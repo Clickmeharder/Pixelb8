@@ -1,0 +1,1375 @@
+[
+  {
+    "Id": 1,
+    "ItemId": 5400001,
+    "Name": "Cheeky Finder Amp (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.5,
+      "Efficiency": 2.5,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 50,
+        "MinTT": 1.5,
+        "Decay": 50
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/1"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 2,
+    "ItemId": 5400002,
+    "Name": "D-Class Mining Amp (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 20,
+      "MinProfessionLevel": 10,
+      "Economy": {
+        "MaxTT": 160,
+        "MinTT": 0,
+        "Decay": 400
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/2"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 3,
+    "ItemId": 5400003,
+    "Name": "DSEC Seeker Amplifier II (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.2,
+      "Efficiency": 6.7,
+      "MinProfessionLevel": 3,
+      "Economy": {
+        "MaxTT": 125,
+        "MinTT": 2.64,
+        "Decay": 133
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/3"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 4,
+    "ItemId": 5400004,
+    "Name": "DSEC Seeker Amplifier III (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.4,
+      "Efficiency": 14.3,
+      "MinProfessionLevel": 7,
+      "Economy": {
+        "MaxTT": 268,
+        "MinTT": 8.04,
+        "Decay": 285
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/4"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 5,
+    "ItemId": 5400005,
+    "Name": "eMINE Amplifier 1 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 3.8,
+      "MinProfessionLevel": 3,
+      "Economy": {
+        "MaxTT": 105,
+        "MinTT": 3.15,
+        "Decay": 75
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/5"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 6,
+    "ItemId": 5400006,
+    "Name": "eMINE Amplifier 2 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 7.5,
+      "MinProfessionLevel": 3,
+      "Economy": {
+        "MaxTT": 105,
+        "MinTT": 3.15,
+        "Decay": 150
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/6"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 7,
+    "ItemId": 5400007,
+    "Name": "Level 1 Finder Amplifier",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 1.3,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 78,
+        "MinTT": 2.34,
+        "Decay": 25
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/7"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 8,
+    "ItemId": 5400008,
+    "Name": "Level 1 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 1.3,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 78,
+        "MinTT": 2.34,
+        "Decay": 25
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/8"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 9,
+    "ItemId": 5400009,
+    "Name": "Level 1 Finder Amplifier 'Achilles' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 1.3,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 89,
+        "MinTT": 2.67,
+        "Decay": 25
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Run Speed Increased",
+        "Values": {
+          "Strength": 3,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/6"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/9"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 10,
+    "ItemId": 5400010,
+    "Name": "Level 1 Finder Amplifier Light (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.5,
+      "Efficiency": 1.2,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 30,
+        "MinTT": 0.9,
+        "Decay": 25
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/10"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 11,
+    "ItemId": 5400011,
+    "Name": "Level 2 Finder Amplifier",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.6,
+      "Efficiency": 2.5,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 78,
+        "MinTT": 2.34,
+        "Decay": 50
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/11"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 12,
+    "ItemId": 5400012,
+    "Name": "Level 2 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.6,
+      "Efficiency": 2.5,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 100,
+        "MinTT": 2.34,
+        "Decay": 50
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/12"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 13,
+    "ItemId": 5400013,
+    "Name": "Level 2 Finder Amplifier, SGA Edition",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.6,
+      "Efficiency": 2.5,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 78,
+        "MinTT": 2.34,
+        "Decay": 50
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/13"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 14,
+    "ItemId": 5400014,
+    "Name": "Level 2 Finder Amplifier Light (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.5,
+      "Efficiency": 2.5,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 50,
+        "MinTT": 1.5,
+        "Decay": 50
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/14"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 15,
+    "ItemId": 5400015,
+    "Name": "Level 3 Finder Amplifier",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 5,
+      "MinProfessionLevel": 2,
+      "Economy": {
+        "MaxTT": 100,
+        "MinTT": 3,
+        "Decay": 100
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/15"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 16,
+    "ItemId": 5400016,
+    "Name": "Level 3 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 5,
+      "MinProfessionLevel": 2,
+      "Economy": {
+        "MaxTT": 114,
+        "MinTT": 3,
+        "Decay": 100
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/16"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 17,
+    "ItemId": 5400017,
+    "Name": "Level 3 Finder Amplifier, SGA Edition",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.5,
+      "Efficiency": 5,
+      "MinProfessionLevel": 2,
+      "Economy": {
+        "MaxTT": 114,
+        "MinTT": 3,
+        "Decay": 100
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/17"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 18,
+    "ItemId": 5400018,
+    "Name": "Level 3 Finder Amplifier 'Achilles' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 5,
+      "MinProfessionLevel": 2,
+      "Economy": {
+        "MaxTT": 131,
+        "MinTT": 3,
+        "Decay": 100
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Run Speed Increased",
+        "Values": {
+          "Strength": 3,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/6"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/18"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 19,
+    "ItemId": 5400019,
+    "Name": "Level 3 Finder Amplifier Light (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.5,
+      "Efficiency": 5,
+      "MinProfessionLevel": 2,
+      "Economy": {
+        "MaxTT": 75,
+        "MinTT": 2.25,
+        "Decay": 100
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/19"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 20,
+    "ItemId": 5400020,
+    "Name": "Level 4 Finder Amplifier",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 7.5,
+      "MinProfessionLevel": 3,
+      "Economy": {
+        "MaxTT": 150,
+        "MinTT": 0,
+        "Decay": 150
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/20"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 21,
+    "ItemId": 5400021,
+    "Name": "Level 4 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 7.5,
+      "MinProfessionLevel": 4,
+      "Economy": {
+        "MaxTT": 150,
+        "MinTT": 4.5,
+        "Decay": 150
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/21"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 22,
+    "ItemId": 5400022,
+    "Name": "Level 5 Finder Amplifier",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 10,
+      "MinProfessionLevel": 3,
+      "Economy": {
+        "MaxTT": 113,
+        "MinTT": 3.42,
+        "Decay": 200
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/22"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 23,
+    "ItemId": 5400023,
+    "Name": "Level 5 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 10,
+      "MinProfessionLevel": 3,
+      "Economy": {
+        "MaxTT": 200,
+        "MinTT": 6,
+        "Decay": 200
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/23"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 24,
+    "ItemId": 5400024,
+    "Name": "Level 6 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 12.5,
+      "MinProfessionLevel": 6,
+      "Economy": {
+        "MaxTT": 250,
+        "MinTT": 7.5,
+        "Decay": 250
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/24"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 25,
+    "ItemId": 5400025,
+    "Name": "Level 7 Finder Amplifier",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 15,
+      "MinProfessionLevel": 4,
+      "Economy": {
+        "MaxTT": 120,
+        "MinTT": 3.6,
+        "Decay": 300
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/25"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 26,
+    "ItemId": 5400026,
+    "Name": "Level 7 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 15,
+      "MinProfessionLevel": 4,
+      "Economy": {
+        "MaxTT": 120,
+        "MinTT": 3.6,
+        "Decay": 300
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/26"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 27,
+    "ItemId": 5400027,
+    "Name": "Level 7 Finder Amplifier 'Athena' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 16,
+      "MinProfessionLevel": 16,
+      "Economy": {
+        "MaxTT": 198,
+        "MinTT": 5.94,
+        "Decay": 320
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Skill Gain - Mining Increased",
+        "Values": {
+          "Strength": 8,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/16"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/27"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 28,
+    "ItemId": 5400028,
+    "Name": "Level 8 Finder Amplifier",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 20,
+      "MinProfessionLevel": 5,
+      "Economy": {
+        "MaxTT": 160,
+        "MinTT": 4.8,
+        "Decay": 400
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/28"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 29,
+    "ItemId": 5400029,
+    "Name": "Level 8 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 20,
+      "MinProfessionLevel": 5,
+      "Economy": {
+        "MaxTT": 160,
+        "MinTT": 4.8,
+        "Decay": 400
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/29"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 30,
+    "ItemId": 5400030,
+    "Name": "Level 9 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 25,
+      "MinProfessionLevel": 6,
+      "Economy": {
+        "MaxTT": 260,
+        "MinTT": 6,
+        "Decay": 500
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/30"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 31,
+    "ItemId": 5400031,
+    "Name": "Level 10 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 37.5,
+      "MinProfessionLevel": 8,
+      "Economy": {
+        "MaxTT": 300,
+        "MinTT": 9,
+        "Decay": 750
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/31"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 32,
+    "ItemId": 5400032,
+    "Name": "Level 11 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 50,
+      "MinProfessionLevel": 10,
+      "Economy": {
+        "MaxTT": 350,
+        "MinTT": 10,
+        "Decay": 1000
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/32"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 33,
+    "ItemId": 5400033,
+    "Name": "Level 12 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 75,
+      "MinProfessionLevel": 15,
+      "Economy": {
+        "MaxTT": 255,
+        "MinTT": 15,
+        "Decay": 1500
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/33"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 34,
+    "ItemId": 5400034,
+    "Name": "Level 13 Finder Amplifier (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 100,
+      "MinProfessionLevel": 20,
+      "Economy": {
+        "MaxTT": 340,
+        "MinTT": 20,
+        "Decay": 2000
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/34"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 35,
+    "ItemId": 5400035,
+    "Name": "Level II Finder Amplifier 'Achilles' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.6,
+      "Efficiency": 2.5,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 115,
+        "MinTT": 3.45,
+        "Decay": 50
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Increased Run Speed",
+        "Values": {
+          "Strength": 3,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/6"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/35"
+    }
+  },
+  {
+    "Id": 36,
+    "ItemId": 5400036,
+    "Name": "Level II Finder Amplifier 'Athena' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 3,
+      "MinProfessionLevel": 6,
+      "Economy": {
+        "MaxTT": 82,
+        "MinTT": 2.46,
+        "Decay": 60
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Skill Gain - Mining Increased",
+        "Values": {
+          "Strength": 4,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/16"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/36"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 37,
+    "ItemId": 5400037,
+    "Name": "Level III Finder Amplifier 'Athena' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 4,
+      "MinProfessionLevel": 8,
+      "Economy": {
+        "MaxTT": 102,
+        "MinTT": 2.8,
+        "Decay": 80
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Skill Gain - Mining Increased",
+        "Values": {
+          "Strength": 4,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/16"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/37"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 38,
+    "ItemId": 5400038,
+    "Name": "Level V Finder Amplifier 'Athena' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 11,
+      "MinProfessionLevel": 12,
+      "Economy": {
+        "MaxTT": 178,
+        "MinTT": 5.34,
+        "Decay": 220
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Skill Gain - Mining Increased",
+        "Values": {
+          "Strength": 8,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/16"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/38"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 39,
+    "ItemId": 5400039,
+    "Name": "Level VIII Finder Amplifier 'Athena' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 19,
+      "MinProfessionLevel": 18,
+      "Economy": {
+        "MaxTT": 208,
+        "MinTT": 6.24,
+        "Decay": 380
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Skill Gain - Mining Increased",
+        "Values": {
+          "Strength": 8,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/16"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/39"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 40,
+    "ItemId": 5400040,
+    "Name": "Sabad Finder Amp V1 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 5.5,
+      "MinProfessionLevel": null,
+      "Economy": {
+        "MaxTT": 165,
+        "MinTT": 0,
+        "Decay": 110
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Evade Chance Increased",
+        "Values": {
+          "Strength": 15,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/25"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/40"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 41,
+    "ItemId": 5400041,
+    "Name": "Terra Amp 1 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 4,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 45,
+        "MinTT": 1.35,
+        "Decay": 80
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/41"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 42,
+    "ItemId": 5400042,
+    "Name": "Terra Amp 1 Gold Rush",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 4,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 45,
+        "MinTT": 0.2,
+        "Decay": 80
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/42"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 43,
+    "ItemId": 5400043,
+    "Name": "Terra Amp 2 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 8,
+      "MinProfessionLevel": 2,
+      "Economy": {
+        "MaxTT": 195,
+        "MinTT": 5.85,
+        "Decay": 160
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/43"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 44,
+    "ItemId": 5400044,
+    "Name": "Terra Amp 3 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 12.5,
+      "MinProfessionLevel": 3,
+      "Economy": {
+        "MaxTT": 300,
+        "MinTT": 9,
+        "Decay": 250
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/44"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 45,
+    "ItemId": 5400045,
+    "Name": "Terra Amp 4 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 17.5,
+      "MinProfessionLevel": 4,
+      "Economy": {
+        "MaxTT": 315,
+        "MinTT": 9.45,
+        "Decay": 350
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/45"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 46,
+    "ItemId": 5400046,
+    "Name": "Terra Amp 5 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 22.5,
+      "MinProfessionLevel": 5,
+      "Economy": {
+        "MaxTT": 325,
+        "MinTT": 9.75,
+        "Decay": 450
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/46"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 47,
+    "ItemId": 5400047,
+    "Name": "Terra Amp 6 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 30,
+      "MinProfessionLevel": 7,
+      "Economy": {
+        "MaxTT": 338,
+        "MinTT": 10.14,
+        "Decay": 600
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/47"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 48,
+    "ItemId": 5400048,
+    "Name": "Terra Amp 7 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 45,
+      "MinProfessionLevel": 9,
+      "Economy": {
+        "MaxTT": 360,
+        "MinTT": 10.8,
+        "Decay": 900
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/48"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 49,
+    "ItemId": 5400049,
+    "Name": "Terra Amp 8 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 60,
+      "MinProfessionLevel": 12,
+      "Economy": {
+        "MaxTT": 385,
+        "MinTT": 11.55,
+        "Decay": 1200
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/49"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 50,
+    "ItemId": 5400050,
+    "Name": "Terra Amp 9 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 80,
+      "MinProfessionLevel": 15,
+      "Economy": {
+        "MaxTT": 400,
+        "MinTT": 12,
+        "Decay": 1600
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/50"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 51,
+    "ItemId": 5400051,
+    "Name": "Terra Amp 10 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 100,
+      "MinProfessionLevel": 18,
+      "Economy": {
+        "MaxTT": 442,
+        "MinTT": 13.26,
+        "Decay": 2000
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/51"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 52,
+    "ItemId": 5400052,
+    "Name": "Terra Amp I 'Athena' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 2,
+      "MinProfessionLevel": 4,
+      "Economy": {
+        "MaxTT": 64,
+        "MinTT": 1.92,
+        "Decay": 40
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Skill Gain - Mining Increased",
+        "Values": {
+          "Strength": 4,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/16"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/52"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 53,
+    "ItemId": 5400053,
+    "Name": "Terra Amp IV 'Athena' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 6,
+      "MinProfessionLevel": 10,
+      "Economy": {
+        "MaxTT": 134,
+        "MinTT": 4.02,
+        "Decay": 120
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Skill Gain - Mining Increased",
+        "Values": {
+          "Strength": 4,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/16"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/53"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 54,
+    "ItemId": 5400054,
+    "Name": "Terra Amp VI 'Athena' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 13,
+      "MinProfessionLevel": 14,
+      "Economy": {
+        "MaxTT": 188,
+        "MinTT": 5.64,
+        "Decay": 260
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Skill Gain - Mining Increased",
+        "Values": {
+          "Strength": 8,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/16"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/54"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 55,
+    "ItemId": 5400055,
+    "Name": "Mayhem Level 1 Finder Amplifier Mini",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "Efficiency": 1,
+      "MinProfessionLevel": 10,
+      "Economy": {
+        "MaxTT": 100,
+        "MinTT": 0,
+        "Decay": 0.2
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/55"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 56,
+    "ItemId": 5400056,
+    "Name": "Terra Amp 3 Gold Rush",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 12.5,
+      "MinProfessionLevel": 3,
+      "Economy": {
+        "MaxTT": 300,
+        "MinTT": 0.2,
+        "Decay": 250
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/56"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 57,
+    "ItemId": 5400057,
+    "Name": "Terra Amp 5 Gold Rush",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "Efficiency": 22.5,
+      "MinProfessionLevel": 5,
+      "Economy": {
+        "MaxTT": 325,
+        "MinTT": 0.2,
+        "Decay": 450
+      }
+    },
+    "EffectsOnEquip": [],
+    "Links": {
+      "$Url": "/finderamplifiers/57"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 35,
+    "ClassId": null,
+    "ItemId": 5400035,
+    "Name": "Level 2 Finder Amplifier 'Achilles' (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.6,
+      "Efficiency": 2.5,
+      "MinProfessionLevel": 1,
+      "Economy": {
+        "MaxTT": 115,
+        "MinTT": 3.45,
+        "Decay": 50
+      }
+    },
+    "EffectsOnEquip": [
+      {
+        "Name": "Run Speed Increased",
+        "Values": {
+          "Strength": 3,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/6"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/finderamplifiers/35"
+    }
+  }
+]

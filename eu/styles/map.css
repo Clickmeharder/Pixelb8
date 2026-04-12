@@ -1,0 +1,1206 @@
+
+/* ----======--- Screen Power switch ----======----*/
+#screenPowerSwitch {
+    padding: 1px;
+    border: 2px inset #0e0c0c;
+    outline: 3px solid #000000;
+    border-radius: 8px;
+    border-right-width: 1px;
+    margin: 3px;
+    margin-left: auto;
+}
+/* --- MAP VIEWPORT --- */
+.map-layer, #mapCanvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#lastKnownPosition {
+	font-family: lucida console, sans-serif;
+    background: rgba(0, 20, 20, 0.8);
+    border-left: 3px solid #00ffff;
+    padding: 4px;
+    color: #d76f22;
+    font-size: 0.9rem;
+}
+.pos-main {
+    width: 525px;
+    margin-bottom: 0px;
+}
+.pos-timestamp {
+    letter-spacing: 1px;
+    margin-top: 0px;
+    border-top: 2px dashed rgba(0, 255, 255, 0.3);
+    padding-top: 3px;
+    line-height: 0.9;
+}
+
+
+div#maps-outerwrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 72vh;
+    max-height: 75vh;
+    overflow-y: scroll;
+    border: 2px solid #444;
+    padding: 6px;
+}
+#theMap {
+    width: 100%;
+    height: 97%; 
+    position: relative;
+    overflow: hidden;
+    background-color: #050505;
+    border: 2px solid #333;
+    cursor: grab;
+    user-select: none;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+#theMap:active {
+    cursor: grabbing;
+}
+
+div#themapTab {
+    min-width: 250px;
+    max-width: 90vw;
+    height: 74vh;
+}
+
+div#mapsTab-mainSection {
+    border: 3px inset #444;
+    padding: 2px;
+    padding-top: 1px;
+    padding-bottom: 8px;
+}
+#mapsTab-mainSection h2{
+	margin-bottom:8px;
+}
+div#maps-rightpanelB {
+    display: flex;
+    flex: 1;
+    OVERFLOW-Y: AUTO;
+    /* min-width: 23%; */
+	min-width:19%;
+    border: 3px inset #1e1e1e;
+    flex-wrap: wrap;
+    overflow-x: hidden;
+
+}
+/* Base state for the loot items */
+.mapMoblootItem {
+    display: inline-block; /* Required for transforms to work properly */
+    transition: all 0.2s ease-in-out;
+    cursor: default;
+    position: relative; /* Keeps z-index context */
+}
+
+/* Hover state */
+.mapMoblootItem:hover {
+    transform: scale(1.15); /* Makes it 15% larger */
+    background: #333 !important; /* Slightly lighten the background */
+    border-color: #ff9800 !important; /* Highlight the border */
+    color: #fff !important; /* Brighten text for readability */
+    z-index: 10; /* Ensures it pops 'above' the items next to it */
+    box-shadow: 0 0 8px rgba(255, 152, 0, 0.4); /* Optional: adds a slight glow */
+}
+/*
+idk if i need justify-content yet but temp use till i fill rightpanelB with content in maps
+*/
+div#maps-rightpanelB {
+    
+}
+div#rightpanelListsection {
+    flex: 1;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 97%;
+}
+div#rightpanelListsection2 {
+    display: relative;
+    flex: 1;
+    border: 3px inset #444;
+    padding: 2px;
+    padding-top: 1px;
+    padding-bottom: 8px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 97%;
+}
+div#section-mats {
+    display: block;
+    padding: 0.75rem;
+    border-bottom: 1px solid rgb(34, 34, 34);
+    max-height: 175px;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+div#section-spawns {
+    display: block;
+    padding: 0.75rem;
+    border-bottom: 1px solid rgb(34, 34, 34);
+    max-height: 175px;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+div#mapsTab-powerSection {
+    border: 2px inset #444;
+    border-radius: 9px;
+    padding: 6px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin: 4px;
+    display: flex;
+	flex-wrap: wrap;
+}
+
+#mapToggleContainer {
+	display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    border: 2px outset #444;
+    padding: 6px;
+
+}
+
+div#mapToggleWrapper {
+	position: relative;
+    overflow: hidden;
+    overflow-y: auto;
+    resize: vertical;
+	height: 55px;	
+	max-height: 568px;
+    border-bottom: 2px dashed #5b514f;
+    outline: 5px dashed #3b3b3b;
+    border-radius: 5%;
+}
+/* zipper start*/
+/* ----- DOPE ASS ZIPPER SYSTEM ----- */
+
+:root {
+    --zipper-rotation: 8deg;
+    --teeth-color: #555;
+    --gap-color: transparent;
+}
+
+#mapToggleContainer {
+    position: relative;
+    /* Container for the wrapper, handle, and teeth */
+}
+
+/* --- The Content Wrapper --- */
+#mapToggleWrapper {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    box-sizing: border-box;
+    min-height: 0px !important;
+    background-color: #1a1a1a;
+    transition: none !important; /* Instant tracking for mechanical feel */
+    
+    /* Decorative dashed border/outline from your final version */
+    border-bottom: 2px dashed #5b514f;
+    outline: 5px dashed #3b3b3b;
+    border-radius: 8px; /* Slightly adjusted from 5% for better corners */
+}
+
+/* --- The Dynamic Zipper Teeth (The Trail) --- */
+#zipperteeth {
+    position: absolute;
+    display: none;
+    top: 91px;
+    left: 99%;
+    width: 0px;
+    height: 600px;
+    background: #1e1d1d;
+    border-right: 2px dashed #5b514f;
+    outline: 5px dashed #3b3b3b;
+    outline-offset: 0px;
+    z-index: 0;
+    pointer-events: none;
+    transition: height 0.02s linear;
+}
+
+/* --- The Zipper Handle (Main Slider) --- */
+#zipperHandle {
+    position: absolute;
+    right: 10px;
+    bottom: 1px;
+    width: 16px;
+    height: 14px;
+    z-index: 1000;
+    pointer-events: auto !important;
+    cursor: grab;
+    transition: transform 0.2s ease;
+}
+
+#zipperHandle:active {
+    cursor: grabbing;
+}
+
+#zipperHandle.engaged {
+    /* Slight shift to show mechanical tension */
+    transform: translate(2px, 1px);
+}
+
+/* The Metal Slider Body (The Head) */
+#zipperHandle::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #bbb, #666);
+    border: 1px solid #222;
+    border-radius: 2px;
+    box-shadow: 
+        inset 0 1px 0 #eee, 
+        0 1px 2px rgba(0,0,0,0.5);
+    z-index: 1;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+#zipperHandle.engaged::before {
+    background: linear-gradient(135deg, #999, #444);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+}
+
+/* The Pull Tab (The Swinging Handle) */
+#zipperHandle::after {
+    content: "";
+    position: absolute;
+    top: 6px; 
+    left: 3px;
+    width: 10px;
+    height: 47px;
+    
+    /* Hole + Grip Lines + Metal Texture */
+    background: 
+        radial-gradient(circle at 50% 5px, #111 2.5px, transparent 3px),
+        linear-gradient(to bottom, 
+            transparent 20px, rgba(0,0,0,0.2) 20px, rgba(0,0,0,0.2) 21px, transparent 21px,
+            transparent 25px, rgba(0,0,0,0.2) 25px, rgba(0,0,0,0.2) 26px, transparent 26px,
+            transparent 30px, rgba(0,0,0,0.2) 30px, rgba(0,0,0,0.2) 31px, transparent 31px
+        ),
+        linear-gradient(to bottom, #999, #444);
+    
+    border: 2px solid #111;
+    border-radius: 3px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+
+    /* Physics & Rotation logic */
+    transform-origin: 50% 5px;
+    transform: rotate(var(--zipper-rotation, 8deg));
+    z-index: 2;
+    
+    /* Settle Transition */
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                box-shadow 0.3s ease,
+                filter 0.3s ease,
+                height 0.2s ease;
+}
+
+/* Tab Visuals when active/dragging */
+#zipperHandle.dragging::after {
+    transition: transform 0.02s linear;
+}
+
+#zipperHandle.engaged::after {
+    border-color: #996a189c;
+    box-shadow: 0 0 10px rgb(140 142 16 / 33%), 0 4px 8px rgba(0,0,0,0.6);
+    filter: brightness(1.2) contrast(1.1);
+}
+
+/* --- Special States & Animations --- */
+
+.stuck {
+    filter: drop-shadow(0 0 4px red) !important;
+    cursor: help !important;
+}
+
+.stuck:active {
+    animation: struggle 0.1s infinite;
+}
+
+.bounce-active {
+    animation: zipperBounce 0.6s ease-in-out;
+}
+
+@keyframes zipperBounce {
+    0%, 100% { transform: translateY(0) rotate(var(--zipper-rotation, 3deg)); }
+    20% { transform: translateY(-10px) rotate(calc(var(--zipper-rotation, 3deg) - 10deg)); }
+    40% { transform: translateY(5px) rotate(calc(var(--zipper-rotation, 3deg) + 8deg)); }
+    60% { transform: translateY(-3px) rotate(calc(var(--zipper-rotation, 3deg) - 4deg)); }
+    80% { transform: translateY(1px) rotate(calc(var(--zipper-rotation, 3deg) + 2deg)); }
+}
+
+@keyframes struggle {
+    0% { transform: translate(1px, 0); }
+    50% { transform: translate(-1px, 1px); }
+    100% { transform: translate(0, -1px); }
+}
+
+/* ----- END OF DOPE ZIPPER SYSTEM ----- */
+/* ----- END OF DOPE ZIPPER */
+
+
+#mapToggleContainer .retrotoggleswitchA .switch-label {
+	
+	font-size: 11px;
+    font-weight: bold;
+    text-shadow:
+        -1px -1px 0 #444,
+        -1px -1px 1px #555,
+        1px 1px 0 #1a1a1a,
+        1px 1px 2px #0f0f0f,
+        0 0 3px rgba(0,0,0,0.6),
+        0 2px 4px rgba(0, 0, 0, 0.95);
+    
+    letter-spacing: 0.6px;
+    text-transform: uppercase;   /* optional, looks very retro */
+	flex: 1;                    /* Takes remaining space */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/*===================================================================
+ ------   MAP & Sidebar          ---------------------------------
+ */
+.map-sidebar {
+    width: 98%;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border: 1px solid #333;
+	resize:vertical;
+	transition: height 0.8s ease;
+}
+.map-sidebar-controls {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+input#mobComboboxInput {
+    width: 338px;
+}
+/* Sidebar Toggle State */
+.map-sidebar.collapsed {
+    overflow: hidden;
+	overflow-y:auto;
+	height: 4vh;
+    min-height: 45px;
+    padding: 0px;
+	padding-left:10px;
+	padding-right:10px;
+}
+.map-sidebar.collapsed:hover {
+	height:350px;
+	transition: height 0.8s ease;
+}
+.map-sidebar.collapsed .map-sidebar-scroll-area {
+
+}
+.map-sidebar.collapsed .map-sidebar-controls{
+	display:none;
+}
+/* Caret Icon Styling */
+.sectionToggler {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    color: #237d9a;
+    font-size: 18px;
+    padding: 5px;
+}
+
+/* Rotated state when sidebar is collapsed */
+.map-sidebar.collapsed .sectionToggler {
+    transform: rotate(-180deg);
+}
+.fuzzy-input {
+    flex: 1;
+    background: #000;
+    color: #00e5ff;
+    border: 1px solid #00e5ff;
+    padding: 5px 10px;
+    font-family: monospace;
+}
+
+.list-filter-input {
+    width: calc(100% - 20px);
+    margin: 5px 10px;
+    background: #222;
+    border: 1px solid #444;
+    color: #ccc;
+    font-size: 11px;
+}
+
+/* Card Mode Styling */
+.list-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.list-row.cardMode {
+    flex-direction: column;
+    padding: 10px;
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 4px;
+}
+
+.sublist-container {
+    margin: 10px 0;
+    border-left: 2px solid #00e5ff;
+    padding-left: 5px;
+}
+
+.sublist-header {
+    font-weight: bold;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #b77815;
+    padding: 5px;
+}
+
+/* Section Containers */
+.map-list-section {
+    margin-bottom: 8px;
+    border: 1px solid #17555f;
+    border-radius: 4px;
+    overflow: hidden;
+	transition: color 0.8s ease;
+}
+
+/* Collapsible Summaries */
+.map-list-section summary {
+    padding: 10px;
+	padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: #252525;
+    cursor: pointer;
+    font-weight: bold;
+    list-style: none; /* Removes default arrow in some browsers */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+.map-list-section summary:hover {
+    background-color: #17555f;
+}
+.local-filter-input {
+    width: calc(100% - 20px);
+    margin: 5px 10px;
+    background: #111;
+    border: 1px solid #444;
+    color: #00e5ff;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-family: monospace;
+}
+
+.area-subgroup {
+    border-left: 2px solid #b77815;
+    margin: 10px 5px;
+    background: rgba(255, 255, 255, 0.02);
+}
+.area-subgroup summary {
+    list-style: none;
+    outline: none;
+    cursor: pointer;
+}
+
+.area-subgroup summary::-webkit-details-marker {
+    display: none;
+}
+
+.subgroup-content {
+    padding-top: 5px;
+    border-left: 2px solid #b77815; /* Visual indicator of being "inside" a group */
+    margin-left: 5px;
+}
+.subgroup-header {
+    background: #333;
+    color: #b77815;
+    padding: 4px 10px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.list-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.list-row:hover {
+    background: rgba(0, 229, 255, 0.1);
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    filter: grayscale(1);
+    transition: filter 0.2s;
+}
+
+.action-btn:hover {
+    filter: grayscale(0);
+}
+/* Counters */
+#npcCount, #teleporterCount, #outpostCount, #campCount, #cityCount, #revivalpointCount, #vendorCount, #interactableCount, #magicalflowerCount, #instanceentranceCount {
+    background: #4a90e2;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+/* The Content Box */
+.map-list-section .list-content {
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: #1e1e1e;
+}
+/* Rows & Data Columns */
+.map-list-section .list-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    border-bottom: 1px solid #333;
+    gap: 10px;
+}
+.map-list-section .list-row:last-child {
+    border-bottom: none;
+}
+.map-list-section .list-row .name {
+    flex: 1;
+    font-weight: 500;
+}
+.map-list-section .list-row .coords {
+    font-family: monospace;
+    color: #888;
+    font-size: 0.9rem;
+}
+/* Buttons & Actions */
+.map-list-section .list-row .actions {
+    display: flex;
+    gap: 5px;
+}
+.map-list-section .list-row .actions button {
+    background: #444;
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+.map-list-section .list-row .actions button:hover {
+    background: #666;
+}
+/* Specific Section Overrides (Optional) */
+#npcListSection summary {
+    border-left: 4px solid #ed9121; /* orange for NPCs */
+}
+#npcListSection summary #npcCount {
+    background: #ed9121;
+}
+#teleporterListSection summary {
+    border-left: 4px solid #50c878; /* Green for Locations */
+}
+#teleporterListSection summary #teleporterCount {
+    background: #50c878;
+}
+/* Outpost Section Override */
+#outpostListSection summary {
+    border-left: 4px solid #39ff14; /* Neon Green for Outposts */
+}
+
+#outpostListSection summary #outpostCount {
+    background: #898a8b;
+    color: #000; /* Darker text for better contrast on neon green */
+}
+#campListSection summary {
+    border-left: 4px solid #898a8b; /* Neon Green for Outposts */
+}
+
+#campListSection summary #campCount {
+    background: #E3A857;
+    color: #000; /* Darker text for better contrast on neon green */
+}
+#cityListSection summary {
+    border-left: 4px solid #E3A857; /* Neon Green for Outposts */
+}
+
+#cityListSection summary #cityCount {
+    background: #39ff14;
+    color: #000; /* Darker text for better contrast on neon green */
+}
+#revivalpointListSection summary {
+    border-left: 4px solid #ff4d4d;
+}
+
+#revivalpointListSection summary #revivalpointCount {
+    background: #ff4d4d;
+    color: black;
+}
+#vendorListSection summary {
+    border-left: 4px solid #D4AF37;
+}
+
+#vendorListSection summary #vendorCount {
+    background: #D4AF37;
+    color: black;
+}
+#interactableListSection summary {
+    border-left: 4px solid #474545;
+}
+
+#interactableListSection summary #interactableCount {
+    background: #474545;
+    color: black;
+}
+
+#magicalflowerListSection summary {
+    border-left: 4px solid #8425bf;
+}
+
+#magicalflowerListSection summary #magicalflowerCount {
+    background: #8425bf;
+    color: white;
+}
+#instanceentranceListSection summary {
+    border-left: 4px solid #5f3305;
+}
+
+#instanceentranceListSection summary #instanceentranceCount {
+    background: #5f3305;
+    color: white;
+}
+#areaListSection summary {
+    border-left: 4px solid #5f3305;
+}
+
+#areaListSection summary #areaCount {
+    background: #5f3305;
+    color: white;
+}
+
+
+/* The container for the entire category */
+.map-list-section.layer-off {
+    opacity: 0.5;
+    filter: grayscale(0.8);
+    transition: all 0.3s ease;
+}
+
+/* Optional: Keep the summary slightly brighter so the user can see what it is */
+.map-list-section.layer-off summary {
+    color: #888;
+}
+
+/* Ensure the toggle button itself remains visible enough to click back on */
+.map-list-section.layer-off .toggle-btn {
+    filter: none;
+    opacity: 1;
+}
+/*
+*/
+/*___________________________________________________________________________*/
+/*============================================================================
+ --- THE CANVAS --- */
+.map-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0; /* Essential for precise zoom-to-cursor math */
+    will-change: transform;
+}
+canvas#mapCanvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* Base Image Sharpness */
+.surface-layer {
+    display: block;
+    width: 100%;
+    height: auto;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    pointer-events: none; /* Let dragging happen on the wrapper */
+}
+
+/* --- WAYPOINT OVERLAY & LAYERING --- */
+.waypoint-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allow clicks to pass through to map container */
+}
+
+.waypoint-group {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.2s ease;
+}
+
+.waypoint-group.hidden {
+    display: none;
+    opacity: 0;
+}
+
+/* --- INDIVIDUAL WAYPOINTS --- */
+.waypoint {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    /* Centers the icon exactly on the coordinate point */
+    transform: translate(-50%, -50%); 
+    cursor: crosshair;
+    pointer-events: auto; /* Re-enable pointer events so waypoints are hoverable */
+    transition: transform 0.1s ease-out, filter 0.2s;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));
+    z-index: 10;
+}
+
+.waypoint:hover {
+    transform: translate(-50%, -50%) scale(1.5);
+    z-index: 100;
+    filter: drop-shadow(0 0 5px #0f0);
+}
+
+/* --- CONTROL BAR ---- */
+.map-controls {
+    display: flex;
+	flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 7px;
+    min-width: 50%;
+    background: #111;
+    border-top: 1px solid #444;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+	flex-wrap: wrap;
+}
+div#mapDetailsWrapper, div#mobDetailsWrapper {
+    flex-direction: column;
+	width: 98%;
+}
+div#mapMainDetails, div#selectedmobDetailsEl {
+    width: 99%;
+}
+#mapDetailsWrapper h2, #mobDetailsWrapper h2 {width:98%;}
+/* Selects & Standard Buttons */
+.map-selectEl, .map-btn, .toggle-btn {
+    background: #222;
+    color: #b3b3b3;
+    border: 1px solid #444;
+    padding: 6px 12px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.map-selectEl:hover, .map-btn:hover {
+    background: #2a2a2a;
+    border-color: #0f0;
+}
+.mob-match-row:hover {
+    background: rgba(0, 229, 255, 0.05);
+    border-left: 2px solid #00e5ff;
+}
+
+#mapmobmatchEl {
+    max-height: 631px;
+    overflow-y: auto;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    scrollbar-width: thin;
+    scrollbar-color: #444 #0a0a0a;
+}
+
+
+
+
+/* Layer Toggle Buttons */
+.toggle-btn {
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+.toggle-btn:active {
+    padding: 6px 12px;
+}
+.toggle-btn.active {
+    opacity: 1;
+    filter: grayscale(0);
+    border-color: #0f0;
+    background: #1a2e1a;
+    box-shadow: inset 0 0 5px rgba(0, 255, 0, 0.2);
+	padding: 6px 12px;
+}
+
+/* Zoom Controls Group */
+.zoom-controls .map-btn {
+    font-weight: bold;
+    min-width: 35px;
+}
+
+/* --- TOOLTIP --- */
+.map-status-bar {
+    z-index: 1000;
+    position: absolute;
+    bottom: 1%;
+    left: 38%;
+    padding: 4px 12px;
+    background: rgba(0, 0, 0, 0.6); /* Slightly darker for readability */
+    border: 6px ridge #444;
+    border-radius: 18px;
+    color: #208f24;
+    font-weight: bold;
+    
+    /* Subtle glow on text instead of heavy offset */
+    text-shadow: 1px 1px 2px #000;
+
+    /* The "Landing" Shadow: X-offset, Y-offset, Blur, Spread, Color */
+    /* Adjust the 10px and 15px to change "height" */
+    box-shadow: 0px 10px 15px 2px rgba(0, 0, 0, 0.5);
+    
+    /* Smooth transition for when we hover or change states */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.map-status-bar:hover {
+    transform: translateY(-2px); /* Lift the element up */
+    box-shadow: 0px 15px 25px 5px rgba(0, 0, 0, 0.6); /* Shadow gets deeper and blurrier */
+}
+span#static-coords {
+    white-space: pre-wrap;
+}
+
+
+/* ai togle button*/
+.toggle-btn {
+    opacity: 0.5;
+    filter: grayscale(1);
+    transition: all 1.4s;
+	padding: 2px 60px;
+    border: 1px solid #2f0404d9;
+    box-shadow: inset 0 0 5px 5px #890b0b7a;	
+}
+
+.toggle-btn.active {
+    opacity: 1;
+	padding: 2px 6px;
+    filter: grayscale(0);
+	border: 1px solid #20bd3ca8;
+	box-shadow: inset 0 0 5px 5px #20bd3ca8;
+
+}
+.master-toggle-row {
+    border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+}
+
+.master-toggle-row .switch-label {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+}
+
+
+/*
+==============================
+    CONTEXT MENU SHIT
+------------------------
+*/
+.custom-context-menu {
+    position: fixed;
+    background: #1a1a1a91;
+    border: 1px solid #888;
+    color: #ffffff;
+    padding: 8px;
+    border-radius: 4px;
+    z-index: 9999;
+    display: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    min-width: 150px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.custom-context-menu.active {
+    display: block;
+}
+
+.menu-header {
+	font-size: 0.8rem;
+    color: #e39721;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-bottom: 1px solid #333;
+    margin-bottom: 5px;
+    padding-bottom: 3px;
+}
+
+.menu-coords {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.menu-btn {
+    width: 100%;
+    background: #500ebb;
+    color: #bcb7c3;
+    border: 2px outset #493d49;
+    padding: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 2px;
+}
+.menu-btn.active {
+	padding: 4px;
+}
+.menu-btn:hover {
+    background: #382a4f;
+}
+
+/* Toast Notification */
+.map-toast {
+    position: fixed;
+    TOP: 18%;
+    left: 7%;
+    transform: translateX(-50%);
+    background: rgba(0, 255, 255, 0.9);
+    color: #000;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 10000;
+}
+
+.map-toast.show {
+    opacity: 1;
+}
+
+
+
+
+
+
+
+
+#theMap {
+    position: relative;
+    overflow: hidden; /* Clips the giant map image */
+}
+
+#mapWrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0; /* Critical for your zoom math */
+    will-change: transform;
+}
+
+#mapCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allows you to click the map THROUGH the canvas */
+    z-index: 5; /* Sits above the image, below the status bar */
+}
+
+/* --- MAP CORE LAYERS --- */
+#mapCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allows interaction with the map image underneath */
+    z-index: 5; 
+}
+/* --- SATELLITE SEARCH LAYER --- */
+#satelliteSweep {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10001;
+    overflow: hidden;
+}
+
+/* Moving Scanline Bar */
+.sweep-bar {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(0, 229, 255, 0.8);
+    box-shadow: 0 0 15px #00e5ff, 0 0 30px #00e5ff;
+    z-index: 10002;
+}
+
+/* SEARCH BRACKETS (The "Looking Around" Boxes) */
+.search-bracket {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border: 2px solid #00e5ff;
+    transform: translate(-50%, -50%); 
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+    animation: bracketJitter 0.1s infinite;
+}
+
+.search-bracket::after {
+    content: "ACQUIRING...";
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    color: #00e5ff;
+    font-family: monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+/* RED ALERT: Triggered if Validation Fails */
+.search-bracket.error-state {
+    border-color: #ff4d4d !important;
+    box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
+    background: rgba(255, 77, 77, 0.1);
+}
+
+.search-bracket.error-state::after {
+    content: "ALIGNMENT ERROR - RE-CALIBRATING";
+    color: #ff4d4d;
+}
+
+/* --- FINAL TRACKING RETICLE (LOCK-ON) --- */
+.tracking-reticle {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    pointer-events: none;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translate(-50%, -50%);
+    animation: lockSuccess 0.5s ease-out;
+}
+
+.reticle-bracket {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #00e5ff;
+}
+
+/* Corner Bracket Logic */
+.reticle-bracket.tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.reticle-bracket.tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.reticle-bracket.bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.reticle-bracket.br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+.reticle-metadata {
+position: absolute;
+    /* Center it horizontally */
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* Position it above the box */
+    bottom: calc(100% + 20px); 
+    
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #00e5ff;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 12px;
+    
+    /* Changed border-left to border-bottom for better 'top-box' flow */
+    border-bottom: 4px solid #00e5ff; 
+    
+    white-space: nowrap;
+    
+    /* Optional: Updated clip-path for a top-box look */
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); 
+    
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+}
+
+/* --- ANIMATION KEYFRAMES --- */
+
+/* High-speed search jitter */
+@keyframes bracketJitter {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50.5%, -49.5%) scale(1.02); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Final lock-on snap effect */
+@keyframes lockSuccess {
+    0% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* Final reticle breathing/pulse */
+.reticle-pulse {
+    animation: reticlePulse 0.4s ease-out infinite alternate;
+}
+
+@keyframes reticlePulse {
+    from { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    to { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
+
+/* Digital Grid Flicker (Applied to map) */
+.scan-flicker {
+    animation: mapFlicker 0.1s infinite;
+}
+
+@keyframes mapFlicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.98; }
+}

@@ -1,0 +1,2407 @@
+[
+  {
+    "Id": 30,
+    "ItemId": 4800030,
+    "Name": "Regeneration Field Chip 8",
+    "Properties": {
+      "Description": null,
+      "Range": 38,
+      "Weight": 0.2,
+      "MaxHeal": 124.5,
+      "MinHeal": 93.4,
+      "UsesPerMinute": 4,
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 55,
+        "IsSiB": false
+      },
+      "Mindforce": {
+        "Level": 8,
+        "Concentration": 3,
+        "Cooldown": 12,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 51,
+        "MinTT": 1.53,
+        "Decay": null,
+        "AmmoBurn": 2640
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Light Mind Essence",
+      "Links": {
+        "$Url": "/materials/1288"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/30"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 29,
+    "ItemId": 4800029,
+    "Name": "Regeneration Field Chip 3 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 40,
+      "Weight": 0.2,
+      "MaxHeal": 84.8,
+      "MinHeal": 63.6,
+      "UsesPerMinute": 5,
+      "Skill": {
+        "LearningIntervalStart": 28,
+        "LearningIntervalEnd": 33,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 3,
+        "Concentration": 3,
+        "Cooldown": 10,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 15.5,
+        "MinTT": 0.465,
+        "Decay": null,
+        "AmmoBurn": 1719
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Light Mind Essence",
+      "Links": {
+        "$Url": "/materials/1288"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/29"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 28,
+    "ItemId": 4800028,
+    "Name": "Regeneration Field Chip 2 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 40,
+      "Weight": 0.2,
+      "MaxHeal": 75.8,
+      "MinHeal": 56.8,
+      "UsesPerMinute": 5,
+      "Skill": {
+        "LearningIntervalStart": 23,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 2,
+        "Concentration": 3,
+        "Cooldown": 10,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 11.7,
+        "MinTT": 0.351,
+        "Decay": null,
+        "AmmoBurn": 1608
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Light Mind Essence",
+      "Links": {
+        "$Url": "/materials/1288"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/28"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 27,
+    "ItemId": 4800027,
+    "Name": "Regeneration Field Chip 1 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 39,
+      "Weight": 0.2,
+      "MaxHeal": 69,
+      "MinHeal": 51.8,
+      "UsesPerMinute": 5,
+      "Skill": {
+        "LearningIntervalStart": 18,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 1,
+        "Concentration": 3,
+        "Cooldown": 10,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 8,
+        "MinTT": 0.24,
+        "Decay": 3.301,
+        "AmmoBurn": 1334
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Light Mind Essence",
+      "Links": {
+        "$Url": "/materials/1288"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/27"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 4,
+    "ItemId": 4800004,
+    "Name": "Official Regeneration Field Chip",
+    "Properties": {
+      "Description": null,
+      "Range": 170,
+      "Weight": 0.2,
+      "MaxHeal": 1995,
+      "MinHeal": 1496.3,
+      "UsesPerMinute": 15,
+      "Skill": {
+        "LearningIntervalStart": null,
+        "LearningIntervalEnd": 53,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 8,
+        "Concentration": 1,
+        "Cooldown": 3,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 34,
+        "MinTT": null,
+        "Decay": null,
+        "AmmoBurn": 100
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Light Mind Essence",
+      "Links": {
+        "$Url": "/materials/1288"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/4"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 53,
+    "ItemId": 4800053,
+    "Name": "Exceptional Mayhem Restoration Chip, Modified (L)",
+    "Properties": {
+      "Description": "<p></p>",
+      "Range": 15,
+      "Weight": 0.2,
+      "MaxHeal": 1480,
+      "MinHeal": 1110,
+      "UsesPerMinute": 1,
+      "Skill": {
+        "LearningIntervalStart": 45,
+        "LearningIntervalEnd": 50,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 10,
+        "Concentration": null,
+        "Cooldown": 60,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 90,
+        "MinTT": 0,
+        "Decay": 0.229,
+        "AmmoBurn": 530
+      }
+    },
+    "EffectsOnUse": [
+      {
+        "Name": "Lifesteal Added",
+        "Values": {
+          "Strength": 1,
+          "DurationSeconds": 60,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/34"
+        }
+      },
+      {
+        "Name": "Heal Over Time",
+        "Values": {
+          "Strength": 90,
+          "DurationSeconds": 60,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/41"
+        }
+      }
+    ],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/53"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 54,
+    "ItemId": 4800054,
+    "Name": "Restoration Chip 9 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 308.7,
+      "MinHeal": 231.5,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 40,
+        "LearningIntervalEnd": 45,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 5,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 11.3,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 113
+      }
+    },
+    "EffectsOnUse": [
+      {
+        "Name": "Heal Over Time",
+        "Values": {
+          "Strength": 95,
+          "DurationSeconds": 30,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/41"
+        }
+      }
+    ],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/54"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 52,
+    "ItemId": 4800052,
+    "Name": "Mayhem Restoration Chip, Modified",
+    "Properties": {
+      "Description": null,
+      "Range": 15,
+      "Weight": 0.2,
+      "MaxHeal": 1480,
+      "MinHeal": 1110,
+      "UsesPerMinute": 1,
+      "Skill": {
+        "LearningIntervalStart": 45,
+        "LearningIntervalEnd": 50,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 10,
+        "Concentration": null,
+        "Cooldown": 60,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 90,
+        "MinTT": null,
+        "Decay": 4.99,
+        "AmmoBurn": 260
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/52"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 51,
+    "ItemId": 4800051,
+    "Name": "Restoration Chip, Modified",
+    "Properties": {
+      "Description": "<p></p>",
+      "Range": 5,
+      "Weight": 0.2,
+      "MaxHeal": 780,
+      "MinHeal": 585,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 20,
+        "LearningIntervalEnd": 25,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 9,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 60,
+        "MinTT": 2.7,
+        "Decay": 1.58,
+        "AmmoBurn": 110
+      }
+    },
+    "EffectsOnUse": [
+      {
+        "Name": "Heal Over Time",
+        "Values": {
+          "Strength": 80,
+          "DurationSeconds": 60,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/41"
+        }
+      },
+      {
+        "Name": "Lifesteal Added",
+        "Values": {
+          "Strength": 1,
+          "DurationSeconds": 60,
+          "Unit": "%",
+          "Description": null
+        },
+        "Links": {
+          "$Url": "/effects/34"
+        }
+      }
+    ],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/51"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 50,
+    "ItemId": 4800050,
+    "Name": "Restoration Chip, Improved",
+    "Properties": {
+      "Description": null,
+      "Range": 5,
+      "Weight": 0.2,
+      "MaxHeal": 380,
+      "MinHeal": 285,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 10,
+        "LearningIntervalEnd": 15,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 6,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 60,
+        "MinTT": 1.8,
+        "Decay": 1.019,
+        "AmmoBurn": 60
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/50"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 49,
+    "ItemId": 4800049,
+    "Name": "Restoration Chip, Adjusted",
+    "Properties": {
+      "Description": null,
+      "Range": null,
+      "Weight": 0.2,
+      "MaxHeal": 220,
+      "MinHeal": 165,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 5,
+        "LearningIntervalEnd": 10,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 3,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 48,
+        "MinTT": 1.44,
+        "Decay": 0.829,
+        "AmmoBurn": 38
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/49"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 48,
+    "ItemId": 4800048,
+    "Name": "Restoration Chip 8 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 267.3,
+      "MinHeal": 200.5,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 35,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 4,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 10.4,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 104
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/48"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 47,
+    "ItemId": 4800047,
+    "Name": "Restoration Chip 7 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 233.1,
+      "MinHeal": 174.8,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 30,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 4,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 9.69,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 97
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/47"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 46,
+    "ItemId": 4800046,
+    "Name": "Restoration Chip 6 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 198.9,
+      "MinHeal": 149.2,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 25,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 3,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 8.9,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 89
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/46"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 45,
+    "ItemId": 4800045,
+    "Name": "Restoration Chip 5 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 164.7,
+      "MinHeal": 123.5,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 20,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 3,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 8,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 80
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/45"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 44,
+    "ItemId": 4800044,
+    "Name": "Restoration Chip 4 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 137.1,
+      "MinHeal": 102.8,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 15,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 2,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 7.3,
+        "MinTT": 0,
+        "Decay": 0.72,
+        "AmmoBurn": 73
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/44"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 43,
+    "ItemId": 4800043,
+    "Name": "Restoration Chip 3 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 109.8,
+      "MinHeal": 82.4,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 10,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 2,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 6.4,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 64
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/43"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 42,
+    "ItemId": 4800042,
+    "Name": "Restoration Chip 20 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 966.9,
+      "MinHeal": 725.2,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 95,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 10,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 20.89,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 209
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/42"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 41,
+    "ItemId": 4800041,
+    "Name": "Restoration Chip 2 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 82.2,
+      "MinHeal": 61.6,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 5,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 1,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 5.3,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 53
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/41"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 40,
+    "ItemId": 4800040,
+    "Name": "Restoration Chip 19 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 891.3,
+      "MinHeal": 668.5,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 90,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 10,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 20,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 200
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/40"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 39,
+    "ItemId": 4800039,
+    "Name": "Restoration Chip 18 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 816,
+      "MinHeal": 612,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 85,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 9,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 19,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 190
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/39"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 38,
+    "ItemId": 4800038,
+    "Name": "Restoration Chip 17 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 747.3,
+      "MinHeal": 560.5,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 80,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 9,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 18.2,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 182
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/38"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 37,
+    "ItemId": 4800037,
+    "Name": "Restoration Chip 15 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 617.1,
+      "MinHeal": 462.8,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 70,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 8,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 16.39,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 164
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/37"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 36,
+    "ItemId": 4800036,
+    "Name": "Restoration Chip 14 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 555.3,
+      "MinHeal": 416.5,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 65,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 7,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 15.4,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 154
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/36"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 35,
+    "ItemId": 4800035,
+    "Name": "Restoration Chip 13 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 500.7,
+      "MinHeal": 375.5,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 60,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 7,
+        "Concentration": null,
+        "Cooldown": 300,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 14.6,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 146
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/35"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 34,
+    "ItemId": 4800034,
+    "Name": "Restoration Chip 12 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 445.8,
+      "MinHeal": 334.3,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 55,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 6,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 13.7,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 137
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/34"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 33,
+    "ItemId": 4800033,
+    "Name": "Restoration Chip 11 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 397.8,
+      "MinHeal": 298.3,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 50,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 6,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 12.9,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 129
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/33"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 32,
+    "ItemId": 4800032,
+    "Name": "Restoration Chip 10 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 349.8,
+      "MinHeal": 262.3,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 45,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 5,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 12,
+        "MinTT": 0,
+        "Decay": 1.173,
+        "AmmoBurn": 120
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/32"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 31,
+    "ItemId": 4800031,
+    "Name": "Restoration Chip 1 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 61.8,
+      "MinHeal": 46.3,
+      "UsesPerMinute": 2,
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 1,
+        "Concentration": null,
+        "Cooldown": 30,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 4.5,
+        "MinTT": 0,
+        "Decay": null,
+        "AmmoBurn": 45
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/31"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 26,
+    "ItemId": 4800026,
+    "Name": "Regeneration Chip 9 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": null,
+      "Weight": null,
+      "MaxHeal": null,
+      "MinHeal": null,
+      "UsesPerMinute": null,
+      "Skill": {
+        "LearningIntervalStart": null,
+        "LearningIntervalEnd": null,
+        "IsSiB": false
+      },
+      "Mindforce": {
+        "Level": 9,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": null,
+        "MinTT": null,
+        "Decay": null,
+        "AmmoBurn": null
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/26"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 25,
+    "ItemId": 4800025,
+    "Name": "Regeneration Chip 8",
+    "Properties": {
+      "Description": null,
+      "Range": 18,
+      "Weight": 0.2,
+      "MaxHeal": 63,
+      "MinHeal": 47.3,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 14.4,
+        "LearningIntervalEnd": 19,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 8,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 179,
+        "MinTT": 5.37,
+        "Decay": 2.8,
+        "AmmoBurn": 420
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/25"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 24,
+    "ItemId": 4800024,
+    "Name": "Regeneration Chip 7 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 16,
+      "Weight": 0.2,
+      "MaxHeal": 56,
+      "MinHeal": 42,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 9.8,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 7,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 25,
+        "MinTT": 0.75,
+        "Decay": 2.32,
+        "AmmoBurn": 353
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/24"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 23,
+    "ItemId": 4800023,
+    "Name": "Regeneration Chip 7",
+    "Properties": {
+      "Description": null,
+      "Range": 16,
+      "Weight": 0.2,
+      "MaxHeal": 56,
+      "MinHeal": 42,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 9.8,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 7,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 154,
+        "MinTT": 4.62,
+        "Decay": 2.479,
+        "AmmoBurn": 372
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/23"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 22,
+    "ItemId": 4800022,
+    "Name": "Regeneration Chip 6 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 14,
+      "Weight": 0.2,
+      "MaxHeal": 50,
+      "MinHeal": 34.3,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 8.9,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 6,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 22.5,
+        "MinTT": 0.675,
+        "Decay": 2.108,
+        "AmmoBurn": 316
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/22"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 21,
+    "ItemId": 4800021,
+    "Name": "Regeneration Chip 6",
+    "Properties": {
+      "Description": null,
+      "Range": 14,
+      "Weight": 0.2,
+      "MaxHeal": 50,
+      "MinHeal": 37.5,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 8.9,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 6,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 58,
+        "MinTT": 1.74,
+        "Decay": 2.22,
+        "AmmoBurn": 333
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/21"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 20,
+    "ItemId": 4800020,
+    "Name": "Regeneration Chip 5 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 13,
+      "Weight": 0.2,
+      "MaxHeal": 44,
+      "MinHeal": 33,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 6.4,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 5,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 20.5,
+        "MinTT": 0.615,
+        "Decay": 1.857,
+        "AmmoBurn": 278
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/20"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 19,
+    "ItemId": 4800019,
+    "Name": "Regeneration Chip 5",
+    "Properties": {
+      "Description": null,
+      "Range": 13,
+      "Weight": 0.2,
+      "MaxHeal": 44,
+      "MinHeal": 33,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 6.4,
+        "LearningIntervalEnd": 11,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 5,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 49,
+        "MinTT": 1.47,
+        "Decay": 1.956,
+        "AmmoBurn": 293
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/19"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 18,
+    "ItemId": 4800018,
+    "Name": "Regeneration Chip 4 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 11,
+      "Weight": 0.2,
+      "MaxHeal": 38,
+      "MinHeal": 28.5,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 3.8,
+        "LearningIntervalEnd": 9,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 4,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 18.5,
+        "MinTT": 0.555,
+        "Decay": 1.605,
+        "AmmoBurn": 241
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/18"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 17,
+    "ItemId": 4800017,
+    "Name": "Regeneration Chip 4",
+    "Properties": {
+      "Description": null,
+      "Range": 11,
+      "Weight": 0.2,
+      "MaxHeal": 38,
+      "MinHeal": 28.5,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 3.8,
+        "LearningIntervalEnd": 9,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 4,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 37,
+        "MinTT": 1.11,
+        "Decay": 1.69,
+        "AmmoBurn": 254
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/17"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 16,
+    "ItemId": 4800016,
+    "Name": "Regeneration Chip 3 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 10,
+      "Weight": 0.2,
+      "MaxHeal": 32,
+      "MinHeal": 24,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 6,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 3,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 14.5,
+        "MinTT": 0.435,
+        "Decay": 1.349,
+        "AmmoBurn": 202
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/16"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 15,
+    "ItemId": 4800015,
+    "Name": "Regeneration Chip 3",
+    "Properties": {
+      "Description": null,
+      "Range": 10,
+      "Weight": 0.2,
+      "MaxHeal": 32,
+      "MinHeal": 24,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 5,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 3,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 35,
+        "MinTT": 1.05,
+        "Decay": 1.42,
+        "AmmoBurn": 213
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/15"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 14,
+    "ItemId": 4800014,
+    "Name": "Regeneration Chip 2 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 9,
+      "Weight": 0.2,
+      "MaxHeal": 24,
+      "MinHeal": 18,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 4,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 2,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 11,
+        "MinTT": 0.33,
+        "Decay": 1.015,
+        "AmmoBurn": 152
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/14"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 13,
+    "ItemId": 4800013,
+    "Name": "Regeneration Chip 2",
+    "Properties": {
+      "Description": null,
+      "Range": 9,
+      "Weight": 0.2,
+      "MaxHeal": 24,
+      "MinHeal": 18,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 4,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 2,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 30,
+        "MinTT": 0.9,
+        "Decay": 1.068,
+        "AmmoBurn": 160
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/13"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 12,
+    "ItemId": 4800012,
+    "Name": "Regeneration Chip 11 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 86,
+      "MinHeal": null,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 22,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 11,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 41,
+        "MinTT": 1.23,
+        "Decay": null,
+        "AmmoBurn": 544
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/12"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 11,
+    "ItemId": 4800011,
+    "Name": "Regeneration Chip 11",
+    "Properties": {
+      "Description": null,
+      "Range": 25,
+      "Weight": 0.2,
+      "MaxHeal": 86,
+      "MinHeal": 64.5,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 22,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 11,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 272,
+        "MinTT": 8.16,
+        "Decay": 3.744,
+        "AmmoBurn": 573
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/11"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 10,
+    "ItemId": 4800010,
+    "Name": "Regeneration Chip 10 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 22,
+      "Weight": 0.2,
+      "MaxHeal": 78,
+      "MinHeal": 58.5,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 18,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 10,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 35,
+        "MinTT": 1.05,
+        "Decay": 3.294,
+        "AmmoBurn": 494
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/10"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 9,
+    "ItemId": 4800009,
+    "Name": "Regeneration Chip 10",
+    "Properties": {
+      "Description": null,
+      "Range": 22,
+      "Weight": 0.2,
+      "MaxHeal": 78,
+      "MinHeal": 58.5,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 18,
+        "LearningIntervalEnd": 23,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 10,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 240,
+        "MinTT": 7.2,
+        "Decay": 3.468,
+        "AmmoBurn": 520
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/9"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 8,
+    "ItemId": 4800008,
+    "Name": "Regeneration Chip 1 (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 8,
+      "Weight": 0.2,
+      "MaxHeal": 16,
+      "MinHeal": 12,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 3,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 1,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 7,
+        "MinTT": 0.21,
+        "Decay": 0.676,
+        "AmmoBurn": 102
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/8"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 7,
+    "ItemId": 4800007,
+    "Name": "Regeneration Chip 1",
+    "Properties": {
+      "Description": null,
+      "Range": 8,
+      "Weight": 0.2,
+      "MaxHeal": 16,
+      "MinHeal": 12,
+      "UsesPerMinute": 22,
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 3,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 1,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 15,
+        "MinTT": 0.45,
+        "Decay": 0.712,
+        "AmmoBurn": 107
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/7"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 6,
+    "ItemId": 4800006,
+    "Name": "Rakzum's Pouch (L)",
+    "Properties": {
+      "Description": null,
+      "Range": 5,
+      "Weight": 0.3,
+      "MaxHeal": null,
+      "MinHeal": null,
+      "UsesPerMinute": 4,
+      "Skill": {
+        "LearningIntervalStart": 25,
+        "LearningIntervalEnd": 35,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 1,
+        "Concentration": 6,
+        "Cooldown": 8,
+        "CooldownGroup": 2
+      },
+      "Economy": {
+        "MaxTT": 1.8,
+        "MinTT": 0.054,
+        "Decay": 10,
+        "AmmoBurn": 2400
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/6"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 5,
+    "ItemId": 4800005,
+    "Name": "Official Resurrection Chip",
+    "Properties": {
+      "Description": null,
+      "Range": 5,
+      "Weight": 1,
+      "MaxHeal": null,
+      "MinHeal": null,
+      "UsesPerMinute": 15,
+      "Skill": {
+        "LearningIntervalStart": 14,
+        "LearningIntervalEnd": null,
+        "IsSiB": false
+      },
+      "Mindforce": {
+        "Level": 8,
+        "Concentration": 2,
+        "Cooldown": 2,
+        "CooldownGroup": 2
+      },
+      "Economy": {
+        "MaxTT": 38.9,
+        "MinTT": null,
+        "Decay": null,
+        "AmmoBurn": 100
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/5"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 3,
+    "ItemId": 4800003,
+    "Name": "Official Regeneration Chip",
+    "Properties": {
+      "Description": null,
+      "Range": 200,
+      "Weight": 0.2,
+      "MaxHeal": 350,
+      "MinHeal": 262.5,
+      "UsesPerMinute": 61,
+      "Skill": {
+        "LearningIntervalStart": 22,
+        "LearningIntervalEnd": null,
+        "IsSiB": false
+      },
+      "Mindforce": {
+        "Level": 11,
+        "Concentration": null,
+        "Cooldown": null,
+        "CooldownGroup": null
+      },
+      "Economy": {
+        "MaxTT": 27,
+        "MinTT": 0.81,
+        "Decay": null,
+        "AmmoBurn": 100
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/3"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 2,
+    "ItemId": 4800002,
+    "Name": "First Gen Resurrect Chip 8",
+    "Properties": {
+      "Description": null,
+      "Range": 12,
+      "Weight": 1,
+      "MaxHeal": 0,
+      "MinHeal": null,
+      "UsesPerMinute": 3,
+      "Skill": {
+        "LearningIntervalStart": 14,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 8,
+        "Concentration": 8,
+        "Cooldown": 10,
+        "CooldownGroup": 2
+      },
+      "Economy": {
+        "MaxTT": 389.4,
+        "MinTT": 5.43,
+        "Decay": 23.52,
+        "AmmoBurn": 1200
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/2"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 1,
+    "ItemId": 4800001,
+    "Name": "Divine Intervention Chip",
+    "Properties": {
+      "Description": null,
+      "Range": 12,
+      "Weight": 1,
+      "MaxHeal": 50,
+      "MinHeal": 50,
+      "UsesPerMinute": 8,
+      "Skill": {
+        "LearningIntervalStart": 4,
+        "LearningIntervalEnd": null,
+        "IsSiB": false
+      },
+      "Mindforce": {
+        "Level": 3,
+        "Concentration": 2.2,
+        "Cooldown": 5,
+        "CooldownGroup": 2
+      },
+      "Economy": {
+        "MaxTT": 150,
+        "MinTT": 4.5,
+        "Decay": 1.5,
+        "AmmoBurn": 300
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": {
+      "Name": "Mind Essence",
+      "Links": {
+        "$Url": "/materials/1447"
+      }
+    },
+    "Links": {
+      "$Url": "/medicalchips/1"
+    },
+    "ClassId": null
+  },
+  {
+    "Id": 56,
+    "ClassId": null,
+    "ItemId": 4800056,
+    "Name": "Regeneration Field Chip 7 (L)",
+    "Properties": {
+      "Description": "<p></p>",
+      "Range": 41,
+      "Weight": 0.2,
+      "MaxHeal": 115.5,
+      "MinHeal": 86.6,
+      "UsesPerMinute": 4,
+      "Skill": {
+        "LearningIntervalStart": 48,
+        "LearningIntervalEnd": 53,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 7,
+        "Concentration": 3,
+        "Cooldown": 11,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 30,
+        "MinTT": 0,
+        "Decay": 0,
+        "AmmoBurn": 2358
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": null,
+    "Links": {
+      "$Url": "/medicalchips/56"
+    }
+  },
+  {
+    "Id": 55,
+    "ClassId": null,
+    "ItemId": 4800055,
+    "Name": "Healing Staff (L)",
+    "Properties": {
+      "Description": "",
+      "Range": 170,
+      "Weight": 0.2,
+      "MaxHeal": 69,
+      "MinHeal": 51.8,
+      "UsesPerMinute": 5,
+      "Skill": {
+        "LearningIntervalStart": 18,
+        "LearningIntervalEnd": 23,
+        "IsSiB": true
+      },
+      "Mindforce": {
+        "Level": 18,
+        "Concentration": 1,
+        "Cooldown": 10,
+        "CooldownGroup": 4
+      },
+      "Economy": {
+        "MaxTT": 8,
+        "MinTT": 0,
+        "Decay": 0,
+        "AmmoBurn": 100
+      }
+    },
+    "EffectsOnUse": [],
+    "EffectsOnEquip": [],
+    "Ammo": null,
+    "Links": {
+      "$Url": "/medicalchips/55"
+    }
+  }
+]

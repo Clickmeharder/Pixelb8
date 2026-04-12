@@ -1,0 +1,128 @@
+[
+  {
+    "Id": 1,
+    "ItemId": 5300001,
+    "Name": "ArMatrix Extender P10 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.1,
+      "Economy": {
+        "Efficiency": 85,
+        "MaxTT": 100,
+        "MinTT": 3,
+        "Absorption": 0.1
+      }
+    },
+    "Links": {
+      "$Url": "/absorbers/1"
+    }
+  },
+  {
+    "Id": 2,
+    "ItemId": 5300002,
+    "Name": "ArMatrix Extender P15 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.1,
+      "Economy": {
+        "Efficiency": 85,
+        "MaxTT": 150,
+        "MinTT": 5,
+        "Absorption": 0.15
+      }
+    },
+    "Links": {
+      "$Url": "/absorbers/2"
+    }
+  },
+  {
+    "Id": 3,
+    "ItemId": 5300003,
+    "Name": "ArMatrix Extender P20 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.1,
+      "Economy": {
+        "Efficiency": 85,
+        "MaxTT": 200,
+        "MinTT": 0,
+        "Absorption": 0.2
+      }
+    },
+    "Links": {
+      "$Url": "/absorbers/3"
+    }
+  },
+  {
+    "Id": 4,
+    "ItemId": 5300004,
+    "Name": "Karona's Extender P20 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.1,
+      "Economy": {
+        "Efficiency": 60,
+        "MaxTT": 1,
+        "MinTT": 0,
+        "Absorption": 0.2
+      }
+    },
+    "Links": {
+      "$Url": "/absorbers/4"
+    }
+  },
+  {
+    "Id": 5,
+    "ItemId": 5300005,
+    "Name": "Mayhem Extender P20",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.1,
+      "Economy": {
+        "Efficiency": 70,
+        "MaxTT": 40,
+        "MinTT": 0,
+        "Absorption": 0.2
+      }
+    },
+    "Links": {
+      "$Url": "/absorbers/5"
+    }
+  },
+  {
+    "Id": 6,
+    "ItemId": 5300006,
+    "Name": "Mayhem Extender P25",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.1,
+      "Economy": {
+        "Efficiency": 70,
+        "MaxTT": 60,
+        "MinTT": 0,
+        "Absorption": 0.25
+      }
+    },
+    "Links": {
+      "$Url": "/absorbers/6"
+    }
+  },
+  {
+    "Id": 7,
+    "ItemId": 5300007,
+    "Name": "Mayhem Extender P30 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.1,
+      "Economy": {
+        "Efficiency": 70,
+        "MaxTT": 100,
+        "MinTT": 3,
+        "Absorption": 0.3
+      }
+    },
+    "Links": {
+      "$Url": "/absorbers/7"
+    }
+  }
+]

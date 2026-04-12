@@ -1,0 +1,270 @@
+/* --- Mission Cooldown Container Scope --- */
+.timer-container {
+    max-width: 96%;
+    margin: auto;
+    margin-top: 24px;
+    position: relative;
+    width: 98%;
+    font-family: 'Orbitron', sans-serif; /* Applied font here since body rule was removed */
+}
+
+.timer-container h1 {
+    margin: auto;
+    margin-top: 4px;
+}
+
+/* Planet Grouping & Stats */
+.timer-container .stat-cd {
+    color: #ac4915;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.timer-container .closest-timer {
+    color: #0ff;
+    font-family: monospace;
+    font-size: 1.5em;
+    margin: 0 15px;
+    border-left: 1px solid #333;
+    padding-left: 15px;
+}
+
+.timer-container .planet-section {
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid #333;
+    border-radius: 8px;
+    margin-bottom: 3px;
+    overflow: visible;
+    min-height: auto;
+}
+
+/* Progress Bars */
+.timer-container .progress-container {
+    width: 93%;
+    height: 4px;
+    padding-top: 3px;
+    margin: auto;
+    border-radius: 15px;
+    background: #222;
+    overflow: hidden;
+}
+
+.timer-container .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #147b1d, #00ffff1a);
+    transition: width 1.5s;
+    opacity: 0.8;
+}
+
+/* Headers */
+.timer-container .planet-header {
+    background: #1a1a1a;
+    color: #85847f;
+    padding: 4px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.8s ease;
+}
+
+.timer-container .planet-header:hover {
+    color: #d3730d;
+}
+
+.timer-container .header-stats {
+    display: flex;
+    gap: 15px;
+    font-size: 0.75em;
+    color: #ccc;
+    align-items: center;
+}
+
+.timer-container .stat-ready {
+    color: #147b1d;
+    font-weight: bold;
+}
+
+.timer-container .category-header {
+    background: #111;
+    color: #ababab;
+    font-size: 0.82em;
+    padding: 4px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #222;
+	transition: all 0.8s ease;
+}
+.timer-container .category-header:hover {
+	color: #d7ad0e;
+	font-size: 0.85em;
+} 
+/* Collapsing Logic */
+.timer-container .collapsedSection {
+    transition: height 0.6s ease;
+}
+
+.timer-container .planet-content, 
+.timer-container .category-content {
+    display: block;
+}
+
+.timer-container .planet-section.collapsedSection { height: 34px; }
+.timer-container .category-wrapper.collapsedSection { height: 20px; }
+
+.timer-container .planet-section.collapsedSection .planet-content {
+    display: none !important;
+}
+
+.timer-container .category-wrapper.collapsedSection .category-content {
+    display: none !important;
+}
+
+/* Global Controls */
+.timer-container .global-controls button {
+    background: #111;
+    border: 1px solid #333;
+    color: #888;
+    margin-left: 5px;
+    font-size: 0.65em;
+}
+
+.timer-container .global-controls button:hover {
+    color: #0ff;
+    border-color: #0ff;
+}
+
+/* Mission Rows */
+.timer-container .mission-row {
+    display: grid;
+    grid-template-columns: 2.2fr 1fr 1.3fr 0.4fr;
+    gap: 15px;
+    align-items: center;
+    background: #0a0a0a;
+    padding: 10px 20px;
+    border-bottom: 1px solid #1a1a1a;
+    border-left: 4px solid #147b1d;
+}
+
+.timer-container .mission-row.in-progress {
+    border-left-color: #ffd700;
+    background: #161401;
+}
+
+.timer-container .mission-row.on-cooldown {
+    border-left-color: #ac4915;
+    opacity: 0.7;
+}
+
+.timer-container .mission-info h4 {
+    margin: 0;
+    font-size: 0.9em;
+    color: #555;
+    transition: color 0.8s ease;
+}
+
+.timer-container .mission-info h4:hover {
+    color: #238718;
+}
+
+.timer-container .mission-meta {
+    font-size: 0.72em;
+    color: #888;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+/* Badges & Tags */
+.timer-container .diff-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #060606;
+    text-transform: uppercase;
+}
+
+.timer-container .diff-v-easy { background-color: #2ecc71; }
+.timer-container .diff-easy   { background-color: #a2d149; }
+.timer-container .diff-medium { background-color: #f1c40f; color: #333; }
+.timer-container .diff-hard   { background-color: #e67e22; }
+.timer-container .diff-v-hard { background-color: #e74c3c; }
+
+.timer-container .wp-tag {
+    color: #19a9a9;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.timer-container .wp-tag:hover { color: #6c236a; }
+
+.timer-container .cd-type-tag {
+    color: #555;
+    font-style: italic;
+}
+
+/* Status Text */
+.timer-container .status-text {
+    font-family: monospace;
+    font-weight: bold;
+    text-align: center;
+}
+
+.timer-container .status-ready { color: #147b1d; font-size: 0.9em; }
+.timer-container .status-active { color: #ffd700; font-size: 0.8em; }
+.timer-container .status-timer { color: #0ff; font-size: 1.1em; }
+
+/* Buttons & Inputs */
+.timer-container .actions {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.timer-container button {
+    cursor: pointer;
+    background: #2d2929;
+    color: #eee;
+    border: 1px solid #4d4949;
+    padding: 6px 10px;
+    font-family: 'Orbitron';
+    font-size: 0.75em;
+}
+
+.timer-container .btn-start { border-color: #147b1d; }
+.timer-container .btn-finish { border-color: #ffd700; color: #ffd700; }
+.timer-container .btn-delete {
+    color: #888;
+    border: 1px outset #833333;
+    background: none;
+    font-size: 1em;
+    transition: color 0.8s ease;
+}
+
+.timer-container .btn-delete:hover { color: #ff4444; }
+.timer-container button#btn-reset { color: #888; transition: color 0.8s ease; }
+.timer-container button#btn-reset:hover { color: #ff4444; }
+
+.timer-container .add-controls {
+    background: #3b3b3b96;
+    padding: 15px;
+    border: 1px outset #48494d;
+    margin-bottom: 5%;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.timer-container input, 
+.timer-container select {
+    background: #000;
+    border: 1px solid #444;
+    color: #0ff;
+    padding: 6px;
+    font-size: 0.8em;
+}

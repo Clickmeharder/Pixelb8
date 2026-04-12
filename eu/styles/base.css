@@ -1,0 +1,227 @@
+/* base.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: rgba(0, 0, 0, 0.88);
+    color: #ddd;
+}
+
+a {
+    color: #0f9d58;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+h2 {
+    font-size: 1.3em;
+    color: #7f7f7f;/*#0baed5;*/
+    margin: 2px;
+    padding: 4px 8px;
+    outline: 2px outset #555555eb;
+    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+}
+.subtabs-header h2, .tableh2 {
+font-size: 1.1em;
+overflow: hidden;
+}
+h4 {
+    margin: auto;
+	font-size: 0.75em;
+    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+}
+button {
+    font-weight: bold;
+    border: 2px outset #272323;
+    background: #413e3e;
+    color: #6d6d6d;
+    cursor: pointer;
+    margin: 1px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
+    box-shadow: 0 1px 0 #272323;
+}
+/* button.tab-btn, button.subtab-btn {
+    font-weight: bold;
+    border: 2px outset #272323;
+    background: #413e3e;
+    color: #6d6d6d;
+    padding: 6px 12px;
+    cursor: pointer;
+    margin: 1px;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease, color 0.1s ease;
+    position: relative;
+    box-shadow: 0 1px 0 #272323;
+} */
+
+/* Hover effect */
+button:hover {
+	background: #2b2d2f;
+    color: #209aa1;
+}
+
+button.active, button:active {
+    border: 2px inset #272323;
+    padding: 0px 0px;
+    background: #2d2929;
+    color: #209aa1;
+    box-shadow: 0 1px 0 #1a1818 inset;
+}
+
+/* Pressed / active effect */
+/* button.tab-btn.active, button.subtab-btn:active, .tab-btn.active {
+    border: 2px inset #272323;
+    background: #2d2929;
+    color: #209aa1;
+    padding: 7px 12px;
+    transform: scale(0.99);
+    box-shadow: 0 2px 0 #1a1818 inset;
+}
+ */
+/* Optional: smooth release effect when button goes back to normal */
+button:not(.active):not(:active) {
+    box-shadow: 0 1px 0 #272323;
+    transform: translateY(0);
+}
+
+input[type="text"], input[type="number"] {
+    flex: 1;
+    padding: 2px 4px 2px 8px;
+    border-radius: 6px;
+    border: 1px solid #555;
+    background: #2b2b2b;
+    color: #f0f0f0;
+    font-size: 0.95em;
+    max-width: 45%;
+    transition: border 0.2s, background 0.2s;
+	text-align: center;
+}
+input[type="text"]:focus, input[type="number"]:focus {
+  outline: none;
+  border-color: #00bfff;
+  background: #333;
+}
+input[type="text"]{
+    background: black;
+    color: #555
+}
+input[type="number"] {
+  text-align: center;
+}
+input.percentNumber{
+    flex: 1;
+    padding: 2px 4px 2px 8px;
+    border-radius: 6px;
+    border: 1px solid #555;
+    background: #2b2b2b;
+    color: #f0f0f0;
+    font-size: 0.95em;
+    max-width: 45%;
+    transition: border 0.2s, background 0.2s;
+	text-align: center;
+}
+.field.dropdown-wrapper input[type="number"] {
+  max-width: 50%;
+  width: 50%;
+  box-sizing: border-box;
+}
+/* --- Optional: Highlight selected attachment --- */
+.field.selected input[type="text"] {
+  border-color: #00ff90;
+  background: #223322;
+}
+.field.selected input[type="number"] {
+  border-color: #00ff90;
+  background: #223322;
+}
+.field .MU-Input{
+  width:45%;
+  max-width:45%;
+}
+.dropdown {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #555;
+  display: none;
+  position: absolute;
+  top: 100%; /* directly below input */
+  left: 0;
+  width: 100%;
+  background: #2b2b2b;
+  border-radius: 6px;
+  z-index: 100;
+}
+
+.dropdown div {
+  padding: 8px 12px;
+  cursor: pointer;
+  color: #f0f0f0;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dropdown div:hover {
+  background-color: #00bfff;
+  color: #000;
+}
+/* Make the parent relative so the dropdown can position itself inside */
+
+/* 
+.dropdown {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #aaa;
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #000000;
+  color: #fff;
+  z-index: 100;
+}
+
+.dropdown div {
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.dropdown div:hover {
+  background-color: #ddd;
+  color: #000;
+} */
+
+#enhancer-stats-grid{
+	display:flex;
+	flex-direction:row;
+	flex-wrap: wrap;
+	padding:4px;
+	border:2px ridge #444;
+	margin:auto;
+}
+#enhancer-stats-grid .stat-card {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    width: 18%;
+    border: 2px ridge #444;
+    margin: auto;
+}
+.UImodal, .loadout-add-modal {
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgb(34, 34, 34);
+    border: 2px outset #444;
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 1000;
+    box-shadow: 3px 2px 16px 4px rgb(0 0 0 / 68%);
+}
+@media (max-width: 900px) {
+    .loadout-internalWrapper {
+        flex-direction: column;
+    }
+}

@@ -1,0 +1,9 @@
+select#loadoutSelect {
+    background: black;
+    color: #cf5929;
+}
+/* Responsive panels */
+.loadout-internalWrapper {
+    display: flex;
+    gap: 15px;
+}

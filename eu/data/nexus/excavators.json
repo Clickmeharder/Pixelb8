@@ -1,0 +1,4179 @@
+[
+  {
+    "Id": 1,
+    "ItemId": 4600001,
+    "Name": "ARD Excavator A-100 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 3,
+        "MinTT": null,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/1"
+    }
+  },
+  {
+    "Id": 2,
+    "ItemId": 4600002,
+    "Name": "ARD Excavator Beginner (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.4,
+      "UsesPerMinute": 17,
+      "Efficiency": 1.2,
+      "Economy": {
+        "MaxTT": 0.05,
+        "MinTT": null,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/2"
+    }
+  },
+  {
+    "Id": 3,
+    "ItemId": 4600003,
+    "Name": "ARD Excavator M1 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.8,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 2.4,
+        "MinTT": 0.072,
+        "Decay": 0.3
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/3"
+    }
+  },
+  {
+    "Id": 4,
+    "ItemId": 4600004,
+    "Name": "ARD Excavator M2 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.6,
+      "UsesPerMinute": 24,
+      "Efficiency": 9.2,
+      "Economy": {
+        "MaxTT": 54,
+        "MinTT": null,
+        "Decay": 1.263
+      },
+      "Skill": {
+        "LearningIntervalStart": 0.5,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/4"
+    }
+  },
+  {
+    "Id": 5,
+    "ItemId": 4600005,
+    "Name": "ARD Excavator M3 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": null,
+      "UsesPerMinute": null,
+      "Efficiency": null,
+      "Economy": {
+        "MaxTT": null,
+        "MinTT": null,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": null,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/5"
+    }
+  },
+  {
+    "Id": 6,
+    "ItemId": 4600006,
+    "Name": "ARD Excavator M4 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": null,
+      "UsesPerMinute": null,
+      "Efficiency": null,
+      "Economy": {
+        "MaxTT": null,
+        "MinTT": null,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": null,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/6"
+    }
+  },
+  {
+    "Id": 7,
+    "ItemId": 4600007,
+    "Name": "ARD Excavator M5 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.9,
+      "UsesPerMinute": 26,
+      "Efficiency": 12.8,
+      "Economy": {
+        "MaxTT": 132,
+        "MinTT": null,
+        "Decay": 2.336
+      },
+      "Skill": {
+        "LearningIntervalStart": 8,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/7"
+    }
+  },
+  {
+    "Id": 8,
+    "ItemId": 4600008,
+    "Name": "Demonic Excavator MK-I (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "UsesPerMinute": 17,
+      "Efficiency": 0.6,
+      "Economy": {
+        "MaxTT": 5,
+        "MinTT": 0.14,
+        "Decay": 0.1
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/8"
+    }
+  },
+  {
+    "Id": 9,
+    "ItemId": 4600009,
+    "Name": "Earth Excavator ME/01",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 2.4,
+        "MinTT": 0.06,
+        "Decay": 0.3
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Earth Excavator ME/01 Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 9,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 18,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          },
+          {
+            "Amount": 103,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 39,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 19,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600009&IsArmorSet=0&Tier=1"
+        }
+      },
+      {
+        "Name": "Earth Excavator ME/01 Tier 2",
+        "Properties": {
+          "Tier": 2,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 26,
+            "Material": {
+              "Name": "Tier 2 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.14
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2355"
+              }
+            }
+          },
+          {
+            "Amount": 19,
+            "Material": {
+              "Name": "Typonolic Gas",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2410"
+              }
+            }
+          },
+          {
+            "Amount": 78,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 39,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 10,
+            "Material": {
+              "Name": "Simple 1 Plastic Springs",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Mechanical Component",
+                "Economy": {
+                  "MaxTT": 0.4
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2150"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600009&IsArmorSet=0&Tier=2"
+        }
+      },
+      {
+        "Name": "Earth Excavator ME/01 Tier 3",
+        "Properties": {
+          "Tier": 3,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 12,
+            "Material": {
+              "Name": "Simple 1 Plastic Ruds",
+              "Properties": {
+                "Weight": null,
+                "Type": "Metal Component",
+                "Economy": {
+                  "MaxTT": 0.5
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2149"
+              }
+            }
+          },
+          {
+            "Amount": 28,
+            "Material": {
+              "Name": "Tier 3 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2356"
+              }
+            }
+          },
+          {
+            "Amount": 17,
+            "Material": {
+              "Name": "Ares Powder",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.52
+                }
+              },
+              "Links": {
+                "$Url": "/materials/148"
+              }
+            }
+          },
+          {
+            "Amount": 118,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 44,
+            "Material": {
+              "Name": "Pile of Opals",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1729"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600009&IsArmorSet=0&Tier=3"
+        }
+      },
+      {
+        "Name": "Earth Excavator ME/01 Tier 4",
+        "Properties": {
+          "Tier": 4,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 12,
+            "Material": {
+              "Name": "Simple 2 Conductors",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.65
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2151"
+              }
+            }
+          },
+          {
+            "Amount": 27,
+            "Material": {
+              "Name": "Tier 4 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.27
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2357"
+              }
+            }
+          },
+          {
+            "Amount": 23,
+            "Material": {
+              "Name": "Magerian Spray",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.5
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1367"
+              }
+            }
+          },
+          {
+            "Amount": 157,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 59,
+            "Material": {
+              "Name": "Pile of Opals",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1729"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600009&IsArmorSet=0&Tier=4"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/9"
+    }
+  },
+  {
+    "Id": 10,
+    "ItemId": 4600010,
+    "Name": "eMINE E (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.5,
+      "UsesPerMinute": 27,
+      "Efficiency": 12,
+      "Economy": {
+        "MaxTT": 85,
+        "MinTT": 2.55,
+        "Decay": 2.101
+      },
+      "Skill": {
+        "LearningIntervalStart": 10,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/10"
+    }
+  },
+  {
+    "Id": 12,
+    "ItemId": 4600012,
+    "Name": "Genesis Rookie Extractor (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.5,
+      "UsesPerMinute": 17,
+      "Efficiency": 1.2,
+      "Economy": {
+        "MaxTT": 0.01,
+        "MinTT": 0.0003,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/12"
+    }
+  },
+  {
+    "Id": 13,
+    "ItemId": 4600013,
+    "Name": "Genesis Star Basic Excavator (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 3,
+        "MinTT": 0.09,
+        "Decay": 0.3
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/13"
+    }
+  },
+  {
+    "Id": 14,
+    "ItemId": 4600014,
+    "Name": "Genesis Star Earth Excavator ME/02",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 22,
+      "Efficiency": 7.2,
+      "Economy": {
+        "MaxTT": 8,
+        "MinTT": 0.24,
+        "Decay": 0.5
+      },
+      "Skill": {
+        "LearningIntervalStart": 0.6,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Genesis Star Earth Excavator ME/02 Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 131,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 49,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 24,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 12,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 23,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600014&IsArmorSet=0&Tier=1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/14"
+    }
+  },
+  {
+    "Id": 15,
+    "ItemId": 4600015,
+    "Name": "Genesis Star Earth Excavator ME/03",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 22,
+      "Efficiency": 7.2,
+      "Economy": {
+        "MaxTT": 41,
+        "MinTT": 1.23,
+        "Decay": 0.75
+      },
+      "Skill": {
+        "LearningIntervalStart": 1.1,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/15"
+    }
+  },
+  {
+    "Id": 16,
+    "ItemId": 4600016,
+    "Name": "Genesis Star Earth Excavator ME/04",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "UsesPerMinute": 23,
+      "Efficiency": 8,
+      "Economy": {
+        "MaxTT": 55,
+        "MinTT": 1.65,
+        "Decay": 0.85
+      },
+      "Skill": {
+        "LearningIntervalStart": 2.5,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/16"
+    }
+  },
+  {
+    "Id": 17,
+    "ItemId": 4600017,
+    "Name": "Genesis Star Earth Excavator ME/05",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "UsesPerMinute": 23,
+      "Efficiency": 8.8,
+      "Economy": {
+        "MaxTT": 66,
+        "MinTT": 1.98,
+        "Decay": 0.8
+      },
+      "Skill": {
+        "LearningIntervalStart": 4.5,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/17"
+    }
+  },
+  {
+    "Id": 18,
+    "ItemId": 4600018,
+    "Name": "Genesis Star Earth Excavator ME/05, SGA Edition",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "UsesPerMinute": 33,
+      "Efficiency": 8.8,
+      "Economy": {
+        "MaxTT": 66,
+        "MinTT": 1.98,
+        "Decay": 0.8
+      },
+      "Skill": {
+        "LearningIntervalStart": 4.5,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Genesis Star Earth Excavator ME/05, SGA Edition Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 366,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 696,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          },
+          {
+            "Amount": 3846,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 1465,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 732,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600018&IsArmorSet=0&Tier=1"
+        }
+      },
+      {
+        "Name": "Genesis Star Earth Excavator ME/05, SGA Edition Tier 2",
+        "Properties": {
+          "Tier": 2,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 384,
+            "Material": {
+              "Name": "Simple 1 Plastic Springs",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Mechanical Component",
+                "Economy": {
+                  "MaxTT": 0.4
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2150"
+              }
+            }
+          },
+          {
+            "Amount": 994,
+            "Material": {
+              "Name": "Tier 2 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.14
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2355"
+              }
+            }
+          },
+          {
+            "Amount": 732,
+            "Material": {
+              "Name": "Typonolic Gas",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2410"
+              }
+            }
+          },
+          {
+            "Amount": 2931,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 1465,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600018&IsArmorSet=0&Tier=2"
+        }
+      },
+      {
+        "Name": "Genesis Star Earth Excavator ME/05, SGA Edition Tier 3",
+        "Properties": {
+          "Tier": 3,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 3216,
+            "Material": {
+              "Name": "Pile of Opals",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1729"
+              }
+            }
+          },
+          {
+            "Amount": 900,
+            "Material": {
+              "Name": "Simple 1 Plastic Ruds",
+              "Properties": {
+                "Weight": null,
+                "Type": "Metal Component",
+                "Economy": {
+                  "MaxTT": 0.5
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2149"
+              }
+            }
+          },
+          {
+            "Amount": 2037,
+            "Material": {
+              "Name": "Tier 3 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2356"
+              }
+            }
+          },
+          {
+            "Amount": 1237,
+            "Material": {
+              "Name": "Ares Powder",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.52
+                }
+              },
+              "Links": {
+                "$Url": "/materials/148"
+              }
+            }
+          },
+          {
+            "Amount": 8577,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600018&IsArmorSet=0&Tier=3"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/18"
+    }
+  },
+  {
+    "Id": 19,
+    "ItemId": 4600019,
+    "Name": "Genesis Star Excavator, Adjusted",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 23,
+      "Efficiency": 12.8,
+      "Economy": {
+        "MaxTT": 18,
+        "MinTT": 0.54,
+        "Decay": 0.5
+      },
+      "Skill": {
+        "LearningIntervalStart": 0.5,
+        "LearningIntervalEnd": 21,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Genesis Star Excavator, Adjusted Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 1090,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 2071,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          },
+          {
+            "Amount": 11448,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 4361,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 2180,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600019&IsArmorSet=0&Tier=1"
+        }
+      },
+      {
+        "Name": "Genesis Star Excavator, Adjusted Tier 2",
+        "Properties": {
+          "Tier": 2,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 8722,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 4361,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 1144,
+            "Material": {
+              "Name": "Simple 1 Plastic Springs",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Mechanical Component",
+                "Economy": {
+                  "MaxTT": 0.4
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2150"
+              }
+            }
+          },
+          {
+            "Amount": 2959,
+            "Material": {
+              "Name": "Tier 2 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.14
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2355"
+              }
+            }
+          },
+          {
+            "Amount": 2181,
+            "Material": {
+              "Name": "Typonolic Gas",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2410"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600019&IsArmorSet=0&Tier=2"
+        }
+      },
+      {
+        "Name": "Genesis Star Excavator, Adjusted Tier 3",
+        "Properties": {
+          "Tier": 3,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 1887,
+            "Material": {
+              "Name": "Ares Powder",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.52
+                }
+              },
+              "Links": {
+                "$Url": "/materials/148"
+              }
+            }
+          },
+          {
+            "Amount": 13083,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 4906,
+            "Material": {
+              "Name": "Pile of Opals",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1729"
+              }
+            }
+          },
+          {
+            "Amount": 1373,
+            "Material": {
+              "Name": "Simple 1 Plastic Ruds",
+              "Properties": {
+                "Weight": null,
+                "Type": "Metal Component",
+                "Economy": {
+                  "MaxTT": 0.5
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2149"
+              }
+            }
+          },
+          {
+            "Amount": 3107,
+            "Material": {
+              "Name": "Tier 3 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2356"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600019&IsArmorSet=0&Tier=3"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/19"
+    }
+  },
+  {
+    "Id": 20,
+    "ItemId": 4600020,
+    "Name": "Genesis Star Excavator, Adjusted, TWEN Edition",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "UsesPerMinute": 23,
+      "Efficiency": 16.8,
+      "Economy": {
+        "MaxTT": 100,
+        "MinTT": null,
+        "Decay": 0.5
+      },
+      "Skill": {
+        "LearningIntervalStart": 0.5,
+        "LearningIntervalEnd": 20,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Genesis Star Excavator, Adjusted, TWEN Edition Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 14761,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 5623,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 2811,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 1406,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 2671,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600020&IsArmorSet=0&Tier=1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/20"
+    }
+  },
+  {
+    "Id": 22,
+    "ItemId": 4600022,
+    "Name": "Genesis Star Excavator, Improved, TWEN Edition",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "UsesPerMinute": 24,
+      "Efficiency": 19.2,
+      "Economy": {
+        "MaxTT": 200,
+        "MinTT": 0,
+        "Decay": 0.5
+      },
+      "Skill": {
+        "LearningIntervalStart": 1,
+        "LearningIntervalEnd": 22,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Genesis Star Excavator, Improved, TWEN Edition Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 2847,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 1424,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 2705,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          },
+          {
+            "Amount": 14951,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 5695,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600022&IsArmorSet=0&Tier=1"
+        }
+      },
+      {
+        "Name": "Genesis Star Excavator, Improved, TWEN Edition Tier 2",
+        "Properties": {
+          "Tier": 2,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 1495,
+            "Material": {
+              "Name": "Simple 1 Plastic Springs",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Mechanical Component",
+                "Economy": {
+                  "MaxTT": 0.4
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2150"
+              }
+            }
+          },
+          {
+            "Amount": 3865,
+            "Material": {
+              "Name": "Tier 2 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.14
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2355"
+              }
+            }
+          },
+          {
+            "Amount": 2848,
+            "Material": {
+              "Name": "Typonolic Gas",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2410"
+              }
+            }
+          },
+          {
+            "Amount": 11391,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 5695,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600022&IsArmorSet=0&Tier=2"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/22"
+    }
+  },
+  {
+    "Id": 23,
+    "ItemId": 4600023,
+    "Name": "Genesis Star Excavator, Modified",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "UsesPerMinute": 27,
+      "Efficiency": 20.8,
+      "Economy": {
+        "MaxTT": 4362,
+        "MinTT": 130.86,
+        "Decay": 3.212
+      },
+      "Skill": {
+        "LearningIntervalStart": 19.7,
+        "LearningIntervalEnd": 27.9,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/23"
+    }
+  },
+  {
+    "Id": 24,
+    "ItemId": 4600024,
+    "Name": "Genesis Star Excavator, Modified, TWEN Edition",
+    "Properties": {
+      "Description": null,
+      "Weight": 0.8,
+      "UsesPerMinute": 27,
+      "Efficiency": 24.8,
+      "Economy": {
+        "MaxTT": 400,
+        "MinTT": null,
+        "Decay": 3.212
+      },
+      "Skill": {
+        "LearningIntervalStart": 19.7,
+        "LearningIntervalEnd": 27.9,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/24"
+    }
+  },
+  {
+    "Id": 25,
+    "ItemId": 4600025,
+    "Name": "Genesis Star Rookie Extractor (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.5,
+      "UsesPerMinute": 17,
+      "Efficiency": 1.2,
+      "Economy": {
+        "MaxTT": 0.1,
+        "MinTT": 0.003,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/25"
+    }
+  },
+  {
+    "Id": 26,
+    "ItemId": 4600026,
+    "Name": "Imperium Extirpater v1",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 2.2,
+        "MinTT": 0.06,
+        "Decay": 0.34
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/26"
+    }
+  },
+  {
+    "Id": 27,
+    "ItemId": 4600027,
+    "Name": "Initiate's Excavator (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 3,
+        "MinTT": 0.09,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/27"
+    }
+  },
+  {
+    "Id": 28,
+    "ItemId": 4600028,
+    "Name": "Island Earth Excavator ME/01",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 2.4,
+        "MinTT": 0.072,
+        "Decay": 0.3
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/28"
+    }
+  },
+  {
+    "Id": 29,
+    "ItemId": 4600029,
+    "Name": "Lost Soul Savior (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 2.4,
+      "UsesPerMinute": 26,
+      "Efficiency": 19.2,
+      "Economy": {
+        "MaxTT": 64,
+        "MinTT": 1.92,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": 2,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/29"
+    }
+  },
+  {
+    "Id": 30,
+    "ItemId": 4600030,
+    "Name": "NI Basic Excavator (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 3,
+        "MinTT": 0.09,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/30"
+    }
+  },
+  {
+    "Id": 32,
+    "ItemId": 4600032,
+    "Name": "Punk Digger (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 3,
+        "MinTT": 0.09,
+        "Decay": 0.3
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/32"
+    }
+  },
+  {
+    "Id": 33,
+    "ItemId": 4600033,
+    "Name": "Resource Extractor RE-101",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 20,
+      "Efficiency": 7.2,
+      "Economy": {
+        "MaxTT": 5.5,
+        "MinTT": 0.12,
+        "Decay": 0.6
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 4,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Resource Extractor RE-101 Tier 2",
+        "Properties": {
+          "Tier": 2,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 17,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 4,
+            "Material": {
+              "Name": "Simple 1 Plastic Springs",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Mechanical Component",
+                "Economy": {
+                  "MaxTT": 0.4
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2150"
+              }
+            }
+          },
+          {
+            "Amount": 11,
+            "Material": {
+              "Name": "Tier 2 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.14
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2355"
+              }
+            }
+          },
+          {
+            "Amount": 8,
+            "Material": {
+              "Name": "Typonolic Gas",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2410"
+              }
+            }
+          },
+          {
+            "Amount": 35,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600033&IsArmorSet=0&Tier=2"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/33"
+    }
+  },
+  {
+    "Id": 34,
+    "ItemId": 4600034,
+    "Name": "Resource Extractor RE-102",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 22,
+      "Efficiency": 8,
+      "Economy": {
+        "MaxTT": 12.6,
+        "MinTT": 0.378,
+        "Decay": 1.1
+      },
+      "Skill": {
+        "LearningIntervalStart": 0.6,
+        "LearningIntervalEnd": 4,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/34"
+    }
+  },
+  {
+    "Id": 35,
+    "ItemId": 4600035,
+    "Name": "Resource Extractor RE-103",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 23,
+      "Efficiency": 8.4,
+      "Economy": {
+        "MaxTT": 50,
+        "MinTT": 1.5,
+        "Decay": 1.5
+      },
+      "Skill": {
+        "LearningIntervalStart": 1,
+        "LearningIntervalEnd": 6.5,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Resource Extractor RE-103 Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 12,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 22,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          },
+          {
+            "Amount": 126,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 48,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 24,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600035&IsArmorSet=0&Tier=1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/35"
+    }
+  },
+  {
+    "Id": 36,
+    "ItemId": 4600036,
+    "Name": "Resource Extractor RE-104",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.5,
+      "UsesPerMinute": 24,
+      "Efficiency": 9.6,
+      "Economy": {
+        "MaxTT": 65,
+        "MinTT": 1.95,
+        "Decay": 1.73
+      },
+      "Skill": {
+        "LearningIntervalStart": 3,
+        "LearningIntervalEnd": 13,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Resource Extractor RE-104 Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 42,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 80,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          },
+          {
+            "Amount": 444,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 169,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 84,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600036&IsArmorSet=0&Tier=1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/36"
+    }
+  },
+  {
+    "Id": 37,
+    "ItemId": 4600037,
+    "Name": "Resource Extractor RE-105",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.3,
+      "UsesPerMinute": 26,
+      "Efficiency": 10.8,
+      "Economy": {
+        "MaxTT": 80,
+        "MinTT": 2.4,
+        "Decay": 2.22
+      },
+      "Skill": {
+        "LearningIntervalStart": 4,
+        "LearningIntervalEnd": 14,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Resource Extractor RE-105 Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 361,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 686,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          },
+          {
+            "Amount": 3791,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 1444,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 722,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600037&IsArmorSet=0&Tier=1"
+        }
+      },
+      {
+        "Name": "Resource Extractor RE-105 Tier 2",
+        "Properties": {
+          "Tier": 2,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 722,
+            "Material": {
+              "Name": "Typonolic Gas",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2410"
+              }
+            }
+          },
+          {
+            "Amount": 2888,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 1444,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 397,
+            "Material": {
+              "Name": "Simple 1 Plastic Springs",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Mechanical Component",
+                "Economy": {
+                  "MaxTT": 0.4
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2150"
+              }
+            }
+          },
+          {
+            "Amount": 980,
+            "Material": {
+              "Name": "Tier 2 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.14
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2355"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600037&IsArmorSet=0&Tier=2"
+        }
+      },
+      {
+        "Name": "Resource Extractor RE-105 Tier 3",
+        "Properties": {
+          "Tier": 3,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 1624,
+            "Material": {
+              "Name": "Pile of Opals",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1729"
+              }
+            }
+          },
+          {
+            "Amount": 454,
+            "Material": {
+              "Name": "Simple 1 Plastic Ruds",
+              "Properties": {
+                "Weight": null,
+                "Type": "Metal Component",
+                "Economy": {
+                  "MaxTT": 0.5
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2149"
+              }
+            }
+          },
+          {
+            "Amount": 1029,
+            "Material": {
+              "Name": "Tier 3 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2356"
+              }
+            }
+          },
+          {
+            "Amount": 625,
+            "Material": {
+              "Name": "Ares Powder",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.52
+                }
+              },
+              "Links": {
+                "$Url": "/materials/148"
+              }
+            }
+          },
+          {
+            "Amount": 4332,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600037&IsArmorSet=0&Tier=3"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/37"
+    }
+  },
+  {
+    "Id": 38,
+    "ItemId": 4600038,
+    "Name": "Resource Extractor RE-201 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.7,
+      "UsesPerMinute": 25,
+      "Efficiency": 9.2,
+      "Economy": {
+        "MaxTT": 89,
+        "MinTT": 2.67,
+        "Decay": 1.29
+      },
+      "Skill": {
+        "LearningIntervalStart": 0.3,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/38"
+    }
+  },
+  {
+    "Id": 39,
+    "ItemId": 4600039,
+    "Name": "Resource Extractor RE-202 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.5,
+      "UsesPerMinute": 25,
+      "Efficiency": 10.4,
+      "Economy": {
+        "MaxTT": 110,
+        "MinTT": 3.3,
+        "Decay": 1.6
+      },
+      "Skill": {
+        "LearningIntervalStart": 1.2,
+        "LearningIntervalEnd": 6.5,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/39"
+    }
+  },
+  {
+    "Id": 40,
+    "ItemId": 4600040,
+    "Name": "Resource Extractor RE-203 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.5,
+      "UsesPerMinute": 25,
+      "Efficiency": 11.6,
+      "Economy": {
+        "MaxTT": 185,
+        "MinTT": 5.55,
+        "Decay": 2.06
+      },
+      "Skill": {
+        "LearningIntervalStart": 6.3,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/40"
+    }
+  },
+  {
+    "Id": 41,
+    "ItemId": 4600041,
+    "Name": "Resource Extractor RE-204 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.5,
+      "UsesPerMinute": 26,
+      "Efficiency": 12.8,
+      "Economy": {
+        "MaxTT": 195,
+        "MinTT": 5.85,
+        "Decay": 2.331
+      },
+      "Skill": {
+        "LearningIntervalStart": 9,
+        "LearningIntervalEnd": 19.1,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/41"
+    }
+  },
+  {
+    "Id": 42,
+    "ItemId": 4600042,
+    "Name": "Resource Extractor RE-204 Adapted (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.5,
+      "UsesPerMinute": 34,
+      "Efficiency": 12.8,
+      "Economy": {
+        "MaxTT": 195,
+        "MinTT": 5.85,
+        "Decay": 2.331
+      },
+      "Skill": {
+        "LearningIntervalStart": 9,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/42"
+    }
+  },
+  {
+    "Id": 43,
+    "ItemId": 4600043,
+    "Name": "Resource Extractor RE-205 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 3.9,
+      "UsesPerMinute": 24,
+      "Efficiency": 14,
+      "Economy": {
+        "MaxTT": 83,
+        "MinTT": 0,
+        "Decay": 2.5
+      },
+      "Skill": {
+        "LearningIntervalStart": 17,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/43"
+    }
+  },
+  {
+    "Id": 44,
+    "ItemId": 4600044,
+    "Name": "Resource Extractor RE-301 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 3.9,
+      "UsesPerMinute": 24,
+      "Efficiency": 14,
+      "Economy": {
+        "MaxTT": 83,
+        "MinTT": 2.49,
+        "Decay": 2.503
+      },
+      "Skill": {
+        "LearningIntervalStart": 17,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/44"
+    }
+  },
+  {
+    "Id": 45,
+    "ItemId": 4600045,
+    "Name": "Rock Ripper 1 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.4,
+      "UsesPerMinute": 22,
+      "Efficiency": 6.6,
+      "Economy": {
+        "MaxTT": 2,
+        "MinTT": 0.06,
+        "Decay": 0.28
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 1,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/45"
+    }
+  },
+  {
+    "Id": 46,
+    "ItemId": 4600046,
+    "Name": "Rock Ripper 2 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.4,
+      "UsesPerMinute": 24,
+      "Efficiency": 7.7,
+      "Economy": {
+        "MaxTT": 22,
+        "MinTT": 0.66,
+        "Decay": 1.129
+      },
+      "Skill": {
+        "LearningIntervalStart": 1,
+        "LearningIntervalEnd": 3,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/46"
+    }
+  },
+  {
+    "Id": 47,
+    "ItemId": 4600047,
+    "Name": "Rock Ripper 3 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.4,
+      "UsesPerMinute": 24,
+      "Efficiency": 8.8,
+      "Economy": {
+        "MaxTT": 44,
+        "MinTT": 1.32,
+        "Decay": 1.454
+      },
+      "Skill": {
+        "LearningIntervalStart": 3,
+        "LearningIntervalEnd": 6,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/47"
+    }
+  },
+  {
+    "Id": 48,
+    "ItemId": 4600048,
+    "Name": "Rock Ripper 3 Gold Rush",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.4,
+      "UsesPerMinute": 29,
+      "Efficiency": 8.5,
+      "Economy": {
+        "MaxTT": 44,
+        "MinTT": 1.32,
+        "Decay": 0.833
+      },
+      "Skill": {
+        "LearningIntervalStart": 3,
+        "LearningIntervalEnd": 6,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/48"
+    }
+  },
+  {
+    "Id": 49,
+    "ItemId": 4600049,
+    "Name": "Rock Ripper 4 (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": null,
+      "UsesPerMinute": null,
+      "Efficiency": null,
+      "Economy": {
+        "MaxTT": null,
+        "MinTT": null,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": null,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/49"
+    }
+  },
+  {
+    "Id": 50,
+    "ItemId": 4600050,
+    "Name": "Rock Ripper Trainer (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.4,
+      "UsesPerMinute": 17,
+      "Efficiency": 6,
+      "Economy": {
+        "MaxTT": 0.2,
+        "MinTT": 0.006,
+        "Decay": 0.274
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 1,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/50"
+    }
+  },
+  {
+    "Id": 51,
+    "ItemId": 4600051,
+    "Name": "Rock Ripper TT (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 3,
+        "MinTT": 0.09,
+        "Decay": 0.3
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/51"
+    }
+  },
+  {
+    "Id": 52,
+    "ItemId": 4600052,
+    "Name": "Rookie Rock Ripper",
+    "Properties": {
+      "Description": null,
+      "Weight": 1.4,
+      "UsesPerMinute": 17,
+      "Efficiency": 6,
+      "Economy": {
+        "MaxTT": 1,
+        "MinTT": 0.03,
+        "Decay": 0.274
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": 1,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Rookie Rock Ripper Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 3,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 5,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          },
+          {
+            "Amount": 33,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 12,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 6,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600052&IsArmorSet=0&Tier=1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/52"
+    }
+  },
+  {
+    "Id": 53,
+    "ItemId": 4600053,
+    "Name": "Training Mineral Extractor (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 0.1,
+        "MinTT": 0.003,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/53"
+    }
+  },
+  {
+    "Id": 54,
+    "ItemId": 4600054,
+    "Name": "Xtreme Excavator MK-I (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 1,
+      "UsesPerMinute": 17,
+      "Efficiency": 7.6,
+      "Economy": {
+        "MaxTT": 5,
+        "MinTT": 0.15,
+        "Decay": null
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/54"
+    }
+  },
+  {
+    "Id": 31,
+    "ItemId": 4600031,
+    "Name": "NI Extractor New Settler Issue (L)",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 24,
+      "Efficiency": 1.2,
+      "Economy": {
+        "MaxTT": 0.1,
+        "MinTT": 0.003,
+        "Decay": 0.1
+      },
+      "Skill": {
+        "LearningIntervalStart": 0,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [],
+    "Links": {
+      "$Url": "/excavators/31"
+    }
+  },
+  {
+    "Id": 11,
+    "ItemId": 4600011,
+    "Name": "Exhumer Mk1",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 19,
+      "Efficiency": 6.8,
+      "Economy": {
+        "MaxTT": 2.4,
+        "MinTT": 0,
+        "Decay": 0.3
+      },
+      "Skill": {
+        "LearningIntervalStart": null,
+        "LearningIntervalEnd": null,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Exhumer Mk1 Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 18,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          },
+          {
+            "Amount": 9,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 19,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 103,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 39,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600011&IsArmorSet=0&Tier=1"
+        }
+      },
+      {
+        "Name": "Exhumer Mk1 Tier 2",
+        "Properties": {
+          "Tier": 2,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 19,
+            "Material": {
+              "Name": "Typonolic Gas",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2410"
+              }
+            }
+          },
+          {
+            "Amount": 26,
+            "Material": {
+              "Name": "Tier 2 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.14
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2355"
+              }
+            }
+          },
+          {
+            "Amount": 10,
+            "Material": {
+              "Name": "Simple 1 Plastic Springs",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Mechanical Component",
+                "Economy": {
+                  "MaxTT": 0.4
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2150"
+              }
+            }
+          },
+          {
+            "Amount": 39,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 78,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600011&IsArmorSet=0&Tier=2"
+        }
+      },
+      {
+        "Name": "Exhumer Mk1 Tier 3",
+        "Properties": {
+          "Tier": 3,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 28,
+            "Material": {
+              "Name": "Tier 3 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2356"
+              }
+            }
+          },
+          {
+            "Amount": 12,
+            "Material": {
+              "Name": "Simple 1 Plastic Ruds",
+              "Properties": {
+                "Weight": null,
+                "Type": "Metal Component",
+                "Economy": {
+                  "MaxTT": 0.5
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2149"
+              }
+            }
+          },
+          {
+            "Amount": 44,
+            "Material": {
+              "Name": "Pile of Opals",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1729"
+              }
+            }
+          },
+          {
+            "Amount": 118,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 17,
+            "Material": {
+              "Name": "Ares Powder",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.52
+                }
+              },
+              "Links": {
+                "$Url": "/materials/148"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600011&IsArmorSet=0&Tier=3"
+        }
+      },
+      {
+        "Name": "Exhumer Mk1 Tier 5",
+        "Properties": {
+          "Tier": 5,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 23,
+            "Material": {
+              "Name": "Tier 5 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.4
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2358"
+              }
+            }
+          },
+          {
+            "Amount": 13,
+            "Material": {
+              "Name": "Simple 2 Plastic Springs",
+              "Properties": {
+                "Weight": null,
+                "Type": "Mechanical Component",
+                "Economy": {
+                  "MaxTT": 0.75
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2153"
+              }
+            }
+          },
+          {
+            "Amount": 49,
+            "Material": {
+              "Name": "Pile of Emeralds",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1726"
+              }
+            }
+          },
+          {
+            "Amount": 196,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 14,
+            "Material": {
+              "Name": "Angelic Flakes",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/109"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600011&IsArmorSet=0&Tier=5"
+        }
+      },
+      {
+        "Name": "Exhumer Mk1 Tier 6",
+        "Properties": {
+          "Tier": 6,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 22,
+            "Material": {
+              "Name": "Putty",
+              "Properties": {
+                "Weight": 0.2,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.78
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1803"
+              }
+            }
+          },
+          {
+            "Amount": 13,
+            "Material": {
+              "Name": "Simple 2 Plastic Ruds",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Metal Component",
+                "Economy": {
+                  "MaxTT": 0.95
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2152"
+              }
+            }
+          },
+          {
+            "Amount": 236,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 59,
+            "Material": {
+              "Name": "Pile of Emeralds",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1726"
+              }
+            }
+          },
+          {
+            "Amount": 22,
+            "Material": {
+              "Name": "Tier 6 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.5
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2359"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600011&IsArmorSet=0&Tier=6"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/11"
+    }
+  },
+  {
+    "Id": 21,
+    "ItemId": 4600021,
+    "Name": "Genesis Star Excavator, Improved",
+    "Properties": {
+      "Description": null,
+      "Weight": 2,
+      "UsesPerMinute": 24,
+      "Efficiency": 15.2,
+      "Economy": {
+        "MaxTT": 27,
+        "MinTT": 0.81,
+        "Decay": 0.5
+      },
+      "Skill": {
+        "LearningIntervalStart": 1,
+        "LearningIntervalEnd": 22,
+        "IsSiB": true
+      }
+    },
+    "EffectsOnEquip": [],
+    "Tiers": [
+      {
+        "Name": "Genesis Star Excavator, Improved Tier 1",
+        "Properties": {
+          "Tier": 1,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 2514,
+            "Material": {
+              "Name": "Tier 1 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2354"
+              }
+            }
+          },
+          {
+            "Amount": 1323,
+            "Material": {
+              "Name": "Simple 1 Conductors",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Electronic Component",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2148"
+              }
+            }
+          },
+          {
+            "Amount": 2647,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 13897,
+            "Material": {
+              "Name": "Oil",
+              "Properties": {
+                "Weight": 0.02,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.02
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1564"
+              }
+            }
+          },
+          {
+            "Amount": 5294,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600021&IsArmorSet=0&Tier=1"
+        }
+      },
+      {
+        "Name": "Genesis Star Excavator, Improved Tier 2",
+        "Properties": {
+          "Tier": 2,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 2772,
+            "Material": {
+              "Name": "Typonolic Gas",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2410"
+              }
+            }
+          },
+          {
+            "Amount": 3762,
+            "Material": {
+              "Name": "Tier 2 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.14
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2355"
+              }
+            }
+          },
+          {
+            "Amount": 1455,
+            "Material": {
+              "Name": "Simple 1 Plastic Springs",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Mechanical Component",
+                "Economy": {
+                  "MaxTT": 0.4
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2150"
+              }
+            }
+          },
+          {
+            "Amount": 5544,
+            "Material": {
+              "Name": "Pile of Garnets",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.15
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1727"
+              }
+            }
+          },
+          {
+            "Amount": 11088,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600021&IsArmorSet=0&Tier=2"
+        }
+      },
+      {
+        "Name": "Genesis Star Excavator, Improved Tier 3",
+        "Properties": {
+          "Tier": 3,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 3950,
+            "Material": {
+              "Name": "Tier 3 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2356"
+              }
+            }
+          },
+          {
+            "Amount": 1746,
+            "Material": {
+              "Name": "Simple 1 Plastic Ruds",
+              "Properties": {
+                "Weight": null,
+                "Type": "Metal Component",
+                "Economy": {
+                  "MaxTT": 0.5
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2149"
+              }
+            }
+          },
+          {
+            "Amount": 6237,
+            "Material": {
+              "Name": "Pile of Opals",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.2
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1729"
+              }
+            }
+          },
+          {
+            "Amount": 16632,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 2399,
+            "Material": {
+              "Name": "Ares Powder",
+              "Properties": {
+                "Weight": 0.01,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 0.52
+                }
+              },
+              "Links": {
+                "$Url": "/materials/148"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600021&IsArmorSet=0&Tier=3"
+        }
+      },
+      {
+        "Name": "Genesis Star Excavator, Improved Tier 5",
+        "Properties": {
+          "Tier": 5,
+          "IsArmorSet": false
+        },
+        "Materials": [
+          {
+            "Amount": 2079,
+            "Material": {
+              "Name": "Angelic Flakes",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Refined Enmatter",
+                "Economy": {
+                  "MaxTT": 1
+                }
+              },
+              "Links": {
+                "$Url": "/materials/109"
+              }
+            }
+          },
+          {
+            "Amount": 1940,
+            "Material": {
+              "Name": "Simple 2 Plastic Springs",
+              "Properties": {
+                "Weight": null,
+                "Type": "Mechanical Component",
+                "Economy": {
+                  "MaxTT": 0.75
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2153"
+              }
+            }
+          },
+          {
+            "Amount": 27720,
+            "Material": {
+              "Name": "Blazar Fragment",
+              "Properties": {
+                "Weight": 0,
+                "Type": "Fragment",
+                "Economy": {
+                  "MaxTT": 0.00001
+                }
+              },
+              "Links": {
+                "$Url": "/materials/331"
+              }
+            }
+          },
+          {
+            "Amount": 6930,
+            "Material": {
+              "Name": "Pile of Emeralds",
+              "Properties": {
+                "Weight": null,
+                "Type": "Precious Stones",
+                "Economy": {
+                  "MaxTT": 0.3
+                }
+              },
+              "Links": {
+                "$Url": "/materials/1726"
+              }
+            }
+          },
+          {
+            "Amount": 3291,
+            "Material": {
+              "Name": "Tier 5 Component",
+              "Properties": {
+                "Weight": 0.1,
+                "Type": "Enhancer Component",
+                "Economy": {
+                  "MaxTT": 0.4
+                }
+              },
+              "Links": {
+                "$Url": "/materials/2358"
+              }
+            }
+          }
+        ],
+        "Links": {
+          "$Url": "/tiers?ItemId=4600021&IsArmorSet=0&Tier=5"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/excavators/21"
+    }
+  }
+]

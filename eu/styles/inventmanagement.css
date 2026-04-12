@@ -1,0 +1,1361 @@
+/* =========================================================
+   PIXELB8 OMEGA - PIXEL-PERFECT RESIZEABLE TABLE
+   ========================================================= */
+
+/* --- UNIVERSAL COLUMN WIDTHS & DEFAULTS --- */
+:root {
+    --col-min-width: 80px;           /* ← CHANGE THIS NUMBER if you want a different global minimum */
+    --col-name-width: 120px;
+    --col-location-width: 160px;
+    --col-qty-width: 80px;
+    --col-unit-width: 90px;
+    --col-total-width: 110px;
+    --col-decision-width: 130px;
+    --col-action-width: 100px;
+    --col-mu-width: 130px;
+    --col-price-width: 100px;
+    --col-bp-width: 150px;
+	--col-tx-total-width: 110px;
+}
+.subtab-content th[class*="col-"],
+.subtab-content td[class*="col-"] {
+    min-width: var(--col-min-width) !important;
+    flex-shrink: 0 !important;
+}
+/* Special override for MU column (keeps your 130px minimum) */
+.subtab-content th.col-mu,
+.subtab-content td.col-mu {
+    min-width: 130px !important;
+    width: var(--col-mu-width) !important;
+    justify-content: center !important;
+    color: #fde047;
+}
+
+.subtab-content th.col-mu,
+.subtab-content td.col-mu {
+    width: var(--col-mu-width) !important;
+    min-width: 130px !important;           /* ← THIS IS YOUR NEW HARD MINIMUM */
+    justify-content: center !important;
+    color: #fde047;
+    flex-shrink: 0 !important;
+}
+
+/* Also protect the header specifically */
+.subtab-content th.col-mu {
+    min-width: 130px !important;
+}
+.subtab-content .col-price { width: var(--col-price-width); justify-content: flex-end; color: #4ade80; }
+.subtab-content .col-bp    { width: var(--col-bp-width); }
+.subtab-content .col-ttvalue { width: var(--col-ttvalue-width); justify-content: flex-end; color: #a5f3fc; }
+.subtab-content .col-total   { width: var(--col-total-width); justify-content: flex-end; font-weight: bold; color: #4ade80; }
+#inline-type-select {
+    height: 18px;
+    line-height: 1;
+    padding: 0 2px;
+}
+#InventoryTab {
+    font-family: 'Inter', sans-serif;
+    color: #d1d5db;
+}
+.inventory-scroll-container {
+    position: relative;
+    overflow-y: auto;
+}
+
+.tablecontainer{border:3px ridge #444;}
+/* Make the header sticky */
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 10; /* Keep it above the virtual rows */
+    background-color: #030712; /* Matches your gray-950/black background */
+}
+
+/* Optional: Add a subtle border or shadow to separate it from the scrolling rows */
+thead th {
+    border-bottom: 2px solid #374151; /* gray-700 */
+}
+/* --- SCROLL CONTAINERS (Main Tabs) --- */
+#fulllist-scroll-container,
+.virtual-scroll-container {
+    max-height: 70vh;
+    overflow: auto; 
+    border: 1px solid #374151;
+    /* background: #111827; */
+    position: relative;
+}
+
+/* --- SIDEBAR LOCK & COLLAPSE LOGIC --- */
+#inventory-sidebar {
+    overflow-x: hidden; 
+}
+
+.sidebar-location-content {
+    display: block;
+    max-height: 500px; /* Limits vertical height for long ammo lists */
+    overflow-y: auto;  /* Vertical scroll only */
+    overflow-x: hidden;
+    /* background: #0f172a; */
+    border: 1px solid #374151;
+    border-top: none;
+    transition: max-height 0.3s ease-in-out;
+}
+
+/* 🟢 Sidebar Hidden State (Matches your JS .hidden toggle) */
+.sidebar-location-content.hidden {
+    display: none !important;
+}
+
+/* Force Sidebar Table to fit within the 80px/w-80 container */
+#inventory-sidebar table {
+    display: table; 
+    width: 100% !important;
+    table-layout: fixed; /* Prevents column spillover */
+    border-collapse: collapse;
+}
+
+/* --- BASE TABLE LOGIC (Main Tabs) --- */
+.subtab-content table {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+}
+div#location-panels-container {
+    margin-top: 12px;
+}
+#inventory-sidebar th {
+    background: #132047;
+    color: #a0a9b7;
+    font-weight: 900;
+    border: 2px solid #4b5563;
+}
+.subtab-content thead tr, 
+.subtab-content tbody tr {
+    display: flex !important;
+	width: 100%;
+	align-items: center;
+}
+
+#InventoryTab tbody tr {
+    border-bottom: 1px solid #1f2937;
+    transition: background-color 0.1s;
+}
+
+/* --- CELL & HEADER CORE STYLES --- */
+.subtab-content th, 
+.subtab-content td,
+#inventory-sidebar th,
+#inventory-sidebar td {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-right: 1px solid #374151;
+    box-sizing: border-box;
+}
+
+/* Main Tab specific Flex behavior for Resizing */
+.subtab-content th, 
+.subtab-content td {
+    display: table-cell;
+    align-items: center;
+    flex-shrink: 0 !important;
+}
+
+.subtab-content th {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #111827;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    border-bottom: 2px solid #4b5563;
+    resize: horizontal;
+}
+
+/* Sidebar Specific Tightening & Text Wrapping */
+#inventory-sidebar th, 
+#inventory-sidebar td {
+    padding: 6px 4px;
+    font-size: 13px;
+    white-space: normal; /* Wraps text so columns stay narrow */
+    word-break: break-word;
+
+}
+#inventory-sidebar td {
+	font-weight: bold;
+}
+/* .inventory-row {
+    height: 20px !important;
+    overflow: hidden;
+    contain: strict; 
+} */
+/* --- COLUMN VARIABLE MAPPING (Main Tabs Only) --- */
+/* Individual column widths (still use the variables) */
+.subtab-content .col-name     { width: var(--col-name-width); }
+.subtab-content .col-location { width: var(--col-location-width); }
+.subtab-content .col-qty      { width: var(--col-qty-width); }
+.subtab-content .col-unit     { width: var(--col-unit-width); }
+.subtab-content .col-total    { width: var(--col-total-width); color: #22d3ee; font-weight: bold; }
+.subtab-content .col-decision { width: var(--col-decision-width); }
+.subtab-content .col-action   { width: var(--col-action-width); justify-content: center; border-right: none !important; }
+.subtab-content .col-price    { width: var(--col-price-width); color: #4ade80; }
+.subtab-content .col-bp       { width: var(--col-bp-width); }
+
+
+.subtab-content .col-qty,
+.subtab-content .col-unit,
+.subtab-content .col-total,
+.subtab-content .col-ttvalue,
+.subtab-content .col-price { 
+    text-align: right; /* Replaces justify-content: flex-end */
+}
+
+.subtab-content .col-action,
+.subtab-content .col-mu { 
+    text-align: center; /* Replaces justify-content: center */
+}
+/* MU COLUMN — THIS IS THE FIXED VERSION */
+
+/* CRITICAL: Force tables to respect fixed widths */
+/* --- UPDATED BASE TABLE LOGIC --- */
+.subtab-content table {
+    display: table; /* Changed from block */
+    width: 100%;    /* Changed from max-content */
+    table-layout: fixed; /* Essential for variable-based widths */
+    border-collapse: collapse;
+}
+
+/* Ensure the container handles the overflow if the table gets too wide */
+.virtual-scroll-container,
+#fulllist-scroll-container {
+    max-height: 70vh;
+    overflow-x: auto; /* Allow horizontal scroll if columns exceed screen width */
+    overflow-y: auto;
+    position: relative;
+}
+
+
+
+/* If using Flexbox for alignment inside cells */
+.subtab-content td[class*="col-"], 
+.subtab-content th[class*="col-"] {
+    display: flex;
+    align-items: center;
+    height: 100%; /* Important for flex alignment */
+}
+/* MU COLUMN - Clean & Strong */
+.subtab-content .col-mu {
+    width: var(--col-mu-width) !important;
+    min-width: 130px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    color: #fde047;
+    flex-shrink: 0 !important;
+    padding: 0 4px;
+}
+
+.subtab-content th.col-mu,
+.subtab-content td.col-mu {
+    min-width: 130px !important;
+}
+
+/* Make sure the % span doesn't break layout */
+.mu-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 90px;
+}
+
+/* Remove the "spinners" (arrows) from the number input for a cleaner look */
+.mu-edit-input::-webkit-outer-spin-button,
+.mu-edit-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+/* MU% input with visual % suffix */
+.mu-edit-input {
+    width: 100% !important;
+    max-width: 75px;
+    text-align: center !important;
+    outline: none;
+    margin-left: 10%;
+	margin-right: -9%;
+}
+
+.mu-edit-input + span {
+    pointer-events: none;
+    user-select: none;
+}
+/* --- UI ENHANCEMENTS & SCROLLBARS --- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 5px; }
+::-webkit-scrollbar-corner { background: #111827; }
+
+/* Minimalist Scrollbar for Sidebar */
+.sidebar-location-content::-webkit-scrollbar { width: 4px; }
+.sidebar-location-content::-webkit-scrollbar-thumb { background: #374151; border-radius: 2px; }
+
+#InventoryTab th::-webkit-resizer {background: #4b556300; }
+
+
+#InventoryTab tbody tr:hover {
+    background-color: rgba(55, 65, 81, 0.5);
+}
+
+.col-action button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    font-weight: 700;
+}
+
+
+/* Icon Rotation for Collapsibles */
+.collapsible-header .collapsible-icon {
+    transition: transform 0.2s ease;
+}
+
+div#summary-panel-container {
+    padding-left: ;
+}
+/* div#summary-metrics-wrapper {
+    padding-left: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+} */
+#summary-metrics-wrapper {
+    display: flex
+;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 95%;
+    margin: auto;
+    margin-top: 12px;
+    padding: 6px 10px;
+    background: #000;
+    outline: 3px ridge #3d3d3d;
+    border: 2px inset #333;
+    justify-content: space-evenly;
+}
+#summary-metrics-wrapper {
+    position: relative;
+}
+
+#summary-metrics-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.03) 0px,
+        rgba(255,255,255,0.03) 1px,
+        transparent 2px,
+        transparent 4px
+    );
+}
+.summary-metric {
+    display: flex;
+    flex-direction: column;
+
+    padding: 4px 6px;
+
+    background: #000;
+    border-left: 2px solid currentColor;
+
+    font-family: 'Courier New', monospace;
+	
+    min-width: 120px;
+	opacity:0.6;
+	transition: all 0.4s ease;
+}
+
+/* tighter text */
+.summary-metric p {
+    font-size: 9px;
+    margin: 0;
+    opacity: 0.6;
+    letter-spacing: 1px;
+}
+
+.summary-metric strong {
+    font-size: 16px;
+    letter-spacing: 1px;
+
+    text-shadow:
+        0 0 2px currentColor,
+        0 0 4px currentColor;
+
+    line-height: 1.2;
+}
+.border-yellow-500 { color: #ffd84d; }
+.border-cyan-500 { color: #00e5ff; }
+.border-emerald-500 { color: #00ff9c; }
+.border-blue-500 { color: #4da6ff; }
+
+/* hover = pixel press */
+.summary-metric:hover {
+    /*transform: translate(1px, 1px);*/
+	opacity:0.9;
+	text-shadow:
+        0 0 4px currentColor,
+        0 0 8px currentColor;
+    box-shadow: 1px 1px 0px rgba(0,0,0,0.8);
+}
+
+/* Totals Privacy */
+.privacy-masked {
+    filter: blur(8px);
+    transition: filter 0.2s ease;
+    user-select: none;
+}
+
+.privacy-visible {
+    filter: blur(0);
+}
+span.privacy-toggle {
+    background: black;
+    padding: 0px 4px 2px 4px;
+	border: 2px inset #000;
+}
+.stocklabel {
+    margin-left: 4px;
+    margin-right: 2px;
+}
+/* Target the PED value specifically */
+.header-total-value {
+	text-shadow: 0 0 8px rgb(191 179 16 / 13%);
+    letter-spacing: 0.05em;
+    color: #bb8c1f;
+    font-family: 'Courier New', monospace; /* Make it look like a terminal/game UI */
+	cursor: pointer;       /* Changes arrow to hand */
+	
+    transition: all 0.2s ease; /* Smooths out the hover effect */
+}
+
+/* You can even override the colors specifically for the Undecided table if you want */
+#undecided-table-count .header-total-value {
+
+}
+.header-total-value:hover {
+    text-shadow: 0 0 8px rgb(191 179 16 / 87%);
+}
+.header-total-value:hover .pedtext {
+    text-shadow: 0 0 0px rgb(191 179 16 / 0%);
+}
+.header-total-value .pedtext{
+	text-shadow: 0 0 0px rgb(191 179 16 / 0%);
+	color:#878787;
+}
+/* Style the count label (e.g., "(2980 in list)") */
+.header-count-label {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+}
+.pedSpan {
+    float: right;
+}
+
+/* Stable width for header totals - prevents jumping when toggling privacy */
+
+.header-total-wrapper {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.header-total-value {
+    display: inline-block;
+    min-width: 135px;           /* Increased for 5-6 digit numbers + PED */
+    text-align: right;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;   /* Keeps digits from shifting */
+}
+
+.pedtext {
+    font-size: 10px;
+    opacity: 0.8;
+    margin-left: 4px;
+}
+
+/* Privacy hidden state - same width */
+.header-total-value.privacy-hidden {
+    min-width: 135px;
+    filter: blur(3px);
+    opacity: 0.5;
+    user-select: none;
+}
+#btn-importChanges-clipboard {
+	color: #444; 
+	background: #222; 
+	border: 1px solid #333; 
+	cursor: not-allowed; 
+	transition: all 0.2s;
+	opacity: 0.8;
+}
+
+/* Hover effect even when disabled */
+#btn-importChanges-clipboard:hover {
+	color: #c73b23a8 !important;
+	border-color: #c73b23a8;
+	opacity: 1;
+}
+
+/* Ensure it doesn't "sink" or move when clicked */
+#btn-importChanges-clipboard:active {
+	transform: none !important;
+	background: #222 !important;
+}
+
+
+#modalCancel {
+    background: ;
+    border: 1px solid #222;
+    color: #555;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+#modalCancel:hover {
+    background: rgb(109 16 16 / 97%);   /* light red background */
+    color: #161414;                          /* bright red text */
+    border: 1px solid rgba(248, 113, 113, 0.4);
+}
+
+#modalCancel:active {
+    background: rgba(248, 113, 113, 0.25);
+    transform: translateY(1px);
+}
+
+/*
+==============================
+ DECISION QUEUE CARD
+-----------------------------
+*/
+div#static-decision-queue {
+    border: 3px ridge #444;
+    border-radius: 40px;
+    padding-left: 21px;
+    padding-bottom: 9px;
+    background: #1a1a1a;
+    margin-top: 14px;
+    overflow: hidden;
+    resize: vertical;
+}
+h2#qcardlabel {
+    margin-left: -21px;
+    padding-left: 45px;
+}
+/*___________________________*/
+#decision-card {
+    background: #000;
+    color: #00ff9c;
+
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+
+    padding: 8px;
+    margin: 8px 0;
+
+    border: 2px inset #333;
+    outline: 2px ridge #3d3d3d;
+
+    position: relative;
+}
+
+/* scanlines (match everything else) */
+#decision-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.02) 0px,
+        rgba(255,255,255,0.02) 1px,
+        transparent 2px,
+        transparent 4px
+    );
+}
+
+/* empty state */
+#decision-empty {
+    text-align: center;
+    opacity: 0.5;
+    letter-spacing: 1px;
+}
+
+/* details section */
+#decision-item-details p,
+#decision-item-details div {
+    margin: 2px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* labels = dim */
+#decision-item-details span {
+    color: #9ca3af;
+    opacity: 0.7;
+}
+
+/* values = brighter */
+#decision-item-details strong,
+#decision-item-details span[id] {
+    color: #cbd5e1;
+    opacity: 0.9;
+    text-shadow: 0 0 2px currentColor;
+}
+
+/* total value = highlighted */
+#decision-item-value {
+    color: #00ff9c;
+    text-shadow:
+        0 0 4px currentColor,
+        0 0 8px currentColor;
+}
+
+/* divider line */
+#decision-item-details p.border-t {
+    border-color: rgba(255,255,255,0.2);
+}
+
+/* buttons (retro terminal buttons) */
+#decision-buttons button,
+#decision-inputs button,
+#undo-btn {
+    background: #111;
+    color: #cbd5e1;
+
+    border: 2px outset #333;
+    border-radius: 3px;
+
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 1px;
+
+    padding: 4px;
+
+    transition: all 0.2s ease;
+}
+
+/* button hover = same glow system */
+#decision-buttons button:hover,
+#decision-inputs button:hover,
+#undo-btn:hover {
+    color: #00ff9c;
+
+    text-shadow:
+        0 0 4px currentColor,
+        0 0 8px currentColor;
+
+    border-color: currentColor;
+}
+
+/* button press */
+#decision-buttons button:active,
+#decision-inputs button:active,
+#undo-btn:active {
+    border: 2px inset #222;
+    transform: translateY(1px);
+}
+
+/* disabled undo */
+#undo-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    text-shadow: none;
+}
+
+/* inputs */
+#decision-inputs input {
+    background: #000;
+    color: #00ff9c;
+
+    border: 2px inset #333;
+    outline: none;
+
+    font-family: inherit;
+    font-size: 12px;
+
+    padding: 4px;
+}
+
+/* input focus glow */
+#decision-inputs input:focus {
+    border-color: #00ff9c;
+    box-shadow: 0 0 6px #00ff9c inset;
+}
+
+/* type badge (small chip look) */
+#type-display-slot {
+    border-left: 2px solid currentColor;
+    padding-left: 6px;
+}
+
+/* subtle flicker to match system */
+@keyframes decisionFlicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.985; }
+}
+
+#decision-card {
+    animation: decisionFlicker 3s infinite;
+}
+
+/*
+==============================
+ tABLE THEME
+-----------------------------
+*/
+.tableTheme {
+    width: 100%;
+    border-collapse: collapse;
+
+    background: #000;
+    color: #00ff9c;
+
+    font-family: lucida console;
+    font-size: 15px;
+
+
+    position: relative;
+
+    animation: tableFlicker 3s infinite;
+}
+.tableTheme {
+    color: inherit; /* keep table color for later */
+}
+
+.tableTheme th,
+.tableTheme td {
+    color: #7b7b7b; /* base grey */
+}
+/* subtle scanlines like your metrics */
+.tableTheme::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.02) 0px,
+        rgba(255,255,255,0.02) 1px,
+        transparent 2px,
+        transparent 4px
+    );
+}
+
+/* header */
+.tableTheme thead {
+    border-left: 1px solid currentColor;
+}
+
+.tableTheme th {
+    text-align: left;
+/*     padding: 4px 6px; */
+
+    font-size: 14px;
+    font-weight: normal;
+
+    letter-spacing: 1px;
+    text-transform: uppercase;
+
+    opacity: 0.75;
+    text-shadow: 0 0 2px currentColor;
+
+    position: sticky;
+    top: 0;
+    background:#0a1627;
+    z-index: 2;
+}
+
+/* body cells (dim idle state like metrics) */
+.tableTheme td {
+/*     padding: 3px 6px; */
+    white-space: nowrap;
+
+    opacity: 0.6;
+    transition: all 0.8s ease;
+
+    text-shadow: 0 0 2px currentColor;
+}
+
+/* row structure */
+.tableTheme tbody tr {
+    border-bottom: 1px dotted rgba(255,255,255,0.15);
+    border-left: 2px solid transparent;
+
+    transition: all 0.4s ease;
+}
+
+/* hover = "signal boost" */
+.tableTheme tbody tr:hover {
+    background: rgba(255,255,255,0.04);
+    border-left: 2px solid currentColor;
+}
+
+/* glow the TEXT, not just the row */
+.tableTheme tbody tr:hover td {
+    opacity: 0.9;
+
+    /* text-shadow: 0 0 4px currentColor; */
+}
+.tableTheme tbody tr:hover td.col-total{
+	color:yellow;
+}
+/* sortable headers */
+.sortable-header {
+    cursor: pointer;
+}
+
+.sortable-header:hover {
+    opacity: 0.9;
+    text-shadow: 0 0 4px currentColor;
+}
+
+/* table color themes (match your metrics) */
+#ammo-table { color: #00ff9c; }
+#ped-cash-table { color: #00ff9c; }
+#buy-table { color: #00ff9c; }
+#craft-table { color: #00ff9c; }
+#sell_mu-table { color:#00ff9c; }
+#sell_tt-table { color: #ffb84d; }
+#save-table { color: #9cff57; }
+#undecided-table { color: #00ff9c; }
+#full-list-table { color: #00ff9c; }
+.col-location {
+    color: #9ca3af; /* soft grey */
+}
+.tableTheme td {
+	background:unset;
+    transition: color 0.25s ease, text-shadow 0.4s ease, opacity 0.4s ease, transform 0.9s ease;
+}
+.tableTheme tbody tr:hover td {
+	opacity:0.9;
+    color: inherit;
+}
+.tableTheme th:hover {
+    color: inherit;
+}
+
+/* Row hover - background only */
+.tableTheme tbody tr:hover {
+    background: rgba(255,255,255,0.04);
+    border-left: 2px solid currentColor;
+}
+
+/* Hover effect on individual cells */
+.tableTheme tbody td:hover {
+    font-size: 1.04em;
+    transform: scale(1.09);
+    transform-origin: left center;
+    color: #fff;
+    text-shadow: 0 0 6px rgba(0, 255, 180, 0.6);
+    z-index: ;
+}
+
+/* Active / Clicked state - stays until another cell is clicked */
+.tableTheme tbody td.active {
+    font-size: 1.04em;
+    transform: scale(1.09);
+    transform-origin: left center;
+    color: #fff;
+    text-shadow: 0 0 8px rgba(0, 255, 180, 0.85);
+    z-index: ;
+    background: rgba(0, 255, 100, 0.08) !important;
+}
+
+/* subtle flicker (reduced so it’s not distracting) */
+@keyframes tableFlicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.985; }
+}
+
+
+
+
+/* ====================== RETRO PLASTIC BACKLIGHT TOGGLE ====================== */
+.backlight-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: bold;
+    user-select: none;
+    color: #bbb;
+    float: right;
+    margin-right: 35px;
+}
+
+/* Hide real checkbox */
+.backlight-switch input[type="checkbox"] {
+    display: none;
+}
+
+/* Plastic toggle track */
+.backlight-switch label {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 22px;
+    background: #1c1b1b;
+    border: 3px inset #666666;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.7), 0 1px 2px rgba(255,255,255,0.1);
+}
+
+/* Rubber knob */
+.backlight-switch .switch-handle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: #2b2626;
+    border: 2px outset #413e3e;
+    border-radius: 3px;
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.6);
+    transition: left 0.18s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.backlight-switch input:checked + label .switch-handle {
+    left: 33px;
+    background: #2b2626;
+    border-color: #413e3e;
+}
+
+/* Green Indicator Light */
+.backlight-switch .indicator {
+    width: 14px;
+    height: 14px;
+    background: #1a1a1a;
+    border: 2px inset #444;
+    border-radius: 50%;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+    transition: all 0.4s ease;
+}
+
+/* Long delay + flicker when turning ON */
+.backlight-on .indicator {
+    animation: hackerGreenFlicker 1.6s 0.9s ease forwards;   /* 900ms delay before flicker starts */
+}
+
+/* Flicker animation */
+@keyframes hackerGreenFlicker {
+    0%   { background: #002200; box-shadow: 0 0 2px #00aa00; }
+    25%  { background: #00cc00; box-shadow: 0 0 11px #00ff00; }
+    40%  { background: #074b07; box-shadow: 0 0 5px #00cc00; }
+    55%  { background: #00cc00; box-shadow: 0 0 14px #00ff44; }
+    70%  { background: #003300; box-shadow: 0 0 6px #00cc00; }
+    85%  { background: #00cc00; box-shadow: 0 0 10px #00ff00; }
+    100% { background: #00aa00; box-shadow: 0 0 9px #00ff44, inset 0 2px 8px #66ff88; }
+}
+
+/* Table backlight effect */
+.tableTheme td {
+/*     padding: 3px 6px; */
+    white-space: nowrap;
+    opacity: 0.6;
+    transition: all 0.8s ease;
+    text-shadow: 0 0 2px currentColor;
+}
+
+.backlight-on .tableTheme td {
+    opacity: 1.0;
+}
+
+.backlight-on .tableTheme th {
+    opacity: 0.99;
+}
+
+/* Label */
+.backlight-switch .switch-label {
+    min-width: 40px;
+    /* transition: color 0.4s ease; */
+}
+
+.backlight-on .switch-label {
+    color: ;
+}
+
+
+
+/*Full inventory & generic table rows*/
+td.col-name{}
+td.col-qty{}
+td.col-unit{}
+td.col-total{}
+td.col-decision{}
+td.col-action{}
+/*Sell-mu specific table*/
+td.col-mu{}
+td.col-price{}
+/*craft specific table*/
+td.col-bp{}
+
+
+
+td.col-qty {
+    font-size: 15px;
+}
+td.col-unit.text-gray-500 {
+    font-size: 14px;
+}
+td.col-total.font-mono.text-cyan-400 {
+    font-size: 14px;
+}
+
+.table-container {
+  display: flex;
+  justify-content: center; /* Centers the table if it's smaller than the screen */
+  width: 100%;
+  overflow-x: auto; /* Adds a scrollbar only if the screen is too narrow */
+}
+
+table {
+  min-width: 100%; /* Ensures it fills the container */
+}
+/* Fix for Flexbox Table Rows */
+
+
+
+
+
+/*----------------------------------------------------*/
+
+
+/* Ensure columns don't squish, but CAN grow if assigned */
+.subtab-content th[class*="col-"],
+.subtab-content td[class*="col-"] {
+    min-width: var(--col-min-width);
+
+}
+
+
+
+
+/* 1. Modify the Name column to be less aggressive */
+.subtab-content .col-name { 
+    width: var(--col-name-width); 
+    flex-grow: 2; /* Gives it a higher priority to grow */
+    min-width: 100px;
+}
+
+/* 2. Allow the Location column to also fill gaps */
+.subtab-content .col-location { 
+    width: var(--col-location-width); 
+    flex-grow: 1; /* Grows, but half as much as Name */
+    min-width: var(--col-min-width);
+}
+
+/* 3. Allow the Decision column to fill gaps */
+.subtab-content .col-decision { 
+    width: var(--col-decision-width); 
+    flex-grow: 1; 
+    min-width: var(--col-min-width);
+}
+
+
+
+
+
+
+
+/* Container for the MU input to show the % sign visually */
+.mu-input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 25%;
+}
+
+#trade-mu {
+    width: 100% !important;
+    padding-right: 18px !important;
+    text-align: right;
+}
+
+.mu-input-wrapper::after {
+    content: "%";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 0.75em;
+    pointer-events: none;
+}
+
+/* Scrollable History Log Styling */
+#trade-history-log::-webkit-scrollbar {
+    width: 4px;
+}
+#trade-history-log::-webkit-scrollbar-thumb {
+    background: #333;
+}
+#trade-feedback{
+	font-size: 10px; color: #888; margin: 0; min-height: 12px;
+}
+
+.cashregisterWrapper {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex: 1;
+	font-family: "Courier New", monospace;
+}
+
+/* Label = retro LED text */
+.toggleLabel {
+	font-size: 0.75em;
+	font-weight: bold;
+	min-width: 70px;
+	text-align: center;
+	color: #68ff9c;
+	text-shadow: 0 0 4px #00ff88;
+	letter-spacing: 1px;
+}
+
+/* Toggle body */
+.cashregisterToggle {
+	position: relative;
+	display: inline-block;
+	width: 48px;
+	height: 24px;
+}
+
+.cashregisterToggle input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+/* Track */
+.slider {
+	position: absolute;
+	cursor: pointer;
+	inset: 0;
+	background: linear-gradient(to bottom, #2f4f4f, #1a2a2a);
+	border: 2px solid #0f1f1f;
+	border-radius: 6px;
+	box-shadow:
+		inset 0 2px 4px #000,
+		0 0 4px rgba(0,255,150,0.2);
+	transition: all .4s ease;
+}
+
+/* Knob */
+.slider:before {
+		content: "";
+		position: absolute;
+		height: 16px;
+		width: 16px;
+		left: 3px;
+		top: 2px;
+		background: linear-gradient(to bottom, #717171, #3d3d3d);
+		border: 1px solid #222;
+		border-radius: 3px;
+		box-shadow: inset 0 1px 0 #6b6262, 0 2px 3px rgba(0, 0, 0, 0.6);
+		transition: all .4s ease;
+}
+
+/* PURCHASE (default) */
+.cashregisterToggle input:not(:checked) + .slider {
+	box-shadow:
+		inset 0 0 6px #00ff88,
+		0 0 6px rgba(0,255,120,0.4);
+}
+
+/* SALE (checked) */
+.cashregisterToggle input:checked + .slider {
+	background: linear-gradient(to bottom, #4a1f1f, #2a0f0f);
+	box-shadow:
+		inset 0 0 6px #ff4d4d,
+		0 0 6px rgba(255,0,0,0.4);
+}
+
+/* Move knob */
+.cashregisterToggle input:checked + .slider:before {
+		transform: translateX(22px);
+		background: linear-gradient(to bottom, #474747, #aa4444);
+}
+
+/* Click feel */
+.cashregisterToggle:active .slider:before {
+	transform: scale(0.92);
+}
+
+/* --- INTEGRATED TERMINAL STYLING --- */
+.terminal-body {
+    padding: 12px;
+    font-family: lucida console, sans-serif;
+}
+
+/* Performance Block (Weapon Stats) */
+.perf-block {
+    margin-bottom: 6px;
+    padding: 10px;
+    background: rgb(11 32 77 / 51%); /* Faint blue tint */
+    border: 1px solid rgb(54 171 237 / 20%);/* 1px solid rgba(237, 137, 54, 0.2);*/
+    border-radius: 2px;
+}
+
+.perf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(237, 137, 54, 0.1);
+    padding-bottom: 4px;
+}
+
+.perf-title {
+    font-size: 10px;
+    color: #ed8936;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.perf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 12px;
+}
+
+/* Key-Value Pairs (Using your Colors) */
+.term-kv {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    font-size: 11px;
+}
+
+.term-key { color: rgb(209 209 209 / 62%); text-transform: lowercase; }
+.term-val { color: #22d3ee; text-align: right; } /* Your Cyan */
+
+.perf-block .term-val {
+    color: #d1a90f; /* White for emphasis in the top block */
+    font-weight: bold;
+}
+
+.perf-block .term-val.highlight {
+    color: #ed8936; /* Orange for DPP */
+}
+
+/* Collapsible Sections */
+.term-details { margin-bottom: 2px; }
+
+.term-summary {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-left: 2px solid rgba(237, 137, 54, 0.3);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    font-size: 11px;
+    color: #e79033; /* Your Orange Summary */
+    font-weight: bold;
+	opacity:0.7;
+    text-transform: uppercase;
+}
+
+.term-summary:hover { background: rgba(34, 211, 238, 0.05);opacity:1.0; }
+
+.term-details[open] > .term-summary {
+    border-left: 2px solid #ed8936;
+    background: rgba(237, 137, 54, 0.05);
+}
+
+.term-content {
+    padding-left: 12px;
+    margin-left: 6px;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Nav & History Links (Using your Purple) */
+.info-nav-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    margin-bottom: 3px;
+    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.info-nav-link:hover {
+    background: rgba(168, 85, 247, 0.2);
+    border-color: #a855f7;
+}
+
+.info-nav-link span {
+    color: #fff;
+    font-size: 10px;
+}
+
+/* Update your existing CSS */
+.border-bottom-terminal {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+}
+
+/* Subtle Return Link styling */
+#info-back-btn {
+    font-family: monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-decoration: underline dotted rgba(168, 85, 247, 0.3);
+}
+
+#info-back-btn:hover {
+    text-decoration: underline solid #a855f7;
+}
+
+div#buying-list-controls {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.itemsearch-result-row:hover {
+	background: rgba(168, 85, 247, 0.1) !important;
+	border-left: 3px solid #a855f7;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* nice spacing */
+  max-width: 18%;
+  flex-direction: row;
+}
+
+.ellipsis-label {
+  flex: 1;
+  min-width: 0;            /* CRITICAL for ellipsis in flex */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

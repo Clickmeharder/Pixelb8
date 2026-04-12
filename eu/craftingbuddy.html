@@ -17,391 +17,6 @@
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7382192474927902"
      crossorigin="anonymous"></script>
 
-
-
-
-<!-- <style>
-/* === Reset and Base === */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(160deg, #1e1e1e, #2a2a2a);
-  color: #e6e6e6;
-  padding: 2rem;
-  line-height: 1.6;
-  font-size: 16px;
-}
-
-/* === Main Layout === */
-.craftingbuddyWrapper {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-}
-
-@media (max-width: 1024px) {
-  .craftingbuddyWrapper {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* === Panels / Card Boxes === */
-.eu-blueprint,
-#nexusJunk,
-#eu-myBlueprintWrapper,
-#results {
-  background: #252525;
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 0 12px #0007;
-}
-
-/* === Labels and Inputs === */
-label {
-  display: block;
-  font-weight: 600;
-  margin-top: 1rem;
-}
-
-.label-inline {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.label-note {
-  font-size: 0.8em;
-  color: #aaa;
-  font-style: italic;
-}
-
-input[type="text"],
-input[type="number"],
-select {
-  width: 100%;
-  padding: 0.6rem 0.8rem;
-  background: #1a1a1a;
-  color: #f0f0f0;
-  border: 1px solid #444;
-  border-radius: 6px;
-  margin-top: 0.4rem;
-  transition: border 0.2s ease;
-}
-
-input[type="text"]:focus,
-input[type="number"]:focus,
-select:focus {
-  border-color: #00d4ff;
-  outline: none;
-}
-
-/* === Range Slider === */
-input[type="range"] {
-  width: 100%;
-  margin-top: 0.5rem;
-  accent-color: #00d4ff;
-}
-
-/* === Buttons === */
-button {
-  background: #00d4ff;
-  border: none;
-  color: #000;
-  font-weight: bold;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  margin-top: 1rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-button:hover {
-  background: #00bce1;
-  transform: scale(1.03);
-}
-
-.bpButts {
-  background: #7c4dff;
-  color: #fff;
-}
-
-.bpButts:hover {
-  background: #6933ff;
-}
-
-#openHistoryModal {
-  background: #ff4081;
-}
-
-#openHistoryModal:hover {
-  background: #f50057;
-}
-
-/* === Results Layout === */
-.result-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.result-row {
-  background: #2c2c2c;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.result-row.total {
-  background: #444;
-  font-weight: bold;
-}
-
-.result-row.profit {
-  background: #1b3c1b;
-  color: #9fff9f;
-}
-
-/* === Tables === */
-.material-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-.material-table th,
-.material-table td {
-  padding: 0.6rem;
-  border: 1px solid #444;
-  text-align: left;
-}
-
-.material-table thead {
-  background: #333;
-}
-
-.material-table tbody tr:hover {
-  background: #3c3c3c;
-}
-
-/* === Details (expanders) === */
-details summary {
-  cursor: pointer;
-  padding: 0.5rem 0;
-  font-weight: bold;
-  color: #ccc;
-}
-
-details[open] summary {
-  color: #fff;
-}
-
-/* === Blueprint list scroll areas === */
-#allBlueprintsList,
-#savedList {
-  max-height: 300px;
-  overflow-y: auto;
-  background: #1c1c1c;
-  padding: 0.5rem;
-  border-radius: 6px;
-}
-
-/* === Toggle Layout Switcher === */
-#layoutToggle {
-  display: flex;
-  align-items: center;
-  margin: 1rem 0;
-  gap: 1rem;
-}
-
-input[type="radio"] {
-  transform: scale(1.2);
-  margin-right: 0.3rem;
-}
-
-/* === Header styles === */
-h1, h2, h3 {
-  color: #00d4ff;
-  margin-bottom: 0.5rem;
-}
-
-em {
-  color: #ccc;
-  font-style: italic;
-}
-</style>
-<style>
-
-@media (max-width: 768px) {
-  /* === Mobile-specific styling overrides === */
-
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #1a1a1a;
-    color: #eee;
-    padding: 1rem;
-  }
-
-  .craftingbuddyWrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-width: 100%;
-    margin: auto;
-  }
-
-  .eu-blueprint,
-  #eu-myBlueprintWrapper,
-  #results,
-  #nexusJunk {
-    background: #2b2b2b;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 0 10px #0005;
-  }
-
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-
-  input[type="text"],
-  input[type="number"],
-  select {
-    width: 100%;
-    padding: 0.5rem;
-    margin-top: 0.2rem;
-    margin-bottom: 1rem;
-    background: #2c2c2c;
-    border: 1px solid #444;
-    border-radius: 6px;
-    color: #fff;
-  }
-
-  input[type="range"] {
-    width: 100%;
-    margin: 0.5rem 0;
-  }
-
-  button {
-    background: #4caf50;
-    color: white;
-    border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    cursor: pointer;
-    margin: 0.2rem;
-    transition: background 0.3s ease;
-  }
-
-  button:hover {
-    background: #45a049;
-  }
-
-  .bpButts {
-    background: #2196f3;
-  }
-
-  .bpButts:hover {
-    background: #1e88e5;
-  }
-
-  .result-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .result-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.4rem;
-    background: #333;
-    border-radius: 6px;
-  }
-
-  .result-row.total {
-    font-weight: bold;
-    background: #444;
-  }
-
-  .result-row.profit {
-    background: #1b3c1b;
-  }
-
-  .material-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-  }
-
-  .material-table th,
-  .material-table td {
-    border: 1px solid #444;
-    padding: 0.4rem;
-    text-align: left;
-  }
-
-  details summary {
-    cursor: pointer;
-    padding: 0.4rem 0;
-    font-weight: bold;
-    color: #ccc;
-  }
-
-  details[open] summary {
-    color: #fff;
-  }
-
-  input:focus,
-  select:focus,
-  button:focus {
-    outline: 2px solid #4caf50;
-  }
-
-  #allBlueprintsList,
-  #savedList {
-    max-height: 300px;
-    overflow-y: auto;
-    background: #202020;
-    padding: 0.5rem;
-    border-radius: 8px;
-  }
-
-  #layoutToggle {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin: 1rem 0;
-  }
-
-  input[type="radio"] {
-    transform: scale(1.2);
-    margin-right: 0.4rem;
-  }
-
-  .label-note {
-    font-size: 0.8em;
-    opacity: 0.6;
-  }
-}
-</style>
-
- -->
-
 <!--Messy css fixes-->
   <style> 
 .materialCardInputRow{display:flex;flex-direction:row; gap: 12px;}	
@@ -1773,283 +1388,2260 @@ div#bpbuttonDiv {
 		<a href="https://Pixelb8.lol/tools">Tools</a>
 		<a href="https://Pixelb8.lol/arcade">Arcade</a>
     </div>
-<div class="eu-container">
-<!--   <h1>Entropia Crafting Tool</h1> -->
-  <div class="craftingbuddyWrapper">
-	<div id="nexusJunk">
-	  <div id="nexusJunk-Header" style="display:flex;flex-direction:row;">
-	    <button id="showAllBlueprintsBtn" class="nexusHax power-btn active" type="button" aria-label="Power">
-		  <svg viewBox="0 0 24 24" width="24" height="24" fill="#ccc" xmlns="http://www.w3.org/2000/svg" >
-			<path d="M13 3h-2v10h2V3zm4.83 2.17-1.42 1.42A7 7 0 1 1 7.6 6.6L6.17 5.17a9 9 0 1 0 11.66 0z"/>
-		  </svg>
-	    </button>
-	    <label id="matfilterlabel"for="materialFilter" title="Filter by blueprint name, material, product, book, profession, or use 'level:3'">n3xusH4ck3r
-	      
-	    </label>
-	  </div>
-	  <input id="materialFilter" list="bpList" type="text" placeholder="e.g. Melchi Crystal" autocomplete="off"  />
-	  <div id="allBlueprintsList" class="blueprint-list "></div>
-
-	  <div id="bpbuttonDiv2" style="margin-top:auto; margin-bottom:0;">
-	    <button class="bpButts" onclick="addMaterial()" id="addMattButt">+ Add Mat</button>
-	    <button class="bpButts" onclick="saveBlueprint()" id="saveBlueprintButt">💾 Save BP</button>
-	    <button class="bpButts" id="resetBlueprintBtn">🔄 New BP</button>
-	  </div>
-	</div>
-	<div id="craftingbuddy-mainSection">
-		<div class="eu-blueprint">
-		  <div id="bpLoadingSpinner" style="display:;">...</div>
-		  <datalist id="bpList" style="display: none;"></datalist>
-		  <button id="loadNexusBP" style="display: none;">Load</button>
-		  <label for="itemName">BP Name:
-			<input id="itemName" type="text" value="Explosive Projectiles 1" />
-		  </label> 
-		  <label for="clicks">Clicks:
-			<input id="clicks" type="number" value="100" />
-		  </label>
-		  <div id="conditionBlock">
-			<label for="qvsc" id="wvclabelText">Quantity⇔Condition: <span id="qvscLabel">0%</span></label>
-			<input type="range" id="qvsc" min="0" max="100" value="0" 
-				   oninput="document.getElementById('qvscLabel').innerText = this.value + '%'; updateRatesFromSlider()">
-			<div style="element.style {font-size: 0.8em;margin-top: 2px;display: flex;flex-direction: row;flex-wrap: wrap;min-width: 136px;width: max-content;max-width: 202px;}">
-			  <div><span id="visibleSuccess"> 38%</span>✅ Success</div>
-			  <div><span id="visibleNearSuccess"> 50%</span>🔶 Near</div>
-			  <div><span id="visibleFail">12%</span>❌ Fail</div>
+	<div class="eu-container">
+		  <!-- Tabs -->
+		<div id="tabs" style="display:none;">
+			<div id="tab-row" style="display: flex;">
+				<div id="tab-buttons">
+<!-- 				  <button class="tab-btn stat-tab-btn" data-tab="trackTab">Tracking</button>
+				  <button class="tab-btn stat-tab-btn" data-tab="loadoutTab">Loadouts</button> -->
+				  <button class="tab-btn stat-tab-btn" data-tab="craftingTab">Blueprints</button>
+				  <button class="tab-btn stat-tab-btn" data-tab="missionsTab">Missions [WIP]</button>
+				  <button class="tab-btn stat-tab-btn" data-tab="InventoryTab">Items [WIP]</button>
+				  <button class="tab-btn stat-tab-btn" data-tab="mapTab" style="">Map</button>
+<!-- 				  <button class="tab-btn stat-tab-btn" data-tab="twitchTab" style="display:none;" disabled>Twitch</button>
+				  <button class="tab-btn stat-tab-btn" data-tab="chatTab">Chat Output</button> -->
+				  <button class="tab-btn stat-tab-btn" data-tab="settingsTab">Settings</button>
+				</div>
+				<div class="loadout-search">
+					<label for="loadoutSelect" class="loadout-label">Current Loadout</label>
+					<select id="loadoutSelect">
+						<option disabled>Loadout Select</option>
+					</select>
+				</div>
 			</div>
 
-		 </div>
-		  <button type="button" class="ExpandableY-button" onclick="toggleExpand('bpDetails', this)">bpDetails ▼</button>
-			<div id="bpDetails" class="expandable">
-			  <label for="bpType">BP Type:
-				<select id="bpType" onchange="toggleBpMuField()">
-				  <option value="Limited">Limited</option>
-				  <option value="Unlimited" selected>Unlimited</option>
-				</select>
-			  </label>
+			<!-- Crafting Tab -->
+			<div class="tab-content" id="craftingTab">
+			  <div class="subtabs-header">
+				<h2>Crafting</h2>
+				<div class="subtabs">
+				  <button class="subtab-btn stat-tab-btn active-subtab" data-subtab="craftingOverview">Overview</button>
+				  <button class="subtab-btn stat-tab-btn stat-tab-btn" data-subtab="craftingPlans">Plans</button>
+				  <button class="subtab-btn stat-tab-btn stat-tab-btn" data-subtab="craftingCalculator" style="display:none;">Calculator</button>
+				  <button class="subtab-btn stat-tab-btn stat-tab-btn" data-subtab="craftingHistory" style="display:none;">History</button>
+				</div>
+			  </div>
+			  <div id="crafting-outerwrapper" style="display:flex;flex-direction:row;">
+				  <div class="subtab-content" id="craftingOverview" style="display:block;">
+				  <!--========= NEW CRAFTIG BUDDY HTML ==================================================-->
+			
+					<div class="craftingbuddyWrapper">
+						<div id="nexusJunk">
+						  <div id="nexusJunk-Header" style="display:flex;flex-direction:row;">
+							<button id="showAllBlueprintsBtn" class="nexusHax power-btn" type="button" aria-label="Power">
+							  <svg viewBox="0 0 24 24" width="24" height="24" fill="#ccc" xmlns="http://www.w3.org/2000/svg">
+								<path d="M13 3h-2v10h2V3zm4.83 2.17-1.42 1.42A7 7 0 1 1 7.6 6.6L6.17 5.17a9 9 0 1 0 11.66 0z"></path>
+							  </svg>
+							</button>
+							<label id="matfilterlabel" for="materialFilter" title="Filter by blueprint name, material, product, book, profession, or use 'level:3'">n3xusH4ck3r
+							  
+							</label>
+						 </div>
+						  <!-- <input id="materialFilter" list="bpList" type="text" placeholder="e.g. Melchi Crystal" autocomplete="off"> -->
+						  <input id="materialFilter"  type="text" placeholder="e.g. Melchi Crystal" autocomplete="off">
+						  <div id="allBlueprintsList" class="blueprint-list "><div>Helen Venture's Walking Stick Blueprint</div></div>
 
-			  <label id="bpMuLabel" for="bpMu">Limited BP MU %:
-				<input id="bpMu" type="number" value="150" />
-			  </label>
+						  <div id="bpbuttonDiv2" style="margin-top:auto; margin-bottom:0;">
+							<button class="bpButts" id="addMattButt">+ Add Mat</button>
+							<button class="bpButts" id="saveBlueprintButt">💾 Save BP</button>
+							<button class="bpButts" id="resetBlueprintBtn">🔄 New BP</button>
+						  </div>
+						</div>
 
-			  <label for="bpBook">
-				<span class="label-inline">Book
-				  <span class="label-note">comma separated</span>
-				</span>
-				<input id="bpBook" type="text" value="Planet Calypso Components (Vol1)" />
-			  </label>
+					</div>
+			
+					<div id="markupReminderPopup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; color: #fff; padding: 20px; border-radius: 12px; border: 2px solid #3399ff; box-shadow: 0 0 20px rgba(0,0,0,0.6); z-index: 9999; max-width: 360px; text-align: center;">
+					  <p style="margin-bottom: 20px;">🧠 <strong>Reminder:</strong><br>
+						Adjust markup % for the crafted item and each material.<br>
+						Set click count, then press <strong>Calculate Estimates</strong>.
+					  </p>
+					  <div style="display: flex; justify-content: center; gap: 10px;">
+							<button id="reminderOkBtn" type="button" style="background-color: #3399ff; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1.1em; cursor: pointer;">OK</button>
+							<button id="reminderDisableBtn" type="button" style="background-color: #555; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1.1em; cursor: pointer;">Don't show again</button>
+					  </div>
+					</div>
+				  </div>
+				  <div class="subtab-content" id="craftingPlans"  style="display:none;">
+					<div class="plans-container" style="display: flex; gap: 20px; height: 80vh; background: #0a0a0a; color: #eee; border: 1px solid #222; border-radius: 8px; overflow: hidden;">
+						
+						<div class="plans-list-panel" style="flex: 0 0 300px; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; background: #0f0f0f;">
+							<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+								<h3 style="margin: 0; font-size: 1.1rem; color: #a19f9a; text-transform: uppercase; letter-spacing: 1px;">Active Plans</h3>
+								<button class="bpButts" id="createNewPlanBtn" style="padding: 5px 12px; font-size: 12px; cursor: pointer;">+ Add New Plan</button>
+							</div>
+							
+							<div id="activePlansList" style="flex-grow: 1; overflow-y: auto; padding-right: 5px;">
+								<div style="color: #444; font-size: 12px; text-align: center; margin-top: 20px;">No plans saved yet.</div>
+							</div>
+						</div>
 
-			  <label for="bpLevel">Blueprint Req. Lvl:
-				<input id="bpLevel" type="number" value="5" min="0" max="100" />
-			  </label>
+						<div class="plan-details-panel" style="flex: 1; padding: 20px; overflow-y: auto; background: #050505; position: relative;">
+							<div id="planDetailPlaceholder" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #444; text-align: center; width: 100%;">
+								<i class="fas fa-sitemap" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.2;"></i>
+								<p>Select a plan from the sidebar to view the production tree.</p>
+							</div>
 
-			  <label for="qr">
-				<span class="label-inline">Quality Rating
-				  <span class="label-note">(0.01–1.00)</span>
-				</span>
-				<input id="qr" type="number" value="1.00" min="0.01" max="1.00" step="0.01" />
-			  </label>
+							<div id="planDetailView" style="display: none;">
+								<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 20px;">
+									<h2 id="planTitle" style="margin: 0; color: #fff; font-size: 1.4rem;">Plan Name</h2>
+									<div id="planDate" style="font-size: 10px; color: #555;"></div>
+								</div>
 
-			  <label for="maxTT">Product Max TT Val:
-				<input id="maxTT" type="number" value="0.02" step="0.01"/>
-			  </label>
+								<div id="planStats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px;">
+									</div>
 
-			  <label for="sellMu">Product MU%:
-				<input id="sellMu" type="number" value="150"/>
-			  </label>
+								<h4 style="color: #888; text-transform: uppercase; font-size: 11px; letter-spacing: 2px; border-bottom: 1px solid #1a1a1a; padding-bottom: 5px;">Production Tree</h4>
+								<div id="productionTree" class="tree-view" style="margin-top: 15px;">
+									</div>
+							</div>
+						</div>
+					</div>
 
-			  <input type="hidden" id="successRate" value="38">
-			  <input type="hidden" id="nearSuccessRate" value="50">
-			  <input type="hidden" id="failRate" value="12">
-			  <label for="residuePerSuccess">Average Residue per Success (PED):
-				<input id="residuePerSuccess" type="number" value="0" />
-			  </label>
-			</div>
+					<div id="planInputModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 10000; display: none;">
+						<div style="background: #111; padding: 25px; border: 1px solid #ff00ff; border-radius: 12px; width: 380px; box-shadow: 0 0 30px rgba(255, 0, 255, 0.15);">
+							<h3 style="color: #f0f; margin-top: 0; margin-bottom: 15px; font-family: sans-serif; font-weight: 300; letter-spacing: 1px;">New Production Plan</h3>
+								
+							<label style="display: block; font-size: 11px; color: #666; margin-bottom: 6px; text-transform: uppercase;">Search Inventory Blueprints</label>
+							<input id="modalBpSearch" type="text" placeholder="Type to filter..." 
+								   style="width: 100%; background: #000; color: #0f0; border: 1px solid #333; padding: 10px; margin-bottom: 12px; border-radius: 4px; font-family: 'Courier New', monospace; box-sizing: border-box; outline: none;">
+
+							<select id="modalBpSelect" size="8" style="width: 100%; background: #1a1a1a; color: #ddd; border: 1px solid #333; padding: 8px; margin-bottom: 15px; border-radius: 4px; font-size: 12px; outline: none; cursor: pointer;">
+							</select>
+							
+							<label style="display: block; font-size: 11px; color: #666; margin-bottom: 6px; text-transform: uppercase;">Crafting Location (Storage Context)</label>
+							<select id="modalPlanPlanet" style="width: 100%; background: #1a1a1a; color: #f0f; border: 1px solid #333; padding: 10px; margin-bottom: 15px; border-radius: 4px; outline: none; cursor: pointer; font-weight: bold;">
+								<option value="ALL">All Locations (Global)</option>
+							</select>
+
+							<label style="display: block; font-size: 11px; color: #666; margin-bottom: 6px; text-transform: uppercase;">Target Clicks / Item Count</label>
+							<input id="modalBpQty" type="number" value="1" min="1" 
+								   style="width: 100%; background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 10px; box-sizing: border-box; border-radius: 4px; outline: none;">
+							<div style="margin-top:10px; padding:10px; background:#111; border:1px solid #333; border-radius:4px;">
+								<label style="font-size:11px; color:#aaa; display:block; margin-bottom:5px;">Automated Decision Allocation:</label>
+								<select id="modalPlanAllocation" style="width:100%; background:#222; color:white; border:1px solid #444; padding:5px; font-size:12px;">
+									<option value="NONE">Don't set decisions</option>
+									<option value="REQUIRED">Only amount required for plan</option>
+									<option value="ALL">All matching stacks on planet</option>
+								</select>
+							</div>
+							<div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px;">
+								<button id="modalCancel" style="background: none; border: none; color: #555; cursor: pointer; font-size: 13px; transition: color 0.2s;">Cancel</button>
+								<button id="modalConfirm" style="background: #c0c; color: white; border: none; padding: 10px 22px; border-radius: 4px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">CREATE PLAN</button>
+							</div>
+						</div>
+					</div>
+					
+				  </div>
+				  <div class="subtab-content" id="craftingCalculator" style="display:none;">
+					<p>Crafting calculator content here.</p>
+					<button id="calculateBPBtn">Calculate BP</button>
+				  </div>
+				  <div class="subtab-content" id="craftingHistory" style="display:none;">
+					<p>Crafting history content here.</p>
+				  </div>
+				  <div class="loadout-container Overview" id="crafting-rightpanelB">
+					<div id="craftingbuddy-mainSection">
+						<div class="eu-blueprint">
+						  <div id="bpLoadingSpinner" style="display: none;">...</div>
+						  <datalist id="bpList" style="display: none;"><option value="Helen Venture's Walking Stick Blueprint"></option></datalist>
+						  <button id="loadNexusBP" style="display: none;">Load</button>
+						  <label for="blueprintNameField">BP Name:
+							<input id="blueprintNameField" type="text" value="Explosive Projectiles Blueprint 1">
+						  </label> 
+						  <label for="clicks">Clicks:
+							<input id="clicks" type="number" value="100">
+						  </label>
+						  <div id="conditionBlock">
+							<label for="qvsc" id="wvclabelText">Quantity⇔Condition: <span id="qvscLabel">0%</span></label>
+							<input type="range" id="qvsc" min="0" max="100" value="0" oninput="document.getElementById('qvscLabel').innerText = this.value + '%'; updateRatesFromSlider()">
+							<div style="element.style {font-size: 0.8em;margin-top: 2px;display: flex;flex-direction: row;flex-wrap: wrap;min-width: 136px;width: max-content;max-width: 202px;}">
+							  <div><span id="visibleSuccess">41.0%</span>✅ Success</div>
+							  <div><span id="visibleNearSuccess">54.0%</span>🔶 Near</div>
+							  <div><span id="visibleFail">5.0%</span>❌ Fail</div>
+							</div>
+						 </div>
+						  <button type="button" class="ExpandableY-button">bpDetails ▲</button>
+							<div id="bpDetails" class="expandable expanded">
+							  <label for="bpType">BP Type:
+								<select id="bpType" onchange="toggleBpMuField()">
+								  <option value="Limited">Limited</option>
+								  <option value="Unlimited" selected="">Unlimited</option>
+								</select>
+							  </label>
+
+							  <label id="bpMuLabel" for="bpMu" style="display: none;">Limited BP MU %:
+								<input id="bpMu" type="number" value="150">
+							  </label>
+
+							  <label for="bpBook">
+								<span class="label-inline">Book
+								  <span class="label-note">comma separated</span>
+								</span>
+								<input id="bpBook" type="text" value="Planet Calypso Components (Vol1)">
+							  </label>
+
+							  <label for="bpLevel">Blueprint Req. Lvl:
+								<input id="bpLevel" type="number" value="5" min="0" max="100">
+							  </label>
+
+							  <label for="qr">
+								<span class="label-inline">Quality Rating
+								  <span class="label-note">(0.01–1.00)</span>
+								</span>
+								<input id="qr" type="number" value="1.00" min="0.01" max="1.00" step="0.01">
+							  </label>
+
+							  <label for="maxTT">Product Max TT Val:
+								<input id="maxTT" type="number" value="0.02" step="0.01">
+							  </label>
+
+							  <label for="sellMu">Product MU%:
+								<input id="sellMu" type="number" value="150">
+							  </label>
+
+							  <input type="hidden" id="successRate" value="41.0">
+							  <input type="hidden" id="nearSuccessRate" value="54.0">
+							  <input type="hidden" id="failRate" value="5.0">
+							  <label for="residuePerSuccess">Average Residue per Success (PED):
+								<input id="residuePerSuccess" type="number" value="0">
+							  </label>
+							</div>
 
 
-		  </div>    
-		<div id="eu-myBlueprintWrapper">    
-			<div style="display:flex;flex-direction:row;">
+						</div>    
+						<div id="eu-myBlueprintWrapper">    
+							<div style="display:flex;flex-direction:row;">
 
-			  <div id="bpbuttonDiv">
-				<label id="playerCraftlvlWrapper" for="playerLevel">Your Crafting Level:
-				  <input id="playerLevel" type="number" value="10" min="0" max="100" />
-				</label>
-				<button class="bpButts" onclick="calculate()">calculate estimates</button>
+							  <div id="bpbuttonDiv">
+								<label id="playerCraftlvlWrapper" for="playerLevel">Your Crafting Level:
+								  <input id="playerLevel" type="number" value="10" min="0" max="100">
+								</label>
+								<button class="bpButts" id="calcEstimatesButt">calculate estimates</button>
+							  </div>
+							</div>
+							<div id="eu-myBlueprintWrapper-interior">
+								<button type="button" class="ExpandableY-button" id="toggleMaterialsButt">materials ▼</button>
+								<div id="materials" class="expandable">
+									<div class="material" id="material_0">
+										<strong>1</strong><br>
+										<div id="materialInputs">
+										  <div class="materialCardInputRow">
+											<label for="name_0"> item: <input type="text" value="Nanocubes" placeholder="item name" id="name_0"></label>
+											<label for="mu_0">MU%: <input type="number" value="100" id="mu_0" style="width:60px"></label>
+										  </div>
+										  <div class="materialCardInputRow">
+											<label for="qty_0"> Qty:  <input type="number" value="2" placeholder="amount" id="qty_0" style=""></label>
+											<label for="tt_0"> TT/Unit:  <input type="number" value="0.01" id="tt_0" style="width:80px"></label>
+										  </div>
+										</div>
+										<button class="remove-mat-btn" data-index="0">X</button>
+									</div>
+								</div>
+								<div class="results" id="results">
+									<h3>📊<em>Explosive Projectiles Blueprint 1</em></h3>
+									<div class="result-grid">
+									  <div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>Unlimited</span></div>
+									  <div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>0.02 PED</span></div>
+									  <div class="result-row"><span class="label">📈 Total Markup:</span> <span>0.00 PED</span></div>
+									  <div class="result-row total"><span class="label">🧾 Total Cost (TT + MU):</span> <span>0.02 PED</span></div>
+									</div>
+									<details class="material-breakdown" open="">
+									  <summary><strong>📦 Material Breakdown</strong> (click to expand)</summary>
+									  <table class="material-table sortable">
+										<thead>
+										  <tr>
+											<th>Name</th>
+											<th>Qty</th>
+											<th>TT/Unit</th>
+											<th>Total TT</th>
+											<th>MU %</th>
+											<th>Total MU</th>
+											<th>Total Cost</th>
+										  </tr>
+										</thead>
+										<tbody>
+										  <tr class="low-cost">
+											<td>Nanocubes</td>
+											<td>2.00</td>
+											<td>0.0100</td>
+											<td>0.02</td>
+											<td>100.0%</td>
+											<td>0.00</td>
+											<td>0.02</td>
+										  </tr>
+										</tbody>
+									  </table>
+									</details>
+					  
+									<details class="estimation-breakdown" closed="">
+									  <summary><strong>📉 Estimation Breakdown</strong> (click to expand)</summary>
+									  <div class="result-grid" style="margin-top: 10px">
+										<div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>0.0000 PED</span></div>
+										<div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>41.0</span></div>
+										<div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>54.0</span></div>
+										<div class="result-row profit">
+										  <span class="label">💹 Estimated Profit/Loss:</span>
+										  <span>0.00 PED</span>
+										</div>
+									  </div>
+									</details>
+								</div>
+							</div>
+
+							<div class="eu-myBlueprintList" style="display:none;">
+								<h1>Your List<button id="loadBlueprintsButt">📂 Expand</button></h1>
+								<div class="results" id="savedList" style="display: none;">
+								  <div id="panelControls">
+									  <div id="blueprintFilters"></div>
+									  <div id="layoutToggle">
+										<div id="layoutLabel">Layout:</div>
+										<div id="layoutOptions">
+											<label><input type="radio" name="layout" value="cards"> Cards</label>
+											<label><input type="radio" name="layout" value="list" checked> List</label>
+										</div>
+									  </div>
+								  </div>
+								  <div id="blueprintList"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				  </div>
 			  </div>
 			</div>
-		<div id="eu-myBlueprintWrapper-interior">
-			<button type="button" class="ExpandableY-button" onclick="toggleExpand('materials', this)">materials ▼</button>
-			<div id="materials"class="expandable"></div>
-			<div class="results" id="results">
-				<h3>📊<em>---</em></h3>
-				<div class="result-grid">
-				  <div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>---</span></div>
-				  <div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>0.00 PED</span></div>
-				  <div class="result-row"><span class="label">📈 Total Markup:</span> <span>0.00 PED</span></div>
-				  <div class="result-row total"><span class="label">🧾 Total Cost (TT + MU):</span> <span>0.00 PED</span></div>
+			<!-- Inventory Tab -->
+			<div class="tab-content" id="InventoryTab">
+				<div id="inventory-outerwrapper" class="display:flex;flex-direction:row;">
+
+					<div id="inventory-main-content-wrapper" class="flex-grow flex flex-col space-y-4">
+						<div class="subtabs-header">
+							<h2><i class="fas fa-box-open text-cyan-400 mr-2"></i> Inventory Manager</h2>
+						</div>
+						<div class="subtabs-header">
+							<button id="InventoryTabA_btn" class="subtab-btn stat-tab-btn active-subtab" data-subtab="InventoryTabA"><i class="fas fa-table mr-1"></i> Full Inventory List</button>
+							<button id="InventoryTabB_btn" class="subtab-btn stat-tab-btn" data-subtab="InventoryTabB"><i class="fas fa-bullseye mr-1"></i>Item Processing</button>
+							<button id="InventoryTabD_btn" class="subtab-btn stat-tab-btn" data-subtab="InventoryTabD"><i class="fas fa-shopping-basket mr-1"></i>Trade</button>
+							<button id="InventoryTabC_btn" class="subtab-btn stat-tab-btn" data-subtab="InventoryTabC"><i class="fas fa-chart-line mr-1"></i>Overview</button>
+							<div id="inventoryDockingbay" style="float:right;">
+								<button id="load-csv-btn" class="stat-tab-btn" style="display:none;"><i class="fas fa-file-csv mr-2"></i>Upload CSV/TSV</button>
+								<button id="export-inventory-btn" class="stat-tab-btn" style="display:none;><i class="fas fa-file-export mr-2"></i> Export Decisions</button>
+								<button id="btn-importChanges-clipboard" class="stat-tab-btn" title="Paste Changes from Clipboard [soon™]" disabled>📋 Changes[Soon™]</button>
+								<button id="btn-import-clipboard" class="stat-tab-btn" title="Paste Inventory from Clipboard" style="color: #c78e23;">📋 Paste Inventory Csv</button>
+
+
+							</div>
+						</div>
+						
+						<div style="display:flex; width:100%;height:89%;">
+								
+								<div id="InventoryTabA" class="subtab-content" style="display:block;">
+									<p style="display:none; margin: 5px; color:#ff8400ed;font-style: italic; text-decoration: underline;font-size: 0.9em;" class="">NOTICE: this module is incomplete and fairly useless in its current state. I dont recommend wasting time with decisions queue until we get it finished as you may lose old decisions</p>
+									<div id="full-inventory-view-container" class="tablecontainer">
+										<div id="full-list-card" class="grid-card">
+											<div class="">
+												<h2 class="tableh2" style="margin-top: 8px;">
+													<i class="fas fa-cubes"></i>
+													Full Inventory List
+													<span id="full-list-count" class="pedSpan"></span>
+												</h2>
+											</div>
+											<div class="">
+												<div class="" style="display: flex;flex-direction: row;flex-wrap: wrap;justify-content: flex-end;align-items: center;">
+													<input type="text" id="full-list-search" placeholder="Search by name, type, or location..." class="">
+
+													<div class="">
+														<label class="">Planet</label>
+														<select id="filter-planet" class="">
+															<option value="ALL">All Locations</option>
+														</select>
+													</div>
+
+													<div class="">
+														<label class="">Category</label>
+														<select id="filter-category" class="">
+															<option value="ALL">All Categories</option>
+														</select>
+													</div>
+
+													<div class="flex items-center">
+														<input type="checkbox" id="chk-full-path-inventory" class="">
+														<label for="chk-full-path-inventory" class="">
+															Show Full Storage Path
+														</label>
+													</div>
+												</div>
+
+												<div id="fulllist-scroll-container" style="height: 667px; overflow-y: scroll; position: relative;">
+													<table id="full-list-table" class="tableTheme">
+														<thead class="">
+															<tr>
+																<th class="col-location sortable-header" data-column="location">Location <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-name sortable-header" data-column="name">Name <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-qty sortable-header" data-column="quantity">Qty <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-unit sortable-header" data-column="value">TT/Unit <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-total sortable-header" data-column="totalValue">Total TT <i class="fas fa-sort ml-1"></i></th>
+		<!-- 														<th class="col-decision sortable-header" data-column="decision">Decision <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-action">Action</th> -->
+															</tr>
+														</thead>
+														<tbody id="full-list-tbody" class=""></tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div id="InventoryTabB" class="subtab-content space-y-4" style="display:none;">
+									<div id="universal-lookup-container" style="position: relative; margin-bottom: 15px; background: #111; border: 1px solid #333; padding: 10px; border-radius: 4px;">
+										<div style="display: flex; align-items: center; gap: 10px;">
+											<i class="fas fa-search" style="color: #a855f7; opacity: 0.6;"></i>
+											<input type="text" id="universal-search-input" placeholder="BEGIN TYPING TO ITEM NAME TO SEARCH ITEM DATABASE (NAME OR ALIAS)..." 
+												   style="flex: 1; background: transparent; border: none; color: #fff; font-family: monospace; font-size: 12px; outline: none;">
+											<i class="fas fa-times" id="clear-search" style="cursor: pointer; color: #444; font-size: 10px;"></i>
+										</div>
+										
+										<div id="search-results-dropdown" 
+											 style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 999; 
+													background: #0f0f0f; border: 1px solid #a855f7; border-top: none; 
+													max-height: 300px; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+										</div>
+									</div>
+									
+									<div id="static-decision-queue" class="grid-card" style="display:none;">
+										<div id="decisionqcard" class="">
+											<h3 class="" id="qcardlabel">
+												<i class="fas fa-crosshairs"></i>
+												Current Item Decision
+												<span id="undecided-count" class="pedSpan">(0 left)</span>
+											</h3>
+										</div>
+
+										<div id="decision-card" class="hidden">
+											<div id="decision-empty" class="">Decision queue is clear.</div>
+
+											<div id="decision-item-details" class="">
+												<p class="flex justify-between">
+													<span class="text-gray-300">Item:</span>
+													<strong id="decision-item-name" class="">N/A</strong>
+												</p>
+												<div class="">
+													<span class="">Type:</span>
+													<div id="type-display-slot" class="">
+														<span id="decision-item-type" class="">N/A</span>
+													</div>
+												</div>
+												<p class="flex justify-between">
+													<span class="text-gray-300">SubType:</span>
+													<span id="decision-item-subtype" class="text-gray-400">N/A</span>
+												</p>
+												<p class="flex justify-between">
+													<span class="text-gray-300">Location:</span>
+													<span id="decision-item-container" class="text-gray-400">N/A</span>
+												</p>
+												<p class="flex justify-between">
+													<span class="text-gray-300">Quantity:</span>
+													<span id="decision-item-qty" class="text-gray-400">N/A</span>
+												</p>
+												<p class="flex justify-between border-t border-gray-600 pt-1 mt-1">
+													<span class="text-gray-300 font-semibold">Total Value:</span>
+													<strong id="decision-item-value" class="text-green-400 text-base">N/A</strong>
+												</p>
+											</div>
+
+											<div id="decision-buttons" class="hidden">
+												<button data-action="save" class=""><i class="fas fa-lock"></i> SAVE (Fixed)</button>
+												<button data-action="sell_tt" class=""><i class="fas fa-dollar-sign"></i> TT it!</button>
+												<button data-action="sell_mu" class=""><i class="fas fa-tag"></i> SELL for MU</button>
+												<button data-action="craft" class=""><i class="fas fa-hammer"></i> CRAFT (Materials)</button>
+												<button data-action="skip" class=""><i class="fas fa-forward"></i> SKIP</button>
+											</div>
+
+											<div id="decision-inputs" class="hidden">
+												<input type="text" id="decision-input-val" placeholder="" class="">
+												<div class="flex space-x-2">
+													<button id="decision-confirm-btn" data-confirm-action="" class="">Confirm</button>
+													<button data-action="cancel" class="">Cancel</button>
+												</div>
+											</div>
+											<button data-action="undo" id="undo-btn" class="" disabled><i class="fas fa-rotate-left mr-1"></i> Undo Last Action</button>
+										</div>
+									</div>
+
+									
+									<div id="undecided-list-collapsible" class="grid-card">
+										<div data-target="undecided-view-container" data-toggle="collapse" class="collapsible-header">
+												<h2 class="tableh2">
+													<i class="fas fa-chevron-up collapsible-icon"></i>
+													<i class="fas fa-list-check"></i> 
+													Pending Decisions 
+													<span id="undecided-table-count" class="pedSpan"></span> 
+												</h2>
+										</div>
+										<div id="undecided-view-container" class="tablecontainer hidden">
+											<div class="" style="display:flex;border: 2px ridge black;border-top: 3px ridge black;border-bottom: none;margin-top: 6px;padding-top:4px;align-items: center;flex-wrap: wrap;">
+												<input id="undecided-search" type="text" placeholder="Search Unprocessed Inventory..." 
+													   class="">
+
+												<select id="undecided-planet-filter" class="">
+													<option value="ALL">All Planets</option>
+												</select>
+
+												<select id="undecided-category-filter" class="">
+													<option value="ALL">All Categories</option>
+												</select>
+												<label class="row">
+												  <input type="checkbox" name="path-toggle">
+												  <span class="ellipsis-label">Show Full Storage Path</span>
+												</label>
+												<button id="btn-bulk-skip-type" class="stat-tab-btn">
+													Skip All of Type
+												</button>
+												<button id="btn-bulk-skip-location" class="stat-tab-btn">
+													Skip All in Location
+												</button>
+												<div class="">
+														<input type="checkbox" data-bulk-action="tag" name="alwaysTagItem" class="">
+														<label class="">
+															Always
+														</label>
+												</div>
+											</div>
+											
+											<div id="bulk-action-bar" class="hidden">
+												<span id="selected-count" class="pedSpan">0 Items Selected</span>
+												<div class="flex gap-2">
+													<button data-bulk-action="save" class="">keep this!</button>
+													<button data-bulk-action="sell_tt" class="">TT it!</button>
+													<button data-bulk-action="sell_mu" class="">SELL for MU</button>
+													<button data-bulk-action="skip" class="">SKIP</button>
+
+												</div>
+											</div>
+											<div id="undecided-scroll-container" class="" style="height: 635px; overflow-y: scroll; position: relative;">
+
+												<table id="undecided-table" class="tableTheme">
+												
+													<thead>
+														<tr>
+															<th class="w-10 text-center">
+																<input type="checkbox" id="check-all-undecided" class="">
+															</th>
+															<th class="col-location sortable-header" data-column="location">Location <i class="fas fa-sort ml-1"></i></th>
+															<th class="col-name sortable-header" data-column="name">Name <i class="fas fa-sort ml-1"></i></th>
+															<th class="col-qty sortable-header" data-column="quantity">Qty <i class="fas fa-sort ml-1"></i></th>
+															<th class="col-total sortable-header" data-column="totalValue">Total TT <i class="fas fa-sort ml-1"></i></th>
+															<!-- <th class="col-action">Action</th> -->
+														</tr>
+													</thead>
+													<tbody id="undecided-tbody"></tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+
+									<div id="market-view-container" class="">
+										<div id="fixed-assets-collapsible" class="grid-card">
+											<div data-target="fixed-assets-content" data-toggle="collapse" class="collapsible-header">
+												<h2 class="tableh2">
+													<i class="fas fa-chevron-up collapsible-icon"></i>
+													<i class="fas fa-lock"></i> 
+													Fixed Assets
+													<span id="save-table-count" class="pedSpan" data-zone="save_list"></span>
+												</h2>
+											</div>
+											<div id="fixed-assets-content" class="tablecontainer hidden">
+												<div id="save-scroll-container" style="height: 500px; overflow-y: scroll; position: relative;">
+													<table id="save-table" class="tableTheme">
+														<thead>
+															<tr>
+																<th data-column="location" class="col-location sortable-header">Location <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-name sortable-header" data-column="name">Name <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-qty sortable-header" data-column="quantity">Qty <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-unit sortable-header" data-column="value">TT/Unit <i class="fas fa-sort ml-1"></i></th>
+																<th data-column="totalValue" class="col-total sortable-header">Total TT <i class="fas fa-sort ml-1"></i></th> 
+																<th class="col-action">Action</th>
+															</tr>
+														</thead>
+														<tbody id="save-tbody"></tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+
+										<div id="crafting-materials-collapsible" class="grid-card mt-4">
+											<div data-target="crafting-materials-content" data-toggle="collapse" class="collapsible-header">
+												<h2 class="tableh2">
+													<i class="fas fa-chevron-up collapsible-icon"></i>
+													<i class="fas fa-hammer mr-2"></i> 
+													Crafting Plan Materials 
+													<span id="craft-table-count" class="pedSpan"></span>
+												</h2>
+											</div>
+											<div id="crafting-materials-content" class="tablecontainer hidden">
+												<div id="craft-scroll-container" style="height: 500px; overflow-y: scroll; position: relative;">
+													<table id="craft-table" class="tableTheme">
+														<thead>
+															<tr>
+																<th data-column="location" class="col-location sortable-header text-blue-400">Location <i class="fas fa-sort ml-1"></i></th>
+																<th data-column="name" class="col-name sortable-header">Name <i class="fas fa-sort ml-1"></i></th>
+																<th data-column="quantity" class="col-qty sortable-header">Qty <i class="fas fa-sort ml-1"></i></th>
+																<th data-column="totalValue" class="col-total sortable-header">Total TT (PED) <i class="fas fa-sort ml-1"></i></th>
+																<th data-column="bp" class="col-bp sortable-header">Blueprint <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-action text-right">Action</th>
+															</tr>
+														</thead>
+														<tbody id="craft-tbody"></tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+
+										<div id="sell-tt-collapsible" class="grid-card mt-4">
+											<div data-target="sell-tt-content" data-toggle="collapse" class="collapsible-header">
+												<h2 class="tableh2">
+													<i class="fas fa-chevron-up collapsible-icon"></i>
+													<i class="fas fa-hand-holding-usd text-lime-400 mr-2"></i>
+													Flagged as TT Trash 
+													<span id="sell_tt-table-count" class="pedSpan"></span>
+												</h2>
+											</div>
+											<div id="sell-tt-content" class="tablecontainer hidden">
+												<div id="selltt-scroll-container" style="height: 500px; overflow-y: scroll; position: relative;">
+													<table id="sell_tt-table" class="tableTheme divide-y divide-gray-600">
+														<thead>
+															<tr>
+																<th data-column="location" class="col-location sortable-header text-blue-400">Location <i class="fas fa-sort ml-1"></i></th>
+																<th data-column="name" class="col-name sortable-header text-left text-xs font-medium text-gray-400 uppercase">Name <i class="fas fa-sort ml-1"></i></th>
+																<th data-column="quantity" class="col-qty sortable-header text-left text-xs font-medium text-gray-400 uppercase">Qty <i class="fas fa-sort ml-1"></i></th>
+																<th data-column="totalValue" class="col-total sortable-header text-left text-xs font-medium text-gray-400 uppercase">Ttl TT <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-action text-right text-xs font-medium text-gray-400 uppercase">Action</th>
+															</tr>
+														</thead>
+														<tbody id="sell-tt-tbody"></tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+
+									</div>
+
+								</div>
+
+								<div id="InventoryTabC" class="subtab-content" style="width:1200px;min-width: 700px;max-width: 1258px;display:none;">
+									Coming Soon
+								</div>
+
+								<div id="InventoryTabD" class="subtab-content" style="display:none; width:100%;">
+								
+							
+									<div id="sell-mu-collapsible" class="grid-card mt-4">
+										<div data-target="sell-mu-content" data-toggle="collapse" class="collapsible-header">
+											<h2 class="tableh2">
+												<i class="fas fa-chevron-up collapsible-icon"></i>
+												<i class="fas fa-tag text-yellow-400 mr-2"></i>
+												For Sale [Wts]
+												<span id="sell_mu-table-count" class="pedSpan"></span>
+											</h2>
+										</div>
+										<div id="sell-mu-content" class="tablecontainer hidden">
+											<div id="pricelist-controls" class="">
+												<button data-action="copy-csv-sell" class="stat-tab-btn">
+													<i class="fas fa-file-csv mr-1"></i> Copy CSV
+												</button>
+												<button data-action="export-html" class="stat-tab-btn" style="display:none;">
+													<i class="fas fa-eye mr-1"></i> Preview HTML
+												</button>
+											</div>
+											<div id="sellmu-scroll-container" style="height: 300px; overflow-y: scroll; position: relative;resize:vertical;max-height:700px;min-height:185px;">
+												<table id="sell_mu-table" class="tableTheme">
+													<thead>
+														<tr>
+															<th data-column="location" class="col-location sortable-header">Location <i class="fas fa-sort ml-1"></i></th> 
+															<th data-column="name" class="col-name sortable-header">Name <i class="fas fa-sort ml-1"></i></th>
+															<th data-column="quantity" class="col-qty sortable-header">Qty <i class="fas fa-sort ml-1"></i></th>
+															<th data-column="value" class="col-unit sortable-header">TT/Unit <i class="fas fa-sort ml-1"></i></th>
+															<th data-column="totalValue" class="col-total sortable-header">Total TT <i class="fas fa-sort ml-1"></i></th> 
+															<th data-column="mu" class="col-mu sortable-header">MU% <i class="fas fa-sort ml-1"></i></th>
+															<th class="col-price">Sale Price</th>
+															<th class="col-action">Action</th>
+														</tr>
+													</thead>
+													<tbody id="sell-mu-tbody"></tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+
+									<div id="buying-list-view-container" class="">
+										<div id="buying-list-panel" class="grid-card">
+											<div data-target="buying-list-content" data-toggle="collapse" class="collapsible-header">
+												<h2 class="tableh2">
+													<i class="fas fa-chevron-up collapsible-icon"></i>
+													<i class="fas fa-shopping-cart text-green-400 mr-2"></i> 
+													Item Orders [Wtb]
+													<span id="buy-table-count" class="pedSpan"></span> 
+												</h2>
+											</div>
+											<div id="buying-list-content" class="tablecontainer hidden">
+											
+												<div id="buying-list-controls" class="">
+													<button data-action="copy-csv-buy" class="stat-tab-btn">
+														<i class="fas fa-file-csv mr-1"></i> Copy CSV
+													</button>
+
+											
+													<div id="buying-list-input" class="">
+														<div class="">
+															<input type="text" id="buy-name" placeholder="Item Name" 
+																   class="">
+
+															<input type="number" id="buy-qty" placeholder="Qty" 
+																   class="" min="1">
+
+															<input type="number" id="buy-mu" placeholder="MU%" 
+																   class="" min="1" max="150" step="0.1">
+
+															<!-- New Planet Dropdown -->
+															<select id="buy-planet" 
+																	class="">
+																<option value="ALL">All Planets</option>
+																<option value="CARRIED">CARRIED</option>
+																<option value="ANCIENT GREECE">ANCIENT GREECE</option>
+																<option value="ARIS">ARIS</option>
+																<option value="ARKADIA">ARKADIA</option>
+																<option value="ARKADIA MOON">ARKADIA MOON</option>
+																<option value="CALYPSO">CALYPSO</option>
+																<option value="HOWLING MINE">HOWLING MINE</option>
+																<option value="MONRIA">MONRIA</option>
+																<option value="NEXT ISLAND">NEXT ISLAND</option>
+																<option value="PLANET CYRENE">PLANET CYRENE</option>
+																<option value="PLANET TOULAN">PLANET TOULAN</option>
+																<option value="ROCKTROPIA">ROCKTROPIA</option>
+																<option value="SECRET ISLAND">SECRET ISLAND</option>
+																<option value="SETESH">SETESH</option>
+																<option value="SPACE">SPACE</option>
+																<option value="THE HUB">THE HUB</option>
+																<option value="THULE">THULE</option>
+															</select>
+
+															<button data-action="add-buying-item" 
+																	class="stat-tab-btn">
+																<i class="fas fa-plus mr-1"></i> Add
+															</button>
+														</div>
+													</div>
+
+												</div>
+												<div class="listScrollbox">
+													<div id="buy-scroll-container" class="" style="height: 300px; overflow-y: scroll; position: relative;resize:vertical;max-height:700px;min-height:185px;">
+													<table id="buy-table" class="tableTheme">
+														<thead>
+															<tr>
+																<th class="col-location sortable-header" data-column="planet">Location <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-name sortable-header" data-column="name">Name <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-qty sortable-header" data-column="targetQty">Target Qty <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-ttvalue sortable-header" data-column="ttValue">TT/Unit <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-total sortable-header" data-column="totalTT">Total TT <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-mu sortable-header" data-column="targetMu">Target MU% <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-total sortable-header" data-column="maxBuy">Max Buy Price <i class="fas fa-sort ml-1"></i></th>
+																<th class="col-action">Action</th>
+															</tr>
+														</thead>
+														<tbody id="buy-tbody"></tbody>
+													</table>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+							
+								
+									<div id="trade-log-card" class="grid-card">
+										<div  data-target="trade-history-content" data-toggle="collapse" class="collapsible-header" style="">
+											<h2 class="tableh2">
+												<i class="fas fa-history text-orange-400 mr-2"></i>
+												Full Trade History Ledger
+												<i class="fas fa-chevron-up collapsible-icon"></i>
+												<button id="btn-clear-trade-history" class="stat-tab-btn" style="float: right;border-color: #552222; color: #ff8888;">
+													Clear Ledger
+												</button>
+											</h2>
+
+										</div>
+										
+										<div id="trade-history-content" class="tablecontainer hidden">
+											<div id="trade-history-scroll-container" class="listScrollbox" style="height: 500px; overflow-y: auto;resize:vertical;max-height:700px;min-height:185px;">
+												<table id="trade-history-table" class="tableTheme" style="width: 100%; table-layout: fixed;">
+													<thead class="bg-gray-900 sticky top-0 z-10">
+														<tr>
+															<th class="col-date" style="width: var(--col-date-width, 160px);">Date/Time</th>
+															<th class="col-type" style="width: var(--col-type-width, 70px);">Type</th>
+															<th class="col-location" style="width: var(--col-location-width, 160px);">Location</th>
+															<th class="col-player" style="width: var(--col-player-width, 150px);">Player</th>
+															<th class="col-name" style="width: var(--col-name-width, auto);">Item Name</th>
+															<th class="col-qty" style="width: var(--col-qty-width, 80px); text-align: right;">Qty</th>
+															<th class="col-mu" style="width: var(--col-mu-width, 70px); text-align: right;">MU%</th>
+															<th class="col-peds" style="width: var(--col-peds-width, 100px); text-align: right;">Item PED</th>
+															<th class="col-tx-total" style="width: 110px; text-align: right; color: #ed8936;">TX Total</th>
+														</tr>
+													</thead>
+													<tbody id="trade-history-full-tbody" class="bg-gray-800">
+														</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
+							<div id="inventory-sidebar" class="loadout-container Overview">
+
+								<div id="summary-panel-container" class="">
+									<div class="backlight-switch">
+										<input type="checkbox" id="backlightToggle" />
+										
+										<!-- Plastic Toggle -->
+										<label for="backlightToggle">
+											<span class="switch-handle"></span>
+										</label>
+										
+										<!-- Separate Green Indicator Light -->
+										<div class="indicator"></div>
+										
+										<span class="switch-label">BACKLIGHT</span>
+									</div>
+									<h2 class="" style="padding: 12px 8px;">
+										<i class="fas fa-chart-line"></i> Asset Overview
+									</h2>
+
+									<div id="summary-metrics-wrapper" class="flex flex-col space-y-2">
+										<div class="summary-metric border-yellow-500 max-w-64 cursor-pointer"" title="Click to toggle visibility">
+											<p class="text-xs text-gray-400 uppercase font-semibold flex items-center mb-1">
+												<i class="fas fa-coins mr-1 text-yellow-500"></i> Total Value
+												<i id="privacy-icon" class="fas fa-eye-slash ml-auto text-gray-600 text-[10px]"></i>
+											</p>
+											<strong id="summary-total" class="text-2xl text-yellow-300 font-extrabold transition-all duration-200 blur-sm opacity-50 select-none">
+												•••••• PED
+											</strong>
+										</div>
+
+										<div class="summary-metric border-cyan-500 max-w-64">
+											<p class="text-xs text-gray-400 uppercase font-semibold flex items-center mb-1">
+												<i class="fas fa-money-bill-wave mr-1 text-cyan-500"></i> Liquid Cash
+											</p>
+											<strong id="summary-liquid" class="text-2xl text-cyan-300 font-extrabold">0.00 PED</strong>
+										</div>
+
+										<div class="summary-metric border-emerald-500 max-w-64">
+											<p class="text-xs text-gray-400 uppercase font-semibold flex items-center mb-1">
+												<i class="fas fa-tag mr-1 text-emerald-500"></i> Pending Sales
+											</p>
+											<strong id="summary-pending" class="text-xl text-emerald-300 font-bold">0.00 PED</strong>
+										</div>
+
+										<div class="summary-metric border-blue-500 max-w-64">
+											<p class="text-xs text-gray-400 uppercase font-semibold flex items-center mb-1">
+												<i class="fas fa-lock mr-1 text-blue-500"></i> Fixed Assets TT
+											</p>
+											<strong id="summary-fixed" class="text-xl text-blue-300 font-bold">0.00 PED</strong>
+										</div>
+									</div>
+								</div>
+
+								<div id="location-panels-container" class="space-y-4">
+
+									<div id="ped-cash-location-wrapper" class="grid-card">
+										<div data-target="ped-cash-location-content" data-toggle="collapse" class="collapsible-header">
+											<h2 class="tableh2">
+												<i class="fas fa-chevron-up collapsible-icon text-white transition-transform"></i>
+												<i class="fas fa-wallet text-yellow-400 mr-2"></i>
+												Peds
+												<span id="ped-cash-table-count" class="pedSpan"></span>
+											</h2>
+
+										</div>
+										<div id="ped-cash-location-content" class="sidebar-location-content hidden">
+
+											<table id="ped-cash-table" class="tableTheme">
+												<thead>
+													<tr>
+														<th class="col-name sortable-header" data-column="name">Item Name <i class="fas fa-sort ml-1"></i></th>
+														<th class="col-qty sortable-header" data-column="quantity">Qty <i class="fas fa-sort ml-1"></i></th>
+														<th class="col-total sortable-header" data-column="totalValue">Value (PED) <i class="fas fa-sort ml-1"></i></th>
+														<th class="col-location sortable-header" data-column="location">Location <i class="fas fa-sort ml-1"></i></th>
+													</tr>
+												</thead>
+												<tbody id="ped-cash-tbody"></tbody>
+											</table>
+										</div>
+									</div>
+									<div id="ammo-location-wrapper" class="grid-card mt-4">
+										<div data-target="ammo-location-content" data-toggle="collapse" class="collapsible-header">
+											<h2 class="tableh2">
+												<i class="fas fa-chevron-up collapsible-icon text-white transition-transform"></i>
+												<i class="fas fa-gun text-red-400 mr-2"></i>
+												Ammo
+												<span id="ammo-table-count" class="pedSpan"></span>
+											</h2>
+										</div>
+
+										<div id="ammo-location-content" class="sidebar-location-content hidden">
+											<table id="ammo-table" class="tableTheme">
+												<thead>
+													<tr>
+														<th class="col-name sortable-header" data-column="name">Item Name <i class="fas fa-sort ml-1"></i></th>
+														<th class="col-qty sortable-header" data-column="quantity">Qty <i class="fas fa-sort ml-1"></i></th>
+														<th class="col-total sortable-header" data-column="totalValue">Value (PED) <i class="fas fa-sort ml-1"></i></th>
+														<th class="col-location sortable-header" data-column="location">Location <i class="fas fa-sort ml-1"></i></th>
+													</tr>
+												</thead>
+												<tbody id="ammo-tbody"></tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+								<div id="item-info-panel" class="grid-card mb-4" style="display: none; border-left: 3px solid #ed8936; background: #111;">
+									<div class="p-3">
+										<div data-target="info-item-details" data-toggle="collapse"class="collapsible-header border-bottom-terminal">
+											
+											<h2 id="info-item-name" class="text-orange-400 font-bold uppercase text-[10px] tracking-widest flex items-center gap-2">
+												Item Details
+											</h2>
+											
+											<div id="info-ref-id" style="font-family:monospace; color:rgba(255,255,255,0.2); font-size:9px;"></div>
+										</div>
+										<div id="info-item-details" class="mt-2 space-y-1 text-[11px] text-gray-400">
+											</div>
+									</div>
+								</div>
+								<div id="quick-trade-panel" class="grid-card mt-4" style="border: 1px solid #444; background: #1a1a1a; padding: 10px;">
+									<h2 class="tableh2" style="margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
+										<span><i class="fas fa-exchange-alt text-orange-400 mr-2"></i>Quick Trade Logger</span>
+										<button id="btn-undo-trade" title="Undo Last Transaction" style="background:none; border:none; color:#666; cursor:pointer; font-size: 0.8em; transition: color 0.2s;">
+											<i class="fas fa-undo"></i> Undo
+										</button>
+									</h2>
+									
+									<div style="display: flex; flex-direction: column; gap: 8px;">
+										<div style="display: flex; gap: 5px;">
+											<input type="text" id="trade-player-name" placeholder="Traded With" 
+												style="flex: 1; background: #000; color: #9ae6b4; border: 1px solid #333; padding: 4px; font-size: 0.8em;">
+											<input type="text" id="trade-location" placeholder="Location (Optional)" 
+												style="flex: 1; background: #000; color: #a0aec0; border: 1px solid #333; padding: 4px; font-size: 0.8em;">
+										</div>
+
+										<div style="display: flex; gap: 5px;">
+											<input type="text" id="trade-item-name" placeholder="Item Name" 
+												style="flex: 1; background: #000; color: #fff; border: 1px solid #555; padding: 4px; font-size: 0.8em;">
+											<input type="number" id="trade-unit-tt" placeholder="TT/Unit" 
+												style="width: 70px; background: #000; color: #fff; border: 1px solid #555; padding: 4px; font-size: 0.8em;">
+										</div>
+										
+										<div style="display: flex; gap: 5px;">
+											<input type="number" id="trade-qty" placeholder="Qty" 
+												style="width: 30%; background: #000; color: #fff; border: 1px solid #555; padding: 4px; font-size: 0.8em;">
+											<div class="mu-input-wrapper" style="flex: 1;">
+												<input type="number" id="trade-mu" placeholder="MU%" value="100" 
+													style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 4px; font-size: 0.8em;">
+											</div>
+											<input type="number" id="trade-price" placeholder="Total" 
+												style="width: 40%; background: #000; color: #fff; border: 1px solid #005555; padding: 4px; font-size: 0.8em; font-weight: bold;">
+										</div>
+
+										<div style="display: flex; gap: 10px; align-items: center; background: #111; padding: 5px; border-radius: 4px;">
+											<div class="cashregisterWrapper">
+												<span id="toggle-label" class="toggleLabel">PURCHASE</span>
+												<label class="cashregisterToggle">
+													<input type="checkbox" id="trade-type-toggle">
+													<span class="slider"></span>
+												</label>
+											</div>
+											<button id="btn-stage-item" style="flex: 1.5; background: #2b6cb0; color: white; border: none; padding: 8px; cursor: pointer; font-size: 0.75em; font-weight: bold; border-radius: 2px;">
+												<i class="fas fa-plus mr-1"></i> ITEM
+											</button>
+										</div>
+
+										<div id="trade-draft-container" style="display:none; background: #000; border: 1px solid #ed8936; padding: 5px; margin-top: 5px;">
+											<div style="font-size: 9px; color: #ed8936; text-transform: uppercase; margin-bottom: 4px; font-weight: bold;">Pending Items:</div>
+											<div id="trade-draft-list" style="max-height: 100px; overflow-y: auto; font-size: 10px; margin-bottom: 8px; color: #eee;"></div>
+											<button id="btn-process-trade" style="width: 100%; background: #2d3748; color: white; border: 1px solid #4a5568; padding: 8px; cursor: pointer; font-weight: bold; font-size: 0.8em; letter-spacing: 1px;">COMMIT TRANSACTION</button>
+										</div>
+
+										<p id="trade-feedback" style="font-size: 10px; color: #888; margin: 0; min-height: 12px;"></p>
+									</div>
+								</div>
+
+								<div id="recent-history-panel" class="grid-card mt-2" style="background: #111; border: 1px solid #222;">
+									<h2 class="tableh2" style="font-size: 0.75rem; color: #718096;"><i class="fas fa-history mr-2"></i>Recent Activity</h2>
+									<div id="trade-sidebar-log" class="max-h-64 overflow-y-auto custom-scrollbar">
+										<div class="text-gray-600 p-2 italic text-xs">No trades logged.</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Missions Tab -->
+<!-- 			<div class="tab-content" id="missionsTab">
+			  <div class="subtabs-header">
+				<h2>Mission Cooldown Tracking</h2>
+				<div class="subtabs">
+				  <button class="subtab-btn stat-tab-btn active-subtab" data-subtab="missionsTabA">Cooldown Timers</button>
+				  <button class="subtab-btn stat-tab-btn" data-subtab="missionsTabB" style="display:none;">One Time Missions</button>
+				  <button class="subtab-btn stat-tab-btn" data-subtab="missionsTabC" style="display:none;">Twitch comfy</button>
+				</div>
+				<div class="global-controls" style="text-align: right; margin-bottom: 10px; display: flex; gap: 10px; justify-content: flex-end;">
+					<button class="stat-tab-btn" id="btn-export">EXPORT DATA</button>
+					<button class="stat-tab-btn" id="btn-import">IMPORT DATA</button>
+					<button class="stat-tab-btn" id="btn-reset" style="background: #310c0cbd;">RESET DEFAULTS</button>
+					
+					<button class="stat-tab-btn" id="btn-collapse">COLLAPSE ALL</button>
+					<button class="stat-tab-btn" id="btn-expand">EXPAND ALL</button>
+
+					<input class="" type="file" id="importFile" style="display:none" accept=".json">
+				</div>
+				
+			  </div>
+			  <div class="subtab-content" id="missionsTabA" style="display:block;">
+
+				<div class="timer-container">
+					<div id="planetList"></div>
+					<div class="add-controls">
+						<input type="text" id="mName" placeholder="Mission Name">
+						<input type="text" id="mCat" placeholder="Category">
+						<select id="mPlanet">
+							<option value="Setesh">Setesh</option>
+							<option value="Calypso">Calypso</option>
+							<option value="Aris">Aris</option>
+							<option value="Monria/DSEC">Monria/DSEC</option>
+							<option value="Rocktropia">Rocktropia</option>
+							<option value="Howling Mine">Howling Mine</option>
+							<option value="Toulan">Toulan</option>
+							<option value="Next Island">Next Island</option>
+							<option value="Arkadia">Arkadia</option>
+							<option value="Arkadia Moon">Arkadia Moon</option>
+							<option value="Cyrene">Cyrene</option>
+							<option value="Foma">FOMA</option>
+							<option value="Crystal Palace">Crystal Palace</option>
+							<option value="Space">Space</option>
+							<option value="Interplanetary">Interplanetary</option>
+							<option value="Private Contract">Private Contract</option>
+							<option value="Earth">Earth</option>
+							<option value="Other">Other</option>
+						</select>
+						<input type="text" id="mWp" placeholder="/wp [Planet Calypso, 123, 456, 000, example waypoint]">
+						<input type="text" id="mReward" placeholder="Rewards (comma seperated)">
+						<div class="cd-input-group" style="display: inline-flex; gap: 5px; align-items: center; background: #1a1a1a; padding: 5px; border-radius: 4px; border: 1px solid #333;">
+							<span style="font-size: 0.7em; color: #888; margin-right: 5px;">COOLDOWN:</span>
+							<input type="number" id="mDays" placeholder="D" min="0" style="width: 35px; text-align: center;">
+							<input type="number" id="mHrs" placeholder="H" min="0" style="width: 35px; text-align: center;" value="21">
+							<input type="number" id="mMins" placeholder="M" min="0" style="width: 35px; text-align: center;">
+						</div>
+						<select id="mType">
+							<option value="SOR" class="">Start on Received</option>
+							<option value="SOF" class="">Start on Finished</option>
+						</select>
+						<button class="" id="btn-add-mission">ADD MISSION</button>
+					</div>
+
 				</div>
 
-				<details class="material-breakdown" closed open>
-				  <summary><strong>📦 Material Breakdown</strong> (click to expand)</summary>
-				  <table class="material-table sortable">
-					<thead>
-					  <tr>
-						<th>Name</th>
-						<th>Qty</th>
-						<th>TT/Unit</th>
-						<th>Total TT</th>
-						<th>MU %</th>
-						<th>Total MU</th>
-						<th>Total Cost</th>
-					  </tr>
-					</thead>
-					<tbody>
-					  <tr><td colspan="7" style="text-align:center;">No data yet</td></tr>
-					</tbody>
-				  </table>
-				</details>
 
-				<details class="estimation-breakdown" closed>
-				  <summary><strong>📉 Estimation Breakdown</strong> (click to expand)</summary>
-				  <div class="result-grid" style="margin-top: 10px">
-					<div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>0.0000 PED</span></div>
-					<div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>0.0</span></div>
-					<div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>0.0</span></div>
-					<div class="result-row"><span class="label">💰 Return from Success:</span> <span>0.00 PED</span></div>
-					<div class="result-row"><span class="label">💵 Return from Near-Success:</span> <span>0.00 PED</span></div>
-					<div class="result-row"><span class="label">💱 Total Return:</span> <span>0.00 PED</span></div>
-					<div class="result-row"><span class="label">🧪 Residue Needed:</span> <span>0.00 PED</span></div>
-					<div class="result-row"><span class="label">📊 ROI:</span> <span>0.00%</span></div>
-					<div class="result-row profit">
-					  <span class="label">💹 Estimated Profit/Loss:</span>
-					  <span>0.00 PED</span>
-					</div>
-				  </div>
-				</details>
-			  <!-- 🪪 Button to Open Modal -->
-			  <span class="label">Features coming soon (not finished):</span><br>
-			  <button id="openHistoryModal">🕮 Crafting History</button>
-			  <!-- 🧪 Simulation Buttons -->
-			  <button onclick="startLiveSimulation()" style="display:none;">Default Simulation</button>
-			  <button onclick="runSimulation('historic')" style="display:none">Simulate Based on History</button>
-			</div>
-		</div>
-
-		<div class="eu-myBlueprintList">
-			<h1>Your List<button id="loadBlueprintsButt" onclick="toggleBlueprints()">📂 Expand</button></h1>
-			<div class="results" id="savedList" style="display: none;">
-			  <div id="panelControls" style="">
-				  <div id="blueprintFilters"></div>
-				  <div id="layoutToggle">
-					<div id="layoutLabel">Layout:</div>
-					<div id="layoutOptions">
-						<label><input type="radio" name="layout" value="cards" checked onchange="renderBlueprintList()"> Cards</label>
-						<label><input type="radio" name="layout" value="list" onchange="renderBlueprintList()"> List</label>
-					</div>
-				  </div>
 			  </div>
-			  <div id="blueprintList"></div>
+			  <div class="subtab-content" id="missionsTabB" style="display:none;">
+				<p>Missions tab 2 content will go here.</p>
+				<div class="" id="">
+				  <button id="" data-toggle="data-source">Example Button</button>
+				  <div class="" id="">Status: generic status message confirmed...</div>
+				</div>
+			  </div>
+			  <div class="subtab-content" id="missionsTabC" style="display:none;">
+				<p>Missions tab 3 content will go here.</p>
+			  </div>
+			</div>
+ -->
+			<!-- Map Tab -->
+			<div class="tab-content" id="mapTab">
+			  <div class="subtabs-header">
+
+
+				<div class="subtabs" style="flex-wrap: wrap;">
+				
+					<div class="map-controls">
+						<div>Map</div>
+						<div class="control-group">
+
+							<select id="planetMapSelect" class="map-selectEl">
+								<option value="disconnected">Disconnected</option>
+								<option value="space">space</option>
+								<option value="calypso">Calypso</option>
+								<option value="calypsogateway">Calypso Gateway</option>
+								<option value="foma">F.O.M.A</option>
+								<option value="crystalpalace">Crystal Palace</option>
+								<option value="aris">Aris</option>
+								<option value="setesh">Setesh</option>
+								<option value="monria">Monria</option>
+								<option value="rocktropia">Rocktropia</option>
+								<option value="arctic">Arctic</option>
+								<option value="secretisland">Secret Island</option>
+								<option value="hell">Hell</option>
+								<option value="howlingmine">Howling Mine</option>
+								<option value="toulan">Toulan</option>
+								<option value="nextisland">Next Island</option>
+								<option value="ancientgreece">Ancient Greece</option>
+								<option value="arkadiamoon">Arkadia Moon</option>
+								<option value="arkadia">Arkadia</option>
+								<option value="arkadiaunderground">Arkadia Underground</option>
+								<option value="cyrene">Cyrene</option>
+								<option value="thehub">The Hub</option>
+							</select>
+							<button class="map-btn" id="waypointPaste" title="Paste [WP] from Clipboard">📋 Paste WP</button>
+						</div>
+
+						<div id="layerToggles" class="control-group layer-toggles">
+			<!-- 				<button class="toggle-btn active" data-target="waypoints-teleporters" title="Toggle TPs">🌀</button>
+							<button class="toggle-btn active" data-target="waypoints-mining" title="Toggle Mining">⛏️</button>
+							<button class="toggle-btn active" data-target="waypoints-creatures" title="Toggle Mobs">👾</button>
+							<button class="toggle-btn active" data-target="waypoints-estates" title="Toggle Estates">🏦</button> -->
+						</div>
+
+						<div class="control-group zoom-controls">
+							<button class="map-btn" id="zoomin">➕</button>
+							<button class="map-btn" id="zoomout">➖</button>
+							<button class="map-btn" id="resetview">reset view</button>
+							
+
+						</div>
+					</div>
+					<button class="subtab-btn stat-tab-btn active-subtab" data-subtab="themapTab" style="display:none;">Map</button>
+					<button class="subtab-btn stat-tab-btn" data-subtab="mapTab2" style="display:none;">maptab2</button>
+					<button class="subtab-btn stat-tab-btn" data-subtab="mapTab3" style="display:none;">maptab3</button>
+					<div class="mob-combobox-container" style="position: relative; padding: 10px; border-bottom: 1px solid #333;">
+						<input type="text" 
+							   id="mobComboboxInput" 
+							   placeholder="Type to filter mobs..." 
+							   autocomplete="off">
+						<div id="mobComboboxResults" 
+							 style="display: none; position: absolute; left: 10px; right: 10px; top: 55px; max-height: 200px; overflow-y: auto; background: #0a0a0a; border: 1px solid #444; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.8);">
+						</div>
+					</div>
+					<button id="btn-clear-waypoints" class="tactical-btn stat-tab-btn">
+						CLEAR WP's
+					</button>
+					<div id="lastknownposWrapper">
+						<div id="lastKnownPosition">[planet, long, lat, alt, waypoint]</div>
+
+					</div>
+					<button class="stat-tab-btn" id="copyLastknownPositionbtn">Copy</button>
+					<button class="stat-tab-btn" id="focusLastknownPositionbtn">Focus</button>
+				</div>
+			  </div>
+			  <div id="maps-outerwrapper" style="display:flex;flex-direction:row;width:100%;height:89%;">
+				  <div class="subtab-content" id="themapTab">
+		<!-- 			<div class="map-container" id="theMap">
+						<div class="map-wrapper" id="mapWrapper">
+							<img src="assets/images/maps/space_map.jpg" class="map-layer surface-layer" id="baseMapImg">
+							<div id="waypointMaplayer" class="waypoint-overlay">
+								<div id="waypoints-general" class="waypoint-group" data-layer="general"></div>
+								<div id="waypoints-mining" class="waypoint-group" data-layer="mining"></div>
+								<div id="waypoints-creatures" class="waypoint-group" data-layer="creatures"></div>
+								<div id="waypoints-teleporters" class="waypoint-group" data-layer="teleporters"></div>
+								<div id="waypoints-estates" class="waypoint-group" data-layer="estates"></div>
+								<div id="waypoints-instances" class="waypoint-group" data-layer="instances"></div>
+								<canvas id="mapCanvas"></canvas>
+							</div>
+						</div>
+						<div class="map-status-bar">
+							<span id="static-coords">Select a planet to see coordinates</span>
+						</div>
+					</div> -->
+					<div class="map-container" id="theMap">
+
+							<div class="map-wrapper" id="mapWrapper">
+								<img src="" class="map-layer surface-layer" id="baseMapImg">
+								
+								<div id="waypointMaplayer" class="waypoint-overlay">
+									<div id="waypoints-general" class="waypoint-group" data-layer="general"></div>
+									<div id="waypoints-teleporters" class="waypoint-group" data-layer="teleporters"></div>
+								</div>
+
+							</div>
+
+							<canvas id="mapCanvas"></canvas>
+							
+							<div class="map-status-bar">
+								<span id="static-coords">Select a planet to see coordinates</span>
+							</div>
+							<div class="crt-overlay power-off">
+								<div id="satelliteSweep"></div>
+								<div class="scanlines"></div>
+							</div>	
+					</div>
+
+				  </div>
+				  <div class="subtab-content" id="mapTab2" style="display:none;">
+					<p>map tab 3 content placeholder.</p>
+				  </div>
+				  <div class="subtab-content" id="mapTab3" style="display:none;">
+					<p>map tab 3 content placeholder.</p>
+				  </div>
+				  <div class="mapTab-container Overview" id="maps-rightpanelB">
+				  
+					<div class="maptab-rightpanelBsection"id="rightpanelListsection2">
+
+						<div id="mapsTab-powerSection">
+							<div class="retrotoggleswitchA map-switch" id="screenPowerSwitch">
+								<input type="checkbox" id="mapPowerToggle"/> <label for="mapPowerToggle">
+									<span class="switch-handle"></span>
+								</label>
+								<div class="indicator"></div>
+								<span class="switch-label">System Power</span>
+							</div>
+						</div>
+						
+						
+						<div class="" id="mapToggleContainer">
+							<div class="control-group toggle-controls" id="mapToggleWrapper">
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="crtOverlayToggle" />
+									<label for="crtOverlayToggle">
+										<span class="switch-handle"></span>
+									</label>
+
+									
+									<span class="switch-label" style="color:#bd941a;">CRT Scanlines</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch master-toggle-row">
+									<div class="indicator"></div>
+									<input type="checkbox" id="masterLabelToggle" />
+									<label for="masterLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label" style="font-weight: bold; color: #bd941a;">Label Master</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="areaLabelToggle" />
+									<label for="areaLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">Area Labels</span>
+								</div>
+								
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="teleporterLabelToggle" />
+									<label for="teleporterLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">Tp Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="npcLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="npcLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									
+									<span class="switch-label">Npc Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="outpostLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="outpostLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+
+									
+									<span class="switch-label">outpost Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="revivalpointLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="revivalpointLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									
+									<span class="switch-label">revivalpoint Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="vendorLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="vendorLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									
+									<span class="switch-label">vendor Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="interactableLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="interactableLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									
+									<span class="switch-label">interactable Labels</span>
+								</div>
+
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="instanceentranceLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="instanceentranceLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									
+									<span class="switch-label">Instance Entrance Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="magicalflowerLabelToggle" />
+									<label for="magicalflowerLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">Magicalflower Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="campLabelToggle" />
+									<label for="campLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">Camp Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="cityLabelToggle" />
+									<label for="cityLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">City Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="estateLabelToggle" />
+									<label for="estateLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">Estate Labels</span>
+								</div>
+							</div>
+							<div id="zipperHandle"></div>
+
+						</div>
+						<div id="zipperteeth"></div>
+						<div class="control-group toggle-controls" id="mapDetailsContainer">
+							<div class="control-group toggle-controls" id="mapDetailsWrapper">
+								<h2 class="mob-details-header" 
+									data-target="mapMainDetails" 
+									style="cursor:pointer; display: flex; justify-content: space-between; align-items: center; background: #222; padding: 5px 10px; border-bottom: 2px solid #3a6085;">
+									Location Details
+									<span class="section-arrow" style="transition: transform 0.2s; transform: rotate(90deg);">▶</span>
+								</h2>
+								<div class="mapdetailBox" id="mapMainDetails" style="display:block;"></div>
+							</div>
+
+							<div class="control-group toggle-controls" id="mobDetailsWrapper">
+								<h2 class="mob-details-header" 
+									data-target="selectedmobDetailsEl" 
+									style="cursor:pointer; display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 5px 10px; border-bottom: 2px solid #176547;">
+									Lifeform Details
+									<span class="section-arrow" style="transition: transform 0.2s; transform: rotate(90deg);">▶</span>
+								</h2>
+								<div class="mapdetailBox" id="selectedmobDetailsEl" style="display:Block;"></div>
+							</div>
+						</div>
+					</div>
+					<div class="maptab-rightpanelBsection"id="rightpanelListsection">
+
+						<div id="mapsTab-mainSection">
+						
+		<!-- 					<div class="retrotoggleswitchA map-switch" id="screenPowerSwitch">
+								<input type="checkbox" id="mapPowerToggle"/> <label for="mapPowerToggle">
+									<span class="switch-handle"></span>
+								</label>
+								<div class="indicator"></div>
+								<span class="switch-label">System Power</span>
+							</div> -->
+						
+							<h2 id="waypointlistHeader">Location Lists <span class="sectionToggler">▶</span></h2>
+							<div class="map-sidebar collapsed">
+							
+								<div class="map-sidebar-controls">
+									<input type="text" id="globalFuzzySearch" placeholder="Search all lists..." class="fuzzy-input">
+								</div>
+								<div class="map-sidebar-scroll-area">
+									<details class="map-list-section" id="teleporterListSection">
+										<summary>Teleporters <span id="teleporterCount">0</span></summary>
+										<div class="list-content" id="teleporterList"></div>
+									</details>
+									<details class="map-list-section" id="npcListSection">
+										<summary>NPCs <span id="npcCount">0</span></summary>
+										<div class="list-content" id="npcList"></div>
+									</details>
+									
+									<details class="map-list-section" id="areaListSection">
+										<summary>Areas <span id="areaCount">0</span></summary>
+										<div class="list-content" id="areaList"></div>
+									</details>
+
+
+									<details class="map-list-section" id="outpostListSection">
+										<summary>outposts <span id="outpostCount">0</span></summary>
+										<div class="list-content" id="outpostList"></div>
+									</details>
+									<details class="map-list-section" id="campListSection">
+										<summary>Camps <span id="campCount">0</span></summary>
+										<div class="list-content" id="campList"></div>
+									</details>
+									<details class="map-list-section" id="cityListSection">
+										<summary>Citys <span id="cityCount">0</span></summary>
+										<div class="list-content" id="cityList"></div>
+									</details>
+									<details class="map-list-section" id="estateListSection">
+										<summary>Estates <span id="estateCount">0</span></summary>
+										<div class="list-content" id="estateList"></div>
+									</details>
+									<details class="map-list-section" id="revivalpointListSection">
+										<summary>revivalpoints <span id="revivalpointCount">0</span></summary>
+										<div class="list-content" id="revivalpointList"></div>
+									</details>
+									<details class="map-list-section" id="vendorListSection">
+										<summary>vendors <span id="vendorCount">0</span></summary>
+										<div class="list-content" id="vendorList"></div>
+									</details>
+									<details class="map-list-section" id="interactableListSection">
+										<summary>Interactables <span id="interactableCount">0</span></summary>
+										<div class="list-content" id="interactableList"></div>
+									</details>
+									<details class="map-list-section" id="instanceentranceListSection">
+										<summary>Instance Entrances <span id="instanceentranceCount">0</span></summary>
+										<div class="list-content" id="instanceentranceList"></div>
+									</details>
+									<details class="map-list-section" id="magicalflowerListSection">
+										<summary>Magical Flowers <span id="magicalflowerCount">0</span></summary>
+										<div class="list-content" id="magicalflowerList"></div>
+									</details>
+								</div>
+							</div>
+						</div>
+						<div id="mapsTab-secondarySection">
+							<div id="mobmatchSourceEl"></div>
+							<div id="mapmobmatchEl"></div>
+						</div>
+					</div>
+				  </div>
+				  
+			  </div>
+			</div>
+			<!-- Settings Tab -->
+			<div class="tab-content" id="settingsTab">
+			  <div class="subtabs-header">
+				<h2>Settings</h2>
+				<div class="subtabs">
+				  <button class="subtab-btn stat-tab-btn active-subtab" data-subtab="settingsTabA">chat Snooper</button>
+				  <button class="subtab-btn stat-tab-btn" data-subtab="settingsTabB">Data Sourcing</button>
+				  <button class="subtab-btn stat-tab-btn" data-subtab="settingsTabOBS">OBS/Twitch</button>
+				  <button class="subtab-btn stat-tab-btn" data-subtab="settingsTabD">Overlay</button>
+				  <button class="subtab-btn stat-tab-btn" data-subtab="settingsTabSound">Sound/lang Settings</button>
+				  <button class="subtab-btn stat-tab-btn" data-subtab="settingsTabKeybinds">Keybinds</button>
+				  <button class="subtab-btn stat-tab-btn" data-subtab="settingsTabG">Inventory Settings</button>
+				</div>
+			  </div>
+		<!--       <p>Future settings / configuration tab.</p> -->
+			  <div class="subtab-content" id="settingsTabA" style="display:block;">
+				
+				<div id="chatlogfilepathsettings">
+				  <p id="currentfilepath">.</p>
+				  <button id="chooseLog">Choose Chat Log</button>
+				  <div id="logStatus">No log selected.</div>
+				</div>
+				<div id="entropiausernamesettings">
+					<input id="entropiaUsername" list="usernameOptions" type="text" placeholder="Enter username">
+					<datalist id="usernameOptions"></datalist>
+					<button id="saveUsername">Save Username</button>
+					<button id="removeUsername">Remove Username</button>	
+					<!-- resetonstartcheckbox is not currently in use, but this may be usefull in the future-->
+					<label for="resetOnStartCheckbox" style="display:none;"> 
+					  <input type="checkbox" id="resetOnStartCheckbox" style="display: none;margin-right: 5px;">
+					  Reset hunt automatically when starting
+					</label>
+				</div>
+			  </div>
+			  <div class="subtab-content" id="settingsTabB" style="display:none;">
+				<p>Toggle data source between local files and the entropianexus.com api</p>
+				<div class="" id="">
+				  <button id="DataSourceToggle" data-toggle="data-source">Toggle Data Source</button>
+				  <button id="nexus-sync-launcher">Check for Database Updates</button>
+				  <div class="NexusAPIstatus" id="NexusAPIstatus-Settings">Status: Waiting...</div>
+				  <div><label for="mergeTeleportersBtn" title="This is used for merging teleporters.json with locations.json (local data) ">teleporters Data Merge</label><button id="mergeTeleportersBtn" class="merge-button">🔄 Check and Merge Teleporters into locations.json</button></div>
+				</div>
+			  </div>
+			  <div class="subtab-content" id="settingsTabOBS" style="display:none;">
+				<h3>Stream Configuration</h3>
+				<div class="obs-settings-section">
+					<div class="hud-header">OBS_LINK_PROTOCOL_V1</div>
+					
+					<div class="setting-row">
+						<span>ENABLE_OVERLAY_SERVER:</span>
+						<label class="switch">
+							<input type="checkbox" id="broadcastToggle">
+							<span class="slider"></span>
+						</label>
+					</div>
+
+					<div class="obs-info-block">
+						<p style="color: #ffb300;">[ STATUS: BETA_CORE ]</p>
+						<p>> 01: INITIALIZE HARDWARE TOGGLE</p>
+						<p>> 02: CREATE OBS BROWSER SOURCE</p>
+						<p>> 03: URL: <span style="color:#fff;">http://localhost:8080/stream-overlay</span></p>
+						<br>
+						<p style="font-size: 9px; opacity: 0.5;">TRANSMISSION_PROTOCOL: UNENCRYPTED_TCP</p>
+					</div>
+				</div>
+			  </div>
+			  <div class="subtab-content" id="settingsTabD" style="display:none;">
+					<!--<p>Overlay settings content goes here.</p>-->
+					<div class="loadout-section" id="">
+						<div id="overlayControls">
+							<button id="toggleOverlayBtn">Show / Hide Overlay</button>
+							<button id="refreshOverlayBtn">Refresh Overlay</button>
+							<label>
+							  <input type="checkbox" id="overlayAlwaysOnTop">
+							  Always on Top
+							</label>
+							
+							<div id="overlaySettings">
+								<div class="settings-row">
+									<label for="show-icons-toggle">Show Tool Icons on HUD</label>
+									<input type="checkbox" id="show-icons-toggle">
+								</div>
+								<h3>Overlay Panels</h3>
+								<div class="OverlayPanelOptions-Wrapper">
+								  <label><input type="checkbox" class="panel-toggle" data-panel="graph"> Show Hunt Graph</label><br>
+								</div>
+								
+								<div class="OverlayPanelOptions-Wrapper">
+									<label><input type="checkbox" class="panel-toggle" data-panel="crafting" checked> Crafting Panel</label><br>
+									<div class="setting-row">
+										<label>
+											<input type="checkbox" id="toggleIncludeMU" checked> 
+											Include Markup in Click Cost
+										</label>
+									</div>
+									<div class="OverlaypanelFieldOptions" id="craftingPanelOptions">
+										<label><input type="checkbox" class="data-toggle crafting" data-field="clicks" checked>Clicks</label><br>
+										<label><input type="checkbox" class="data-toggle crafting" data-field="successes" checked>Successes</label><br>
+										<label><input type="checkbox" class="data-toggle crafting" data-field="nearSuccesses" checked>Near Successes</label><br>
+										<label><input type="checkbox" class="data-toggle crafting" data-field="fails" checked>Fails</label><br>
+										<label><input type="checkbox" class="data-toggle crafting" data-field="qrIncrease" checked>QR Increases</label><br>
+										<label><input type="checkbox" class="data-toggle crafting" data-field="loot" checked>Total Value</label><br>
+										<label><input type="checkbox" class="data-toggle crafting" data-field="totalLoots" checked>Total Items</label><br>
+										<label><input type="checkbox" class="data-toggle crafting" data-field="returnPct" checked>Return %</label><br>
+										<label><input type="checkbox" class="data-toggle crafting" data-field="totalCostPerClickPEC" checked>Cost/Click</label><br>
+										<label><input type="checkbox" class="data-toggle crafting" data-field="totalCost" checked>Total Spend</label><br>
+									</div>
+								</div>
+								<div class="OverlayPanelOptions-Wrapper">
+									<label><input type="checkbox" class="panel-toggle" data-panel="mining" checked> Mining Panel</label><br>
+									<div class="OverlaypanelFieldOptions" id="miningPanelOptions">
+										<label><input type="checkbox" class="data-toggle mining" data-field="drops" checked> Drops</label><br>
+										<label><input type="checkbox" class="data-toggle mining" data-field="totalCost" checked> Total Spend</label><br>
+										<label><input type="checkbox" class="data-toggle mining" data-field="totalReturns" checked> Total Returns</label><br>
+										<label><input type="checkbox" class="data-toggle mining" data-field="returnPct" checked> Return %</label><br>
+										<label><input type="checkbox" class="data-toggle mining" data-field="avgReturn" checked> Avg per Drop</label><br>
+									</div>
+								</div>
+								<div class="OverlayPanelOptions-Wrapper">
+								  <label><input type="checkbox" class="panel-toggle" data-panel="hunt" checked> Hunt Panel</label><br>
+								  <div class="OverlaypanelFieldOptions" id="huntPanelOptions">
+									<!-- stats.loot -->
+									<label><input type="checkbox" class="data-toggle stats" data-field="loot" checked>loot</label><br>
+									<!-- stats.totalLoots -->
+									<label><input type="checkbox" class="data-toggle stats" data-field="totalLoots" checked>total Loots</label><br>
+									<!-- hunt.totalCost -->
+									<label><input type="checkbox" class="data-toggle hunt" data-field="clickCost" checked>Total Cost</label><br>
+									<!-- hunt.totalCostPerUsePEC -->
+									<label><input type="checkbox" class="data-toggle hunt" data-field="totalCost" checked>Cost/Click</label><br>
+									<!-- hunt.returnPct -->
+									<label><input type="checkbox" class="data-toggle hunt" data-field="returnPCT" checked>Return %</label><br>
+									<!-- hunt.enhancersBroken -->
+									<label><input type="checkbox" class="data-toggle stats" data-field="enhancersBroken" checked>Enhancers Broken</label><br>
+									<!-- hunt.totalReturns -->
+									<label><input type="checkbox" class="data-toggle hunt" data-field="totalReturns" checked>Total Returns</label><br>
+									<!-- stats.universalAmmo -->
+									<label><input type="checkbox" class="data-toggle stats" data-field="universalAmmo" checked>universalAmmo</label><br>
+									<!--<label><input type="checkbox" class="data-toggle stats" data-field="sweatGains" checked>sweatGains</label><br>-->
+								  </div>
+								</div>
+								<div class="OverlayPanelOptions-Wrapper">
+								<label><input type="checkbox" class="panel-toggle" data-panel="combat" checked> Combat Panel</label><br>
+								  <div class="OverlaypanelFieldOptions" id="combatPanelOptions">
+									<!-- combat -->
+									<!-- combat.crits  -->
+									<label><input type="checkbox" class="data-toggle combat" data-field="crits" checked>crits</label><br>
+									<!-- combat.enemyDodgeCount -->
+									<label><input type="checkbox" class="data-toggle combat" data-field="enemyDodgeCount" checked>enemyDodgeCount</label><br>
+									<!-- combat.enemyEvadeCount -->
+									<label><input type="checkbox" class="data-toggle combat" data-field="enemyEvadeCount" checked>enemyEvadeCount</label><br>
+									<!-- combat.misses -->
+									<label><input type="checkbox" class="data-toggle combat" data-field="misses" checked>misses</label><br>
+									<!-- combat.totalDamage -->
+									<label><input type="checkbox" class="data-toggle combat" data-field="totalDamage" checked>totalDamage</label><br>
+									<!-- combat.totalShots -->
+									<label><input type="checkbox" class="data-toggle combat" data-field="totalShots" checked>totalShots</label><br>
+
+									<!-- stats -->
+									<!-- stats.damageDealt -->
+									<label><input type="checkbox" class="data-toggle stats" data-field="damageDealt" checked>damageDealt</label><br>
+									<!-- stats.damageTaken -->
+									<label><input type="checkbox" class="data-toggle stats" data-field="damageTaken" checked>damageTaken</label><br>
+									<!-- stats.deathCount -->
+									<label><input type="checkbox" class="data-toggle stats" data-field="deathCount" checked>deathCount</label><br>
+									<!-- healTimes -->
+									<label><input type="checkbox" class="data-toggle stats" data-field="healTimes" checked>heal count</label><br>
+									<!-- stats.heals -->
+									<label><input type="checkbox" class="data-toggle stats" data-field="heals" checked>heal amount</label><br>
+								  </div>
+								</div>
+								<div class="OverlayPanelOptions-Wrapper">
+								<label><input type="checkbox" class="panel-toggle" data-panel="skills" checked> Skills Panel</label><br>
+								  <div class="OverlaypanelFieldOptions" id="skillsPanelOptions">
+									<!-- skills -->
+									<!-- skills.total -->
+									<label><input type="checkbox" class="data-toggle skills" data-field="skills" checked>skill gained</label><br>
+								  </div>
+								</div>
+								<div class="OverlayPanelOptions-Wrapper">
+								<label><input type="checkbox" class="panel-toggle" data-panel="hof" checked> HOF / Globals Panel</label><br>
+								  <div class="OverlaypanelFieldOptions" id="hofPanelOptions">
+									<!-- hunt.globals  -->
+									<label><input type="checkbox" class="data-toggle hunt" data-field="globals" checked>globals</label><br>
+									<!-- hunt.hofs -->
+									<label><input type="checkbox" class="data-toggle hunt" data-field="hofs" checked>hofs</label><br>
+								  </div>
+								</div>
+								<div class="OverlayPanelOptions-Wrapper">
+									<label><input type="checkbox" class="panel-toggle" data-panel="pickups" checked> Pickups Panel</label><br>
+									<div class="OverlaypanelFieldOptions" id="pickupsPanelOptions">
+										<label><input type="checkbox" class="data-toggle pickupStats" data-field="sweatGains" checked>sweatGains</label><br>
+										<label><input type="checkbox" class="data-toggle pickupStats" data-field="fruits" checked> Fruits Picked Up</label><br>
+										<label><input type="checkbox" class="data-toggle pickupStats" data-field="stones" checked> Stones Picked Up</label><br>
+										<label><input type="checkbox" class="data-toggle pickupStats" data-field="commonDung" checked> Common Dung</label><br>
+										<label><input type="checkbox" class="data-toggle pickupStats" data-field="crudeOil" checked> Crude Oil</label><br>
+										<label><input type="checkbox" class="data-toggle pickupStats" data-field="motorheadKegs" checked> Motorhead Kegs</label><br>
+										<label><input type="checkbox" class="data-toggle pickupStats" data-field="brokenElysianTechnology" checked> Broken Elysian Tech</label><br>
+										<label><input type="checkbox" class="data-toggle pickupStats" data-field="rewardTokensLimeGreen" checked> Reward Tokens (LG)</label><br>
+										<label><input type="checkbox" class="data-toggle pickupStats" data-field="nawaFragments" checked> Nawa Fragments</label><br>
+									</div>
+								</div>
+								<div class="OverlayPanelOptions-Wrapper">
+									<label><input type="checkbox" class="panel-toggle" data-panel="rings" checked> Rings Panel</label><br>
+									<div class="OverlaypanelFieldOptions" id="ringsPanelOptions">
+										<label><input type="checkbox" class="data-toggle rings" data-field="leftRing" checked> Show Left Ring</label><br>
+										<label><input type="checkbox" class="data-toggle rings" data-field="rightRing" checked> Show Right Ring</label><br>
+									</div>
+								</div>
+
+								<div class="OverlayPanelOptions-Wrapper">
+									<label><input type="checkbox" class="panel-toggle" data-panel="dbuffcooldown" checked> Mayhem Monitor</label><br>
+									<div class="OverlaypanelFieldOptions" id="mayhemPanelOptions">
+										<label><input type="checkbox" class="data-toggle dbuff" data-field="mayhemTimer" checked> Show Timers</label><br>
+										<label><input type="checkbox" class="data-toggle dbuff" data-field="mayhemStacks" checked> Show Stack %</label><br>
+									</div>
+								</div>
+								<div class="OverlayPanelOptions-Wrapper" id="overlayMiscOptions"><label>More Misc Options</label><br>
+								<!--  all possible data options -->
+								
+								</div>
+							  
+							</div>
+						</div>
+					</div>
+			  </div>
+			  
+			  <div class="subtab-content" id="settingsTabSound" style="display:none;">
+				<h2>Sound Settings 🔊</h2>
+				<div id="SoundSettings" style="padding: 15px; background: #222; border-radius: 8px;">
+					<h2 style="color: #00c0ff;">Audio Settings</h2>
+
+					<div style="display: flex; gap: 10px; margin-bottom: 15px;">
+						<button id="toggleMuteBtn" style="padding: 8px 15px; font-size: 1.1em; font-weight: bold; border: none; border-radius: 6px; cursor: pointer;">Toggle Mute</button>
+						<button id="resetSoundsBtn" class="btn btn-danger" style="padding: 8px 15px; font-size: 1.1em; border-radius: 6px;">Reset All Sounds to Default</button>
+					</div>
+					
+					<h3 style="border-bottom: 2px solid #333; padding-bottom: 5px;">Sound Event Mapping</h3>
+					<div class="settings-row">
+						<label class="">App Language (Override):</label>
+						<select id="lang-selector">
+							<option value="system">System Default</option>
+							<option value="en">English</option>
+							<option value="fr">Español</option>
+							<option value="pt">Português (Brazil)</option>
+							<option value="ru">Русский (Russian)</option>
+							<option value="de">Deutsch (German)</option>
+							<option value="es">Español</option>
+						</select>
+					</div>
+					<div id="soundEventsList">
+						<!-- App Startup -->
+						<div class="sound-settings-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #333;">
+							<span class="sound-settings-label" style="font-weight: bold; flex: 1;">App Startup</span>
+							
+							<!-- ⭐ INDIVIDUAL TOGGLE ADDED ⭐ -->
+							<label style="display: flex; align-items: center; font-size: 0.9em; flex: 0 0 80px;">
+								<input type="checkbox" class="toggle-sound-enabled" data-event="startup" style="margin-right: 5px;">
+								Enabled
+							</label>
+							<!-- ⭐ END TOGGLE ⭐ -->
+							
+							<span id="path-startup" class="sound-path-display" style="flex: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85em; color: #bbb; margin-right: 10px; text-align: right;">
+								Loading...
+							</span>
+							<button class="change-sound-btn" data-event="startup" style="padding: 4px 10px;">Change</button>
+							<button id="testStartupBtn" style="margin-right: 5px; padding: 8px;">▶</button>
+						</div>
+
+						<!-- UI Click -->
+						<div class="sound-settings-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #333;">
+							<span class="sound-settings-label" style="font-weight: bold; flex: 1;">UI Click</span>
+							
+							<label style="display: flex; align-items: center; font-size: 0.9em; flex: 0 0 80px;">
+								<input type="checkbox" class="toggle-sound-enabled" data-event="ui-click" style="margin-right: 5px;">
+								Enabled
+							</label>
+					
+							<span id="path-ui-click" class="sound-path-display" style="flex: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85em; color: #bbb; margin-right: 10px; text-align: right;">
+								Loading...
+							</span>
+							<button class="change-sound-btn" data-event="ui-click" style="padding: 4px 10px;">Change</button>
+							<button id="testUiClickBtn" style="margin-right: 5px; padding: 8px;">▶</button>
+						
+						</div>
+						<!-- Zipper Sound -->
+						<div class="sound-settings-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #333;">
+							<span class="sound-settings-label" style="font-weight: bold; flex: 1;">Zipper Movement</span>
+							
+							<label style="display: flex; align-items: center; font-size: 0.9em; flex: 0 0 80px;">
+								<input type="checkbox" class="toggle-sound-enabled" data-event="zipper-move" style="margin-right: 5px;">
+								Enabled
+							</label>
+
+							<span id="path-zipper-move" class="sound-path-display" style="flex: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85em; color: #bbb; margin-right: 10px; text-align: right;">
+								Loading...
+							</span>
+							<button class="change-sound-btn" data-event="zipper-move" style="padding: 4px 10px;">Change</button>
+							<button id="testZipperBtn" style="margin-right: 5px; padding: 8px;">▶</button>
+						</div>
+						<!-- Dung Sound -->
+						<div class="sound-settings-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #333;">
+							<span class="sound-settings-label" style="font-weight: bold; flex: 1;">Dung Sound</span>
+							
+							<label style="display: flex; align-items: center; font-size: 0.9em; flex: 0 0 80px;">
+								<input type="checkbox" class="toggle-sound-enabled" data-event="dung-sound" style="margin-right: 5px;">
+								Enabled
+							</label>
+
+							<span id="path-dung-sound" class="sound-path-display" style="flex: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85em; color: #bbb; margin-right: 10px; text-align: right;">
+								Loading...
+							</span>
+							<button class="change-sound-btn" data-event="dung-sound" style="padding: 4px 10px;">Change</button>
+							<button id="testDungBtn" style="padding: 8px;">▶</button>
+						</div>
+						<!-- New Oil sound  -->
+						<div class="sound-settings-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+							<span class="sound-settings-label" style="font-weight: bold; flex: 1;">Oil Pickup sound</span>
+
+							<label style="display: flex; align-items: center; font-size: 0.9em; flex: 0 0 80px;">
+								<input type="checkbox" class="toggle-sound-enabled" data-event="oil-sound" style="margin-right: 5px;">
+								Enabled
+							</label>
+
+							<span id="path-oil-sound" class="sound-path-display" style="flex: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85em; color: #bbb; margin-right: 10px; text-align: right;">
+								Loading...
+							</span>
+							<button class="change-sound-btn" data-event="oil-sound" style="padding: 4px 10px;">Change</button>
+							<button id="testOilBtn" style="padding: 8px;">▶</button>
+						</div>
+						<!-- New Loot Drop (ID/event changed to loot-drop for clarity) -->
+						<div class="sound-settings-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+							<span class="sound-settings-label" style="font-weight: bold; flex: 1;">notifications ring05</span>
+
+							<label style="display: flex; align-items: center; font-size: 0.9em; flex: 0 0 80px;">
+								<input type="checkbox" class="toggle-sound-enabled" data-event="ring05" style="margin-right: 5px;">
+								Enabled
+							</label>
+
+							<span id="path-ring05" class="sound-path-display" style="flex: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85em; color: #bbb; margin-right: 10px; text-align: right;">
+								Loading...
+							</span>
+							<button class="change-sound-btn" data-event="ring05" style="padding: 4px 10px;">Change</button>
+							<button id="testRing05Btn" style="padding: 8px;">▶</button>
+						</div>
+						<!-- lahar event -->
+						<div class="sound-settings-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #333;">
+							<span class="sound-settings-label" style="font-weight: bold; flex: 1;">lahar event</span>
+							
+							<label style="display: flex; align-items: center; font-size: 0.9em; flex: 0 0 80px;">
+								<input type="checkbox" class="toggle-sound-enabled" data-event="lahar-event" style="margin-right: 5px;">
+								Enabled
+							</label>
+
+							<span id="path-lahar-event" class="sound-path-display" style="flex: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85em; color: #bbb; margin-right: 10px; text-align: right;">
+								Loading...
+							</span>
+							<button class="change-sound-btn" data-event="lahar-event" style="padding: 4px 10px;">Change</button>
+							<button id="testlaharEventBtn" style="margin-right: 5px; padding: 8px;">▶</button>
+						</div>
+						<!-- Mission Timer Finished -->
+						<div class="sound-settings-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #333;">
+							<span class="sound-settings-label" style="font-weight: bold; flex: 1;">Mission Timer Finished</span>
+							
+							<label style="display: flex; align-items: center; font-size: 0.9em; flex: 0 0 80px;">
+								<input type="checkbox" class="toggle-sound-enabled" data-event="mission-done" style="margin-right: 5px;">
+								Enabled
+							</label>
+
+							<span id="path-mission-done" class="sound-path-display" style="flex: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85em; color: #bbb; margin-right: 10px; text-align: right;">
+								./assets/sounds/timer-done.mp3
+							</span>
+							<button class="change-sound-btn" data-event="mission-done" style="padding: 4px 10px;">Change</button>
+							<button id="testMissionDoneBtn" style="margin-right: 5px; padding: 8px;">▶</button>
+						</div>
+					</div>
+					<h3 style="border-bottom: 2px solid #333; padding-bottom: 5px; margin-top: 20px;">Voice Assistant (TTS)</h3>
+					<div id="ttsSettings" style="background: #1a1a1a; padding: 10px; border-radius: 6px; border: 1px solid #333;">
+						<div class="sound-settings-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+							<span style="font-weight: bold; flex: 1;">Enable Verbal Mission Announcements</span>
+							<label style="display: flex; align-items: center; font-size: 0.9em; cursor: pointer;">
+								<input type="checkbox" id="toggleTtsEnabled" style="margin-right: 8px; width: 18px; height: 18px;">
+								Active
+							</label>
+						</div>
+						<div style="font-size: 0.8em; color: #888; margin-top: 5px;">
+							Reads planet and mission names when starting or finishing missions.
+						</div>
+						<div class="sound-settings-row" style="display: flex; flex-direction: column; padding: 8px 0; border-top: 1px solid #333;">
+							<div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px;">
+								<span style="font-weight: bold; flex: 1;">Assistant Voice</span>
+								<select id="ttsVoiceSelect" style="background: #333; color: white; border: 1px solid #555; border-radius: 4px; padding: 4px; flex: 2;">
+									<option value="">Loading voices...</option>
+								</select>
+								<button id="testVoiceBtn" style="padding: 4px 12px; cursor: pointer; background: #444; color: white; border: 1px solid #666; border-radius: 4px;">Test</button>
+							</div>
+						</div>
+						<div class="sound-settings-row" style="display: flex; flex-direction: column; padding: 8px 0; border-top: 1px solid #333;">
+							<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+								<span style="font-weight: bold;">Voice Volume</span>
+								<input type="range" id="ttsVolumeSlider" min="0" max="1" step="0.1" value="0.6" style="width: 60%; cursor: pointer;">
+							</div>
+						</div>
+						<div class="sound-settings-row" style="display: flex; flex-direction: column; padding: 8px 0; border-top: 1px solid #333;">
+							<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+								<span style="font-weight: bold;">Auto-Translate Missions</span>
+								<label style="display: flex; align-items: center; font-size: 0.9em; cursor: pointer;">
+									<input type="checkbox" id="toggleAutoTranslate" style="margin-right: 8px;">
+									Enabled
+								</label>
+							</div>
+							<div style="font-size: 0.75em; color: #777; margin-top: 4px;">
+								Translates mission text to match your selected voice's language.(Requires relaunching the app)
+							</div>
+						</div>
+						
+					</div>
+					<div style="margin-top: 20px;">
+						
+						<button id="testNewSound1Btn" style="padding: 8px;"> PLay new sound 1</button>
+						<button id="testNewSound2Btn" style="padding: 8px;"> PLay new sound 1</button>
+						
+					</div>
+
+				</div>
+			  </div>
+			  <div class="subtab-content" id="settingsTabKeybinds" style="display:none;">
+				<h3>Keybind Configuration</h3>
+				<div class="Keybind-settings-section" style="border-bottom: 1px solid #444; padding-bottom: 15px; margin-bottom: 15px;">
+					<div class="bind-row" style="justify-content: flex-end; gap: 10px;">
+						<button class="rebind-btn" id="btn-restore-all" style="background: #444;">RESTORE DEFAULTS</button>
+						<button class="rebind-btn" id="btn-unset-all" style="background: #833;">UNSET ALL</button>
+					</div>
+				</div>
+
+				<div>
+					<div class="Keybind-settings-section">
+						<div class="hud-header">KB_MAPPING_V2</div>
+						
+						<div class="bind-row">
+							<span title="LOCK_OVERLAY">Lock/Unlock Overlay</span>
+							<span class="current-key" id="label-lockToggle">---</span>
+							<button class="rebind-btn" id="btn-lockToggle">REBIND</button>
+							<button class="unset-btn" data-action="lockToggle" title="Unset">×</button>
+						</div>
+
+						<div class="bind-row">
+							<span title="POWER_TOGGLE">Toggle Overlay</span>
+							<span class="current-key" id="label-powerToggle">---</span>
+							<button class="rebind-btn" id="btn-powerToggle">REBIND</button>
+							<button class="unset-btn" data-action="powerToggle" title="Unset">×</button>
+						</div>
+
+						<div class="bind-row">
+							<span title="HUNT_CYCLE">Track hunt (START/STOP)</span>
+							<span class="current-key" id="label-startStop">---</span>
+							<button class="rebind-btn" id="btn-startStop">REBIND</button>
+							<button class="unset-btn" data-action="startStop" title="Unset">×</button>
+						</div>
+
+						<div class="bind-row">
+							<span title="RESIZE_MODE">Overlay Resize Mode</span>
+							<span class="current-key" id="label-resizeToggle">---</span>
+							<button class="rebind-btn" id="btn-resizeToggle">REBIND</button>
+							<button class="unset-btn" data-action="resizeToggle" title="Unset">×</button>
+						</div>
+
+						<div class="bind-row">
+							<span title="PAUSE_HUNT">Pause Tracker</span>
+							<span class="current-key" id="label-pause">---</span>
+							<button class="rebind-btn" id="btn-pause">REBIND</button>
+							<button class="unset-btn" data-action="pause" title="Unset">×</button>
+						</div>
+
+						<div class="bind-row">
+							<span style="color: #ff4444;" title="EMERGENCY_RESET">Emergency Overlay Reset</span>
+							<span class="current-key" id="label-emergencyReset">---</span>
+							<button class="rebind-btn" id="btn-emergencyReset">REBIND</button>
+							<button class="unset-btn" data-action="emergencyReset" title="Unset">×</button>
+						</div>
+					</div>
+					<div class="Keybind-settings-section">
+						<div class="bind-row">
+							<span title="MAIN_FAP_EQUIP">Main FAP Equip Bind</span>
+							<span class="current-key" id="label-mainFap_Equip">---</span>
+							<button class="rebind-btn" id="btn-mainFap_Equip">REBIND</button>
+							<button class="unset-btn" data-action="mainFap_Equip" title="Unset">×</button>
+						</div>
+
+						<div class="bind-row">
+							<span title="SECONDARY_FAP_EQUIP">Secondary FAP Equip Bind</span>
+							<span class="current-key" id="label-secondaryFap_Equip">---</span>
+							<button class="rebind-btn" id="btn-secondaryFap_Equip">REBIND</button>
+							<button class="unset-btn" data-action="secondaryFap_Equip" title="Unset">×</button>
+						</div>
+					</div>
+					<div class="Keybind-settings-section">
+						<div class="hud-header" style="color: #ffaa00;">MINING_HARDWARE_LOGGING</div>
+						
+						<div class="bind-row">
+							<span title="EQUIP_OR_LOG">Equip Finder / Log Drop</span>
+							<span class="current-key" id="label-finderEquip">---</span>
+							<button class="rebind-btn" id="btn-finderEquip">REBIND</button>
+							<button class="unset-btn" data-action="finderEquip" title="Unset">×</button>
+						</div>
+
+						<div class="bind-row">
+							<span title="UNEQUIP_FINDER">Unequip Finder (Safety)</span>
+							<span class="current-key" id="label-finderUnequip">---</span>
+							<button class="rebind-btn" id="btn-finderUnequip">REBIND</button>
+							<button class="unset-btn" data-action="finderUnequip" title="Unset">×</button>
+						</div>
+
+						<div class="bind-row">
+							<span title="USE_TOOL">Generic "Use Tool" Bind</span>
+							<span class="current-key" id="label-useTool">---</span>
+							<button class="rebind-btn" id="btn-useTool">REBIND</button>
+							<button class="unset-btn" data-action="useTool" title="Unset">×</button>
+						</div>
+						<div class="bind-row">
+							<span title="EXTRACTOR_EQUIP">Extractor Equip Bind</span>
+							<span class="current-key" id="label-extractorEquip">---</span>
+							<button class="rebind-btn" id="btn-extractorEquip">REBIND</button>
+							<button class="unset-btn" data-action="extractorEquip" title="Unset">×</button>
+						</div>
+					</div>
+					</div>
+
+					<div class="Keybind-settings-section">
+						<div class="hud-header">LOADOUT_HOTKEYS</div>
+						
+						<div class="bind-row">
+							<span>PREV_LOADOUT:</span>
+							<span class="current-key" id="label-prevLoadout">---</span>
+							<button class="rebind-btn" id="btn-prevLoadout">REBIND</button>
+							<button class="unset-btn" data-action="prevLoadout" title="Unset">×</button>
+						</div>
+						<div class="bind-row">
+							<span>NEXT_LOADOUT:</span>
+							<span class="current-key" id="label-nextLoadout">---</span>
+							<button class="rebind-btn" id="btn-nextLoadout">REBIND</button>
+							<button class="unset-btn" data-action="nextLoadout" title="Unset">×</button>
+						</div>
+						
+						<div class="setting-row" style="margin-top: 10px;">
+							<label class="switch-label">
+								<input type="checkbox" class="pref-toggle" data-pref="useGlobalCooldown" id="gcd-toggle">
+								<span class="label-text">Use Global Cooldown (1.25s)</span>
+							</label>
+						</div>
+
+						<details>
+							<summary style="cursor:pointer; color: #0af; margin-top:10px; font-weight: bold;">
+								Individual Loadouts (1-10) ▼
+							</summary>
+							<div style="max-height: 250px; overflow-y: auto; padding-right: 8px; margin-top: 5px; border-left: 1px solid #333; padding-left: 10px;">
+								
+								<style>
+									.loadout-mapping-select {
+										background: #1a1a1a;
+										color: #0af;
+										border: 1px solid #444;
+										border-radius: 3px;
+										font-size: 10px;
+										padding: 2px;
+										width: 100px;
+										outline: none;
+									}
+									.loadout-mapping-select:hover { border-color: #0af; }
+								</style>
+
+								<div class="bind-row">
+									<span style="min-width: 80px;">KB_1:</span>
+									<select class="loadout-mapping-select" data-action="loadout1"></select>
+									<span class="current-key" id="label-loadout1">---</span>
+									<button class="rebind-btn" id="btn-loadout1">REBIND</button>
+									<button class="unset-btn" data-action="loadout1" title="Unset">×</button>
+								</div>
+
+								<div class="bind-row">
+									<span style="min-width: 80px;">KB_2:</span>
+									<select class="loadout-mapping-select" data-action="loadout2"></select>
+									<span class="current-key" id="label-loadout2">---</span>
+									<button class="rebind-btn" id="btn-loadout2">REBIND</button>
+									<button class="unset-btn" data-action="loadout2" title="Unset">×</button>
+								</div>
+
+								<div class="bind-row">
+									<span style="min-width: 80px;">KB_3:</span>
+									<select class="loadout-mapping-select" data-action="loadout3"></select>
+									<span class="current-key" id="label-loadout3">---</span>
+									<button class="rebind-btn" id="btn-loadout3">REBIND</button>
+									<button class="unset-btn" data-action="loadout3" title="Unset">×</button>
+								</div>
+
+								<div class="bind-row">
+									<span style="min-width: 80px;">KB_4:</span>
+									<select class="loadout-mapping-select" data-action="loadout4"></select>
+									<span class="current-key" id="label-loadout4">---</span>
+									<button class="rebind-btn" id="btn-loadout4">REBIND</button>
+									<button class="unset-btn" data-action="loadout4" title="Unset">×</button>
+								</div>
+
+								<div class="bind-row">
+									<span style="min-width: 80px;">KB_5:</span>
+									<select class="loadout-mapping-select" data-action="loadout5"></select>
+									<span class="current-key" id="label-loadout5">---</span>
+									<button class="rebind-btn" id="btn-loadout5">REBIND</button>
+									<button class="unset-btn" data-action="loadout5" title="Unset">×</button>
+								</div>
+
+								<div class="bind-row">
+									<span style="min-width: 80px;">KB_6:</span>
+									<select class="loadout-mapping-select" data-action="loadout6"></select>
+									<span class="current-key" id="label-loadout6">---</span>
+									<button class="rebind-btn" id="btn-loadout6">REBIND</button>
+									<button class="unset-btn" data-action="loadout6" title="Unset">×</button>
+								</div>
+
+								<div class="bind-row">
+									<span style="min-width: 80px;">KB_7:</span>
+									<select class="loadout-mapping-select" data-action="loadout7"></select>
+									<span class="current-key" id="label-loadout7">---</span>
+									<button class="rebind-btn" id="btn-loadout7">REBIND</button>
+									<button class="unset-btn" data-action="loadout7" title="Unset">×</button>
+								</div>
+
+								<div class="bind-row">
+									<span style="min-width: 80px;">KB_8:</span>
+									<select class="loadout-mapping-select" data-action="loadout8"></select>
+									<span class="current-key" id="label-loadout8">---</span>
+									<button class="rebind-btn" id="btn-loadout8">REBIND</button>
+									<button class="unset-btn" data-action="loadout8" title="Unset">×</button>
+								</div>
+
+								<div class="bind-row">
+									<span style="min-width: 80px;">KB_9:</span>
+									<select class="loadout-mapping-select" data-action="loadout9"></select>
+									<span class="current-key" id="label-loadout9">---</span>
+									<button class="rebind-btn" id="btn-loadout9">REBIND</button>
+									<button class="unset-btn" data-action="loadout9" title="Unset">×</button>
+								</div>
+
+								<div class="bind-row">
+									<span style="min-width: 80px;">KB_10:</span>
+									<select class="loadout-mapping-select" data-action="loadout10"></select>
+									<span class="current-key" id="label-loadout10">---</span>
+									<button class="rebind-btn" id="btn-loadout10">REBIND</button>
+									<button class="unset-btn" data-action="loadout10" title="Unset">×</button>
+								</div>
+							</div>
+						</details>
+					</div>
+					<div class="Keybind-settings-section">
+						<div class="hud-header">RING_HOTKEYS</div>
+						
+						<div class="bind-row">
+							<span>L_Ring_1:</span>
+							<select class="ring-mapping-select" data-action="leftRing1"></select>
+							<span class="current-key" id="label-leftRing1">---</span>
+							<button class="rebind-btn" id="btn-leftRing1">REBIND</button>
+							<button class="unset-btn" data-action="leftRing1">×</button>
+						</div>
+						<div class="bind-row">
+							<span>L_Ring_2:</span>
+							<select class="ring-mapping-select" data-action="leftRing2"></select>
+							<span class="current-key" id="label-leftRing2">---</span>
+							<button class="rebind-btn" id="btn-leftRing2">REBIND</button>
+							<button class="unset-btn" data-action="leftRing2">×</button>
+						</div>
+						<div class="bind-row">
+							<span>L_Ring_3:</span>
+							<select class="ring-mapping-select" data-action="leftRing3"></select>
+							<span class="current-key" id="label-leftRing3">---</span>
+							<button class="rebind-btn" id="btn-leftRing3">REBIND</button>
+							<button class="unset-btn" data-action="leftRing3">×</button>
+						</div>
+						<div class="bind-row">
+							<span>L_Ring_4:</span>
+							<select class="ring-mapping-select" data-action="leftRing4"></select>
+							<span class="current-key" id="label-leftRing4">---</span>
+							<button class="rebind-btn" id="btn-leftRing4">REBIND</button>
+							<button class="unset-btn" data-action="leftRing4">×</button>
+						</div>
+						<div class="bind-row">
+							<span>R_Ring_1:</span>
+							<select class="ring-mapping-select" data-action="rightRing1"></select>
+							<span class="current-key" id="label-rightRing1">---</span>
+							<button class="rebind-btn" id="btn-rightRing1">REBIND</button>
+							<button class="unset-btn" data-action="rightRing1">×</button>
+						</div>
+						<div class="bind-row">
+							<span>R_Ring_2:</span>
+							<select class="ring-mapping-select" data-action="rightRing2"></select>
+							<span class="current-key" id="label-rightRing2">---</span>
+							<button class="rebind-btn" id="btn-rightRing2">REBIND</button>
+							<button class="unset-btn" data-action="rightRing2">×</button>
+						</div>
+						<div class="bind-row">
+							<span>R_Ring_3:</span>
+							<select class="ring-mapping-select" data-action="rightRing3"></select>
+							<span class="current-key" id="label-rightRing3">---</span>
+							<button class="rebind-btn" id="btn-rightRing3">REBIND</button>
+							<button class="unset-btn" data-action="rightRing3">×</button>
+						</div>
+						<div class="bind-row">
+							<span>R_Ring_4:</span>
+							<select class="ring-mapping-select" data-action="rightRing4"></select>
+							<span class="current-key" id="label-rightRing4">---</span>
+							<button class="rebind-btn" id="btn-rightRing4">REBIND</button>
+							<button class="unset-btn" data-action="rightRing4">×</button>
+						</div>
+					</div>
+				</div>
+			  
+			  <div class="subtab-content" id="settingsTabG" style="display:none;">
+				<h3>Inventory Configuration</h3>
+				<div>
+					<p style="font-size: 0.8em; color: #888;">
+						If you prefer keeping your inventory saved in a file and loading it from there, you can select the file below, otherwise leave this blank.
+					</p>
+					<label>Current Inventory CSV Path:</label>
+					<div style="display: flex; gap: 10px; margin-top: 5px;">
+						<input type="text" id="inventory-path-display" readonly 
+							   style="flex-grow: 1;" placeholder="No file selected...">
+						<button id="btn-select-inventory">Browse</button>
+					</div>
+
+					<p style="font-size: 0.8em; color: #888;">
+						Pixelbot will automatically load this file on startup.
+					</p>
+				</div>
+			  </div>
+			</div>
+
+		</div>
+
+		<div id="customConfirmModal" class="modal-overlay" style="display: none;">
+			<div class="modal-content" style="background:#1a1a1a; border:1px solid #0af; padding:20px; border-radius:4px; width:350px; box-shadow: 0 0 20px rgba(0,170,255,0.2);">
+				<p id="confirmMessage"></p>
+				<div class="modal-actions">
+					<button id="confirmCancelBtn" class="hunt-btn">Cancel</button>
+					<button id="confirmDeleteBtn" class="hunt-btn danger-btn">Confirm</button>
+				</div>
 			</div>
 		</div>
 
-	   </div>
+		<div id="customEditModal" class="custom-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter: blur(2px);">
+			<div class="custom-modal-content" style="background:#1a1a1a; border:1px solid #0af; padding:20px; border-radius:4px; width:450px; max-height:90vh; box-shadow: 0 0 20px rgba(0,170,255,0.2); display:flex; flex-direction:column; font-family:monospace;">
+				<h3 style="color:#0af; margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">EDIT RUN DATA</h3>
+				
+				<div style="overflow-y:auto; flex-grow:1; padding-right:5px;">
+					<div style="margin-top:10px;">
+						<label style="color:#888; display:block; margin-bottom:5px;">RUN NAME</label>
+						<input type="text" id="modalEditName" style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:8px; outline:none;">
+					</div>
 
-	</div>
-  </div>
-  
-<!-- 📜 Modal Containers -->
-<!--oOooOOOoOOOoOOoOOooOOOooOoOOo-->
-   <!-- 📜 History Modal -->
-<div id="historyModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
+					<div id="modalDynamicStats" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;"></div>
 
-    <h2>📜 Crafting Session Logger</h2>
+					<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
+						<div>
+							<label style="color:#888;">TOTAL COST (PED)</label>
+							<input type="number" step="0.0001" id="modalEditCost" style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:8px;">
+						</div>
+						<div>
+							<label style="color:#888;">TOTAL RETURNS (PED)</label>
+							<input type="number" step="0.0001" id="modalEditReturns" style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:8px;">
+						</div>
+					</div>
 
-    <label for="blueprintName">Blueprint Name:</label>
-    <input id="blueprintName" type="text" placeholder="e.g. Portable TT Unit (L)" />
+					<div style="margin-top:20px;">
+						<div style="display:flex; justify-content:space-between; align-items:center;">
+							<label style="color:#0af;">LOOT TIMELINE</label>
+							<button id="modalAddLoot" style="background:#222; color:#0af; border:1px solid #0af; cursor:pointer; padding:2px 8px;">+ ADD ITEM</button>
+						</div>
+						<div id="modalLootTimeline" style="background:#000; border:1px solid #333; margin-top:8px; max-height:200px; overflow-y:auto; padding:5px;"></div>
+					</div>
 
-    <label for="planet">Planet:</label>
-    <input id="planet" type="text" placeholder="e.g. Calypso" />
+					<div style="margin-top:15px;">
+						<label style="color:#888;">RUN NOTES</label>
+						<textarea id="modalEditNotes" rows="3" style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:8px; resize:none;"></textarea>
+					</div>
+				</div>
 
-    <label for="playerSkillBefore">Player Skill Before:</label>
-    <input id="playerSkillBefore" type="number" step="0.01" />
-
-    <label for="playerSkillAfter">Player Skill After:</label>
-    <input id="playerSkillAfter" type="number" step="0.01" />
-
-    <label for="qrBefore">QR Before:</label>
-    <input id="qrBefore" type="number" step="0.01" min="0.00" max="1.00" />
-
-    <label for="qrAfter">QR After (optional):</label>
-    <input id="qrAfter" type="number" step="0.01" min="0.00" max="1.00" />
-
-    <label for="clickCount">Click Count:</label>
-    <input id="clickCount" type="number" />
-
-    <label for="successRate">Success Rate (0.00–1.00):</label>
-    <input id="successRate" type="number" step="0.01" min="0.00" max="1.00" />
-
-    <label for="residueReturned">Residue Returned (PED):</label>
-    <input id="residueReturned" type="number" step="0.01" />
-
-    <label for="totalReturnTT">Total Return TT:</label>
-    <input id="totalReturnTT" type="number" step="0.01" />
-
-    <label for="bigHits">Big Hits (comma-separated):</label>
-    <input id="bigHits" type="text" placeholder="e.g. 45.2, 32.8, 28.9" />
-
-    <label for="date">Date:</label>
-    <input id="date" type="date" />
-
-    <label for="time">Time (optional):</label>
-    <input id="time" type="time" />
-
-    <button onclick="saveFormSession()">💾 Save Session</button>
-
-    <hr />
-
-    <h3>📂 Load Previous Sessions</h3>
-    <label for="loadBlueprintSelect">Select Blueprint:</label>
-    <select id="loadBlueprintSelect">
-      <option value="">-- Choose --</option>
-    </select>
-    <button onclick="loadSelectedSession()">📤 Load</button>
-  </div>
-</div>
-
-<!-- 🛠️ Crafting Simulation Modal -->
-<div id="simulationModal" class="modal">
-  <div class="modal-content entropia-style">
-    <span class="close" id="closeSimulationModal">&times;</span>
-    <h2 class="sim-title">🛠️ Crafting Simulation</h2>
-
-    <div class="sim-bar-wrapper">
-      <div id="simProgressBar" class="sim-progress-bar"></div>
-    </div>
-
-    <div class="sim-log" id="simLog">
-      <p class="sim-message">Click "Start Simulation" to begin...</p>
-    </div>
-
-    <div class="sim-actions">
-		<button onclick="promptSimulationOptions('default')">Default Simulation</button>
-		<button onclick="promptSimulationOptions('historic')">Simulate Based on History</button>
-    </div>
-  </div>
-</div>
-<!-- 🛠️ Reminder popup -->
-<!-- 🛠️ Reminder popup -->
-<div id="markupReminderPopup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; color: #fff; padding: 20px; border-radius: 12px; border: 2px solid #3399ff; box-shadow: 0 0 20px rgba(0,0,0,0.6); z-index: 9999; max-width: 360px; text-align: center;">
-  <p style="margin-bottom: 20px;">🧠 <strong>Reminder:</strong><br>
-    Adjust markup % for the crafted item and each material.<br>
-    Set click count, then press <strong>Calculate Estimates</strong>.
-  </p>
-  <div style="display: flex; justify-content: center; gap: 10px;">
-    <button onclick="closeReminderPopup()" style="background-color: #3399ff; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1.1em; cursor: pointer;">OK</button>
-    <button onclick="disableReminderPopup()" style="background-color: #555; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1.1em; cursor: pointer;">Don't show again</button>
-  </div>
-</div>
+				<div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #333; padding-top:15px;">
+					<button id="modalEditCancel" style="background:transparent; color:#888; border:1px solid #444; padding:8px 15px; cursor:pointer;">CANCEL</button>
+					<button id="modalEditSave" style="background:#0af; color:#000; border:none; padding:8px 15px; cursor:pointer; font-weight:bold;">SAVE CHANGES</button>
+				</div>
+			</div>
+		</div>
+		<!--Add New Loadout Modal -->
+		<div class="loadout-add-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);background:#222; padding:20px; border-radius:8px; z-index:1000;">
+		  <p>Enter Loadout Name:</p>
+		  <input type="text" id="newLoadoutName" placeholder="Loadout name">
+		  <button id="confirmAddLoadout">Add</button>
+		  <button id="cancelAddLoadout">Cancel</button>
+		</div>
+		<!--zip script required for gettign nexusdata -->
+		<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.11.0/jszip.min.js"></script> -->
+			<!-- main renderer script -->
 
 
 
@@ -2064,10 +3656,24 @@ div#bpbuttonDiv {
 <script>
 
 </script>
-  <script src="js/craftingbuddy-core.js"></script>
-  <script src="js/craftingbuddy-simjunk.js"></script>
-  <script src="js/craftingbuddy-apijunk.js"></script>
   <script src="../core/js/pixelb8-global.js"></script>
+  
+  
+   <script src="renderer.js"></script>
+  <!-- App Denendancies -->
+   <script src="./node_modules/chart.js/dist/chart.umd.js"></script>
+   <script src="scripts/terminal.js"></script>
+   <script src="scripts/entropianexusapi.js"></script>
+   <script src="scripts/pixelbotBrain.js"></script>   
+   <script src="scripts/loadoutManager.js"></script>
+   <script src="scripts/chatsnooper.js"></script>
+   <script src="scripts/hunttracker.js"></script>
+   <script src="scripts/craftingbuddy-core.js"></script>
+   <script src="scripts/inventoryManager.js"></script>
+   <script src="scripts/appgui.js"></script>
+   <script src="scripts/pixelb8-dailies.js"></script>
+   <script src="scripts/initmap.js"></script>
+   <script src="scripts/mapstest.js"></script>
 
 </body>
 </html>
