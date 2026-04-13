@@ -75,7 +75,7 @@ getDocs(collection(db, 'UserProfiles'))
 	  const userpixelcountElement = document.getElementById('Userpixelcount');
 	  /* const innerContentloggedin = document.getElementById('innercontent-loggedin'); */
 	  const innerContentloggedout = document.getElementById('innercontent-loggedout');
-	  const userprofileTab = document.getElementById('user-profile-tab');
+	  const userprofileModal = document.getElementById('temporary-user-profile-Modal');
 	  const userprofileBox = document.getElementById('user-profile-box');
 
 
