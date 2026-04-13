@@ -127,14 +127,20 @@ async function loadDefaultJSON() {
 }
 
 // ================= WEB VERSION - SAVE & RENDER =================
-function saveAndRender() {
+// Helper to save collapse states + missions to localStorage
+function saveToLocalStorage() {
     try {
         localStorage.setItem('euMissions_v7', JSON.stringify(window.missions));
-        render();
-        console.log(`💾 Saved ${window.missions.length} missions to localStorage`);
+        localStorage.setItem('euColl_Planets', JSON.stringify(collapsedPlanets));
+        localStorage.setItem('euColl_Cats', JSON.stringify(collapsedCats));
     } catch (err) {
-        console.error("❌ Failed to save missions:", err);
+        console.warn("Failed to save to localStorage", err);
     }
+}
+function saveAndRender() {
+    saveToLocalStorage();
+    render();
+    console.log(`💾 Saved & Rendering`);
 }
 function addMission() {
     const d = parseInt(document.getElementById('mDays').value) || 0;
@@ -184,35 +190,44 @@ function handleAction(id, action) {
     saveAndRender();
 }
 // --- UI HELPERS ---
+// ================= WEB VERSION - COLLAPSE & ACTION FUNCTIONS =================
 
 async function togglePlanet(p) {
     collapsedPlanets[p] = !collapsedPlanets[p];
-    await window.electronAPI.saveAppState('euColl_Planets', collapsedPlanets);
+    saveToLocalStorage();   // Uses localStorage instead of Electron
     render();
 }
 
 async function toggleCat(p, c) {
-    collapsedCats[p + c] = !collapsedCats[p + c];
-    await window.electronAPI.saveAppState('euColl_Cats', collapsedCats);
+    const key = p + c;
+    collapsedCats[key] = !collapsedCats[key];
+    saveToLocalStorage();   // Uses localStorage instead of Electron
     render();
 }
 
 function collapseAll(val) {
     ALL_PLANETS.forEach(p => collapsedPlanets[p] = val);
-    localStorage.setItem('euColl_Planets', JSON.stringify(collapsedPlanets));
+    saveToLocalStorage();
     render();
 }
 
 function deleteMission(id) {
-    if(confirm("Delete mission?")) {
-        missions = missions.filter(m => m.id !== id);
+    if (confirm("Delete mission?")) {
+        window.missions = window.missions.filter(m => m.id !== id);
         saveAndRender();
     }
 }
 
 function resetToDefaults() {
-    if(confirm("Restore defaults? This wipes custom missions and progress!")) {
+    if (confirm("Restore defaults? This wipes custom missions and progress!")) {
         localStorage.removeItem('euMissions_v7');
+        localStorage.removeItem('euColl_Planets');
+        localStorage.removeItem('euColl_Cats');
+        
+        // Reset in-memory objects too
+        collapsedPlanets = {};
+        collapsedCats = {};
+        
         loadDefaultJSON();
     }
 }
