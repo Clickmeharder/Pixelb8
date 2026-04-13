@@ -63,11 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Deactivate all subtabs in this group
             parentTabContent.querySelectorAll('.subtab-btn').forEach(b => {
                 b.classList.remove('active-subtab');
+				b.classList.remove('active');
             });
 
             // Activate this one
             btn.classList.add('active-subtab');
-
+			btn.classList.add('active');
             // Hide all subtab contents in this group
             parentTabContent.querySelectorAll('.subtab-content').forEach(content => {
                 content.style.display = 'none';
