@@ -1408,12 +1408,7 @@ div#bpbuttonDiv {
 				  <button class="tab-btn stat-tab-btn" data-tab="chatTab">Chat Output</button>
 				  <button class="tab-btn stat-tab-btn" data-tab="settingsTab">Settings</button>
 				</div>
-				<div class="loadout-search">
-					<label for="loadoutSelect" class="loadout-label">Current Loadout</label>
-					<select id="loadoutSelect">
-						<option disabled>Loadout Select</option>
-					</select>
-				</div>
+
 			</div>
 
 			<!-- Crafting Tab -->
@@ -2389,6 +2384,386 @@ div#bpbuttonDiv {
 					</div>
 				</div>
 			</div>
+			<div class="tab-content" id="mapTab">
+			  <div class="subtabs-header">
+
+
+				<div class="subtabs" style="flex-wrap: wrap;">
+				
+					<div class="map-controls">
+						<div>Map</div>
+						<div class="control-group">
+
+							<select id="planetMapSelect" class="map-selectEl">
+								<option value="disconnected">Disconnected</option>
+								<option value="space">space</option>
+								<option value="calypso">Calypso</option>
+								<option value="calypsogateway">Calypso Gateway</option>
+								<option value="foma">F.O.M.A</option>
+								<option value="crystalpalace">Crystal Palace</option>
+								<option value="aris">Aris</option>
+								<option value="setesh">Setesh</option>
+								<option value="monria">Monria</option>
+								<option value="rocktropia">Rocktropia</option>
+								<option value="arctic">Arctic</option>
+								<option value="secretisland">Secret Island</option>
+								<option value="hell">Hell</option>
+								<option value="howlingmine">Howling Mine</option>
+								<option value="toulan">Toulan</option>
+								<option value="nextisland">Next Island</option>
+								<option value="ancientgreece">Ancient Greece</option>
+								<option value="arkadiamoon">Arkadia Moon</option>
+								<option value="arkadia">Arkadia</option>
+								<option value="arkadiaunderground">Arkadia Underground</option>
+								<option value="cyrene">Cyrene</option>
+								<option value="thehub">The Hub</option>
+							</select>
+							<button class="map-btn" id="waypointPaste" title="Paste [WP] from Clipboard">📋 Paste WP</button>
+						</div>
+
+						<div id="layerToggles" class="control-group layer-toggles">
+			<!-- 				<button class="toggle-btn active" data-target="waypoints-teleporters" title="Toggle TPs">🌀</button>
+							<button class="toggle-btn active" data-target="waypoints-mining" title="Toggle Mining">⛏️</button>
+							<button class="toggle-btn active" data-target="waypoints-creatures" title="Toggle Mobs">👾</button>
+							<button class="toggle-btn active" data-target="waypoints-estates" title="Toggle Estates">🏦</button> -->
+						</div>
+
+						<div class="control-group zoom-controls">
+							<button class="map-btn" id="zoomin">➕</button>
+							<button class="map-btn" id="zoomout">➖</button>
+							<button class="map-btn" id="resetview">reset view</button>
+							
+
+						</div>
+					</div>
+					<button class="subtab-btn stat-tab-btn active-subtab" data-subtab="themapTab" style="display:none;">Map</button>
+					<button class="subtab-btn stat-tab-btn" data-subtab="mapTab2" style="display:none;">maptab2</button>
+					<button class="subtab-btn stat-tab-btn" data-subtab="mapTab3" style="display:none;">maptab3</button>
+					<div class="mob-combobox-container" style="position: relative; padding: 10px; border-bottom: 1px solid #333;">
+						<input type="text" 
+							   id="mobComboboxInput" 
+							   placeholder="Type to filter mobs..." 
+							   autocomplete="off">
+						<div id="mobComboboxResults" 
+							 style="display: none; position: absolute; left: 10px; right: 10px; top: 55px; max-height: 200px; overflow-y: auto; background: #0a0a0a; border: 1px solid #444; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.8);">
+						</div>
+					</div>
+					<button id="btn-clear-waypoints" class="tactical-btn stat-tab-btn">
+						CLEAR WP's
+					</button>
+					<div id="lastknownposWrapper">
+						<div id="lastKnownPosition">[planet, long, lat, alt, waypoint]</div>
+
+					</div>
+					<button class="stat-tab-btn" id="copyLastknownPositionbtn">Copy</button>
+					<button class="stat-tab-btn" id="focusLastknownPositionbtn">Focus</button>
+				</div>
+			  </div>
+			  <div id="maps-outerwrapper" style="display:flex;flex-direction:row;width:100%;height:89%;">
+				  <div class="subtab-content" id="themapTab">
+		<!-- 			<div class="map-container" id="theMap">
+						<div class="map-wrapper" id="mapWrapper">
+							<img src="assets/images/maps/space_map.jpg" class="map-layer surface-layer" id="baseMapImg">
+							<div id="waypointMaplayer" class="waypoint-overlay">
+								<div id="waypoints-general" class="waypoint-group" data-layer="general"></div>
+								<div id="waypoints-mining" class="waypoint-group" data-layer="mining"></div>
+								<div id="waypoints-creatures" class="waypoint-group" data-layer="creatures"></div>
+								<div id="waypoints-teleporters" class="waypoint-group" data-layer="teleporters"></div>
+								<div id="waypoints-estates" class="waypoint-group" data-layer="estates"></div>
+								<div id="waypoints-instances" class="waypoint-group" data-layer="instances"></div>
+								<canvas id="mapCanvas"></canvas>
+							</div>
+						</div>
+						<div class="map-status-bar">
+							<span id="static-coords">Select a planet to see coordinates</span>
+						</div>
+					</div> -->
+					<div class="map-container" id="theMap">
+
+							<div class="map-wrapper" id="mapWrapper">
+								<img src="" class="map-layer surface-layer" id="baseMapImg">
+								
+								<div id="waypointMaplayer" class="waypoint-overlay">
+									<div id="waypoints-general" class="waypoint-group" data-layer="general"></div>
+									<div id="waypoints-teleporters" class="waypoint-group" data-layer="teleporters"></div>
+								</div>
+
+							</div>
+
+							<canvas id="mapCanvas"></canvas>
+							
+							<div class="map-status-bar">
+								<span id="static-coords">Select a planet to see coordinates</span>
+							</div>
+							<div class="crt-overlay power-off">
+								<div id="satelliteSweep"></div>
+								<div class="scanlines"></div>
+							</div>	
+					</div>
+
+				  </div>
+				  <div class="subtab-content" id="mapTab2" style="display:none;">
+					<p>map tab 3 content placeholder.</p>
+				  </div>
+				  <div class="subtab-content" id="mapTab3" style="display:none;">
+					<p>map tab 3 content placeholder.</p>
+				  </div>
+				  <div class="mapTab-container Overview" id="maps-rightpanelB">
+				  
+					<div class="maptab-rightpanelBsection"id="rightpanelListsection2">
+
+						<div id="mapsTab-powerSection">
+							<div class="retrotoggleswitchA map-switch" id="screenPowerSwitch">
+								<input type="checkbox" id="mapPowerToggle"/> <label for="mapPowerToggle">
+									<span class="switch-handle"></span>
+								</label>
+								<div class="indicator"></div>
+								<span class="switch-label">System Power</span>
+							</div>
+						</div>
+						
+						
+						<div class="" id="mapToggleContainer">
+							<div class="control-group toggle-controls" id="mapToggleWrapper">
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="crtOverlayToggle" />
+									<label for="crtOverlayToggle">
+										<span class="switch-handle"></span>
+									</label>
+
+									
+									<span class="switch-label" style="color:#bd941a;">CRT Scanlines</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch master-toggle-row">
+									<div class="indicator"></div>
+									<input type="checkbox" id="masterLabelToggle" />
+									<label for="masterLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label" style="font-weight: bold; color: #bd941a;">Label Master</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="areaLabelToggle" />
+									<label for="areaLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">Area Labels</span>
+								</div>
+								
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="teleporterLabelToggle" />
+									<label for="teleporterLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">Tp Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="npcLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="npcLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									
+									<span class="switch-label">Npc Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="outpostLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="outpostLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+
+									
+									<span class="switch-label">outpost Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="revivalpointLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="revivalpointLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									
+									<span class="switch-label">revivalpoint Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="vendorLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="vendorLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									
+									<span class="switch-label">vendor Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="interactableLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="interactableLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									
+									<span class="switch-label">interactable Labels</span>
+								</div>
+
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="instanceentranceLabelToggle" />
+									<!-- Plastic Toggle -->
+									<label for="instanceentranceLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									
+									<span class="switch-label">Instance Entrance Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="magicalflowerLabelToggle" />
+									<label for="magicalflowerLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">Magicalflower Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="campLabelToggle" />
+									<label for="campLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">Camp Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="cityLabelToggle" />
+									<label for="cityLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">City Labels</span>
+								</div>
+								<div class="retrotoggleswitchA map-switch">
+									<div class="indicator"></div>
+									<input type="checkbox" id="estateLabelToggle" />
+									<label for="estateLabelToggle">
+										<span class="switch-handle"></span>
+									</label>
+									<span class="switch-label">Estate Labels</span>
+								</div>
+							</div>
+							<div id="zipperHandle"></div>
+
+						</div>
+						<div id="zipperteeth"></div>
+						<div class="control-group toggle-controls" id="mapDetailsContainer">
+							<div class="control-group toggle-controls" id="mapDetailsWrapper">
+								<h2 class="mob-details-header" 
+									data-target="mapMainDetails" 
+									style="cursor:pointer; display: flex; justify-content: space-between; align-items: center; background: #222; padding: 5px 10px; border-bottom: 2px solid #3a6085;">
+									Location Details
+									<span class="section-arrow" style="transition: transform 0.2s; transform: rotate(90deg);">▶</span>
+								</h2>
+								<div class="mapdetailBox" id="mapMainDetails" style="display:block;"></div>
+							</div>
+
+							<div class="control-group toggle-controls" id="mobDetailsWrapper">
+								<h2 class="mob-details-header" 
+									data-target="selectedmobDetailsEl" 
+									style="cursor:pointer; display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 5px 10px; border-bottom: 2px solid #176547;">
+									Lifeform Details
+									<span class="section-arrow" style="transition: transform 0.2s; transform: rotate(90deg);">▶</span>
+								</h2>
+								<div class="mapdetailBox" id="selectedmobDetailsEl" style="display:Block;"></div>
+							</div>
+						</div>
+					</div>
+					<div class="maptab-rightpanelBsection"id="rightpanelListsection">
+
+						<div id="mapsTab-mainSection">
+						
+		<!-- 					<div class="retrotoggleswitchA map-switch" id="screenPowerSwitch">
+								<input type="checkbox" id="mapPowerToggle"/> <label for="mapPowerToggle">
+									<span class="switch-handle"></span>
+								</label>
+								<div class="indicator"></div>
+								<span class="switch-label">System Power</span>
+							</div> -->
+						
+							<h2 id="waypointlistHeader">Location Lists <span class="sectionToggler">▶</span></h2>
+							<div class="map-sidebar collapsed">
+							
+								<div class="map-sidebar-controls">
+									<input type="text" id="globalFuzzySearch" placeholder="Search all lists..." class="fuzzy-input">
+								</div>
+								<div class="map-sidebar-scroll-area">
+									<details class="map-list-section" id="teleporterListSection">
+										<summary>Teleporters <span id="teleporterCount">0</span></summary>
+										<div class="list-content" id="teleporterList"></div>
+									</details>
+									<details class="map-list-section" id="npcListSection">
+										<summary>NPCs <span id="npcCount">0</span></summary>
+										<div class="list-content" id="npcList"></div>
+									</details>
+									
+									<details class="map-list-section" id="areaListSection">
+										<summary>Areas <span id="areaCount">0</span></summary>
+										<div class="list-content" id="areaList"></div>
+									</details>
+
+
+									<details class="map-list-section" id="outpostListSection">
+										<summary>outposts <span id="outpostCount">0</span></summary>
+										<div class="list-content" id="outpostList"></div>
+									</details>
+									<details class="map-list-section" id="campListSection">
+										<summary>Camps <span id="campCount">0</span></summary>
+										<div class="list-content" id="campList"></div>
+									</details>
+									<details class="map-list-section" id="cityListSection">
+										<summary>Citys <span id="cityCount">0</span></summary>
+										<div class="list-content" id="cityList"></div>
+									</details>
+									<details class="map-list-section" id="estateListSection">
+										<summary>Estates <span id="estateCount">0</span></summary>
+										<div class="list-content" id="estateList"></div>
+									</details>
+									<details class="map-list-section" id="revivalpointListSection">
+										<summary>revivalpoints <span id="revivalpointCount">0</span></summary>
+										<div class="list-content" id="revivalpointList"></div>
+									</details>
+									<details class="map-list-section" id="vendorListSection">
+										<summary>vendors <span id="vendorCount">0</span></summary>
+										<div class="list-content" id="vendorList"></div>
+									</details>
+									<details class="map-list-section" id="interactableListSection">
+										<summary>Interactables <span id="interactableCount">0</span></summary>
+										<div class="list-content" id="interactableList"></div>
+									</details>
+									<details class="map-list-section" id="instanceentranceListSection">
+										<summary>Instance Entrances <span id="instanceentranceCount">0</span></summary>
+										<div class="list-content" id="instanceentranceList"></div>
+									</details>
+									<details class="map-list-section" id="magicalflowerListSection">
+										<summary>Magical Flowers <span id="magicalflowerCount">0</span></summary>
+										<div class="list-content" id="magicalflowerList"></div>
+									</details>
+								</div>
+							</div>
+						</div>
+						<div id="mapsTab-secondarySection">
+							<div id="mobmatchSourceEl"></div>
+							<div id="mapmobmatchEl"></div>
+						</div>
+					</div>
+				  </div>
+				  
+			  </div>
+			</div>
+
 			<!-- Chat Tab -->
 			<div class="tab-content" id="chatTab">
 			  <div class="subtabs-header">
@@ -3239,6 +3614,8 @@ div#bpbuttonDiv {
    <script src="scripts/craftingbuddy-core.js"></script>
    <script src="scripts/inventoryManager.js"></script>
    <script src="scripts/appgui.js"></script>
+   <script src="scripts/initmap.js"></script>
+   <script src="scripts/mapstest.js"></script>
 
 </body>
 </html>
