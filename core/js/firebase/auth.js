@@ -107,7 +107,7 @@ getDocs(collection(db, 'UserProfiles'))
           console.log("Photo URL: " + profile.photoURL);
 		  console.log("users pixels: " + user.pixelcount);
           statusElement.textContent = "Status: Online";
-          userauthproveriderElement.textContent = profile.providerId;
+          // userauthproveriderElement.textContent = profile.providerId;
 		  usernameElement.textContent = user.displayName || "Nameless";
           profileusernameElement.textContent = profile.displayName || "-idk-";
           emailElement.textContent = profile.email || "Unknown";
