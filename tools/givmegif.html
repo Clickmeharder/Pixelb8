@@ -1,40 +1,37 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Emote GIF Lab</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f0f; color: #e0e0e0; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { background: #181818; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); max-width: 800px; width: 100%; border: 1px solid #333; }
-        h2 { color: #00ffcc; margin-top: 0; }
-        
-        /* Timeline Styles */
-        #timeline { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; min-height: 120px; padding: 15px; background: #111; border-radius: 8px; border: 1px inset #222; }
-        .frame-card { background: #252525; padding: 5px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; border: 1px solid #444; }
-        .frame-card img { width: 80px; height: 80px; object-fit: contain; background-image: linear-gradient(45deg, #222 25%, transparent 25%), linear-gradient(-45deg, #222 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #222 75%), linear-gradient(-45deg, transparent 75%, #222 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px; }
-        .controls { display: flex; gap: 2px; margin-top: 5px; }
-        .controls button { padding: 2px 5px; font-size: 10px; background: #333; color: white; border: 1px solid #555; border-radius: 2px; }
-        .controls button:hover { background: #444; }
-        .btn-del { color: #ff4444 !important; }
-
-        input, button { margin-top: 10px; cursor: pointer; }
-        .main-btn { background: #00ffcc; color: #000; border: none; padding: 10px 20px; font-weight: bold; border-radius: 5px; font-size: 1rem; }
-        .main-btn:hover { background: #00ccaa; transform: translateY(-1px); }
-        #status { margin-top: 15px; font-weight: bold; }
-        #result { margin-top: 20px; text-align: center; }
-        #result img { border: 3px solid #00ffcc; }
-    </style>
-</head>
-<body> -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Emote Studio - The Final Boss Edition</title>
+    <title>Quick Gif Creation Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+    <link rel="stylesheet" href="../core/css/pixelb8-landing.css">
+	<link rel="stylesheet" href="../core/css/pixelb8-tools.css">
+	<link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7382192474927902"
+     crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: url('https://source.unsplash.com/1600x900/?cyberpunk,neon') no-repeat center center/cover;
+            overflow: hidden;
+            color: #0b7272;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+    </style>
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; background: #080808; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         .container { background: #111; padding: 2rem; border-radius: 15px; box-shadow: 0 0 40px rgba(0,255,200,0.15); max-width: 950px; width: 100%; border: 1px solid #222; }
@@ -65,57 +62,76 @@
         .main-btn:hover { background: #00d4aa; transform: scale(1.02); }
         #status { margin-top: 20px; text-align: center; color: #00ffcc; font-weight: bold; }
     </style>
+
 </head>
 <body>
-
-<div class="container">
-    <h2 style="margin:0; text-align: center; color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,200,0.3);">EMOTE PRECISION STUDIO</h2>
-    
-    <div class="editor-layout">
-        <div class="preview-section">
-            <div class="preview-box">
-                <canvas id="liveCanvas" width="112" height="112"></canvas>
-            </div>
-            <span style="font-size: 10px; color: #666;">LIVE 112x112 PREVIEW</span>
-        </div>
-
-        <div class="controls-panel">
-            <input type="file" id="fileInput" accept="image/png" multiple style="margin-bottom: 20px; color: #888;">
-            
-            <div class="slider-group">
-                <div class="slider-header"><label>Scale (Zoom)</label> <span class="val-badge" id="scaleVal">1.00</span></div>
-                <input type="range" id="scale" min="0.1" max="4.0" step="0.05" value="1.0">
-            </div>
-
-            <div style="display: flex; gap: 10px;">
-                <div class="slider-group" style="flex: 1;">
-                    <div class="slider-header"><label>Horizontal (X)</label> <span class="val-badge" id="xVal">0</span></div>
-                    <input type="range" id="xOffset" min="-112" max="112" step="1" value="0">
-                </div>
-
-                <div class="slider-group" style="flex: 1;">
-                    <div class="slider-header"><label>Vertical (Y)</label> <span class="val-badge" id="yVal">0</span></div>
-                    <input type="range" id="yOffset" min="-112" max="112" step="1" value="0">
-                </div>
-            </div>
-
-            <div class="slider-group">
-                <div class="slider-header"><label>Frame Delay (ms)</label> <span class="val-badge" id="delayVal">80</span></div>
-                <input type="range" id="delay" min="10" max="500" step="10" value="80">
-            </div>
-
-            <button class="main-btn" onclick="generateGif()">EXPORT FOR TWITCH</button>
-        </div>
+	<div class="background-container">
+	  <div class="stars"></div>
+	  <div class="twinkling"></div>
+	</div>
+    <div class="crt-overlay">
+        <div class="scanlines"></div>
     </div>
-
-    <div id="timeline">
-        <p style="color: #333; width: 100%; text-align: center; font-size: 0.9rem;">Drop your PNG frames here to begin...</p>
+    <div class="header">PixelB8.LoL - EU</div>
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="https://Pixelb8.lol/home">Home</a>
+		<a href="https://Pixelb8.lol/eu">Entropia</a>
+        <a href="https://Pixelb8.lol/media">Media</a>
+		<a href="https://Pixelb8.lol/tools">Tools</a>
+		<a href="https://Pixelb8.lol/givmegif.html">EU Tools</a>
+		<a href="https://Pixelb8.lol/arcade">Arcade</a>
     </div>
+	
+	<div class="eu-container">
+		<div class="container">
+			<h2 style="margin:0; text-align: center; color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,200,0.3);">Quick Gif Creation</h2>
+			
+			<div class="editor-layout">
+				<div class="preview-section">
+					<div class="preview-box">
+						<canvas id="liveCanvas" width="112" height="112"></canvas>
+					</div>
+					<span style="font-size: 10px; color: #666;">LIVE 112x112 PREVIEW</span>
+				</div>
 
-    <div id="status"></div>
-    <div id="result" style="text-align: center; margin-top: 20px;"></div>
-</div>
+				<div class="controls-panel">
+					<input type="file" id="fileInput" accept="image/png" multiple style="margin-bottom: 20px; color: #888;">
+					
+					<div class="slider-group">
+						<div class="slider-header"><label>Scale (Zoom)</label> <span class="val-badge" id="scaleVal">1.00</span></div>
+						<input type="range" id="scale" min="0.1" max="4.0" step="0.05" value="1.0">
+					</div>
 
+					<div style="display: flex; gap: 10px;">
+						<div class="slider-group" style="flex: 1;">
+							<div class="slider-header"><label>Horizontal (X)</label> <span class="val-badge" id="xVal">0</span></div>
+							<input type="range" id="xOffset" min="-112" max="112" step="1" value="0">
+						</div>
+
+						<div class="slider-group" style="flex: 1;">
+							<div class="slider-header"><label>Vertical (Y)</label> <span class="val-badge" id="yVal">0</span></div>
+							<input type="range" id="yOffset" min="-112" max="112" step="1" value="0">
+						</div>
+					</div>
+
+					<div class="slider-group">
+						<div class="slider-header"><label>Frame Delay (ms)</label> <span class="val-badge" id="delayVal">80</span></div>
+						<input type="range" id="delay" min="10" max="500" step="10" value="80">
+					</div>
+
+					<button class="main-btn" onclick="generateGif()">EXPORT FOR TWITCH</button>
+				</div>
+			</div>
+
+			<div id="timeline">
+				<p style="color: #333; width: 100%; text-align: center; font-size: 0.9rem;">Drop your PNG frames here to begin...</p>
+			</div>
+
+			<div id="status"></div>
+			<div id="result" style="text-align: center; margin-top: 20px;"></div>
+		</div>
+	</div>
 <script>
     let frameList = [];
     const canvas = document.getElementById('liveCanvas');
