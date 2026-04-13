@@ -636,42 +636,138 @@ async function updateFilterDropdowns() {
     populate(selects.mCat, window.categoryNames);
 }
 // Function to handle the "Browse" button click in Settings
-async function handleManualFileSelection() {
-    const result = await window.electronAPI.selectFilePath();
-    if (result.success && result.path) {
-        // 1. Save the path to persistence
-        await window.electronAPI.saveFilePath(result.path);
-        // 2. Update the text box in the settings tab
-        if (inputs.pathInput) inputs.pathInput.value = result.path;
-        // 3. Use your existing wrapper to parse and render everything
-        await loadAndProcessFile(result.path);
-        console.log("Inventory updated from settings:", result.path);
-    }
-}
-async function initializeInventoryStartup() {
-    if (!window.electronAPI) return;
-    // 1. Check if we are in Clipboard Mode first
-    const mode = await window.electronAPI.loadAppState('inventorySourceMode');   
-    if (mode === 'CLIPBOARD') {
-        const cachedCSV = await window.electronAPI.loadAppState('customInventoryData');
-        if (cachedCSV) {
-            console.log("Restoring from Clipboard State...");
-            const blob = new Blob([cachedCSV], { type: 'text/csv' });
-            const virtualFile = new File([blob], "clipboard_cache.csv", { type: 'text/csv' });
-            
-            // This now works because of our changes to loadAndProcessFile above
-            await loadAndProcessFile(virtualFile);
-            return; // STOP HERE so we don't load the old path
+// ================= WEB VERSION - FILTER DROPDOWNS =================
+async function updateFilterDropdowns() {
+    if (!Object.values(selects).some(el => el)) return;
+
+    // 1. Reset all dropdowns
+    const reset = (el, txt) => {
+        if (el) el.innerHTML = `<option value="ALL">${txt}</option>`;
+    };
+
+    reset(selects.planet, "All Locations");
+    reset(selects.cat, "All Categories");
+    reset(selects.uPlanet, "All Planets");
+    reset(selects.uCat, "All Categories");
+    reset(selects.mPlanet, "All Locations");
+    reset(selects.mCat, "All Categories");
+
+    // 2. Extract unique planets from inventory
+    const planetNames = new Set();
+    const inventoryItems = Object.values(inventoryState.items || {});
+
+    inventoryItems.forEach(item => {
+        if (item.location) {
+            const loc = item.location.toUpperCase();
+
+            if (loc === "CARRIED" || loc === "HUB") {
+                planetNames.add(loc);
+                return;
+            }
+
+            // Extract planet name from STORAGE (Planet Name)
+            const match = loc.match(/STORAGE\s*\(([^)]+)\)/i);
+            if (match && match[1]) {
+                planetNames.add(match[1].trim().toUpperCase());
+            }
         }
+    });
+
+    // 3. Ensure category lookup is ready
+    if (!window.categoryNames || window.categoryNames.size === 0) {
+        await initItemLookupSystem();
     }
-    // 2. Otherwise, check for a file path
-    const savedPath = await window.electronAPI.getSavedFilePath();
-    if (savedPath && savedPath.trim() !== '') {
-        await loadAndProcessFile(savedPath); 
-    }
-	updateFilterDropdowns();
+
+    // 4. Populate dropdowns
+    const populate = (el, set) => {
+        if (!el || !set) return;
+        const sorted = Array.from(set).sort((a, b) => {
+            if (a === "CARRIED") return -1;
+            if (b === "CARRIED") return 1;
+            if (a === "HUB") return -1;
+            return a.localeCompare(b);
+        });
+
+        sorted.forEach(val => {
+            el.appendChild(new Option(val, val));
+        });
+    };
+
+    populate(selects.planet, planetNames);
+    populate(selects.cat, window.categoryNames || new Set());
+    populate(selects.uPlanet, planetNames);
+    populate(selects.uCat, window.categoryNames || new Set());
+    populate(selects.mPlanet, planetNames);
+    populate(selects.mCat, window.categoryNames || new Set());
+
+    console.log(`✅ Filter dropdowns updated: ${planetNames.size} planets, ${window.categoryNames?.size || 0} categories`);
 }
 
+// ================= WEB VERSION - MANUAL IMPORT (Clipboard only) =================
+async function handleManualFileSelection() {
+    alert("In the web version, please use the '📋 Paste Inventory Csv' button instead.");
+}
+
+// ================= WEB VERSION - STARTUP INITIALIZATION =================
+async function initializeInventoryStartup() {
+    console.log("🔄 Starting inventory initialization (Web Version)...");
+
+    // 1. Check if we have clipboard-saved data
+    const mode = localStorage.getItem('inventorySourceMode');
+    if (mode === 'CLIPBOARD') {
+        const cachedCSV = localStorage.getItem('customInventoryData');
+        if (cachedCSV) {
+            console.log("Restoring inventory from clipboard cache...");
+            const blob = new Blob([cachedCSV], { type: 'text/csv' });
+            const virtualFile = new File([blob], "clipboard_cache.csv", { type: 'text/csv' });
+            await loadAndProcessFile(virtualFile);
+            return;
+        }
+    }
+
+    // 2. If no clipboard data, check if we have any items already in memory
+    if (Object.keys(inventoryState.items || {}).length > 0) {
+        console.log("Inventory already loaded in memory.");
+        renderInitialTabA();
+        updateSummary();
+        return;
+    }
+
+    // 3. No data at all → prompt user to paste from clipboard
+    console.log("No inventory data found. Prompting user to paste from clipboard.");
+    if (confirm("No inventory data found.\n\nWould you like to paste your inventory from clipboard now?")) {
+        await importInventoryFromClipboard();
+    } else {
+        console.log("User declined to load inventory on startup.");
+    }
+
+    updateFilterDropdowns();
+}
+
+// ================= FULL PATH TOGGLE SYNC =================
+function initPathfullpathTogglesync() {
+    // Use event delegation on document (safest for dynamic content)
+    document.addEventListener('change', (e) => {
+        if (e.target.classList.contains('chk-show-full-path')) {
+            showFullContainerPath = e.target.checked;
+
+            // Sync ALL checkboxes with this class
+            document.querySelectorAll('.chk-show-full-path').forEach(el => {
+                el.checked = showFullContainerPath;
+            });
+
+            // Refresh views
+            refreshInventoryViews();
+        }
+    });
+
+    // Initial sync on load
+    document.querySelectorAll('.chk-show-full-path').forEach(el => {
+        el.checked = showFullContainerPath;
+    });
+
+    console.log("✅ Full path toggle sync initialized");
+}
 // =========================================================
 // 🟢 NEW/MODIFIED: LAZY LOAD & TAB HANDLERS
 // =========================================================
