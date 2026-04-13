@@ -132,140 +132,144 @@
 			<div id="result" style="text-align: center; margin-top: 20px;"></div>
 		</div>
 	</div>
-<script>
-    let frameList = [];
-    const canvas = document.getElementById('liveCanvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    
-    // UI Elements
-    const scaleIn = document.getElementById('scale');
-    const xIn = document.getElementById('xOffset');
-    const yIn = document.getElementById('yOffset');
-    const delayIn = document.getElementById('delay');
 
-    const updateUI = () => {
-        document.getElementById('scaleVal').innerText = parseFloat(scaleIn.value).toFixed(2);
-        document.getElementById('xVal').innerText = xIn.value;
-        document.getElementById('yVal').innerText = yIn.value;
-        document.getElementById('delayVal').innerText = delayIn.value;
-        drawPreview();
-    };
 
-    [scaleIn, xIn, yIn, delayIn].forEach(input => input.addEventListener('input', updateUI));
+	<script src="../core/js/pixelb8-global.js"></script>
+	<script>
+		let frameList = [];
+		const canvas = document.getElementById('liveCanvas');
+		const ctx = canvas.getContext('2d', { willReadFrequently: true });
+		
+		// UI Elements
+		const scaleIn = document.getElementById('scale');
+		const xIn = document.getElementById('xOffset');
+		const yIn = document.getElementById('yOffset');
+		const delayIn = document.getElementById('delay');
 
-    document.getElementById('fileInput').addEventListener('change', async (e) => {
-        for (let file of e.target.files) {
-            const img = await loadImage(file);
-            frameList.push(img);
-        }
-        renderTimeline();
-        updateUI();
-    });
+		const updateUI = () => {
+			document.getElementById('scaleVal').innerText = parseFloat(scaleIn.value).toFixed(2);
+			document.getElementById('xVal').innerText = xIn.value;
+			document.getElementById('yVal').innerText = yIn.value;
+			document.getElementById('delayVal').innerText = delayIn.value;
+			drawPreview();
+		};
 
-    function drawPreview() {
-        if (frameList.length === 0) return;
-        ctx.clearRect(0, 0, 112, 112);
-        
-        const scale = parseFloat(scaleIn.value);
-        const xOff = parseInt(xIn.value);
-        const yOff = parseInt(yIn.value);
-        
-        const img = frameList[0]; // Preview using frame 1
-        const w = 112 * scale;
-        const h = 112 * scale;
-        const x = ((112 - w) / 2) + xOff;
-        const y = ((112 - h) / 2) + yOff;
+		[scaleIn, xIn, yIn, delayIn].forEach(input => input.addEventListener('input', updateUI));
 
-        ctx.drawImage(img, x, y, w, h);
-    }
+		document.getElementById('fileInput').addEventListener('change', async (e) => {
+			for (let file of e.target.files) {
+				const img = await loadImage(file);
+				frameList.push(img);
+			}
+			renderTimeline();
+			updateUI();
+		});
 
-    function renderTimeline() {
-        const timeline = document.getElementById('timeline');
-        timeline.innerHTML = '';
-        frameList.forEach((img, i) => {
-            const div = document.createElement('div');
-            div.className = 'frame-card';
-            div.innerHTML = `
-                <img src="${img.src}">
-                <div class="mini-btns">
-                    <button onclick="move(${i}, -1)">◀</button>
-                    <button onclick="dup(${i})">＋</button>
-                    <button onclick="rem(${i})" style="color:#ff4444">X</button>
-                    <button onclick="move(${i}, 1)">▶</button>
-                </div>
-            `;
-            timeline.appendChild(div);
-        });
-    }
+		function drawPreview() {
+			if (frameList.length === 0) return;
+			ctx.clearRect(0, 0, 112, 112);
+			
+			const scale = parseFloat(scaleIn.value);
+			const xOff = parseInt(xIn.value);
+			const yOff = parseInt(yIn.value);
+			
+			const img = frameList[0]; // Preview using frame 1
+			const w = 112 * scale;
+			const h = 112 * scale;
+			const x = ((112 - w) / 2) + xOff;
+			const y = ((112 - h) / 2) + yOff;
 
-    function dup(i) { 
-        const c = new Image(); c.src = frameList[i].src; 
-        frameList.splice(i+1, 0, c); renderTimeline(); 
-    }
-    function rem(i) { frameList.splice(i, 1); renderTimeline(); updateUI(); }
-    function move(i, d) {
-        if(i+d < 0 || i+d >= frameList.length) return;
-        [frameList[i], frameList[i+d]] = [frameList[i+d], frameList[i]];
-        renderTimeline();
-    }
+			ctx.drawImage(img, x, y, w, h);
+		}
 
-    async function generateGif() {
-        const status = document.getElementById('status');
-        const result = document.getElementById('result');
-        if (frameList.length === 0) return alert("Upload frames first!");
+		function renderTimeline() {
+			const timeline = document.getElementById('timeline');
+			timeline.innerHTML = '';
+			frameList.forEach((img, i) => {
+				const div = document.createElement('div');
+				div.className = 'frame-card';
+				div.innerHTML = `
+					<img src="${img.src}">
+					<div class="mini-btns">
+						<button onclick="move(${i}, -1)">◀</button>
+						<button onclick="dup(${i})">＋</button>
+						<button onclick="rem(${i})" style="color:#ff4444">X</button>
+						<button onclick="move(${i}, 1)">▶</button>
+					</div>
+				`;
+				timeline.appendChild(div);
+			});
+		}
 
-        status.innerText = "🚧 GENERATING MASTERPIECE...";
-        result.innerHTML = "";
+		function dup(i) { 
+			const c = new Image(); c.src = frameList[i].src; 
+			frameList.splice(i+1, 0, c); renderTimeline(); 
+		}
+		function rem(i) { frameList.splice(i, 1); renderTimeline(); updateUI(); }
+		function move(i, d) {
+			if(i+d < 0 || i+d >= frameList.length) return;
+			[frameList[i], frameList[i+d]] = [frameList[i+d], frameList[i]];
+			renderTimeline();
+		}
 
-        const scale = parseFloat(scaleIn.value);
-        const xOff = parseInt(xIn.value);
-        const yOff = parseInt(yIn.value);
-        const delay = parseInt(delayIn.value);
+		async function generateGif() {
+			const status = document.getElementById('status');
+			const result = document.getElementById('result');
+			if (frameList.length === 0) return alert("Upload frames first!");
 
-        try {
-            const response = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
-            const workerBlob = new Blob([await response.text()], { type: 'application/javascript' });
-            const workerUrl = URL.createObjectURL(workerBlob);
+			status.innerText = "🚧 GENERATING MASTERPIECE...";
+			result.innerHTML = "";
 
-            const gif = new GIF({
-                workers: 4, quality: 1, width: 112, height: 112,
-                transparent: 'rgba(0,0,0,0)', workerScript: workerUrl
-            });
+			const scale = parseFloat(scaleIn.value);
+			const xOff = parseInt(xIn.value);
+			const yOff = parseInt(yIn.value);
+			const delay = parseInt(delayIn.value);
 
-            const w = 112 * scale;
-            const h = 112 * scale;
-            const x = ((112 - w) / 2) + xOff;
-            const y = ((112 - h) / 2) + yOff;
+			try {
+				const response = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
+				const workerBlob = new Blob([await response.text()], { type: 'application/javascript' });
+				const workerUrl = URL.createObjectURL(workerBlob);
 
-            frameList.forEach(img => {
-                ctx.clearRect(0, 0, 112, 112);
-                ctx.drawImage(img, x, y, w, h);
-                gif.addFrame(ctx, {copy: true, delay: delay});
-            });
+				const gif = new GIF({
+					workers: 4, quality: 1, width: 112, height: 112,
+					transparent: 'rgba(0,0,0,0)', workerScript: workerUrl
+				});
 
-            gif.on('finished', blob => {
-                status.innerText = "✨ EMOTE RENDERED ✨";
-                const url = URL.createObjectURL(blob);
-                result.innerHTML = `
-                    <div style="background:#000; padding:20px; border-radius:10px; display:inline-block; border:1px solid #333;">
-                        <img src="${url}" style="width:112px; height:112px; border:2px solid #00ffcc;">
-                        <br>
-                        <a href="${url}" download="twitch_emote.gif" style="display:block; margin-top:15px; color:#00ffcc; text-decoration:none; font-weight:800; font-size:12px;">CLICK HERE TO DOWNLOAD</a>
-                    </div>`;
-                URL.revokeObjectURL(workerUrl);
-            });
+				const w = 112 * scale;
+				const h = 112 * scale;
+				const x = ((112 - w) / 2) + xOff;
+				const y = ((112 - h) / 2) + yOff;
 
-            gif.render();
-        } catch (e) { status.innerText = "Error: " + e.message; }
-    }
+				frameList.forEach(img => {
+					ctx.clearRect(0, 0, 112, 112);
+					ctx.drawImage(img, x, y, w, h);
+					gif.addFrame(ctx, {copy: true, delay: delay});
+				});
 
-    function loadImage(file) {
-        return new Promise(r => {
-            const rd = new FileReader();
-            rd.onload = e => { const i = new Image(); i.onload = () => r(i); i.src = e.target.result; };
-            rd.readAsDataURL(file);
-        });
-    }
-</script>
+				gif.on('finished', blob => {
+					status.innerText = "✨ EMOTE RENDERED ✨";
+					const url = URL.createObjectURL(blob);
+					result.innerHTML = `
+						<div style="background:#000; padding:20px; border-radius:10px; display:inline-block; border:1px solid #333;">
+							<img src="${url}" style="width:112px; height:112px; border:2px solid #00ffcc;">
+							<br>
+							<a href="${url}" download="twitch_emote.gif" style="display:block; margin-top:15px; color:#00ffcc; text-decoration:none; font-weight:800; font-size:12px;">CLICK HERE TO DOWNLOAD</a>
+						</div>`;
+					URL.revokeObjectURL(workerUrl);
+				});
+
+				gif.render();
+			} catch (e) { status.innerText = "Error: " + e.message; }
+		}
+
+		function loadImage(file) {
+			return new Promise(r => {
+				const rd = new FileReader();
+				rd.onload = e => { const i = new Image(); i.onload = () => r(i); i.src = e.target.result; };
+				rd.readAsDataURL(file);
+			});
+		}
+	</script>
+
 </body>
 </html>
