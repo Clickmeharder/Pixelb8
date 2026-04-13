@@ -117,8 +117,8 @@ getDocs(collection(db, 'UserProfiles'))
           // emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
           // emailVerifiedElement.classList.remove('hidden');
           // listedElementEmail.classList.remove('hidden');
-          profileLinkElement.classList.remove('hidden');
-          userauthproveriderElement.classList.remove('hidden');
+          // profileLinkElement.classList.remove('hidden');
+          // userauthproveriderElement.classList.remove('hidden');
           loginButton.classList.add('hidden');
           logoutButton.classList.remove('hidden');
 
@@ -160,9 +160,9 @@ getDocs(collection(db, 'UserProfiles'))
 		userpixelcountElement.classList.add('hidden');
         // emailVerifiedElement.textContent = "";
         // emailVerifiedElement.classList.add('hidden');
-       /*  listedElementEmail.classList.add('hidden'); */
-        profileLinkElement.classList.add('hidden');
-        userauthproveriderElement.classList.add('hidden');
+        // listedElementEmail.classList.add('hidden');
+        // profileLinkElement.classList.add('hidden');
+        // userauthproveriderElement.classList.add('hidden');
         loginButton.classList.remove('hidden');
         logoutButton.classList.add('hidden');
 		innerContentloggedin.classList.add('hidden');
