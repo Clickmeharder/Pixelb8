@@ -2538,149 +2538,132 @@ function parseCsvToInventory(csvContent) {
     // ... (rest of queue sorting logic)
     return items;
 }
+// ================= WEB VERSION - INVENTORY LOADING =================
+
 async function loadAndProcessFile(fileOrPath) {
     if (!fileOrPath) return false;
-    
-    // Ensure decisions are loaded before processing
+
+    // Ensure decisions are loaded first
     await loadDecisions();
-    
+
     let csvData = "";
 
-    // 1. Resolve CSV Data from File object (Clipboard) or Path (Local Disk)
+    // 1. Handle File object (from clipboard or file input) or string path
     if (fileOrPath instanceof File) {
         csvData = await fileOrPath.text();
-        inventoryState.inventoryFilePath = "Clipboard Data";
-    } else {
-        if (!window.electronAPI) return false;
-        const result = await window.electronAPI.readFileByPath(fileOrPath); 
-        if (!result.success || !result.data) return false;
-        csvData = result.data;
-        inventoryState.inventoryFilePath = fileOrPath;
+        inventoryState.inventoryFilePath = "Clipboard Import";
+        console.log("📋 Loaded inventory from clipboard");
+    } 
+    else if (typeof fileOrPath === 'string') {
+        // For web version, we treat string as raw CSV text (rare case)
+        csvData = fileOrPath;
+        inventoryState.inventoryFilePath = "Manual CSV";
+    } 
+    else {
+        console.error("Invalid input to loadAndProcessFile");
+        return false;
     }
 
-    // 🟢 2. CRITICAL: Initialize lookup map BEFORE parsing
-    // We moved this up so parseCsvToInventory can "stamp" types onto items immediately.
+    // 2. Initialize item lookup system BEFORE parsing
     await initItemLookupSystem();
 
-    // 3. Parse the CSV into our state
+    // 3. Parse CSV into inventory state
     const newItems = parseCsvToInventory(csvData);
     inventoryState.items = newItems;
-    
-    inventoryState.actionHistory = []; 
+
+    // Reset temporary states
+    inventoryState.actionHistory = [];
     inventoryState.currentDecisionId = null;
-    
-    // 4. Reset UI rendering flags for the new dataset
+
+    // Reset rendering flags
     if (typeof renderedContent !== 'undefined') {
         Object.keys(renderedContent).forEach(key => renderedContent[key] = false);
     }
-	if (typeof syncInventoryToPlans === 'function') {
+
+    // Sync with crafting plans if function exists
+    if (typeof syncInventoryToPlans === 'function') {
         await syncInventoryToPlans();
     }
-    // 5. Update UI
+
+    // 4. Update UI
     await updateFilterDropdowns();
     renderInitialTabA();
-    updateSummary(); 
-    promptNextDecision(); 
-    
+    updateSummary();
+    promptNextDecision();
+
+    console.log(`✅ Inventory loaded: ${Object.keys(newItems).length} items`);
     return true;
 }
+
+// ================= LOAD INVENTORY (Web Version) =================
 async function loadInventory(forceNewSelection = false) {
-    if (!window.electronAPI) return;
+    // In web version, we don't have a persistent file path like Electron
+    // So we rely on clipboard import or manual upload
 
-    try {
-        let filePath = inventoryState.inventoryFilePath;
+    if (forceNewSelection) {
+        alert("In the web version, please use the 'Paste Inventory from Clipboard' button.");
+        return;
+    }
 
-        // 1. Try to get the saved path first (if we don't already have it)
-        if (!forceNewSelection && !filePath) {
-            filePath = await window.electronAPI.getSavedFilePath(); 
-            if (filePath) {
-                inventoryState.inventoryFilePath = filePath;
-            }
-        }
+    // If we already have data in memory, just re-render
+    if (Object.keys(inventoryState.items).length > 0) {
+        renderInitialTabA();
+        updateSummary();
+        return;
+    }
 
-        // 2. Initial Startup Check: If STILL no path, ask the user after the app is visible
-        if (!filePath && !forceNewSelection) {
-          if (inventoryDEBUG) console.log("No path found on startup. Waiting for app visibility to prompt...");
-            
-            // 9 second delay (8s for splash screen + 1s for main window transition)
-            setTimeout(async () => {
-                const wantToSelect = confirm("No inventory CSV found. Would you like to select your inventory file path now?");
-                
-                if (wantToSelect) {
-                    const pathResult = await window.electronAPI.selectFilePath(); 
-                    if (pathResult.success && pathResult.path) {
-                        inventoryState.inventoryFilePath = pathResult.path;
-                        await window.electronAPI.saveFilePath(pathResult.path); 
-                        // Process the file immediately after selection
-                        await loadAndProcessFile(pathResult.path);
-                    }
-                } else {
-                  if (inventoryDEBUG) console.log("User declined to select inventory path on startup.");
-                }
-            }, 9000); 
-
-            return; // Exit main flow; the setTimeout will handle the rest if they say yes
-        }
-
-        // 3. Manual Button Click: If user clicked "Change File" (forceNewSelection is true)
-        if (forceNewSelection) {
-            const pathResult = await window.electronAPI.selectFilePath(); 
-            if (pathResult.success && pathResult.path) {
-                filePath = pathResult.path;
-                inventoryState.inventoryFilePath = pathResult.path;
-                await window.electronAPI.saveFilePath(pathResult.path); 
-            } else {
-                return; // User cancelled the file picker
-            }
-        }
-        
-        // 4. Final Processing: Load the file if we have a valid path
-        if (filePath) {
-            await loadAndProcessFile(filePath);
-        }
-        
-    } catch (error) {
-        console.error("Error loading inventory:", error);
+    // No data yet — prompt user to paste from clipboard
+    if (confirm("No inventory data found.\n\nWould you like to paste your inventory from clipboard now?")) {
+        await importInventoryFromClipboard();
+    } else {
+        console.log("User declined to load inventory on startup.");
     }
 }
+
+// ================= CLIPBOARD IMPORT (Already mostly good) =================
 async function importInventoryFromClipboard() {
     try {
         const clipboardText = await navigator.clipboard.readText();
-        
+
         if (!clipboardText || !clipboardText.trim()) {
             alert("Clipboard is empty or doesn't contain text.");
             return;
         }
 
-        if (!confirm("This will OVERWRITE your current inventory list with the clipboard data. Proceed?")) return;
+        if (!confirm("This will OVERWRITE your current inventory with the clipboard data.\n\nProceed?")) {
+            return;
+        }
 
-        // 1. Create a "Virtual File" from the clipboard text
-        // This tricks loadAndProcessFile into running its usual parsing logic
+        // Create virtual File object
         const blob = new Blob([clipboardText], { type: 'text/csv' });
-        const virtualFile = new File([blob], "clipboard_import.csv", { type: 'text/csv' });
+        const virtualFile = new File([blob], "clipboard_inventory.csv", { type: 'text/csv' });
 
-        // 2. Run your existing processor
-        // This fills inventoryState.items, updates the UI, and refreshes tables
-        await loadAndProcessFile(virtualFile);
-        
-        // 3. Persist the raw text to your App State
-        await saveInventoryToState(clipboardText);
-		updateFilterDropdowns();
-        alert("Inventory updated successfully from clipboard!");
-        
+        // Process it
+        const success = await loadAndProcessFile(virtualFile);
+
+        if (success) {
+            // Save raw text for persistence
+            saveInventoryToState(clipboardText);
+            updateFilterDropdowns();
+            alert("✅ Inventory successfully imported from clipboard!");
+        }
+
     } catch (err) {
         console.error("Clipboard Error:", err);
-        alert("Failed to read clipboard. Ensure the window is focused and permissions are granted.");
-    }
-}
-async function saveInventoryToState(csvText) {
-    if (window.electronAPI && window.electronAPI.saveAppState) {
-        await window.electronAPI.saveAppState('customInventoryData', csvText);
-        await window.electronAPI.saveAppState('inventorySourceMode', 'CLIPBOARD');
-        await window.electronAPI.saveAppState('inventoryPath', '');
+        alert("Failed to read clipboard.\nMake sure the page has focus and clipboard permission is granted.");
     }
 }
 
+// ================= SAVE INVENTORY STATE (Web Version) =================
+function saveInventoryToState(csvText) {
+    try {
+        localStorage.setItem('customInventoryData', csvText);
+        localStorage.setItem('inventorySourceMode', 'CLIPBOARD');
+        console.log("💾 Inventory raw data saved to localStorage");
+    } catch (err) {
+        console.warn("Failed to save inventory to localStorage", err);
+    }
+}
 function copyTableToClipboard(tableId, fileName) {
     const table = document.getElementById(tableId);
     if (!table) return;
