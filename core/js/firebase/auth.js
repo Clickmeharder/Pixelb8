@@ -114,9 +114,9 @@ getDocs(collection(db, 'UserProfiles'))
           photoElement.src = user.photoURL || "default.jpg";
 
 		  userpixelcountElement.classList.remove('hidden');
-          emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
-          emailVerifiedElement.classList.remove('hidden');
-          listedElementEmail.classList.remove('hidden');
+          // emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
+          // emailVerifiedElement.classList.remove('hidden');
+          // listedElementEmail.classList.remove('hidden');
           profileLinkElement.classList.remove('hidden');
           userauthproveriderElement.classList.remove('hidden');
           loginButton.classList.add('hidden');
