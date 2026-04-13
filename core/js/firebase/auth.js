@@ -155,12 +155,12 @@ getDocs(collection(db, 'UserProfiles'))
         statusElement.textContent = "Status: offline";
         usernameElement.textContent = "StrangerDanger!";
 		profileusernameElement.textContent = "-";
-        emailElement.textContent = "";
+        // emailElement.textContent = "";
         photoElement.src = "assets/images/logo/pixelb8logo1.png"; // Set a default image
 		userpixelcountElement.classList.add('hidden');
-        emailVerifiedElement.textContent = "";
-        emailVerifiedElement.classList.add('hidden');
-        listedElementEmail.classList.add('hidden');
+        // emailVerifiedElement.textContent = "";
+        // emailVerifiedElement.classList.add('hidden');
+       /*  listedElementEmail.classList.add('hidden'); */
         profileLinkElement.classList.add('hidden');
         userauthproveriderElement.classList.add('hidden');
         loginButton.classList.remove('hidden');
