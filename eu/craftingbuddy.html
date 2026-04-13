@@ -2528,31 +2528,31 @@ div#bpbuttonDiv {
 						</div>
 					</div>
 					<!-- CLEAR WAYPOINTS - Disabled for Web -->
-					<button id="btn-clear-waypoints" 
-							class="tactical-btn stat-tab-btn" 
-							title="Current location & waypoint features are only available in the Desktop App"
+					<button id="btn-clear-waypoints"
+							class="tactical-btn stat-tab-btn disabled-feature-btn"
+							data-tooltip="Current location & waypoint features are only available in the Desktop App"
 							disabled>
 						CLEAR WP's
 					</button>
 
 					<!-- LAST KNOWN POSITION - Disabled for Web -->
 					<div id="lastknownposWrapper" 
-						 class="disabled-feature" 
-						 title="Current location is only available in the Desktop App">
+						 class="disabled-feature"
+						 data-tooltip="Current location is only available in the Desktop App">
 						<div id="lastKnownPosition">[planet, long, lat, alt, waypoint]</div>
 					</div>
 
-					<!-- Copy & Focus buttons - Disabled for Web -->
-					<button class="stat-tab-btn disabled-feature-btn" 
-							id="copyLastknownPositionbtn" 
-							title="Current location is only available in the Desktop App"
+					<!-- Copy & Focus buttons -->
+					<button class="stat-tab-btn disabled-feature-btn"
+							id="copyLastknownPositionbtn"
+							data-tooltip="Current location is only available in the Desktop App"
 							disabled>
 						Copy
 					</button>
 
-					<button class="stat-tab-btn disabled-feature-btn" 
-							id="focusLastknownPositionbtn" 
-							title="Current location is only available in the Desktop App"
+					<button class="stat-tab-btn disabled-feature-btn"
+							id="focusLastknownPositionbtn"
+							data-tooltip="Current location is only available in the Desktop App"
 							disabled>
 						Focus
 					</button>
@@ -2563,6 +2563,7 @@ div#bpbuttonDiv {
 							opacity: 0.45;
 							cursor: not-allowed;
 							filter: grayscale(30%);
+							position: relative;           /* Important for tooltip positioning */
 						}
 
 						.disabled-feature:hover,
@@ -2570,20 +2571,20 @@ div#bpbuttonDiv {
 							opacity: 0.55;
 						}
 
-						/* Optional: Make disabled buttons look more obviously inactive */
+						/* Disabled button styling */
 						button[disabled] {
 							background-color: #333 !important;
 							color: #777 !important;
 							border-color: #444 !important;
 						}
 
-						/* Tooltip enhancement */
-						[title*="Desktop App"] {
+						/* Custom Tooltip - using data-tooltip instead of title */
+						[data-tooltip] {
 							position: relative;
 						}
 
-						[title*="Desktop App"]:hover::after {
-							content: attr(title);
+						[data-tooltip]:hover::after {
+							content: attr(data-tooltip);
 							position: absolute;
 							bottom: 100%;
 							left: 50%;
@@ -2592,10 +2593,21 @@ div#bpbuttonDiv {
 							color: #ffcc00;
 							padding: 6px 10px;
 							border-radius: 4px;
-							font-size: 0.8em;
+							font-size: 0.82em;
 							white-space: nowrap;
 							z-index: 100;
 							pointer-events: none;
+							box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+						}
+
+						/* Optional: Small delay before tooltip appears */
+						[data-tooltip]:hover::after {
+							animation: tooltip-delay 0.2s forwards;
+						}
+
+						@keyframes tooltip-delay {
+							from { opacity: 0; }
+							to { opacity: 1; }
 						}
 					</style>
 				</div>
