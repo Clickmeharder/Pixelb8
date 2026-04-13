@@ -297,7 +297,70 @@
     </div>
   </div>
 </div>
+<!-- ----------- -->
+<!--hidden modals (redo most/all these lol) -->
+<!-- ----------- -->
+<!-- Container to display user details -->
+<div id="user-detailsbox" class="modal" style="display:none;">
+	<span id="user-detailsboxError" style="display:none;">error</span>
+	<div id="user-details" style="display: none; border: 1px solid #ccc; padding: 20px; margin-top: 20px; background-color: ;">
+	  <h3>User Details</h3>
+	  <p><strong>Entropia Name:</strong> <span id="entropia-name">Loading...</span></p>
+	  <p><strong>Status:</strong> <span id="status">Loading...</span></p>
+	  <p><strong>Last Login:</strong> <span id="last-login">Loading...</span></p>
+	  <button id="sendmessage-to-user" data-owner-id="">Message</button>
+	  <button id="userdetails-close-button">Close</button>
+	</div>
+</div>
 
+<!-- Send Message Modal -->
+<div id="send-message-modal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="modal-close">&times;</span>
+    <h3>Send Message</h3>
+    <form id="send-message-form">
+      <label for="recipient">Recipient ID:</label>
+      <input type="text" id="recipient" required />
+      <label for="subject">Subject:</label>
+      <input type="text" id="subject" required />
+      <label for="message">Message:</label>
+      <textarea id="message" required></textarea>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal for viewing mail -->
+<div id="view-mail-modal" class="modal" style="display: none;">
+  <div class="mailbox-container">
+    <!-- Header Section -->
+    <div id="mailbox-header" class="mailbox-header">
+      <h3>Mailbox</h3>
+	  <button id="loadMessagesBtn">Refresh Messages</button>
+      <button id="close-mail-modal" class="modal-close">✖</button>
+    </div>
+    <!-- Tabs for Inbox and Outbox -->
+    <div class="mailbox-tabs">
+      <button class="tab-btn active" data-target="inbox-messages">Inbox</button>
+      <button class="tab-btn" data-target="outbox-messages">Outbox</button>
+    </div>
+    <!-- Messages Section -->
+	<div class="mailbox-wrapper">
+		<div class="mailbox-messages">
+		  <div id="inbox-messages" class="messages-container active">
+			<!-- Inbox messages will be displayed here -->
+		  </div>
+		  <div id="outbox-messages" class="messages-container">
+			<!-- Outbox messages will be displayed here -->
+		  </div>
+		</div>
+	</div>
+    <!-- Footer Section -->
+    <div class="mailbox-footer">
+      <!-- can put something here -->
+    </div>
+  </div>
+</div>
 
     <div style="height: 100px;">---</div>
 
