@@ -297,7 +297,7 @@ canvas#huntGraph {
 }
 div#tabs {
     border: 2px ridge #444;
-    height: 93%;
+    height: 101%;
 }
 .tabs, .subtabs {
     display: flex;
