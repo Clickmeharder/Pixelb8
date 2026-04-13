@@ -10,8 +10,52 @@ let collapsedPlanets = JSON.parse(localStorage.getItem('euColl_Planets')) || {};
 let collapsedCats = JSON.parse(localStorage.getItem('euColl_Cats')) || {};
 
 // --- INITIALIZATION ---
-
+// ================= WEB VERSION - INITIALIZATION =================
 async function initDailyTimerApp() {
+    console.log("🚀 Initializing Daily Mission Tracker (Web Version)...");
+
+    // 1. Try to load saved user progress from localStorage
+    const savedMissionsStr = localStorage.getItem('euMissions_v7');
+    const savedPlanetsStr = localStorage.getItem('euColl_Planets');
+    const savedCatsStr = localStorage.getItem('euColl_Cats');
+
+    if (savedMissionsStr) {
+        try {
+            window.missions = JSON.parse(savedMissionsStr);
+            console.log(`✅ Loaded ${window.missions.length} saved missions from localStorage`);
+        } catch (e) {
+            console.warn("⚠️ Saved missions data was corrupted. Loading defaults instead.");
+            window.missions = [];
+        }
+    } else {
+        console.log("ℹ️ No saved missions found → loading default template");
+        await loadDefaultJSON();
+    }
+
+    // Load collapse states
+    if (savedPlanetsStr) {
+        try {
+            collapsedPlanets = JSON.parse(savedPlanetsStr);
+        } catch (e) {
+            collapsedPlanets = {};
+        }
+    }
+
+    if (savedCatsStr) {
+        try {
+            collapsedCats = JSON.parse(savedCatsStr);
+        } catch (e) {
+            collapsedCats = {};
+        }
+    }
+
+    // Final render + start timer
+    render();
+    setInterval(updateTimers, 1000);
+
+    console.log("✅ Daily Mission Tracker initialized successfully");
+}
+/* async function initDailyTimerApp() {
     // 1. Load user-specific progress from Electron AppData (user_memory folder)
     // This replaces localStorage.getItem
     const savedMissions = await window.electronAPI.loadAppState('euMissions_v7');
@@ -30,7 +74,7 @@ async function initDailyTimerApp() {
 
     render(); 
     setInterval(updateTimers, 1000);
-}
+} */
 /* async function loadDefaultJSON() {
     try {
         // 🟢 FIX: Use your new bridge instead of fetch()
