@@ -721,6 +721,15 @@ button.btn.btn-primary {
     margin-top: 7PX;
 }
 
+/* Style for modal trigger buttons (if needed) */
+.modal-trigger {
+  cursor: pointer;
+}
+
+/* Hide scroll bars on body when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
 img#profilephoto {
     height: 32px;
     width: 32px;
