@@ -229,6 +229,105 @@ div#userInfoContainer ul {
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
 }
 
+/* Modal styles */
+#loginStatus{}
+.logged-in{}
+.logged-out{}
+form#loginForm {
+    height: 115px;
+    overflow-y: auto;
+    font-size: 10px;
+    line-height: normal;
+    font-family: lucida console;
+    color: #0e7504;
+    background-color: #1b1818a1;
+
+}
+.modal {
+	position: fixed;
+	font-size: 1.5vw;
+	z-index: 1000;
+    left: 256px;
+    top: 134px;
+	width: 45%;
+	height: 29.5%;
+	overflow: hidden;
+	background-color: rgba(0, 0, 0, 0.4);
+	white-space: nowrap;
+	
+}
+
+.modal-dialog {
+    position: relative;
+    margin: 0.5% 0.1% auto;
+    padding: 4px;
+    max-width: 94%;
+    height: 86%;
+    border: 3px outset #007480b0;
+    background-color: #1110348f;
+}
+
+.modal-content {
+  color: #008dcdad;
+  padding: 8px;
+}
+input#signup-username, input#signup-email, input#signup-password {
+	color: #0b80e787;
+    background-color: transparent;border-color: #07baff66;
+
+}
+input#signup-username:focus-visible, input#signup-email:focus-visible, input#signup-password:focus-visible {
+	color: #0b80e7d6;
+    background-color: #00ffff21;
+    border-color: #69755d00;
+    border-radius: 8px;
+    outline-color: #12706ef5;
+    outline-width: 1px;
+    outline-offset: 1px;
+    outline-style: ridge;
+}
+input#signup-username{
+	margin-bottom:4px;
+}
+input#signup-email{
+	margin-left:10px;
+}
+/* Close button styles */
+.close {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    font-size: 1em;
+    cursor: pointer;
+}
+button.btn.btn-primary {
+    margin-left: 122PX;
+    margin-top: 7PX;
+}
+/* Style for modal trigger buttons (if needed) */
+.modal-trigger {
+  cursor: pointer;
+}
+
+/* Hide scroll bars on body when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+img#profilephoto {
+    height: 32px;
+    width: 32px;
+    border: 3px ridge #333;
+    border-radius: 50%;
+	opacity:0.6;
+}
+img#profilephoto:hover {
+    height: 32px;
+    width: 32px;
+    border: 3px ridge #333;
+    border-radius: 50%;
+	opacity:0.8;
+}
 </style>
 </head>
 <body>
