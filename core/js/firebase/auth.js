@@ -110,7 +110,7 @@ getDocs(collection(db, 'UserProfiles'))
           // userauthproveriderElement.textContent = profile.providerId;
 		  usernameElement.textContent = user.displayName || "Nameless";
           profileusernameElement.textContent = profile.displayName || "-idk-";
-          emailElement.textContent = profile.email || "Unknown";
+          // emailElement.textContent = profile.email || "Unknown";
           photoElement.src = user.photoURL || "default.jpg";
 
 		  userpixelcountElement.classList.remove('hidden');
