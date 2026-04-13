@@ -86,6 +86,7 @@ div#craftingOverview {
 	display: block;
     height: stretch;
 	width: 384px;
+	max-height: 98%;
 }
 div#craftingPlans {
     width: 948px;
