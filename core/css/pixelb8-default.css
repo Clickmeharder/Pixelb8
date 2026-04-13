@@ -1357,7 +1357,7 @@ img#profilephoto:hover {
 /* ======================================================================== */
 /* EU MAPS CSS */
 .maprow {
-    height: 615px;
+    height: 800px;
 }
 .content-panel-eumaps {
 	display: inline-flex;
@@ -1367,9 +1367,9 @@ img#profilephoto:hover {
     width: 1005px;
     height: 618px;
     max-width: 1005px;
-    max-height: 621px;
+    max-height: 800px;
     margin: auto;
-    margin-left: 12px;
+    margin-left: 10%;
     margin-top: 0px;/*-195px;*/
     justify-content: center;
     color: var(--staticpage-contentpanel-text-color);
