@@ -60,122 +60,49 @@ getDocs(collection(db, 'UserProfiles'))
   });
 
     // Set up the onAuthStateChanged listener
-    onAuthStateChanged(auth, async (user) => {
-      const statusElement = document.getElementById('loginStatus');
-      const userauthproveriderElement = document.getElementById('userauthProvider');
-      const usernameElement = document.getElementById('username');
-	  const profileusernameElement = document.getElementById('profileusername');
-      const emailElement = document.getElementById('email');
-      const listedElementEmail = document.getElementById('userinfolist-email');
-      const photoElement = document.getElementById('profilephoto');
-      const emailVerifiedElement = document.getElementById('emailVerified');
-      const profileLinkElement = document.getElementById('profileLink');
-      const loginButton = document.getElementById('loginbutt');
-      const logoutButton = document.getElementById('logoutbutt');
-	  const userpixelcountElement = document.getElementById('Userpixelcount');
-	  /* const innerContentloggedin = document.getElementById('innercontent-loggedin'); */
-	  const innerContentloggedout = document.getElementById('innercontent-loggedout');
-	  const userprofileModal = document.getElementById('temporary-user-profile-Modal');
-	  const userprofileBox = document.getElementById('user-profile-box');
+   onAuthStateChanged(auth, async (user) => {
+		const loggedInControls = document.getElementById('loggedInControls');
+		const loginButton = document.getElementById('loginbutt');
+		const logoutButton = document.getElementById('logoutbutt');
+		const usernameElement = document.getElementById('username');
+		const profilePhoto = document.getElementById('profilephoto');
+		const userPixelCount = document.getElementById('Userpixelcount');
 
+		if (user) {
+			// === USER IS LOGGED IN ===
+			console.log('User logged in:', user);
 
-	  if (user !== null) {
-		// User is signed in
-		const uniqueUserId = user.uid;
-		  // Fetch data from the 'users' collection
-		  getDocs(collection(db, 'users'))
-		    .then((querySnapshot) => {
-			  querySnapshot.forEach((doc) => {
-			  // Check if the document's ID matches the logged-in user's UID
-			    if (doc.id === uniqueUserId) {
-				// Log the user's pixelBalance field
-			      const userData = doc.data();
-				    console.log("Logged-in user's pixelBalance:", userData.balancePixels);
-					userpixelcountElement.textContent = "Pixels: " + userData.balancePixels || "null";
-			    }
-			  });
-		    })
-		    .catch((error) => {
-			  console.log(uniqueUserId,"Error getting users documents: ", error);
-		    });
-		console.log('user logged in: ', user);
-        user.providerData.forEach(async (profile) => {
-		  console.log("user displayname: " + user.displayName);
-          console.log("profile.displayname: " + profile.displayName);
-          console.log("profile Email: " + profile.email);
-		  console.log("user Email: " + user.email);
-          console.log("Photo URL: " + profile.photoURL);
-		  console.log("users pixels: " + user.pixelcount);
-          statusElement.textContent = "Status: Online";
-          // userauthproveriderElement.textContent = profile.providerId;
-		  usernameElement.textContent = user.displayName || "Nameless";
-          profileusernameElement.textContent = profile.displayName || "-idk-";
-          // emailElement.textContent = profile.email || "Unknown";
-          photoElement.src = user.photoURL || "default.jpg";
+			// Show logged-in controls
+			loggedInControls.style.display = 'block';
+			loginButton.classList.add('hidden');
+			logoutButton.classList.remove('hidden');
 
-		  userpixelcountElement.classList.remove('hidden');
-          // emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
-          // emailVerifiedElement.classList.remove('hidden');
-          // listedElementEmail.classList.remove('hidden');
-          // profileLinkElement.classList.remove('hidden');
-          // userauthproveriderElement.classList.remove('hidden');
-          loginButton.classList.add('hidden');
-          logoutButton.classList.remove('hidden');
+			// Update basic UI
+			usernameElement.textContent = user.displayName || "Pixel Colonist";
+			profilePhoto.src = user.photoURL || "assets/images/logo/pixelb8logo1.png";
+			
+			// Fetch pixel balance from Firestore
+			try {
+				const userDoc = await getDoc(doc(db, 'users', user.uid));
+				if (userDoc.exists()) {
+					const data = userDoc.data();
+					userPixelCount.textContent = `Pixels: ${data.balancePixels || 0}`;
+					userPixelCount.classList.remove('hidden');
+				}
+			} catch (e) {
+				console.warn("Could not load pixel balance", e);
+			}
 
-		  innerContentloggedout.classList.add('hidden');
-          /* innerContentloggedin.classList.remove('hidden'); */
-		  userprofileTab.classList.remove('hidden');
-		  userprofileTab.classList.add('Active');
-		  userprofileBox.classList.remove('hidden');
-		  userprofileBox.classList.add('Active');
-          const userName = encodeURIComponent(user.displayName || "Guest");
-          const userEmail = encodeURIComponent(user.email || "");
-
-          if (user.emailVerified) {
-            emailVerifiedElement.style.color = "#24b500b5"; // Green color for verified email
-          } else {
-            emailVerifiedElement.style.color = "#dd230e66"; // Red color for unverified email
-          }
-          // Check if provider is GitHub and display name is null
-          if (profile.providerId === 'github.com' && !user.displayName) {
-            try {
-              const githubUserData = await getGitHubUserData(profile.uid);
-              if (githubUserData.login) {
-                usernameElement.textContent = githubUserData.login;
-              }
-            } catch (error) {
-              console.error("Error fetching GitHub user data:", error);
-            }
-          }
-		  
-        });
-      } else {
-        // User is signed out
-		console.log('user logged out');
-        statusElement.textContent = "Status: offline";
-        usernameElement.textContent = "StrangerDanger!";
-		profileusernameElement.textContent = "-";
-        // emailElement.textContent = "";
-        photoElement.src = "assets/images/logo/pixelb8logo1.png"; // Set a default image
-		userpixelcountElement.classList.add('hidden');
-        // emailVerifiedElement.textContent = "";
-        // emailVerifiedElement.classList.add('hidden');
-        // listedElementEmail.classList.add('hidden');
-        // profileLinkElement.classList.add('hidden');
-        // userauthproveriderElement.classList.add('hidden');
-        loginButton.classList.remove('hidden');
-        logoutButton.classList.add('hidden');
-		innerContentloggedin.classList.add('hidden');
-        innerContentloggedout.classList.remove('hidden');
-		populateAccountDetails(user);
-		userprofileTab.classList.remove('Active');
-		userprofileTab.classList.add('hidden');
-		userprofileBox.classList.remove('Active');
-		userprofileBox.classList.add('hidden');
-		console.log("User is not signed in.");
-      }
-
-    });
+		} else {
+			// === USER IS LOGGED OUT ===
+			loggedInControls.style.display = 'none';
+			loginButton.classList.remove('hidden');
+			logoutButton.classList.add('hidden');
+			usernameElement.textContent = "StrangerDanger!";
+			profilePhoto.src = "assets/images/logo/pixelb8logo1.png";
+			userPixelCount.classList.add('hidden');
+		}
+	});
 // Signup form submission event listener
 	const signUpForm = document.querySelector('#signup-form');
 
@@ -238,35 +165,6 @@ getDocs(collection(db, 'UserProfiles'))
 		  console.error('Sign out error:', error);
 		});
 	}
-	
-// Function to update profile
-	function updateProfileData(username, photoURL) {
-	  const user = auth.currentUser;
-
-	  updateProfile(user, {
-		displayName: username,
-		photoURL: photoURL
-	  }).then(() => {
-		console.log('Profile updated successfully');
-		// Close the modal after updating the profile
-		$('#modal-editProfile').modal('hide');
-	  }).catch((error) => {
-		console.error('Error updating profile:', error);
-		// Handle error if profile update fails
-	  });
-	}
-
-	// Handle form submission for updating profile
-	const updateProfileForm = document.getElementById('update-profile-form');
-
-	updateProfileForm.addEventListener('submit', (e) => {
-	  e.preventDefault(); // Prevent default form submission
-
-	  const username = document.getElementById('update-username').value;
-	  const photoURL = document.getElementById('update-photoURL').value;
-
-	  updateProfileData(username, photoURL);
-	});
     // Add event listener to login button
 	const loginButton = document.getElementById('loginbutt');
     loginButton.addEventListener('click', signInWithGitHub);
@@ -274,12 +172,111 @@ getDocs(collection(db, 'UserProfiles'))
 	// Select the logout button element by its ID
 	const logoutButton = document.getElementById('logoutbutt');
 	logoutButton.addEventListener('click', signOutFromFirebase);
-	
-	const editProfileButton = document.getElementById('editprofilebutt');
-	editProfileButton.addEventListener('click', () => {
-		console.log('edit profile button clicked');
 	  /* $('#modal-editProfile').modal('show'); */
 	});
 	// Call on page load
+// ====================== PROFILE FUNCTIONS ======================
 
+// Open Edit Profile Modal
+document.getElementById('editProfileBtn').addEventListener('click', () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Pre-fill the form
+    document.getElementById('update-username').value = user.displayName || '';
+    document.getElementById('update-photoURL').value = user.photoURL || '';
+
+    // Show the modal
+    const modal = document.getElementById('modal-editProfile');
+    modal.style.display = 'block';
+});
+
+// Close Edit Profile Modal
+document.querySelectorAll('.close-modal-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const modal = btn.closest('.modal');
+        if (modal) modal.style.display = 'none';
+    });
+});
+
+// Handle Edit Profile Form Submission
+document.getElementById('update-profile-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById('update-username').value.trim();
+    const photoURL = document.getElementById('update-photoURL').value.trim();
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        await updateProfile(user, {
+            displayName: username || user.displayName,
+            photoURL: photoURL || user.photoURL
+        });
+
+        alert("✅ Profile updated successfully!");
+        document.getElementById('modal-editProfile').style.display = 'none';
+
+        // Refresh UI
+        document.getElementById('username').textContent = username || user.displayName;
+        document.getElementById('profilephoto').src = photoURL || user.photoURL;
+
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        alert("Failed to update profile: " + error.message);
+    }
+});
+
+// ====================== VIEW ALL PROFILES ======================
+
+document.getElementById('viewAllProfilesBtn').addEventListener('click', async () => {
+    const profilesContainer = document.getElementById('allProfilesContainer') || 
+        createProfilesModal();
+
+    profilesContainer.innerHTML = '<p style="text-align:center; color:#888;">Loading profiles...</p>';
+
+    try {
+        const querySnapshot = await getDocs(collection(db, 'UserProfiles'));
+        let html = '<h3 style="margin-bottom:15px; color:#0ff;">All User Profiles</h3>';
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const isCurrentUser = auth.currentUser && doc.id === auth.currentUser.uid;
+
+            html += `
+                <div style="background:#1a1a1a; padding:12px; margin:8px 0; border-radius:6px; border:1px solid ${isCurrentUser ? '#0ff' : '#333'};">
+                    <strong style="color:#0ff;">${data.displayName || 'Anonymous'}</strong>
+                    ${isCurrentUser ? ' <span style="color:#0f0;">(You)</span>' : ''}
+                    <br>
+                    <small style="color:#888;">${data.email || ''}</small>
+                    ${data.bio ? `<p style="margin:5px 0; font-size:0.9em;">${data.bio}</p>` : ''}
+                </div>`;
+        });
+
+        if (querySnapshot.empty) {
+            html += '<p style="color:#666; text-align:center;">No profiles found yet.</p>';
+        }
+
+        profilesContainer.innerHTML = html;
+        profilesContainer.style.display = 'block';
+
+    } catch (error) {
+        console.error("Error loading profiles:", error);
+        profilesContainer.innerHTML = '<p style="color:#f66;">Failed to load profiles.</p>';
+    }
+});
+
+// Helper to create modal container if it doesn't exist
+function createProfilesModal() {
+    const modal = document.createElement('div');
+    modal.id = 'allProfilesContainer';
+    modal.style.cssText = `
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: #111; border: 2px solid #0ff; padding: 20px; width: 90%; max-width: 600px;
+        max-height: 80vh; overflow-y: auto; border-radius: 8px; z-index: 10000; display: none;
+    `;
+    document.body.appendChild(modal);
+    return modal;
+}
 //hmmm
