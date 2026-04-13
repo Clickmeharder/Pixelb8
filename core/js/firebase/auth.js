@@ -56,7 +56,7 @@ getDocs(collection(db, 'UserProfiles'))
     });
   })
   .catch((error) => {
-    console.log("Error getting documents: ", error);
+    console.log("Error getting documents: ", error);8
   });
 
     // Set up the onAuthStateChanged listener
@@ -173,7 +173,8 @@ getDocs(collection(db, 'UserProfiles'))
 	const logoutButton = document.getElementById('logoutbutt');
 	logoutButton.addEventListener('click', signOutFromFirebase);
 	  /* $('#modal-editProfile').modal('show'); */
-	});
+
+
 	// Call on page load
 // ====================== PROFILE FUNCTIONS ======================
 
