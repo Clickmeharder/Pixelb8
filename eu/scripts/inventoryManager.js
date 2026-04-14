@@ -2383,7 +2383,7 @@ function renderDetailedLocationTable(tbodyId, itemsArray) {
 
     sortedItems.forEach(item => {
         const row = document.createElement('tr');
-        // Standardize classes: 'display-flex' ensures it doesn't squish
+        // Standardize classes: display empty string keeps standard table layout
         row.className = 'text-xs hover:bg-gray-700 inventory-row';
         row.style.display = ''; 
         row.style.width = '100%';
@@ -2391,11 +2391,13 @@ function renderDetailedLocationTable(tbodyId, itemsArray) {
         const qty = parseFloat(String(item.quantity || 0).replace(/,/g, ''));
         const val = parseFloat(String(item.totalValuePed || item.totalValue || 0).replace(/,/g, ''));
 
-        // Use the same column classes as your other tables so the CSS widths apply
+        // Removed style="flex:..." and style="justify-content:..."
+        // Added col-location back in
         row.innerHTML = `
-            <td class="col-name" style="flex: 1;">${item.name || 'Unknown'}</td>
-            <td class="col-qty" style="width: 80px; justify-content: flex-end;">${qty.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
-            <td class="col-total" style="width: 100px; justify-content: flex-end; font-family: monospace;">${val.toFixed(2)}</td>
+            <td class="col-name">${item.name || 'Unknown'}</td>
+            <td class="col-qty">${qty.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+            <td class="col-total" style="font-family: monospace;">${val.toFixed(2)}</td>
+            <td class="col-location">${item.location || 'N/A'}</td>
         `;
         fragment.appendChild(row);
     });
