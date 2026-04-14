@@ -62,72 +62,45 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getAuth, signInWithRedirect, getRedirectResult, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
         authDomain: "pixelb8lol.firebaseapp.com",
         projectId: "pixelb8lol",
-        storageBucket: "pixelb8lol.appspot.com",
-        messagingSenderId: "373700849652",
-        appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
-        measurementId: "G-5EGV2VNMX3"
+        // ... rest of your config
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const statusEl = document.getElementById('status');
-    const provider = new GithubAuthProvider();
 
-    async function performAuth() {
-        // 1. Check if the URL has GitHub return parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const hasGithubParams = urlParams.has('code') || urlParams.has('state');
-
-        try {
-            statusEl.innerText = "CHECKING HANDSHAKE STATUS...";
+    // This is the "Magic Listener"
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            statusEl.innerText = "AUTHENTICATED. PREPARING HANDSHAKE...";
             
-            // 2. Attempt to catch the redirect result
-            const result = await getRedirectResult(auth);
-
-            if (result) {
-                // SUCCESS: User is back from GitHub and verified
-                const credential = GithubAuthProvider.credentialFromResult(result);
-                const token = credential.accessToken;
-                
-                statusEl.innerText = "HANDSHAKE SUCCESSFUL.";
-                
-                setTimeout(() => {
-                    statusEl.innerText = "RE-LINKING TO DESKTOP...";
-                    window.location.href = `pixelb8://auth/${token}`;
-                }, 1000);
-                return; // Stop execution here
-            }
-
-            // 3. The Loop-Breaker Logic
-            // If we DON'T have a result, AND the URL doesn't look like a return trip...
-            // THEN it's safe to start a new redirect.
-            if (!hasGithubParams) {
-                statusEl.innerText = "REDIRECTING TO GITHUB GATEWAY...";
-                await signInWithRedirect(auth, provider);
-            } else {
-                // If we HAVE GitHub params but NO result yet, just wait. 
-                // Don't trigger a new redirect or you'll loop.
-                statusEl.innerText = "FINALIZING GITHUB HANDSHAKE...";
-            }
-
-        } catch (error) {
-            console.error("Auth Bridge Error:", error);
-            statusEl.style.color = "#ff4141";
-            statusEl.innerText = "HANDSHAKE FAILED: " + error.code;
+            // Get the token from the current session
+            // We use getIdToken because we are already logged in on the web side
+            const token = await user.getIdToken();
             
-            // If the redirect failed because of a timeout, show a button instead
-            const subStatus = document.getElementById('sub-status');
-            subStatus.innerHTML = `<button onclick="location.reload()" style="background:#00ff41; color:#000; border:none; padding:10px; cursor:pointer; margin-top:10px;">RETRY HANDSHAKE</button>`;
+            statusEl.innerText = "RE-LINKING TO PIXELB8 DESKTOP...";
+            
+            // Send to Electron via deep link
+            setTimeout(() => {
+                window.location.href = `pixelb8://auth/${token}`;
+            }, 1500);
+
+        } else {
+            statusEl.innerText = "AWAITING GITHUB AUTHORIZATION...";
+            // If they aren't logged in, we trigger the popup/redirect 
+            // specifically for this domain.
+            const provider = new GithubAuthProvider();
+            // Using a simple redirect here since GitHub is already configured for Firebase
+            import { signInWithRedirect } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+            signInWithRedirect(auth, provider);
         }
-    }
-
-    window.onload = performAuth;
+    });
 </script>
 </body>
 </html>
