@@ -471,7 +471,7 @@ async function loadCommunityMarket() {
                 html += `
                     <div class="community-list-card" data-user-id="${item.userId}">
                         <div style="display:flex; justify-content:space-between; align-items:start;">
-                            <strong style="color:${isWtb ? '#0a3' : '#f93'};">${item.name}</strong>
+                            <strong style="color:${isWtb ? '#48bb78' : '#ed8936'};">${item.name}</strong>
                             <span style="font-size:0.85em; color:#666;">${item.displayName}</span>
                         </div>
                         <div style="margin:8px 0; font-size:1.1em;">
@@ -485,37 +485,60 @@ async function loadCommunityMarket() {
             html += '</div>';
             container.innerHTML = html;
         } else {
-            // Table view
-			let html = `<table class="tableTheme" style="width:100%; table-layout: fixed;">
-				<thead><tr>
-					<th style="width: var(--col-type-width, 80px);">Type</th>
-					<th style="width: var(--col-name-width, 220px);">Item</th>
-					<th style="width: var(--col-qty-width, 90px);">Qty</th>
-					<th style="width: var(--col-mu-width, 110px);">MU%</th>
-					<th style="width: var(--col-user-width, 160px);">User</th>
-					<th style="width: var(--col-date-width, 130px);">Last Updated</th>
-				</tr></thead><tbody>`;
+            // Table view - Standardized with global resizing classes
+            let html = `
+                <table class="tableTheme resizableTable" style="width:100%; table-layout: fixed; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th class="col-type" style="width: var(--col-type-width, 80px);">TYPE</th>
+                            <th class="col-name" style="width: var(--col-name-width, auto);">ITEM</th>
+                            <th class="col-qty" style="width: var(--col-qty-width, 90px);">QTY</th>
+                            <th class="col-mu" style="width: var(--col-mu-width, 100px);">MU%</th>
+                            <th class="col-player" style="width: var(--col-player-width, 150px);">USER</th>
+                            <th class="col-date" style="width: var(--col-date-width, 130px);">UPDATED</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
             
             items.forEach(item => {
                 const isWtb = item.type === 'wtb';
-                html += `<tr data-user-id="${item.userId}">
-                    <td style="color:${isWtb ? '#0a3' : '#f93'};">${isWtb ? 'Wtb' : 'Wts'}</td>
-                    <td><strong>${item.name}</strong></td>
-                    <td>${item.quantity || item.targetQty || 1}</td>
-                    <td>${item.mu || item.targetMu || 100}%</td>
-                    <td>${item.displayName}</td>
-                    <td>${new Date(item.updatedAt).toLocaleDateString()}</td>
-                </tr>`;
+                const statusColor = isWtb ? '#48bb78' : '#ed8936'; 
+                const updatedDate = new Date(item.updatedAt).toLocaleDateString();
+                const safeName = item.name.replace(/'/g, "\\'");
+
+                html += `
+                    <tr data-user-id="${item.userId}" data-nav-name="${safeName}" class="info-nav-link" style="cursor: pointer;">
+                        <td class="col-type" style="color: ${statusColor}; font-weight: bold;">
+                            ${isWtb ? 'WTB' : 'WTS'}
+                        </td>
+                        <td class="col-name">
+                            <strong style="color: #fff;">${item.name}</strong>
+                        </td>
+                        <td class="col-qty">
+                            ${item.quantity || item.targetQty || 1}
+                        </td>
+                        <td class="col-mu" style="color: #ecc94b;">
+                            ${item.mu || item.targetMu || 100}%
+                        </td>
+                        <td class="col-player" style="color: #4fd1c5;">
+                            ${item.displayName}
+                        </td>
+                        <td class="col-date" style="color: #666; font-size: 0.9em;">
+                            ${updatedDate}
+                        </td>
+                    </tr>`;
             });
+            
             html += `</tbody></table>`;
             container.innerHTML = html;
         }
-
+	initTableResizer();
     } catch (err) {
         console.error(err);
         container.innerHTML = `<p style="color:#f66; padding:40px;">Failed to load market data.</p>`;
     }
 }
+
 
 // ====================== COMMUNITY TAB EVENT LISTENERS ======================
 // ====================== GLOBAL EVENT LISTENERS ======================

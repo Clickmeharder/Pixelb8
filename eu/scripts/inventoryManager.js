@@ -2234,22 +2234,20 @@ function renderDetailedLocationTable(tbodyId, itemsArray) {
     const headerId = tbodyId.replace('-tbody', '-table-count');
     updateTableCountHeader(headerId, itemsArray);
 }
-
-const tableHeaders = document.querySelectorAll('th[class*="col-"]');
 function initTableResizer() {
-    const tableHeaders = document.querySelectorAll('.subtab-content th.sortable-header, .subtab-content th');
+    // Consolidated selector: targets all headers with a col- class across all tabs
+    const tableHeaders = document.querySelectorAll('th[class*="col-"]');
 
     tableHeaders.forEach(th => {
         let isResizing = false;
         let startX, startWidth, colClass;
 
-        // ── Mouse down ──
         th.addEventListener('mousedown', e => {
-            // Only trigger if clicking near the right edge (the "handle")
+            // Check for handle on right edge
             if (e.offsetX < th.offsetWidth - 12) return; 
 
-            // Find the specific class used for the CSS variable (e.g., col-name, col-tx-total)
             colClass = Array.from(th.classList).find(c => c.startsWith('col-'));
+            if (!colClass) return;
 
             isResizing = true;
             startX = e.pageX;
@@ -2260,7 +2258,6 @@ function initTableResizer() {
             document.body.style.cursor = 'col-resize';
         });
 
-        // ── Mouse move (global) ──
         const onMouseMove = e => {
             if (!isResizing) return;
 
@@ -2269,22 +2266,21 @@ function initTableResizer() {
 
             // === ENFORCE MINIMUM WIDTHS ===
             if (colClass === 'col-mu') {
-				newWidth = Math.max(newWidth, 130);
-			} else if (colClass === 'col-tx-total') {
-				newWidth = Math.max(newWidth, 100);
-			} else if (colClass === 'col-location') {
-				newWidth = Math.max(newWidth, 100); // Add a safe minimum for location
-			} else {
-				newWidth = Math.max(newWidth, 80);
-			}
-
-            // Update the CSS variable on the root document
-            if (colClass) {
-                document.documentElement.style.setProperty(`--${colClass}-width`, `${newWidth}px`);
+                newWidth = Math.max(newWidth, 110);
+            } else if (colClass === 'col-name') {
+                newWidth = Math.max(newWidth, 150);
+            } else if (colClass === 'col-player') {
+                newWidth = Math.max(newWidth, 140); // Standardize for Usernames
+            } else if (colClass === 'col-tx-total' || colClass === 'col-location') {
+                newWidth = Math.max(newWidth, 100);
+            } else {
+                newWidth = Math.max(newWidth, 60);
             }
+
+            // Update the CSS variable globally
+            document.documentElement.style.setProperty(`--${colClass}-width`, `${newWidth}px`);
         };
 
-        // ── Mouse up / cancel ──
         const stopResize = () => {
             if (!isResizing) return;
             isResizing = false;
@@ -2293,32 +2289,15 @@ function initTableResizer() {
             document.body.style.userSelect = '';
             document.body.style.cursor = '';
 
-            // Re-render the active table view to ensure alignment is perfect
-            handleResizeRedraw();
+            // NOTE: We removed heavy re-renders here because CSS variables 
+            // handle the visual stretching instantly.
+            console.log(`Column ${colClass} set to ${th.offsetWidth}px`);
         };
 
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', stopResize);
-        document.addEventListener('mouseleave', stopResize);
-
-        // Touch support for mobile devices
-        th.addEventListener('touchstart', e => {
-            if (e.touches.length !== 1) return;
-            const touch = e.touches[0];
-            const rect = th.getBoundingClientRect();
-            if (touch.clientX < rect.right - 20) return;
-
-            colClass = Array.from(th.classList).find(c => c.startsWith('col-'));
-
-            isResizing = true;
-            startX = touch.pageX;
-            startWidth = th.offsetWidth;
-            th.classList.add('is-resizing');
-        }, { passive: false });
     });
 }
-
-
 
 /**
  * Helper to redraw the correct virtual table after a column resize
