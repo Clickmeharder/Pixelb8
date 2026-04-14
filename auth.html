@@ -60,68 +60,64 @@
         <div id="sub-status" style="font-size: 10px; margin-top: 15px; color: #888;">GITHUB GATEWAY v1.1 - REDIRECT MODE</div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getAuth, signInWithRedirect, getRedirectResult, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, signInWithRedirect, getRedirectResult, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
-            authDomain: "pixelb8lol.firebaseapp.com",
-            projectId: "pixelb8lol",
-            storageBucket: "pixelb8lol.appspot.com",
-            messagingSenderId: "373700849652",
-            appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
-            measurementId: "G-5EGV2VNMX3"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
+        authDomain: "pixelb8lol.firebaseapp.com",
+        projectId: "pixelb8lol",
+        storageBucket: "pixelb8lol.appspot.com",
+        messagingSenderId: "373700849652",
+        appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
+        measurementId: "G-5EGV2VNMX3"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const statusEl = document.getElementById('status');
-        const provider = new GithubAuthProvider();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const statusEl = document.getElementById('status');
+    const provider = new GithubAuthProvider();
 
-        async function performAuth() {
-            try {
-                // 1. Check if we are returning from the GitHub redirect
-                const result = await getRedirectResult(auth);
+    async function performAuth() {
+        try {
+            // 1. Check if we just returned from GitHub
+            const result = await getRedirectResult(auth);
 
-                if (result) {
-                    // Success! We have returned from GitHub with a user
-                    const credential = GithubAuthProvider.credentialFromResult(result);
-                    const token = credential.accessToken; // This is the token Electron needs
-                    
-                    statusEl.innerText = "HANDSHAKE SUCCESSFUL.";
-                    
-                    setTimeout(() => {
-                        statusEl.innerText = "RE-LINKING TO DESKTOP...";
-                        window.location.href = `pixelb8://auth/${token}`;
-                    }, 1000);
-
-                    setTimeout(() => {
-                        statusEl.innerText = "SAFE TO CLOSE WINDOW.";
-                    }, 4000);
-
-                } else {
-                    // 2. We haven't started login yet, so trigger the redirect
-                    statusEl.innerText = "REDIRECTING TO GITHUB...";
-                    await signInWithRedirect(auth, provider);
-                }
-
-            } catch (error) {
-                console.error("Auth Bridge Error:", error);
-                statusEl.style.color = "#ff4141";
+            if (result) {
+                // SUCCESS: Returning from GitHub
+                const credential = GithubAuthProvider.credentialFromResult(result);
+                const token = credential.accessToken;
                 
-                if (error.code === 'auth/popup-blocked') {
-                    statusEl.innerText = "ERROR: POPUP BLOCKED. RETRYING...";
-                    // Fallback to redirect if popup fails for any reason
-                    signInWithRedirect(auth, provider);
+                statusEl.innerText = "HANDSHAKE SUCCESSFUL.";
+                sessionStorage.removeItem('pending_auth'); // Clear gatekeeper
+
+                setTimeout(() => {
+                    statusEl.innerText = "RE-LINKING TO DESKTOP...";
+                    window.location.href = `pixelb8://auth/${token}`;
+                }, 1000);
+
+            } else {
+                // 2. Gatekeeper: Only redirect if we haven't tried yet this session
+                if (!sessionStorage.getItem('pending_auth')) {
+                    statusEl.innerText = "REDIRECTING TO GITHUB...";
+                    sessionStorage.setItem('pending_auth', 'true'); // Set gatekeeper
+                    await signInWithRedirect(auth, provider);
                 } else {
-                    statusEl.innerText = "SYSTEM ERROR: " + error.code;
+                    // If we get here, it means we are waiting for the redirect result
+                    statusEl.innerText = "AWAITING GITHUB RESPONSE...";
                 }
             }
-        }
 
-        // Execute when page is ready
-        window.onload = performAuth;
-    </script>
+        } catch (error) {
+            console.error("Auth Bridge Error:", error);
+            sessionStorage.removeItem('pending_auth'); // Clear on error so user can retry
+            statusEl.style.color = "#ff4141";
+            statusEl.innerText = "ERROR: " + error.code;
+        }
+    }
+
+    window.onload = performAuth;
+</script>
 </body>
 </html>
