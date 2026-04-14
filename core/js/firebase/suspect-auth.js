@@ -486,10 +486,15 @@ async function loadCommunityMarket() {
             container.innerHTML = html;
         } else {
             // Table view
-            let html = `<table class="tableTheme" style="width:100%;">
-                <thead><tr>
-                    <th>Type</th><th>Item</th><th>Qty</th><th>MU%</th><th>User</th><th>Last Updated</th>
-                </tr></thead><tbody>`;
+			let html = `<table class="tableTheme" style="width:100%; table-layout: fixed;">
+				<thead><tr>
+					<th style="width: var(--col-type-width, 80px);">Type</th>
+					<th style="width: var(--col-name-width, 220px);">Item</th>
+					<th style="width: var(--col-qty-width, 90px);">Qty</th>
+					<th style="width: var(--col-mu-width, 110px);">MU%</th>
+					<th style="width: var(--col-user-width, 160px);">User</th>
+					<th style="width: var(--col-date-width, 130px);">Last Updated</th>
+				</tr></thead><tbody>`;
             
             items.forEach(item => {
                 const isWtb = item.type === 'wtb';

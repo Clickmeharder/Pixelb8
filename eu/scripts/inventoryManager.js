@@ -2327,7 +2327,7 @@ function initTableResizer() {
  * Helper to redraw the correct components after a column resize
  * Ensures all visible tables snap to the new CSS variable widths
  */
-function handleResizeRedraw() {
+/* function handleResizeRedraw() {
     const mainTab = document.getElementById('InventoryTabA'); 
     const buyingTab = document.getElementById('InventoryTabC');
     const historyTab = document.getElementById('InventoryTabD'); 
@@ -2357,19 +2357,53 @@ function handleResizeRedraw() {
         // (like a summary or "Sell MU" preview), redraw those here too:
         if (typeof renderSellMUTable === 'function') renderSellMUTable();
     }
-	// 4. Community Market Tab (Tab D) - if you have virtual tables here later
-    if (document.getElementById('InventoryTabD')?.style.display !== 'none') {
-        // Add redraw for community market if it becomes virtualized later
-        if (typeof loadCommunityMarket === 'function') {
-            loadCommunityMarket();
-        }
-    }
+    
     // 4. Always update the Sidebar Log 
     // This ensures the mini-trade-logger in the sidebar stays aligned
     if (typeof renderSidebarLog === 'function') {
         renderSidebarLog();
     }
+} */
+function handleResizeRedraw() {
+    console.log("🔄 Column resize detected - redrawing visible tables");
+
+    // 1. Full Inventory List (Tab A)
+    if (document.getElementById('InventoryTabA')?.style.display !== 'none') {
+        if (typeof renderFullInventoryList === 'function') {
+            renderFullInventoryList();
+        }
+    }
+
+    // 2. Trade Tab (Tab C - Buying/Selling lists)
+    if (document.getElementById('InventoryTabC')?.style.display !== 'none') {
+        if (typeof renderBuyingList === 'function') renderBuyingList();
+        if (typeof renderSellMUTable === 'function') renderSellMUTable();
+    }
+
+    // 3. Community Market Tab (Tab D) ← This was missing proper support
+    const communityTab = document.getElementById('InventoryTabD');
+    if (communityTab && communityTab.style.display !== 'none') {
+        if (typeof loadCommunityMarket === 'function') {
+            loadCommunityMarket();        // Re-render the market with new widths
+        }
+    }
+
+    // 4. Undecided / Decision Queue (Tab B)
+    if (document.getElementById('InventoryTabB')?.style.display !== 'none') {
+        if (typeof renderFilteredUndecided === 'function') {
+            renderFilteredUndecided();
+        }
+    }
+
+    // Force table layout recalculation on all tables
+    document.querySelectorAll('table.tableTheme').forEach(table => {
+        table.style.tableLayout = 'fixed';
+        // Small reflow trick
+        void table.offsetWidth;
+    });
 }
+
+
 function updateSortIcons(tbodyId, config) {
     const table = document.getElementById(tbodyId)?.closest('table');
     if (!table || !config) return;
