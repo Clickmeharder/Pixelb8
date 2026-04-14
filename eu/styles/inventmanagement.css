@@ -1058,17 +1058,6 @@ table {
 	max-width: 35%;
 }
 
-.subtab-content th.col-location,
-.subtab-content td.col-location,
-.subtab-content th.col-decision,
-.subtab-content td.col-decision {
-    width: auto !important;
-    min-width: 100px;
-    flex: 1 1 var(--col-location-width, 120px);
-    display: table-cell;
-}
-
-
 /* 1. Modify the Name column to be less aggressive */
 .subtab-content .col-name { 
     width: var(--col-name-width); 
