@@ -298,10 +298,11 @@ async function saveMyBuyingList() {
             userId: user.uid,
             displayName: user.displayName || "Anonymous",
             buyingList: inventoryState.buyingList || [],
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
+            itemCount: (inventoryState.buyingList || []).length
         });
 
-        alert("✅ Your Buying List has been saved publicly and is now visible in the Community tab.");
+        alert(`✅ Your Buying List has been saved publicly (${(inventoryState.buyingList || []).length} items).`);
         console.log("✅ Buying list saved successfully");
     } catch (error) {
         console.error("Error saving buying list:", error);
@@ -310,6 +311,7 @@ async function saveMyBuyingList() {
 }
 
 // Save current Selling List (items marked SELL_MU)
+// Save current Selling List (items marked SELL_MU) - FIXED
 async function saveMySellingList() {
     const user = auth.currentUser;
     if (!user) {
@@ -317,32 +319,50 @@ async function saveMySellingList() {
         return;
     }
 
+    // Filter only items marked for selling at markup
     const sellingItems = Object.values(inventoryState.decisions || {})
         .filter(dec => dec.type === 'SELL_MU')
-        .map(dec => ({
-            itemId: dec.itemId,
-            name: inventoryState.items[dec.itemId]?.name || "Unknown",
-            quantity: inventoryState.items[dec.itemId]?.quantity || 0,
-            mu: dec.meta?.mu || 100,
-            totalValue: inventoryState.items[dec.itemId]?.totalValue || 0
-        }));
+        .map(dec => {
+            const item = inventoryState.items[dec.itemId] || {};
+            return {
+                itemId: dec.itemId || "",
+                name: item.name || "Unknown Item",
+                quantity: item.quantity || 0,
+                mu: dec.meta?.mu || 100,                    // default to 100 if missing
+                totalValue: item.totalValue || 0,
+                // Add safe fallbacks for any other fields you might use later
+                ttValue: item.value || 0,
+                location: item.location || "Unknown"
+            };
+        })
+        // Optional: Remove any completely empty entries
+        .filter(item => item.name !== "Unknown Item" || item.quantity > 0);
+
+    // Final safety check - ensure no undefined values
+    const cleanSellingItems = sellingItems.map(item => {
+        const clean = {};
+        Object.keys(item).forEach(key => {
+            clean[key] = item[key] !== undefined ? item[key] : null;
+        });
+        return clean;
+    });
 
     try {
         await setDoc(doc(db, "UserSellingLists", user.uid), {
             userId: user.uid,
             displayName: user.displayName || "Anonymous",
-            sellingList: sellingItems,
-            updatedAt: new Date().toISOString()
+            sellingList: cleanSellingItems,
+            updatedAt: new Date().toISOString(),
+            itemCount: cleanSellingItems.length
         });
 
-        alert("✅ Your Selling List has been saved publicly and is now visible in the Community tab.");
+        alert(`✅ Your Selling List has been saved publicly (${cleanSellingItems.length} items).`);
         console.log("✅ Selling list saved successfully");
     } catch (error) {
         console.error("Error saving selling list:", error);
         alert("Failed to save selling list. See console for details.");
     }
 }
-
 // ====================== COMMUNITY MARKET FUNCTIONS ======================
 // ====================== COMMUNITY MARKET ======================
 
