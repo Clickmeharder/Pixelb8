@@ -80,40 +80,50 @@
     const provider = new GithubAuthProvider();
 
     async function performAuth() {
+        // 1. Check if the URL has GitHub return parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasGithubParams = urlParams.has('code') || urlParams.has('state');
+
         try {
-            // 1. Check if we just returned from GitHub
+            statusEl.innerText = "CHECKING HANDSHAKE STATUS...";
+            
+            // 2. Attempt to catch the redirect result
             const result = await getRedirectResult(auth);
 
             if (result) {
-                // SUCCESS: Returning from GitHub
+                // SUCCESS: User is back from GitHub and verified
                 const credential = GithubAuthProvider.credentialFromResult(result);
                 const token = credential.accessToken;
                 
                 statusEl.innerText = "HANDSHAKE SUCCESSFUL.";
-                sessionStorage.removeItem('pending_auth'); // Clear gatekeeper
-
+                
                 setTimeout(() => {
                     statusEl.innerText = "RE-LINKING TO DESKTOP...";
                     window.location.href = `pixelb8://auth/${token}`;
                 }, 1000);
+                return; // Stop execution here
+            }
 
+            // 3. The Loop-Breaker Logic
+            // If we DON'T have a result, AND the URL doesn't look like a return trip...
+            // THEN it's safe to start a new redirect.
+            if (!hasGithubParams) {
+                statusEl.innerText = "REDIRECTING TO GITHUB GATEWAY...";
+                await signInWithRedirect(auth, provider);
             } else {
-                // 2. Gatekeeper: Only redirect if we haven't tried yet this session
-                if (!sessionStorage.getItem('pending_auth')) {
-                    statusEl.innerText = "REDIRECTING TO GITHUB...";
-                    sessionStorage.setItem('pending_auth', 'true'); // Set gatekeeper
-                    await signInWithRedirect(auth, provider);
-                } else {
-                    // If we get here, it means we are waiting for the redirect result
-                    statusEl.innerText = "AWAITING GITHUB RESPONSE...";
-                }
+                // If we HAVE GitHub params but NO result yet, just wait. 
+                // Don't trigger a new redirect or you'll loop.
+                statusEl.innerText = "FINALIZING GITHUB HANDSHAKE...";
             }
 
         } catch (error) {
             console.error("Auth Bridge Error:", error);
-            sessionStorage.removeItem('pending_auth'); // Clear on error so user can retry
             statusEl.style.color = "#ff4141";
-            statusEl.innerText = "ERROR: " + error.code;
+            statusEl.innerText = "HANDSHAKE FAILED: " + error.code;
+            
+            // If the redirect failed because of a timeout, show a button instead
+            const subStatus = document.getElementById('sub-status');
+            subStatus.innerHTML = `<button onclick="location.reload()" style="background:#00ff41; color:#000; border:none; padding:10px; cursor:pointer; margin-top:10px;">RETRY HANDSHAKE</button>`;
         }
     }
 
