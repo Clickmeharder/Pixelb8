@@ -1117,23 +1117,23 @@ th[class*="col-"]::after {
 
 /* Force all virtualized rows to respect the height variable strictly */
 .inventory-row {
-    display: flex !important;
+/*     display: flex !important;
     align-items: center;
     overflow: hidden;
-    padding: 0 !important; /* Rows should not have padding */
+    padding: 0 !important; 
     margin: 0 !important;
-    border-bottom: 1px solid rgba(255,255,255,0.05); /* Optional: visual separator */
+    border-bottom: 1px solid rgba(255,255,255,0.05);  */
 }
 
 /* Ensure cells don't expand the row */
 .inventory-row td {
-/*     display: flex;
+    display: flex;
     align-items: center;
     height: 100%;
     padding: 0 8px !important; 
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; */
+    text-overflow: ellipsis;
 }
 
 /* Container for the MU input to show the % sign visually */
