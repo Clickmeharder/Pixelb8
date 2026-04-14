@@ -1091,7 +1091,29 @@ th[class*="col-"]::after {
     width: 1px;
     background: rgba(255,255,255,0.05);
 }
+/* Force headers and cells to calculate width exactly the same way */
+.tableTheme th, 
+.tableTheme td {
+    box-sizing: border-box; 
+    padding: 8px 12px; /* Ensure this matches across all tabs */
+    text-align: left;
+    vertical-align: middle;
+}
 
+/* Ensure the Name column in the header matches the body logic */
+.tableTheme th.col-name {
+    width: var(--col-name-width, auto) !important;
+    min-width: 150px;
+}
+/* Add the same indentation to the header text so it aligns with the data */
+.tableTheme th.col-name {
+    padding-left: 24px; /* Adjust this number until 'ITEM' sits right over the names */
+}
+
+/* OR, if the rows have a specific margin/padding for the 'zipper' effect */
+.tableTheme td.col-name {
+    padding-left: 24px; 
+}
 
 
 /* Container for the MU input to show the % sign visually */
