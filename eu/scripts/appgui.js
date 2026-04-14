@@ -408,7 +408,7 @@ function handleRetroToggle(checkboxId, storageKey, onToggleCallback) {
         if (onToggleCallback) onToggleCallback(isOn);
     });
 }
-document.getElementById('toggleIncludeMU').addEventListener('change', (e) => {
+/* document.getElementById('toggleIncludeMU').addEventListener('change', (e) => {
     window.includeMUInCraftingCost = e.target.checked;
     
     // Recalculate and update overlay immediately
@@ -416,7 +416,7 @@ document.getElementById('toggleIncludeMU').addEventListener('change', (e) => {
         calculate(); 
     }
     if (guiDebug) console.log("Crafting MU inclusion set to:", window.includeMUInCraftingCost);
-});
+}); */
 // Run after DOM/stats are loaded
 
 

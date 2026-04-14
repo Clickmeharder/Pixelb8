@@ -1393,7 +1393,7 @@ function handleVirtualScroll(tableKey) {
     }
 }
 
-async function saveDecisions() {
+/* async function saveDecisions() {
     if (window.electronAPI) {
         // Save the decisions object
         await window.electronAPI.saveAppState('inventoryDecisions', inventoryState.decisions);
@@ -1424,6 +1424,58 @@ async function loadDecisions() {
         }
         
         promptNextDecision();
+    }
+} */
+// ================= WEB VERSION - SAVE & LOAD DECISIONS + BUYING LIST =================
+
+async function saveDecisions() {
+    try {
+        // Save decisions (Save/Sell/Craft choices)
+        localStorage.setItem('inventoryDecisions', JSON.stringify(inventoryState.decisions || {}));
+
+        // Save buying list
+        localStorage.setItem('inventoryBuyingList', JSON.stringify(inventoryState.buyingList || []));
+
+        console.log("💾 Decisions & Buying List saved to localStorage");
+    } catch (err) {
+        console.error("Failed to save decisions/buying list:", err);
+    }
+}
+
+async function loadDecisions() {
+    try {
+        // Load decisions
+        const savedDecisions = localStorage.getItem('inventoryDecisions');
+        if (savedDecisions) {
+            inventoryState.decisions = JSON.parse(savedDecisions);
+            console.log(`✅ Loaded ${Object.keys(inventoryState.decisions).length} decisions`);
+        }
+
+        // Load buying list
+        const savedBuyingList = localStorage.getItem('inventoryBuyingList');
+        if (savedBuyingList) {
+            inventoryState.buyingList = JSON.parse(savedBuyingList);
+            console.log(`✅ Loaded ${inventoryState.buyingList.length} buying items`);
+        }
+
+        // Refresh UI
+        rebuildDecisionQueue();
+        updateSummary();
+
+        if (typeof renderFullInventoryList === 'function') {
+            renderFullInventoryList();
+        }
+        if (typeof renderBuyingList === 'function') {
+            renderBuyingList();
+        }
+
+        promptNextDecision();
+
+    } catch (err) {
+        console.error("Failed to load decisions/buying list:", err);
+        // Fallback to empty state
+        inventoryState.decisions = {};
+        inventoryState.buyingList = [];
     }
 }
 function rebuildDecisionQueue() {
