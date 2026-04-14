@@ -50,6 +50,20 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .glitch { font-size: 12px; letter-spacing: 3px; animation: flicker 0.1s infinite; text-transform: uppercase; }
         @keyframes flicker { 0% { opacity: 0.9; } 100% { opacity: 1; } }
+        
+        /* New Button Style */
+        #loginbutt {
+            margin-top: 20px;
+            background: #00ff41;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            font-weight: bold;
+            display: block;
+        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -57,15 +71,14 @@
     <div class="status-container">
         <div class="loader"></div>
         <div id="status" class="glitch">INITIALIZING HANDSHAKE...</div>
-        <div id="sub-status" style="font-size: 10px; margin-top: 15px; color: #888;">GITHUB GATEWAY v1.1 - REDIRECT MODE</div>
+        <button id="loginbutt" class="hidden">MANUAL LOGIN</button>
+        <div id="sub-status" style="font-size: 10px; margin-top: 15px; color: #888;">GITHUB GATEWAY v1.1 - BRIDGE MODE</div>
     </div>
 
 <script type="module">
-  // --- YOUR EXISTING IMPORTS ---
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getAuth, signInWithPopup, GithubAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
-  // --- YOUR CONFIG ---
   const firebaseConfig = {
     apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
     authDomain: "pixelb8lol.firebaseapp.com",
@@ -80,27 +93,21 @@
   const auth = getAuth(app);
   const provider = new GithubAuthProvider();
   const statusEl = document.getElementById('status');
+  const loginBtn = document.getElementById('loginbutt');
 
-  // --- THE MODIFIED LISTENER ---
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // === USER IS LOGGED IN ===
       statusEl.innerText = "AUTHENTICATED: " + (user.displayName || "Colonist");
+      if(loginBtn) loginBtn.classList.add('hidden');
       
       try {
-        // 1. Get the token needed for the Desktop Handshake
-        // We use getIdToken(true) to force a fresh token for the app
         const token = await user.getIdToken(true);
-        
         statusEl.innerText = "SHOUTING TO DESKTOP...";
 
-        // 2. Perform the Deep Link Shout
-        // This triggers handleDeepLink(url) in your engineroom.js
         setTimeout(() => {
           window.location.href = `pixelb8://auth/${token}`;
         }, 1500);
 
-        // 3. UI Cleanup
         setTimeout(() => {
           statusEl.innerText = "HANDSHAKE COMPLETE. YOU MAY CLOSE THIS TAB.";
         }, 4000);
@@ -110,26 +117,22 @@
         statusEl.innerText = "BRIDGE ERROR: " + e.message;
       }
     } else {
-      // === USER IS LOGGED OUT ===
       statusEl.innerText = "INITIALIZING GITHUB GATEWAY...";
       
-      // Since this is the bridge page, we auto-trigger the login
-      // We use popup here because it's a real browser window
       signInWithPopup(auth, provider).catch((error) => {
-        console.error("Popup blocked or closed:", error);
-        statusEl.innerText = "CLICK 'LOGIN' TO START HANDSHAKE";
-        
-        // Show your existing login button if the auto-popup fails
-        const loginBtn = document.getElementById('loginbutt');
+        console.error("Popup blocked:", error);
+        statusEl.innerText = "ACTION REQUIRED: START HANDSHAKE";
         if(loginBtn) loginBtn.classList.remove('hidden');
       });
     }
   });
 
-  // Keep your existing event listeners for the manual buttons just in case
-  document.getElementById('loginbutt').addEventListener('click', () => {
-    signInWithPopup(auth, provider);
-  });
+  // Safety check for the listener
+  if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+      signInWithPopup(auth, provider);
+    });
+  }
 </script>
 </body>
 </html>
