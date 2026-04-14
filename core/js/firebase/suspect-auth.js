@@ -344,133 +344,127 @@ async function saveMySellingList() {
 }
 
 // ====================== COMMUNITY MARKET FUNCTIONS ======================
+// ====================== COMMUNITY MARKET ======================
 
-// Switch between Buying and Selling subtabs
-function switchCommunitySubtab(tab) {
-    document.getElementById('communityBuying').style.display = (tab === 'buying') ? 'block' : 'none';
-    document.getElementById('communitySelling').style.display = (tab === 'selling') ? 'block' : 'none';
+let currentMarketFilter = 'both'; // 'wtb', 'wts', or 'both'
 
-    document.getElementById('communityBuyingTabBtn').classList.toggle('active-subtab', tab === 'buying');
-    document.getElementById('communitySellingTabBtn').classList.toggle('active-subtab', tab === 'selling');
-}
-
-// Load Public Buying Lists
-async function loadCommunityBuyingLists() {
-    const container = document.getElementById('communityBuyingContainer');
-    if (!container) return;
-
-    container.innerHTML = `<p style="text-align:center; color:#888; padding:60px;">Loading public buying lists...</p>`;
+async function loadCommunityMarket() {
+    const container = document.getElementById('market-container');
+    container.innerHTML = `<p style="text-align:center; color:#888; padding:80px;">Loading community market...</p>`;
 
     try {
-        const snapshot = await getDocs(collection(db, "UserBuyingLists"));
-        if (snapshot.empty) {
-            container.innerHTML = `<p style="color:#888; text-align:center; padding:60px;">No public buying lists yet.<br>Be the first to publish yours!</p>`;
-            return;
-        }
+        const [buyingSnap, sellingSnap] = await Promise.all([
+            getDocs(collection(db, "UserBuyingLists")),
+            getDocs(collection(db, "UserSellingLists"))
+        ]);
 
-        let html = '';
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const count = data.buyingList ? data.buyingList.length : 0;
-            html += `
-                <div class="community-list-card" data-type="buying" data-user-id="${doc.id}">
-                    <strong>${data.displayName || 'Anonymous'}</strong>
-                    <span style="float:right; color:#0a3;">${count} items wanted</span><br>
-                    <small style="color:#666;">Updated ${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'Unknown'}</small>
-                </div>`;
-        });
-        container.innerHTML = html;
-    } catch (err) {
-        console.error(err);
-        container.innerHTML = `<p style="color:#f66; padding:40px;">Failed to load buying lists.</p>`;
-    }
-}
+        let items = [];
 
-// Load Public Selling Lists
-async function loadCommunitySellingLists() {
-    const container = document.getElementById('communitySellingContainer');
-    if (!container) return;
-
-    container.innerHTML = `<p style="text-align:center; color:#888; padding:60px;">Loading public selling lists...</p>`;
-
-    try {
-        const snapshot = await getDocs(collection(db, "UserSellingLists"));
-        if (snapshot.empty) {
-            container.innerHTML = `<p style="color:#888; text-align:center; padding:60px;">No public selling lists yet.</p>`;
-            return;
-        }
-
-        let html = '';
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const count = data.sellingList ? data.sellingList.length : 0;
-            html += `
-                <div class="community-list-card" data-type="selling" data-user-id="${doc.id}">
-                    <strong>${data.displayName || 'Anonymous'}</strong>
-                    <span style="float:right; color:#f93;">${count} items for sale</span><br>
-                    <small style="color:#666;">Updated ${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'Unknown'}</small>
-                </div>`;
-        });
-        container.innerHTML = html;
-    } catch (err) {
-        console.error(err);
-        container.innerHTML = `<p style="color:#f66; padding:40px;">Failed to load selling lists.</p>`;
-    }
-}
-
-// View a specific user's buying list in modal
-async function viewUserBuyingList(userId) {
-    console.log(`Viewing buying list for user: ${userId}`);
-
-    try {
-        const docSnap = await getDoc(doc(db, "UserBuyingLists", userId));
-        if (!docSnap.exists()) {
-            alert("This user's buying list could not be found.");
-            return;
-        }
-
-        const data = docSnap.data();
-        let html = `<h3 style="color:#0af;">${data.displayName || 'Anonymous'}'s Buying List</h3><hr style="border-color:#333;">`;
-
-        if (!data.buyingList || data.buyingList.length === 0) {
-            html += `<p style="color:#888; text-align:center;">This user has no items in their buying list.</p>`;
-        } else {
-            data.buyingList.forEach(item => {
-                html += `
-                    <div style="padding:10px; background:#1f1f1f; margin:8px 0; border-radius:6px;">
-                        <strong>${item.name}</strong> × ${item.targetQty || 1} 
-                        @ ${item.targetMu || 100}% MU
-                    </div>`;
+        // Process Buying Lists (Wtb)
+        if (currentMarketFilter === 'wtb' || currentMarketFilter === 'both') {
+            buyingSnap.forEach(doc => {
+                const data = doc.data();
+                if (data.buyingList) {
+                    data.buyingList.forEach(item => {
+                        items.push({
+                            ...item,
+                            type: 'wtb',
+                            userId: doc.id,
+                            displayName: data.displayName || 'Anonymous',
+                            updatedAt: data.updatedAt
+                        });
+                    });
+                }
             });
         }
 
-        const modal = document.createElement('div');
-        modal.id = 'viewListModal';
-        modal.style.cssText = `
-            position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-            background:#111; border:2px solid #0af; padding:25px; width:90%; max-width:580px;
-            max-height:85vh; overflow-y:auto; border-radius:10px; z-index:100000; color:#ddd;
-        `;
+        // Process Selling Lists (Wts)
+        if (currentMarketFilter === 'wts' || currentMarketFilter === 'both') {
+            sellingSnap.forEach(doc => {
+                const data = doc.data();
+                if (data.sellingList) {
+                    data.sellingList.forEach(item => {
+                        items.push({
+                            ...item,
+                            type: 'wts',
+                            userId: doc.id,
+                            displayName: data.displayName || 'Anonymous',
+                            updatedAt: data.updatedAt
+                        });
+                    });
+                }
+            });
+        }
 
-        modal.innerHTML = html + `
-            <div style="text-align:center; margin-top:20px;">
-                <button id="closeViewModalBtn" style="padding:10px 24px; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">
-                    Close
-                </button>
-            </div>`;
+        // Simple search filter
+        const searchTerm = document.getElementById('market-search').value.toLowerCase().trim();
+        if (searchTerm) {
+            items = items.filter(item => 
+                (item.name && item.name.toLowerCase().includes(searchTerm)) ||
+                (item.displayName && item.displayName.toLowerCase().includes(searchTerm))
+            );
+        }
 
-        document.body.appendChild(modal);
+        if (items.length === 0) {
+            container.innerHTML = `<p style="color:#888; text-align:center; padding:80px;">No matching items found.</p>`;
+            return;
+        }
 
-    } catch (error) {
-        console.error("Error viewing user list:", error);
-        alert("Could not load this buying list.");
+        const viewMode = document.getElementById('market-view-mode').value;
+
+        if (viewMode === 'cards') {
+            let html = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:15px;">';
+            items.forEach(item => {
+                const isWtb = item.type === 'wtb';
+                html += `
+                    <div class="community-list-card" data-user-id="${item.userId}">
+                        <div style="display:flex; justify-content:space-between; align-items:start;">
+                            <strong style="color:${isWtb ? '#0a3' : '#f93'};">${item.name}</strong>
+                            <span style="font-size:0.85em; color:#666;">${item.displayName}</span>
+                        </div>
+                        <div style="margin:8px 0; font-size:1.1em;">
+                            ${isWtb ? 'Wanted:' : 'For Sale:'} 
+                            <strong>${item.quantity || item.targetQty || 1}</strong> 
+                            @ ${item.mu || item.targetMu || 100}%
+                        </div>
+                        <small style="color:#666;">${new Date(item.updatedAt).toLocaleDateString()}</small>
+                    </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        } else {
+            // Table view
+            let html = `<table class="tableTheme" style="width:100%;">
+                <thead><tr>
+                    <th>Type</th><th>Item</th><th>Qty</th><th>MU%</th><th>User</th><th>Last Updated</th>
+                </tr></thead><tbody>`;
+            
+            items.forEach(item => {
+                const isWtb = item.type === 'wtb';
+                html += `<tr data-user-id="${item.userId}">
+                    <td style="color:${isWtb ? '#0a3' : '#f93'};">${isWtb ? 'Wtb' : 'Wts'}</td>
+                    <td><strong>${item.name}</strong></td>
+                    <td>${item.quantity || item.targetQty || 1}</td>
+                    <td>${item.mu || item.targetMu || 100}%</td>
+                    <td>${item.displayName}</td>
+                    <td>${new Date(item.updatedAt).toLocaleDateString()}</td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = `<p style="color:#f66; padding:40px;">Failed to load market data.</p>`;
     }
 }
 
 // ====================== COMMUNITY TAB EVENT LISTENERS ======================
+// ====================== GLOBAL EVENT LISTENERS ======================
 document.addEventListener('click', (e) => {
 
-    // Save buttons (in InventoryTabC)
+    // ==================== SAVE BUTTONS (in InventoryTabC) ====================
     if (e.target.id === 'saveMyBuyingListBtn') {
         saveMyBuyingList();
     }
@@ -478,7 +472,9 @@ document.addEventListener('click', (e) => {
         saveMySellingList();
     }
 
-    // Community subtab switching
+    // ==================== COMMUNITY MARKET TAB ====================
+
+    // Subtab switching inside Community tab
     if (e.target.id === 'communityBuyingTabBtn') {
         switchCommunitySubtab('buying');
     }
@@ -486,12 +482,40 @@ document.addEventListener('click', (e) => {
         switchCommunitySubtab('selling');
     }
 
-    // Browse buttons
+    // Browse / Refresh buttons
     if (e.target.id === 'browseCommunityBuyingBtn') {
         loadCommunityBuyingLists();
     }
     if (e.target.id === 'browseCommunitySellingBtn') {
         loadCommunitySellingLists();
+    }
+    if (e.target.id === 'btn-refresh-market') {
+        loadCommunityMarket();        // for the unified version
+    }
+
+    // Filter buttons in unified market
+    if (e.target.id === 'btn-show-wtb') {
+        currentMarketFilter = 'wtb';
+        document.querySelectorAll('#InventoryTabD .stat-tab-btn').forEach(btn => btn.classList.remove('active-filter'));
+        e.target.classList.add('active-filter');
+        loadCommunityMarket();
+    }
+    if (e.target.id === 'btn-show-wts') {
+        currentMarketFilter = 'wts';
+        document.querySelectorAll('#InventoryTabD .stat-tab-btn').forEach(btn => btn.classList.remove('active-filter'));
+        e.target.classList.add('active-filter');
+        loadCommunityMarket();
+    }
+    if (e.target.id === 'btn-show-both') {
+        currentMarketFilter = 'both';
+        document.querySelectorAll('#InventoryTabD .stat-tab-btn').forEach(btn => btn.classList.remove('active-filter'));
+        e.target.classList.add('active-filter');
+        loadCommunityMarket();
+    }
+
+    // View mode change
+    if (e.target.id === 'market-view-mode') {
+        loadCommunityMarket();
     }
 
     // Click on community list card
@@ -501,7 +525,7 @@ document.addEventListener('click', (e) => {
         const type = card.dataset.type;
         if (userId) {
             if (type === 'buying') viewUserBuyingList(userId);
-            // TODO: Add viewUserSellingList() when ready
+            // Add viewUserSellingList(userId) later if needed
         }
     }
 

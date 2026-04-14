@@ -1926,44 +1926,31 @@ div#bpbuttonDiv {
 
 								  <div class="subtabs-header">
 									<h2><i class="fas fa-store text-purple-400 mr-2"></i> Community Market</h2>
-									<div class="subtabs">
-									  <button id="communityBuyingTabBtn" class="subtab-btn stat-tab-btn active-subtab" data-subtab="communityBuying">
-										<i class="fas fa-shopping-cart mr-1"></i> Buying Lists (Wtb)
-									  </button>
-									  <button id="communitySellingTabBtn" class="subtab-btn stat-tab-btn" data-subtab="communitySelling">
-										<i class="fas fa-tag mr-1"></i> Selling Lists (Wts)
-									  </button>
-									</div>
 								  </div>
 
-								  <!-- Buying Lists Panel -->
-								  <div id="communityBuying" class="community-subtab-content" style="display: block;">
-									<div class="grid-card">
-									  <div class="collapsible-header">
-										<h3><i class="fas fa-shopping-cart text-green-400"></i> Public Buying Lists</h3>
-									  </div>
-									  <div style="padding: 20px;">
-										<button id="browseCommunityBuyingBtn" class="stat-tab-btn" style="width:100%; padding:14px; font-size:1.05em; margin-bottom:20px;">
-										  👥 Browse All Community Buying Lists
-										</button>
-										<div id="communityBuyingContainer" class="community-container"></div>
-									  </div>
-									</div>
+								  <!-- Controls -->
+								  <div style="padding:15px 20px; background:#111; border-bottom:1px solid #333; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+									
+									<button id="btn-show-wtb" class="stat-tab-btn active-filter">🛒 Items Wanted (Wtb)</button>
+									<button id="btn-show-wts" class="stat-tab-btn">🏷️ Items For Sale (Wts)</button>
+									<button id="btn-show-both" class="stat-tab-btn">Both</button>
+
+									<input type="text" id="market-search" placeholder="Search item, type, or username..." 
+										   style="flex:1; min-width:280px; padding:10px; background:#1a1a1a; border:1px solid #444; color:#fff;">
+
+									<select id="market-view-mode" class="stat-tab-btn">
+									  <option value="cards">Card View</option>
+									  <option value="table">Table View</option>
+									</select>
+
+									<button id="btn-refresh-market" class="stat-tab-btn">
+									  <i class="fas fa-sync"></i> Refresh
+									</button>
 								  </div>
 
-								  <!-- Selling Lists Panel -->
-								  <div id="communitySelling" class="community-subtab-content" style="display: none;">
-									<div class="grid-card">
-									  <div class="collapsible-header">
-										<h3><i class="fas fa-tag text-yellow-400"></i> Public Selling Lists</h3>
-									  </div>
-									  <div style="padding: 20px;">
-										<button id="browseCommunitySellingBtn" class="stat-tab-btn" style="width:100%; padding:14px; font-size:1.05em; margin-bottom:20px;">
-										  👥 Browse All Community Selling Lists
-										</button>
-										<div id="communitySellingContainer" class="community-container"></div>
-									  </div>
-									</div>
+								  <!-- Main Content Area -->
+								  <div id="market-container" style="padding:20px; min-height:500px;">
+									<!-- Dynamic content loaded here -->
 								  </div>
 
 								</div>
