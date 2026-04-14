@@ -2195,7 +2195,7 @@ function renderTable(type, tbodyId) {
 	updateTableCountHeader(countHeaderId, itemsToRender);
 }
 
-/* function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
+function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
     // Special handling for Full List to ensure consistent IDs
     let tbodyId, scrollContainerId;
     if (tableKey === 'FULL_LIST_TABLE') {
@@ -2239,9 +2239,9 @@ function renderTable(type, tbodyId) {
     handleVirtualScroll(tableKey);
     scrollContainer.onscroll = () => handleVirtualScroll(tableKey);
 }
- */
 
-function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
+
+/* function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
     // 1. Resolve IDs based on the tableKey
     let tbodyId, scrollContainerId;
 
@@ -2309,7 +2309,7 @@ function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
     handleVirtualScroll(tableKey);
     scrollContainer.onscroll = () => handleVirtualScroll(tableKey);
 }
-
+ */
 function renderDetailedLocationTable(tbodyId, itemsArray) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
