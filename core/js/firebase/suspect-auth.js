@@ -312,6 +312,7 @@ async function saveMyBuyingList() {
 
 // Save current Selling List (items marked SELL_MU)
 // Save current Selling List (items marked SELL_MU) - FIXED
+// Save current Selling List - DEBUG + ROBUST VERSION
 async function saveMySellingList() {
     const user = auth.currentUser;
     if (!user) {
@@ -319,51 +320,81 @@ async function saveMySellingList() {
         return;
     }
 
-    // Filter only items marked for selling at markup
-    const sellingItems = Object.values(inventoryState.decisions || {})
-        .filter(dec => dec.type === 'SELL_MU')
-        .map(dec => {
+    console.log("🔍 Starting saveMySellingList...");
+
+    const decisions = inventoryState.decisions || {};
+    console.log("Total decisions found:", Object.keys(decisions).length);
+
+    const sellingItems = [];
+
+    // Scan all decisions for SELL_MU
+    Object.entries(decisions).forEach(([key, dec]) => {
+        console.log(`Decision ${key}: type=${dec.type}, action=${dec.action}`);
+
+        if (dec.type === 'SELL_MU' || dec.action === 'sell_mu' || key.includes('sell_mu')) {
             const item = inventoryState.items[dec.itemId] || {};
-            return {
-                itemId: dec.itemId || "",
-                name: item.name || "Unknown Item",
-                quantity: item.quantity || 0,
-                mu: dec.meta?.mu || 100,                    // default to 100 if missing
+            const entry = {
+                itemId: dec.itemId || key,
+                name: item.name || dec.name || "Unknown Item",
+                quantity: item.quantity || dec.quantity || 0,
+                mu: dec.meta?.mu || dec.mu || 100,
                 totalValue: item.totalValue || 0,
-                // Add safe fallbacks for any other fields you might use later
                 ttValue: item.value || 0,
                 location: item.location || "Unknown"
             };
-        })
-        // Optional: Remove any completely empty entries
-        .filter(item => item.name !== "Unknown Item" || item.quantity > 0);
-
-    // Final safety check - ensure no undefined values
-    const cleanSellingItems = sellingItems.map(item => {
-        const clean = {};
-        Object.keys(item).forEach(key => {
-            clean[key] = item[key] !== undefined ? item[key] : null;
-        });
-        return clean;
+            sellingItems.push(entry);
+            console.log("✅ Found selling item:", entry.name);
+        }
     });
+
+    // Fallback: Try to scrape from the visible sell-mu table
+    if (sellingItems.length === 0) {
+        console.log("No selling items found in decisions. Trying to read from table...");
+        const rows = document.querySelectorAll('#sell-mu-tbody tr');
+        console.log(`Found ${rows.length} rows in sell-mu table`);
+
+        rows.forEach((row, index) => {
+            const nameCell = row.querySelector('td.col-name, .col-name');
+            const qtyCell = row.querySelector('td.col-qty, .col-qty');
+            const muCell = row.querySelector('td.col-mu, .col-mu');
+
+            if (nameCell) {
+                const entry = {
+                    name: nameCell.textContent.trim(),
+                    quantity: qtyCell ? parseInt(qtyCell.textContent) || 1 : 1,
+                    mu: muCell ? parseFloat(muCell.textContent) || 100 : 100,
+                    totalValue: 0,
+                    location: "From Table"
+                };
+                sellingItems.push(entry);
+                console.log(`✅ Scraped from table row ${index}:`, entry.name);
+            }
+        });
+    }
+
+    console.log(`Final sellingItems count: ${sellingItems.length}`, sellingItems);
+
+    if (sellingItems.length === 0) {
+        alert("Could not find any items marked as 'For Sale'. Please make sure the item is in the Wts table.");
+        return;
+    }
 
     try {
         await setDoc(doc(db, "UserSellingLists", user.uid), {
             userId: user.uid,
             displayName: user.displayName || "Anonymous",
-            sellingList: cleanSellingItems,
+            sellingList: sellingItems,
             updatedAt: new Date().toISOString(),
-            itemCount: cleanSellingItems.length
+            itemCount: sellingItems.length
         });
 
-        alert(`✅ Your Selling List has been saved publicly (${cleanSellingItems.length} items).`);
-        console.log("✅ Selling list saved successfully");
+        alert(`✅ Your Selling List has been saved publicly (${sellingItems.length} items).`);
+        console.log("✅ Selling list saved successfully!");
     } catch (error) {
         console.error("Error saving selling list:", error);
-        alert("Failed to save selling list. See console for details.");
+        alert("Failed to save selling list. Check console for details.");
     }
 }
-// ====================== COMMUNITY MARKET FUNCTIONS ======================
 // ====================== COMMUNITY MARKET ======================
 
 let currentMarketFilter = 'both'; // 'wtb', 'wts', or 'both'
