@@ -1359,20 +1359,3 @@ div#buying-list-controls {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* Ensure sidebar rows match the main table layout */
-#ped-inventory-tbody .inventory-row,
-#ammo-inventory-tbody .inventory-row {
-    display: flex !important;
-    width: 100%;
-    align-items: center;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-#ped-inventory-tbody td,
-#ammo-inventory-tbody td {
-    display: flex;
-    align-items: center;
-    padding: 4px 8px;
-    overflow: hidden;
-    white-space: nowrap;
-}
