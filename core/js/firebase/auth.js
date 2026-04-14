@@ -281,3 +281,121 @@ function createProfilesModal() {
     return modal;
 }
 //hmmm
+// ====================== SAVE / LOAD BUYING & SELLING LISTS ======================
+
+// Save current Buying List to Firebase
+async function saveMyBuyingList() {
+    const user = auth.currentUser;
+    if (!user) {
+        alert("You must be logged in to save your buying list.");
+        return;
+    }
+
+    try {
+        await setDoc(doc(db, "UserBuyingLists", user.uid), {
+            userId: user.uid,
+            displayName: user.displayName || "Anonymous",
+            buyingList: inventoryState.buyingList || [],
+            updatedAt: new Date().toISOString()
+        });
+
+        alert("✅ Your Buying List has been saved publicly.");
+    } catch (error) {
+        console.error("Error saving buying list:", error);
+        alert("Failed to save buying list.");
+    }
+}
+
+// Save current Selling List (items marked SELL_MU)
+async function saveMySellingList() {
+    const user = auth.currentUser;
+    if (!user) {
+        alert("You must be logged in to save your selling list.");
+        return;
+    }
+
+    // Filter only items marked for selling at markup
+    const sellingItems = Object.values(inventoryState.decisions || {})
+        .filter(dec => dec.type === 'SELL_MU')
+        .map(dec => ({
+            itemId: dec.itemId,
+            name: inventoryState.items[dec.itemId]?.name || "Unknown",
+            quantity: inventoryState.items[dec.itemId]?.quantity || 0,
+            mu: dec.meta?.mu || 100,
+            totalValue: inventoryState.items[dec.itemId]?.totalValue || 0
+        }));
+
+    try {
+        await setDoc(doc(db, "UserSellingLists", user.uid), {
+            userId: user.uid,
+            displayName: user.displayName || "Anonymous",
+            sellingList: sellingItems,
+            updatedAt: new Date().toISOString()
+        });
+
+        alert("✅ Your Selling List has been saved publicly.");
+    } catch (error) {
+        console.error("Error saving selling list:", error);
+        alert("Failed to save selling list.");
+    }
+}
+
+// ====================== BROWSE COMMUNITY LISTS ======================
+
+async function browseCommunityBuyingLists() {
+    const container = document.getElementById('communityListsContainer');
+    if (!container) return;
+
+    container.innerHTML = "<p>Loading community buying lists...</p>";
+
+    try {
+        const querySnapshot = await getDocs(collection(db, "UserBuyingLists"));
+        let html = "<h3>Community Buying Lists</h3>";
+
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            html += `
+                <div style="background:#1a1a1a; padding:12px; margin:8px 0; border-radius:6px;">
+                    <strong>${data.displayName || 'Anonymous'}</strong>
+                    <span style="float:right; color:#0af;">${data.buyingList?.length || 0} items</span>
+                    <button onclick="viewUserBuyingList('${doc.id}')" style="margin-top:6px; padding:4px 10px;">
+                        View List
+                    </button>
+                </div>`;
+        });
+
+        container.innerHTML = html || "<p>No buying lists found yet.</p>";
+    } catch (e) {
+        container.innerHTML = "<p style='color:#f66;'>Failed to load community lists.</p>";
+    }
+}
+
+async function viewUserBuyingList(userId) {
+    try {
+        const docSnap = await getDoc(doc(db, "UserBuyingLists", userId));
+        if (!docSnap.exists()) return alert("List not found.");
+
+        const data = docSnap.data();
+        let html = `<h3>${data.displayName}'s Buying List</h3>`;
+
+        data.buyingList.forEach(item => {
+            html += `
+                <div style="padding:8px; background:#222; margin:4px 0;">
+                    ${item.name} × ${item.targetQty} @ ${item.targetMu}% MU
+                </div>`;
+        });
+
+        // Show in a modal or alert for now (you can improve this later)
+        const modal = document.createElement('div');
+        modal.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#111; padding:20px; border:2px solid #0ff; max-width:500px; max-height:80vh; overflow:auto;";
+        modal.innerHTML = html + `<br><button onclick="this.parentElement.remove()">Close</button>`;
+        document.body.appendChild(modal);
+    } catch (e) {
+        alert("Could not load this user's list.");
+    }
+}
+
+// Add these after your other event listeners
+document.getElementById('saveMyBuyingListBtn')?.addEventListener('click', saveMyBuyingList);
+document.getElementById('saveMySellingListBtn')?.addEventListener('click', saveMySellingList);
+document.getElementById('browseCommunityListsBtn')?.addEventListener('click', browseCommunityBuyingLists);
