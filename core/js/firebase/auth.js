@@ -394,8 +394,38 @@ async function viewUserBuyingList(userId) {
         alert("Could not load this user's list.");
     }
 }
+// ====================== ATTACH BUTTON LISTENERS (Safe Version) ======================
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Wait a tiny bit for DOM to be fully ready
+    setTimeout(() => {
 
-// Add these after your other event listeners
-document.getElementById('saveMyBuyingListBtn')?.addEventListener('click', saveMyBuyingList);
-document.getElementById('saveMySellingListBtn')?.addEventListener('click', saveMySellingList);
-document.getElementById('browseCommunityListsBtn')?.addEventListener('click', browseCommunityBuyingLists);
+        const saveBuyingBtn = document.getElementById('saveMyBuyingListBtn');
+        const saveSellingBtn = document.getElementById('saveMySellingListBtn');
+        const browseBtn = document.getElementById('browseCommunityListsBtn');
+
+        if (saveBuyingBtn) {
+            saveBuyingBtn.addEventListener('click', () => {
+                console.log("💾 Save Buying List button clicked");
+                saveMyBuyingList();
+            });
+        }
+
+        if (saveSellingBtn) {
+            saveSellingBtn.addEventListener('click', () => {
+                console.log("💾 Save Selling List button clicked");
+                saveMySellingList();
+            });
+        }
+
+        if (browseBtn) {
+            browseBtn.addEventListener('click', () => {
+                console.log("👥 Browse Community Lists button clicked");
+                browseCommunityBuyingLists();
+            });
+        }
+
+        console.log("✅ Community list buttons listeners attached");
+
+    }, 800); // Small delay to make sure DOM is ready
+});
