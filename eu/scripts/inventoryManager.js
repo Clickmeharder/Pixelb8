@@ -1332,6 +1332,7 @@ function createCommunityMarketRow(item) {
     row.className = 'text-gray-300 hover:bg-gray-700/50 text-xs inventory-row info-nav-link';
     row.setAttribute('data-user-id', item.userId);
     row.style.height = `${VIRTUAL_ROW_HEIGHT}px`;
+    row.style.maxHeight = `${VIRTUAL_ROW_HEIGHT}px`;
     row.style.position = 'absolute';
     row.style.width = '100%';
     row.style.display = 'flex'; // Ensure flex is set from the start
