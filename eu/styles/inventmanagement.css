@@ -1047,16 +1047,8 @@ table {
 
 }
 
-/* Ensure the Header and Data cells both use the same flex logic */
-.subtab-content th.col-name,
-.subtab-content td.col-name { 
-    /* We use the variable as the basis, but set width to auto to allow growth */
-    width: auto !important; 
-    min-width: 150px;
-    flex: 2 1 var(--col-name-width, 250px); 
-    display: table-cell; /* Keeps table integrity */
-	max-width: 35%;
-}
+
+
 
 /* 1. Modify the Name column to be less aggressive */
 .subtab-content .col-name { 
