@@ -311,8 +311,7 @@ async function saveMyBuyingList() {
 }
 
 // Save current Selling List (items marked SELL_MU)
-// Save current Selling List (items marked SELL_MU) - FIXED
-// Save current Selling List - DEBUG + ROBUST VERSION
+// Save Selling List - FIXED & SMART VERSION
 async function saveMySellingList() {
     const user = auth.currentUser;
     if (!user) {
@@ -323,51 +322,53 @@ async function saveMySellingList() {
     console.log("🔍 Starting saveMySellingList...");
 
     const decisions = inventoryState.decisions || {};
-    console.log("Total decisions found:", Object.keys(decisions).length);
+    const items = inventoryState.items || {};
+    let sellingItems = [];
 
-    const sellingItems = [];
-
-    // Scan all decisions for SELL_MU
+    // 1. Primary method: From decisions
     Object.entries(decisions).forEach(([key, dec]) => {
-        console.log(`Decision ${key}: type=${dec.type}, action=${dec.action}`);
+        if (dec.type === 'SELL_MU' || dec.action === 'sell_mu') {
+            const itemData = items[dec.itemId] || items[key] || {};
 
-        if (dec.type === 'SELL_MU' || dec.action === 'sell_mu' || key.includes('sell_mu')) {
-            const item = inventoryState.items[dec.itemId] || {};
             const entry = {
                 itemId: dec.itemId || key,
-                name: item.name || dec.name || "Unknown Item",
-                quantity: item.quantity || dec.quantity || 0,
+                name: itemData.name || dec.name || "Unknown Item",
+                quantity: itemData.quantity || dec.quantity || 0,
                 mu: dec.meta?.mu || dec.mu || 100,
-                totalValue: item.totalValue || 0,
-                ttValue: item.value || 0,
-                location: item.location || "Unknown"
+                totalValue: itemData.totalValue || 0,
+                ttValue: itemData.value || 0,
+                location: itemData.location || dec.location || "Unknown"
             };
-            sellingItems.push(entry);
-            console.log("✅ Found selling item:", entry.name);
+
+            if (entry.name !== "Unknown Item" || entry.quantity > 0) {
+                sellingItems.push(entry);
+                console.log("✅ Added from decisions:", entry.name);
+            }
         }
     });
 
-    // Fallback: Try to scrape from the visible sell-mu table
+    // 2. Fallback: Scrape directly from the visible "For Sale [Wts]" table
     if (sellingItems.length === 0) {
-        console.log("No selling items found in decisions. Trying to read from table...");
+        console.log("⚠️ No items found in decisions. Scraping from sell-mu table...");
+        
         const rows = document.querySelectorAll('#sell-mu-tbody tr');
-        console.log(`Found ${rows.length} rows in sell-mu table`);
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 2) return;
 
-        rows.forEach((row, index) => {
-            const nameCell = row.querySelector('td.col-name, .col-name');
-            const qtyCell = row.querySelector('td.col-qty, .col-qty');
-            const muCell = row.querySelector('td.col-mu, .col-mu');
+            const name = cells[1] ? cells[1].textContent.trim() : "Unknown";
+            const qtyText = cells[2] ? cells[2].textContent.trim() : "1";
+            const muText = cells[5] ? cells[5].textContent.trim() : "100";
 
-            if (nameCell) {
-                const entry = {
-                    name: nameCell.textContent.trim(),
-                    quantity: qtyCell ? parseInt(qtyCell.textContent) || 1 : 1,
-                    mu: muCell ? parseFloat(muCell.textContent) || 100 : 100,
+            if (name && name !== "") {
+                sellingItems.push({
+                    name: name,
+                    quantity: parseInt(qtyText) || 1,
+                    mu: parseFloat(muText) || 100,
                     totalValue: 0,
                     location: "From Table"
-                };
-                sellingItems.push(entry);
-                console.log(`✅ Scraped from table row ${index}:`, entry.name);
+                });
+                console.log("✅ Scraped from table:", name);
             }
         });
     }
@@ -375,7 +376,7 @@ async function saveMySellingList() {
     console.log(`Final sellingItems count: ${sellingItems.length}`, sellingItems);
 
     if (sellingItems.length === 0) {
-        alert("Could not find any items marked as 'For Sale'. Please make sure the item is in the Wts table.");
+        alert("No selling items detected. Make sure the item is in the 'For Sale [Wts]' section.");
         return;
     }
 
@@ -392,7 +393,7 @@ async function saveMySellingList() {
         console.log("✅ Selling list saved successfully!");
     } catch (error) {
         console.error("Error saving selling list:", error);
-        alert("Failed to save selling list. Check console for details.");
+        alert("Failed to save selling list. Check console.");
     }
 }
 // ====================== COMMUNITY MARKET ======================
