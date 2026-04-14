@@ -231,7 +231,7 @@ document.getElementById('update-profile-form').addEventListener('submit', async 
 
 // ====================== VIEW ALL PROFILES ======================
 
-document.getElementById('viewAllProfilesBtn').addEventListener('click', async () => {
+/* document.getElementById('viewAllProfilesBtn').addEventListener('click', async () => {
     const profilesContainer = document.getElementById('allProfilesContainer') || 
         createProfilesModal();
 
@@ -267,7 +267,7 @@ document.getElementById('viewAllProfilesBtn').addEventListener('click', async ()
         profilesContainer.innerHTML = '<p style="color:#f66;">Failed to load profiles.</p>';
     }
 });
-
+ */
 // Helper to create modal container if it doesn't exist
 function createProfilesModal() {
     const modal = document.createElement('div');
