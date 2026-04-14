@@ -411,7 +411,8 @@ async function loadCommunityMarket() {
         ]);
 
         let items = [];
-        // (Keep your existing data processing logic here...)
+        
+        // 1. Data Collection
         if (currentMarketFilter === 'wtb' || currentMarketFilter === 'both') {
             buyingSnap.forEach(doc => {
                 const data = doc.data();
@@ -435,12 +436,32 @@ async function loadCommunityMarket() {
             });
         }
 
+        // 2. Searching
         const searchTerm = document.getElementById('market-search').value.toLowerCase().trim();
         if (searchTerm) {
             items = items.filter(item => 
                 (item.name && item.name.toLowerCase().includes(searchTerm)) ||
                 (item.displayName && item.displayName.toLowerCase().includes(searchTerm))
             );
+        }
+
+        // 3. Sorting (Essential for virtualization consistency)
+        const tableKey = 'COMMUNITY_MARKET_TABLE';
+        const sort = inventoryState.sortConfig[tableKey];
+        if (sort && items.length > 0) {
+            items.sort((a, b) => {
+                // Handle different keys for Market data (e.g., displayName vs name)
+                let aVal = a[sort.column] || '';
+                let bVal = b[sort.column] || '';
+                
+                const isNumeric = ['mu', 'quantity', 'targetQty', 'targetMu'].includes(sort.column);
+                if (isNumeric) {
+                    return sort.direction === 'asc' ? (aVal - bVal) : (bVal - aVal);
+                }
+                return sort.direction === 'asc' 
+                    ? String(aVal).localeCompare(String(bVal)) 
+                    : String(bVal).localeCompare(String(aVal));
+            });
         }
 
         if (items.length === 0) {
@@ -451,67 +472,47 @@ async function loadCommunityMarket() {
         const viewMode = document.getElementById('market-view-mode').value;
 
         if (viewMode === 'cards') {
-            // ... (keep card code)
+            // ... (keep your existing card rendering code here)
         } else {
-            // Standardized Table view to match Tab A/B/C
-            let html = `
-                <div class="scroll-container" style="height: calc(100vh - 250px); overflow-y: auto;">
-                <table class="tableTheme resizableTable" style="width:100%; table-layout: fixed;">
-                    <thead>
-                        <tr>
-                            <th class="col-type sortable-header" style="width: var(--col-type-width, 80px);">
-                                TYPE <span class="sort-icon"></span>
-                            </th>
-                            <th class="col-name sortable-header" style="width: var(--col-name-width, auto);">
-                                ITEM <span class="sort-icon"></span>
-                            </th>
-                            <th class="col-qty sortable-header" style="width: var(--col-qty-width, 90px);">
-                                QTY <span class="sort-icon"></span>
-                            </th>
-                            <th class="col-mu sortable-header" style="width: var(--col-mu-width, 100px);">
-                                MU% <span class="sort-icon"></span>
-                            </th>
-                            <th class="col-player sortable-header" style="width: var(--col-player-width, 150px);">
-                                USER <span class="sort-icon"></span>
-                            </th>
-                            <th class="col-date sortable-header" style="width: var(--col-date-width, 130px);">
-                                UPDATED <span class="sort-icon"></span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-            
-            items.forEach(item => {
-                const isWtb = item.type === 'wtb';
-                const statusColor = isWtb ? '#48bb78' : '#ed8936'; 
-                const updatedDate = new Date(item.updatedAt).toLocaleDateString();
+            // 4. Virtualized Table Shell
+            // Notice the specific IDs used here to match the renderVirtualTable logic
+            container.innerHTML = `
+                <div id="market-scroll-container" class="scroll-container" style="height: calc(100vh - 250px); overflow-y: auto; position: relative;">
+                    <table class="tableTheme resizableTable" style="width:100%; table-layout: fixed; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th class="col-type sortable-header" data-col="type" style="width: var(--col-type-width, 80px);">TYPE <span class="sort-icon"></span></th>
+                                <th class="col-name sortable-header" data-col="name" style="width: var(--col-name-width, auto);">ITEM <span class="sort-icon"></span></th>
+                                <th class="col-qty sortable-header" data-col="quantity" style="width: var(--col-qty-width, 90px);">QTY <span class="sort-icon"></span></th>
+                                <th class="col-mu sortable-header" data-col="mu" style="width: var(--col-mu-width, 100px);">MU% <span class="sort-icon"></span></th>
+                                <th class="col-player sortable-header" data-col="displayName" style="width: var(--col-player-width, 150px);">USER <span class="sort-icon"></span></th>
+                                <th class="col-date sortable-header" data-col="updatedAt" style="width: var(--col-date-width, 130px);">UPDATED <span class="sort-icon"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="market-tbody" style="position: relative; display: block;">
+                            </tbody>
+                    </table>
+                </div>`;
 
-                html += `
-                    <tr data-user-id="${item.userId}" class="info-nav-link inventory-row">
-                        <td class="col-type" style="color: ${statusColor}; font-weight: bold;">
-                            ${isWtb ? 'WTB' : 'WTS'}
-                        </td>
-                        <td class="col-name"><strong>${item.name}</strong></td>
-                        <td class="col-qty">${(item.quantity || item.targetQty || 1).toLocaleString()}</td>
-                        <td class="col-mu" style="color: #ecc94b;">${item.mu || item.targetMu || 100}%</td>
-                        <td class="col-player" style="color: #4fd1c5;">${item.displayName}</td>
-                        <td class="col-date" style="color: #666;">${updatedDate}</td>
-                    </tr>`;
-            });
+            // 5. Execute Virtualization
+            // Pass the data to the engine along with our custom row creator
+            renderVirtualTable(tableKey, items, createCommunityMarketRow);
             
-            html += `</tbody></table></div>`;
-            container.innerHTML = html;
+            // Sync the sort icons in the header
+            updateSortIcons('market-tbody', sort);
         }
 
-        // IMPORTANT: Re-init the resizer so it finds the new headers
+        // 6. Update Header Count
+        updateTableCountHeader('market-table-count', items);
+
+        // Standard Resizer Refresh
         initTableResizer();
 
     } catch (err) {
-        console.error(err);
+        console.error("Market Load Error:", err);
         container.innerHTML = `<p style="color:#f66; padding:40px;">Failed to load market data.</p>`;
     }
 }
-
 // ====================== COMMUNITY TAB EVENT LISTENERS ======================
 // ====================== GLOBAL EVENT LISTENERS ======================
 document.addEventListener('click', (e) => {

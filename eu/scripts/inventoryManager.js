@@ -1326,6 +1326,28 @@ function updateFullInventoryRowContent(row, item) {
     row.dataset.itemId = item.id;
 }
 
+function createCommunityMarketRow(item) {
+    const row = document.createElement('tr');
+    row.className = 'inventory-row info-nav-link';
+    row.setAttribute('data-user-id', item.userId);
+    row.style.height = `${VIRTUAL_ROW_HEIGHT}px`;
+    row.style.position = 'absolute';
+    row.style.width = '100%';
+
+    const isWtb = item.type === 'wtb';
+    const statusColor = isWtb ? '#48bb78' : '#ed8936';
+    const updatedDate = new Date(item.updatedAt).toLocaleDateString();
+
+    row.innerHTML = `
+        <td class="col-type" style="color: ${statusColor}; font-weight: bold;">${isWtb ? 'WTB' : 'WTS'}</td>
+        <td class="col-name"><strong>${item.name || 'Unknown'}</strong></td>
+        <td class="col-qty">${(item.quantity || item.targetQty || 1).toLocaleString()}</td>
+        <td class="col-mu" style="color: #ecc94b;">${item.mu || item.targetMu || 100}%</td>
+        <td class="col-player" style="color: #4fd1c5;">${item.displayName}</td>
+        <td class="col-date" style="color: #666;">${updatedDate}</td>
+    `;
+    return row;
+}
 // CENTRAL VIRTUAL SCROLL HANDLER
 function handleVirtualScroll(tableKey) {
     let scrollContainerId, tbodyId;
@@ -2031,6 +2053,31 @@ function renderFilteredUndecided() {
  * Optimized Sort-Only Renderer for the Full Inventory Table
  * Use this for header clicks to avoid re-filtering 3,000 items.
  */
+function renderCommunityMarketTable(marketItems) {
+    // 1. Get Filters
+    const searchTerm = (document.getElementById('market-search')?.value || '').toLowerCase();
+    const typeFilter = currentMarketFilter; // 'wtb', 'wts', or 'both'
+
+    // 2. Filter the raw Firebase data
+    let filtered = marketItems.filter(item => {
+        const matchesType = (typeFilter === 'both') || (item.type === typeFilter);
+        const matchesSearch = !searchTerm || 
+            (item.name || '').toLowerCase().includes(searchTerm) || 
+            (item.displayName || '').toLowerCase().includes(searchTerm);
+        return matchesType && matchesSearch;
+    });
+
+    // 3. Sort (Optional: use your existing sort logic if you have a market sort state)
+    // For now, we'll sort by date descending
+    filtered.sort((a, b) => b.updatedAt - a.updatedAt);
+
+    // 4. Update Header Count
+    updateTableCountHeader('market-table-count', filtered);
+
+    // 5. Hand off to the Virtual Engine
+    // Note: We use a custom row creator because the Market UI is unique
+    renderVirtualTable('COMMUNITY_MARKET_TABLE', filtered, createCommunityMarketRow);
+}
 function renderFullTable() {
     // 1. Prepare Data
     let items = Object.values(inventoryState.items).map(item => {
@@ -2145,7 +2192,8 @@ function renderTable(type, tbodyId) {
 	// Change from .length to the actual array 'itemsToRender'
 	updateTableCountHeader(countHeaderId, itemsToRender);
 }
-function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
+
+/* function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
     // Special handling for Full List to ensure consistent IDs
     let tbodyId, scrollContainerId;
     if (tableKey === 'FULL_LIST_TABLE') {
@@ -2189,6 +2237,77 @@ function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
     handleVirtualScroll(tableKey);
     scrollContainer.onscroll = () => handleVirtualScroll(tableKey);
 }
+ */
+
+function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
+    // 1. Resolve IDs based on the tableKey
+    let tbodyId, scrollContainerId;
+
+    if (tableKey === 'FULL_LIST_TABLE') {
+        tbodyId = 'full-list-tbody';
+        scrollContainerId = 'fulllist-scroll-container';
+    } 
+    else if (tableKey === 'COMMUNITY_MARKET_TABLE') {
+        // Explicit IDs for the community market tab
+        tbodyId = 'market-tbody';
+        scrollContainerId = 'market-scroll-container';
+    } 
+    else {
+        // Default logic for DECISION tables (e.g., KEEP_TABLE, SELL_TABLE)
+        const prefix = tableKey.toLowerCase().replace(/_table/g, '');
+        tbodyId = prefix.replace(/_/g, '-') + '-tbody';
+        scrollContainerId = prefix.replace(/_/g, '') + '-scroll-container';
+    }
+
+    const tbody = document.getElementById(tbodyId);
+    const scrollContainer = document.getElementById(scrollContainerId);
+
+    if (!tbody || !scrollContainer) {
+        console.warn(`renderVirtualTable: Missing elements for ${tableKey}`, { tbodyId, scrollContainerId });
+        return;
+    }
+
+    // 2. Sync header widths for the initial creation of buffer rows
+    // This ensures the td matches the th before the first scroll event
+    const tableEl = scrollContainer.querySelector('table');
+    const ths = tableEl ? tableEl.querySelectorAll('thead th') : [];
+    const currentWidths = Array.from(ths).map(th => th.style.width || getComputedStyle(th).width);
+
+    // 3. Update State and Container Height
+    inventoryState.virtualizedData[tableKey] = itemsToRender;
+    tbody.style.height = `${itemsToRender.length * VIRTUAL_ROW_HEIGHT}px`;
+    
+    // Clear and build initial fragment
+    tbody.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    const initialRenderCount = Math.min(itemsToRender.length, VIRTUAL_BUFFER_SIZE);
+
+    // 4. Initial Render Pass
+    for (let i = 0; i < initialRenderCount; i++) {
+        const item = itemsToRender[i];
+        // Pass the item and a sanitized key to the row creator
+        const row = rowCreatorFunction(item, tableKey.replace('_TABLE', ''));
+        
+        // Set widths on initial cells to match headers (Fixes the alignment issue)
+        const cells = row.querySelectorAll('td');
+        cells.forEach((td, idx) => {
+            if (currentWidths[idx]) {
+                td.style.width = currentWidths[idx];
+                td.style.minWidth = currentWidths[idx];
+            }
+        });
+
+        row.style.transform = `translateY(${i * VIRTUAL_ROW_HEIGHT}px)`;
+        fragment.appendChild(row);
+    }
+
+    tbody.appendChild(fragment);
+
+    // 5. Attach Scroll Logic
+    handleVirtualScroll(tableKey);
+    scrollContainer.onscroll = () => handleVirtualScroll(tableKey);
+}
+
 function renderDetailedLocationTable(tbodyId, itemsArray) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
