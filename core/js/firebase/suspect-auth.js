@@ -231,7 +231,7 @@ document.getElementById('update-profile-form').addEventListener('submit', async 
 
 // ====================== VIEW ALL PROFILES ======================
 
-document.getElementById('viewAllProfilesBtn').addEventListener('click', async () => {
+/* document.getElementById('viewAllProfilesBtn').addEventListener('click', async () => {
     const profilesContainer = document.getElementById('allProfilesContainer') || 
         createProfilesModal();
 
@@ -267,7 +267,7 @@ document.getElementById('viewAllProfilesBtn').addEventListener('click', async ()
         profilesContainer.innerHTML = '<p style="color:#f66;">Failed to load profiles.</p>';
     }
 });
-
+ */
 // Helper to create modal container if it doesn't exist
 function createProfilesModal() {
     const modal = document.createElement('div');
@@ -281,3 +281,186 @@ function createProfilesModal() {
     return modal;
 }
 //hmmm
+// ====================== SAVE / LOAD BUYING & SELLING LISTS ======================
+
+// Save current Buying List to Firebase
+async function saveMyBuyingList() {
+    const user = auth.currentUser;
+    if (!user) {
+        alert("You must be logged in to save your buying list.");
+        return;
+    }
+
+    try {
+        await setDoc(doc(db, "UserBuyingLists", user.uid), {
+            userId: user.uid,
+            displayName: user.displayName || "Anonymous",
+            buyingList: inventoryState.buyingList || [],
+            updatedAt: new Date().toISOString()
+        });
+
+        alert("✅ Your Buying List has been saved publicly and is now visible in the Community tab.");
+        console.log("Buying list saved successfully");
+    } catch (error) {
+        console.error("Error saving buying list:", error);
+        alert("Failed to save buying list. See console for details.");
+    }
+}
+
+// Save current Selling List (items marked SELL_MU)
+async function saveMySellingList() {
+    const user = auth.currentUser;
+    if (!user) {
+        alert("You must be logged in to save your selling list.");
+        return;
+    }
+
+    // Filter only items marked for selling at markup
+    const sellingItems = Object.values(inventoryState.decisions || {})
+        .filter(dec => dec.type === 'SELL_MU')
+        .map(dec => ({
+            itemId: dec.itemId,
+            name: inventoryState.items[dec.itemId]?.name || "Unknown",
+            quantity: inventoryState.items[dec.itemId]?.quantity || 0,
+            mu: dec.meta?.mu || 100,
+            totalValue: inventoryState.items[dec.itemId]?.totalValue || 0
+        }));
+
+    try {
+        await setDoc(doc(db, "UserSellingLists", user.uid), {
+            userId: user.uid,
+            displayName: user.displayName || "Anonymous",
+            sellingList: sellingItems,
+            updatedAt: new Date().toISOString()
+        });
+
+        alert("✅ Your Selling List has been saved publicly and is now visible in the Community tab.");
+        console.log("Selling list saved successfully");
+    } catch (error) {
+        console.error("Error saving selling list:", error);
+        alert("Failed to save selling list. See console for details.");
+    }
+}
+
+// ====================== COMMUNITY BROWSING FUNCTIONS ======================
+
+// Load Public Buying Lists into InventoryTabD
+async function loadCommunityBuyingLists() {
+    const container = document.getElementById('communityBuyingContainer');
+    if (!container) return;
+
+    container.innerHTML = `<p style="text-align:center; color:#888; padding:60px;">Loading public buying lists...</p>`;
+
+    try {
+        const snapshot = await getDocs(collection(db, "UserBuyingLists"));
+
+        if (snapshot.empty) {
+            container.innerHTML = `<p style="color:#888; text-align:center; padding:60px;">No public buying lists yet.<br>Be the first to publish yours!</p>`;
+            return;
+        }
+
+        let html = '';
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const count = data.buyingList ? data.buyingList.length : 0;
+
+            html += `
+                <div class="community-list-card" data-type="buying" data-user-id="${doc.id}">
+                    <strong>${data.displayName || 'Anonymous'}</strong>
+                    <span style="float:right; color:#0a3;">${count} items wanted</span><br>
+                    <small style="color:#666;">Updated ${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'Unknown'}</small>
+                </div>`;
+        });
+
+        container.innerHTML = html;
+
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = `<p style="color:#f66; padding:40px;">Failed to load buying lists.</p>`;
+    }
+}
+
+// Load Public Selling Lists into InventoryTabD
+async function loadCommunitySellingLists() {
+    const container = document.getElementById('communitySellingContainer');
+    if (!container) return;
+
+    container.innerHTML = `<p style="text-align:center; color:#888; padding:60px;">Loading public selling lists...</p>`;
+
+    try {
+        const snapshot = await getDocs(collection(db, "UserSellingLists"));
+
+        if (snapshot.empty) {
+            container.innerHTML = `<p style="color:#888; text-align:center; padding:60px;">No public selling lists yet.</p>`;
+            return;
+        }
+
+        let html = '';
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const count = data.sellingList ? data.sellingList.length : 0;
+
+            html += `
+                <div class="community-list-card" data-type="selling" data-user-id="${doc.id}">
+                    <strong>${data.displayName || 'Anonymous'}</strong>
+                    <span style="float:right; color:#f93;">${count} items for sale</span><br>
+                    <small style="color:#666;">Updated ${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'Unknown'}</small>
+                </div>`;
+        });
+
+        container.innerHTML = html;
+
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = `<p style="color:#f66; padding:40px;">Failed to load selling lists.</p>`;
+    }
+}
+
+// View a specific user's buying list in a modal
+async function viewUserBuyingList(userId) {
+    console.log(`Viewing buying list for user: ${userId}`);
+
+    try {
+        const docSnap = await getDoc(doc(db, "UserBuyingLists", userId));
+        if (!docSnap.exists()) {
+            alert("This user's buying list could not be found.");
+            return;
+        }
+
+        const data = docSnap.data();
+        let html = `<h3 style="color:#0af;">${data.displayName || 'Anonymous'}'s Buying List</h3><hr style="border-color:#333;">`;
+
+        if (!data.buyingList || data.buyingList.length === 0) {
+            html += `<p style="color:#888; text-align:center;">This user has no items in their buying list.</p>`;
+        } else {
+            data.buyingList.forEach(item => {
+                html += `
+                    <div style="padding:10px; background:#1f1f1f; margin:8px 0; border-radius:6px;">
+                        <strong>${item.name}</strong> × ${item.targetQty || 1} 
+                        @ ${item.targetMu || 100}% MU
+                    </div>`;
+            });
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'viewListModal';
+        modal.style.cssText = `
+            position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+            background:#111; border:2px solid #0af; padding:25px; width:90%; max-width:580px;
+            max-height:85vh; overflow-y:auto; border-radius:10px; z-index:100000; color:#ddd;
+        `;
+
+        modal.innerHTML = html + `
+            <div style="text-align:center; margin-top:20px;">
+                <button id="closeViewModalBtn" style="padding:10px 24px; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">
+                    Close
+                </button>
+            </div>`;
+
+        document.body.appendChild(modal);
+
+    } catch (error) {
+        console.error("Error viewing user list:", error);
+        alert("Could not load this buying list.");
+    }
+}

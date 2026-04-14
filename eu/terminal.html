@@ -1411,17 +1411,6 @@ div#bpbuttonDiv {
 				✏️ Edit Profile
 			</button>
 
-			<button id="saveMyBuyingListBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px; background:#0a3;">
-				💾 Save My Buying List
-			</button>
-
-			<button id="saveMySellingListBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px; background:#a30;">
-				💾 Save My Selling List
-			</button>
-
-			<button id="browseCommunityListsBtn" class="stat-tab-btn" style="width:100%;">
-				👥 Browse Community Lists
-			</button>
 		</div>
 		<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
 			<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
@@ -1457,8 +1446,9 @@ div#bpbuttonDiv {
 						<div class="subtabs-header">
 							<button id="InventoryTabA_btn" class="subtab-btn stat-tab-btn active-subtab" data-subtab="InventoryTabA"><i class="fas fa-table mr-1"></i> Full Inventory List</button>
 							<button id="InventoryTabB_btn" class="subtab-btn stat-tab-btn" data-subtab="InventoryTabB"><i class="fas fa-bullseye mr-1"></i>Item Processing</button>
-							<button id="InventoryTabD_btn" class="subtab-btn stat-tab-btn" data-subtab="InventoryTabD"><i class="fas fa-shopping-basket mr-1"></i>Trade</button>
-							<button id="InventoryTabC_btn" class="subtab-btn stat-tab-btn" data-subtab="InventoryTabC"><i class="fas fa-chart-line mr-1"></i>Overview</button>
+							<button id="InventoryTabC_btn" class="subtab-btn stat-tab-btn" data-subtab="InventoryTabC"><i class="fas fa-shopping-basket mr-1"></i>Trade</button>
+							<button id="InventoryTabD_btn" class="subtab-btn stat-tab-btn" data-subtab="InventoryTabD"><i class="fas fa-user-group mr-1"></i>></i>Community</button>
+							<button id="InventoryTabE_btn" class="subtab-btn stat-tab-btn" data-subtab="InventoryTabE"><i class="fas fa-chart-line mr-1"></i>Overview</button>
 							<div id="inventoryDockingbay" style="float:right;">
 								<button id="load-csv-btn" class="stat-tab-btn" style="display:none;"><i class="fas fa-file-csv mr-2"></i>Upload CSV/TSV</button>
 								<button id="export-inventory-btn" class="stat-tab-btn" style="display:none;><i class="fas fa-file-export mr-2"></i> Export Decisions</button>
@@ -1765,13 +1755,7 @@ div#bpbuttonDiv {
 
 								</div>
 
-								<div id="InventoryTabC" class="subtab-content" style="width:1200px;min-width: 700px;max-width: 1258px;display:none;">
-									Coming Soon
-								</div>
-
-								<div id="InventoryTabD" class="subtab-content" style="display:none; width:100%;">
-								
-							
+								<div id="InventoryTabC" class="subtab-content" style="display:none; width:100%;">
 									<div id="sell-mu-collapsible" class="grid-card mt-4">
 										<div data-target="sell-mu-content" data-toggle="collapse" class="collapsible-header">
 											<h2 class="tableh2">
@@ -1785,6 +1769,9 @@ div#bpbuttonDiv {
 											<div id="pricelist-controls" class="">
 												<button data-action="copy-csv-sell" class="stat-tab-btn">
 													<i class="fas fa-file-csv mr-1"></i> Copy CSV
+												</button>
+												<button id="saveMySellingListBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px; background:#a30;">
+													💾 Publish My Selling List
 												</button>
 												<button data-action="export-html" class="stat-tab-btn" style="display:none;">
 													<i class="fas fa-eye mr-1"></i> Preview HTML
@@ -1826,8 +1813,10 @@ div#bpbuttonDiv {
 													<button data-action="copy-csv-buy" class="stat-tab-btn">
 														<i class="fas fa-file-csv mr-1"></i> Copy CSV
 													</button>
-
-											
+													<button id="saveMyBuyingListBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px; background:#0a3;">
+														💾 Save My Buying List
+													</button>
+																					
 													<div id="buying-list-input" class="">
 														<div class="">
 															<input type="text" id="buy-name" placeholder="Item Name" 
@@ -1930,6 +1919,95 @@ div#bpbuttonDiv {
 											</div>
 										</div>
 									</div>
+								</div>
+
+								<!-- ====================== COMMUNITY TAB (InventoryTabD) ====================== -->
+								<div id="InventoryTabD" class="subtab-content" style="display:none; width:100%;">
+
+								  <!-- Subtab Header -->
+								  <div class="subtabs-header">
+									<h2><i class="fas fa-users text-purple-400 mr-2"></i> Community Marketplace</h2>
+									<div class="subtabs">
+									  <button id="communityBuyingBtn" class="subtab-btn stat-tab-btn active-subtab" data-subtab="communityBuying">
+										<i class="fas fa-shopping-cart mr-1"></i> Buying Lists
+									  </button>
+									  <button id="communitySellingBtn" class="subtab-btn stat-tab-btn" data-subtab="communitySelling">
+										<i class="fas fa-tag mr-1"></i> Selling Lists
+									  </button>
+									</div>
+								  </div>
+
+								  <!-- Buying Lists Content -->
+								  <div id="communityBuying" class="community-subtab-content" style="display:block;">
+									<div class="grid-card">
+									  <div class="collapsible-header">
+										<h3><i class="fas fa-shopping-cart text-green-400"></i> Public Buying Lists (Wtb)</h3>
+									  </div>
+									  <div style="padding: 20px;">
+										<button id="browseCommunityBuyingBtn" class="stat-tab-btn" style="width:100%; padding:14px; font-size:1.05em; margin-bottom:15px;">
+										  👥 Browse All Community Buying Lists
+										</button>
+										
+										<div id="communityBuyingContainer" class="community-container" style="min-height: 400px;">
+										  <!-- Dynamic content loaded here -->
+										</div>
+									  </div>
+									</div>
+								  </div>
+
+								  <!-- Selling Lists Content -->
+								  <div id="communitySelling" class="community-subtab-content" style="display:none;">
+									<div class="grid-card">
+									  <div class="collapsible-header">
+										<h3><i class="fas fa-tag text-yellow-400"></i> Public Selling Lists (Wts)</h3>
+									  </div>
+									  <div style="padding: 20px;">
+										<button id="browseCommunitySellingBtn" class="stat-tab-btn" style="width:100%; padding:14px; font-size:1.05em; margin-bottom:15px;">
+										  👥 Browse All Community Selling Lists
+										</button>
+										
+										<div id="communitySellingContainer" class="community-container" style="min-height: 400px;">
+										  <!-- Dynamic content loaded here -->
+										</div>
+									  </div>
+									</div>
+								  </div>
+
+								</div>
+
+								<style>
+										
+									.community-subtab-content {
+										padding: 10px;
+									}
+
+									.community-container {
+										background: #111;
+										border: 1px solid #333;
+										border-radius: 6px;
+										padding: 15px;
+										min-height: 400px;
+									}
+
+									.community-list-card {
+										background: #1a1a1a;
+										padding: 14px;
+										margin: 10px 0;
+										border-radius: 8px;
+										border: 1px solid #444;
+										cursor: pointer;
+										transition: all 0.2s;
+									}
+
+									.community-list-card:hover {
+										background: #222;
+										border-color: #0af;
+										transform: translateX(4px);
+									}
+								</style>
+
+								<div id="InventoryTabE" class="subtab-content" style="width:1200px;min-width: 700px;max-width: 1258px;display:none;">
+									Coming Soon
 								</div>
 							<div id="inventory-sidebar" class="loadout-container Overview">
 
@@ -3396,7 +3474,7 @@ div#bpbuttonDiv {
 
 </script>
   <script src="../core/js/pixelb8-global.js"></script>
-  <script type="module" src="../core/js/firebase/auth.js"></script>
+  <script type="module" src="../core/js/firebase/suspect-auth.js"></script>
   <!-- App Denendancies -->
    <script src="scripts/terminal.js"></script>
    <script src="scripts/entropianexusapi.js"></script>
