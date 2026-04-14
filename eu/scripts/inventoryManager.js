@@ -2385,7 +2385,7 @@ function renderDetailedLocationTable(tbodyId, itemsArray) {
         const row = document.createElement('tr');
         // Standardize classes: 'display-flex' ensures it doesn't squish
         row.className = 'text-xs hover:bg-gray-700 inventory-row';
-        row.style.display = 'flex'; 
+        row.style.display = ''; 
         row.style.width = '100%';
         
         const qty = parseFloat(String(item.quantity || 0).replace(/,/g, ''));
