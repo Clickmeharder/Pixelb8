@@ -1055,6 +1055,7 @@ table {
     min-width: 150px;
     flex: 2 1 var(--col-name-width, 250px); 
     display: table-cell; /* Keeps table integrity */
+	max-width: 35%;
 }
 
 .subtab-content th.col-location,
