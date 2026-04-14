@@ -1410,7 +1410,6 @@ div#bpbuttonDiv {
 			<button id="editProfileBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px;">
 				✏️ Edit Profile
 			</button>
-
 		</div>
 		<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
 			<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
@@ -1922,59 +1921,52 @@ div#bpbuttonDiv {
 								</div>
 
 								<!-- ====================== COMMUNITY TAB (InventoryTabD) ====================== -->
-								<div id="InventoryTabD" class="subtab-content" style="display:none; width:100%;">
+								<!-- ====================== COMMUNITY MARKET TAB (InventoryTabD) ====================== -->
+								<div id="InventoryTabD" class="subtab-content" style="display:none;">
 
-								  <!-- Subtab Header -->
 								  <div class="subtabs-header">
-									<h2><i class="fas fa-users text-purple-400 mr-2"></i> Community Marketplace</h2>
+									<h2><i class="fas fa-store text-purple-400 mr-2"></i> Community Market</h2>
 									<div class="subtabs">
-									  <button id="communityBuyingBtn" class="subtab-btn stat-tab-btn active-subtab" data-subtab="communityBuying">
-										<i class="fas fa-shopping-cart mr-1"></i> Buying Lists
+									  <button id="communityBuyingTabBtn" class="subtab-btn stat-tab-btn active-subtab" data-subtab="communityBuying">
+										<i class="fas fa-shopping-cart mr-1"></i> Buying Lists (Wtb)
 									  </button>
-									  <button id="communitySellingBtn" class="subtab-btn stat-tab-btn" data-subtab="communitySelling">
-										<i class="fas fa-tag mr-1"></i> Selling Lists
+									  <button id="communitySellingTabBtn" class="subtab-btn stat-tab-btn" data-subtab="communitySelling">
+										<i class="fas fa-tag mr-1"></i> Selling Lists (Wts)
 									  </button>
 									</div>
 								  </div>
 
-								  <!-- Buying Lists Content -->
-								  <div id="communityBuying" class="community-subtab-content" style="display:block;">
+								  <!-- Buying Lists Panel -->
+								  <div id="communityBuying" class="community-subtab-content" style="display: block;">
 									<div class="grid-card">
 									  <div class="collapsible-header">
-										<h3><i class="fas fa-shopping-cart text-green-400"></i> Public Buying Lists (Wtb)</h3>
+										<h3><i class="fas fa-shopping-cart text-green-400"></i> Public Buying Lists</h3>
 									  </div>
 									  <div style="padding: 20px;">
-										<button id="browseCommunityBuyingBtn" class="stat-tab-btn" style="width:100%; padding:14px; font-size:1.05em; margin-bottom:15px;">
+										<button id="browseCommunityBuyingBtn" class="stat-tab-btn" style="width:100%; padding:14px; font-size:1.05em; margin-bottom:20px;">
 										  👥 Browse All Community Buying Lists
 										</button>
-										
-										<div id="communityBuyingContainer" class="community-container" style="min-height: 400px;">
-										  <!-- Dynamic content loaded here -->
-										</div>
+										<div id="communityBuyingContainer" class="community-container"></div>
 									  </div>
 									</div>
 								  </div>
 
-								  <!-- Selling Lists Content -->
-								  <div id="communitySelling" class="community-subtab-content" style="display:none;">
+								  <!-- Selling Lists Panel -->
+								  <div id="communitySelling" class="community-subtab-content" style="display: none;">
 									<div class="grid-card">
 									  <div class="collapsible-header">
-										<h3><i class="fas fa-tag text-yellow-400"></i> Public Selling Lists (Wts)</h3>
+										<h3><i class="fas fa-tag text-yellow-400"></i> Public Selling Lists</h3>
 									  </div>
 									  <div style="padding: 20px;">
-										<button id="browseCommunitySellingBtn" class="stat-tab-btn" style="width:100%; padding:14px; font-size:1.05em; margin-bottom:15px;">
+										<button id="browseCommunitySellingBtn" class="stat-tab-btn" style="width:100%; padding:14px; font-size:1.05em; margin-bottom:20px;">
 										  👥 Browse All Community Selling Lists
 										</button>
-										
-										<div id="communitySellingContainer" class="community-container" style="min-height: 400px;">
-										  <!-- Dynamic content loaded here -->
-										</div>
+										<div id="communitySellingContainer" class="community-container"></div>
 									  </div>
 									</div>
 								  </div>
 
 								</div>
-
 								<style>
 										
 									.community-subtab-content {

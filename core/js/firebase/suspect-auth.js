@@ -283,6 +283,8 @@ function createProfilesModal() {
 //hmmm
 // ====================== SAVE / LOAD BUYING & SELLING LISTS ======================
 
+// ====================== SAVE BUYING & SELLING LISTS ======================
+
 // Save current Buying List to Firebase
 async function saveMyBuyingList() {
     const user = auth.currentUser;
@@ -300,7 +302,7 @@ async function saveMyBuyingList() {
         });
 
         alert("✅ Your Buying List has been saved publicly and is now visible in the Community tab.");
-        console.log("Buying list saved successfully");
+        console.log("✅ Buying list saved successfully");
     } catch (error) {
         console.error("Error saving buying list:", error);
         alert("Failed to save buying list. See console for details.");
@@ -315,7 +317,6 @@ async function saveMySellingList() {
         return;
     }
 
-    // Filter only items marked for selling at markup
     const sellingItems = Object.values(inventoryState.decisions || {})
         .filter(dec => dec.type === 'SELL_MU')
         .map(dec => ({
@@ -335,16 +336,25 @@ async function saveMySellingList() {
         });
 
         alert("✅ Your Selling List has been saved publicly and is now visible in the Community tab.");
-        console.log("Selling list saved successfully");
+        console.log("✅ Selling list saved successfully");
     } catch (error) {
         console.error("Error saving selling list:", error);
         alert("Failed to save selling list. See console for details.");
     }
 }
 
-// ====================== COMMUNITY BROWSING FUNCTIONS ======================
+// ====================== COMMUNITY MARKET FUNCTIONS ======================
 
-// Load Public Buying Lists into InventoryTabD
+// Switch between Buying and Selling subtabs
+function switchCommunitySubtab(tab) {
+    document.getElementById('communityBuying').style.display = (tab === 'buying') ? 'block' : 'none';
+    document.getElementById('communitySelling').style.display = (tab === 'selling') ? 'block' : 'none';
+
+    document.getElementById('communityBuyingTabBtn').classList.toggle('active-subtab', tab === 'buying');
+    document.getElementById('communitySellingTabBtn').classList.toggle('active-subtab', tab === 'selling');
+}
+
+// Load Public Buying Lists
 async function loadCommunityBuyingLists() {
     const container = document.getElementById('communityBuyingContainer');
     if (!container) return;
@@ -353,7 +363,6 @@ async function loadCommunityBuyingLists() {
 
     try {
         const snapshot = await getDocs(collection(db, "UserBuyingLists"));
-
         if (snapshot.empty) {
             container.innerHTML = `<p style="color:#888; text-align:center; padding:60px;">No public buying lists yet.<br>Be the first to publish yours!</p>`;
             return;
@@ -363,7 +372,6 @@ async function loadCommunityBuyingLists() {
         snapshot.forEach(doc => {
             const data = doc.data();
             const count = data.buyingList ? data.buyingList.length : 0;
-
             html += `
                 <div class="community-list-card" data-type="buying" data-user-id="${doc.id}">
                     <strong>${data.displayName || 'Anonymous'}</strong>
@@ -371,16 +379,14 @@ async function loadCommunityBuyingLists() {
                     <small style="color:#666;">Updated ${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'Unknown'}</small>
                 </div>`;
         });
-
         container.innerHTML = html;
-
     } catch (err) {
         console.error(err);
         container.innerHTML = `<p style="color:#f66; padding:40px;">Failed to load buying lists.</p>`;
     }
 }
 
-// Load Public Selling Lists into InventoryTabD
+// Load Public Selling Lists
 async function loadCommunitySellingLists() {
     const container = document.getElementById('communitySellingContainer');
     if (!container) return;
@@ -389,7 +395,6 @@ async function loadCommunitySellingLists() {
 
     try {
         const snapshot = await getDocs(collection(db, "UserSellingLists"));
-
         if (snapshot.empty) {
             container.innerHTML = `<p style="color:#888; text-align:center; padding:60px;">No public selling lists yet.</p>`;
             return;
@@ -399,7 +404,6 @@ async function loadCommunitySellingLists() {
         snapshot.forEach(doc => {
             const data = doc.data();
             const count = data.sellingList ? data.sellingList.length : 0;
-
             html += `
                 <div class="community-list-card" data-type="selling" data-user-id="${doc.id}">
                     <strong>${data.displayName || 'Anonymous'}</strong>
@@ -407,16 +411,14 @@ async function loadCommunitySellingLists() {
                     <small style="color:#666;">Updated ${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'Unknown'}</small>
                 </div>`;
         });
-
         container.innerHTML = html;
-
     } catch (err) {
         console.error(err);
         container.innerHTML = `<p style="color:#f66; padding:40px;">Failed to load selling lists.</p>`;
     }
 }
 
-// View a specific user's buying list in a modal
+// View a specific user's buying list in modal
 async function viewUserBuyingList(userId) {
     console.log(`Viewing buying list for user: ${userId}`);
 
@@ -464,3 +466,48 @@ async function viewUserBuyingList(userId) {
         alert("Could not load this buying list.");
     }
 }
+
+// ====================== COMMUNITY TAB EVENT LISTENERS ======================
+document.addEventListener('click', (e) => {
+
+    // Save buttons (in InventoryTabC)
+    if (e.target.id === 'saveMyBuyingListBtn') {
+        saveMyBuyingList();
+    }
+    if (e.target.id === 'saveMySellingListBtn') {
+        saveMySellingList();
+    }
+
+    // Community subtab switching
+    if (e.target.id === 'communityBuyingTabBtn') {
+        switchCommunitySubtab('buying');
+    }
+    if (e.target.id === 'communitySellingTabBtn') {
+        switchCommunitySubtab('selling');
+    }
+
+    // Browse buttons
+    if (e.target.id === 'browseCommunityBuyingBtn') {
+        loadCommunityBuyingLists();
+    }
+    if (e.target.id === 'browseCommunitySellingBtn') {
+        loadCommunitySellingLists();
+    }
+
+    // Click on community list card
+    const card = e.target.closest('.community-list-card');
+    if (card) {
+        const userId = card.dataset.userId;
+        const type = card.dataset.type;
+        if (userId) {
+            if (type === 'buying') viewUserBuyingList(userId);
+            // TODO: Add viewUserSellingList() when ready
+        }
+    }
+
+    // Close modal
+    if (e.target.id === 'closeViewModalBtn') {
+        const modal = document.getElementById('viewListModal');
+        if (modal) modal.remove();
+    }
+});
