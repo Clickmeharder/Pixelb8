@@ -59,50 +59,50 @@ getDocs(collection(db, 'UserProfiles'))
     console.log("Error getting documents: ", error);8
   });
 
-    // Set up the onAuthStateChanged listener
-   onAuthStateChanged(auth, async (user) => {
-		const loggedInControls = document.getElementById('loggedInControls');
-		const loginButton = document.getElementById('loginbutt');
-		const logoutButton = document.getElementById('logoutbutt');
-		const usernameElement = document.getElementById('username');
-		const profilePhoto = document.getElementById('profilephoto');
-		const userPixelCount = document.getElementById('Userpixelcount');
+// Set up the onAuthStateChanged listener
+onAuthStateChanged(auth, async (user) => {
+	const loggedInControls = document.getElementById('loggedInControls');
+	const loginButton = document.getElementById('loginbutt');
+	const logoutButton = document.getElementById('logoutbutt');
+	const usernameElement = document.getElementById('username');
+	const profilePhoto = document.getElementById('profilephoto');
+	const userPixelCount = document.getElementById('Userpixelcount');
 
-		if (user) {
-			// === USER IS LOGGED IN ===
-			console.log('User logged in:', user);
+	if (user) {
+		// === USER IS LOGGED IN ===
+		console.log('User logged in:', user);
 
-			// Show logged-in controls
-			loggedInControls.style.display = 'block';
-			loginButton.classList.add('hidden');
-			logoutButton.classList.remove('hidden');
+		// Show logged-in controls
+		loggedInControls.style.display = 'block';
+		loginButton.classList.add('hidden');
+		logoutButton.classList.remove('hidden');
 
-			// Update basic UI
-			usernameElement.textContent = user.displayName || "Pixel Colonist";
-			profilePhoto.src = user.photoURL || "assets/images/logo/pixelb8logo1.png";
-			
-			// Fetch pixel balance from Firestore
-			try {
-				const userDoc = await getDoc(doc(db, 'users', user.uid));
-				if (userDoc.exists()) {
-					const data = userDoc.data();
-					userPixelCount.textContent = `Pixels: ${data.balancePixels || 0}`;
-					userPixelCount.classList.remove('hidden');
-				}
-			} catch (e) {
-				console.warn("Could not load pixel balance", e);
+		// Update basic UI
+		usernameElement.textContent = user.displayName || "Pixel Colonist";
+		profilePhoto.src = user.photoURL || "assets/images/logo/pixelb8logo1.png";
+		
+		// Fetch pixel balance from Firestore
+		try {
+			const userDoc = await getDoc(doc(db, 'users', user.uid));
+			if (userDoc.exists()) {
+				const data = userDoc.data();
+				userPixelCount.textContent = `Pixels: ${data.balancePixels || 0}`;
+				userPixelCount.classList.remove('hidden');
 			}
-
-		} else {
-			// === USER IS LOGGED OUT ===
-			loggedInControls.style.display = 'none';
-			loginButton.classList.remove('hidden');
-			logoutButton.classList.add('hidden');
-			usernameElement.textContent = "StrangerDanger!";
-			profilePhoto.src = "assets/images/logo/pixelb8logo1.png";
-			userPixelCount.classList.add('hidden');
+		} catch (e) {
+			console.warn("Could not load pixel balance", e);
 		}
-	});
+
+	} else {
+		// === USER IS LOGGED OUT ===
+		loggedInControls.style.display = 'none';
+		loginButton.classList.remove('hidden');
+		logoutButton.classList.add('hidden');
+		usernameElement.textContent = "StrangerDanger!";
+		profilePhoto.src = "assets/images/logo/pixelb8logo1.png";
+		userPixelCount.classList.add('hidden');
+	}
+});
 // Signup form submission event listener
 	const signUpForm = document.querySelector('#signup-form');
 
