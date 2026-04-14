@@ -2195,7 +2195,7 @@ function renderTable(type, tbodyId) {
 	updateTableCountHeader(countHeaderId, itemsToRender);
 }
 
-function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
+/* function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
     // Special handling for Full List to ensure consistent IDs
     let tbodyId, scrollContainerId;
     if (tableKey === 'FULL_LIST_TABLE') {
@@ -2240,8 +2240,8 @@ function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
     scrollContainer.onscroll = () => handleVirtualScroll(tableKey);
 }
 
-
-/* function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
+ */
+function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
     // 1. Resolve IDs based on the tableKey
     let tbodyId, scrollContainerId;
 
@@ -2309,7 +2309,10 @@ function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
     handleVirtualScroll(tableKey);
     scrollContainer.onscroll = () => handleVirtualScroll(tableKey);
 }
- */
+
+
+
+
 function renderDetailedLocationTable(tbodyId, itemsArray) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
@@ -2334,7 +2337,7 @@ function renderDetailedLocationTable(tbodyId, itemsArray) {
 
     sortedItems.forEach(item => {
         const row = document.createElement('tr');
-        row.className = 'text-xs hover:bg-gray-700 inventory-row';
+        row.className = 'inventory-row';
         
         // We use || 0 to prevent errors if a property is missing
         const qty = parseFloat(String(item.quantity || 0).replace(/,/g, ''));

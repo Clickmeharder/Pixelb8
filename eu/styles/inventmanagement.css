@@ -1127,13 +1127,13 @@ th[class*="col-"]::after {
 
 /* Ensure cells don't expand the row */
 .inventory-row td {
-    display: flex;
+/*     display: flex;
     align-items: center;
     height: 100%;
-    padding: 0 8px !important; /* Move padding here, but keep it tight */
+    padding: 0 8px !important; 
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis; */
 }
 
 /* Container for the MU input to show the % sign visually */
