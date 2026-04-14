@@ -2317,6 +2317,9 @@ function initTableResizer() {
         }, { passive: false });
     });
 }
+
+
+
 /**
  * Helper to redraw the correct virtual table after a column resize
  */
@@ -2354,7 +2357,13 @@ function handleResizeRedraw() {
         // (like a summary or "Sell MU" preview), redraw those here too:
         if (typeof renderSellMUTable === 'function') renderSellMUTable();
     }
-
+	// 4. Community Market Tab (Tab D) - if you have virtual tables here later
+    if (document.getElementById('InventoryTabD')?.style.display !== 'none') {
+        // Add redraw for community market if it becomes virtualized later
+        if (typeof loadCommunityMarket === 'function') {
+            loadCommunityMarket();
+        }
+    }
     // 4. Always update the Sidebar Log 
     // This ensures the mini-trade-logger in the sidebar stays aligned
     if (typeof renderSidebarLog === 'function') {
