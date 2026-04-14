@@ -1327,12 +1327,14 @@ function updateFullInventoryRowContent(row, item) {
 }
 
 function createCommunityMarketRow(item) {
-    const row = document.createElement('tr');
-    row.className = 'inventory-row info-nav-link';
+	const row = document.createElement('tr');
+    // Added 'text-xs' and other classes to match FullInventoryRow
+    row.className = 'text-gray-300 hover:bg-gray-700/50 text-xs inventory-row info-nav-link';
     row.setAttribute('data-user-id', item.userId);
     row.style.height = `${VIRTUAL_ROW_HEIGHT}px`;
     row.style.position = 'absolute';
     row.style.width = '100%';
+    row.style.display = 'flex'; // Ensure flex is set from the start
 
     const isWtb = item.type === 'wtb';
     const statusColor = isWtb ? '#48bb78' : '#ed8936';
