@@ -36,6 +36,7 @@
             background: rgba(0, 20, 0, 0.8);
             box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
             z-index: 3;
+            max-width: 80%;
         }
         .loader {
             border: 2px solid #1a1a1a;
@@ -47,7 +48,7 @@
             margin: 0 auto 15px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .glitch { font-size: 12px; letter-spacing: 3px; animation: flicker 0.1s infinite; }
+        .glitch { font-size: 12px; letter-spacing: 3px; animation: flicker 0.1s infinite; text-transform: uppercase; }
         @keyframes flicker { 0% { opacity: 0.9; } 100% { opacity: 1; } }
     </style>
 </head>
@@ -56,15 +57,13 @@
     <div class="status-container">
         <div class="loader"></div>
         <div id="status" class="glitch">INITIALIZING HANDSHAKE...</div>
-        <div id="sub-status" style="font-size: 10px; margin-top: 15px; color: #888;">GITHUB GATEWAY v1.0</div>
+        <div id="sub-status" style="font-size: 10px; margin-top: 15px; color: #888;">GITHUB GATEWAY v1.1 - REDIRECT MODE</div>
     </div>
 
     <script type="module">
-        // Import exact versions used in your app
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { getAuth, signInWithRedirect, getRedirectResult, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
-        // Your specific Pixelb8 Project Config
         const firebaseConfig = {
             apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
             authDomain: "pixelb8lol.firebaseapp.com",
@@ -78,39 +77,50 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const statusEl = document.getElementById('status');
+        const provider = new GithubAuthProvider();
 
         async function performAuth() {
             try {
-                statusEl.innerText = "WAITING FOR GITHUB...";
-                const provider = new GithubAuthProvider();
-                
-                // Triggers the real-browser popup (Safe from CSP blocks)
-                const result = await signInWithPopup(auth, provider);
-                
-                // Get the refresh token to pass back to the Electron desktop environment
-                const token = result.user.refreshToken;
-                
-                statusEl.innerText = "HANDSHAKE SUCCESSFUL.";
-                
-                // Protocol redirect to S.U.S.P.E.C.T.
-                setTimeout(() => {
-                    statusEl.innerText = "RE-LINKING TO DESKTOP...";
-                    window.location.href = `pixelb8://auth/${token}`;
-                }, 1000);
+                // 1. Check if we are returning from the GitHub redirect
+                const result = await getRedirectResult(auth);
 
-                // Auto-close tab after handshake
-                setTimeout(() => {
-                    statusEl.innerText = "SAFE TO CLOSE WINDOW.";
-                }, 4000);
+                if (result) {
+                    // Success! We have returned from GitHub with a user
+                    const credential = GithubAuthProvider.credentialFromResult(result);
+                    const token = credential.accessToken; // This is the token Electron needs
+                    
+                    statusEl.innerText = "HANDSHAKE SUCCESSFUL.";
+                    
+                    setTimeout(() => {
+                        statusEl.innerText = "RE-LINKING TO DESKTOP...";
+                        window.location.href = `pixelb8://auth/${token}`;
+                    }, 1000);
+
+                    setTimeout(() => {
+                        statusEl.innerText = "SAFE TO CLOSE WINDOW.";
+                    }, 4000);
+
+                } else {
+                    // 2. We haven't started login yet, so trigger the redirect
+                    statusEl.innerText = "REDIRECTING TO GITHUB...";
+                    await signInWithRedirect(auth, provider);
+                }
 
             } catch (error) {
                 console.error("Auth Bridge Error:", error);
                 statusEl.style.color = "#ff4141";
-                statusEl.innerText = "ERROR: " + error.code;
+                
+                if (error.code === 'auth/popup-blocked') {
+                    statusEl.innerText = "ERROR: POPUP BLOCKED. RETRYING...";
+                    // Fallback to redirect if popup fails for any reason
+                    signInWithRedirect(auth, provider);
+                } else {
+                    statusEl.innerText = "SYSTEM ERROR: " + error.code;
+                }
             }
         }
 
-        // Execute auth when page loads
+        // Execute when page is ready
         window.onload = performAuth;
     </script>
 </body>
