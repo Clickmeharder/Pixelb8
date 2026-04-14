@@ -1073,68 +1073,9 @@ table {
 
 
 
-th[class*="col-"] {
-    position: relative;
-    padding-right: 15px !important; /* Make room for the resize handle */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
 
-/* Optional: Show a subtle vertical line on the right edge of headers to see where to grab */
-th[class*="col-"]::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 25%;
-    height: 50%;
-    width: 1px;
-    background: rgba(255,255,255,0.05);
-}
-/* Force headers and cells to calculate width exactly the same way */
-.tableTheme th, 
-.tableTheme td {
-    box-sizing: border-box; 
-    padding: 8px 12px; /* Ensure this matches across all tabs */
-    text-align: left;
-    vertical-align: middle;
-}
 
-/* Ensure the Name column in the header matches the body logic */
-.tableTheme th.col-name {
-    width: var(--col-name-width, auto) !important;
-    min-width: 150px;
-}
-/* Add the same indentation to the header text so it aligns with the data */
-.tableTheme th.col-name {
-    padding-left: 24px; /* Adjust this number until 'ITEM' sits right over the names */
-}
 
-/* OR, if the rows have a specific margin/padding for the 'zipper' effect */
-.tableTheme td.col-name {
-    padding-left: 24px; 
-}
-
-/* Force all virtualized rows to respect the height variable strictly */
-.inventory-row {
-/*     display: flex !important;
-    align-items: center;
-    overflow: hidden;
-    padding: 0 !important; 
-    margin: 0 !important;
-    border-bottom: 1px solid rgba(255,255,255,0.05);  */
-}
-
-/* Ensure cells don't expand the row */
-.inventory-row td {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    padding: 0 8px !important; 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 
 /* Container for the MU input to show the % sign visually */
 .mu-input-wrapper {
@@ -1160,13 +1101,6 @@ th[class*="col-"]::after {
     pointer-events: none;
 }
 
-/* Fix the inputs that are pushing height */
-.mu-edit-input {
-    height: 20px !important; /* Keep this smaller than VIRTUAL_ROW_HEIGHT */
-    line-height: 1;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-}
 /* Scrollable History Log Styling */
 #trade-history-log::-webkit-scrollbar {
     width: 4px;
