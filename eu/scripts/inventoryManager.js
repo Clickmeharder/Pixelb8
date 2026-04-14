@@ -2312,7 +2312,7 @@ function renderVirtualTable(tableKey, itemsToRender, rowCreatorFunction) {
 
 
 
-
+/* 
 function renderDetailedLocationTable(tbodyId, itemsArray) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
@@ -2337,7 +2337,7 @@ function renderDetailedLocationTable(tbodyId, itemsArray) {
 
     sortedItems.forEach(item => {
         const row = document.createElement('tr');
-        row.className = 'inventory-row';
+        row.className = 'text-xs hover:bg-gray-700 inventory-row';
         
         // We use || 0 to prevent errors if a property is missing
         const qty = parseFloat(String(item.quantity || 0).replace(/,/g, ''));
@@ -2358,6 +2358,55 @@ function renderDetailedLocationTable(tbodyId, itemsArray) {
     const headerId = tbodyId.replace('-tbody', '-table-count');
     updateTableCountHeader(headerId, itemsArray);
 }
+ */
+
+function renderDetailedLocationTable(tbodyId, itemsArray) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+
+    const tableKey = getTableKeyFromTbodyId(tbodyId);
+    
+    // 1. Ensure a default sort
+    if (!inventoryState.sortConfig[tableKey]) { 
+        inventoryState.sortConfig[tableKey] = { 
+            column: 'totalValue', 
+            direction: 'desc' 
+        }; 
+    }
+
+    // 2. Sort the data
+    const sortedItems = sortItems([...itemsArray], tableKey); 
+
+    // 3. Clear and build
+    tbody.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
+    sortedItems.forEach(item => {
+        const row = document.createElement('tr');
+        // Standardize classes: 'display-flex' ensures it doesn't squish
+        row.className = 'text-xs hover:bg-gray-700 inventory-row';
+        row.style.display = 'flex'; 
+        row.style.width = '100%';
+        
+        const qty = parseFloat(String(item.quantity || 0).replace(/,/g, ''));
+        const val = parseFloat(String(item.totalValuePed || item.totalValue || 0).replace(/,/g, ''));
+
+        // Use the same column classes as your other tables so the CSS widths apply
+        row.innerHTML = `
+            <td class="col-name" style="flex: 1;">${item.name || 'Unknown'}</td>
+            <td class="col-qty" style="width: 80px; justify-content: flex-end;">${qty.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+            <td class="col-total" style="width: 100px; justify-content: flex-end; font-family: monospace;">${val.toFixed(2)}</td>
+        `;
+        fragment.appendChild(row);
+    });
+
+    tbody.appendChild(fragment);
+    
+    // Update the header count
+    const headerId = tbodyId.replace('-tbody', '-table-count');
+    updateTableCountHeader(headerId, itemsArray);
+}
+
 function initTableResizer() {
     // Consolidated selector: targets all headers with a col- class across all tabs
     const tableHeaders = document.querySelectorAll('th[class*="col-"]');
