@@ -61,46 +61,75 @@
     </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  // --- YOUR EXISTING IMPORTS ---
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GithubAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
-        authDomain: "pixelb8lol.firebaseapp.com",
-        projectId: "pixelb8lol",
-        // ... rest of your config
-    };
+  // --- YOUR CONFIG ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
+    authDomain: "pixelb8lol.firebaseapp.com",
+    projectId: "pixelb8lol",
+    storageBucket: "pixelb8lol.appspot.com",
+    messagingSenderId: "373700849652",
+    appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
+    measurementId: "G-5EGV2VNMX3"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const statusEl = document.getElementById('status');
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GithubAuthProvider();
+  const statusEl = document.getElementById('status');
 
-    // This is the "Magic Listener"
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            statusEl.innerText = "AUTHENTICATED. PREPARING HANDSHAKE...";
-            
-            // Get the token from the current session
-            // We use getIdToken because we are already logged in on the web side
-            const token = await user.getIdToken();
-            
-            statusEl.innerText = "RE-LINKING TO PIXELB8 DESKTOP...";
-            
-            // Send to Electron via deep link
-            setTimeout(() => {
-                window.location.href = `pixelb8://auth/${token}`;
-            }, 1500);
+  // --- THE MODIFIED LISTENER ---
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // === USER IS LOGGED IN ===
+      statusEl.innerText = "AUTHENTICATED: " + (user.displayName || "Colonist");
+      
+      try {
+        // 1. Get the token needed for the Desktop Handshake
+        // We use getIdToken(true) to force a fresh token for the app
+        const token = await user.getIdToken(true);
+        
+        statusEl.innerText = "SHOUTING TO DESKTOP...";
 
-        } else {
-            statusEl.innerText = "AWAITING GITHUB AUTHORIZATION...";
-            // If they aren't logged in, we trigger the popup/redirect 
-            // specifically for this domain.
-            const provider = new GithubAuthProvider();
-            // Using a simple redirect here since GitHub is already configured for Firebase
-            import { signInWithRedirect } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-            signInWithRedirect(auth, provider);
-        }
-    });
+        // 2. Perform the Deep Link Shout
+        // This triggers handleDeepLink(url) in your engineroom.js
+        setTimeout(() => {
+          window.location.href = `pixelb8://auth/${token}`;
+        }, 1500);
+
+        // 3. UI Cleanup
+        setTimeout(() => {
+          statusEl.innerText = "HANDSHAKE COMPLETE. YOU MAY CLOSE THIS TAB.";
+        }, 4000);
+
+      } catch (e) {
+        console.error("Bridge Error:", e);
+        statusEl.innerText = "BRIDGE ERROR: " + e.message;
+      }
+    } else {
+      // === USER IS LOGGED OUT ===
+      statusEl.innerText = "INITIALIZING GITHUB GATEWAY...";
+      
+      // Since this is the bridge page, we auto-trigger the login
+      // We use popup here because it's a real browser window
+      signInWithPopup(auth, provider).catch((error) => {
+        console.error("Popup blocked or closed:", error);
+        statusEl.innerText = "CLICK 'LOGIN' TO START HANDSHAKE";
+        
+        // Show your existing login button if the auto-popup fails
+        const loginBtn = document.getElementById('loginbutt');
+        if(loginBtn) loginBtn.classList.remove('hidden');
+      });
+    }
+  });
+
+  // Keep your existing event listeners for the manual buttons just in case
+  document.getElementById('loginbutt').addEventListener('click', () => {
+    signInWithPopup(auth, provider);
+  });
 </script>
 </body>
 </html>
