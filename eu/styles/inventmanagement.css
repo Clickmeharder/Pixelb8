@@ -1115,6 +1115,26 @@ th[class*="col-"]::after {
     padding-left: 24px; 
 }
 
+/* Force all virtualized rows to respect the height variable strictly */
+.inventory-row {
+    display: flex !important;
+    align-items: center;
+    overflow: hidden;
+    padding: 0 !important; /* Rows should not have padding */
+    margin: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05); /* Optional: visual separator */
+}
+
+/* Ensure cells don't expand the row */
+.inventory-row td {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 8px !important; /* Move padding here, but keep it tight */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 /* Container for the MU input to show the % sign visually */
 .mu-input-wrapper {
@@ -1140,6 +1160,13 @@ th[class*="col-"]::after {
     pointer-events: none;
 }
 
+/* Fix the inputs that are pushing height */
+.mu-edit-input {
+    height: 20px !important; /* Keep this smaller than VIRTUAL_ROW_HEIGHT */
+    line-height: 1;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
 /* Scrollable History Log Styling */
 #trade-history-log::-webkit-scrollbar {
     width: 4px;
