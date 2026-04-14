@@ -342,31 +342,59 @@ async function saveMySellingList() {
 
 // ====================== BROWSE COMMUNITY LISTS ======================
 
+// ================= BROWSE COMMUNITY BUYING LISTS =================
 async function browseCommunityBuyingLists() {
-    const container = document.getElementById('communityListsContainer');
-    if (!container) return;
+    console.log("👥 browseCommunityBuyingLists() started");
 
-    container.innerHTML = "<p>Loading community buying lists...</p>";
+    let container = document.getElementById('communityListsContainer');
+
+    // If no container exists yet, create one dynamically
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'communityListsContainer';
+        container.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #0f0f0f; border: 2px solid #0af; padding: 20px; width: 90%; 
+            max-width: 700px; max-height: 80vh; overflow-y: auto; border-radius: 8px; 
+            z-index: 99999; color: #ddd;
+        `;
+        document.body.appendChild(container);
+    }
+
+    container.innerHTML = `<p style="text-align:center;">Loading community buying lists...</p>`;
 
     try {
         const querySnapshot = await getDocs(collection(db, "UserBuyingLists"));
-        let html = "<h3>Community Buying Lists</h3>";
 
-        querySnapshot.forEach(doc => {
+        if (querySnapshot.empty) {
+            container.innerHTML = `<p style="color:#888; text-align:center;">No public buying lists found yet.</p>`;
+            return;
+        }
+
+        let html = `<h3 style="color:#0af; margin-bottom:15px;">Community Buying Lists (${querySnapshot.size})</h3>`;
+
+        querySnapshot.forEach((doc) => {
             const data = doc.data();
+            const listCount = data.buyingList ? data.buyingList.length : 0;
+
             html += `
-                <div style="background:#1a1a1a; padding:12px; margin:8px 0; border-radius:6px;">
-                    <strong>${data.displayName || 'Anonymous'}</strong>
-                    <span style="float:right; color:#0af;">${data.buyingList?.length || 0} items</span>
-                    <button onclick="viewUserBuyingList('${doc.id}')" style="margin-top:6px; padding:4px 10px;">
-                        View List
+                <div style="background:#1a1a1a; padding:12px; margin:10px 0; border-radius:6px; border:1px solid #333;">
+                    <strong style="color:#0ff;">${data.displayName || 'Anonymous User'}</strong>
+                    <span style="float:right; color:#0a3;">${listCount} items</span><br>
+                    <small style="color:#888;">Last updated: ${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'Unknown'}</small>
+                    <br><br>
+                    <button onclick="viewUserBuyingList('${doc.id}')" 
+                            style="background:#0a3; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">
+                        View Full List →
                     </button>
                 </div>`;
         });
 
-        container.innerHTML = html || "<p>No buying lists found yet.</p>";
-    } catch (e) {
-        container.innerHTML = "<p style='color:#f66;'>Failed to load community lists.</p>";
+        container.innerHTML = html;
+
+    } catch (error) {
+        console.error("Error browsing community lists:", error);
+        container.innerHTML = `<p style="color:#f66;">Failed to load community lists.<br>Error: ${error.message}</p>`;
     }
 }
 
