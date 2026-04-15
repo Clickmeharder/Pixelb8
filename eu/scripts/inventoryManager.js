@@ -257,8 +257,6 @@ function getItemData(name) {
 // History stack to track navigation
 window.infoHistory = window.infoHistory || [];
 
-window.infoHistory = window.infoHistory || [];
-
 async function showItemInfo(itemName, isBackAction = false) {
     const panel = document.getElementById('item-info-panel');
     const nameEl = document.getElementById('info-item-name');
@@ -2156,7 +2154,7 @@ function renderTable(type, tbodyId) {
             }
         }
     }
-    // 3. 🟢 Apply Market Filters (Planet/Category)
+    // 3. 🟢 Apply Filters (Planet/Category)
     const planetFilter = inventoryState.currentMarketPlanetFilter || 'ALL';
     const catFilter = inventoryState.currentMarketCategoryFilter || 'ALL';
     if (planetFilter !== 'ALL' || catFilter !== 'ALL') {
@@ -2392,8 +2390,6 @@ function renderDetailedLocationTable(tbodyId, itemsArray) {
         const qty = parseFloat(String(item.quantity || 0).replace(/,/g, ''));
         const val = parseFloat(String(item.totalValuePed || item.totalValue || 0).replace(/,/g, ''));
 
-        // Removed style="flex:..." and style="justify-content:..."
-        // Added col-location back in
         row.innerHTML = `
             <td class="col-name">${item.name || 'Unknown'}</td>
             <td class="col-qty">${qty.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
@@ -2478,10 +2474,6 @@ function initTableResizer() {
 /**
  * Helper to redraw the correct virtual table after a column resize
  */
-/**
- * Helper to redraw the correct components after a column resize
- * Ensures all visible tables snap to the new CSS variable widths
- */
 /* function handleResizeRedraw() {
     const mainTab = document.getElementById('InventoryTabA'); 
     const buyingTab = document.getElementById('InventoryTabC');
@@ -2528,29 +2520,26 @@ function handleResizeRedraw() {
             renderFullInventoryList();
         }
     }
-
-    // 2. Trade Tab (Tab C - Buying/Selling lists)
+    // 2. Undecided / Decision Queue (Tab B)
+    if (document.getElementById('InventoryTabB')?.style.display !== 'none') {
+        if (typeof renderFilteredUndecided === 'function') {
+            renderFilteredUndecided();
+        }
+    }
+    // 3. Trade Tab (Tab C - Buying/Selling lists)
     if (document.getElementById('InventoryTabC')?.style.display !== 'none') {
         if (typeof renderBuyingList === 'function') renderBuyingList();
         if (typeof renderSellMUTable === 'function') renderSellMUTable();
     }
 
-    // 3. Community Market Tab (Tab D) ← This was missing proper support
+    // 4. Community Market Tab (Tab D) ← This was missing proper support
     const communityTab = document.getElementById('InventoryTabD');
     if (communityTab && communityTab.style.display !== 'none') {
         if (typeof loadCommunityMarket === 'function') {
             loadCommunityMarket();        // Re-render the market with new widths
         }
     }
-
-    // 4. Undecided / Decision Queue (Tab B)
-    if (document.getElementById('InventoryTabB')?.style.display !== 'none') {
-        if (typeof renderFilteredUndecided === 'function') {
-            renderFilteredUndecided();
-        }
-    }
-
-    // Force table layout recalculation on all tables
+    // 5.Force table layout recalculation on all tables
     document.querySelectorAll('table.tableTheme').forEach(table => {
         table.style.tableLayout = 'fixed';
         // Small reflow trick
