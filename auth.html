@@ -105,7 +105,7 @@
         statusEl.innerText = "SHOUTING TO DESKTOP...";
 
         setTimeout(() => {
-          window.location.href = `pixelb8://auth/${token}`;
+          window.location.href = `pixelb8://auth/?token=${token}`;
         }, 1500);
 
         setTimeout(() => {
