@@ -77,7 +77,12 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-  import { getAuth, signInWithPopup, GithubAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  import { 
+    getAuth, 
+    signInWithPopup, 
+    GithubAuthProvider, 
+    onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
@@ -92,45 +97,75 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const provider = new GithubAuthProvider();
+  
+  // Scopes are important to ensure GitHub gives us a token we can use
+  provider.addScope('read:user');
+
   const statusEl = document.getElementById('status');
   const loginBtn = document.getElementById('loginbutt');
 
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      statusEl.innerText = "AUTHENTICATED: " + (user.displayName || "Colonist");
+  // This handles the logic after a successful popup login
+  async function handleLoginSuccess(result) {
+    try {
+      // 1. EXTRACT THE GITHUB ACCESS TOKEN
+      // This is the raw token from GitHub, not the Firebase one.
+      const credential = GithubAuthProvider.credentialFromResult(result);
+      const githubToken = credential.accessToken;
+
+      if (!githubToken) {
+        throw new Error("No GitHub Access Token retrieved.");
+      }
+
+      statusEl.innerText = "AUTHENTICATED: " + (result.user.displayName || "Colonist");
       if(loginBtn) loginBtn.classList.add('hidden');
       
-      try {
-        const token = await user.getIdToken(true);
-        statusEl.innerText = "SHOUTING TO DESKTOP...";
+      statusEl.innerText = "SHOUTING TO DESKTOP...";
 
-        setTimeout(() => {
-          window.location.href = `pixelb8://auth/?token=${token}`;
-        }, 1500);
+      // 2. SEND THE REAL GITHUB TOKEN TO THE APP
+      setTimeout(() => {
+        window.location.href = `pixelb8://auth/?token=${githubToken}`;
+      }, 1500);
 
-        setTimeout(() => {
-          statusEl.innerText = "HANDSHAKE COMPLETE. YOU MAY CLOSE THIS TAB.";
-        }, 4000);
+      setTimeout(() => {
+        statusEl.innerText = "HANDSHAKE COMPLETE. YOU MAY CLOSE THIS TAB.";
+      }, 4000);
 
-      } catch (e) {
-        console.error("Bridge Error:", e);
-        statusEl.innerText = "BRIDGE ERROR: " + e.message;
-      }
+    } catch (e) {
+      console.error("Bridge Error:", e);
+      statusEl.innerText = "BRIDGE ERROR: " + e.message;
+    }
+  }
+
+  // Handle the automatic check
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        // If user is already logged in, we still need to re-trigger a popup 
+        // to get the Credential Result, because the GitHub Access Token 
+        // is not stored in the persistent user object for security.
+        statusEl.innerText = "SESSION DETECTED. RE-SYNCING GITHUB...";
+        loginBtn.classList.remove('hidden');
+        loginBtn.innerText = "SYNC TO DESKTOP";
     } else {
-      statusEl.innerText = "INITIALIZING GITHUB GATEWAY...";
-      
-      signInWithPopup(auth, provider).catch((error) => {
-        console.error("Popup blocked:", error);
-        statusEl.innerText = "ACTION REQUIRED: START HANDSHAKE";
-        if(loginBtn) loginBtn.classList.remove('hidden');
-      });
+        statusEl.innerText = "INITIALIZING GITHUB GATEWAY...";
+        // Auto-trigger popup on fresh load
+        signInWithPopup(auth, provider)
+            .then(handleLoginSuccess)
+            .catch((error) => {
+                console.error("Popup error:", error);
+                statusEl.innerText = "ACTION REQUIRED: START HANDSHAKE";
+                if(loginBtn) loginBtn.classList.remove('hidden');
+            });
     }
   });
 
-  // Safety check for the listener
+  // Manual Trigger
   if (loginBtn) {
     loginBtn.addEventListener('click', () => {
-      signInWithPopup(auth, provider);
+      signInWithPopup(auth, provider)
+        .then(handleLoginSuccess)
+        .catch(err => {
+            statusEl.innerText = "POPUP BLOCKED OR CLOSED.";
+        });
     });
   }
 </script>
