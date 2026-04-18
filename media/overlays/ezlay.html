@@ -978,66 +978,64 @@ function saveEditorChanges(event) {
     const inputs = tbody.querySelectorAll('input, select');
     const rawData = JSON.parse(localStorage.getItem('prizeData')) || [];
 
-    // 1. First, pull all changes from the UI into the array
+    // 1. Pull all current values from the UI inputs
     inputs.forEach(input => {
         const idx = input.getAttribute('data-index');
         const key = input.getAttribute('data-key');
         let value = input.value;
 
-        if (key === 'amount') value = parseFloat(value);
+        if (key === 'amount') value = parseFloat(value) || 0;
         if (rawData[idx]) {
             rawData[idx][key] = value;
         }
     });
 
-    // 2. MERGE LOGIC: Group by Winner + Prize Name
+    // 2. MERGE & SUM LOGIC
     const mergedMap = new Map();
 
     rawData.forEach(entry => {
-        // Create a unique key (e.g., "jaedraze-baitfish token")
-        // We use lowercase to ensure "Baitfish" and "baitfish" merge correctly
-        const mergeKey = `${entry.winner.toLowerCase()}-${entry.prize.toLowerCase()}`;
+        // Create a unique key based on Name + Prize (e.g. "jaedraze-baitfish")
+        const mergeKey = `${entry.winner.trim().toLowerCase()}-${entry.prize.trim().toLowerCase()}`;
 
         if (mergedMap.has(mergeKey)) {
-            // If exists, add the amounts together
+            // ITEM EXISTS: Add the amounts together
             const existing = mergedMap.get(mergeKey);
-            existing.amount += entry.amount;
+            existing.amount = (parseFloat(existing.amount) || 0) + (parseFloat(entry.amount) || 0);
+            
+            // Optional: Keep the most recent date
+            if (new Date(entry.date) > new Date(existing.date)) {
+                existing.date = entry.date;
+            }
         } else {
-            // If new, add a copy to the map
+            // NEW ITEM: Add to map (making a copy so we don't edit the original rawData)
             mergedMap.set(mergeKey, { ...entry });
         }
     });
 
-    // Convert map back into an array
+    // Convert the map back into a clean array
     const finalData = Array.from(mergedMap.values());
 
     // 3. Save to LocalStorage
     localStorage.setItem('prizeData', JSON.stringify(finalData));
 
-    // 4. Update global variables and sync main UI
+    // 4. Update UI and Global Variables
     if (typeof prizeData !== 'undefined') prizeData = finalData; 
-    if (typeof filterAndRender === 'function') filterAndRender();
     
-    // Refresh the editor view so the merged rows consolidate visually
-    renderEditor();
+    // Refresh both tables so the rows consolidate visually immediately
+    renderEditor(); 
+    if (typeof filterAndRender === 'function') filterAndRender();
 
-    // 5. VISUAL FEEDBACK
-    const btn = event.currentTarget;
+    // 5. VISUAL FEEDBACK (Optional indicator)
+    const btn = event ? event.currentTarget : null;
     const indicator = document.getElementById('saveIndicator');
-
     if (btn) {
-        btn.classList.add('save-active');
-        btn.innerText = "✅ Items Merged & Saved!";
+        btn.innerText = "✅ Merged & Saved!";
+        setTimeout(() => { btn.innerText = "💾 Save All Changes"; }, 2000);
     }
-    if (indicator) indicator.style.opacity = '1';
-
-    setTimeout(() => {
-        if (btn) {
-            btn.classList.remove('save-active');
-            btn.innerText = "💾 Save All Changes";
-        }
-        if (indicator) indicator.style.opacity = '0';
-    }, 2000);
+    if (indicator) {
+        indicator.style.opacity = '1';
+        setTimeout(() => { indicator.style.opacity = '0'; }, 2000);
+    }
 }
 let pendingDeleteIndex = null;
 
