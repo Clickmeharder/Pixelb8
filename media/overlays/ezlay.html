@@ -437,9 +437,17 @@
 				<input type="text" id="editorSearch" oninput="renderEditor()" placeholder="Search by winner name..." 
 					style="width: 100%; padding: 8px; background: #222; color: white; border: 1px solid orange; box-sizing: border-box;">
 			</div>
-		        <!-- NEW: Total PED Display -->
-			<div style="background: #222; border: 1px solid orange; padding: 7px 15px; color: orange; font-weight: bold; min-width: 120px; text-align: center;">
-				TOTAL: <span id="totalPedDisplay">0.00</span> PED
+		<!-- NEW: Total PED Display -->
+			<!-- Unclaimed Total -->
+			<div style="display:flex;flex-direction:row;">
+				<div style="background: #1a1a1a; border: 1px solid orange; padding: 5px 10px; color: orange; font-size: 0.9em; min-width: 100px; text-align: center;">
+					UNCLAIMED<br><span id="totalUnclaimed" style="font-weight: bold; font-size: 1.1em;">0.00</span>
+				</div>
+
+				<!-- Claimed Total -->
+				<div style="background: #1a1a1a; border: 1px solid #2e7d32; padding: 5px 10px; color: #4caf50; font-size: 0.9em; min-width: 100px; text-align: center;">
+					CLAIMED<br><span id="totalClaimed" style="font-weight: bold; font-size: 1.1em;">0.00</span>
+				</div>
 			</div>
 					<!-- Custom "Are You Sure?" Modal -->
 			<div id="deleteModal" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; border: 2px solid #7b1d1d; padding: 20px; z-index: 1000; box-shadow: 0 0 20px rgba(0,0,0,0.8); text-align: center; width: 250px;">
@@ -924,14 +932,23 @@ function renderEditor() {
     const searchTerm = document.getElementById('editorSearch').value.toLowerCase();
     
     tbody.innerHTML = '';
-    let runningTotal = 0; // NEW: Start a counter
+    
+    // NEW: Separate Counters
+    let unclaimedSum = 0;
+    let claimedSum = 0;
 
     const inputStyle = `width: 100%; background: transparent; color: white; border: 1px solid #333; box-sizing: border-box; padding: 2px;`;
 
     data.forEach((entry, index) => {
         if (entry.winner.toLowerCase().includes(searchTerm)) {
-            // NEW: Add current entry amount to total
-            runningTotal += (parseFloat(entry.amount) || 0);
+            
+            // NEW: Logic to add to correct total
+            const amount = parseFloat(entry.amount) || 0;
+            if (entry.status === 'claimed') {
+                claimedSum += amount;
+            } else {
+                unclaimedSum += amount;
+            }
 
             const row = document.createElement('tr');
             row.style.borderBottom = "1px solid #333";
@@ -954,9 +971,11 @@ function renderEditor() {
         }
     });
 
-    // NEW: Update the display element with the formatted total
-    document.getElementById('totalPedDisplay').innerText = runningTotal.toFixed(2);
+    // Update the displays
+    document.getElementById('totalUnclaimed').innerText = unclaimedSum.toFixed(2);
+    document.getElementById('totalClaimed').innerText = claimedSum.toFixed(2);
 }
+
 let sortDirection = true;
 
 function sortData(key) {
