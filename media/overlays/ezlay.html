@@ -130,7 +130,22 @@
 		max-height: 115px;
 	}
 
+/* Button Click Feedback */
+#editorContainer button:active {
+    transform: scale(0.95);
+    filter: brightness(1.2);
+}
 
+/* Specific styling for the Save button when clicked */
+.save-active {
+    background: #4caf50 !important;
+    border-color: white !important;
+}
+
+/* Specific styling for the Close button when clicked */
+.close-active {
+    background: #ff5252 !important;
+}
 </style>
 	<body>
 		<div id="streamSpace"></div>
@@ -421,6 +436,15 @@
 			<div style="margin-bottom: 10px;">
 				<input type="text" id="editorSearch" oninput="renderEditor()" placeholder="Search by winner name..." 
 					style="width: 100%; padding: 8px; background: #222; color: white; border: 1px solid orange; box-sizing: border-box;">
+			</div>
+		
+					<!-- Custom "Are You Sure?" Modal -->
+			<div id="deleteModal" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; border: 2px solid #7b1d1d; padding: 20px; z-index: 1000; box-shadow: 0 0 20px rgba(0,0,0,0.8); text-align: center; width: 250px;">
+				<p style="color: white; margin-bottom: 20px;">Delete this entry forever?</p>
+				<div style="display: flex; gap: 10px;">
+					<button id="confirmDeleteBtn" style="background: #7b1d1d; color: white; border: none; padding: 10px; flex: 1; cursor: pointer;">Yes, Delete</button>
+					<button onclick="closeDeleteModal()" style="background: #444; color: white; border: none; padding: 10px; flex: 1; cursor: pointer;">Cancel</button>
+				</div>
 			</div>
 			<div style="max-height: 80%; overflow-x: auto; overflow-y: auto; border: 1px solid #333;">
 				<table id="editorTable" style="width: 100%; border-collapse: collapse; color: white; table-layout: fixed; min-width: 500px;">
@@ -954,47 +978,76 @@ function saveEditorChanges() {
     const inputs = tbody.querySelectorAll('input, select');
     const data = JSON.parse(localStorage.getItem('prizeData')) || [];
 
+    // 1. Map all changes from the UI back to the data array
     inputs.forEach(input => {
         const idx = input.getAttribute('data-index');
         const key = input.getAttribute('data-key');
         let value = input.value;
 
         if (key === 'amount') value = parseFloat(value);
-        data[idx][key] = value;
+        if (data[idx]) {
+            data[idx][key] = value;
+        }
     });
 
+    // 2. Save to LocalStorage
     localStorage.setItem('prizeData', JSON.stringify(data));
-    // Update the live prizeData variable if you have one globally
+
+    // 3. Update global variables and sync main UI
     if (typeof prizeData !== 'undefined') prizeData = data; 
+    if (typeof filterAndRender === 'function') filterAndRender();
 
-    if (typeof filterAndRender === 'function') filterAndRender(); // Refresh your main table
+    // 4. VISUAL FEEDBACK FOR OBS
+    // Targets the button clicked to trigger this function
+    const btn = event.currentTarget;
+    const indicator = document.getElementById('saveIndicator');
+
+    if (btn) {
+        btn.classList.add('save-active');
+        btn.innerText = "✅ Changes Saved!";
+    }
+
+    if (indicator) {
+        indicator.style.opacity = '1';
+    }
+
+    // 5. Reset button and indicator after 2 seconds
+    setTimeout(() => {
+        if (btn) {
+            btn.classList.remove('save-active');
+            btn.innerText = "💾 Save All Changes";
+        }
+        if (indicator) {
+            indicator.style.opacity = '0';
+        }
+    }, 2000);
+
+    console.log("Editor changes saved and synced.");
 }
+let pendingDeleteIndex = null;
 
+// --- DELETE LOGIC WITH MODAL ---
 function deletePrize(index) {
-    // 1. Get the data
-    let data = JSON.parse(localStorage.getItem('prizeData')) || [];
-
-    // 2. Perform the deletion
-    data.splice(index, 1);
-
-    // 3. Update Storage
-    localStorage.setItem('prizeData', JSON.stringify(data));
-
-    // 4. Sync global variable if it exists
-    if (typeof prizeData !== 'undefined') {
-        prizeData = data;
-    }
-
-    // 5. Refresh the Editor Table
-    renderEditor();
-
-    // 6. Refresh the Main Prize List (if applicable)
-    if (typeof filterAndRender === 'function') {
-        filterAndRender();
-    }
-    
-    console.log("Deleted entry at index " + index);
+    pendingDeleteIndex = index;
+    document.getElementById('deleteModal').style.display = 'block';
 }
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    pendingDeleteIndex = null;
+}
+
+document.getElementById('confirmDeleteBtn').onclick = function() {
+    if (pendingDeleteIndex !== null) {
+        let data = JSON.parse(localStorage.getItem('prizeData')) || [];
+        data.splice(pendingDeleteIndex, 1);
+        localStorage.setItem('prizeData', JSON.stringify(data));
+        
+        closeDeleteModal();
+        renderEditor();
+        if (typeof filterAndRender === 'function') filterAndRender();
+    }
+};
 	function clearPrizeDataCache() {
 		localStorage.removeItem('prizeData');
 		console.log("LocalStorage prizeData cleared!");
