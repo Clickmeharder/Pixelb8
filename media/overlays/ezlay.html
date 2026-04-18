@@ -973,56 +973,71 @@ function sortData(key) {
     localStorage.setItem('prizeData', JSON.stringify(data));
     renderEditor(); // Refresh the list
 }
-function saveEditorChanges() {
+function saveEditorChanges(event) {
     const tbody = document.getElementById('editorBody');
     const inputs = tbody.querySelectorAll('input, select');
-    const data = JSON.parse(localStorage.getItem('prizeData')) || [];
+    const rawData = JSON.parse(localStorage.getItem('prizeData')) || [];
 
-    // 1. Map all changes from the UI back to the data array
+    // 1. First, pull all changes from the UI into the array
     inputs.forEach(input => {
         const idx = input.getAttribute('data-index');
         const key = input.getAttribute('data-key');
         let value = input.value;
 
         if (key === 'amount') value = parseFloat(value);
-        if (data[idx]) {
-            data[idx][key] = value;
+        if (rawData[idx]) {
+            rawData[idx][key] = value;
         }
     });
 
-    // 2. Save to LocalStorage
-    localStorage.setItem('prizeData', JSON.stringify(data));
+    // 2. MERGE LOGIC: Group by Winner + Prize Name
+    const mergedMap = new Map();
 
-    // 3. Update global variables and sync main UI
-    if (typeof prizeData !== 'undefined') prizeData = data; 
+    rawData.forEach(entry => {
+        // Create a unique key (e.g., "jaedraze-baitfish token")
+        // We use lowercase to ensure "Baitfish" and "baitfish" merge correctly
+        const mergeKey = `${entry.winner.toLowerCase()}-${entry.prize.toLowerCase()}`;
+
+        if (mergedMap.has(mergeKey)) {
+            // If exists, add the amounts together
+            const existing = mergedMap.get(mergeKey);
+            existing.amount += entry.amount;
+        } else {
+            // If new, add a copy to the map
+            mergedMap.set(mergeKey, { ...entry });
+        }
+    });
+
+    // Convert map back into an array
+    const finalData = Array.from(mergedMap.values());
+
+    // 3. Save to LocalStorage
+    localStorage.setItem('prizeData', JSON.stringify(finalData));
+
+    // 4. Update global variables and sync main UI
+    if (typeof prizeData !== 'undefined') prizeData = finalData; 
     if (typeof filterAndRender === 'function') filterAndRender();
+    
+    // Refresh the editor view so the merged rows consolidate visually
+    renderEditor();
 
-    // 4. VISUAL FEEDBACK FOR OBS
-    // Targets the button clicked to trigger this function
+    // 5. VISUAL FEEDBACK
     const btn = event.currentTarget;
     const indicator = document.getElementById('saveIndicator');
 
     if (btn) {
         btn.classList.add('save-active');
-        btn.innerText = "✅ Changes Saved!";
+        btn.innerText = "✅ Items Merged & Saved!";
     }
+    if (indicator) indicator.style.opacity = '1';
 
-    if (indicator) {
-        indicator.style.opacity = '1';
-    }
-
-    // 5. Reset button and indicator after 2 seconds
     setTimeout(() => {
         if (btn) {
             btn.classList.remove('save-active');
             btn.innerText = "💾 Save All Changes";
         }
-        if (indicator) {
-            indicator.style.opacity = '0';
-        }
+        if (indicator) indicator.style.opacity = '0';
     }, 2000);
-
-    console.log("Editor changes saved and synced.");
 }
 let pendingDeleteIndex = null;
 
