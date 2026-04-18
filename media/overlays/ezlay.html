@@ -963,14 +963,29 @@ function saveEditorChanges() {
 }
 
 function deletePrize(index) {
-    if (confirm("Delete this entry forever?")) {
-        let data = JSON.parse(localStorage.getItem('prizeData')) || [];
-        data.splice(index, 1);
-        localStorage.setItem('prizeData', JSON.stringify(data));
-        if (typeof prizeData !== 'undefined') prizeData = data;
-        renderEditor();
-        if (typeof filterAndRender === 'function') filterAndRender();
+    // 1. Get the data
+    let data = JSON.parse(localStorage.getItem('prizeData')) || [];
+
+    // 2. Perform the deletion
+    data.splice(index, 1);
+
+    // 3. Update Storage
+    localStorage.setItem('prizeData', JSON.stringify(data));
+
+    // 4. Sync global variable if it exists
+    if (typeof prizeData !== 'undefined') {
+        prizeData = data;
     }
+
+    // 5. Refresh the Editor Table
+    renderEditor();
+
+    // 6. Refresh the Main Prize List (if applicable)
+    if (typeof filterAndRender === 'function') {
+        filterAndRender();
+    }
+    
+    console.log("Deleted entry at index " + index);
 }
 	function clearPrizeDataCache() {
 		localStorage.removeItem('prizeData');
