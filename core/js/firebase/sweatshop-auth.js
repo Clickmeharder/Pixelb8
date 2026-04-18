@@ -1,14 +1,6 @@
 //sweatshop.js
 // firebase/sweatshop-auth.js
-/* 
-#, Item, tt, ttmax, sweatprice, pedcost
-30,	B101 Amp,0.00,0.00, 110,0.18
-99+, Sollomate Rubio,0.00,0.00, 123, 0.20
-50, EP-2 Proton,0.00,0.00, 321, 0.50
-99, Sollomate Azuro,0.00,0.00, 800, 1.40
-99, Skildek Lancehead, 0.00,0.00,200, 0.30
-20, Shotgun (SA), 0.00,0.00, 1025, 2.10
-*/
+
 	//import scripts
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";

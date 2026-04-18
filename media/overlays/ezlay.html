@@ -422,12 +422,12 @@
 				<table id="editorTable" style="width: 100%; border-collapse: collapse; color: white; table-layout: fixed; min-width: 500px;">
 					<thead>
 						<tr style="border-bottom: 2px solid orange; text-align: left; background: #222;">
-							<th style="width: 80px; padding: 5px;">Date</th>
-							<th style="width: 120px; padding: 5px;">Winner</th>
-							<th style="width: 60px; padding: 5px;">PED</th>
-							<th style="width: 100px; padding: 5px;">Prize</th>
-							<th style="width: 90px; padding: 5px;">Status</th>
-							<th style="width: 40px; padding: 5px; text-align: center;">X</th>
+							<th onclick="sortData('date')" style="width: 80px; padding: 10px; cursor: pointer; user-select: none;">Date ↕</th>
+							<th onclick="sortData('winner')" style="width: 120px; padding: 10px; cursor: pointer; user-select: none;">Winner ↕</th>
+							<th onclick="sortData('amount')" style="width: 60px; padding: 10px; cursor: pointer; user-select: none;">PED ↕</th>
+							<th style="width: 100px; padding: 10px;">Prize</th>
+							<th style="width: 90px; padding: 10px;">Status</th>
+							<th style="width: 60px; padding: 10px; text-align: center;">X</th>
 						</tr>
 					</thead>
 					<tbody id="editorBody"></tbody>
@@ -910,12 +910,36 @@ function renderEditor() {
                     <option value="claimed" ${entry.status === 'claimed' ? 'selected' : ''}>Claimed</option>
                 </select>
             </td>
-            <td style="text-align: center;">
-                <button onclick="deletePrize(${index})" style="background: #7b1d1d; border: none; color: white; cursor: pointer; padding: 2px 8px; border-radius: 3px;">&times;</button>
-            </td>
+            <td style="text-align: center; padding: 5px;">
+				<button onclick="deletePrize(${index})" style="background: #7b1d1d; border: none; color: white; cursor: pointer; padding: 10px 15px; border-radius: 3px; font-size: 18px; line-height: 1;">&times;</button>
+			</td>
         `;
         tbody.appendChild(row);
     });
+}
+let sortDirection = true;
+
+function sortData(key) {
+    const data = JSON.parse(localStorage.getItem('prizeData')) || [];
+    
+    data.sort((a, b) => {
+        let valA = a[key];
+        let valB = b[key];
+        
+        // Handle numbers correctly
+        if (key === 'amount') {
+            return sortDirection ? valA - valB : valB - valA;
+        }
+        
+        // Handle strings
+        return sortDirection 
+            ? String(valA).localeCompare(String(valB)) 
+            : String(valB).localeCompare(String(valA));
+    });
+
+    sortDirection = !sortDirection; // Toggle direction for next click
+    localStorage.setItem('prizeData', JSON.stringify(data));
+    renderEditor(); // Refresh the list
 }
 function saveEditorChanges() {
     const tbody = document.getElementById('editorBody');
