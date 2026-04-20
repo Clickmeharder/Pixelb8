@@ -260,9 +260,10 @@ document.addEventListener('click', async (e) => {
 
 // --- WEB PORT AUTH LOGIC ---
 
-// 1. Check if we are in a browser or the Electron app
-const isWeb = (typeof window.electronAPI === 'undefined');
-
+const isWebMode = (typeof window.electronAPI === 'undefined');
+let fileHandle = null; 
+let lastSize = 0;
+let pollInterval = null;
 if (!isWeb) {
     // KEEPS ELECTRON LOGIC: Only runs if the bridge exists
     window.electronAPI.onAuthSuccess((token) => {
