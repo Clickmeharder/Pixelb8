@@ -841,7 +841,7 @@ fishnet specific
     transform: translate(-50%, -50%);
     width: 500px; /* Adjust size as needed */
     height: 500px;
-    background-image: url('../fishnetimage.png');
+    background-image: url('../fishnet.png');
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
