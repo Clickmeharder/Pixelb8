@@ -161,8 +161,8 @@ function renderAchievements(userData) {
             badge.textContent = count;
             badge.style.cssText = `
                 position: absolute;
-                bottom: -2px;
-                right: -5px;
+                top: -4px;
+				right: -8px;
                 background: #111;
                 color: ${award.color};
                 border: 1px solid ${award.color};
@@ -348,13 +348,30 @@ async function updateEntropiaProfile(newName) {
 }
 
 // --- 4. THE AUTH OBSERVER ---
+// --- 5. THE AUTH OBSERVER (RESTORED ICONS & AUTOFILL) ---
 onAuthStateChanged(auth, async (user) => {
     const body = document.body;
     const hostSection = document.getElementById('host-tools');
     const adminTabBtn = document.querySelector('.tab-btn[data-target="admin-terminal"]');
     const anonAuthContainer = document.getElementById('anon-auth-container');
 
+    // Restore the icon mapping
+    const roleToIcon = {
+        ceo: '👑',
+        admin: '⭐',
+        mod: '🛡️',
+        susrep: '💼',
+        contestHost: '🎤',
+        vip: '🌟',
+        associate: '🤝',
+        verified: '✔️',
+        user: '🙂',
+        guest: '👤',
+        default: '👤'
+    };
+
     if (user) {
+        console.log('✅ User Session Active:', user.uid);
         body.classList.add('auth-logged-in');
         body.classList.remove('auth-logged-out');
         if (anonAuthContainer) anonAuthContainer.style.display = 'none';
@@ -362,14 +379,20 @@ onAuthStateChanged(auth, async (user) => {
         const displayName = user.displayName || "Pixel Colonist";
         const photoURL = user.photoURL || defaultAvatar;
 
+        // UI Header Updates
         usernameElements.forEach(el => el.textContent = displayName);
         profilePhotoElements.forEach(img => img.src = photoURL);
+
+        // RESTORED: Autofill the Settings Inputs
+        if (updateUsernameInp) updateUsernameInp.value = displayName;
+        if (updatePhotoInp) updatePhotoInp.value = photoURL;
 
         try {
             const userDocRef = doc(db, 'users', user.uid);
             const userDoc = await getDoc(userDocRef);
             
             if (!userDoc.exists()) {
+                console.log("🆕 New User: Initializing Firestore identity...");
                 const newUserData = {
                     displayname: displayName,
                     entropianame: "Unlinked Avatar",
@@ -379,7 +402,7 @@ onAuthStateChanged(auth, async (user) => {
                     isOnline: 'online',
                     balancePixels: 0,
                     euNameVerified: false,
-                    achievements: [], // CRITICAL: Initialize
+                    achievements: [],
                     lastUpdated: serverTimestamp(),
                     createdAt: serverTimestamp()
                 };
@@ -387,26 +410,70 @@ onAuthStateChanged(auth, async (user) => {
                 globalUserData = newUserData;
             } else {
                 globalUserData = userDoc.data();
+                
+                // Patch legacy accounts missing the achievements key
+                if (!globalUserData.achievements) {
+                    await updateDoc(userDocRef, { achievements: [] });
+                    globalUserData.achievements = [];
+                }
             }
 
-            // Sync UI with DB Rank/Role
+            // --- PERMISSIONS & TAB VISIBILITY ---
             const userRole = (globalUserData.role || 'user').toLowerCase();
             const staffRoles = ['ceo', 'admin', 'mod', 'susrep', 'contesthost'];
+            
             if (hostSection) hostSection.style.display = staffRoles.includes(userRole) ? 'block' : 'none';
+            if (adminTabBtn) adminTabBtn.style.display = ['ceo', 'admin', 'mod'].includes(userRole) ? 'block' : 'none';
 
-            // Final Render
+            // --- RESTORED: ROLE ICON & LABEL LOGIC ---
+            const icon = roleToIcon[userRole] || roleToIcon['default'];
+            userRoleIcons.forEach(el => el.textContent = icon);
+            userRoleLabels.forEach(el => el.textContent = userRole.toUpperCase());
+
+            // --- RESTORED: ENTROPIA NAME & STATUS AUTOFILL ---
+            const eName = globalUserData.entropianame || "Unlinked Avatar";
+            const isVerified = globalUserData.euNameVerified === true;
+            
+            entropiaNameElements.forEach(el => {
+                el.textContent = eName + (isVerified ? ' ☑' : '');
+            });
+            if (updateEntropiaInp) updateEntropiaInp.value = eName;
+
+            const uStatus = globalUserData.status || "Scanning horizon...";
+            if (statusDisplay) statusDisplay.textContent = `"${uStatus}"`;
+            if (updateStatusInp) updateStatusInp.value = uStatus;
+
+            if (userPixelCount) {
+                userPixelCount.textContent = (globalUserData.balancePixels || "0") + "px";
+            }
+
             loadAuthenticatedData(user);
 
         } catch (error) {
             console.error("❌ Error fetching account data:", error);
         }
-
     } else {
-        // Handled Logged Out State
+        // --- LOGGED OUT STATE ---
+        console.log('❌ No active session.');
+        globalUserData = null; 
         body.classList.add('auth-logged-out');
         body.classList.remove('auth-logged-in');
         if (anonAuthContainer) anonAuthContainer.style.display = 'block';
+        if (hostSection) hostSection.style.display = 'none';
+        if (adminTabBtn) adminTabBtn.style.display = 'none';
+
         usernameElements.forEach(el => el.textContent = "StrangerDanger!");
+        profilePhotoElements.forEach(img => img.src = defaultAvatar);
+        entropiaNameElements.forEach(el => el.textContent = "-");
+        
+        // Reset role visuals
+        userRoleIcons.forEach(el => el.textContent = roleToIcon['guest']);
+        userRoleLabels.forEach(el => el.textContent = "GUEST");
+
+        // Clear inputs
+        [updateUsernameInp, updatePhotoInp, updateEntropiaInp, updateStatusInp].forEach(inp => {
+            if (inp) inp.value = "";
+        });
     }
 });
 function signOutFromFirebase() {
