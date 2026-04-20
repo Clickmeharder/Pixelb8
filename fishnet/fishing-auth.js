@@ -115,6 +115,75 @@ if (saveProfileBtn) {
         }
     };
 }
+function renderAchievements(userData) {
+    const cabinet = document.getElementById('achievement-cabinet');
+    if (!cabinet) return;
+
+    // Clear existing icons
+    cabinet.innerHTML = '';
+
+    const achievements = userData.achievements || [];
+
+    if (achievements.length === 0) {
+        cabinet.innerHTML = `<span style="color: #444; font-size: 10px; letter-spacing: 1px;">NO_AWARDS_YET</span>`;
+        return;
+    }
+
+    // Mapping keys to Emojis and Colors
+    const awardMap = {
+        'gold_trophy':   { icon: '🏆', color: '#FFD700', label: '1st Place' },
+        'silver_trophy': { icon: '🥈', color: '#C0C0C0', label: '2nd Place' },
+        'bronze_trophy': { icon: '🥉', color: '#CD7F32', label: '3rd Place' },
+        'ribbon':        { icon: '🎗️', color: '#ff4444', label: 'Finisher' }
+    };
+
+    achievements.forEach(awardObj => {
+        // Support both old string format and new object format {id, count}
+        const id = typeof awardObj === 'string' ? awardObj : awardObj.id;
+        const count = awardObj.count || 1;
+        const award = awardMap[id] || { icon: '⭐', color: '#fff', label: 'Award' };
+        
+        const container = document.createElement('div');
+        container.style.cssText = `position: relative; display: inline-block; margin-right: 12px; transition: transform 0.2s; cursor: help;`;
+        container.title = `${award.label} (x${count})`;
+
+        const trophySpan = document.createElement('span');
+        trophySpan.style.cssText = `
+            font-size: 22px;
+            filter: drop-shadow(0 0 3px ${award.color}88);
+            display: inline-block;
+        `;
+        trophySpan.textContent = award.icon;
+
+        // Add numerical badge if count > 1
+        if (count > 1) {
+            const badge = document.createElement('span');
+            badge.textContent = count;
+            badge.style.cssText = `
+                position: absolute;
+                bottom: -2px;
+                right: -5px;
+                background: #111;
+                color: ${award.color};
+                border: 1px solid ${award.color};
+                font-size: 9px;
+                font-weight: bold;
+                padding: 0px 3px;
+                border-radius: 4px;
+                pointer-events: none;
+            `;
+            container.appendChild(badge);
+        }
+
+        // Hover effect
+        container.onmouseover = () => container.style.transform = 'scale(1.2)';
+        container.onmouseout = () => container.style.transform = 'scale(1)';
+        
+        container.appendChild(trophySpan);
+        cabinet.appendChild(container);
+    });
+}
+
 // --- 2. PROTECTED DATA LOADER ---
 async function loadAuthenticatedData(user) {
     try {
@@ -125,9 +194,12 @@ async function loadAuthenticatedData(user) {
         if (userDoc.exists()) {
             const data = userDoc.data();
             if (userPixelCount) {
-                userPixelCount.textContent = `Pixels: ${data.balancePixels || 0}`;
+                userPixelCount.textContent = `${data.balancePixels || 0}px`;
                 userPixelCount.classList.remove('hidden');
             }
+
+            // Trigger Render
+            renderAchievements(data);
         }
 
         if (typeof loadCommunityMarket === "function") {
@@ -137,9 +209,11 @@ async function loadAuthenticatedData(user) {
         console.warn("⚠️ Data sync partially failed:", e);
     }
 }
-
-// --- 3. THE  BRIDGE (RECEIVER) ---
+// --- 3. THE BRIDGE (RECEIVER) ---
 console.log("🕵️ AUTH MODULE: Awake and listening for the bridge...");
+
+// --- 3. IDENTITY HANDLERS (GHOST & AUTH) ---
+
 async function anonymousIdentity(euName, displayInput) {
     if (!euName || euName.length < 3) {
         addLog("❌ IDENTITY_ERR: Valid Entropia Name required.", true);
@@ -147,54 +221,35 @@ async function anonymousIdentity(euName, displayInput) {
     }
 
     try {
-        // 1. Create the real Firebase Anonymous Session
         const credential = await signInAnonymously(auth);
         const user = credential.user;
-
-        // 2. Set the Auth Profile Display Name
         await updateProfile(user, { displayName: displayInput || euName });
 
-        // 3. Initialize Firestore with the FULL Schema
         const userDocRef = doc(db, 'users', user.uid);
-        
         const ghostData = {
-            // Financials
             balancePixels: 0,
             balanceUsd: 0.00,
-            
-            // Identity
             displayname: displayInput || euName,
             entropianame: euName,
-            photoURL: defaultAvatar, // Use your defined fallback constant
-            
-            // Status & Permissions
+            photoURL: defaultAvatar, 
             role: 'user', 
             isOnline: 'online',
             status: "In Cognito...",
-            
-            // Verification Flags
             euNameVerified: false, 
             verified: false,
-            isAnonymous: true, // Flag to identify ghost accounts in Admin Hub
-            
-            // Technical / Affiliates
+            isAnonymous: true, 
+            achievements: [], // CRITICAL: Initialize for Cloud Function
             subId1: "{ghost_session}",
             subId2: "{unlinked}",
-            
-            // Timing
             lastStatusChange: serverTimestamp(),
             lastUpdated: serverTimestamp(),
             createdAt: serverTimestamp()
         };
 
         await setDoc(userDocRef, ghostData);
-
-        // Update local global variable so the UI updates immediately
         globalUserData = ghostData;
 
         addLog(`👻 GHOST_LINK_COMPLETE: ${euName.toUpperCase()}`);
-        
-        // Refresh UI elements (similar to onAuthStateChanged logic)
         usernameElements.forEach(el => el.textContent = ghostData.displayname);
         entropiaNameElements.forEach(el => el.textContent = ghostData.entropianame);
         
@@ -203,9 +258,8 @@ async function anonymousIdentity(euName, displayInput) {
         addLog(`❌ LINK_FAILED: ${error.code}`, true);
     }
 }
-// --- GHOST IDENTITY EVENT DELEGATION ---
+// Event delegation for the Ghost Auth UI
 document.addEventListener('click', async (e) => {
-    // 1. Handle the "START_FISHING" button in the anon-auth-container
     if (e.target && e.target.id === 'btn-anon-auth') {
         const anonDisp = document.getElementById('anon-displayname')?.value.trim();
         const anonEU = document.getElementById('anon-euname')?.value.trim();
@@ -216,88 +270,65 @@ document.addEventListener('click', async (e) => {
 
         try {
             addLog("👻 INITIALIZING_GHOST_LINK...");
-            
-            // Step A: Create real Firebase Anonymous Session to satisfy Security Rules
             const credential = await signInAnonymously(auth);
             const user = credential.user;
 
-            // Step B: Set local persistence so the app remembers who you are
-            localStorage.setItem('guest_uid', user.uid);
-            localStorage.setItem('guest_ename', anonEU);
-            localStorage.setItem('guest_dname', anonDisp || anonEU);
-
-            // Step C: Initialize the user document in Firestore
             const userDocRef = doc(db, 'users', user.uid);
             await setDoc(userDocRef, {
                 displayname: anonDisp || anonEU,
                 entropianame: anonEU,
                 role: 'user',
+                balancePixels: 0,
                 euNameVerified: false,
                 isAnonymous: true,
+                achievements: [], // CRITICAL: Initialize
                 createdAt: serverTimestamp()
             });
 
             addLog(`✅ GHOST_LINK_ACTIVE: ${anonEU.toUpperCase()}`);
 
-            // Step D: If there is an active contest selected, join it immediately
-            // Note: This assumes you've stored the target contest info somewhere
-            // or the user clicks "Join" on a specific card.
             if (window.pendingContestJoin) {
                 const { planet, contestId } = window.pendingContestJoin;
                 joinContest(planet, contestId);
-            } else {
-                addLog("📡 IDENTITY_SYNCED: Now select a contest to join.");
             }
-
         } catch (error) {
-            console.error(error);
             addLog(`❌ LINK_FAILED: ${error.code}`, true);
         }
     }
-
 });
 
-
 // --- WEB PORT AUTH LOGIC ---
-
 const isWebMode = (typeof window.electronAPI === 'undefined');
 let fileHandle = null; 
 let lastSize = 0;
 let pollInterval = null;
+
 if (!isWebMode) {
-    // KEEPS ELECTRON LOGIC: Only runs if the bridge exists
     window.electronAPI.onAuthSuccess((token) => {
         const credential = GithubAuthProvider.credential(token);
         signInWithCredential(auth, credential);
     });
 } else {
-    // WEB LOGIC: Run standard Firebase Auth
     console.log("🌐 WEB_MODE: Initializing Web Auth...");
-
-    // Check if user is already logged in
     onAuthStateChanged(auth, (user) => {
         if (user) {
             console.log("✅ User already active:", user.displayName);
         } else {
             console.log("👤 No user session found. Waiting for login...");
-            // If you want them to log in immediately on page load, 
-            // you can call your login function here.
         }
     });
 }
 
-// 2. Create a Web Login Function
-// Bind this to your 'Login' button in index.html
 async function webSignIn() {
     const provider = new GithubAuthProvider();
     try {
-        // This opens the standard GitHub popup in a browser
         const result = await signInWithPopup(auth, provider);
         console.log("✅ Web Login Success:", result.user.displayName);
     } catch (error) {
         console.error("🔥 Web Login Failed:", error.message);
     }
 }
+
 async function updateEntropiaProfile(newName) {
     const user = auth.currentUser;
     if (!user) return;
@@ -306,17 +337,17 @@ async function updateEntropiaProfile(newName) {
         const userDocRef = doc(db, 'users', user.uid);
         await setDoc(userDocRef, {
             entropianame: newName,
-            lastUpdated: serverTimestamp() // Better practice for sync
+            lastUpdated: serverTimestamp()
         }, { merge: true });
         
         alert("eu profile updated");
-        
-        // Manual UI sync since profile changes don't trigger onAuthStateChanged
         entropiaNameElements.forEach(el => el.textContent = newName);
     } catch (e) {
         console.error("Update failed:", e);
     }
 }
+
+// --- 4. THE AUTH OBSERVER ---
 onAuthStateChanged(auth, async (user) => {
     const body = document.body;
     const hostSection = document.getElementById('host-tools');
@@ -324,11 +355,8 @@ onAuthStateChanged(auth, async (user) => {
     const anonAuthContainer = document.getElementById('anon-auth-container');
 
     if (user) {
-        console.log('✅ User Session Active:', user.uid);
         body.classList.add('auth-logged-in');
         body.classList.remove('auth-logged-out');
-
-        // --- HIDE ANON AUTH IF LOGGED IN ---
         if (anonAuthContainer) anonAuthContainer.style.display = 'none';
 
         const displayName = user.displayName || "Pixel Colonist";
@@ -337,15 +365,11 @@ onAuthStateChanged(auth, async (user) => {
         usernameElements.forEach(el => el.textContent = displayName);
         profilePhotoElements.forEach(img => img.src = photoURL);
 
-        if (updateUsernameInp) updateUsernameInp.value = displayName;
-        if (updatePhotoInp) updatePhotoInp.value = photoURL;
-
         try {
             const userDocRef = doc(db, 'users', user.uid);
             const userDoc = await getDoc(userDocRef);
             
             if (!userDoc.exists()) {
-                console.log("🆕 New User: Initializing Firestore identity...");
                 const newUserData = {
                     displayname: displayName,
                     entropianame: "Unlinked Avatar",
@@ -355,6 +379,7 @@ onAuthStateChanged(auth, async (user) => {
                     isOnline: 'online',
                     balancePixels: 0,
                     euNameVerified: false,
+                    achievements: [], // CRITICAL: Initialize
                     lastUpdated: serverTimestamp(),
                     createdAt: serverTimestamp()
                 };
@@ -362,109 +387,28 @@ onAuthStateChanged(auth, async (user) => {
                 globalUserData = newUserData;
             } else {
                 globalUserData = userDoc.data();
-                
-                if (!globalUserData.displayname && user.displayName) {
-                    await updateDoc(userDocRef, { displayname: user.displayName });
-                    globalUserData.displayname = user.displayName;
-                }
             }
 
-            // --- PERMISSIONS & TAB VISIBILITY ---
+            // Sync UI with DB Rank/Role
             const userRole = (globalUserData.role || 'user').toLowerCase();
             const staffRoles = ['ceo', 'admin', 'mod', 'susrep', 'contesthost'];
-            const adminRoles = ['ceo', 'admin', 'mod'];
+            if (hostSection) hostSection.style.display = staffRoles.includes(userRole) ? 'block' : 'none';
 
-            // 1. Toggle Host Creation Tools (Contest Terminal)
-            if (hostSection) {
-                hostSection.style.display = staffRoles.includes(userRole) ? 'block' : 'none';
-            }
-
-            // 2. Toggle Admin Hub Tab Button
-            if (adminTabBtn) {
-                adminTabBtn.style.display = adminRoles.includes(userRole) ? 'block' : 'none';
-            }
-
-            // --- UI UPDATE FROM GLOBAL DATA ---
-            const onlineStatus = globalUserData.isOnline || "online";
-            if (statusDot) statusDot.setAttribute('data-status', onlineStatus);
-            if (updateIsOnlineInp) updateIsOnlineInp.value = onlineStatus;
-            if (loginStatus) loginStatus.textContent = `Status: ${onlineStatus.toUpperCase()}`;
-
-            const eName = globalUserData.entropianame || "Unlinked Avatar";
-            const isVerified = globalUserData.euNameVerified === true;
-            
-            entropiaNameElements.forEach(el => {
-                el.textContent = eName + (isVerified ? ' ☑' : '');
-            });
-            if (updateEntropiaInp) updateEntropiaInp.value = eName;
-
-            const uStatus = globalUserData.status || "Scanning horizon...";
-            if (statusDisplay) statusDisplay.textContent = `"${uStatus}"`;
-            if (updateStatusInp) updateStatusInp.value = uStatus;
-
-            const role = globalUserData.role || 'user';
-            const icon = roleToIcon[role] || roleToIcon['default'];
-            userRoleIcons.forEach(el => el.textContent = icon);
-            userRoleLabels.forEach(el => el.textContent = role.toUpperCase());
-
-            if (userPixelCount) {
-                userPixelCount.textContent = (globalUserData.balancePixels || "0") + "px";
-            }
-
-            // --- TRIGGER CONTEST LIST SCAN ---
-            if (typeof refreshContestList === "function") {
-                refreshContestList();
-            }
-
-            // --- RECONNECT ACTIVE CONTEST HUD ---
-            // Small delay to ensure globalUserData is fully mapped before scanning rosters
-            setTimeout(() => {
-                if (typeof restoreActiveContest === 'function') {
-                    restoreActiveContest();
-                }
-            }, 1500);
+            // Final Render
+            loadAuthenticatedData(user);
 
         } catch (error) {
             console.error("❌ Error fetching account data:", error);
         }
-        
-        loadAuthenticatedData(user);
 
     } else {
-        console.log('❌ No active session.');
-        globalUserData = null; 
+        // Handled Logged Out State
         body.classList.add('auth-logged-out');
         body.classList.remove('auth-logged-in');
-
-        // --- SHOW ANON AUTH IF LOGGED OUT ---
         if (anonAuthContainer) anonAuthContainer.style.display = 'block';
-
-        // Reset UI Elements
-        if (hostSection) hostSection.style.display = 'none';
-        if (adminTabBtn) adminTabBtn.style.display = 'none';
-
-        // Auto-switch away from Admin Tab if user logs out while viewing it
-        if (document.getElementById('admin-terminal')?.style.display === 'block') {
-            document.querySelector('[data-target="scout-pane"]')?.click();
-        }
-
-        if (statusDot) statusDot.setAttribute('data-status', 'offline');
         usernameElements.forEach(el => el.textContent = "StrangerDanger!");
-        profilePhotoElements.forEach(img => img.src = defaultAvatar);
-        entropiaNameElements.forEach(el => el.textContent = "-");
-        
-        // Hide HUD on logout
-        const hud = document.getElementById('contest-hud');
-        if (hud) hud.style.display = 'none';
-        if (hudInterval) clearInterval(hudInterval);
-        activeContestRef = null;
-
-        [updateUsernameInp, updatePhotoInp, updateEntropiaInp, updateStatusInp].forEach(inp => {
-            if (inp) inp.value = "";
-        });
     }
 });
-// --- 5. SIGN OUT ---
 function signOutFromFirebase() {
     signOut(auth)
         .then(() => {
@@ -473,7 +417,6 @@ function signOutFromFirebase() {
         })
         .catch((error) => console.error('Logout error:', error));
 }
-
 // --- 6. PROFILE MODAL FUNCTIONS ---
 document.getElementById('saveProfileBtn')?.addEventListener('click', async () => {
     const user = auth.currentUser;
@@ -1535,15 +1478,6 @@ async function joinContest(contestId) {
 /**
  * FETCH_CONTEST_ROSTER: SYNCED_MANIFEST_VIEWER
  * Refactored for Flat Pathing
- */
-/**
- * FETCH_CONTEST_ROSTER: SYNCED_MANIFEST_VIEWER
- * Fetches the 'participants' sub-collection for a specific contest.
- */
-/**
- * FETCH_CONTEST_ROSTER
- * Displays the participant list within a contest card, 
- * applying Podium styling if the contest is finalized.
  */
 async function fetchContestRoster(contestId, rosterContainer, isConcluded = false) {
     if (!contestId) return;
