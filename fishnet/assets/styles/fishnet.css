@@ -1,0 +1,1222 @@
+:root {
+	--eu-blue: #00aaff;
+	--eu-bg: #0b151d;
+	--eu-panel: rgb(16 32 45 / 6%);
+	--eu-border: #3a5060;
+	--eu-accent: #ffaa00;
+	--eu-dark-bg: #050505;
+	--eu-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/*
+old top styles tag stuff
+*/
+
+
+        .header { border-bottom: 1px solid #0f0; padding-bottom: 5px; margin-bottom: 15px; font-size: 12px; }
+        label { font-size: 10px; color: #888; display: block; margin-top: 10px; }
+        
+        input, select { 
+            background: #050505; border: 1px solid #222; color: #0f0; 
+            width: 100%; padding: 8px; box-sizing: border-box; outline: none;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        input:focus { border-color: #0f0; }
+        
+        #log-window { 
+            height: 280px; background: #050505; border: 1px solid #222; 
+            margin-top: 15px; padding: 10px; font-size: 11px; overflow-y: auto;
+        }
+        
+/* login css */
+
+.right-panel {
+  margin-top: 0px;
+  margin-left: -8px;
+  color: var(--staticpage-sidepanels-text-color);
+  border-color: var(--staticpage-sidepanels-border-color);
+  border-width: var(--staticpage-sidepanels-border-width);
+  border-style: var(--staticpage-sidepanels-border-style);
+  border-radius: var(--staticpage-sidepanels-border-radius);
+  background-color: var(--staticpage-sidepanels-bg-color);
+  opacity: var(--staticpage-sidepanels-opacity);
+  padding: 5px;
+  height: auto;
+  min-height: ;
+  max-height: 27vh;
+  font-family: 'Pixelify Sans';
+  box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
+  overflow: hidden;
+}
+/* login panel */
+div#useraccountPanel.panel {
+    border-bottom-color: rgba(77, 242, 0, 0.36);
+    min-height: ;
+    max-height: ;
+    width: ;
+    height: ;
+	z-index:;
+}
+
+.right-panel p {
+	margin: 0;
+    margin-top: 2px;
+    line-height: 0.8;
+}
+
+#websiteStatContainer p {
+	font-size: 11px;
+    line-height: 0.8;
+    margin-bottom: 1px;
+    color: #34d213;
+    font-weight: bold;
+}
+
+#websiteStatContainer {
+    margin-bottom: 4px;
+    border: inherit;
+    border-style: ridge;
+	background-color:#000;
+}
+#websiteStatContainer#sitestats h2 {
+	margin:auto;
+	text-align:center;
+}
+div#userInfoContainer {
+    display: flex;
+	background-color: var(--staticpage-panels-bg-color);
+    border: 2px ridge #444;
+    height: ;
+    overflow-y: ;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+div#userInfoContainer ul {
+    padding-top: 6px;
+    margin-block-end: 0em;
+    font-family: 'Pixelify Sans';
+    font-size: 9px;
+}
+.content-panel {
+    display: inline-flex;
+    padding: 0px;
+    max-width: -webkit-fill-available;
+    height: 180px;
+    margin-right: 12px;
+    margin-left: 12px;
+    justify-content: flex-end;
+    color: var(--staticpage-contentpanel-text-color);
+    border-color: #0313186b;
+    border-radius: var(--staticpage-contentpanel-border-radius);
+    background-color: transparent;
+    box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
+}
+
+/* Modal styles */
+#loginStatus{}
+.logged-in{}
+.logged-out{}
+form#loginForm {
+    height: 115px;
+    overflow-y: auto;
+    font-size: 10px;
+    line-height: normal;
+    font-family: lucida console;
+    color: #0e7504;
+    background-color: #1b1818a1;
+
+}
+
+input#signup-username, input#signup-email, input#signup-password {
+	color: #0b80e787;
+    background-color: transparent;border-color: #07baff66;
+
+}
+input#signup-username:focus-visible, input#signup-email:focus-visible, input#signup-password:focus-visible {
+	color: #0b80e7d6;
+    background-color: #00ffff21;
+    border-color: #69755d00;
+    border-radius: 8px;
+    outline-color: #12706ef5;
+    outline-width: 1px;
+    outline-offset: 1px;
+    outline-style: ridge;
+}
+input#signup-username{
+	margin-bottom:4px;
+}
+input#signup-email{
+	margin-left:10px;
+}
+/* Close button styles */
+.close {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    font-size: 1em;
+    cursor: pointer;
+}
+button.btn.btn-primary {
+    margin-left: 122PX;
+    margin-top: 7PX;
+}
+
+/* Style for modal trigger buttons (if needed) */
+.modal-trigger {
+  cursor: pointer;
+}
+
+/* Hide scroll bars on body when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+.top-bar-user {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.top-bar-user .loggedinUsername {
+    margin: 0px;
+}
+
+img#settingsprofilephoto {
+    height: 128px;
+    width: 128px;
+    border: 3px ridge #333;
+    border-radius: 50%;
+	opacity:0.6;
+	position: relative;
+    left: -9%;
+    bottom: 20px;
+}
+img#profilephoto {
+    height: 32px;
+    width: 32px;
+    border: 3px ridge #333;
+    border-radius: 50%;
+	margin: 0px;
+	margin-left:6px;
+	margin-right:12px;
+	opacity:0.6;
+}
+img#profilephoto:hover {
+    height: 32px;
+    width: 32px;
+    border: 3px ridge #333;
+    border-radius: 50%;
+	opacity:0.8;
+}
+
+.availability-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #555; /* Default Gray */
+    margin-right: 5px;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+/* Color Mapping based on Firestore string */
+.availability-indicator[data-status="online"] { background-color: #00ff00; box-shadow: 0 0 8px #00ff00; }
+.availability-indicator[data-status="away"]   { background-color: #ffcc00; box-shadow: 0 0 8px #ffcc00; }
+.availability-indicator[data-status="busy"]   { background-color: #ff0000; box-shadow: 0 0 8px #ff0000; }
+.availability-indicator[data-status="idle"]   { background-color: #00ffff; box-shadow: 0 0 8px #00ffff; }
+.availability-indicator[data-status="dnd"]    { background-color: #990000; }
+.availability-indicator[data-status="offline"] { background-color: #555555; }
+
+.userstatus-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+.userstatus-online { background-color: #00ff00; box-shadow: 0 0 8px #00ff00; }
+.userstatus-idle   { background-color: #00ffff; box-shadow: 0 0 8px #00ffff; }
+.userstatus-away   { background-color: #ffcc00; box-shadow: 0 0 8px #ffcc00; }
+.userstatus-busy   { background-color: #ff0000; box-shadow: 0 0 8px #ff0000; }
+.userstatus-dnd    { background-color: #990000; box-shadow: 0 0 5px #f00; }
+.userstatus-offline { background-color: #555555; }
+.popover-menu {
+    position: absolute;
+    top: 48px;
+    right: 12px;
+    width: 200px;
+    background: #050505;
+    border: 4px ridge var(--primary-color, #3e3e3e);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    padding: 10px;
+    z-index: 10999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+	opacity: 0.85;
+	transition:all 0.4s ease;
+}
+.popover-menu:hover{
+	opacity:0.95;
+}
+.popover-menu.hidden { display: none; }
+
+.popover-header { font-size: 0.7em; color: #555; border-bottom: 1px solid #222; margin-bottom: 5px; }
+
+.popover-menu input, .popover-menu select {
+    background: #111;
+    border: 1px solid #333;
+    color: #0f0;
+    font-family: monospace;
+    padding: 5px;
+    font-size: 0.9em;
+	width: 98%;
+}
+
+.popover-btn {
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+.popover-btn:hover { background: #333; border-color: #0f0; }
+input#update-status {
+    min-width: 85%;
+}
+.popover-footer{margin:auto;}
+
+
+/* The badge in the message list */
+.verified-badge {
+    font-weight: bold;
+    user-select: none;
+    animation: pulse-cyan 2s infinite ease-in-out;
+}
+
+/* The tag in the User Details modal */
+.verified-tag {
+    font-family: monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+@keyframes pulse-cyan {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; text-shadow: 0 0 8px #00f2ff; }
+    100% { opacity: 0.8; }
+}
+/*MAILBOX CSS*/
+
+/* ---MAILBOX Modal --- */
+#view-mail-modal, #user-details {
+    position: fixed !important;
+    z-index: 10001; /* This is our baseline */
+}
+div#view-mail-modal {
+    position: fixed;
+    top: 150px;
+    left: 50%;
+	min-width: 400px;
+	width:40%;
+    background-color: rgba(0, 0, 0, 0.85);
+}
+/* --- PIXELB8: MAILBOX WINDOW --- */
+.mailbox-window {
+	position: relative;
+	margin: 0;
+    width: 99%;max-width: 800px;
+	background: #050505;
+    border: 4px ridge var(--primary-color, #3e3e3e);
+    background-color: #1a1919;
+    box-shadow: -2px 2px 15px rgb(0 0 0 / 95%);
+    font-family: 'Pixelify Sans', sans-serif;
+    opacity: 0.85;
+    display: flex;
+    flex-direction: column;
+}
+.mailbox-window:hover {opacity:0.99;}
+.terminal-header {
+background: #111; padding: 8px; border-bottom: 1px solid #333; display: flex; justify-content: space-between;
+}
+
+/* Ensure the scroll area doesn't collapse */
+#mail-scroll-area {
+	height: 380px; overflow-y: auto; padding: 10px; background: #000;
+    border: 1px inset #111;
+    margin: 5px;
+    /* This ensures items are laid out vertically */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Individual Message Cards - Using your websiteStatContainer style */
+.message-item {
+    display: flex !important;
+    flex-direction: column;
+	background-color: #000 !important;
+    border: 2px ridge #7d7d7d !important;
+    padding: 8px;
+    margin-bottom: 0px;
+    min-height: 50px;
+	opacity: 0.85;
+	transition:opacity, 0.4s ease;
+}
+.message-item:hover{
+	opacity:0.99;
+}
+.message-item h3 {
+    font-size: 14px;
+    line-height: 1;
+    margin: 0 0 4px 0;
+    color: #787d7d;
+}
+
+.message-item p {
+	font-size: 16px;
+    line-height: 1.2;
+    margin: 3px;
+    padding: 4px;
+    padding-left: 12px;
+    color: #eee;
+    border: 1px solid #222;
+    font-family: 'Lucida Console', monospace;
+}
+
+.message-item .meta {
+    font-size: 14px;
+    color: #7f7e77;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+/* Action Buttons within messages */
+.message-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 5px;
+	justify-content: flex-end;
+}
+
+.message-actions button {
+    background: #111;
+    border: 1px solid #333;
+    color: #0f0;
+    font-size: 11px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-family: 'Pixelify Sans';
+}
+
+.message-actions button:hover {
+    background: #0f0;
+    color: #000;
+}
+/* Force the containers to behave within the mailbox-window */
+#inbox-messages, #outbox-messages {
+	display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+.mail-tab-btn{
+	background: #1a1616;
+    color: #35a7d5;
+    border: 2px ridge #656363;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Pixelify Sans';
+}
+.mail-tab-btn:hover{
+    background: #133918;
+	color: #1aa13d;
+}
+/* Ensure the button highlights correctly when clicked */
+.mail-tab-btn.active {
+	background: #191a19;
+    color: #d15827;
+    padding-block: 1px;
+    padding-inline: 6px;
+    border: 2px inset #d15827 !important;
+}
+button#show-mailbox-modal:not(.active):not(:active) {
+    box-shadow: 0 1px 0 #272323;
+    transform: none;
+}
+button.mail-tab-btn:not(.active):not(:active) {
+    box-shadow: 0 1px 0 #272323;
+    transform: none;
+}
+button#btn-refresh-mail {
+    background: #111;
+    color: #35a7d5;
+    border: 1px ridge #333;
+    cursor: pointer;
+    font-size: 10px;
+    font-family: 'Pixelify Sans';
+}
+.date-group-header {
+    width: 100%;
+    padding: 3px 5px 3px 5px;
+    border-bottom: 1px solid #222;
+    margin-bottom: ;
+}
+
+.date-group-header span {
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 16px;
+    color: #999999;
+    letter-spacing: 2px;
+}
+
+.contact-link{
+	color:#bf6f1e;
+	cursor:pointer; text-decoration:underline;
+	transition:all 0.4s ease;
+}
+.contact-link:hover {
+    color: #3f7dcd !important;
+    background: rgb(35 51 61 / 38%);
+}
+
+.reply-input:focus {
+    outline: none;
+    border-color: #0f0 !important;
+    background: #000 !important;
+}
+
+.reply-tray {
+    animation: scanlineFade 0.3s ease-in-out;
+}
+
+@keyframes scanlineFade {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+div#user-details {
+    position: fixed;
+	top: 150px;
+    left: 60%;
+    background: #1a1919;
+    border: 4px ridge var(--primary-color, #3e3e3e);
+    padding: 0px;
+    width: 35%;height: fit-content;
+    box-shadow: rgb(0, 0, 0) 0px 0px 30px;
+	opacity:0.85;
+}
+#view-mail-modal, #user-details {
+    position: fixed !important;
+    /* Remove any centering transforms so top/left math works perfectly */
+    transform: none !important; 
+
+}
+div#user-details:hover {opacity:0.99;}
+#user-details-interior{
+    padding: 10px;
+    background: #000;
+    border: 1px inset #111;
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+#user-details-header{
+	background: #111;
+    padding: 5px 10px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #8a8b8a;
+}
+#user-details-headerText{
+	font-size: 13px; color: #cdcdcd; font-family: monospace; font-weight: bold;
+}
+
+#user-detailsbox{
+	padding: 15px; font-family: monospace; font-size: 0.9em;
+}
+button#sendmessage-to-user {
+    width: 100%;
+    background: #0a2a0a;
+    color: #0f0;
+    border: 1px solid #0f0;
+    padding: 10px;
+    cursor: pointer;
+    font-family: monospace;
+    font-weight: bold;
+	opacity:0.50;
+    transition: 0.3s;
+}
+button#sendmessage-to-user:hover {
+	opacity:0.85;
+}
+textarea#intel-reply-input {
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 10px;
+    min-height: 60px;
+    resize: none;
+    padding: 5px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+	transition:all, 0.4s ease;
+}
+textarea#intel-reply-input:focus-visible {
+    outline: 1px solid #85807b;
+    padding: 12px;
+    font-size: 13px !important;
+}
+/* Apply grab to the headers */
+.grabbableHeader {
+    cursor: grab;
+    user-select: none;
+    background: #111; /* Ensure there is a background to grab */
+}
+/* While dragging, show the grabbing cursor globally to prevent flicker */
+body.dragging {
+    cursor: grabbing !important;
+}
+/* If body has 'auth-logged-in', hide all 'logged-out' elements */
+body.auth-logged-in .logged-out { display: none !important; }
+
+/* If body has 'auth-logged-out', hide all 'logged-in' elements */
+body.auth-logged-out .logged-in { display: none !important; }
+
+/*
+fishnet specific
+*/
+
+
+	button#start-btn {
+		width: 24%;
+		min-width: 97px;
+		padding: 4px;
+		border: 1px solid #5a655a;
+		color: #c1e3e08c;
+		cursor: pointer;
+		font-weight: bold;
+		margin: auto;
+	}
+	.contest-card {
+		background: #111;
+		border-left: 3px solid #333;
+		padding: 10px;
+		display: block;
+		justify-content: space-between;
+		align-items: center;
+		transition: border-color 0.3s;
+	}
+	.contest-card:hover {
+		border-left-color: #0f0;
+		background: #161616;
+	}
+	.contest-card.joined {
+		border-left-color: #00f2ff;
+		background: rgba(0, 242, 255, 0.05);
+	}
+	.planet-tag {
+		font-size: 9px;
+		background: #222;
+		padding: 2px 5px;
+		border-radius: 3px;
+		color: #888;
+		text-transform: uppercase;
+	}
+	.planet-tag {
+		font-size: 9px;
+		background: #222;
+		padding: 1px 4px;
+		margin-left: 5px;
+		color: #ffaa00;
+		border: 1px solid #444;
+	}
+	
+
+
+        /* Base Layout */
+        body { 
+            background: transparent;
+			border: none;
+			color: #e0f2ff;
+			font-family: var(--eu-font);
+			margin: 0;
+			padding: 1px;
+			height: 100vh;
+			overflow: hidden;
+        }
+		div#appwrapper {
+			background: radial-gradient(circle at center, #162a3af5 0%, #050a0fe8 95%);
+			border: none;
+			border-radius: 19px;
+			color: #e0f2ff;
+			font-family: var(--eu-font);
+			margin: 0;
+			padding: 15px;
+			height: 95vh;
+			overflow: hidden;
+		}
+#title-bar {
+    background: rgb(20 46 61 / 95%);
+    border-radius: 15px;
+    margin: auto;
+    margin-top: -8px;
+    margin-left: -6px;
+    margin-bottom: 5px;
+    border-bottom: 2px solid #000000a6;
+    user-select: none;
+    width: 102%;
+}
+
+#drag-region {
+    height: 12px;
+    -webkit-app-region: drag;
+    align-items: center;
+    font-size: 10px;
+    margin: auto;
+    border: 3px ridge #233a4a;
+    padding: 0px;
+    border-radius: 15px;
+}
+
+.brand { color: #00ffff; font-weight: bold; margin-right: 8px; }
+.status { color: #444; }
+/* 1. The scrollbar width/height (Thin & Stealthy) */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+/* 2. The Track (The "Gutter" the bar slides in) */
+::-webkit-scrollbar-track {
+    background: #050505; /* Matches your terminal background */
+}
+
+/* 3. The Thumb (The draggable element) */
+::-webkit-scrollbar-thumb {
+    background: #1a1a1a; /* Subtle charcoal */
+    border: 1px solid #333;
+    transition: background 0.3s ease;
+}
+
+/* 4. The Hover State (Reactive Feedback) */
+::-webkit-scrollbar-thumb:hover {
+    background: #0f0; /* Neon green activation */
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+}
+
+/* 5. Firefox Support (The "standard" way) */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #1a1a1a #050505;
+}
+        .header { 
+            border-bottom: 2px solid var(--eu-border); padding-bottom: 8px; margin-bottom: 2px; 
+            font-size: 14px; font-weight: bold; color: var(--eu-blue); text-transform: uppercase;
+        }
+
+        /* Auth Bar */
+        #auth-header {
+            display: flex; justify-content: flex-end; padding: 4px;
+            background: var(--eu-panel); border: 1px solid var(--eu-border);
+            border-radius: 4px; margin-bottom: 5px;
+        }
+
+        .top-bar-user { cursor: pointer; position: relative; display: flex; align-items: center; gap: 10px; }
+        .loggedinUsername { margin: 0; font-weight: bold; color: #9d9a9a; font-size: 13px;text-shadow: 0 0 2px #000000; }
+        .userProfileImg { width: 32px; height: 32px; border: 1px solid var(--eu-border); border-radius: 2px; }
+        .availability-indicator { font-size: 9px; color: #888; }
+
+        /* Tabs */
+        .main-tabs {    display: flex;gap: 2px;margin-bottom: 2px;border-bottom: 1px solid #333;padding-bottom: 4px;justify-content: space-around;}
+        .tab-btn {background: var(--eu-panel); border: 1px solid var(--eu-border);color: #898989; padding: 4px 6px; cursor: pointer;font-weight:bold; font-family: monospace; font-size: 11px;text-transform: uppercase; border-radius: 3px 3px 0 0;}
+        .tab-btn.active { background: var(--eu-panel); color: #b99615; }
+
+        .tab-content {
+			background: var(--eu-panel);
+			border: 1px solid var(--eu-border);
+			padding: 15px;
+			padding-top: 10px;
+			border-radius: 15px 15px 14px 14px;
+			height: calc(97vh - 153px);
+			overflow-y: auto;
+		}
+		div#scout-pane{
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+		}
+        /* HUD & Manifest */
+        #contest-hud {
+			background: linear-gradient(to right, rgb(12 26 30), transparent);
+			padding: 12px;
+			margin-bottom: 10px;
+			border: 2px inset #444;
+			border-left: 4px solid #383838;
+		}
+        #session-manifest { 
+            border: 1px solid var(--eu-border); background: rgba(0,0,0,0.3); padding: 12px; 
+            margin-bottom: 10px; font-family: monospace; 
+        }
+        #manifest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        /* Forms & Buttons */
+        input, select, textarea {
+            background: #0b1316ed !important; border: 1px solid var(--eu-border) !important;
+            color: #7f7878!important; padding: 8px; border-radius: 2px; font-size: 12px; width: 100%; box-sizing: border-box;
+        }
+        label { font-size: 10px; color: var(--eu-blue); font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; }
+
+        .btn, .popover-btn {
+            -webkit-app-region: no-drag; background: linear-gradient(to bottom, #4a5a6a, #2a3a4a); border: 1px solid #6a7a8a;
+            color: white; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 11px;
+            padding: 8px; border-radius: 4px;
+        }
+		button#browse-btn {
+			color: #c1e3e08c;
+		}
+        .btn:hover { background: linear-gradient(to bottom, #0077cc, #394c55); border-color: #00ccff; }
+		button#reload-btn {
+			border-radius: 50%;
+			padding: 0px 6px;
+			height: 32px;
+			width: 32px;
+			color: #afafaf;
+			font-size: 19px;
+			opacity:0.4;
+			transition: all 0.4s ease;
+		}
+		button#reload-btn:hover {
+			color: #00ccff;
+			border-color: #00ccff;
+			opacity:0.8;
+
+		}
+        /* Popover & Modals */
+        .popover-menu { 
+			position: absolute;
+			top: 45px;
+			right: 0;
+			background: rgb(17 29 38);
+			border: 2px solid #275671;
+			padding: 15px;
+			z-index: 1000;
+			width: 220px;
+			border-radius: 4px;
+        }
+        .hidden { display: none !important; }
+        #log-window { 
+            background: rgba(0,0,0,0.4); border: 1px solid var(--eu-border); 
+            height: 120px;min-height: 26px; overflow-y: auto; padding: 10px; font-family: monospace; font-size: 11px; margin-top: 10px;
+        }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; }
+        .modal-dialog { width: 400px; margin: 100px auto; background: var(--eu-panel); border: 2px solid var(--eu-blue); padding: 20px; }
+        
+        #user-details {
+            position: fixed; bottom: 20px; right: 20px; width: 300px; background: var(--eu-panel); border: 1px solid var(--eu-border); z-index: 1500;
+        }
+		
+	#scout-pane {
+    position: relative; /* This is the anchor for the absolute image */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Keeps the image from 'bleeding' out */
+    background-color: var(--eu-panel); /* Your existing bg color */
+}
+
+.pane-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px; /* Adjust size as needed */
+    height: 500px;
+    background-image: url('../fishnetimage.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.15; /* Makes it subtle/transparent */
+    z-index: 1;    /* Sits behind the manifest and log window */
+    pointer-events: none; /* Allows clicks to pass through to the logs */
+}
+
+/* Ensure your data panels have a slightly opaque background so they pop */
+#session-manifest, #log-window {
+    position: relative;
+    z-index: 2;
+    background: rgba(5, 5, 5, 0.8) !important; /* Slight transparency to see the logo behind */
+}	
+		
+#settingsTabA .settings-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 0px;
+}
+
+label.checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 15px;
+    letter-spacing: 0.8px;
+    color: #857c7c;
+    gap: 3px;
+    padding: 4px;
+    margin: 0;
+    border: 2px outset #444;
+	text-shadow: 0 0 2px #000000;
+}
+
+/* The actual checkbox styling */
+#always-on-top-check {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background-color: #000;      /* Black background when unchecked */
+    border: 1px solid #003366;   /* Dark blue border */
+    border-radius: 50%;          /* Makes it round */
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    transition: all 0.2s ease;
+    display: flex;               /* Added to help center the inner dot */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hover effect */
+#always-on-top-check:hover {
+    border-color: #00ffff;
+}
+
+/* Checked state - The outer ring remains cyan */
+#always-on-top-check:checked {
+    background-color: #000;      /* Keep the well black */
+    border-color: #ff0000;       /* Border turns red when active */
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); /* Subtle red glow */
+}
+
+/* The Red Circle Inside (The "Check") */
+#always-on-top-check:checked::after {
+    content: '';
+    position: absolute;
+    width: 8px;                  /* Adjusted size for better visual weight */
+    height: 8px;
+    background-color: #ff0000;   /* Vibrant Red Dot */
+    border-radius: 50%;          /* Makes the inner dot round */
+    box-shadow: 0 0 4px #ff0000; /* Makes the red dot "glow" */
+}
+
+/* Text color change when checked */
+#always-on-top-check:checked + .label-text {
+    color: #329527;
+    
+}
+	div#hud-leaderboard-list {
+		max-height: 150px;
+		overflow-y: auto;
+		font-family: lucida console, monospace;
+		border-bottom: 1px solid #616161;
+		margin-bottom: 5px;
+	}
+	
+		#contest-hud-header{
+			display: flex;
+			justify-content: space-between;
+			font-size: 12px;
+			font-weight: bold;
+			color: #bbbbbb;
+			border-bottom: 2px solid #444;
+			margin-bottom: 5px;
+			padding-bottom: 5px;
+		}
+		button#btn-refresh-contests {
+			background: none;
+			border: none;
+			color: #535353;
+			cursor: pointer;
+			font-size: 10px;
+			transition:color 0.4s ease;
+		}
+		button#btn-refresh-contests:hover {
+			color: #0f0;
+		}
+		.hud-leaderboard-row {
+			padding: 3px 5px;
+			margin-bottom: 2px;
+			font-size: 13px;
+			border-left: 2px solid #333; /* Default border */
+			background: #000000ba;
+		}
+
+		.hud-row-main {
+			display: flex; 
+			justify-content: space-between;
+			color: #aaa; /* Default text */
+		}
+
+		.hud-row-cargo {
+			color: #444; 
+			font-size: 8px; 
+			white-space: nowrap; 
+			overflow: hidden; 
+			text-overflow: ellipsis;
+		}
+		/* Hide cargo list by default */
+		.hud-row-cargo {
+			display: none; 
+			color: #666; 
+			font-size: 9px; 
+			margin-top: 4px;
+			border-top: 1px solid #111;
+			padding-top: 2px;
+		}
+
+		/* Show when parent is expanded */
+		.hud-leaderboard-row.expanded .hud-row-cargo {
+			display: block;
+			white-space: normal; /* Allow wrapping in expanded view */
+		}
+
+		.hud-leaderboard-row {
+			cursor: pointer;
+			transition: background 0.1s;
+		}
+
+		.hud-leaderboard-row:hover {
+			background: rgba(255, 255, 255, 0.05);
+		}
+		/* State Classes */
+		.hud-is-me {
+			border-left-color: #edbf15 !important;
+		}
+		.hud-is-me .hud-row-main {
+			color: #edbf15 !important;
+		}
+
+		/* Podium Styling */
+		.rank-gold   { border-left-color: #ffd700; }
+		.rank-silver { border-left-color: #c0c0c0; }
+		.rank-bronze { border-left-color: #cd7f32; }
+
+		.rank-gold   .hud-row-main { color: #ffd700; }
+		.rank-silver .hud-row-main { color: #c0c0c0; }
+		.rank-bronze .hud-row-main { color: #cd7f32; }
+
+		.pts-highlight {
+			color: #ffaa00;
+		}
+		
+		
+		
+		div#host-tools {
+			display: block;
+			background: rgb(21 26 28 / 78%);
+			border: 1px solid rgb(34, 68, 34);
+			padding: 15px;
+			margin-bottom: 20px;
+		}
+		/* Container & Collapse Logic */
+		.host-only-section {
+			background: #0a0a0a;
+			padding: 10px;
+			border: 1px solid #222;
+			margin-bottom: 10px;
+		}
+
+		.host-only-section.collapsed #host-tools-body {
+			display: none;
+		}
+
+		.section-header {
+			color: #ffaa00;
+			margin: 0;
+			font-size: 11px;
+			letter-spacing: 1px;
+			font-family: monospace;
+			cursor: pointer;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			user-select: none;
+		}
+
+		.section-header:hover {
+			color: #fff;
+		}
+
+		.collapse-icon {
+			font-size: 14px;
+			color: #ffaa00;
+			transition: transform 0.2s;
+		}
+
+		/* Grid Layout */
+		.host-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 8px;
+			margin-top: 12px;
+		}
+		div#contest-list-container {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			margin-top: 10px;
+			height: 300px;
+			border: 1px inset #222;
+			padding: 10px;
+			background: #050505;
+			overflow-y: scroll;
+		}
+		/* Form Styling */
+		.input-group {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+		}
+
+		.input-group label {
+			font-size: 9px;
+			color: #555;
+			text-transform: uppercase;
+		}
+
+		.checkbox-group {
+			flex-direction: row !important;
+			align-items: center;
+			justify-content: space-between;
+			border: 1px solid #1a1a1a;
+			padding: 4px;
+		}
+
+		/* Sovereign Input Theme */
+		#host-tools input[type="text"],
+		#host-tools input[type="number"],
+		#host-tools input[type="datetime-local"],
+		#host-tools select {
+			background: #000;
+			color: #0f0;
+			border: 1px solid #333;
+			padding: 4px;
+			font-size: 11px;
+			font-family: monospace;
+			outline: none;
+		}
+
+		#host-tools input:focus, #host-tools select:focus {
+			border-color: #0f0;
+		}
+
+		/* Prize Section */
+		#prize-config {
+			margin-top: 12px;
+			border-top: 1px solid #222;
+			padding-top: 10px;
+		}
+
+		.prize-header {
+			color: #0f0;
+			font-size: 10px;
+			display: block;
+			margin-bottom: 6px;
+		}
+
+		.prize-input-row {
+			display: flex;
+			gap: 5px;
+			margin-bottom: 5px;
+		}
+
+		.prize-item { flex: 1; }
+		.spacer-small { width: 25px; }
+
+		/* Action Elements */
+		.btn-dashed {
+			background: none;
+			border: 1px dashed #444;
+			color: #888;
+			cursor: pointer;
+			font-size: 9px;
+			width: 100%;
+			padding: 4px;
+			margin-top: 5px;
+		}
+
+		.btn-primary-action {
+			margin-top: 12px;
+			width: 100%;
+			background: #0a2a0a;
+			color: #0f0;
+			border: 1px solid #0f0;
+			padding: 10px;
+			cursor: pointer;
+			font-weight: bold;
+			font-family: monospace;
+			text-transform: uppercase;
+		}
+
+		.btn-primary-action:hover {
+			background: #0f3d0f;
+			box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+		}
+		
+		/* Roster Participant Rows */
+		.roster-row {
+			background: #050505; 
+			padding: 4px 8px; 
+			border: 1px solid #1a1a1a; 
+			margin-bottom: 4px;
+			font-family: monospace;
+			width: 100%;
+			cursor: pointer;
+			transition: border-color 0.2s;
+		}
+
+		.roster-row:hover {
+			border-color: #444;
+		}
+
+		/* Cargo List (Hidden by default) */
+		.roster-cargo-list {
+			display: none;
+			color: #555; 
+			font-size: 9px; 
+			margin-top: 4px; 
+			border-top: 1px solid #111; 
+			padding-top: 4px;
+			overflow-y: scroll;
+			max-height: 208px;
+		}
+
+		/* Show Cargo when row is expanded */
+		.roster-row.expanded .roster-cargo-list {
+			display: block;
+		}
+
+		.cargo-item {
+			color: #666;
+			display: block;
+		}
+		
+		#hudsyncdiv {
+			display: flex;
+			justify-content: space-between;
+			font-size: 8px;
+			font-family: monospace;
+			color: #34b534;
+			background: black;
+		}

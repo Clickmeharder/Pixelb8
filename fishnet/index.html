@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<meta http-equiv="Content-Security-Policy" content="
+		default-src 'self';
+		frame-src 'self' https://pixelb8lol.firebaseapp.com https://pixelb8lol.web.app;
+		script-src 'self' https://www.gstatic.com https://apis.google.com;
+		style-src 'self' 'unsafe-inline';
+		img-src 'self' data: https:;
+		font-src 'self' data:;
+		connect-src 'self' https://api.entropianexus.com https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com wss://*.firebaseio.com https://www.gstatic.com;
+	">
+    <title>FISH NET by Pixelb8</title>
+	 <link rel="stylesheet" href="assets/styles/fishnet.css">
+    <style>
+
+    </style>
+
+</head>
+<body class="auth-logged-out">
+	<div id="appwrapper">
+		<div id="title-bar">
+			<div id="drag-region"class="header"></div>
+		</div>
+		<div id="auth-header" style="">
+			<button id="reload-btn" class="popover-btn" title="Refresh HUD">⟳</button>
+			<button id="start-btn" class="btn">📡 Activate</button>
+			<div class="top-bar-user" id="topBarUserTrigger" style="">
+				<span class="userRoleIcon" style="display:none;"></span>
+				<span class="availability-indicator" id="topbar-status-dot" data-status="offline"></span>
+				<p class="loggedinUsername" id="username">StrangerDanger</p>
+				<img class="userProfileImg" id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+
+				<div id="statusPopover" class="popover-menu hidden">
+					<div class="popover-header">SYSTEM STATUS</div>
+					<input type="text" id="update-status" placeholder="Update Status Message...">
+					<div class="status-selector-wrapper">
+						<select id="update-isOnline">
+							<option value="online">🟢 ONLINE</option>
+							<option value="away">🟡 AWAY</option>
+							<option value="busy">🔴 BUSY</option>
+							<option value="idle">🌙 IDLE</option>
+							<option value="dnd">⛔ DO NOT DISTURB</option>
+							<option value="offline">⚫ OFFLINE</option>
+						</select>
+					</div>
+					<button id="show-mailbox-modal" class="popover-btn">📬 OPEN MAILBOX</button>
+					<button id="loginbutt" class="popover-btn logged-out" style="width:100%; margin-top:10px;">🔑 LOGIN / CONNECT</button>
+					<button id="logoutbutt" class="popover-btn logged-in" type="button" style="width:100%; margin-top:10px;">🚪 LOGOUT</button>
+					<button id="close-btn" class="popover-btn" title="Exit App">✕ Exit</button>
+					<div class="popover-footer">pixelb8.lol</div>
+				</div>
+			</div>
+		</div>
+
+		 <div class="main-tabs">
+			<button class="tab-btn active" data-target="scout-pane">[ 📡 Session]</button>
+			<button class="tab-btn" data-target="contest-terminal">[ 🏆 CONTESTS]</button>
+			
+			<button class="tab-btn" data-target="settings-pane">[ ⚙️ CONFIG]</button>
+			<button class="tab-btn admin-only" data-target="admin-terminal" style="display:none;">[ 🔐 ADMIN]</button>
+		</div>
+
+		<div id="scout-pane" class="tab-content">
+			<div class="pane-watermark"></div>
+			<div id="session-manifest" style="border: 1px solid #222; background: #050505; padding: 10px; margin-bottom: 10px; font-family: monospace;">
+				<div style="color: #555; font-size: 9px; margin-bottom: 8px; border-bottom: 1px solid #111;">[ LOCAL_CARGO_MANIFEST ]</div>
+				<div id="manifest-grid" style="display: grid; grid-template-columns: 1fr; gap: 4px; border-bottom: 1px solid #111; padding-bottom: 8px; max-height: 200px; overflow-y: auto;">
+				</div>
+				<div style="display: flex; justify-content: space-between; margin-top: 8px; font-weight: bold;">
+					<span style="color: #555; font-size: 10px;">SESSION_TOTAL_VALUE:</span>
+					<span style="color: #00ffff; font-size: 11px;"><span id="session-grand-total">0.0000</span> PED</span>
+				</div>
+			</div>
+			<div id="log-window"></div>
+		</div>
+
+		<div id="contest-terminal" class="tab-content" style="display: none;">
+			<div class="terminal-header">
+				<h2 style=" margin: 0;color: #9b978c;font-size: 14px;">🏆 CONTESTS</h2>
+				<small style="color: #555;">FISH_NET</small>
+				<button id="btn-refresh-contests">[ Refresh ]</button>
+			</div>
+			<div id="host-tools" class="host-only-section collapsed" style="display: none;">
+				<h3 class="section-header" id="host-tools-trigger">
+					<span>[ CONTEST_CREATION ]</span>
+					<span class="collapse-icon">+</span>
+				</h3>
+				
+				<div id="host-tools-body">
+					<div class="host-grid">
+
+						<div class="input-group">
+							<div class="input-group checkbox-group">
+								<label>ALLOW_GUESTS?</label>
+								<input type="checkbox" id="contest-allow-guests">
+							</div>
+							<label>CONTEST_NAME:</label>
+							<input type="text" id="contest-name-input" placeholder="e.g. Master Baiters">
+						</div>
+						
+						<div class="input-group">
+							<label>PLANET:</label>
+							<select id="contest-planet">
+								<option value="calypso">Calypso</option>
+								<option value="rocktropia">Rocktropia</option>
+								<option value="next-island">Next Island</option>
+							</select>
+						</div>
+						
+						<div class="input-group">
+							<label>TARGET_FISH:</label>
+							<select id="contest-target-fish">
+								<option value="Baitfish">Baitfish</option>
+								<option value="Fish Scrap">Fish Scrap</option>
+							</select>
+						</div>
+
+						<div class="input-group">
+							<label>START_TIME:</label>
+							<input type="datetime-local" id="contest-start-time">
+							<div id="time-bridge" style="margin-top: 5px; font-family: monospace; font-size: 12px; border-left: 2px solid #ffaa00; padding-left: 8px;">
+								<div style="color: #888;">Mr Wolf: <span id="clock-local" style="color: #afafaf;font-family: ui-serif;">00:00:00</span></div>
+								<div style="color: #888;">(UTC): <span id="clock-utc" style="color: #00ffff;">00:00:00</span></div>
+							</div>
+							<button id="btn-set-now" style="font-size: 9px; background: #222; border: 1px solid #444; color: #aaa; cursor: pointer; margin-top: 5px;">
+								SET_TO_NOW
+							</button>
+						</div>
+
+						<div class="input-group">
+							<label>DURATION (MINS):</label>
+							<input type="number" id="contest-duration" value="60">
+						</div>
+					</div>
+
+					<div id="prize-config">
+						<label class="prize-header">🏆 PRIZE_POOL (MIN_1_REQ)</label>
+						<div id="prize-list-inputs">
+							<div class="prize-input-row">
+								<input type="text" class="prize-item" placeholder="1ST PLACE PRIZE (E.G. 50 PED)">
+								<div class="spacer-small"></div> 
+							</div>
+						</div>
+						<button id="btn-add-prize-field" class="btn-dashed">+ ADD_ADDITIONAL_PRIZE_TIER</button>
+					</div>
+
+					<button id="btn-create-contest" class="btn-primary-action">
+						THROW_FISH_NET
+					</button>
+				</div>
+			</div>
+
+			<div id="contest-hud" style="display:none; font-family: monospace;">
+				<div id="contest-hud-header">
+					<span></span>
+					<span id="hud-contest-name">---</span>
+				</div>
+				
+				<div style="display: flex;justify-content: space-between;border-bottom: 2px solid #444;margin-bottom: 5px;padding-bottom: 2px;">
+					<div>
+						<div style="font-size: 9px; color: #888;">RANK</div>
+						<div id="hud-rank" style="font-size: 20px; color: #ffaa00; font-weight: bold;"></div>
+					</div>
+					<div>
+						<div style="font-size: 9px; color: #888;">POINTS</div>
+						<div id="hud-score" style="font-size: 20px; color: #0f0; font-weight: bold;"></div>
+					</div>
+				</div>
+
+				<div style="color: #444; font-size: 9px; margin-bottom: 4px;">[ Contest Leaderboard ]</div>
+				<div id="hud-leaderboard-list">
+					</div>
+
+				<div id="hudsyncdiv">
+					<span>STATUS: DATA_LINK_STABLE</span>
+					<span id="hud-last-sync">SYNC: --:--:--</span>
+				</div>
+			</div>
+
+			<div class="contest-browser">
+
+				
+				<div id="contest-list-container">
+					<p style="color: #444; text-align: center; margin-top: 50px;">NO Contests Ongoing</p>
+				</div>
+			</div>
+			
+
+		</div>
+		<div id="settings-pane" class="tab-content" style="display:none;">
+			<div class="subtab-content" id="settingsTabA">
+				<div class="settings-row">
+					<label class="checkbox-container">
+						<input type="checkbox" id="always-on-top-check">
+						<span class="label-text">ALWAYS ON TOP</span>
+					</label>
+				</div>
+				<label style="margin-top: 4px;">LOG_FILE_LOCATION</label>
+				<div style="display: flex; gap: 5px; margin-bottom: 10px;">
+					<input type="text" id="path-input" placeholder="No file selected..." readonly style="flex-grow: 1; cursor: default;">
+					<button id="browse-btn" class="btn">
+						BROWSE
+					</button>
+				</div>
+
+				<div id="useraccountPanel" style="border: 1px solid #222; padding: 10px;">
+					<div id="userInfoContainer">
+						<div style="font-size: 16px;color: #555;margin: 2px;">
+							<span class="userRoleIcon">👤</span> <span class="userRoleLabel">GUEST</span>
+						</div>
+						<p class="loggedinUsername" id="settings-username-display" style="margin:0; font-weight:bold;color: #dfa700;font-size: 22px;">StrangerDanger</p>
+						<div class="profile-layout" style="display:flex; gap:10px;">
+							<img class="userProfileImg" id="settingsprofilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo" style="width:60px; height:60px; border:1px solid #333;">
+							<div style="flex-grow:1;">
+								<span class="entropiaName" style="display:block; font-size:11px;">Unlinked Avatar</span>
+								<p id="Userpixelcount" class="logged-in" style="margin:2px 0; color:#00ffff; font-size:10px;">0px</p>
+								<p id="userStatusDisplay" style="    font-style: italic;color: #999;font-size: 18px;margin: 0;">"Scanning horizon..."</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="logged-in" id="loggedInControls" style="border-top: 1px solid #333; padding-top: 10px; margin-top: 10px;">
+						<div id="editProfileFields" style="display: flex; flex-direction: column; gap: 5px;">
+							<input type="text" id="update-username" placeholder="GitHub Display Name">
+							<input type="text" id="update-entropia" placeholder="Entropia Avatar Name">
+							<input type="text" id="update-photoURL" placeholder="Profile Image URL">
+							<button id="saveProfileBtn" class="popover-btn" style="background: #0a2a0a; border-color: #0f0;">💾 Sync Cloud Profile</button>
+						</div>
+					</div>
+
+					<div class="logged-out" id="innercontent-loggedout" style="margin-top:10px;">
+						<button class="popover-btn modal-trigger" id="createaccountbutt" style="width:100%;" data-target="modal-usersignup">Register Account</button>
+					</div>
+				</div>
+				<div id="anon-auth-container" style="margin-top: 10px; border: 1px solid #1a1a1a; padding: 10px; background: #050505;">
+					<div style="font-size: 9px; color: #444; margin-bottom: 5px;">[ GHOST_IDENTITY_PROTOCOL ]</div>
+					<input type="text" id="anon-displayname" placeholder="ANON_DISPLAY_NAME" 
+						   style="width: 100%; background: #000; border: 1px solid #333; color: #0f0; padding: 4px; margin-bottom: 8px; font-family: monospace;">
+					<input type="text" id="anon-euname" placeholder="ENTROPIA_AVATAR_NAME" 
+						   style="width: 100%; background: #000; border: 1px solid #333; color: #0f0; padding: 4px; margin-bottom: 8px; font-family: monospace;">
+					
+					<button id="btn-anon-auth" style="width: 100%; background: #111; border: 1px solid #0f0; color: #0f0; padding: 6px; cursor: pointer; font-family: monospace; font-size: 10px;">
+						START_FISHING
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="admin-terminal" class="tab-content" style="display: none;">
+			<div class="terminal-header" style="border-bottom: 1px solid #422; padding-bottom: 10px; margin-bottom: 15px;">
+				<h2 style="color: #f66; margin: 0;">🔐 Admin Control</h2>
+				<small style="color: #555;">USER_VERIFICATION_PROTOCOLS</small>
+			</div>
+
+			<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+				<button id="btn-fetch-users" style="background:#111; border:1px solid #f66; color:#f66; padding:5px 10px; cursor:pointer; font-size:10px;">REFRESH_USER_DATABASE</button>
+				<div style="font-size: 10px; color: #555;">SECURITY_LEVEL: <span style="color:#f66;">AUTHORIZED</span></div>
+			</div>
+			<div class="admin-controls" style="display:flex; gap:10px; margin-bottom:10px;">
+				<input type="text" id="admin-user-search" placeholder="SEARCH BY NAME..." 
+					style="flex-grow:1; background:#000; border:1px solid #333; color:#0f0; font-family:monospace; padding:5px; font-size:11px;">
+				
+				<select id="admin-user-filter" 
+					style="background:#000; border:1px solid #333; color:#0f0; font-family:monospace; padding:5px; font-size:11px;">
+					<option value="all">ALL_USERS</option>
+					<option value="verified">VERIFIED</option>
+					<option value="pending">PENDING</option>
+				</select>
+			</div>
+			<div id="admin-user-list" style="background:#050505; border:1px solid #222; min-height:300px; padding:10px; font-family:monospace;">
+				<p style="color:#444; text-align:center; margin-top:100px;">READY_FOR_SCAN...</p>
+			</div>
+		</div>
+
+		<div class="modal fade hidden" style="display:none;" id="modal-usersignup">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Create Account</h5>
+						<button type="button" class="close close-modal-btn" data-dismiss="modal-usersignup"><span>&times;</span></button>
+					</div>
+					<div class="modal-body">
+						<form id="signup-form">
+							<div class="form-group input-field">
+								<label>Username</label>
+								<input type="text" id="signup-username" class="form-control">
+							</div>
+							<div class="form-group input-field">
+								<label>Email address</label>
+								<input type="email" id="signup-email" class="form-control" required>
+							</div>
+							<div class="form-group input-field">
+								<label>Password</label>
+								<input type="password" id="signup-password" class="form-control" required>
+							</div>
+							<button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">Create Account</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="view-mail-modal" class="mailmodal" style="display: none;">
+			<div class="mailbox-window">
+				<div class="terminal-header grabbableHeader">
+					<span style="color: #cdcdcd; font-size: 13px;">[ SYSTEM_MAIL_RELAY ]</span>
+					<span class="modal-close" style="color: #f00; cursor: pointer;">[X]</span>
+				</div>
+				<div class="mail-tabs">
+					<button class="mail-tab-btn active">📥 INBOX</button>
+					<button class="mail-tab-btn">📤 OUTBOX</button>
+					<button id="btn-refresh-mail">🔄 SYNC</button>
+				</div>
+				<div id="mail-scroll-area">
+					<div id="inbox-messages"></div>
+					<div id="outbox-messages" style="display: none;"></div>
+				</div>
+				<div class="popover-footer" style="padding: 5px; font-size: 9px; text-align: center; color: #444;">SuS Communication Systems</div>
+			</div>
+		</div>
+
+		<div id="user-details" style="display: none;">
+			<div id="user-details-header" class="user-details-header grabbableHeader">
+				<span id="user-details-headerText">[ USER_DETAILS ]</span>
+				<span id="userdetails-close-button" style="cursor: pointer; color: #f00;">[X]</span>
+			</div>
+			<div id="user-details-interior">
+				<div id="user-detailsbox"></div>
+				<div style="padding: 0 15px; font-size: 10px; color: #555;">Access: <span class="user-role-label">GUEST</span></div>
+				<div id="intel-message-area" style="padding: 15px;">
+					<textarea id="intel-reply-input" placeholder="ENTER SECURE TRANSMISSION..."></textarea>
+					<button id="sendmessage-to-user" style="width: 100%; background: #0a2a0a; color: #0f0; border: 1px solid #0f0; padding: 10px; cursor: pointer; font-family: monospace;">📡 SEND TRANSMISSION</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    <script type="module" src="fishing-auth.js"></script>
+</body>
+</html>
