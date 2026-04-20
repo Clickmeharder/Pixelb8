@@ -260,11 +260,11 @@ document.addEventListener('click', async (e) => {
 
 // --- WEB PORT AUTH LOGIC ---
 
-const isWebMode = true;
+const isWebMode = (typeof window.electronAPI === 'undefined');
 let fileHandle = null; 
 let lastSize = 0;
 let pollInterval = null;
-if (!isWeb) {
+if (!isWebMode) {
     // KEEPS ELECTRON LOGIC: Only runs if the bridge exists
     window.electronAPI.onAuthSuccess((token) => {
         const credential = GithubAuthProvider.credential(token);
@@ -1977,7 +1977,7 @@ startBtn.onclick = async () => {
 
 // --- 1. ELECTRON PATH LISTENER (GHOST REMOVAL) ---
 // Only listen for 'selected-path' if we aren't in a browser
-if (!isWeb) {
+if (!isWebMode) {
     window.electronAPI.on('selected-path', (path) => {
         pathInput.value = path;
         localStorage.setItem('fishScout_path', path);
@@ -1987,7 +1987,7 @@ if (!isWeb) {
 
 // --- 2. BROWSE BUTTON PORT ---
 browseBtn.onclick = async () => {
-    if (!isWeb) {
+    if (!isWebMode) {
         // Desktop App: Open the native folder dialog
         window.electronAPI.openFileDialog();
     } else {
@@ -2012,7 +2012,7 @@ browseBtn.onclick = async () => {
 window.addEventListener('DOMContentLoaded', () => {
     // Only auto-fill the path string if we are in Electron.
     // Web browsers cannot "restore" a file link without a fresh user click.
-    if (!isWeb) {
+    if (!isWebMode) {
         const savedPath = localStorage.getItem('fishScout_path');
         if (savedPath && pathInput) {
             pathInput.value = savedPath;
