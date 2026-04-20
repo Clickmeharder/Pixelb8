@@ -1297,7 +1297,10 @@ async function initializeFishData() {
 }
 // Call this when the app starts or when "Initialize Scout" is clicked
 initializeFishData();
-
+/**
+ * PERMISSION_GATE: Validates if the local user has the necessary
+ * role to initiate a contest broadcast.
+ */
 function canCreateContest() {
     if (!globalUserData) return false;
     const staffRoles = ['ceo', 'admin', 'mod', 'susrep', 'contesthost'];
@@ -1306,8 +1309,17 @@ function canCreateContest() {
 
 const btnCreateContest = document.getElementById('btn-create-contest');
 btnCreateContest?.addEventListener('click', async () => {
-    // 1. CLEARANCE CHECK
+    
+    // 1. AUTH & CLEARANCE CHECK
+    // Hardening: Ensure auth.currentUser exists before accessing .uid
+    const user = auth.currentUser;
+    if (!user) {
+        addLog("❌ AUTH_ERR: User session not found.");
+        return alert("❌ Error: Authentication required.");
+    }
+
     if (!canCreateContest()) {
+        addLog("⚠️ ACCESS_DENIED: Attempted contest creation without clearance.");
         return alert("RESTRICTED: Higher clearance required.");
     }
 
@@ -1334,24 +1346,25 @@ btnCreateContest?.addEventListener('click', async () => {
         const contestId = name.replace(/\s+/g, '_');
         const contestRef = doc(db, 'fishingContests', contestId);
         
+        // Check for existing document to preserve original metadata (Zero-Loss)
         const existingSnap = await getDoc(contestRef);
         const exists = existingSnap.exists();
         
         let participantCount = 0;
         let originalCreatedAt = serverTimestamp();
 
-        // Preserve state if overwriting/editing
         if (exists) {
             const existingData = existingSnap.data().settings;
             participantCount = existingData.participantCount || 0;
+            // Use the original timestamp if it exists, otherwise set it now
             originalCreatedAt = existingData.createdAt || serverTimestamp();
         }
 
         const scheduledDate = new Date(startTimeStr);
         if (isNaN(scheduledDate.getTime())) return alert("❌ Error: Invalid Date.");
 
-        // 6. DATABASE COMMIT
-        await setDoc(contestRef, {
+        // 6. DATABASE COMMIT (Atomic Set with Metadata Preservation)
+        const contestPayload = {
             settings: {
                 planet: planet, 
                 name: name,
@@ -1359,20 +1372,24 @@ btnCreateContest?.addEventListener('click', async () => {
                 startTime: Timestamp.fromDate(scheduledDate), 
                 duration: duration,
                 allowGuests: allowGuests,
-                hostUID: auth.currentUser.uid,
+                hostUID: user.uid, // Using the local 'user' variable for safety
                 hostName: globalUserData?.entropianame || "Unknown Host",
                 prizes: prizes,
                 status: 'pending',
                 participantCount: participantCount,
-                createdAt: originalCreatedAt
+                createdAt: originalCreatedAt,
+                lastModified: serverTimestamp() // Audit trail for system tracking
             }
-        }, { merge: true });
+        };
+
+        // { merge: true } ensures we don't wipe out other fields outside of 'settings'
+        await setDoc(contestRef, contestPayload, { merge: true });
 
         // 7. UI RESET & LOGGING
         currentEditingContestId = null; 
         btnCreateContest.textContent = "BROADCAST_CONTEST_TO_NETWORK";
         
-        addLog(`🚀 CONTEST_CREATED: ${name} @ ${planet.toUpperCase()}`);
+        addLog(`🚀 CONTEST_SYNCED: ${name} @ ${planet.toUpperCase()}`);
         alert("Broadcast Synchronized.");
         
         if (typeof refreshContestList === 'function') refreshContestList();
@@ -1380,6 +1397,7 @@ btnCreateContest?.addEventListener('click', async () => {
     } catch (err) {
         console.error("Broadcast Error:", err);
         addLog(`❌ CRT_ERR: ${err.code || 'PERMISSION_DENIED'}`, true);
+        alert(`Broadcast Failed: ${err.message}`);
     }
 });
 
@@ -1458,16 +1476,27 @@ async function joinContest(contestId) {
             
             const contestData = contestSnap.data().settings;
 
-            // GATEKEEPER: Block registration if the Janitor has closed the contest
+            // 1. GATEKEEPER: Status Check
             if (contestData.status === 'concluded') {
                 return addLog("🚫 REGISTRATION_CLOSED: This contest has finalized.", true);
             }
 
+            // 2. GATEKEEPER: Verification Check (Aligned with Firestore Rules)
+            const isVerified = globalUserData?.euNameVerified === true;
+            const allowsGuests = contestData.allowGuests === true;
+
+            if (!isVerified && !allowsGuests) {
+                addLog("⚠️ VERIFICATION_REQUIRED: This contest does not allow unverified guests.", true);
+                return alert("This contest requires a Verified Entropia Identity. Please verify your avatar to join.");
+            }
+
             const user = auth.currentUser;
+            
+            // Perform the registration
             await setDoc(participantRef, {
                 uid: user?.uid || localStorage.getItem('guest_uid'),
                 displayName: dName,
-                isGuest: !user || user.isAnonymous,
+                isGuest: !isVerified, // Based on verification status
                 joinedAt: serverTimestamp(),
                 score: 0,
                 totals: { 
@@ -1478,7 +1507,9 @@ async function joinContest(contestId) {
                 }
             });
 
+            // Update global count
             await updateDoc(contestRef, { "settings.participantCount": increment(1) });
+            
             addLog(`🎣 REGISTERED: ${eName.toUpperCase()}`);
 
             activeContestRef = participantRef; 
@@ -1492,11 +1523,15 @@ async function joinContest(contestId) {
         setTimeout(() => refreshContestList(), 500);
 
     } catch (err) {
-        console.error("Join/Leave Error:", err);
-        addLog(`🚫 ACCESS_DENIED: ${err.code}`, true);
-    }
+		console.error("Join/Leave Error:", err);
+		if (err.code === 'permission-denied' || err.message === 'VERIFICATION_REQUIRED') {
+			addLog(`🚫 ACCESS_DENIED: Verification required`, true);
+			return "AUTH_ERR"; // Return a specific string for the UI to catch
+		}
+		addLog(`🚫 SYSTEM_ERR: ${err.code}`, true);
+		return "SYS_ERR";
+	}
 }
-
 /**
  * FETCH_CONTEST_ROSTER: SYNCED_MANIFEST_VIEWER
  * Refactored for Flat Pathing
@@ -1670,6 +1705,7 @@ async function refreshContestList() {
                     <button class="join-contest-btn" data-id="${contestId}" ${isConcluded ? 'disabled' : ''} style="width: 100%; background:${btnBg}; color:${btnColor}; border: 1px solid ${btnColor}; padding:8px; font-family: monospace; cursor:pointer; opacity: ${isConcluded ? '0.5' : '1'};">
                         ${btnText}
                     </button>
+					<div class="join-error-msg" style="font-size: 9px; color: #f66; text-align: center; margin-top: 4px; display: none; font-family: monospace;"></div>
                     <div class="roster-container" style="margin-top:10px; display: flex; flex-wrap: wrap; gap: 4px;"></div>
                 </div>
             `;
@@ -2318,7 +2354,23 @@ document.getElementById('contest-list-container')?.addEventListener('click', (e)
     if (joinBtn) {
         e.stopPropagation();
         const contestId = joinBtn.getAttribute('data-id'); 
-        if (contestId) joinContest(contestId);
+        const errorDiv = joinBtn.nextElementSibling; // Targets the .join-error-msg div
+
+        if (contestId) {
+            // Await the response from the async join function
+            joinContest(contestId).then((result) => {
+                if (result === "AUTH_ERR" && errorDiv) {
+                    // Update visual feedback for permission/verification issues
+                    errorDiv.textContent = "⚠ PERMISSION_ERROR: CHECK_SESSION_LOGS";
+                    errorDiv.style.display = "block";
+                    
+                    // Auto-hide after 5 seconds to clear the UI
+                    setTimeout(() => {
+                        errorDiv.style.display = "none";
+                    }, 5000);
+                }
+            });
+        }
         return; 
     }
 
