@@ -260,7 +260,7 @@ document.addEventListener('click', async (e) => {
 
 // --- WEB PORT AUTH LOGIC ---
 
-const isWebMode = (typeof window.electronAPI === 'undefined');
+const isWebMode = true;
 let fileHandle = null; 
 let lastSize = 0;
 let pollInterval = null;
