@@ -776,470 +776,6 @@ const initAdminUserRegistry = () => {
 
 };
 
-/*---------------------------------------------------------
-  SECTION: SECURE MAIL RELAY SYSTEM
----------------------------------------------------------*/
-// --- 1. TAB SWITCHING LOGIC ---
-const setupMailTabs = () => {
-    const tabBtns = document.querySelectorAll('.mail-tab-btn');
-    const inbox = document.getElementById('inbox-messages');
-    const outbox = document.getElementById('outbox-messages');
-
-    tabBtns.forEach((btn, index) => {
-        btn.addEventListener('click', () => {
-            // Remove active status from all buttons
-            tabBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            if (index === 0) { // Inbox
-                inbox.style.display = 'flex';
-                outbox.style.display = 'none';
-            } else { // Outbox
-                inbox.style.display = 'none';
-                outbox.style.display = 'flex';
-            }
-        });
-    });
-};
-
-// --- 2. MESSAGE ELEMENT GENERATOR ---
-// This handles creating the buttons and attaching listeners directly to them
-/*---------------------------------------------------------
-  UPDATED COMPONENT: Message Element Generator
----------------------------------------------------------*/
-function createMessageMarkup(msgId, data, contact, folderType) {
-const div = document.createElement('div');
-    div.className = 'message-item';
-	const role = contact.role;
-    // 1. Resolve Role Icon
-    const roleIcon = roleToIcon[contact.role] || roleToIcon['default'];
-    
-    // 2. Verification Logic
-    const verifiedBadge = contact.isVerified 
-        ? `<span class="verified-badge" title="VERIFIED AVATAR" style="color: #00f2ff; text-shadow: 0 0 5px #00f2ff; margin-left: 5px; cursor: help;">☑ Verified ${role}</span>` 
-        : `<span class="unverified-badge" title="UNVERIFIED AVATAR" style="color: #555; margin-left: 5px; font-size: 0.9em; opacity: 0.7;">☒ Unverified ${role}</span>`;
-
-    const timestamp = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
-    const label = folderType === 'inbox' ? `FROM` : `TO`;
-    const contactId = folderType === 'inbox' ? data.senderId : data.receiverId;
-
-    const rawStatus = (contact.isOnline || 'offline').toLowerCase();
-    const statusClass = `userstatus-${rawStatus}`;
-
-    div.innerHTML = `
-        <div class="meta">${timestamp.toLocaleString()}</div>
-        <h3>
-            ${label}:${roleIcon}
-            <span style="color: #aaa; font-size: 0.9em; margin-right: 4px;">${verifiedBadge}</span>
-        </h3>
-        <h3>
-            <span class="userstatus-indicator ${statusClass}" title="${rawStatus.toUpperCase()}"></span>
-            <span class="contact-link" data-uid="${contactId}" style="cursor: pointer; text-decoration: underline;">${contact.entropiaName}</span>
-        </h3>
-        <p>${data.content}</p>
-        
-        <div class="message-actions"></div>
-        <div class="reply-tray" style="display:none; margin-top:10px; border-top:1px ridge #333; padding-top:8px;">
-            <textarea class="reply-input" placeholder="Enter secure response..." 
-                style="width:100%; background:#111; border:1px solid #444; color:#0f0; font-family:monospace; font-size:10px; min-height:40px; resize:none;"></textarea>
-            <div style="display:flex; gap:5px; margin-top:5px;">
-                <button class="send-reply-btn" style="background:#0a2a0a; color:#0f0; border:1px solid #0f0; font-size:9px; cursor:pointer; padding:2px 8px;">SEND_RELAY</button>
-                <button class="cancel-reply-btn" style="background:none; color:#555; border:1px solid #333; font-size:9px; cursor:pointer; padding:2px 8px;">CANCEL</button>
-            </div>
-        </div>
-    `;
-
-    // --- Listeners: Contact Intel ---
-    div.querySelector('.contact-link').addEventListener('click', () => {
-        if (typeof showUserDetails === 'function') {
-            showUserDetails(contactId);
-        } else {
-            const detailsModal = document.getElementById('user-details');
-            if (detailsModal) detailsModal.style.display = 'block';
-        }
-    });
-
-    const actionsContainer = div.querySelector('.message-actions');
-    const tray = div.querySelector('.reply-tray');
-
-    // --- Listeners: Reply Logic ---
-    if (folderType === 'inbox') {
-        const replyBtn = document.createElement('button');
-        replyBtn.textContent = 'REPLY';
-        replyBtn.addEventListener('click', () => {
-            tray.style.display = tray.style.display === 'none' ? 'block' : 'none';
-        });
-        actionsContainer.appendChild(replyBtn);
-
-        // Send Reply logic
-        div.querySelector('.send-reply-btn').addEventListener('click', () => {
-            const content = div.querySelector('.reply-input').value;
-            if (content.trim()) {
-                sendTransmission(data.senderId, content);
-                tray.style.display = 'none';
-            }
-        });
-
-        // Cancel Reply
-        div.querySelector('.cancel-reply-btn').addEventListener('click', () => {
-            tray.style.display = 'none';
-        });
-    }
-
-    // --- Listeners: Delete ---
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'DELETE';
-    deleteBtn.style.color = '#f66';
-    deleteBtn.addEventListener('click', () => deleteMessage(auth.currentUser.uid, folderType, msgId));
-    actionsContainer.appendChild(deleteBtn);
-
-    return div;
-}
-// Add 'query' and 'orderBy' to your getMessages function
-async function getMessages() {
-    const inboxContainer = document.getElementById('inbox-messages');
-    const outboxContainer = document.getElementById('outbox-messages');
-    const user = auth.currentUser;
-
-    if (!user) return;
-
-    inboxContainer.innerHTML = '<p style="color:#0f0; font-size:10px;">DECRYPTING_INBOX...</p>';
-    outboxContainer.innerHTML = '<p style="color:#0f0; font-size:10px;">DECRYPTING_OUTBOX...</p>';
-
-    try {
-        // Fetch data without the Firestore 'orderBy' (no index needed!)
-        const [inSnap, outSnap] = await Promise.all([
-            getDocs(collection(db, `users/${user.uid}/inbox`)),
-            getDocs(collection(db, `users/${user.uid}/outbox`))
-        ]);
-
-        // Convert Snapshots to Arrays and Sort in JS (Newest First)
-        const sortedInbox = [...inSnap.docs].sort((a, b) => {
-            const timeA = a.data().timestamp?.toMillis() || 0;
-            const timeB = b.data().timestamp?.toMillis() || 0;
-            return timeB - timeA; 
-        });
-
-        const sortedOutbox = [...outSnap.docs].sort((a, b) => {
-            const timeA = a.data().timestamp?.toMillis() || 0;
-            const timeB = b.data().timestamp?.toMillis() || 0;
-            return timeB - timeA;
-        });
-
-        // Pass the sorted arrays to your rendering function
-        renderGroupedMessages(sortedInbox, inboxContainer, 'inbox');
-        renderGroupedMessages(sortedOutbox, outboxContainer, 'outbox');
-
-    } catch (e) {
-        console.error("Mail Relay Error:", e);
-        inboxContainer.innerHTML = '<p style="color:red; font-size:10px;">RELAY_FAILED</p>';
-    }
-}
-async function renderGroupedMessages(docs, container, folderType) {
-    container.innerHTML = docs.length === 0 ? `<p style="color:#444; font-size:10px; margin:auto;">${folderType.toUpperCase()}_EMPTY</p>` : '';
-    
-    let lastDateLabel = "";
-
-    for (const d of docs) {
-        const data = d.data();
-        const timestamp = data.timestamp?.toDate() || new Date();
-        
-        // Determine the Date Label (Today, Yesterday, or Date string)
-        const dateLabel = getDateLabel(timestamp);
-
-        // If the date label changed, inject a header
-        if (dateLabel !== lastDateLabel) {
-            const header = document.createElement('div');
-            header.className = 'date-group-header';
-            header.innerHTML = `<span>// ${dateLabel}</span>`;
-            container.appendChild(header);
-            lastDateLabel = dateLabel;
-        }
-
-        const contact = await getUserDetails(folderType === 'inbox' ? data.senderId : data.receiverId);
-        container.appendChild(createMessageMarkup(d.id, data, contact, folderType));
-    }
-}
-
-// Helper to calculate Date Labels
-function getDateLabel(date) {
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-
-    // Format the actual date part (e.g., "15 APR 2026")
-    const dateString = date.toLocaleDateString('en-GB', { 
-        day: '2-digit', 
-        month: 'short', 
-        year: 'numeric' 
-    }).toUpperCase();
-
-    // Check for Today
-    if (date.toDateString() === today.toDateString()) {
-        return `TODAY - ${dateString}`;
-    }
-    
-    // Check for Yesterday
-    if (date.toDateString() === yesterday.toDateString()) {
-        return `YESTERDAY - ${dateString}`;
-    }
-    
-    // For anything older
-    return dateString;
-}
-// --- 4. ACTIONS: SEND/DELETE/REPLY ---
-async function deleteMessage(userUid, folder, messageId) {
-    if (!confirm("PURGE TRANSMISSION?")) return;
-    try {
-        await deleteDoc(doc(db, `users/${userUid}/${folder}/${messageId}`));
-        getMessages(); 
-    } catch (e) { console.error(e); }
-}
-
-function openReplyInput(receiverId) {
-    const content = prompt("ENTER SECURE TRANSMISSION:");
-    if (content?.trim()) sendTransmission(receiverId, content);
-}
-
-async function sendTransmission(receiverId, content) {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const messageData = {
-        senderId: user.uid,
-        receiverId: receiverId,
-        content: content,
-        timestamp: serverTimestamp()
-    };
-
-    try {
-        await addDoc(collection(db, `users/${receiverId}/inbox`), messageData);
-        await addDoc(collection(db, `users/${user.uid}/outbox`), messageData);
-        alert("TRANSMISSION_SENT");
-        getMessages();
-    } catch (e) { console.error(e); }
-}
-
-// --- 5. INTEL: USER DETAILS ---
-async function getUserDetails(userId) {
-    try {
-        const userDoc = await getDoc(doc(db, 'users', userId));
-        if (userDoc.exists()) {
-            const data = userDoc.data();
-            return { 
-                entropiaName: data.entropianame || 'Unknown',
-                isOnline: data.isOnline || 'offline',
-                isVerified: data.euNameVerified === true || data.euNameVerified === "true",
-                // ADD THIS LINE:
-                role: data.role || 'default'
-            };
-        }
-    } catch (e) { console.error(e); }
-    return { entropiaName: 'Unknown', isOnline: 'offline', isVerified: false, role: 'default' };
-}
-// --- INTEL: POPULATE USER DETAILS MODAL ---
- async function showUserDetails(userId) {
-    const detailsBox = document.getElementById('user-detailsbox');
-    const detailsModal = document.getElementById('user-details');
-    const errorBox = document.getElementById('user-detailsboxError');
-    const sendBtn = document.getElementById('sendmessage-to-user');
-    const intelInput = document.getElementById('intel-reply-input');
-
-    if (!detailsBox || !detailsModal) return;
-
-    // Reset input and state
-    if (intelInput) intelInput.value = "";
-    detailsModal.style.display = 'block';
-    errorBox.style.display = 'none';
-    detailsBox.innerHTML = '<p style="color:#0f0; font-size:10px;">[ ACCESSING_DATABASE... ]</p>';
-
-    try {
-        const userDoc = await getDoc(doc(db, 'users', userId));
-        
-        if (userDoc.exists()) {
-            const data = userDoc.data();
-            const displayName = data.displayname || "Pixel Colonist";
-            // RE-CHECK: Force verify check here
-            const isVerified = data.euNameVerified === true || data.euNameVerified === "true";
-            
-            const verifiedBadge = isVerified 
-                ? `<span class="verified-badge" title="VERIFIED AVATAR" style="color: #00f2ff; text-shadow: 0 0 5px #00f2ff; margin-left: 5px; cursor: help;">[☑ Verified]</span>` 
-                : `<span class="unverified-badge" title="UNVERIFIED AVATAR" style="color: #555; margin-left: 5px; font-size: 0.9em; opacity: 0.7;">[☒ Unverified]</span>`;
-
-            const role = data.role;
-            const roleIcon = roleToIcon[data.role] || roleToIcon['default'];
-            
-            
-            // Availability Mapping for Color
-            const statusMap = {
-                'online': '#0f0',
-                'idle': '#ffaa00',
-                'away': '#ffaa00',
-                'busy': '#f00',
-                'dnd': '#f00',
-                'offline': '#888'
-            };
-            const currentStatus = (data.isOnline || 'offline').toLowerCase();
-            const statusColor = statusMap[currentStatus] || '#888';
-            
-
-            detailsBox.innerHTML = `
-				<div style="margin-bottom: 12px; display: flex; flex-direction: row; gap:4px;">
-                    <span style="color: #a7a1a1; font-size: 14px; display: block;">
-                        Account ID
-                    </span> 
-                    <span style="color: #0f0; font-size: 15px; letter-spacing: 1px; font-family: monospace;">
-                        @${displayName}
-                    </span>
-                </div>
-                <div style="margin-bottom: 12px;display: flex; flex-direction: row; gap:4px;">
-                    <span style="color: #a7a1a1; font-size: 14px; display: block;">
-                        User Role
-                    </span> 
-                    <span style="color: #fff; font-size: 15px; letter-spacing: 1px;">
-                        ${roleIcon}${role}
-                    </span>
-                </div>
-                <div style="margin-bottom: 12px;">
-                    <span style="color: #a7a1a1; font-size: 14px; display: block;">
-                        Entropia Identity
-                    </span> 
-                    <span style="color: #fff; font-size: 15px; letter-spacing: 1px;">
-                        ${data.entropianame || 'UNLINKED_AVATAR'} 
-                    </span>
-					<span style="font-size: 14px; display: block;">
-                        ${verifiedBadge}
-                    </span> 
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;">
-                    <div style="display:flex;flex: 1;flex-direction:row;">
-                        <span style="color: #a7a1a1; font-size: 14px; display: block;">STATUS  </span>
-                        <span style="margin-left:4px;color: ${statusColor}; text-shadow: 0 0 5px ${statusColor};">
-                            ${currentStatus.toUpperCase()}
-                        </span>
-                    </div>
-                    <div style="display:flex;flex: 1;flex-direction:row;">
-                        <span style="color: #a7a1a1; font-size: 12px; display: block;">LAST_SYNC - </span>
-                        <span style="color: #888; font-size: 12px;">
-                            ${data.lastUpdated ? data.lastUpdated.toDate().toLocaleDateString() : 'NEVER'}
-                        </span>
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 5px; border-left: 2px solid #333; padding-left: 10px;">
-                    <span style="color: #a7a1a1; font-size: 13px; display: block;">status_note:</span>
-                    <span style="color: #aaa; font-style: italic; font-size: 14px;">"${data.status || 'No bio on file.'}"</span>
-                </div>
-            `;
-
-            if (sendBtn) {
-                sendBtn.onclick = async () => {
-                    const content = intelInput.value.trim();
-                    if (!content) return;
-
-                    sendBtn.textContent = "⏳ RELAYING...";
-                    sendBtn.disabled = true;
-
-                    try {
-                        await sendTransmission(userId, content);
-                        detailsModal.style.display = 'none';
-                        intelInput.value = "";
-                    } catch (err) {
-                        console.error("Relay failed:", err);
-                        errorBox.textContent = "[!] TRANSMISSION_FAILED";
-                        errorBox.style.display = 'block';
-                    } finally {
-                        sendBtn.textContent = "📡 SEND TRANSMISSION";
-                        sendBtn.disabled = false;
-                    }
-                };
-            }
-
-        } else {
-            throw new Error("AVATAR_NOT_FOUND");
-        }
-    } catch (e) {
-        errorBox.textContent = `[!] ERROR: ${e.message}`;
-        errorBox.style.display = 'block';
-        detailsBox.innerHTML = '';
-    }
-}
-
-
-
-// Keep track of the last element we boosted
-let lastActiveElement = null;
-
-function bringToFront(element) {
-    // 1. If there was a previous active element, drop its z-index back down
-    if (lastActiveElement && lastActiveElement !== element) {
-        lastActiveElement.style.zIndex = "10001"; // Your base z-index
-    }
-
-    // 2. Boost the current element
-    element.style.zIndex = "10101"; // Base + 100
-    
-    // 3. Update the tracker
-    lastActiveElement = element;
-}
-function makeDraggable(modalId, handleSelector) {
-    const modal = document.getElementById(modalId);
-    const handle = document.getElementById(handleSelector) || modal.querySelector(handleSelector);
-    
-    if (!modal || !handle) return;
-
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-    // Initial state
-    handle.style.cursor = 'grab';
-
-    handle.onmousedown = (e) => {
-        e.preventDefault();
-        bringToFront(modal);
-        handle.style.cursor = 'grabbing';
-        
-        // Prepare modal for movement
-        modal.style.position = 'fixed';
-        modal.style.transform = 'none';
-        modal.style.margin = '0';
-
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        
-        document.onmouseup = () => {
-            handle.style.cursor = 'grab';
-            document.onmouseup = null;
-            document.onmousemove = null;
-        };
-        
-        document.onmousemove = (e) => {
-            e.preventDefault();
-            pos1 = pos3 - e.clientX;
-            pos2 = pos4 - e.clientY;
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-
-            // Calculate new position
-            let newTop = modal.offsetTop - pos2;
-            let newLeft = modal.offsetLeft - pos1;
-
-            // --- BOUNDARY LIMITS ---
-            const maxX = window.innerWidth - modal.offsetWidth;
-            const maxY = window.innerHeight - modal.offsetHeight;
-
-            // Constrain X (Left/Right)
-            if (newLeft < 0) newLeft = 0;
-            if (newLeft > maxX) newLeft = maxX;
-
-            // Constrain Y (Top/Bottom)
-            if (newTop < 0) newTop = 0;
-            if (newTop > maxY) newTop = maxY;
-
-            modal.style.top = newTop + "px";
-            modal.style.left = newLeft + "px";
-        };
-    };
-}
 
 // --- 6. FISHING LOGIC ---
  // Add this to your global variables
@@ -2321,6 +1857,545 @@ function startContestClock() {
 
 // Call this at the end of your script or in initializeFishData
 startContestClock();
+
+
+/*---------------------------------------------------------
+  SECTION: MAIL RELAY SYSTEM
+---------------------------------------------------------*/
+
+// --- 1. TAB SWITCHING LOGIC ---
+const setupMailTabs = () => {
+    const tabBtns = document.querySelectorAll('.mail-tab-btn');
+    const inbox = document.getElementById('inbox-messages');
+    const outbox = document.getElementById('outbox-messages');
+    const onlineList = document.getElementById('online-users');
+
+    tabBtns.forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Toggle visibility
+            inbox.style.display = index === 0 ? 'flex' : 'none';
+            outbox.style.display = index === 1 ? 'flex' : 'none';
+            onlineList.style.display = index === 2 ? 'flex' : 'none';
+
+            if (index === 2) fetchOnlineUsers();
+        });
+    });
+};
+
+async function fetchOnlineUsers() {
+    const container = document.getElementById('online-users');
+    container.innerHTML = '<p style="color:#0f0; font-size:10px;">📡 SCANNING_FREQUENCIES...</p>';
+
+    try {
+        // Query users where isOnline is NOT offline
+        const q = query(collection(db, "users"), limit(50)); 
+        const snap = await getDocs(q);
+        
+        container.innerHTML = '';
+        
+        snap.forEach(docSnap => {
+            const u = docSnap.data();
+            const status = (u.isOnline || 'offline').toLowerCase();
+            
+            // Only show if not offline (or show all with indicators)
+            if (status === 'offline') return;
+
+            const row = document.createElement('div');
+            row.className = 'message-item'; // Reuse your styling
+            row.style.cursor = 'pointer';
+            row.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span class="userstatus-indicator userstatus-${status}"></span>
+                    <span style="color:#0f0; font-family:monospace;">${u.displayname || 'Unknown'}</span>
+                    <span style="color:#666; font-size:9px;">[${u.entropianame || 'UNLINKED'}]</span>
+                </div>
+            `;
+            row.onclick = () => showUserDetails(docSnap.id);
+            container.appendChild(row);
+        });
+
+        if (container.innerHTML === '') {
+            container.innerHTML = '<p style="color:#444; font-size:10px;">NO_ACTIVE_SIGNALS</p>';
+        }
+    } catch (e) {
+        container.innerHTML = '<p style="color:red; font-size:10px;">SCAN_FAILED</p>';
+    }
+}
+
+// --- 2. MESSAGE ELEMENT GENERATOR ---
+// This handles creating the buttons and attaching listeners directly to them
+/*---------------------------------------------------------
+  UPDATED COMPONENT: Message Element Generator
+---------------------------------------------------------*/
+function createMessageMarkup(msgId, data, contact, folderType) {
+const div = document.createElement('div');
+    div.className = 'message-item';
+	const role = contact.role;
+    // 1. Resolve Role Icon
+    const roleIcon = roleToIcon[contact.role] || roleToIcon['default'];
+    
+    // 2. Verification Logic
+    const verifiedBadge = contact.isVerified 
+        ? `<span class="verified-badge" title="VERIFIED AVATAR" style="color: #00f2ff; text-shadow: 0 0 5px #00f2ff; margin-left: 5px; cursor: help;">☑ Verified ${role}</span>` 
+        : `<span class="unverified-badge" title="UNVERIFIED AVATAR" style="color: #555; margin-left: 5px; font-size: 0.9em; opacity: 0.7;">☒ Unverified ${role}</span>`;
+
+    const timestamp = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
+    const label = folderType === 'inbox' ? `FROM` : `TO`;
+    const contactId = folderType === 'inbox' ? data.senderId : data.receiverId;
+
+    const rawStatus = (contact.isOnline || 'offline').toLowerCase();
+    const statusClass = `userstatus-${rawStatus}`;
+
+    div.innerHTML = `
+        <div class="meta">${timestamp.toLocaleString()}</div>
+        <h3>
+            ${label}:${roleIcon}
+            <span style="color: #aaa; font-size: 0.9em; margin-right: 4px;">${verifiedBadge}</span>
+        </h3>
+        <h3>
+            <span class="userstatus-indicator ${statusClass}" title="${rawStatus.toUpperCase()}"></span>
+            <span class="contact-link" data-uid="${contactId}" style="cursor: pointer; text-decoration: underline;">${contact.entropiaName}</span>
+        </h3>
+        <p>${data.content}</p>
+        
+        <div class="message-actions"></div>
+        <div class="reply-tray" style="display:none; margin-top:10px; border-top:1px ridge #333; padding-top:8px;">
+            <textarea class="reply-input" placeholder="Enter secure response..." 
+                style="width:100%; background:#111; border:1px solid #444; color:#0f0; font-family:monospace; font-size:10px; min-height:40px; resize:none;"></textarea>
+            <div style="display:flex; gap:5px; margin-top:5px;">
+                <button class="send-reply-btn" style="background:#0a2a0a; color:#0f0; border:1px solid #0f0; font-size:9px; cursor:pointer; padding:2px 8px;">SEND_RELAY</button>
+                <button class="cancel-reply-btn" style="background:none; color:#555; border:1px solid #333; font-size:9px; cursor:pointer; padding:2px 8px;">CANCEL</button>
+            </div>
+        </div>
+    `;
+
+    // --- Listeners: Contact Intel ---
+    div.querySelector('.contact-link').addEventListener('click', () => {
+        if (typeof showUserDetails === 'function') {
+            showUserDetails(contactId);
+        } else {
+            const detailsModal = document.getElementById('user-details');
+            if (detailsModal) detailsModal.style.display = 'block';
+        }
+    });
+
+    const actionsContainer = div.querySelector('.message-actions');
+    const tray = div.querySelector('.reply-tray');
+
+    // --- Listeners: Reply Logic ---
+    if (folderType === 'inbox') {
+        const replyBtn = document.createElement('button');
+        replyBtn.textContent = 'REPLY';
+        replyBtn.addEventListener('click', () => {
+            tray.style.display = tray.style.display === 'none' ? 'block' : 'none';
+        });
+        actionsContainer.appendChild(replyBtn);
+
+        // Send Reply logic
+        div.querySelector('.send-reply-btn').addEventListener('click', () => {
+            const content = div.querySelector('.reply-input').value;
+            if (content.trim()) {
+                sendTransmission(data.senderId, content);
+                tray.style.display = 'none';
+            }
+        });
+
+        // Cancel Reply
+        div.querySelector('.cancel-reply-btn').addEventListener('click', () => {
+            tray.style.display = 'none';
+        });
+    }
+
+    // --- Listeners: Delete ---
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'DELETE';
+    deleteBtn.style.color = '#f66';
+    deleteBtn.addEventListener('click', () => deleteMessage(auth.currentUser.uid, folderType, msgId));
+    actionsContainer.appendChild(deleteBtn);
+
+    return div;
+}
+// Add 'query' and 'orderBy' to your getMessages function
+async function getMessages() {
+    const inboxContainer = document.getElementById('inbox-messages');
+    const outboxContainer = document.getElementById('outbox-messages');
+    const user = auth.currentUser;
+
+    if (!user) return;
+
+    inboxContainer.innerHTML = '<p style="color:#0f0; font-size:10px;">DECRYPTING_INBOX...</p>';
+    outboxContainer.innerHTML = '<p style="color:#0f0; font-size:10px;">DECRYPTING_OUTBOX...</p>';
+
+    try {
+        // Fetch data without the Firestore 'orderBy' (no index needed!)
+        const [inSnap, outSnap] = await Promise.all([
+            getDocs(collection(db, `users/${user.uid}/inbox`)),
+            getDocs(collection(db, `users/${user.uid}/outbox`))
+        ]);
+
+        // Convert Snapshots to Arrays and Sort in JS (Newest First)
+        const sortedInbox = [...inSnap.docs].sort((a, b) => {
+            const timeA = a.data().timestamp?.toMillis() || 0;
+            const timeB = b.data().timestamp?.toMillis() || 0;
+            return timeB - timeA; 
+        });
+
+        const sortedOutbox = [...outSnap.docs].sort((a, b) => {
+            const timeA = a.data().timestamp?.toMillis() || 0;
+            const timeB = b.data().timestamp?.toMillis() || 0;
+            return timeB - timeA;
+        });
+
+        // Pass the sorted arrays to your rendering function
+        renderGroupedMessages(sortedInbox, inboxContainer, 'inbox');
+        renderGroupedMessages(sortedOutbox, outboxContainer, 'outbox');
+
+    } catch (e) {
+        console.error("Mail Relay Error:", e);
+        inboxContainer.innerHTML = '<p style="color:red; font-size:10px;">RELAY_FAILED</p>';
+    }
+}
+async function renderGroupedMessages(docs, container, folderType) {
+    container.innerHTML = docs.length === 0 ? `<p style="color:#444; font-size:10px; margin:auto;">${folderType.toUpperCase()}_EMPTY</p>` : '';
+    
+    let lastDateLabel = "";
+
+    for (const d of docs) {
+        const data = d.data();
+        const timestamp = data.timestamp?.toDate() || new Date();
+        
+        // Determine the Date Label (Today, Yesterday, or Date string)
+        const dateLabel = getDateLabel(timestamp);
+
+        // If the date label changed, inject a header
+        if (dateLabel !== lastDateLabel) {
+            const header = document.createElement('div');
+            header.className = 'date-group-header';
+            header.innerHTML = `<span>// ${dateLabel}</span>`;
+            container.appendChild(header);
+            lastDateLabel = dateLabel;
+        }
+
+        const contact = await getUserDetails(folderType === 'inbox' ? data.senderId : data.receiverId);
+        container.appendChild(createMessageMarkup(d.id, data, contact, folderType));
+    }
+}
+
+// Helper to calculate Date Labels
+function getDateLabel(date) {
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    // Format the actual date part (e.g., "15 APR 2026")
+    const dateString = date.toLocaleDateString('en-GB', { 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric' 
+    }).toUpperCase();
+
+    // Check for Today
+    if (date.toDateString() === today.toDateString()) {
+        return `TODAY - ${dateString}`;
+    }
+    
+    // Check for Yesterday
+    if (date.toDateString() === yesterday.toDateString()) {
+        return `YESTERDAY - ${dateString}`;
+    }
+    
+    // For anything older
+    return dateString;
+}
+// --- 4. ACTIONS: SEND/DELETE/REPLY ---
+async function deleteMessage(userUid, folder, messageId) {
+    if (!confirm("PURGE TRANSMISSION?")) return;
+    try {
+        await deleteDoc(doc(db, `users/${userUid}/${folder}/${messageId}`));
+        getMessages(); 
+    } catch (e) { console.error(e); }
+}
+
+function openReplyInput(receiverId) {
+    const content = prompt("ENTER SECURE TRANSMISSION:");
+    if (content?.trim()) sendTransmission(receiverId, content);
+}
+
+async function sendTransmission(receiverId, content) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const messageData = {
+        senderId: user.uid,
+        receiverId: receiverId,
+        content: content,
+        timestamp: serverTimestamp()
+    };
+
+    try {
+        await addDoc(collection(db, `users/${receiverId}/inbox`), messageData);
+        await addDoc(collection(db, `users/${user.uid}/outbox`), messageData);
+        alert("TRANSMISSION_SENT");
+        getMessages();
+    } catch (e) { console.error(e); }
+}
+
+// --- 5. INTEL: USER DETAILS ---
+// --- 5. INTEL: USER DETAILS ---
+async function getUserDetails(userId) {
+    try {
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        if (userDoc.exists()) {
+            const data = userDoc.data();
+            return { 
+                entropiaName: data.entropianame || 'Unknown',
+                isOnline: data.isOnline || 'offline',
+                isVerified: data.euNameVerified === true || data.euNameVerified === "true",
+                role: data.role || 'default',
+                // ADD THIS LINE:
+                achievements: data.achievements || [] 
+            };
+        }
+    } catch (e) { 
+        console.error("Error fetching user details:", e); 
+    }
+    // Return matching structure even on failure
+    return { 
+        entropiaName: 'Unknown', 
+        isOnline: 'offline', 
+        isVerified: false, 
+        role: 'default', 
+        achievements: [] 
+    };
+}
+
+// --- INTEL: POPULATE USER DETAILS MODAL ---
+async function showUserDetails(userId) {
+    const detailsBox = document.getElementById('user-detailsbox');
+    const detailsModal = document.getElementById('user-details');
+    const errorBox = document.getElementById('user-detailsboxError') || { style: {}, textContent: "" }; 
+    const sendBtn = document.getElementById('sendmessage-to-user');
+    const intelInput = document.getElementById('intel-reply-input');
+
+    if (!detailsBox || !detailsModal) return;
+
+    // Reset input and state
+    if (intelInput) intelInput.value = "";
+    detailsModal.style.display = 'block';
+    if (errorBox.style) errorBox.style.display = 'none';
+    detailsBox.innerHTML = '<p style="color:#0f0; font-size:10px;">[ ACCESSING_DATABASE... ]</p>';
+
+    try {
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        
+        if (userDoc.exists()) {
+            const data = userDoc.data();
+            const displayName = data.displayname || "Pixel Colonist";
+            const isVerified = data.euNameVerified === true || data.euNameVerified === "true";
+            
+            const verifiedBadge = isVerified 
+                ? `<span class="verified-badge" title="VERIFIED AVATAR" style="color: #00f2ff; text-shadow: 0 0 5px #00f2ff; margin-left: 5px; cursor: help;">[☑ Verified]</span>` 
+                : `<span class="unverified-badge" title="UNVERIFIED AVATAR" style="color: #555; margin-left: 5px; font-size: 0.9em; opacity: 0.7;">[☒ Unverified]</span>`;
+
+            const role = data.role || 'GUEST';
+            const roleIcon = (typeof roleToIcon !== 'undefined' && roleToIcon[role]) ? roleToIcon[role] : '👤';
+            
+            const statusMap = {
+                'online': '#0f0',
+                'idle': '#ffaa00',
+                'away': '#ffaa00',
+                'busy': '#f00',
+                'dnd': '#f00',
+                'offline': '#888'
+            };
+            const currentStatus = (data.isOnline || 'offline').toLowerCase();
+            const statusColor = statusMap[currentStatus] || '#888';
+
+            // BUILD THE UI
+            detailsBox.innerHTML = `
+                <div style="margin-bottom: 12px; display: flex; flex-direction: row; gap:4px;">
+                    <span style="color: #a7a1a1; font-size: 14px; display: block;">Account ID</span> 
+                    <span style="color: #0f0; font-size: 15px; letter-spacing: 1px; font-family: monospace;">@${displayName}</span>
+                </div>
+                <div style="margin-bottom: 12px; display: flex; flex-direction: row; gap:4px;">
+                    <span style="color: #a7a1a1; font-size: 14px; display: block;">User Role</span> 
+                    <span style="color: #fff; font-size: 15px; letter-spacing: 1px;">${roleIcon}${role}</span>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <span style="color: #a7a1a1; font-size: 14px; display: block;">Entropia Identity</span> 
+                    <span style="color: #fff; font-size: 15px; letter-spacing: 1px;">${data.entropianame || 'UNLINKED_AVATAR'}</span>
+                    <span style="font-size: 14px; display: block;">${verifiedBadge}</span> 
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;">
+                    <div style="display:flex; flex: 1; flex-direction:row;">
+                        <span style="color: #a7a1a1; font-size: 14px; display: block;">STATUS </span>
+                        <span style="margin-left:4px; color: ${statusColor}; text-shadow: 0 0 5px ${statusColor};">${currentStatus.toUpperCase()}</span>
+                    </div>
+                    <div style="display:flex; flex: 1; flex-direction:row;">
+                        <span style="color: #a7a1a1; font-size: 12px; display: block;">LAST_SYNC - </span>
+                        <span style="color: #888; font-size: 12px;">${data.lastUpdated ? data.lastUpdated.toDate().toLocaleDateString() : 'NEVER'}</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px; padding: 10px 0; border-top: 1px solid #222; border-bottom: 1px solid #222;">
+                    <span style="color: #a7a1a1; font-size: 11px; display: block; margin-bottom: 5px; letter-spacing:1px;">AWARDS_CABINET:</span>
+                    <div id="intel-achievement-cabinet" style="min-height: 30px; display: flex; flex-wrap: wrap; gap: 8px;">
+                        </div>
+                </div>
+
+                <div style="margin-bottom: 5px; border-left: 2px solid #333; padding-left: 10px;">
+                    <span style="color: #a7a1a1; font-size: 13px; display: block;">status_note:</span>
+                    <span style="color: #aaa; font-style: italic; font-size: 14px;">"${data.status || 'No bio on file.'}"</span>
+                </div>
+            `;
+
+            // RENDER TROPHIES
+            const intelCabinet = document.getElementById('intel-achievement-cabinet');
+            if (intelCabinet) {
+                const achievements = data.achievements || [];
+                if (achievements.length === 0) {
+                    intelCabinet.innerHTML = '<span style="color:#333; font-size:10px;">NO_AWARDS_ON_RECORD</span>';
+                } else {
+                    achievements.forEach(awardObj => {
+                        const id = typeof awardObj === 'string' ? awardObj : awardObj.id;
+                        const count = awardObj.count || 1;
+                        const awardMap = {
+                            'gold_trophy': { icon: '🏆', color: '#FFD700', label: '1st Place' },
+                            'silver_trophy': { icon: '🥈', color: '#C0C0C0', label: '2nd Place' },
+                            'bronze_trophy': { icon: '🥉', color: '#CD7F32', label: '3rd Place' },
+                            'ribbon': { icon: '🎗️', color: '#ff4444', label: 'Finisher' }
+                        };
+                        const award = awardMap[id] || { icon: '⭐', color: '#fff', label: 'Commendation' };
+                        
+                        const span = document.createElement('span');
+                        span.title = `${award.label} ${count > 1 ? 'x' + count : ''}`;
+                        span.style.cssText = `font-size:20px; filter: drop-shadow(0 0 3px ${award.color}66); cursor:help; position:relative;`;
+                        span.textContent = award.icon;
+                        
+                        if (count > 1) {
+                            const badge = document.createElement('small');
+                            badge.textContent = count;
+                            badge.style.cssText = `position:absolute; bottom:-2px; right:-2px; font-size:9px; background:#000; color:#0f0; padding:0 2px; border:1px solid #0f0; font-family:monospace;`;
+                            span.appendChild(badge);
+                        }
+                        
+                        intelCabinet.appendChild(span);
+                    });
+                }
+            }
+
+            // ATTACH SEND LISTENER
+            if (sendBtn) {
+                sendBtn.onclick = async () => {
+                    const content = intelInput.value.trim();
+                    if (!content) return;
+                    sendBtn.textContent = "⏳ RELAYING...";
+                    sendBtn.disabled = true;
+                    try {
+                        await sendTransmission(userId, content);
+                        detailsModal.style.display = 'none';
+                        intelInput.value = "";
+                    } catch (err) {
+                        console.error("Relay failed:", err);
+                        errorBox.textContent = "[!] TRANSMISSION_FAILED";
+                        errorBox.style.display = 'block';
+                    } finally {
+                        sendBtn.textContent = "📡 SEND TRANSMISSION";
+                        sendBtn.disabled = false;
+                    }
+                };
+            }
+
+        } else {
+            throw new Error("AVATAR_NOT_FOUND");
+        }
+    } catch (e) {
+        errorBox.textContent = `[!] ERROR: ${e.message}`;
+        errorBox.style.display = 'block';
+        detailsBox.innerHTML = '';
+    }
+}
+
+
+// Keep track of the last element we boosted
+let lastActiveElement = null;
+
+function bringToFront(element) {
+    // 1. If there was a previous active element, drop its z-index back down
+    if (lastActiveElement && lastActiveElement !== element) {
+        lastActiveElement.style.zIndex = "10001"; // Your base z-index
+    }
+
+    // 2. Boost the current element
+    element.style.zIndex = "10101"; // Base + 100
+    
+    // 3. Update the tracker
+    lastActiveElement = element;
+}
+function makeDraggable(modalId, handleSelector) {
+    const modal = document.getElementById(modalId);
+    const handle = document.getElementById(handleSelector) || modal.querySelector(handleSelector);
+    
+    if (!modal || !handle) return;
+
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    // Initial state
+    handle.style.cursor = 'grab';
+
+    handle.onmousedown = (e) => {
+        e.preventDefault();
+        bringToFront(modal);
+        handle.style.cursor = 'grabbing';
+        
+        // Prepare modal for movement
+        modal.style.position = 'fixed';
+        modal.style.transform = 'none';
+        modal.style.margin = '0';
+
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        
+        document.onmouseup = () => {
+            handle.style.cursor = 'grab';
+            document.onmouseup = null;
+            document.onmousemove = null;
+        };
+        
+        document.onmousemove = (e) => {
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+
+            // Calculate new position
+            let newTop = modal.offsetTop - pos2;
+            let newLeft = modal.offsetLeft - pos1;
+
+            // --- BOUNDARY LIMITS ---
+            const maxX = window.innerWidth - modal.offsetWidth;
+            const maxY = window.innerHeight - modal.offsetHeight;
+
+            // Constrain X (Left/Right)
+            if (newLeft < 0) newLeft = 0;
+            if (newLeft > maxX) newLeft = maxX;
+
+            // Constrain Y (Top/Bottom)
+            if (newTop < 0) newTop = 0;
+            if (newTop > maxY) newTop = maxY;
+
+            modal.style.top = newTop + "px";
+            modal.style.left = newLeft + "px";
+        };
+    };
+}
+
+
+
 document.getElementById('btn-set-now')?.addEventListener('click', () => {
     const now = new Date();
     

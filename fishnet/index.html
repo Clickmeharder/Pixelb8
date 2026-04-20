@@ -25,7 +25,7 @@
 			<div id="drag-region"class="header"></div>
 		</div>
 		<div id="auth-header" style="">
-			<button id="reload-btn" class="popover-btn" title="Refresh HUD">⟳</button>
+			<button id="reload-btn" class="popover-btn desktoponly" title="Refresh HUD">⟳</button>
 			<button id="start-btn" class="btn">📡 Activate</button>
 			<div class="top-bar-user" id="topBarUserTrigger" style="">
 				<span class="userRoleIcon" style="display:none;"></span>
@@ -314,11 +314,14 @@
 				<div class="mail-tabs">
 					<button class="mail-tab-btn active">📥 INBOX</button>
 					<button class="mail-tab-btn">📤 OUTBOX</button>
+					<button class="mail-tab-btn">📡 ONLINE</button>
+					
 					<button id="btn-refresh-mail">🔄 SYNC</button>
 				</div>
 				<div id="mail-scroll-area">
 					<div id="inbox-messages"></div>
 					<div id="outbox-messages" style="display: none;"></div>
+					<div id="online-users" style="display: none; flex-direction: column; gap: 5px; padding: 10px;"></div>
 				</div>
 				<div class="popover-footer" style="padding: 5px; font-size: 9px; text-align: center; color: #444;">SuS Communication Systems</div>
 			</div>
