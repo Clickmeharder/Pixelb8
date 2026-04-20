@@ -258,42 +258,45 @@ document.addEventListener('click', async (e) => {
 });
 
 
-if (window.electronAPI && window.electronAPI.onAuthSuccess) {
-    console.log("🔗 Bridge connection established.");
-    
+// --- WEB PORT AUTH LOGIC ---
+
+// 1. Check if we are in a browser or the Electron app
+const isWeb = (typeof window.electronAPI === 'undefined');
+
+if (!isWeb) {
+    // KEEPS ELECTRON LOGIC: Only runs if the bridge exists
     window.electronAPI.onAuthSuccess((token) => {
-        console.log("🎉 SUCCESS: Bridge token received! Length:", token.length);
-        
-        setTimeout(() => {
-            console.log("🚀 Attempting Firebase Sign-In...");
-
-            try {
-                // FIX: Pass the token as the ONLY argument. 
-                // Firebase uses this to reconstruct the session.
-                const credential = GithubAuthProvider.credential(token); 
-
-                signInWithCredential(auth, credential)
-                    .then((result) => {
-                        console.log("✅ Firebase Auth Success! User:", result.user.displayName);
-                    })
-                    .catch((error) => {
-                        console.error("🔥 Firebase Auth Failed:", error.code, error.message);
-                        
-                        // Fallback: If Credential fails, try Custom Token login
-                        if (error.code === 'auth/argument-error') {
-                            console.log("🔄 Attempting Custom Token Fallback...");
-                            return signInWithCustomToken(auth, token);
-                        }
-                    });
-            } catch (e) {
-                console.error("❌ Sign-in initialization error:", e);
-            }
-        }, 500); 
+        const credential = GithubAuthProvider.credential(token);
+        signInWithCredential(auth, credential);
     });
 } else {
-    console.error("❌ CRITICAL: Electron Bridge NOT detected!");
+    // WEB LOGIC: Run standard Firebase Auth
+    console.log("🌐 WEB_MODE: Initializing Web Auth...");
+
+    // Check if user is already logged in
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("✅ User already active:", user.displayName);
+        } else {
+            console.log("👤 No user session found. Waiting for login...");
+            // If you want them to log in immediately on page load, 
+            // you can call your login function here.
+        }
+    });
 }
 
+// 2. Create a Web Login Function
+// Bind this to your 'Login' button in index.html
+async function webSignIn() {
+    const provider = new GithubAuthProvider();
+    try {
+        // This opens the standard GitHub popup in a browser
+        const result = await signInWithPopup(auth, provider);
+        console.log("✅ Web Login Success:", result.user.displayName);
+    } catch (error) {
+        console.error("🔥 Web Login Failed:", error.message);
+    }
+}
 async function updateEntropiaProfile(newName) {
     const user = auth.currentUser;
     if (!user) return;
