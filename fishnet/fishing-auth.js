@@ -1432,7 +1432,6 @@ async function pollWebLog() {
         lastSize = file.size;
     }
 }
-// NEW: Reusable Parser Function
 async function handleChatLine(line) {
     const fishRegex = /\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
     const match = line.match(fishRegex);
@@ -1443,23 +1442,71 @@ async function handleChatLine(line) {
         const value = parseFloat(match[3]);
 
         if (!isNaN(value)) {
-            // --- 1. LOCAL TRACKING ---
+            // --- 1. DYNAMIC REGISTRATION (Local Session Stats) ---
             if (!(fishType in sessionStats)) {
                 sessionStats[fishType] = 0;
                 sessionValues[fishType] = 0;
-                if (typeof createDynamicRow === 'function') createDynamicRow(fishType);
+                if (typeof createDynamicRow === 'function') {
+                    createDynamicRow(fishType);
+                }
             }
+
             sessionStats[fishType] += amount;
             sessionValues[fishType] += value;
 
-            // --- 2. CLOUD SYNC ---
+            // --- 2. CLOUD SYNC LOGIC (Contest Tracking & Phase Gates) ---
             if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                 const settings = window.currentContestSettings;
-                // ... (Keep all your existing Phase Check logic here) ...
-                // Just ensure variables like syncTimer and pendingCatchBuffer are declared at the top of the file
+                
+                const isConcluded = settings?.status === 'concluded';
+                const startTime = settings?.startTime?.toMillis() || 0;
+                const durationMs = (settings?.duration || 60) * 60000;
+                const endTime = startTime + durationMs;
+                const now = Date.now() + (window.serverOffset || 0);
+
+                // PHASE CHECK: PRE-START
+                if (now < startTime) {
+                    addLog(`⏳ PRE_START: Catch ignored by cloud (Starts in ${formatTime(startTime - now)})`, true);
+                } 
+                // PHASE CHECK: POST-END
+                else if (isConcluded || now > endTime) {
+                    addLog(`🚫 SESSION_FINALIZED: Catch not synced to cloud.`, true);
+                    
+                    if (isConcluded) {
+                        activeContestRef = null; 
+                        setTimeout(() => {
+                            const hud = document.getElementById('contest-hud');
+                            if (hud) hud.style.display = 'none';
+                        }, 5000);
+                    }
+                } 
+                // PHASE CHECK: ACTIVE (LIVE)
+                else {
+                    const target = settings?.targetFish?.toLowerCase();
+                    const currentCatch = fishType.toLowerCase();
+
+                    // TARGET CHECK
+                    if (target && currentCatch === target) {
+                        pendingCatchBuffer.score += amount;
+                        addLog(`🎯 TARGET_HIT: +${amount} PTS [${fishType.toUpperCase()}]`);
+                    }
+
+                    // Add to the totals buffer
+                    if (!pendingCatchBuffer.totals[fishType]) {
+                        pendingCatchBuffer.totals[fishType] = 0;
+                    }
+                    pendingCatchBuffer.totals[fishType] += amount;
+
+                    // Trigger sync timer
+                    if (!syncTimer) {
+                        syncTimer = setTimeout(pushBufferToCloud, SYNC_INTERVAL_MS);
+                        const minutes = Math.floor(SYNC_INTERVAL_MS / 60000);
+                        addLog(`⏳ SYNC_QUEUED: Uplink in ~${minutes}m.`);
+                    }
+                }
             }
 
-            // --- 3. UI UPDATE ---
+            // --- 3. UI UPDATE (Always update local display) ---
             updateSessionUI();
             addLog(`🎣 CAUGHT: ${amount}x ${fishType}`);
         }
