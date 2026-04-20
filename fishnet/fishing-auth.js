@@ -1858,7 +1858,47 @@ function startContestClock() {
 // Call this at the end of your script or in initializeFishData
 startContestClock();
 
+/*---------------------------------------------------------
+  SECTION: GLOBAL AUDIO SYSTEM
+---------------------------------------------------------*/
 
+// 1. Global Settings Toggle
+// This can be updated by your UI settings menu
+window.soundSettings = {
+    masterEnabled: true,
+    gotmailsound: true,
+    sendmailsound: true,
+/*     contestStart: true,
+    contestConcluded: true */
+};
+
+// 2. Audio Asset Registry
+// We map the keys to actual Audio objects
+const audioAssets = {
+    gotmailsound: new Audio('assets/sounds/mail_in.mp3'),
+    sendmailsound: new Audio('assets/sounds/mail_out.mp3'),
+/*     contestStart: new Audio('assets/sounds/alarm_start.mp3'),
+    contestConcluded: new Audio('assets/sounds/alarm_end.mp3') */
+};
+
+/**
+ * Generic Sound Controller
+ * @param {string} soundKey - The key from audioAssets
+ */
+function playSound(soundKey) {
+    const sound = audioAssets[soundKey];
+    
+    // Check if the master toggle is on AND the specific sound is enabled
+    if (window.soundSettings.masterEnabled && window.soundSettings[soundKey]) {
+        if (sound) {
+            sound.currentTime = 0; // Rewind for rapid fire
+            sound.play().catch(err => {
+                // Silently catch browser 'autoplay' blocks until first user click
+                console.warn(`[!] Audio: ${soundKey} blocked or missing.`, err);
+            });
+        }
+    }
+}
 /*---------------------------------------------------------
   SECTION: MAIL RELAY SYSTEM
 ---------------------------------------------------------*/
@@ -2019,6 +2059,9 @@ const div = document.createElement('div');
     return div;
 }
 // Add 'query' and 'orderBy' to your getMessages function
+// Keep track of the inbox count globally to detect new arrivals
+let lastInboxCount = -1;
+
 async function getMessages() {
     const inboxContainer = document.getElementById('inbox-messages');
     const outboxContainer = document.getElementById('outbox-messages');
@@ -2036,6 +2079,17 @@ async function getMessages() {
             getDocs(collection(db, `users/${user.uid}/outbox`))
         ]);
 
+        // --- NEW MAIL SOUND LOGIC ---
+        const currentInboxCount = inSnap.docs.length;
+
+        // If this isn't the first load of the session and count has increased, play sound
+        if (lastInboxCount !== -1 && currentInboxCount > lastInboxCount) {
+            playSound('gotmailsound');
+        }
+        
+        // Update the persistent tracker
+        lastInboxCount = currentInboxCount;
+
         // Convert Snapshots to Arrays and Sort in JS (Newest First)
         const sortedInbox = [...inSnap.docs].sort((a, b) => {
             const timeA = a.data().timestamp?.toMillis() || 0;
@@ -2052,6 +2106,11 @@ async function getMessages() {
         // Pass the sorted arrays to your rendering function
         renderGroupedMessages(sortedInbox, inboxContainer, 'inbox');
         renderGroupedMessages(sortedOutbox, outboxContainer, 'outbox');
+        
+        // Update the Online Users tab if the function exists
+        if (typeof fetchOnlineUsers === 'function') {
+            fetchOnlineUsers();
+        }
 
     } catch (e) {
         console.error("Mail Relay Error:", e);
@@ -2136,11 +2195,23 @@ async function sendTransmission(receiverId, content) {
     };
 
     try {
+        // Record the transmission in both the receiver's inbox and sender's outbox
         await addDoc(collection(db, `users/${receiverId}/inbox`), messageData);
         await addDoc(collection(db, `users/${user.uid}/outbox`), messageData);
+        
+        // Play the outgoing mail sound effect
+        playSound('sendmailsound');
+
         alert("TRANSMISSION_SENT");
-        getMessages();
-    } catch (e) { console.error(e); }
+        
+        // Refresh the UI to show the new message in the Outbox
+        if (typeof getMessages === 'function') {
+            getMessages();
+        }
+    } catch (e) { 
+        console.error("Transmission Relay Failure:", e); 
+        // Optional: play an error sound or alert user here
+    }
 }
 
 // --- 5. INTEL: USER DETAILS ---
@@ -2393,7 +2464,6 @@ function makeDraggable(modalId, handleSelector) {
         };
     };
 }
-
 
 
 document.getElementById('btn-set-now')?.addEventListener('click', () => {

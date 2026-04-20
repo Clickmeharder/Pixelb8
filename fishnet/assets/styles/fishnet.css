@@ -368,6 +368,9 @@ background: #111; padding: 8px; border-bottom: 1px solid #333; display: flex; ju
 	opacity: 0.85;
 	transition:opacity, 0.4s ease;
 }
+#online-users .message-item {
+    min-height: 20px;
+}
 .message-item:hover{
 	opacity:0.99;
 }
