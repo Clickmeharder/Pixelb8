@@ -125,7 +125,7 @@ function renderAchievements(userData) {
     const achievements = userData.achievements || [];
 
     if (achievements.length === 0) {
-        cabinet.innerHTML = `<span style="color: #444; font-size: 10px; letter-spacing: 1px;">NO_AWARDS_YET</span>`;
+        cabinet.innerHTML = `<span style="color: #8b8989; font-size: 10px; letter-spacing: 1px;">NO_AWARDS_YET</span>`;
         return;
     }
 

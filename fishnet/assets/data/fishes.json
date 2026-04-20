@@ -1,495 +1,39 @@
 [
   {
-    "Id": 38,
-    "Name": "Calypso Salmon",
+    "Id": 19,
+    "Name": "Juvenile Calypsocod",
     "Properties": {
       "Description": "",
       "Difficulty": "Easy",
       "MinDepth": null,
-      "TimesOfDay": [
-        "Day",
-        "Night"
-      ],
+      "Strength": 2,
+      "ScrapsToRefine": 10000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
       "Biomes": [
-        "Deep Ocean"
+        "Sea"
       ],
       "RodTypes": [
-        "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Young Calypso Salmon",
-        "Strength": null,
-        "ScrapsToRefine": 12000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      },
-      {
-        "Name": "Migrating Calypso Salmon",
-        "Strength": null,
-        "ScrapsToRefine": 20000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Salmon",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/327"
-      }
-    },
-    "FishOil": {
-      "Name": "Salmon Fish Oil",
-      "Links": {
-        "$Url": "/items/1003292"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 12,
-            "Row": 17,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/38"
-    }
-  },
-  {
-    "Id": 9,
-    "Name": "Siltswimmer",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Lake",
-        "Deep Ocean"
-      ],
-      "RodTypes": [
-        "Angling",
-        "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Juvenile Siltswimmer",
-        "Strength": null,
-        "ScrapsToRefine": 10000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      },
-      {
-        "Name": "Adult Siltswimmer",
-        "Strength": null,
-        "ScrapsToRefine": 18000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Salmon",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/327"
-      }
-    },
-    "FishOil": {
-      "Name": "Salmon Fish Oil",
-      "Links": {
-        "$Url": "/items/1003292"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 34,
-            "Row": 25,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 34,
-            "Row": 26,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 2,
-            "Row": 18,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 28,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/9"
-    }
-  },
-  {
-    "Id": 26,
-    "Name": "Seabed Salmon",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Sea",
-        "Deep Ocean"
-      ],
-      "RodTypes": [
-        "Angling",
-        "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Seabed Salmon",
-        "Strength": null,
-        "ScrapsToRefine": 16000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Salmon",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/327"
-      }
-    },
-    "FishOil": {
-      "Name": "Salmon Fish Oil",
-      "Links": {
-        "$Url": "/items/1003292"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 22,
-            "Row": 24,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 21,
-            "Row": 24,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 12,
-            "Row": 17,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 23,
-            "Row": 31,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/26"
-    }
-  },
-  {
-    "Id": 10,
-    "Name": "Predatorfish",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Lake"
-      ],
-      "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Juvenile Predatorfish",
-        "Strength": null,
-        "ScrapsToRefine": 14000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Salmon",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/327"
-      }
-    },
-    "FishOil": {
-      "Name": "Salmon Fish Oil",
-      "Links": {
-        "$Url": "/items/1003292"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 34,
-            "Row": 25,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 34,
-            "Row": 26,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 2,
-            "Row": 18,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/10"
-    }
-  },
-  {
-    "Id": 29,
-    "Name": "Lumiscale Bass",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Sea",
-        "Deep Ocean"
-      ],
-      "RodTypes": [
-        "Angling",
-        "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Lumiscale Bass",
-        "Strength": null,
-        "ScrapsToRefine": 20000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Bass",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/323"
-      }
-    },
-    "FishOil": {
-      "Name": "Bass Fish Oil",
-      "Links": {
-        "$Url": "/items/1003289"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 21,
-            "Row": 24,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 22,
-            "Row": 24,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 23,
-            "Row": 31,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/29"
-    }
-  },
-  {
-    "Id": 11,
-    "Name": "Striped Basil Bass",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [
-        "Day"
-      ],
-      "Biomes": [
-        "River"
-      ],
-      "RodTypes": [
-        "Angling",
         "Casting"
-      ],
-      "PreferredLureTypes": [
-        "Spinners"
       ]
     },
-    "Sizes": [
-      {
-        "Name": "Striped Basil Bass",
-        "Strength": null,
-        "ScrapsToRefine": 16000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      },
-      {
-        "Name": "Juvenile Striped Basil Bass",
-        "Strength": null,
-        "ScrapsToRefine": 12000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      },
-      {
-        "Name": "Old Striped Basil Bass",
-        "Strength": null,
-        "ScrapsToRefine": 24000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
-      "Name": "Bass",
+      "Name": "Cod",
       "Properties": {
         "CodexBaseCost": 6,
         "CodexType": "Fish"
       },
       "Links": {
-        "$Url": "/mobspecies/323"
+        "$Url": "/mobspecies/347"
       }
     },
     "FishOil": {
-      "Name": "Bass Fish Oil",
+      "Name": "Cod Fish Oil",
       "Links": {
-        "$Url": "/items/1003289"
+        "$Url": "/items/materials/3310"
       }
     },
     "Planets": [
@@ -502,76 +46,45 @@
         }
       }
     ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 26,
-            "Row": 28,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
     "Links": {
-      "$Url": "/fishes/11"
+      "$Url": "/fishes/19"
     }
   },
   {
-    "Id": 8,
-    "Name": "Calypso Smallmouth",
+    "Id": 24,
+    "Name": "Blue Snapper",
     "Properties": {
       "Description": "",
       "Difficulty": "Easy",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 2,
+      "ScrapsToRefine": 12000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
       "Biomes": [
-        "Lake"
+        "Sea"
       ],
       "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
+        "Casting"
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Calypso Smallmouth",
-        "Strength": null,
-        "ScrapsToRefine": 14000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
-      "Name": "Bass",
+      "Name": "Cod",
       "Properties": {
         "CodexBaseCost": 6,
         "CodexType": "Fish"
       },
       "Links": {
-        "$Url": "/mobspecies/323"
+        "$Url": "/mobspecies/347"
       }
     },
     "FishOil": {
-      "Name": "Bass Fish Oil",
+      "Name": "Cod Fish Oil",
       "Links": {
-        "$Url": "/items/1003289"
+        "$Url": "/items/materials/3310"
       }
     },
     "Planets": [
@@ -582,131 +95,26 @@
         "Links": {
           "$Url": "/planets/1"
         }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 34,
-            "Row": 25,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 34,
-            "Row": 26,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 2,
-            "Row": 18,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 28,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 28,
-            "Row": 26,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/8"
-    }
-  },
-  {
-    "Id": 6,
-    "Name": "Largemouth",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Lake"
-      ],
-      "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Juvenile Largemouth",
-        "Strength": null,
-        "ScrapsToRefine": 18000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Bass",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
       },
-      "Links": {
-        "$Url": "/mobspecies/323"
-      }
-    },
-    "FishOil": {
-      "Name": "Bass Fish Oil",
-      "Links": {
-        "$Url": "/items/1003289"
-      }
-    },
-    "Planets": [
       {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
+        "Name": "Setesh",
+        "Width": 1,
+        "Height": 1,
         "Links": {
-          "$Url": "/planets/1"
+          "$Url": "/planets/20"
+        }
+      },
+      {
+        "Name": "ARIS",
+        "Width": 1,
+        "Height": 3,
+        "Links": {
+          "$Url": "/planets/19"
         }
       }
     ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 34,
-            "Row": 25,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 34,
-            "Row": 26,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 2,
-            "Row": 18,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
     "Links": {
-      "$Url": "/fishes/6"
+      "$Url": "/fishes/24"
     }
   },
   {
@@ -716,33 +124,19 @@
       "Description": "",
       "Difficulty": "Easy",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": null,
+      "ScrapsToRefine": null,
+      "Rarity": null,
+      "TimeOfDay": null,
       "Biomes": [
         "Lake",
-        "Deep Ocean"
+        "Sea"
       ],
       "RodTypes": [
         "Angling",
         "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Drainwater Bassling",
-        "Strength": null,
-        "ScrapsToRefine": 10000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      },
-      {
-        "Name": "Adult Drainwater Bass",
-        "Strength": null,
-        "ScrapsToRefine": 22000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
       "Name": "Bass",
       "Properties": {
@@ -756,7 +150,7 @@
     "FishOil": {
       "Name": "Bass Fish Oil",
       "Links": {
-        "$Url": "/items/1003289"
+        "$Url": "/items/materials/3289"
       }
     },
     "Planets": [
@@ -767,45 +161,6 @@
         "Links": {
           "$Url": "/planets/1"
         }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 34,
-            "Row": 25,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 34,
-            "Row": 26,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 2,
-            "Row": 18,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 28,
-            "Row": 26,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 28,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
       }
     ],
     "Links": {
@@ -813,97 +168,40 @@
     }
   },
   {
-    "Id": 35,
-    "Name": "Blooddrinker",
+    "Id": 36,
+    "Name": "Rusty's Shortfin",
     "Properties": {
       "Description": "",
       "Difficulty": "Easy",
       "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [],
-      "RodTypes": [],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Mutated Blooddrinker",
-        "Strength": null,
-        "ScrapsToRefine": 12000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Eel",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
+      "Strength": 2,
+      "ScrapsToRefine": 16000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
       },
-      "Links": {
-        "$Url": "/mobspecies/325"
-      }
-    },
-    "FishOil": {
-      "Name": "Eel Fish Oil",
-      "Links": {
-        "$Url": "/items/1003294"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "ROCKtropia",
-        "Width": 1,
-        "Height": 2,
-        "Links": {
-          "$Url": "/planets/4"
-        }
-      }
-    ],
-    "Locations": [],
-    "Links": {
-      "$Url": "/fishes/35"
-    }
-  },
-  {
-    "Id": 20,
-    "Name": "Terrormouth",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
       "Biomes": [
         "Sea"
       ],
       "RodTypes": [
-        "Angling",
         "Casting"
-      ],
-      "PreferredLureTypes": []
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Terrormouth Youngling",
-        "Strength": null,
-        "ScrapsToRefine": 14000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
-      "Name": "Eel",
+      "Name": "Cod",
       "Properties": {
         "CodexBaseCost": 6,
         "CodexType": "Fish"
       },
       "Links": {
-        "$Url": "/mobspecies/325"
+        "$Url": "/mobspecies/347"
       }
     },
     "FishOil": {
-      "Name": "Eel Fish Oil",
+      "Name": "Cod Fish Oil",
       "Links": {
-        "$Url": "/items/1003294"
+        "$Url": "/items/materials/3310"
       }
     },
     "Planets": [
@@ -916,64 +214,45 @@
         }
       }
     ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 18,
-            "Row": 19,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
     "Links": {
-      "$Url": "/fishes/20"
+      "$Url": "/fishes/36"
     }
   },
   {
-    "Id": 1,
-    "Name": "Sweatsucker",
+    "Id": 3,
+    "Name": "Pulsing Snapper",
     "Properties": {
       "Description": "",
       "Difficulty": "Easy",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 2,
+      "ScrapsToRefine": 18000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0.25,
+        "End": 0.75
+      },
       "Biomes": [
-        "River"
+        "Sea"
       ],
       "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
+        "Casting"
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Sweatsucker",
-        "Strength": null,
-        "ScrapsToRefine": 10000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
-      "Name": "Eel",
+      "Name": "Cod",
       "Properties": {
         "CodexBaseCost": 6,
         "CodexType": "Fish"
       },
       "Links": {
-        "$Url": "/mobspecies/325"
+        "$Url": "/mobspecies/347"
       }
     },
     "FishOil": {
-      "Name": "Eel Fish Oil",
+      "Name": "Cod Fish Oil",
       "Links": {
-        "$Url": "/items/1003294"
+        "$Url": "/items/materials/3310"
       }
     },
     "Planets": [
@@ -986,70 +265,266 @@
         }
       }
     ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
     "Links": {
-      "$Url": "/fishes/1"
+      "$Url": "/fishes/3"
     }
   },
   {
-    "Id": 7,
-    "Name": "Scyllian Eel",
+    "Id": 23,
+    "Name": "Half Moon Longmouth",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 20000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Cod",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/347"
+      }
+    },
+    "FishOil": {
+      "Name": "Cod Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3310"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/23"
+    }
+  },
+  {
+    "Id": 37,
+    "Name": "Coastal Hookmouth",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 22000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting",
+        "Deep Ocean Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Cod",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/347"
+      }
+    },
+    "FishOil": {
+      "Name": "Cod Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3310"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/37"
+    }
+  },
+  {
+    "Id": 58,
+    "Name": "Mutated Blue Snapper",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2.5,
+      "ScrapsToRefine": 24000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.75,
+        "End": 0.25
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Cod",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/347"
+      }
+    },
+    "FishOil": {
+      "Name": "Cod Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3310"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/58"
+    }
+  },
+  {
+    "Id": 44,
+    "Name": "Dullshine Floaty",
     "Properties": {
       "Description": "",
       "Difficulty": "Easy",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 1.5,
+      "ScrapsToRefine": 10000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
       "Biomes": [
         "Lake"
       ],
       "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
+        "Fly Fishing"
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Scyllian Eel",
-        "Strength": null,
-        "ScrapsToRefine": 20000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
-      "Name": "Eel",
+      "Name": "Carp",
       "Properties": {
         "CodexBaseCost": 6,
         "CodexType": "Fish"
       },
       "Links": {
-        "$Url": "/mobspecies/325"
+        "$Url": "/mobspecies/395"
       }
     },
     "FishOil": {
-      "Name": "Eel Fish Oil",
+      "Name": "Carp Fish Oil",
       "Links": {
-        "$Url": "/items/1003294"
+        "$Url": "/items/materials/3504"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      },
+      {
+        "Name": "Setesh",
+        "Width": 1,
+        "Height": 1,
+        "Links": {
+          "$Url": "/planets/20"
+        }
+      },
+      {
+        "Name": "ARIS",
+        "Width": 1,
+        "Height": 3,
+        "Links": {
+          "$Url": "/planets/19"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/44"
+    }
+  },
+  {
+    "Id": 43,
+    "Name": "Juvenile Crystal Grouper",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 12000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Carp",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/395"
+      }
+    },
+    "FishOil": {
+      "Name": "Carp Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3504"
       }
     },
     "Planets": [
@@ -1062,66 +537,667 @@
         }
       }
     ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 34,
-            "Row": 25,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 34,
-            "Row": 26,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
     "Links": {
-      "$Url": "/fishes/7"
+      "$Url": "/fishes/43"
     }
   },
   {
-    "Id": 15,
-    "Name": "Longtooth",
+    "Id": 39,
+    "Name": "Bluescale Carp",
     "Properties": {
       "Description": "",
       "Difficulty": "Easy",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 1.5,
+      "ScrapsToRefine": 14000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Carp",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/395"
+      }
+    },
+    "FishOil": {
+      "Name": "Carp Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3504"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/39"
+    }
+  },
+  {
+    "Id": 41,
+    "Name": "Sapphire Carp",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 16000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.25,
+        "End": 0.75
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Carp",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/395"
+      }
+    },
+    "FishOil": {
+      "Name": "Carp Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3504"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/41"
+    }
+  },
+  {
+    "Id": 61,
+    "Name": "Crystal Grouper",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 22000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Carp",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/395"
+      }
+    },
+    "FishOil": {
+      "Name": "Carp Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3504"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/61"
+    }
+  },
+  {
+    "Id": 54,
+    "Name": "Juvenile Striped Basil Bass",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 3,
+      "ScrapsToRefine": 12000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Bass",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/323"
+      }
+    },
+    "FishOil": {
+      "Name": "Bass Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3289"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      },
+      {
+        "Name": "Next Island",
+        "Width": 2,
+        "Height": 2,
+        "Links": {
+          "$Url": "/planets/6"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/54"
+    }
+  },
+  {
+    "Id": 8,
+    "Name": "Calypso Smallmouth",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 3,
+      "ScrapsToRefine": 14000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
       "Biomes": [
         "River"
       ],
       "RodTypes": [
-        "Angling",
-        "Casting"
-      ],
-      "PreferredLureTypes": [
-        "Spinners"
+        "Angling"
       ]
     },
-    "Sizes": [
-      {
-        "Name": "Spawnhunter Longtooth",
-        "Strength": null,
-        "ScrapsToRefine": 10000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
+    "Species": {
+      "Name": "Bass",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
       },
+      "Links": {
+        "$Url": "/mobspecies/323"
+      }
+    },
+    "FishOil": {
+      "Name": "Bass Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3289"
+      }
+    },
+    "Planets": [
       {
-        "Name": "Adult Longtooth",
-        "Strength": null,
-        "ScrapsToRefine": 20000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
       }
     ],
+    "Links": {
+      "$Url": "/fishes/8"
+    }
+  },
+  {
+    "Id": 11,
+    "Name": "Striped Basil Bass",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 16000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Bass",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/323"
+      }
+    },
+    "FishOil": {
+      "Name": "Bass Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3289"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/11"
+    }
+  },
+  {
+    "Id": 6,
+    "Name": "Juvenile Largemouth",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 18000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "River"
+      ],
+      "RodTypes": [
+        "Angling"
+      ]
+    },
+    "Species": {
+      "Name": "Bass",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/323"
+      }
+    },
+    "FishOil": {
+      "Name": "Bass Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3289"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/6"
+    }
+  },
+  {
+    "Id": 29,
+    "Name": "Lumiscale Bass",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 20000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.25,
+        "End": 0.8
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Bass",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/323"
+      }
+    },
+    "FishOil": {
+      "Name": "Bass Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3289"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/29"
+    }
+  },
+  {
+    "Id": 51,
+    "Name": "Adult Drainwater Bass",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 22000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "River"
+      ],
+      "RodTypes": [
+        "Angling"
+      ]
+    },
+    "Species": {
+      "Name": "Bass",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/323"
+      }
+    },
+    "FishOil": {
+      "Name": "Bass Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3289"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      },
+      {
+        "Name": "Setesh",
+        "Width": 1,
+        "Height": 1,
+        "Links": {
+          "$Url": "/planets/20"
+        }
+      },
+      {
+        "Name": "ARIS",
+        "Width": 1,
+        "Height": 3,
+        "Links": {
+          "$Url": "/planets/19"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/51"
+    }
+  },
+  {
+    "Id": 9,
+    "Name": "Juvenile Siltswimmer",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 10000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.6
+      },
+      "Biomes": [
+        "River"
+      ],
+      "RodTypes": [
+        "Angling"
+      ]
+    },
+    "Species": {
+      "Name": "Salmon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/327"
+      }
+    },
+    "FishOil": {
+      "Name": "Salmon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3292"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/9"
+    }
+  },
+  {
+    "Id": 38,
+    "Name": "Young Calypso Salmon",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 12000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.6
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Salmon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/327"
+      }
+    },
+    "FishOil": {
+      "Name": "Salmon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3292"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/38"
+    }
+  },
+  {
+    "Id": 10,
+    "Name": "Juvenile Predatorfish",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 14000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.6
+      },
+      "Biomes": [
+        "River"
+      ],
+      "RodTypes": [
+        "Angling"
+      ]
+    },
+    "Species": {
+      "Name": "Salmon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/327"
+      }
+    },
+    "FishOil": {
+      "Name": "Salmon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3292"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/10"
+    }
+  },
+  {
+    "Id": 15,
+    "Name": "Spawnhunter Longtooth",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 10000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
     "Species": {
       "Name": "Pike",
       "Properties": {
@@ -1135,7 +1211,7 @@
     "FishOil": {
       "Name": "Pike Fish Oil",
       "Links": {
-        "$Url": "/items/1003300"
+        "$Url": "/items/materials/3300"
       }
     },
     "Planets": [
@@ -1146,33 +1222,22 @@
         "Links": {
           "$Url": "/planets/1"
         }
-      }
-    ],
-    "Locations": [
+      },
       {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 26,
-            "Row": 28,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
+        "Name": "Setesh",
+        "Width": 1,
+        "Height": 1,
+        "Links": {
+          "$Url": "/planets/20"
+        }
+      },
+      {
+        "Name": "Next Island",
+        "Width": 2,
+        "Height": 2,
+        "Links": {
+          "$Url": "/planets/6"
+        }
       }
     ],
     "Links": {
@@ -1180,37 +1245,26 @@
     }
   },
   {
-    "Id": 13,
-    "Name": "Daggertooth",
+    "Id": 12,
+    "Name": "Siltscale Pike",
     "Properties": {
       "Description": "",
       "Difficulty": "Easy",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 2,
+      "ScrapsToRefine": 12000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
       "Biomes": [
-        "River"
+        "Lake"
       ],
       "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
+        "Fly Fishing"
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Young Daggertooth",
-        "Strength": null,
-        "ScrapsToRefine": 14000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      },
-      {
-        "Name": "Old Daggertooth",
-        "Strength": null,
-        "ScrapsToRefine": 24000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
       "Name": "Pike",
       "Properties": {
@@ -1224,7 +1278,7 @@
     "FishOil": {
       "Name": "Pike Fish Oil",
       "Links": {
-        "$Url": "/items/1003300"
+        "$Url": "/items/materials/3300"
       }
     },
     "Planets": [
@@ -1237,25 +1291,55 @@
         }
       }
     ],
-    "Locations": [
+    "Links": {
+      "$Url": "/fishes/12"
+    }
+  },
+  {
+    "Id": 13,
+    "Name": "Young Daggertooth",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 14000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Pike",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/332"
+      }
+    },
+    "FishOil": {
+      "Name": "Pike Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3300"
+      }
+    },
+    "Planets": [
       {
-        "PlanetName": "Calypso",
+        "Name": "Calypso",
         "Width": 9,
         "Height": 9,
-        "Sectors": [
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
+        "Links": {
+          "$Url": "/planets/1"
+        }
       }
     ],
     "Links": {
@@ -1269,25 +1353,20 @@
       "Description": "",
       "Difficulty": "Easy",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 2,
+      "ScrapsToRefine": 16000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
       "Biomes": [
-        "River"
+        "Lake"
       ],
       "RodTypes": [
-        "Angling",
-        "Casting"
-      ],
-      "PreferredLureTypes": []
+        "Fly Fishing"
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Reedstalker Pike",
-        "Strength": null,
-        "ScrapsToRefine": 16000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
       "Name": "Pike",
       "Properties": {
@@ -1301,7 +1380,7 @@
     "FishOil": {
       "Name": "Pike Fish Oil",
       "Links": {
-        "$Url": "/items/1003300"
+        "$Url": "/items/materials/3300"
       }
     },
     "Planets": [
@@ -1312,33 +1391,14 @@
         "Links": {
           "$Url": "/planets/1"
         }
-      }
-    ],
-    "Locations": [
+      },
       {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 26,
-            "Row": 28,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
+        "Name": "ARIS",
+        "Width": 1,
+        "Height": 3,
+        "Links": {
+          "$Url": "/planets/19"
+        }
       }
     ],
     "Links": {
@@ -1346,30 +1406,26 @@
     }
   },
   {
-    "Id": 12,
-    "Name": "Siltscale Pike",
+    "Id": 78,
+    "Name": "Rusty's Pike",
     "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
+      "Description": null,
+      "Difficulty": "Medium",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 2,
+      "ScrapsToRefine": null,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.25,
+        "End": 0.5
+      },
       "Biomes": [
-        "River"
+        "Lake"
       ],
       "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
+        "Fly Fishing"
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Siltscale Pike",
-        "Strength": null,
-        "ScrapsToRefine": 12000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
       "Name": "Pike",
       "Properties": {
@@ -1383,7 +1439,7 @@
     "FishOil": {
       "Name": "Pike Fish Oil",
       "Links": {
-        "$Url": "/items/1003300"
+        "$Url": "/items/materials/3300"
       }
     },
     "Planets": [
@@ -1396,70 +1452,257 @@
         }
       }
     ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
     "Links": {
-      "$Url": "/fishes/12"
+      "$Url": "/fishes/78"
     }
   },
   {
-    "Id": 27,
-    "Name": "Mudstalking Lynxfish",
+    "Id": 57,
+    "Name": "Adult Longtooth",
     "Properties": {
       "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 20000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Pike",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/332"
+      }
+    },
+    "FishOil": {
+      "Name": "Pike Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3300"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      },
+      {
+        "Name": "Setesh",
+        "Width": 1,
+        "Height": 1,
+        "Links": {
+          "$Url": "/planets/20"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/57"
+    }
+  },
+  {
+    "Id": 56,
+    "Name": "Old Daggertooth",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 24000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.7
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Pike",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/332"
+      }
+    },
+    "FishOil": {
+      "Name": "Pike Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3300"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/56"
+    }
+  },
+  {
+    "Id": 80,
+    "Name": "Ironscale Pike",
+    "Properties": {
+      "Description": null,
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 3,
+      "ScrapsToRefine": null,
+      "Rarity": "Very Rare",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.7
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Pike",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/332"
+      }
+    },
+    "FishOil": {
+      "Name": "Pike Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3300"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/80"
+    }
+  },
+  {
+    "Id": 81,
+    "Name": "Ol' Toothy",
+    "Properties": {
+      "Description": null,
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 3,
+      "ScrapsToRefine": null,
+      "Rarity": "Extremely Rare",
+      "TimeOfDay": {
+        "Start": 0.3,
+        "End": 0.5
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Pike",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/332"
+      }
+    },
+    "FishOil": {
+      "Name": "Pike Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3300"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/81"
+    }
+  },
+  {
+    "Id": 82,
+    "Name": "Drainwater Bassling",
+    "Properties": {
+      "Description": null,
       "Difficulty": "Easy",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 3,
+      "ScrapsToRefine": null,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
       "Biomes": [
         "River"
       ],
       "RodTypes": [
         "Angling"
-      ],
-      "PreferredLureTypes": []
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Mudstalking Lynxfish",
-        "Strength": null,
-        "ScrapsToRefine": 12000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
-      "Name": "Catfish",
+      "Name": "Bass",
       "Properties": {
         "CodexBaseCost": 6,
         "CodexType": "Fish"
       },
       "Links": {
-        "$Url": "/mobspecies/339"
+        "$Url": "/mobspecies/323"
       }
     },
     "FishOil": {
-      "Name": "Catfish Oil",
+      "Name": "Bass Fish Oil",
       "Links": {
-        "$Url": "/items/1003301"
+        "$Url": "/items/materials/3289"
       }
     },
     "Planets": [
@@ -1470,1390 +1713,34 @@
         "Links": {
           "$Url": "/planets/1"
         }
-      }
-    ],
-    "Locations": [],
-    "Links": {
-      "$Url": "/fishes/27"
-    }
-  },
-  {
-    "Id": 17,
-    "Name": "Corinthian Lynxfish",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "River"
-      ],
-      "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Corinthian Lynxfish",
-        "Strength": null,
-        "ScrapsToRefine": 18000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Catfish",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
       },
-      "Links": {
-        "$Url": "/mobspecies/339"
-      }
-    },
-    "FishOil": {
-      "Name": "Catfish Oil",
-      "Links": {
-        "$Url": "/items/1003301"
-      }
-    },
-    "Planets": [
       {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
+        "Name": "Setesh",
+        "Width": 1,
+        "Height": 1,
         "Links": {
-          "$Url": "/planets/1"
+          "$Url": "/planets/20"
+        }
+      },
+      {
+        "Name": "ARIS",
+        "Width": 1,
+        "Height": 3,
+        "Links": {
+          "$Url": "/planets/19"
+        }
+      },
+      {
+        "Name": "Next Island",
+        "Width": 2,
+        "Height": 2,
+        "Links": {
+          "$Url": "/planets/6"
         }
       }
     ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Uncommon",
-            "Note": null
-          },
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Uncommon",
-            "Note": null
-          }
-        ]
-      }
-    ],
     "Links": {
-      "$Url": "/fishes/17"
-    }
-  },
-  {
-    "Id": 16,
-    "Name": "Charybdis Catfish",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "River"
-      ],
-      "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Charybdis Catfish",
-        "Strength": null,
-        "ScrapsToRefine": 24000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Catfish",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/339"
-      }
-    },
-    "FishOil": {
-      "Name": "Catfish Oil",
-      "Links": {
-        "$Url": "/items/1003301"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Uncommon",
-            "Note": null
-          },
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Uncommon",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/16"
-    }
-  },
-  {
-    "Id": 24,
-    "Name": "Blue Snapper",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [
-        "Day"
-      ],
-      "Biomes": [
-        "Sea",
-        "Deep Ocean"
-      ],
-      "RodTypes": [
-        "Angling",
-        "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Blue Snapper",
-        "Strength": null,
-        "ScrapsToRefine": 12000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      },
-      {
-        "Name": "Mutated Blue Snapper",
-        "Strength": null,
-        "ScrapsToRefine": 24000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Cod",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/347"
-      }
-    },
-    "FishOil": {
-      "Name": "Cod Fish Oil",
-      "Links": {
-        "$Url": "/items/1003310"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 18,
-            "Row": 19,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 12,
-            "Row": 17,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 23,
-            "Row": 31,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/24"
-    }
-  },
-  {
-    "Id": 23,
-    "Name": "Half Moon Longmouth",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [
-        "Day"
-      ],
-      "Biomes": [
-        "Sea",
-        "Deep Ocean"
-      ],
-      "RodTypes": [
-        "Angling",
-        "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Half Moon Longmouth",
-        "Strength": null,
-        "ScrapsToRefine": 20000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Cod",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/347"
-      }
-    },
-    "FishOil": {
-      "Name": "Cod Fish Oil",
-      "Links": {
-        "$Url": "/items/1003310"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 18,
-            "Row": 19,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 12,
-            "Row": 17,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 23,
-            "Row": 31,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/23"
-    }
-  },
-  {
-    "Id": 3,
-    "Name": "Pulsing Snapper",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Sea",
-        "Deep Ocean"
-      ],
-      "RodTypes": [
-        "Angling",
-        "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Pulsing Snapper",
-        "Strength": null,
-        "ScrapsToRefine": 18000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Cod",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/347"
-      }
-    },
-    "FishOil": {
-      "Name": "Cod Fish Oil",
-      "Links": {
-        "$Url": "/items/1003310"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 21,
-            "Row": 24,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 22,
-            "Row": 24,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 23,
-            "Row": 31,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/3"
-    }
-  },
-  {
-    "Id": 37,
-    "Name": "Coastal Hookmouth",
-    "Properties": {
-      "Description": "",
-      "Difficulty": null,
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [],
-      "RodTypes": [],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Coastal Hookmouth",
-        "Strength": null,
-        "ScrapsToRefine": 22000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Cod",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/347"
-      }
-    },
-    "FishOil": {
-      "Name": "Cod Fish Oil",
-      "Links": {
-        "$Url": "/items/1003310"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 12,
-            "Row": 17,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/37"
-    }
-  },
-  {
-    "Id": 19,
-    "Name": "Calypsocod",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Sea"
-      ],
-      "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Juvenile Calypsocod",
-        "Strength": null,
-        "ScrapsToRefine": 10000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Cod",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/347"
-      }
-    },
-    "FishOil": {
-      "Name": "Cod Fish Oil",
-      "Links": {
-        "$Url": "/items/1003310"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 18,
-            "Row": 19,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 12,
-            "Row": 17,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/19"
-    }
-  },
-  {
-    "Id": 36,
-    "Name": "Rusty's Shortfin",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [],
-      "RodTypes": [],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Rusty's Shortfin",
-        "Strength": null,
-        "ScrapsToRefine": 16000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Cod",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/347"
-      }
-    },
-    "FishOil": {
-      "Name": "Cod Fish Oil",
-      "Links": {
-        "$Url": "/items/1003310"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 12,
-            "Row": 17,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/36"
-    }
-  },
-  {
-    "Id": 22,
-    "Name": "Snapjaw Tuna",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Sea",
-        "Deep Ocean"
-      ],
-      "RodTypes": [
-        "Angling",
-        "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Snapjaw Tuna",
-        "Strength": null,
-        "ScrapsToRefine": 16000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Tuna",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/349"
-      }
-    },
-    "FishOil": {
-      "Name": "Tuna Fish Oil",
-      "Links": {
-        "$Url": "/items/1003311"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 18,
-            "Row": 19,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 12,
-            "Row": 17,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 23,
-            "Row": 31,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/22"
-    }
-  },
-  {
-    "Id": 21,
-    "Name": "Twin-Eyed Broadfin",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Sea",
-        "Deep Ocean"
-      ],
-      "RodTypes": [
-        "Angling",
-        "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Twin-Eyed Broadfin",
-        "Strength": null,
-        "ScrapsToRefine": 10000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Tuna",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/349"
-      }
-    },
-    "FishOil": {
-      "Name": "Tuna Fish Oil",
-      "Links": {
-        "$Url": "/items/1003311"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 18,
-            "Row": 19,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 12,
-            "Row": 17,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 23,
-            "Row": 31,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/21"
-    }
-  },
-  {
-    "Id": 33,
-    "Name": "Atlantian Sturgeon",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "River"
-      ],
-      "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Mutated Atlantian Sturgeon",
-        "Strength": null,
-        "ScrapsToRefine": 22000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      },
-      {
-        "Name": "Atlantian Sturgeon",
-        "Strength": null,
-        "ScrapsToRefine": 14000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Sturgeon",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/353"
-      }
-    },
-    "FishOil": {
-      "Name": "Sturgeon Fish Oil",
-      "Links": {
-        "$Url": "/items/1003318"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 26,
-            "Row": 28,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/33"
-    }
-  },
-  {
-    "Id": 30,
-    "Name": "Saltscale Sturgeon",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Sea"
-      ],
-      "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Juvenile Saltscale Sturgeon",
-        "Strength": null,
-        "ScrapsToRefine": 12000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Sturgeon",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/353"
-      }
-    },
-    "FishOil": {
-      "Name": "Sturgeon Fish Oil",
-      "Links": {
-        "$Url": "/items/1003318"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 18,
-            "Row": 19,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/30"
-    }
-  },
-  {
-    "Id": 2,
-    "Name": "Glimmerroe Sturgeon",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [
-        "Day"
-      ],
-      "Biomes": [
-        "Sea"
-      ],
-      "RodTypes": [],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [],
-    "Species": {
-      "Name": "Sturgeon",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/353"
-      }
-    },
-    "FishOil": {
-      "Name": "Sturgeon Fish Oil",
-      "Links": {
-        "$Url": "/items/1003318"
-      }
-    },
-    "Planets": [],
-    "Locations": [],
-    "Links": {
-      "$Url": "/fishes/2"
-    }
-  },
-  {
-    "Id": 25,
-    "Name": "Calypso Sturgeon",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "River"
-      ],
-      "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Juvenile Calypso Sturgeon",
-        "Strength": null,
-        "ScrapsToRefine": 10000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Sturgeon",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/353"
-      }
-    },
-    "FishOil": {
-      "Name": "Sturgeon Fish Oil",
-      "Links": {
-        "$Url": "/items/1003318"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [],
-    "Links": {
-      "$Url": "/fishes/25"
-    }
-  },
-  {
-    "Id": 40,
-    "Name": "Pyrotip Swordfish",
-    "Properties": {
-      "Description": "",
-      "Difficulty": null,
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [],
-      "RodTypes": [],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Pyrotip Swordfish",
-        "Strength": null,
-        "ScrapsToRefine": null,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Swordfish",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/357"
-      }
-    },
-    "FishOil": {
-      "Name": "Swordfish Oil",
-      "Links": {
-        "$Url": "/items/1003321"
-      }
-    },
-    "Planets": [],
-    "Locations": [],
-    "Links": {
-      "$Url": "/fishes/40"
-    }
-  },
-  {
-    "Id": 28,
-    "Name": "Calypso Swordfish",
-    "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [
-        "Sea"
-      ],
-      "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Calypso Swordfish",
-        "Strength": null,
-        "ScrapsToRefine": 10000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Swordfish",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/357"
-      }
-    },
-    "FishOil": {
-      "Name": "Swordfish Oil",
-      "Links": {
-        "$Url": "/items/1003321"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 21,
-            "Row": 24,
-            "Rarity": "Common",
-            "Note": null
-          },
-          {
-            "Col": 22,
-            "Row": 24,
-            "Rarity": "Common",
-            "Note": null
-          }
-        ]
-      }
-    ],
-    "Links": {
-      "$Url": "/fishes/28"
-    }
-  },
-  {
-    "Id": 41,
-    "Name": "Sapphire Carp",
-    "Properties": {
-      "Description": "",
-      "Difficulty": null,
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [],
-      "RodTypes": [],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Sapphire Carp",
-        "Strength": null,
-        "ScrapsToRefine": 16000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Carp",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/395"
-      }
-    },
-    "FishOil": {
-      "Name": "Carp Fish Oil",
-      "Links": {
-        "$Url": "/items/1003504"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [],
-    "Links": {
-      "$Url": "/fishes/41"
-    }
-  },
-  {
-    "Id": 39,
-    "Name": "Bluescale Carp",
-    "Properties": {
-      "Description": "",
-      "Difficulty": null,
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [],
-      "RodTypes": [],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Bluescale Carp",
-        "Strength": null,
-        "ScrapsToRefine": 14000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Carp",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/395"
-      }
-    },
-    "FishOil": {
-      "Name": "Carp Fish Oil",
-      "Links": {
-        "$Url": "/items/1003504"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [],
-    "Links": {
-      "$Url": "/fishes/39"
-    }
-  },
-  {
-    "Id": 44,
-    "Name": "Dullshine Floaty",
-    "Properties": {
-      "Description": "",
-      "Difficulty": null,
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [],
-      "RodTypes": [],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Dullshine Floaty",
-        "Strength": null,
-        "ScrapsToRefine": 10000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Carp",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/395"
-      }
-    },
-    "FishOil": {
-      "Name": "Carp Fish Oil",
-      "Links": {
-        "$Url": "/items/1003504"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [],
-    "Links": {
-      "$Url": "/fishes/44"
-    }
-  },
-  {
-    "Id": 43,
-    "Name": "Crystal Grouper",
-    "Properties": {
-      "Description": "",
-      "Difficulty": null,
-      "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [],
-      "RodTypes": [],
-      "PreferredLureTypes": []
-    },
-    "Sizes": [
-      {
-        "Name": "Juvenile Crystal Grouper",
-        "Strength": null,
-        "ScrapsToRefine": 12000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      },
-      {
-        "Name": "Crystal Grouper",
-        "Strength": null,
-        "ScrapsToRefine": 22000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
-    "Species": {
-      "Name": "Carp",
-      "Properties": {
-        "CodexBaseCost": 6,
-        "CodexType": "Fish"
-      },
-      "Links": {
-        "$Url": "/mobspecies/395"
-      }
-    },
-    "FishOil": {
-      "Name": "Carp Fish Oil",
-      "Links": {
-        "$Url": "/items/1003504"
-      }
-    },
-    "Planets": [
-      {
-        "Name": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Links": {
-          "$Url": "/planets/1"
-        }
-      }
-    ],
-    "Locations": [],
-    "Links": {
-      "$Url": "/fishes/43"
+      "$Url": "/fishes/82"
     }
   },
   {
@@ -2861,22 +1748,22 @@
     "Name": "Whirlpool Swallower",
     "Properties": {
       "Description": "",
-      "Difficulty": null,
+      "Difficulty": "Very Hard",
       "MinDepth": null,
-      "TimesOfDay": [],
-      "Biomes": [],
-      "RodTypes": [],
-      "PreferredLureTypes": []
+      "Strength": 1.75,
+      "ScrapsToRefine": 26000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.4,
+        "End": 0.6
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Whirlpool Swallower",
-        "Strength": null,
-        "ScrapsToRefine": 26000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
       "Name": "Carp",
       "Properties": {
@@ -2890,7 +1777,7 @@
     "FishOil": {
       "Name": "Carp Fish Oil",
       "Links": {
-        "$Url": "/items/1003504"
+        "$Url": "/items/materials/3504"
       }
     },
     "Planets": [
@@ -2903,47 +1790,47 @@
         }
       }
     ],
-    "Locations": [],
     "Links": {
       "$Url": "/fishes/42"
     }
   },
   {
-    "Id": 34,
-    "Name": "Thunderfin Tuna",
+    "Id": 68,
+    "Name": "Ancient Crystal Grouper",
     "Properties": {
-      "Description": "",
-      "Difficulty": "Easy",
+      "Description": null,
+      "Difficulty": "Very Hard",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 1.75,
+      "ScrapsToRefine": null,
+      "Rarity": "Very Rare",
+      "TimeOfDay": {
+        "Start": 0.3,
+        "End": 0.8
+      },
       "Biomes": [
-        "Deep Ocean"
+        "Lake"
       ],
       "RodTypes": [
-        "Deep Ocean Fishing"
-      ],
-      "PreferredLureTypes": []
+        "Fly Fishing"
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Thunderfin Tuna",
-        "Strength": null,
-        "ScrapsToRefine": null,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
-      "Name": "Thunderfin Tuna",
+      "Name": "Carp",
       "Properties": {
         "CodexBaseCost": 6,
         "CodexType": "Fish"
       },
       "Links": {
-        "$Url": "/mobspecies/373"
+        "$Url": "/mobspecies/395"
       }
     },
-    "FishOil": null,
+    "FishOil": {
+      "Name": "Carp Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3504"
+      }
+    },
     "Planets": [
       {
         "Name": "Calypso",
@@ -2954,9 +1841,1475 @@
         }
       }
     ],
-    "Locations": [],
     "Links": {
-      "$Url": "/fishes/34"
+      "$Url": "/fishes/68"
+    }
+  },
+  {
+    "Id": 1,
+    "Name": "Sweatsucker",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 10000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "River"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Eel",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/325"
+      }
+    },
+    "FishOil": {
+      "Name": "Eel Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3294"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      },
+      {
+        "Name": "Next Island",
+        "Width": 2,
+        "Height": 2,
+        "Links": {
+          "$Url": "/planets/6"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/1"
+    }
+  },
+  {
+    "Id": 35,
+    "Name": "Mutated Blooddrinker",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 12000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.7,
+        "End": 0.2
+      },
+      "Biomes": [
+        "River",
+        "Lake"
+      ],
+      "RodTypes": [
+        "Angling",
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Eel",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/325"
+      }
+    },
+    "FishOil": {
+      "Name": "Eel Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3294"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Setesh",
+        "Width": 1,
+        "Height": 1,
+        "Links": {
+          "$Url": "/planets/20"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/35"
+    }
+  },
+  {
+    "Id": 20,
+    "Name": "Terrormouth Youngling",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 14000,
+      "Rarity": "Common",
+      "TimeOfDay": {
+        "Start": 0.7,
+        "End": 0.2
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Eel",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/325"
+      }
+    },
+    "FishOil": {
+      "Name": "Eel Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3294"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/20"
+    }
+  },
+  {
+    "Id": 45,
+    "Name": "Chemscale Stalker",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": null,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.7,
+        "End": 0.2
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Eel",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/325"
+      }
+    },
+    "FishOil": {
+      "Name": "Eel Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3294"
+      }
+    },
+    "Planets": [],
+    "Links": {
+      "$Url": "/fishes/45"
+    }
+  },
+  {
+    "Id": 49,
+    "Name": "Ghostfin Ringmouth",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 18000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.7,
+        "End": 0.2
+      },
+      "Biomes": [
+        "River"
+      ],
+      "RodTypes": [
+        "Angling"
+      ]
+    },
+    "Species": {
+      "Name": "Eel",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/325"
+      }
+    },
+    "FishOil": {
+      "Name": "Eel Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3294"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "ARIS",
+        "Width": 1,
+        "Height": 3,
+        "Links": {
+          "$Url": "/planets/19"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/49"
+    }
+  },
+  {
+    "Id": 7,
+    "Name": "Scyllian Eel",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 20000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.7,
+        "End": 0.2
+      },
+      "Biomes": [
+        "River",
+        "Lake"
+      ],
+      "RodTypes": [
+        "Angling",
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Eel",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/325"
+      }
+    },
+    "FishOil": {
+      "Name": "Eel Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3294"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/7"
+    }
+  },
+  {
+    "Id": 69,
+    "Name": "Stalking Terrormouth",
+    "Properties": {
+      "Description": null,
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": null,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.7,
+        "End": 0.2
+      },
+      "Biomes": [
+        "River"
+      ],
+      "RodTypes": [
+        "Angling"
+      ]
+    },
+    "Species": {
+      "Name": "Eel",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/325"
+      }
+    },
+    "FishOil": {
+      "Name": "Eel Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3294"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/69"
+    }
+  },
+  {
+    "Id": 70,
+    "Name": "Spawn of Jormungandr",
+    "Properties": {
+      "Description": null,
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 1.25,
+      "ScrapsToRefine": null,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.7,
+        "End": 0.2
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Eel",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/325"
+      }
+    },
+    "FishOil": {
+      "Name": "Eel Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3294"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/70"
+    }
+  },
+  {
+    "Id": 21,
+    "Name": "Twin-Eyed Broadfin",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 10000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Tuna",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/349"
+      }
+    },
+    "FishOil": {
+      "Name": "Tuna Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3311"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/21"
+    }
+  },
+  {
+    "Id": 50,
+    "Name": "Jetfin Tuna",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 12000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting",
+        "Deep Ocean Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Tuna",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/349"
+      }
+    },
+    "FishOil": {
+      "Name": "Tuna Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3311"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "ARIS",
+        "Width": 1,
+        "Height": 3,
+        "Links": {
+          "$Url": "/planets/19"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/50"
+    }
+  },
+  {
+    "Id": 22,
+    "Name": "Snapjaw Tuna",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 16000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0,
+        "End": 1
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting",
+        "Deep Ocean Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Tuna",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/349"
+      }
+    },
+    "FishOil": {
+      "Name": "Tuna Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3311"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/22"
+    }
+  },
+  {
+    "Id": 46,
+    "Name": "Swiftstrike Tuna",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 2.25,
+      "ScrapsToRefine": null,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.25,
+        "End": 0.8
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Tuna",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/349"
+      }
+    },
+    "FishOil": {
+      "Name": "Tuna Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3311"
+      }
+    },
+    "Planets": [],
+    "Links": {
+      "$Url": "/fishes/46"
+    }
+  },
+  {
+    "Id": 55,
+    "Name": "Old Striped Basil Bass",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 24000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.3,
+        "End": 0.7
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Bass",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/323"
+      }
+    },
+    "FishOil": {
+      "Name": "Bass Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3289"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/55"
+    }
+  },
+  {
+    "Id": 83,
+    "Name": "Upwater Largemouth",
+    "Properties": {
+      "Description": null,
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": null,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.1,
+        "End": 0.4
+      },
+      "Biomes": [
+        "River"
+      ],
+      "RodTypes": [
+        "Angling"
+      ]
+    },
+    "Species": {
+      "Name": "Bass",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/323"
+      }
+    },
+    "FishOil": {
+      "Name": "Bass Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3289"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/83"
+    }
+  },
+  {
+    "Id": 40,
+    "Name": "Pyrotip Swordfish",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": null,
+      "Rarity": "Very Rare",
+      "TimeOfDay": {
+        "Start": 0.5,
+        "End": 0
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Swordfish",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/357"
+      }
+    },
+    "FishOil": {
+      "Name": "Swordfish Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3524"
+      }
+    },
+    "Planets": [],
+    "Links": {
+      "$Url": "/fishes/40"
+    }
+  },
+  {
+    "Id": 91,
+    "Name": "Hadesscale Salmon",
+    "Properties": {
+      "Description": null,
+      "Difficulty": "Very Hard",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": null,
+      "Rarity": "Very Rare",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.6
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting",
+        "Deep Ocean Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Salmon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/327"
+      }
+    },
+    "FishOil": {
+      "Name": "Salmon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3292"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/91"
+    }
+  },
+  {
+    "Id": 25,
+    "Name": "Juvenile Calypso Sturgeon",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 10000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.1,
+        "End": 0.4
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Sturgeon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/353"
+      }
+    },
+    "FishOil": {
+      "Name": "Sturgeon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3318"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/25"
+    }
+  },
+  {
+    "Id": 30,
+    "Name": "Juvenile Saltscale Sturgeon",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 12000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.5,
+        "End": 0.8
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Sturgeon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/353"
+      }
+    },
+    "FishOil": {
+      "Name": "Sturgeon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3318"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/30"
+    }
+  },
+  {
+    "Id": 59,
+    "Name": "Atlantian Sturgeon",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 14000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.1,
+        "End": 0.4
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Sturgeon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/353"
+      }
+    },
+    "FishOil": {
+      "Name": "Sturgeon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3318"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/59"
+    }
+  },
+  {
+    "Id": 2,
+    "Name": "Glimmerroe Sturgeon",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": null,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.5,
+        "End": 0.8
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Sturgeon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/353"
+      }
+    },
+    "FishOil": {
+      "Name": "Sturgeon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3318"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/2"
+    }
+  },
+  {
+    "Id": 92,
+    "Name": "Calypso Sturgeon",
+    "Properties": {
+      "Description": null,
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": null,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.1,
+        "End": 0.4
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Sturgeon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/353"
+      }
+    },
+    "FishOil": {
+      "Name": "Sturgeon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3318"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/92"
+    }
+  },
+  {
+    "Id": 93,
+    "Name": "Adult Saltscale Sturgeon",
+    "Properties": {
+      "Description": null,
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": null,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.5,
+        "End": 0.8
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Sturgeon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/353"
+      }
+    },
+    "FishOil": {
+      "Name": "Sturgeon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3318"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/93"
+    }
+  },
+  {
+    "Id": 33,
+    "Name": "Mutated Atlantian Sturgeon",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 22000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.1,
+        "End": 0.4
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Sturgeon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/353"
+      }
+    },
+    "FishOil": {
+      "Name": "Sturgeon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3318"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/33"
+    }
+  },
+  {
+    "Id": 94,
+    "Name": "Ancient Calypso Sturgeon",
+    "Properties": {
+      "Description": null,
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": null,
+      "Rarity": "Very Rare",
+      "TimeOfDay": {
+        "Start": 0.1,
+        "End": 0.4
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Sturgeon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/353"
+      }
+    },
+    "FishOil": {
+      "Name": "Sturgeon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3318"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/94"
+    }
+  },
+  {
+    "Id": 28,
+    "Name": "Calypso Swordfish",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 10000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.7
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Swordfish",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/357"
+      }
+    },
+    "FishOil": {
+      "Name": "Swordfish Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3524"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/28"
+    }
+  },
+  {
+    "Id": 18,
+    "Name": "Juvenile Spikefin Catfish",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Easy",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 10000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.75,
+        "End": 0.25
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Catfish",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/339"
+      }
+    },
+    "FishOil": {
+      "Name": "Catfish Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3523"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/18"
+    }
+  },
+  {
+    "Id": 27,
+    "Name": "Mudstalking Lynxfish",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 12000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.75,
+        "End": 0.25
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Catfish",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/339"
+      }
+    },
+    "FishOil": {
+      "Name": "Catfish Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3523"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/27"
+    }
+  },
+  {
+    "Id": 86,
+    "Name": "Spikefin Catfish",
+    "Properties": {
+      "Description": null,
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": null,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.75,
+        "End": 0.25
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Catfish",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/339"
+      }
+    },
+    "FishOil": {
+      "Name": "Catfish Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3523"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/86"
+    }
+  },
+  {
+    "Id": 17,
+    "Name": "Corinthian Lynxfish",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Hard",
+      "MinDepth": null,
+      "Strength": 1.5,
+      "ScrapsToRefine": 18000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.75,
+        "End": 0.25
+      },
+      "Biomes": [
+        "Lake"
+      ],
+      "RodTypes": [
+        "Fly Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Catfish",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/339"
+      }
+    },
+    "FishOil": {
+      "Name": "Catfish Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3523"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/17"
     }
   },
   {
@@ -2964,26 +3317,22 @@
     "Name": "Longwhisker Catfish",
     "Properties": {
       "Description": "",
-      "Difficulty": "Easy",
+      "Difficulty": "Hard",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 1.5,
+      "ScrapsToRefine": 20000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.75,
+        "End": 0.25
+      },
       "Biomes": [
-        "River"
+        "Lake"
       ],
       "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
+        "Fly Fishing"
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Longwhisker Catfish",
-        "Strength": null,
-        "ScrapsToRefine": 20000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
       "Name": "Catfish",
       "Properties": {
@@ -2994,7 +3343,12 @@
         "$Url": "/mobspecies/339"
       }
     },
-    "FishOil": null,
+    "FishOil": {
+      "Name": "Catfish Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3523"
+      }
+    },
     "Planets": [
       {
         "Name": "Calypso",
@@ -3003,27 +3357,6 @@
         "Links": {
           "$Url": "/planets/1"
         }
-      }
-    ],
-    "Locations": [
-      {
-        "PlanetName": "Calypso",
-        "Width": 9,
-        "Height": 9,
-        "Sectors": [
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Uncommon",
-            "Note": null
-          },
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Uncommon",
-            "Note": null
-          }
-        ]
       }
     ],
     "Links": {
@@ -3031,30 +3364,26 @@
     }
   },
   {
-    "Id": 18,
-    "Name": "Spikefin Catfish",
+    "Id": 16,
+    "Name": "Charybdis Catfish",
     "Properties": {
       "Description": "",
-      "Difficulty": null,
+      "Difficulty": "Medium",
       "MinDepth": null,
-      "TimesOfDay": [],
+      "Strength": 1.5,
+      "ScrapsToRefine": 24000,
+      "Rarity": "Rare",
+      "TimeOfDay": {
+        "Start": 0.75,
+        "End": 0.25
+      },
       "Biomes": [
-        "River"
+        "Lake"
       ],
       "RodTypes": [
-        "Angling"
-      ],
-      "PreferredLureTypes": []
+        "Fly Fishing"
+      ]
     },
-    "Sizes": [
-      {
-        "Name": "Juvenile Spikefin Catfish",
-        "Strength": null,
-        "ScrapsToRefine": 10000,
-        "Weight": 0.01,
-        "MaxTT": 0.01
-      }
-    ],
     "Species": {
       "Name": "Catfish",
       "Properties": {
@@ -3065,7 +3394,12 @@
         "$Url": "/mobspecies/339"
       }
     },
-    "FishOil": null,
+    "FishOil": {
+      "Name": "Catfish Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3523"
+      }
+    },
     "Planets": [
       {
         "Name": "Calypso",
@@ -3076,29 +3410,213 @@
         }
       }
     ],
-    "Locations": [
+    "Links": {
+      "$Url": "/fishes/16"
+    }
+  },
+  {
+    "Id": 26,
+    "Name": "Seabed Salmon",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 16000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.6
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting",
+        "Deep Ocean Fishing"
+      ]
+    },
+    "Species": {
+      "Name": "Salmon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/327"
+      }
+    },
+    "FishOil": {
+      "Name": "Salmon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3292"
+      }
+    },
+    "Planets": [
       {
-        "PlanetName": "Calypso",
+        "Name": "Calypso",
         "Width": 9,
         "Height": 9,
-        "Sectors": [
-          {
-            "Col": 27,
-            "Row": 27,
-            "Rarity": "Uncommon",
-            "Note": null
-          },
-          {
-            "Col": 26,
-            "Row": 27,
-            "Rarity": "Uncommon",
-            "Note": null
-          }
-        ]
+        "Links": {
+          "$Url": "/planets/1"
+        }
       }
     ],
     "Links": {
-      "$Url": "/fishes/18"
+      "$Url": "/fishes/26"
+    }
+  },
+  {
+    "Id": 52,
+    "Name": "Adult Siltswimmer",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 18000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.6
+      },
+      "Biomes": [
+        "River"
+      ],
+      "RodTypes": [
+        "Angling"
+      ]
+    },
+    "Species": {
+      "Name": "Salmon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/327"
+      }
+    },
+    "FishOil": {
+      "Name": "Salmon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3292"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/52"
+    }
+  },
+  {
+    "Id": 60,
+    "Name": "Migrating Calypso Salmon",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Medium",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 20000,
+      "Rarity": "Uncommon",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.6
+      },
+      "Biomes": [
+        "Sea"
+      ],
+      "RodTypes": [
+        "Casting"
+      ]
+    },
+    "Species": {
+      "Name": "Salmon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/327"
+      }
+    },
+    "FishOil": {
+      "Name": "Salmon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3292"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/60"
+    }
+  },
+  {
+    "Id": 53,
+    "Name": "Riverterror Predatorfish",
+    "Properties": {
+      "Description": "",
+      "Difficulty": "Very Hard",
+      "MinDepth": null,
+      "Strength": 2,
+      "ScrapsToRefine": 26000,
+      "Rarity": "Extremely Rare",
+      "TimeOfDay": {
+        "Start": 0.2,
+        "End": 0.6
+      },
+      "Biomes": [
+        "River"
+      ],
+      "RodTypes": [
+        "Angling"
+      ]
+    },
+    "Species": {
+      "Name": "Salmon",
+      "Properties": {
+        "CodexBaseCost": 6,
+        "CodexType": "Fish"
+      },
+      "Links": {
+        "$Url": "/mobspecies/327"
+      }
+    },
+    "FishOil": {
+      "Name": "Salmon Fish Oil",
+      "Links": {
+        "$Url": "/items/materials/3292"
+      }
+    },
+    "Planets": [
+      {
+        "Name": "Calypso",
+        "Width": 9,
+        "Height": 9,
+        "Links": {
+          "$Url": "/planets/1"
+        }
+      }
+    ],
+    "Links": {
+      "$Url": "/fishes/53"
     }
   }
 ]
