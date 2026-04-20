@@ -2456,6 +2456,10 @@ document.getElementById('host-tools-trigger')?.addEventListener('click', () => {
     }
 });
 
+
+/* 
+*desktoponly*/
+/*
 document.getElementById('close-btn').addEventListener('click', () => {
     // You already have 'close-app' in your main.js ipcMain listeners!
     window.electronAPI.send('close-app'); 
@@ -2476,4 +2480,4 @@ const ontTopCheckbox = document.getElementById('always-on-top-check');
 ontTopCheckbox.addEventListener('change', (e) => {
     const isChecked = e.target.checked;
     window.electronAPI.setAlwaysOnTop(isChecked);
-});
+}); */
