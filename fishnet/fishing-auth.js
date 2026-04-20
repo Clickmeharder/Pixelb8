@@ -87,6 +87,7 @@ const defaultAvatar = "assets/images/logo/pixelb8-guest.png";
         guest: '👤',
         default: '👤'
     };
+let myRegisteredContests = []; // Global array to track all joined events
 if (saveProfileBtn) {
     saveProfileBtn.onclick = async () => {
         const user = auth.currentUser;
@@ -237,7 +238,7 @@ async function anonymousIdentity(euName, displayInput) {
             status: "In Cognito...",
             euNameVerified: false, 
             verified: false,
-            isAnonymous: true, 
+            isOnline: true, 
             achievements: [], // CRITICAL: Initialize for Cloud Function
             subId1: "{ghost_session}",
             subId2: "{unlinked}",
@@ -280,7 +281,7 @@ document.addEventListener('click', async (e) => {
                 role: 'user',
                 balancePixels: 0,
                 euNameVerified: false,
-                isAnonymous: true,
+                isOnline: true,
                 achievements: [], // CRITICAL: Initialize
                 createdAt: serverTimestamp()
             });
@@ -456,7 +457,7 @@ onAuthStateChanged(auth, async (user) => {
             }
 
             loadAuthenticatedData(user);
-
+			restoreActiveContest();
         } catch (error) {
             console.error("❌ Error fetching account data:", error);
         }
@@ -1557,9 +1558,21 @@ startBtn.onclick = async () => {
             return;
         }
     }
+	// ADD THIS BLOCK:
+    if (!activeContestRef) {
+        addLog("🔍 CHECKING_UPLINK: Looking for registered contests...");
+        await restoreActiveContest();
+    }
+
+    if (activeContestRef) {
+        activateContestLocally();
+        addLog("✨ CONTEST_SYNCED: Ready to transmit catches.");
+    } else {
+        addLog("⚠️ NO_ACTIVE_CONTEST: Join a contest to sync scores.", true);
+    }
 
     // Common UI Updates
-    const eName = globalUserData?.entropianame || localStorage.getItem('guest_ename') || "ANONYMOUS_SCOUT";
+    const eName = globalUserData?.entropianame || "ANONYMOUS_SCOUT";
     startBtn.disabled = true;
     startBtn.style.opacity = "0.3";
     startBtn.textContent = "Activated";
@@ -1637,7 +1650,7 @@ function activateContestLocally() {
     // 4. Play a sound or flash the screen (Optional flair)
     // new Audio('assets/start_siren.mp3').play();
 }
-let myRegisteredContests = []; // Global array to track all joined events
+
 
 async function restoreActiveContest() {
     const eName = globalUserData?.entropianame || localStorage.getItem('guest_ename');
