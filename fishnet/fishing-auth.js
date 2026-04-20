@@ -348,26 +348,25 @@ async function updateEntropiaProfile(newName) {
 }
 
 // --- 4. THE AUTH OBSERVER ---
-// --- 5. THE AUTH OBSERVER (RESTORED ICONS & AUTOFILL) ---
 onAuthStateChanged(auth, async (user) => {
     const body = document.body;
     const hostSection = document.getElementById('host-tools');
     const adminTabBtn = document.querySelector('.tab-btn[data-target="admin-terminal"]');
     const anonAuthContainer = document.getElementById('anon-auth-container');
 
-    // Restore the icon mapping
+    // Helper: Internal function to sync status dot and dropdown
+    function updatePresenceUI(status) {
+        const normalizedStatus = (status || 'online').toLowerCase();
+        if (statusDot) statusDot.setAttribute('data-status', normalizedStatus);
+        if (updateIsOnlineInp) updateIsOnlineInp.value = normalizedStatus;
+        if (loginStatus) loginStatus.textContent = `Status: ${normalizedStatus.toUpperCase()}`;
+    }
+
+    // Role Mapping
     const roleToIcon = {
-        ceo: '👑',
-        admin: '⭐',
-        mod: '🛡️',
-        susrep: '💼',
-        contestHost: '🎤',
-        vip: '🌟',
-        associate: '🤝',
-        verified: '✔️',
-        user: '🙂',
-        guest: '👤',
-        default: '👤'
+        ceo: '👑', admin: '⭐', mod: '🛡️', susrep: '💼',
+        contestHost: '🎤', vip: '🌟', associate: '🤝',
+        verified: '✔️', user: '🙂', guest: '👤', default: '👤'
     };
 
     if (user) {
@@ -383,7 +382,7 @@ onAuthStateChanged(auth, async (user) => {
         usernameElements.forEach(el => el.textContent = displayName);
         profilePhotoElements.forEach(img => img.src = photoURL);
 
-        // RESTORED: Autofill the Settings Inputs
+        // Autofill Settings Inputs
         if (updateUsernameInp) updateUsernameInp.value = displayName;
         if (updatePhotoInp) updatePhotoInp.value = photoURL;
 
@@ -399,7 +398,7 @@ onAuthStateChanged(auth, async (user) => {
                     status: "Scanning horizon...",
                     role: 'user',
                     verified: false, 
-                    isOnline: 'online',
+                    isOnline: 'online', 
                     balancePixels: 0,
                     euNameVerified: false,
                     achievements: [],
@@ -411,12 +410,15 @@ onAuthStateChanged(auth, async (user) => {
             } else {
                 globalUserData = userDoc.data();
                 
-                // Patch legacy accounts missing the achievements key
+                // Patch legacy accounts
                 if (!globalUserData.achievements) {
                     await updateDoc(userDocRef, { achievements: [] });
                     globalUserData.achievements = [];
                 }
             }
+
+            // --- PRESENCE UI SYNC ---
+            updatePresenceUI(globalUserData.isOnline || 'online');
 
             // --- PERMISSIONS & TAB VISIBILITY ---
             const userRole = (globalUserData.role || 'user').toLowerCase();
@@ -425,12 +427,12 @@ onAuthStateChanged(auth, async (user) => {
             if (hostSection) hostSection.style.display = staffRoles.includes(userRole) ? 'block' : 'none';
             if (adminTabBtn) adminTabBtn.style.display = ['ceo', 'admin', 'mod'].includes(userRole) ? 'block' : 'none';
 
-            // --- RESTORED: ROLE ICON & LABEL LOGIC ---
+            // Role Icon & Label Logic
             const icon = roleToIcon[userRole] || roleToIcon['default'];
             userRoleIcons.forEach(el => el.textContent = icon);
             userRoleLabels.forEach(el => el.textContent = userRole.toUpperCase());
 
-            // --- RESTORED: ENTROPIA NAME & STATUS AUTOFILL ---
+            // Entropia Identity & Verification
             const eName = globalUserData.entropianame || "Unlinked Avatar";
             const isVerified = globalUserData.euNameVerified === true;
             
@@ -439,12 +441,18 @@ onAuthStateChanged(auth, async (user) => {
             });
             if (updateEntropiaInp) updateEntropiaInp.value = eName;
 
+            // Status Bio
             const uStatus = globalUserData.status || "Scanning horizon...";
             if (statusDisplay) statusDisplay.textContent = `"${uStatus}"`;
             if (updateStatusInp) updateStatusInp.value = uStatus;
 
             if (userPixelCount) {
                 userPixelCount.textContent = (globalUserData.balancePixels || "0") + "px";
+            }
+
+            // --- 1. START THE BACKGROUND MAIL MONITOR ---
+            if (typeof startMailMonitor === 'function') {
+                startMailMonitor();
             }
 
             loadAuthenticatedData(user);
@@ -455,9 +463,20 @@ onAuthStateChanged(auth, async (user) => {
     } else {
         // --- LOGGED OUT STATE ---
         console.log('❌ No active session.');
+        
+        // --- 2. STOP THE BACKGROUND MAIL MONITOR ---
+        if (typeof mailMonitorThread !== 'undefined' && mailMonitorThread) {
+            clearInterval(mailMonitorThread);
+            mailMonitorThread = null;
+            console.log("📨 Mail Monitor: Terminated.");
+        }
+
         globalUserData = null; 
         body.classList.add('auth-logged-out');
         body.classList.remove('auth-logged-in');
+        
+        updatePresenceUI('offline');
+
         if (anonAuthContainer) anonAuthContainer.style.display = 'block';
         if (hostSection) hostSection.style.display = 'none';
         if (adminTabBtn) adminTabBtn.style.display = 'none';
@@ -466,16 +485,15 @@ onAuthStateChanged(auth, async (user) => {
         profilePhotoElements.forEach(img => img.src = defaultAvatar);
         entropiaNameElements.forEach(el => el.textContent = "-");
         
-        // Reset role visuals
         userRoleIcons.forEach(el => el.textContent = roleToIcon['guest']);
         userRoleLabels.forEach(el => el.textContent = "GUEST");
 
-        // Clear inputs
         [updateUsernameInp, updatePhotoInp, updateEntropiaInp, updateStatusInp].forEach(inp => {
             if (inp) inp.value = "";
         });
     }
 });
+
 function signOutFromFirebase() {
     signOut(auth)
         .then(() => {
@@ -2218,7 +2236,6 @@ async function sendTransmission(receiverId, content) {
 }
 
 // --- 5. INTEL: USER DETAILS ---
-// --- 5. INTEL: USER DETAILS ---
 async function getUserDetails(userId) {
     try {
         const userDoc = await getDoc(doc(db, 'users', userId));
@@ -2393,7 +2410,28 @@ async function showUserDetails(userId) {
     }
 }
 
+// --- MAIL MONITORING CONFIG ---
+const MAIL_CHECK_INTERVAL = 15 * 60 * 1000; // 15 Minutes
+let mailMonitorThread = null;
 
+/**
+ * Starts the automated mail relay scan.
+ */
+function startMailMonitor() {
+    // Prevent multiple intervals from stacking
+    if (mailMonitorThread) clearInterval(mailMonitorThread);
+
+    console.log("📨 Mail Monitor: Standing by. Next scan in 15m.");
+
+    mailMonitorThread = setInterval(async () => {
+        console.log("📨 Mail Monitor: Polling for new transmissions...");
+        
+        // This function already contains the logic to compare 
+        // currentInboxCount vs lastInboxCount and play 'gotmailsound'
+        await getMessages(); 
+        
+    }, MAIL_CHECK_INTERVAL);
+}
 // Keep track of the last element we boosted
 let lastActiveElement = null;
 
