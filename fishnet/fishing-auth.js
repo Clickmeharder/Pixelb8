@@ -2203,7 +2203,10 @@ async function sendTransmission(receiverId, content) {
         playSound('sendmailsound');
 
         alert("TRANSMISSION_SENT");
-        
+		if (typeof addLog === 'function') {
+			addLog("📡 TRANSMISSION_SENT: Secure relay confirmed.");
+		}
+		
         // Refresh the UI to show the new message in the Outbox
         if (typeof getMessages === 'function') {
             getMessages();
