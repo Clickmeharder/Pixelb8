@@ -1974,20 +1974,52 @@ startBtn.onclick = async () => {
     addLog(`✅ WATCHER_ENGAGED: TRACKING [${eName}]`);
 };
 
-window.electronAPI.on('selected-path', (path) => {
-    pathInput.value = path;
-    localStorage.setItem('fishScout_path', path);
-    addLog(`📂 Path Linked: ...\\${path.split('\\').pop()}`);
-});
-browseBtn.onclick = () => {
-    window.electronAPI.openFileDialog();
+// --- 1. ELECTRON PATH LISTENER (GHOST REMOVAL) ---
+// Only listen for 'selected-path' if we aren't in a browser
+if (!isWeb) {
+    window.electronAPI.on('selected-path', (path) => {
+        pathInput.value = path;
+        localStorage.setItem('fishScout_path', path);
+        addLog(`📂 Path Linked: ...\\${path.split('\\').pop()}`);
+    });
+}
+
+// --- 2. BROWSE BUTTON PORT ---
+browseBtn.onclick = async () => {
+    if (!isWeb) {
+        // Desktop App: Open the native folder dialog
+        window.electronAPI.openFileDialog();
+    } else {
+        // Web App: Trigger the browser file picker immediately
+        // This makes 'Browse' act as a shortcut to 'Activate'
+        try {
+            [fileHandle] = await window.showOpenFilePicker({
+                types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
+                multiple: false
+            });
+            const file = await fileHandle.getFile();
+            // Show the filename in the path input so the user knows it's linked
+            pathInput.value = file.name; 
+            addLog(`📂 FILE_LINKED: ${file.name}`);
+        } catch (err) {
+            console.log("Picker dismissed");
+        }
+    }
 };
-// On Startup: Auto-fill path from localStorage
+
+// --- 3. STARTUP RESTORATION (WEB-SAFE) ---
 window.addEventListener('DOMContentLoaded', () => {
-    const savedPath = localStorage.getItem('fishScout_path');
-    if (savedPath && pathInput) {
-        pathInput.value = savedPath;
-        addLog(`📂 PATH_RESTORED: ${savedPath.split('\\').pop()}`);
+    // Only auto-fill the path string if we are in Electron.
+    // Web browsers cannot "restore" a file link without a fresh user click.
+    if (!isWeb) {
+        const savedPath = localStorage.getItem('fishScout_path');
+        if (savedPath && pathInput) {
+            pathInput.value = savedPath;
+            addLog(`📂 PATH_RESTORED: ${savedPath.split('\\').pop()}`);
+        }
+    } else {
+        // Optional: Change the placeholder to let web users know how it works
+        if (pathInput) pathInput.placeholder = "Click ACTIVATE to link Chat.log";
     }
 });
 // Initialization
