@@ -1501,7 +1501,7 @@ function addLog(message, isError = false) {
     logWindow.prepend(div);
 }
 
-
+/* 
 // --- BATCHING & BUFFERING CONFIG ---
 let syncTimer = null;
 const SYNC_INTERVAL_MS = 300000; // 5 Minutes (300,000ms)
@@ -1510,17 +1510,11 @@ let pendingCatchBuffer = {
     score: 0,
     totals: {} // Will be populated dynamically: { "Young Calypso Salmon": 5, ... }
 };
-/**
- * Hardened Log Polling for PIXELB8 Scout
- * Handles NotReadableError for Web File System Access API
- */
+
 let errorCount = 0;
 const MAX_RETRIES = 3;
 let lastCatchTimestamp = 0; // Tracking time between catches
-/**
- * Hardened Log Polling with Audio Alerts & Auto-Recovery UI
- * Monitors the Entropia log and plays 'uhoh' if the link snaps.
- */
+
 async function pollWebLog() {
     if (!fileHandle) return;
 
@@ -1587,19 +1581,28 @@ async function pollWebLog() {
         }
     }
 }
-/**
- * handleChatLine: PARSING & ANTI-CHEAT PROTOCOL
- * Processes log lines with quantity caps and timing gates.
- */
+
+// Add this global to track the last parsed log time
+let lastLogTimestamp = 0; 
+
+
 async function handleChatLine(line) {
-    const fishRegex = /\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
+    // Regex updated to capture the timestamp at the beginning of the line
+    // Group 1: Timestamp (YYYY-MM-DD HH:MM:SS)
+    // Group 2: Item Name
+    // Group 3: Amount
+    // Group 4: PED Value
+    const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
     const match = line.match(fishRegex);
 
     if (match) {
-        const fishType = match[1].trim(); 
-        const amount = parseInt(match[2]);
-        const value = parseFloat(match[3]);
-        const now = Date.now();
+        const logTimeString = match[1];
+        const fishType = match[2].trim(); 
+        const amount = parseInt(match[3]);
+        const value = parseFloat(match[4]);
+        
+        // Convert the log's timestamp string into a Unix epoch (milliseconds)
+        const currentLogTimestamp = new Date(logTimeString).getTime();
 
         // --- ANTI-CHEAT GATE 1: QUANTITY SANITY ---
         // Baitfish specifically cannot exceed 3 in a single loot instance
@@ -1609,18 +1612,19 @@ async function handleChatLine(line) {
             return; 
         }
 
-        // --- ANTI-CHEAT GATE 2: TIMING SANITY ---
-        // Minimum 5 seconds floor between timestamps to block echo-scripts
-        const secondsSinceLast = (now - lastCatchTimestamp) / 1000;
-        if (secondsSinceLast < 5) {
-            addLog(`⚠️ ANOMALY: Catch frequency too high (${secondsSinceLast.toFixed(1)}s). Rejected.`, true);
-            // Don't update timestamp here; wait for a legitimate 5s gap
+        // --- ANTI-CHEAT GATE 2: LOG-TIMESTAMP TIMING SANITY ---
+        // Minimum 5 seconds floor between the timestamps printed IN the log
+        const secondsBetweenLogs = (currentLogTimestamp - lastLogTimestamp) / 1000;
+        
+        if (lastLogTimestamp !== 0 && secondsBetweenLogs < 5) {
+            addLog(`⚠️ ANOMALY: Log frequency violation (${secondsBetweenLogs}s). Rejected.`, true);
+            // Optional: playSound('scouterror'); 
             return; 
         }
 
         if (!isNaN(value)) {
-            // Update timestamp only after passing sanity checks
-            lastCatchTimestamp = now;
+            // Update the global timestamp with the log's time
+            lastLogTimestamp = currentLogTimestamp;
 
             // --- 1. DYNAMIC REGISTRATION (Local Session Stats) ---
             if (!(fishType in sessionStats)) {
@@ -1642,7 +1646,10 @@ async function handleChatLine(line) {
                 const startTime = settings?.startTime?.toMillis() || 0;
                 const durationMs = (settings?.duration || 60) * 60000;
                 const endTime = startTime + durationMs;
-                const serverAdjustedNow = now + (window.serverOffset || 0);
+                
+                // For cloud sync logic, we use Date.now() + offset to ensure 
+                // the player isn't fishing after the contest clock hits zero.
+                const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
 
                 // PHASE CHECK: PRE-START
                 if (serverAdjustedNow < startTime) {
@@ -1680,8 +1687,7 @@ async function handleChatLine(line) {
                     // Trigger sync timer
                     if (!syncTimer) {
                         syncTimer = setTimeout(pushBufferToCloud, SYNC_INTERVAL_MS);
-                        const minutes = Math.floor(SYNC_INTERVAL_MS / 60000);
-                        addLog(`⏳ SYNC_QUEUED: Uplink in ~${minutes}m.`);
+                        addLog(`⏳ SYNC_QUEUED: Uplink scheduled.`);
                     }
                 }
             }
@@ -1692,28 +1698,6 @@ async function handleChatLine(line) {
         }
     }
 }
-// Only set up the bridge listener if Electron exists
-if (window.electronAPI && window.electronAPI.onChatLine) {
-    window.electronAPI.onChatLine((line) => {
-        handleChatLine(line);
-    });
-}
-function createDynamicRow(name) {
-    const safeId = name.replace(/\s+/g, '-');
-    if (document.getElementById(`row-${safeId}`)) return;
-    
-    const grid = document.getElementById('manifest-grid');
-    const div = document.createElement('div');
-    div.id = `row-${safeId}`;
-    div.style = "color:#aaa; font-size:11px;";
-    div.innerHTML = `${name.toUpperCase()}: <span id="session-${safeId}" style="color:#0f0">0</span> <span id="val-${safeId}" style="color:#00ffff; font-size:9px;">(0.0000)</span>`;
-    grid.appendChild(div);
-}
-
-/**
- * pushBufferToCloud: BATCH_WRITE_PROTOCOL
- * Consolidates all buffered catches into a single Firestore write.
- */
 async function pushBufferToCloud() {
     if (!activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
         syncTimer = null;
@@ -1753,7 +1737,232 @@ async function pushBufferToCloud() {
         addLog("⚠️ SYNC_FAILED: Retrying in 30s...", true);
         syncTimer = setTimeout(pushBufferToCloud, 30000);
     }
+} */
+/*---------------------------------------------------------
+  PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
+---------------------------------------------------------*/
+(function() {
+    // --- PRIVATE SECURITY VAULT (Invisible to Browser Console) ---
+    let pendingCatchBuffer = {
+        score: 0,
+        totals: {}
+    };
+    
+    let syncTimer = null;
+    const SYNC_INTERVAL_MS = 300000; // 5 Minutes
+    
+    let errorCount = 0;
+    const MAX_RETRIES = 3;
+    let lastLogTimestamp = 0; 
+    let lastProcessedLine = ""; // ANTI-ECHO: Prevents duplicate line injections
+
+    /**
+     * Hardened Log Polling with Audio Alerts & Auto-Recovery UI
+     */
+    window.pollWebLog = async function() {
+        if (!fileHandle) return;
+
+        try {
+            const file = await fileHandle.getFile();
+            
+            if (file.size > lastSize) {
+                const blob = file.slice(lastSize, file.size);
+                const text = await blob.text();
+                
+                const lines = text.split(/\r?\n/);
+                lines.forEach(line => {
+                    if (line.trim()) window.handleChatLine(line); 
+                });
+                
+                lastSize = file.size;
+            } else if (file.size < lastSize) {
+                // ANTI-CHEAT: Detects if the log was cleared or swapped
+                addLog("⚠️ SECURITY: Log file shrink detected. Resetting pointer.", true);
+                lastSize = file.size;
+            }
+
+            errorCount = 0;
+
+        } catch (err) {
+            errorCount++;
+            console.warn(`[!] Scout Sync: Attempt ${errorCount}/${MAX_RETRIES} failed.`, err.name);
+
+            if (errorCount >= MAX_RETRIES) {
+                await window.pushBufferToCloud();
+
+                if (typeof playSound === 'function') playSound('scoutError');
+
+                if (window.pollInterval) {
+                    clearInterval(window.pollInterval);
+                    window.pollInterval = null;
+                }
+
+                if (typeof startBtn !== 'undefined' && startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.style.opacity = "1.0";
+                    startBtn.style.background = "#d32f2f"; 
+                    startBtn.textContent = "RE-LINK LOG FILE";
+                }
+
+                const btn = document.getElementById('browse-btn');
+                if (btn) {
+                    btn.innerHTML = "⚠️ LINK BROKEN - RE-CLICK";
+                    btn.classList.add('error-pulse');
+                    btn.style.borderColor = "#ff4444";
+                }
+
+                if (typeof addLog === 'function') {
+                    addLog("❌ SCOUT_HALTED: File access lost. Re-link to resume.", true);
+                }
+            }
+        }
+    };
+
+    /**
+     * handleChatLine: HARDENED PARSING & ANTI-CHEAT PROTOCOL
+     */
+    window.handleChatLine = async function(line) {
+        // --- 1. ANTI-ECHO GUARD ---
+        // Instantly rejects if the line is exactly the same as the last one (common in simple loops)
+        if (line === lastProcessedLine) return;
+
+        const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
+        const match = line.match(fishRegex);
+
+        if (match) {
+            const logTimeString = match[1];
+            const fishType = match[2].trim(); 
+            const amount = parseInt(match[3]);
+            const value = parseFloat(match[4]);
+            const currentLogTimestamp = new Date(logTimeString).getTime();
+
+            // --- 2. ANTI-CHEAT: QUANTITY ---
+            if (fishType.toLowerCase() === 'baitfish' && amount > 3) {
+                if (typeof addLog === 'function') addLog(`⚠️ ANOMALY: Baitfish qty (${amount}) rejected. (Max 3)`, true);
+                if (typeof playSound === 'function') playSound('scouterror');
+                return; 
+            }
+
+            // --- 3. ANTI-CHEAT: LOG-TIMESTAMP ---
+            // Minimum 5 seconds floor between the timestamps printed IN the log
+            const secondsBetweenLogs = (currentLogTimestamp - lastLogTimestamp) / 1000;
+            if (lastLogTimestamp !== 0 && secondsBetweenLogs < 5) {
+                // Silent drop for frequency violations
+                return; 
+            }
+
+            if (!isNaN(value)) {
+                // Update tracking variables
+                lastLogTimestamp = currentLogTimestamp;
+                lastProcessedLine = line; 
+
+                // --- 4. DYNAMIC REGISTRATION (Local Stats) ---
+                if (!(fishType in sessionStats)) {
+                    sessionStats[fishType] = 0;
+                    sessionValues[fishType] = 0;
+                    if (typeof createDynamicRow === 'function') createDynamicRow(fishType);
+                }
+
+                sessionStats[fishType] += amount;
+                sessionValues[fishType] += value;
+
+                // --- 5. CLOUD SYNC LOGIC ---
+                if (typeof activeContestRef !== 'undefined' && activeContestRef) {
+                    const settings = window.currentContestSettings;
+                    const isConcluded = settings?.status === 'concluded';
+                    const startTime = settings?.startTime?.toMillis() || 0;
+                    const durationMs = (settings?.duration || 60) * 60000;
+                    const endTime = startTime + durationMs;
+                    const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
+
+                    if (serverAdjustedNow < startTime) {
+                        if (typeof addLog === 'function') addLog(`⏳ PRE_START: Catch ignored.`, true);
+                    } 
+                    else if (isConcluded || serverAdjustedNow > endTime) {
+                        if (typeof addLog === 'function') addLog(`🚫 SESSION_FINALIZED: Catch not synced.`, true);
+                        if (isConcluded) activeContestRef = null; 
+                    } 
+                    else {
+                        const target = settings?.targetFish?.toLowerCase();
+                        if (target && fishType.toLowerCase() === target) {
+                            pendingCatchBuffer.score += amount;
+                            if (typeof addLog === 'function') addLog(`🎯 TARGET_HIT: +${amount} PTS [${fishType.toUpperCase()}]`);
+                        }
+
+                        if (!pendingCatchBuffer.totals[fishType]) pendingCatchBuffer.totals[fishType] = 0;
+                        pendingCatchBuffer.totals[fishType] += amount;
+
+                        if (!syncTimer) {
+                            syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
+                            if (typeof addLog === 'function') addLog(`⏳ SYNC_QUEUED: Uplink scheduled.`);
+                        }
+                    }
+                }
+
+                if (typeof updateSessionUI === 'function') updateSessionUI();
+                if (typeof addLog === 'function') addLog(`🎣 CAUGHT: ${amount}x ${fishType}`);
+            }
+        }
+    };
+
+    /**
+     * pushBufferToCloud: BATCH_WRITE_PROTOCOL
+     */
+    window.pushBufferToCloud = async function() {
+        if (!activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
+            syncTimer = null;
+            return;
+        }
+
+        try {
+            const updateData = { lastUpdate: serverTimestamp() };
+
+            if (pendingCatchBuffer.score > 0) {
+                updateData.score = increment(pendingCatchBuffer.score);
+            }
+
+            for (const [fishName, qty] of Object.entries(pendingCatchBuffer.totals)) {
+                updateData[`totals.${fishName}`] = increment(qty);
+            }
+
+            await updateDoc(activeContestRef, updateData);
+            
+            // Clear buffer
+            pendingCatchBuffer = { score: 0, totals: {} };
+            syncTimer = null;
+            
+            if (typeof addLog === 'function') addLog("☁️ SYNC_COMPLETE: Cloud Manifest Updated.");
+            if (typeof updateContestHUD === 'function') setTimeout(updateContestHUD, 1000);
+
+        } catch (err) {
+            console.error("Pulse Sync Error:", err);
+            if (typeof addLog === 'function') addLog("⚠️ SYNC_FAILED: Retrying...", true);
+            syncTimer = setTimeout(window.pushBufferToCloud, 30000);
+        }
+    };
+})();
+// Only set up the bridge listener if Electron exists
+if (window.electronAPI && window.electronAPI.onChatLine) {
+    window.electronAPI.onChatLine((line) => {
+        handleChatLine(line);
+    });
 }
+function createDynamicRow(name) {
+    const safeId = name.replace(/\s+/g, '-');
+    if (document.getElementById(`row-${safeId}`)) return;
+    
+    const grid = document.getElementById('manifest-grid');
+    const div = document.createElement('div');
+    div.id = `row-${safeId}`;
+    div.style = "color:#aaa; font-size:11px;";
+    div.innerHTML = `${name.toUpperCase()}: <span id="session-${safeId}" style="color:#0f0">0</span> <span id="val-${safeId}" style="color:#00ffff; font-size:9px;">(0.0000)</span>`;
+    grid.appendChild(div);
+}
+
+/**
+ * pushBufferToCloud: BATCH_WRITE_PROTOCOL
+ * Consolidates all buffered catches into a single Firestore write.
+ */
 
 /**
  * Saves the FileSystemFileHandle to a sovereign IndexedDB store
