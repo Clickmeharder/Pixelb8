@@ -26,6 +26,7 @@
 		</div>
 		<div id="auth-header" style="">
 			<button id="reload-btn" class="popover-btn desktoponly" title="Refresh HUD">⟳</button>
+			<button id="bgToggle">BG</button>
 			<button id="start-btn" class="btn">📡 Activate</button>
 			<div class="top-bar-user" id="topBarUserTrigger" style="">
 				<span class="userRoleIcon" style="display:none;"></span>
@@ -247,6 +248,67 @@
 					<button id="btn-anon-auth" class="popover-btn">
 						Alternative Anonymous Login
 					</button>
+				</div>
+				<div class="config-section" id="sound-configuration">
+					<h3 style="color: #ffaa00; font-size: 12px; border-bottom: 1px solid #222; padding-bottom: 5px;">AUDIO_HARDWARE_CONFIG</h3>
+					
+					<input type="file" id="sound-upload-input" accept="audio/mpeg" style="display:none;">
+
+					<div class="sound-control-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+						
+						<label style="color: #0f0; display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 4px;">
+							<span>MASTER_AUDIO</span>
+							<input type="checkbox" id="masterEnabled" class="sound-toggle" checked>
+						</label>
+
+						<hr style="border: 0; border-top: 1px solid #222; width: 100%; margin: 2px 0 6px 0;">
+
+						<div class="sound-row" data-key="gotmailsound" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px;">
+							<span style="color: #ccc; font-size: 11px; flex-grow: 1;">MAIL_INCOMING</span>
+							<div style="display: flex; gap: 6px; align-items: center;">
+								<button class="test-sound-btn" title="Test" style="background:#111; border:1px solid #444; color:#0f0; font-size:9px; cursor:pointer; padding:2px 6px; font-family: monospace;">▶</button>
+								<button class="upload-sound-btn" title="Upload Custom MP3" style="background:#111; border:1px solid #444; color:#aaa; font-size:9px; cursor:pointer; padding:2px 6px; font-family: monospace;">UP</button>
+								<input type="checkbox" id="gotmailsound" class="sound-toggle" checked>
+							</div>
+						</div>
+
+						<div class="sound-row" data-key="sendmailsound" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px;">
+							<span style="color: #ccc; font-size: 11px; flex-grow: 1;">MAIL_OUTGOING</span>
+							<div style="display: flex; gap: 6px; align-items: center;">
+								<button class="test-sound-btn" title="Test" style="background:#111; border:1px solid #444; color:#0f0; font-size:9px; cursor:pointer; padding:2px 6px; font-family: monospace;">▶</button>
+								<button class="upload-sound-btn" title="Upload Custom MP3" style="background:#111; border:1px solid #444; color:#aaa; font-size:9px; cursor:pointer; padding:2px 6px; font-family: monospace;">UP</button>
+								<input type="checkbox" id="sendmailsound" class="sound-toggle" checked>
+							</div>
+						</div>
+
+						<div class="sound-row" data-key="scouterror" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px;">
+							<span style="color: #ccc; font-size: 11px; flex-grow: 1;">SCOUT_ERROR_ALERTS</span>
+							<div style="display: flex; gap: 6px; align-items: center;">
+								<button class="test-sound-btn" title="Test" style="background:#111; border:1px solid #444; color:#0f0; font-size:9px; cursor:pointer; padding:2px 6px; font-family: monospace;">▶</button>
+								<button class="upload-sound-btn" title="Upload Custom MP3" style="background:#111; border:1px solid #444; color:#aaa; font-size:9px; cursor:pointer; padding:2px 6px; font-family: monospace;">UP</button>
+								<input type="checkbox" id="scouterror" class="sound-toggle" checked>
+							</div>
+						</div>
+
+						<div class="sound-row" data-key="conteststart" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px;">
+							<span style="color: #ccc; font-size: 11px; flex-grow: 1;">CONTEST_START_SIGNAL</span>
+							<div style="display: flex; gap: 6px; align-items: center;">
+								<button class="test-sound-btn" title="Test" style="background:#111; border:1px solid #444; color:#0f0; font-size:9px; cursor:pointer; padding:2px 6px; font-family: monospace;">▶</button>
+								<button class="upload-sound-btn" title="Upload Custom MP3" style="background:#111; border:1px solid #444; color:#aaa; font-size:9px; cursor:pointer; padding:2px 6px; font-family: monospace;">UP</button>
+								<input type="checkbox" id="conteststart" class="sound-toggle" checked>
+							</div>
+						</div>
+
+						<div class="sound-row" data-key="contestfinish" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px;">
+							<span style="color: #ccc; font-size: 11px; flex-grow: 1;">CONTEST_FINISH_SIGNAL</span>
+							<div style="display: flex; gap: 6px; align-items: center;">
+								<button class="test-sound-btn" title="Test" style="background:#111; border:1px solid #444; color:#0f0; font-size:9px; cursor:pointer; padding:2px 6px; font-family: monospace;">▶</button>
+								<button class="upload-sound-btn" title="Upload Custom MP3" style="background:#111; border:1px solid #444; color:#aaa; font-size:9px; cursor:pointer; padding:2px 6px; font-family: monospace;">UP</button>
+								<input type="checkbox" id="contestfinish" class="sound-toggle" checked>
+							</div>
+						</div>
+
+					</div>
 				</div>
 			</div>
 		</div>

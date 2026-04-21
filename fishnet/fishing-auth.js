@@ -2211,26 +2211,51 @@ startContestClock();
 
 // 1. Global Settings Toggle
 // This can be updated by your UI settings menu
-window.soundSettings = {
+// --- 1. INITIAL LOAD & PERSISTENCE ---
+/*---------------------------------------------------------
+  SECTION: GLOBAL AUDIO SYSTEM
+---------------------------------------------------------*/
+
+// 1. INITIAL LOAD & PERSISTENCE
+const defaultSoundSettings = {
     masterEnabled: true,
     gotmailsound: true,
     sendmailsound: true,
-	scouterror: true,
-	conteststart: true,
-	contestfinish: true,
-/*     contestStart: true,
-    contestConcluded: true */
+    scouterror: true,
+    conteststart: true,
+    contestfinish: true,
+    customPaths: {} // Stores Base64 strings for custom sounds
 };
 
-// 2. Audio Asset Registry
-// We map the keys to actual Audio objects
-const audioAssets = {
-    gotmailsound: new Audio('assets/sounds/mail_in.mp3'),
-    sendmailsound: new Audio('assets/sounds/mail_out.mp3'),
-	scoutError: new Audio('assets/sounds/uhoh.mp3'),
-    conteststart: new Audio('assets/sounds/conteststart.mp3'),
-    contestfishish: new Audio('assets/sounds/contestfinish.mp3')
+// Default file paths for internal assets
+const defaultPaths = {
+    gotmailsound: 'assets/sounds/mail_in.mp3',
+    sendmailsound: 'assets/sounds/mail_out.mp3',
+    scouterror: 'assets/sounds/uhoh.mp3',
+    conteststart: 'assets/sounds/conteststart.mp3',
+    contestfinish: 'assets/sounds/contestfinish.mp3'
 };
+
+// Load saved data or fall back to defaults
+const savedSettings = localStorage.getItem('fishing_sound_settings');
+window.soundSettings = savedSettings ? JSON.parse(savedSettings) : defaultSoundSettings;
+
+// 2. AUDIO ASSET REGISTRY
+const audioAssets = {};
+
+/**
+ * (Re)loads an audio object from custom user data or default assets
+ * @param {string} key - The setting key
+ */
+function refreshAudioInstance(key) {
+    const source = window.soundSettings.customPaths[key] || defaultPaths[key];
+    if (source) {
+        audioAssets[key] = new Audio(source);
+    }
+}
+
+// Initial build of the registry
+Object.keys(defaultPaths).forEach(key => refreshAudioInstance(key));
 
 /**
  * Generic Sound Controller
@@ -2244,12 +2269,103 @@ function playSound(soundKey) {
         if (sound) {
             sound.currentTime = 0; // Rewind for rapid fire
             sound.play().catch(err => {
-                // Silently catch browser 'autoplay' blocks until first user click
                 console.warn(`[!] Audio: ${soundKey} blocked or missing.`, err);
             });
         }
     }
 }
+
+// 3. UI INITIALIZATION & EVENT LISTENERS
+document.addEventListener('DOMContentLoaded', () => {
+    const soundSection = document.getElementById('sound-configuration');
+    const fileInput = document.getElementById('sound-upload-input');
+    let currentUploadKey = null;
+    
+    if (soundSection) {
+        // A. SYNC UI STATE WITH SETTINGS
+        Object.keys(window.soundSettings).forEach(key => {
+            const checkbox = document.getElementById(key);
+            if (checkbox) {
+                checkbox.checked = window.soundSettings[key];
+            }
+        });
+
+        // B. CLICK HANDLERS (TEST & UPLOAD)
+        soundSection.addEventListener('click', (e) => {
+            const row = e.target.closest('.sound-row');
+            if (!row) return;
+            const key = row.getAttribute('data-key');
+
+            // Test Button Logic
+            if (e.target.classList.contains('test-sound-btn')) {
+                playSound(key);
+            }
+
+            // Upload Trigger Logic
+            if (e.target.classList.contains('upload-sound-btn')) {
+                currentUploadKey = key;
+                if (fileInput) fileInput.click();
+            }
+        });
+
+        // C. TOGGLE CHANGE HANDLER (PERSISTENCE)
+        soundSection.addEventListener('change', (e) => {
+            if (e.target.classList.contains('sound-toggle')) {
+                const settingKey = e.target.id;
+                const isEnabled = e.target.checked;
+
+                if (window.soundSettings.hasOwnProperty(settingKey)) {
+                    window.soundSettings[settingKey] = isEnabled;
+                    
+                    // Optional feedback on toggle
+                    if (isEnabled && settingKey !== 'masterEnabled') {
+                        playSound(settingKey);
+                    }
+
+                    localStorage.setItem('fishing_sound_settings', JSON.stringify(window.soundSettings));
+                    
+                    if (typeof addLog === 'function') {
+                        addLog(`⚙️ AUDIO_CONFIG: ${settingKey.toUpperCase()} is ${isEnabled ? 'ENABLED' : 'DISABLED'}`);
+                    }
+                }
+            }
+        });
+    }
+
+    // D. FILE INPUT HANDLER (BASE64 CONVERSION)
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && currentUploadKey) {
+                // Ensure it's an audio file
+                if (!file.type.startsWith('audio/')) {
+                    if (typeof addLog === 'function') addLog("❌ UPLOAD_ERROR: Invalid file type.");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const base64Data = event.target.result;
+                    
+                    // Save to global settings and localStorage
+                    window.soundSettings.customPaths[currentUploadKey] = base64Data;
+                    localStorage.setItem('fishing_sound_settings', JSON.stringify(window.soundSettings));
+                    
+                    // Update live audio object
+                    refreshAudioInstance(currentUploadKey);
+                    
+                    if (typeof addLog === 'function') {
+                        addLog(`💾 SYSTEM: Custom MP3 loaded for ${currentUploadKey.toUpperCase()}`);
+                    }
+                    
+                    // Play confirmation
+                    playSound(currentUploadKey);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
 /*---------------------------------------------------------
   SECTION: MAIL RELAY SYSTEM
 ---------------------------------------------------------*/
