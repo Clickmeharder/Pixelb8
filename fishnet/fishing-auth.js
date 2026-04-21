@@ -1097,7 +1097,7 @@ async function joinContest(contestId) {
             if (!contestSnap.exists()) return alert("Contest signal lost.");
             
             const contestData = contestSnap.data().settings;
-
+			const targetFishName = contestData.targetFish || "Baitfish";
             // 1. GATEKEEPER: Status Check
             if (contestData.status === 'concluded') {
                 return addLog("🚫 REGISTRATION_CLOSED: This contest has finalized.", true);
@@ -1113,21 +1113,18 @@ async function joinContest(contestId) {
             }
 
             const user = auth.currentUser;
-            
-            // Perform the registration
-            await setDoc(participantRef, {
-                uid: user?.uid || localStorage.getItem('guest_uid'),
-                displayName: dName,
-                isGuest: !isVerified, // Based on verification status
-                joinedAt: serverTimestamp(),
-                score: 0,
-                totals: { 
-                    "Baitfish": 0, 
-                    "Atlantian Sturgeon": 0, 
-                    "Blue Snapper": 0, 
-                    "Corinthian Lynxfish": 0 
-                }
-            });
+
+			// Perform the registration
+			await setDoc(participantRef, {
+				uid: user?.uid || localStorage.getItem('guest_uid'),
+				displayName: dName,
+				isGuest: !isVerified,
+				joinedAt: serverTimestamp(),
+				score: 0,
+				totals: { 
+					[targetFishName]: 0 // Dynamically initialize with the target fish
+				}
+			});
 
             // Update global count
             await updateDoc(contestRef, { "settings.participantCount": increment(1) });
@@ -1240,6 +1237,11 @@ async function refreshContestList() {
 
     container.innerHTML = `<p style="color: #444; text-align: center; margin-top: 50px;">📡 SCANNING_FREQUENCIES...</p>`;
 
+    // --- TIME FILTER CONSTANTS ---
+    const now = Date.now();
+    const oneHourMs = 3600000;
+    const hourAgo = now - oneHourMs;
+
     try {
         const q = query(
             collection(db, 'fishingContests'), 
@@ -1265,6 +1267,13 @@ async function refreshContestList() {
             const contestId = contestDoc.id;
             const planet = data.planet || "Unknown";
             const isConcluded = data.status === 'concluded';
+            const startTimestamp = data.startTime?.toDate().getTime() || 0;
+            const hasStarted = now >= startTimestamp;
+            const durationMs = (data.duration || 60) * 60000;
+            const endTimestamp = startTimestamp + durationMs;
+
+            // 1. FILTER: Hide contests finished > 1 hour ago
+            if (isConcluded && endTimestamp < hourAgo) continue;
             
             let isRegistered = false;
             if (eName && eName !== "Unlinked Avatar") {
@@ -1275,29 +1284,28 @@ async function refreshContestList() {
 
             const actualCount = data.participantCount || 0;
             const isOwner = auth.currentUser && auth.currentUser.uid === data.hostUID;
-            const startTimestamp = data.startTime?.toDate().getTime() || 0;
             
+            // 2. THEME & LABEL LOGIC
+            // If concluded, force gray even if registered. If registered & live, green.
+            const statusColor = isConcluded ? '#444' : (isRegistered ? '#0f0' : '#222');
+            const statusLabel = isConcluded ? '[FINALIZED]' : `[${planet.toUpperCase()}]`;
+            const cardTitleColor = isConcluded ? '#666' : (isRegistered ? '#0f0' : '#fff');
+
             const prizesHtml = (data.prizes || []).map((p, i) => {
                 const label = i === 0 ? '1st' : i === 1 ? '2nd' : i === 2 ? '3rd' : `${i+1}th`;
                 return `<div style="color: #0f0; font-size: 11px;"><span style="color: #ffaa00;">${label}:</span> ${p}</div>`;
             }).join('');
 
-            const statusColor = isConcluded ? '#444' : '#0f0';
-            const statusLabel = isConcluded ? '[FINALIZED]' : `[${planet.toUpperCase()}]`;
-            const btnText = isConcluded ? "CONTEST_LOCKED" : (isRegistered ? "ABORT_REGISTRATION" : "INITIATE_REGISTRATION");
-            const btnColor = isConcluded ? '#444' : (isRegistered ? '#f66' : '#0f0');
-            const btnBg = isConcluded ? '#111' : (isRegistered ? '#2a0a0a' : '#0a2a0a');
-
             const card = document.createElement('div');
             card.className = 'contest-card';
             card.setAttribute('data-contest-id', contestId); 
-            card.setAttribute('data-concluded', isConcluded); // Critical for the event listener
+            card.setAttribute('data-concluded', isConcluded);
             card.style = `background: #0a0a0a; border: 1px solid #222; border-left: 3px solid ${statusColor}; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: border 0.2s;`;
             
             card.innerHTML = `
                 <div class="contest-main-info" style="display: flex; justify-content: space-between; pointer-events: none;">
                     <div>
-                        <div style="font-size: 13px; color: ${isConcluded ? '#666' : '#0f0'}; font-weight: bold;">
+                        <div style="font-size: 13px; color: ${cardTitleColor}; font-weight: bold;">
                             ${data.name} <span style="font-size: 9px; background: #222; padding: 1px 4px; color: #ffaa00; border: 1px solid #444;">${statusLabel}</span>
                         </div>
                         <div style="font-size: 10px; color: #00bcff; font-family: monospace;">TARGET: ${data.targetFish?.toUpperCase()}</div>
@@ -1305,20 +1313,31 @@ async function refreshContestList() {
                     </div>
                     <div style="text-align: right;">
                         <div style="font-size: 10px; color: #555;">Entries</div>
-                        <div style="font-size: 14px; color: ${statusColor}; font-family: monospace;">${actualCount}</div>
+                        <div style="font-size: 14px; color: ${isConcluded ? '#444' : '#0f0'}; font-family: monospace;">${actualCount}</div>
                     </div>
                 </div>
 
                 <div class="contest-details" style="display: none; margin-top: 10px; border-top: 1px solid #222; padding-top: 10px;">
-                    ${isOwner ? `<button class="delete-contest-btn" data-id="${contestId}" style="background:#422; color:#f66; border:1px solid #f66; font-size:9px; margin-bottom:10px; cursor:pointer;">TERMINATE_CONTEST</button>` : ''}
+                    ${(isOwner && !isConcluded) ? `<button class="delete-contest-btn" data-id="${contestId}" style="background:#422; color:#f66; border:1px solid #f66; font-size:9px; margin-bottom:10px; cursor:pointer;">TERMINATE_CONTEST</button>` : ''}
+                    
                     <div style="font-size: 10px; color: #555; font-weight: bold;">[ PRIZE_POOL ]</div>
                     <div style="background: #050505; border: 1px solid #1a1a1a; padding: 8px; margin-bottom: 12px; border-left: 2px solid #ffaa00;">
                         ${prizesHtml || 'NO_PRIZES_BROADCAST'}
                     </div>
-                    <button class="join-contest-btn" data-id="${contestId}" ${isConcluded ? 'disabled' : ''} style="width: 100%; background:${btnBg}; color:${btnColor}; border: 1px solid ${btnColor}; padding:8px; font-family: monospace; cursor:pointer; opacity: ${isConcluded ? '0.5' : '1'};">
-                        ${btnText}
-                    </button>
-					<div class="join-error-msg" style="font-size: 9px; color: #f66; text-align: center; margin-top: 4px; display: none; font-family: monospace;"></div>
+
+                    <div class="action-zone">
+                        ${isConcluded ? `
+                            <div style="text-align: center; color: #444; font-size: 10px; border: 1px dashed #222; padding: 8px;">Registration Closed</div>
+                        ` : (isRegistered ? `
+                            <button class="join-contest-btn" data-id="${contestId}" style="width: 100%; background: #2a0a0a; color: #f66; border: 1px solid #f66; padding: 8px; font-family: monospace; cursor: pointer;">ABORT_REGISTRATION</button>
+                        ` : (hasStarted ? `
+                            <div style="text-align: center; color: #ffaa00; font-size: 10px; border: 1px dashed #430; padding: 8px;">REGISTRATION_CLOSED (Contest Live)</div>
+                        ` : `
+                            <button class="join-contest-btn" data-id="${contestId}" style="width: 100%; background: #0a2a0a; color: #0f0; border: 1px solid #0f0; padding: 8px; font-family: monospace; cursor: pointer;">INITIATE_REGISTRATION</button>
+                        `))}
+                    </div>
+
+                    <div class="join-error-msg" style="font-size: 9px; color: #f66; text-align: center; margin-top: 4px; display: none; font-family: monospace;"></div>
                     <div class="roster-container" style="margin-top:10px; display: flex; flex-wrap: wrap; gap: 4px;"></div>
                 </div>
             `;
@@ -1368,16 +1387,33 @@ function updateSessionUI() {
  * Real-time overlay update for the active contest, 
  * highlighting top Entries with podium colors.
  */
-async function updateContestHUD() {
+sync function updateContestHUD() {
     if (!activeContestRef) {
-        document.getElementById('contest-hud').style.display = 'none';
+        const hud = document.getElementById('contest-hud');
+        if (hud) hud.style.display = 'none';
         return;
     }
 
     try {
         const hud = document.getElementById('contest-hud');
-        hud.style.display = 'block';
+        if (hud) hud.style.display = 'block';
 
+        // --- 1. UPDATE HEADER INFO ---
+        const settings = window.currentContestSettings;
+        const contestNameEl = document.getElementById('hud-contest-name');
+        const targetFishEl = document.getElementById('hud-target-fish');
+
+        if (contestNameEl) {
+            contestNameEl.textContent = settings?.name?.toUpperCase() || "LIVE_FEED";
+        }
+
+        // NEW: Display the specific target fish species
+        if (targetFishEl) {
+            const target = settings?.targetFish || "ANY_SPECIES";
+            targetFishEl.innerHTML = `TARGET: <span style="color: #00ffff;">${target.toUpperCase()}</span>`;
+        }
+
+        // --- 2. FETCH LEADERBOARD ---
         const participantsRef = collection(db, activeContestRef.parent.path);
         const q = query(participantsRef, orderBy("score", "desc"), limit(10));
         const snap = await getDocs(q);
@@ -1411,8 +1447,10 @@ async function updateContestHUD() {
                 .join('') || "<div>NO_CARGO_DETECTED</div>";
 
             if (isMe) {
-                document.getElementById('hud-score').textContent = pData.score || 0;
-                document.getElementById('hud-rank').textContent = `#${currentRank}`;
+                const scoreEl = document.getElementById('hud-score');
+                const rankEl = document.getElementById('hud-rank');
+                if (scoreEl) scoreEl.textContent = pData.score || 0;
+                if (rankEl) rankEl.textContent = `#${currentRank}`;
             }
 
             const row = document.createElement('div');
@@ -1433,8 +1471,6 @@ async function updateContestHUD() {
             listContainer.appendChild(row);
             currentRank++;
         });
-
-        document.getElementById('hud-contest-name').textContent = window.currentContestSettings?.name?.toUpperCase() || "LIVE_FEED";
 
         const syncEl = document.getElementById('hud-last-sync');
         if (syncEl) {
