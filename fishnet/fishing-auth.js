@@ -109,7 +109,7 @@ if (saveProfileBtn) {
             });
 
             alert("✅ Cloud Profile Synchronized.");
-            addLog("📡 Cloud Profile Updated.");
+            addLog("📡FISH_NET: Cloud Profile Updated.");
         } catch (err) {
             console.error("Sync Error:", err);
             alert("❌ Sync Failed: " + err.message);
@@ -270,7 +270,7 @@ document.addEventListener('click', async (e) => {
         }
 
         try {
-            addLog("👻 INITIALIZING_GHOST_LINK...");
+            addLog("👻FISH_NET: INITIALIZING_GHOST_LINK...");
             const credential = await signInAnonymously(auth);
             const user = credential.user;
 
@@ -914,7 +914,7 @@ async function initializeFishData() {
         addLog("📋 MANIFEST: ASSET_REGISTRY_LOADED & DROPDOWN_SYNCED");
     } catch (err) {
         console.error("Failed to load fishes.json:", err);
-        addLog("ERR: FISH_DATA_LOAD_FAILED", true);
+        addLog("ID10tERR: FISH_DATA_LOAD_FAILED", true);
     }
 }
 // Call this when the app starts or when "Initialize Scout" is clicked
@@ -1287,9 +1287,9 @@ async function refreshContestList() {
             
             // 2. THEME & LABEL LOGIC
             // If concluded, force gray even if registered. If registered & live, green.
-            const statusColor = isConcluded ? '#444' : (isRegistered ? '#0f0' : '#222');
+            const statusColor = isConcluded ? '#444' : (isRegistered ? '#ffc136' : '#222');
             const statusLabel = isConcluded ? '[FINALIZED]' : `[${planet.toUpperCase()}]`;
-            const cardTitleColor = isConcluded ? '#666' : (isRegistered ? '#0f0' : '#fff');
+            const cardTitleColor = isConcluded ? '#666' : (isRegistered ? '#ffdb2a' : '#fff');
 
             const prizesHtml = (data.prizes || []).map((p, i) => {
                 const label = i === 0 ? '1st' : i === 1 ? '2nd' : i === 2 ? '3rd' : `${i+1}th`;
@@ -1305,7 +1305,7 @@ async function refreshContestList() {
             card.innerHTML = `
                 <div class="contest-main-info" style="display: flex; justify-content: space-between; pointer-events: none;">
                     <div>
-                        <div style="font-size: 13px; color: ${cardTitleColor}; font-weight: bold;">
+                        <div style="font-size: 17px; color: ${cardTitleColor}; ">
                             ${data.name} <span style="font-size: 9px; background: #222; padding: 1px 4px; color: #ffaa00; border: 1px solid #444;">${statusLabel}</span>
                         </div>
                         <div style="font-size: 10px; color: #00bcff; font-family: monospace;">TARGET: ${data.targetFish?.toUpperCase()}</div>
@@ -1841,8 +1841,10 @@ startBtn.onclick = async () => {
             
             // STRATEGY 1: Engage Wake Lock
             await requestWakeLock();
-            
-            addLog("📡 WEB_LINK: Chat.log bound. Polling active.");
+            refreshContestList();
+			addLog("📡 FISH_NET: Refreshing Contest list.");
+            addLog("📡 FISH_NET: Chat.log bound. Polling active.");
+
         } catch (err) {
             console.error(err);
             addLog("❌ PICKER_CANCELLED_OR_FAILED", true);
