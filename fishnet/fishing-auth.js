@@ -349,18 +349,20 @@ async function updateEntropiaProfile(newName) {
 }
 
 // --- 4. THE AUTH OBSERVER ---
+// --- 4. THE AUTH OBSERVER (Hardened for Anonymous Recovery) ---
 onAuthStateChanged(auth, async (user) => {
     const body = document.body;
     const hostSection = document.getElementById('host-tools');
     const adminTabBtn = document.querySelector('.tab-btn[data-target="admin-terminal"]');
     const anonAuthContainer = document.getElementById('anon-auth-container');
+    const logoutBtn = document.getElementById('btn-logout');
 
     // Helper: Internal function to sync status dot and dropdown
     function updatePresenceUI(status) {
         const normalizedStatus = (status || 'online').toLowerCase();
-        if (statusDot) statusDot.setAttribute('data-status', normalizedStatus);
-        if (updateIsOnlineInp) updateIsOnlineInp.value = normalizedStatus;
-        if (loginStatus) loginStatus.textContent = `Status: ${normalizedStatus.toUpperCase()}`;
+        if (typeof statusDot !== 'undefined' && statusDot) statusDot.setAttribute('data-status', normalizedStatus);
+        if (typeof updateIsOnlineInp !== 'undefined' && updateIsOnlineInp) updateIsOnlineInp.value = normalizedStatus;
+        if (typeof loginStatus !== 'undefined' && loginStatus) loginStatus.textContent = `Status: ${normalizedStatus.toUpperCase()}`;
     }
 
     // Role Mapping
@@ -376,6 +378,19 @@ onAuthStateChanged(auth, async (user) => {
         body.classList.remove('auth-logged-out');
         if (anonAuthContainer) anonAuthContainer.style.display = 'none';
 
+        // --- ANONYMOUS SESSION WARNING ---
+        if (user.isAnonymous) {
+            if (logoutBtn) {
+                logoutBtn.innerHTML = `<span>Logout</span> <small style="color: #ffa500; display: block; font-size: 10px;">(Ghost Session: No Recovery)</small>`;
+                logoutBtn.style.border = "1px solid #ffa500";
+            }
+        } else {
+            if (logoutBtn) {
+                logoutBtn.innerHTML = `Logout`;
+                logoutBtn.style.border = "";
+            }
+        }
+
         const displayName = user.displayName || "Pixel Colonist";
         const photoURL = user.photoURL || defaultAvatar;
 
@@ -384,8 +399,8 @@ onAuthStateChanged(auth, async (user) => {
         profilePhotoElements.forEach(img => img.src = photoURL);
 
         // Autofill Settings Inputs
-        if (updateUsernameInp) updateUsernameInp.value = displayName;
-        if (updatePhotoInp) updatePhotoInp.value = photoURL;
+        if (typeof updateUsernameInp !== 'undefined' && updateUsernameInp) updateUsernameInp.value = displayName;
+        if (typeof updatePhotoInp !== 'undefined' && updatePhotoInp) updatePhotoInp.value = photoURL;
 
         try {
             const userDocRef = doc(db, 'users', user.uid);
@@ -402,7 +417,7 @@ onAuthStateChanged(auth, async (user) => {
                     isOnline: 'online', 
                     balancePixels: 0,
                     euNameVerified: false,
-                    achievements: [],
+                    achievements: {}, // Changed to object to match Cloud Function Map logic
                     lastUpdated: serverTimestamp(),
                     createdAt: serverTimestamp()
                 };
@@ -412,9 +427,9 @@ onAuthStateChanged(auth, async (user) => {
                 globalUserData = userDoc.data();
                 
                 // Patch legacy accounts
-                if (!globalUserData.achievements) {
-                    await updateDoc(userDocRef, { achievements: [] });
-                    globalUserData.achievements = [];
+                if (!globalUserData.achievements || Array.isArray(globalUserData.achievements)) {
+                    await updateDoc(userDocRef, { achievements: {} });
+                    globalUserData.achievements = {};
                 }
             }
 
@@ -440,13 +455,14 @@ onAuthStateChanged(auth, async (user) => {
             entropiaNameElements.forEach(el => {
                 el.textContent = eName + (isVerified ? ' ☑' : '');
             });
-            if (updateEntropiaInp) updateEntropiaInp.value = eName;
+            if (typeof updateEntropiaInp !== 'undefined' && updateEntropiaInp) updateEntropiaInp.value = eName;
 
             // Status Bio
             const uStatus = globalUserData.status || "Scanning horizon...";
-            if (statusDisplay) statusDisplay.textContent = `"${uStatus}"`;
-            if (updateStatusInp) updateStatusInp.value = uStatus;
+            if (typeof statusDisplay !== 'undefined' && statusDisplay) statusDisplay.textContent = `"${uStatus}"`;
+            if (typeof updateStatusInp !== 'undefined' && updateStatusInp) updateStatusInp.value = uStatus;
 
+            const userPixelCount = document.getElementById('Userpixelcount');
             if (userPixelCount) {
                 userPixelCount.textContent = (globalUserData.balancePixels || "0") + "px";
             }
@@ -457,7 +473,8 @@ onAuthStateChanged(auth, async (user) => {
             }
 
             loadAuthenticatedData(user);
-			restoreActiveContest();
+            if (typeof restoreActiveContest === 'function') restoreActiveContest();
+
         } catch (error) {
             console.error("❌ Error fetching account data:", error);
         }
@@ -489,19 +506,56 @@ onAuthStateChanged(auth, async (user) => {
         userRoleIcons.forEach(el => el.textContent = roleToIcon['guest']);
         userRoleLabels.forEach(el => el.textContent = "GUEST");
 
-        [updateUsernameInp, updatePhotoInp, updateEntropiaInp, updateStatusInp].forEach(inp => {
-            if (inp) inp.value = "";
+        const inps = [updateUsernameInp, updatePhotoInp, updateEntropiaInp, updateStatusInp];
+        inps.forEach(inp => {
+            if (typeof inp !== 'undefined' && inp) inp.value = "";
         });
     }
 });
 
+/**
+ * Hardened Logout for PIXELB8
+ * Checks for Anonymous status to prevent accidental data loss.
+ */
 function signOutFromFirebase() {
-    signOut(auth)
-        .then(() => {
-            console.log('Logged out successfully.');
-            window.location.reload(); 
-        })
-        .catch((error) => console.error('Logout error:', error));
+    const user = auth.currentUser;
+
+    if (user && user.isAnonymous) {
+        // 1. ASK THE GHOST: Do they want to destroy the session or just hide the UI?
+        const confirmPermanentDelete = confirm(
+            "👻 GHOST SESSION DETECTED\n\n" +
+            "Click 'OK' to PERMANENTLY DELETE this session (Trophies/Pixels lost).\n" +
+            "Click 'Cancel' to just sign out locally (Saves progress for your next visit)."
+        );
+
+        if (confirmPermanentDelete) {
+            // FULL WIPE: The user wants to start over
+            signOut(auth)
+                .then(() => window.location.reload())
+                .catch(e => console.error("Wipe failed:", e));
+        } else {
+            // SOFT LOGOUT: Clear the UI but keep the Firebase token active in the background
+            console.log('📡 Ghost Session: Local state cleared. Token preserved.');
+            
+            globalUserData = null;
+            document.body.classList.remove('auth-logged-in');
+            document.body.classList.add('auth-logged-out');
+            
+            // Show the login entry screen again
+            const anonAuthContainer = document.getElementById('anon-auth-container');
+            if (anonAuthContainer) anonAuthContainer.style.display = 'block';
+            
+            addLog("👤 SESSION_DETACHED: UI cleared, progress preserved.");
+        }
+    } else {
+        // 2. STANDARD AUTH: Full logout for GitHub/Social accounts
+        signOut(auth)
+            .then(() => {
+                console.log('Logged out successfully.');
+                window.location.reload(); 
+            })
+            .catch((error) => console.error('Logout error:', error));
+    }
 }
 // --- 6. PROFILE MODAL FUNCTIONS ---
 document.getElementById('saveProfileBtn')?.addEventListener('click', async () => {
