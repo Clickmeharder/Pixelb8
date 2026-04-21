@@ -2128,28 +2128,51 @@ setInterval(() => {
             const diff = startTime - now;
             el.textContent = `T-MINUS: ${formatTime(diff)}`;
             el.style.color = "#ffaa00";
+
         } else if (now >= startTime && now < endTime) {
             // PHASE 2: ACTIVE (LIVE)
             const remaining = endTime - now;
             el.textContent = `LIVE: ${formatTime(remaining)} REMAINING`;
             el.style.color = "#0f0";
-            el.classList.add('pulse-text'); 
+            el.classList.add('pulse-text');
+
+            // --- TRIGGER: CONTEST START ---
+            // Only play if it started recently (within 10s) to avoid refresh-scares
+            if (!el.getAttribute('data-start-played')) {
+                const timeSinceStart = now - startTime;
+                if (timeSinceStart < 10000) {
+                    playSound('conteststart');
+                    addLog("🔔 CONTEST_LIVE: Signal locked. Casting lines!");
+                }
+                el.setAttribute('data-start-played', 'true');
+            }
+
         } else {
             // PHASE 3: ENDED
             el.textContent = "CONTEST_CONCLUDED";
             el.style.color = "#444";
             el.classList.remove('pulse-text');
+
+            // --- TRIGGER: CONTEST FINISH ---
+            if (!el.getAttribute('data-finish-played')) {
+                // Only play if it ended recently (within 10s)
+                const timeSinceEnd = now - endTime;
+                if (timeSinceEnd < 10000) {
+                    playSound('contestfinish');
+                    addLog("🏁 TIME_EXPIRED: Contest finalized. Syncing final weights.");
+                }
+                el.setAttribute('data-finish-played', 'true');
+            }
             
-            // OPTIONAL: If this is the active HUD contest, kill the sync
             if (activeContestRef && el.closest('#contest-hud')) {
-                 addLog("🏁 TIME_EXPIRED: Contest session finalized.");
-                 // We don't null activeContestRef yet to allow one final sync
+                // Final sync logic if needed
             }
         }
-		if (now % 30000 < 1000) { 
-			renderSmartHUD(); 
-		}
     });
+
+    if (now % 30000 < 1000) { 
+        renderSmartHUD(); 
+    }
 }, 1000);
 
 function formatTime(ms) {
@@ -2193,6 +2216,8 @@ window.soundSettings = {
     gotmailsound: true,
     sendmailsound: true,
 	scouterror: true,
+	conteststart: true,
+	conteststart: true,
 /*     contestStart: true,
     contestConcluded: true */
 };
@@ -2203,8 +2228,8 @@ const audioAssets = {
     gotmailsound: new Audio('assets/sounds/mail_in.mp3'),
     sendmailsound: new Audio('assets/sounds/mail_out.mp3'),
 	scoutError: new Audio('assets/sounds/uhoh.mp3'),
-/*     contestStart: new Audio('assets/sounds/alarm_start.mp3'),
-    contestConcluded: new Audio('assets/sounds/alarm_end.mp3') */
+    conteststart: new Audio('assets/sounds/conteststart.mp3'),
+    contestfishish: new Audio('assets/sounds/contestfinish.mp3')
 };
 
 /**
