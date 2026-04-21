@@ -1417,19 +1417,81 @@ let pendingCatchBuffer = {
     score: 0,
     totals: {} // Will be populated dynamically: { "Young Calypso Salmon": 5, ... }
 };
+/**
+ * Hardened Log Polling for PIXELB8 Scout
+ * Handles NotReadableError for Web File System Access API
+ */
+let errorCount = 0;
+const MAX_RETRIES = 3;
+
+/**
+ * Hardened Log Polling with Audio Alerts & Auto-Recovery UI
+ * Monitors the Entropia log and plays 'uhoh' if the link snaps.
+ */
 async function pollWebLog() {
     if (!fileHandle) return;
-    const file = await fileHandle.getFile();
-    
-    if (file.size > lastSize) {
-        const blob = file.slice(lastSize, file.size);
-        const text = await blob.text();
-        const lines = text.split(/\r?\n/);
+
+    try {
+        const file = await fileHandle.getFile();
         
-        lines.forEach(line => {
-            if (line.trim()) handleChatLine(line); 
-        });
-        lastSize = file.size;
+        if (file.size > lastSize) {
+            const blob = file.slice(lastSize, file.size);
+            const text = await blob.text();
+            
+            // Split and process lines
+            const lines = text.split(/\r?\n/);
+            lines.forEach(line => {
+                if (line.trim()) handleChatLine(line); 
+            });
+            
+            lastSize = file.size;
+        }
+
+        // Success! Reset the error counter
+        errorCount = 0;
+
+    } catch (err) {
+        // Increment the fail counter
+        errorCount++;
+        
+        console.warn(`[!] Scout Sync: Attempt ${errorCount}/${MAX_RETRIES} failed.`, err.name);
+
+        if (errorCount >= MAX_RETRIES) {
+            // 1. EMERGENCY CLOUD SYNC
+            // Push any un-transmitted scores before stopping
+            await pushBufferToCloud();
+
+            // 2. ALERT PLAYER
+            // Play the 'uhoh' sound via your system
+            playSound('scoutError');
+
+            // 3. STOP POLLING
+            // Prevent infinite alarms/errors
+            if (window.pollInterval) {
+                clearInterval(window.pollInterval);
+                window.pollInterval = null;
+            }
+
+            // 4. UI RECOVERY (Critical for Re-linking)
+            // Re-enable the start button so showOpenFilePicker can be called again
+            if (startBtn) {
+                startBtn.disabled = false;
+                startBtn.style.opacity = "1.0";
+                startBtn.style.background = "#d32f2f"; // Urgent red
+                startBtn.textContent = "RE-LINK LOG FILE";
+            }
+
+            // Also update the specific browse-btn if used separately
+            const btn = document.getElementById('browse-btn');
+            if (btn) {
+                btn.innerHTML = "⚠️ LINK BROKEN - RE-CLICK";
+                btn.classList.add('error-pulse');
+                btn.style.borderColor = "#ff4444";
+            }
+
+            addLog("❌ SCOUT_HALTED: File access lost. Re-link to resume.", true);
+            console.error("❌ SCOUT_HALTED: File handle lost. User interaction required.");
+        }
     }
 }
 async function handleChatLine(line) {
@@ -1574,6 +1636,77 @@ async function pushBufferToCloud() {
         syncTimer = setTimeout(pushBufferToCloud, 30000);
     }
 }
+
+/**
+ * Saves the FileSystemFileHandle to a sovereign IndexedDB store
+ */
+async function saveFileHandle(handle) {
+    const db = await initDB();
+    const tx = db.transaction('settings', 'readwrite');
+    tx.objectStore('settings').put(handle, 'logFileHandle');
+    return tx.complete;
+}
+
+/**
+ * Simple IndexedDB Initializer
+ */
+function initDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('PixelB8_Storage', 1);
+        request.onupgradeneeded = (e) => e.target.result.createObjectStore('settings');
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e.error);
+    });
+}
+
+/**
+ * Call this on Page Load! 
+ * If a handle exists, it updates the UI to show a "Resume" option.
+ */
+async function checkPersistentHandle() {
+    try {
+        const db = await initDB();
+        const tx = db.transaction('settings', 'readonly');
+        const handle = await new Promise(res => {
+            const req = tx.objectStore('settings').get('logFileHandle');
+            req.onsuccess = () => res(req.result);
+        });
+
+        if (handle) {
+            fileHandle = handle;
+            addLog("💾 PREVIOUS_SESSION_FOUND: Ready to resume scout.");
+            startBtn.textContent = "RESUME SCOUT";
+            startBtn.style.background = "#2e7d32"; // Green for resume
+        }
+    } catch (err) {
+        console.warn("No persistent handle found.");
+    }
+}
+
+// Call on load
+window.addEventListener('DOMContentLoaded', checkPersistentHandle);
+let wakeLock = null;
+
+/**
+ * Strategy 1: Request Wake Lock 
+ * Prevents the OS from sleeping/throttling the log-polling tab.
+ */
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            addLog("🌙 WAKE_LOCK: Engaged. Preventing deep sleep.");
+            
+            // Re-request if page is tabbed back in (wakeLock is released on visibility change)
+            wakeLock.addEventListener('release', () => {
+                console.log('Wake Lock was released');
+            });
+        }
+    } catch (err) {
+        console.warn("Wake Lock failed:", err);
+    }
+}
+
 startBtn.onclick = async () => {
     // 1. ELECTRON PATH (Desktop App)
     if (!isWebMode) {
@@ -1588,10 +1721,24 @@ startBtn.onclick = async () => {
     // 2. WEB PATH (Browser)
     else {
         try {
-            [fileHandle] = await window.showOpenFilePicker({
-                types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
-                multiple: false
-            });
+            // Check if we need to pick a new file or if we are clicking "Resume"
+            if (!fileHandle) {
+                [fileHandle] = await window.showOpenFilePicker({
+                    types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
+                    multiple: false
+                });
+
+                // STRATEGY 2: Save the handle to IndexedDB for next time
+                await saveFileHandle(fileHandle);
+            } else {
+                // If we already have a handle (from a restore), verify permission
+                const opts = { mode: 'read' };
+                if (await fileHandle.queryPermission(opts) !== 'granted') {
+                    if (await fileHandle.requestPermission(opts) !== 'granted') {
+                        throw new Error("Permission denied");
+                    }
+                }
+            }
             
             const file = await fileHandle.getFile();
             lastSize = file.size; // Start reading from now
@@ -1599,13 +1746,17 @@ startBtn.onclick = async () => {
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = setInterval(pollWebLog, 3000); // 3s Poll
             
+            // STRATEGY 1: Engage Wake Lock
+            await requestWakeLock();
+            
             addLog("📡 WEB_LINK: Chat.log bound. Polling active.");
         } catch (err) {
-            addLog("❌ PICKER_CANCELLED", true);
+            console.error(err);
+            addLog("❌ PICKER_CANCELLED_OR_FAILED", true);
             return;
         }
     }
-	// ADD THIS BLOCK:
+
     if (!activeContestRef) {
         addLog("🔍 CHECKING_UPLINK: Looking for registered contests...");
         await restoreActiveContest();
@@ -1946,6 +2097,7 @@ window.soundSettings = {
     masterEnabled: true,
     gotmailsound: true,
     sendmailsound: true,
+	scouterror: true,
 /*     contestStart: true,
     contestConcluded: true */
 };
@@ -1955,6 +2107,7 @@ window.soundSettings = {
 const audioAssets = {
     gotmailsound: new Audio('assets/sounds/mail_in.mp3'),
     sendmailsound: new Audio('assets/sounds/mail_out.mp3'),
+	scoutError: new Audio('assets/sounds/uhoh.mp3'),
 /*     contestStart: new Audio('assets/sounds/alarm_start.mp3'),
     contestConcluded: new Audio('assets/sounds/alarm_end.mp3') */
 };
