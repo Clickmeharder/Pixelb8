@@ -3028,3 +3028,17 @@ ontTopCheckbox.addEventListener('change', (e) => {
     const isChecked = e.target.checked;
     window.electronAPI.setAlwaysOnTop(isChecked);
 }); */
+
+let isDark = localStorage.getItem("bg") === "dark";
+
+function applyBG() {
+    document.body.style.background = isDark ? "#0b0b0b" : "transparent";
+}
+
+applyBG();
+
+document.getElementById("bgToggle").addEventListener("click", () => {
+    isDark = !isDark;
+    localStorage.setItem("bg", isDark ? "dark" : "transparent");
+    applyBG();
+});
