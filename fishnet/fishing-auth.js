@@ -1516,7 +1516,7 @@ let pendingCatchBuffer = {
  */
 let errorCount = 0;
 const MAX_RETRIES = 3;
-
+let lastCatchTimestamp = 0; // Tracking time between catches
 /**
  * Hardened Log Polling with Audio Alerts & Auto-Recovery UI
  * Monitors the Entropia log and plays 'uhoh' if the link snaps.
@@ -1587,6 +1587,10 @@ async function pollWebLog() {
         }
     }
 }
+/**
+ * handleChatLine: PARSING & ANTI-CHEAT PROTOCOL
+ * Processes log lines with quantity caps and timing gates.
+ */
 async function handleChatLine(line) {
     const fishRegex = /\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
     const match = line.match(fishRegex);
@@ -1595,8 +1599,29 @@ async function handleChatLine(line) {
         const fishType = match[1].trim(); 
         const amount = parseInt(match[2]);
         const value = parseFloat(match[3]);
+        const now = Date.now();
+
+        // --- ANTI-CHEAT GATE 1: QUANTITY SANITY ---
+        // Baitfish specifically cannot exceed 3 in a single loot instance
+        if (fishType.toLowerCase() === 'baitfish' && amount > 3) {
+            addLog(`⚠️ ANOMALY: Baitfish qty (${amount}) rejected. (Max 3)`, true);
+            if (typeof playSound === 'function') playSound('scouterror');
+            return; 
+        }
+
+        // --- ANTI-CHEAT GATE 2: TIMING SANITY ---
+        // Minimum 5 seconds floor between timestamps to block echo-scripts
+        const secondsSinceLast = (now - lastCatchTimestamp) / 1000;
+        if (secondsSinceLast < 5) {
+            addLog(`⚠️ ANOMALY: Catch frequency too high (${secondsSinceLast.toFixed(1)}s). Rejected.`, true);
+            // Don't update timestamp here; wait for a legitimate 5s gap
+            return; 
+        }
 
         if (!isNaN(value)) {
+            // Update timestamp only after passing sanity checks
+            lastCatchTimestamp = now;
+
             // --- 1. DYNAMIC REGISTRATION (Local Session Stats) ---
             if (!(fishType in sessionStats)) {
                 sessionStats[fishType] = 0;
@@ -1617,14 +1642,14 @@ async function handleChatLine(line) {
                 const startTime = settings?.startTime?.toMillis() || 0;
                 const durationMs = (settings?.duration || 60) * 60000;
                 const endTime = startTime + durationMs;
-                const now = Date.now() + (window.serverOffset || 0);
+                const serverAdjustedNow = now + (window.serverOffset || 0);
 
                 // PHASE CHECK: PRE-START
-                if (now < startTime) {
-                    addLog(`⏳ PRE_START: Catch ignored by cloud (Starts in ${formatTime(startTime - now)})`, true);
+                if (serverAdjustedNow < startTime) {
+                    addLog(`⏳ PRE_START: Catch ignored by cloud (Starts in ${formatTime(startTime - serverAdjustedNow)})`, true);
                 } 
                 // PHASE CHECK: POST-END
-                else if (isConcluded || now > endTime) {
+                else if (isConcluded || serverAdjustedNow > endTime) {
                     addLog(`🚫 SESSION_FINALIZED: Catch not synced to cloud.`, true);
                     
                     if (isConcluded) {
