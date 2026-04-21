@@ -1387,7 +1387,7 @@ function updateSessionUI() {
  * Real-time overlay update for the active contest, 
  * highlighting top Entries with podium colors.
  */
-sync function updateContestHUD() {
+async function updateContestHUD() {
     if (!activeContestRef) {
         const hud = document.getElementById('contest-hud');
         if (hud) hud.style.display = 'none';
@@ -2217,7 +2217,7 @@ window.soundSettings = {
     sendmailsound: true,
 	scouterror: true,
 	conteststart: true,
-	conteststart: true,
+	contestfinish: true,
 /*     contestStart: true,
     contestConcluded: true */
 };
