@@ -417,7 +417,7 @@ onAuthStateChanged(auth, async (user) => {
                     isOnline: 'online', 
                     balancePixels: 0,
                     euNameVerified: false,
-                    achievements: {}, // Changed to object to match Cloud Function Map logic
+                    achievements: {}, // Initialized as Object/Map for Cloud Compatibility
                     lastUpdated: serverTimestamp(),
                     createdAt: serverTimestamp()
                 };
@@ -426,10 +426,12 @@ onAuthStateChanged(auth, async (user) => {
             } else {
                 globalUserData = userDoc.data();
                 
-                // Patch legacy accounts
+                // --- SOVEREIGN DATA PATCH ---
+                // We fix the format LOCALLY for the session. 
+                // We do NOT call updateDoc because security rules protect the 'achievements' key.
                 if (!globalUserData.achievements || Array.isArray(globalUserData.achievements)) {
-                    await updateDoc(userDocRef, { achievements: {} });
-                    globalUserData.achievements = {};
+                    console.log("🛠️ SESSION_PATCH: Normalizing achievements structure...");
+                    globalUserData.achievements = {}; 
                 }
             }
 
@@ -476,7 +478,9 @@ onAuthStateChanged(auth, async (user) => {
             if (typeof restoreActiveContest === 'function') restoreActiveContest();
 
         } catch (error) {
-            console.error("❌ Error fetching account data:", error);
+            console.error("❌ Auth Data Sync Failed:", error);
+            // Non-blocking log for user awareness
+            if (typeof addLog === 'function') addLog("⚠️ IDENTITY_SYNC_ISSUE: Check connection.", true);
         }
     } else {
         // --- LOGGED OUT STATE ---
@@ -512,7 +516,6 @@ onAuthStateChanged(auth, async (user) => {
         });
     }
 });
-
 /**
  * Hardened Logout for PIXELB8
  * Checks for Anonymous status to prevent accidental data loss.
