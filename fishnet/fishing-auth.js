@@ -2042,7 +2042,27 @@ async function pushBufferToCloud() {
     // --- BUTTON LISTENER ---
     const setupBtn = document.getElementById('setup-ocr-btn');
     if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
+// --- UI TOGGLE LOGIC ---
+const toggleBtn = document.getElementById('toggle-scout-ui');
+const scoutContainer = document.getElementById('scout-container');
 
+toggleBtn.addEventListener('click', () => {
+    if (scoutContainer.style.display === 'none') {
+        scoutContainer.style.display = 'block';
+        toggleBtn.textContent = "✖️ Hide Scout View";
+    } else {
+        scoutContainer.style.display = 'none';
+        toggleBtn.textContent = "🖥️ Show Scout View";
+    }
+});
+
+// Update the calibrateVisualScout function slightly to automatically show the UI
+const originalCalibrate = window.calibrateVisualScout;
+window.calibrateVisualScout = async function() {
+    await originalCalibrate(); // Run existing logic
+    scoutContainer.style.display = 'block'; // Ensure it pops open when linking
+    toggleBtn.textContent = "✖️ Hide Scout View";
+};
 /*---------------------------------------------------------
   PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
 ---------------------------------------------------------*/
