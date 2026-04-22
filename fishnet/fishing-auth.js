@@ -1817,42 +1817,49 @@ async function pushBufferToCloud() {
     /**
      * OCR LOOP (Scans ROI every 10 seconds)
      */
-    function startOcrLoop() {
-        setInterval(async () => {
-            if (!isOcrActive || !ocrWorker) return;
+	function startOcrLoop() {
+		setInterval(async () => {
+			if (!isOcrActive || !ocrWorker) return;
 
-            const video = document.getElementById('ocr-video');
-            const canvas = document.getElementById('ocr-canvas');
-            const ctx = canvas.getContext('2d');
+			const video = document.getElementById('ocr-video');
+			const box = document.getElementById('crop-box');
+			const canvas = document.getElementById('ocr-canvas');
+			const ctx = canvas.getContext('2d');
 
-            // 1. Calculate Crop Area based on OCR_CONFIG percentages
-            const cropX = (video.videoWidth * OCR_CONFIG.x) / 100;
-            const cropY = (video.videoHeight * OCR_CONFIG.y) / 100;
-            const cropW = (video.videoWidth * OCR_CONFIG.w) / 100;
-            const cropH = (video.videoHeight * OCR_CONFIG.h) / 100;
+			// 1. Get the current position/size of the box relative to the video
+			const boxRect = box.getBoundingClientRect();
+			const videoRect = video.getBoundingClientRect();
 
-            canvas.width = cropW;
-            canvas.height = cropH;
+			// 2. Convert to percentages to handle window resizing
+			const xPct = (boxRect.left - videoRect.left) / videoRect.width;
+			const yPct = (boxRect.top - videoRect.top) / videoRect.height;
+			const wPct = boxRect.width / videoRect.width;
+			const hPct = boxRect.height / videoRect.height;
 
-            // 2. Draw only the chat box area
-            ctx.drawImage(
-                video, 
-                cropX, cropY, cropW, cropH, 
-                0, 0, cropW, cropH
-            );
+			// 3. Convert percentages to actual source video pixels
+			const cropX = video.videoWidth * xPct;
+			const cropY = video.videoHeight * yPct;
+			const cropW = video.videoWidth * wPct;
+			const cropH = video.videoHeight * hPct;
 
-            // 3. APPLY FILTER: Grayscale + High Contrast for white-on-dark text
-            ctx.filter = 'grayscale(1) contrast(200%) brightness(120%)';
-            ctx.drawImage(canvas, 0, 0);
+			canvas.width = cropW;
+			canvas.height = cropH;
 
-            try {
-                const { data: { text } } = await ocrWorker.recognize(canvas);
-                lastOcrText = text;
-            } catch (e) {
-                console.warn("OCR skip.");
-            }
-        }, 10000); 
-    }
+			// 4. Capture the frame
+			ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+			// 5. Pre-process for OCR (High contrast)
+			ctx.filter = 'grayscale(1) contrast(300%) invert(1)'; 
+			ctx.drawImage(canvas, 0, 0);
+
+			try {
+				const { data: { text } } = await ocrWorker.recognize(canvas);
+				lastOcrText = text;
+			} catch (e) {
+				console.warn("OCR failure.");
+			}
+		}, 10000); 
+	}
 
     /**
      * LOG POLLING
@@ -1995,7 +2002,26 @@ async function pushBufferToCloud() {
     if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
 
 })();
+const box = document.getElementById('crop-box');
+let isDragging = false;
+let offset = { x: 0, y: 0 };
 
+box.addEventListener('mousedown', (e) => {
+    if (e.target !== box) return; // Only drag if clicking the box, not the resize handle
+    isDragging = true;
+    offset.x = e.clientX - box.offsetLeft;
+    offset.y = e.clientY - box.offsetTop;
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    box.style.left = `${e.clientX - offset.x}px`;
+    box.style.top = `${e.clientY - offset.y}px`;
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+});
 
 /*---------------------------------------------------------
   PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
