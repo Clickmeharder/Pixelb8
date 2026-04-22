@@ -1741,10 +1741,7 @@ async function pushBufferToCloud() {
 
 /*---------------------------------------------------------
   PIXELB8 OCR: ANTI_CHEAT SYSTEM
----------------------------------------------------------*/
-/*---------------------------------------------------------
-  PIXELB8 OCR: ANTI_CHEAT SYSTEM
-  Status: Hardened // Sovereign // Local-First
+  Hardened Version // Includes pollWebLog & Ghost Mode
 ---------------------------------------------------------*/
 (function() {
     // --- PRIVATE STATE & SECURITY VAULT ---
@@ -1757,6 +1754,7 @@ async function pushBufferToCloud() {
     let lastLogTimestamp = 0; 
     let lastProcessedLine = ""; 
 
+    // --- OCR, SCROLL & ANOMALY TRACKING ---
     let ocrWorker = null;
     let isOcrActive = false;
     let anomalyCountThisBatch = 0; 
@@ -1793,23 +1791,22 @@ async function pushBufferToCloud() {
                 video: { cursor: "never" },
                 audio: false
             });
-            
             const video = document.getElementById('ocr-video');
-            const setupBtn = document.getElementById('setup-ocr-btn');
             const scoutContainer = document.getElementById('scout-container');
             const toggleBtn = document.getElementById('toggle-scout-ui');
-
+            
             video.srcObject = stream;
             isOcrActive = true;
             
             if (!ocrWorker) await initOcr();
             
-            if (setupBtn) {
-                setupBtn.textContent = "📷 SCOUT ACTIVE";
-                setupBtn.style.background = "#2e7d32";
+            const btn = document.getElementById('setup-ocr-btn');
+            if (btn) {
+                btn.textContent = "📷 SCOUT ACTIVE";
+                btn.style.background = "#2e7d32";
             }
 
-            // Ghost Mode Reset: Bring back to view on calibration
+            // Auto-show on calibration
             if (scoutContainer) {
                 scoutContainer.style.position = 'relative';
                 scoutContainer.style.left = '0';
@@ -1823,7 +1820,7 @@ async function pushBufferToCloud() {
             stream.getVideoTracks()[0].onended = () => {
                 isOcrActive = false;
                 addLog("⚠️ VISUAL_SCOUT: Monitoring stopped.", true);
-                if (setupBtn) setupBtn.textContent = "📷 RE-LINK SCOUT";
+                if (btn) btn.textContent = "📷 RE-LINK SCOUT";
             };
         } catch (err) {
             addLog("⚠️ VISUAL_SCOUT: Monitoring declined.");
@@ -1834,9 +1831,7 @@ async function pushBufferToCloud() {
      * OCR LOOP
      */
     function startOcrLoop() {
-        if (window.pixelb8ScoutInterval) clearInterval(window.pixelb8ScoutInterval);
-
-        window.pixelb8ScoutInterval = setInterval(async () => {
+        setInterval(async () => {
             if (!isOcrActive || !ocrWorker) return;
 
             const video = document.getElementById('ocr-video');
@@ -1886,6 +1881,37 @@ async function pushBufferToCloud() {
     }
 
     /**
+     * LOG POLLING
+     */
+    window.pollWebLog = async function() {
+        if (!fileHandle) return;
+        try {
+            const file = await fileHandle.getFile();
+            if (file.size > lastSize) {
+                const blob = file.slice(lastSize, file.size);
+                const text = await blob.text();
+                const lines = text.split(/\r?\n/);
+                lines.forEach(line => {
+                    if (line.trim()) window.handleChatLine(line); 
+                });
+                lastSize = file.size;
+            } else if (file.size < lastSize) {
+                addLog("⚠️ SECURITY: Log file shrink detected.", true);
+                lastSize = file.size;
+            }
+            errorCount = 0;
+        } catch (err) {
+            errorCount++;
+            if (errorCount >= MAX_RETRIES) {
+                await window.pushBufferToCloud();
+                if (typeof playSound === 'function') playSound('scoutError');
+                if (window.pollInterval) { clearInterval(window.pollInterval); window.pollInterval = null; }
+                addLog("❌ SCOUT_HALTED: Link broken.", true);
+            }
+        }
+    };
+
+    /**
      * HANDLE CHAT LINE
      */
     window.handleChatLine = async function(line) {
@@ -1930,7 +1956,6 @@ async function pushBufferToCloud() {
                 sessionStats[fishType] += amount;
                 sessionValues[fishType] += value;
 
-                // Cloud Sync logic...
                 if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                     const settings = window.currentContestSettings;
                     const startTime = settings?.startTime?.toMillis() || 0;
@@ -1981,54 +2006,58 @@ async function pushBufferToCloud() {
             pendingCatchBuffer = { score: 0, totals: {} };
             anomalyCountThisBatch = 0;
             syncTimer = null;
-            addLog("☁️ SYNC_COMPLETE: Cloud updated.");
+            addLog("☁️ SYNC_COMPLETE: Scores & Security Updated.");
         } catch (err) {
             syncTimer = setTimeout(window.pushBufferToCloud, 30000);
         }
     };
 
-    // --- UI: DRAGGABLE ROI BOX ---
-    const box = document.getElementById('crop-box');
-    let isDragging = false;
-    let dragOffset = { x: 0, y: 0 };
+    // --- UI: DRAGGABLE ROI BOX & TOGGLES ---
+    function initUI() {
+        const box = document.getElementById('crop-box');
+        const toggleBtn = document.getElementById('toggle-scout-ui');
+        const scoutContainer = document.getElementById('scout-container');
+        const setupBtn = document.getElementById('setup-ocr-btn');
 
-    if (box) {
-        box.addEventListener('mousedown', (e) => {
-            if (e.target !== box) return; 
-            isDragging = true;
-            dragOffset.x = e.clientX - box.offsetLeft;
-            dragOffset.y = e.clientY - box.offsetTop;
-        });
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            box.style.left = `${e.clientX - dragOffset.x}px`;
-            box.style.top = `${e.clientY - dragOffset.y}px`;
-        });
-        document.addEventListener('mouseup', () => { isDragging = false; });
+        if (box) {
+            let isDragging = false;
+            let dragOffset = { x: 0, y: 0 };
+            box.addEventListener('mousedown', (e) => {
+                if (e.target !== box) return; 
+                isDragging = true;
+                dragOffset.x = e.clientX - box.offsetLeft;
+                dragOffset.y = e.clientY - box.offsetTop;
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                box.style.left = `${e.clientX - dragOffset.x}px`;
+                box.style.top = `${e.clientY - dragOffset.y}px`;
+            });
+            document.addEventListener('mouseup', () => { isDragging = false; });
+        }
+
+        if (toggleBtn && scoutContainer) {
+            toggleBtn.addEventListener('click', () => {
+                if (scoutContainer.style.position === 'absolute') {
+                    scoutContainer.style.position = 'relative';
+                    scoutContainer.style.left = '0';
+                    scoutContainer.style.visibility = 'visible';
+                    toggleBtn.textContent = "✖️ Hide Scout View";
+                } else {
+                    scoutContainer.style.position = 'absolute';
+                    scoutContainer.style.left = '-10000px';
+                    scoutContainer.style.visibility = 'visible'; 
+                    toggleBtn.textContent = "🖥️ Show Scout View";
+                }
+            });
+        }
+
+        if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
     }
 
-    // --- UI: GHOST MODE TOGGLE ---
-    const toggleBtn = document.getElementById('toggle-scout-ui');
-    const scoutContainer = document.getElementById('scout-container');
-
-    if (toggleBtn && scoutContainer) {
-        toggleBtn.addEventListener('click', () => {
-            if (scoutContainer.style.position === 'absolute') {
-                scoutContainer.style.position = 'relative';
-                scoutContainer.style.left = '0';
-                scoutContainer.style.visibility = 'visible';
-                toggleBtn.textContent = "✖️ Hide Scout View";
-            } else {
-                scoutContainer.style.position = 'absolute';
-                scoutContainer.style.left = '-10000px';
-                scoutContainer.style.visibility = 'visible'; 
-                toggleBtn.textContent = "🖥️ Show Scout View";
-            }
-        });
-    }
-
-    const setupBtn = document.getElementById('setup-ocr-btn');
-    if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
+    // Run UI Init
+    if (document.readyState === 'complete') initUI();
+    else window.addEventListener('load', initUI);
 
 })();
 /*---------------------------------------------------------
