@@ -1748,6 +1748,10 @@ async function pushBufferToCloud() {
   PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V4)
   Features: Phase-Aware Sync, Target Tracking & Hard Teardown
 ---------------------------------------------------------*/
+/*---------------------------------------------------------
+  PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V5)
+  Features: Full Polling, Phase-Aware Sync & Hard Teardown
+---------------------------------------------------------*/
 (function() {
     // --- PRIVATE STATE & SECURITY VAULT ---
     let pendingCatchBuffer = { score: 0, totals: {} };
@@ -1834,9 +1838,7 @@ async function pushBufferToCloud() {
             }
 
             if (scoutContainer) {
-                scoutContainer.style.position = 'relative';
-                scoutContainer.style.left = '0';
-                scoutContainer.style.visibility = 'visible';
+                scoutContainer.style.position = 'relative'; scoutContainer.style.left = '0'; scoutContainer.style.visibility = 'visible';
                 if (toggleBtn) toggleBtn.textContent = "✖️ Hide Scout View";
             }
 
@@ -1859,15 +1861,11 @@ async function pushBufferToCloud() {
             const ctx = canvas.getContext('2d');
             const boxRect = box.getBoundingClientRect();
             const videoRect = video.getBoundingClientRect();
-            const xPct = (boxRect.left - videoRect.left) / videoRect.width;
-            const yPct = (boxRect.top - videoRect.top) / videoRect.height;
-            const wPct = boxRect.width / videoRect.width;
-            const hPct = boxRect.height / videoRect.height;
+            
+            canvas.width = video.videoWidth * (boxRect.width / videoRect.width);
+            canvas.height = video.videoHeight * (boxRect.height / videoRect.height);
 
-            canvas.width = video.videoWidth * wPct;
-            canvas.height = video.videoHeight * hPct;
-
-            ctx.drawImage(video, video.videoWidth * xPct, video.videoHeight * yPct, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(video, video.videoWidth * ((boxRect.left - videoRect.left) / videoRect.width), video.videoHeight * ((boxRect.top - videoRect.top) / videoRect.height), canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
             ctx.filter = 'grayscale(1) contrast(300%) invert(1)'; 
             ctx.drawImage(canvas, 0, 0);
 
@@ -1887,7 +1885,46 @@ async function pushBufferToCloud() {
     }
 
     /**
-     * HANDLE CHAT LINE (Integrates OCR Verification + Phase Gates)
+     * LOG POLLING (The missing link)
+     */
+    window.pollWebLog = async function() {
+        if (typeof fileHandle === 'undefined' || !fileHandle) return;
+        try {
+            const file = await fileHandle.getFile();
+            if (file.size > lastSize) {
+                const blob = file.slice(lastSize, file.size);
+                const text = await blob.text();
+                const lines = text.split(/\r?\n/);
+                lines.forEach(line => {
+                    if (line.trim()) window.handleChatLine(line); 
+                });
+                lastSize = file.size;
+            } else if (file.size < lastSize) {
+                addLog("⚠️ SECURITY: Log file shrink detected.", true);
+                lastSize = file.size;
+            }
+            errorCount = 0;
+        } catch (err) {
+            errorCount++;
+            if (errorCount >= MAX_RETRIES) {
+                await window.pushBufferToCloud();
+                if (typeof playSound === 'function') playSound('scoutError');
+                if (window.pollInterval) { clearInterval(window.pollInterval); window.pollInterval = null; }
+                
+                // UI Recovery for Start Button
+                const startBtn = document.getElementById('start-btn');
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.style.opacity = "1.0";
+                    startBtn.textContent = "RE-LINK LOG FILE";
+                }
+                addLog("❌ SCOUT_HALTED: Link broken.", true);
+            }
+        }
+    };
+
+    /**
+     * HANDLE CHAT LINE
      */
     window.handleChatLine = async function(line) {
         if (line === lastProcessedLine) return;
@@ -1901,7 +1938,6 @@ async function pushBufferToCloud() {
             const value = parseFloat(match[4]);
             const currentLogTimestamp = new Date(match[1]).getTime();
 
-            // Frequency Protection (5s floor)
             const secondsBetween = (currentLogTimestamp - lastLogTimestamp) / 1000;
             if (lastLogTimestamp !== 0 && secondsBetween < 5) return; 
 
@@ -1909,7 +1945,6 @@ async function pushBufferToCloud() {
                 lastLogTimestamp = currentLogTimestamp;
                 lastProcessedLine = line; 
 
-                // 1. OCR VERIFICATION GATE
                 if (isOcrActive) {
                     const fish = fishType.toLowerCase();
                     const isFresh = (Date.now() - scoutState.lastScanTime) < 45000;
@@ -1924,7 +1959,6 @@ async function pushBufferToCloud() {
                     }
                 }
 
-                // 2. LOCAL SESSION UPDATE
                 if (!(fishType in sessionStats)) {
                     sessionStats[fishType] = 0;
                     sessionValues[fishType] = 0;
@@ -1933,30 +1967,22 @@ async function pushBufferToCloud() {
                 sessionStats[fishType] += amount;
                 sessionValues[fishType] += value;
 
-                // 3. CONTEST PHASE GATES & CLOUD SYNC
                 if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                     const settings = window.currentContestSettings;
                     const startTime = settings?.startTime?.toMillis() || 0;
                     const durationMs = (settings?.duration || 60) * 60000;
-                    const endTime = startTime + durationMs;
                     const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
 
-                    // PHASE: PRE-START
                     if (serverAdjustedNow < startTime) {
-                        addLog(`⏳ PRE_START: Catch ignored by cloud (Starts in ${formatTime(startTime - serverAdjustedNow)})`, true);
-                    } 
-                    // PHASE: POST-END
-                    else if (settings?.status === 'concluded' || serverAdjustedNow > endTime) {
-                        addLog(`🚫 SESSION_FINALIZED: Catch not synced to cloud.`, true);
-                    } 
-                    // PHASE: ACTIVE (LIVE)
-                    else {
+                        addLog(`⏳ PRE_START: Catch ignored (Starts in ${formatTime(startTime - serverAdjustedNow)})`, true);
+                    } else if (settings?.status === 'concluded' || serverAdjustedNow > (startTime + durationMs)) {
+                        addLog(`🚫 SESSION_FINALIZED: Catch not synced.`, true);
+                    } else {
                         const target = settings?.targetFish?.toLowerCase();
                         if (target && fishType.toLowerCase() === target) {
                             pendingCatchBuffer.score += amount;
                             addLog(`🎯 TARGET_HIT: +${amount} PTS [${fishType.toUpperCase()}]`);
                         }
-
                         if (!pendingCatchBuffer.totals[fishType]) pendingCatchBuffer.totals[fishType] = 0;
                         pendingCatchBuffer.totals[fishType] += amount;
 
@@ -2002,16 +2028,6 @@ async function pushBufferToCloud() {
         } catch (err) {
             syncTimer = setTimeout(window.pushBufferToCloud, 30000);
         }
-    };
-
-    // Trigger Final Sync on conclusion
-    const originalRefresh = window.refreshContestList;
-    window.refreshContestList = async function() {
-        if (window.currentContestSettings?.status === 'concluded' && (pendingCatchBuffer.score > 0 || Object.keys(pendingCatchBuffer.totals).length > 0)) {
-            addLog("🏁 TIME_EXPIRED: Contest Finalized. Syncing final weights.");
-            await window.pushBufferToCloud();
-        }
-        if (originalRefresh) return originalRefresh();
     };
 
     function initUI() {
