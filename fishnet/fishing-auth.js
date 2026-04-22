@@ -1961,6 +1961,7 @@ async function pushBufferToCloud() {
             syncTimer = setTimeout(window.pushBufferToCloud, 30000);
         }
     };
+	document.getElementById('setup-ocr-btn').addEventListener('click', window.calibrateVisualScout);
 })();
 
 
