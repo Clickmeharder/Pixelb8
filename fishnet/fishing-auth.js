@@ -1885,10 +1885,10 @@ async function pushBufferToCloud() {
                 const globalText = text.toLowerCase();
                 
                 // Lock 1: Client Verification
-                scoutState.clientVerified = globalText.includes("entropia") && globalText.includes("client");
+                scoutState.clientVerified = globalText.includes("Entropia Universe") && globalText.includes("Client");
                 
                 // Lock 2: Mini-game UI Presence
-                if (globalText.includes("reel") || globalText.includes("hold")) {
+                if (globalText.includes("reel") || globalText.includes("hold to")) {
                     scoutState.miniGameDetected = true;
                     // Keep detection true for 45s to account for reeling time
                     setTimeout(() => { scoutState.miniGameDetected = false; }, 45000);
