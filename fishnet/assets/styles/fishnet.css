@@ -656,6 +656,7 @@ fishnet specific
 			padding: 1px;
 			height: 100vh;
 			overflow: hidden;
+			overflow-y:auto;
         }
 		div#appwrapper {
 			background: radial-gradient(circle at center, #162a3af5 0%, #050a0fe8 95%);
@@ -741,8 +742,8 @@ fishnet specific
 
         /* Tabs */
         .main-tabs {    display: flex;gap: 2px;margin-bottom: 2px;border-bottom: 1px solid #333;padding-bottom: 4px;justify-content: space-around;}
-        .tab-btn {background: var(--eu-panel); border: 1px solid var(--eu-border);color: #898989; padding: 4px 6px; cursor: pointer;font-weight:bold; font-family: monospace; font-size: 11px;text-transform: uppercase; border-radius: 3px 3px 0 0;}
-        .tab-btn.active { background: var(--eu-panel); color: #b99615; }
+        .tab-btn, .tabbish-btn {background: var(--eu-panel); border: 1px solid var(--eu-border);color: #898989; padding: 4px 6px; cursor: pointer;font-weight:bold; font-family: monospace; font-size: 11px;text-transform: uppercase; border-radius: 3px 3px 0 0;}
+        .tab-btn.active, .tabbish-btn { background: var(--eu-panel); color: #b99615; }
 
         .tab-content {
 			background: var(--eu-panel);
