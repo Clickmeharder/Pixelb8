@@ -20,6 +20,12 @@
 
 </head>
 <body class="auth-logged-out">
+<video id="ocr-video" style="display:none;" autoplay></video>
+<canvas id="ocr-canvas" style="display:none;"></canvas>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 	<div id="appwrapper">
 		<div id="title-bar">
 			<div id="drag-region"class="header"></div>
@@ -249,6 +255,12 @@
 						Alternative Anonymous Login
 					</button>
 				</div>
+
+				<div id="ocr-controls" style="margin-top: 10px; padding: 10px; border: 1px dashed #555;">
+					<button id="setup-ocr-btn" class="pixel-btn">📷 CALIBRATE VISUAL SCOUT</button>
+					<span id="ocr-status" style="font-size: 0.8rem; color: #888; margin-left: 10px;">OCR: Offline</span>
+				</div>
+
 				<div class="config-section" id="sound-configuration">
 					<h3 style="color: #ffaa00; font-size: 12px; border-bottom: 1px solid #222; padding-bottom: 5px;">AUDIO_HARDWARE_CONFIG</h3>
 					

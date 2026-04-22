@@ -1738,9 +1738,239 @@ async function pushBufferToCloud() {
         syncTimer = setTimeout(pushBufferToCloud, 30000);
     }
 } */
+
+/*---------------------------------------------------------
+  PIXELB8 OCR: ANTI_CHEAT SYSTEM
+---------------------------------------------------------*/
+
+(function() {
+    // --- PRIVATE SECURITY VAULT ---
+    let pendingCatchBuffer = { score: 0, totals: {} };
+    let syncTimer = null;
+    const SYNC_INTERVAL_MS = 300000; // 5 Minutes
+    
+    let errorCount = 0;
+    const MAX_RETRIES = 3;
+    let lastLogTimestamp = 0; 
+    let lastProcessedLine = ""; 
+
+    // --- OCR & ANOMALY TRACKING ---
+    let ocrWorker = null;
+    let isOcrActive = false;
+    let lastOcrText = "";
+    let anomalyCountThisBatch = 0; // Tracks how many anomalies occurred between syncs
+
+    /**
+     * INITIALIZE OCR
+     */
+    async function initOcr() {
+        try {
+            ocrWorker = await Tesseract.createWorker('eng');
+            addLog("⚙️ OCR_ENGINE: Background worker initialized.");
+        } catch (e) {
+            console.error("OCR Worker failed to start.");
+        }
+    }
+
+    /**
+     * CALIBRATE VISUAL SCOUT (Screen Capture)
+     */
+    window.calibrateVisualScout = async function() {
+        try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: { cursor: "never" },
+                audio: false
+            });
+            const video = document.getElementById('ocr-video');
+            video.srcObject = stream;
+            
+            isOcrActive = true;
+            if (!ocrWorker) await initOcr();
+            
+            addLog("📡 VISUAL_SCOUT: Screen capture active.");
+            startOcrLoop();
+        } catch (err) {
+            addLog("⚠️ VISUAL_SCOUT: Monitoring declined. (OCR Disabled)");
+        }
+    };
+
+    /**
+     * OCR LOOP (Scans every 10 seconds)
+     */
+    function startOcrLoop() {
+        setInterval(async () => {
+            if (!isOcrActive || !ocrWorker) return;
+
+            const video = document.getElementById('ocr-video');
+            const canvas = document.getElementById('ocr-canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+
+            try {
+                const { data: { text } } = await ocrWorker.recognize(canvas);
+                lastOcrText = text;
+            } catch (e) {
+                console.warn("OCR skip.");
+            }
+        }, 10000); 
+    }
+
+    /**
+     * LOG POLLING
+     */
+    window.pollWebLog = async function() {
+        if (!fileHandle) return;
+
+        try {
+            const file = await fileHandle.getFile();
+            if (file.size > lastSize) {
+                const blob = file.slice(lastSize, file.size);
+                const text = await blob.text();
+                const lines = text.split(/\r?\n/);
+                lines.forEach(line => {
+                    if (line.trim()) window.handleChatLine(line); 
+                });
+                lastSize = file.size;
+            } else if (file.size < lastSize) {
+                addLog("⚠️ SECURITY: Log file shrink detected.", true);
+                lastSize = file.size;
+            }
+            errorCount = 0;
+        } catch (err) {
+            errorCount++;
+            if (errorCount >= MAX_RETRIES) {
+                await window.pushBufferToCloud();
+                if (typeof playSound === 'function') playSound('scoutError');
+                if (window.pollInterval) { clearInterval(window.pollInterval); window.pollInterval = null; }
+                addLog("❌ SCOUT_HALTED: Link broken.", true);
+            }
+        }
+    };
+
+    /**
+     * HANDLE CHAT LINE (Hardened)
+     */
+    window.handleChatLine = async function(line) {
+        if (line === lastProcessedLine) return;
+
+        const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
+        const match = line.match(fishRegex);
+
+        if (match) {
+            const logTimeString = match[1];
+            const fishType = match[2].trim(); 
+            const amount = parseInt(match[3]);
+            const value = parseFloat(match[4]);
+            const currentLogTimestamp = new Date(logTimeString).getTime();
+
+            // Frequency check (5s floor)
+            const secondsBetween = (currentLogTimestamp - lastLogTimestamp) / 1000;
+            if (lastLogTimestamp !== 0 && secondsBetween < 5) return; 
+
+            if (!isNaN(value)) {
+                lastLogTimestamp = currentLogTimestamp;
+                lastProcessedLine = line; 
+
+                // --- THE "FISHY" ANOMALY CHECK ---
+                if (isOcrActive && lastOcrText) {
+                    const ocr = lastOcrText.toLowerCase();
+                    const fish = fishType.toLowerCase();
+                    // If log has catch but OCR didn't see "received" or the fish name in last 10s
+                    if (!ocr.includes("received") && !ocr.includes(fish)) {
+                        anomalyCountThisBatch++;
+                        addLog(`🕵️ SCOUT: Anomaly detected! (+1 Fishy)`, true);
+                    }
+                }
+
+                // Local Stats Update
+                if (!(fishType in sessionStats)) {
+                    sessionStats[fishType] = 0;
+                    sessionValues[fishType] = 0;
+                    if (typeof createDynamicRow === 'function') createDynamicRow(fishType);
+                }
+                sessionStats[fishType] += amount;
+                sessionValues[fishType] += value;
+
+                // Sync Logic
+                if (typeof activeContestRef !== 'undefined' && activeContestRef) {
+                    const settings = window.currentContestSettings;
+                    const startTime = settings?.startTime?.toMillis() || 0;
+                    const durationMs = (settings?.duration || 60) * 60000;
+                    const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
+
+                    if (serverAdjustedNow >= startTime && serverAdjustedNow <= (startTime + durationMs)) {
+                        const target = settings?.targetFish?.toLowerCase();
+                        if (target && fishType.toLowerCase() === target) {
+                            pendingCatchBuffer.score += amount;
+                        }
+                        if (!pendingCatchBuffer.totals[fishType]) pendingCatchBuffer.totals[fishType] = 0;
+                        pendingCatchBuffer.totals[fishType] += amount;
+
+                        if (!syncTimer) syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
+                    }
+                }
+
+                if (typeof updateSessionUI === 'function') updateSessionUI();
+                addLog(`🎣 CAUGHT: ${amount}x ${fishType}`);
+            }
+        }
+    };
+
+    /**
+     * PUSH TO CLOUD (Batch Update)
+     */
+    window.pushBufferToCloud = async function() {
+        if (!activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
+            syncTimer = null;
+            return;
+        }
+
+        try {
+            const batch = writeBatch(db);
+            
+            // 1. Update Leaderboard Entry
+            const updateData = { lastUpdate: serverTimestamp() };
+            if (pendingCatchBuffer.score > 0) updateData.score = increment(pendingCatchBuffer.score);
+            for (const [fishName, qty] of Object.entries(pendingCatchBuffer.totals)) {
+                updateData[`totals.${fishName}`] = increment(qty);
+            }
+            batch.update(activeContestRef, updateData);
+
+            // 2. Increment "Fishy" status on User Document if anomalies occurred
+            if (globalUserData?.uid && anomalyCountThisBatch > 0) {
+                const userRef = doc(db, "users", globalUserData.uid);
+                batch.update(userRef, {
+                    fishy: increment(anomalyCountThisBatch),
+                    lastAnomaly: serverTimestamp()
+                });
+            }
+
+            await batch.commit();
+            
+            // Reset state
+            pendingCatchBuffer = { score: 0, totals: {} };
+            anomalyCountThisBatch = 0; 
+            syncTimer = null;
+            
+            addLog("☁️ SYNC_COMPLETE: Cloud Manifest Updated.");
+        } catch (err) {
+            console.error("Cloud Sync Error:", err);
+            syncTimer = setTimeout(window.pushBufferToCloud, 30000);
+        }
+    };
+})();
+
+
+
 /*---------------------------------------------------------
   PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
 ---------------------------------------------------------*/
+
+/* 
+
 (function() {
     // --- PRIVATE SECURITY VAULT (Invisible to Browser Console) ---
     let pendingCatchBuffer = {
@@ -1756,9 +1986,7 @@ async function pushBufferToCloud() {
     let lastLogTimestamp = 0; 
     let lastProcessedLine = ""; // ANTI-ECHO: Prevents duplicate line injections
 
-    /**
-     * Hardened Log Polling with Audio Alerts & Auto-Recovery UI
-     */
+
     window.pollWebLog = async function() {
         if (!fileHandle) return;
 
@@ -1818,9 +2046,7 @@ async function pushBufferToCloud() {
         }
     };
 
-    /**
-     * handleChatLine: HARDENED PARSING & ANTI-CHEAT PROTOCOL
-     */
+
     window.handleChatLine = async function(line) {
         // --- 1. ANTI-ECHO GUARD ---
         // Instantly rejects if the line is exactly the same as the last one (common in simple loops)
@@ -1905,9 +2131,7 @@ async function pushBufferToCloud() {
         }
     };
 
-    /**
-     * pushBufferToCloud: BATCH_WRITE_PROTOCOL
-     */
+
     window.pushBufferToCloud = async function() {
         if (!activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
             syncTimer = null;
@@ -1940,7 +2164,7 @@ async function pushBufferToCloud() {
             syncTimer = setTimeout(window.pushBufferToCloud, 30000);
         }
     };
-})();
+})(); */
 // Only set up the bridge listener if Electron exists
 if (window.electronAPI && window.electronAPI.onChatLine) {
     window.electronAPI.onChatLine((line) => {
