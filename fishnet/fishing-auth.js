@@ -1743,6 +1743,9 @@ async function pushBufferToCloud() {
   PIXELB8 OCR: ANTI_CHEAT SYSTEM
   Hardened Version // Includes pollWebLog & Ghost Mode
 ---------------------------------------------------------*/
+/*---------------------------------------------------------
+  PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V2)
+---------------------------------------------------------*/
 (function() {
     // --- PRIVATE STATE & SECURITY VAULT ---
     let pendingCatchBuffer = { score: 0, totals: {} };
@@ -1764,7 +1767,7 @@ async function pushBufferToCloud() {
         bottomLine: "",
         totalCatchLines: 0,
         lastScanTime: 0,
-        consumedLines: 0 
+        consumedLines: 0 // Reset when bottomLine changes
     };
 
     /**
@@ -1776,7 +1779,7 @@ async function pushBufferToCloud() {
             await ocrWorker.setParameters({
                 tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]():. ',
             });
-            addLog("⚙️ OCR_ENGINE: Hardened Scroll-Detection Mode Active.");
+            addLog("⚙️ OCR_ENGINE: Active.");
         } catch (e) {
             console.error("OCR Worker failed to start.", e);
         }
@@ -1806,7 +1809,6 @@ async function pushBufferToCloud() {
                 btn.style.background = "#2e7d32";
             }
 
-            // Auto-show on calibration
             if (scoutContainer) {
                 scoutContainer.style.position = 'relative';
                 scoutContainer.style.left = '0';
@@ -1814,7 +1816,7 @@ async function pushBufferToCloud() {
                 if (toggleBtn) toggleBtn.textContent = "✖️ Hide Scout View";
             }
 
-            addLog("📡 VISUAL_SCOUT: Screen capture active.");
+            addLog("📡 VISUAL_SCOUT: Linked.");
             startOcrLoop();
 
             stream.getVideoTracks()[0].onended = () => {
@@ -1828,7 +1830,7 @@ async function pushBufferToCloud() {
     };
 
     /**
-     * OCR LOOP
+     * OCR LOOP (Updates visual context)
      */
     function startOcrLoop() {
         setInterval(async () => {
@@ -1852,7 +1854,6 @@ async function pushBufferToCloud() {
             const cropW = video.videoWidth * wPct;
             const cropH = video.videoHeight * hPct;
 
-            // --- ANTI-CRASH GATEKEEPER ---
             if (isNaN(cropW) || isNaN(cropH) || cropW <= 1 || cropH <= 1) return;
 
             canvas.width = cropW;
@@ -1865,10 +1866,13 @@ async function pushBufferToCloud() {
             try {
                 const { data: { text } } = await ocrWorker.recognize(canvas);
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 5);
-                const newBottomLine = lines[lines.length - 1] || "";
+                const currentBottomLine = lines[lines.length - 1] || "";
 
-                if (newBottomLine !== scoutState.bottomLine) {
-                    scoutState.bottomLine = newBottomLine;
+                // If the chat has moved (new bottom line), reset our "consumed" count
+                // this allows a small window to catch multiple lines even if the box is small.
+                if (currentBottomLine !== scoutState.bottomLine) {
+                    scoutState.bottomLine = currentBottomLine;
+                    scoutState.consumedLines = 0; 
                     scoutState.totalCatchLines = lines.filter(l => l.toLowerCase().includes("received")).length;
                 }
 
@@ -1877,14 +1881,14 @@ async function pushBufferToCloud() {
             } catch (e) {
                 console.warn("OCR Sync Drift.");
             }
-        }, 8000); 
+        }, 5000); // Scans slightly faster (5s) for small windows
     }
 
     /**
      * LOG POLLING
      */
     window.pollWebLog = async function() {
-        if (!fileHandle) return;
+        if (typeof fileHandle === 'undefined' || !fileHandle) return;
         try {
             const file = await fileHandle.getFile();
             if (file.size > lastSize) {
@@ -1912,7 +1916,7 @@ async function pushBufferToCloud() {
     };
 
     /**
-     * HANDLE CHAT LINE
+     * HANDLE CHAT LINE (The Security Gate)
      */
     window.handleChatLine = async function(line) {
         if (line === lastProcessedLine) return;
@@ -1935,19 +1939,24 @@ async function pushBufferToCloud() {
 
                 if (isOcrActive) {
                     const fish = fishType.toLowerCase();
-                    const isFresh = (Date.now() - scoutState.lastScanTime) < 35000;
+                    // Give it a 45s window to find the visual match (for slow polling/small boxes)
+                    const isFresh = (Date.now() - scoutState.lastScanTime) < 45000;
                     const hasVisual = scoutState.fullText.includes(fish);
                     
                     scoutState.consumedLines++;
 
-                    if (!hasVisual || !isFresh || scoutState.consumedLines > scoutState.totalCatchLines) {
+                    // RELAXED CHECK:
+                    // Only flag if there's NO visual match AND the OCR hasn't updated in ages.
+                    // Or if we've processed way more catches than the box can even hold.
+                    if ((!hasVisual && isFresh && scoutState.consumedLines > 2) || scoutState.consumedLines > 15) {
                         anomalyCountThisBatch++;
-                        addLog(`🕵️ SCOUT: Anomaly! (Visible: ${scoutState.totalCatchLines}, Log: ${scoutState.consumedLines})`, true);
+                        addLog(`🕵️ SCOUT: Unverified catch (${fishType}).`, true);
                     } else {
-                        addLog(`📸 SCOUT: Visual match for ${fishType}.`);
+                        addLog(`📸 SCOUT: Visual match confirmed for ${fishType}.`);
                     }
                 }
 
+                // --- PROCESS STATS ---
                 if (!(fishType in sessionStats)) {
                     sessionStats[fishType] = 0;
                     sessionValues[fishType] = 0;
@@ -1956,6 +1965,7 @@ async function pushBufferToCloud() {
                 sessionStats[fishType] += amount;
                 sessionValues[fishType] += value;
 
+                // --- CONTEST LOGIC ---
                 if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                     const settings = window.currentContestSettings;
                     const startTime = settings?.startTime?.toMillis() || 0;
@@ -1983,7 +1993,7 @@ async function pushBufferToCloud() {
      * CLOUD SYNC
      */
     window.pushBufferToCloud = async function() {
-        if (!activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
+        if (typeof activeContestRef === 'undefined' || !activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
             syncTimer = null;
             return;
         }
@@ -1996,7 +2006,7 @@ async function pushBufferToCloud() {
             }
             batch.update(activeContestRef, updateData);
 
-            if (globalUserData?.uid && anomalyCountThisBatch > 0) {
+            if (typeof globalUserData !== 'undefined' && globalUserData?.uid && anomalyCountThisBatch > 0) {
                 batch.update(doc(db, "users", globalUserData.uid), {
                     fishy: increment(anomalyCountThisBatch),
                     lastAnomaly: serverTimestamp()
@@ -2006,7 +2016,7 @@ async function pushBufferToCloud() {
             pendingCatchBuffer = { score: 0, totals: {} };
             anomalyCountThisBatch = 0;
             syncTimer = null;
-            addLog("☁️ SYNC_COMPLETE: Scores & Security Updated.");
+            addLog("☁️ SYNC_COMPLETE: Cloud scores updated.");
         } catch (err) {
             syncTimer = setTimeout(window.pushBufferToCloud, 30000);
         }
@@ -2055,10 +2065,8 @@ async function pushBufferToCloud() {
         if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
     }
 
-    // Run UI Init
     if (document.readyState === 'complete') initUI();
     else window.addEventListener('load', initUI);
-
 })();
 /*---------------------------------------------------------
   PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
