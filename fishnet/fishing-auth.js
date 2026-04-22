@@ -1742,17 +1742,8 @@ async function pushBufferToCloud() {
 /*---------------------------------------------------------
   PIXELB8 OCR: ANTI_CHEAT SYSTEM
 ---------------------------------------------------------*/
-
 (function() {
-    // --- OCR CONFIGURATION (Adjust these to frame your chat window) ---
-    const OCR_CONFIG = {
-        x: 5,      // % from left
-        y: 70,     // % from top
-        w: 35,     // % width
-        h: 25      // % height
-    };
-
-    // --- PRIVATE SECURITY VAULT ---
+    // --- PRIVATE STATE & SECURITY VAULT ---
     let pendingCatchBuffer = { score: 0, totals: {} };
     let syncTimer = null;
     const SYNC_INTERVAL_MS = 300000; // 5 Minutes
@@ -1762,19 +1753,30 @@ async function pushBufferToCloud() {
     let lastLogTimestamp = 0; 
     let lastProcessedLine = ""; 
 
-    // --- OCR & ANOMALY TRACKING ---
+    // --- OCR, SCROLL & ANOMALY TRACKING ---
     let ocrWorker = null;
     let isOcrActive = false;
-    let lastOcrText = "";
     let anomalyCountThisBatch = 0; 
+
+    let scoutState = {
+        fullText: "",
+        bottomLine: "",
+        totalCatchLines: 0,
+        lastScanTime: 0,
+        consumedLines: 0 // How many visual lines we've already "credited" to log entries
+    };
 
     /**
      * INITIALIZE OCR
+     * Uses a character whitelist to prevent [Baitfish] misreads.
      */
     async function initOcr() {
         try {
             ocrWorker = await Tesseract.createWorker('eng');
-            addLog("⚙️ OCR_ENGINE: Background worker initialized.");
+            await ocrWorker.setParameters({
+                tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]():. ',
+            });
+            addLog("⚙️ OCR_ENGINE: Hardened Scroll-Detection Mode Active.");
         } catch (e) {
             console.error("OCR Worker failed to start.", e);
         }
@@ -1815,51 +1817,58 @@ async function pushBufferToCloud() {
     };
 
     /**
-     * OCR LOOP (Scans ROI every 10 seconds)
+     * OCR LOOP (Scans ROI every 8 seconds for Scroll-Sync)
      */
-	function startOcrLoop() {
-		setInterval(async () => {
-			if (!isOcrActive || !ocrWorker) return;
+    function startOcrLoop() {
+        setInterval(async () => {
+            if (!isOcrActive || !ocrWorker) return;
 
-			const video = document.getElementById('ocr-video');
-			const box = document.getElementById('crop-box');
-			const canvas = document.getElementById('ocr-canvas');
-			const ctx = canvas.getContext('2d');
+            const video = document.getElementById('ocr-video');
+            const box = document.getElementById('crop-box');
+            const canvas = document.getElementById('ocr-canvas');
+            const ctx = canvas.getContext('2d');
 
-			// 1. Get the current position/size of the box relative to the video
-			const boxRect = box.getBoundingClientRect();
-			const videoRect = video.getBoundingClientRect();
+            // 1. Map Draggable Box to Video Stream Pixels
+            const boxRect = box.getBoundingClientRect();
+            const videoRect = video.getBoundingClientRect();
 
-			// 2. Convert to percentages to handle window resizing
-			const xPct = (boxRect.left - videoRect.left) / videoRect.width;
-			const yPct = (boxRect.top - videoRect.top) / videoRect.height;
-			const wPct = boxRect.width / videoRect.width;
-			const hPct = boxRect.height / videoRect.height;
+            const xPct = (boxRect.left - videoRect.left) / videoRect.width;
+            const yPct = (boxRect.top - videoRect.top) / videoRect.height;
+            const wPct = boxRect.width / videoRect.width;
+            const hPct = boxRect.height / videoRect.height;
 
-			// 3. Convert percentages to actual source video pixels
-			const cropX = video.videoWidth * xPct;
-			const cropY = video.videoHeight * yPct;
-			const cropW = video.videoWidth * wPct;
-			const cropH = video.videoHeight * hPct;
+            const cropX = video.videoWidth * xPct;
+            const cropY = video.videoHeight * yPct;
+            const cropW = video.videoWidth * wPct;
+            const cropH = video.videoHeight * hPct;
 
-			canvas.width = cropW;
-			canvas.height = cropH;
+            canvas.width = cropW;
+            canvas.height = cropH;
 
-			// 4. Capture the frame
-			ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+            // 2. Capture and Pre-Process (Invert for white-on-dark chat)
+            ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+            ctx.filter = 'grayscale(1) contrast(300%) invert(1)'; 
+            ctx.drawImage(canvas, 0, 0);
 
-			// 5. Pre-process for OCR (High contrast)
-			ctx.filter = 'grayscale(1) contrast(300%) invert(1)'; 
-			ctx.drawImage(canvas, 0, 0);
+            try {
+                const { data: { text } } = await ocrWorker.recognize(canvas);
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 5);
+                const newBottomLine = lines[lines.length - 1] || "";
 
-			try {
-				const { data: { text } } = await ocrWorker.recognize(canvas);
-				lastOcrText = text;
-			} catch (e) {
-				console.warn("OCR failure.");
-			}
-		}, 10000); 
-	}
+                // 3. SCROLL DETECTION: If the bottom line changes, we have new visual context
+                if (newBottomLine !== scoutState.bottomLine) {
+                    scoutState.bottomLine = newBottomLine;
+                    // Update the total available "Received" lines visible on screen
+                    scoutState.totalCatchLines = lines.filter(l => l.toLowerCase().includes("received")).length;
+                }
+
+                scoutState.fullText = text.toLowerCase();
+                scoutState.lastScanTime = Date.now();
+            } catch (e) {
+                console.warn("OCR failure.");
+            }
+        }, 8000); 
+    }
 
     /**
      * LOG POLLING
@@ -1893,7 +1902,7 @@ async function pushBufferToCloud() {
     };
 
     /**
-     * HANDLE CHAT LINE
+     * HANDLE CHAT LINE (The Security Gatekeeper)
      */
     window.handleChatLine = async function(line) {
         if (line === lastProcessedLine) return;
@@ -1902,11 +1911,10 @@ async function pushBufferToCloud() {
         const match = line.match(fishRegex);
 
         if (match) {
-            const logTimeString = match[1];
             const fishType = match[2].trim(); 
             const amount = parseInt(match[3]);
             const value = parseFloat(match[4]);
-            const currentLogTimestamp = new Date(logTimeString).getTime();
+            const currentLogTimestamp = new Date(match[1]).getTime();
 
             const secondsBetween = (currentLogTimestamp - lastLogTimestamp) / 1000;
             if (lastLogTimestamp !== 0 && secondsBetween < 5) return; 
@@ -1915,18 +1923,28 @@ async function pushBufferToCloud() {
                 lastLogTimestamp = currentLogTimestamp;
                 lastProcessedLine = line; 
 
-                // --- THE "FISHY" ANOMALY CHECK ---
-                if (isOcrActive && lastOcrText) {
-                    const ocr = lastOcrText.toLowerCase();
+                // --- THE "SCROLL-AWARE" VALIDATION ---
+                if (isOcrActive) {
                     const fish = fishType.toLowerCase();
+                    const isFresh = (Date.now() - scoutState.lastScanTime) < 35000;
+                    const hasVisual = scoutState.fullText.includes(fish);
                     
-                    // Integrity Check: Does OCR see 'received' or the fish name?
-                    if (!ocr.includes("received") && !ocr.includes(fish)) {
+                    // Increment "consumed" for every log entry found
+                    scoutState.consumedLines++;
+
+                    // ANOMALY CHECK:
+                    // 1. Does the fish name exist in the box?
+                    // 2. Is the OCR data reasonably fresh?
+                    // 3. Are there more log lines than visual "Received" lines? (Spoofing detection)
+                    if (!hasVisual || !isFresh || scoutState.consumedLines > scoutState.totalCatchLines) {
                         anomalyCountThisBatch++;
-                        addLog(`🕵️ SCOUT: Anomaly detected! (+1 Fishy)`, true);
+                        addLog(`🕵️ SCOUT: Anomaly detected! (Lines Seen: ${scoutState.totalCatchLines}, Log Catch: ${scoutState.consumedLines})`, true);
+                    } else {
+                        addLog(`📸 SCOUT: Visual match confirmed for ${fishType}.`);
                     }
                 }
 
+                // --- PROCESS VALID CATCH ---
                 if (!(fishType in sessionStats)) {
                     sessionStats[fishType] = 0;
                     sessionValues[fishType] = 0;
@@ -1997,31 +2015,33 @@ async function pushBufferToCloud() {
         }
     };
 
-    // --- EVENT LISTENERS ---
-    const setupBtn = document.getElementById('setup-ocr-btn');
-    if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
+    // --- DRAGGABLE UI LOGIC ---
 
 })();
-const box = document.getElementById('crop-box');
-let isDragging = false;
-let offset = { x: 0, y: 0 };
+    const box = document.getElementById('crop-box');
+    let isDragging = false;
+    let dragOffset = { x: 0, y: 0 };
 
-box.addEventListener('mousedown', (e) => {
-    if (e.target !== box) return; // Only drag if clicking the box, not the resize handle
-    isDragging = true;
-    offset.x = e.clientX - box.offsetLeft;
-    offset.y = e.clientY - box.offsetTop;
-});
+    if (box) {
+        box.addEventListener('mousedown', (e) => {
+            if (e.target !== box) return; 
+            isDragging = true;
+            dragOffset.x = e.clientX - box.offsetLeft;
+            dragOffset.y = e.clientY - box.offsetTop;
+        });
 
-document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    box.style.left = `${e.clientX - offset.x}px`;
-    box.style.top = `${e.clientY - offset.y}px`;
-});
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            box.style.left = `${e.clientX - dragOffset.x}px`;
+            box.style.top = `${e.clientY - dragOffset.y}px`;
+        });
 
-document.addEventListener('mouseup', () => {
-    isDragging = false;
-});
+        document.addEventListener('mouseup', () => { isDragging = false; });
+    }
+
+    // --- BUTTON LISTENER ---
+    const setupBtn = document.getElementById('setup-ocr-btn');
+    if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
 
 /*---------------------------------------------------------
   PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
