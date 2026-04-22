@@ -1943,11 +1943,9 @@ async function pushBufferToCloud() {
 /*---------------------------------------------------------
   PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
 ---------------------------------------------------------*/
-
 /* 
-
 (function() {
-    // --- PRIVATE SECURITY VAULT (Invisible to Browser Console) ---
+
     let pendingCatchBuffer = {
         score: 0,
         totals: {}
