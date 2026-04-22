@@ -1750,31 +1750,23 @@ async function pushBufferToCloud() {
   Features: Full Polling, Phase-Aware Sync & Hard Teardown
 ---------------------------------------------------------*/
 (function() {
-    // --- PRIVATE STATE & SECURITY VAULT ---
     let pendingCatchBuffer = { score: 0, totals: {} };
     let syncTimer = null;
     const SYNC_INTERVAL_MS = 300000; 
-    let errorCount = 0;
-    const MAX_RETRIES = 3;
-    let lastLogTimestamp = 0; 
+    let lastSize = 0; 
     let lastProcessedLine = ""; 
-
-    // --- OCR & DUAL-LOCK STATE ---
     let ocrWorker = null;
     let isOcrActive = false;
     let anomalyCountThisBatch = 0; 
 
+    // Removed clientVerified lock
     let scoutState = {
         fullText: "",
-        miniGameDetected: false,  // Exact UI detected
-        barFullyReeled: false,    // Blue bar reached ≥90%
-        clientVerified: false,    // Global Window Title Check
+        miniGameDetected: false,
+        barFullyReeled: false,
         lastScanTime: 0
     };
 
-    /**
-     * INITIALIZE OCR
-     */
     async function initOcr() {
         try {
             if (ocrWorker) await ocrWorker.terminate();
@@ -1783,13 +1775,10 @@ async function pushBufferToCloud() {
                 tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]():. ',
                 tessedit_pageseg_mode: '7' 
             });
-            addLog("⚙️ OCR_ENGINE: Dual-Crop + Triple-Lock Security Enabled.");
+            addLog("⚙️ OCR_ENGINE: Initialized (Dual-Crop Mode).");
         } catch (e) { console.error("OCR Init Fail", e); }
     }
 
-    /**
-     * PIXEL ANALYSIS: BLUE BAR FILL LEVEL
-     */
     function calculateBlueBarFillLevel(pixels, width, height) {
         let filledColumns = 0;
         const colThreshold = Math.floor(height * 0.55); 
@@ -1797,16 +1786,14 @@ async function pushBufferToCloud() {
             let blueCount = 0;
             for (let y = 0; y < height; y++) {
                 const i = (y * width + x) * 4;
-                if (pixels[i] < 60 && pixels[i + 1] > 90 && pixels[i + 2] > 170) blueCount++;
+                // Specific Entropia Blue Bar RGB Range
+                if (pixels[i] < 75 && pixels[i + 1] > 85 && pixels[i + 2] > 165) blueCount++;
             }
             if (blueCount >= colThreshold) filledColumns++;
         }
         return Math.round((filledColumns / width) * 100);
     }
 
-    /**
-     * OCR MONITORING LOOP
-     */
     function startOcrLoop() {
         if (window.scoutLoopInterval) clearInterval(window.scoutLoopInterval);
         window.scoutLoopInterval = setInterval(async () => {
@@ -1821,15 +1808,7 @@ async function pushBufferToCloud() {
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             const vRect = video.getBoundingClientRect();
 
-            // 1. GLOBAL VERIFICATION (Lock 1: Client Window)
-            if (Math.random() > 0.7) {
-                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-                ctx.drawImage(video, 0, 0);
-                const { data: { text } } = await ocrWorker.recognize(canvas);
-                scoutState.clientVerified = text.toLowerCase().includes("entropia universe");
-            }
-
-            // 2. UI CROP: BLUE BAR + REEL TEXT
+            // 1. UI CROP: BLUE BAR + REEL TEXT
             const uR = uiBox.getBoundingClientRect();
             canvas.width = 400; canvas.height = 80;
             ctx.drawImage(video, (uR.left - vRect.left) / vRect.width * video.videoWidth, (uR.top - vRect.top) / vRect.height * video.videoHeight, uR.width / vRect.width * video.videoWidth, uR.height / vRect.height * video.videoHeight, 0, 0, canvas.width, canvas.height);
@@ -1839,21 +1818,24 @@ async function pushBufferToCloud() {
 
             try {
                 ctx.filter = 'grayscale(1) contrast(400%) brightness(1.2) invert(1)';
-                ctx.drawImage(canvas, 0, 0); // Redraw with filter
+                ctx.drawImage(canvas, 0, 0); 
                 const { data: { text } } = await ocrWorker.recognize(canvas);
                 const uiText = text.toLowerCase();
+                
                 const hasReelWords = uiText.includes('hold') || uiText.includes('reel') || uiText.includes('[3]');
-
-                if (hasReelWords) {
+                
+                // Detection Logic (Bar or Text)
+                if (hasReelWords || fillLevel > 5) {
                     scoutState.miniGameDetected = true;
-                    if (fillLevel >= 90) {
+                    if (fillLevel >= 88) { 
                         scoutState.barFullyReeled = true;
-                        setTimeout(() => { scoutState.barFullyReeled = false; }, 15000);
+                        // Extended buffer to allow log file to update
+                        setTimeout(() => { scoutState.barFullyReeled = false; }, 25000);
                     }
                 }
             } catch (e) {} finally { ctx.filter = 'none'; }
 
-            // 3. CHAT CROP: FISH NAME
+            // 2. CHAT CROP: FISH NAME
             const cR = chatBox.getBoundingClientRect();
             canvas.width = chatBox.offsetWidth * 2; canvas.height = chatBox.offsetHeight * 2;
             ctx.filter = 'grayscale(1) contrast(300%) invert(1)';
@@ -1864,12 +1846,9 @@ async function pushBufferToCloud() {
                 scoutState.fullText = text.toLowerCase();
                 scoutState.lastScanTime = Date.now();
             } catch (e) {}
-        }, 5000);
+        }, 4500); 
     }
 
-    /**
-     * LOG HANDLING & SECURITY GATE
-     */
     window.handleChatLine = async function(line) {
         if (line === lastProcessedLine) return;
         const fishRegex = /You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
@@ -1882,31 +1861,27 @@ async function pushBufferToCloud() {
             if (isOcrActive) {
                 const hasVisualChat = scoutState.fullText.includes(fishType.toLowerCase());
                 const hasReeled = scoutState.barFullyReeled || scoutState.miniGameDetected;
-                const isFresh = (Date.now() - scoutState.lastScanTime) < 45000;
+                const isFresh = (Date.now() - scoutState.lastScanTime) < 60000;
 
                 if (!hasVisualChat || !hasReeled || !isFresh) {
                     anomalyCountThisBatch++;
-                    addLog(`🕵️ SCOUT: Anomaly! Chat:${hasVisualChat} | UI:${hasReeled}`, true);
+                    addLog(`🕵️ SCOUT FAIL: Chat:${hasVisualChat} | UI:${hasReeled}`, true);
                     return; 
                 }
             }
 
             lastProcessedLine = line;
             if (typeof sessionStats !== 'undefined') sessionStats[fishType] = (sessionStats[fishType] || 0) + amount;
-
-            // Cloud Buffer
+            
             pendingCatchBuffer.score += amount;
             pendingCatchBuffer.totals[fishType] = (pendingCatchBuffer.totals[fishType] || 0) + amount;
+            
             if (!syncTimer) syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
-
             if (typeof updateSessionUI === 'function') updateSessionUI();
             addLog(`🎣 VERIFIED: ${amount}x ${fishType}`);
         }
     };
 
-    /**
-     * POLL LOG FILE
-     */
     window.pollWebLog = async function() {
         if (typeof fileHandle === 'undefined' || !fileHandle) return;
         try {
@@ -1917,45 +1892,25 @@ async function pushBufferToCloud() {
                 text.split(/\r?\n/).forEach(l => { if (l.trim()) window.handleChatLine(l); });
                 lastSize = file.size;
             }
-            errorCount = 0;
-        } catch (err) {
-            errorCount++;
-            if (errorCount >= MAX_RETRIES) window.stopVisualScout();
-        }
+        } catch (err) {}
     };
 
-    /**
-     * CLOUD SYNC
-     */
-    window.pushBufferToCloud = async function() {
-        if (typeof activeContestRef === 'undefined' || !activeContestRef) return;
-        try {
-            // Placeholder for your Firestore logic (writeBatch, increment, etc)
-            console.log("☁️ SYNCING TO CLOUD...", pendingCatchBuffer);
-            pendingCatchBuffer = { score: 0, totals: {} };
-            anomalyCountThisBatch = 0;
-            syncTimer = null;
-            addLog("☁️ SYNC_COMPLETE.");
-        } catch (err) { syncTimer = setTimeout(window.pushBufferToCloud, 30000); }
-    };
-
-    /**
-     * UI SETUP (Resizable & Draggable)
-     */
     function initUI() {
         const setupBtn = document.getElementById('setup-ocr-btn');
         if (setupBtn) setupBtn.onclick = window.calibrateVisualScout;
 
         [document.getElementById('crop-box'), document.getElementById('ui-crop-box')].forEach(box => {
             if (!box) return;
-            // Force resizable CSS
+            // Setup CSS for Resizing
             box.style.resize = "both";
             box.style.overflow = "hidden";
+            box.style.position = "absolute";
+            box.style.zIndex = "9999";
             
             let drag = false, off = { x: 0, y: 0 };
             box.onmousedown = (e) => { 
-                // Only drag if not clicking the resize handle (bottom-right 15px)
-                if (e.offsetX < box.clientWidth - 15 || e.offsetY < box.clientHeight - 15) {
+                // Only drag if not clicking the bottom-right corner (resize handle area)
+                if (e.offsetX < box.clientWidth - 25 || e.offsetY < box.clientHeight - 25) {
                     drag = true; 
                     off.x = e.clientX - box.offsetLeft; 
                     off.y = e.clientY - box.offsetTop; 
@@ -1978,9 +1933,9 @@ async function pushBufferToCloud() {
             isOcrActive = true;
             await initOcr();
             startOcrLoop();
-            if (typeof window.pollWebLog === 'function') setInterval(window.pollWebLog, 2000);
-            addLog("📡 VISUAL_SCOUT: Screen capture + Log Polling active.");
-        } catch (e) { addLog("⚠️ VISUAL_SCOUT: Link declined."); }
+            setInterval(window.pollWebLog, 2000);
+            addLog("📡 SCOUT: Monitoring started (Dual-Crop).");
+        } catch (e) { addLog("⚠️ SCOUT: Stream Error."); }
     };
 
     window.addEventListener('load', initUI);
