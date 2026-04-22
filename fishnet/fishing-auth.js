@@ -1744,7 +1744,8 @@ async function pushBufferToCloud() {
   Hardened Version // Includes pollWebLog & Ghost Mode
 ---------------------------------------------------------*/
 /*---------------------------------------------------------
-  PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V2)
+  PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V3)
+  Features: Scroll-Aware Logic & Memory-Safe Teardown
 ---------------------------------------------------------*/
 (function() {
     // --- PRIVATE STATE & SECURITY VAULT ---
@@ -1787,6 +1788,7 @@ async function pushBufferToCloud() {
 
     /**
      * CALIBRATE VISUAL SCOUT
+     * Includes Hard Teardown to prevent system hangs/Alt-Tab bugs.
      */
     window.calibrateVisualScout = async function() {
         try {
@@ -1794,16 +1796,46 @@ async function pushBufferToCloud() {
                 video: { cursor: "never" },
                 audio: false
             });
+            
             const video = document.getElementById('ocr-video');
             const scoutContainer = document.getElementById('scout-container');
             const toggleBtn = document.getElementById('toggle-scout-ui');
+            const btn = document.getElementById('setup-ocr-btn');
             
             video.srcObject = stream;
             isOcrActive = true;
             
             if (!ocrWorker) await initOcr();
             
-            const btn = document.getElementById('setup-ocr-btn');
+            // --- CLEANUP FUNCTION (The "Teardown") ---
+            window.stopVisualScout = async function() {
+                isOcrActive = false;
+                
+                // Stop all video tracks to release Windows DWM handles
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+
+                // Terminate Tesseract worker to flush WASM memory
+                if (ocrWorker) {
+                    await ocrWorker.terminate();
+                    ocrWorker = null;
+                    addLog("⚙️ OCR_ENGINE: Terminated safely.");
+                }
+
+                addLog("⚠️ VISUAL_SCOUT: Monitoring stopped & memory cleared.", true);
+                
+                if (btn) {
+                    btn.textContent = "📷 RE-LINK SCOUT";
+                    btn.style.background = ""; 
+                }
+            };
+
+            // Handle browser-level "Stop Sharing" click
+            stream.getVideoTracks()[0].onended = () => {
+                window.stopVisualScout();
+            };
+
             if (btn) {
                 btn.textContent = "📷 SCOUT ACTIVE";
                 btn.style.background = "#2e7d32";
@@ -1819,11 +1851,6 @@ async function pushBufferToCloud() {
             addLog("📡 VISUAL_SCOUT: Linked.");
             startOcrLoop();
 
-            stream.getVideoTracks()[0].onended = () => {
-                isOcrActive = false;
-                addLog("⚠️ VISUAL_SCOUT: Monitoring stopped.", true);
-                if (btn) btn.textContent = "📷 RE-LINK SCOUT";
-            };
         } catch (err) {
             addLog("⚠️ VISUAL_SCOUT: Monitoring declined.");
         }
@@ -1868,8 +1895,7 @@ async function pushBufferToCloud() {
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 5);
                 const currentBottomLine = lines[lines.length - 1] || "";
 
-                // If the chat has moved (new bottom line), reset our "consumed" count
-                // this allows a small window to catch multiple lines even if the box is small.
+                // Scroll detection: If the bottom line changed, reset the count
                 if (currentBottomLine !== scoutState.bottomLine) {
                     scoutState.bottomLine = currentBottomLine;
                     scoutState.consumedLines = 0; 
@@ -1881,7 +1907,7 @@ async function pushBufferToCloud() {
             } catch (e) {
                 console.warn("OCR Sync Drift.");
             }
-        }, 5000); // Scans slightly faster (5s) for small windows
+        }, 5000); 
     }
 
     /**
@@ -1939,15 +1965,12 @@ async function pushBufferToCloud() {
 
                 if (isOcrActive) {
                     const fish = fishType.toLowerCase();
-                    // Give it a 45s window to find the visual match (for slow polling/small boxes)
                     const isFresh = (Date.now() - scoutState.lastScanTime) < 45000;
                     const hasVisual = scoutState.fullText.includes(fish);
                     
                     scoutState.consumedLines++;
 
-                    // RELAXED CHECK:
-                    // Only flag if there's NO visual match AND the OCR hasn't updated in ages.
-                    // Or if we've processed way more catches than the box can even hold.
+                    // Visual verification check
                     if ((!hasVisual && isFresh && scoutState.consumedLines > 2) || scoutState.consumedLines > 15) {
                         anomalyCountThisBatch++;
                         addLog(`🕵️ SCOUT: Unverified catch (${fishType}).`, true);
@@ -1956,7 +1979,6 @@ async function pushBufferToCloud() {
                     }
                 }
 
-                // --- PROCESS STATS ---
                 if (!(fishType in sessionStats)) {
                     sessionStats[fishType] = 0;
                     sessionValues[fishType] = 0;
@@ -1965,7 +1987,6 @@ async function pushBufferToCloud() {
                 sessionStats[fishType] += amount;
                 sessionValues[fishType] += value;
 
-                // --- CONTEST LOGIC ---
                 if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                     const settings = window.currentContestSettings;
                     const startTime = settings?.startTime?.toMillis() || 0;
@@ -2067,8 +2088,7 @@ async function pushBufferToCloud() {
 
     if (document.readyState === 'complete') initUI();
     else window.addEventListener('load', initUI);
-})();
-/*---------------------------------------------------------
+})();/*---------------------------------------------------------
   PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
 ---------------------------------------------------------*/
 
