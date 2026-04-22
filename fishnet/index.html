@@ -5,12 +5,14 @@
 	<meta http-equiv="Content-Security-Policy" content="
 		default-src 'self';
 		frame-src 'self' https://pixelb8lol.firebaseapp.com https://pixelb8lol.web.app;
-		script-src 'self' https://www.gstatic.com https://apis.google.com;
+		script-src 'self' https://www.gstatic.com https://apis.google.com https://cdn.jsdelivr.net;
+		worker-src 'self' blob:;
 		style-src 'self' 'unsafe-inline';
 		img-src 'self' data: https:;
 		font-src 'self' data:;
-		connect-src 'self' https://api.entropianexus.com https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com wss://*.firebaseio.com https://www.gstatic.com;
+		connect-src 'self' https://api.entropianexus.com https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com wss://*.firebaseio.com https://www.gstatic.com https://cdn.jsdelivr.net;
 	">
+	<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <title>FISH NET by Pixelb8</title>
 	 <link rel="stylesheet" href="assets/styles/fishnet.css">
 	 <link rel="icon" type="image/png" href="assets/fishnet.png">
@@ -25,7 +27,7 @@
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
 	<div id="appwrapper">
 		<div id="title-bar">
 			<div id="drag-region"class="header"></div>
