@@ -1771,9 +1771,9 @@ async function pushBufferToCloud() {
     let scoutState = {
         fullText: "",
         bottomLine: "",
-        totalCatchLines: 0, // Count of "received" lines visible in current OCR
+        totalCatchLines: 0, // "received" lines visible in current OCR frame
         lastScanTime: 0,
-        consumedLines: 0    // How many log lines we've processed for this specific visual frame
+        consumedLines: 0    // Log lines credited to the current visual frame
     };
 
     /**
@@ -1781,6 +1781,9 @@ async function pushBufferToCloud() {
      */
     async function initOcr() {
         try {
+            // Kill existing worker if re-initializing to prevent thread leaks
+            if (ocrWorker) await ocrWorker.terminate();
+            
             ocrWorker = await Tesseract.createWorker('eng');
             await ocrWorker.setParameters({
                 tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]():. ',
@@ -1792,10 +1795,46 @@ async function pushBufferToCloud() {
     }
 
     /**
-     * CALIBRATE VISUAL SCOUT (Screen Capture)
+     * NUCLEAR CLEANUP (The Alt-Tab Fix)
+     * Explicitly stops hardware tracks and kills the worker thread.
+     */
+    window.stopVisualScout = async function() {
+        isOcrActive = false;
+        if (window.scoutLoopInterval) clearInterval(window.scoutLoopInterval);
+        
+        const video = document.getElementById('ocr-video');
+        const setupBtn = document.getElementById('setup-ocr-btn');
+
+        if (video && video.srcObject) {
+            const tracks = video.srcObject.getTracks();
+            tracks.forEach(track => {
+                track.stop(); // Explicitly releases the Windows Capture Hook
+                track.enabled = false;
+            });
+            video.srcObject = null;
+        }
+
+        if (ocrWorker) {
+            await ocrWorker.terminate(); // Kills the CPU thread immediately
+            ocrWorker = null;
+            addLog("⚙️ OCR_ENGINE: Terminated safely.");
+        }
+
+        if (setupBtn) {
+            setupBtn.textContent = "📷 RE-LINK SCOUT";
+            setupBtn.style.background = ""; 
+        }
+        addLog("⚠️ VISUAL_SCOUT: Monitoring stopped & Focus released.", true);
+    };
+
+    /**
+     * CALIBRATE VISUAL SCOUT
      */
     window.calibrateVisualScout = async function() {
         try {
+            // Ensure clean state before starting
+            if (isOcrActive) await window.stopVisualScout();
+
             const stream = await navigator.mediaDevices.getDisplayMedia({
                 video: { cursor: "never" },
                 audio: false
@@ -1809,7 +1848,7 @@ async function pushBufferToCloud() {
             video.srcObject = stream;
             isOcrActive = true;
             
-            if (!ocrWorker) await initOcr();
+            await initOcr();
             
             if (setupBtn) {
                 setupBtn.textContent = "📷 SCOUT ACTIVE";
@@ -1823,21 +1862,19 @@ async function pushBufferToCloud() {
             }
             if (toggleBtn) toggleBtn.textContent = "✖️ Hide Scout View";
 
+            // If user stops sharing via Windows UI bar
+            stream.getVideoTracks()[0].onended = () => { window.stopVisualScout(); };
+
             addLog("📡 VISUAL_SCOUT: Screen capture active.");
             startOcrLoop();
 
-            stream.getVideoTracks()[0].onended = () => {
-                isOcrActive = false;
-                addLog("⚠️ VISUAL_SCOUT: Monitoring stopped.", true);
-                if (setupBtn) setupBtn.textContent = "📷 RE-LINK SCOUT";
-            };
         } catch (err) {
             addLog("⚠️ VISUAL_SCOUT: Monitoring declined.");
         }
     };
 
     /**
-     * OCR LOOP (Scans ROI every 5-8 seconds)
+     * OCR LOOP (Optimized for Main-Thread Performance)
      */
     function startOcrLoop() {
         if (window.scoutLoopInterval) clearInterval(window.scoutLoopInterval);
@@ -1855,7 +1892,7 @@ async function pushBufferToCloud() {
             const boxRect = box.getBoundingClientRect();
             const videoRect = video.getBoundingClientRect();
 
-            // Source mapping
+            // Direct relative mapping to source resolution
             const xPct = (boxRect.left - videoRect.left) / videoRect.width;
             const yPct = (boxRect.top - videoRect.top) / videoRect.height;
             const wPct = boxRect.width / videoRect.width;
@@ -1864,6 +1901,7 @@ async function pushBufferToCloud() {
             canvas.width = video.videoWidth * wPct;
             canvas.height = video.videoHeight * hPct;
 
+            // Process only the snippet to save CPU/GPU bandwidth
             ctx.drawImage(video, video.videoWidth * xPct, video.videoHeight * yPct, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
             ctx.filter = 'grayscale(1) contrast(300%) invert(1)'; 
             ctx.drawImage(canvas, 0, 0);
@@ -1873,47 +1911,20 @@ async function pushBufferToCloud() {
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 5);
                 const newBottomLine = lines[lines.length - 1] || "";
 
-                // Reset consumption if the chat has scrolled/changed
+                // Detection: Did the chat scroll or change?
                 if (newBottomLine !== scoutState.bottomLine) {
                     scoutState.bottomLine = newBottomLine;
                     scoutState.consumedLines = 0; 
-                    // Count how many "received" lines are currently visible
                     scoutState.totalCatchLines = lines.filter(l => l.toLowerCase().includes("received")).length;
                 }
 
                 scoutState.fullText = text.toLowerCase();
                 scoutState.lastScanTime = Date.now();
             } catch (e) {
-                console.warn("OCR Sync Drift.");
+                console.warn("OCR busy or sync drift.");
             }
         }, 6000); 
     }
-
-    /**
-     * LOG POLLING
-     */
-    window.pollWebLog = async function() {
-        if (typeof fileHandle === 'undefined' || !fileHandle) return;
-        try {
-            const file = await fileHandle.getFile();
-            if (file.size > lastSize) {
-                const blob = file.slice(lastSize, file.size);
-                const text = await blob.text();
-                const lines = text.split(/\r?\n/);
-                lines.forEach(line => {
-                    if (line.trim()) window.handleChatLine(line); 
-                });
-                lastSize = file.size;
-            }
-            errorCount = 0;
-        } catch (err) {
-            errorCount++;
-            if (errorCount >= MAX_RETRIES) {
-                if (window.pollInterval) clearInterval(window.pollInterval);
-                addLog("❌ SCOUT_HALTED: Log link broken.", true);
-            }
-        }
-    };
 
     /**
      * HANDLE CHAT LINE (The Security Gate)
@@ -1926,15 +1937,14 @@ async function pushBufferToCloud() {
 
         if (match) {
             const fishType = match[2].trim(); 
-            const amount = parseInt(match[3]);
+            const amount = match[3];
             const value = parseFloat(match[4]);
-            const currentLogTimestamp = new Date(match[1]).getTime();
+            const logTime = new Date(match[1]).getTime();
 
-            // Simple debounce for log duplicates
-            if (lastLogTimestamp !== 0 && (currentLogTimestamp - lastLogTimestamp) / 1000 < 2) return; 
+            if (lastLogTimestamp !== 0 && (logTime - lastLogTimestamp) / 1000 < 2) return; 
 
             if (!isNaN(value)) {
-                lastLogTimestamp = currentLogTimestamp;
+                lastLogTimestamp = logTime;
                 lastProcessedLine = line; 
 
                 if (isOcrActive) {
@@ -1944,43 +1954,38 @@ async function pushBufferToCloud() {
                     
                     scoutState.consumedLines++;
 
-                    // ANOMALY CHECK:
-                    // If log says we caught a fish but OCR doesn't see it, OR
-                    // if log claims more catches than there are visible "received" lines in the chat box.
+                    // ANOMALY CHECK
                     if (!hasVisual || !isFresh || scoutState.consumedLines > scoutState.totalCatchLines) {
                         anomalyCountThisBatch++;
-                        addLog(`🕵️ SCOUT: Unverified catch (${fishType}). Buffer overflow or missing visual.`, true);
+                        addLog(`🕵️ SCOUT: Unverified catch (${fishType}). Visual mismatch.`, true);
                     } else {
                         addLog(`📸 SCOUT: Visual match confirmed for ${fishType}.`);
                     }
                 }
 
-                // Update Session Statistics
+                // Stats & UI
                 if (!(fishType in sessionStats)) {
-                    sessionStats[fishType] = 0;
-                    sessionValues[fishType] = 0;
+                    sessionStats[fishType] = 0; sessionValues[fishType] = 0;
                     if (typeof createDynamicRow === 'function') createDynamicRow(fishType);
                 }
-                sessionStats[fishType] += amount;
+                sessionStats[fishType] += parseInt(amount);
                 sessionValues[fishType] += value;
 
                 // Cloud Sync Logic
                 if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                     const settings = window.currentContestSettings;
                     const startTime = settings?.startTime?.toMillis() || 0;
-                    const durationMs = (settings?.duration || 60) * 60000;
-                    const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
+                    const serverNow = Date.now() + (window.serverOffset || 0);
 
-                    if (serverAdjustedNow >= startTime && serverAdjustedNow <= (startTime + durationMs)) {
+                    if (serverNow >= startTime && serverNow <= (startTime + (settings?.duration || 60) * 60000)) {
                         const target = settings?.targetFish?.toLowerCase();
                         if (target && fishType.toLowerCase() === target) {
-                            pendingCatchBuffer.score += amount;
+                            pendingCatchBuffer.score += parseInt(amount);
                         }
-                        pendingCatchBuffer.totals[fishType] = (pendingCatchBuffer.totals[fishType] || 0) + amount;
+                        pendingCatchBuffer.totals[fishType] = (pendingCatchBuffer.totals[fishType] || 0) + parseInt(amount);
 
                         if (!syncTimer) {
                             syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
-                            addLog(`⏳ SYNC_QUEUED: Uplink scheduled.`);
                         }
                     }
                 }
@@ -1991,18 +1996,51 @@ async function pushBufferToCloud() {
         }
     };
 
+    /**
+     * EMERGENCY TAB-CLOSE CLEANUP
+     * Triggers the second a user tries to close the tab to release hardware hooks.
+     */
+    window.addEventListener('beforeunload', () => {
+        isOcrActive = false;
+        if (window.scoutLoopInterval) clearInterval(window.scoutLoopInterval);
+        const video = document.getElementById('ocr-video');
+        if (video && video.srcObject) {
+            video.srcObject.getTracks().forEach(t => t.stop());
+        }
+        if (ocrWorker) ocrWorker.terminate();
+    });
+
+    // --- OTHER CORE FUNCTIONS (POLL, CLOUD, UI) ---
+
+    window.pollWebLog = async function() {
+        if (typeof fileHandle === 'undefined' || !fileHandle) return;
+        try {
+            const file = await fileHandle.getFile();
+            if (file.size > lastSize) {
+                const blob = file.slice(lastSize, file.size);
+                const text = await blob.text();
+                text.split(/\r?\n/).forEach(l => { if (l.trim()) window.handleChatLine(l); });
+                lastSize = file.size;
+            }
+            errorCount = 0;
+        } catch (err) {
+            errorCount++;
+            if (errorCount >= MAX_RETRIES) {
+                window.stopVisualScout(); // Release if file handle locks up
+                addLog("❌ SCOUT_HALTED: Log link broken.", true);
+            }
+        }
+    };
+
     window.pushBufferToCloud = async function() {
         if (typeof activeContestRef === 'undefined' || !activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
-            syncTimer = null;
-            return;
+            syncTimer = null; return;
         }
         try {
             const batch = writeBatch(db);
             const updateData = { lastUpdate: serverTimestamp() };
             if (pendingCatchBuffer.score > 0) updateData.score = increment(pendingCatchBuffer.score);
-            for (const [fishName, qty] of Object.entries(pendingCatchBuffer.totals)) {
-                updateData[`totals.${fishName}`] = increment(qty);
-            }
+            for (const [f, q] of Object.entries(pendingCatchBuffer.totals)) updateData[`totals.${f}`] = increment(q);
             batch.update(activeContestRef, updateData);
 
             if (typeof globalUserData !== 'undefined' && globalUserData?.uid && anomalyCountThisBatch > 0) {
@@ -2015,41 +2053,18 @@ async function pushBufferToCloud() {
             pendingCatchBuffer = { score: 0, totals: {} };
             anomalyCountThisBatch = 0;
             syncTimer = null;
-            addLog("☁️ SYNC_COMPLETE: Cloud scores updated.");
-            if (typeof updateContestHUD === 'function') setTimeout(updateContestHUD, 1000);
-        } catch (err) {
-            syncTimer = setTimeout(window.pushBufferToCloud, 30000);
-        }
+            addLog("☁️ SYNC_COMPLETE.");
+        } catch (err) { syncTimer = setTimeout(window.pushBufferToCloud, 30000); }
     };
 
     function initUI() {
         const box = document.getElementById('crop-box');
-        const toggleBtn = document.getElementById('toggle-scout-ui');
-        const scoutContainer = document.getElementById('scout-container');
         const setupBtn = document.getElementById('setup-ocr-btn');
-
         if (box) {
-            let isDragging = false, dragOffset = { x: 0, y: 0 };
-            box.addEventListener('mousedown', (e) => {
-                if (e.target !== box) return; 
-                isDragging = true;
-                dragOffset.x = e.clientX - box.offsetLeft;
-                dragOffset.y = e.clientY - box.offsetTop;
-            });
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                box.style.left = `${e.clientX - dragOffset.x}px`;
-                box.style.top = `${e.clientY - dragOffset.y}px`;
-            });
-            document.addEventListener('mouseup', () => { isDragging = false; });
-        }
-        if (toggleBtn && scoutContainer) {
-            toggleBtn.addEventListener('click', () => {
-                const isHidden = scoutContainer.style.position === 'absolute';
-                scoutContainer.style.position = isHidden ? 'relative' : 'absolute';
-                scoutContainer.style.left = isHidden ? '0' : '-10000px';
-                toggleBtn.textContent = isHidden ? "✖️ Hide Scout View" : "🖥️ Show Scout View";
-            });
+            let drag = false, off = { x: 0, y: 0 };
+            box.onmousedown = (e) => { if(e.target === box) { drag = true; off.x = e.clientX - box.offsetLeft; off.y = e.clientY - box.offsetTop; }};
+            document.onmousemove = (e) => { if (drag) { box.style.left = `${e.clientX - off.x}px`; box.style.top = `${e.clientY - off.y}px`; }};
+            document.onmouseup = () => drag = false;
         }
         if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
     }
