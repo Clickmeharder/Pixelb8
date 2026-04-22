@@ -1744,10 +1744,7 @@ async function pushBufferToCloud() {
   PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V3)
   Features: Scroll-Aware Logic & Memory-Safe Teardown
 ---------------------------------------------------------*/
-/*---------------------------------------------------------
-  PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V4)
-  Features: Phase-Aware Sync, Target Tracking & Hard Teardown
----------------------------------------------------------*/
+
 /*---------------------------------------------------------
   PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V5)
   Features: Full Polling, Phase-Aware Sync & Hard Teardown
@@ -1763,7 +1760,7 @@ async function pushBufferToCloud() {
     let lastLogTimestamp = 0; 
     let lastProcessedLine = ""; 
 
-    // --- OCR, SCROLL & ANOMALY TRACKING ---
+    // --- OCR, SCROLL & TRIPLE-LOCK TRACKING ---
     let ocrWorker = null;
     let isOcrActive = false;
     let anomalyCountThisBatch = 0; 
@@ -1771,9 +1768,10 @@ async function pushBufferToCloud() {
     let scoutState = {
         fullText: "",
         bottomLine: "",
-        totalCatchLines: 0, // "received" lines visible in current OCR frame
+        clientVerified: false,   // Lock 1: Client Window Title
+        miniGameDetected: false, // Lock 2: Reel UI detected
         lastScanTime: 0,
-        consumedLines: 0    // Log lines credited to the current visual frame
+        consumedLines: 0 
     };
 
     /**
@@ -1781,22 +1779,20 @@ async function pushBufferToCloud() {
      */
     async function initOcr() {
         try {
-            // Kill existing worker if re-initializing to prevent thread leaks
             if (ocrWorker) await ocrWorker.terminate();
             
             ocrWorker = await Tesseract.createWorker('eng');
             await ocrWorker.setParameters({
                 tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]():. ',
             });
-            addLog("⚙️ OCR_ENGINE: Hardened Scroll-Detection Mode Active.");
+            addLog("⚙️ OCR_ENGINE: Triple-Lock Security Enabled.");
         } catch (e) {
             console.error("OCR Worker failed to start.", e);
         }
     }
 
     /**
-     * NUCLEAR CLEANUP (The Alt-Tab Fix)
-     * Explicitly stops hardware tracks and kills the worker thread.
+     * NUCLEAR CLEANUP
      */
     window.stopVisualScout = async function() {
         isOcrActive = false;
@@ -1808,14 +1804,14 @@ async function pushBufferToCloud() {
         if (video && video.srcObject) {
             const tracks = video.srcObject.getTracks();
             tracks.forEach(track => {
-                track.stop(); // Explicitly releases the Windows Capture Hook
+                track.stop();
                 track.enabled = false;
             });
             video.srcObject = null;
         }
 
         if (ocrWorker) {
-            await ocrWorker.terminate(); // Kills the CPU thread immediately
+            await ocrWorker.terminate();
             ocrWorker = null;
             addLog("⚙️ OCR_ENGINE: Terminated safely.");
         }
@@ -1824,7 +1820,7 @@ async function pushBufferToCloud() {
             setupBtn.textContent = "📷 RE-LINK SCOUT";
             setupBtn.style.background = ""; 
         }
-        addLog("⚠️ VISUAL_SCOUT: Monitoring stopped & Focus released.", true);
+        addLog("⚠️ VISUAL_SCOUT: Monitoring stopped.", true);
     };
 
     /**
@@ -1832,7 +1828,6 @@ async function pushBufferToCloud() {
      */
     window.calibrateVisualScout = async function() {
         try {
-            // Ensure clean state before starting
             if (isOcrActive) await window.stopVisualScout();
 
             const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -1841,8 +1836,6 @@ async function pushBufferToCloud() {
             });
             
             const video = document.getElementById('ocr-video');
-            const scoutContainer = document.getElementById('scout-container');
-            const toggleBtn = document.getElementById('toggle-scout-ui');
             const setupBtn = document.getElementById('setup-ocr-btn');
 
             video.srcObject = stream;
@@ -1855,16 +1848,7 @@ async function pushBufferToCloud() {
                 setupBtn.style.background = "#2e7d32";
             }
 
-            if (scoutContainer) {
-                scoutContainer.style.position = 'relative'; 
-                scoutContainer.style.left = '0'; 
-                scoutContainer.style.visibility = 'visible';
-            }
-            if (toggleBtn) toggleBtn.textContent = "✖️ Hide Scout View";
-
-            // If user stops sharing via Windows UI bar
             stream.getVideoTracks()[0].onended = () => { window.stopVisualScout(); };
-
             addLog("📡 VISUAL_SCOUT: Screen capture active.");
             startOcrLoop();
 
@@ -1874,7 +1858,7 @@ async function pushBufferToCloud() {
     };
 
     /**
-     * OCR LOOP (Optimized for Main-Thread Performance)
+     * OCR LOOP (Triple-Lock Logic)
      */
     function startOcrLoop() {
         if (window.scoutLoopInterval) clearInterval(window.scoutLoopInterval);
@@ -1889,10 +1873,32 @@ async function pushBufferToCloud() {
             if (!video || !box || !canvas || video.videoWidth === 0) return;
 
             const ctx = canvas.getContext('2d');
+
+            // --- TRIPLE LOCK: GLOBAL PEEK (Every ~18 seconds) ---
+            // Occasionally scan the entire frame to verify Client Title and UI
+            if (Math.random() > 0.65) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0);
+                
+                const { data: { text } } = await ocrWorker.recognize(canvas);
+                const globalText = text.toLowerCase();
+                
+                // Lock 1: Client Verification
+                scoutState.clientVerified = globalText.includes("entropia") && globalText.includes("client");
+                
+                // Lock 2: Mini-game UI Presence
+                if (globalText.includes("reel") || globalText.includes("hold")) {
+                    scoutState.miniGameDetected = true;
+                    // Keep detection true for 45s to account for reeling time
+                    setTimeout(() => { scoutState.miniGameDetected = false; }, 45000);
+                }
+            }
+
+            // --- TRIPLE LOCK: CHAT CROP (Primary Scanner) ---
             const boxRect = box.getBoundingClientRect();
             const videoRect = video.getBoundingClientRect();
 
-            // Direct relative mapping to source resolution
             const xPct = (boxRect.left - videoRect.left) / videoRect.width;
             const yPct = (boxRect.top - videoRect.top) / videoRect.height;
             const wPct = boxRect.width / videoRect.width;
@@ -1901,7 +1907,6 @@ async function pushBufferToCloud() {
             canvas.width = video.videoWidth * wPct;
             canvas.height = video.videoHeight * hPct;
 
-            // Process only the snippet to save CPU/GPU bandwidth
             ctx.drawImage(video, video.videoWidth * xPct, video.videoHeight * yPct, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
             ctx.filter = 'grayscale(1) contrast(300%) invert(1)'; 
             ctx.drawImage(canvas, 0, 0);
@@ -1911,17 +1916,15 @@ async function pushBufferToCloud() {
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 5);
                 const newBottomLine = lines[lines.length - 1] || "";
 
-                // Detection: Did the chat scroll or change?
                 if (newBottomLine !== scoutState.bottomLine) {
                     scoutState.bottomLine = newBottomLine;
                     scoutState.consumedLines = 0; 
-                    scoutState.totalCatchLines = lines.filter(l => l.toLowerCase().includes("received")).length;
                 }
 
                 scoutState.fullText = text.toLowerCase();
                 scoutState.lastScanTime = Date.now();
             } catch (e) {
-                console.warn("OCR busy or sync drift.");
+                console.warn("OCR Sync Drift.");
             }
         }, 6000); 
     }
@@ -1950,20 +1953,26 @@ async function pushBufferToCloud() {
                 if (isOcrActive) {
                     const fish = fishType.toLowerCase();
                     const isFresh = (Date.now() - scoutState.lastScanTime) < 45000;
-                    const hasVisual = scoutState.fullText.includes(fish);
                     
+                    // The Verification Gate
+                    const hasVisualChat = scoutState.fullText.includes(fish);
+                    const hasClient = scoutState.clientVerified;
+                    const hasReeled = scoutState.miniGameDetected;
+
                     scoutState.consumedLines++;
 
-                    // ANOMALY CHECK
-                    if (!hasVisual || !isFresh || scoutState.consumedLines > scoutState.totalCatchLines) {
+                    // ANOMALY CHECK: Must pass all three locks
+                    if (!hasVisualChat || !hasClient || !hasReeled || !isFresh) {
                         anomalyCountThisBatch++;
-                        addLog(`🕵️ SCOUT: Unverified catch (${fishType}). Visual mismatch.`, true);
+                        let failMsg = !hasClient ? "Wrong Window" : (!hasReeled ? "No Reel UI" : "Visual Mismatch");
+                        addLog(`🕵️ SCOUT: Anomaly (${failMsg}) for ${fishType}.`, true);
+                        return; // Block the sync if spoofing detected
                     } else {
-                        addLog(`📸 SCOUT: Visual match confirmed for ${fishType}.`);
+                        addLog(`📸 SCOUT: Triple-Lock Match for ${fishType}.`);
                     }
                 }
 
-                // Stats & UI
+                // Stats & UI Update
                 if (!(fishType in sessionStats)) {
                     sessionStats[fishType] = 0; sessionValues[fishType] = 0;
                     if (typeof createDynamicRow === 'function') createDynamicRow(fishType);
@@ -1971,7 +1980,7 @@ async function pushBufferToCloud() {
                 sessionStats[fishType] += parseInt(amount);
                 sessionValues[fishType] += value;
 
-                // Cloud Sync Logic
+                // Cloud Sync
                 if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                     const settings = window.currentContestSettings;
                     const startTime = settings?.startTime?.toMillis() || 0;
@@ -1997,41 +2006,8 @@ async function pushBufferToCloud() {
     };
 
     /**
-     * EMERGENCY TAB-CLOSE CLEANUP
-     * Triggers the second a user tries to close the tab to release hardware hooks.
+     * CLOUD & UI HELPERS
      */
-    window.addEventListener('beforeunload', () => {
-        isOcrActive = false;
-        if (window.scoutLoopInterval) clearInterval(window.scoutLoopInterval);
-        const video = document.getElementById('ocr-video');
-        if (video && video.srcObject) {
-            video.srcObject.getTracks().forEach(t => t.stop());
-        }
-        if (ocrWorker) ocrWorker.terminate();
-    });
-
-    // --- OTHER CORE FUNCTIONS (POLL, CLOUD, UI) ---
-
-    window.pollWebLog = async function() {
-        if (typeof fileHandle === 'undefined' || !fileHandle) return;
-        try {
-            const file = await fileHandle.getFile();
-            if (file.size > lastSize) {
-                const blob = file.slice(lastSize, file.size);
-                const text = await blob.text();
-                text.split(/\r?\n/).forEach(l => { if (l.trim()) window.handleChatLine(l); });
-                lastSize = file.size;
-            }
-            errorCount = 0;
-        } catch (err) {
-            errorCount++;
-            if (errorCount >= MAX_RETRIES) {
-                window.stopVisualScout(); // Release if file handle locks up
-                addLog("❌ SCOUT_HALTED: Log link broken.", true);
-            }
-        }
-    };
-
     window.pushBufferToCloud = async function() {
         if (typeof activeContestRef === 'undefined' || !activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
             syncTimer = null; return;
@@ -2057,6 +2033,26 @@ async function pushBufferToCloud() {
         } catch (err) { syncTimer = setTimeout(window.pushBufferToCloud, 30000); }
     };
 
+    window.pollWebLog = async function() {
+        if (typeof fileHandle === 'undefined' || !fileHandle) return;
+        try {
+            const file = await fileHandle.getFile();
+            if (file.size > lastSize) {
+                const blob = file.slice(lastSize, file.size);
+                const text = await blob.text();
+                text.split(/\r?\n/).forEach(l => { if (l.trim()) window.handleChatLine(l); });
+                lastSize = file.size;
+            }
+            errorCount = 0;
+        } catch (err) {
+            errorCount++;
+            if (errorCount >= MAX_RETRIES) {
+                window.stopVisualScout();
+                addLog("❌ SCOUT_HALTED: Log link broken.", true);
+            }
+        }
+    };
+
     function initUI() {
         const box = document.getElementById('crop-box');
         const setupBtn = document.getElementById('setup-ocr-btn');
@@ -2068,6 +2064,8 @@ async function pushBufferToCloud() {
         }
         if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
     }
+
+    window.addEventListener('beforeunload', () => { window.stopVisualScout(); });
 
     if (document.readyState === 'complete') initUI();
     else window.addEventListener('load', initUI);
