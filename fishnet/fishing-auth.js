@@ -1744,6 +1744,14 @@ async function pushBufferToCloud() {
 ---------------------------------------------------------*/
 
 (function() {
+    // --- OCR CONFIGURATION (Adjust these to frame your chat window) ---
+    const OCR_CONFIG = {
+        x: 5,      // % from left
+        y: 70,     // % from top
+        w: 35,     // % width
+        h: 25      // % height
+    };
+
     // --- PRIVATE SECURITY VAULT ---
     let pendingCatchBuffer = { score: 0, totals: {} };
     let syncTimer = null;
@@ -1758,7 +1766,7 @@ async function pushBufferToCloud() {
     let ocrWorker = null;
     let isOcrActive = false;
     let lastOcrText = "";
-    let anomalyCountThisBatch = 0; // Tracks how many anomalies occurred between syncs
+    let anomalyCountThisBatch = 0; 
 
     /**
      * INITIALIZE OCR
@@ -1768,7 +1776,7 @@ async function pushBufferToCloud() {
             ocrWorker = await Tesseract.createWorker('eng');
             addLog("⚙️ OCR_ENGINE: Background worker initialized.");
         } catch (e) {
-            console.error("OCR Worker failed to start.");
+            console.error("OCR Worker failed to start.", e);
         }
     }
 
@@ -1787,15 +1795,27 @@ async function pushBufferToCloud() {
             isOcrActive = true;
             if (!ocrWorker) await initOcr();
             
+            const btn = document.getElementById('setup-ocr-btn');
+            if (btn) {
+                btn.textContent = "📷 SCOUT ACTIVE";
+                btn.style.background = "#2e7d32";
+            }
+
             addLog("📡 VISUAL_SCOUT: Screen capture active.");
             startOcrLoop();
+
+            stream.getVideoTracks()[0].onended = () => {
+                isOcrActive = false;
+                addLog("⚠️ VISUAL_SCOUT: Monitoring stopped.", true);
+                if (btn) btn.textContent = "📷 RE-LINK SCOUT";
+            };
         } catch (err) {
-            addLog("⚠️ VISUAL_SCOUT: Monitoring declined. (OCR Disabled)");
+            addLog("⚠️ VISUAL_SCOUT: Monitoring declined.");
         }
     };
 
     /**
-     * OCR LOOP (Scans every 10 seconds)
+     * OCR LOOP (Scans ROI every 10 seconds)
      */
     function startOcrLoop() {
         setInterval(async () => {
@@ -1805,9 +1825,25 @@ async function pushBufferToCloud() {
             const canvas = document.getElementById('ocr-canvas');
             const ctx = canvas.getContext('2d');
 
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);
+            // 1. Calculate Crop Area based on OCR_CONFIG percentages
+            const cropX = (video.videoWidth * OCR_CONFIG.x) / 100;
+            const cropY = (video.videoHeight * OCR_CONFIG.y) / 100;
+            const cropW = (video.videoWidth * OCR_CONFIG.w) / 100;
+            const cropH = (video.videoHeight * OCR_CONFIG.h) / 100;
+
+            canvas.width = cropW;
+            canvas.height = cropH;
+
+            // 2. Draw only the chat box area
+            ctx.drawImage(
+                video, 
+                cropX, cropY, cropW, cropH, 
+                0, 0, cropW, cropH
+            );
+
+            // 3. APPLY FILTER: Grayscale + High Contrast for white-on-dark text
+            ctx.filter = 'grayscale(1) contrast(200%) brightness(120%)';
+            ctx.drawImage(canvas, 0, 0);
 
             try {
                 const { data: { text } } = await ocrWorker.recognize(canvas);
@@ -1823,7 +1859,6 @@ async function pushBufferToCloud() {
      */
     window.pollWebLog = async function() {
         if (!fileHandle) return;
-
         try {
             const file = await fileHandle.getFile();
             if (file.size > lastSize) {
@@ -1851,7 +1886,7 @@ async function pushBufferToCloud() {
     };
 
     /**
-     * HANDLE CHAT LINE (Hardened)
+     * HANDLE CHAT LINE
      */
     window.handleChatLine = async function(line) {
         if (line === lastProcessedLine) return;
@@ -1866,7 +1901,6 @@ async function pushBufferToCloud() {
             const value = parseFloat(match[4]);
             const currentLogTimestamp = new Date(logTimeString).getTime();
 
-            // Frequency check (5s floor)
             const secondsBetween = (currentLogTimestamp - lastLogTimestamp) / 1000;
             if (lastLogTimestamp !== 0 && secondsBetween < 5) return; 
 
@@ -1878,14 +1912,14 @@ async function pushBufferToCloud() {
                 if (isOcrActive && lastOcrText) {
                     const ocr = lastOcrText.toLowerCase();
                     const fish = fishType.toLowerCase();
-                    // If log has catch but OCR didn't see "received" or the fish name in last 10s
+                    
+                    // Integrity Check: Does OCR see 'received' or the fish name?
                     if (!ocr.includes("received") && !ocr.includes(fish)) {
                         anomalyCountThisBatch++;
                         addLog(`🕵️ SCOUT: Anomaly detected! (+1 Fishy)`, true);
                     }
                 }
 
-                // Local Stats Update
                 if (!(fishType in sessionStats)) {
                     sessionStats[fishType] = 0;
                     sessionValues[fishType] = 0;
@@ -1894,7 +1928,6 @@ async function pushBufferToCloud() {
                 sessionStats[fishType] += amount;
                 sessionValues[fishType] += value;
 
-                // Sync Logic
                 if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                     const settings = window.currentContestSettings;
                     const startTime = settings?.startTime?.toMillis() || 0;
@@ -1920,7 +1953,7 @@ async function pushBufferToCloud() {
     };
 
     /**
-     * PUSH TO CLOUD (Batch Update)
+     * PUSH TO CLOUD
      */
     window.pushBufferToCloud = async function() {
         if (!activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
@@ -1930,16 +1963,14 @@ async function pushBufferToCloud() {
 
         try {
             const batch = writeBatch(db);
-            
-            // 1. Update Leaderboard Entry
             const updateData = { lastUpdate: serverTimestamp() };
+            
             if (pendingCatchBuffer.score > 0) updateData.score = increment(pendingCatchBuffer.score);
             for (const [fishName, qty] of Object.entries(pendingCatchBuffer.totals)) {
                 updateData[`totals.${fishName}`] = increment(qty);
             }
             batch.update(activeContestRef, updateData);
 
-            // 2. Increment "Fishy" status on User Document if anomalies occurred
             if (globalUserData?.uid && anomalyCountThisBatch > 0) {
                 const userRef = doc(db, "users", globalUserData.uid);
                 batch.update(userRef, {
@@ -1949,21 +1980,21 @@ async function pushBufferToCloud() {
             }
 
             await batch.commit();
-            
-            // Reset state
             pendingCatchBuffer = { score: 0, totals: {} };
             anomalyCountThisBatch = 0; 
             syncTimer = null;
-            
-            addLog("☁️ SYNC_COMPLETE: Cloud Manifest Updated.");
+            addLog("☁️ SYNC_COMPLETE: Scores & Security Updated.");
         } catch (err) {
             console.error("Cloud Sync Error:", err);
             syncTimer = setTimeout(window.pushBufferToCloud, 30000);
         }
     };
-	document.getElementById('setup-ocr-btn').addEventListener('click', window.calibrateVisualScout);
-})();
 
+    // --- EVENT LISTENERS ---
+    const setupBtn = document.getElementById('setup-ocr-btn');
+    if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
+
+})();
 
 
 /*---------------------------------------------------------
