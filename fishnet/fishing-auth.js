@@ -1747,9 +1747,9 @@ async function pushBufferToCloud() {
 
 /*---------------------------------------------------------
   PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V5)
-  Features: Full Polling, Phase-Aware Sync & Hard Teardown
+  last one i tried using
 ---------------------------------------------------------*/
-(function() {
+/* (function() {
     let pendingCatchBuffer = { score: 0, totals: {} };
     let syncTimer = null;
     const SYNC_INTERVAL_MS = 300000; 
@@ -1939,7 +1939,10 @@ async function pushBufferToCloud() {
     };
 
     window.addEventListener('load', initUI);
-})();
+})(); */
+
+
+
 /*---------------------------------------------------------
   PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
 ---------------------------------------------------------*/
