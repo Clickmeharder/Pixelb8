@@ -1739,13 +1739,14 @@ async function pushBufferToCloud() {
     }
 } */
 
-/*---------------------------------------------------------
-  PIXELB8 OCR: ANTI_CHEAT SYSTEM
-  Hardened Version // Includes pollWebLog & Ghost Mode
----------------------------------------------------------*/
+
 /*---------------------------------------------------------
   PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V3)
   Features: Scroll-Aware Logic & Memory-Safe Teardown
+---------------------------------------------------------*/
+/*---------------------------------------------------------
+  PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V4)
+  Features: Phase-Aware Sync, Target Tracking & Hard Teardown
 ---------------------------------------------------------*/
 (function() {
     // --- PRIVATE STATE & SECURITY VAULT ---
@@ -1768,7 +1769,7 @@ async function pushBufferToCloud() {
         bottomLine: "",
         totalCatchLines: 0,
         lastScanTime: 0,
-        consumedLines: 0 // Reset when bottomLine changes
+        consumedLines: 0 
     };
 
     /**
@@ -1788,7 +1789,6 @@ async function pushBufferToCloud() {
 
     /**
      * CALIBRATE VISUAL SCOUT
-     * Includes Hard Teardown to prevent system hangs/Alt-Tab bugs.
      */
     window.calibrateVisualScout = async function() {
         try {
@@ -1807,16 +1807,12 @@ async function pushBufferToCloud() {
             
             if (!ocrWorker) await initOcr();
             
-            // --- CLEANUP FUNCTION (The "Teardown") ---
             window.stopVisualScout = async function() {
                 isOcrActive = false;
-                
-                // Stop all video tracks to release Windows DWM handles
                 const tracks = stream.getTracks();
                 tracks.forEach(track => track.stop());
                 video.srcObject = null;
 
-                // Terminate Tesseract worker to flush WASM memory
                 if (ocrWorker) {
                     await ocrWorker.terminate();
                     ocrWorker = null;
@@ -1824,17 +1820,13 @@ async function pushBufferToCloud() {
                 }
 
                 addLog("⚠️ VISUAL_SCOUT: Monitoring stopped & memory cleared.", true);
-                
                 if (btn) {
                     btn.textContent = "📷 RE-LINK SCOUT";
                     btn.style.background = ""; 
                 }
             };
 
-            // Handle browser-level "Stop Sharing" click
-            stream.getVideoTracks()[0].onended = () => {
-                window.stopVisualScout();
-            };
+            stream.getVideoTracks()[0].onended = () => { window.stopVisualScout(); };
 
             if (btn) {
                 btn.textContent = "📷 SCOUT ACTIVE";
@@ -1856,37 +1848,26 @@ async function pushBufferToCloud() {
         }
     };
 
-    /**
-     * OCR LOOP (Updates visual context)
-     */
     function startOcrLoop() {
         setInterval(async () => {
             if (!isOcrActive || !ocrWorker) return;
-
             const video = document.getElementById('ocr-video');
             const box = document.getElementById('crop-box');
             const canvas = document.getElementById('ocr-canvas');
-            
             if (!video || !box || !canvas || video.videoWidth === 0) return;
 
             const ctx = canvas.getContext('2d');
             const boxRect = box.getBoundingClientRect();
             const videoRect = video.getBoundingClientRect();
-
             const xPct = (boxRect.left - videoRect.left) / videoRect.width;
             const yPct = (boxRect.top - videoRect.top) / videoRect.height;
             const wPct = boxRect.width / videoRect.width;
             const hPct = boxRect.height / videoRect.height;
 
-            const cropW = video.videoWidth * wPct;
-            const cropH = video.videoHeight * hPct;
+            canvas.width = video.videoWidth * wPct;
+            canvas.height = video.videoHeight * hPct;
 
-            if (isNaN(cropW) || isNaN(cropH) || cropW <= 1 || cropH <= 1) return;
-
-            canvas.width = cropW;
-            canvas.height = cropH;
-
-            ctx.drawImage(video, video.videoWidth * xPct, video.videoHeight * yPct, cropW, cropH, 0, 0, cropW, cropH);
+            ctx.drawImage(video, video.videoWidth * xPct, video.videoHeight * yPct, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
             ctx.filter = 'grayscale(1) contrast(300%) invert(1)'; 
             ctx.drawImage(canvas, 0, 0);
 
@@ -1895,54 +1876,18 @@ async function pushBufferToCloud() {
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 5);
                 const currentBottomLine = lines[lines.length - 1] || "";
 
-                // Scroll detection: If the bottom line changed, reset the count
                 if (currentBottomLine !== scoutState.bottomLine) {
                     scoutState.bottomLine = currentBottomLine;
                     scoutState.consumedLines = 0; 
-                    scoutState.totalCatchLines = lines.filter(l => l.toLowerCase().includes("received")).length;
                 }
-
                 scoutState.fullText = text.toLowerCase();
                 scoutState.lastScanTime = Date.now();
-            } catch (e) {
-                console.warn("OCR Sync Drift.");
-            }
+            } catch (e) { console.warn("OCR Sync Drift."); }
         }, 5000); 
     }
 
     /**
-     * LOG POLLING
-     */
-    window.pollWebLog = async function() {
-        if (typeof fileHandle === 'undefined' || !fileHandle) return;
-        try {
-            const file = await fileHandle.getFile();
-            if (file.size > lastSize) {
-                const blob = file.slice(lastSize, file.size);
-                const text = await blob.text();
-                const lines = text.split(/\r?\n/);
-                lines.forEach(line => {
-                    if (line.trim()) window.handleChatLine(line); 
-                });
-                lastSize = file.size;
-            } else if (file.size < lastSize) {
-                addLog("⚠️ SECURITY: Log file shrink detected.", true);
-                lastSize = file.size;
-            }
-            errorCount = 0;
-        } catch (err) {
-            errorCount++;
-            if (errorCount >= MAX_RETRIES) {
-                await window.pushBufferToCloud();
-                if (typeof playSound === 'function') playSound('scoutError');
-                if (window.pollInterval) { clearInterval(window.pollInterval); window.pollInterval = null; }
-                addLog("❌ SCOUT_HALTED: Link broken.", true);
-            }
-        }
-    };
-
-    /**
-     * HANDLE CHAT LINE (The Security Gate)
+     * HANDLE CHAT LINE (Integrates OCR Verification + Phase Gates)
      */
     window.handleChatLine = async function(line) {
         if (line === lastProcessedLine) return;
@@ -1956,6 +1901,7 @@ async function pushBufferToCloud() {
             const value = parseFloat(match[4]);
             const currentLogTimestamp = new Date(match[1]).getTime();
 
+            // Frequency Protection (5s floor)
             const secondsBetween = (currentLogTimestamp - lastLogTimestamp) / 1000;
             if (lastLogTimestamp !== 0 && secondsBetween < 5) return; 
 
@@ -1963,14 +1909,13 @@ async function pushBufferToCloud() {
                 lastLogTimestamp = currentLogTimestamp;
                 lastProcessedLine = line; 
 
+                // 1. OCR VERIFICATION GATE
                 if (isOcrActive) {
                     const fish = fishType.toLowerCase();
                     const isFresh = (Date.now() - scoutState.lastScanTime) < 45000;
                     const hasVisual = scoutState.fullText.includes(fish);
-                    
                     scoutState.consumedLines++;
 
-                    // Visual verification check
                     if ((!hasVisual && isFresh && scoutState.consumedLines > 2) || scoutState.consumedLines > 15) {
                         anomalyCountThisBatch++;
                         addLog(`🕵️ SCOUT: Unverified catch (${fishType}).`, true);
@@ -1979,6 +1924,7 @@ async function pushBufferToCloud() {
                     }
                 }
 
+                // 2. LOCAL SESSION UPDATE
                 if (!(fishType in sessionStats)) {
                     sessionStats[fishType] = 0;
                     sessionValues[fishType] = 0;
@@ -1987,20 +1933,37 @@ async function pushBufferToCloud() {
                 sessionStats[fishType] += amount;
                 sessionValues[fishType] += value;
 
+                // 3. CONTEST PHASE GATES & CLOUD SYNC
                 if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                     const settings = window.currentContestSettings;
                     const startTime = settings?.startTime?.toMillis() || 0;
                     const durationMs = (settings?.duration || 60) * 60000;
+                    const endTime = startTime + durationMs;
                     const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
 
-                    if (serverAdjustedNow >= startTime && serverAdjustedNow <= (startTime + durationMs)) {
+                    // PHASE: PRE-START
+                    if (serverAdjustedNow < startTime) {
+                        addLog(`⏳ PRE_START: Catch ignored by cloud (Starts in ${formatTime(startTime - serverAdjustedNow)})`, true);
+                    } 
+                    // PHASE: POST-END
+                    else if (settings?.status === 'concluded' || serverAdjustedNow > endTime) {
+                        addLog(`🚫 SESSION_FINALIZED: Catch not synced to cloud.`, true);
+                    } 
+                    // PHASE: ACTIVE (LIVE)
+                    else {
                         const target = settings?.targetFish?.toLowerCase();
                         if (target && fishType.toLowerCase() === target) {
                             pendingCatchBuffer.score += amount;
+                            addLog(`🎯 TARGET_HIT: +${amount} PTS [${fishType.toUpperCase()}]`);
                         }
+
                         if (!pendingCatchBuffer.totals[fishType]) pendingCatchBuffer.totals[fishType] = 0;
                         pendingCatchBuffer.totals[fishType] += amount;
-                        if (!syncTimer) syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
+
+                        if (!syncTimer) {
+                            syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
+                            addLog(`⏳ SYNC_QUEUED: Uplink scheduled.`);
+                        }
                     }
                 }
 
@@ -2010,9 +1973,6 @@ async function pushBufferToCloud() {
         }
     };
 
-    /**
-     * CLOUD SYNC
-     */
     window.pushBufferToCloud = async function() {
         if (typeof activeContestRef === 'undefined' || !activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
             syncTimer = null;
@@ -2038,12 +1998,22 @@ async function pushBufferToCloud() {
             anomalyCountThisBatch = 0;
             syncTimer = null;
             addLog("☁️ SYNC_COMPLETE: Cloud scores updated.");
+            if (typeof updateContestHUD === 'function') setTimeout(updateContestHUD, 1000);
         } catch (err) {
             syncTimer = setTimeout(window.pushBufferToCloud, 30000);
         }
     };
 
-    // --- UI: DRAGGABLE ROI BOX & TOGGLES ---
+    // Trigger Final Sync on conclusion
+    const originalRefresh = window.refreshContestList;
+    window.refreshContestList = async function() {
+        if (window.currentContestSettings?.status === 'concluded' && (pendingCatchBuffer.score > 0 || Object.keys(pendingCatchBuffer.totals).length > 0)) {
+            addLog("🏁 TIME_EXPIRED: Contest Finalized. Syncing final weights.");
+            await window.pushBufferToCloud();
+        }
+        if (originalRefresh) return originalRefresh();
+    };
+
     function initUI() {
         const box = document.getElementById('crop-box');
         const toggleBtn = document.getElementById('toggle-scout-ui');
@@ -2051,8 +2021,7 @@ async function pushBufferToCloud() {
         const setupBtn = document.getElementById('setup-ocr-btn');
 
         if (box) {
-            let isDragging = false;
-            let dragOffset = { x: 0, y: 0 };
+            let isDragging = false, dragOffset = { x: 0, y: 0 };
             box.addEventListener('mousedown', (e) => {
                 if (e.target !== box) return; 
                 isDragging = true;
@@ -2066,29 +2035,21 @@ async function pushBufferToCloud() {
             });
             document.addEventListener('mouseup', () => { isDragging = false; });
         }
-
         if (toggleBtn && scoutContainer) {
             toggleBtn.addEventListener('click', () => {
-                if (scoutContainer.style.position === 'absolute') {
-                    scoutContainer.style.position = 'relative';
-                    scoutContainer.style.left = '0';
-                    scoutContainer.style.visibility = 'visible';
-                    toggleBtn.textContent = "✖️ Hide Scout View";
-                } else {
-                    scoutContainer.style.position = 'absolute';
-                    scoutContainer.style.left = '-10000px';
-                    scoutContainer.style.visibility = 'visible'; 
-                    toggleBtn.textContent = "🖥️ Show Scout View";
-                }
+                const isHidden = scoutContainer.style.position === 'absolute';
+                scoutContainer.style.position = isHidden ? 'relative' : 'absolute';
+                scoutContainer.style.left = isHidden ? '0' : '-10000px';
+                toggleBtn.textContent = isHidden ? "✖️ Hide Scout View" : "🖥️ Show Scout View";
             });
         }
-
         if (setupBtn) setupBtn.addEventListener('click', window.calibrateVisualScout);
     }
 
     if (document.readyState === 'complete') initUI();
     else window.addEventListener('load', initUI);
-})();/*---------------------------------------------------------
+})();
+/*---------------------------------------------------------
   PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
 ---------------------------------------------------------*/
 
