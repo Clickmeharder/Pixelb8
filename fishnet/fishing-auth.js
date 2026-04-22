@@ -1771,9 +1771,9 @@ async function pushBufferToCloud() {
     let scoutState = {
         fullText: "",
         bottomLine: "",
-        totalCatchLines: 0,
+        totalCatchLines: 0, // Count of "received" lines visible in current OCR
         lastScanTime: 0,
-        consumedLines: 0 
+        consumedLines: 0    // How many log lines we've processed for this specific visual frame
     };
 
     /**
@@ -1785,14 +1785,14 @@ async function pushBufferToCloud() {
             await ocrWorker.setParameters({
                 tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]():. ',
             });
-            addLog("⚙️ OCR_ENGINE: Active.");
+            addLog("⚙️ OCR_ENGINE: Hardened Scroll-Detection Mode Active.");
         } catch (e) {
             console.error("OCR Worker failed to start.", e);
         }
     }
 
     /**
-     * CALIBRATE VISUAL SCOUT
+     * CALIBRATE VISUAL SCOUT (Screen Capture)
      */
     window.calibrateVisualScout = async function() {
         try {
@@ -1804,88 +1804,93 @@ async function pushBufferToCloud() {
             const video = document.getElementById('ocr-video');
             const scoutContainer = document.getElementById('scout-container');
             const toggleBtn = document.getElementById('toggle-scout-ui');
-            const btn = document.getElementById('setup-ocr-btn');
-            
+            const setupBtn = document.getElementById('setup-ocr-btn');
+
             video.srcObject = stream;
             isOcrActive = true;
             
             if (!ocrWorker) await initOcr();
             
-            window.stopVisualScout = async function() {
-                isOcrActive = false;
-                const tracks = stream.getTracks();
-                tracks.forEach(track => track.stop());
-                video.srcObject = null;
-
-                if (ocrWorker) {
-                    await ocrWorker.terminate();
-                    ocrWorker = null;
-                    addLog("⚙️ OCR_ENGINE: Terminated safely.");
-                }
-
-                addLog("⚠️ VISUAL_SCOUT: Monitoring stopped & memory cleared.", true);
-                if (btn) {
-                    btn.textContent = "📷 RE-LINK SCOUT";
-                    btn.style.background = ""; 
-                }
-            };
-
-            stream.getVideoTracks()[0].onended = () => { window.stopVisualScout(); };
-
-            if (btn) {
-                btn.textContent = "📷 SCOUT ACTIVE";
-                btn.style.background = "#2e7d32";
+            if (setupBtn) {
+                setupBtn.textContent = "📷 SCOUT ACTIVE";
+                setupBtn.style.background = "#2e7d32";
             }
 
             if (scoutContainer) {
-                scoutContainer.style.position = 'relative'; scoutContainer.style.left = '0'; scoutContainer.style.visibility = 'visible';
-                if (toggleBtn) toggleBtn.textContent = "✖️ Hide Scout View";
+                scoutContainer.style.position = 'relative'; 
+                scoutContainer.style.left = '0'; 
+                scoutContainer.style.visibility = 'visible';
             }
+            if (toggleBtn) toggleBtn.textContent = "✖️ Hide Scout View";
 
-            addLog("📡 VISUAL_SCOUT: Linked.");
+            addLog("📡 VISUAL_SCOUT: Screen capture active.");
             startOcrLoop();
 
+            stream.getVideoTracks()[0].onended = () => {
+                isOcrActive = false;
+                addLog("⚠️ VISUAL_SCOUT: Monitoring stopped.", true);
+                if (setupBtn) setupBtn.textContent = "📷 RE-LINK SCOUT";
+            };
         } catch (err) {
             addLog("⚠️ VISUAL_SCOUT: Monitoring declined.");
         }
     };
 
+    /**
+     * OCR LOOP (Scans ROI every 5-8 seconds)
+     */
     function startOcrLoop() {
-        setInterval(async () => {
+        if (window.scoutLoopInterval) clearInterval(window.scoutLoopInterval);
+
+        window.scoutLoopInterval = setInterval(async () => {
             if (!isOcrActive || !ocrWorker) return;
+
             const video = document.getElementById('ocr-video');
             const box = document.getElementById('crop-box');
             const canvas = document.getElementById('ocr-canvas');
+
             if (!video || !box || !canvas || video.videoWidth === 0) return;
 
             const ctx = canvas.getContext('2d');
             const boxRect = box.getBoundingClientRect();
             const videoRect = video.getBoundingClientRect();
-            
-            canvas.width = video.videoWidth * (boxRect.width / videoRect.width);
-            canvas.height = video.videoHeight * (boxRect.height / videoRect.height);
 
-            ctx.drawImage(video, video.videoWidth * ((boxRect.left - videoRect.left) / videoRect.width), video.videoHeight * ((boxRect.top - videoRect.top) / videoRect.height), canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+            // Source mapping
+            const xPct = (boxRect.left - videoRect.left) / videoRect.width;
+            const yPct = (boxRect.top - videoRect.top) / videoRect.height;
+            const wPct = boxRect.width / videoRect.width;
+            const hPct = boxRect.height / videoRect.height;
+
+            canvas.width = video.videoWidth * wPct;
+            canvas.height = video.videoHeight * hPct;
+
+            ctx.drawImage(video, video.videoWidth * xPct, video.videoHeight * yPct, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
             ctx.filter = 'grayscale(1) contrast(300%) invert(1)'; 
             ctx.drawImage(canvas, 0, 0);
 
             try {
                 const { data: { text } } = await ocrWorker.recognize(canvas);
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 5);
-                const currentBottomLine = lines[lines.length - 1] || "";
+                const newBottomLine = lines[lines.length - 1] || "";
 
-                if (currentBottomLine !== scoutState.bottomLine) {
-                    scoutState.bottomLine = currentBottomLine;
+                // Reset consumption if the chat has scrolled/changed
+                if (newBottomLine !== scoutState.bottomLine) {
+                    scoutState.bottomLine = newBottomLine;
                     scoutState.consumedLines = 0; 
+                    // Count how many "received" lines are currently visible
+                    scoutState.totalCatchLines = lines.filter(l => l.toLowerCase().includes("received")).length;
                 }
+
                 scoutState.fullText = text.toLowerCase();
                 scoutState.lastScanTime = Date.now();
-            } catch (e) { console.warn("OCR Sync Drift."); }
-        }, 5000); 
+            } catch (e) {
+                console.warn("OCR Sync Drift.");
+            }
+        }, 6000); 
     }
 
     /**
-     * LOG POLLING (The missing link)
+     * LOG POLLING
      */
     window.pollWebLog = async function() {
         if (typeof fileHandle === 'undefined' || !fileHandle) return;
@@ -1899,32 +1904,19 @@ async function pushBufferToCloud() {
                     if (line.trim()) window.handleChatLine(line); 
                 });
                 lastSize = file.size;
-            } else if (file.size < lastSize) {
-                addLog("⚠️ SECURITY: Log file shrink detected.", true);
-                lastSize = file.size;
             }
             errorCount = 0;
         } catch (err) {
             errorCount++;
             if (errorCount >= MAX_RETRIES) {
-                await window.pushBufferToCloud();
-                if (typeof playSound === 'function') playSound('scoutError');
-                if (window.pollInterval) { clearInterval(window.pollInterval); window.pollInterval = null; }
-                
-                // UI Recovery for Start Button
-                const startBtn = document.getElementById('start-btn');
-                if (startBtn) {
-                    startBtn.disabled = false;
-                    startBtn.style.opacity = "1.0";
-                    startBtn.textContent = "RE-LINK LOG FILE";
-                }
-                addLog("❌ SCOUT_HALTED: Link broken.", true);
+                if (window.pollInterval) clearInterval(window.pollInterval);
+                addLog("❌ SCOUT_HALTED: Log link broken.", true);
             }
         }
     };
 
     /**
-     * HANDLE CHAT LINE
+     * HANDLE CHAT LINE (The Security Gate)
      */
     window.handleChatLine = async function(line) {
         if (line === lastProcessedLine) return;
@@ -1938,8 +1930,8 @@ async function pushBufferToCloud() {
             const value = parseFloat(match[4]);
             const currentLogTimestamp = new Date(match[1]).getTime();
 
-            const secondsBetween = (currentLogTimestamp - lastLogTimestamp) / 1000;
-            if (lastLogTimestamp !== 0 && secondsBetween < 5) return; 
+            // Simple debounce for log duplicates
+            if (lastLogTimestamp !== 0 && (currentLogTimestamp - lastLogTimestamp) / 1000 < 2) return; 
 
             if (!isNaN(value)) {
                 lastLogTimestamp = currentLogTimestamp;
@@ -1949,16 +1941,21 @@ async function pushBufferToCloud() {
                     const fish = fishType.toLowerCase();
                     const isFresh = (Date.now() - scoutState.lastScanTime) < 45000;
                     const hasVisual = scoutState.fullText.includes(fish);
+                    
                     scoutState.consumedLines++;
 
-                    if ((!hasVisual && isFresh && scoutState.consumedLines > 2) || scoutState.consumedLines > 15) {
+                    // ANOMALY CHECK:
+                    // If log says we caught a fish but OCR doesn't see it, OR
+                    // if log claims more catches than there are visible "received" lines in the chat box.
+                    if (!hasVisual || !isFresh || scoutState.consumedLines > scoutState.totalCatchLines) {
                         anomalyCountThisBatch++;
-                        addLog(`🕵️ SCOUT: Unverified catch (${fishType}).`, true);
+                        addLog(`🕵️ SCOUT: Unverified catch (${fishType}). Buffer overflow or missing visual.`, true);
                     } else {
                         addLog(`📸 SCOUT: Visual match confirmed for ${fishType}.`);
                     }
                 }
 
+                // Update Session Statistics
                 if (!(fishType in sessionStats)) {
                     sessionStats[fishType] = 0;
                     sessionValues[fishType] = 0;
@@ -1967,24 +1964,19 @@ async function pushBufferToCloud() {
                 sessionStats[fishType] += amount;
                 sessionValues[fishType] += value;
 
+                // Cloud Sync Logic
                 if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                     const settings = window.currentContestSettings;
                     const startTime = settings?.startTime?.toMillis() || 0;
                     const durationMs = (settings?.duration || 60) * 60000;
                     const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
 
-                    if (serverAdjustedNow < startTime) {
-                        addLog(`⏳ PRE_START: Catch ignored (Starts in ${formatTime(startTime - serverAdjustedNow)})`, true);
-                    } else if (settings?.status === 'concluded' || serverAdjustedNow > (startTime + durationMs)) {
-                        addLog(`🚫 SESSION_FINALIZED: Catch not synced.`, true);
-                    } else {
+                    if (serverAdjustedNow >= startTime && serverAdjustedNow <= (startTime + durationMs)) {
                         const target = settings?.targetFish?.toLowerCase();
                         if (target && fishType.toLowerCase() === target) {
                             pendingCatchBuffer.score += amount;
-                            addLog(`🎯 TARGET_HIT: +${amount} PTS [${fishType.toUpperCase()}]`);
                         }
-                        if (!pendingCatchBuffer.totals[fishType]) pendingCatchBuffer.totals[fishType] = 0;
-                        pendingCatchBuffer.totals[fishType] += amount;
+                        pendingCatchBuffer.totals[fishType] = (pendingCatchBuffer.totals[fishType] || 0) + amount;
 
                         if (!syncTimer) {
                             syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
