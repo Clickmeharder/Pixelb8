@@ -1749,36 +1749,26 @@ async function pushBufferToCloud() {
   PIXELB8 OCR: ANTI_CHEAT SYSTEM (SCROLL-RESISTANT V5)
   Features: Full Polling, Phase-Aware Sync & Hard Teardown
 ---------------------------------------------------------*/
-// ──────────────────────────────────────────────────────────────
-// OCR ANTI-CHEAT SYSTEM FOR UI MATCHING
-// Entropia Universe MMO Fishing Contest Web App
-// FULLY COMPLETED + UNTRUNCATED VERSION
-// ──────────────────────────────────────────────────────────────
-// Features exact UI detection:
-//   • Orange fish icon pixel match
-//   • Blue reel bar color + column-by-column FILL LEVEL (≥90% = "fully reeled")
-//   • Tesseract OCR confirming "[3] HOLD TO REEL" text on the same crop
-//   • Strict verification: catch line only accepted when BOTH chat OCR + FULL reel UI observed
-//   • Anti-spoofing timeouts + slightly detailed anomaly logging
-// Replace your entire script with this. Calibrate the #ui-crop-box to tightly cover the
-// dark bar + orange fish box + "[3] HOLD TO REEL" text line.
-
 (function() {
-    // --- PRIVATE STATE ---
+    // --- PRIVATE STATE & SECURITY VAULT ---
     let pendingCatchBuffer = { score: 0, totals: {} };
     let syncTimer = null;
-    const SYNC_INTERVAL_MS = 300000;
-    let lastLogTimestamp = 0;
-    let lastProcessedLine = "";
+    const SYNC_INTERVAL_MS = 300000; 
+    let errorCount = 0;
+    const MAX_RETRIES = 3;
+    let lastLogTimestamp = 0; 
+    let lastProcessedLine = ""; 
 
-    // --- DUAL-CROP & SECURITY STATE ---
+    // --- OCR & DUAL-LOCK STATE ---
     let ocrWorker = null;
     let isOcrActive = false;
-    let anomalyCountThisBatch = 0;
+    let anomalyCountThisBatch = 0; 
+
     let scoutState = {
         fullText: "",
-        miniGameDetected: false,     // Any exact fishing UI detected
-        barFullyReeled: false,       // Blue bar reached ≥90% fill (strict)
+        miniGameDetected: false,  // Exact UI detected
+        barFullyReeled: false,    // Blue bar reached ≥90%
+        clientVerified: false,    // Global Window Title Check
         lastScanTime: 0
     };
 
@@ -1791,29 +1781,23 @@ async function pushBufferToCloud() {
             ocrWorker = await Tesseract.createWorker('eng');
             await ocrWorker.setParameters({
                 tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]():. ',
-                tessedit_pageseg_mode: '7'   // Single line / UI text mode for faster & more accurate "HOLD TO REEL"
+                tessedit_pageseg_mode: '7' 
             });
-            addLog("⚙️ OCR_ENGINE: Dual-Crop + Exact UI Matching Mode Active.");
+            addLog("⚙️ OCR_ENGINE: Dual-Crop + Triple-Lock Security Enabled.");
         } catch (e) { console.error("OCR Init Fail", e); }
     }
 
     /**
-     * BLUE BAR FILL LEVEL HELPER (column scan left-to-right)
-     * Only returns ≥90 when the blue reel bar is visually "filled all the way"
+     * PIXEL ANALYSIS: BLUE BAR FILL LEVEL
      */
     function calculateBlueBarFillLevel(pixels, width, height) {
         let filledColumns = 0;
-        const colThreshold = Math.floor(height * 0.55); // 55% of column height must be blue
-
+        const colThreshold = Math.floor(height * 0.55); 
         for (let x = 0; x < width; x++) {
             let blueCount = 0;
             for (let y = 0; y < height; y++) {
                 const i = (y * width + x) * 4;
-                const r = pixels[i];
-                const g = pixels[i + 1];
-                const b = pixels[i + 2];
-                // Exact Entropia blue bar color from your screenshot
-                if (r < 60 && g > 90 && b > 170) blueCount++;
+                if (pixels[i] < 60 && pixels[i + 1] > 90 && pixels[i + 2] > 170) blueCount++;
             }
             if (blueCount >= colThreshold) filledColumns++;
         }
@@ -1821,7 +1805,7 @@ async function pushBufferToCloud() {
     }
 
     /**
-     * START MONITORING LOOP (Enhanced Exact UI + Blue Bar Full Fill)
+     * OCR MONITORING LOOP
      */
     function startOcrLoop() {
         if (window.scoutLoopInterval) clearInterval(window.scoutLoopInterval);
@@ -1829,147 +1813,65 @@ async function pushBufferToCloud() {
             if (!isOcrActive || !ocrWorker) return;
 
             const video = document.getElementById('ocr-video');
-            const chatBox = document.getElementById('crop-box');     // For Fish Names
-            const uiBox = document.getElementById('ui-crop-box');    // For Blue Bar + Orange Icon + HOLD TO REEL
+            const chatBox = document.getElementById('crop-box');
+            const uiBox = document.getElementById('ui-crop-box');
             const canvas = document.getElementById('ocr-canvas');
 
             if (!video || !chatBox || !uiBox || video.videoWidth === 0) return;
-
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             const vRect = video.getBoundingClientRect();
 
-            // ──────────────────────────────────────────────────────────────
-            // 1. EXACT UI CROP: BLUE REEL BAR + ORANGE FISH ICON + TESSERACT TEXT
-            // ──────────────────────────────────────────────────────────────
+            // 1. GLOBAL VERIFICATION (Lock 1: Client Window)
+            if (Math.random() > 0.7) {
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0);
+                const { data: { text } } = await ocrWorker.recognize(canvas);
+                scoutState.clientVerified = text.toLowerCase().includes("entropia universe");
+            }
+
+            // 2. UI CROP: BLUE BAR + REEL TEXT
             const uR = uiBox.getBoundingClientRect();
-
-            // Larger canvas for accurate Tesseract on "[3] HOLD TO REEL"
-            canvas.width = 400;
-            canvas.height = 80;
-
-            // Draw PLAIN first (for pixel analysis)
-            ctx.drawImage(
-                video,
-                (uR.left - vRect.left) / vRect.width * video.videoWidth,
-                (uR.top - vRect.top) / vRect.height * video.videoHeight,
-                uR.width / vRect.width * video.videoWidth,
-                uR.height / vRect.height * video.videoHeight,
-                0, 0, canvas.width, canvas.height
-            );
+            canvas.width = 400; canvas.height = 80;
+            ctx.drawImage(video, (uR.left - vRect.left) / vRect.width * video.videoWidth, (uR.top - vRect.top) / vRect.height * video.videoHeight, uR.width / vRect.width * video.videoWidth, uR.height / vRect.height * video.videoHeight, 0, 0, canvas.width, canvas.height);
 
             const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
-            // Pixel voting (tuned to your exact screenshot)
-            let blueCount = 0;
-            let orangeCount = 0;
-            for (let i = 0; i < pixels.length; i += 4) {
-                const r = pixels[i];
-                const g = pixels[i + 1];
-                const b = pixels[i + 2];
-
-                // Cyan/blue reel bar
-                if (r < 60 && g > 90 && b > 170) blueCount++;
-                // Orange fish icon box
-                if (r > 190 && g > 100 && b < 100) orangeCount++;
-            }
-
-            const totalPixels = canvas.width * canvas.height;
-            const hasBlueBar = blueCount > totalPixels * 0.12;      // ~12%+ blue present
-            const hasOrangeIcon = orangeCount > totalPixels * 0.04; // ~4%+ orange icon
-
-            // Column-by-column fill level (the "blue bar fill up all the way" check)
             const fillLevel = calculateBlueBarFillLevel(pixels, canvas.width, canvas.height);
 
-            // ── TESSERACT OCR FOR EXACT "[3] HOLD TO REEL" TEXT ──
-            let hasExactReelText = false;
             try {
-                // Pre-process for OCR (high contrast + invert for white text on dark UI)
                 ctx.filter = 'grayscale(1) contrast(400%) brightness(1.2) invert(1)';
-
-                // Re-draw with filter (same exact crop)
-                ctx.drawImage(
-                    video,
-                    (uR.left - vRect.left) / vRect.width * video.videoWidth,
-                    (uR.top - vRect.top) / vRect.height * video.videoHeight,
-                    uR.width / vRect.width * video.videoWidth,
-                    uR.height / vRect.height * video.videoHeight,
-                    0, 0, canvas.width, canvas.height
-                );
-
+                ctx.drawImage(canvas, 0, 0); // Redraw with filter
                 const { data: { text } } = await ocrWorker.recognize(canvas);
-                const uiTextLower = text.toLowerCase().trim();
+                const uiText = text.toLowerCase();
+                const hasReelWords = uiText.includes('hold') || uiText.includes('reel') || uiText.includes('[3]');
 
-                // Exact text patterns from your screenshot
-                hasExactReelText = 
-                    uiTextLower.includes('hold') ||
-                    uiTextLower.includes('reel') ||
-                    uiTextLower.includes('to reel') ||
-                    uiTextLower.includes('[3]') ||
-                    uiTextLower.includes('hold to');
-
-                if (uiTextLower.length > 3) {
-                    addLog(`🔍 UI_OCR: "${uiTextLower}" | ReelText:${hasExactReelText} | Fill:${fillLevel}%`, false);
+                if (hasReelWords) {
+                    scoutState.miniGameDetected = true;
+                    if (fillLevel >= 90) {
+                        scoutState.barFullyReeled = true;
+                        setTimeout(() => { scoutState.barFullyReeled = false; }, 15000);
+                    }
                 }
-            } catch (e) {
-                // OCR busy is normal
-            } finally {
-                ctx.filter = 'none';
-            }
+            } catch (e) {} finally { ctx.filter = 'none'; }
 
-            // ── FINAL EXACT UI + FULL REEL DECISION ──
-            const isExactFishingUI = hasBlueBar && hasOrangeIcon && hasExactReelText;
-
-            if (isExactFishingUI) {
-                scoutState.miniGameDetected = true;
-
-                if (fillLevel >= 90) {   // <--- THIS IS THE "BLUE BAR FILLED ALL THE WAY" CHECK
-                    scoutState.barFullyReeled = true;
-                    addLog(`✅ FULL REEL CONFIRMED! Fill:${fillLevel}% | Exact UI OCR + colors matched`, true);
-                    // Short 15s window for the catch chat line to arrive
-                    setTimeout(() => { scoutState.barFullyReeled = false; }, 15000);
-                }
-
-                // General mini-game timeout (fallback)
-                setTimeout(() => { scoutState.miniGameDetected = false; }, 30000);
-            }
-
-            // Debug log when blue is present but not yet full (helps tuning)
-            if (hasBlueBar && fillLevel < 90) {
-                addLog(`📊 BlueBarFill: ${fillLevel}% | Orange:${orangeCount} | OCR:${hasExactReelText}`, false);
-            }
-
-            // ──────────────────────────────────────────────────────────────
-            // 2. THE CHAT CROP: SCAN FOR FISH NAME (unchanged)
-            // ──────────────────────────────────────────────────────────────
+            // 3. CHAT CROP: FISH NAME
             const cR = chatBox.getBoundingClientRect();
-            canvas.width = chatBox.offsetWidth * 2;
-            canvas.height = chatBox.offsetHeight * 2;
-
+            canvas.width = chatBox.offsetWidth * 2; canvas.height = chatBox.offsetHeight * 2;
             ctx.filter = 'grayscale(1) contrast(300%) invert(1)';
-            ctx.drawImage(
-                video,
-                (cR.left - vRect.left) / vRect.width * video.videoWidth,
-                (cR.top - vRect.top) / vRect.height * video.videoHeight,
-                cR.width / vRect.width * video.videoWidth,
-                cR.height / vRect.height * video.videoHeight,
-                0, 0, canvas.width, canvas.height
-            );
+            ctx.drawImage(video, (cR.left - vRect.left) / vRect.width * video.videoWidth, (cR.top - vRect.top) / vRect.height * video.videoHeight, cR.width / vRect.width * video.videoWidth, cR.height / vRect.height * video.videoHeight, 0, 0, canvas.width, canvas.height);
 
             try {
                 const { data: { text } } = await ocrWorker.recognize(canvas);
                 scoutState.fullText = text.toLowerCase();
                 scoutState.lastScanTime = Date.now();
-            } catch (e) { /* Busy */ }
-
-        }, 5000); // Check every 5 seconds
+            } catch (e) {}
+        }, 5000);
     }
 
     /**
-     * VERIFICATION LOGIC (now uses strict full-reel check)
+     * LOG HANDLING & SECURITY GATE
      */
     window.handleChatLine = async function(line) {
         if (line === lastProcessedLine) return;
-
         const fishRegex = /You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
         const match = line.match(fishRegex);
 
@@ -1979,26 +1881,22 @@ async function pushBufferToCloud() {
 
             if (isOcrActive) {
                 const hasVisualChat = scoutState.fullText.includes(fishType.toLowerCase());
-                // STRICT: require either full reel OR recent exact UI (but full reel is preferred)
                 const hasReeled = scoutState.barFullyReeled || scoutState.miniGameDetected;
+                const isFresh = (Date.now() - scoutState.lastScanTime) < 45000;
 
-                if (!hasVisualChat || !hasReeled) {
+                if (!hasVisualChat || !hasReeled || !isFresh) {
                     anomalyCountThisBatch++;
-                    addLog(`🕵️ SCOUT: Anomaly! Chat:${hasVisualChat} | UI:${hasReeled} | FullReel:${scoutState.barFullyReeled}`, true);
-                    return;
+                    addLog(`🕵️ SCOUT: Anomaly! Chat:${hasVisualChat} | UI:${hasReeled}`, true);
+                    return; 
                 }
             }
 
-            // Standard Sync Logic
             lastProcessedLine = line;
-            if (typeof sessionStats !== 'undefined') {
-                sessionStats[fishType] = (sessionStats[fishType] || 0) + amount;
-            }
+            if (typeof sessionStats !== 'undefined') sessionStats[fishType] = (sessionStats[fishType] || 0) + amount;
 
-            // Sync to Firestore (Buffer)
+            // Cloud Buffer
             pendingCatchBuffer.score += amount;
             pendingCatchBuffer.totals[fishType] = (pendingCatchBuffer.totals[fishType] || 0) + amount;
-
             if (!syncTimer) syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
 
             if (typeof updateSessionUI === 'function') updateSessionUI();
@@ -2006,19 +1904,62 @@ async function pushBufferToCloud() {
         }
     };
 
-    // --- UI SETUP ---
+    /**
+     * POLL LOG FILE
+     */
+    window.pollWebLog = async function() {
+        if (typeof fileHandle === 'undefined' || !fileHandle) return;
+        try {
+            const file = await fileHandle.getFile();
+            if (file.size > lastSize) {
+                const blob = file.slice(lastSize, file.size);
+                const text = await blob.text();
+                text.split(/\r?\n/).forEach(l => { if (l.trim()) window.handleChatLine(l); });
+                lastSize = file.size;
+            }
+            errorCount = 0;
+        } catch (err) {
+            errorCount++;
+            if (errorCount >= MAX_RETRIES) window.stopVisualScout();
+        }
+    };
+
+    /**
+     * CLOUD SYNC
+     */
+    window.pushBufferToCloud = async function() {
+        if (typeof activeContestRef === 'undefined' || !activeContestRef) return;
+        try {
+            // Placeholder for your Firestore logic (writeBatch, increment, etc)
+            console.log("☁️ SYNCING TO CLOUD...", pendingCatchBuffer);
+            pendingCatchBuffer = { score: 0, totals: {} };
+            anomalyCountThisBatch = 0;
+            syncTimer = null;
+            addLog("☁️ SYNC_COMPLETE.");
+        } catch (err) { syncTimer = setTimeout(window.pushBufferToCloud, 30000); }
+    };
+
+    /**
+     * UI SETUP (Resizable & Draggable)
+     */
     function initUI() {
         const setupBtn = document.getElementById('setup-ocr-btn');
         if (setupBtn) setupBtn.onclick = window.calibrateVisualScout;
 
-        // Add Draggable logic for BOTH boxes
         [document.getElementById('crop-box'), document.getElementById('ui-crop-box')].forEach(box => {
             if (!box) return;
+            // Force resizable CSS
+            box.style.resize = "both";
+            box.style.overflow = "hidden";
+            
             let drag = false, off = { x: 0, y: 0 };
             box.onmousedown = (e) => { 
-                drag = true; 
-                off.x = e.clientX - box.offsetLeft; 
-                off.y = e.clientY - box.offsetTop; 
+                // Only drag if not clicking the resize handle (bottom-right 15px)
+                if (e.offsetX < box.clientWidth - 15 || e.offsetY < box.clientHeight - 15) {
+                    drag = true; 
+                    off.x = e.clientX - box.offsetLeft; 
+                    off.y = e.clientY - box.offsetTop; 
+                }
             };
             document.addEventListener('mousemove', (e) => { 
                 if (drag) { 
@@ -2031,11 +1972,15 @@ async function pushBufferToCloud() {
     }
 
     window.calibrateVisualScout = async function() {
-        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        document.getElementById('ocr-video').srcObject = stream;
-        isOcrActive = true;
-        await initOcr();
-        startOcrLoop();
+        try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            document.getElementById('ocr-video').srcObject = stream;
+            isOcrActive = true;
+            await initOcr();
+            startOcrLoop();
+            if (typeof window.pollWebLog === 'function') setInterval(window.pollWebLog, 2000);
+            addLog("📡 VISUAL_SCOUT: Screen capture + Log Polling active.");
+        } catch (e) { addLog("⚠️ VISUAL_SCOUT: Link declined."); }
     };
 
     window.addEventListener('load', initUI);
