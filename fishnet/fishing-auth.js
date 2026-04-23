@@ -1372,33 +1372,45 @@ function runSessionTicker() {
     updateSessionUI();
 }
 function updateSessionUI() {
-	let grandTotal = 0;
-	const elapsedHours = (Date.now() - window.sessionStartTime) / 3600000;
+    let grandTotal = 0;
+    const now = Date.now();
+    const elapsedHours = (now - window.sessionStartTime) / 3600000;
 
-	Object.keys(sessionStats).forEach(key => {
-		const count = sessionStats[key] || 0;
-		const totalValue = sessionValues[key] || 0;
-		grandTotal += totalValue;
+    Object.keys(sessionStats).forEach(key => {
+        const count = sessionStats[key] || 0;
+        const totalValue = sessionValues[key] || 0;
+        grandTotal += totalValue;
 
-		const safeKey = key.replace(/\s+/g, '-');
-		const rowEl = document.getElementById(`row-${safeKey}`);
-		
-		if (count > 0 && rowEl) {
-			rowEl.style.display = "grid";
-			document.getElementById(`session-${safeKey}`).textContent = count;
-			document.getElementById(`val-${safeKey}`).textContent = `(${totalValue.toFixed(4)})`;
+        const safeKey = key.replace(/\s+/g, '-');
+        const rowEl = document.getElementById(`row-${safeKey}`);
+        
+        if (count > 0 && rowEl) {
+            // 1. Ensure the row is visible
+            rowEl.style.display = "grid";
 
-			const rateEl = document.getElementById(`rate-${safeKey}`);
-			if (rateEl && elapsedHours > 0.0001) {
-				const perHour = (count / elapsedHours).toFixed(1);
-				rateEl.textContent = `${perHour}/hr`;
-				rateEl.style.color = perHour > 0 ? "#00ffff" : "#555";
-			}
-		}
-	});
-	const totalEl = document.getElementById('session-grand-total');
-	if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
-};
+            // 2. Update Totals (Only strictly needed on catch, but fine to run)
+            const sessionEl = document.getElementById(`session-${safeKey}`);
+            const valEl = document.getElementById(`val-${safeKey}`);
+            if (sessionEl) sessionEl.textContent = count;
+            if (valEl) valEl.textContent = `(${totalValue.toFixed(4)})`;
+
+            // 3. Update LIVE RATE (This is what you see change every second)
+            const rateEl = document.getElementById(`rate-${safeKey}`);
+            if (rateEl) {
+                if (elapsedHours > 0.0001) {
+                    const perHour = (count / elapsedHours).toFixed(1);
+                    rateEl.textContent = `${perHour}/hr`;
+                    rateEl.style.color = "#00ffff"; // Keep it cyan for visibility
+                } else {
+                    rateEl.textContent = "calc...";
+                }
+            }
+        }
+    });
+
+    const totalEl = document.getElementById('session-grand-total');
+    if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
+}
 /*
  * UPDATE_CONTEST_HUD
  * Real-time overlay update for the active contest, 
@@ -2112,7 +2124,7 @@ function createDynamicRow(fishType) {
     const row = document.createElement('div');
     row.id = `row-${safeKey}`;
     
-    // Explicit 3-column grid: [Name] [Rate] [Total/Value]
+    // Strict grid setup
     row.style.display = "grid"; 
     row.style.gridTemplateColumns = "1.5fr 1fr 1.5fr"; 
     row.style.gap = "4px";
@@ -2120,8 +2132,9 @@ function createDynamicRow(fishType) {
     row.style.padding = "2px 0";
     row.style.alignItems = "center";
 
+    // IMPORTANT: We need the 3 separate spans/divs to exist so updateSessionUI can find them
     row.innerHTML = `
-        <span style="color: #ccc; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fishType.toUpperCase()}</span>
+        <span style="color: #ccc; font-size: 10px; white-space: nowrap;">${fishType.toUpperCase()}</span>
         <span id="rate-${safeKey}" style="color: #00ffff; font-size: 9px; text-align: center; font-weight: bold;">0.0/hr</span>
         <div style="text-align: right; font-size: 10px;">
             <span id="session-${safeKey}" style="color: #00ff00;">0</span>
@@ -2129,8 +2142,7 @@ function createDynamicRow(fishType) {
         </div>
     `;
     container.appendChild(row);
-}
-/**
+}/**
  * pushBufferToCloud: BATCH_WRITE_PROTOCOL
  * Consolidates all buffered catches into a single Firestore write.
  */
