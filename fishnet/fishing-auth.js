@@ -2327,6 +2327,37 @@ startBtn.onclick = async () => {
     addLog(`✅ WATCHER_ENGAGED: TRACKING [${eName}]`);
     if (typeof updateSessionUI === 'function') updateSessionUI();
 };
+
+const resetBtn = document.getElementById('reset-session-btn');
+
+resetBtn.onclick = () => {
+    // 1. Confirm with the user so they don't misclick
+    if (!confirm("Are you sure? This will wipe the current session counts and UI.")) return;
+
+    // 2. Clear the core data objects
+    if (typeof sessionStats !== 'undefined') {
+        Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
+        Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
+    }
+
+    // 3. Reset the Start Time so /hr rates start fresh
+    window.sessionStartTime = Date.now();
+
+    // 4. Clear the UI Rows
+    const container = document.getElementById('manifest-grid');
+    if (container) {
+        container.innerHTML = ''; // Wipes all dynamic rows
+    }
+
+    // 5. Reset Global Totals
+    const totalEl = document.getElementById('session-grand-total');
+    if (totalEl) totalEl.textContent = "0.0000";
+
+    const timerEl = document.getElementById('session-timer');
+    if (timerEl) timerEl.textContent = "00:00:00";
+
+    addLog("🧹 SESSION_RESET: All local stats have been cleared.");
+};
 // --- 1. ELECTRON PATH LISTENER (GHOST REMOVAL) ---
 // Only listen for 'selected-path' if we aren't in a browser
 if (!isWebMode) {
