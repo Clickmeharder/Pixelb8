@@ -1967,120 +1967,140 @@ async function pushBufferToCloud() {
 /*---------------------------------------------------------
   PIXELB8 SCOUT: ENCAPSULATED LOG PROCESSING SYSTEM
 ---------------------------------------------------------*/
-startBtn.onclick = async () => {
-    // --- 0. TOGGLE STOP LOGIC ---
-    if (startBtn.textContent === "STOP SESSION") {
-        if (sessionTickerInterval) clearInterval(sessionTickerInterval);
-        if (window.pollInterval) clearInterval(window.pollInterval); 
-        
-        startBtn.textContent = "START SESSION";
-        startBtn.style.background = ""; 
-        startBtn.style.opacity = "1.0";
-        startBtn.disabled = false;
-        
-        addLog("🛑 SESSION_STOPPED: Tracking and rates frozen.", true);
-        return;
-    }
+(function() {
+    // --- PRIVATE STATE ---
+    let pendingCatchBuffer = { score: 0, totals: {} };
+    let syncTimer = null;
+    const SYNC_INTERVAL_MS = 300000; 
+    let errorCount = 0;
+    const MAX_RETRIES = 3;
+    let lastLogTimestamp = 0; 
+    let lastProcessedLine = ""; 
+    
+    // Global Session Start for per-hour math
+    window.sessionStartTime = Date.now(); 
 
-    // --- 1. WEB PATH (Browser) - MUST BE FIRST FOR SECURITY ---
-    // Browsers require the file picker to be triggered immediately after the click
-    if (isWebMode) {
+    /**
+     * POLL LOG FILE
+     */
+    window.pollWebLog = async function() {
+        if (typeof fileHandle === 'undefined' || !fileHandle) return;
         try {
-            if (!fileHandle) {
-                const pickerResult = await window.showOpenFilePicker({
-                    types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
-                    multiple: false
-                });
-                fileHandle = pickerResult[0];
-                // Save handle to IndexedDB for persistence
-                if (typeof saveFileHandle === 'function') await saveFileHandle(fileHandle);
-            } else {
-                // If we already have a handle (from IndexedDB), verify permissions
-                const opts = { mode: 'read' };
-                if (await fileHandle.queryPermission(opts) !== 'granted') {
-                    if (await fileHandle.requestPermission(opts) !== 'granted') {
-                        throw new Error("Permission denied");
-                    }
-                }
-            }
-            
             const file = await fileHandle.getFile();
-            lastSize = file.size; 
-            
-            if (window.pollInterval) clearInterval(window.pollInterval);
-            window.pollInterval = setInterval(window.pollWebLog, 3000); 
-            
-            if (typeof requestWakeLock === 'function') await requestWakeLock();
-            if (typeof refreshContestList === 'function') refreshContestList();
-            
-            addLog("📡 FISH_NET: Chat.log bound. Polling active.");
-
+            if (file.size > lastSize) {
+                const blob = file.slice(lastSize, file.size);
+                const text = await blob.text();
+                text.split(/\r?\n/).forEach(l => { if (l.trim()) window.handleChatLine(l); });
+                lastSize = file.size;
+            } else if (file.size < lastSize) {
+                addLog("⚠️ SECURITY: Log shrink detected. Resetting pointer.", true);
+                lastSize = file.size;
+            }
+            errorCount = 0;
         } catch (err) {
-            console.error("Picker Error:", err);
-            addLog("❌ PICKER_FAILED: Direct user click required.", true);
+            errorCount++;
+            if (errorCount >= MAX_RETRIES) {
+                await window.pushBufferToCloud();
+                if (window.pollInterval) clearInterval(window.pollInterval);
+                addLog("❌ SCOUT_HALTED: File access lost.", true);
+            }
+        }
+    };
+
+    /**
+     * MAIN CHAT HANDLER
+     */
+	window.handleChatLine = async function(line) {
+		if (line === lastProcessedLine) return;
+
+		const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
+		const match = line.match(fishRegex);
+
+		if (match) {
+			const logTimeString = match[1];
+			const fishType = match[2].trim(); 
+			const amount = parseInt(match[3]);
+			const value = parseFloat(match[4]);
+			const currentLogTimestamp = new Date(logTimeString).getTime();
+
+			const secondsBetweenLogs = (currentLogTimestamp - lastLogTimestamp) / 1000;
+			if (lastLogTimestamp !== 0 && secondsBetweenLogs < 5) return; 
+
+			if (!isNaN(value)) {
+				lastLogTimestamp = currentLogTimestamp;
+				lastProcessedLine = line; 
+
+				// DYNAMIC REGISTRATION: Create UI only when caught
+				if (!(fishType in sessionStats)) {
+					sessionStats[fishType] = 0;
+					sessionValues[fishType] = 0;
+				}
+				
+				// Check if physical row exists, if not, create the 3-column version
+				const safeKey = fishType.replace(/\s+/g, '-');
+				if (!document.getElementById(`row-${safeKey}`)) {
+					createDynamicRow(fishType);
+				}
+
+				sessionStats[fishType] += amount;
+				sessionValues[fishType] += value;
+
+				// CLOUD CONTEST SYNC
+				if (typeof activeContestRef !== 'undefined' && activeContestRef) {
+					const settings = window.currentContestSettings;
+					const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
+					const startTime = settings?.startTime?.toMillis() || 0;
+					const endTime = startTime + ((settings?.duration || 60) * 60000);
+
+					if (serverAdjustedNow >= startTime && serverAdjustedNow <= endTime && settings?.status !== 'concluded') {
+						const target = settings?.targetFish?.toLowerCase();
+						if (target && fishType.toLowerCase() === target) {
+							pendingCatchBuffer.score += amount;
+						}
+						pendingCatchBuffer.totals[fishType] = (pendingCatchBuffer.totals[fishType] || 0) + amount;
+						if (!syncTimer) syncTimer = setTimeout(window.pushBufferToCloud, 300000);
+					}
+				}
+
+				if (typeof updateSessionUI === 'function') updateSessionUI();
+				addLog(`🎣 CAUGHT: ${amount}x ${fishType}`);
+			}
+		}
+	};
+    /**
+     * CLOUD UPLINK
+     */
+    window.pushBufferToCloud = async function() {
+        if (!activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
+            syncTimer = null;
             return;
         }
-    } 
-    // --- 2. ELECTRON PATH (Desktop App) ---
-    else {
-        const path = pathInput?.value?.trim();
-        if (!path) {
-            addLog("📂 ACTION_REQUIRED: SELECT_LOG_PATH", true);
-            if (window.electronAPI) window.electronAPI.openFileDialog(); 
-            return; 
+        try {
+            const updateData = { lastUpdate: serverTimestamp() };
+            if (pendingCatchBuffer.score > 0) updateData.score = increment(pendingCatchBuffer.score);
+            for (const [fishName, qty] of Object.entries(pendingCatchBuffer.totals)) {
+                updateData[`totals.${fishName}`] = increment(qty);
+            }
+            await updateDoc(activeContestRef, updateData);
+            pendingCatchBuffer = { score: 0, totals: {} };
+            syncTimer = null;
+            addLog("☁️ SYNC_COMPLETE.");
+        } catch (err) {
+            syncTimer = setTimeout(window.pushBufferToCloud, 30000);
         }
-        window.electronAPI.send('start-watch', path);
-    }
+    };
 
-    // --- 3. INITIALIZE SESSION TIMING & STATS ---
-    window.sessionStartTime = Date.now(); 
-    
-    // Clear previous session stats
-    if (typeof sessionStats !== 'undefined') {
-        Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
-        Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
-    }
+    /**
+     * RATE CALCULATOR
+     */
+    window.getFishPerHour = function(fishType) {
+        const elapsedHours = (Date.now() - window.sessionStartTime) / 3600000;
+        if (elapsedHours <= 0.001) return 0; 
+        const count = sessionStats[fishType] || 0;
+        return (count / elapsedHours).toFixed(1);
+    };
 
-    // --- 4. CONTEST & UPLINK (GUEST-SAFE) ---
-    // Only attempt cloud sync if the user is logged in
-    if (typeof globalUserData !== 'undefined' && globalUserData?.entropianame) {
-        if (!activeContestRef) {
-            if (typeof restoreActiveContest === 'function') await restoreActiveContest();
-        }
-        if (activeContestRef) {
-            if (typeof activateContestLocally === 'function') activateContestLocally();
-            addLog("✨ CLOUD_SYNC: Contest tracking active.");
-        }
-    } else {
-        addLog("👤 GUEST_MODE: Tracking locally only.");
-    }
-
-    // --- 5. START UI TICKER (The Clock & Rate Engine) ---
-    if (sessionTickerInterval) clearInterval(sessionTickerInterval);
-    sessionTickerInterval = setInterval(() => {
-        // Update visual clock
-        const timerEl = document.getElementById('session-timer');
-        if (timerEl) {
-            const elapsed = Date.now() - window.sessionStartTime;
-            const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
-            const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
-            const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
-            timerEl.textContent = `${h}:${m}:${s}`;
-        }
-        // Recalculate /hr rates
-        if (typeof updateSessionUI === 'function') updateSessionUI();
-    }, 1000);
-
-    // --- 6. BUTTON & LOG FINALIZATION ---
-    const eName = globalUserData?.entropianame || localStorage.getItem('guest_ename') || "ANONYMOUS_SCOUT";
-    
-    startBtn.textContent = "STOP SESSION";
-    startBtn.style.background = "#d32f2f"; // Active Red
-    startBtn.style.opacity = "1.0";
-    
-    addLog(`✅ WATCHER_ENGAGED: TRACKING [${eName}]`);
-    if (typeof updateSessionUI === 'function') updateSessionUI();
-};
+})();
 // Only set up the bridge listener if Electron exists
 if (window.electronAPI && window.electronAPI.onChatLine) {
     window.electronAPI.onChatLine((line) => {
