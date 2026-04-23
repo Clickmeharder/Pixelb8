@@ -2115,8 +2115,9 @@ function createDynamicRow(fishType) {
     const row = document.createElement('div');
     row.id = `row-${safeKey}`;
     
-    row.style.display = "grid"; 
-    row.style.gridTemplateColumns = "1.5fr 1fr 1.5fr"; 
+    row.style.display = ""; 
+	row.style.width = "fit-content";
+    row.style.gridTemplateColumns = ""; 
     row.style.gap = "4px";
     row.style.borderBottom = "1px solid #111";
     row.style.padding = "2px 0";
