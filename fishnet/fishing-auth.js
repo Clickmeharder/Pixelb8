@@ -470,9 +470,9 @@ onAuthStateChanged(auth, async (user) => {
             }
 
             // --- 1. START THE BACKGROUND MAIL MONITOR ---
-            if (typeof startMailMonitor === 'function') {
+/*             if (typeof startMailMonitor === 'function') {
                 startMailMonitor();
-            }
+            } */
 
             loadAuthenticatedData(user);
             if (typeof restoreActiveContest === 'function') restoreActiveContest();
