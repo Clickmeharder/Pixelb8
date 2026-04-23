@@ -1983,18 +1983,19 @@ startBtn.onclick = async () => {
     }
 
     // --- 1. WEB PATH (Browser) - MUST BE FIRST FOR SECURITY ---
-    // Moving this to the very top ensures the "User Gesture" hasn't timed out.
+    // Browsers require the file picker to be triggered immediately after the click
     if (isWebMode) {
         try {
             if (!fileHandle) {
-                // Trigger picker immediately before any other awaits
                 const pickerResult = await window.showOpenFilePicker({
                     types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
                     multiple: false
                 });
                 fileHandle = pickerResult[0];
+                // Save handle to IndexedDB for persistence
                 if (typeof saveFileHandle === 'function') await saveFileHandle(fileHandle);
             } else {
+                // If we already have a handle (from IndexedDB), verify permissions
                 const opts = { mode: 'read' };
                 if (await fileHandle.queryPermission(opts) !== 'granted') {
                     if (await fileHandle.requestPermission(opts) !== 'granted') {
@@ -2010,12 +2011,14 @@ startBtn.onclick = async () => {
             window.pollInterval = setInterval(window.pollWebLog, 3000); 
             
             if (typeof requestWakeLock === 'function') await requestWakeLock();
+            if (typeof refreshContestList === 'function') refreshContestList();
+            
             addLog("📡 FISH_NET: Chat.log bound. Polling active.");
 
         } catch (err) {
             console.error("Picker Error:", err);
-            addLog("❌ PICKER_FAILED: Click again and select immediately.", true);
-            return; // Stop execution if picker is blocked or cancelled
+            addLog("❌ PICKER_FAILED: Direct user click required.", true);
+            return;
         }
     } 
     // --- 2. ELECTRON PATH (Desktop App) ---
@@ -2031,12 +2034,15 @@ startBtn.onclick = async () => {
 
     // --- 3. INITIALIZE SESSION TIMING & STATS ---
     window.sessionStartTime = Date.now(); 
+    
+    // Clear previous session stats
     if (typeof sessionStats !== 'undefined') {
         Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
         Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
     }
 
-    // --- 4. CONTEST & UPLINK (Safe to await network here) ---
+    // --- 4. CONTEST & UPLINK (GUEST-SAFE) ---
+    // Only attempt cloud sync if the user is logged in
     if (typeof globalUserData !== 'undefined' && globalUserData?.entropianame) {
         if (!activeContestRef) {
             if (typeof restoreActiveContest === 'function') await restoreActiveContest();
@@ -2045,14 +2051,14 @@ startBtn.onclick = async () => {
             if (typeof activateContestLocally === 'function') activateContestLocally();
             addLog("✨ CLOUD_SYNC: Contest tracking active.");
         }
-        if (typeof refreshContestList === 'function') refreshContestList();
     } else {
         addLog("👤 GUEST_MODE: Tracking locally only.");
     }
 
-    // --- 5. START UI TICKER ---
+    // --- 5. START UI TICKER (The Clock & Rate Engine) ---
     if (sessionTickerInterval) clearInterval(sessionTickerInterval);
     sessionTickerInterval = setInterval(() => {
+        // Update visual clock
         const timerEl = document.getElementById('session-timer');
         if (timerEl) {
             const elapsed = Date.now() - window.sessionStartTime;
@@ -2061,13 +2067,16 @@ startBtn.onclick = async () => {
             const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
             timerEl.textContent = `${h}:${m}:${s}`;
         }
+        // Recalculate /hr rates
         if (typeof updateSessionUI === 'function') updateSessionUI();
     }, 1000);
 
     // --- 6. BUTTON & LOG FINALIZATION ---
     const eName = globalUserData?.entropianame || localStorage.getItem('guest_ename') || "ANONYMOUS_SCOUT";
+    
     startBtn.textContent = "STOP SESSION";
-    startBtn.style.background = "#d32f2f"; 
+    startBtn.style.background = "#d32f2f"; // Active Red
+    startBtn.style.opacity = "1.0";
     
     addLog(`✅ WATCHER_ENGAGED: TRACKING [${eName}]`);
     if (typeof updateSessionUI === 'function') updateSessionUI();
