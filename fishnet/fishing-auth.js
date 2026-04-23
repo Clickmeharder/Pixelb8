@@ -873,35 +873,26 @@ async function initializeFishData() {
         const grid = document.getElementById('manifest-grid');
         const targetSelect = document.getElementById('contest-target-fish');
         
-        // 1. Clear Manifest Grid (keep standard categories)
-        grid.innerHTML = `
-            <div id="row-Baitfish" style="display:none; color:#aaa; font-size:11px;">BAITFISH: <span id="session-Baitfish" style="color:#0f0">0</span> <span id="val-Baitfish" style="color:#00ffff; font-size:9px;">(0.0000)</span></div>
-            <div id="row-Fish-Scrap" style="display:none; color:#aaa; font-size:11px;">FISH SCRAP: <span id="session-Fish-Scrap" style="color:#0f0">0</span> <span id="val-Fish-Scrap" style="color:#00ffff; font-size:9px;">(0.0000)</span></div>
-        `;
+        // 1. Clear Manifest Grid entirely
+        if (grid) grid.innerHTML = ''; 
 
         // 2. Reset Dropdown with default "Baitfish" option
         if (targetSelect) {
             targetSelect.innerHTML = `<option value="Baitfish">Baitfish</option>`;
         }
 
-        // 3. Loop through JSON to build UI and Dropdown
+        // 3. Register fish in memory only (UI rows created on catch)
         data.forEach(fish => {
             fish.Sizes.forEach(size => {
-                const fishName = size.Name; // e.g. "Young Calypso Salmon"
-                const safeId = fishName.replace(/\s+/g, '-');
+                const fishName = size.Name;
 
-                // Register in tracking objects
-                sessionStats[fishName] = 0;
-                sessionValues[fishName] = 0;
+                // Register in tracking objects if not already there
+                if (!(fishName in sessionStats)) {
+                    sessionStats[fishName] = 0;
+                    sessionValues[fishName] = 0;
+                }
 
-                // Create UI Row for Manifest
-                const div = document.createElement('div');
-                div.id = `row-${safeId}`;
-                div.style = "display:none; color:#aaa; font-size:11px;";
-                div.innerHTML = `${fishName.toUpperCase()}: <span id="session-${safeId}" style="color:#0f0">0</span> <span id="val-${safeId}" style="color:#00ffff; font-size:9px;">(0.0000)</span>`;
-                grid.appendChild(div);
-
-                // Create Option for Contest Dropdown
+                // Populate the Contest Dropdown
                 if (targetSelect) {
                     const opt = document.createElement('option');
                     opt.value = fishName;
@@ -911,7 +902,7 @@ async function initializeFishData() {
             });
         });
 
-        addLog("📋 MANIFEST: ASSET_REGISTRY_LOADED & DROPDOWN_SYNCED");
+        addLog("📋 MANIFEST: Registry initialized. UI will build on catch.");
     } catch (err) {
         console.error("Failed to load fishes.json:", err);
         addLog("ID10tERR: FISH_DATA_LOAD_FAILED", true);
@@ -2032,7 +2023,6 @@ async function pushBufferToCloud() {
 			const value = parseFloat(match[4]);
 			const currentLogTimestamp = new Date(logTimeString).getTime();
 
-			// 1. ANTI-CHEAT
 			const secondsBetweenLogs = (currentLogTimestamp - lastLogTimestamp) / 1000;
 			if (lastLogTimestamp !== 0 && secondsBetweenLogs < 5) return; 
 
@@ -2040,19 +2030,22 @@ async function pushBufferToCloud() {
 				lastLogTimestamp = currentLogTimestamp;
 				lastProcessedLine = line; 
 
-				// 2. DYNAMIC REGISTRATION
+				// DYNAMIC REGISTRATION: Create UI only when caught
 				if (!(fishType in sessionStats)) {
 					sessionStats[fishType] = 0;
 					sessionValues[fishType] = 0;
-					// This creates the 3-column row with the rate-span
-					if (typeof createDynamicRow === 'function') createDynamicRow(fishType);
+				}
+				
+				// Check if physical row exists, if not, create the 3-column version
+				const safeKey = fishType.replace(/\s+/g, '-');
+				if (!document.getElementById(`row-${safeKey}`)) {
+					createDynamicRow(fishType);
 				}
 
-				// 3. INCREMENT STATS
 				sessionStats[fishType] += amount;
 				sessionValues[fishType] += value;
 
-				// 4. CLOUD CONTEST SYNC (Keep your existing logic here)
+				// CLOUD CONTEST SYNC
 				if (typeof activeContestRef !== 'undefined' && activeContestRef) {
 					const settings = window.currentContestSettings;
 					const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
@@ -2065,14 +2058,11 @@ async function pushBufferToCloud() {
 							pendingCatchBuffer.score += amount;
 						}
 						pendingCatchBuffer.totals[fishType] = (pendingCatchBuffer.totals[fishType] || 0) + amount;
-						if (!syncTimer) syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
+						if (!syncTimer) syncTimer = setTimeout(window.pushBufferToCloud, 300000);
 					}
 				}
 
-				// 5. REFRESH UI IMMEDIATELY
-				// This ensures the green count updates the instant the log is read
 				if (typeof updateSessionUI === 'function') updateSessionUI();
-				
 				addLog(`🎣 CAUGHT: ${amount}x ${fishType}`);
 			}
 		}
@@ -2125,7 +2115,6 @@ function createDynamicRow(fishType) {
     const row = document.createElement('div');
     row.id = `row-${safeKey}`;
     
-    // Force the 3-column layout
     row.style.display = "grid"; 
     row.style.gridTemplateColumns = "1.5fr 1fr 1.5fr"; 
     row.style.gap = "4px";
@@ -2135,7 +2124,6 @@ function createDynamicRow(fishType) {
     row.style.color = "#aaa";
     row.style.fontSize = "11px";
 
-    // We MUST have three distinct elements here
     row.innerHTML = `
         <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fishType.toUpperCase()}</span>
         <span id="rate-${safeKey}" style="color: #00ffff; font-size: 9px; text-align: center; font-weight: bold;">0.0/hr</span>
