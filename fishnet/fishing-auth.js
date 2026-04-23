@@ -2202,30 +2202,39 @@ async function requestWakeLock() {
 }
 
 startBtn.onclick = async () => {
-    // 1. ELECTRON PATH (Desktop App)
+    // --- 1. INITIALIZE SESSION TIMING & STATS ---
+    window.sessionStartTime = Date.now(); 
+    // Reset local session trackers so old data doesn't skew new rates
+    if (typeof sessionStats !== 'undefined') {
+        Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
+        Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
+    }
+
+    // --- 2. ELECTRON PATH (Desktop App) ---
     if (!isWebMode) {
         const path = pathInput?.value?.trim();
         if (!path) {
             addLog("📂 ACTION_REQUIRED: SELECT_LOG_PATH", true);
-            window.electronAPI.openFileDialog(); 
+            if (window.electronAPI) window.electronAPI.openFileDialog(); 
             return; 
         }
         window.electronAPI.send('start-watch', path);
     } 
-    // 2. WEB PATH (Browser)
+    // --- 3. WEB PATH (Browser) ---
     else {
         try {
             // Check if we need to pick a new file or if we are clicking "Resume"
             if (!fileHandle) {
-                [fileHandle] = await window.showOpenFilePicker({
+                const pickerResult = await window.showOpenFilePicker({
                     types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
                     multiple: false
                 });
+                fileHandle = pickerResult[0];
 
-                // STRATEGY 2: Save the handle to IndexedDB for next time
-                await saveFileHandle(fileHandle);
+                // Save the handle to IndexedDB for next time
+                if (typeof saveFileHandle === 'function') await saveFileHandle(fileHandle);
             } else {
-                // If we already have a handle (from a restore), verify permission
+                // If we already have a handle, verify permission
                 const opts = { mode: 'read' };
                 if (await fileHandle.queryPermission(opts) !== 'granted') {
                     if (await fileHandle.requestPermission(opts) !== 'granted') {
@@ -2235,15 +2244,17 @@ startBtn.onclick = async () => {
             }
             
             const file = await fileHandle.getFile();
-            lastSize = file.size; // Start reading from now
+            lastSize = file.size; // Start reading from current end of file
             
-            if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(pollWebLog, 3000); // 3s Poll
+            if (window.pollInterval) clearInterval(window.pollInterval);
+            window.pollInterval = setInterval(window.pollWebLog, 3000); // 3s Poll
             
-            // STRATEGY 1: Engage Wake Lock
-            await requestWakeLock();
-            refreshContestList();
-			addLog("📡 FISH_NET: Refreshing Contest list.");
+            // Engage Wake Lock to keep the browser from sleeping
+            if (typeof requestWakeLock === 'function') await requestWakeLock();
+            
+            if (typeof refreshContestList === 'function') refreshContestList();
+            
+            addLog("📡 FISH_NET: Refreshing Contest list.");
             addLog("📡 FISH_NET: Chat.log bound. Polling active.");
 
         } catch (err) {
@@ -2253,26 +2264,31 @@ startBtn.onclick = async () => {
         }
     }
 
+    // --- 4. CONTEST & UPLINK LOGIC ---
     if (!activeContestRef) {
         addLog("🔍 CHECKING_UPLINK: Looking for registered contests...");
-        await restoreActiveContest();
+        if (typeof restoreActiveContest === 'function') await restoreActiveContest();
     }
 
     if (activeContestRef) {
-        activateContestLocally();
+        if (typeof activateContestLocally === 'function') activateContestLocally();
         addLog("✨ CONTEST_SYNCED: Ready to transmit catches.");
     } else {
         addLog("⚠️ NO_ACTIVE_CONTEST: Join a contest to sync scores.", true);
     }
 
-    // Common UI Updates
-    const eName = globalUserData?.entropianame || "ANONYMOUS_SCOUT";
+    // --- 5. COMMON UI UPDATES ---
+    const eName = globalUserData?.entropianame || localStorage.getItem('guest_ename') || "ANONYMOUS_SCOUT";
+    
     startBtn.disabled = true;
     startBtn.style.opacity = "0.3";
     startBtn.textContent = "Activated";
+    
     addLog(`✅ WATCHER_ENGAGED: TRACKING [${eName}]`);
+    
+    // Final UI refresh to clear out old numbers
+    if (typeof updateSessionUI === 'function') updateSessionUI();
 };
-
 // --- 1. ELECTRON PATH LISTENER (GHOST REMOVAL) ---
 // Only listen for 'selected-path' if we aren't in a browser
 if (!isWebMode) {
