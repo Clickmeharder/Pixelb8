@@ -503,7 +503,7 @@ onAuthStateChanged(auth, async (user) => {
         if (hostSection) hostSection.style.display = 'none';
         if (adminTabBtn) adminTabBtn.style.display = 'none';
 
-        usernameElements.forEach(el => el.textContent = "StrangerDanger!");
+        usernameElements.forEach(el => el.textContent = "Anonymous Baiter");
         profilePhotoElements.forEach(img => img.src = defaultAvatar);
         entropiaNameElements.forEach(el => el.textContent = "-");
         
