@@ -2214,87 +2214,76 @@ startBtn.onclick = async () => {
     // --- 0. TOGGLE STOP LOGIC ---
     if (startBtn.textContent === "STOP SESSION") {
         if (sessionTickerInterval) clearInterval(sessionTickerInterval);
-        if (window.pollInterval) clearInterval(window.pollInterval); // Stop polling if in web mode
+        if (window.pollInterval) clearInterval(window.pollInterval);
         
         startBtn.textContent = "START SESSION";
-        startBtn.style.background = ""; // Reset to default
+        startBtn.style.background = ""; 
         startBtn.style.opacity = "1.0";
-        startBtn.disabled = false;
-        
-        addLog("🛑 SESSION_STOPPED: Tracking and rates frozen.", true);
+        addLog("🛑 SESSION_STOPPED", true);
         return;
     }
 
     // --- 1. INITIALIZE SESSION TIMING & STATS ---
     window.sessionStartTime = Date.now(); 
     
-    // Reset local session trackers
     if (typeof sessionStats !== 'undefined') {
         Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
         Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
     }
 
-    // --- 2. ELECTRON PATH (Desktop App) ---
-    if (!isWebMode) {
+    // --- 2. THE PATHWAY (ELECTRON vs WEB) ---
+    // Check if we are in Electron or Browser
+    const isElectron = !!(window.electronAPI);
+
+    if (isElectron) {
         const path = pathInput?.value?.trim();
         if (!path) {
             addLog("📂 ACTION_REQUIRED: SELECT_LOG_PATH", true);
-            if (window.electronAPI) window.electronAPI.openFileDialog(); 
+            window.electronAPI.openFileDialog(); 
             return; 
         }
         window.electronAPI.send('start-watch', path);
-    } 
-    // --- 3. WEB PATH (Browser) ---
-    else {
+    } else {
+        // WEB PATH
         try {
-            if (!fileHandle) {
-                const pickerResult = await window.showOpenFilePicker({
+            // Re-check global fileHandle
+            if (typeof fileHandle === 'undefined' || !fileHandle) {
+                const [handle] = await window.showOpenFilePicker({
                     types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
                     multiple: false
                 });
-                fileHandle = pickerResult[0];
-                if (typeof saveFileHandle === 'function') await saveFileHandle(fileHandle);
+                window.fileHandle = handle; // Assign to window for global access
             } else {
                 const opts = { mode: 'read' };
-                if (await fileHandle.queryPermission(opts) !== 'granted') {
-                    if (await fileHandle.requestPermission(opts) !== 'granted') {
+                if (await window.fileHandle.queryPermission(opts) !== 'granted') {
+                    if (await window.fileHandle.requestPermission(opts) !== 'granted') {
                         throw new Error("Permission denied");
                     }
                 }
             }
             
-            const file = await fileHandle.getFile();
-            lastSize = file.size; 
+            const file = await window.fileHandle.getFile();
+            window.lastSize = file.size; // Global pointer
             
             if (window.pollInterval) clearInterval(window.pollInterval);
             window.pollInterval = setInterval(window.pollWebLog, 3000); 
             
             if (typeof requestWakeLock === 'function') await requestWakeLock();
-            if (typeof refreshContestList === 'function') refreshContestList();
-            
-            addLog("📡 FISH_NET: Chat.log bound. Polling active.");
-
         } catch (err) {
-            console.error(err);
+            console.error("Picker Error:", err);
             addLog("❌ PICKER_CANCELLED_OR_FAILED", true);
             return;
         }
     }
 
-    // --- 4. CONTEST & UPLINK LOGIC ---
-    if (!activeContestRef) {
+    // --- 3. CONTEST LOGIC (Requires login, but session tracking doesn't) ---
+    if (typeof activeContestRef !== 'undefined' && !activeContestRef) {
         if (typeof restoreActiveContest === 'function') await restoreActiveContest();
     }
 
-    if (activeContestRef) {
-        if (typeof activateContestLocally === 'function') activateContestLocally();
-        addLog("✨ CONTEST_SYNCED: Ready to transmit catches.");
-    }
-
-    // --- 5. START UI TICKER (The Clock & Rate Engine) ---
+    // --- 4. START UI TICKER ---
     if (sessionTickerInterval) clearInterval(sessionTickerInterval);
     sessionTickerInterval = setInterval(() => {
-        // Update the visual clock
         const timerEl = document.getElementById('session-timer');
         if (timerEl) {
             const elapsed = Date.now() - window.sessionStartTime;
@@ -2303,17 +2292,18 @@ startBtn.onclick = async () => {
             const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
             timerEl.textContent = `${h}:${m}:${s}`;
         }
-        // Force the /hr rates to recalculate
         if (typeof updateSessionUI === 'function') updateSessionUI();
     }, 1000);
 
-    // --- 6. BUTTON & LOG FINALIZATION ---
-    const eName = globalUserData?.entropianame || localStorage.getItem('guest_ename') || "ANONYMOUS_SCOUT";
+    // --- 5. UI FINALIZATION ---
+    // Handle the "Not Logged In" name check properly
+    const guestName = localStorage.getItem('guest_ename') || "ANONYMOUS_SCOUT";
+    const eName = (typeof globalUserData !== 'undefined' && globalUserData?.entropianame) 
+                  ? globalUserData.entropianame 
+                  : guestName;
     
-    startBtn.disabled = false; // Keep enabled so user can click "STOP"
     startBtn.textContent = "STOP SESSION";
-    startBtn.style.background = "#d32f2f"; // Red to indicate active/stoppable
-    startBtn.style.opacity = "1.0";
+    startBtn.style.background = "#d32f2f"; 
     
     addLog(`✅ WATCHER_ENGAGED: TRACKING [${eName}]`);
     if (typeof updateSessionUI === 'function') updateSessionUI();
