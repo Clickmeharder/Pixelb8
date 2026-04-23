@@ -1374,7 +1374,9 @@ function runSessionTicker() {
 function updateSessionUI() {
     let grandTotal = 0;
     const now = Date.now();
-    const elapsedHours = (now - window.sessionStartTime) / 3600000;
+    // Safety: ensure we don't divide by zero
+    const elapsedMs = Math.max(1000, now - window.sessionStartTime); 
+    const elapsedHours = elapsedMs / 3600000;
 
     Object.keys(sessionStats).forEach(key => {
         const count = sessionStats[key] || 0;
@@ -1385,25 +1387,24 @@ function updateSessionUI() {
         const rowEl = document.getElementById(`row-${safeKey}`);
         
         if (count > 0 && rowEl) {
-            // 1. Ensure the row is visible
             rowEl.style.display = "grid";
 
-            // 2. Update Totals (Only strictly needed on catch, but fine to run)
+            // Update Counts
             const sessionEl = document.getElementById(`session-${safeKey}`);
-            const valEl = document.getElementById(`val-${safeKey}`);
             if (sessionEl) sessionEl.textContent = count;
+
+            // Update Value
+            const valEl = document.getElementById(`val-${safeKey}`);
             if (valEl) valEl.textContent = `(${totalValue.toFixed(4)})`;
 
-            // 3. Update LIVE RATE (This is what you see change every second)
+            // --- THE FIX: Update Rate ---
             const rateEl = document.getElementById(`rate-${safeKey}`);
             if (rateEl) {
-                if (elapsedHours > 0.0001) {
-                    const perHour = (count / elapsedHours).toFixed(1);
-                    rateEl.textContent = `${perHour}/hr`;
-                    rateEl.style.color = "#00ffff"; // Keep it cyan for visibility
-                } else {
-                    rateEl.textContent = "calc...";
-                }
+                const perHour = (count / elapsedHours).toFixed(1);
+                rateEl.textContent = `${perHour}/hr`;
+                // If it's still showing 0.0, it's because not enough time has passed
+                // or the count is actually 0.
+                rateEl.style.color = perHour > 0 ? "#00ffff" : "#444";
             }
         }
     });
@@ -2018,64 +2019,64 @@ async function pushBufferToCloud() {
     /**
      * MAIN CHAT HANDLER
      */
-    window.handleChatLine = async function(line) {
-        if (line === lastProcessedLine) return;
+	window.handleChatLine = async function(line) {
+		if (line === lastProcessedLine) return;
 
-        // Standard Entropia "You received [Item] x (Qty) Value: [Value] PED" regex
-        const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
-        const match = line.match(fishRegex);
+		const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
+		const match = line.match(fishRegex);
 
-        if (match) {
-            const logTimeString = match[1];
-            const fishType = match[2].trim(); 
-            const amount = parseInt(match[3]);
-            const value = parseFloat(match[4]);
-            const currentLogTimestamp = new Date(logTimeString).getTime();
+		if (match) {
+			const logTimeString = match[1];
+			const fishType = match[2].trim(); 
+			const amount = parseInt(match[3]);
+			const value = parseFloat(match[4]);
+			const currentLogTimestamp = new Date(logTimeString).getTime();
 
-            // 1. ANTI-CHEAT: FREQUENCY (5s floor between catches)
-            const secondsBetweenLogs = (currentLogTimestamp - lastLogTimestamp) / 1000;
-            if (lastLogTimestamp !== 0 && secondsBetweenLogs < 5) return; 
+			// 1. ANTI-CHEAT
+			const secondsBetweenLogs = (currentLogTimestamp - lastLogTimestamp) / 1000;
+			if (lastLogTimestamp !== 0 && secondsBetweenLogs < 5) return; 
 
-            if (!isNaN(value)) {
-                lastLogTimestamp = currentLogTimestamp;
-                lastProcessedLine = line; 
+			if (!isNaN(value)) {
+				lastLogTimestamp = currentLogTimestamp;
+				lastProcessedLine = line; 
 
-                // 2. DYNAMIC REGISTRATION (Fish, Scrap, etc.)
-                if (!(fishType in sessionStats)) {
-                    sessionStats[fishType] = 0;
-                    sessionValues[fishType] = 0;
-                    if (typeof createDynamicRow === 'function') createDynamicRow(fishType);
-                }
+				// 2. DYNAMIC REGISTRATION
+				if (!(fishType in sessionStats)) {
+					sessionStats[fishType] = 0;
+					sessionValues[fishType] = 0;
+					// This creates the 3-column row with the rate-span
+					if (typeof createDynamicRow === 'function') createDynamicRow(fishType);
+				}
 
-                sessionStats[fishType] += amount;
-                sessionValues[fishType] += value;
+				// 3. INCREMENT STATS
+				sessionStats[fishType] += amount;
+				sessionValues[fishType] += value;
 
-                // 3. CLOUD CONTEST SYNC
-                if (typeof activeContestRef !== 'undefined' && activeContestRef) {
-                    const settings = window.currentContestSettings;
-                    const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
-                    const startTime = settings?.startTime?.toMillis() || 0;
-                    const endTime = startTime + ((settings?.duration || 60) * 60000);
+				// 4. CLOUD CONTEST SYNC (Keep your existing logic here)
+				if (typeof activeContestRef !== 'undefined' && activeContestRef) {
+					const settings = window.currentContestSettings;
+					const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
+					const startTime = settings?.startTime?.toMillis() || 0;
+					const endTime = startTime + ((settings?.duration || 60) * 60000);
 
-                    if (serverAdjustedNow >= startTime && serverAdjustedNow <= endTime && settings?.status !== 'concluded') {
-                        const target = settings?.targetFish?.toLowerCase();
-                        // If it's the target fish, increase contest score
-                        if (target && fishType.toLowerCase() === target) {
-                            pendingCatchBuffer.score += amount;
-                        }
-                        // Always buffer the totals for the cloud manifest
-                        pendingCatchBuffer.totals[fishType] = (pendingCatchBuffer.totals[fishType] || 0) + amount;
-                        
-                        if (!syncTimer) syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
-                    }
-                }
+					if (serverAdjustedNow >= startTime && serverAdjustedNow <= endTime && settings?.status !== 'concluded') {
+						const target = settings?.targetFish?.toLowerCase();
+						if (target && fishType.toLowerCase() === target) {
+							pendingCatchBuffer.score += amount;
+						}
+						pendingCatchBuffer.totals[fishType] = (pendingCatchBuffer.totals[fishType] || 0) + amount;
+						if (!syncTimer) syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
+					}
+				}
 
-                if (typeof updateSessionUI === 'function') updateSessionUI();
-                addLog(`🎣 CAUGHT: ${amount}x ${fishType}`);
-            }
-        }
-    };
-
+				// 5. REFRESH UI IMMEDIATELY
+				// This ensures the green count updates the instant the log is read
+				if (typeof updateSessionUI === 'function') updateSessionUI();
+				
+				addLog(`🎣 CAUGHT: ${amount}x ${fishType}`);
+			}
+		}
+	};
     /**
      * CLOUD UPLINK
      */
@@ -2124,19 +2125,21 @@ function createDynamicRow(fishType) {
     const row = document.createElement('div');
     row.id = `row-${safeKey}`;
     
-    // Strict grid setup
+    // Force the 3-column layout
     row.style.display = "grid"; 
     row.style.gridTemplateColumns = "1.5fr 1fr 1.5fr"; 
     row.style.gap = "4px";
     row.style.borderBottom = "1px solid #111";
     row.style.padding = "2px 0";
     row.style.alignItems = "center";
+    row.style.color = "#aaa";
+    row.style.fontSize = "11px";
 
-    // IMPORTANT: We need the 3 separate spans/divs to exist so updateSessionUI can find them
+    // We MUST have three distinct elements here
     row.innerHTML = `
-        <span style="color: #ccc; font-size: 10px; white-space: nowrap;">${fishType.toUpperCase()}</span>
+        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fishType.toUpperCase()}</span>
         <span id="rate-${safeKey}" style="color: #00ffff; font-size: 9px; text-align: center; font-weight: bold;">0.0/hr</span>
-        <div style="text-align: right; font-size: 10px;">
+        <div style="text-align: right;">
             <span id="session-${safeKey}" style="color: #00ff00;">0</span>
             <span id="val-${safeKey}" style="color: #444; font-size: 9px; margin-left: 4px;">(0.0000)</span>
         </div>
