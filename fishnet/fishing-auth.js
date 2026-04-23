@@ -1378,7 +1378,6 @@ function updateSessionUI() {
         const rowEl = document.getElementById(`row-${safeKey}`);
         
         if (count > 0 && rowEl) {
-            rowEl.style.display = "block";
 
             // Update Counts
             const sessionEl = document.getElementById(`session-${safeKey}`);
@@ -1402,6 +1401,42 @@ function updateSessionUI() {
 
     const totalEl = document.getElementById('session-grand-total');
     if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
+}
+function createDynamicRow(fishType) {
+    const safeKey = fishType.replace(/\s+/g, '-');
+    const container = document.getElementById('manifest-grid');
+    if (document.getElementById(`row-${safeKey}`)) return;
+
+    const row = document.createElement('div');
+    row.id = `row-${safeKey}`;
+    
+    // --- FLEXBOX FOR SINGLE LINE ---
+    row.style.display = "flex"; 
+    row.style.flexDirection = "row";
+    row.style.justifyContent = "space-between"; // Push name to left, values to right
+    row.style.alignItems = "center";
+    row.style.width = "100%"; // Ensure it fills the grid/container
+    row.style.gap = "10px";
+    row.style.borderBottom = "1px solid #222";
+    row.style.padding = "4px 0";
+    row.style.color = "#aaa";
+    row.style.fontSize = "14px";
+
+    row.innerHTML = `
+        <span style="flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${fishType.toUpperCase()}
+        </span>
+        
+        <span id="rate-${safeKey}" style="color: #00ffff; font-weight: bold; min-width: 60px; text-align: right;">
+            0.0/hr
+        </span>
+        
+        <div style="min-width: 90px; text-align: right;">
+            <span id="session-${safeKey}" style="color: #00ff00;">0</span>
+            <span id="val-${safeKey}" style="color: #555; font-size: 12px; margin-left: 4px;">(0.0000)</span>
+        </div>
+    `;
+    container.appendChild(row);
 }
 /*
  * UPDATE_CONTEST_HUD
@@ -2107,34 +2142,7 @@ if (window.electronAPI && window.electronAPI.onChatLine) {
         handleChatLine(line);
     });
 }
-function createDynamicRow(fishType) {
-    const safeKey = fishType.replace(/\s+/g, '-');
-    const container = document.getElementById('manifest-grid');
-    if (document.getElementById(`row-${safeKey}`)) return;
-
-    const row = document.createElement('div');
-    row.id = `row-${safeKey}`;
-    
-    row.style.display = "block"; 
-	row.style.width = "fit-content";
-    row.style.gridTemplateColumns = ""; 
-    row.style.gap = "4px";
-    row.style.borderBottom = "1px solid #111";
-    row.style.padding = "2px 0";
-    row.style.alignItems = "left";
-    row.style.color = "#aaa";
-    row.style.fontSize = "15px";
-
-    row.innerHTML = `
-        <span style="overflow: hidden; text-overflow:; white-space: nowrap;">${fishType.toUpperCase()}</span>
-        <span id="rate-${safeKey}" style="color: #00ffff; font-size: 15px; text-align: center; font-weight: bold;">0.0/hr</span>
-        <div style="text-align: right;">
-            <span id="session-${safeKey}" style="color: #00ff00;">0</span>
-            <span id="val-${safeKey}" style="color: #444; font-size: 15px; margin-left: 4px;">(0.0000)</span>
-        </div>
-    `;
-    container.appendChild(row);
-}/**
+/**
  * pushBufferToCloud: BATCH_WRITE_PROTOCOL
  * Consolidates all buffered catches into a single Firestore write.
  */
