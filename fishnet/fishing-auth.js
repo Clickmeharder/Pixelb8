@@ -1357,45 +1357,33 @@ document.getElementById('btn-refresh-contests')?.addEventListener('click', refre
  */
 
 function updateSessionUI() {
-    let grandTotal = 0;
+	let grandTotal = 0;
+	const elapsedHours = (Date.now() - window.sessionStartTime) / 3600000;
 
-    Object.keys(sessionStats).forEach(key => {
-        const count = sessionStats[key] || 0;
-        const totalValue = sessionValues[key] || 0;
-        grandTotal += totalValue;
+	Object.keys(sessionStats).forEach(key => {
+		const count = sessionStats[key] || 0;
+		const totalValue = sessionValues[key] || 0;
+		grandTotal += totalValue;
 
-        const safeKey = key.replace(/\s+/g, '-');
-        
-        // 1. Row Visibility and Layout
-        const rowEl = document.getElementById(`row-${safeKey}`);
-        if (count > 0 && rowEl) {
-            // Using grid to align the name, rate, and values across the manifest
-            rowEl.style.display = "grid";
-            rowEl.style.gridTemplateColumns = "1.5fr 1fr 1.5fr"; 
-            rowEl.style.gap = "8px";
-            rowEl.style.alignItems = "center";
-        }
+		const safeKey = key.replace(/\s+/g, '-');
+		const rowEl = document.getElementById(`row-${safeKey}`);
+		
+		if (count > 0 && rowEl) {
+			rowEl.style.display = "grid";
+			document.getElementById(`session-${safeKey}`).textContent = count;
+			document.getElementById(`val-${safeKey}`).textContent = `(${totalValue.toFixed(4)})`;
 
-        // 2. Update Catch Count
-        const countEl = document.getElementById(`session-${safeKey}`);
-        if (countEl) countEl.textContent = count;
-
-        // 3. Update Hourly Rate (Calculated from sessionStartTime)
-        const rateEl = document.getElementById(`rate-${safeKey}`);
-        if (rateEl && typeof window.getFishPerHour === 'function') {
-            const perHour = window.getFishPerHour(key);
-            rateEl.textContent = `${perHour}/hr`;
-        }
-
-        // 4. Update PED Value
-        const valEl = document.getElementById(`val-${safeKey}`);
-        if (valEl) valEl.textContent = `(${totalValue.toFixed(4)})`;
-    });
-
-    // 5. Update Grand Total
-    const totalEl = document.getElementById('session-grand-total');
-    if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
-}
+			const rateEl = document.getElementById(`rate-${safeKey}`);
+			if (rateEl && elapsedHours > 0.0001) {
+				const perHour = (count / elapsedHours).toFixed(1);
+				rateEl.textContent = `${perHour}/hr`;
+				rateEl.style.color = perHour > 0 ? "#00ffff" : "#555";
+			}
+		}
+	});
+	const totalEl = document.getElementById('session-grand-total');
+	if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
+};
 /*
  * UPDATE_CONTEST_HUD
  * Real-time overlay update for the active contest, 
@@ -1969,14 +1957,12 @@ async function pushBufferToCloud() {
     const MAX_RETRIES = 3;
     let lastLogTimestamp = 0; 
     let lastProcessedLine = ""; 
-    let sessionTickerInterval = null;
-
-    // --- SESSION STATE ---
+    
+    // Global Session Start for per-hour math
     window.sessionStartTime = Date.now(); 
-    window.isWatcherActive = false;
 
     /**
-     * POLL LOG FILE (Web/Browser Mode)
+     * POLL LOG FILE
      */
     window.pollWebLog = async function() {
         if (typeof fileHandle === 'undefined' || !fileHandle) return;
@@ -2006,8 +1992,9 @@ async function pushBufferToCloud() {
      * MAIN CHAT HANDLER
      */
     window.handleChatLine = async function(line) {
-        if (line === lastProcessedLine || !window.isWatcherActive) return;
+        if (line === lastProcessedLine) return;
 
+        // Standard Entropia "You received [Item] x (Qty) Value: [Value] PED" regex
         const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
         const match = line.match(fishRegex);
 
@@ -2018,7 +2005,7 @@ async function pushBufferToCloud() {
             const value = parseFloat(match[4]);
             const currentLogTimestamp = new Date(logTimeString).getTime();
 
-            // Anti-cheat frequency gate
+            // 1. ANTI-CHEAT: FREQUENCY (5s floor between catches)
             const secondsBetweenLogs = (currentLogTimestamp - lastLogTimestamp) / 1000;
             if (lastLogTimestamp !== 0 && secondsBetweenLogs < 5) return; 
 
@@ -2026,7 +2013,7 @@ async function pushBufferToCloud() {
                 lastLogTimestamp = currentLogTimestamp;
                 lastProcessedLine = line; 
 
-                // Dynamic Registration
+                // 2. DYNAMIC REGISTRATION (Fish, Scrap, etc.)
                 if (!(fishType in sessionStats)) {
                     sessionStats[fishType] = 0;
                     sessionValues[fishType] = 0;
@@ -2036,7 +2023,7 @@ async function pushBufferToCloud() {
                 sessionStats[fishType] += amount;
                 sessionValues[fishType] += value;
 
-                // Cloud Sync logic
+                // 3. CLOUD CONTEST SYNC
                 if (typeof activeContestRef !== 'undefined' && activeContestRef) {
                     const settings = window.currentContestSettings;
                     const serverAdjustedNow = Date.now() + (window.serverOffset || 0);
@@ -2045,10 +2032,13 @@ async function pushBufferToCloud() {
 
                     if (serverAdjustedNow >= startTime && serverAdjustedNow <= endTime && settings?.status !== 'concluded') {
                         const target = settings?.targetFish?.toLowerCase();
+                        // If it's the target fish, increase contest score
                         if (target && fishType.toLowerCase() === target) {
                             pendingCatchBuffer.score += amount;
                         }
+                        // Always buffer the totals for the cloud manifest
                         pendingCatchBuffer.totals[fishType] = (pendingCatchBuffer.totals[fishType] || 0) + amount;
+                        
                         if (!syncTimer) syncTimer = setTimeout(window.pushBufferToCloud, SYNC_INTERVAL_MS);
                     }
                 }
@@ -2060,117 +2050,47 @@ async function pushBufferToCloud() {
     };
 
     /**
-     * UI TICKER (Timer and Burn-rate update)
+     * CLOUD UPLINK
      */
-    window.updateSessionTimerUI = function() {
-        if (!window.isWatcherActive) return;
-        
-        const elapsed = Date.now() - window.sessionStartTime;
-        const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
-        const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
-        const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
-        
-        const timerEl = document.getElementById('session-timer');
-        if (timerEl) timerEl.textContent = `${h}:${m}:${s}`;
-        
-        // Refresh UI to show the "real-time" drop in Fish/Hr as time passes
-        window.updateSessionUI();
-    };
-
-    /**
-     * START/STOP SESSION TOGGLE
-     */
-    startBtn.onclick = async () => {
-        if (window.isWatcherActive) {
-            // STOP LOGIC
-            window.isWatcherActive = false;
-            if (sessionTickerInterval) clearInterval(sessionTickerInterval);
-            startBtn.textContent = "START SESSION";
-            startBtn.style.background = ""; 
-            startBtn.style.opacity = "1.0";
-            addLog("🛑 SESSION_STOPPED: Tracking paused.", true);
+    window.pushBufferToCloud = async function() {
+        if (!activeContestRef || (pendingCatchBuffer.score === 0 && Object.keys(pendingCatchBuffer.totals).length === 0)) {
+            syncTimer = null;
             return;
         }
-
-        // START LOGIC
-        window.sessionStartTime = Date.now();
-        window.isWatcherActive = true;
-
-        // Reset stats for fresh session
-        if (typeof sessionStats !== 'undefined') {
-            Object.keys(sessionStats).forEach(k => sessionStats[k] = 0);
-            Object.keys(sessionValues).forEach(k => sessionValues[k] = 0);
-        }
-
-        if (!isWebMode) {
-            const path = pathInput?.value?.trim();
-            if (!path) {
-                addLog("📂 ACTION_REQUIRED: SELECT_LOG_PATH", true);
-                if (window.electronAPI) window.electronAPI.openFileDialog(); 
-                return; 
+        try {
+            const updateData = { lastUpdate: serverTimestamp() };
+            if (pendingCatchBuffer.score > 0) updateData.score = increment(pendingCatchBuffer.score);
+            for (const [fishName, qty] of Object.entries(pendingCatchBuffer.totals)) {
+                updateData[`totals.${fishName}`] = increment(qty);
             }
-            window.electronAPI.send('start-watch', path);
-        } else {
-            // Web Path Logic... (omitted for brevity, remains as in your previous version)
-            try {
-                if (!fileHandle) {
-                    [fileHandle] = await window.showOpenFilePicker({ types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }] });
-                }
-                const file = await fileHandle.getFile();
-                lastSize = file.size;
-                if (window.pollInterval) clearInterval(window.pollInterval);
-                window.pollInterval = setInterval(window.pollWebLog, 3000);
-            } catch (e) { return; }
+            await updateDoc(activeContestRef, updateData);
+            pendingCatchBuffer = { score: 0, totals: {} };
+            syncTimer = null;
+            addLog("☁️ SYNC_COMPLETE.");
+        } catch (err) {
+            syncTimer = setTimeout(window.pushBufferToCloud, 30000);
         }
-
-        // Start Ticker
-        if (sessionTickerInterval) clearInterval(sessionTickerInterval);
-        sessionTickerInterval = setInterval(window.updateSessionTimerUI, 1000);
-
-        // UI Feedback
-        startBtn.textContent = "STOP SESSION";
-        startBtn.style.background = "#d32f2f"; 
-        startBtn.style.opacity = "1.0";
-        
-        const eName = globalUserData?.entropianame || "ANONYMOUS_SCOUT";
-        addLog(`✅ WATCHER_ENGAGED: TRACKING [${eName}]`);
-        window.updateSessionUI();
     };
 
     /**
-     * UI UPDATES
+     * RATE CALCULATOR
      */
-    window.updateSessionUI = function() {
-        let grandTotal = 0;
+    window.getFishPerHour = function(fishType) {
         const elapsedHours = (Date.now() - window.sessionStartTime) / 3600000;
-
-        Object.keys(sessionStats).forEach(key => {
-            const count = sessionStats[key] || 0;
-            const totalValue = sessionValues[key] || 0;
-            grandTotal += totalValue;
-
-            const safeKey = key.replace(/\s+/g, '-');
-            const rowEl = document.getElementById(`row-${safeKey}`);
-            
-            if (count > 0 && rowEl) {
-                rowEl.style.display = "grid";
-                document.getElementById(`session-${safeKey}`).textContent = count;
-                document.getElementById(`val-${safeKey}`).textContent = `(${totalValue.toFixed(4)})`;
-
-                const rateEl = document.getElementById(`rate-${safeKey}`);
-                if (rateEl && elapsedHours > 0.0001) {
-                    const perHour = (count / elapsedHours).toFixed(1);
-                    rateEl.textContent = `${perHour}/hr`;
-                    rateEl.style.color = perHour > 0 ? "#00ffff" : "#555";
-                }
-            }
-        });
-        const totalEl = document.getElementById('session-grand-total');
-        if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
+        if (elapsedHours <= 0.001) return 0; 
+        const count = sessionStats[fishType] || 0;
+        return (count / elapsedHours).toFixed(1);
     };
 
-    window.createDynamicRow = function(fishType) {
-        const safeKey = fishType.replace(/\s+/g, '-');
+})();
+// Only set up the bridge listener if Electron exists
+if (window.electronAPI && window.electronAPI.onChatLine) {
+    window.electronAPI.onChatLine((line) => {
+        handleChatLine(line);
+    });
+}
+function createDynamicRow(fishType) {
+	const safeKey = fishType.replace(/\s+/g, '-');
         const container = document.getElementById('manifest-grid');
         if (document.getElementById(`row-${safeKey}`)) return;
 
@@ -2187,39 +2107,6 @@ async function pushBufferToCloud() {
         `;
         container.appendChild(row);
     };
-
-})();
-// Only set up the bridge listener if Electron exists
-if (window.electronAPI && window.electronAPI.onChatLine) {
-    window.electronAPI.onChatLine((line) => {
-        handleChatLine(line);
-    });
-}
-function createDynamicRow(fishType) {
-    const safeKey = fishType.replace(/\s+/g, '-');
-    const container = document.getElementById('manifest-grid');
-    if (document.getElementById(`row-${safeKey}`)) return;
-
-    const row = document.createElement('div');
-    row.id = `row-${safeKey}`;
-    // Match the 3-column grid of the parent
-    row.style.display = "none"; // Hidden until first catch
-    row.style.gridTemplateColumns = "subgrid"; // Inherits parent columns
-    row.style.gridColumn = "1 / -1"; 
-    row.style.display = "grid"; 
-    row.style.gridTemplateColumns = "1.5fr 1fr 1.5fr"; 
-    row.style.gap = "4px";
-
-    row.innerHTML = `
-        <span style="color: #ccc; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fishType.toUpperCase()}</span>
-        <span id="rate-${safeKey}" style="color: #666; font-size: 9px; text-align: center;">0.0/hr</span>
-        <div style="text-align: right; font-size: 10px;">
-            <span id="session-${safeKey}" style="color: #00ff00;">0</span>
-            <span id="val-${safeKey}" style="color: #444; font-size: 9px; margin-left: 4px;">(0.0000)</span>
-        </div>
-    `;
-    container.appendChild(row);
-}
 /**
  * pushBufferToCloud: BATCH_WRITE_PROTOCOL
  * Consolidates all buffered catches into a single Firestore write.
