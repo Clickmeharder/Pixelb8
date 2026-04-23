@@ -2101,18 +2101,31 @@ if (window.electronAPI && window.electronAPI.onChatLine) {
         handleChatLine(line);
     });
 }
-function createDynamicRow(name) {
-    const safeId = name.replace(/\s+/g, '-');
-    if (document.getElementById(`row-${safeId}`)) return;
-    
-    const grid = document.getElementById('manifest-grid');
-    const div = document.createElement('div');
-    div.id = `row-${safeId}`;
-    div.style = "color:#aaa; font-size:11px;";
-    div.innerHTML = `${name.toUpperCase()}: <span id="session-${safeId}" style="color:#0f0">0</span> <span id="val-${safeId}" style="color:#00ffff; font-size:9px;">(0.0000)</span>`;
-    grid.appendChild(div);
-}
+function createDynamicRow(fishType) {
+    const safeKey = fishType.replace(/\s+/g, '-');
+    const container = document.getElementById('manifest-grid');
+    if (document.getElementById(`row-${safeKey}`)) return;
 
+    const row = document.createElement('div');
+    row.id = `row-${safeKey}`;
+    // Match the 3-column grid of the parent
+    row.style.display = "none"; // Hidden until first catch
+    row.style.gridTemplateColumns = "subgrid"; // Inherits parent columns
+    row.style.gridColumn = "1 / -1"; 
+    row.style.display = "grid"; 
+    row.style.gridTemplateColumns = "1.5fr 1fr 1.5fr"; 
+    row.style.gap = "4px";
+
+    row.innerHTML = `
+        <span style="color: #ccc; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fishType.toUpperCase()}</span>
+        <span id="rate-${safeKey}" style="color: #666; font-size: 9px; text-align: center;">0.0/hr</span>
+        <div style="text-align: right; font-size: 10px;">
+            <span id="session-${safeKey}" style="color: #00ff00;">0</span>
+            <span id="val-${safeKey}" style="color: #444; font-size: 9px; margin-left: 4px;">(0.0000)</span>
+        </div>
+    `;
+    container.appendChild(row);
+}
 /**
  * pushBufferToCloud: BATCH_WRITE_PROTOCOL
  * Consolidates all buffered catches into a single Firestore write.
