@@ -1355,6 +1355,8 @@ document.getElementById('btn-refresh-contests')?.addEventListener('click', refre
  * 
  * 
  */
+
+
 let sessionTickerInterval = null;
 
 function runSessionTicker() {
@@ -1366,7 +1368,7 @@ function runSessionTicker() {
         const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
         timerEl.textContent = `${h}:${m}:${s}`;
     }
-    // This forces the /hr math to run every second
+    // CRITICAL: This line updates the /hr rates every second
     updateSessionUI();
 }
 function updateSessionUI() {
@@ -2110,7 +2112,7 @@ function createDynamicRow(fishType) {
     const row = document.createElement('div');
     row.id = `row-${safeKey}`;
     
-    // Force the 3-column layout immediately
+    // Explicit 3-column grid: [Name] [Rate] [Total/Value]
     row.style.display = "grid"; 
     row.style.gridTemplateColumns = "1.5fr 1fr 1.5fr"; 
     row.style.gap = "4px";
