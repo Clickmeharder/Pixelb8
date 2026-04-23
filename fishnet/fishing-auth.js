@@ -1378,7 +1378,7 @@ function updateSessionUI() {
         const rowEl = document.getElementById(`row-${safeKey}`);
         
         if (count > 0 && rowEl) {
-            rowEl.style.display = "grid";
+            rowEl.style.display = "block";
 
             // Update Counts
             const sessionEl = document.getElementById(`session-${safeKey}`);
@@ -2115,18 +2115,18 @@ function createDynamicRow(fishType) {
     const row = document.createElement('div');
     row.id = `row-${safeKey}`;
     
-    row.style.display = ""; 
+    row.style.display = "block"; 
 	row.style.width = "fit-content";
     row.style.gridTemplateColumns = ""; 
     row.style.gap = "4px";
     row.style.borderBottom = "1px solid #111";
     row.style.padding = "2px 0";
-    row.style.alignItems = "center";
+    row.style.alignItems = "left";
     row.style.color = "#aaa";
     row.style.fontSize = "15px";
 
     row.innerHTML = `
-        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fishType.toUpperCase()}</span>
+        <span style="overflow: hidden; text-overflow:; white-space: nowrap;">${fishType.toUpperCase()}</span>
         <span id="rate-${safeKey}" style="color: #00ffff; font-size: 15px; text-align: center; font-weight: bold;">0.0/hr</span>
         <div style="text-align: right;">
             <span id="session-${safeKey}" style="color: #00ff00;">0</span>
