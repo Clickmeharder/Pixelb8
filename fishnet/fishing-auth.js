@@ -2122,14 +2122,14 @@ function createDynamicRow(fishType) {
     row.style.padding = "2px 0";
     row.style.alignItems = "center";
     row.style.color = "#aaa";
-    row.style.fontSize = "11px";
+    row.style.fontSize = "15px";
 
     row.innerHTML = `
         <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fishType.toUpperCase()}</span>
-        <span id="rate-${safeKey}" style="color: #00ffff; font-size: 9px; text-align: center; font-weight: bold;">0.0/hr</span>
+        <span id="rate-${safeKey}" style="color: #00ffff; font-size: 15px; text-align: center; font-weight: bold;">0.0/hr</span>
         <div style="text-align: right;">
             <span id="session-${safeKey}" style="color: #00ff00;">0</span>
-            <span id="val-${safeKey}" style="color: #444; font-size: 9px; margin-left: 4px;">(0.0000)</span>
+            <span id="val-${safeKey}" style="color: #444; font-size: 15px; margin-left: 4px;">(0.0000)</span>
         </div>
     `;
     container.appendChild(row);
