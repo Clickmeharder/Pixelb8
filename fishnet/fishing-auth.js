@@ -1355,7 +1355,20 @@ document.getElementById('btn-refresh-contests')?.addEventListener('click', refre
  * 
  * 
  */
+let sessionTickerInterval = null;
 
+function runSessionTicker() {
+    const timerEl = document.getElementById('session-timer');
+    if (timerEl) {
+        const elapsed = Date.now() - window.sessionStartTime;
+        const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
+        const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
+        const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+        timerEl.textContent = `${h}:${m}:${s}`;
+    }
+    // This forces the /hr math to run every second
+    updateSessionUI();
+}
 function updateSessionUI() {
 	let grandTotal = 0;
 	const elapsedHours = (Date.now() - window.sessionStartTime) / 3600000;
@@ -2090,23 +2103,31 @@ if (window.electronAPI && window.electronAPI.onChatLine) {
     });
 }
 function createDynamicRow(fishType) {
-	const safeKey = fishType.replace(/\s+/g, '-');
-        const container = document.getElementById('manifest-grid');
-        if (document.getElementById(`row-${safeKey}`)) return;
+    const safeKey = fishType.replace(/\s+/g, '-');
+    const container = document.getElementById('manifest-grid');
+    if (document.getElementById(`row-${safeKey}`)) return;
 
-        const row = document.createElement('div');
-        row.id = `row-${safeKey}`;
-        row.style = "display: grid; grid-template-columns: 1.5fr 1fr 1.5fr; gap: 4px; border-bottom: 1px solid #111; padding: 2px 0;";
-        row.innerHTML = `
-            <span style="color: #ccc; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fishType.toUpperCase()}</span>
-            <span id="rate-${safeKey}" style="color: #00ffff; font-size: 9px; text-align: center;">0.0/hr</span>
-            <div style="text-align: right; font-size: 10px;">
-                <span id="session-${safeKey}" style="color: #00ff00;">0</span>
-                <span id="val-${safeKey}" style="color: #444; font-size: 9px; margin-left: 4px;">(0.0000)</span>
-            </div>
-        `;
-        container.appendChild(row);
-    };
+    const row = document.createElement('div');
+    row.id = `row-${safeKey}`;
+    
+    // Force the 3-column layout immediately
+    row.style.display = "grid"; 
+    row.style.gridTemplateColumns = "1.5fr 1fr 1.5fr"; 
+    row.style.gap = "4px";
+    row.style.borderBottom = "1px solid #111";
+    row.style.padding = "2px 0";
+    row.style.alignItems = "center";
+
+    row.innerHTML = `
+        <span style="color: #ccc; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fishType.toUpperCase()}</span>
+        <span id="rate-${safeKey}" style="color: #00ffff; font-size: 9px; text-align: center; font-weight: bold;">0.0/hr</span>
+        <div style="text-align: right; font-size: 10px;">
+            <span id="session-${safeKey}" style="color: #00ff00;">0</span>
+            <span id="val-${safeKey}" style="color: #444; font-size: 9px; margin-left: 4px;">(0.0000)</span>
+        </div>
+    `;
+    container.appendChild(row);
+}
 /**
  * pushBufferToCloud: BATCH_WRITE_PROTOCOL
  * Consolidates all buffered catches into a single Firestore write.
@@ -2182,10 +2203,27 @@ async function requestWakeLock() {
     }
 }
 
+
+
 startBtn.onclick = async () => {
+    // --- 0. TOGGLE STOP LOGIC ---
+    if (startBtn.textContent === "STOP SESSION") {
+        if (sessionTickerInterval) clearInterval(sessionTickerInterval);
+        if (window.pollInterval) clearInterval(window.pollInterval); // Stop polling if in web mode
+        
+        startBtn.textContent = "START SESSION";
+        startBtn.style.background = ""; // Reset to default
+        startBtn.style.opacity = "1.0";
+        startBtn.disabled = false;
+        
+        addLog("🛑 SESSION_STOPPED: Tracking and rates frozen.", true);
+        return;
+    }
+
     // --- 1. INITIALIZE SESSION TIMING & STATS ---
     window.sessionStartTime = Date.now(); 
-    // Reset local session trackers so old data doesn't skew new rates
+    
+    // Reset local session trackers
     if (typeof sessionStats !== 'undefined') {
         Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
         Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
@@ -2204,18 +2242,14 @@ startBtn.onclick = async () => {
     // --- 3. WEB PATH (Browser) ---
     else {
         try {
-            // Check if we need to pick a new file or if we are clicking "Resume"
             if (!fileHandle) {
                 const pickerResult = await window.showOpenFilePicker({
                     types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
                     multiple: false
                 });
                 fileHandle = pickerResult[0];
-
-                // Save the handle to IndexedDB for next time
                 if (typeof saveFileHandle === 'function') await saveFileHandle(fileHandle);
             } else {
-                // If we already have a handle, verify permission
                 const opts = { mode: 'read' };
                 if (await fileHandle.queryPermission(opts) !== 'granted') {
                     if (await fileHandle.requestPermission(opts) !== 'granted') {
@@ -2225,17 +2259,14 @@ startBtn.onclick = async () => {
             }
             
             const file = await fileHandle.getFile();
-            lastSize = file.size; // Start reading from current end of file
+            lastSize = file.size; 
             
             if (window.pollInterval) clearInterval(window.pollInterval);
-            window.pollInterval = setInterval(window.pollWebLog, 3000); // 3s Poll
+            window.pollInterval = setInterval(window.pollWebLog, 3000); 
             
-            // Engage Wake Lock to keep the browser from sleeping
             if (typeof requestWakeLock === 'function') await requestWakeLock();
-            
             if (typeof refreshContestList === 'function') refreshContestList();
             
-            addLog("📡 FISH_NET: Refreshing Contest list.");
             addLog("📡 FISH_NET: Chat.log bound. Polling active.");
 
         } catch (err) {
@@ -2247,27 +2278,39 @@ startBtn.onclick = async () => {
 
     // --- 4. CONTEST & UPLINK LOGIC ---
     if (!activeContestRef) {
-        addLog("🔍 CHECKING_UPLINK: Looking for registered contests...");
         if (typeof restoreActiveContest === 'function') await restoreActiveContest();
     }
 
     if (activeContestRef) {
         if (typeof activateContestLocally === 'function') activateContestLocally();
         addLog("✨ CONTEST_SYNCED: Ready to transmit catches.");
-    } else {
-        addLog("⚠️ NO_ACTIVE_CONTEST: Join a contest to sync scores.", true);
     }
 
-    // --- 5. COMMON UI UPDATES ---
+    // --- 5. START UI TICKER (The Clock & Rate Engine) ---
+    if (sessionTickerInterval) clearInterval(sessionTickerInterval);
+    sessionTickerInterval = setInterval(() => {
+        // Update the visual clock
+        const timerEl = document.getElementById('session-timer');
+        if (timerEl) {
+            const elapsed = Date.now() - window.sessionStartTime;
+            const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
+            const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
+            const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+            timerEl.textContent = `${h}:${m}:${s}`;
+        }
+        // Force the /hr rates to recalculate
+        if (typeof updateSessionUI === 'function') updateSessionUI();
+    }, 1000);
+
+    // --- 6. BUTTON & LOG FINALIZATION ---
     const eName = globalUserData?.entropianame || localStorage.getItem('guest_ename') || "ANONYMOUS_SCOUT";
     
-    startBtn.disabled = true;
-    startBtn.style.opacity = "0.3";
-    startBtn.textContent = "Activated";
+    startBtn.disabled = false; // Keep enabled so user can click "STOP"
+    startBtn.textContent = "STOP SESSION";
+    startBtn.style.background = "#d32f2f"; // Red to indicate active/stoppable
+    startBtn.style.opacity = "1.0";
     
     addLog(`✅ WATCHER_ENGAGED: TRACKING [${eName}]`);
-    
-    // Final UI refresh to clear out old numbers
     if (typeof updateSessionUI === 'function') updateSessionUI();
 };
 // --- 1. ELECTRON PATH LISTENER (GHOST REMOVAL) ---
