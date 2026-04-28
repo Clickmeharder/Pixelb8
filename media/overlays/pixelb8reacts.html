@@ -7,9 +7,33 @@
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Press Start 2P', cursive; user-select: none; }
-        #companion-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; }
-        #companionCanvas { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: auto;position: relative; z-index: 15000; }
+        
+        body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background: transparent; 
+            font-family: 'Press Start 2P', cursive; 
+            user-select: none; 
+        }
+
+        #companion-container { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            pointer-events: none; 
+        }
+
+        #companionCanvas { 
+            width: 100%; 
+            height: 100%; 
+            image-rendering: pixelated; 
+            pointer-events: auto; 
+            position: relative; 
+            z-index: 100; 
+        }
         
         #nameplate { 
             position: absolute; 
@@ -21,25 +45,67 @@
             pointer-events: auto; 
             white-space: nowrap; 
             transform: translate(-50%, -50%); 
-            z-index: 10000; 
+            z-index: 1000; 
             cursor: pointer; 
             transition: background 0.2s, transform 0.1s;
         }
+
         #nameplate:hover {
             background: rgba(50, 50, 0, 0.9);
             border-color: teal;
             color: teal;
         }
+
         #nameplate:active {
             transform: translate(-50%, -50%) scale(0.95);
         }
 
-        #status { position: absolute; font-size: 9px; color: #ffffff; background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 4px; text-align: center; line-height: 1.6; min-width: 250px; transform: translate(-50%, -50%); z-index: 10000; }
+        #status { 
+            position: absolute; 
+            font-size: 9px; 
+            color: #ffffff; 
+            background: rgba(0,0,0,0.7); 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            text-align: center; 
+            line-height: 1.6; 
+            min-width: 250px; 
+            transform: translate(-50%, -50%); 
+            z-index: 1000; 
+        }
         
-        .chat-bubble { position: absolute; background: white; border: 3px solid #333; padding: 10px; font-size: 10px; border-radius: 15px; opacity: 0; transition: opacity 0.3s; color: black; pointer-events: none; white-space: nowrap; z-index: 16005; }
+        .chat-bubble { 
+            position: absolute; 
+            background: white; 
+            border: 3px solid #333; 
+            padding: 10px; 
+            font-size: 10px; 
+            border-radius: 15px; 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+            color: black; 
+            pointer-events: none; 
+            white-space: nowrap; 
+            z-index: 1100; 
+        }
+
         .chat-bubble.show { opacity: 1; }
         
-        #comfycontrolContainer { position: fixed; top: 70px; right: 20px; background: rgba(0,0,0,0.95); border: 3px solid #ffcc00; padding: 15px; width: 300px; color: #fff; display: none; z-index: 20001; max-height: 85vh; overflow-y: auto; }
+        #comfycontrolContainer { 
+            position: fixed; 
+            top: 70px; 
+            right: 20px; 
+            background: rgba(0,0,0,0.95); 
+            border: 3px solid #ffcc00; 
+            padding: 15px; 
+            width: 300px; 
+            color: #fff; 
+            display: none; 
+            z-index: 2000; 
+            max-height: 85vh; 
+            overflow-y: auto; 
+        }
+
         #comfycontrolContainer.active { display: block; }
         
         .settings-group { margin-top: 15px; padding-top: 10px; border-top: 1px solid #444; }
@@ -82,6 +148,7 @@
         <h4>Identity</h4>
         <label style="font-size: 8px;">Kitty Name:</label>
         <input type="text" id="nameInput" placeholder="Name your kitty...">
+        <button id="btnNewKitten" style="background: #2c3e50; border-color: #0ec3c3;">Get New Kitten 🐾</button>
         
         <h4>Twitch Config</h4>
         <input type="text" id="streamerInput" placeholder="Twitch User">
@@ -413,12 +480,12 @@ function loadData() {
         if(state.name) document.getElementById("nameInput").value = state.name;
         Object.keys(state.layout).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = state.layout[k]; });
     }
-    initSwatches(); // Ensure swatches reflect loaded color
+    initSwatches(); 
 }
 
 function initSwatches() {
     const swatchContainer = document.getElementById("bedColorSwatches");
-    swatchContainer.innerHTML = ""; // Clear existing
+    swatchContainer.innerHTML = ""; 
     BED_PRESETS.forEach(color => {
         const btn = document.createElement("div");
         btn.className = "swatch";
@@ -441,6 +508,21 @@ document.getElementById("nameplate").addEventListener("click", () => {
 
 document.getElementById("nameInput").addEventListener("input", (e) => {
     state.name = e.target.value || "Greta";
+});
+
+document.getElementById("btnNewKitten").addEventListener("click", () => {
+    state.birthday = Date.now();
+    state.ageDays = 0;
+    state.stage = "Baby";
+    state.exp = 0;
+    state.hunger = 100;
+    state.digestive = 0;
+    state.isDead = false;
+    state.color = KITTY_COLORS[Math.floor(Math.random() * KITTY_COLORS.length)];
+    state.poops = [];
+    state.action = "idle";
+    say("New kitten! 🐾");
+    saveData();
 });
 
 document.getElementById("connectBtn").addEventListener("click", () => {
@@ -469,10 +551,10 @@ document.getElementById("btnReset").addEventListener("click", () => { localStora
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
-    if(cmd === "feed") document.getElementById("btnFeed").click();
-    if(cmd === "play") document.getElementById("btnPlay").click();
+    if(cmd === "feedkitty") document.getElementById("btnFeed").click();
+    if(cmd === "playwithkitty") document.getElementById("btnPlay").click();
     if(cmd === "dance") document.getElementById("btnDance").click();
-    if(cmd === "treat") document.getElementById("btnTreat").click();
+    if(cmd === "treatkitty") document.getElementById("btnTreat").click();
     if(cmd === "cleanlitter") document.getElementById("btnClear").click();
 };
 
