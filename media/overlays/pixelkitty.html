@@ -211,7 +211,7 @@ let state = {
     ageDays: 0,
     stage: "Baby",
     exp: 0,
-    hunger: 100,
+    hunger: 0,
     digestive: 0,
     lastHungerTick: Date.now(),
     color: KITTY_COLORS[Math.floor(Math.random() * KITTY_COLORS.length)],
@@ -396,13 +396,15 @@ function updateAI(t) {
     // --- REAL TIME HUNGER DECAY ---
     const now = Date.now();
     const msElapsed = now - state.lastHungerTick;
-    if (msElapsed >= HUNGER_TICK_MS) {
-        const pointsToLose = Math.floor(msElapsed / HUNGER_TICK_MS);
-        state.hunger = Math.max(0, state.hunger - pointsToLose);
-        state.lastHungerTick = now - (msElapsed % HUNGER_TICK_MS); // Preserve remainder for next tick
-    }
-    
-    if (state.hunger === 0) state.isDead = true;
+	if (msElapsed >= HUNGER_TICK_MS) {
+		const pointsToGain = Math.floor(msElapsed / HUNGER_TICK_MS);
+		// Count UP to 100
+		state.hunger = Math.min(100, state.hunger + pointsToGain); 
+		state.lastHungerTick = now - (msElapsed % HUNGER_TICK_MS);
+	}
+
+	// Change death condition: Now she dies if hunger reaches 100
+	if (state.hunger === 100) state.isDead = true;
 
     const walkToPoint = (targetX, targetY, speed = 2) => {
         const dx = targetX - state.x;
@@ -433,12 +435,17 @@ function updateAI(t) {
                 else { state.action = "beg"; state.actionTimer = 150; say("Hungry! 🐟"); }
             }
             break;
-        case "eating":
-            if (state.actionTimer <= 0) {
-                state.hasFood = false; state.hunger = Math.min(100, state.hunger + 40);
-                state.digestive++; state.exp += 15; state.action = "idle"; state.actionTimer = 400;
-            }
-            break;
+		case "eating":
+			if (state.actionTimer <= 0) {
+				state.hasFood = false; 
+				// Subtract hunger instead of adding
+				state.hunger = Math.max(0, state.hunger - 5); 
+				state.digestive++; 
+				state.exp += 15; 
+				state.action = "idle"; 
+				state.actionTimer = 400;
+			}
+			break;
         case "walk_to_litter":
             if (walkToPoint(litPos.x, litPos.y)) { state.action = "potty"; state.actionTimer = 150; }
             break;
@@ -602,7 +609,7 @@ document.getElementById("btnNewKitten").addEventListener("click", () => {
     state.ageDays = 0;
     state.stage = "Baby";
     state.exp = 0;
-    state.hunger = 100;
+    state.hunger = 0;
     state.digestive = 0;
     state.isDead = false;
     state.lastHungerTick = Date.now();
@@ -633,7 +640,7 @@ document.getElementById("btnPlay").addEventListener("click", () => { if(!state.i
 document.getElementById("btnDance").addEventListener("click", () => { if(!state.isDead) { state.action = "dance"; state.actionTimer = 300; say("Dance! ✨"); } });
 document.getElementById("btnTreat").addEventListener("click", () => { 
     if(!state.isDead) { 
-        state.hunger = Math.min(100, state.hunger + 15);
+        state.hunger = Math.max(0, state.hunger - 3); // Subtract hunger
         state.action = "special"; 
         state.actionTimer = 200; 
         say("Treat! 🍗"); 
