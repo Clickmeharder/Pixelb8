@@ -450,7 +450,7 @@ function updateAI(t) {
             break;
         case "kicking":
             if (t % 2 === 0) state.particles.push({x: state.x - 10, y: state.y + 25, vx: 6 + Math.random()*8, vy: -5, s: 2, c: "#bdc3c7", life: 30});
-            if (state.actionTimer <= 0) { state.action = "idle"; state.actionTimer = 400; say("Clean! ✨"); }
+            if (state.actionTimer <= 0) { state.action = "idle"; state.actionTimer = 400; say("I made a Poopy!"); }
             break;
         case "walk_to_bed":
             if (walkToPoint(bedPos.x, bedPos.y)) { state.action = "sleep"; state.actionTimer = 1200; }
@@ -465,24 +465,45 @@ function updateAI(t) {
              if (t % 3 === 0) state.particles.push({x: state.x + 10, y: state.y - 10, vx: Math.random()*4, vy: -2, s: 2, c: "#d2b48c", life: 15});
              if (state.actionTimer <= 0) state.action = "idle";
              break;
-        case "idle":
+		case "idle":
             if (state.actionTimer <= 0) {
-                if (state.digestive >= 3) state.action = "walk_to_litter";
-                else {
+                // Give her a 50% chance to just stay idle longer before deciding on a task
+                if (Math.random() < 0.5) {
+                    state.actionTimer = 600 + Math.random() * 600; // Wait 10-20 more seconds
+                    return;
+                }
+
+                if (state.digestive >= 3) {
+                    state.action = "walk_to_litter";
+                } else {
                     const r = Math.random();
-                    if (r < 0.2) { state.action = "walk"; state.facing = Math.random() > 0.5 ? 1 : -1; state.actionTimer = 300; }
-                    else if (r < 0.4) state.action = "walk_to_bed";
-                    else if (r < 0.6 && state.layout.showTower) {
+                    // Reduced frequency of state changes
+                    if (r < 0.15) { 
+                        state.action = "walk"; 
+                        state.facing = Math.random() > 0.5 ? 1 : -1; 
+                        state.actionTimer = 400 + Math.random() * 400; 
+                    }
+                    else if (r < 0.25) {
+                        state.action = "walk_to_bed";
+                    }
+                    else if (r < 0.40 && state.layout.showTower) {
                          state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
                     }
-                    else state.actionTimer = 500;
+                    else {
+                        // Default to staying idle much longer
+                        state.actionTimer = 800 + Math.random() * 1000;
+                    }
                 }
             }
             break;
+
         case "walk":
-            state.x += state.facing * 1.5;
-            if (state.x < 50 || state.x > canvas.width - 50) state.facing *= -1;
-            if (state.actionTimer <= 0) state.action = "idle";
+            state.x += state.facing * 1.2; // Slightly slower walk
+            if (state.x < 100 || state.x > canvas.width - 100) state.facing *= -1;
+            if (state.actionTimer <= 0) {
+                state.action = "idle";
+                state.actionTimer = 500;
+            }
             break;
         case "sleep":
         case "tower_sleep":
