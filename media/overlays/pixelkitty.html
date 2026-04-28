@@ -563,12 +563,12 @@ function loadData() {
         // Recalculate hunger loss while the window was closed
         const now = Date.now();
         const msOffline = now - state.lastHungerTick;
-        if (msOffline >= HUNGER_TICK_MS && !state.isDead) {
-            const pointsLost = Math.floor(msOffline / HUNGER_TICK_MS);
-            state.hunger = Math.max(0, state.hunger - pointsLost);
-            state.lastHungerTick = now - (msOffline % HUNGER_TICK_MS);
-            if (state.hunger === 0) state.isDead = true;
-        }
+		if (msOffline >= HUNGER_TICK_MS && !state.isDead) {
+			const pointsGained = Math.floor(msOffline / HUNGER_TICK_MS);
+			state.hunger = Math.min(100, state.hunger + pointsGained); // Count up
+			state.lastHungerTick = now - (msOffline % HUNGER_TICK_MS);
+			if (state.hunger === 100) state.isDead = true;
+		}
 
         if(state.name) document.getElementById("nameInput").value = state.name;
         document.getElementById("showTower").checked = state.layout.showTower;
