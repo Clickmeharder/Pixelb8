@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comfy Kitty Ultra - Greta Custom Edition</title>
+    <title>Comfy Kitty Ultra - Greta Tower Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -125,14 +125,8 @@
             cursor: pointer;
             transition: transform 0.1s, border-color 0.1s;
         }
-        .swatch:hover {
-            border-color: #ffcc00;
-            transform: scale(1.1);
-        }
-        .swatch.active {
-            border-color: #ffffff;
-            outline: 1px solid #ffcc00;
-        }
+        .swatch:hover { border-color: #ffcc00; transform: scale(1.1); }
+        .swatch.active { border-color: #ffffff; outline: 1px solid #ffcc00; }
     </style>
 </head>
 <body>
@@ -164,11 +158,17 @@
 
         <div class="settings-group">
             <h4>Prop Layout</h4>
+            <div class="setting-row">
+                <label>Show Cat Tower</label>
+                <input type="checkbox" id="showTower" checked>
+            </div>
+            <div class="setting-row"><label>Tower X</label><input type="range" id="towerX" min="0" max="100" value="70"></div>
+            <div class="setting-row"><label>Tower Y</label><input type="range" id="towerY" min="-100" max="100" value="0"></div>
             <div class="setting-row"><label>Bed X</label><input type="range" id="bedX" min="0" max="100" value="20"></div>
             <div class="setting-row"><label>Bed Y</label><input type="range" id="bedY" min="-100" max="100" value="0"></div>
             <div class="setting-row"><label>Bowl X</label><input type="range" id="bowlX" min="0" max="100" value="45"></div>
             <div class="setting-row"><label>Bowl Y</label><input type="range" id="bowlY" min="-100" max="100" value="0"></div>
-            <div class="setting-row"><label>Litter X</label><input type="range" id="litterX" min="0" max="100" value="85"></div>
+            <div class="setting-row"><label>Litter X</label><input type="range" id="litterX" min="0" max="100" value="90"></div>
             <div class="setting-row"><label>Litter Y</label><input type="range" id="litterY" min="-100" max="100" value="0"></div>
             <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                 <label>Bed Color Swatches:</label>
@@ -225,7 +225,9 @@ let state = {
         statsX: 50, statsY: 90,
         bedX: 20, bedY: 0,
         bowlX: 45, bowlY: 0,
-        litterX: 85, litterY: 0,
+        litterX: 90, litterY: 0,
+        towerX: 70, towerY: 0,
+        showTower: true,
         bedColor: "#e74c3c"
     }
 };
@@ -240,12 +242,31 @@ function getPos(pctX, pctY, offY = 0) {
 }
 
 function drawEnvironment() {
+    // Bed
     const bPos = getPos(state.layout.bedX, 100, -BASE_FLOOR_Y + state.layout.bedY);
     ctx.fillStyle = "rgba(0,0,0,0.1)";
     ctx.beginPath(); ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = state.layout.bedColor;
     ctx.beginPath(); ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); ctx.fill();
 
+    // Cat Tower
+    if (state.layout.showTower) {
+        const tPos = getPos(state.layout.towerX, 100, -BASE_FLOOR_Y + state.layout.towerY);
+        ctx.fillStyle = "rgba(0,0,0,0.1)";
+        ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); // Base Shadow
+        
+        ctx.fillStyle = "#7f8c8d"; // Gray carpet
+        ctx.fillRect(tPos.x - 50, tPos.y - 5, 100, 15); // Base
+        
+        ctx.fillStyle = "#a67c52"; // sisal post
+        ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
+        
+        ctx.fillStyle = "#95a5a6"; // levels
+        ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); // Mid level
+        ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); // Top level
+    }
+
+    // Food Bowl
     const fPos = getPos(state.layout.bowlX, 100, -105 + state.layout.bowlY);
     ctx.fillStyle = "rgba(0,0,0,0.2)";
     ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); ctx.fill();
@@ -259,6 +280,7 @@ function drawEnvironment() {
         ctx.font = "18px Arial"; ctx.fillText("🐟", fPos.x - 10, fPos.y - 6);
     }
 
+    // Litter
     const lPos = getPos(state.layout.litterX, 100, -110 + state.layout.litterY);
     const boxW = 150;
     ctx.fillStyle = "rgba(0,0,0,0.2)";
@@ -322,7 +344,7 @@ function drawKitty(t, scale) {
     if(state.isDead) ctx.globalAlpha = 0.5;
     ctx.fillStyle = finalColor;
 
-    if (state.action === "sleep") {
+    if (state.action === "sleep" || state.action === "tower_sleep") {
         const breathing = Math.sin(t * 0.03) * 2.5;
         ctx.beginPath(); ctx.ellipse(0, 12, 42 + breathing, 32 + breathing, 0, 0, Math.PI * 2); ctx.fill();
         ctx.beginPath(); ctx.arc(15, 8, 22, 0, Math.PI*2); ctx.fill();
@@ -330,12 +352,12 @@ function drawKitty(t, scale) {
         ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); ctx.stroke();
         drawEars(15, 8, finalColor, true); drawFace(15, 8, false, true);
     } 
-    else if (state.action === "special") {
-        ctx.rotate(Math.sin(t * 0.15) * 0.2);
-        ctx.beginPath(); ctx.arc(0, 0, 38, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(20, 15, 22, 0, Math.PI*2); ctx.fill();
-        drawEars(20, 15, finalColor, false); drawFace(20, 15, false, false);
-        ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(50 + Math.sin(t * 0.2) * 20, 20, 16, 0, Math.PI*2); ctx.fill();
+    else if (state.action === "special" || state.action === "scratching") {
+        const shake = (state.action === "scratching") ? Math.sin(t*0.5)*5 : 0;
+        ctx.translate(shake, 0);
+        ctx.beginPath(); ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, -45, 24, 0, Math.PI*2); ctx.fill();
+        drawEars(0, -45, finalColor, false); drawFace(0, -45, false, false);
     }
     else if (["groom", "potty", "kicking", "beg"].includes(state.action)) {
         ctx.beginPath(); ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); ctx.fill();
@@ -384,6 +406,7 @@ function updateAI(t) {
     const bowlPos = getPos(state.layout.bowlX, 100, -BASE_FLOOR_Y + state.layout.bowlY);
     const bedPos = getPos(state.layout.bedX, 100, -BASE_FLOOR_Y + state.layout.bedY);
     const litPos = getPos(state.layout.litterX, 100, -BASE_FLOOR_Y + state.layout.litterY);
+    const towerPos = getPos(state.layout.towerX, 100, -BASE_FLOOR_Y + state.layout.towerY);
 
     if (state.actionTimer > 0) state.actionTimer--;
     
@@ -418,6 +441,16 @@ function updateAI(t) {
         case "walk_to_bed":
             if (walkToPoint(bedPos.x, bedPos.y)) { state.action = "sleep"; state.actionTimer = 1200; }
             break;
+        case "walk_to_tower_scratch":
+            if (walkToPoint(towerPos.x - 15, towerPos.y)) { state.facing = 1; state.action = "scratching"; state.actionTimer = 200; say("Scritch! 🐾"); }
+            break;
+        case "walk_to_tower_climb":
+            if (walkToPoint(towerPos.x, towerPos.y - 145)) { state.action = "tower_sleep"; state.actionTimer = 1500; }
+            break;
+        case "scratching":
+             if (t % 3 === 0) state.particles.push({x: state.x + 10, y: state.y - 10, vx: Math.random()*4, vy: -2, s: 2, c: "#d2b48c", life: 15});
+             if (state.actionTimer <= 0) state.action = "idle";
+             break;
         case "idle":
             if (state.actionTimer <= 0) {
                 if (state.digestive >= 3) state.action = "walk_to_litter";
@@ -425,6 +458,9 @@ function updateAI(t) {
                     const r = Math.random();
                     if (r < 0.2) { state.action = "walk"; state.facing = Math.random() > 0.5 ? 1 : -1; state.actionTimer = 300; }
                     else if (r < 0.4) state.action = "walk_to_bed";
+                    else if (r < 0.6 && state.layout.showTower) {
+                         state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
+                    }
                     else state.actionTimer = 500;
                 }
             }
@@ -435,9 +471,14 @@ function updateAI(t) {
             if (state.actionTimer <= 0) state.action = "idle";
             break;
         case "sleep":
+        case "tower_sleep":
         case "dance":
         case "special":
-            if (state.actionTimer <= 0) state.action = "idle";
+            if (state.actionTimer <= 0) { 
+                // If waking up on tower, "jump down" instantly
+                if(state.action === "tower_sleep") state.y = window.innerHeight - BASE_FLOOR_Y;
+                state.action = "idle"; 
+            }
             break;
     }
 }
@@ -470,15 +511,16 @@ function updateUI() {
     nameEl.textContent = (state.isDead ? "GHOST " : state.stage.toUpperCase() + " ") + state.name.toUpperCase();
 }
 
-function saveData() { localStorage.setItem("greta_ultra_v9_z", JSON.stringify(state)); }
+function saveData() { localStorage.setItem("greta_ultra_v10", JSON.stringify(state)); }
 
 function loadData() {
-    const saved = localStorage.getItem("greta_ultra_v9_z");
+    const saved = localStorage.getItem("greta_ultra_v10");
     if(saved) {
         const loaded = JSON.parse(saved);
         state = {...state, ...loaded};
         if(state.name) document.getElementById("nameInput").value = state.name;
-        Object.keys(state.layout).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = state.layout[k]; });
+        document.getElementById("showTower").checked = state.layout.showTower;
+        Object.keys(state.layout).forEach(k => { if(document.getElementById(k) && k !== 'showTower') document.getElementById(k).value = state.layout[k]; });
     }
     initSwatches(); 
 }
@@ -530,9 +572,14 @@ document.getElementById("connectBtn").addEventListener("click", () => {
     if(u) { ComfyJS.Init(u); say("Meow! Connected"); }
 });
 
-const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY"];
+const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY", "towerX", "towerY"];
 sliders.forEach(id => {
     document.getElementById(id).addEventListener("input", (e) => state.layout[id] = parseInt(e.target.value));
+});
+
+document.getElementById("showTower").addEventListener("change", (e) => {
+    state.layout.showTower = e.target.checked;
+    if(!state.layout.showTower && state.action.includes("tower")) state.action = "idle";
 });
 
 document.getElementById("btnFeed").addEventListener("click", () => { if(!state.isDead && !state.hasFood) { state.hasFood = true; say("Food! 🐟"); } });
