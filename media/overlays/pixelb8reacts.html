@@ -51,22 +51,22 @@
         button { width: 100%; padding: 8px; margin: 4px 0; font-family: inherit; font-size: 9px; cursor: pointer; background: #333; color: white; border: 1px solid #555; }
         button:hover { background: #444; border-color: #ffcc00; }
         input[type="text"] { width: 90%; padding: 8px; margin-bottom: 10px; background: #000; color: #fff; border: 1px solid #ffcc00; font-family: inherit; font-size: 9px;}
-		
-		.swatch {
-			width: 24px;
-			height: 24px;
-			border: 2px solid #555;
-			cursor: pointer;
-			transition: transform 0.1s, border-color 0.1s;
-		}
-		.swatch:hover {
-			border-color: #ffcc00;
-			transform: scale(1.1);
-		}
-		.swatch.active {
-			border-color: #ffffff;
-			outline: 1px solid #ffcc00;
-		}
+
+        .swatch {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #555;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.1s;
+        }
+        .swatch:hover {
+            border-color: #ffcc00;
+            transform: scale(1.1);
+        }
+        .swatch.active {
+            border-color: #ffffff;
+            outline: 1px solid #ffcc00;
+        }
     </style>
 </head>
 <body>
@@ -104,10 +104,9 @@
             <div class="setting-row"><label>Litter X</label><input type="range" id="litterX" min="0" max="100" value="85"></div>
             <div class="setting-row"><label>Litter Y</label><input type="range" id="litterY" min="-100" max="100" value="0"></div>
             <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-				<label>Bed Color Swatches:</label>
-				<div id="bedColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;">
-					</div>
-			</div>
+                <label>Bed Color Swatches:</label>
+                <div id="bedColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;"></div>
+            </div>
         </div>
 
         <div class="settings-group">
@@ -133,6 +132,7 @@ window.onresize = resize;
 resize();
 
 const KITTY_COLORS = ["#E67E22", "#95A5A6", "#2C3E50", "#ECF0F1", "#BDC3C7", "#D35400"];
+const BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
 
 let state = {
     name: "Greta",
@@ -375,29 +375,6 @@ function updateAI(t) {
     }
 }
 
-const BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
-const swatchContainer = document.getElementById("bedColorSwatches");
-
-BED_PRESETS.forEach(color => {
-    const btn = document.createElement("div");
-    btn.className = "swatch";
-    btn.style.backgroundColor = color;
-    if (state.layout.bedColor === color) btn.classList.add("active");
-    
-    btn.addEventListener("click", () => {
-        // Update State
-        state.layout.bedColor = color;
-        
-        // UI Feedback
-        document.querySelectorAll(".swatch").forEach(s => s.classList.remove("active"));
-        btn.classList.add("active");
-        
-        say("New bed! ✨");
-    });
-    
-    swatchContainer.appendChild(btn);
-});
-
 function animate(t) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     state.animT++;
@@ -427,6 +404,7 @@ function updateUI() {
 }
 
 function saveData() { localStorage.setItem("greta_ultra_v9_z", JSON.stringify(state)); }
+
 function loadData() {
     const saved = localStorage.getItem("greta_ultra_v9_z");
     if(saved) {
@@ -435,6 +413,26 @@ function loadData() {
         if(state.name) document.getElementById("nameInput").value = state.name;
         Object.keys(state.layout).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = state.layout[k]; });
     }
+    initSwatches(); // Ensure swatches reflect loaded color
+}
+
+function initSwatches() {
+    const swatchContainer = document.getElementById("bedColorSwatches");
+    swatchContainer.innerHTML = ""; // Clear existing
+    BED_PRESETS.forEach(color => {
+        const btn = document.createElement("div");
+        btn.className = "swatch";
+        btn.style.backgroundColor = color;
+        if (state.layout.bedColor === color) btn.classList.add("active");
+        
+        btn.addEventListener("click", () => {
+            state.layout.bedColor = color;
+            document.querySelectorAll(".swatch").forEach(s => s.classList.remove("active"));
+            btn.classList.add("active");
+            say("Comfy! ✨");
+        });
+        swatchContainer.appendChild(btn);
+    });
 }
 
 document.getElementById("nameplate").addEventListener("click", () => {
@@ -455,7 +453,6 @@ sliders.forEach(id => {
     document.getElementById(id).addEventListener("input", (e) => state.layout[id] = parseInt(e.target.value));
 });
 
-document.getElementById("bedColor").addEventListener("input", (e) => state.layout.bedColor = e.target.value);
 document.getElementById("btnFeed").addEventListener("click", () => { if(!state.isDead && !state.hasFood) { state.hasFood = true; say("Food! 🐟"); } });
 document.getElementById("btnPlay").addEventListener("click", () => { if(!state.isDead) { state.action = "special"; state.actionTimer = 350; say("Play! 🧶"); } });
 document.getElementById("btnDance").addEventListener("click", () => { if(!state.isDead) { state.action = "dance"; state.actionTimer = 300; say("Dance! ✨"); } });
@@ -470,7 +467,6 @@ document.getElementById("btnTreat").addEventListener("click", () => {
 document.getElementById("btnClear").addEventListener("click", () => { state.poops = []; say("Fresh sand! ✨"); });
 document.getElementById("btnReset").addEventListener("click", () => { localStorage.clear(); location.reload(); });
 
-// Updated Twitch Command Logic
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
     if(cmd === "feed") document.getElementById("btnFeed").click();
