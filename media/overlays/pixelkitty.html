@@ -303,7 +303,33 @@ function drawEnvironment() {
         if(p.life <= 0) state.particles.splice(i, 1);
     });
 }
+function drawYarn(x, y, t) {
+    const roll = Math.sin(t * 0.15) * 40; // The ball rolls back and forth
+    ctx.save();
+    ctx.translate(x + roll, y);
+    
+    // String Shadow
+    ctx.fillStyle = "rgba(0,0,0,0.1)";
+    ctx.beginPath(); ctx.ellipse(0, 15, 15, 5, 0, 0, Math.PI*2); ctx.fill();
 
+    // The Yarn Ball
+    ctx.fillStyle = "#e74c3c"; // Red yarn
+    ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI*2); ctx.fill();
+    
+    // Yarn Texture (the "wrapped" look)
+    ctx.strokeStyle = "#c0392b";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(12, -5); ctx.stroke();
+    
+    // Trailing thread
+    ctx.beginPath();
+    ctx.moveTo(-12, 5);
+    ctx.bezierCurveTo(-20, 15, -30, 0, -45, 10);
+    ctx.stroke();
+    
+    ctx.restore();
+}
 function drawEars(x, y, color, sleeping) {
     ctx.fillStyle = color;
     if (sleeping) {
@@ -358,11 +384,33 @@ function drawKitty(t, scale) {
         drawEars(15, 8, finalColor, true); drawFace(15, 8, false, true);
     } 
     else if (state.action === "special" || state.action === "scratching") {
+        const isPlaying = state.action === "special";
         const shake = (state.action === "scratching") ? Math.sin(t*0.5)*5 : 0;
+        
+        // Render the Ball of String if she is playing
+        if (isPlaying) {
+            drawYarn(30, 20, t);
+        }
+
         ctx.translate(shake, 0);
         ctx.beginPath(); ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); ctx.fill();
         ctx.beginPath(); ctx.arc(0, -45, 24, 0, Math.PI*2); ctx.fill();
-        drawEars(0, -45, finalColor, false); drawFace(0, -45, false, false);
+        
+        // Paws logic
+        ctx.fillStyle = finalColor;
+        if (isPlaying) {
+            // Batting paws for play
+            const reach = Math.sin(t * 0.2) * 15;
+            ctx.fillRect(10, -5 + reach, 10, 15); 
+            ctx.fillRect(-20, -5 - reach, 10, 15);
+        } else {
+            // Reaching paws for scratching the post
+            ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15);
+            ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
+        }
+
+        drawEars(0, -45, finalColor, false); 
+        drawFace(0, -45, false, false);
     }
     else if (["groom", "potty", "kicking", "beg"].includes(state.action)) {
         ctx.beginPath(); ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); ctx.fill();
@@ -386,7 +434,6 @@ function drawKitty(t, scale) {
     }
     ctx.restore();
 }
-
 function updateAI(t) {
     if (state.isDead) return;
 
@@ -474,36 +521,44 @@ function updateAI(t) {
              if (state.actionTimer <= 0) state.action = "idle";
              break;
 		case "idle":
-            if (state.actionTimer <= 0) {
-                // Give her a 50% chance to just stay idle longer before deciding on a task
-                if (Math.random() < 0.5) {
-                    state.actionTimer = 600 + Math.random() * 600; // Wait 10-20 more seconds
-                    return;
-                }
+			if (state.actionTimer <= 0) {
+				// --- RANDOM CHATTER CHECK ---
+				// 20% chance to say something when deciding on a new task
+				if (Math.random() < 0.20) {
+					let sound = "Meow!";
+					if (state.hunger < 20) sound = "Purrr... ❤️"; // Purrs when full
+					if (state.hunger > 70) sound = "Mew? (Hungry)"; // Mews when hungry
+					if (state.action === "tower_sleep") sound = "Zzz... meow... zzz";
+					say(sound);
+				}
 
-                if (state.digestive >= 3) {
-                    state.action = "walk_to_litter";
-                } else {
-                    const r = Math.random();
-                    // Reduced frequency of state changes
-                    if (r < 0.15) { 
-                        state.action = "walk"; 
-                        state.facing = Math.random() > 0.5 ? 1 : -1; 
-                        state.actionTimer = 400 + Math.random() * 400; 
-                    }
-                    else if (r < 0.25) {
-                        state.action = "walk_to_bed";
-                    }
-                    else if (r < 0.40 && state.layout.showTower) {
-                         state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
-                    }
-                    else {
-                        // Default to staying idle much longer
-                        state.actionTimer = 800 + Math.random() * 1000;
-                    }
-                }
-            }
-            break;
+				// Give her a 50% chance to just stay idle longer
+				if (Math.random() < 0.5) {
+					state.actionTimer = 600 + Math.random() * 600; 
+					return;
+				}
+
+				if (state.digestive >= 3) {
+					state.action = "walk_to_litter";
+				} else {
+					const r = Math.random();
+					if (r < 0.15) { 
+						state.action = "walk"; 
+						state.facing = Math.random() > 0.5 ? 1 : -1; 
+						state.actionTimer = 400 + Math.random() * 400; 
+					}
+					else if (r < 0.25) {
+						state.action = "walk_to_bed";
+					}
+					else if (r < 0.40 && state.layout.showTower) {
+						 state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
+					}
+					else {
+						state.actionTimer = 800 + Math.random() * 1000;
+					}
+				}
+			}
+			break;
 
         case "walk":
             state.x += state.facing * 1.2; // Slightly slower walk
