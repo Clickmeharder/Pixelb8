@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comfy Kitty Ultra - Greta Custom Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Press Start 2P', cursive; user-select: none; }
+        #companion-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; }
+        #companionCanvas { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: auto; }
+        
+        #nameplate { 
+            position: absolute; 
+            background: rgba(0,0,0,0.8); 
+            color: #ffcc00; 
+            padding: 8px 15px; 
+            font-size: 10px; 
+            border: 2px solid #ffcc00; 
+            pointer-events: auto; 
+            white-space: nowrap; 
+            transform: translate(-50%, -50%); 
+            z-index: 10000; 
+            cursor: pointer; 
+            transition: background 0.2s, transform 0.1s;
+        }
+        #nameplate:hover {
+            background: rgba(50, 50, 0, 0.9);
+            border-color: #ffffff;
+            color: #ffffff;
+        }
+        #nameplate:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        #status { position: absolute; font-size: 9px; color: #ffffff; background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 4px; text-align: center; line-height: 1.6; min-width: 250px; transform: translate(-50%, -50%); z-index: 10000; }
+        
+        .chat-bubble { position: absolute; background: white; border: 3px solid #333; padding: 10px; font-size: 10px; border-radius: 15px; opacity: 0; transition: opacity 0.3s; color: black; pointer-events: none; white-space: nowrap; z-index: 10005; }
+        .chat-bubble.show { opacity: 1; }
+        
+        #comfycontrolContainer { position: fixed; top: 70px; right: 20px; background: rgba(0,0,0,0.95); border: 3px solid #ffcc00; padding: 15px; width: 300px; color: #fff; display: none; z-index: 20001; max-height: 85vh; overflow-y: auto; }
+        #comfycontrolContainer.active { display: block; }
+        
+        .settings-group { margin-top: 15px; padding-top: 10px; border-top: 1px solid #444; }
+        .setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 8px; }
+        .setting-row label { width: 45%; }
+        .setting-row input[type="range"] { width: 50%; }
+        
+        h4 { font-size: 10px; color: #ffcc00; margin: 10px 0; text-transform: uppercase; border-bottom: 1px solid #444; padding-bottom: 4px;}
+        button { width: 100%; padding: 8px; margin: 4px 0; font-family: inherit; font-size: 9px; cursor: pointer; background: #333; color: white; border: 1px solid #555; }
+        button:hover { background: #444; border-color: #ffcc00; }
+        input[type="text"] { width: 90%; padding: 8px; margin-bottom: 10px; background: #000; color: #fff; border: 1px solid #ffcc00; font-family: inherit; font-size: 9px;}
+    </style>
+</head>
+<body>
+
+    <div id="companion-container">
+        <div id="bubble" class="chat-bubble"></div>
+        <div id="nameplate">Loading...</div>
+        <canvas id="companionCanvas"></canvas>
+        <div id="status">❤️ Greta | EXP 0</div>
+    </div>
+    
+    <div id="comfycontrolContainer">
+        <h4>Identity</h4>
+        <label style="font-size: 8px;">Kitty Name:</label>
+        <input type="text" id="nameInput" placeholder="Name your kitty...">
+        
+        <h4>Twitch Config</h4>
+        <input type="text" id="streamerInput" placeholder="Twitch User">
+        <button id="connectBtn">Connect Twitch</button>
+        
+        <div class="settings-group">
+            <h4>UI Positioning</h4>
+            <div class="setting-row"><label>Name X</label><input type="range" id="nameX" min="0" max="100" value="50"></div>
+            <div class="setting-row"><label>Name Y</label><input type="range" id="nameY" min="0" max="100" value="70"></div>
+            <div class="setting-row"><label>Stats X</label><input type="range" id="statsX" min="0" max="100" value="50"></div>
+            <div class="setting-row"><label>Stats Y</label><input type="range" id="statsY" min="0" max="100" value="90"></div>
+        </div>
+
+        <div class="settings-group">
+            <h4>Prop Layout</h4>
+            <div class="setting-row"><label>Bed X</label><input type="range" id="bedX" min="0" max="100" value="20"></div>
+            <div class="setting-row"><label>Bed Y</label><input type="range" id="bedY" min="-100" max="100" value="0"></div>
+            <div class="setting-row"><label>Bowl X</label><input type="range" id="bowlX" min="0" max="100" value="45"></div>
+            <div class="setting-row"><label>Bowl Y</label><input type="range" id="bowlY" min="-100" max="100" value="0"></div>
+            <div class="setting-row"><label>Litter X</label><input type="range" id="litterX" min="0" max="100" value="85"></div>
+            <div class="setting-row"><label>Litter Y</label><input type="range" id="litterY" min="-100" max="100" value="0"></div>
+            <div class="setting-row"><label>Bed Color</label><input type="color" id="bedColor" value="#e74c3c"></div>
+        </div>
+
+        <div class="settings-group">
+            <h4>Manual Actions</h4>
+            <button id="btnFeed">Feed 🐟</button>
+            <button id="btnPlay">Play 🧶</button>
+            <button id="btnDance">Dance 💃</button>
+            <button id="btnTreat">Treat 🍗</button>
+            <button id="btnClear">Clean Litter ✨</button>
+            <button id="btnReset" style="color:red; margin-top:10px;">Hard Reset</button>
+        </div>
+    </div>
+
+<script>
+const canvas = document.getElementById("companionCanvas");
+const ctx = canvas.getContext("2d");
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.onresize = resize;
+resize();
+
+const KITTY_COLORS = ["#E67E22", "#95A5A6", "#2C3E50", "#ECF0F1", "#BDC3C7", "#D35400"];
+
+let state = {
+    name: "Greta",
+    isDead: false,
+    birthday: Date.now(),
+    ageDays: 0,
+    stage: "Baby",
+    exp: 0,
+    hunger: 100,
+    digestive: 0,
+    color: KITTY_COLORS[Math.floor(Math.random() * KITTY_COLORS.length)],
+    x: 200,
+    y: window.innerHeight - 150,
+    facing: 1,
+    action: "idle",
+    actionTimer: 300,
+    animT: 0,
+    poops: [],
+    hasFood: false,
+    particles: [],
+    layout: {
+        nameX: 50, nameY: 70,
+        statsX: 50, statsY: 90,
+        bedX: 20, bedY: 0,
+        bowlX: 45, bowlY: 0,
+        litterX: 85, litterY: 0,
+        bedColor: "#e74c3c"
+    }
+};
+
+const BASE_FLOOR_Y = 110;
+
+function getPos(pctX, pctY, offY = 0) {
+    return {
+        x: (pctX / 100) * canvas.width,
+        y: ((pctY / 100) * canvas.height) + offY
+    };
+}
+
+function drawEnvironment() {
+    const bPos = getPos(state.layout.bedX, 100, -BASE_FLOOR_Y + state.layout.bedY);
+    ctx.fillStyle = "rgba(0,0,0,0.1)";
+    ctx.beginPath(); ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = state.layout.bedColor;
+    ctx.beginPath(); ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); ctx.fill();
+
+    const fPos = getPos(state.layout.bowlX, 100, -105 + state.layout.bowlY);
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#ecf0f1";
+    ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#bdc3c7";
+    ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); ctx.fill();
+    if(state.hasFood) {
+        ctx.fillStyle = "#d35400";
+        ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); ctx.fill();
+        ctx.font = "18px Arial"; ctx.fillText("🐟", fPos.x - 10, fPos.y - 6);
+    }
+
+    const lPos = getPos(state.layout.litterX, 100, -110 + state.layout.litterY);
+    const boxW = 150;
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 50);
+    ctx.fillStyle = "#2c3e50"; 
+    ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 50);
+    ctx.fillStyle = "#95a5a6"; 
+    ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 5, boxW - 16, 38);
+    state.poops.forEach(p => ctx.fillText("💩", (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40), lPos.y + 30));
+
+    state.particles.forEach((p, i) => {
+        ctx.fillStyle = p.c; ctx.globalAlpha = p.life / 30;
+        ctx.fillRect(p.x, p.y, p.s, p.s); ctx.globalAlpha = 1.0;
+        p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life--;
+        if(p.life <= 0) state.particles.splice(i, 1);
+    });
+}
+
+function drawEars(x, y, color, sleeping) {
+    ctx.fillStyle = color;
+    if (sleeping) {
+        ctx.beginPath(); ctx.moveTo(x - 15, y - 8); ctx.lineTo(x - 22, y + 2); ctx.lineTo(x - 5, y + 5); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x + 15, y - 8); ctx.lineTo(x + 22, y + 2); ctx.lineTo(x + 5, y + 5); ctx.fill();
+    } else {
+        ctx.beginPath(); ctx.moveTo(x - 20, y - 10); ctx.lineTo(x - 12, y - 40); ctx.lineTo(x - 2, y - 15); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x + 20, y - 10); ctx.lineTo(x + 12, y - 40); ctx.lineTo(x + 2, y - 15); ctx.fill();
+    }
+}
+
+function drawFace(x, y, begging, sleeping) {
+    if (sleeping) {
+        ctx.strokeStyle = "rgba(0,0,0,0.5)"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(x - 7, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x + 9, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+    } else {
+        ctx.fillStyle = "white";
+        ctx.beginPath(); ctx.arc(x - 7, y - 5, 6, 0, Math.PI*2); ctx.arc(x + 9, y - 5, 6, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "black";
+        ctx.beginPath(); ctx.arc(x - 6, y - 5, 2.5, 0, Math.PI*2); ctx.arc(x + 10, y - 5, 2.5, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 1;
+    [[-10, -28], [-10, -28], [-10, -28]].forEach((p,i) => {
+       ctx.beginPath(); ctx.moveTo(x+12, y+2*i); ctx.lineTo(x+30, y-8+8*i); ctx.stroke();
+       ctx.beginPath(); ctx.moveTo(x-10, y+2*i); ctx.lineTo(x-28, y-8+8*i); ctx.stroke();
+    });
+    ctx.fillStyle = "#ffaaaa";
+    if (begging) { ctx.beginPath(); ctx.arc(x+1, y+8, 4, 0, Math.PI*2); ctx.fill(); }
+    else { ctx.beginPath(); ctx.moveTo(x+1, y+3); ctx.lineTo(x-2, y); ctx.lineTo(x+4, y); ctx.fill(); }
+}
+
+function drawKitty(t, scale) {
+    ctx.save();
+    let bounce = (state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
+    ctx.translate(state.x, state.y - bounce);
+    ctx.scale(state.facing * scale, scale);
+    
+    ctx.fillStyle = "rgba(0,0,0,0.1)";
+    ctx.beginPath(); ctx.ellipse(0, 30 + bounce, 45, 12, 0, 0, Math.PI*2); ctx.fill();
+
+    let finalColor = state.isDead ? "#ffffff" : (state.poops.length > 5 ? "#8edb4b" : state.color);
+    if(state.isDead) ctx.globalAlpha = 0.5;
+    ctx.fillStyle = finalColor;
+
+    if (state.action === "sleep") {
+        const breathing = Math.sin(t * 0.03) * 2.5;
+        ctx.beginPath(); ctx.ellipse(0, 12, 42 + breathing, 32 + breathing, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(15, 8, 22, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.lineWidth = 11; ctx.lineCap = "round"; ctx.strokeStyle = finalColor;
+        ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); ctx.stroke();
+        drawEars(15, 8, finalColor, true); drawFace(15, 8, false, true);
+    } 
+    else if (state.action === "special") {
+        ctx.rotate(Math.sin(t * 0.15) * 0.2);
+        ctx.beginPath(); ctx.arc(0, 0, 38, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(20, 15, 22, 0, Math.PI*2); ctx.fill();
+        drawEars(20, 15, finalColor, false); drawFace(20, 15, false, false);
+        ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(50 + Math.sin(t * 0.2) * 20, 20, 16, 0, Math.PI*2); ctx.fill();
+    }
+    else if (["groom", "potty", "kicking", "beg"].includes(state.action)) {
+        ctx.beginPath(); ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, -45, 24, 0, Math.PI*2); ctx.fill();
+        if (state.action === "kicking") {
+            ctx.fillStyle = finalColor; ctx.fillRect(10, 10 + Math.sin(t * 0.5) * 15, 10, 15);
+        }
+        drawEars(0, -45, finalColor, false); drawFace(0, -45, state.action === "beg", false);
+    }
+    else {
+        ctx.beginPath(); ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(35, -15, 24, 0, Math.PI*2); ctx.fill();
+        drawEars(35, -15, finalColor, false);
+        const walkCycle = (state.action.includes("walk")) ? Math.sin(t * 0.18) : 0;
+        [[-35, 12], [-12, 12], [10, 12], [28, 12]].forEach((p, i) => {
+            ctx.fillRect(p[0], p[1], 9, 16 + (i % 2 === 0 ? walkCycle : -walkCycle) * 8);
+        });
+        ctx.beginPath(); ctx.lineWidth = 8; ctx.lineCap = "round"; ctx.strokeStyle = finalColor;
+        ctx.moveTo(-45, 0); ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); ctx.stroke();
+        drawFace(35, -15, false, false);
+    }
+    ctx.restore();
+}
+
+function updateAI(t) {
+    if (state.isDead) return;
+    state.ageDays = Math.floor((Date.now() - state.birthday) / 86400000);
+    state.stage = state.ageDays < 2 ? "Baby" : state.ageDays < 5 ? "Juvenile" : "Adult";
+
+    if (t % 500 === 0) state.hunger = Math.max(0, state.hunger - 1);
+    if (state.hunger === 0) state.isDead = true;
+
+    const walkToPoint = (targetX, targetY, speed = 2) => {
+        const dx = targetX - state.x;
+        const dy = targetY - state.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 10) {
+            state.facing = dx > 0 ? 1 : -1;
+            state.x += (dx / dist) * speed;
+            state.y += (dy / dist) * speed;
+            return false;
+        }
+        return true;
+    };
+
+    const bowlPos = getPos(state.layout.bowlX, 100, -BASE_FLOOR_Y + state.layout.bowlY);
+    const bedPos = getPos(state.layout.bedX, 100, -BASE_FLOOR_Y + state.layout.bedY);
+    const litPos = getPos(state.layout.litterX, 100, -BASE_FLOOR_Y + state.layout.litterY);
+
+    if (state.actionTimer > 0) state.actionTimer--;
+    
+    if (state.hasFood && !["eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(state.action)) state.action = "walk_to_food";
+
+    switch(state.action) {
+        case "walk_to_food":
+            if (walkToPoint(bowlPos.x, bowlPos.y)) { 
+                if (state.hasFood) { state.action = "eating"; state.actionTimer = 150; }
+                else { state.action = "beg"; state.actionTimer = 150; say("Hungry! 🐟"); }
+            }
+            break;
+        case "eating":
+            if (state.actionTimer <= 0) {
+                state.hasFood = false; state.hunger = Math.min(100, state.hunger + 40);
+                state.digestive++; state.exp += 15; state.action = "idle"; state.actionTimer = 400;
+            }
+            break;
+        case "walk_to_litter":
+            if (walkToPoint(litPos.x, litPos.y)) { state.action = "potty"; state.actionTimer = 150; }
+            break;
+        case "potty":
+            if (state.actionTimer <= 0) { state.poops.push({ox: Math.random()*100}); state.digestive = 0; state.action = "walk_to_kick"; }
+            break;
+        case "walk_to_kick":
+            if (walkToPoint(litPos.x - 60, litPos.y)) { state.facing = 1; state.action = "kicking"; state.actionTimer = 100; }
+            break;
+        case "kicking":
+            if (t % 2 === 0) state.particles.push({x: state.x - 10, y: state.y + 25, vx: 6 + Math.random()*8, vy: -5, s: 2, c: "#bdc3c7", life: 30});
+            if (state.actionTimer <= 0) { state.action = "idle"; state.actionTimer = 400; say("Clean! ✨"); }
+            break;
+        case "walk_to_bed":
+            if (walkToPoint(bedPos.x, bedPos.y)) { state.action = "sleep"; state.actionTimer = 1200; }
+            break;
+        case "idle":
+            if (state.actionTimer <= 0) {
+                if (state.digestive >= 3) state.action = "walk_to_litter";
+                else {
+                    const r = Math.random();
+                    if (r < 0.2) { state.action = "walk"; state.facing = Math.random() > 0.5 ? 1 : -1; state.actionTimer = 300; }
+                    else if (r < 0.4) state.action = "walk_to_bed";
+                    else state.actionTimer = 500;
+                }
+            }
+            break;
+        case "walk":
+            state.x += state.facing * 1.5;
+            if (state.x < 50 || state.x > canvas.width - 50) state.facing *= -1;
+            if (state.actionTimer <= 0) state.action = "idle";
+            break;
+        case "sleep":
+        case "dance":
+        case "special":
+            if (state.actionTimer <= 0) state.action = "idle";
+            break;
+    }
+}
+
+function animate(t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    state.animT++;
+    drawEnvironment();
+    updateAI(state.animT);
+    const scale = state.stage === "Baby" ? 0.4 : state.stage === "Juvenile" ? 0.75 : 1.1;
+    drawKitty(state.animT, scale);
+    updateUI();
+    requestAnimationFrame(animate);
+}
+
+function say(txt) {
+    const b = document.getElementById("bubble");
+    b.textContent = txt; b.style.left = (state.x - 50) + "px"; b.style.top = (state.y - 140) + "px";
+    b.classList.add("show"); setTimeout(() => b.classList.remove("show"), 3000);
+}
+
+function updateUI() {
+    const nameEl = document.getElementById("nameplate");
+    const statsEl = document.getElementById("status");
+    nameEl.style.left = state.layout.nameX + "%"; nameEl.style.top = state.layout.nameY + "%";
+    statsEl.style.left = state.layout.statsX + "%"; statsEl.style.top = state.layout.statsY + "%";
+    
+    let sTxt = state.isDead ? "DECEASED" : (state.poops.length > 5 ? "SICK" : "HEALTHY");
+    statsEl.innerHTML = `${state.name} | Age: ${state.ageDays}d | Hunger: ${state.hunger}%<br>Status: ${sTxt} | EXP: ${state.exp}`;
+    nameEl.textContent = (state.isDead ? "GHOST " : state.stage.toUpperCase() + " ") + state.name.toUpperCase();
+}
+
+function saveData() { localStorage.setItem("greta_ultra_v9_z", JSON.stringify(state)); }
+function loadData() {
+    const saved = localStorage.getItem("greta_ultra_v9_z");
+    if(saved) {
+        const loaded = JSON.parse(saved);
+        state = {...state, ...loaded};
+        if(state.name) document.getElementById("nameInput").value = state.name;
+        Object.keys(state.layout).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = state.layout[k]; });
+    }
+}
+
+document.getElementById("nameplate").addEventListener("click", () => {
+    document.getElementById("comfycontrolContainer").classList.toggle("active");
+});
+
+document.getElementById("nameInput").addEventListener("input", (e) => {
+    state.name = e.target.value || "Greta";
+});
+
+document.getElementById("connectBtn").addEventListener("click", () => {
+    const u = document.getElementById("streamerInput").value;
+    if(u) { ComfyJS.Init(u); say("Meow! Connected"); }
+});
+
+const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY"];
+sliders.forEach(id => {
+    document.getElementById(id).addEventListener("input", (e) => state.layout[id] = parseInt(e.target.value));
+});
+
+document.getElementById("bedColor").addEventListener("input", (e) => state.layout.bedColor = e.target.value);
+document.getElementById("btnFeed").addEventListener("click", () => { if(!state.isDead && !state.hasFood) { state.hasFood = true; say("Food! 🐟"); } });
+document.getElementById("btnPlay").addEventListener("click", () => { if(!state.isDead) { state.action = "special"; state.actionTimer = 350; say("Play! 🧶"); } });
+document.getElementById("btnDance").addEventListener("click", () => { if(!state.isDead) { state.action = "dance"; state.actionTimer = 300; say("Dance! ✨"); } });
+document.getElementById("btnTreat").addEventListener("click", () => { 
+    if(!state.isDead) { 
+        state.hunger = Math.min(100, state.hunger + 15);
+        state.action = "special"; 
+        state.actionTimer = 200; 
+        say("Treat! 🍗"); 
+    } 
+});
+document.getElementById("btnClear").addEventListener("click", () => { state.poops = []; say("Fresh sand! ✨"); });
+document.getElementById("btnReset").addEventListener("click", () => { localStorage.clear(); location.reload(); });
+
+// Updated Twitch Command Logic
+ComfyJS.onCommand = (user, command, message, flags, extra) => {
+    const cmd = command.toLowerCase();
+    if(cmd === "feed") document.getElementById("btnFeed").click();
+    if(cmd === "play") document.getElementById("btnPlay").click();
+    if(cmd === "dance") document.getElementById("btnDance").click();
+    if(cmd === "treat") document.getElementById("btnTreat").click();
+    if(cmd === "cleanlitter") document.getElementById("btnClear").click();
+};
+
+loadData();
+setInterval(saveData, 5000);
+animate();
+</script>
+</body>
+</html>
