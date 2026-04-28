@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comfy Kitty Ultra - Greta Tower Edition</title>
+    <title>Comfy Kitty Ultra - Greta Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -201,6 +201,9 @@ resize();
 const KITTY_COLORS = ["#E67E22", "#95A5A6", "#2C3E50", "#ECF0F1", "#BDC3C7", "#D35400"];
 const BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
 
+// Hunger logic constants
+const HUNGER_TICK_MS = 144000; // 144 seconds per 1% hunger (4 hours total)
+
 let state = {
     name: "Greta",
     isDead: false,
@@ -210,6 +213,7 @@ let state = {
     exp: 0,
     hunger: 100,
     digestive: 0,
+    lastHungerTick: Date.now(),
     color: KITTY_COLORS[Math.floor(Math.random() * KITTY_COLORS.length)],
     x: 200,
     y: window.innerHeight - 150,
@@ -384,10 +388,20 @@ function drawKitty(t, scale) {
 
 function updateAI(t) {
     if (state.isDead) return;
+
+    // Age calculation
     state.ageDays = Math.floor((Date.now() - state.birthday) / 86400000);
     state.stage = state.ageDays < 2 ? "Baby" : state.ageDays < 5 ? "Juvenile" : "Adult";
 
-    if (t % 500 === 0) state.hunger = Math.max(0, state.hunger - 1);
+    // --- REAL TIME HUNGER DECAY ---
+    const now = Date.now();
+    const msElapsed = now - state.lastHungerTick;
+    if (msElapsed >= HUNGER_TICK_MS) {
+        const pointsToLose = Math.floor(msElapsed / HUNGER_TICK_MS);
+        state.hunger = Math.max(0, state.hunger - pointsToLose);
+        state.lastHungerTick = now - (msElapsed % HUNGER_TICK_MS); // Preserve remainder for next tick
+    }
+    
     if (state.hunger === 0) state.isDead = true;
 
     const walkToPoint = (targetX, targetY, speed = 2) => {
@@ -475,7 +489,6 @@ function updateAI(t) {
         case "dance":
         case "special":
             if (state.actionTimer <= 0) { 
-                // If waking up on tower, "jump down" instantly
                 if(state.action === "tower_sleep") state.y = window.innerHeight - BASE_FLOOR_Y;
                 state.action = "idle"; 
             }
@@ -518,6 +531,17 @@ function loadData() {
     if(saved) {
         const loaded = JSON.parse(saved);
         state = {...state, ...loaded};
+        
+        // Recalculate hunger loss while the window was closed
+        const now = Date.now();
+        const msOffline = now - state.lastHungerTick;
+        if (msOffline >= HUNGER_TICK_MS && !state.isDead) {
+            const pointsLost = Math.floor(msOffline / HUNGER_TICK_MS);
+            state.hunger = Math.max(0, state.hunger - pointsLost);
+            state.lastHungerTick = now - (msOffline % HUNGER_TICK_MS);
+            if (state.hunger === 0) state.isDead = true;
+        }
+
         if(state.name) document.getElementById("nameInput").value = state.name;
         document.getElementById("showTower").checked = state.layout.showTower;
         Object.keys(state.layout).forEach(k => { if(document.getElementById(k) && k !== 'showTower') document.getElementById(k).value = state.layout[k]; });
@@ -560,6 +584,7 @@ document.getElementById("btnNewKitten").addEventListener("click", () => {
     state.hunger = 100;
     state.digestive = 0;
     state.isDead = false;
+    state.lastHungerTick = Date.now();
     state.color = KITTY_COLORS[Math.floor(Math.random() * KITTY_COLORS.length)];
     state.poops = [];
     state.action = "idle";
