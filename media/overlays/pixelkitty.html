@@ -92,18 +92,18 @@
         .chat-bubble.show { opacity: 1; }
         
         #comfycontrolContainer { 
-            position: fixed; 
-            top: 70px; 
-            right: 20px; 
-            background: rgba(0,0,0,0.95); 
-            border: 3px solid #ffcc00; 
-            padding: 15px; 
-            width: 300px; 
-            color: #fff; 
-            display: none; 
-            z-index: 2000; 
-            max-height: 85vh; 
-            overflow-y: auto; 
+			position: fixed;
+			top: 1px;
+			right: 132px;
+			background: rgba(0, 0, 0, 0.95);
+			border: 3px solid #4f4e4c;
+			padding: 15px;
+			width: 300px;
+			color: #fff;
+			display: none;
+			z-index: 2000;
+			max-height: 35vh;
+			overflow-y: auto;
         }
 
         #comfycontrolContainer.active { display: block; }
@@ -205,6 +205,7 @@ const BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e6
 const HUNGER_TICK_MS = 144000; // 144 seconds per 1% hunger (4 hours total)
 
 let state = {
+	twitchUser: "",
     name: "Greta",
     isDead: false,
     birthday: Date.now(),
@@ -559,17 +560,34 @@ function loadData() {
     if(saved) {
         const loaded = JSON.parse(saved);
         state = {...state, ...loaded};
+		if(state.name) document.getElementById("nameInput").value = state.name;
         
+        // --- TWITCH AUTO-CONNECT LOGIC ---
+        if(state.twitchUser) {
+            document.getElementById("streamerInput").value = state.twitchUser;
+            ComfyJS.Init(state.twitchUser);
+            // Slight delay so the UI/Canvas is ready before she speaks
+            setTimeout(() => say(`Reconnected to ${state.twitchUser}!`), 1000);
+        }
         // Recalculate hunger loss while the window was closed
-        const now = Date.now();
+		const now = Date.now();
         const msOffline = now - state.lastHungerTick;
-		if (msOffline >= HUNGER_TICK_MS && !state.isDead) {
-			const pointsGained = Math.floor(msOffline / HUNGER_TICK_MS);
-			state.hunger = Math.min(100, state.hunger + pointsGained); // Count up
-			state.lastHungerTick = now - (msOffline % HUNGER_TICK_MS);
-			if (state.hunger === 100) state.isDead = true;
-		}
+        
+        if (msOffline >= HUNGER_TICK_MS && !state.isDead) {
+            const pointsGained = Math.floor(msOffline / HUNGER_TICK_MS);
+            let potentialHunger = state.hunger + pointsGained;
 
+            if (potentialHunger >= 100) {
+                // Mercy Rule: If she would have died while offline, 
+                // just set her to 70% hunger instead.
+                state.hunger = 70;
+                // Reset the tick so she doesn't immediately jump to 71%
+                state.lastHungerTick = now; 
+            } else {
+                state.hunger = potentialHunger;
+                state.lastHungerTick = now - (msOffline % HUNGER_TICK_MS);
+            }
+        }
         if(state.name) document.getElementById("nameInput").value = state.name;
         document.getElementById("showTower").checked = state.layout.showTower;
         Object.keys(state.layout).forEach(k => { if(document.getElementById(k) && k !== 'showTower') document.getElementById(k).value = state.layout[k]; });
@@ -621,8 +639,13 @@ document.getElementById("btnNewKitten").addEventListener("click", () => {
 });
 
 document.getElementById("connectBtn").addEventListener("click", () => {
-    const u = document.getElementById("streamerInput").value;
-    if(u) { ComfyJS.Init(u); say("Meow! Connected"); }
+    const u = document.getElementById("streamerInput").value.trim();
+    if(u) { 
+        state.twitchUser = u; // Store it in state
+        saveData();           // Force a save
+        ComfyJS.Init(u); 
+        say("Meow! Connected"); 
+    }
 });
 
 const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY", "towerX", "towerY"];
