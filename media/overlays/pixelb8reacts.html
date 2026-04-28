@@ -51,6 +51,22 @@
         button { width: 100%; padding: 8px; margin: 4px 0; font-family: inherit; font-size: 9px; cursor: pointer; background: #333; color: white; border: 1px solid #555; }
         button:hover { background: #444; border-color: #ffcc00; }
         input[type="text"] { width: 90%; padding: 8px; margin-bottom: 10px; background: #000; color: #fff; border: 1px solid #ffcc00; font-family: inherit; font-size: 9px;}
+		
+		.swatch {
+			width: 24px;
+			height: 24px;
+			border: 2px solid #555;
+			cursor: pointer;
+			transition: transform 0.1s, border-color 0.1s;
+		}
+		.swatch:hover {
+			border-color: #ffcc00;
+			transform: scale(1.1);
+		}
+		.swatch.active {
+			border-color: #ffffff;
+			outline: 1px solid #ffcc00;
+		}
     </style>
 </head>
 <body>
@@ -87,7 +103,11 @@
             <div class="setting-row"><label>Bowl Y</label><input type="range" id="bowlY" min="-100" max="100" value="0"></div>
             <div class="setting-row"><label>Litter X</label><input type="range" id="litterX" min="0" max="100" value="85"></div>
             <div class="setting-row"><label>Litter Y</label><input type="range" id="litterY" min="-100" max="100" value="0"></div>
-            <div class="setting-row"><label>Bed Color</label><input type="color" id="bedColor" value="#e74c3c"></div>
+            <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+				<label>Bed Color Swatches:</label>
+				<div id="bedColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;">
+					</div>
+			</div>
         </div>
 
         <div class="settings-group">
@@ -354,6 +374,29 @@ function updateAI(t) {
             break;
     }
 }
+
+const BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
+const swatchContainer = document.getElementById("bedColorSwatches");
+
+BED_PRESETS.forEach(color => {
+    const btn = document.createElement("div");
+    btn.className = "swatch";
+    btn.style.backgroundColor = color;
+    if (state.layout.bedColor === color) btn.classList.add("active");
+    
+    btn.addEventListener("click", () => {
+        // Update State
+        state.layout.bedColor = color;
+        
+        // UI Feedback
+        document.querySelectorAll(".swatch").forEach(s => s.classList.remove("active"));
+        btn.classList.add("active");
+        
+        say("New bed! ✨");
+    });
+    
+    swatchContainer.appendChild(btn);
+});
 
 function animate(t) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
