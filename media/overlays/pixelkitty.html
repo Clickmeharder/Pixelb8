@@ -487,7 +487,7 @@ function updateAI(t) {
 			if (state.actionTimer <= 0) {
 				state.hasFood = false; 
 				// Subtract hunger instead of adding
-				state.hunger = Math.max(0, state.hunger - 5); 
+				state.hunger = Math.max(0, state.hunger - 10); 
 				state.digestive++; 
 				state.exp += 15; 
 				state.action = "idle"; 
@@ -718,7 +718,7 @@ document.getElementById("btnPlay").addEventListener("click", () => { if(!state.i
 document.getElementById("btnDance").addEventListener("click", () => { if(!state.isDead) { state.action = "dance"; state.actionTimer = 300; say("Dance! ✨"); } });
 document.getElementById("btnTreat").addEventListener("click", () => { 
     if(!state.isDead) { 
-        state.hunger = Math.max(0, state.hunger - 3); // Subtract hunger
+        state.hunger = Math.max(0, state.hunger - 5); // Subtract hunger
         state.action = "special"; 
         state.actionTimer = 200; 
         say("NOM NOM NOM! 🍗"); 
