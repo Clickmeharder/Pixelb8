@@ -4134,7 +4134,7 @@ const DUNGEON_THEMES = {
     11: { name: "Celestial Spire", mobs: ["StarWraith", "StickmanHunter", "VoidWalker"], boss: "ASTRAL_TITAN" },
     12: { name: "The End Times", mobs: ["CosmicHorror", "StickmanHunter", "DireWolf"], boss: "CHRONOS" },
     13: { name: "The Creators Realm", mobs: ["VoidDragon", "CosmicHorror",  "StickmanHunter"], boss: "THE_CREATOR" },
-	14: { name: "Cow", mobs: ["calf", "Cow", "Willow_Treant"], boss: "dairy_Cow" },
+	14: { name: "Broken Cow Level Replacement", mobs: ["Maple_Treant", "CaveSpider", "Willow_Treant"], boss: "BROOD_MOTHER" },
 	15: { name: "Ig its Horses now", mobs: ["pony", "StickmanHunter", "horse"], boss: "pegasus" },
 	16: { name: "Sunny Day", mobs: ["Cloud", "Storm_Cloud", "unicorn", "gardenGnome"], boss: "The_Sun" },
 	17: { name: "The Whispering Wilds", mobs: ["Maple_Treant", "Oak_Treant", "Living_Bush", "Willow_Treant"], boss: "Void_Singularity" },

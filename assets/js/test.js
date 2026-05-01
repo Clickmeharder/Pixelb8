@@ -2239,8 +2239,11 @@ function spawnWave() {
         let bossKey = currentTheme.boss || "DUNGEON_OVERLORD";
         let bossConfig = MONSTER_DB[bossKey] || MONSTER_DB["DUNGEON_OVERLORD"];
         
-        // Bosses also benefit from the strengthMult if the wave was supposed to be huge
-        let bossHp = (500 + (dungeonWave * 150)) * (bossConfig.hpMult || 5.0) * partySize * strengthMult;
+        // scale party health and cap boss multiline
+		let partyFactor = 1 + ( partySize - 1 ) * 0.7;
+		let basHp = 500 + (dungeonWave * 150);
+		let bossHp = baseHp * 2.5 * partyFactor * strengthMult;
+        //let bossHp = (500 + (dungeonWave * 150)) * (bossConfig.hpMult || 5.0) * partySize * strengthMult;
         
         boss = {
             name: bossKey.replace(/_/g, " "),
