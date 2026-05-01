@@ -343,7 +343,7 @@ const ITEM_DB = {
 	// --- unique fish ---
 	"Golden Bass":    { type: "fish", source:"fishing",  tier: 10, rarity: 0, value: 100, color: "#FFD700", stacks: true },
 	//rare fishing finds
-	"fishhat":      { type: "helmet", sources:"fishing",  style: "fishhat", tier: 99, rarity: 13, def: 1, value: 500000, color: "#d2b48c" },
+	"fishhat":      { type: "helmet", sources:"fishing",  style: "fishhat", tier: 99, rarity: 13, def: 1, value: 1, color: "#d2b48c" },
 	// --- unique swimming find ---
 	"Pearl":    { type: "fish", sources:"fishing swimming",  tier: 3, rarity: 5, value: 100, color: "white", stacks: true },
 	"Black Pearl":    { type: "fish", sources:"fishing swimming",  tier: 6, rarity: 5, value: 100, color: "black", stacks: true },
