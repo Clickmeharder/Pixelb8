@@ -216,6 +216,8 @@ let state = {
     digestive: 0,
     lastHungerTick: Date.now(),
     color: KITTY_COLORS[Math.floor(Math.random() * KITTY_COLORS.length)],
+	originalPos: { x: 0, y: 0},
+	nyanTimer: 0,
     x: 200,
     y: window.innerHeight - 150,
     facing: 1,
@@ -245,7 +247,14 @@ function getPos(pctX, pctY, offY = 0) {
         y: ((pctY / 100) * canvas.height) + offY
     };
 }
-
+function triggerNyan() {
+    if (state.isDead || state.action === "nyan") return;
+    
+    state.originalPos = { x: state.x, y: state.y };
+    state.action = "nyan";
+    state.nyanTimer = 300; // Fly for about 5 seconds
+    say("NYAN NYAN NYAN! 🌈");
+}
 function drawEnvironment() {
     // Bed
     const bPos = getPos(state.layout.bedX, 100, -BASE_FLOOR_Y + state.layout.bedY);
@@ -295,6 +304,14 @@ function drawEnvironment() {
     ctx.fillStyle = "#95a5a6"; 
     ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 5, boxW - 16, 38);
     state.poops.forEach(p => ctx.fillText("💩", (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40), lPos.y + 30));
+
+	if (state.action === "nyan") {
+		const colors = ["+ff0000","#ff9900","#ffff00","#0099ff","#6633ff"];
+		colors.forEach((col, i) => {
+		ctx.fillStyle = col;
+		ctx.fillRect(state.x - (state.facing * 80), state. y - 14 + (i * 6), 60, 6);
+		});
+	}
 
     state.particles.forEach((p, i) => {
         ctx.fillStyle = p.c; ctx.globalAlpha = p.life / 30;
@@ -483,6 +500,28 @@ function updateAI(t) {
                 else { state.action = "beg"; state.actionTimer = 150; say("Hungry! 🐟"); }
             }
             break;
+
+		case "nyan":
+            // Flying movement
+            state.x += state.facing * 10;
+            state.y = (window.innerHeight / 2) + Math.sin(t * 0.1) * 100;
+            
+            // Wrap around screen
+            if (state.x > window.innerWidth + 100) state.x = -100;
+            if (state.x < -100) state.x = window.innerWidth + 100;
+
+            if (state.actionTimer <= 0) {
+                // Return to original spot
+                state.x = state.originalPos.x;
+                state.y = state.originalPos.y;
+                // Transition to Dance
+                state.action = "dance";
+                state.actionTimer = 200;
+                // Schedule the meow for after the dance
+                setTimeout(() => { say("Meow! 🌈✨"); }, 3000);
+            }
+            break;
+
 		case "eating":
 			if (state.actionTimer <= 0) {
 				state.hasFood = false; 
@@ -729,6 +768,7 @@ document.getElementById("btnReset").addEventListener("click", () => { localStora
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
+	if(cmd === "nyankitty") triggerNyan();
     if(cmd === "feedkitty") document.getElementById("btnFeed").click();
     if(cmd === "playwithkitty") document.getElementById("btnPlay").click();
     if(cmd === "dance") document.getElementById("btnDance").click();
