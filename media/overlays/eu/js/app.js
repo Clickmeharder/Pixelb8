@@ -3,7 +3,7 @@
 //===============================================
 import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
-const STORAGE_KEY = "entropiaOBS_state_v2"; // Incremented version for new schema
+const STORAGE_KEY = "entropiaOBS_state_v3"; // Version bumped for RGB schema
 const SOUND_KEY = "entropiaOBS_sound_settings";
 const FILE_HANDLE_KEY = "entropia_chat_handle";
 
@@ -21,13 +21,13 @@ export let state = {
         showTerminalOutput: true,
         showManifest: true,
 
-        // Dynamic Styling Engine
-        textColor: "#ffffff",
-        bgColor1: "#000000",
-        bgColor2: "#000000",
+        // Dynamic Styling Engine (Migrated to RGB Objects)
+        textColor: { r: 255, g: 255, b: 255 },
+        bgColor1: { r: 0, g: 0, b: 0 },
+        bgColor2: { r: 0, g: 0, b: 0 },
         bgAlpha: 0.8,
-        borderColor1: "#0ec3c3",
-        borderColor2: "#0ec3c3",
+        borderColor1: { r: 14, g: 195, b: 195 },
+        borderColor2: { r: 14, g: 195, b: 195 },
         borderStyle: "solid",
         borderWidth: 2,
         borderRadius: 0,
@@ -47,7 +47,8 @@ const numericSliders = [
     "borderWidth", "borderRadius", "fontSize", "textOutline", "bgAlpha"
 ];
 
-const colorInputs = ["textColor", "bgColor1", "bgColor2", "borderColor1", "borderColor2"];
+// Reference keys for color objects
+const colorKeys = ["textColor", "bgColor1", "bgColor2", "borderColor1", "borderColor2"];
 
 //===============================================
 // --- 2. SOUND SYSTEM ---
@@ -83,8 +84,14 @@ export function playSound(soundKey) {
 }
 
 //===============================================
-// --- 3. UI SYNC & LOGGING ---
+// --- 3. UI SYNC & STYLING ---
 //===============================================
+
+// Helper: Convert RGB object to CSS rgba/rgb string
+function rgbToCss(rgbObj, alpha = 1) {
+    return `rgba(${rgbObj.r}, ${rgbObj.g}, ${rgbObj.b}, ${alpha})`;
+}
+
 export function addLog(message, isError = false) {
     const logWindow = document.getElementById("terminaloutput");
     if (!logWindow) return;
@@ -94,50 +101,49 @@ export function addLog(message, isError = false) {
         hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' 
     });
 
-    div.style = `padding: 2px 0; font-family: ${state.layout.fontFamily}; color: ${isError ? '#ff4444' : state.layout.textColor}; font-size: 9px;`;
+    const textColor = rgbToCss(state.layout.textColor);
+    div.style = `padding: 2px 0; font-family: ${state.layout.fontFamily}; color: ${isError ? '#ff4444' : textColor}; font-size: 9px;`;
     div.textContent = `[${timestamp}] ${isError ? "[ERR]" : "[LOG]"} ${message.toUpperCase()}`;
 
     logWindow.prepend(div);
     if (logWindow.childNodes.length > 25) logWindow.removeChild(logWindow.lastChild);
 }
 
-// Helper: Convert Hex to RGBA for alpha support
-function hexToRgba(hex, alpha) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 function applyStyles() {
     const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest');
     const l = state.layout;
 
-    const bgRgba1 = hexToRgba(l.bgColor1, l.bgAlpha);
-    const bgRgba2 = hexToRgba(l.bgColor2, l.bgAlpha);
+    const bgRgba1 = rgbToCss(l.bgColor1, l.bgAlpha);
+    const bgRgba2 = rgbToCss(l.bgColor2, l.bgAlpha);
+    const textRgb = rgbToCss(l.textColor);
+    const borderRgb1 = rgbToCss(l.borderColor1);
+    const borderRgb2 = rgbToCss(l.borderColor2);
 
     targets.forEach(el => {
-        // Typography
-        el.style.color = l.textColor;
+        el.style.color = textRgb;
         el.style.fontSize = l.fontSize + "px";
         el.style.fontFamily = l.fontFamily;
         el.style.textShadow = l.textOutline > 0 ? `0 0 ${l.textOutline}px black` : "none";
 
-        // Background Gradient
         el.style.background = `linear-gradient(135deg, ${bgRgba1}, ${bgRgba2})`;
 
-        // Border Logic
         el.style.borderStyle = l.borderStyle;
         el.style.borderWidth = l.borderWidth + "px";
         el.style.borderRadius = l.borderRadius + "px";
         
-        if (l.borderColor1 === l.borderColor2) {
+        if (JSON.stringify(l.borderColor1) === JSON.stringify(l.borderColor2)) {
             el.style.borderImage = "none";
-            el.style.borderColor = l.borderColor1;
+            el.style.borderColor = borderRgb1;
         } else {
-            el.style.borderImageSource = `linear-gradient(135deg, ${l.borderColor1}, ${l.borderColor2})`;
+            el.style.borderImageSource = `linear-gradient(135deg, ${borderRgb1}, ${borderRgb2})`;
             el.style.borderImageSlice = 1;
         }
+    });
+
+    // Update preview boxes in the settings menu
+    colorKeys.forEach(key => {
+        const preview = document.getElementById(`preview-${key}`);
+        if (preview) preview.style.backgroundColor = rgbToCss(l[key]);
     });
 }
 
@@ -226,15 +232,17 @@ async function loadData() {
         }
     }
 
-    // Sync UI elements to state
+    // Sync Numeric Sliders
     numericSliders.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = state.layout[id];
     });
 
-    colorInputs.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = state.layout[id];
+    // Sync RGB Sliders
+    document.querySelectorAll('.rgb-slider').forEach(slider => {
+        const key = slider.dataset.color;
+        const channel = slider.dataset.channel;
+        if (state.layout[key]) slider.value = state.layout[key][channel];
     });
 
     ["showStreamerName", "showTerminalOutput", "showManifest"].forEach(id => {
@@ -267,8 +275,22 @@ document.getElementById("connectBtn")?.addEventListener("click", () => {
     }
 });
 
-// Universal input listener for layout settings
-document.querySelectorAll('input, select').forEach(input => {
+// Listener for RGB Sliders (Channel based)
+document.querySelectorAll('.rgb-slider').forEach(slider => {
+    slider.addEventListener('input', (e) => {
+        const colorKey = e.target.dataset.color;
+        const channel = e.target.dataset.channel;
+        const val = parseInt(e.target.value);
+
+        if (state.layout[colorKey]) {
+            state.layout[colorKey][channel] = val;
+            updateUI();
+        }
+    });
+});
+
+// Universal listener for remaining standard inputs
+document.querySelectorAll('input:not(.rgb-slider), select').forEach(input => {
     input.addEventListener('input', (e) => {
         const id = e.target.id;
         if (state.layout.hasOwnProperty(id)) {

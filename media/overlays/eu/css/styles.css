@@ -34,7 +34,7 @@ body {
     pointer-events: auto;
     z-index: 50;
     box-sizing: border-box;
-    /* Transition background and color, but NOT border-image (not supported by CSS transitions) */
+    /* Transition background and color for smooth visual updates */
     transition: background 0.3s, color 0.3s, opacity 0.4s;
     overflow: hidden;
 }
@@ -115,21 +115,46 @@ button#openMenu-Butt:hover {
     display: flex; 
     align-items: center; 
     justify-content: space-between; 
-    margin-bottom: 8px; 
+    margin-bottom: 12px; 
     font-size: 11px; 
 }
 
-.setting-row label { width: 40%; font-weight: bold; }
-.setting-row input[type="range"] { width: 30%; cursor: pointer; }
-.setting-row input[type="color"] { 
-    width: 25px; 
-    height: 25px; 
-    border: none; 
-    background: transparent; 
-    cursor: pointer;
+.setting-row label { width: 35%; font-weight: bold; }
+.setting-row input[type="range"]:not(.rgb-slider) { width: 55%; cursor: pointer; }
+
+/* --- 5. RGB SLIDER SYSTEM (OBS INTERACT FIX) --- */
+.rgb-group {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    width: 60%;
 }
 
-/* --- 5. FORMS & BUTTONS --- */
+.rgb-slider {
+    flex: 1;
+    height: 6px;
+    cursor: pointer;
+    appearance: none;
+    background: #333;
+    border-radius: 3px;
+    outline: none;
+}
+
+/* RGB specific accent colors for the slider handles */
+.rgb-slider[data-channel="r"] { accent-color: #ff4444; }
+.rgb-slider[data-channel="g"] { accent-color: #44ff44; }
+.rgb-slider[data-channel="b"] { accent-color: #4444ff; }
+
+.color-preview {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #777;
+    border-radius: 3px;
+    flex-shrink: 0;
+    background-color: #000;
+}
+
+/* --- 6. FORMS & BUTTONS --- */
 h4 { 
     font-size: 11px; 
     color: var(--primary-cyan); 
@@ -180,11 +205,11 @@ input[type="text"] {
     font-size: 11px;
 }
 
-/* --- 6. AUDIO & SPECIAL --- */
+/* --- 7. AUDIO & SPECIAL --- */
 .setting-row[data-key] .file-btn { width: 30px; margin-left: 5px; }
 .setting-row[data-key] .test-btn { width: 60px; margin-left: 5px; }
 
-/* --- 7. CUSTOM SCROLLBAR --- */
+/* --- 8. CUSTOM SCROLLBAR --- */
 #comfycontrolContainer::-webkit-scrollbar { width: 6px; }
 #comfycontrolContainer::-webkit-scrollbar-track { background: #000; }
 #comfycontrolContainer::-webkit-scrollbar-thumb {

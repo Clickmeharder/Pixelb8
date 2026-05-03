@@ -46,34 +46,64 @@
             <div id="session-timer">00:00:00</div>
         </div>
 
-        <!-- Visual Styling Suite: Updates overlay-container elements -->
+        <!-- Visual Styling Suite: RGB Sliders for OBS Compatibility -->
         <div class="settings-group">
             <h4>Visual Styling</h4>
             
+            <!-- Text Color -->
             <div class="setting-row">
                 <label>Text Color</label>
-                <input type="color" id="textColor">
+                <div class="rgb-group">
+                    <input type="range" class="rgb-slider" data-color="textColor" data-channel="r" min="0" max="255" value="255">
+                    <input type="range" class="rgb-slider" data-color="textColor" data-channel="g" min="0" max="255" value="255">
+                    <input type="range" class="rgb-slider" data-color="textColor" data-channel="b" min="0" max="255" value="255">
+                    <div id="preview-textColor" class="color-preview"></div>
+                </div>
             </div>
 
+            <!-- BG Color 1 & Alpha -->
             <div class="setting-row">
                 <label>BG Color 1</label>
-                <input type="color" id="bgColor1">
+                <div class="rgb-group">
+                    <input type="range" class="rgb-slider" data-color="bgColor1" data-channel="r" min="0" max="255" value="0">
+                    <input type="range" class="rgb-slider" data-color="bgColor1" data-channel="g" min="0" max="255" value="0">
+                    <input type="range" class="rgb-slider" data-color="bgColor1" data-channel="b" min="0" max="255" value="0">
+                    <div id="preview-bgColor1" class="color-preview"></div>
+                </div>
                 <input type="range" id="bgAlpha" min="0" max="1" step="0.1" title="Opacity">
             </div>
             
+            <!-- BG Color 2 (Gradient) -->
             <div class="setting-row">
-                <label>BG Color 2 (Gradient)</label>
-                <input type="color" id="bgColor2">
+                <label>BG Color 2</label>
+                <div class="rgb-group">
+                    <input type="range" class="rgb-slider" data-color="bgColor2" data-channel="r" min="0" max="255" value="0">
+                    <input type="range" class="rgb-slider" data-color="bgColor2" data-channel="g" min="0" max="255" value="0">
+                    <input type="range" class="rgb-slider" data-color="bgColor2" data-channel="b" min="0" max="255" value="0">
+                    <div id="preview-bgColor2" class="color-preview"></div>
+                </div>
             </div>
 
+            <!-- Border Color 1 -->
             <div class="setting-row">
                 <label>Border Start</label>
-                <input type="color" id="borderColor1">
+                <div class="rgb-group">
+                    <input type="range" class="rgb-slider" data-color="borderColor1" data-channel="r" min="0" max="255" value="14">
+                    <input type="range" class="rgb-slider" data-color="borderColor1" data-channel="g" min="0" max="255" value="195">
+                    <input type="range" class="rgb-slider" data-color="borderColor1" data-channel="b" min="0" max="255" value="195">
+                    <div id="preview-borderColor1" class="color-preview"></div>
+                </div>
             </div>
             
+            <!-- Border Color 2 -->
             <div class="setting-row">
                 <label>Border End</label>
-                <input type="color" id="borderColor2">
+                <div class="rgb-group">
+                    <input type="range" class="rgb-slider" data-color="borderColor2" data-channel="r" min="0" max="255" value="14">
+                    <input type="range" class="rgb-slider" data-color="borderColor2" data-channel="g" min="0" max="255" value="195">
+                    <input type="range" class="rgb-slider" data-color="borderColor2" data-channel="b" min="0" max="255" value="195">
+                    <div id="preview-borderColor2" class="color-preview"></div>
+                </div>
             </div>
 
             <div class="setting-row">
@@ -103,7 +133,7 @@
             <div class="setting-row"><label>Text Outline</label><input type="range" id="textOutline" min="0" max="5"></div>
         </div>
 
-        <!-- UI Positioning: Controls X/Y percentages in the state -->
+        <!-- UI Positioning -->
         <div class="settings-group">
             <h4>UI Positioning</h4>
             <div class="setting-row"><label>Name X</label><input type="range" id="nameX" min="0" max="100"></div>
@@ -150,7 +180,6 @@
 
         <button id="btnReset" style="color:red; margin-top:10px; width:100%;">Hard Reset</button>
     </div>
-
     <!-- Core Modules -->
     <script type="module" src="js/comfyEU.js"></script>
     <script type="module" src="js/polling.js"></script>
