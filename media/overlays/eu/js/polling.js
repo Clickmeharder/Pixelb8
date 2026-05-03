@@ -135,40 +135,38 @@ window.pollWebLog = async function() {
 };
 
 window.handleChatLine = async function(line) {
+    // 1. Prevent processing the exact same line twice
     if (line === lastProcessedLine) return;
 
-    // Regex optimized for Entropia Universe [System] loot messages
+    // 2. Optimized Regex for loot messages
     const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
     const match = line.match(fishRegex);
 
     if (match) {
-        const logTimeString = match[1];
-        const fishType = match[2].trim(); // CRITICAL: Trim ensures multi-word names match correctly
+        const fishType = match[2].trim(); 
         const amount = parseInt(match[3]);
         const value = parseFloat(match[4]);
-        const currentLogTimestamp = new Date(logTimeString).getTime();
 
-        const secondsBetweenLogs = (currentLogTimestamp - lastLogTimestamp) / 1000;
-        if (lastLogTimestamp !== 0 && secondsBetweenLogs < 1) return; 
+        // 3. Update 'lastProcessedLine' immediately
+        lastProcessedLine = line; 
 
         if (!isNaN(value)) {
-            lastLogTimestamp = currentLogTimestamp;
-            lastProcessedLine = line; 
-
+            // Initialize keys if they don't exist
             if (!(fishType in sessionStats)) {
                 sessionStats[fishType] = 0;
                 sessionValues[fishType] = 0;
             }
             
+            // Add to session data
             sessionStats[fishType] += amount;
             sessionValues[fishType] += value;
 
+            // Update UI and Log
             updateSessionUI();
             addLog(`🎣 CAUGHT: ${amount}x ${fishType}`);
         }
     }
 };
-
 // ===== Session Control Handlers =====
 
 browseBtn.onclick = async () => {
