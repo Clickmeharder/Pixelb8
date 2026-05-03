@@ -1,8 +1,11 @@
 //===============================================
 // --- 1. STATE & CONSTANTS ---
 //===============================================
+import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
+
 const STORAGE_KEY = "entropiaOBS_state_v1";
 const SOUND_KEY = "entropiaOBS_sound_settings";
+const FILE_HANDLE_KEY = "entropia_chat_handle";
 
 export let state = {
     twitchUser: "",
@@ -10,13 +13,12 @@ export let state = {
         nameX: 50, nameY: 70,
         terminalOutputX: 10, terminalOutputY: 10,
         manifestX: 80, manifestY: 80,
-        bubbleX: 50, bubbleY: 50, // Added bubble positioning[cite: 4]
+        bubbleX: 50, bubbleY: 50,
         
         showStreamerName: true,
         showTerminalOutput: true,
         showManifest: true,
 
-        // Visual Styling Properties[cite: 4]
         textColor: "#ffffff",
         elementBg: "rgba(0,0,0,0.8)",
         borderColor: "#0ec3c3",
@@ -32,7 +34,6 @@ export let state = {
 
 window.addLog = addLog;
 
-// Comprehensive slider list[cite: 4]
 const sliders = [
     "nameX", "nameY", "terminalOutputX", "terminalOutputY", 
     "manifestX", "manifestY", "bubbleX", "bubbleY",
@@ -55,9 +56,7 @@ const audioAssets = {};
 
 function refreshAudioInstance(key) {
     const source = window.soundSettings.customPaths[key] || defaultPaths[key];
-    if (source) {
-        audioAssets[key] = new Audio(source);
-    }
+    if (source) audioAssets[key] = new Audio(source);
 }
 
 Object.keys(window.soundSettings).forEach(key => {
@@ -93,9 +92,6 @@ export function addLog(message, isError = false) {
     if (logWindow.childNodes.length > 25) logWindow.removeChild(logWindow.lastChild);
 }
 
-/**
- * Applies all visual styling from state to DOM elements[cite: 4].
- */
 function applyStyles() {
     const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest');
     targets.forEach(el => {
@@ -111,36 +107,36 @@ function applyStyles() {
 }
 
 function updateUI() {
-    const nameplate = document.getElementById("nameplate");
-    const terminal = document.getElementById("terminaloutput");
-    const manifest = document.getElementById("session-manifest");
-    const bubble = document.getElementById("bubble");
+    const els = {
+        nameplate: document.getElementById("nameplate"),
+        terminal: document.getElementById("terminaloutput"),
+        manifest: document.getElementById("session-manifest"),
+        bubble: document.getElementById("bubble")
+    };
 
-    if (nameplate) {
-        nameplate.style.left = state.layout.nameX + "%";
-        nameplate.style.top = state.layout.nameY + "%";
-        nameplate.style.display = state.layout.showStreamerName ? "block" : "none";
+    if (els.nameplate) {
+        els.nameplate.style.left = state.layout.nameX + "%";
+        els.nameplate.style.top = state.layout.nameY + "%";
+        els.nameplate.style.display = state.layout.showStreamerName ? "block" : "none";
+        if (state.twitchUser) els.nameplate.textContent = state.twitchUser;
     }
-    if (terminal) {
-        terminal.style.left = state.layout.terminalOutputX + "%";
-        terminal.style.top = state.layout.terminalOutputY + "%";
-        terminal.style.display = state.layout.showTerminalOutput ? "block" : "none";
+    if (els.terminal) {
+        els.terminal.style.left = state.layout.terminalOutputX + "%";
+        els.terminal.style.top = state.layout.terminalOutputY + "%";
+        els.terminal.style.display = state.layout.showTerminalOutput ? "block" : "none";
     }
-    if (manifest) {
-        manifest.style.left = state.layout.manifestX + "%";
-        manifest.style.top = state.layout.manifestY + "%";
-        manifest.style.display = state.layout.showManifest ? "block" : "none";
+    if (els.manifest) {
+        els.manifest.style.left = state.layout.manifestX + "%";
+        els.manifest.style.top = state.layout.manifestY + "%";
+        els.manifest.style.display = state.layout.showManifest ? "block" : "none";
     }
-    if (bubble) {
-        bubble.style.left = state.layout.bubbleX + "%";
-        bubble.style.top = state.layout.bubbleY + "%";
+    if (els.bubble) {
+        els.bubble.style.left = state.layout.bubbleX + "%";
+        els.bubble.style.top = state.layout.bubbleY + "%";
     }
     applyStyles();
 }
 
-/**
- * Builds swatch grids for OBS-safe color picking[cite: 4].
- */
 function setupSwatches(containerId, stateKey) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -160,13 +156,34 @@ function setupSwatches(containerId, stateKey) {
 }
 
 //===============================================
-// --- 4. DATA PERSISTENCE ---
+// --- 4. DATA PERSISTENCE & FILE HANDLING ---
 //===============================================
 export function saveData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function loadData() {
+/**
+ * Restores the Chat.log handle from IndexedDB[cite: 3, 4]
+ */
+async function restoreFileHandle() {
+    const savedHandle = await get(FILE_HANDLE_KEY);
+    if (savedHandle && window.initializeFile) {
+        try {
+            const options = { mode: 'read' };
+            if (await savedHandle.queryPermission(options) === 'granted') {
+                await window.initializeFile(savedHandle);
+                addLog("LOG_RECONNECTED: AUTO");
+            } else {
+                addLog("LOG_PENDING: CLICK BROWSE TO AUTHORIZE", true);
+                document.getElementById("browseBtn").style.boxShadow = "0 0 10px yellow";
+            }
+        } catch (err) {
+            console.warn("File handle restoration failed", err);
+        }
+    }
+}
+
+async function loadData() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
         const loaded = JSON.parse(saved);
@@ -175,6 +192,14 @@ function loadData() {
             layout: { ...state.layout, ...loaded.layout }, 
             twitchUser: loaded.twitchUser || "" 
         };
+        
+        // Auto-persist Twitch Username[cite: 4]
+        if (state.twitchUser) {
+            const input = document.getElementById("streamerInput");
+            if (input) input.value = state.twitchUser;
+            // Trigger ComfyJS connection if defined in global scope
+            if (window.ComfyJS) ComfyJS.Init(state.twitchUser);
+        }
     }
 
     sliders.forEach(id => {
@@ -191,14 +216,23 @@ function loadData() {
     if (styleSel) styleSel.value = state.layout.borderStyle;
 
     updateUI();
+    await restoreFileHandle();[cite: 3]
 }
 
 //===============================================
 // --- 5. EVENT LISTENERS ---
 //===============================================
-
 document.getElementById("openMenu-Butt")?.addEventListener("click", () => {
     document.getElementById("comfycontrolContainer").classList.toggle("active");
+});
+
+document.getElementById("connectBtn")?.addEventListener("click", () => {
+    const user = document.getElementById("streamerInput").value;
+    if (user) {
+        state.twitchUser = user;[cite: 4]
+        saveData();
+        location.reload(); // Reload to initialize ComfyJS with new user
+    }
 });
 
 sliders.forEach(id => {
@@ -221,8 +255,9 @@ document.getElementById("borderStyle")?.addEventListener("change", (e) => {
 });
 
 document.getElementById("btnReset")?.addEventListener("click", () => {
-    if(confirm("Factory Reset: Clear all settings?")) {
+    if(confirm("Factory Reset: Clear all settings and file handles?")) {
         localStorage.clear();
+        set(FILE_HANDLE_KEY, null);[cite: 3]
         location.reload();
     }
 });

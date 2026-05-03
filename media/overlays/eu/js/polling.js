@@ -1,5 +1,6 @@
 //<script type="module" src="js/polling.js"></script>
-import { addLog } from './app.js';
+import { addLog, state, saveData } from './app.js';
+import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
 // ===== Global State & References =====
 let fileHandle = null; 
@@ -10,6 +11,7 @@ let lastProcessedLine = "";
 let lastLogTimestamp = 0;
 let errorCount = 0;
 const MAX_RETRIES = 5;
+const FILE_HANDLE_KEY = "entropia_chat_handle"; // Key for IndexedDB[cite: 3]
 
 // Essential data objects for tracking session performance[cite: 4]
 const sessionStats = {}; 
@@ -26,11 +28,43 @@ const resetBtn = document.getElementById('btnReset');
 const browseBtn = document.getElementById('browseBtn');
 const pathInput = document.getElementById('pathInput');
 
-// ===== UI Update Logic[cite: 4] =====
+// ===== Persistence Logic (IndexedDB)[cite: 3, 4] =====
 
 /**
- * Updates the visual clock and triggers the rate recalculations.
+ * Restores the file handle from IndexedDB on page load.
  */
+window.restoreFileHandle = async function() {
+    const savedHandle = await get(FILE_HANDLE_KEY);
+    if (savedHandle) {
+        try {
+            // Check if we still have permission to read the file[cite: 3]
+            const options = { mode: 'read' };
+            if (await savedHandle.queryPermission(options) === 'granted') {
+                await initializeFile(savedHandle);
+                addLog("LOG_RECONNECTED: AUTO");
+            } else {
+                addLog("LOG_PENDING: CLICK TO RE-AUTHORIZE", true);
+                if (browseBtn) browseBtn.style.border = "2px solid #0ec3c3";
+            }
+        } catch (err) {
+            console.error("Failed to restore handle", err);
+        }
+    }
+};
+
+/**
+ * Internal helper to set up the handle and UI.
+ */
+async function initializeFile(handle) {
+    fileHandle = handle;
+    const file = await fileHandle.getFile();
+    if (pathInput) pathInput.value = file.name;
+    state.logLinked = true;
+    saveData();
+}
+
+// ===== UI Update Logic[cite: 4] =====
+
 function runSessionTicker() {
     const timerEl = document.getElementById('session-timer');
     if (timerEl) {
@@ -43,9 +77,6 @@ function runSessionTicker() {
     updateSessionUI();
 }
 
-/**
- * Calculates /hr rates and updates all dynamic session rows.
- */
 function updateSessionUI() {
     let grandTotal = 0;
     const now = Date.now();
@@ -62,7 +93,6 @@ function updateSessionUI() {
         
         if (count > 0 && sessionEl) {
             sessionEl.textContent = count;
-
             const valEl = document.getElementById(`val-${safeKey}`);
             if (valEl) valEl.textContent = `(${totalValue.toFixed(4)})`;
 
@@ -81,9 +111,6 @@ function updateSessionUI() {
 
 // ===== Polling & Parsing Core[cite: 1, 4] =====
 
-/**
- * Browser-based log poller using File System Access API.
- */
 window.pollWebLog = async function() {
     if (!fileHandle) return;
     try {
@@ -109,13 +136,9 @@ window.pollWebLog = async function() {
     }
 };
 
-/**
- * High-performance regex parsing for chat.log lines[cite: 1].
- */
 window.handleChatLine = async function(line) {
     if (line === lastProcessedLine) return;
 
-    // Strict regex for Entropia System messages regarding loot/catches[cite: 4]
     const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
     const match = line.match(fishRegex);
 
@@ -149,19 +172,19 @@ window.handleChatLine = async function(line) {
 
 // ===== Session Control Handlers[cite: 4] =====
 
-/**
- * Manual file picker to bypass browser security restrictions.
- */
 browseBtn.onclick = async () => {
     try {
         const [handle] = await window.showOpenFilePicker({
             types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
             multiple: false
         });
-        fileHandle = handle;
-        const file = await fileHandle.getFile();
-        if (pathInput) pathInput.value = file.name;
-        addLog(`📂 LOG_LINKED: ${file.name}`);
+        
+        // Save handle to IndexedDB for persistence[cite: 3, 4]
+        await set(FILE_HANDLE_KEY, handle);
+        await initializeFile(handle);
+        
+        if (browseBtn) browseBtn.style.border = "";
+        addLog(`📂 LOG_LINKED: SUCCESS`);
     } catch (err) {
         addLog("❌ PICKER_CANCELLED", true);
     }
@@ -171,7 +194,6 @@ startBtn.onclick = async () => {
     if (startBtn.textContent === "STOP SESSION") {
         if (sessionTickerInterval) clearInterval(sessionTickerInterval);
         if (window.pollInterval) clearInterval(window.pollInterval);
-        
         startBtn.textContent = "START SESSION";
         startBtn.style.background = ""; 
         addLog("🛑 SESSION_STOPPED.", true);
@@ -184,8 +206,6 @@ startBtn.onclick = async () => {
     }
 
     window.sessionStartTime = Date.now(); 
-    
-    // Reset trackers
     Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
     Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
 
@@ -196,7 +216,6 @@ startBtn.onclick = async () => {
         if (window.pollInterval) clearInterval(window.pollInterval);
         window.pollInterval = setInterval(window.pollWebLog, 3000); 
         
-        // Request Wake Lock for OBS browser source stability[cite: 4]
         if ('wakeLock' in navigator) {
             await navigator.wakeLock.request('screen');
         }
@@ -212,11 +231,10 @@ startBtn.onclick = async () => {
     }
 };
 
-// Reset logic integrated with your existing reset button
 if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-        Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
-        Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
+        Object.keys(sessionStats).forEach(key => delete sessionStats[key]);
+        Object.keys(sessionValues).forEach(key => delete sessionValues[key]);
         window.sessionStartTime = Date.now();
         addLog("🧹 SESSION_STATS_CLEARED.");
     });
@@ -225,4 +243,5 @@ if (resetBtn) {
 // ===== Initial Startup[cite: 4] =====
 window.addEventListener('DOMContentLoaded', () => {
     if (pathInput) pathInput.placeholder = "Link Chat.log to begin...";
+    // File handle restoration is handled by app.js calling restoreFileHandle()
 });
