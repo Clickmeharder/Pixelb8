@@ -193,10 +193,10 @@
 				<input type="checkbox" id="masterEnabled" checked>
 			</div>
 			
-			<!-- Sound Rows -->
+			<!-- Each row must have a data-key that matches your audioAssets keys -->
 			<div class="setting-row" data-key="meowSound">
 				<label>Meows</label>
-				<input type="checkbox" id="meowSound" checked>
+				<input type="checkbox" id="meowToggle" checked>
 				<button class="file-btn">📁</button>
 				<button class="test-btn">Test</button>
 				<input type="file" class="hidden-file-input" accept="audio/*" style="display:none">
@@ -204,7 +204,7 @@
 
 			<div class="setting-row" data-key="purrSound">
 				<label>Purring</label>
-				<input type="checkbox" id="purrSound" checked>
+				<input type="checkbox" id="purrToggle" checked>
 				<button class="file-btn">📁</button>
 				<button class="test-btn">Test</button>
 				<input type="file" class="hidden-file-input" accept="audio/*" style="display:none">
@@ -212,7 +212,7 @@
 
 			<div class="setting-row" data-key="nyanSound">
 				<label>Nyan Music</label>
-				<input type="checkbox" id="nyanSound" checked>
+				<input type="checkbox" id="nyanToggle" checked>
 				<button class="file-btn">📁</button>
 				<button class="test-btn">Test</button>
 				<input type="file" class="hidden-file-input" accept="audio/*" style="display:none">
@@ -220,7 +220,7 @@
 
 			<div class="setting-row" data-key="mewSound">
 				<label>Mew (Hungry)</label>
-				<input type="checkbox" id="mewSound" checked>
+				<input type="checkbox" id="mewToggle" checked>
 				<button class="file-btn">📁</button>
 				<button class="test-btn">Test</button>
 				<input type="file" class="hidden-file-input" accept="audio/*" style="display:none">
@@ -721,7 +721,8 @@ document.getElementById("connectBtn").addEventListener("click", () => {
 
 const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY", "towerX", "towerY"];
 sliders.forEach(id => {
-    document.getElementById(id).addEventListener("input", (e) => state.layout[id] = parseInt(e.target.value));
+    const el = document.getElementById(id);
+    if(el) el.addEventListener("input", (e) => state.layout[id] = parseInt(e.target.value));
 });
 
 document.getElementById("showTower").addEventListener("change", (e) => {
@@ -736,39 +737,6 @@ document.getElementById("btnTreat").addEventListener("click", () => { if(!state.
 document.getElementById("btnClear").addEventListener("click", () => { state.poops = []; say("Fresh sand! ✨"); });
 document.getElementById("btnReset").addEventListener("click", () => { localStorage.clear(); location.reload(); });
 
-// Sound Toggles - Now safe because window.soundSettings is defined above
-["meowSound", "purrSound", "nyanSound", "mewSound"].forEach(key => {
-    const toggle = document.getElementById(key);
-    const pathInput = document.getElementById(`path_${key}`);
-
-    // Set initial values from saved settings
-    if (toggle) toggle.checked = window.soundSettings[key];
-    if (pathInput && window.soundSettings.customPaths[key]) {
-        pathInput.value = window.soundSettings.customPaths[key];
-    }
-
-    // Handle Toggle Changes
-    if (toggle) {
-        toggle.addEventListener("change", (e) => {
-            window.soundSettings[key] = e.target.checked;
-            localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
-        });
-    }
-
-    // Handle Path Changes
-    if (pathInput) {
-        pathInput.addEventListener("change", (e) => {
-            const newPath = e.target.value.trim();
-            window.soundSettings.customPaths[key] = newPath;
-            localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
-            
-            // Re-initialize this specific sound instance with the new path
-            refreshAudioInstance(key);
-            say("Voice updated! 🎵");
-        });
-    }
-});
-
 // Master Audio Toggle
 const masterToggle = document.getElementById("masterEnabled");
 if (masterToggle) {
@@ -779,20 +747,50 @@ if (masterToggle) {
     });
 }
 
-// Test Button Functionality
-document.querySelectorAll(".test-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-        const soundKey = btn.getAttribute("data-sound");
-        const sound = audioAssets[soundKey];
-        
-        if (sound) {
-            sound.currentTime = 0;
-            sound.play().catch(err => {
-                console.error("Playback failed:", err);
-                say("Error: Check file path!");
-            });
-        }
-    });
+// Sound Row Logic
+document.querySelectorAll('.setting-row[data-key]').forEach(row => {
+    const key = row.getAttribute('data-key');
+    const checkbox = row.querySelector('input[type="checkbox"]');
+    const fileBtn = row.querySelector('.file-btn');
+    const fileInput = row.querySelector('.hidden-file-input');
+    const testBtn = row.querySelector('.test-btn');
+
+    // Sync UI with existing settings[cite: 1]
+    if (checkbox) checkbox.checked = window.soundSettings[key];
+
+    // Listeners
+    if (checkbox) {
+        checkbox.addEventListener('change', (e) => {
+            window.soundSettings[key] = e.target.checked;
+            localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+        });
+    }
+
+    if (fileBtn && fileInput) {
+        fileBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const objectURL = URL.createObjectURL(file); //[cite: 1]
+                window.soundSettings.customPaths[key] = objectURL;
+                localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+                refreshAudioInstance(key); //[cite: 1]
+                say("Sound loaded! 🎵");
+            }
+        });
+    }
+
+    if (testBtn) {
+        testBtn.addEventListener('click', () => {
+            const sound = audioAssets[key];
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(() => say("Pick a sound first!"));
+            } else {
+                say("Sound error!");
+            }
+        });
+    }
 });
 
 // --- 8. TWITCH INTEGRATION & LOOP ---
