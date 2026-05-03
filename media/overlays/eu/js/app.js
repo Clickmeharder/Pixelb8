@@ -163,7 +163,7 @@ export function saveData() {
 }
 
 /**
- * Restores the Chat.log handle from IndexedDB[cite: 3, 4]
+ * Restores the Chat.log handle from IndexedDB
  */
 async function restoreFileHandle() {
     const savedHandle = await get(FILE_HANDLE_KEY);
@@ -193,7 +193,7 @@ async function loadData() {
             twitchUser: loaded.twitchUser || "" 
         };
         
-        // Auto-persist Twitch Username[cite: 4]
+        // Auto-persist Twitch Username
         if (state.twitchUser) {
             const input = document.getElementById("streamerInput");
             if (input) input.value = state.twitchUser;
@@ -216,7 +216,7 @@ async function loadData() {
     if (styleSel) styleSel.value = state.layout.borderStyle;
 
     updateUI();
-    await restoreFileHandle();[cite: 3]
+    await restoreFileHandle();
 }
 
 //===============================================
@@ -229,7 +229,7 @@ document.getElementById("openMenu-Butt")?.addEventListener("click", () => {
 document.getElementById("connectBtn")?.addEventListener("click", () => {
     const user = document.getElementById("streamerInput").value;
     if (user) {
-        state.twitchUser = user;[cite: 4]
+        state.twitchUser = user;
         saveData();
         location.reload(); // Reload to initialize ComfyJS with new user
     }
@@ -257,7 +257,7 @@ document.getElementById("borderStyle")?.addEventListener("change", (e) => {
 document.getElementById("btnReset")?.addEventListener("click", () => {
     if(confirm("Factory Reset: Clear all settings and file handles?")) {
         localStorage.clear();
-        set(FILE_HANDLE_KEY, null);[cite: 3]
+        set(FILE_HANDLE_KEY, null);
         location.reload();
     }
 });
