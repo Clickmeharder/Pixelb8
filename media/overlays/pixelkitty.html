@@ -192,17 +192,37 @@
 				<label>Master Audio</label>
 				<input type="checkbox" id="masterEnabled" checked>
 			</div>
+			
+			<!-- Meow Settings -->
 			<div class="setting-row">
 				<label>Meows</label>
 				<input type="checkbox" id="meowSound" checked>
+				<input type="text" id="path_meowSound" placeholder="Path to meow.mp3">
+				<button class="test-btn" data-sound="meowSound">Test</button>
 			</div>
+
+			<!-- Purr Settings -->
 			<div class="setting-row">
 				<label>Purring</label>
 				<input type="checkbox" id="purrSound" checked>
+				<input type="text" id="path_purrSound" placeholder="Path to purr.mp3">
+				<button class="test-btn" data-sound="purrSound">Test</button>
 			</div>
+
+			<!-- Nyan Settings -->
 			<div class="setting-row">
 				<label>Nyan Music</label>
 				<input type="checkbox" id="nyanSound" checked>
+				<input type="text" id="path_nyanSound" placeholder="Path to nyan.mp3">
+				<button class="test-btn" data-sound="nyanSound">Test</button>
+			</div>
+
+			<!-- Mew Settings -->
+			<div class="setting-row">
+				<label>Mew (Hungry)</label>
+				<input type="checkbox" id="mewSound" checked>
+				<input type="text" id="path_mewSound" placeholder="Path to mew.mp3">
+				<button class="test-btn" data-sound="mewSound">Test</button>
 			</div>
 		</div>
     </div>
@@ -716,15 +736,62 @@ document.getElementById("btnClear").addEventListener("click", () => { state.poop
 document.getElementById("btnReset").addEventListener("click", () => { localStorage.clear(); location.reload(); });
 
 // Sound Toggles - Now safe because window.soundSettings is defined above
-["masterEnabled", "meowSound", "purrSound", "nyanSound"].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) {
-        el.checked = window.soundSettings[id];
-        el.addEventListener("change", (e) => {
-            window.soundSettings[id] = e.target.checked;
+["meowSound", "purrSound", "nyanSound", "mewSound"].forEach(key => {
+    const toggle = document.getElementById(key);
+    const pathInput = document.getElementById(`path_${key}`);
+
+    // Set initial values from saved settings
+    if (toggle) toggle.checked = window.soundSettings[key];
+    if (pathInput && window.soundSettings.customPaths[key]) {
+        pathInput.value = window.soundSettings.customPaths[key];
+    }
+
+    // Handle Toggle Changes
+    if (toggle) {
+        toggle.addEventListener("change", (e) => {
+            window.soundSettings[key] = e.target.checked;
             localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
         });
     }
+
+    // Handle Path Changes
+    if (pathInput) {
+        pathInput.addEventListener("change", (e) => {
+            const newPath = e.target.value.trim();
+            window.soundSettings.customPaths[key] = newPath;
+            localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+            
+            // Re-initialize this specific sound instance with the new path
+            refreshAudioInstance(key);
+            say("Voice updated! 🎵");
+        });
+    }
+});
+
+// Master Audio Toggle
+const masterToggle = document.getElementById("masterEnabled");
+if (masterToggle) {
+    masterToggle.checked = window.soundSettings.masterEnabled;
+    masterToggle.addEventListener("change", (e) => {
+        window.soundSettings.masterEnabled = e.target.checked;
+        localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+    });
+}
+
+// Test Button Functionality
+document.querySelectorAll(".test-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const soundKey = btn.getAttribute("data-sound");
+        const sound = audioAssets[soundKey];
+        
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play().catch(err => {
+                console.error("Playback failed:", err);
+                say("Error: Check file path!");
+            });
+        }
+    });
 });
 
 // --- 8. TWITCH INTEGRATION & LOOP ---
