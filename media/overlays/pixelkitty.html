@@ -185,6 +185,26 @@
             <button id="btnClear">Clean Litter ✨</button>
             <button id="btnReset" style="color:red; margin-top:10px;">Hard Reset</button>
         </div>
+
+		<div class="settings-group">
+			<h4>Sound Settings</h4>
+			<div class="setting-row">
+				<label>Master Audio</label>
+				<input type="checkbox" id="masterEnabled" checked>
+			</div>
+			<div class="setting-row">
+				<label>Meows</label>
+				<input type="checkbox" id="meowSound" checked>
+			</div>
+			<div class="setting-row">
+				<label>Purring</label>
+				<input type="checkbox" id="purrSound" checked>
+			</div>
+			<div class="setting-row">
+				<label>Nyan Music</label>
+				<input type="checkbox" id="nyanSound" checked>
+			</div>
+		</div>
     </div>
 
 <script>
@@ -637,6 +657,9 @@ function say(txt) {
     const b = document.getElementById("bubble");
     b.textContent = txt; b.style.left = (state.x - 50) + "px"; b.style.top = (state.y - 140) + "px";
     b.classList.add("show"); setTimeout(() => b.classList.remove("show"), 3000);
+	if (txt.includes("Meow")) playSound('meowSound');
+	if (txt.includes("Mew")) playSound('mewSound');
+    if (txt.includes("Purrr")) playSound('purrSound');
 }
 
 function updateUI() {
@@ -768,6 +791,62 @@ document.getElementById("btnTreat").addEventListener("click", () => {
 });
 document.getElementById("btnClear").addEventListener("click", () => { state.poops = []; say("Fresh sand! ✨"); });
 document.getElementById("btnReset").addEventListener("click", () => { localStorage.clear(); location.reload(); });
+["masterEnabled", "meowSound", "purrSound", "nyanSound"].forEach(id => {
+    const el = document.getElementById(id);
+    el.checked = window.soundSettings[id]; // Sync UI with loaded state
+    el.addEventListener("change", (e) => {
+        window.soundSettings[id] = e.target.checked;
+        localStorage.setItem('fishing_sound_settings', JSON.stringify(window.soundSettings));
+    });
+});
+// 1. INITIAL LOAD & PERSISTENCE
+const defaultSoundSettings = {
+	masterEnabled: true,
+    meowSound: true,
+    purrSound: true,
+    nyanSound: true,
+    customPaths: {} // Stores Base64 strings for custom sounds
+};
+
+// Default file paths for internal assets
+const defaultPaths = {
+  meowSound: 'assets/sounds/meowSoundh.mp3',
+  mewSound: 'assets/sounds/mewSound.mp3',
+  purrSound: 'assets/sounds/purrSound.mp3',
+  nyanSound: 'assets/sounds/nyanSound.mp3'
+
+};
+
+// Load saved data or fall back to defaults
+const savedSettings = localStorage.getItem('pixelkitty_sound_settings');
+window.soundSettings = savedSettings ? JSON.parse(savedSettings) : defaultSoundSettings;
+
+// 2. AUDIO ASSET REGISTRY
+const audioAssets = {};
+function refreshAudioInstance(key) {
+    const source = window.soundSettings.customPaths[key] || defaultPaths[key];
+    if (source) {
+        audioAssets[key] = new Audio(source);
+    }
+}
+
+// Initial build of the registry
+Object.keys(defaultPaths).forEach(key => refreshAudioInstance(key));
+
+function playSound(soundKey) {
+    const sound = audioAssets[soundKey];
+    
+    // Check if the master toggle is on AND the specific sound is enabled
+    if (window.soundSettings.masterEnabled && window.soundSettings[soundKey]) {
+        if (sound) {
+            sound.currentTime = 0; // Rewind for rapid fire
+            sound.play().catch(err => {
+                console.warn(`[!] Audio: ${soundKey} blocked or missing.`, err);
+            });
+        }
+    }
+}
+
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
