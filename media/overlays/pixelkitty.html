@@ -208,6 +208,7 @@
     </div>
 
 <script>
+// --- 1. CORE CANVAS & STATE ---
 const canvas = document.getElementById("companionCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -220,12 +221,11 @@ resize();
 
 const KITTY_COLORS = ["#E67E22", "#95A5A6", "#2C3E50", "#ECF0F1", "#BDC3C7", "#D35400"];
 const BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
-
-// Hunger logic constants
-const HUNGER_TICK_MS = 144000; // 144 seconds per 1% hunger (4 hours total)
+const HUNGER_TICK_MS = 144000; 
+const BASE_FLOOR_Y = 110;
 
 let state = {
-	twitchUser: "",
+    twitchUser: "",
     name: "Greta",
     isDead: false,
     birthday: Date.now(),
@@ -236,9 +236,9 @@ let state = {
     digestive: 0,
     lastHungerTick: Date.now(),
     color: KITTY_COLORS[Math.floor(Math.random() * KITTY_COLORS.length)],
-	originalPos: { x: 0, y: 0},
-	nyanTimer: 0,
-	nyanPhase: "takeoff",
+    originalPos: { x: 0, y: 0},
+    nyanTimer: 0,
+    nyanPhase: "takeoff",
     x: 200,
     y: window.innerHeight - 150,
     facing: 1,
@@ -260,93 +260,145 @@ let state = {
     }
 };
 
-const BASE_FLOOR_Y = 110;
+// --- 2. SOUND SYSTEM INITIALIZATION (MUST BE BEFORE UI) ---
+const defaultSoundSettings = {
+    masterEnabled: true,
+    meowSound: true,
+    purrSound: true,
+    nyanSound: true,
+    mewSound: true,
+    customPaths: {}
+};
 
+const defaultPaths = {
+    meowSound: 'assets/sounds/meowSoundh.mp3',
+    mewSound: 'assets/sounds/mewSound.mp3',
+    purrSound: 'assets/sounds/purrSound.mp3',
+    nyanSound: 'assets/sounds/nyanSound.mp3'
+};
+
+const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
+window.soundSettings = savedSoundSettings ? JSON.parse(savedSoundSettings) : defaultSoundSettings;
+
+const audioAssets = {};
+function refreshAudioInstance(key) {
+    const source = window.soundSettings.customPaths[key] || defaultPaths[key];
+    if (source) {
+        audioAssets[key] = new Audio(source);
+        if (key === 'nyanSound') audioAssets[key].loop = true;
+    }
+}
+
+Object.keys(defaultPaths).forEach(key => refreshAudioInstance(key));
+
+function playSound(soundKey) {
+    if (window.soundSettings.masterEnabled && window.soundSettings[soundKey]) {
+        const sound = audioAssets[soundKey];
+        if (sound) {
+            sound.currentTime = 0; 
+            sound.play().catch(err => console.warn(`[!] Audio: ${soundKey} blocked.`, err));
+        }
+    }
+}
+
+function stopSound(soundKey) {
+    if (audioAssets[soundKey]) {
+        audioAssets[soundKey].pause();
+        audioAssets[soundKey].currentTime = 0;
+    }
+}
+
+// --- 3. UTILITIES & HELPER FUNCTIONS ---
 function getPos(pctX, pctY, offY = 0) {
     return {
         x: (pctX / 100) * canvas.width,
         y: ((pctY / 100) * canvas.height) + offY
     };
 }
+
+function say(txt) {
+    const b = document.getElementById("bubble");
+    if (!b) return;
+    b.textContent = txt; 
+    b.style.left = (state.x - 50) + "px"; 
+    b.style.top = (state.y - 140) + "px";
+    b.classList.add("show"); 
+    setTimeout(() => b.classList.remove("show"), 3000);
+
+    if (txt.includes("Meow")) playSound('meowSound');
+    if (txt.includes("Mew")) playSound('mewSound');
+    if (txt.includes("Purrr")) playSound('purrSound');
+}
+
 function triggerNyan() {
     if (state.isDead || state.action === "nyan") return;
-    
     state.originalPos = { x: state.x, y: state.y };
     state.action = "nyan";
     state.nyanPhase = "takeoff";
-    state.actionTimer = 400; // Increased to give her time to fly and land
+    state.actionTimer = 400;
+    playSound('nyanSound');
     say("NYAN NYAN NYAN! 🌈");
 }
+
+// --- 4. DRAWING & RENDERING ---
+function drawYarn(x, y, t) {
+    const roll = Math.sin(t * 0.15) * 40;
+    ctx.save();
+    ctx.translate(x + roll, y);
+    ctx.fillStyle = "rgba(0,0,0,0.1)";
+    ctx.beginPath(); ctx.ellipse(0, 15, 15, 5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#e74c3c";
+    ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = "#c0392b";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(12, -5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-12, 5); ctx.bezierCurveTo(-20, 15, -30, 0, -45, 10); ctx.stroke();
+    ctx.restore();
+}
+
 function drawEnvironment(t) {
-    // Bed
     const bPos = getPos(state.layout.bedX, 100, -BASE_FLOOR_Y + state.layout.bedY);
     ctx.fillStyle = "rgba(0,0,0,0.1)";
     ctx.beginPath(); ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = state.layout.bedColor;
     ctx.beginPath(); ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); ctx.fill();
 
-    // Cat Tower
     if (state.layout.showTower) {
         const tPos = getPos(state.layout.towerX, 100, -BASE_FLOOR_Y + state.layout.towerY);
-        ctx.fillStyle = "rgba(0,0,0,0.1)";
-        ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
-        ctx.fillStyle = "#7f8c8d"; 
-        ctx.fillRect(tPos.x - 50, tPos.y - 5, 100, 15); 
-        ctx.fillStyle = "#a67c52"; 
-        ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
-        ctx.fillStyle = "#95a5a6"; 
-        ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); 
-        ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
+        ctx.fillStyle = "rgba(0,0,0,0.1)"; ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
+        ctx.fillStyle = "#7f8c8d"; ctx.fillRect(tPos.x - 50, tPos.y - 5, 100, 15); 
+        ctx.fillStyle = "#a67c52"; ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
+        ctx.fillStyle = "#95a5a6"; ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
     }
 
-    // Food Bowl
     const fPos = getPos(state.layout.bowlX, 100, -105 + state.layout.bowlY);
-    ctx.fillStyle = "rgba(0,0,0,0.2)";
-    ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = "#ecf0f1";
-    ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = "#bdc3c7";
-    ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#bdc3c7"; ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); ctx.fill();
     if(state.hasFood) {
-        ctx.fillStyle = "#d35400";
-        ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#d35400"; ctx.beginPath(); ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); ctx.fill();
         ctx.font = "18px Arial"; ctx.fillText("🐟", fPos.x - 10, fPos.y - 6);
     }
 
-    // Litter
     const lPos = getPos(state.layout.litterX, 100, -110 + state.layout.litterY);
     const boxW = 150;
-    ctx.fillStyle = "rgba(0,0,0,0.2)";
-    ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 50);
-    ctx.fillStyle = "#2c3e50"; 
-    ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 50);
-    ctx.fillStyle = "#95a5a6"; 
-    ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 5, boxW - 16, 38);
+    ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 50);
+    ctx.fillStyle = "#2c3e50"; ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 50);
+    ctx.fillStyle = "#95a5a6"; ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 5, boxW - 16, 38);
     state.poops.forEach(p => ctx.fillText("💩", (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40), lPos.y + 30));
 
-    // --- NYAN TRAIL LOGIC ---
     if (state.action === "nyan") {
         const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
         ctx.globalAlpha = state.nyanPhase === "flying" ? 1.0 : 0.4;
-
         for (let segment = 0; segment < 8; segment++) {
             const segOffset = segment * 35;
             const timeOffset = segment * 2;
-            
             colors.forEach((col, i) => {
                 ctx.fillStyle = col;
-                // Use the passed 't' variable for the wave math
-                const segY = (state.nyanPhase === "flying") 
-                    ? (window.innerHeight / 2) + Math.sin((t - timeOffset) * 0.1) * 100
-                    : state.y; 
-
+                const segY = (state.nyanPhase === "flying") ? (window.innerHeight / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : state.y; 
                 const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
-                
-                ctx.fillRect(
-                    state.x - (state.facing * (60 + segOffset)), 
-                    segY - 15 + (i * 6) + wiggle, 
-                    40, 6
-                );
+                ctx.fillRect(state.x - (state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
             });
         }
         ctx.globalAlpha = 1.0;
@@ -359,9 +411,99 @@ function drawEnvironment(t) {
         if(p.life <= 0) state.particles.splice(i, 1);
     });
 }
+
+function drawKitty(t, scale) {
+    ctx.save();
+    let bounce = (state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
+    ctx.translate(state.x, state.y - bounce);
+    ctx.scale(state.facing * scale, scale);
+    
+    ctx.fillStyle = "rgba(0,0,0,0.1)";
+    ctx.beginPath(); ctx.ellipse(0, 30 + bounce, 45, 12, 0, 0, Math.PI*2); ctx.fill();
+
+    let finalColor = state.isDead ? "#ffffff" : (state.poops.length > 5 ? "#8edb4b" : state.color);
+    if(state.isDead) ctx.globalAlpha = 0.5;
+    ctx.fillStyle = finalColor;
+
+    if (state.action === "sleep" || state.action === "tower_sleep") {
+        const breathing = Math.sin(t * 0.03) * 2.5;
+        ctx.beginPath(); ctx.ellipse(0, 12, 42 + breathing, 32 + breathing, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(15, 8, 22, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.lineWidth = 11; ctx.lineCap = "round"; ctx.strokeStyle = finalColor;
+        ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); ctx.stroke();
+        drawEars(15, 8, finalColor, true); drawFace(15, 8, false, true);
+    } 
+    else if (state.action === "special" || state.action === "scratching") {
+        if (state.action === "special") drawYarn(30, 20, t);
+        const shake = (state.action === "scratching") ? Math.sin(t*0.5)*5 : 0;
+        ctx.translate(shake, 0);
+        ctx.beginPath(); ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, -45, 24, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = finalColor;
+        if (state.action === "special") {
+            const reach = Math.sin(t * 0.2) * 15;
+            ctx.fillRect(10, -5 + reach, 10, 15); ctx.fillRect(-20, -5 - reach, 10, 15);
+        } else {
+            ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15); ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
+        }
+        drawEars(0, -45, finalColor, false); drawFace(0, -45, false, false);
+    }
+    else if (["groom", "potty", "kicking", "beg"].includes(state.action)) {
+        ctx.beginPath(); ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, -45, 24, 0, Math.PI*2); ctx.fill();
+        if (state.action === "kicking") {
+            ctx.fillStyle = finalColor; ctx.fillRect(10, 10 + Math.sin(t * 0.5) * 15, 10, 15);
+        }
+        drawEars(0, -45, finalColor, false); drawFace(0, -45, state.action === "beg", false);
+    }
+    else {
+        ctx.beginPath(); ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(35, -15, 24, 0, Math.PI*2); ctx.fill();
+        drawEars(35, -15, finalColor, false);
+        const walkCycle = (state.action.includes("walk")) ? Math.sin(t * 0.18) : 0;
+        [[-35, 12], [-12, 12], [10, 12], [28, 12]].forEach((p, i) => {
+            ctx.fillRect(p[0], p[1], 9, 16 + (i % 2 === 0 ? walkCycle : -walkCycle) * 8);
+        });
+        ctx.beginPath(); ctx.lineWidth = 8; ctx.lineCap = "round"; ctx.strokeStyle = finalColor;
+        ctx.moveTo(-45, 0); ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); ctx.stroke();
+        drawFace(35, -15, false, false);
+    }
+    ctx.restore();
+}
+
+function drawEars(x, y, color, sleeping) {
+    ctx.fillStyle = color;
+    if (sleeping) {
+        ctx.beginPath(); ctx.moveTo(x - 15, y - 8); ctx.lineTo(x - 22, y + 2); ctx.lineTo(x - 5, y + 5); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x + 15, y - 8); ctx.lineTo(x + 22, y + 2); ctx.lineTo(x + 5, y + 5); ctx.fill();
+    } else {
+        ctx.beginPath(); ctx.moveTo(x - 20, y - 10); ctx.lineTo(x - 12, y - 40); ctx.lineTo(x - 2, y - 15); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x + 20, y - 10); ctx.lineTo(x + 12, y - 40); ctx.lineTo(x + 2, y - 15); ctx.fill();
+    }
+}
+
+function drawFace(x, y, begging, sleeping) {
+    if (sleeping) {
+        ctx.strokeStyle = "rgba(0,0,0,0.5)"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(x - 7, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x + 9, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+    } else {
+        ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(x - 7, y - 5, 6, 0, Math.PI*2); ctx.arc(x + 9, y - 5, 6, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(x - 6, y - 5, 2.5, 0, Math.PI*2); ctx.arc(x + 10, y - 5, 2.5, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 1;
+    [0, 1, 2].forEach(i => {
+       ctx.beginPath(); ctx.moveTo(x+12, y+2*i); ctx.lineTo(x+30, y-8+8*i); ctx.stroke();
+       ctx.beginPath(); ctx.moveTo(x-10, y+2*i); ctx.lineTo(x-28, y-8+8*i); ctx.stroke();
+    });
+    ctx.fillStyle = "#ffaaaa";
+    if (begging) { ctx.beginPath(); ctx.arc(x+1, y+8, 4, 0, Math.PI*2); ctx.fill(); }
+    else { ctx.beginPath(); ctx.moveTo(x+1, y+3); ctx.lineTo(x-2, y); ctx.lineTo(x+4, y); ctx.fill(); }
+}
+
+// --- 5. AI & STATE UPDATES ---
 function updateAI(t) {
     if (state.isDead) return;
-
     state.ageDays = Math.floor((Date.now() - state.birthday) / 86400000);
     state.stage = state.ageDays < 2 ? "Baby" : state.ageDays < 5 ? "Juvenile" : "Adult";
 
@@ -374,13 +516,11 @@ function updateAI(t) {
     if (state.hunger === 100) state.isDead = true;
 
     const walkToPoint = (targetX, targetY, speed = 2) => {
-        const dx = targetX - state.x;
-        const dy = targetY - state.y;
+        const dx = targetX - state.x; const dy = targetY - state.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist > 10) {
             state.facing = dx > 0 ? 1 : -1;
-            state.x += (dx / dist) * speed;
-            state.y += (dy / dist) * speed;
+            state.x += (dx / dist) * speed; state.y += (dy / dist) * speed;
             return false;
         }
         return true;
@@ -392,43 +532,30 @@ function updateAI(t) {
     const towerPos = getPos(state.layout.towerX, 100, -BASE_FLOOR_Y + state.layout.towerY);
 
     if (state.actionTimer > 0) state.actionTimer--;
-    
-    // Prevent interruptions during Nyan or Potty
-    if (state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(state.action)) {
-        state.action = "walk_to_food";
-    }
+    if (state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(state.action)) state.action = "walk_to_food";
 
     switch(state.action) {
         case "nyan":
             if (state.nyanPhase === "takeoff") {
                 const targetY = window.innerHeight / 2;
-                state.y += (targetY - state.y) * 0.05;
-                state.x += state.facing * 5;
+                state.y += (targetY - state.y) * 0.05; state.x += state.facing * 5;
                 if (Math.abs(state.y - targetY) < 15) state.nyanPhase = "flying";
             } else if (state.nyanPhase === "flying") {
-                state.x += state.facing * 10;
-                state.y = (window.innerHeight / 2) + Math.sin(t * 0.1) * 100;
+                state.x += state.facing * 10; state.y = (window.innerHeight / 2) + Math.sin(t * 0.1) * 100;
                 if (state.actionTimer < 80) state.nyanPhase = "landing";
             } else if (state.nyanPhase === "landing") {
-                state.x += (state.originalPos.x - state.x) * 0.08;
-                state.y += (state.originalPos.y - state.y) * 0.08;
+                state.x += (state.originalPos.x - state.x) * 0.08; state.y += (state.originalPos.y - state.y) * 0.08;
             }
-
-            // Wrap logic for flying
             if (state.nyanPhase !== "landing") {
                 if (state.x > window.innerWidth + 150) state.x = -150;
                 if (state.x < -150) state.x = window.innerWidth + 150;
             }
-
             if (state.actionTimer <= 0) {
-                state.x = state.originalPos.x;
-                state.y = state.originalPos.y;
-                state.action = "dance";
-                state.actionTimer = 200;
-                setTimeout(() => { if(state.action === "idle") say("Meow! 🌈✨"); }, 3000);
+                stopSound('nyanSound');
+                state.x = state.originalPos.x; state.y = state.originalPos.y;
+                state.action = "dance"; state.actionTimer = 200;
             }
             break;
-
         case "walk_to_food":
             if (walkToPoint(bowlPos.x, bowlPos.y)) { 
                 if (state.hasFood) { state.action = "eating"; state.actionTimer = 150; }
@@ -502,172 +629,14 @@ function updateAI(t) {
             break;
     }
 }
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Increment our custom global timer
-    state.animT++;
-    
-    // Pass state.animT to all functions that need it
-    drawEnvironment(state.animT);
-    updateAI(state.animT);
-    
-    const scale = state.stage === "Baby" ? 0.4 : state.stage === "Juvenile" ? 0.75 : 1.1;
-    drawKitty(state.animT, scale);
-    
-    updateUI();
-    requestAnimationFrame(animate);
-}
 
-
-//=================================
-function drawYarn(x, y, t) {
-    const roll = Math.sin(t * 0.15) * 40; // The ball rolls back and forth
-    ctx.save();
-    ctx.translate(x + roll, y);
-    
-    // String Shadow
-    ctx.fillStyle = "rgba(0,0,0,0.1)";
-    ctx.beginPath(); ctx.ellipse(0, 15, 15, 5, 0, 0, Math.PI*2); ctx.fill();
-
-    // The Yarn Ball
-    ctx.fillStyle = "#e74c3c"; // Red yarn
-    ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI*2); ctx.fill();
-    
-    // Yarn Texture (the "wrapped" look)
-    ctx.strokeStyle = "#c0392b";
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(12, -5); ctx.stroke();
-    
-    // Trailing thread
-    ctx.beginPath();
-    ctx.moveTo(-12, 5);
-    ctx.bezierCurveTo(-20, 15, -30, 0, -45, 10);
-    ctx.stroke();
-    
-    ctx.restore();
-}
-function drawEars(x, y, color, sleeping) {
-    ctx.fillStyle = color;
-    if (sleeping) {
-        ctx.beginPath(); ctx.moveTo(x - 15, y - 8); ctx.lineTo(x - 22, y + 2); ctx.lineTo(x - 5, y + 5); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(x + 15, y - 8); ctx.lineTo(x + 22, y + 2); ctx.lineTo(x + 5, y + 5); ctx.fill();
-    } else {
-        ctx.beginPath(); ctx.moveTo(x - 20, y - 10); ctx.lineTo(x - 12, y - 40); ctx.lineTo(x - 2, y - 15); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(x + 20, y - 10); ctx.lineTo(x + 12, y - 40); ctx.lineTo(x + 2, y - 15); ctx.fill();
-    }
-}
-
-function drawFace(x, y, begging, sleeping) {
-    if (sleeping) {
-        ctx.strokeStyle = "rgba(0,0,0,0.5)"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(x - 7, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
-        ctx.beginPath(); ctx.arc(x + 9, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
-    } else {
-        ctx.fillStyle = "white";
-        ctx.beginPath(); ctx.arc(x - 7, y - 5, 6, 0, Math.PI*2); ctx.arc(x + 9, y - 5, 6, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "black";
-        ctx.beginPath(); ctx.arc(x - 6, y - 5, 2.5, 0, Math.PI*2); ctx.arc(x + 10, y - 5, 2.5, 0, Math.PI*2); ctx.fill();
-    }
-    ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 1;
-    [[-10, -28], [-10, -28], [-10, -28]].forEach((p,i) => {
-       ctx.beginPath(); ctx.moveTo(x+12, y+2*i); ctx.lineTo(x+30, y-8+8*i); ctx.stroke();
-       ctx.beginPath(); ctx.moveTo(x-10, y+2*i); ctx.lineTo(x-28, y-8+8*i); ctx.stroke();
-    });
-    ctx.fillStyle = "#ffaaaa";
-    if (begging) { ctx.beginPath(); ctx.arc(x+1, y+8, 4, 0, Math.PI*2); ctx.fill(); }
-    else { ctx.beginPath(); ctx.moveTo(x+1, y+3); ctx.lineTo(x-2, y); ctx.lineTo(x+4, y); ctx.fill(); }
-}
-
-function drawKitty(t, scale) {
-    ctx.save();
-    let bounce = (state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
-    ctx.translate(state.x, state.y - bounce);
-    ctx.scale(state.facing * scale, scale);
-    
-    ctx.fillStyle = "rgba(0,0,0,0.1)";
-    ctx.beginPath(); ctx.ellipse(0, 30 + bounce, 45, 12, 0, 0, Math.PI*2); ctx.fill();
-
-    let finalColor = state.isDead ? "#ffffff" : (state.poops.length > 5 ? "#8edb4b" : state.color);
-    if(state.isDead) ctx.globalAlpha = 0.5;
-    ctx.fillStyle = finalColor;
-
-    if (state.action === "sleep" || state.action === "tower_sleep") {
-        const breathing = Math.sin(t * 0.03) * 2.5;
-        ctx.beginPath(); ctx.ellipse(0, 12, 42 + breathing, 32 + breathing, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(15, 8, 22, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.lineWidth = 11; ctx.lineCap = "round"; ctx.strokeStyle = finalColor;
-        ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); ctx.stroke();
-        drawEars(15, 8, finalColor, true); drawFace(15, 8, false, true);
-    } 
-    else if (state.action === "special" || state.action === "scratching") {
-        const isPlaying = state.action === "special";
-        const shake = (state.action === "scratching") ? Math.sin(t*0.5)*5 : 0;
-        
-        // Render the Ball of String if she is playing
-        if (isPlaying) {
-            drawYarn(30, 20, t);
-        }
-
-        ctx.translate(shake, 0);
-        ctx.beginPath(); ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(0, -45, 24, 0, Math.PI*2); ctx.fill();
-        
-        // Paws logic
-        ctx.fillStyle = finalColor;
-        if (isPlaying) {
-            // Batting paws for play
-            const reach = Math.sin(t * 0.2) * 15;
-            ctx.fillRect(10, -5 + reach, 10, 15); 
-            ctx.fillRect(-20, -5 - reach, 10, 15);
-        } else {
-            // Reaching paws for scratching the post
-            ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15);
-            ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
-        }
-
-        drawEars(0, -45, finalColor, false); 
-        drawFace(0, -45, false, false);
-    }
-    else if (["groom", "potty", "kicking", "beg"].includes(state.action)) {
-        ctx.beginPath(); ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(0, -45, 24, 0, Math.PI*2); ctx.fill();
-        if (state.action === "kicking") {
-            ctx.fillStyle = finalColor; ctx.fillRect(10, 10 + Math.sin(t * 0.5) * 15, 10, 15);
-        }
-        drawEars(0, -45, finalColor, false); drawFace(0, -45, state.action === "beg", false);
-    }
-    else {
-        ctx.beginPath(); ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(35, -15, 24, 0, Math.PI*2); ctx.fill();
-        drawEars(35, -15, finalColor, false);
-        const walkCycle = (state.action.includes("walk")) ? Math.sin(t * 0.18) : 0;
-        [[-35, 12], [-12, 12], [10, 12], [28, 12]].forEach((p, i) => {
-            ctx.fillRect(p[0], p[1], 9, 16 + (i % 2 === 0 ? walkCycle : -walkCycle) * 8);
-        });
-        ctx.beginPath(); ctx.lineWidth = 8; ctx.lineCap = "round"; ctx.strokeStyle = finalColor;
-        ctx.moveTo(-45, 0); ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); ctx.stroke();
-        drawFace(35, -15, false, false);
-    }
-    ctx.restore();
-}
-
-function say(txt) {
-    const b = document.getElementById("bubble");
-    b.textContent = txt; b.style.left = (state.x - 50) + "px"; b.style.top = (state.y - 140) + "px";
-    b.classList.add("show"); setTimeout(() => b.classList.remove("show"), 3000);
-	if (txt.includes("Meow")) playSound('meowSound');
-	if (txt.includes("Mew")) playSound('mewSound');
-    if (txt.includes("Purrr")) playSound('purrSound');
-}
-
+// --- 6. DATA & UI SYNC ---
 function updateUI() {
     const nameEl = document.getElementById("nameplate");
     const statsEl = document.getElementById("status");
+    if(!nameEl || !statsEl) return;
     nameEl.style.left = state.layout.nameX + "%"; nameEl.style.top = state.layout.nameY + "%";
     statsEl.style.left = state.layout.statsX + "%"; statsEl.style.top = state.layout.statsY + "%";
-    
     let sTxt = state.isDead ? "DECEASED" : (state.poops.length > 5 ? "SICK" : "HEALTHY");
     statsEl.innerHTML = `${state.name} | Age: ${state.ageDays}d | Hunger: ${state.hunger}%<br>Status: ${sTxt} | EXP: ${state.exp}`;
     nameEl.textContent = (state.isDead ? "GHOST " : state.stage.toUpperCase() + " ") + state.name.toUpperCase();
@@ -680,35 +649,16 @@ function loadData() {
     if(saved) {
         const loaded = JSON.parse(saved);
         state = {...state, ...loaded};
-		if(state.name) document.getElementById("nameInput").value = state.name;
-        
-        // --- TWITCH AUTO-CONNECT LOGIC ---
-        if(state.twitchUser) {
-            document.getElementById("streamerInput").value = state.twitchUser;
-            ComfyJS.Init(state.twitchUser);
-            // Slight delay so the UI/Canvas is ready before she speaks
-            setTimeout(() => say(`Reconnected to ${state.twitchUser}!`), 1000);
-        }
-        // Recalculate hunger loss while the window was closed
-		const now = Date.now();
+        const now = Date.now();
         const msOffline = now - state.lastHungerTick;
-        
         if (msOffline >= HUNGER_TICK_MS && !state.isDead) {
             const pointsGained = Math.floor(msOffline / HUNGER_TICK_MS);
             let potentialHunger = state.hunger + pointsGained;
-
-            if (potentialHunger >= 100) {
-                // Mercy Rule: If she would have died while offline, 
-                // just set her to 70% hunger instead.
-                state.hunger = 70;
-                // Reset the tick so she doesn't immediately jump to 71%
-                state.lastHungerTick = now; 
-            } else {
-                state.hunger = potentialHunger;
-                state.lastHungerTick = now - (msOffline % HUNGER_TICK_MS);
-            }
+            if (potentialHunger >= 100) { state.hunger = 70; state.lastHungerTick = now; } 
+            else { state.hunger = potentialHunger; state.lastHungerTick = now - (msOffline % HUNGER_TICK_MS); }
         }
         if(state.name) document.getElementById("nameInput").value = state.name;
+        if(state.twitchUser) { document.getElementById("streamerInput").value = state.twitchUser; ComfyJS.Init(state.twitchUser); }
         document.getElementById("showTower").checked = state.layout.showTower;
         Object.keys(state.layout).forEach(k => { if(document.getElementById(k) && k !== 'showTower') document.getElementById(k).value = state.layout[k]; });
     }
@@ -717,13 +667,12 @@ function loadData() {
 
 function initSwatches() {
     const swatchContainer = document.getElementById("bedColorSwatches");
+    if (!swatchContainer) return;
     swatchContainer.innerHTML = ""; 
     BED_PRESETS.forEach(color => {
         const btn = document.createElement("div");
-        btn.className = "swatch";
+        btn.className = "swatch" + (state.layout.bedColor === color ? " active" : "");
         btn.style.backgroundColor = color;
-        if (state.layout.bedColor === color) btn.classList.add("active");
-        
         btn.addEventListener("click", () => {
             state.layout.bedColor = color;
             document.querySelectorAll(".swatch").forEach(s => s.classList.remove("active"));
@@ -734,38 +683,19 @@ function initSwatches() {
     });
 }
 
-document.getElementById("nameplate").addEventListener("click", () => {
-    document.getElementById("comfycontrolContainer").classList.toggle("active");
-});
-
-document.getElementById("nameInput").addEventListener("input", (e) => {
-    state.name = e.target.value || "Greta";
-});
-
+// --- 7. EVENT LISTENERS ---
+document.getElementById("nameplate").addEventListener("click", () => document.getElementById("comfycontrolContainer").classList.toggle("active"));
+document.getElementById("nameInput").addEventListener("input", (e) => state.name = e.target.value || "Greta");
 document.getElementById("btnNewKitten").addEventListener("click", () => {
-    state.birthday = Date.now();
-    state.ageDays = 0;
-    state.stage = "Baby";
-    state.exp = 0;
-    state.hunger = 0;
-    state.digestive = 0;
-    state.isDead = false;
-    state.lastHungerTick = Date.now();
+    state.birthday = Date.now(); state.ageDays = 0; state.stage = "Baby"; state.exp = 0; state.hunger = 0;
+    state.digestive = 0; state.isDead = false; state.lastHungerTick = Date.now(); state.poops = []; state.action = "idle";
     state.color = KITTY_COLORS[Math.floor(Math.random() * KITTY_COLORS.length)];
-    state.poops = [];
-    state.action = "idle";
-    say("New kitten! 🐾");
-    saveData();
+    say("New kitten! 🐾"); saveData();
 });
 
 document.getElementById("connectBtn").addEventListener("click", () => {
     const u = document.getElementById("streamerInput").value.trim();
-    if(u) { 
-        state.twitchUser = u; // Store it in state
-        saveData();           // Force a save
-        ComfyJS.Init(u); 
-        say("Meow! Connected"); 
-    }
+    if(u) { state.twitchUser = u; saveData(); ComfyJS.Init(u); say("Meow! Connected"); }
 });
 
 const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY", "towerX", "towerY"];
@@ -781,82 +711,43 @@ document.getElementById("showTower").addEventListener("change", (e) => {
 document.getElementById("btnFeed").addEventListener("click", () => { if(!state.isDead && !state.hasFood) { state.hasFood = true; say("Food! 🐟"); } });
 document.getElementById("btnPlay").addEventListener("click", () => { if(!state.isDead) { state.action = "special"; state.actionTimer = 350; say("Play! 🧶"); } });
 document.getElementById("btnDance").addEventListener("click", () => { if(!state.isDead) { state.action = "dance"; state.actionTimer = 300; say("Dance! ✨"); } });
-document.getElementById("btnTreat").addEventListener("click", () => { 
-    if(!state.isDead) { 
-        state.hunger = Math.max(0, state.hunger - 5); // Subtract hunger
-        state.action = "special"; 
-        state.actionTimer = 200; 
-        say("NOM NOM NOM! 🍗"); 
-    } 
-});
+document.getElementById("btnTreat").addEventListener("click", () => { if(!state.isDead) { state.hunger = Math.max(0, state.hunger - 5); state.action = "special"; state.actionTimer = 200; say("NOM NOM NOM! 🍗"); } });
 document.getElementById("btnClear").addEventListener("click", () => { state.poops = []; say("Fresh sand! ✨"); });
 document.getElementById("btnReset").addEventListener("click", () => { localStorage.clear(); location.reload(); });
+
+// Sound Toggles - Now safe because window.soundSettings is defined above
 ["masterEnabled", "meowSound", "purrSound", "nyanSound"].forEach(id => {
     const el = document.getElementById(id);
-    el.checked = window.soundSettings[id]; // Sync UI with loaded state
-    el.addEventListener("change", (e) => {
-        window.soundSettings[id] = e.target.checked;
-        localStorage.setItem('fishing_sound_settings', JSON.stringify(window.soundSettings));
-    });
+    if(el) {
+        el.checked = window.soundSettings[id];
+        el.addEventListener("change", (e) => {
+            window.soundSettings[id] = e.target.checked;
+            localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+        });
+    }
 });
-// 1. INITIAL LOAD & PERSISTENCE
-const defaultSoundSettings = {
-	masterEnabled: true,
-    meowSound: true,
-    purrSound: true,
-    nyanSound: true,
-    customPaths: {} // Stores Base64 strings for custom sounds
-};
 
-// Default file paths for internal assets
-const defaultPaths = {
-  meowSound: 'assets/sounds/meowSoundh.mp3',
-  mewSound: 'assets/sounds/mewSound.mp3',
-  purrSound: 'assets/sounds/purrSound.mp3',
-  nyanSound: 'assets/sounds/nyanSound.mp3'
-
-};
-
-// Load saved data or fall back to defaults
-const savedSettings = localStorage.getItem('pixelkitty_sound_settings');
-window.soundSettings = savedSettings ? JSON.parse(savedSettings) : defaultSoundSettings;
-
-// 2. AUDIO ASSET REGISTRY
-const audioAssets = {};
-function refreshAudioInstance(key) {
-    const source = window.soundSettings.customPaths[key] || defaultPaths[key];
-    if (source) {
-        audioAssets[key] = new Audio(source);
-    }
-}
-
-// Initial build of the registry
-Object.keys(defaultPaths).forEach(key => refreshAudioInstance(key));
-
-function playSound(soundKey) {
-    const sound = audioAssets[soundKey];
-    
-    // Check if the master toggle is on AND the specific sound is enabled
-    if (window.soundSettings.masterEnabled && window.soundSettings[soundKey]) {
-        if (sound) {
-            sound.currentTime = 0; // Rewind for rapid fire
-            sound.play().catch(err => {
-                console.warn(`[!] Audio: ${soundKey} blocked or missing.`, err);
-            });
-        }
-    }
-}
-
-
+// --- 8. TWITCH INTEGRATION & LOOP ---
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
-	if(cmd === "nyankitty") triggerNyan();
+    if(cmd === "nyankitty") triggerNyan();
     if(cmd === "feedkitty") document.getElementById("btnFeed").click();
     if(cmd === "playwithkitty") document.getElementById("btnPlay").click();
     if(cmd === "dance") document.getElementById("btnDance").click();
     if(cmd === "treatkitty") document.getElementById("btnTreat").click();
     if(cmd === "cleanlitter") document.getElementById("btnClear").click();
 };
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    state.animT++;
+    drawEnvironment(state.animT);
+    updateAI(state.animT);
+    const scale = state.stage === "Baby" ? 0.4 : state.stage === "Juvenile" ? 0.75 : 1.1;
+    drawKitty(state.animT, scale);
+    updateUI();
+    requestAnimationFrame(animate);
+}
 
 loadData();
 setInterval(saveData, 5000);
