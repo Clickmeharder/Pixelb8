@@ -218,6 +218,7 @@ let state = {
     color: KITTY_COLORS[Math.floor(Math.random() * KITTY_COLORS.length)],
 	originalPos: { x: 0, y: 0},
 	nyanTimer: 0,
+	nyanPhase: "takeoff",
     x: 200,
     y: window.innerHeight - 150,
     facing: 1,
@@ -252,7 +253,8 @@ function triggerNyan() {
     
     state.originalPos = { x: state.x, y: state.y };
     state.action = "nyan";
-    state.nyanTimer = 300; // Fly for about 5 seconds
+    state.nyanPhase = "takeoff";
+    state.nyanTimer = 300; // Total duration
     say("NYAN NYAN NYAN! 🌈");
 }
 function drawEnvironment() {
@@ -306,11 +308,33 @@ function drawEnvironment() {
     state.poops.forEach(p => ctx.fillText("💩", (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40), lPos.y + 30));
 
 	if (state.action === "nyan") {
-		const colors = ["+ff0000","#ff9900","#ffff00","#0099ff","#6633ff"];
-		colors.forEach((col, i) => {
-		ctx.fillStyle = col;
-		ctx.fillRect(state.x - (state.facing * 80), state. y - 14 + (i * 6), 60, 6);
-		});
+		const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
+		ctx.globalAlpha = state.nyanPhase === "flying" ? 1.0 : 0.4;
+
+		// We draw 5 segments behind the kitty to make a long, curved trail
+		for (let segment = 0; segment < 5; segment++) {
+			const segOffset = segment * 40; // Spacing between segments
+			const timeOffset = segment * 2; // Makes the wave flow backwards
+			
+			colors.forEach((col, i) => {
+				ctx.fillStyle = col;
+				// The wave calculation uses (t - timeOffset) to make the trail follow the path
+				const segY = (state.nyanPhase === "flying") 
+					? (window.innerHeight / 2) + Math.sin((t - timeOffset) * 0.1) * 100
+					: state.y; // Keep it flat during takeoff/landing
+
+				const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
+				
+				// Draw the segment
+				ctx.fillRect(
+					state.x - (state.facing * (80 + segOffset)), 
+					segY - 15 + (i * 6) + wiggle, 
+					45, // Length of each segment
+					6   // Height of each stripe
+				);
+			});
+		}
+		ctx.globalAlpha = 1.0;
 	}
 
     state.particles.forEach((p, i) => {
@@ -502,25 +526,47 @@ function updateAI(t) {
             break;
 
 		case "nyan":
-            // Flying movement
-            state.x += state.facing * 10;
-            state.y = (window.innerHeight / 2) + Math.sin(t * 0.1) * 100;
-            
-            // Wrap around screen
-            if (state.x > window.innerWidth + 100) state.x = -100;
-            if (state.x < -100) state.x = window.innerWidth + 100;
+			state.nyanTimer--;
+			
+			// 1. FLYING LOGIC BASED ON PHASE
+			if (state.nyanPhase === "takeoff") {
+				// Move towards center screen height
+				const targetY = window.innerHeight / 2;
+				state.y += (targetY - state.y) * 0.05; // Smoothly glide up
+				state.x += state.facing * 5;
+				
+				// Once high enough, start the crazy flight
+				if (Math.abs(state.y - targetY) < 10) state.nyanPhase = "flying";
 
-            if (state.actionTimer <= 0) {
-                // Return to original spot
-                state.x = state.originalPos.x;
-                state.y = state.originalPos.y;
-                // Transition to Dance
-                state.action = "dance";
-                state.actionTimer = 200;
-                // Schedule the meow for after the dance
-                setTimeout(() => { say("Meow! 🌈✨"); }, 3000);
-            }
-            break;
+			} else if (state.nyanPhase === "flying") {
+				// The classic Nyan wave
+				state.x += state.facing * 10;
+				state.y = (window.innerHeight / 2) + Math.sin(t * 0.1) * 100;
+				
+				// Start landing when timer is low
+				if (state.actionTimer < 60) state.nyanPhase = "landing";
+
+			} else if (state.nyanPhase === "landing") {
+				// Glide back to the original spot
+				state.x += (state.originalPos.x - state.x) * 0.1;
+				state.y += (state.originalPos.y - state.y) * 0.1;
+			}
+
+			// 2. SCREEN WRAP (Only during flight phase)
+			if (state.nyanPhase !== "landing") {
+				if (state.x > window.innerWidth + 100) state.x = -100;
+				if (state.x < -100) state.x = window.innerWidth + 100;
+			}
+
+			// 3. FINISH LINE
+			if (state.actionTimer <= 0) {
+				state.x = state.originalPos.x;
+				state.y = state.originalPos.y;
+				state.action = "dance";
+				state.actionTimer = 200;
+				setTimeout(() => { if(state.action === "idle") say("Meow! 🌈✨"); }, 3000);
+			}
+			break;
 
 		case "eating":
 			if (state.actionTimer <= 0) {
