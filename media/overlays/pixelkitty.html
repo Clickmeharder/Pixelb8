@@ -254,10 +254,10 @@ function triggerNyan() {
     state.originalPos = { x: state.x, y: state.y };
     state.action = "nyan";
     state.nyanPhase = "takeoff";
-    state.nyanTimer = 300; // Total duration
+    state.actionTimer = 400; // Increased to give her time to fly and land
     say("NYAN NYAN NYAN! 🌈");
 }
-function drawEnvironment() {
+function drawEnvironment(t) {
     // Bed
     const bPos = getPos(state.layout.bedX, 100, -BASE_FLOOR_Y + state.layout.bedY);
     ctx.fillStyle = "rgba(0,0,0,0.1)";
@@ -269,17 +269,14 @@ function drawEnvironment() {
     if (state.layout.showTower) {
         const tPos = getPos(state.layout.towerX, 100, -BASE_FLOOR_Y + state.layout.towerY);
         ctx.fillStyle = "rgba(0,0,0,0.1)";
-        ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); // Base Shadow
-        
-        ctx.fillStyle = "#7f8c8d"; // Gray carpet
-        ctx.fillRect(tPos.x - 50, tPos.y - 5, 100, 15); // Base
-        
-        ctx.fillStyle = "#a67c52"; // sisal post
+        ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
+        ctx.fillStyle = "#7f8c8d"; 
+        ctx.fillRect(tPos.x - 50, tPos.y - 5, 100, 15); 
+        ctx.fillStyle = "#a67c52"; 
         ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
-        
-        ctx.fillStyle = "#95a5a6"; // levels
-        ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); // Mid level
-        ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); // Top level
+        ctx.fillStyle = "#95a5a6"; 
+        ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); 
+        ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
     }
 
     // Food Bowl
@@ -307,13 +304,33 @@ function drawEnvironment() {
     ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 5, boxW - 16, 38);
     state.poops.forEach(p => ctx.fillText("💩", (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40), lPos.y + 30));
 
-	if (state.action === "nyan") {
-		const colors = ["+ff0000","#ff9900","#ffff00","#0099ff","#6633ff"];
-		colors.forEach((col, i) => {
-		ctx.fillStyle = col;
-		ctx.fillRect(state.x - (state.facing * 80), state. y - 14 + (i * 6), 60, 6);
-		});
-	}
+    // --- NYAN TRAIL LOGIC ---
+    if (state.action === "nyan") {
+        const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
+        ctx.globalAlpha = state.nyanPhase === "flying" ? 1.0 : 0.4;
+
+        for (let segment = 0; segment < 8; segment++) {
+            const segOffset = segment * 35;
+            const timeOffset = segment * 2;
+            
+            colors.forEach((col, i) => {
+                ctx.fillStyle = col;
+                // Use the passed 't' variable for the wave math
+                const segY = (state.nyanPhase === "flying") 
+                    ? (window.innerHeight / 2) + Math.sin((t - timeOffset) * 0.1) * 100
+                    : state.y; 
+
+                const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
+                
+                ctx.fillRect(
+                    state.x - (state.facing * (60 + segOffset)), 
+                    segY - 15 + (i * 6) + wiggle, 
+                    40, 6
+                );
+            });
+        }
+        ctx.globalAlpha = 1.0;
+    }
 
     state.particles.forEach((p, i) => {
         ctx.fillStyle = p.c; ctx.globalAlpha = p.life / 30;
@@ -322,26 +339,19 @@ function drawEnvironment() {
         if(p.life <= 0) state.particles.splice(i, 1);
     });
 }
-
 function updateAI(t) {
     if (state.isDead) return;
 
-    // Age calculation
     state.ageDays = Math.floor((Date.now() - state.birthday) / 86400000);
     state.stage = state.ageDays < 2 ? "Baby" : state.ageDays < 5 ? "Juvenile" : "Adult";
 
-    // --- REAL TIME HUNGER DECAY ---
     const now = Date.now();
     const msElapsed = now - state.lastHungerTick;
-	if (msElapsed >= HUNGER_TICK_MS) {
-		const pointsToGain = Math.floor(msElapsed / HUNGER_TICK_MS);
-		// Count UP to 100
-		state.hunger = Math.min(100, state.hunger + pointsToGain); 
-		state.lastHungerTick = now - (msElapsed % HUNGER_TICK_MS);
-	}
-
-	// Change death condition: Now she dies if hunger reaches 100
-	if (state.hunger === 100) state.isDead = true;
+    if (msElapsed >= HUNGER_TICK_MS) {
+        state.hunger = Math.min(100, state.hunger + Math.floor(msElapsed / HUNGER_TICK_MS)); 
+        state.lastHungerTick = now - (msElapsed % HUNGER_TICK_MS);
+    }
+    if (state.hunger === 100) state.isDead = true;
 
     const walkToPoint = (targetX, targetY, speed = 2) => {
         const dx = targetX - state.x;
@@ -363,70 +373,54 @@ function updateAI(t) {
 
     if (state.actionTimer > 0) state.actionTimer--;
     
-    if (state.hasFood && !["eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(state.action)) state.action = "walk_to_food";
+    // Prevent interruptions during Nyan or Potty
+    if (state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(state.action)) {
+        state.action = "walk_to_food";
+    }
 
     switch(state.action) {
+        case "nyan":
+            if (state.nyanPhase === "takeoff") {
+                const targetY = window.innerHeight / 2;
+                state.y += (targetY - state.y) * 0.05;
+                state.x += state.facing * 5;
+                if (Math.abs(state.y - targetY) < 15) state.nyanPhase = "flying";
+            } else if (state.nyanPhase === "flying") {
+                state.x += state.facing * 10;
+                state.y = (window.innerHeight / 2) + Math.sin(t * 0.1) * 100;
+                if (state.actionTimer < 80) state.nyanPhase = "landing";
+            } else if (state.nyanPhase === "landing") {
+                state.x += (state.originalPos.x - state.x) * 0.08;
+                state.y += (state.originalPos.y - state.y) * 0.08;
+            }
+
+            // Wrap logic for flying
+            if (state.nyanPhase !== "landing") {
+                if (state.x > window.innerWidth + 150) state.x = -150;
+                if (state.x < -150) state.x = window.innerWidth + 150;
+            }
+
+            if (state.actionTimer <= 0) {
+                state.x = state.originalPos.x;
+                state.y = state.originalPos.y;
+                state.action = "dance";
+                state.actionTimer = 200;
+                setTimeout(() => { if(state.action === "idle") say("Meow! 🌈✨"); }, 3000);
+            }
+            break;
+
         case "walk_to_food":
             if (walkToPoint(bowlPos.x, bowlPos.y)) { 
                 if (state.hasFood) { state.action = "eating"; state.actionTimer = 150; }
                 else { state.action = "beg"; state.actionTimer = 150; say("Hungry! 🐟"); }
             }
             break;
-
-		case "nyan":
-			state.nyanTimer--;
-			
-			// 1. FLYING LOGIC BASED ON PHASE
-			if (state.nyanPhase === "takeoff") {
-				// Move towards center screen height
-				const targetY = window.innerHeight / 2;
-				state.y += (targetY - state.y) * 0.05; // Smoothly glide up
-				state.x += state.facing * 5;
-				
-				// Once high enough, start the crazy flight
-				if (Math.abs(state.y - targetY) < 10) state.nyanPhase = "flying";
-
-			} else if (state.nyanPhase === "flying") {
-				// The classic Nyan wave
-				state.x += state.facing * 10;
-				state.y = (window.innerHeight / 2) + Math.sin(t * 0.1) * 100;
-				
-				// Start landing when timer is low
-				if (state.actionTimer < 60) state.nyanPhase = "landing";
-
-			} else if (state.nyanPhase === "landing") {
-				// Glide back to the original spot
-				state.x += (state.originalPos.x - state.x) * 0.1;
-				state.y += (state.originalPos.y - state.y) * 0.1;
-			}
-
-			// 2. SCREEN WRAP (Only during flight phase)
-			if (state.nyanPhase !== "landing") {
-				if (state.x > window.innerWidth + 100) state.x = -100;
-				if (state.x < -100) state.x = window.innerWidth + 100;
-			}
-
-			// 3. FINISH LINE
-			if (state.actionTimer <= 0) {
-				state.x = state.originalPos.x;
-				state.y = state.originalPos.y;
-				state.action = "dance";
-				state.actionTimer = 200;
-				setTimeout(() => { if(state.action === "idle") say("Meow! 🌈✨"); }, 3000);
-			}
-			break;
-
-		case "eating":
-			if (state.actionTimer <= 0) {
-				state.hasFood = false; 
-				// Subtract hunger instead of adding
-				state.hunger = Math.max(0, state.hunger - 10); 
-				state.digestive++; 
-				state.exp += 15; 
-				state.action = "idle"; 
-				state.actionTimer = 400;
-			}
-			break;
+        case "eating":
+            if (state.actionTimer <= 0) {
+                state.hasFood = false; state.hunger = Math.max(0, state.hunger - 10); 
+                state.digestive++; state.exp += 15; state.action = "idle"; state.actionTimer = 400;
+            }
+            break;
         case "walk_to_litter":
             if (walkToPoint(litPos.x, litPos.y)) { state.action = "potty"; state.actionTimer = 150; }
             break;
@@ -453,53 +447,29 @@ function updateAI(t) {
              if (t % 3 === 0) state.particles.push({x: state.x + 10, y: state.y - 10, vx: Math.random()*4, vy: -2, s: 2, c: "#d2b48c", life: 15});
              if (state.actionTimer <= 0) state.action = "idle";
              break;
-		case "idle":
-			if (state.actionTimer <= 0) {
-				// --- RANDOM CHATTER CHECK ---
-				// 20% chance to say something when deciding on a new task
-				if (Math.random() < 0.20) {
-					let sound = "Meow!";
-					if (state.hunger < 20) sound = "Purrr... ❤️"; // Purrs when full
-					if (state.hunger > 70) sound = "Mew? (Hungry)"; // Mews when hungry
-					if (state.action === "tower_sleep") sound = "Zzz... meow... zzz";
-					say(sound);
-				}
-
-				// Give her a 50% chance to just stay idle longer
-				if (Math.random() < 0.5) {
-					state.actionTimer = 600 + Math.random() * 600; 
-					return;
-				}
-
-				if (state.digestive >= 3) {
-					state.action = "walk_to_litter";
-				} else {
-					const r = Math.random();
-					if (r < 0.15) { 
-						state.action = "walk"; 
-						state.facing = Math.random() > 0.5 ? 1 : -1; 
-						state.actionTimer = 400 + Math.random() * 400; 
-					}
-					else if (r < 0.25) {
-						state.action = "walk_to_bed";
-					}
-					else if (r < 0.40 && state.layout.showTower) {
-						 state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
-					}
-					else {
-						state.actionTimer = 800 + Math.random() * 1000;
-					}
-				}
-			}
-			break;
-
-        case "walk":
-            state.x += state.facing * 1.2; // Slightly slower walk
-            if (state.x < 100 || state.x > canvas.width - 100) state.facing *= -1;
+        case "idle":
             if (state.actionTimer <= 0) {
-                state.action = "idle";
-                state.actionTimer = 500;
+                if (Math.random() < 0.20) {
+                    let sound = "Meow!";
+                    if (state.hunger < 20) sound = "Purrr... ❤️";
+                    if (state.hunger > 70) sound = "Mew? (Hungry)";
+                    say(sound);
+                }
+                if (Math.random() < 0.5) { state.actionTimer = 600 + Math.random() * 600; return; }
+                if (state.digestive >= 3) { state.action = "walk_to_litter"; } 
+                else {
+                    const r = Math.random();
+                    if (r < 0.15) { state.action = "walk"; state.facing = Math.random() > 0.5 ? 1 : -1; state.actionTimer = 400 + Math.random() * 400; }
+                    else if (r < 0.25) state.action = "walk_to_bed";
+                    else if (r < 0.40 && state.layout.showTower) state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
+                    else state.actionTimer = 800 + Math.random() * 1000;
+                }
             }
+            break;
+        case "walk":
+            state.x += state.facing * 1.2;
+            if (state.x < 100 || state.x > window.innerWidth - 100) state.facing *= -1;
+            if (state.actionTimer <= 0) { state.action = "idle"; state.actionTimer = 500; }
             break;
         case "sleep":
         case "tower_sleep":
@@ -512,14 +482,19 @@ function updateAI(t) {
             break;
     }
 }
-
-function animate(t) {
+function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Increment our custom global timer
     state.animT++;
-    drawEnvironment();
+    
+    // Pass state.animT to all functions that need it
+    drawEnvironment(state.animT);
     updateAI(state.animT);
+    
     const scale = state.stage === "Baby" ? 0.4 : state.stage === "Juvenile" ? 0.75 : 1.1;
     drawKitty(state.animT, scale);
+    
     updateUI();
     requestAnimationFrame(animate);
 }
