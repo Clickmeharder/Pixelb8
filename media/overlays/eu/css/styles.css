@@ -93,8 +93,8 @@ body {
 
 /* --- 4. COMFY CONTROL PANEL --- */
 
-#openMenu-Butt:hover {
-	opacity:0.85;
+button#openMenu-Butt:hover {
+	opacity:0.85!important;
 }
 #comfycontrolContainer { 
     position: fixed;
