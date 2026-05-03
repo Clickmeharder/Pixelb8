@@ -50,14 +50,42 @@
         <div class="settings-group">
             <h4>Visual Styling</h4>
             
-            <label>Text Color</label>
-            <div id="textSwatches" class="swatch-grid"></div>
+            <div class="setting-row">
+                <label>Text Color</label>
+                <input type="color" id="textColor">
+            </div>
 
-            <label>Element BG</label>
-            <div id="bgSwatches" class="swatch-grid"></div>
+            <div class="setting-row">
+                <label>BG Color 1</label>
+                <input type="color" id="bgColor1">
+                <input type="range" id="bgAlpha" min="0" max="1" step="0.1" title="Opacity">
+            </div>
+            
+            <div class="setting-row">
+                <label>BG Color 2 (Gradient)</label>
+                <input type="color" id="bgColor2">
+            </div>
 
-            <label>Border Color</label>
-            <div id="borderSwatches" class="swatch-grid"></div>
+            <div class="setting-row">
+                <label>Border Start</label>
+                <input type="color" id="borderColor1">
+            </div>
+            
+            <div class="setting-row">
+                <label>Border End</label>
+                <input type="color" id="borderColor2">
+            </div>
+
+            <div class="setting-row">
+                <label>Font Family</label>
+                <select id="fontFamily">
+                    <option value="'Segoe UI', sans-serif">Standard</option>
+                    <option value="'Courier New', monospace">Monospace</option>
+                    <option value="Georgia, serif">Serif</option>
+                    <option value="'Arial Black', sans-serif">Chunky</option>
+                    <option value="Impact, sans-serif">Impact</option>
+                </select>
+            </div>
 
             <div class="setting-row">
                 <label>Border Style</label>
@@ -65,7 +93,6 @@
                     <option value="solid">Solid</option>
                     <option value="dashed">Dashed</option>
                     <option value="double">Double</option>
-                    <option value="inset">Inset</option>
                     <option value="none">None</option>
                 </select>
             </div>
@@ -127,7 +154,6 @@
     <!-- Core Modules -->
     <script type="module" src="js/comfyEU.js"></script>
     <script type="module" src="js/polling.js"></script>
-	<!-- Core Modules -->
-	<script type="module" src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
