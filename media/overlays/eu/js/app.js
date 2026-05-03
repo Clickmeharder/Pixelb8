@@ -167,15 +167,19 @@ export function saveData() {
  */
 async function restoreFileHandle() {
     const savedHandle = await get(FILE_HANDLE_KEY);
-    if (savedHandle && window.initializeFile) {
+    if (savedHandle) {
         try {
             const options = { mode: 'read' };
+            // Browser security check: Permissions must be 'granted' for auto-load
             if (await savedHandle.queryPermission(options) === 'granted') {
-                await window.initializeFile(savedHandle);
-                addLog("LOG_RECONNECTED: AUTO");
+                if (window.initializeFile) {
+                    await window.initializeFile(savedHandle);
+                    addLog("LOG_RECONNECTED: AUTO");
+                }
             } else {
-                addLog("LOG_PENDING: CLICK BROWSE TO AUTHORIZE", true);
-                document.getElementById("browseBtn").style.boxShadow = "0 0 10px yellow";
+                addLog("LOG_PENDING: CLICK LINK TO AUTHORIZE", true);
+                const bBtn = document.getElementById("browseBtn");
+                if (bBtn) bBtn.style.boxShadow = "0 0 10px yellow";
             }
         } catch (err) {
             console.warn("File handle restoration failed", err);
@@ -216,7 +220,8 @@ async function loadData() {
     if (styleSel) styleSel.value = state.layout.borderStyle;
 
     updateUI();
-    await restoreFileHandle();
+    // Use a small delay to ensure polling.js has registered window.initializeFile
+    setTimeout(restoreFileHandle, 100);
 }
 
 //===============================================

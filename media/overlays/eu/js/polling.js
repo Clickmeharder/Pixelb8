@@ -11,13 +11,13 @@ let lastProcessedLine = "";
 let lastLogTimestamp = 0;
 let errorCount = 0;
 const MAX_RETRIES = 5;
-const FILE_HANDLE_KEY = "entropia_chat_handle"; // Key for IndexedDB[cite: 3]
+const FILE_HANDLE_KEY = "entropia_chat_handle";
 
-// Essential data objects for tracking session performance[cite: 4]
+// Essential data objects for tracking session performance
 const sessionStats = {}; 
 const sessionValues = {};
 
-// EXPOSE TO GLOBAL SCOPE for Twitch command access[cite: 1, 4]
+// EXPOSE TO GLOBAL SCOPE for Twitch command access
 window.sessionStats = sessionStats;
 window.sessionValues = sessionValues;
 window.sessionStartTime = Date.now(); 
@@ -28,7 +28,7 @@ const resetBtn = document.getElementById('btnReset');
 const browseBtn = document.getElementById('browseBtn');
 const pathInput = document.getElementById('pathInput');
 
-// ===== Persistence Logic (IndexedDB)[cite: 3, 4] =====
+// ===== Persistence Logic (IndexedDB) =====
 
 /**
  * Restores the file handle from IndexedDB on page load.
@@ -37,10 +37,10 @@ window.restoreFileHandle = async function() {
     const savedHandle = await get(FILE_HANDLE_KEY);
     if (savedHandle) {
         try {
-            // Check if we still have permission to read the file[cite: 3]
+            // Check if we still have permission to read the file
             const options = { mode: 'read' };
             if (await savedHandle.queryPermission(options) === 'granted') {
-                await initializeFile(savedHandle);
+                await window.initializeFile(savedHandle);
                 addLog("LOG_RECONNECTED: AUTO");
             } else {
                 addLog("LOG_PENDING: CLICK TO RE-AUTHORIZE", true);
@@ -54,16 +54,34 @@ window.restoreFileHandle = async function() {
 
 /**
  * Internal helper to set up the handle and UI.
+ * Now exposed to window so app.js can trigger it.
  */
-async function initializeFile(handle) {
+window.initializeFile = async function(handle) {
     fileHandle = handle;
-    const file = await fileHandle.getFile();
-    if (pathInput) pathInput.value = file.name;
-    state.logLinked = true;
-    saveData();
-}
+    try {
+        const file = await fileHandle.getFile();
+        if (pathInput) pathInput.value = file.name;
+        state.logLinked = true;
 
-// ===== UI Update Logic[cite: 4] =====
+        // AUTO-START LOGIC: Set pointer to current end and begin polling
+        lastSize = file.size; 
+        if (window.pollInterval) clearInterval(window.pollInterval);
+        window.pollInterval = setInterval(window.pollWebLog, 3000); 
+
+        // Update UI State to reflect active watcher
+        if (startBtn) {
+            startBtn.textContent = "STOP SESSION";
+            startBtn.style.background = "#d32f2f";
+        }
+        
+        saveData();
+    } catch (err) {
+        console.error("Initialize failed", err);
+        addLog("❌ INITIALIZE_FAILED", true);
+    }
+};
+
+// ===== UI Update Logic =====
 
 function runSessionTicker() {
     const timerEl = document.getElementById('session-timer');
@@ -109,7 +127,7 @@ function updateSessionUI() {
     if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
 }
 
-// ===== Polling & Parsing Core[cite: 1, 4] =====
+// ===== Polling & Parsing Core =====
 
 window.pollWebLog = async function() {
     if (!fileHandle) return;
@@ -170,7 +188,7 @@ window.handleChatLine = async function(line) {
     }
 };
 
-// ===== Session Control Handlers[cite: 4] =====
+// ===== Session Control Handlers =====
 
 browseBtn.onclick = async () => {
     try {
@@ -179,9 +197,9 @@ browseBtn.onclick = async () => {
             multiple: false
         });
         
-        // Save handle to IndexedDB for persistence[cite: 3, 4]
+        // Save handle to IndexedDB for persistence
         await set(FILE_HANDLE_KEY, handle);
-        await initializeFile(handle);
+        await window.initializeFile(handle);
         
         if (browseBtn) browseBtn.style.border = "";
         addLog(`📂 LOG_LINKED: SUCCESS`);
@@ -240,8 +258,7 @@ if (resetBtn) {
     });
 }
 
-// ===== Initial Startup[cite: 4] =====
+// ===== Initial Startup =====
 window.addEventListener('DOMContentLoaded', () => {
     if (pathInput) pathInput.placeholder = "Link Chat.log to begin...";
-    // File handle restoration is handled by app.js calling restoreFileHandle()
 });
