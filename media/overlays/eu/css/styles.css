@@ -1,0 +1,206 @@
+/* --- 1. GLOBAL & FONT --- */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --primary-cyan: #0ec3c3;
+    --terminal-green: #00ff00;
+    --error-red: #ff4444;
+    --bg-dark: rgba(0, 0, 0, 0.95);
+    --border-gray: #4f4e4c;
+}
+
+body { 
+    margin: 0; 
+    padding: 0; 
+    overflow: hidden; 
+    background: transparent; /* Essential for OBS Browser Source */
+    font-family: 'Press Start 2P', cursive; 
+    user-select: none; 
+}
+
+/* --- 2. OVERLAY CONTAINERS --- */
+#overlay-container { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    pointer-events: none; /* Allows clicking through to game if needed */
+}
+
+/* Terminal / Log Output Window[cite: 4] */
+#terminaloutput {
+    position: absolute;
+    width: 320px;
+    height: 180px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid var(--border-gray);
+    padding: 10px;
+    overflow-y: hidden;
+    pointer-events: auto;
+    z-index: 50;
+    text-shadow: 1px 1px 0px #000;
+}
+
+#nameplate { 
+    position: absolute; 
+    background: rgba(0,0,0,0.8); 
+    color: var(--primary-cyan); 
+    padding: 8px 15px; 
+    font-size: 10px; 
+    border: 2px solid var(--primary-cyan); 
+    pointer-events: auto; 
+    white-space: nowrap; 
+    transform: translate(-50%, -50%); 
+    z-index: 1000; 
+    cursor: pointer; 
+    transition: background 0.2s, transform 0.1s, border-color 0.2s;
+}
+
+#nameplate:hover {
+    background: rgba(50, 50, 0, 0.9);
+    border-color: #ffcc00;
+    color: #ffcc00;
+}
+
+#nameplate:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+/* --- 3. CHAT & BUBBLES --- */
+.chat-bubble { 
+    position: absolute; 
+    background: white; 
+    border: 3px solid #333; 
+    padding: 10px; 
+    font-size: 10px; 
+    border-radius: 15px; 
+    opacity: 0; 
+    transition: opacity 0.3s; 
+    color: black; 
+    pointer-events: none; 
+    white-space: nowrap; 
+    z-index: 1100; 
+}
+
+.chat-bubble.show { opacity: 1; }
+
+/* --- 4. COMFY CONTROL PANEL[cite: 4] --- */
+#comfycontrolContainer { 
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: var(--bg-dark);
+    border: 3px solid var(--border-gray);
+    padding: 15px;
+    width: 300px;
+    color: #fff;
+    display: none;
+    z-index: 2000;
+    max-height: 80vh; /* Increased for better visibility */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-cyan) #000;
+}
+
+#comfycontrolContainer.active { display: block; }
+
+.settings-group { 
+    margin-top: 15px; 
+    padding-top: 10px; 
+    border-top: 1px solid #444; 
+}
+
+.setting-row { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin-bottom: 12px; 
+    font-size: 9px; 
+}
+
+.setting-row label { width: 50%; }
+.setting-row input[type="range"] { width: 45%; cursor: pointer; }
+
+/* --- 5. FORMS & BUTTONS --- */
+h4 { 
+    font-size: 10px; 
+    color: var(--primary-cyan); 
+    margin: 10px 0; 
+    text-transform: uppercase; 
+    border-bottom: 1px solid #444; 
+    padding-bottom: 4px;
+}
+
+button { 
+    width: 100%; 
+    padding: 10px; 
+    margin: 5px 0; 
+    font-family: inherit; 
+    font-size: 9px; 
+    cursor: pointer; 
+    background: #222; 
+    color: white; 
+    border: 1px solid #555; 
+    transition: 0.2s;
+}
+
+button:hover { 
+    background: #333; 
+    border-color: #ffcc00; 
+    color: #ffcc00;
+}
+
+input[type="text"] { 
+    width: calc(100% - 18px); 
+    padding: 8px; 
+    margin-bottom: 10px; 
+    background: #000; 
+    color: #fff; 
+    border: 1px solid var(--border-gray); 
+    font-family: inherit; 
+    font-size: 9px;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary-cyan);
+    outline: none;
+}
+
+/* --- 6. COLOR SWATCHES --- */
+.swatch {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #333;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+}
+
+.swatch:hover { 
+    border-color: #ffcc00; 
+    transform: scale(1.15); 
+}
+
+.swatch.active { 
+    border-color: #ffffff; 
+    outline: 2px solid var(--primary-cyan); 
+}
+
+/* --- 7. AUDIO SETTINGS ROWS --- */
+.setting-row[data-key] .file-btn { width: 30px; margin-left: 5px; }
+.setting-row[data-key] .test-btn { width: 60px; margin-left: 5px; }
+
+/* --- 8. CUSTOM SCROLLBAR (Chrome/OBS) --- */
+#comfycontrolContainer::-webkit-scrollbar {
+    width: 6px;
+}
+#comfycontrolContainer::-webkit-scrollbar-track {
+    background: #000;
+}
+#comfycontrolContainer::-webkit-scrollbar-thumb {
+    background: var(--border-gray);
+    border-radius: 3px;
+}
+#comfycontrolContainer::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-cyan);
+}

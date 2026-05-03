@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropia Universe OBS Overlay</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
+</head>
+<body>
+
+    <!-- Overlay Visuals -->
+    <div id="overlay-container">
+        <div id="bubble" class="chat-bubble"></div>
+        <div id="terminaloutput" class="textcontainer"></div>
+        <div id="nameplate">Connecting...</div>
+    </div>
+    
+    <button id="openMenu-Butt" style="position:fixed; top:10px; right:10px; z-index:9999;">⚙️</button>
+
+    <!-- Control Panel -->
+    <div id="comfycontrolContainer">
+        <h4>Twitch Config</h4>
+        <input type="text" id="streamerInput" placeholder="Twitch User">
+        <button id="connectBtn">Connect Twitch</button>
+        
+        <div class="settings-group">
+            <h4>UI Positioning</h4>
+            <div class="setting-row"><label>Name X</label><input type="range" id="nameX" min="0" max="100"></div>
+            <div class="setting-row"><label>Name Y</label><input type="range" id="nameY" min="0" max="100"></div>
+            <div class="setting-row"><label>Terminal X</label><input type="range" id="terminalOutputX" min="0" max="100"></div>
+            <div class="setting-row"><label>Terminal Y</label><input type="range" id="terminalOutputY" min="0" max="100"></div>
+        </div>
+
+        <div class="settings-group">
+            <h4>Overlay Layout</h4>
+            <div class="setting-row">
+                <label>Show Nameplate</label>
+                <input type="checkbox" id="showStreamerName" checked>
+            </div>
+            <div class="setting-row">
+                <label>Show Terminal</label>
+                <input type="checkbox" id="showTerminalOutput" checked>
+            </div>
+            <div id="PrimaryColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
+        </div>
+
+        <div class="settings-group">
+            <h4>Sound Settings</h4>
+            <div class="setting-row">
+                <label>Master Audio</label>
+                <input type="checkbox" id="masterEnabled" checked>
+            </div>
+            
+            <div class="setting-row" data-key="meowSound">
+                <label>Meow Sound</label>
+                <input type="checkbox" checked>
+                <button class="file-btn">📁</button>
+                <button class="test-btn">Test</button>
+                <input type="file" class="hidden-file-input" accept="audio/*" style="display:none">
+            </div>
+        </div>
+
+        <button id="btnReset" style="color:red; margin-top:10px; width:100%;">Hard Reset</button>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/comfyEU.js"></script>
+</body>
+</html>
