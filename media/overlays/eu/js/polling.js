@@ -1,4 +1,4 @@
-//<script type="module" src="js/polling.js"></script>
+// <script type="module" src="js/polling.js"></script>
 import { addLog, state, saveData } from './app.js';
 import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
@@ -32,7 +32,6 @@ const pathInput = document.getElementById('pathInput');
 
 /**
  * Internal helper to set up the handle and UI.
- * Refactored to "Ready" state without auto-starting the poll.
  */
 window.initializeFile = async function(handle) {
     if (!handle) return;
@@ -86,6 +85,7 @@ function updateSessionUI() {
         const totalValue = sessionValues[key] || 0;
         grandTotal += totalValue;
 
+        // Use a safe ID selector for items with spaces (e.g., "Fish Scrap" becomes "session-Fish-Scrap")
         const safeKey = key.replace(/\s+/g, '-');
         const sessionEl = document.getElementById(`session-${safeKey}`);
         
@@ -137,12 +137,13 @@ window.pollWebLog = async function() {
 window.handleChatLine = async function(line) {
     if (line === lastProcessedLine) return;
 
+    // Regex optimized for Entropia Universe [System] loot messages
     const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
     const match = line.match(fishRegex);
 
     if (match) {
         const logTimeString = match[1];
-        const fishType = match[2].trim(); 
+        const fishType = match[2].trim(); // CRITICAL: Trim ensures multi-word names match correctly
         const amount = parseInt(match[3]);
         const value = parseFloat(match[4]);
         const currentLogTimestamp = new Date(logTimeString).getTime();
@@ -177,7 +178,6 @@ browseBtn.onclick = async () => {
             multiple: false
         });
         
-        // Save handle to IndexedDB for persistence across reloads
         await set(FILE_HANDLE_KEY, handle);
         await window.initializeFile(handle);
         
@@ -189,7 +189,7 @@ browseBtn.onclick = async () => {
 };
 
 startBtn.onclick = async () => {
-    // 1. Logic for STOPPING
+    // 1. STOP Logic
     if (startBtn.textContent === "STOP SESSION") {
         if (sessionTickerInterval) clearInterval(sessionTickerInterval);
         if (window.pollInterval) clearInterval(window.pollInterval);
@@ -201,7 +201,7 @@ startBtn.onclick = async () => {
         return;
     }
 
-    // 2. Logic for STARTING
+    // 2. START Logic
     if (!fileHandle) {
         addLog("❌ ERROR: Link Chat.log first!", true);
         if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
@@ -209,7 +209,6 @@ startBtn.onclick = async () => {
     }
 
     try {
-        // Security: Request/Verify permission via user gesture
         const status = await fileHandle.requestPermission({ mode: 'read' });
         if (status !== 'granted') {
             addLog("❌ PERMISSION_DENIED", true);
@@ -217,29 +216,25 @@ startBtn.onclick = async () => {
         }
 
         const file = await fileHandle.getFile();
-        lastSize = file.size; // Jump to the end to ignore historical data
+        lastSize = file.size; // Start from current end of log
         window.sessionStartTime = Date.now(); 
 
-        // Clear existing intervals
         if (window.pollInterval) clearInterval(window.pollInterval);
         if (sessionTickerInterval) clearInterval(sessionTickerInterval);
 
-        // Start fresh intervals
         window.pollInterval = setInterval(window.pollWebLog, 3000); 
         sessionTickerInterval = setInterval(runSessionTicker, 1000);
 
-        // Reset Session Stats for the fresh start
-        Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
-        Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
+        // Reset data for fresh session
+        Object.keys(sessionStats).forEach(key => delete sessionStats[key]);
+        Object.keys(sessionValues).forEach(key => delete sessionValues[key]);
 
-        // UI Update to Running state
         startBtn.textContent = "STOP SESSION";
         startBtn.style.background = "#d32f2f"; 
         startBtn.style.boxShadow = "none";
         
         addLog(`✅ SESSION_STARTED: ${file.name}`);
 
-        // Keep page active
         if ('wakeLock' in navigator) {
             try { await navigator.wakeLock.request('screen'); } catch(e){}
         }
@@ -255,6 +250,7 @@ if (resetBtn) {
         Object.keys(sessionStats).forEach(key => delete sessionStats[key]);
         Object.keys(sessionValues).forEach(key => delete sessionValues[key]);
         window.sessionStartTime = Date.now();
+        updateSessionUI();
         addLog("🧹 SESSION_STATS_CLEARED.");
     });
 }
@@ -263,7 +259,5 @@ if (resetBtn) {
 window.addEventListener('DOMContentLoaded', () => {
     if (pathInput) pathInput.placeholder = "Link Chat.log to begin...";
 });
-
-
 
 addLog("entropia obs source version_0.01 loaded Succesfully");

@@ -69,27 +69,33 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 
     // Session Total Command: Displays loot stats in the bubble overlay[cite: 1, 4]
-    if (cmd === "sessiontotal") {
-        const itemName = message.trim();
-        if (!itemName || !window.sessionStats) return;
+	if (cmd === "sessiontotal") {
+		// message captures everything after !sessiontotal (e.g., "Fish Scrap")
+		const itemName = message.trim(); 
+		
+		if (!itemName || !window.sessionStats) {
+			addLog("TWITCH: INVALID COMMAND DATA", true);
+			return;
+		}
 
-        // Search session data for the specific loot item (case-insensitive)[cite: 4]
-        const key = Object.keys(window.sessionStats).find(
-            k => k.toLowerCase() === itemName.toLowerCase()
-        );
+		// Search session data using a normalized comparison
+		const key = Object.keys(window.sessionStats).find(k => {
+			return k.trim().toLowerCase() === itemName.toLowerCase();
+		});
 
-        if (key) {
-            const total = window.sessionStats[key];
-            const elapsedHours = (Date.now() - window.sessionStartTime) / 3600000;
-            const perHour = (total / Math.max(0.01, elapsedHours)).toFixed(1);
+		if (key) {
+			const total = window.sessionStats[key];
+			const startTime = window.sessionStartTime || Date.now(); // Fallback to now if not set
+			const elapsedHours = (Date.now() - startTime) / 3600000;
+			const perHour = (total / Math.max(0.01, elapsedHours)).toFixed(1);
 
-            // Display the high-density visual alert
-            showSessionAlert(key, total, perHour);
-            addLog(`TWITCH: ${user.toUpperCase()} QUERIED ${key}`);
-        } else {
-            addLog(`TWITCH: ${user.toUpperCase()} SEARCHED FOR "${itemName}" (NO DATA)`, true);
-        }
-    }
+			showSessionAlert(key, total, perHour);
+			addLog(`TWITCH: ${user.toUpperCase()} QUERIED ${key}`);
+		} else {
+			// Log the exact string received to debug hidden characters/spaces
+			addLog(`TWITCH: NO DATA FOR "${itemName.toUpperCase()}"`, true);
+		}
+	}
 };
 
 //===============================================
