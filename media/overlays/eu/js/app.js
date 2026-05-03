@@ -7,17 +7,24 @@ const SOUND_KEY = "entropiaOBS_sound_settings";
 export let state = {
     twitchUser: "",
     layout: {
-        nameX: 50, 
-        nameY: 70,
-        terminalOutputX: 10, 
-        terminalOutputY: 10,
-        manifestX: 80, // New default position
-        manifestY: 80,
+        nameX: 50, nameY: 70,
+        terminalOutputX: 10, terminalOutputY: 10,
+        manifestX: 80, manifestY: 80,
+        bubbleX: 50, bubbleY: 50, // Added bubble positioning[cite: 4]
+        
         showStreamerName: true,
         showTerminalOutput: true,
-        showManifest: true, // New toggle[cite: 4]
-        primaryColor: "#00ff00",
-        secondaryColor: "#000"
+        showManifest: true,
+
+        // Visual Styling Properties[cite: 4]
+        textColor: "#ffffff",
+        elementBg: "rgba(0,0,0,0.8)",
+        borderColor: "#0ec3c3",
+        borderStyle: "solid",
+        borderWidth: 2,
+        borderRadius: 0,
+        fontSize: 10,
+        textOutline: 0
     },
     sessionActive: false,
     logLinked: false
@@ -25,8 +32,12 @@ export let state = {
 
 window.addLog = addLog;
 
-// Updated slider list to include manifest positioning[cite: 4]
-const sliders = ["nameX", "nameY", "terminalOutputX", "terminalOutputY", "manifestX", "manifestY"];
+// Comprehensive slider list[cite: 4]
+const sliders = [
+    "nameX", "nameY", "terminalOutputX", "terminalOutputY", 
+    "manifestX", "manifestY", "bubbleX", "bubbleY",
+    "borderWidth", "borderRadius", "fontSize", "textOutline"
+];
 
 //===============================================
 // --- 2. SOUND SYSTEM ---
@@ -72,26 +83,38 @@ export function addLog(message, isError = false) {
 
     const div = document.createElement('div');
     const timestamp = new Date().toLocaleTimeString([], { 
-        hour12: false, 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit' 
+        hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' 
     });
 
-    div.style = `padding: 2px 0; font-family: monospace; color: ${isError ? '#ff4444' : '#0ec3c3'}; font-size: 9px;`;
+    div.style = `padding: 2px 0; font-family: monospace; color: ${isError ? '#ff4444' : state.layout.textColor}; font-size: 9px;`;
     div.textContent = `[${timestamp}] ${isError ? "[ERR]" : "[LOG]"} ${message.toUpperCase()}`;
 
     logWindow.prepend(div);
-    
-    if (logWindow.childNodes.length > 25) {
-        logWindow.removeChild(logWindow.lastChild);
-    }
+    if (logWindow.childNodes.length > 25) logWindow.removeChild(logWindow.lastChild);
+}
+
+/**
+ * Applies all visual styling from state to DOM elements[cite: 4].
+ */
+function applyStyles() {
+    const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest');
+    targets.forEach(el => {
+        el.style.color = state.layout.textColor;
+        el.style.backgroundColor = state.layout.elementBg;
+        el.style.borderColor = state.layout.borderColor;
+        el.style.borderStyle = state.layout.borderStyle;
+        el.style.borderWidth = state.layout.borderWidth + "px";
+        el.style.borderRadius = state.layout.borderRadius + "px";
+        el.style.fontSize = state.layout.fontSize + "px";
+        el.style.textShadow = state.layout.textOutline > 0 ? `0 0 ${state.layout.textOutline}px black` : "none";
+    });
 }
 
 function updateUI() {
     const nameplate = document.getElementById("nameplate");
     const terminal = document.getElementById("terminaloutput");
     const manifest = document.getElementById("session-manifest");
+    const bubble = document.getElementById("bubble");
 
     if (nameplate) {
         nameplate.style.left = state.layout.nameX + "%";
@@ -103,12 +126,37 @@ function updateUI() {
         terminal.style.top = state.layout.terminalOutputY + "%";
         terminal.style.display = state.layout.showTerminalOutput ? "block" : "none";
     }
-    // New Manifest UI Sync[cite: 4]
     if (manifest) {
         manifest.style.left = state.layout.manifestX + "%";
         manifest.style.top = state.layout.manifestY + "%";
         manifest.style.display = state.layout.showManifest ? "block" : "none";
     }
+    if (bubble) {
+        bubble.style.left = state.layout.bubbleX + "%";
+        bubble.style.top = state.layout.bubbleY + "%";
+    }
+    applyStyles();
+}
+
+/**
+ * Builds swatch grids for OBS-safe color picking[cite: 4].
+ */
+function setupSwatches(containerId, stateKey) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const colors = ["#ffffff", "#0ec3c3", "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#000000", "rgba(0,0,0,0)", "rgba(0,0,0,0.6)", "#ffaa00", "#55ff55"];
+    
+    colors.forEach(color => {
+        const btn = document.createElement('button');
+        btn.style.backgroundColor = color;
+        btn.className = "swatch-btn";
+        btn.onclick = () => {
+            state.layout[stateKey] = color;
+            updateUI();
+            saveData();
+        };
+        container.appendChild(btn);
+    });
 }
 
 //===============================================
@@ -127,13 +175,6 @@ function loadData() {
             layout: { ...state.layout, ...loaded.layout }, 
             twitchUser: loaded.twitchUser || "" 
         };
-        
-        if (state.twitchUser) {
-            const streamInput = document.getElementById("streamerInput");
-            const plate = document.getElementById("nameplate");
-            if (streamInput) streamInput.value = state.twitchUser;
-            if (plate) plate.textContent = state.twitchUser;
-        }
     }
 
     sliders.forEach(id => {
@@ -146,6 +187,9 @@ function loadData() {
         if (el) el.checked = state.layout[id];
     });
     
+    const styleSel = document.getElementById("borderStyle");
+    if (styleSel) styleSel.value = state.layout.borderStyle;
+
     updateUI();
 }
 
@@ -171,43 +215,22 @@ sliders.forEach(id => {
     });
 });
 
+document.getElementById("borderStyle")?.addEventListener("change", (e) => {
+    state.layout.borderStyle = e.target.value;
+    updateUI();
+});
+
 document.getElementById("btnReset")?.addEventListener("click", () => {
-    if(confirm("Factory Reset: Clear all settings and logs?")) {
+    if(confirm("Factory Reset: Clear all settings?")) {
         localStorage.clear();
         location.reload();
     }
 });
 
-document.querySelectorAll('.setting-row[data-key]').forEach(row => {
-    const key = row.getAttribute('data-key');
-    const checkbox = row.querySelector('input[type="checkbox"]');
-    const fileInput = row.querySelector('.hidden-file-input');
-    const testBtn = row.querySelector('.test-btn');
-
-    if (checkbox) {
-        checkbox.checked = window.soundSettings[key];
-        checkbox.addEventListener('change', (e) => {
-            window.soundSettings[key] = e.target.checked;
-            localStorage.setItem(SOUND_KEY, JSON.stringify(window.soundSettings));
-        });
-    }
-
-    row.querySelector('.file-btn')?.addEventListener('click', () => fileInput.click());
-
-    fileInput?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            window.soundSettings.customPaths[key] = URL.createObjectURL(file);
-            localStorage.setItem(SOUND_KEY, JSON.stringify(window.soundSettings));
-            refreshAudioInstance(key);
-            addLog(`SOUND_UPDATED: ${key}`);
-        }
-    });
-
-    testBtn?.addEventListener('click', () => playSound(key));
-});
-
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
+    setupSwatches("textSwatches", "textColor");
+    setupSwatches("bgSwatches", "elementBg");
+    setupSwatches("borderSwatches", "borderColor");
     setInterval(saveData, 5000);
 });

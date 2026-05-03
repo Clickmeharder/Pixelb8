@@ -11,14 +11,15 @@
 
     <!-- Overlay Visuals -->
     <div id="overlay-container">
+        <!-- Absolute positioned bubble for !sessiontotal[cite: 4] -->
         <div id="bubble" class="chat-bubble"></div>
         <div id="terminaloutput" class="textcontainer"></div>
         <div id="nameplate">Connecting...</div>
         
-        <!-- NEW: High-density Loot Display[cite: 4] -->
+        <!-- High-density Loot Display[cite: 4] -->
         <div id="session-manifest" style="position: absolute;">
             <div id="manifest-grid" style="display: flex; flex-direction: column; gap: 4px; text-align: right;"></div>
-            <div style="border-top: 1px solid #0ec3c3; margin-top: 5px; padding-top: 5px; font-size: 12px; color: #0ec3c3; text-align: right;">
+            <div id="manifest-footer" style="border-top: 1px solid #0ec3c3; margin-top: 5px; padding-top: 5px; font-size: 12px; text-align: right;">
                 TOTAL: <span id="session-grand-total">0.0000</span> PED
             </div>
         </div>
@@ -43,19 +44,51 @@
             <div id="session-timer" style="text-align:center; font-size:12px; margin-top:5px; color:#0ec3c3;">00:00:00</div>
         </div>
 
+        <!-- NEW: Visual Styling Suite[cite: 4] -->
+        <div class="settings-group">
+            <h4>Visual Styling</h4>
+            
+            <label>Text Color</label>
+            <div id="textSwatches" class="swatch-grid"></div>
+
+            <label>Element BG</label>
+            <div id="bgSwatches" class="swatch-grid"></div>
+
+            <label>Border Color</label>
+            <div id="borderSwatches" class="swatch-grid"></div>
+
+            <div class="setting-row">
+                <label>Border Style</label>
+                <select id="borderStyle">
+                    <option value="solid">Solid</option>
+                    <option value="dashed">Dashed</option>
+                    <option value="double">Double</option>
+                    <option value="inset">Inset</option>
+                    <option value="none">None</option>
+                </select>
+            </div>
+
+            <div class="setting-row"><label>Border Width</label><input type="range" id="borderWidth" min="0" max="10"></div>
+            <div class="setting-row"><label>Border Radius</label><input type="range" id="borderRadius" min="0" max="50"></div>
+            <div class="setting-row"><label>Font Size</label><input type="range" id="fontSize" min="8" max="40"></div>
+            <div class="setting-row"><label>Text Outline</label><input type="range" id="textOutline" min="0" max="5"></div>
+        </div>
+
         <div class="settings-group">
             <h4>UI Positioning</h4>
             <div class="setting-row"><label>Name X</label><input type="range" id="nameX" min="0" max="100"></div>
             <div class="setting-row"><label>Name Y</label><input type="range" id="nameY" min="0" max="100"></div>
             <div class="setting-row"><label>Terminal X</label><input type="range" id="terminalOutputX" min="0" max="100"></div>
             <div class="setting-row"><label>Terminal Y</label><input type="range" id="terminalOutputY" min="0" max="100"></div>
-            <!-- Added Manifest Sliders[cite: 4] -->
             <div class="setting-row"><label>Loot X</label><input type="range" id="manifestX" min="0" max="100"></div>
             <div class="setting-row"><label>Loot Y</label><input type="range" id="manifestY" min="0" max="100"></div>
+            <!-- Added Bubble Positioning[cite: 4] -->
+            <div class="setting-row"><label>Bubble X</label><input type="range" id="bubbleX" min="0" max="100"></div>
+            <div class="setting-row"><label>Bubble Y</label><input type="range" id="bubbleY" min="0" max="100"></div>
         </div>
 
         <div class="settings-group">
-            <h4>Overlay Layout</h4>
+            <h4>Visibility</h4>
             <div class="setting-row">
                 <label>Show Nameplate</label>
                 <input type="checkbox" id="showStreamerName" checked>
@@ -64,12 +97,10 @@
                 <label>Show Terminal</label>
                 <input type="checkbox" id="showTerminalOutput" checked>
             </div>
-            <!-- Added Manifest Toggle[cite: 4] -->
             <div class="setting-row">
                 <label>Show Loot List</label>
                 <input type="checkbox" id="showManifest" checked>
             </div>
-            <div id="PrimaryColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
         </div>
 
         <div class="settings-group">
