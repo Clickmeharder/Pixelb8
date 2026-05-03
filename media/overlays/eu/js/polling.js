@@ -263,3 +263,4 @@ if (resetBtn) {
 window.addEventListener('DOMContentLoaded', () => {
     if (pathInput) pathInput.placeholder = "Link Chat.log to begin...";
 });
+addLog("entropia obs source version_0.01 loaded Succesfully");
