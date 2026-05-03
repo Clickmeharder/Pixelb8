@@ -33,54 +33,43 @@ const pathInput = document.getElementById('pathInput');
 /**
  * Restores the file handle from IndexedDB on page load.
  */
-window.restoreFileHandle = async function() {
-    const savedHandle = await get(FILE_HANDLE_KEY);
-    if (savedHandle) {
-        try {
-            // Check if we still have permission to read the file
-            const options = { mode: 'read' };
-            if (await savedHandle.queryPermission(options) === 'granted') {
-                await window.initializeFile(savedHandle);
-                addLog("LOG_RECONNECTED: AUTO");
-            } else {
-                addLog("LOG_PENDING: CLICK TO RE-AUTHORIZE", true);
-                if (browseBtn) browseBtn.style.border = "2px solid #0ec3c3";
-            }
-        } catch (err) {
-            console.error("Failed to restore handle", err);
-        }
-    }
-};
+
 
 /**
  * Internal helper to set up the handle and UI.
  * Now exposed to window so app.js can trigger it.
  */
+// Ensure this is at the top level of the script
 window.initializeFile = async function(handle) {
-    fileHandle = handle;
+    if (!handle) return;
+    fileHandle = handle; 
+    
     try {
         const file = await fileHandle.getFile();
         if (pathInput) pathInput.value = file.name;
+        
+        // Persist the linked state
         state.logLinked = true;
-
-        // AUTO-START LOGIC: Set pointer to current end and begin polling
+        
+        // Set the pointer to the end so we don't process old logs
         lastSize = file.size; 
+        
+        // Start the watcher automatically
         if (window.pollInterval) clearInterval(window.pollInterval);
         window.pollInterval = setInterval(window.pollWebLog, 3000); 
-
-        // Update UI State to reflect active watcher
+        
+        // Update the Start Button UI
         if (startBtn) {
             startBtn.textContent = "STOP SESSION";
             startBtn.style.background = "#d32f2f";
         }
         
-        saveData();
+        addLog("WATCHER_ACTIVE: " + file.name);
     } catch (err) {
-        console.error("Initialize failed", err);
-        addLog("❌ INITIALIZE_FAILED", true);
+        addLog("❌ PERMISSION_DENIED: RE-LINK LOG", true);
+        console.error(err);
     }
 };
-
 // ===== UI Update Logic =====
 
 function runSessionTicker() {

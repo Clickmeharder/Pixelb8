@@ -167,23 +167,29 @@ export function saveData() {
  */
 async function restoreFileHandle() {
     const savedHandle = await get(FILE_HANDLE_KEY);
-    if (savedHandle) {
-        try {
-            const options = { mode: 'read' };
-            // Browser security check: Permissions must be 'granted' for auto-load
-            if (await savedHandle.queryPermission(options) === 'granted') {
+    if (!savedHandle) return;
+
+    try {
+        // Essential: Check for 'granted' status. 
+        // Note: Chrome often requires a user gesture to 'verify' even saved handles.
+        if (await savedHandle.queryPermission({ mode: 'read' }) === 'granted') {
+            const attemptInitialization = () => {
                 if (window.initializeFile) {
-                    await window.initializeFile(savedHandle);
+                    window.initializeFile(savedHandle);
                     addLog("LOG_RECONNECTED: AUTO");
+                } else {
+                    // If polling.js isn't ready yet, retry once
+                    setTimeout(attemptInitialization, 200);
                 }
-            } else {
-                addLog("LOG_PENDING: CLICK LINK TO AUTHORIZE", true);
-                const bBtn = document.getElementById("browseBtn");
-                if (bBtn) bBtn.style.boxShadow = "0 0 10px yellow";
-            }
-        } catch (err) {
-            console.warn("File handle restoration failed", err);
+            };
+            attemptInitialization();
+        } else {
+            addLog("LOG_LINK_EXPIRED: CLICK 'LINK CHAT.LOG'", true);
+            const bBtn = document.getElementById("browseBtn");
+            if (bBtn) bBtn.style.boxShadow = "0 0 15px #0ec3c3";
         }
+    } catch (err) {
+        console.warn("Handle recovery failed", err);
     }
 }
 
