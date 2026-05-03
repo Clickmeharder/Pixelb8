@@ -1,4 +1,5 @@
 //<script type="module" src="js/polling.js"></script>
+import { addLog } from './app.js';
 
 // ===== Global State & References =====
 let fileHandle = null; 
@@ -14,6 +15,12 @@ const MAX_RETRIES = 5;
 const sessionStats = {}; 
 const sessionValues = {};
 window.sessionStartTime = Date.now(); 
+
+// ===== UI Elements =====
+const startBtn = document.getElementById('start-session-btn');
+const resetBtn = document.getElementById('btnReset'); // Matches your app.js reset ID
+const browseBtn = document.getElementById('browseBtn');
+const pathInput = document.getElementById('pathInput');
 
 // ===== UI Update Logic[cite: 4] =====
 
@@ -47,18 +54,15 @@ function updateSessionUI() {
         grandTotal += totalValue;
 
         const safeKey = key.replace(/\s+/g, '-');
-        const rowEl = document.getElementById(`row-${safeKey}`);
+        // Looks for existing rows in your manifest-grid
+        const sessionEl = document.getElementById(`session-${safeKey}`);
         
-        if (count > 0 && rowEl) {
-            // Update Counts
-            const sessionEl = document.getElementById(`session-${safeKey}`);
-            if (sessionEl) sessionEl.textContent = count;
+        if (count > 0 && sessionEl) {
+            sessionEl.textContent = count;
 
-            // Update PED Value
             const valEl = document.getElementById(`val-${safeKey}`);
             if (valEl) valEl.textContent = `(${totalValue.toFixed(4)})`;
 
-            // Update Rate per Hour
             const rateEl = document.getElementById(`rate-${safeKey}`);
             if (rateEl) {
                 const perHour = (count / elapsedHours).toFixed(1);
@@ -119,7 +123,6 @@ window.handleChatLine = async function(line) {
         const value = parseFloat(match[4]);
         const currentLogTimestamp = new Date(logTimeString).getTime();
 
-        // Anti-spam filter for simultaneous log entries[cite: 4]
         const secondsBetweenLogs = (currentLogTimestamp - lastLogTimestamp) / 1000;
         if (lastLogTimestamp !== 0 && secondsBetweenLogs < 1) return; 
 
@@ -132,56 +135,34 @@ window.handleChatLine = async function(line) {
                 sessionValues[fishType] = 0;
             }
             
-            const safeKey = fishType.replace(/\s+/g, '-');
-            if (!document.getElementById(`row-${safeKey}`)) {
-                if (typeof createDynamicRow === 'function') createDynamicRow(fishType);
-            }
-
             sessionStats[fishType] += amount;
             sessionValues[fishType] += value;
 
-            if (typeof updateSessionUI === 'function') updateSessionUI();
+            updateSessionUI();
             addLog(`🎣 CAUGHT: ${amount}x ${fishType}`);
         }
     }
 };
 
-// ===== Storage & Persistence[cite: 4] =====
-
-async function saveFileHandle(handle) {
-    const db = await initDB();
-    const tx = db.transaction('settings', 'readwrite');
-    tx.objectStore('settings').put(handle, 'logFileHandle');
-    return tx.complete;
-}
-
-function initDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open('PixelB8_Storage', 1);
-        request.onupgradeneeded = (e) => e.target.result.createObjectStore('settings');
-        request.onsuccess = (e) => resolve(e.target.result);
-        request.onerror = (e) => reject(e.error);
-    });
-}
-
-/**
- * Wake Lock to prevent the OBS browser source from throttling[cite: 4].
- */
-async function requestWakeLock() {
-    try {
-        if ('wakeLock' in navigator) {
-            let wakeLock = await navigator.wakeLock.request('screen');
-            addLog("🌙 WAKE_LOCK: Engaged. Preventing sleep throttling.");
-            wakeLock.addEventListener('release', () => console.log('Wake Lock released'));
-        }
-    } catch (err) {
-        console.warn("Wake Lock failed:", err);
-    }
-}
-
 // ===== Session Control Handlers[cite: 4] =====
 
-const startBtn = document.getElementById('start-session-btn'); // Ensure this ID matches your HTML
+/**
+ * Manual file picker to bypass browser security restrictions.
+ */
+browseBtn.onclick = async () => {
+    try {
+        const [handle] = await window.showOpenFilePicker({
+            types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
+            multiple: false
+        });
+        fileHandle = handle;
+        const file = await fileHandle.getFile();
+        if (pathInput) pathInput.value = file.name;
+        addLog(`📂 LOG_LINKED: ${file.name}`);
+    } catch (err) {
+        addLog("❌ PICKER_CANCELLED", true);
+    }
+};
 
 startBtn.onclick = async () => {
     if (startBtn.textContent === "STOP SESSION") {
@@ -190,74 +171,55 @@ startBtn.onclick = async () => {
         
         startBtn.textContent = "START SESSION";
         startBtn.style.background = ""; 
-        startBtn.style.opacity = "1.0";
         addLog("🛑 SESSION_STOPPED.", true);
+        return;
+    }
+
+    if (!fileHandle) {
+        addLog("❌ ERROR: Link Chat.log first!", true);
         return;
     }
 
     window.sessionStartTime = Date.now(); 
     
-    // Reset local session trackers
+    // Reset trackers
     Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
     Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
 
     try {
-        if (!fileHandle) {
-            const pickerResult = await window.showOpenFilePicker({
-                types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
-                multiple: false
-            });
-            fileHandle = pickerResult[0];
-            await saveFileHandle(fileHandle);
-        } else {
-            const opts = { mode: 'read' };
-            if (await fileHandle.queryPermission(opts) !== 'granted') {
-                if (await fileHandle.requestPermission(opts) !== 'granted') throw new Error("Permission denied");
-            }
-        }
-        
         const file = await fileHandle.getFile();
         lastSize = file.size; 
         
         if (window.pollInterval) clearInterval(window.pollInterval);
         window.pollInterval = setInterval(window.pollWebLog, 3000); 
         
-        await requestWakeLock();
-        addLog("📡 CHAT_LOG: Bound and Polling.");
+        // Request Wake Lock for OBS
+        if ('wakeLock' in navigator) {
+            await navigator.wakeLock.request('screen');
+        }
+
+        if (sessionTickerInterval) clearInterval(sessionTickerInterval);
+        sessionTickerInterval = setInterval(runSessionTicker, 1000);
+
+        startBtn.textContent = "STOP SESSION";
+        startBtn.style.background = "#d32f2f"; 
+        addLog(`✅ WATCHER_ENGAGED`);
     } catch (err) {
         addLog("❌ ACCESS_FAILED: Check permissions.", true);
-        return;
     }
-
-    if (sessionTickerInterval) clearInterval(sessionTickerInterval);
-    sessionTickerInterval = setInterval(runSessionTicker, 1000);
-
-    startBtn.textContent = "STOP SESSION";
-    startBtn.style.background = "#d32f2f"; 
-    addLog(`✅ WATCHER_ENGAGED`);
 };
 
-const resetBtn = document.getElementById('reset-session-btn');
-
-resetBtn.onclick = () => {
-    if (!confirm("Wipe session counts?")) return;
-
-    Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
-    Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
-    window.sessionStartTime = Date.now();
-
-    const container = document.getElementById('manifest-grid');
-    if (container) container.innerHTML = ''; 
-
-    if (document.getElementById('session-grand-total')) document.getElementById('session-grand-total').textContent = "0.0000";
-    if (document.getElementById('session-timer')) document.getElementById('session-timer').textContent = "00:00:00";
-
-    addLog("🧹 SESSION_RESET.");
-};
+// Reset logic integrated with your existing reset button
+if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+        Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
+        Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
+        window.sessionStartTime = Date.now();
+        addLog("🧹 SESSION_STATS_CLEARED.");
+    });
+}
 
 // ===== Initial Startup[cite: 4] =====
-
 window.addEventListener('DOMContentLoaded', () => {
-    const pathInput = document.getElementById('pathInput'); // Adjust ID as needed
-    if (pathInput) pathInput.placeholder = "Click START to link Chat.log";
+    if (pathInput) pathInput.placeholder = "Link Chat.log to begin...";
 });

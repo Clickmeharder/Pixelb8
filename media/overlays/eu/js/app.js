@@ -7,13 +7,21 @@ const SOUND_KEY = "entropiaOBS_sound_settings";
 export let state = {
     twitchUser: "",
     layout: {
-        nameX: 50, nameY: 70,
-        terminalOutputX: 10, terminalOutputY: 10,
+        nameX: 50, 
+        nameY: 70,
+        terminalOutputX: 10, 
+        terminalOutputY: 10,
         showStreamerName: true,
         showTerminalOutput: true,
-        primaryColor: "#00ff00"
-    }
+        primaryColor: "#00ff00",
+        secondaryColor: "#000"
+    },
+    sessionActive: false,
+    logLinked: false
 };
+
+// Expose addLog globally so non-module scripts or external triggers can use it
+window.addLog = addLog;
 
 const sliders = ["nameX", "nameY", "terminalOutputX", "terminalOutputY"];
 
@@ -38,6 +46,7 @@ function refreshAudioInstance(key) {
     }
 }
 
+// Initialize audio objects on boot
 Object.keys(window.soundSettings).forEach(key => {
     if (key !== 'masterEnabled' && key !== 'customPaths') refreshAudioInstance(key);
 });
@@ -60,13 +69,22 @@ export function addLog(message, isError = false) {
     if (!logWindow) return;
 
     const div = document.createElement('div');
-    const timestamp = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const timestamp = new Date().toLocaleTimeString([], { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+    });
 
-    div.style = `padding: 2px 0; font-family: monospace; color: ${isError ? '#ff4444' : '#00ff00'};`;
+    div.style = `padding: 2px 0; font-family: monospace; color: ${isError ? '#ff4444' : '#00ff00'}; font-size: 9px;`;
     div.textContent = `[${timestamp}] ${isError ? "[ERR]" : "[LOG]"} ${message.toUpperCase()}`;
 
     logWindow.prepend(div);
-    if (logWindow.childNodes.length > 20) logWindow.removeChild(logWindow.lastChild);
+    
+    // Keep the log lean for performance in OBS browser sources[cite: 4]
+    if (logWindow.childNodes.length > 25) {
+        logWindow.removeChild(logWindow.lastChild);
+    }
 }
 
 function updateUI() {
@@ -96,32 +114,45 @@ function loadData() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
         const loaded = JSON.parse(saved);
-        state = { ...state, layout: { ...state.layout, ...loaded.layout }, twitchUser: loaded.twitchUser };
+        // Deep merge layout to ensure new keys aren't lost
+        state = { 
+            ...state, 
+            layout: { ...state.layout, ...loaded.layout }, 
+            twitchUser: loaded.twitchUser || "" 
+        };
         
         if (state.twitchUser) {
-            document.getElementById("streamerInput").value = state.twitchUser;
-            document.getElementById("nameplate").textContent = state.twitchUser;
+            const streamInput = document.getElementById("streamerInput");
+            const plate = document.getElementById("nameplate");
+            if (streamInput) streamInput.value = state.twitchUser;
+            if (plate) plate.textContent = state.twitchUser;
         }
     }
 
-    // Sync Sliders and Checkboxes
+    // Sync Sliders and Checkboxes with loaded state
     sliders.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = state.layout[id];
     });
 
-    document.getElementById("showStreamerName").checked = state.layout.showStreamerName;
-    document.getElementById("showTerminalOutput").checked = state.layout.showTerminalOutput;
+    const checkName = document.getElementById("showStreamerName");
+    const checkTerm = document.getElementById("showTerminalOutput");
+    if (checkName) checkName.checked = state.layout.showStreamerName;
+    if (checkTerm) checkTerm.checked = state.layout.showTerminalOutput;
+    
     updateUI();
 }
 
 //===============================================
 // --- 5. EVENT LISTENERS ---
 //===============================================
-document.getElementById("openMenu-Butt").addEventListener("click", () => {
+
+// UI Toggles
+document.getElementById("openMenu-Butt")?.addEventListener("click", () => {
     document.getElementById("comfycontrolContainer").classList.toggle("active");
 });
 
+// Layout Adjustments
 sliders.forEach(id => {
     document.getElementById(id)?.addEventListener("input", (e) => {
         state.layout[id] = parseInt(e.target.value);
@@ -129,6 +160,7 @@ sliders.forEach(id => {
     });
 });
 
+// Visibility Toggles
 ["showStreamerName", "showTerminalOutput"].forEach(id => {
     document.getElementById(id)?.addEventListener("change", (e) => {
         state.layout[id] = e.target.checked;
@@ -136,12 +168,15 @@ sliders.forEach(id => {
     });
 });
 
-document.getElementById("btnReset").addEventListener("click", () => {
-    localStorage.clear();
-    location.reload();
+// Master Reset[cite: 3]
+document.getElementById("btnReset")?.addEventListener("click", () => {
+    if(confirm("Factory Reset: Clear all settings and logs?")) {
+        localStorage.clear();
+        location.reload();
+    }
 });
 
-// Sound Controls logic
+// Sound Controls logic[cite: 4]
 document.querySelectorAll('.setting-row[data-key]').forEach(row => {
     const key = row.getAttribute('data-key');
     const checkbox = row.querySelector('input[type="checkbox"]');
@@ -161,10 +196,11 @@ document.querySelectorAll('.setting-row[data-key]').forEach(row => {
     fileInput?.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
+            // Create local URL for the session[cite: 4]
             window.soundSettings.customPaths[key] = URL.createObjectURL(file);
             localStorage.setItem(SOUND_KEY, JSON.stringify(window.soundSettings));
             refreshAudioInstance(key);
-            addLog(`Sound ${key} updated!`);
+            addLog(`SOUND_UPDATED: ${key}`);
         }
     });
 
@@ -172,5 +208,8 @@ document.querySelectorAll('.setting-row[data-key]').forEach(row => {
 });
 
 // Initialization
-loadData();
-setInterval(saveData, 5000);
+document.addEventListener('DOMContentLoaded', () => {
+    loadData();
+    // Auto-save loop to ensure state survives unexpected browser source crashes[cite: 3]
+    setInterval(saveData, 5000);
+});
