@@ -126,8 +126,9 @@ button#openMenu-Butt:hover {
 .rgb-group {
     display: flex;
     gap: 4px;
-    align-items: center;
     width: 60%;
+    flex-direction: column;
+    align-items: center;
 }
 
 .rgb-slider {
