@@ -164,32 +164,40 @@ export function saveData() {
 
 /**
  * Restores the Chat.log handle from IndexedDB
+ * Updated to support "Ready to start" flow.
  */
 async function restoreFileHandle() {
     const savedHandle = await get(FILE_HANDLE_KEY);
-    if (!savedHandle) return;
+    if (!savedHandle) {
+        addLog("LOG_LINK_REQUIRED: BROWSE TO CHAT.LOG");
+        return;
+    }
 
     try {
-        // Essential: Check for 'granted' status. 
-        // Note: Chrome often requires a user gesture to 'verify' even saved handles.
-        if (await savedHandle.queryPermission({ mode: 'read' }) === 'granted') {
-            const attemptInitialization = () => {
-                if (window.initializeFile) {
-                    window.initializeFile(savedHandle);
+        // Query current permission status
+        const perm = await savedHandle.queryPermission({ mode: 'read' });
+        
+        const attemptInitialization = () => {
+            if (window.initializeFile) {
+                window.initializeFile(savedHandle);
+                if (perm === 'granted') {
                     addLog("LOG_RECONNECTED: AUTO");
                 } else {
-                    // If polling.js isn't ready yet, retry once
-                    setTimeout(attemptInitialization, 200);
+                    // This is expected on first reload; user must click 'Start' to trigger permission
+                    addLog("LOG_FOUND: CLICK START TO AUTHORIZE");
+                    const bBtn = document.getElementById("browseBtn");
+                    if (bBtn) bBtn.style.boxShadow = "0 0 15px #0ec3c3";
                 }
-            };
-            attemptInitialization();
-        } else {
-            addLog("LOG_LINK_EXPIRED: CLICK 'LINK CHAT.LOG'", true);
-            const bBtn = document.getElementById("browseBtn");
-            if (bBtn) bBtn.style.boxShadow = "0 0 15px #0ec3c3";
-        }
+            } else {
+                // Wait for polling.js to register initializeFile
+                setTimeout(attemptInitialization, 200);
+            }
+        };
+        attemptInitialization();
+        
     } catch (err) {
         console.warn("Handle recovery failed", err);
+        addLog("LOG_RECOVERY_FAILED", true);
     }
 }
 
@@ -203,11 +211,9 @@ async function loadData() {
             twitchUser: loaded.twitchUser || "" 
         };
         
-        // Auto-persist Twitch Username
         if (state.twitchUser) {
             const input = document.getElementById("streamerInput");
             if (input) input.value = state.twitchUser;
-            // Trigger ComfyJS connection if defined in global scope
             if (window.ComfyJS) ComfyJS.Init(state.twitchUser);
         }
     }
@@ -226,8 +232,8 @@ async function loadData() {
     if (styleSel) styleSel.value = state.layout.borderStyle;
 
     updateUI();
-    // Use a small delay to ensure polling.js has registered window.initializeFile
-    setTimeout(restoreFileHandle, 100);
+    // Start restoration process
+    restoreFileHandle();
 }
 
 //===============================================
@@ -242,7 +248,7 @@ document.getElementById("connectBtn")?.addEventListener("click", () => {
     if (user) {
         state.twitchUser = user;
         saveData();
-        location.reload(); // Reload to initialize ComfyJS with new user
+        location.reload();
     }
 });
 

@@ -28,18 +28,12 @@ const resetBtn = document.getElementById('btnReset');
 const browseBtn = document.getElementById('browseBtn');
 const pathInput = document.getElementById('pathInput');
 
-// ===== Persistence Logic (IndexedDB) =====
-
-/**
- * Restores the file handle from IndexedDB on page load.
- */
-
+// ===== Persistence & Initialization =====
 
 /**
  * Internal helper to set up the handle and UI.
- * Now exposed to window so app.js can trigger it.
+ * Refactored to "Ready" state without auto-starting the poll.
  */
-// Ensure this is at the top level of the script
 window.initializeFile = async function(handle) {
     if (!handle) return;
     fileHandle = handle; 
@@ -48,28 +42,25 @@ window.initializeFile = async function(handle) {
         const file = await fileHandle.getFile();
         if (pathInput) pathInput.value = file.name;
         
-        // Persist the linked state
+        // Update global app state
         state.logLinked = true;
         
-        // Set the pointer to the end so we don't process old logs
-        lastSize = file.size; 
-        
-        // Start the watcher automatically
-        if (window.pollInterval) clearInterval(window.pollInterval);
-        window.pollInterval = setInterval(window.pollWebLog, 3000); 
-        
-        // Update the Start Button UI
+        // Set UI to "Ready to Start" mode
         if (startBtn) {
-            startBtn.textContent = "STOP SESSION";
-            startBtn.style.background = "#d32f2f";
+            startBtn.textContent = "START SESSION";
+            startBtn.style.background = "#2e7d32"; // Green for Ready
+            startBtn.style.boxShadow = "0 0 10px #00ff00";
         }
         
-        addLog("WATCHER_ACTIVE: " + file.name);
+        if (browseBtn) browseBtn.style.boxShadow = "none";
+        addLog("💾 LOG_LINKED: " + file.name.toUpperCase());
     } catch (err) {
-        addLog("❌ PERMISSION_DENIED: RE-LINK LOG", true);
+        addLog("❌ LINK_EXPIRED: CLICK 'LINK CHAT.LOG'", true);
+        if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
         console.error(err);
     }
 };
+
 // ===== UI Update Logic =====
 
 function runSessionTicker() {
@@ -186,11 +177,11 @@ browseBtn.onclick = async () => {
             multiple: false
         });
         
-        // Save handle to IndexedDB for persistence
+        // Save handle to IndexedDB for persistence across reloads
         await set(FILE_HANDLE_KEY, handle);
         await window.initializeFile(handle);
         
-        if (browseBtn) browseBtn.style.border = "";
+        if (browseBtn) browseBtn.style.boxShadow = "none";
         addLog(`📂 LOG_LINKED: SUCCESS`);
     } catch (err) {
         addLog("❌ PICKER_CANCELLED", true);
@@ -198,43 +189,64 @@ browseBtn.onclick = async () => {
 };
 
 startBtn.onclick = async () => {
+    // 1. Logic for STOPPING
     if (startBtn.textContent === "STOP SESSION") {
         if (sessionTickerInterval) clearInterval(sessionTickerInterval);
         if (window.pollInterval) clearInterval(window.pollInterval);
+        
         startBtn.textContent = "START SESSION";
-        startBtn.style.background = ""; 
+        startBtn.style.background = "#2e7d32"; 
+        startBtn.style.boxShadow = "0 0 10px #00ff00";
         addLog("🛑 SESSION_STOPPED.", true);
         return;
     }
 
+    // 2. Logic for STARTING
     if (!fileHandle) {
         addLog("❌ ERROR: Link Chat.log first!", true);
+        if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
         return;
     }
 
-    window.sessionStartTime = Date.now(); 
-    Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
-    Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
-
     try {
-        const file = await fileHandle.getFile();
-        lastSize = file.size; 
-        
-        if (window.pollInterval) clearInterval(window.pollInterval);
-        window.pollInterval = setInterval(window.pollWebLog, 3000); 
-        
-        if ('wakeLock' in navigator) {
-            await navigator.wakeLock.request('screen');
+        // Security: Request/Verify permission via user gesture
+        const status = await fileHandle.requestPermission({ mode: 'read' });
+        if (status !== 'granted') {
+            addLog("❌ PERMISSION_DENIED", true);
+            return;
         }
 
+        const file = await fileHandle.getFile();
+        lastSize = file.size; // Jump to the end to ignore historical data
+        window.sessionStartTime = Date.now(); 
+
+        // Clear existing intervals
+        if (window.pollInterval) clearInterval(window.pollInterval);
         if (sessionTickerInterval) clearInterval(sessionTickerInterval);
+
+        // Start fresh intervals
+        window.pollInterval = setInterval(window.pollWebLog, 3000); 
         sessionTickerInterval = setInterval(runSessionTicker, 1000);
 
+        // Reset Session Stats for the fresh start
+        Object.keys(sessionStats).forEach(key => sessionStats[key] = 0);
+        Object.keys(sessionValues).forEach(key => sessionValues[key] = 0);
+
+        // UI Update to Running state
         startBtn.textContent = "STOP SESSION";
         startBtn.style.background = "#d32f2f"; 
-        addLog(`✅ WATCHER_ENGAGED`);
+        startBtn.style.boxShadow = "none";
+        
+        addLog(`✅ SESSION_STARTED: ${file.name}`);
+
+        // Keep page active
+        if ('wakeLock' in navigator) {
+            try { await navigator.wakeLock.request('screen'); } catch(e){}
+        }
+
     } catch (err) {
         addLog("❌ ACCESS_FAILED: Check permissions.", true);
+        console.error(err);
     }
 };
 
