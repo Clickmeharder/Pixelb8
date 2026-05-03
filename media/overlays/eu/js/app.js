@@ -11,8 +11,11 @@ export let state = {
         nameY: 70,
         terminalOutputX: 10, 
         terminalOutputY: 10,
+        manifestX: 80, // New default position
+        manifestY: 80,
         showStreamerName: true,
         showTerminalOutput: true,
+        showManifest: true, // New toggle[cite: 4]
         primaryColor: "#00ff00",
         secondaryColor: "#000"
     },
@@ -20,10 +23,10 @@ export let state = {
     logLinked: false
 };
 
-// Expose addLog globally so non-module scripts or external triggers can use it
 window.addLog = addLog;
 
-const sliders = ["nameX", "nameY", "terminalOutputX", "terminalOutputY"];
+// Updated slider list to include manifest positioning[cite: 4]
+const sliders = ["nameX", "nameY", "terminalOutputX", "terminalOutputY", "manifestX", "manifestY"];
 
 //===============================================
 // --- 2. SOUND SYSTEM ---
@@ -46,7 +49,6 @@ function refreshAudioInstance(key) {
     }
 }
 
-// Initialize audio objects on boot
 Object.keys(window.soundSettings).forEach(key => {
     if (key !== 'masterEnabled' && key !== 'customPaths') refreshAudioInstance(key);
 });
@@ -76,12 +78,11 @@ export function addLog(message, isError = false) {
         second: '2-digit' 
     });
 
-    div.style = `padding: 2px 0; font-family: monospace; color: ${isError ? '#ff4444' : '#00ff00'}; font-size: 9px;`;
+    div.style = `padding: 2px 0; font-family: monospace; color: ${isError ? '#ff4444' : '#0ec3c3'}; font-size: 9px;`;
     div.textContent = `[${timestamp}] ${isError ? "[ERR]" : "[LOG]"} ${message.toUpperCase()}`;
 
     logWindow.prepend(div);
     
-    // Keep the log lean for performance in OBS browser sources[cite: 4]
     if (logWindow.childNodes.length > 25) {
         logWindow.removeChild(logWindow.lastChild);
     }
@@ -90,6 +91,7 @@ export function addLog(message, isError = false) {
 function updateUI() {
     const nameplate = document.getElementById("nameplate");
     const terminal = document.getElementById("terminaloutput");
+    const manifest = document.getElementById("session-manifest");
 
     if (nameplate) {
         nameplate.style.left = state.layout.nameX + "%";
@@ -100,6 +102,12 @@ function updateUI() {
         terminal.style.left = state.layout.terminalOutputX + "%";
         terminal.style.top = state.layout.terminalOutputY + "%";
         terminal.style.display = state.layout.showTerminalOutput ? "block" : "none";
+    }
+    // New Manifest UI Sync[cite: 4]
+    if (manifest) {
+        manifest.style.left = state.layout.manifestX + "%";
+        manifest.style.top = state.layout.manifestY + "%";
+        manifest.style.display = state.layout.showManifest ? "block" : "none";
     }
 }
 
@@ -114,7 +122,6 @@ function loadData() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
         const loaded = JSON.parse(saved);
-        // Deep merge layout to ensure new keys aren't lost
         state = { 
             ...state, 
             layout: { ...state.layout, ...loaded.layout }, 
@@ -129,16 +136,15 @@ function loadData() {
         }
     }
 
-    // Sync Sliders and Checkboxes with loaded state
     sliders.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = state.layout[id];
     });
 
-    const checkName = document.getElementById("showStreamerName");
-    const checkTerm = document.getElementById("showTerminalOutput");
-    if (checkName) checkName.checked = state.layout.showStreamerName;
-    if (checkTerm) checkTerm.checked = state.layout.showTerminalOutput;
+    ["showStreamerName", "showTerminalOutput", "showManifest"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.checked = state.layout[id];
+    });
     
     updateUI();
 }
@@ -147,12 +153,10 @@ function loadData() {
 // --- 5. EVENT LISTENERS ---
 //===============================================
 
-// UI Toggles
 document.getElementById("openMenu-Butt")?.addEventListener("click", () => {
     document.getElementById("comfycontrolContainer").classList.toggle("active");
 });
 
-// Layout Adjustments
 sliders.forEach(id => {
     document.getElementById(id)?.addEventListener("input", (e) => {
         state.layout[id] = parseInt(e.target.value);
@@ -160,15 +164,13 @@ sliders.forEach(id => {
     });
 });
 
-// Visibility Toggles
-["showStreamerName", "showTerminalOutput"].forEach(id => {
+["showStreamerName", "showTerminalOutput", "showManifest"].forEach(id => {
     document.getElementById(id)?.addEventListener("change", (e) => {
         state.layout[id] = e.target.checked;
         updateUI();
     });
 });
 
-// Master Reset[cite: 3]
 document.getElementById("btnReset")?.addEventListener("click", () => {
     if(confirm("Factory Reset: Clear all settings and logs?")) {
         localStorage.clear();
@@ -176,7 +178,6 @@ document.getElementById("btnReset")?.addEventListener("click", () => {
     }
 });
 
-// Sound Controls logic[cite: 4]
 document.querySelectorAll('.setting-row[data-key]').forEach(row => {
     const key = row.getAttribute('data-key');
     const checkbox = row.querySelector('input[type="checkbox"]');
@@ -196,7 +197,6 @@ document.querySelectorAll('.setting-row[data-key]').forEach(row => {
     fileInput?.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Create local URL for the session[cite: 4]
             window.soundSettings.customPaths[key] = URL.createObjectURL(file);
             localStorage.setItem(SOUND_KEY, JSON.stringify(window.soundSettings));
             refreshAudioInstance(key);
@@ -207,9 +207,7 @@ document.querySelectorAll('.setting-row[data-key]').forEach(row => {
     testBtn?.addEventListener('click', () => playSound(key));
 });
 
-// Initialization
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
-    // Auto-save loop to ensure state survives unexpected browser source crashes[cite: 3]
     setInterval(saveData, 5000);
 });

@@ -14,11 +14,15 @@ const MAX_RETRIES = 5;
 // Essential data objects for tracking session performance[cite: 4]
 const sessionStats = {}; 
 const sessionValues = {};
+
+// EXPOSE TO GLOBAL SCOPE for Twitch command access[cite: 1, 4]
+window.sessionStats = sessionStats;
+window.sessionValues = sessionValues;
 window.sessionStartTime = Date.now(); 
 
 // ===== UI Elements =====
 const startBtn = document.getElementById('start-session-btn');
-const resetBtn = document.getElementById('btnReset'); // Matches your app.js reset ID
+const resetBtn = document.getElementById('btnReset'); 
 const browseBtn = document.getElementById('browseBtn');
 const pathInput = document.getElementById('pathInput');
 
@@ -54,7 +58,6 @@ function updateSessionUI() {
         grandTotal += totalValue;
 
         const safeKey = key.replace(/\s+/g, '-');
-        // Looks for existing rows in your manifest-grid
         const sessionEl = document.getElementById(`session-${safeKey}`);
         
         if (count > 0 && sessionEl) {
@@ -193,7 +196,7 @@ startBtn.onclick = async () => {
         if (window.pollInterval) clearInterval(window.pollInterval);
         window.pollInterval = setInterval(window.pollWebLog, 3000); 
         
-        // Request Wake Lock for OBS
+        // Request Wake Lock for OBS browser source stability[cite: 4]
         if ('wakeLock' in navigator) {
             await navigator.wakeLock.request('screen');
         }
