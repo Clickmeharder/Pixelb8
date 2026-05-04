@@ -1,6 +1,6 @@
 /**
  * polling.js - Sovereign Entropia Log Parser & Session Tracker
- * Version: 0.04 - Twitch Sync & Pause Logic Update
+ * Version: 0.05 - OBS Permission Guard & Auto-Reauth
  * Specialized for high-density log analysis and Twitch-integrated overlays.
  */
 
@@ -68,7 +68,7 @@ window.initializeFile = async function(handle) {
             startBtn.style.background = "#2e7d32"; 
             startBtn.style.boxShadow = "0 0 10px #00ff00";
         } else {
-            // Permission is likely "prompt" - highlight Browse to guide the user
+            // Permission is "prompt" or "denied" - visually signal that a click is needed
             startBtn.style.background = "#555";
             if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
             addLog("🔑 LOG_FOUND: CLICK START TO RE-AUTH");
@@ -267,10 +267,11 @@ if (startBtn) {
         }
 
         try {
-            // FORCE PERMISSION REQUEST (Solves the OBS Permission Denied issue)
+            // THE "GATEKEEPER": Forces the browser permission prompt
             const opts = { mode: 'read' };
             if ((await fileHandle.queryPermission(opts)) !== 'granted') {
                 addLog("🔐 AUTHORIZING FILE ACCESS...");
+                // This line opens the "Allow" prompt in the OBS Interact window
                 if ((await fileHandle.requestPermission(opts)) !== 'granted') {
                     addLog("❌ PERMISSION_DENIED", true);
                     return;
