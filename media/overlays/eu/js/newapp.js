@@ -18,7 +18,7 @@ let isResetting = false;
 
 /**
  * CRITICAL V0.10: State includes decoupled positioning for 
- * the Manifest Grid and the Grand Total footer.
+ * the Manifest Grid and the Grand Total totalreturns.
  */
 export const state = {
     twitchUser: "",
@@ -26,7 +26,7 @@ export const state = {
         nameX: 50, nameY: 70,
         terminalOutputX: 10, terminalOutputY: 10,
         manifestX: 80, manifestY: 80,
-        totalX: 80, totalY: 95, // DECOUPLED: Independent Footer Position
+        totalX: 80, totalY: 95, // DECOUPLED: Independent totalreturns Position
         bubbleX: 50, bubbleY: 50,
         overlayTimerX: 10, overlayTimerY: 90, 
         showStreamerName: true,
@@ -121,7 +121,7 @@ export function addLog(message, isError = false) {
 window.addLog = addLog; 
 
 function applyStyles() {
-    const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest, #manifest-footer, #overlay-timer');
+    const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest, #session-totalContainer, #overlay-timer');
     const l = state.layout;
 
     const bgRgba1 = rgbToCss(l.bgColor1, l.bgAlpha);
@@ -160,7 +160,7 @@ export function updateUI() {
         nameplate: document.getElementById("nameplate"),
         terminal: document.getElementById("terminaloutput"),
         manifest: document.getElementById("session-manifest"),
-        footer: document.getElementById("manifest-footer"), 
+        totalreturns: document.getElementById("session-totalContainer"), 
         bubble: document.getElementById("bubble"),
         overlayTimer: document.getElementById("overlay-timer")
     };
@@ -182,10 +182,10 @@ export function updateUI() {
         els.manifest.style.top = state.layout.manifestY + "%";
         els.manifest.style.display = state.layout.showManifest ? "block" : "none";
     }
-    if (els.footer) {
-        els.footer.style.left = state.layout.totalX + "%";
-        els.footer.style.top = state.layout.totalY + "%";
-        els.footer.style.display = state.layout.showTotal ? "flex" : "none";
+    if (els.totalreturns) {
+        els.totalreturns.style.left = state.layout.totalX + "%";
+        els.totalreturns.style.top = state.layout.totalY + "%";
+        els.totalreturns.style.display = state.layout.showTotal ? "flex" : "none";
     }
     if (els.bubble) {
         els.bubble.style.left = state.layout.bubbleX + "%";
