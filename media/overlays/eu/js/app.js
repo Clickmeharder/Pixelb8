@@ -10,20 +10,15 @@ const FILE_HANDLE_KEY = "entropia_chat_handle";
 export let state = {
     twitchUser: "",
     layout: {
-        // Positions
         nameX: 50, nameY: 70,
         terminalOutputX: 10, terminalOutputY: 10,
         manifestX: 80, manifestY: 80,
         bubbleX: 50, bubbleY: 50,
         overlayTimerX: 10, overlayTimerY: 90, 
-        
-        // Visibility
         showStreamerName: true,
         showTerminalOutput: true,
         showManifest: true,
         showOverlayTimer: true, 
-
-        // Dynamic Styling Engine (RGB Objects)
         textColor: { r: 255, g: 255, b: 255 },
         bgColor1: { r: 0, g: 0, b: 0 },
         bgColor2: { r: 0, g: 0, b: 0 },
@@ -147,7 +142,7 @@ function applyStyles() {
 
 /**
  * EXPORTED: Centralized UI Update
- * Syncs the state object with the DOM elements and applies dynamic styles.
+ * V0.04 Fix: Syncs DOM elements AND the menu inputs to prevent state snap-back.
  */
 export function updateUI() {
     const els = {
@@ -186,7 +181,8 @@ export function updateUI() {
         els.overlayTimer.style.display = state.layout.showOverlayTimer ? "block" : "none";
     }
 
-    // Sync menu checkboxes with current state (Broadcaster identity toggles)
+    // CRITICAL: Sync checkboxes in the menu with current state 
+    // This stops the manual inputs from holding "old" data that reverts the state
     ["showStreamerName", "showTerminalOutput", "showManifest", "showOverlayTimer"].forEach(id => {
         const checkbox = document.getElementById(id);
         if (checkbox) checkbox.checked = state.layout[id];
@@ -204,20 +200,14 @@ export function saveData() {
 
 async function restoreFileHandle() {
     const savedHandle = await get(FILE_HANDLE_KEY);
-    if (!savedHandle) {
-        addLog("LOG_LINK_REQUIRED: BROWSE TO CHAT.LOG");
-        return;
-    }
+    if (!savedHandle) return;
 
     try {
         const perm = await savedHandle.queryPermission({ mode: 'read' });
         const attemptInitialization = () => {
             if (window.initializeFile) {
                 window.initializeFile(savedHandle);
-                if (perm === 'granted') {
-                    addLog("LOG_RECONNECTED: AUTO");
-                } else {
-                    addLog("LOG_FOUND: CLICK START TO AUTHORIZE");
+                if (perm !== 'granted') {
                     const bBtn = document.getElementById("browseBtn");
                     if (bBtn) bBtn.style.boxShadow = "0 0 15px #0ec3c3";
                 }
@@ -227,7 +217,6 @@ async function restoreFileHandle() {
         };
         attemptInitialization();
     } catch (err) {
-        console.warn("Handle recovery failed", err);
         addLog("LOG_RECOVERY_FAILED", true);
     }
 }
@@ -242,10 +231,8 @@ async function loadData() {
             twitchUser: loaded.twitchUser || "" 
         };
         
-        if (state.twitchUser) {
-            const input = document.getElementById("streamerInput");
-            if (input) input.value = state.twitchUser;
-            if (window.ComfyJS) ComfyJS.Init(state.twitchUser);
+        if (state.twitchUser && window.ComfyJS) {
+            ComfyJS.Init(state.twitchUser);
         }
     }
 
@@ -294,12 +281,8 @@ document.querySelectorAll('.rgb-slider').forEach(slider => {
     slider.addEventListener('input', (e) => {
         const colorKey = e.target.dataset.color;
         const channel = e.target.dataset.channel;
-        const val = parseInt(e.target.value);
-
-        if (state.layout[colorKey]) {
-            state.layout[colorKey][channel] = val;
-            updateUI();
-        }
+        state.layout[colorKey][channel] = parseInt(e.target.value);
+        updateUI();
     });
 });
 
@@ -315,12 +298,13 @@ document.querySelectorAll('input:not(.rgb-slider), select').forEach(input => {
                 state.layout[id] = e.target.value;
             }
             updateUI();
+            saveData(); // Immediate save on manual change to prevent "snap-back"
         }
     });
 });
 
 document.getElementById("btnReset")?.addEventListener("click", () => {
-    if(confirm("Factory Reset: Clear all settings and file handles?")) {
+    if(confirm("Factory Reset?")) {
         localStorage.clear();
         set(FILE_HANDLE_KEY, null);
         location.reload();
@@ -329,7 +313,8 @@ document.getElementById("btnReset")?.addEventListener("click", () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
+    // Background interval for safety, but primary changes trigger saveData() manually
     setInterval(saveData, 5000);
 });
 
-addLog("app.js: V0.03 ONLINE");
+addLog("app.js: V0.04 ONLINE");
