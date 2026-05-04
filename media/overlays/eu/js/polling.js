@@ -8,7 +8,7 @@ import { addLog, state, saveData } from './newapp.js';
 import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
 // ==========================================================================
-// 1. GLOBAL STATE & REFERENCES (Exposed for comfyEU.js)
+// 1. GLOBAL STATE & REFERENCES (Exposed for ComfyJS integration)
 // ==========================================================================
 let fileHandle = null; 
 let lastSize = 0;
@@ -23,8 +23,8 @@ const FILE_HANDLE_KEY = "entropia_chat_handle";
 window.sessionStats = {}; 
 window.sessionValues = {};
 window.sessionSkills = {}; 
-window.sessionDeaths = 0;  
-window.globalCount = 0;    
+window.sessionDeaths = 0;   
+window.globalCount = 0;     
 window.isPaused = false;   
 window.sessionStartTime = Date.now(); 
 
@@ -50,7 +50,7 @@ const manifestGrid = document.getElementById('manifest-grid');
 // ==========================================================================
 
 /**
- * Restores reference from IDB.
+ * Restores reference from IDB and checks permission status.
  */
 window.initializeFile = async function(handle) {
     if (!handle) return;
@@ -59,10 +59,20 @@ window.initializeFile = async function(handle) {
     if (pathInput) pathInput.value = fileHandle.name;
     state.logLinked = true;
     
+    // Check if permission is already granted
+    const perm = await fileHandle.queryPermission({ mode: 'read' });
+    
     if (startBtn) {
         startBtn.textContent = "START SESSION";
-        startBtn.style.background = "#2e7d32"; 
-        startBtn.style.boxShadow = "0 0 10px #00ff00";
+        if (perm === 'granted') {
+            startBtn.style.background = "#2e7d32"; 
+            startBtn.style.boxShadow = "0 0 10px #00ff00";
+        } else {
+            // Permission is likely "prompt" - highlight Browse to guide the user
+            startBtn.style.background = "#555";
+            if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
+            addLog("🔑 LOG_FOUND: CLICK START TO RE-AUTH");
+        }
     }
     
     addLog(`💾 LOG_LINK_READY: ${fileHandle.name.toUpperCase()}`);
@@ -73,7 +83,6 @@ window.initializeFile = async function(handle) {
 // ==========================================================================
 
 function runSessionTicker() {
-    // Respect remote pause command from Twitch
     if (window.isPaused) return;
 
     const elapsed = Date.now() - window.sessionStartTime;
@@ -82,20 +91,15 @@ function runSessionTicker() {
     const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
     const timeStr = `${h}:${m}:${s}`;
 
-    // Update Internal UI Timer
     const timerEl = document.getElementById('session-timer');
     if (timerEl) timerEl.textContent = timeStr;
 
-    // Update Overlay Timer (for Twitch/OBS)
     const overlayTimer = document.getElementById('overlay-timer');
     if (overlayTimer) overlayTimer.textContent = timeStr;
 
     updateSessionUI();
 }
 
-/**
- * High-Density UI: Creates grid rows on the fly for new loot types.
- */
 function updateSessionUI() {
     let grandTotal = 0;
     const now = Date.now();
@@ -144,7 +148,6 @@ function updateSessionUI() {
 // ==========================================================================
 
 window.pollWebLog = async function() {
-    // Stop parsing if file is missing OR if session is paused via Twitch
     if (!fileHandle || window.isPaused) return;
 
     try {
@@ -166,7 +169,12 @@ window.pollWebLog = async function() {
         errorCount++;
         if (errorCount >= MAX_RETRIES) {
             clearInterval(window.pollInterval);
-            addLog("❌ ACCESS_LOST: Check browser permissions.", true);
+            clearInterval(sessionTickerInterval);
+            addLog("❌ ACCESS_LOST: RE-LINK LOG", true);
+            if (startBtn) {
+                startBtn.textContent = "START SESSION";
+                startBtn.style.background = "#555";
+            }
         }
     }
 };
@@ -181,7 +189,6 @@ window.handleChatLine = function(line) {
     lastProcessedLine = line;
 
     if (channel === 'System') {
-        // A. LOOT PARSING
         const lootMatch = message.match(lootDetailsRegex);
         if (lootMatch) {
             const itemName = lootMatch[1].trim(); 
@@ -199,7 +206,6 @@ window.handleChatLine = function(line) {
             return;
         }
 
-        // B. XP PARSING
         const xpMatch = message.match(experienceRegex);
         if (xpMatch) {
             const xpVal = parseFloat(xpMatch[1]);
@@ -209,7 +215,6 @@ window.handleChatLine = function(line) {
             return;
         }
 
-        // C. DEATH TRACKING
         if (message.includes("You have been killed") || message.includes("You died")) {
             window.sessionDeaths++;
             addLog("💀 DEATH REGISTERED", true);
@@ -217,10 +222,9 @@ window.handleChatLine = function(line) {
         }
     }
 
-    // D. GLOBAL TRACKING
     if (channel === 'Globals' && globalHofRegex.test(message)) {
         window.globalCount++;
-        addLog(`🏆 GLOBAL: ${message}`, false);
+        addLog(`🏆 GLOBAL: ${message}`);
     }
 };
 
@@ -237,6 +241,7 @@ if (browseBtn) {
             });
             await set(FILE_HANDLE_KEY, handle);
             await window.initializeFile(handle);
+            browseBtn.style.boxShadow = "none";
             addLog(`📂 LOG_LINKED: SUCCESS`);
         } catch (err) {
             addLog("❌ PICKER_CANCELLED", true);
@@ -246,7 +251,6 @@ if (browseBtn) {
 
 if (startBtn) {
     startBtn.addEventListener('click', async () => {
-        // 1. Handle Stopping
         if (startBtn.textContent === "STOP SESSION") {
             if (sessionTickerInterval) clearInterval(sessionTickerInterval);
             if (window.pollInterval) clearInterval(window.pollInterval);
@@ -256,27 +260,23 @@ if (startBtn) {
             return;
         }
 
-        // 2. Handle missing handle
         if (!fileHandle) {
             addLog("❌ ERROR: Link Chat.log first!", true);
-            // Shake the browse button to guide the user
-            const bBtn = document.getElementById("browseBtn");
-            if (bBtn) bBtn.style.boxShadow = "0 0 20px #ff0000";
+            if (browseBtn) browseBtn.style.boxShadow = "0 0 20px #ff0000";
             return;
         }
 
         try {
-            // 3. FORCE PERMISSION REQUEST (Solves the OBS Permission Denied)
+            // FORCE PERMISSION REQUEST (Solves the OBS Permission Denied issue)
             const opts = { mode: 'read' };
             if ((await fileHandle.queryPermission(opts)) !== 'granted') {
-                addLog("🔐 REQUESTING FILE ACCESS...");
+                addLog("🔐 AUTHORIZING FILE ACCESS...");
                 if ((await fileHandle.requestPermission(opts)) !== 'granted') {
                     addLog("❌ PERMISSION_DENIED", true);
                     return;
                 }
             }
 
-            // 4. Initialization Logic
             const file = await fileHandle.getFile();
             lastSize = file.size; 
             window.sessionStartTime = Date.now(); 
@@ -285,20 +285,21 @@ if (startBtn) {
             if (window.pollInterval) clearInterval(window.pollInterval);
             if (sessionTickerInterval) clearInterval(sessionTickerInterval);
 
-            window.pollInterval = setInterval(window.pollWebLog, 2500); 
+            window.pollInterval = setInterval(window.pollWebLog, 2000); 
             sessionTickerInterval = setInterval(runSessionTicker, 1000);
 
+            // Reset Session State
             window.sessionStats = {};
             window.sessionValues = {};
             window.sessionSkills = {};
             window.sessionDeaths = 0;
             window.globalCount = 0;
-            
             if (manifestGrid) manifestGrid.innerHTML = '';
 
             startBtn.textContent = "STOP SESSION";
             startBtn.style.background = "#d32f2f"; 
             startBtn.style.boxShadow = "0 0 10px #ff0000";
+            if (browseBtn) browseBtn.style.boxShadow = "none";
             addLog(`✅ SESSION_STARTED: ${file.name}`);
 
             if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
@@ -323,10 +324,5 @@ if (resetBtn) {
         addLog("🧹 SESSION_STATS_CLEARED.");
     });
 }
-
-// ==========================================================================
-// 8. INITIAL STARTUP
-// ==========================================================================
-
 
 addLog("POLLING_ENGINE: V0.05 ONLINE");
