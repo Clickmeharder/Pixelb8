@@ -1,6 +1,6 @@
 /**
  * newapp.js - Entropia Scout Core Engine (Monolith Edition)
- * Version: 0.10.1 - Grand Total Fix & Decoupled Manifest Architecture
+ * Version: 0.10.2 - Persistence & Deep-Merge Patch
  * Specialized for sovereign, no-dependency web architecture.
  */
 
@@ -12,6 +12,9 @@ import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 const STORAGE_KEY = "entropiaOBS_state_v3"; 
 const SOUND_KEY = "entropiaOBS_sound_settings";
 const FILE_HANDLE_KEY = "entropia_chat_handle";
+
+// Internal flag to prevent auto-save during a factory reset
+let isResetting = false;
 
 /**
  * CRITICAL V0.10: State includes decoupled positioning for 
@@ -349,7 +352,13 @@ const initComfy = (user) => {
 // ===============================================
 // --- 5. DATA PERSISTENCE & FILE HANDLING ---
 // ===============================================
+
+/**
+ * FIXED: Reset Guard
+ * Prevents writing to storage if a reset operation is in progress.
+ */
 export function saveData() {
+    if (isResetting) return; 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
@@ -371,11 +380,17 @@ async function restoreFileHandle() {
     } catch (err) { addLog("LOG_RECOVERY_FAILED", true); }
 }
 
+/**
+ * FIXED: Deep Merge
+ * Uses the spread operator to ensure keys like totalX exist even if the 
+ * saved data is from an older version of the app.
+ */
 async function loadData() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
         const loaded = JSON.parse(saved);
-        Object.assign(state.layout, loaded.layout);
+        // Spread operator ensures defaults are kept for missing keys
+        state.layout = { ...state.layout, ...loaded.layout };
         state.twitchUser = loaded.twitchUser || "";
         if (state.twitchUser) initComfy(state.twitchUser);
     }
@@ -455,6 +470,7 @@ document.querySelectorAll('input:not(.rgb-slider), select').forEach(input => {
 
 document.getElementById("btnReset")?.addEventListener("click", () => {
     if(confirm("Factory Reset? This clears all layout and sound settings.")) { 
+        isResetting = true; // Stop auto-save logic immediately
         localStorage.clear(); 
         set(FILE_HANDLE_KEY, null); 
         location.reload(); 
@@ -463,7 +479,8 @@ document.getElementById("btnReset")?.addEventListener("click", () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
+    // Auto-save interval
     setInterval(saveData, 10000);
 });
 
-addLog("APP_CORE [newapp.js]: V0.10.1 ONLINE");
+addLog("APP_CORE [newapp.js]: V0.10.2 ONLINE");
