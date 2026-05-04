@@ -79,6 +79,19 @@ body {
     transform: translateY(0);
 }
 
+#overlay-timer {
+    position: absolute;
+    pointer-events: auto;
+    z-index: 50;
+    box-sizing: border-box;
+    padding: 8px 15px;
+    white-space: nowrap;
+    /* This prevents it from stretching 100% */
+    width: auto; 
+    min-width: 80px;
+    text-align: center;
+}
+
 /* --- 4. CONTROL PANEL (PIXELB8 OMEGA STYLE) --- */
 button#openMenu-Butt:hover {
     opacity:0.85!important;

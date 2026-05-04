@@ -157,6 +157,7 @@ function updateUI() {
     if (els.nameplate) {
         els.nameplate.style.left = state.layout.nameX + "%";
         els.nameplate.style.top = state.layout.nameY + "%";
+        els.nameplate.style.transform = "translate(-50%, -50%)";
         els.nameplate.style.display = state.layout.showStreamerName ? "block" : "none";
         if (state.twitchUser) els.nameplate.textContent = state.twitchUser;
     }
@@ -177,6 +178,8 @@ function updateUI() {
     if (els.overlayTimer) {
         els.overlayTimer.style.left = state.layout.overlayTimerX + "%";
         els.overlayTimer.style.top = state.layout.overlayTimerY + "%";
+        // FIX: Ensure the timer centers on its coordinates and doesn't stretch
+        els.overlayTimer.style.transform = "translate(-50%, -50%)";
         els.overlayTimer.style.display = state.layout.showOverlayTimer ? "block" : "none";
     }
     applyStyles();
