@@ -65,14 +65,13 @@ body {
 #session-totalContainer {
     /* transform: translate(-50%, -50%); Optional: adds centering logic similar to your nameplate */
     white-space: nowrap;
-}
-div#manifest-footer {
     padding: 4px;
     width: auto;
     min-width: 80px;
     max-width: max-content;
     text-align: center;
 }
+
 /* --- 3. CHAT & BUBBLES --- */
 .chat-bubble { 
     padding: 12px; 
