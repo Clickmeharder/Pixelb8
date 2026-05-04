@@ -186,7 +186,7 @@ export function updateUI() {
         els.overlayTimer.style.display = state.layout.showOverlayTimer ? "block" : "none";
     }
 
-    // Ensure settings checkboxes in the menu reflect the state (useful after Twitch commands)
+    // Sync menu checkboxes with current state (Broadcaster identity toggles)
     ["showStreamerName", "showTerminalOutput", "showManifest", "showOverlayTimer"].forEach(id => {
         const checkbox = document.getElementById(id);
         if (checkbox) checkbox.checked = state.layout[id];
@@ -332,4 +332,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(saveData, 5000);
 });
 
-addLog("app.js: V0.02 ONLINE");
+addLog("app.js: V0.03 ONLINE");

@@ -1,6 +1,6 @@
 /**
  * comfyEU.js - Twitch Integration for Entropia Scout
- * Version: 0.07 - Centralized State Sync & UI Toggle Fix
+ * Version: 0.08 - Identity-Match Streamer Check & Case-Insensitive Fix
  * No-Dependency / Vanilla JS Implementation
  */
 
@@ -29,7 +29,10 @@ const connectToTwitch = () => {
     }
 };
 
-document.getElementById("connectBtn")?.addEventListener("click", connectToTwitch);
+const connectBtn = document.getElementById("connectBtn");
+if (connectBtn) {
+    connectBtn.addEventListener("click", connectToTwitch);
+}
 
 // ===============================================
 // --- 2. COMMAND HANDLING & UI TOGGLES ---
@@ -37,13 +40,19 @@ document.getElementById("connectBtn")?.addEventListener("click", connectToTwitch
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
-    const isAuthorized = flags.broadcaster || flags.mod;
-    const isStreamer = flags.broadcaster; 
+    
+    // Normalize names for identity check
+    const chatterName = user.toLowerCase();
+    const streamerTarget = state.twitchUser.toLowerCase();
+
+    // identity-based streamer check + mod flag check
+    const isStreamer = (chatterName === streamerTarget);
+    const isAuthorized = isStreamer || flags.mod;
 
     // --- PERMISSION-AWARE HELP COMMAND ---
     if (cmd === "help" || cmd === "commands") {
         const publicCmds = ["!test", "!sessiontotal", "!loot", "!skills", "!globals", "!deaths", "!help"];
-        const authCmds = ["!start", "!stop", "!pause", "!unpause", "!resume"];
+        const authCmds = ["!startsession", "!stopsession", "!pausesession", "!resumesession"];
         const streamerCmds = ["!toggleterm", "!togglename", "!toggletotal", "!togglegrid", "!toggletimer"];
 
         let available = [...publicCmds];
@@ -61,8 +70,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         playSound("meowSound");
     }
 
-    // --- UI OVERLAY TOGGLES (Broadcaster Only) ---
-    // Updated logic: Modify global state then trigger updateUI() for sync.
+    // --- UI OVERLAY TOGGLES (Identity Match Only) ---
     if (isStreamer) {
         // 1. Toggle Terminal Visibility
         if (cmd === "toggleterm" || cmd === "toggle") {
@@ -84,7 +92,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         if (cmd === "toggletotal") {
             const el = document.getElementById("session-grand-total")?.parentElement;
             if (el) {
-                // Since this isn't in core state yet, we toggle manually but with a fallback check
                 const isHidden = el.style.display === "none";
                 el.style.display = isHidden ? "flex" : "none";
                 addLog(`CMD_UI: GRAND TOTAL TOGGLED`);
@@ -240,4 +247,4 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-addLog("comfyEU.js: V0.07 ONLINE");
+addLog("comfyEU.js: V0.08 ONLINE");
