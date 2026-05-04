@@ -130,6 +130,47 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             addLog(`TWITCH: NO DATA FOR "${itemName.toUpperCase()}"`, true);
         }
     }
+	// --- NEW: SESSION SKILLS QUERY ---
+	// Usage: !skills (shows last gained) or !skills [SkillName] (shows total for session)
+	if (cmd === "skills") {
+		const targetSkill = message.trim().toLowerCase();
+		if (!window.sessionSkills || Object.keys(window.sessionSkills).length === 0) {
+			addLog("TWITCH: NO SKILL DATA RECORDED", true);
+			return;
+		}
+
+		if (!targetSkill) {
+			// Show the top 3 most improved skills this session
+			const topSkills = Object.entries(window.sessionSkills)
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, 3)
+				.map(([name, val]) => `${name}: ${val.toFixed(2)}`)
+				.join(" | ");
+			addLog(`TWITCH: TOP SKILLS: ${topSkills}`);
+		} else {
+			const key = Object.keys(window.sessionSkills).find(k => k.toLowerCase() === targetSkill);
+			if (key) {
+				const totalXp = window.sessionSkills[key];
+				showSessionAlert(`SKILL: ${key}`, totalXp.toFixed(2), "XP", 0);
+			}
+		}
+	}
+
+	// --- NEW: GLOBAL COUNTER ---
+	// Usage: !globals (Total number of globals tracked this session)
+	if (cmd === "globals") {
+		const count = window.globalCount || 0;
+		addLog(`TWITCH: ${count} GLOBALS TRACKED THIS SESSION`);
+		showSessionAlert("GLOBALS", count, "TOTAL", 0);
+	}
+
+	// --- NEW: SESSION DEATHS ---
+	// Usage: !deaths
+	if (cmd === "deaths") {
+		const deaths = window.sessionDeaths || 0;
+		addLog(`TWITCH: YOU HAVE DIED ${deaths} TIMES THIS SESSION.`);
+		showSessionAlert("DEATHS", deaths, "TOTAL", 0);
+	}
 };
 
 // ===============================================
