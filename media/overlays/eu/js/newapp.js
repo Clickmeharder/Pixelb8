@@ -1,6 +1,6 @@
 /**
  * newapp.js - Entropia Scout Core Engine (Monolith Edition)
- * Version: 0.10 - Sovereign UI & Decoupled Manifest Architecture
+ * Version: 0.10.1 - Grand Total Fix & Decoupled Manifest Architecture
  * Specialized for sovereign, no-dependency web architecture.
  */
 
@@ -380,7 +380,11 @@ async function loadData() {
         if (state.twitchUser) initComfy(state.twitchUser);
     }
 
-    numericSliders.forEach(id => { if (document.getElementById(id)) document.getElementById(id).value = state.layout[id]; });
+    numericSliders.forEach(id => { 
+        const el = document.getElementById(id);
+        if (el) el.value = state.layout[id]; 
+    });
+
     document.querySelectorAll('.rgb-slider').forEach(slider => {
         const key = slider.dataset.color;
         const channel = slider.dataset.channel;
@@ -419,7 +423,8 @@ document.querySelectorAll('.rgb-slider').forEach(slider => {
 document.querySelectorAll('input:not(.rgb-slider), select').forEach(input => {
     input.addEventListener('input', (e) => {
         const id = e.target.id;
-        if (state.layout.hasOwnProperty(id)) {
+        // Verify key exists in layout OR is a known valid coordinate/toggle
+        if (id in state.layout) {
             let val = e.target.type === "range" ? parseFloat(e.target.value) : (e.target.type === "checkbox" ? e.target.checked : e.target.value);
             
             // Core coordinate flooring for clean CSS rendering
@@ -445,4 +450,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(saveData, 10000);
 });
 
-addLog("APP_CORE [newapp.js]: V0.10 ONLINE");
+addLog("APP_CORE [newapp.js]: V0.10.1 ONLINE");
