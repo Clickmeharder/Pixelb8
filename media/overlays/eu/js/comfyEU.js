@@ -1,7 +1,7 @@
 /**
  * comfyEU.js - Twitch Integration for Entropia Scout
- * Version: 0.08 - Identity-Match Streamer Check & Case-Insensitive Fix
- * No-Dependency / Vanilla JS Implementation
+ * Version: 0.09 - Module Sync & Unified UI Integration
+ * Specialized for sovereign, no-dependency web architecture.
  */
 
 import { state, saveData, addLog, playSound, updateUI } from './app.js';
@@ -19,10 +19,11 @@ const connectToTwitch = () => {
         state.twitchUser = user;
         saveData();
         
+        // Initialize ComfyJS with the target channel
         ComfyJS.Init(user);
         
-        const nameplate = document.getElementById("nameplate");
-        if (nameplate) nameplate.textContent = user;
+        // Update the streamer nameplate via central UI sync
+        updateUI();
         
         addLog(`CONNECTED: TWITCH CHANNEL ${user.toUpperCase()}`);
         playSound("meowSound");
@@ -41,11 +42,11 @@ if (connectBtn) {
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
     
-    // Normalize names for identity check
+    // Normalize names for identity check to prevent case-mismatch issues
     const chatterName = user.toLowerCase();
     const streamerTarget = state.twitchUser.toLowerCase();
 
-    // identity-based streamer check + mod flag check
+    // Identity-based streamer check + mod flag check
     const isStreamer = (chatterName === streamerTarget);
     const isAuthorized = isStreamer || flags.mod;
 
@@ -71,24 +72,25 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 
     // --- UI OVERLAY TOGGLES (Identity Match Only) ---
+    // These commands directly modify state.layout and call updateUI/saveData
     if (isStreamer) {
+        let uiChanged = false;
+
         // 1. Toggle Terminal Visibility
         if (cmd === "toggleterm" || cmd === "toggle") {
             state.layout.showTerminalOutput = !state.layout.showTerminalOutput;
             addLog(`CMD_UI: TERMINAL ${state.layout.showTerminalOutput ? 'ENABLED' : 'DISABLED'}`);
-            updateUI();
-            saveData();
+            uiChanged = true;
         }
 
         // 2. Toggle Nameplate Visibility
         if (cmd === "togglename") {
             state.layout.showStreamerName = !state.layout.showStreamerName;
             addLog(`CMD_UI: NAMEPLATE ${state.layout.showStreamerName ? 'ENABLED' : 'DISABLED'}`);
-            updateUI();
-            saveData();
+            uiChanged = true;
         }
 
-        // 3. Toggle Session Total visibility
+        // 3. Toggle Session Total visibility (Local CSS override)
         if (cmd === "toggletotal") {
             const el = document.getElementById("session-grand-total")?.parentElement;
             if (el) {
@@ -102,16 +104,19 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         if (cmd === "togglegrid") {
             state.layout.showManifest = !state.layout.showManifest;
             addLog(`CMD_UI: MANIFEST GRID ${state.layout.showManifest ? 'ENABLED' : 'DISABLED'}`);
-            updateUI();
-            saveData();
+            uiChanged = true;
         }
 
         // 5. Toggle Session Timer Visibility
         if (cmd === "toggletimer") {
             state.layout.showOverlayTimer = !state.layout.showOverlayTimer;
             addLog(`CMD_UI: TIMER ${state.layout.showOverlayTimer ? 'ENABLED' : 'DISABLED'}`);
-            updateUI();
-            saveData();
+            uiChanged = true;
+        }
+
+        if (uiChanged) {
+            updateUI(); // Reflect changes in DOM and Checkboxes
+            saveData(); // Persistent Storage
         }
     }
 
@@ -233,18 +238,19 @@ function showSessionAlert(name, total, rate, pedValue) {
 ComfyJS.onChat = (user, message, flags, self, extra) => {};
 
 window.addEventListener('DOMContentLoaded', () => {
+    // Check if a streamer is already defined in the imported state
     if (state.twitchUser) {
         const streamerInput = document.getElementById("streamerInput");
         if (streamerInput) {
             streamerInput.value = state.twitchUser;
             ComfyJS.Init(state.twitchUser);
             
-            const nameplate = document.getElementById("nameplate");
-            if (nameplate) nameplate.textContent = state.twitchUser;
+            // Sync the nameplate and UI to reflect the existing state
+            updateUI();
             
             addLog(`TWITCH: AUTO-RECONNECTED AS ${state.twitchUser.toUpperCase()}`);
         }
     }
 });
 
-addLog("comfyEU.js: V0.08 ONLINE");
+addLog("comfyEU.js: V0.09 ONLINE");

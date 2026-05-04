@@ -1,13 +1,24 @@
-//===============================================
-// --- 1. STATE & CONSTANTS ---
-//===============================================
+/**
+ * app.js - Entropia Scout Core Engine
+ * Version: 0.05 - Object Reference & Module Sync Fix
+ * Specialized for sovereign, no-dependency web architecture.
+ */
+
 import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
+// ===============================================
+// --- 1. STATE & CONSTANTS ---
+// ===============================================
 const STORAGE_KEY = "entropiaOBS_state_v3"; 
 const SOUND_KEY = "entropiaOBS_sound_settings";
 const FILE_HANDLE_KEY = "entropia_chat_handle";
 
-export let state = {
+/**
+ * CRITICAL V0.05: State is now a const. 
+ * This ensures that other modules (comfyEU.js) importing this reference 
+ * do not lose track of it when data is loaded from storage.
+ */
+export const state = {
     twitchUser: "",
     layout: {
         nameX: 50, nameY: 70,
@@ -36,8 +47,6 @@ export let state = {
     logLinked: false
 };
 
-window.addLog = addLog;
-
 const numericSliders = [
     "nameX", "nameY", "terminalOutputX", "terminalOutputY", 
     "manifestX", "manifestY", "bubbleX", "bubbleY",
@@ -47,9 +56,9 @@ const numericSliders = [
 
 const colorKeys = ["textColor", "bgColor1", "bgColor2", "borderColor1", "borderColor2"];
 
-//===============================================
+// ===============================================
 // --- 2. SOUND SYSTEM ---
-//===============================================
+// ===============================================
 const defaultPaths = { meowSound: 'assets/sounds/meowSound.mp3' };
 const savedSoundSettings = localStorage.getItem(SOUND_KEY);
 
@@ -80,9 +89,9 @@ export function playSound(soundKey) {
     }
 }
 
-//===============================================
+// ===============================================
 // --- 3. UI SYNC & STYLING ---
-//===============================================
+// ===============================================
 
 function rgbToCss(rgbObj, alpha = 1) {
     return `rgba(${rgbObj.r}, ${rgbObj.g}, ${rgbObj.b}, ${alpha})`;
@@ -104,6 +113,8 @@ export function addLog(message, isError = false) {
     logWindow.prepend(div);
     if (logWindow.childNodes.length > 25) logWindow.removeChild(logWindow.lastChild);
 }
+
+window.addLog = addLog; // Expose to global window for non-module script access
 
 function applyStyles() {
     const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest, #overlay-timer');
@@ -142,7 +153,7 @@ function applyStyles() {
 
 /**
  * EXPORTED: Centralized UI Update
- * V0.04 Fix: Syncs DOM elements AND the menu inputs to prevent state snap-back.
+ * Syncs DOM positions AND menu inputs to reflect current state.
  */
 export function updateUI() {
     const els = {
@@ -181,8 +192,7 @@ export function updateUI() {
         els.overlayTimer.style.display = state.layout.showOverlayTimer ? "block" : "none";
     }
 
-    // CRITICAL: Sync checkboxes in the menu with current state 
-    // This stops the manual inputs from holding "old" data that reverts the state
+    // CRITICAL: Sync checkboxes in the menu with current state to prevent input drift
     ["showStreamerName", "showTerminalOutput", "showManifest", "showOverlayTimer"].forEach(id => {
         const checkbox = document.getElementById(id);
         if (checkbox) checkbox.checked = state.layout[id];
@@ -191,9 +201,9 @@ export function updateUI() {
     applyStyles();
 }
 
-//===============================================
+// ===============================================
 // --- 4. DATA PERSISTENCE & FILE HANDLING ---
-//===============================================
+// ===============================================
 export function saveData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
@@ -225,33 +235,31 @@ async function loadData() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
         const loaded = JSON.parse(saved);
-        state = { 
-            ...state, 
-            layout: { ...state.layout, ...loaded.layout }, 
-            twitchUser: loaded.twitchUser || "" 
-        };
+        
+        // V0.05 Fix: Use Object.assign to update the existing layout object 
+        // instead of reassigning 'state.layout' to a new memory address.
+        Object.assign(state.layout, loaded.layout);
+        state.twitchUser = loaded.twitchUser || "";
         
         if (state.twitchUser && window.ComfyJS) {
             ComfyJS.Init(state.twitchUser);
         }
     }
 
+    // Sync Sliders
     numericSliders.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = state.layout[id];
     });
 
+    // Sync Color Sliders
     document.querySelectorAll('.rgb-slider').forEach(slider => {
         const key = slider.dataset.color;
         const channel = slider.dataset.channel;
         if (state.layout[key]) slider.value = state.layout[key][channel];
     });
 
-    ["showStreamerName", "showTerminalOutput", "showManifest", "showOverlayTimer"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.checked = state.layout[id];
-    });
-    
+    // Sync Selects
     ["borderStyle", "fontFamily"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = state.layout[id];
@@ -261,22 +269,26 @@ async function loadData() {
     restoreFileHandle();
 }
 
-//===============================================
+// ===============================================
 // --- 5. EVENT LISTENERS ---
-//===============================================
+// ===============================================
+
+// Toggle Settings Menu
 document.getElementById("openMenu-Butt")?.addEventListener("click", () => {
     document.getElementById("comfycontrolContainer").classList.toggle("active");
 });
 
+// Twitch Connect
 document.getElementById("connectBtn")?.addEventListener("click", () => {
-    const user = document.getElementById("streamerInput").value;
+    const user = document.getElementById("streamerInput").value.trim();
     if (user) {
         state.twitchUser = user;
         saveData();
-        location.reload();
+        location.reload(); // Refresh to re-initialize ComfyJS correctly
     }
 });
 
+// Color Slider Input Handling
 document.querySelectorAll('.rgb-slider').forEach(slider => {
     slider.addEventListener('input', (e) => {
         const colorKey = e.target.dataset.color;
@@ -286,6 +298,7 @@ document.querySelectorAll('.rgb-slider').forEach(slider => {
     });
 });
 
+// Generic Input/Range Handling
 document.querySelectorAll('input:not(.rgb-slider), select').forEach(input => {
     input.addEventListener('input', (e) => {
         const id = e.target.id;
@@ -298,23 +311,25 @@ document.querySelectorAll('input:not(.rgb-slider), select').forEach(input => {
                 state.layout[id] = e.target.value;
             }
             updateUI();
-            saveData(); // Immediate save on manual change to prevent "snap-back"
+            saveData(); // Immediate save on change
         }
     });
 });
 
+// Factory Reset
 document.getElementById("btnReset")?.addEventListener("click", () => {
-    if(confirm("Factory Reset?")) {
+    if(confirm("Factory Reset? This clears all layout and sound settings.")) {
         localStorage.clear();
         set(FILE_HANDLE_KEY, null);
         location.reload();
     }
 });
 
+// DOM Load Init
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
-    // Background interval for safety, but primary changes trigger saveData() manually
-    setInterval(saveData, 5000);
+    // Safety interval (secondary to immediate saves)
+    setInterval(saveData, 10000);
 });
 
-addLog("app.js: V0.04 ONLINE");
+addLog("app.js: V0.05 ONLINE");
