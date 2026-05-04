@@ -441,4 +441,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(saveData, 10000);
 });
 
-addLog("app.js: V0.09 MONOLITH ONLINE");
+addLog("newapp.js: V0.01 ONLINE");
