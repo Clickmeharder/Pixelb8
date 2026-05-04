@@ -17,6 +17,9 @@
         <div id="terminaloutput" class="textcontainer"></div>
         <div id="nameplate">Connecting...</div>
         
+        <!-- NEW: Overlay Timer Clone -->
+        <div id="overlay-timer" class="textcontainer">00:00:00</div>
+        
         <!-- High-density Loot Display -->
         <div id="session-manifest">
             <div id="manifest-grid"></div>
@@ -46,7 +49,7 @@
             <div id="session-timer">00:00:00</div>
         </div>
 
-        <!-- Visual Styling Suite: RGB Sliders for OBS Compatibility -->
+        <!-- Visual Styling Suite -->
         <div class="settings-group">
             <h4>Visual Styling</h4>
             
@@ -139,6 +142,9 @@
             <div class="setting-row"><label>Loot Y</label><input type="range" id="manifestY" min="0" max="100"></div>
             <div class="setting-row"><label>Bubble X</label><input type="range" id="bubbleX" min="0" max="100"></div>
             <div class="setting-row"><label>Bubble Y</label><input type="range" id="bubbleY" min="0" max="100"></div>
+            <!-- NEW: Timer Position Controls -->
+            <div class="setting-row"><label>Timer X</label><input type="range" id="overlayTimerX" min="0" max="100"></div>
+            <div class="setting-row"><label>Timer Y</label><input type="range" id="overlayTimerY" min="0" max="100"></div>
         </div>
 
         <div class="settings-group">
@@ -154,6 +160,11 @@
             <div class="setting-row">
                 <label>Show Loot List</label>
                 <input type="checkbox" id="showManifest" checked>
+            </div>
+            <!-- NEW: Timer Visibility Control -->
+            <div class="setting-row">
+                <label>Show Timer</label>
+                <input type="checkbox" id="showOverlayTimer" checked>
             </div>
         </div>
 
@@ -181,7 +192,7 @@
 
     <!-- Core Modules: Loaded in dependency order -->
     <script type="module" src="js/polling.js"></script>
-	 <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
     <script type="module" src="js/comfyEU.js"></script>
 </body>
 </html>

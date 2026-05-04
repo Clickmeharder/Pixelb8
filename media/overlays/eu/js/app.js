@@ -3,7 +3,7 @@
 //===============================================
 import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
-const STORAGE_KEY = "entropiaOBS_state_v3"; // Version bumped for RGB schema
+const STORAGE_KEY = "entropiaOBS_state_v3"; 
 const SOUND_KEY = "entropiaOBS_sound_settings";
 const FILE_HANDLE_KEY = "entropia_chat_handle";
 
@@ -15,13 +15,15 @@ export let state = {
         terminalOutputX: 10, terminalOutputY: 10,
         manifestX: 80, manifestY: 80,
         bubbleX: 50, bubbleY: 50,
+        overlayTimerX: 10, overlayTimerY: 90, 
         
         // Visibility
         showStreamerName: true,
         showTerminalOutput: true,
         showManifest: true,
+        showOverlayTimer: true, 
 
-        // Dynamic Styling Engine (Migrated to RGB Objects)
+        // Dynamic Styling Engine (RGB Objects)
         textColor: { r: 255, g: 255, b: 255 },
         bgColor1: { r: 0, g: 0, b: 0 },
         bgColor2: { r: 0, g: 0, b: 0 },
@@ -44,10 +46,10 @@ window.addLog = addLog;
 const numericSliders = [
     "nameX", "nameY", "terminalOutputX", "terminalOutputY", 
     "manifestX", "manifestY", "bubbleX", "bubbleY",
+    "overlayTimerX", "overlayTimerY", 
     "borderWidth", "borderRadius", "fontSize", "textOutline", "bgAlpha"
 ];
 
-// Reference keys for color objects
 const colorKeys = ["textColor", "bgColor1", "bgColor2", "borderColor1", "borderColor2"];
 
 //===============================================
@@ -87,7 +89,6 @@ export function playSound(soundKey) {
 // --- 3. UI SYNC & STYLING ---
 //===============================================
 
-// Helper: Convert RGB object to CSS rgba/rgb string
 function rgbToCss(rgbObj, alpha = 1) {
     return `rgba(${rgbObj.r}, ${rgbObj.g}, ${rgbObj.b}, ${alpha})`;
 }
@@ -110,7 +111,7 @@ export function addLog(message, isError = false) {
 }
 
 function applyStyles() {
-    const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest');
+    const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest, #overlay-timer');
     const l = state.layout;
 
     const bgRgba1 = rgbToCss(l.bgColor1, l.bgAlpha);
@@ -124,9 +125,7 @@ function applyStyles() {
         el.style.fontSize = l.fontSize + "px";
         el.style.fontFamily = l.fontFamily;
         el.style.textShadow = l.textOutline > 0 ? `0 0 ${l.textOutline}px black` : "none";
-
         el.style.background = `linear-gradient(135deg, ${bgRgba1}, ${bgRgba2})`;
-
         el.style.borderStyle = l.borderStyle;
         el.style.borderWidth = l.borderWidth + "px";
         el.style.borderRadius = l.borderRadius + "px";
@@ -140,7 +139,6 @@ function applyStyles() {
         }
     });
 
-    // Update preview boxes in the settings menu
     colorKeys.forEach(key => {
         const preview = document.getElementById(`preview-${key}`);
         if (preview) preview.style.backgroundColor = rgbToCss(l[key]);
@@ -152,7 +150,8 @@ function updateUI() {
         nameplate: document.getElementById("nameplate"),
         terminal: document.getElementById("terminaloutput"),
         manifest: document.getElementById("session-manifest"),
-        bubble: document.getElementById("bubble")
+        bubble: document.getElementById("bubble"),
+        overlayTimer: document.getElementById("overlay-timer")
     };
 
     if (els.nameplate) {
@@ -174,6 +173,11 @@ function updateUI() {
     if (els.bubble) {
         els.bubble.style.left = state.layout.bubbleX + "%";
         els.bubble.style.top = state.layout.bubbleY + "%";
+    }
+    if (els.overlayTimer) {
+        els.overlayTimer.style.left = state.layout.overlayTimerX + "%";
+        els.overlayTimer.style.top = state.layout.overlayTimerY + "%";
+        els.overlayTimer.style.display = state.layout.showOverlayTimer ? "block" : "none";
     }
     applyStyles();
 }
@@ -232,20 +236,18 @@ async function loadData() {
         }
     }
 
-    // Sync Numeric Sliders
     numericSliders.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = state.layout[id];
     });
 
-    // Sync RGB Sliders
     document.querySelectorAll('.rgb-slider').forEach(slider => {
         const key = slider.dataset.color;
         const channel = slider.dataset.channel;
         if (state.layout[key]) slider.value = state.layout[key][channel];
     });
 
-    ["showStreamerName", "showTerminalOutput", "showManifest"].forEach(id => {
+    ["showStreamerName", "showTerminalOutput", "showManifest", "showOverlayTimer"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.checked = state.layout[id];
     });
@@ -275,7 +277,6 @@ document.getElementById("connectBtn")?.addEventListener("click", () => {
     }
 });
 
-// Listener for RGB Sliders (Channel based)
 document.querySelectorAll('.rgb-slider').forEach(slider => {
     slider.addEventListener('input', (e) => {
         const colorKey = e.target.dataset.color;
@@ -289,7 +290,6 @@ document.querySelectorAll('.rgb-slider').forEach(slider => {
     });
 });
 
-// Universal listener for remaining standard inputs
 document.querySelectorAll('input:not(.rgb-slider), select').forEach(input => {
     input.addEventListener('input', (e) => {
         const id = e.target.id;

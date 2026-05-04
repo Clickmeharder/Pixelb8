@@ -22,10 +22,18 @@ const FILE_HANDLE_KEY = "entropia_chat_handle";
 // Performance tracking objects
 const sessionStats = {}; 
 const sessionValues = {};
+const sessionSkills = {}; // NEW: Track Skill XP
+let sessionDeaths = 0;    // NEW: Track Deaths
+let globalCount = 0;      // NEW: Track Globals
+let isPaused = false;     // NEW: Remote Pause State
 
 // Expose to global scope for Twitch/External Command access (comfyEU.js)
 window.sessionStats = sessionStats;
 window.sessionValues = sessionValues;
+window.sessionSkills = sessionSkills;
+window.sessionDeaths = sessionDeaths;
+window.globalCount = globalCount;
+window.isPaused = isPaused;
 window.sessionStartTime = Date.now(); 
 
 // ==========================================================================
@@ -78,6 +86,9 @@ window.initializeFile = async function(handle) {
 // ==========================================================================
 
 function runSessionTicker() {
+    // Respect remote pause command from Twitch
+    if (window.isPaused) return;
+
     const timerEl = document.getElementById('session-timer');
     if (timerEl) {
         const elapsed = Date.now() - window.sessionStartTime;
@@ -176,6 +187,7 @@ window.handleChatLine = function(line) {
     lastProcessedLine = line;
 
     if (channel === 'System') {
+        // A. LOOT PARSING
         const lootMatch = message.match(lootDetailsRegex);
         if (lootMatch) {
             const itemName = lootMatch[1].trim(); 
@@ -193,14 +205,27 @@ window.handleChatLine = function(line) {
             return;
         }
 
+        // B. XP PARSING (Aggregated for !skills command)
         const xpMatch = message.match(experienceRegex);
         if (xpMatch) {
-            addLog(`✨ XP: +${xpMatch[1]} ${xpMatch[2]}`);
+            const xpVal = parseFloat(xpMatch[1]);
+            const skillName = xpMatch[2].trim();
+            window.sessionSkills[skillName] = (window.sessionSkills[skillName] || 0) + xpVal;
+            addLog(`✨ XP: +${xpVal} ${skillName}`);
+            return;
+        }
+
+        // C. DEATH TRACKING
+        if (message.includes("You have been killed") || message.includes("You died")) {
+            window.sessionDeaths++;
+            addLog("💀 DEATH REGISTERED", true);
             return;
         }
     }
 
+    // D. GLOBAL TRACKING
     if (channel === 'Globals' && globalHofRegex.test(message)) {
+        window.globalCount++;
         addLog(`🏆 GLOBAL: ${message}`, false);
     }
 };
@@ -242,7 +267,6 @@ if (startBtn) {
         }
 
         try {
-            // CRITICAL: Request permission inside the click event to avoid NotAllowedError
             const status = await fileHandle.requestPermission({ mode: 'read' });
             if (status !== 'granted') {
                 addLog("❌ PERMISSION_DENIED", true);
@@ -252,18 +276,21 @@ if (startBtn) {
             const file = await fileHandle.getFile();
             lastSize = file.size; 
             window.sessionStartTime = Date.now(); 
+            window.isPaused = false; // Reset pause on new session
 
-            // Clear existing intervals
             if (window.pollInterval) clearInterval(window.pollInterval);
             if (sessionTickerInterval) clearInterval(sessionTickerInterval);
 
-            // Start Tickers
             window.pollInterval = setInterval(window.pollWebLog, 2500); 
             sessionTickerInterval = setInterval(runSessionTicker, 1000);
 
             // Reset local stats
             Object.keys(sessionStats).forEach(k => delete sessionStats[k]);
             Object.keys(sessionValues).forEach(k => delete sessionValues[k]);
+            Object.keys(window.sessionSkills).forEach(k => delete window.sessionSkills[k]);
+            window.sessionDeaths = 0;
+            window.globalCount = 0;
+            
             if (manifestGrid) manifestGrid.innerHTML = '';
 
             startBtn.textContent = "STOP SESSION";
@@ -283,8 +310,11 @@ if (resetBtn) {
     resetBtn.addEventListener('click', () => {
         Object.keys(sessionStats).forEach(k => delete sessionStats[k]);
         Object.keys(sessionValues).forEach(k => delete sessionValues[k]);
-        if (manifestGrid) manifestGrid.innerHTML = '';
+        Object.keys(window.sessionSkills).forEach(k => delete window.sessionSkills[k]);
+        window.sessionDeaths = 0;
+        window.globalCount = 0;
         window.sessionStartTime = Date.now();
+        if (manifestGrid) manifestGrid.innerHTML = '';
         updateSessionUI();
         addLog("🧹 SESSION_STATS_CLEARED.");
     });
@@ -294,7 +324,6 @@ if (resetBtn) {
 // 8. INITIAL STARTUP
 // ==========================================================================
 window.addEventListener('DOMContentLoaded', async () => {
-    // Check IndexedDB for previous file handle
     const savedHandle = await get(FILE_HANDLE_KEY);
     if (savedHandle) {
         await window.initializeFile(savedHandle);
