@@ -1,14 +1,14 @@
 /**
  * polling.js - Sovereign Entropia Log Parser & Session Tracker
- * Version: 0.05 - OBS Permission Guard & Auto-Reauth
+ * Version: 0.06 - Hard Reset & Permission Recovery
  * Specialized for high-density log analysis and Twitch-integrated overlays.
  */
 
 import { addLog, state, saveData } from './newapp.js';
-import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
+import { get, set, del } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
 // ==========================================================================
-// 1. GLOBAL STATE & REFERENCES (Exposed for ComfyJS integration)
+// 1. GLOBAL STATE & REFERENCES
 // ==========================================================================
 let fileHandle = null; 
 let lastSize = 0;
@@ -19,13 +19,13 @@ let errorCount = 0;
 const MAX_RETRIES = 5;
 const FILE_HANDLE_KEY = "entropia_chat_handle";
 
-// Attach directly to window to ensure the Twitch script sees real-time updates
+// Exposed window objects for Twitch/Overlay integration
 window.sessionStats = {}; 
 window.sessionValues = {};
 window.sessionSkills = {}; 
 window.sessionDeaths = 0;   
 window.globalCount = 0;     
-window.isPaused = false;   
+window.isPaused = false;    
 window.sessionStartTime = Date.now(); 
 
 // ==========================================================================
@@ -46,11 +46,27 @@ const pathInput = document.getElementById('pathInput');
 const manifestGrid = document.getElementById('manifest-grid');
 
 // ==========================================================================
-// 4. PERSISTENCE & INITIALIZATION
+// 4. PERSISTENCE & RECOVERY
 // ==========================================================================
 
 /**
- * Restores reference from IDB and checks permission status.
+ * Wipes ONLY the log path and handle from storage.
+ * Mechanical Necessity: Clears stale handles without touching UI positioning.
+ */
+window.clearLogPath = async function() {
+    await del(FILE_HANDLE_KEY);
+    fileHandle = null;
+    state.logLinked = false;
+    if (pathInput) pathInput.value = "";
+    if (startBtn) {
+        startBtn.style.background = "#555";
+        startBtn.textContent = "START SESSION";
+    }
+    addLog("🧹 STORAGE_CLEARED: Log path wiped. Please re-browse.");
+};
+
+/**
+ * Initial load: Restores reference and checks permission status.
  */
 window.initializeFile = async function(handle) {
     if (!handle) return;
@@ -59,20 +75,23 @@ window.initializeFile = async function(handle) {
     if (pathInput) pathInput.value = fileHandle.name;
     state.logLinked = true;
     
-    // Check if permission is already granted
-    const perm = await fileHandle.queryPermission({ mode: 'read' });
-    
-    if (startBtn) {
-        startBtn.textContent = "START SESSION";
-        if (perm === 'granted') {
-            startBtn.style.background = "#2e7d32"; 
-            startBtn.style.boxShadow = "0 0 10px #00ff00";
-        } else {
-            // Permission is "prompt" or "denied" - visually signal that a click is needed
-            startBtn.style.background = "#555";
-            if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
-            addLog("🔑 LOG_FOUND: CLICK START TO RE-AUTH");
+    try {
+        const perm = await fileHandle.queryPermission({ mode: 'read' });
+        if (startBtn) {
+            startBtn.textContent = "START SESSION";
+            if (perm === 'granted') {
+                startBtn.style.background = "#2e7d32"; 
+                startBtn.style.boxShadow = "0 0 10px #00ff00";
+            } else {
+                startBtn.style.background = "#555";
+                if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
+                addLog("🔑 RE-AUTH_REQUIRED: Click Start");
+            }
         }
+    } catch (e) {
+        // If the handle is completely unusable/corrupt
+        addLog("⚠️ HANDLE_STALE: Resetting path reference...");
+        window.clearLogPath();
     }
     
     addLog(`💾 LOG_LINK_READY: ${fileHandle.name.toUpperCase()}`);
@@ -170,11 +189,8 @@ window.pollWebLog = async function() {
         if (errorCount >= MAX_RETRIES) {
             clearInterval(window.pollInterval);
             clearInterval(sessionTickerInterval);
-            addLog("❌ ACCESS_LOST: RE-LINK LOG", true);
-            if (startBtn) {
-                startBtn.textContent = "START SESSION";
-                startBtn.style.background = "#555";
-            }
+            addLog("❌ PERMISSION_STUCK: Automatic path reset.", true);
+            window.clearLogPath();
         }
     }
 };
@@ -267,15 +283,11 @@ if (startBtn) {
         }
 
         try {
-            // THE "GATEKEEPER": Forces the browser permission prompt
+            // Permission Guard: This triggers the "Allow" prompt in OBS Interact
             const opts = { mode: 'read' };
-            if ((await fileHandle.queryPermission(opts)) !== 'granted') {
-                addLog("🔐 AUTHORIZING FILE ACCESS...");
-                // This line opens the "Allow" prompt in the OBS Interact window
-                if ((await fileHandle.requestPermission(opts)) !== 'granted') {
-                    addLog("❌ PERMISSION_DENIED", true);
-                    return;
-                }
+            if ((await fileHandle.requestPermission(opts)) !== 'granted') {
+                addLog("❌ PERMISSION_DENIED", true);
+                return;
             }
 
             const file = await fileHandle.getFile();
@@ -306,8 +318,8 @@ if (startBtn) {
             if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
 
         } catch (err) {
-            addLog("❌ ACCESS_FAILED: RE-LINK LOG", true);
-            console.error(err);
+            addLog("❌ AUTH_FAIL: Re-link log via Browse button.", true);
+            window.clearLogPath();
         }
     });
 }
@@ -326,4 +338,4 @@ if (resetBtn) {
     });
 }
 
-addLog("POLLING_ENGINE: V0.05 ONLINE");
+addLog("POLLING_ENGINE: V0.06 ONLINE");
