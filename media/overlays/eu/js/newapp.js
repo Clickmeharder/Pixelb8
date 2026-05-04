@@ -1,6 +1,6 @@
 /**
- * app.js - Entropia Scout Core Engine (Monolith Edition)
- * Version: 0.09 - Integrated UI Stability & Comfy v0.10
+ * newapp.js - Entropia Scout Core Engine (Monolith Edition)
+ * Version: 0.10 - Sovereign UI & Decoupled Manifest Architecture
  * Specialized for sovereign, no-dependency web architecture.
  */
 
@@ -14,8 +14,8 @@ const SOUND_KEY = "entropiaOBS_sound_settings";
 const FILE_HANDLE_KEY = "entropia_chat_handle";
 
 /**
- * CRITICAL V0.05+: State is a const. 
- * Use Object.assign during load to maintain reference for other modules.
+ * CRITICAL V0.10: State includes decoupled positioning for 
+ * the Manifest Grid and the Grand Total footer.
  */
 export const state = {
     twitchUser: "",
@@ -23,11 +23,13 @@ export const state = {
         nameX: 50, nameY: 70,
         terminalOutputX: 10, terminalOutputY: 10,
         manifestX: 80, manifestY: 80,
+        totalX: 80, totalY: 95, // DECOUPLED: Independent Footer Position
         bubbleX: 50, bubbleY: 50,
         overlayTimerX: 10, overlayTimerY: 90, 
         showStreamerName: true,
         showTerminalOutput: true,
-        showManifest: true,
+        showManifest: true,     // Toggles the Grid
+        showTotal: true,        // DECOUPLED: Toggles the Total
         showOverlayTimer: true, 
         textColor: { r: 255, g: 255, b: 255 },
         bgColor1: { r: 0, g: 0, b: 0 },
@@ -48,8 +50,8 @@ export const state = {
 
 const numericSliders = [
     "nameX", "nameY", "terminalOutputX", "terminalOutputY", 
-    "manifestX", "manifestY", "bubbleX", "bubbleY",
-    "overlayTimerX", "overlayTimerY", 
+    "manifestX", "manifestY", "totalX", "totalY",
+    "bubbleX", "bubbleY", "overlayTimerX", "overlayTimerY", 
     "borderWidth", "borderRadius", "fontSize", "textOutline", "bgAlpha"
 ];
 
@@ -116,7 +118,7 @@ export function addLog(message, isError = false) {
 window.addLog = addLog; 
 
 function applyStyles() {
-    const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest, #overlay-timer');
+    const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest, #manifest-footer, #overlay-timer');
     const l = state.layout;
 
     const bgRgba1 = rgbToCss(l.bgColor1, l.bgAlpha);
@@ -155,6 +157,7 @@ export function updateUI() {
         nameplate: document.getElementById("nameplate"),
         terminal: document.getElementById("terminaloutput"),
         manifest: document.getElementById("session-manifest"),
+        footer: document.getElementById("manifest-footer"), 
         bubble: document.getElementById("bubble"),
         overlayTimer: document.getElementById("overlay-timer")
     };
@@ -176,6 +179,11 @@ export function updateUI() {
         els.manifest.style.top = state.layout.manifestY + "%";
         els.manifest.style.display = state.layout.showManifest ? "block" : "none";
     }
+    if (els.footer) {
+        els.footer.style.left = state.layout.totalX + "%";
+        els.footer.style.top = state.layout.totalY + "%";
+        els.footer.style.display = state.layout.showTotal ? "flex" : "none";
+    }
     if (els.bubble) {
         els.bubble.style.left = state.layout.bubbleX + "%";
         els.bubble.style.top = state.layout.bubbleY + "%";
@@ -187,8 +195,7 @@ export function updateUI() {
         els.overlayTimer.style.display = state.layout.showOverlayTimer ? "block" : "none";
     }
 
-    // CRITICAL: Sync checkboxes in the menu with current state to prevent input drift
-    ["showStreamerName", "showTerminalOutput", "showManifest", "showOverlayTimer"].forEach(id => {
+    ["showStreamerName", "showTerminalOutput", "showManifest", "showTotal", "showOverlayTimer"].forEach(id => {
         const checkbox = document.getElementById(id);
         if (checkbox) checkbox.checked = state.layout[id];
     });
@@ -196,9 +203,6 @@ export function updateUI() {
     applyStyles();
 }
 
-/**
- * Atomic Toggle Logic - Exists on window to ensure Twitch and UI remain synced.
- */
 window.toggleOverlayElement = (layoutKey) => {
     if (state.layout.hasOwnProperty(layoutKey)) {
         state.layout[layoutKey] = !state.layout[layoutKey];
@@ -210,7 +214,7 @@ window.toggleOverlayElement = (layoutKey) => {
 };
 
 // ===============================================
-// --- 4. TWITCH (COMFY) LOGIC - V0.10 FULL ---
+// --- 4. TWITCH (COMFY) LOGIC ---
 // ===============================================
 
 function showSessionAlert(name, total, rate, pedValue) {
@@ -240,7 +244,6 @@ const initComfy = (user) => {
         const isStreamer = (chatterName === streamerTarget);
         const isAuthorized = isStreamer || flags.mod;
 
-        // --- PERMISSION-AWARE HELP ---
         if (cmd === "help" || cmd === "commands") {
             const publicCmds = ["!test", "!sessiontotal", "!loot", "!skills", "!globals", "!deaths", "!help"];
             const authCmds = ["!startsession", "!stopsession", "!pausesession", "!resumesession"];
@@ -273,16 +276,13 @@ const initComfy = (user) => {
                 const status = window.toggleOverlayElement("showManifest");
                 addLog(`CMD_UI: MANIFEST GRID ${status ? 'ENABLED' : 'DISABLED'}`);
             }
+            if (cmd === "toggletotal") {
+                const status = window.toggleOverlayElement("showTotal");
+                addLog(`CMD_UI: GRAND TOTAL ${status ? 'ENABLED' : 'DISABLED'}`);
+            }
             if (cmd === "toggletimer") {
                 const status = window.toggleOverlayElement("showOverlayTimer");
                 addLog(`CMD_UI: TIMER ${status ? 'ENABLED' : 'DISABLED'}`);
-            }
-            if (cmd === "toggletotal") {
-                const el = document.getElementById("session-grand-total")?.parentElement;
-                if (el) {
-                    el.style.display = (el.style.display === "none") ? "flex" : "none";
-                    addLog(`CMD_UI: GRAND TOTAL TOGGLED`);
-                }
             }
         }
 
@@ -375,7 +375,6 @@ async function loadData() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
         const loaded = JSON.parse(saved);
-        // V0.05 Fix: Use Object.assign to update existing layout object reference
         Object.assign(state.layout, loaded.layout);
         state.twitchUser = loaded.twitchUser || "";
         if (state.twitchUser) initComfy(state.twitchUser);
@@ -421,7 +420,12 @@ document.querySelectorAll('input:not(.rgb-slider), select').forEach(input => {
     input.addEventListener('input', (e) => {
         const id = e.target.id;
         if (state.layout.hasOwnProperty(id)) {
-            state.layout[id] = e.target.type === "range" ? parseFloat(e.target.value) : (e.target.type === "checkbox" ? e.target.checked : e.target.value);
+            let val = e.target.type === "range" ? parseFloat(e.target.value) : (e.target.type === "checkbox" ? e.target.checked : e.target.value);
+            
+            // Core coordinate flooring for clean CSS rendering
+            if (id.endsWith('X') || id.endsWith('Y')) val = Math.floor(val);
+            
+            state.layout[id] = val;
             updateUI();
             saveData(); 
         }
@@ -441,4 +445,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(saveData, 10000);
 });
 
-addLog("newapp.js: V0.01 ONLINE");
+addLog("APP_CORE [newapp.js]: V0.10 ONLINE");

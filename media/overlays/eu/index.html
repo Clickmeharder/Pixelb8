@@ -20,19 +20,21 @@
         <!-- NEW: Overlay Timer Clone -->
         <div id="overlay-timer" class="textcontainer">00:00:00</div>
         
-        <!-- High-density Loot Display -->
+        <!-- High-density Loot Display (The Grid) -->
         <div id="session-manifest">
             <div id="manifest-grid"></div>
-            <div id="manifest-footer">
-                TOTAL: <span id="session-grand-total">0.0000</span> PED
-            </div>
+        </div>
+
+        <!-- SEPARATED: Grand Total Footer (The Total) -->
+        <div id="manifest-footer" class="textcontainer">
+            RETURNS: <span id="session-grand-total">0.0000</span> PED
         </div>
     </div>
     
     <!-- Settings Toggle Button -->
     <button id="openMenu-Butt" style="position:fixed; top:10px; right: 50%; width: 50px; opacity:0.0; z-index:9999;">⚙️</button>
 
-    <!-- Control Panel: Persists Twitch User and File Handles -->
+    <!-- Control Panel -->
     <div id="comfycontrolContainer">
         <h4>Twitch Config</h4>
         <input type="text" id="streamerInput" placeholder="Twitch User">
@@ -56,9 +58,9 @@
             <div class="setting-row">
                 <label>Text Color</label>
                 <div class="rgb-group">
-                    <input type="range" class="rgb-slider" data-color="textColor" data-channel="r" min="0" max="255" value="255">
-                    <input type="range" class="rgb-slider" data-color="textColor" data-channel="g" min="0" max="255" value="255">
-                    <input type="range" class="rgb-slider" data-color="textColor" data-channel="b" min="0" max="255" value="255">
+                    <input type="range" class="rgb-slider" data-color="textColor" data-channel="r" min="0" max="255">
+                    <input type="range" class="rgb-slider" data-color="textColor" data-channel="g" min="0" max="255">
+                    <input type="range" class="rgb-slider" data-color="textColor" data-channel="b" min="0" max="255">
                     <div id="preview-textColor" class="color-preview"></div>
                 </div>
             </div>
@@ -66,9 +68,9 @@
             <div class="setting-row">
                 <label>BG Color 1</label>
                 <div class="rgb-group">
-                    <input type="range" class="rgb-slider" data-color="bgColor1" data-channel="r" min="0" max="255" value="0">
-                    <input type="range" class="rgb-slider" data-color="bgColor1" data-channel="g" min="0" max="255" value="0">
-                    <input type="range" class="rgb-slider" data-color="bgColor1" data-channel="b" min="0" max="255" value="0">
+                    <input type="range" class="rgb-slider" data-color="bgColor1" data-channel="r" min="0" max="255">
+                    <input type="range" class="rgb-slider" data-color="bgColor1" data-channel="g" min="0" max="255">
+                    <input type="range" class="rgb-slider" data-color="bgColor1" data-channel="b" min="0" max="255">
                     <div id="preview-bgColor1" class="color-preview"></div>
                 </div>
                 <input type="range" id="bgAlpha" min="0" max="1" step="0.1" title="Opacity">
@@ -77,9 +79,9 @@
             <div class="setting-row">
                 <label>BG Color 2</label>
                 <div class="rgb-group">
-                    <input type="range" class="rgb-slider" data-color="bgColor2" data-channel="r" min="0" max="255" value="0">
-                    <input type="range" class="rgb-slider" data-color="bgColor2" data-channel="g" min="0" max="255" value="0">
-                    <input type="range" class="rgb-slider" data-color="bgColor2" data-channel="b" min="0" max="255" value="0">
+                    <input type="range" class="rgb-slider" data-color="bgColor2" data-channel="r" min="0" max="255">
+                    <input type="range" class="rgb-slider" data-color="bgColor2" data-channel="g" min="0" max="255">
+                    <input type="range" class="rgb-slider" data-color="bgColor2" data-channel="b" min="0" max="255">
                     <div id="preview-bgColor2" class="color-preview"></div>
                 </div>
             </div>
@@ -87,9 +89,9 @@
             <div class="setting-row">
                 <label>Border Start</label>
                 <div class="rgb-group">
-                    <input type="range" class="rgb-slider" data-color="borderColor1" data-channel="r" min="0" max="255" value="14">
-                    <input type="range" class="rgb-slider" data-color="borderColor1" data-channel="g" min="0" max="255" value="195">
-                    <input type="range" class="rgb-slider" data-color="borderColor1" data-channel="b" min="0" max="255" value="195">
+                    <input type="range" class="rgb-slider" data-color="borderColor1" data-channel="r" min="0" max="255">
+                    <input type="range" class="rgb-slider" data-color="borderColor1" data-channel="g" min="0" max="255">
+                    <input type="range" class="rgb-slider" data-color="borderColor1" data-channel="b" min="0" max="255">
                     <div id="preview-borderColor1" class="color-preview"></div>
                 </div>
             </div>
@@ -97,9 +99,9 @@
             <div class="setting-row">
                 <label>Border End</label>
                 <div class="rgb-group">
-                    <input type="range" class="rgb-slider" data-color="borderColor2" data-channel="r" min="0" max="255" value="14">
-                    <input type="range" class="rgb-slider" data-color="borderColor2" data-channel="g" min="0" max="255" value="195">
-                    <input type="range" class="rgb-slider" data-color="borderColor2" data-channel="b" min="0" max="255" value="195">
+                    <input type="range" class="rgb-slider" data-color="borderColor2" data-channel="r" min="0" max="255">
+                    <input type="range" class="rgb-slider" data-color="borderColor2" data-channel="g" min="0" max="255">
+                    <input type="range" class="rgb-slider" data-color="borderColor2" data-channel="b" min="0" max="255">
                     <div id="preview-borderColor2" class="color-preview"></div>
                 </div>
             </div>
@@ -138,43 +140,35 @@
             <div class="setting-row"><label>Name Y</label><input type="range" id="nameY" min="0" max="100"></div>
             <div class="setting-row"><label>Terminal X</label><input type="range" id="terminalOutputX" min="0" max="100"></div>
             <div class="setting-row"><label>Terminal Y</label><input type="range" id="terminalOutputY" min="0" max="100"></div>
-            <div class="setting-row"><label>Loot X</label><input type="range" id="manifestX" min="0" max="100"></div>
-            <div class="setting-row"><label>Loot Y</label><input type="range" id="manifestY" min="0" max="100"></div>
+            
+            <div class="setting-row"><label>Loot Grid X</label><input type="range" id="manifestX" min="0" max="100"></div>
+            <div class="setting-row"><label>Loot Grid Y</label><input type="range" id="manifestY" min="0" max="100"></div>
+            
+            <!-- NEW: Independent Total Positioning -->
+            <div class="setting-row"><label>Grand Total X</label><input type="range" id="totalX" min="0" max="100"></div>
+            <div class="setting-row"><label>Grand Total Y</label><input type="range" id="totalY" min="0" max="100"></div>
+
             <div class="setting-row"><label>Bubble X</label><input type="range" id="bubbleX" min="0" max="100"></div>
             <div class="setting-row"><label>Bubble Y</label><input type="range" id="bubbleY" min="0" max="100"></div>
-            <!-- NEW: Timer Position Controls -->
             <div class="setting-row"><label>Timer X</label><input type="range" id="overlayTimerX" min="0" max="100"></div>
             <div class="setting-row"><label>Timer Y</label><input type="range" id="overlayTimerY" min="0" max="100"></div>
         </div>
 
         <div class="settings-group">
             <h4>Visibility</h4>
-            <div class="setting-row">
-                <label>Show Nameplate</label>
-                <input type="checkbox" id="showStreamerName" checked>
-            </div>
-            <div class="setting-row">
-                <label>Show Terminal</label>
-                <input type="checkbox" id="showTerminalOutput" checked>
-            </div>
-            <div class="setting-row">
-                <label>Show Loot List</label>
-                <input type="checkbox" id="showManifest" checked>
-            </div>
-            <!-- NEW: Timer Visibility Control -->
-            <div class="setting-row">
-                <label>Show Timer</label>
-                <input type="checkbox" id="showOverlayTimer" checked>
-            </div>
+            <div class="setting-row"><label>Show Nameplate</label><input type="checkbox" id="showStreamerName" checked></div>
+            <div class="setting-row"><label>Show Terminal</label><input type="checkbox" id="showTerminalOutput" checked></div>
+            <div class="setting-row"><label>Show Loot Grid</label><input type="checkbox" id="showManifest" checked></div>
+            
+            <!-- NEW: Independent Total Visibility -->
+            <div class="setting-row"><label>Show Grand Total</label><input type="checkbox" id="showTotal" checked></div>
+            
+            <div class="setting-row"><label>Show Timer</label><input type="checkbox" id="showOverlayTimer" checked></div>
         </div>
 
         <div class="settings-group">
             <h4>Sound Settings</h4>
-            <div class="setting-row">
-                <label>Master Audio</label>
-                <input type="checkbox" id="masterEnabled" checked>
-            </div>
-            
+            <div class="setting-row"><label>Master Audio</label><input type="checkbox" id="masterEnabled" checked></div>
             <div class="setting-row" data-key="meowSound">
                 <label>Meow Sound</label>
                 <input type="checkbox" checked>
@@ -183,18 +177,12 @@
                 <input type="file" class="hidden-file-input" accept="audio/*" style="display:none">
             </div>
         </div>
-		<button id="btnWipePath" onclick="clearLogPath()" style="background: #444; color: #fff; margin-top: 10px;">
-			RESET LOG LINK
-		</button>
+
         <button id="btnReset" style="color:red; margin-top:10px; width:100%;">Hard Reset</button>
     </div>
 
-    <!-- Audio Element for sound playback system -->
-    <audio id="meowSound" preload="auto"></audio>
-
-    <!-- Core Modules: Loaded in dependency order -->
+    <!-- Core Modules -->
     <script type="module" src="js/polling.js"></script>
     <script type="module" src="js/newapp.js"></script>
-    <!-- <script type="module" src="js/comfyEU.js"></script> -->
 </body>
 </html>
