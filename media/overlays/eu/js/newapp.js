@@ -415,26 +415,42 @@ document.getElementById("connectBtn")?.addEventListener("click", () => {
 
 document.querySelectorAll('.rgb-slider').forEach(slider => {
     slider.addEventListener('input', (e) => {
-        state.layout[e.target.dataset.color][e.target.dataset.channel] = parseInt(e.target.value);
-        updateUI();
+        const key = e.target.dataset.color;
+        const channel = e.target.dataset.channel;
+        state.layout[key][channel] = parseInt(e.target.value);
+        applyStyles(); // Faster visual feedback for colors
     });
+    slider.addEventListener('change', saveData);
 });
 
+/**
+ * FIXED DECOUPLED LISTENER:
+ * Ensures totalX, totalY, showTotal, and Timer elements sync with state.
+ */
 document.querySelectorAll('input:not(.rgb-slider), select').forEach(input => {
     input.addEventListener('input', (e) => {
         const id = e.target.id;
-        // Verify key exists in layout OR is a known valid coordinate/toggle
+        
+        // Verify key exists in layout
         if (id in state.layout) {
-            let val = e.target.type === "range" ? parseFloat(e.target.value) : (e.target.type === "checkbox" ? e.target.checked : e.target.value);
-            
-            // Core coordinate flooring for clean CSS rendering
-            if (id.endsWith('X') || id.endsWith('Y')) val = Math.floor(val);
+            let val;
+            if (e.target.type === "checkbox") {
+                val = e.target.checked;
+            } else if (e.target.type === "range") {
+                val = parseFloat(e.target.value);
+                // Core coordinate flooring for clean CSS rendering
+                if (id.endsWith('X') || id.endsWith('Y')) val = Math.floor(val);
+            } else {
+                val = e.target.value;
+            }
             
             state.layout[id] = val;
             updateUI();
-            saveData(); 
         }
     });
+
+    // Save strictly on change or interaction end to avoid IDB/LocalStorage spam
+    input.addEventListener('change', saveData);
 });
 
 document.getElementById("btnReset")?.addEventListener("click", () => {
