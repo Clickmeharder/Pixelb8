@@ -1,6 +1,6 @@
 /**
  * app.js - Entropia Scout Core Engine
- * Version: 0.05 - Object Reference & Module Sync Fix
+ * Version: 0.06 - Direct Toggle API & Module Sync
  * Specialized for sovereign, no-dependency web architecture.
  */
 
@@ -14,9 +14,8 @@ const SOUND_KEY = "entropiaOBS_sound_settings";
 const FILE_HANDLE_KEY = "entropia_chat_handle";
 
 /**
- * CRITICAL V0.05: State is now a const. 
- * This ensures that other modules (comfyEU.js) importing this reference 
- * do not lose track of it when data is loaded from storage.
+ * CRITICAL V0.05+: State is a const. 
+ * Use Object.assign during load to maintain reference for other modules.
  */
 export const state = {
     twitchUser: "",
@@ -114,7 +113,7 @@ export function addLog(message, isError = false) {
     if (logWindow.childNodes.length > 25) logWindow.removeChild(logWindow.lastChild);
 }
 
-window.addLog = addLog; // Expose to global window for non-module script access
+window.addLog = addLog; 
 
 function applyStyles() {
     const targets = document.querySelectorAll('.chat-bubble, .textcontainer, #nameplate, #session-manifest, #overlay-timer');
@@ -151,10 +150,6 @@ function applyStyles() {
     });
 }
 
-/**
- * EXPORTED: Centralized UI Update
- * Syncs DOM positions AND menu inputs to reflect current state.
- */
 export function updateUI() {
     const els = {
         nameplate: document.getElementById("nameplate"),
@@ -200,6 +195,20 @@ export function updateUI() {
 
     applyStyles();
 }
+
+/**
+ * EXPORTED GLOBAL API: Direct Toggle
+ * Called by comfyEU.js to flip switches and force immediate sync/save.
+ */
+window.toggleOverlayElement = (layoutKey) => {
+    if (state.layout.hasOwnProperty(layoutKey)) {
+        state.layout[layoutKey] = !state.layout[layoutKey];
+        updateUI();
+        saveData();
+        return state.layout[layoutKey];
+    }
+    return null;
+};
 
 // ===============================================
 // --- 4. DATA PERSISTENCE & FILE HANDLING ---
@@ -284,7 +293,7 @@ document.getElementById("connectBtn")?.addEventListener("click", () => {
     if (user) {
         state.twitchUser = user;
         saveData();
-        location.reload(); // Refresh to re-initialize ComfyJS correctly
+        location.reload(); 
     }
 });
 
@@ -311,7 +320,7 @@ document.querySelectorAll('input:not(.rgb-slider), select').forEach(input => {
                 state.layout[id] = e.target.value;
             }
             updateUI();
-            saveData(); // Immediate save on change
+            saveData(); 
         }
     });
 });
@@ -332,4 +341,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(saveData, 10000);
 });
 
-addLog("app.js: V0.05 ONLINE");
+addLog("app.js: V0.06 ONLINE");

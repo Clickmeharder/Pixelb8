@@ -1,6 +1,6 @@
 /**
  * comfyEU.js - Twitch Integration for Entropia Scout
- * Version: 0.09 - Module Sync & Unified UI Integration
+ * Version: 0.10 - Direct API Implementation
  * Specialized for sovereign, no-dependency web architecture.
  */
 
@@ -42,7 +42,7 @@ if (connectBtn) {
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
     
-    // Normalize names for identity check to prevent case-mismatch issues
+    // Normalize names for identity check
     const chatterName = user.toLowerCase();
     const streamerTarget = state.twitchUser.toLowerCase();
 
@@ -72,25 +72,34 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 
     // --- UI OVERLAY TOGGLES (Identity Match Only) ---
-    // These commands directly modify state.layout and call updateUI/saveData
+    // V0.10 Implementation: Uses window.toggleOverlayElement from app.js 
+    // to ensure atomic updates and avoid module-sync flicker.
     if (isStreamer) {
-        let uiChanged = false;
-
-        // 1. Toggle Terminal Visibility
+        // Toggle Terminal Visibility
         if (cmd === "toggleterm" || cmd === "toggle") {
-            state.layout.showTerminalOutput = !state.layout.showTerminalOutput;
-            addLog(`CMD_UI: TERMINAL ${state.layout.showTerminalOutput ? 'ENABLED' : 'DISABLED'}`);
-            uiChanged = true;
+            const status = window.toggleOverlayElement("showTerminalOutput");
+            addLog(`CMD_UI: TERMINAL ${status ? 'ENABLED' : 'DISABLED'}`);
         }
 
-        // 2. Toggle Nameplate Visibility
+        // Toggle Nameplate Visibility
         if (cmd === "togglename") {
-            state.layout.showStreamerName = !state.layout.showStreamerName;
-            addLog(`CMD_UI: NAMEPLATE ${state.layout.showStreamerName ? 'ENABLED' : 'DISABLED'}`);
-            uiChanged = true;
+            const status = window.toggleOverlayElement("showStreamerName");
+            addLog(`CMD_UI: NAMEPLATE ${status ? 'ENABLED' : 'DISABLED'}`);
         }
 
-        // 3. Toggle Session Total visibility (Local CSS override)
+        // Toggle the entire Loot Manifest Grid
+        if (cmd === "togglegrid") {
+            const status = window.toggleOverlayElement("showManifest");
+            addLog(`CMD_UI: MANIFEST GRID ${status ? 'ENABLED' : 'DISABLED'}`);
+        }
+
+        // Toggle Session Timer Visibility
+        if (cmd === "toggletimer") {
+            const status = window.toggleOverlayElement("showOverlayTimer");
+            addLog(`CMD_UI: TIMER ${status ? 'ENABLED' : 'DISABLED'}`);
+        }
+
+        // Toggle Session Total visibility (Local CSS override - non-state managed)
         if (cmd === "toggletotal") {
             const el = document.getElementById("session-grand-total")?.parentElement;
             if (el) {
@@ -98,25 +107,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
                 el.style.display = isHidden ? "flex" : "none";
                 addLog(`CMD_UI: GRAND TOTAL TOGGLED`);
             }
-        }
-
-        // 4. Toggle the entire Loot Manifest Grid
-        if (cmd === "togglegrid") {
-            state.layout.showManifest = !state.layout.showManifest;
-            addLog(`CMD_UI: MANIFEST GRID ${state.layout.showManifest ? 'ENABLED' : 'DISABLED'}`);
-            uiChanged = true;
-        }
-
-        // 5. Toggle Session Timer Visibility
-        if (cmd === "toggletimer") {
-            state.layout.showOverlayTimer = !state.layout.showOverlayTimer;
-            addLog(`CMD_UI: TIMER ${state.layout.showOverlayTimer ? 'ENABLED' : 'DISABLED'}`);
-            uiChanged = true;
-        }
-
-        if (uiChanged) {
-            updateUI(); // Reflect changes in DOM and Checkboxes
-            saveData(); // Persistent Storage
         }
     }
 
@@ -215,11 +205,11 @@ function showSessionAlert(name, total, rate, pedValue) {
     if (!bubble) return;
 
     bubble.innerHTML = `
-        <div style="color: var(--accent-cyan, #0ec3c3); font-size: 8px; margin-bottom: 5px; border-bottom: 1px solid #444; letter-spacing: 1px; font-family: monospace;">SESSION STATS</div>
+        <div style="color: #0ec3c3; font-size: 8px; margin-bottom: 5px; border-bottom: 1px solid #444; letter-spacing: 1px; font-family: monospace;">SESSION STATS</div>
         <div style="font-size: 11px; margin: 5px 0; font-weight: bold; color: #fff;">${name.toUpperCase()}</div>
         <div style="font-size: 10px;">TOTAL: <span style="color: #ffcc00;">${total}</span></div>
-        <div style="font-size: 9px; color: #aaa; margin-top: 2px;">VALUE: ${pedValue.toFixed(4)} PED</div>
-        <div style="color: var(--accent-cyan, #00ffff); font-size: 9px; margin-top: 3px;">AVG: ${rate}/HR</div>
+        <div style="font-size: 9px; color: #aaa; margin-top: 2px;">VALUE: ${Number(pedValue).toFixed(4)} PED</div>
+        <div style="color: #00ffff; font-size: 9px; margin-top: 3px;">AVG: ${rate}/HR</div>
     `;
 
     bubble.classList.add("show");
@@ -253,4 +243,4 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-addLog("comfyEU.js: V0.09 ONLINE");
+addLog("comfyEU.js: V0.10 ONLINE");
