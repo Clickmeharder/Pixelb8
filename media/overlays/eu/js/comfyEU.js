@@ -133,25 +133,25 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         const startBtn = document.getElementById('start-session-btn');
 
         // Start/Stop Logic
-        if (cmd === "start" && startBtn?.textContent === "START SESSION") {
+        if (cmd === "startsession" && startBtn?.textContent === "START SESSION") {
             startBtn.click();
             addLog(`CMD_REMOTE: SESSION STARTED BY ${user.toUpperCase()}`);
         }
 
-        if (cmd === "stop" && startBtn?.textContent === "STOP SESSION") {
+        if (cmd === "stopsession" && startBtn?.textContent === "STOP SESSION") {
             startBtn.click();
             addLog(`CMD_REMOTE: SESSION STOPPED BY ${user.toUpperCase()}`);
         }
 
         // Pause/Resume Logic
-        if (cmd === "pause" && !window.isPaused) {
+        if (cmd === "pausesession" && !window.isPaused) {
             window.isPaused = true;
             if (startBtn) startBtn.style.opacity = "0.5";
             addLog(`CMD_REMOTE: SESSION PAUSED BY ${user.toUpperCase()}`);
             showSessionAlert("SESSION", 0, "PAUSED", 0);
         }
 
-        if ((cmd === "unpause" || cmd === "resume") && window.isPaused) {
+        if ((cmd === "unpausesession" || cmd === "resumesession") && window.isPaused) {
             window.isPaused = false;
             if (startBtn) startBtn.style.opacity = "1.0";
             addLog(`CMD_REMOTE: SESSION RESUMED BY ${user.toUpperCase()}`);
