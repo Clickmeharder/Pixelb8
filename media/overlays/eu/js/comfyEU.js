@@ -1,10 +1,10 @@
 /**
  * comfyEU.js - Twitch Integration for Entropia Scout
- * Version: 0.06 - Added Permission-Aware Help System
+ * Version: 0.07 - Centralized State Sync & UI Toggle Fix
  * No-Dependency / Vanilla JS Implementation
  */
 
-import { state, saveData, addLog, playSound } from './app.js';
+import { state, saveData, addLog, playSound, updateUI } from './app.js';
 
 // ===============================================
 // --- 1. TWITCH CONNECTION & PERSISTENCE ---
@@ -40,7 +40,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const isAuthorized = flags.broadcaster || flags.mod;
     const isStreamer = flags.broadcaster; 
 
-    // --- NEW: PERMISSION-AWARE HELP COMMAND ---
+    // --- PERMISSION-AWARE HELP COMMAND ---
     if (cmd === "help" || cmd === "commands") {
         const publicCmds = ["!test", "!sessiontotal", "!loot", "!skills", "!globals", "!deaths", "!help"];
         const authCmds = ["!start", "!stop", "!pause", "!unpause", "!resume"];
@@ -62,69 +62,49 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 
     // --- UI OVERLAY TOGGLES (Broadcaster Only) ---
+    // Updated logic: Modify global state then trigger updateUI() for sync.
     if (isStreamer) {
-        // Toggle Terminal Visibility
+        // 1. Toggle Terminal Visibility
         if (cmd === "toggleterm" || cmd === "toggle") {
-            const el = document.getElementById("terminaloutput");
-            if (el) {
-                const isHidden = el.style.display === "none";
-                el.style.display = isHidden ? "block" : "none";
-                state.layout.showTerminalOutput = isHidden; // Sync state
-                addLog(`CMD_UI: TERMINAL TOGGLED BY ${user.toUpperCase()}`);
-                saveData();
-            }
+            state.layout.showTerminalOutput = !state.layout.showTerminalOutput;
+            addLog(`CMD_UI: TERMINAL ${state.layout.showTerminalOutput ? 'ENABLED' : 'DISABLED'}`);
+            updateUI();
+            saveData();
         }
 
-        // Toggle Nameplate Visibility
+        // 2. Toggle Nameplate Visibility
         if (cmd === "togglename") {
-            const el = document.getElementById("nameplate");
-            if (el) {
-                const isHidden = el.style.display === "none";
-                el.style.display = isHidden ? "block" : "none";
-                state.layout.showStreamerName = isHidden; // Sync state
-                addLog(`CMD_UI: NAMEPLATE TOGGLED BY ${user.toUpperCase()}`);
-                saveData();
-            }
+            state.layout.showStreamerName = !state.layout.showStreamerName;
+            addLog(`CMD_UI: NAMEPLATE ${state.layout.showStreamerName ? 'ENABLED' : 'DISABLED'}`);
+            updateUI();
+            saveData();
         }
 
-        // Toggle Session Total visibility
+        // 3. Toggle Session Total visibility
         if (cmd === "toggletotal") {
             const el = document.getElementById("session-grand-total")?.parentElement;
             if (el) {
-                el.style.display = (el.style.display === "none") ? "flex" : "none";
-                addLog(`CMD_UI: GRAND TOTAL TOGGLED BY ${user.toUpperCase()}`);
-            }
-        }
-
-        // Toggle the entire Loot Manifest Grid
-        if (cmd === "togglegrid") {
-            const el = document.getElementById("manifest-grid");
-            if (el) {
+                // Since this isn't in core state yet, we toggle manually but with a fallback check
                 const isHidden = el.style.display === "none";
-                el.style.display = isHidden ? "grid" : "none";
-                state.layout.showManifest = isHidden; // Sync state
-                addLog(`CMD_UI: MANIFEST GRID TOGGLED BY ${user.toUpperCase()}`);
-                saveData();
+                el.style.display = isHidden ? "flex" : "none";
+                addLog(`CMD_UI: GRAND TOTAL TOGGLED`);
             }
         }
 
-        // Toggle Session Timer Visibility (Both Internal and Overlay Clone)
+        // 4. Toggle the entire Loot Manifest Grid
+        if (cmd === "togglegrid") {
+            state.layout.showManifest = !state.layout.showManifest;
+            addLog(`CMD_UI: MANIFEST GRID ${state.layout.showManifest ? 'ENABLED' : 'DISABLED'}`);
+            updateUI();
+            saveData();
+        }
+
+        // 5. Toggle Session Timer Visibility
         if (cmd === "toggletimer") {
-            const overlayTimer = document.getElementById("overlay-timer");
-            const internalTimer = document.getElementById("session-timer");
-            
-            if (overlayTimer) {
-                const isHidden = overlayTimer.style.display === "none";
-                overlayTimer.style.display = isHidden ? "block" : "none";
-                state.layout.showOverlayTimer = isHidden; // Sync state
-                addLog(`CMD_UI: TIMER TOGGLED BY ${user.toUpperCase()}`);
-                saveData();
-            }
-            
-            // Mirror logic to the settings UI timer for visual consistency
-            if (internalTimer) {
-                internalTimer.parentElement.style.display = (internalTimer.parentElement.style.display === "none") ? "block" : "none";
-            }
+            state.layout.showOverlayTimer = !state.layout.showOverlayTimer;
+            addLog(`CMD_UI: TIMER ${state.layout.showOverlayTimer ? 'ENABLED' : 'DISABLED'}`);
+            updateUI();
+            saveData();
         }
     }
 
@@ -132,7 +112,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (isAuthorized) {
         const startBtn = document.getElementById('start-session-btn');
 
-        // Start/Stop Logic
         if (cmd === "startsession" && startBtn?.textContent === "START SESSION") {
             startBtn.click();
             addLog(`CMD_REMOTE: SESSION STARTED BY ${user.toUpperCase()}`);
@@ -143,7 +122,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             addLog(`CMD_REMOTE: SESSION STOPPED BY ${user.toUpperCase()}`);
         }
 
-        // Pause/Resume Logic
         if (cmd === "pausesession" && !window.isPaused) {
             window.isPaused = true;
             if (startBtn) startBtn.style.opacity = "0.5";
@@ -162,11 +140,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     // --- SESSION STATS QUERY ---
     if (cmd === "sessiontotal" || cmd === "loot") {
         const itemName = message.trim(); 
-        
-        if (!itemName || !window.sessionStats) {
-            addLog("TWITCH: INVALID COMMAND DATA", true);
-            return;
-        }
+        if (!itemName || !window.sessionStats) return;
 
         const key = Object.keys(window.sessionStats).find(k => k.trim().toLowerCase() === itemName.toLowerCase());
 
@@ -187,10 +161,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     // --- SESSION SKILLS QUERY ---
     if (cmd === "skills") {
         const targetSkill = message.trim().toLowerCase();
-        if (!window.sessionSkills || Object.keys(window.sessionSkills).length === 0) {
-            addLog("TWITCH: NO SKILL DATA RECORDED", true);
-            return;
-        }
+        if (!window.sessionSkills || Object.keys(window.sessionSkills).length === 0) return;
 
         if (!targetSkill) {
             const topSkills = Object.entries(window.sessionSkills)
@@ -227,9 +198,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 // --- 3. VISUAL OVERLAY SYSTEM ---
 // ===============================================
 
-/**
- * Visual Alert System for Twitch Commands
- */
 function showSessionAlert(name, total, rate, pedValue) {
     const bubble = document.getElementById("bubble");
     if (!bubble) return;
@@ -272,6 +240,4 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
-
-addLog("comfuEU.js: V0.01 ONLINE");
+addLog("comfyEU.js: V0.07 ONLINE");

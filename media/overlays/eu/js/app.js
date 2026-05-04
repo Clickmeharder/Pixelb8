@@ -145,7 +145,11 @@ function applyStyles() {
     });
 }
 
-function updateUI() {
+/**
+ * EXPORTED: Centralized UI Update
+ * Syncs the state object with the DOM elements and applies dynamic styles.
+ */
+export function updateUI() {
     const els = {
         nameplate: document.getElementById("nameplate"),
         terminal: document.getElementById("terminaloutput"),
@@ -178,10 +182,16 @@ function updateUI() {
     if (els.overlayTimer) {
         els.overlayTimer.style.left = state.layout.overlayTimerX + "%";
         els.overlayTimer.style.top = state.layout.overlayTimerY + "%";
-        // FIX: Ensure the timer centers on its coordinates and doesn't stretch
         els.overlayTimer.style.transform = "translate(-50%, -50%)";
         els.overlayTimer.style.display = state.layout.showOverlayTimer ? "block" : "none";
     }
+
+    // Ensure settings checkboxes in the menu reflect the state (useful after Twitch commands)
+    ["showStreamerName", "showTerminalOutput", "showManifest", "showOverlayTimer"].forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) checkbox.checked = state.layout[id];
+    });
+
     applyStyles();
 }
 
@@ -322,4 +332,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(saveData, 5000);
 });
 
-addLog("app.js: V0.01 ONLINE");
+addLog("app.js: V0.02 ONLINE");
