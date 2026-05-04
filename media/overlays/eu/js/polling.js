@@ -327,11 +327,6 @@ if (resetBtn) {
 // ==========================================================================
 // 8. INITIAL STARTUP
 // ==========================================================================
-window.addEventListener('DOMContentLoaded', async () => {
-    const savedHandle = await get(FILE_HANDLE_KEY);
-    if (savedHandle) {
-        await window.initializeFile(savedHandle);
-    }
-});
+
 
 addLog("POLLING_ENGINE: V0.05 ONLINE");
