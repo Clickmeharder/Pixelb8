@@ -267,15 +267,18 @@ if (browseBtn) {
 
 if (startBtn) {
     startBtn.addEventListener('click', async () => {
+        // Toggle: Stop Session logic
         if (startBtn.textContent === "STOP SESSION") {
             if (sessionTickerInterval) clearInterval(sessionTickerInterval);
             if (window.pollInterval) clearInterval(window.pollInterval);
             startBtn.textContent = "START SESSION";
             startBtn.style.background = "#2e7d32"; 
+            startBtn.style.boxShadow = "0 0 10px #00ff00";
             addLog("🛑 SESSION_STOPPED.", true);
             return;
         }
 
+        // Error: No log linked
         if (!fileHandle) {
             addLog("❌ ERROR: Link Chat.log first!", true);
             if (browseBtn) browseBtn.style.boxShadow = "0 0 20px #ff0000";
@@ -283,47 +286,64 @@ if (startBtn) {
         }
 
         try {
-            // Permission Guard: This triggers the "Allow" prompt in OBS Interact
+            /**
+             * THE GATEKEEPER: Direct Request
+             * Removing queryPermission to force the browser to re-evaluate 
+             * the security token immediately on user gesture.
+             */
             const opts = { mode: 'read' };
-            if ((await fileHandle.requestPermission(opts)) !== 'granted') {
-                addLog("❌ PERMISSION_DENIED", true);
+            const permissionStatus = await fileHandle.requestPermission(opts);
+
+            if (permissionStatus !== 'granted') {
+                addLog("❌ PERMISSION_DENIED: Check top of Interact window.", true);
                 return;
             }
 
+            // If granted, initialize file and timers
             const file = await fileHandle.getFile();
             lastSize = file.size; 
             window.sessionStartTime = Date.now(); 
             window.isPaused = false; 
 
+            // Clear any existing intervals before starting new ones
             if (window.pollInterval) clearInterval(window.pollInterval);
             if (sessionTickerInterval) clearInterval(sessionTickerInterval);
 
+            // Start polling and UI ticker
             window.pollInterval = setInterval(window.pollWebLog, 2000); 
             sessionTickerInterval = setInterval(runSessionTicker, 1000);
 
-            // Reset Session State
+            // Reset Session State (Window Globals)
             window.sessionStats = {};
             window.sessionValues = {};
             window.sessionSkills = {};
             window.sessionDeaths = 0;
             window.globalCount = 0;
+            
+            // Clear UI Manifest
             if (manifestGrid) manifestGrid.innerHTML = '';
 
+            // Update Button UI
             startBtn.textContent = "STOP SESSION";
             startBtn.style.background = "#d32f2f"; 
             startBtn.style.boxShadow = "0 0 10px #ff0000";
             if (browseBtn) browseBtn.style.boxShadow = "none";
+            
             addLog(`✅ SESSION_STARTED: ${file.name}`);
 
-            if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
+            // Optional: Prevent screen sleep during session
+            if ('wakeLock' in navigator) {
+                try { await navigator.wakeLock.request('screen'); } catch (e) {}
+            }
 
         } catch (err) {
-            addLog("❌ AUTH_FAIL: Re-link log via Browse button.", true);
-            window.clearLogPath();
+            // Catch-all for stale handles or system-level denials
+            addLog("❌ AUTH_FAIL: Path reset. Please Browse again.", true);
+            console.error("Auth Failure:", err);
+            if (window.clearLogPath) window.clearLogPath();
         }
     });
 }
-
 if (resetBtn) {
     resetBtn.addEventListener('click', () => {
         window.sessionStats = {};
