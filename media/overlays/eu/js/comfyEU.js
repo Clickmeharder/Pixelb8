@@ -1,6 +1,6 @@
 /**
  * comfyEU.js - Twitch Integration for Entropia Scout
- * Version: 0.05 - Integrated Overlay Timer Toggles & Dual Timer Sync
+ * Version: 0.06 - Added Permission-Aware Help System
  * No-Dependency / Vanilla JS Implementation
  */
 
@@ -39,6 +39,21 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
     const isAuthorized = flags.broadcaster || flags.mod;
     const isStreamer = flags.broadcaster; 
+
+    // --- NEW: PERMISSION-AWARE HELP COMMAND ---
+    if (cmd === "EUhelp" || cmd === "EUcommands") {
+        const publicCmds = ["!test", "!sessiontotal", "!loot", "!skills", "!globals", "!deaths", "!help"];
+        const authCmds = ["!start", "!stop", "!pause", "!unpause", "!resume"];
+        const streamerCmds = ["!toggleterm", "!togglename", "!toggletotal", "!togglegrid", "!toggletimer"];
+
+        let available = [...publicCmds];
+        if (isAuthorized) available = [...available, ...authCmds];
+        if (isStreamer) available = [...available, ...streamerCmds];
+
+        const commandString = available.join(", ");
+        addLog(`HELP: [${user.toUpperCase()}] CAN USE: ${commandString}`);
+        showSessionAlert("COMMANDS", available.length, "AVAILABLE", 0);
+    }
 
     // Standard Test Command
     if (cmd === "test") {
