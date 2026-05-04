@@ -246,6 +246,7 @@ if (browseBtn) {
 
 if (startBtn) {
     startBtn.addEventListener('click', async () => {
+        // 1. Handle Stopping
         if (startBtn.textContent === "STOP SESSION") {
             if (sessionTickerInterval) clearInterval(sessionTickerInterval);
             if (window.pollInterval) clearInterval(window.pollInterval);
@@ -255,18 +256,27 @@ if (startBtn) {
             return;
         }
 
+        // 2. Handle missing handle
         if (!fileHandle) {
             addLog("❌ ERROR: Link Chat.log first!", true);
+            // Shake the browse button to guide the user
+            const bBtn = document.getElementById("browseBtn");
+            if (bBtn) bBtn.style.boxShadow = "0 0 20px #ff0000";
             return;
         }
 
         try {
-            const status = await fileHandle.requestPermission({ mode: 'read' });
-            if (status !== 'granted') {
-                addLog("❌ PERMISSION_DENIED", true);
-                return;
+            // 3. FORCE PERMISSION REQUEST (Solves the OBS Permission Denied)
+            const opts = { mode: 'read' };
+            if ((await fileHandle.queryPermission(opts)) !== 'granted') {
+                addLog("🔐 REQUESTING FILE ACCESS...");
+                if ((await fileHandle.requestPermission(opts)) !== 'granted') {
+                    addLog("❌ PERMISSION_DENIED", true);
+                    return;
+                }
             }
 
+            // 4. Initialization Logic
             const file = await fileHandle.getFile();
             lastSize = file.size; 
             window.sessionStartTime = Date.now(); 
@@ -278,7 +288,6 @@ if (startBtn) {
             window.pollInterval = setInterval(window.pollWebLog, 2500); 
             sessionTickerInterval = setInterval(runSessionTicker, 1000);
 
-            // Reset all window-scoped stats for a fresh run
             window.sessionStats = {};
             window.sessionValues = {};
             window.sessionSkills = {};
@@ -289,12 +298,13 @@ if (startBtn) {
 
             startBtn.textContent = "STOP SESSION";
             startBtn.style.background = "#d32f2f"; 
+            startBtn.style.boxShadow = "0 0 10px #ff0000";
             addLog(`✅ SESSION_STARTED: ${file.name}`);
 
             if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
 
         } catch (err) {
-            addLog("❌ ACCESS_FAILED", true);
+            addLog("❌ ACCESS_FAILED: RE-LINK LOG", true);
             console.error(err);
         }
     });

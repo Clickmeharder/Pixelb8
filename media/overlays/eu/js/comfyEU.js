@@ -41,7 +41,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const isStreamer = flags.broadcaster; 
 
     // --- NEW: PERMISSION-AWARE HELP COMMAND ---
-    if (cmd === "EUhelp" || cmd === "EUcommands") {
+    if (cmd === "help" || cmd === "commands") {
         const publicCmds = ["!test", "!sessiontotal", "!loot", "!skills", "!globals", "!deaths", "!help"];
         const authCmds = ["!start", "!stop", "!pause", "!unpause", "!resume"];
         const streamerCmds = ["!toggleterm", "!togglename", "!toggletotal", "!togglegrid", "!toggletimer"];
