@@ -334,4 +334,4 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-addLog("POLLING_ENGINE: V0.04 ONLINE");
+addLog("POLLING_ENGINE: V0.05 ONLINE");

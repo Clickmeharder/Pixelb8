@@ -271,3 +271,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+
+
+addLog("comfuEU.js: V0.01 ONLINE");

@@ -321,3 +321,5 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData();
     setInterval(saveData, 5000);
 });
+
+addLog("app.js: V0.01 ONLINE");
