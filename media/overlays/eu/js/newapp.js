@@ -50,7 +50,7 @@ export const state = {
 
 const numericSliders = [
     "nameX", "nameY", "terminalOutputX", "terminalOutputY", 
-    "manifestX", "manifestY", "totalX", "totalY",
+    "manifestX", "manifestY", "totalX", "totalY", 
     "bubbleX", "bubbleY", "overlayTimerX", "overlayTimerY", 
     "borderWidth", "borderRadius", "fontSize", "textOutline", "bgAlpha"
 ];
