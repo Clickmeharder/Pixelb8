@@ -1,6 +1,6 @@
 /**
  * comfyEU.js - Twitch Integration for Entropia Scout
- * Version: 0.02 - Optimized for Polling V2 Logic
+ * Version: 0.03 - UI Command Suite & Administrative Security
  * No-Dependency / Vanilla JS Implementation
  */
 
@@ -35,12 +35,13 @@ const connectToTwitch = () => {
 document.getElementById("connectBtn")?.addEventListener("click", connectToTwitch);
 
 // ===============================================
-// --- 2. COMMAND HANDLING ---
+// --- 2. COMMAND HANDLING & UI TOGGLES ---
 // ===============================================
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
     const isAuthorized = flags.broadcaster || flags.mod;
+    const isStreamer = flags.broadcaster; // Strict check for UI manipulation
 
     // Standard Test Command
     if (cmd === "test") {
@@ -48,16 +49,46 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         playSound("meowSound");
     }
 
-    // Toggle Terminal Visibility
-    if (cmd === "toggle") {
-        const terminal = document.getElementById("terminaloutput");
-        if (terminal) {
-            terminal.style.display = terminal.style.display === "none" ? "block" : "none";
-            addLog(`CMD_UI: TERMINAL DISPLAY TOGGLED`);
+    // --- UI OVERLAY TOGGLES (Broadcaster Only) ---
+    if (isStreamer) {
+        // Toggle Terminal Visibility
+        if (cmd === "toggleterm" || cmd === "toggle") {
+            const el = document.getElementById("terminaloutput");
+            if (el) {
+                el.style.display = (el.style.display === "none") ? "block" : "none";
+                addLog(`CMD_UI: TERMINAL TOGGLED BY ${user.toUpperCase()}`);
+            }
+        }
+
+        // Toggle Nameplate Visibility
+        if (cmd === "togglename") {
+            const el = document.getElementById("nameplate");
+            if (el) {
+                el.style.visibility = (el.style.visibility === "hidden") ? "visible" : "hidden";
+                addLog(`CMD_UI: NAMEPLATE TOGGLED BY ${user.toUpperCase()}`);
+            }
+        }
+
+        // Toggle Session Total/Grand Total visibility
+        if (cmd === "toggletotal") {
+            const el = document.getElementById("session-grand-total")?.parentElement;
+            if (el) {
+                el.style.display = (el.style.display === "none") ? "flex" : "none";
+                addLog(`CMD_UI: GRAND TOTAL TOGGLED BY ${user.toUpperCase()}`);
+            }
+        }
+
+        // Toggle the entire Loot Manifest Grid
+        if (cmd === "togglegrid") {
+            const el = document.getElementById("manifest-grid");
+            if (el) {
+                el.style.display = (el.style.display === "none") ? "grid" : "none";
+                addLog(`CMD_UI: MANIFEST GRID TOGGLED BY ${user.toUpperCase()}`);
+            }
         }
     }
 
-    // Remote Session Start/Stop (Authorized Only)
+    // --- REMOTE SESSION CONTROL (Authorized Only) ---
     if ((cmd === "start" || cmd === "stop") && isAuthorized) {
         const startBtn = document.getElementById('start-session-btn');
         if (!startBtn) return;
@@ -71,8 +102,9 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         }
     }
 
-    // Session Total Command: Displays loot stats and PED value in the bubble overlay
-    if (cmd === "sessiontotal") {
+    // --- SESSION STATS QUERY ---
+    // Displays loot stats and PED value in the bubble overlay[cite: 1]
+    if (cmd === "sessiontotal" || cmd === "loot") {
         const itemName = message.trim(); 
         
         if (!itemName || !window.sessionStats) {
@@ -87,7 +119,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
         if (key) {
             const total = window.sessionStats[key];
-            const pedValue = window.sessionValues[key] || 0; // Integrated from polling.js V2
+            const pedValue = window.sessionValues[key] || 0; 
             const startTime = window.sessionStartTime || Date.now();
             const elapsedHours = (Date.now() - startTime) / 3600000;
             const perHour = (total / Math.max(0.01, elapsedHours)).toFixed(1);
@@ -106,13 +138,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 /**
  * Visual Alert System for Twitch Commands
- * Displays data in the absolutely-positioned bubble element.
+ * Displays data in the absolutely-positioned bubble element.[cite: 1]
  */
 function showSessionAlert(name, total, rate, pedValue) {
     const bubble = document.getElementById("bubble");
     if (!bubble) return;
 
-    // Populate bubble with styled session data and PED value
+    // Populate bubble with high-density styled session data
     bubble.innerHTML = `
         <div style="color: var(--accent-cyan, #0ec3c3); font-size: 8px; margin-bottom: 5px; border-bottom: 1px solid #444; letter-spacing: 1px; font-family: monospace;">SESSION STATS</div>
         <div style="font-size: 11px; margin: 5px 0; font-weight: bold; color: #fff;">${name.toUpperCase()}</div>
@@ -138,9 +170,7 @@ function showSessionAlert(name, total, rate, pedValue) {
 // ===============================================
 
 ComfyJS.onChat = (user, message, flags, self, extra) => {
-    if (!self) {
-        // Chat monitoring for debug or future terminal integration
-    }
+    // Optional: Monitor chat for specific trigger words or logs
 };
 
 /**
@@ -151,7 +181,6 @@ window.addEventListener('DOMContentLoaded', () => {
         const streamerInput = document.getElementById("streamerInput");
         if (streamerInput) {
             streamerInput.value = state.twitchUser;
-            // Auto-initialize connection to avoid manual clicking on reload
             ComfyJS.Init(state.twitchUser);
             
             const nameplate = document.getElementById("nameplate");
