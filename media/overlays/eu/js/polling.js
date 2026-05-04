@@ -4,7 +4,7 @@
  * Specialized for high-density log analysis and Twitch-integrated overlays.
  */
 
-import { addLog, state, saveData } from './app.js';
+import { addLog, state, saveData } from './newapp.js';
 import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
 // ==========================================================================
