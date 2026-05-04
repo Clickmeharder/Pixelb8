@@ -1,6 +1,6 @@
 /**
- * newpolling.js - Sovereign Entropia Log Parser & Session Tracker
- * Version: 0.02 - No-Dependency / Vanilla JS 
+ * polling.js - Sovereign Entropia Log Parser & Session Tracker
+ * Version: 0.03 - Security & High-Density UI Refactor
  * Specialized for high-density log analysis and Twitch-integrated overlays.
  */
 
@@ -15,7 +15,6 @@ let lastSize = 0;
 let pollInterval = null;
 let sessionTickerInterval = null;
 let lastProcessedLine = "";
-let lastLogTimestamp = 0;
 let errorCount = 0;
 const MAX_RETRIES = 5;
 const FILE_HANDLE_KEY = "entropia_chat_handle";
@@ -24,7 +23,7 @@ const FILE_HANDLE_KEY = "entropia_chat_handle";
 const sessionStats = {}; 
 const sessionValues = {};
 
-// Expose to global scope for Twitch/External Command access
+// Expose to global scope for Twitch/External Command access (comfyEU.js)
 window.sessionStats = sessionStats;
 window.sessionValues = sessionValues;
 window.sessionStartTime = Date.now(); 
@@ -35,11 +34,9 @@ window.sessionStartTime = Date.now();
 const timestampChannelMessageRegex = /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[([^\]]+)\]\s*(.*)$/;
 const lootDetailsRegex = /You received\s+\[?(.+?)\]?\s+x\s+\((\d+)\)\s+Value:\s*([\d.]+)\s*PED/i;
 const experienceRegex = /You have gained\s+([\d.]+)\s+experience in your (.+) skill/i;
-const enhancerBreakRegex = /Your enhancer (.+?) on your (.+?) broke\. You have (\d+) enhancers remaining.*You received ([\d.]+) PED Shrapnel/i;
-const pickupRegex = /Picked up (.+?)(?: \((\d+)\))?$/;
+const sweatRegex = /You received.*Vibrant Sweat/;
 const globalValueRegex = /with a value of ([\d,.]+) PED/i;
 const globalHofRegex = /Hall of Fame|Rare Item|ATH/i;
-const sweatRegex = /You received.*Vibrant Sweat/;
 
 // ==========================================================================
 // 3. UI ELEMENT SELECTION
@@ -48,39 +45,32 @@ const startBtn = document.getElementById('start-session-btn');
 const resetBtn = document.getElementById('btnReset'); 
 const browseBtn = document.getElementById('browseBtn');
 const pathInput = document.getElementById('pathInput');
+const manifestGrid = document.getElementById('manifest-grid');
 
 // ==========================================================================
 // 4. PERSISTENCE & INITIALIZATION
 // ==========================================================================
 
 /**
- * Validates the file handle and updates the UI status
+ * Restores reference from IDB. Does NOT call getFile() to avoid NotAllowedError.
  */
 window.initializeFile = async function(handle) {
     if (!handle) return;
     fileHandle = handle; 
     
-    try {
-        const file = await fileHandle.getFile();
-        if (pathInput) pathInput.value = file.name;
-        
-        // Update global app state
-        state.logLinked = true;
-        
-        if (startBtn) {
-            startBtn.textContent = "START SESSION";
-            startBtn.style.setProperty('--btn-bg', "#2e7d32"); // Sovereign CSS Variable usage
-            startBtn.style.background = "#2e7d32"; 
-            startBtn.style.boxShadow = "0 0 10px #00ff00";
-        }
-        
-        if (browseBtn) browseBtn.style.boxShadow = "none";
-        addLog("💾 LOG_LINKED: " + file.name.toUpperCase());
-    } catch (err) {
-        addLog("❌ LINK_EXPIRED: CLICK 'LINK CHAT.LOG'", true);
-        if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
-        console.error(err);
+    // Update path input with name only (safe for auto-boot)
+    if (pathInput) pathInput.value = fileHandle.name;
+    
+    // Update global app state
+    state.logLinked = true;
+    
+    if (startBtn) {
+        startBtn.textContent = "START SESSION";
+        startBtn.style.background = "#2e7d32"; 
+        startBtn.style.boxShadow = "0 0 10px #00ff00";
     }
+    
+    addLog(`💾 LOG_LINK_READY: ${fileHandle.name.toUpperCase()}`);
 };
 
 // ==========================================================================
@@ -99,11 +89,13 @@ function runSessionTicker() {
     updateSessionUI();
 }
 
+/**
+ * High-Density UI: Creates grid rows on the fly for new loot types.
+ */
 function updateSessionUI() {
     let grandTotal = 0;
     const now = Date.now();
-    const elapsedMs = Math.max(1000, now - window.sessionStartTime); 
-    const elapsedHours = elapsedMs / 3600000;
+    const elapsedHours = (now - window.sessionStartTime) / 3600000;
 
     Object.keys(sessionStats).forEach(key => {
         const count = sessionStats[key] || 0;
@@ -111,18 +103,31 @@ function updateSessionUI() {
         grandTotal += totalValue;
 
         const safeKey = key.replace(/\s+/g, '-');
-        const sessionEl = document.getElementById(`session-${safeKey}`);
+        let sessionEl = document.getElementById(`session-${safeKey}`);
         
-        if (count > 0 && sessionEl) {
+        // Create row if it doesn't exist
+        if (!sessionEl && manifestGrid) {
+            const row = document.createElement('div');
+            row.className = 'manifest-row';
+            row.innerHTML = `
+                <span class="m-name">${key.toUpperCase()}</span>
+                <span class="m-count" id="session-${safeKey}">0</span>
+                <span class="m-rate" id="rate-${safeKey}">0/hr</span>
+                <span class="m-val" id="val-${safeKey}">(0.0000)</span>
+            `;
+            manifestGrid.appendChild(row);
+            sessionEl = document.getElementById(`session-${safeKey}`);
+        }
+
+        if (sessionEl) {
             sessionEl.textContent = count;
             const valEl = document.getElementById(`val-${safeKey}`);
             if (valEl) valEl.textContent = `(${totalValue.toFixed(4)})`;
 
             const rateEl = document.getElementById(`rate-${safeKey}`);
             if (rateEl) {
-                const perHour = (count / elapsedHours).toFixed(1);
+                const perHour = (count / Math.max(0.01, elapsedHours)).toFixed(1);
                 rateEl.textContent = `${perHour}/hr`;
-                rateEl.style.color = perHour > 0 ? "var(--accent-cyan, #00ffff)" : "#444";
             }
         }
     });
@@ -143,29 +148,25 @@ window.pollWebLog = async function() {
             const blob = file.slice(lastSize, file.size);
             const text = await blob.text();
             
-            // Standardizing line split to handle different OS line endings
             text.split(/\r?\n/).forEach(l => { 
                 if (l.trim()) window.handleChatLine(l); 
             });
             lastSize = file.size;
         } else if (file.size < lastSize) {
-            addLog("⚠️ SECURITY: Log shrink detected (possible log rotation). Resetting pointer.", true);
+            addLog("⚠️ ROTATION: Log shrink detected. Pointer reset.", true);
             lastSize = file.size;
         }
         errorCount = 0;
     } catch (err) {
         errorCount++;
         if (errorCount >= MAX_RETRIES) {
-            if (window.pollInterval) clearInterval(window.pollInterval);
-            addLog("❌ SCOUT_HALTED: File access lost.", true);
+            clearInterval(window.pollInterval);
+            addLog("❌ ACCESS_LOST: Check browser permissions.", true);
         }
     }
 };
 
-/**
- * handleChatLine acts as the traffic controller for all log data
- */
-window.handleChatLine = async function(line) {
+window.handleChatLine = function(line) {
     if (line === lastProcessedLine || !line.trim()) return;
 
     const logMatch = line.match(timestampChannelMessageRegex);
@@ -174,58 +175,38 @@ window.handleChatLine = async function(line) {
     const [_, timestamp, channel, message] = logMatch;
     lastProcessedLine = line;
 
-    // --- SYSTEM CHANNEL ROUTER ---
     if (channel === 'System') {
-        
-        // 1. LOOT PARSING (Fishing, Mining, Combat Loot)
         const lootMatch = message.match(lootDetailsRegex);
         if (lootMatch) {
             const itemName = lootMatch[1].trim(); 
             const amount = parseInt(lootMatch[2]);
             const value = parseFloat(lootMatch[3]);
 
-            if (!isNaN(value)) {
-                if (!(itemName in sessionStats)) {
-                    sessionStats[itemName] = 0;
-                    sessionValues[itemName] = 0;
-                }
-                sessionStats[itemName] += amount;
-                sessionValues[itemName] += value;
-
-                updateSessionUI();
-                addLog(`🎣 CAUGHT: ${amount}x ${itemName}`);
-                return;
+            if (!(itemName in sessionStats)) {
+                sessionStats[itemName] = 0;
+                sessionValues[itemName] = 0;
             }
-        }
-
-        // 2. XP PARSING
-        const xpMatch = message.match(experienceRegex);
-        if (xpMatch) {
-            const val = xpMatch[1];
-            const skill = xpMatch[2];
-            addLog(`✨ XP: +${val} in ${skill}`);
+            sessionStats[itemName] += amount;
+            sessionValues[itemName] += value;
+            updateSessionUI();
+            addLog(`+ ${amount}x ${itemName}`);
             return;
         }
 
-        // 3. VIBRANT SWEAT PARSING
-        if (sweatRegex.test(message)) {
-            // Specialized logic for sweat collection if needed
+        const xpMatch = message.match(experienceRegex);
+        if (xpMatch) {
+            addLog(`✨ XP: +${xpMatch[1]} ${xpMatch[2]}`);
             return;
         }
     }
 
-    // --- GLOBALS CHANNEL ROUTER ---
-    if (channel === 'Globals') {
-        if (globalHofRegex.test(message)) {
-            const valMatch = message.match(globalValueRegex);
-            const value = valMatch ? valMatch[1] : "Unknown";
-            addLog(`🏆 GLOBAL: ${message}`, false);
-        }
+    if (channel === 'Globals' && globalHofRegex.test(message)) {
+        addLog(`🏆 GLOBAL: ${message}`, false);
     }
 };
 
 // ==========================================================================
-// 7. SESSION CONTROL EVENT LISTENERS (NO-ONCLICK)
+// 7. EVENT LISTENERS (Gestures for Permission)
 // ==========================================================================
 
 if (browseBtn) {
@@ -235,11 +216,8 @@ if (browseBtn) {
                 types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
                 multiple: false
             });
-            
             await set(FILE_HANDLE_KEY, handle);
             await window.initializeFile(handle);
-            
-            browseBtn.style.boxShadow = "none";
             addLog(`📂 LOG_LINKED: SUCCESS`);
         } catch (err) {
             addLog("❌ PICKER_CANCELLED", true);
@@ -249,26 +227,22 @@ if (browseBtn) {
 
 if (startBtn) {
     startBtn.addEventListener('click', async () => {
-        // STOP Logic
         if (startBtn.textContent === "STOP SESSION") {
             if (sessionTickerInterval) clearInterval(sessionTickerInterval);
             if (window.pollInterval) clearInterval(window.pollInterval);
-            
             startBtn.textContent = "START SESSION";
             startBtn.style.background = "#2e7d32"; 
-            startBtn.style.boxShadow = "0 0 10px #00ff00";
             addLog("🛑 SESSION_STOPPED.", true);
             return;
         }
 
-        // START Logic
         if (!fileHandle) {
             addLog("❌ ERROR: Link Chat.log first!", true);
-            if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
             return;
         }
 
         try {
+            // CRITICAL: Request permission inside the click event to avoid NotAllowedError
             const status = await fileHandle.requestPermission({ mode: 'read' });
             if (status !== 'granted') {
                 addLog("❌ PERMISSION_DENIED", true);
@@ -276,31 +250,30 @@ if (startBtn) {
             }
 
             const file = await fileHandle.getFile();
-            lastSize = file.size; // Pointer set to current end of log
+            lastSize = file.size; 
             window.sessionStartTime = Date.now(); 
 
+            // Clear existing intervals
             if (window.pollInterval) clearInterval(window.pollInterval);
             if (sessionTickerInterval) clearInterval(sessionTickerInterval);
 
-            window.pollInterval = setInterval(window.pollWebLog, 3000); 
+            // Start Tickers
+            window.pollInterval = setInterval(window.pollWebLog, 2500); 
             sessionTickerInterval = setInterval(runSessionTicker, 1000);
 
-            // Reset session data
-            Object.keys(sessionStats).forEach(key => delete sessionStats[key]);
-            Object.keys(sessionValues).forEach(key => delete sessionValues[key]);
+            // Reset local stats
+            Object.keys(sessionStats).forEach(k => delete sessionStats[k]);
+            Object.keys(sessionValues).forEach(k => delete sessionValues[k]);
+            if (manifestGrid) manifestGrid.innerHTML = '';
 
             startBtn.textContent = "STOP SESSION";
             startBtn.style.background = "#d32f2f"; 
-            startBtn.style.boxShadow = "none";
-            
             addLog(`✅ SESSION_STARTED: ${file.name}`);
 
-            if ('wakeLock' in navigator) {
-                try { await navigator.wakeLock.request('screen'); } catch(e){}
-            }
+            if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
 
         } catch (err) {
-            addLog("❌ ACCESS_FAILED: Check permissions.", true);
+            addLog("❌ ACCESS_FAILED", true);
             console.error(err);
         }
     });
@@ -308,8 +281,9 @@ if (startBtn) {
 
 if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-        Object.keys(sessionStats).forEach(key => delete sessionStats[key]);
-        Object.keys(sessionValues).forEach(key => delete sessionValues[key]);
+        Object.keys(sessionStats).forEach(k => delete sessionStats[k]);
+        Object.keys(sessionValues).forEach(k => delete sessionValues[k]);
+        if (manifestGrid) manifestGrid.innerHTML = '';
         window.sessionStartTime = Date.now();
         updateSessionUI();
         addLog("🧹 SESSION_STATS_CLEARED.");
@@ -320,14 +294,11 @@ if (resetBtn) {
 // 8. INITIAL STARTUP
 // ==========================================================================
 window.addEventListener('DOMContentLoaded', async () => {
-    if (pathInput) pathInput.placeholder = "Link Chat.log to begin...";
-    
-    // Attempt to restore handle from IndexedDB
+    // Check IndexedDB for previous file handle
     const savedHandle = await get(FILE_HANDLE_KEY);
     if (savedHandle) {
-        addLog("📂 RESTORING_LOG_LINK...");
         await window.initializeFile(savedHandle);
     }
 });
 
-addLog("entropia obs source version_0.02 loaded Successfully");
+addLog("POLLING_ENGINE: V0.03 ONLINE");
