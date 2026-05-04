@@ -29,7 +29,7 @@ body {
 }
 
 /* Terminal, Nameplate, and Manifest Base Styles */
-#terminaloutput, #nameplate, #session-manifest, .chat-bubble {
+#terminaloutput, #nameplate, #session-manifest, .chat-bubble, #manifest-footer {
     position: absolute;
     pointer-events: auto;
     z-index: 50;
@@ -61,6 +61,10 @@ body {
 #session-manifest {
     min-width: 180px;
     padding: 10px;
+}
+#manifest-footer {
+    /* transform: translate(-50%, -50%); Optional: adds centering logic similar to your nameplate */
+    white-space: nowrap;
 }
 div#manifest-footer {
     padding: 4px;
