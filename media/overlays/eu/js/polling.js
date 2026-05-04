@@ -1,8 +1,15 @@
-// <script type="module" src="js/polling.js"></script>
+/**
+ * newpolling.js - Sovereign Entropia Log Parser & Session Tracker
+ * Version: 0.02 - No-Dependency / Vanilla JS 
+ * Specialized for high-density log analysis and Twitch-integrated overlays.
+ */
+
 import { addLog, state, saveData } from './app.js';
 import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
-// ===== Global State & References =====
+// ==========================================================================
+// 1. GLOBAL STATE & REFERENCES
+// ==========================================================================
 let fileHandle = null; 
 let lastSize = 0;
 let pollInterval = null;
@@ -13,25 +20,41 @@ let errorCount = 0;
 const MAX_RETRIES = 5;
 const FILE_HANDLE_KEY = "entropia_chat_handle";
 
-// Essential data objects for tracking session performance
+// Performance tracking objects
 const sessionStats = {}; 
 const sessionValues = {};
 
-// EXPOSE TO GLOBAL SCOPE for Twitch command access
+// Expose to global scope for Twitch/External Command access
 window.sessionStats = sessionStats;
 window.sessionValues = sessionValues;
 window.sessionStartTime = Date.now(); 
 
-// ===== UI Elements =====
+// ==========================================================================
+// 2. REGEX LIBRARY (Entropia Universe Specific)
+// ==========================================================================
+const timestampChannelMessageRegex = /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[([^\]]+)\]\s*(.*)$/;
+const lootDetailsRegex = /You received\s+\[?(.+?)\]?\s+x\s+\((\d+)\)\s+Value:\s*([\d.]+)\s*PED/i;
+const experienceRegex = /You have gained\s+([\d.]+)\s+experience in your (.+) skill/i;
+const enhancerBreakRegex = /Your enhancer (.+?) on your (.+?) broke\. You have (\d+) enhancers remaining.*You received ([\d.]+) PED Shrapnel/i;
+const pickupRegex = /Picked up (.+?)(?: \((\d+)\))?$/;
+const globalValueRegex = /with a value of ([\d,.]+) PED/i;
+const globalHofRegex = /Hall of Fame|Rare Item|ATH/i;
+const sweatRegex = /You received.*Vibrant Sweat/;
+
+// ==========================================================================
+// 3. UI ELEMENT SELECTION
+// ==========================================================================
 const startBtn = document.getElementById('start-session-btn');
 const resetBtn = document.getElementById('btnReset'); 
 const browseBtn = document.getElementById('browseBtn');
 const pathInput = document.getElementById('pathInput');
 
-// ===== Persistence & Initialization =====
+// ==========================================================================
+// 4. PERSISTENCE & INITIALIZATION
+// ==========================================================================
 
 /**
- * Internal helper to set up the handle and UI.
+ * Validates the file handle and updates the UI status
  */
 window.initializeFile = async function(handle) {
     if (!handle) return;
@@ -44,10 +67,10 @@ window.initializeFile = async function(handle) {
         // Update global app state
         state.logLinked = true;
         
-        // Set UI to "Ready to Start" mode
         if (startBtn) {
             startBtn.textContent = "START SESSION";
-            startBtn.style.background = "#2e7d32"; // Green for Ready
+            startBtn.style.setProperty('--btn-bg', "#2e7d32"); // Sovereign CSS Variable usage
+            startBtn.style.background = "#2e7d32"; 
             startBtn.style.boxShadow = "0 0 10px #00ff00";
         }
         
@@ -60,7 +83,9 @@ window.initializeFile = async function(handle) {
     }
 };
 
-// ===== UI Update Logic =====
+// ==========================================================================
+// 5. UI UPDATE & TICKER LOGIC
+// ==========================================================================
 
 function runSessionTicker() {
     const timerEl = document.getElementById('session-timer');
@@ -85,7 +110,6 @@ function updateSessionUI() {
         const totalValue = sessionValues[key] || 0;
         grandTotal += totalValue;
 
-        // Use a safe ID selector for items with spaces (e.g., "Fish Scrap" becomes "session-Fish-Scrap")
         const safeKey = key.replace(/\s+/g, '-');
         const sessionEl = document.getElementById(`session-${safeKey}`);
         
@@ -98,7 +122,7 @@ function updateSessionUI() {
             if (rateEl) {
                 const perHour = (count / elapsedHours).toFixed(1);
                 rateEl.textContent = `${perHour}/hr`;
-                rateEl.style.color = perHour > 0 ? "#00ffff" : "#444";
+                rateEl.style.color = perHour > 0 ? "var(--accent-cyan, #00ffff)" : "#444";
             }
         }
     });
@@ -107,7 +131,9 @@ function updateSessionUI() {
     if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
 }
 
-// ===== Polling & Parsing Core =====
+// ==========================================================================
+// 6. POLLING & PARSING CORE
+// ==========================================================================
 
 window.pollWebLog = async function() {
     if (!fileHandle) return;
@@ -116,12 +142,14 @@ window.pollWebLog = async function() {
         if (file.size > lastSize) {
             const blob = file.slice(lastSize, file.size);
             const text = await blob.text();
+            
+            // Standardizing line split to handle different OS line endings
             text.split(/\r?\n/).forEach(l => { 
                 if (l.trim()) window.handleChatLine(l); 
             });
             lastSize = file.size;
         } else if (file.size < lastSize) {
-            addLog("⚠️ SECURITY: Log shrink detected. Resetting pointer.", true);
+            addLog("⚠️ SECURITY: Log shrink detected (possible log rotation). Resetting pointer.", true);
             lastSize = file.size;
         }
         errorCount = 0;
@@ -134,114 +162,149 @@ window.pollWebLog = async function() {
     }
 };
 
+/**
+ * handleChatLine acts as the traffic controller for all log data
+ */
 window.handleChatLine = async function(line) {
-    // 1. Prevent processing the exact same line twice
-    if (line === lastProcessedLine) return;
+    if (line === lastProcessedLine || !line.trim()) return;
 
-    // 2. Optimized Regex for loot messages
-    const fishRegex = /^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s\[System\]\s+\[\]\s+You received\s+\[?(.*?)\]?\s+x\s+\((\d+)\)\s+Value:\s+([\d.]+)\s+PED/;
-    const match = line.match(fishRegex);
+    const logMatch = line.match(timestampChannelMessageRegex);
+    if (!logMatch) return;
 
-    if (match) {
-        const fishType = match[2].trim(); 
-        const amount = parseInt(match[3]);
-        const value = parseFloat(match[4]);
+    const [_, timestamp, channel, message] = logMatch;
+    lastProcessedLine = line;
 
-        // 3. Update 'lastProcessedLine' immediately
-        lastProcessedLine = line; 
+    // --- SYSTEM CHANNEL ROUTER ---
+    if (channel === 'System') {
+        
+        // 1. LOOT PARSING (Fishing, Mining, Combat Loot)
+        const lootMatch = message.match(lootDetailsRegex);
+        if (lootMatch) {
+            const itemName = lootMatch[1].trim(); 
+            const amount = parseInt(lootMatch[2]);
+            const value = parseFloat(lootMatch[3]);
 
-        if (!isNaN(value)) {
-            // Initialize keys if they don't exist
-            if (!(fishType in sessionStats)) {
-                sessionStats[fishType] = 0;
-                sessionValues[fishType] = 0;
+            if (!isNaN(value)) {
+                if (!(itemName in sessionStats)) {
+                    sessionStats[itemName] = 0;
+                    sessionValues[itemName] = 0;
+                }
+                sessionStats[itemName] += amount;
+                sessionValues[itemName] += value;
+
+                updateSessionUI();
+                addLog(`🎣 CAUGHT: ${amount}x ${itemName}`);
+                return;
             }
-            
-            // Add to session data
-            sessionStats[fishType] += amount;
-            sessionValues[fishType] += value;
-
-            // Update UI and Log
-            updateSessionUI();
-            addLog(`🎣 CAUGHT: ${amount}x ${fishType}`);
         }
-    }
-};
-// ===== Session Control Handlers =====
 
-browseBtn.onclick = async () => {
-    try {
-        const [handle] = await window.showOpenFilePicker({
-            types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
-            multiple: false
-        });
-        
-        await set(FILE_HANDLE_KEY, handle);
-        await window.initializeFile(handle);
-        
-        if (browseBtn) browseBtn.style.boxShadow = "none";
-        addLog(`📂 LOG_LINKED: SUCCESS`);
-    } catch (err) {
-        addLog("❌ PICKER_CANCELLED", true);
-    }
-};
-
-startBtn.onclick = async () => {
-    // 1. STOP Logic
-    if (startBtn.textContent === "STOP SESSION") {
-        if (sessionTickerInterval) clearInterval(sessionTickerInterval);
-        if (window.pollInterval) clearInterval(window.pollInterval);
-        
-        startBtn.textContent = "START SESSION";
-        startBtn.style.background = "#2e7d32"; 
-        startBtn.style.boxShadow = "0 0 10px #00ff00";
-        addLog("🛑 SESSION_STOPPED.", true);
-        return;
-    }
-
-    // 2. START Logic
-    if (!fileHandle) {
-        addLog("❌ ERROR: Link Chat.log first!", true);
-        if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
-        return;
-    }
-
-    try {
-        const status = await fileHandle.requestPermission({ mode: 'read' });
-        if (status !== 'granted') {
-            addLog("❌ PERMISSION_DENIED", true);
+        // 2. XP PARSING
+        const xpMatch = message.match(experienceRegex);
+        if (xpMatch) {
+            const val = xpMatch[1];
+            const skill = xpMatch[2];
+            addLog(`✨ XP: +${val} in ${skill}`);
             return;
         }
 
-        const file = await fileHandle.getFile();
-        lastSize = file.size; // Start from current end of log
-        window.sessionStartTime = Date.now(); 
-
-        if (window.pollInterval) clearInterval(window.pollInterval);
-        if (sessionTickerInterval) clearInterval(sessionTickerInterval);
-
-        window.pollInterval = setInterval(window.pollWebLog, 3000); 
-        sessionTickerInterval = setInterval(runSessionTicker, 1000);
-
-        // Reset data for fresh session
-        Object.keys(sessionStats).forEach(key => delete sessionStats[key]);
-        Object.keys(sessionValues).forEach(key => delete sessionValues[key]);
-
-        startBtn.textContent = "STOP SESSION";
-        startBtn.style.background = "#d32f2f"; 
-        startBtn.style.boxShadow = "none";
-        
-        addLog(`✅ SESSION_STARTED: ${file.name}`);
-
-        if ('wakeLock' in navigator) {
-            try { await navigator.wakeLock.request('screen'); } catch(e){}
+        // 3. VIBRANT SWEAT PARSING
+        if (sweatRegex.test(message)) {
+            // Specialized logic for sweat collection if needed
+            return;
         }
+    }
 
-    } catch (err) {
-        addLog("❌ ACCESS_FAILED: Check permissions.", true);
-        console.error(err);
+    // --- GLOBALS CHANNEL ROUTER ---
+    if (channel === 'Globals') {
+        if (globalHofRegex.test(message)) {
+            const valMatch = message.match(globalValueRegex);
+            const value = valMatch ? valMatch[1] : "Unknown";
+            addLog(`🏆 GLOBAL: ${message}`, false);
+        }
     }
 };
+
+// ==========================================================================
+// 7. SESSION CONTROL EVENT LISTENERS (NO-ONCLICK)
+// ==========================================================================
+
+if (browseBtn) {
+    browseBtn.addEventListener('click', async () => {
+        try {
+            const [handle] = await window.showOpenFilePicker({
+                types: [{ description: 'Entropia Log', accept: { 'text/plain': ['.log'] } }],
+                multiple: false
+            });
+            
+            await set(FILE_HANDLE_KEY, handle);
+            await window.initializeFile(handle);
+            
+            browseBtn.style.boxShadow = "none";
+            addLog(`📂 LOG_LINKED: SUCCESS`);
+        } catch (err) {
+            addLog("❌ PICKER_CANCELLED", true);
+        }
+    });
+}
+
+if (startBtn) {
+    startBtn.addEventListener('click', async () => {
+        // STOP Logic
+        if (startBtn.textContent === "STOP SESSION") {
+            if (sessionTickerInterval) clearInterval(sessionTickerInterval);
+            if (window.pollInterval) clearInterval(window.pollInterval);
+            
+            startBtn.textContent = "START SESSION";
+            startBtn.style.background = "#2e7d32"; 
+            startBtn.style.boxShadow = "0 0 10px #00ff00";
+            addLog("🛑 SESSION_STOPPED.", true);
+            return;
+        }
+
+        // START Logic
+        if (!fileHandle) {
+            addLog("❌ ERROR: Link Chat.log first!", true);
+            if (browseBtn) browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
+            return;
+        }
+
+        try {
+            const status = await fileHandle.requestPermission({ mode: 'read' });
+            if (status !== 'granted') {
+                addLog("❌ PERMISSION_DENIED", true);
+                return;
+            }
+
+            const file = await fileHandle.getFile();
+            lastSize = file.size; // Pointer set to current end of log
+            window.sessionStartTime = Date.now(); 
+
+            if (window.pollInterval) clearInterval(window.pollInterval);
+            if (sessionTickerInterval) clearInterval(sessionTickerInterval);
+
+            window.pollInterval = setInterval(window.pollWebLog, 3000); 
+            sessionTickerInterval = setInterval(runSessionTicker, 1000);
+
+            // Reset session data
+            Object.keys(sessionStats).forEach(key => delete sessionStats[key]);
+            Object.keys(sessionValues).forEach(key => delete sessionValues[key]);
+
+            startBtn.textContent = "STOP SESSION";
+            startBtn.style.background = "#d32f2f"; 
+            startBtn.style.boxShadow = "none";
+            
+            addLog(`✅ SESSION_STARTED: ${file.name}`);
+
+            if ('wakeLock' in navigator) {
+                try { await navigator.wakeLock.request('screen'); } catch(e){}
+            }
+
+        } catch (err) {
+            addLog("❌ ACCESS_FAILED: Check permissions.", true);
+            console.error(err);
+        }
+    });
+}
 
 if (resetBtn) {
     resetBtn.addEventListener('click', () => {
@@ -253,9 +316,18 @@ if (resetBtn) {
     });
 }
 
-// ===== Initial Startup =====
-window.addEventListener('DOMContentLoaded', () => {
+// ==========================================================================
+// 8. INITIAL STARTUP
+// ==========================================================================
+window.addEventListener('DOMContentLoaded', async () => {
     if (pathInput) pathInput.placeholder = "Link Chat.log to begin...";
+    
+    // Attempt to restore handle from IndexedDB
+    const savedHandle = await get(FILE_HANDLE_KEY);
+    if (savedHandle) {
+        addLog("📂 RESTORING_LOG_LINK...");
+        await window.initializeFile(savedHandle);
+    }
 });
 
-addLog("entropia obs source version_0.01 loaded Succesfully");
+addLog("entropia obs source version_0.02 loaded Successfully");

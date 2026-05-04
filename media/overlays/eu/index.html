@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entropia Universe OBS Overlay</title>
+    <title>Entropia Scout - OBS Overlay V2</title>
     <link rel="stylesheet" href="css/styles.css">
     <!-- ComfyJS for Twitch integration -->
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
@@ -27,7 +27,7 @@
     </div>
     
     <!-- Settings Toggle Button -->
-    <button id="openMenu-Butt" style="position:fixed; top:10px;right: 50%;width: 50px;opacity:0.0; z-index:9999;">⚙️</button>
+    <button id="openMenu-Butt" style="position:fixed; top:10px; right: 50%; width: 50px; opacity:0.0; z-index:9999;">⚙️</button>
 
     <!-- Control Panel: Persists Twitch User and File Handles -->
     <div id="comfycontrolContainer">
@@ -42,7 +42,7 @@
                 <input type="text" id="pathInput" readonly placeholder="Click Link Log...">
             </div>
             <button id="browseBtn">📁 Link Chat.log</button>
-            <button id="start-session-btn" style="background: #2e7d32;">START SESSION</button>
+            <button id="start-session-btn" style="background: #2e7d32; color: white; font-weight: bold;">START SESSION</button>
             <div id="session-timer">00:00:00</div>
         </div>
 
@@ -50,7 +50,6 @@
         <div class="settings-group">
             <h4>Visual Styling</h4>
             
-            <!-- Text Color -->
             <div class="setting-row">
                 <label>Text Color</label>
                 <div class="rgb-group">
@@ -61,7 +60,6 @@
                 </div>
             </div>
 
-            <!-- BG Color 1 & Alpha -->
             <div class="setting-row">
                 <label>BG Color 1</label>
                 <div class="rgb-group">
@@ -73,7 +71,6 @@
                 <input type="range" id="bgAlpha" min="0" max="1" step="0.1" title="Opacity">
             </div>
             
-            <!-- BG Color 2 (Gradient) -->
             <div class="setting-row">
                 <label>BG Color 2</label>
                 <div class="rgb-group">
@@ -84,7 +81,6 @@
                 </div>
             </div>
 
-            <!-- Border Color 1 -->
             <div class="setting-row">
                 <label>Border Start</label>
                 <div class="rgb-group">
@@ -95,7 +91,6 @@
                 </div>
             </div>
             
-            <!-- Border Color 2 -->
             <div class="setting-row">
                 <label>Border End</label>
                 <div class="rgb-group">
@@ -180,9 +175,13 @@
 
         <button id="btnReset" style="color:red; margin-top:10px; width:100%;">Hard Reset</button>
     </div>
-    <!-- Core Modules -->
-    <script type="module" src="js/comfyEU.js"></script>
-    <script type="module" src="js/polling.js"></script>
+
+    <!-- Audio Element for sound playback system -->
+    <audio id="meowSound" preload="auto"></audio>
+
+    <!-- Core Modules: Loaded in dependency order -->
     <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/polling.js"></script>
+    <script type="module" src="js/comfyEU.js"></script>
 </body>
 </html>
