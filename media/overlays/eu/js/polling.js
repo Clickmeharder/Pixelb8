@@ -1,6 +1,6 @@
 /**
  * polling.js - Sovereign Entropia Log Parser & Session Tracker
- * Version: 0.03 - Security & High-Density UI Refactor
+ * Version: 0.04 - Twitch Sync & Pause Logic Update
  * Specialized for high-density log analysis and Twitch-integrated overlays.
  */
 
@@ -8,7 +8,7 @@ import { addLog, state, saveData } from './app.js';
 import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
 // ==========================================================================
-// 1. GLOBAL STATE & REFERENCES
+// 1. GLOBAL STATE & REFERENCES (Exposed for comfyEU.js)
 // ==========================================================================
 let fileHandle = null; 
 let lastSize = 0;
@@ -19,21 +19,13 @@ let errorCount = 0;
 const MAX_RETRIES = 5;
 const FILE_HANDLE_KEY = "entropia_chat_handle";
 
-// Performance tracking objects
-const sessionStats = {}; 
-const sessionValues = {};
-const sessionSkills = {}; // NEW: Track Skill XP
-let sessionDeaths = 0;    // NEW: Track Deaths
-let globalCount = 0;      // NEW: Track Globals
-let isPaused = false;     // NEW: Remote Pause State
-
-// Expose to global scope for Twitch/External Command access (comfyEU.js)
-window.sessionStats = sessionStats;
-window.sessionValues = sessionValues;
-window.sessionSkills = sessionSkills;
-window.sessionDeaths = sessionDeaths;
-window.globalCount = globalCount;
-window.isPaused = isPaused;
+// Attach directly to window to ensure the Twitch script sees real-time updates
+window.sessionStats = {}; 
+window.sessionValues = {};
+window.sessionSkills = {}; 
+window.sessionDeaths = 0;  
+window.globalCount = 0;    
+window.isPaused = false;   
 window.sessionStartTime = Date.now(); 
 
 // ==========================================================================
@@ -42,8 +34,6 @@ window.sessionStartTime = Date.now();
 const timestampChannelMessageRegex = /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[([^\]]+)\]\s*(.*)$/;
 const lootDetailsRegex = /You received\s+\[?(.+?)\]?\s+x\s+\((\d+)\)\s+Value:\s*([\d.]+)\s*PED/i;
 const experienceRegex = /You have gained\s+([\d.]+)\s+experience in your (.+) skill/i;
-const sweatRegex = /You received.*Vibrant Sweat/;
-const globalValueRegex = /with a value of ([\d,.]+) PED/i;
 const globalHofRegex = /Hall of Fame|Rare Item|ATH/i;
 
 // ==========================================================================
@@ -60,16 +50,13 @@ const manifestGrid = document.getElementById('manifest-grid');
 // ==========================================================================
 
 /**
- * Restores reference from IDB. Does NOT call getFile() to avoid NotAllowedError.
+ * Restores reference from IDB.
  */
 window.initializeFile = async function(handle) {
     if (!handle) return;
     fileHandle = handle; 
     
-    // Update path input with name only (safe for auto-boot)
     if (pathInput) pathInput.value = fileHandle.name;
-    
-    // Update global app state
     state.logLinked = true;
     
     if (startBtn) {
@@ -89,14 +76,20 @@ function runSessionTicker() {
     // Respect remote pause command from Twitch
     if (window.isPaused) return;
 
+    const elapsed = Date.now() - window.sessionStartTime;
+    const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
+    const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
+    const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+    const timeStr = `${h}:${m}:${s}`;
+
+    // Update Internal UI Timer
     const timerEl = document.getElementById('session-timer');
-    if (timerEl) {
-        const elapsed = Date.now() - window.sessionStartTime;
-        const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
-        const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
-        const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
-        timerEl.textContent = `${h}:${m}:${s}`;
-    }
+    if (timerEl) timerEl.textContent = timeStr;
+
+    // Update Overlay Timer (for Twitch/OBS)
+    const overlayTimer = document.getElementById('overlay-timer');
+    if (overlayTimer) overlayTimer.textContent = timeStr;
+
     updateSessionUI();
 }
 
@@ -108,15 +101,14 @@ function updateSessionUI() {
     const now = Date.now();
     const elapsedHours = (now - window.sessionStartTime) / 3600000;
 
-    Object.keys(sessionStats).forEach(key => {
-        const count = sessionStats[key] || 0;
-        const totalValue = sessionValues[key] || 0;
+    Object.keys(window.sessionStats).forEach(key => {
+        const count = window.sessionStats[key] || 0;
+        const totalValue = window.sessionValues[key] || 0;
         grandTotal += totalValue;
 
         const safeKey = key.replace(/\s+/g, '-');
         let sessionEl = document.getElementById(`session-${safeKey}`);
         
-        // Create row if it doesn't exist
         if (!sessionEl && manifestGrid) {
             const row = document.createElement('div');
             row.className = 'manifest-row';
@@ -152,7 +144,9 @@ function updateSessionUI() {
 // ==========================================================================
 
 window.pollWebLog = async function() {
-    if (!fileHandle) return;
+    // Stop parsing if file is missing OR if session is paused via Twitch
+    if (!fileHandle || window.isPaused) return;
+
     try {
         const file = await fileHandle.getFile();
         if (file.size > lastSize) {
@@ -164,7 +158,7 @@ window.pollWebLog = async function() {
             });
             lastSize = file.size;
         } else if (file.size < lastSize) {
-            addLog("⚠️ ROTATION: Log shrink detected. Pointer reset.", true);
+            addLog("⚠️ ROTATION: Log shrink detected.", true);
             lastSize = file.size;
         }
         errorCount = 0;
@@ -194,18 +188,18 @@ window.handleChatLine = function(line) {
             const amount = parseInt(lootMatch[2]);
             const value = parseFloat(lootMatch[3]);
 
-            if (!(itemName in sessionStats)) {
-                sessionStats[itemName] = 0;
-                sessionValues[itemName] = 0;
+            if (!(itemName in window.sessionStats)) {
+                window.sessionStats[itemName] = 0;
+                window.sessionValues[itemName] = 0;
             }
-            sessionStats[itemName] += amount;
-            sessionValues[itemName] += value;
+            window.sessionStats[itemName] += amount;
+            window.sessionValues[itemName] += value;
             updateSessionUI();
             addLog(`+ ${amount}x ${itemName}`);
             return;
         }
 
-        // B. XP PARSING (Aggregated for !skills command)
+        // B. XP PARSING
         const xpMatch = message.match(experienceRegex);
         if (xpMatch) {
             const xpVal = parseFloat(xpMatch[1]);
@@ -231,7 +225,7 @@ window.handleChatLine = function(line) {
 };
 
 // ==========================================================================
-// 7. EVENT LISTENERS (Gestures for Permission)
+// 7. EVENT LISTENERS
 // ==========================================================================
 
 if (browseBtn) {
@@ -276,7 +270,7 @@ if (startBtn) {
             const file = await fileHandle.getFile();
             lastSize = file.size; 
             window.sessionStartTime = Date.now(); 
-            window.isPaused = false; // Reset pause on new session
+            window.isPaused = false; 
 
             if (window.pollInterval) clearInterval(window.pollInterval);
             if (sessionTickerInterval) clearInterval(sessionTickerInterval);
@@ -284,10 +278,10 @@ if (startBtn) {
             window.pollInterval = setInterval(window.pollWebLog, 2500); 
             sessionTickerInterval = setInterval(runSessionTicker, 1000);
 
-            // Reset local stats
-            Object.keys(sessionStats).forEach(k => delete sessionStats[k]);
-            Object.keys(sessionValues).forEach(k => delete sessionValues[k]);
-            Object.keys(window.sessionSkills).forEach(k => delete window.sessionSkills[k]);
+            // Reset all window-scoped stats for a fresh run
+            window.sessionStats = {};
+            window.sessionValues = {};
+            window.sessionSkills = {};
             window.sessionDeaths = 0;
             window.globalCount = 0;
             
@@ -308,9 +302,9 @@ if (startBtn) {
 
 if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-        Object.keys(sessionStats).forEach(k => delete sessionStats[k]);
-        Object.keys(sessionValues).forEach(k => delete sessionValues[k]);
-        Object.keys(window.sessionSkills).forEach(k => delete window.sessionSkills[k]);
+        window.sessionStats = {};
+        window.sessionValues = {};
+        window.sessionSkills = {};
         window.sessionDeaths = 0;
         window.globalCount = 0;
         window.sessionStartTime = Date.now();
@@ -330,4 +324,4 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-addLog("POLLING_ENGINE: V0.03 ONLINE");
+addLog("POLLING_ENGINE: V0.04 ONLINE");
