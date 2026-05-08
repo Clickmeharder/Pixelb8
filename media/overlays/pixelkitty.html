@@ -793,9 +793,40 @@ document.querySelectorAll('.setting-row[data-key]').forEach(row => {
     }
 });
 
+function revivekitty() {
+	if (state.isDead) {
+		state.isDead = false;
+		state.hunger = 50; // Give them some energy back
+		state.action = "special";
+		state.actionTimer = 200;
+		state.lastHungerTick = Date.now();
+		say("I'M ALIVE! 💖");
+		saveData();
+		
+		// Add some "life" particles
+		for(let i=0; i<20; i++) {
+			state.particles.push({
+				x: state.x, 
+				y: state.y, 
+				vx: (Math.random() - 0.5) * 10, 
+				vy: (Math.random() - 0.5) * 10, 
+				s: 4, 
+				c: "#ff77aa", 
+				life: 40
+			});
+		}
+	} else {
+		say("Already healthy! ✨");
+	}
+};
+
 // --- 8. TWITCH INTEGRATION & LOOP ---
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
+	
+// The Revive Command
+
+	if(cmd === "revivekitty") revivekitty();
     if(cmd === "nyankitty") triggerNyan();
     if(cmd === "feedkitty") document.getElementById("btnFeed").click();
     if(cmd === "playwithkitty") document.getElementById("btnPlay").click();
