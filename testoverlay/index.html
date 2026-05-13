@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixelb8 Test Overlay App</title>
+    <!-- Load ComfyJS from official CDN -->
+    <script src="jsdelivr.net"></script>
+    <style>
+        /* Base page styling */
+        body { 
+            background: transparent; 
+            color: #ffffff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Setup dashboard panel (Hidden inside OBS automatically) */
+        .setup-container { 
+            background: #18181b; 
+            border: 2px solid #9146ff;
+            padding: 40px; 
+            border-radius: 12px; 
+            max-width: 550px; 
+            margin: 50px auto; 
+            text-align: center; 
+            display: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        h2 { color: #9146ff; margin-top: 0; }
+        p { color: #adadb8; line-height: 1.5; }
+
+        .twitch-btn { 
+            background-color: #9146FF; 
+            color: white; 
+            padding: 14px 28px; 
+            border: none; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            font-size: 16px;
+            cursor: pointer; 
+            text-decoration: none; 
+            display: inline-block;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .twitch-btn:hover { background-color: #772ce8; }
+        .twitch-btn:active { transform: scale(0.98); }
+
+        .obs-box { 
+            background: #09090b; 
+            padding: 15px; 
+            border: 1px dashed #a970ff; 
+            margin-top: 15px; 
+            word-break: break-all; 
+            user-select: all; 
+            font-family: monospace; 
+            color: #e4e4e7;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Live Overlay Style (Visible on stream inside OBS) */
+        #overlay-ui { 
+            display: none; 
+            font-size: 3em; 
+            font-weight: 900;
+            text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000;
+            color: #ffffff;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STATE 1: Streamer Configuration Screen (Only shows in web browsers) -->
+    <div id="setup-interface" class="setup-container">
+        <h2>Pixelb8 Overlay Portal</h2>
+        <p>Grant permission to activate your interactive stream overlay and custom automated chat bot response.</p>
+        <button id="login-button" class="twitch-btn">Connect with Twitch</button>
+        
+        <div id="obs-instructions" style="display:none; margin-top: 25px;">
+            <p style="color: #00ff88; font-weight: bold; font-size: 18px;">✔ Secure Connection Authorized!</p>
+            <p>Click below to copy your unique configuration URL. Paste it as a new <b>Browser Source</b> inside OBS:</p>
+            <div id="obs-url-output" class="obs-box" title="Click to copy">Generating link...</div>
+        </div>
+    </div>
+
+    <!-- STATE 2: The Stream Graphics Layer (Only shows inside OBS) -->
+    <div id="overlay-ui">Waiting for commands...</div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        // 1. Paste your Twitch Client ID between the quotes below:
+        const CLIENT_ID = "l1zvkm35dmtw4doj4y699nhnvx655c"; 
+        
+        // 2. This locks the redirect strictly to your folder:
+        const REDIRECT_URI = "pixelb8.lol/testoverlay"; 
+        const SCOPES = "chat:read chat:edit";
+        // =======================================================
+
+        const setupInterface = document.getElementById("setup-interface");
+        const loginButton = document.getElementById("login-button");
+        const obsInstructions = document.getElementById("obs-instructions");
+        const obsUrlOutput = document.getElementById("obs-url-output");
+        const overlayUi = document.getElementById("overlay-ui");
+
+        // Set up the authorization link 
+        const authUrl = `twitch.tv${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(SCOPES)}`;
+        loginButton.onclick = () => { window.location.href = authUrl; };
+
+        // Handle clicking the text box to copy automatically
+        obsUrlOutput.onclick = () => {
+            navigator.clipboard.writeText(obsUrlOutput.innerText);
+            alert("Copied to clipboard! Ready to paste into OBS.");
+        };
+
+        // Read URL query variables
+        const urlParams = new URLSearchParams(window.location.search);
+        const obsToken = urlParams.get("token");
+        const obsChannel = urlParams.get("channel");
+
+        async function init() {
+            // Check context: If parameters are in the URL, run purely as an OBS overlay
+            if (obsToken && obsChannel) {
+                overlayUi.style.display = "block";
+                startTwitchBot(obsChannel, obsToken);
+                return;
+            }
+
+            // Check context: No parameters means a streamer is sitting on your website dashboard
+            setupInterface.style.display = "block";
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const twitchToken = hashParams.get("access_token");
+
+            if (twitchToken) {
+                loginButton.style.display = "none";
+                obsInstructions.style.display = "block";
+
+                try {
+                    // Ask Twitch who logged in using this fresh token
+                    const response = await fetch("twitch.tv", {
+                        headers: { 
+                            "Authorization": `Bearer ${twitchToken}`, 
+                            "Client-Id": CLIENT_ID 
+                        }
+                    });
+                    const userData = await response.json();
+                    const channelName = userData.data[0].login;
+
+                    // Formulate the permanent URL the user will put into OBS
+                    const finalObsUrl = `${REDIRECT_URI}?channel=${channelName}&token=${twitchToken}`;
+                    obsUrlOutput.innerText = finalObsUrl;
+
+                } catch (err) {
+                    obsUrlOutput.innerText = "Error acquiring Twitch username. Please refresh and try again.";
+                    console.error(err);
+                }
+            }
+        }
+
+        let fadeTimeout;
+        function startTwitchBot(channel, token) {
+            const formattedToken = token.startsWith("oauth:") ? token : `oauth:${token}`;
+            
+            ComfyJS.onCommand = (user, command, message, flags, extra) => {
+                if (command === "hello") {
+                    // Update overlay visual text elements smoothly
+                    overlayUi.innerText = `👋 Welcome, @${user}!`;
+                    overlayUi.style.opacity = "1";
+
+                    // Clear previous timers so multiple commands don't conflict
+                    clearTimeout(fadeTimeout);
+                    
+                    // Hide the overlay text smoothly after 6 seconds
+                    fadeTimeout = setTimeout(() => {
+                        overlayUi.style.opacity = "0";
+                    }, 6000);
+
+                    // Send the message back to the Twitch chat room
+                    ComfyJS.Say(`Hello @${user}! Your pixelb8 overlay app integration is working perfectly!`, channel);
+                }
+            };
+            
+            ComfyJS.Init(channel, formattedToken);
+        }
+
+        // Run checking process immediately when file loads
+        init();
+    </script>
+</body>
+</html>
