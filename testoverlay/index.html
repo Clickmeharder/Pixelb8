@@ -107,7 +107,7 @@
         const overlayUi = document.getElementById("overlay-ui");
 
         // 1. Fixed: Explicit target path for user account login
-        const authUrl = `twitch.tv${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(SCOPES)}`;
+        const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(SCOPES)}`;
 
         loginButton.onclick = () => { window.location.href = authUrl; };
 
