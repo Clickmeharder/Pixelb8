@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixelb8 Test Overlay App</title>
     <!-- Load ComfyJS from official CDN -->
-    <script src="jsdelivr.net"></script>
+    <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <style>
         /* Base page styling */
         body { 
@@ -113,6 +113,7 @@
         // Fix: Use the official absolute Twitch OAuth endpoint path
 		const authUrl = `twitch.tv${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(SCOPES)}`;
 
+
         loginButton.onclick = () => { window.location.href = authUrl; };
 
         // Handle clicking the text box to copy automatically
@@ -155,7 +156,7 @@
                     const channelName = userData.data[0].login;
 
                     // Formulate the permanent URL the user will put into OBS
-                    const finalObsUrl = `${REDIRECT_URI}?channel=${channelName}&token=${twitchToken}`;
+                    const finalObsUrl = `https://${REDIRECT_URI}?channel=${channelName}&token=${twitchToken}`;
                     obsUrlOutput.innerText = finalObsUrl;
 
                 } catch (err) {
