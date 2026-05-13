@@ -108,25 +108,20 @@
         const obsInstructions = document.getElementById("obs-instructions");
         const obsUrlOutput = document.getElementById("obs-url-output");
         const overlayUi = document.getElementById("overlay-ui");
-
         // Set up the authorization link 
         // Fix: Use the official absolute Twitch OAuth endpoint path
 		const authUrl = `twitch.tv${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(SCOPES)}`;
 
-
         loginButton.onclick = () => { window.location.href = authUrl; };
-
         // Handle clicking the text box to copy automatically
         obsUrlOutput.onclick = () => {
             navigator.clipboard.writeText(obsUrlOutput.innerText);
             alert("Copied to clipboard! Ready to paste into OBS.");
         };
-
         // Read URL query variables
         const urlParams = new URLSearchParams(window.location.search);
         const obsToken = urlParams.get("token");
         const obsChannel = urlParams.get("channel");
-
         async function init() {
             // Check context: If parameters are in the URL, run purely as an OBS overlay
             if (obsToken && obsChannel) {
@@ -134,24 +129,20 @@
                 startTwitchBot(obsChannel, obsToken);
                 return;
             }
-
             // Check context: No parameters means a streamer is sitting on your website dashboard
             setupInterface.style.display = "block";
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             const twitchToken = hashParams.get("access_token");
-
             if (twitchToken) {
                 loginButton.style.display = "none";
                 obsInstructions.style.display = "block";
-
                 try {
-                    // Ask Twitch who logged in using this fresh token
-                    const response = await fetch("twitch.tv", {
-                        headers: { 
-                            "Authorization": `Bearer ${twitchToken}`, 
-                            "Client-Id": CLIENT_ID 
-                        }
-                    });
+					const response = await fetch("https://api.twitch.tv/helix/users", {
+						headers: { 
+							"Authorization": `Bearer ${twitchToken}`, 
+							"Client-Id": CLIENT_ID 
+						}
+					});
                     const userData = await response.json();
                     const channelName = userData.data[0].login;
 
