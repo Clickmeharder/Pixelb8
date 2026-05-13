@@ -119,7 +119,8 @@
     </style>
 </head>
 <body>
-
+    <!-- ==========================================================================================-->
+	
     <!-- STATE 1: Streamer Configuration Screen -->
     <div id="setup-interface" class="setup-container">
         <h2>Pixelb8 Test Overlay Portal</h2>
@@ -132,7 +133,11 @@
             <div id="obs-url-output" class="obs-box" title="Click to copy">Generating link...</div>
         </div>
     </div>
-
+	
+    <!-- ==========================================================================================-->
+	
+	
+	<!-- ==========================================================================================-->
     <!-- STATE 2: The Stream Graphics Layer -->
     <div id="overlay-wrapper">
         <div id="status-indicator">Connecting to Twitch...</div>
@@ -140,11 +145,14 @@
         <div id="chat-feed"></div>
     </div>
 
+    <!-- ==========================================================================================-->
+	
+	
     <script>
         // ==================== CONFIGURATION ====================
         const CLIENT_ID = "l1zvkm35dmtw4doj4y699nhnvx655c"; 
         const REDIRECT_URI = "pixelb8.lol/testoverlay"; 
-        const SCOPES = "chat:read chat:edit";
+        const SCOPES = "chat:read chat:edit channel:read:redemptions";
         // =======================================================
 
         const setupInterface = document.getElementById("setup-interface");
@@ -241,7 +249,20 @@
                     ComfyJS.Say(`Hello @${user}! Your pixelb8 overlay app integration is working perfectly!`, channel);
                 }
             }; 
-            
+			ComfyJS.onReward = (user, reward, cost, message, extra) => {
+				console.log(`${user} redeemed ${reward} for ${cost} points!`);
+				
+				// Trigger on-screen visual
+				const ui = document.getElementById("overlay-ui");
+				ui.innerText = `✨ ${user} used ${reward}! ✨`;
+				ui.style.opacity = "1";
+				
+				// Optional: Make the bot acknowledge it in chat
+				ComfyJS.Say(`Thanks for the support, @${user}! You just spent ${cost} points on ${reward}.`, channel);
+
+				// Fade out after 8 seconds
+				setTimeout(() => ui.style.opacity = "0", 8000);
+			};
             ComfyJS.Init(channel, formattedToken);
         }
         
