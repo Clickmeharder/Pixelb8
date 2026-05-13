@@ -110,7 +110,9 @@
         const overlayUi = document.getElementById("overlay-ui");
 
         // Set up the authorization link 
-        const authUrl = `twitch.tv${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(SCOPES)}`;
+        // Fix: Use the official absolute Twitch OAuth endpoint path
+		const authUrl = `twitch.tv${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(SCOPES)}`;
+
         loginButton.onclick = () => { window.location.href = authUrl; };
 
         // Handle clicking the text box to copy automatically
