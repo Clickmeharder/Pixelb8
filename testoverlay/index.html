@@ -172,7 +172,6 @@
         async function init() {
             if (obsToken && obsChannel) {
                 overlayWrapper.style.display = "block";
-                statusIndicator.innerText = `🟢 Connected to: ${obsChannel}`;
                 startTwitchBot(obsChannel, obsToken);
                 return;
             }
@@ -209,6 +208,12 @@
         function startTwitchBot(channel, token) {
             const formattedToken = token.startsWith("oauth:") ? token : `oauth:${token}`;
             
+            // Fires when connection is established
+            ComfyJS.onConnected = (address, port) => {
+                statusIndicator.innerText = `🟢 Live & Monitoring: ${channel}`;
+                ComfyJS.Say(`[System] Pixelb8 Test Overlay is now active in ${channel}!`, channel);
+            };
+
             // 1. CHAT OVERLAY LOGIC: Show all messages
             ComfyJS.onChat = (user, message, flags, self, extra) => {
                 const msgEl = document.createElement("div");
