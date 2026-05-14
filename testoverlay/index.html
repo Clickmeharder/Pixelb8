@@ -304,15 +304,30 @@
                 alert('Theme Saved');
             });
 
-            document.getElementById('delete-theme-btn').addEventListener('click', () => {
-                if(registry.active === 'Default') return;
-                if(confirm(`Delete ${registry.active}?`)) {
-                    delete registry.themes[registry.active];
-                    applyTheme('Default');
-                    renderThemeList();
-                    renderThemeControls();
-                }
-            });
+            document.getElementById('delete-theme-btn').addEventListener('click', (e) => {
+				// Prevent the event from bubbling up to global handlers
+				e.stopPropagation();
+
+				if(registry.active === 'Default') return;
+
+				if(confirm(`Delete ${registry.active}?`)) {
+					// 1. Remove the theme from the object
+					delete registry.themes[registry.active];
+					
+					// 2. Fall back to Default
+					registry.active = 'Default';
+					
+					// 3. Save the new state to LocalStorage (This was missing!)
+					localStorage.setItem('p8_registry', JSON.stringify(registry));
+					
+					// 4. Update UI
+					applyTheme('Default');
+					renderThemeList();
+					renderThemeControls();
+					
+					alert('Theme Deleted');
+				}
+			});
 
             // Global Movement Controls
             window.addEventListener('mousedown', e => {
@@ -451,7 +466,7 @@
                 document.getElementById("status-indicator").style.color = "#00ff88";
                 document.getElementById("overlay-ui").innerText = `CONNECTED TO: ${channel.toUpperCase()}`;
             };
-
+			//  CHAT LOGIC: Respond to !hello
             ComfyJS.onChat = (user, message, flags, self, extra) => {
                 const feed = document.getElementById("chat-feed");
                 const m = document.createElement("div");
@@ -461,6 +476,21 @@
                 feed.prepend(m);
                 if (feed.childNodes.length > 15) feed.lastChild.remove();
             };
+			
+			//  COMMAND LOGIC: Respond to !hello
+            ComfyJS.onCommand = (user, command, message, flags, extra) => {
+                if (command === "hello") {
+                    overlayUi.innerText = `👋 Welcome, @${user}!`;
+                    overlayUi.style.opacity = "1";
+
+                    clearTimeout(fadeTimeout);
+                    fadeTimeout = setTimeout(() => {
+                        overlayUi.style.opacity = "0";
+                    }, 6000);
+
+                    ComfyJS.Say(`Hello @${user}! Your pixelb8 overlay app integration is working perfectly!`, channel);
+                }
+            }; 
             ComfyJS.Init(channel, formattedToken);
         }
 
