@@ -42,7 +42,6 @@
             cursor: grab; box-sizing: border-box;
         }
         
-        /* Edit Mode Styles */
         body.edit-mode .p8-widget { outline: 2px dashed rgba(145, 70, 255, 0.5); }
         body:not(.edit-mode) .p8-widget { cursor: default; }
         .p8-widget:active { cursor: grabbing; }
@@ -51,8 +50,10 @@
             position: fixed; background: #18181b; border: 1px solid #3f3f46;
             border-radius: 6px; display: none; z-index: 10000; width: 200px;
         }
-        .ctx-item { padding: 10px 15px; cursor: pointer; font-size: 14px; color: #e4e4e7; }
+        .ctx-item { padding: 10px 15px; cursor: pointer; font-size: 14px; color: #e4e4e7; border-bottom: 1px solid #27272a; }
+        .ctx-item:last-child { border-bottom: none; }
         .ctx-item:hover { background: #27272a; color: var(--accent); }
+        .ctx-danger { color: #ff4b4b !important; }
 
         #style-editor {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -60,18 +61,20 @@
             padding: 25px; display: none; z-index: 10001; width: 320px;
             border-radius: 12px; max-height: 85vh; overflow-y: auto;
         }
-        .input-group { margin-bottom: 12px; }
+        .input-group { margin-bottom: 12px; text-align: left; }
         .input-group label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 4px; }
         .input-group input { width: 100%; background: #09090b; border: 1px solid #3f3f46; color: white; padding: 8px; border-radius: 4px; box-sizing: border-box; }
 
         .obs-box { 
             background: #000; padding: 12px; border: 1px dashed #444; 
-            margin-top: 10px; font-family: monospace; font-size: 12px; 
+            margin: 10px 0; font-family: monospace; font-size: 12px; 
             cursor: copy; color: #00ff88; word-break: break-all;
         }
 
-        .p8-btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .p8-btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: opacity 0.2s; }
+        .p8-btn:hover { opacity: 0.8; }
         .save-btn { background: var(--accent); color: white; }
+        .alt-btn { background: #27272a; color: #e4e4e7; border: 1px solid #3f3f46; }
 
         #chat-feed { display: flex; flex-direction: column-reverse; max-height: 300px; overflow: hidden; }
         .chat-msg { margin-bottom: 5px; font-size: 0.9em; }
@@ -83,11 +86,17 @@
 
     <div id="setup-interface" class="setup-container">
         <h2>PIXELB8 OMEGA</h2>
-        <p>Authorize to generate your draggable overlay link.</p>
-        <button id="login-button" class="p8-btn save-btn">Connect Twitch</button>
+        <div id="auth-gate">
+            <p>Authorize to generate your draggable overlay link.</p>
+            <button id="login-button" class="p8-btn save-btn">Connect Twitch</button>
+        </div>
+        
         <div id="obs-instructions" style="display:none; margin-top: 20px;">
             <div id="obs-url-output" class="obs-box">Generating...</div>
-            <p style="font-size: 11px;">Click box to copy. Right-click anywhere to edit styles.</p>
+            <p style="font-size: 11px; color: #71717a;">Copy this link into an OBS Browser Source.</p>
+            <hr style="border: 0; border-top: 1px solid #27272a; margin: 20px 0;">
+            <button id="quick-theme-btn" class="p8-btn alt-btn">Open Theme Editor</button>
+            <button id="logout-btn-ui" class="p8-btn" style="background:transparent; color:#ef4444; font-size: 12px;">Disconnect Account</button>
         </div>
     </div>
 
@@ -104,7 +113,8 @@
     <div id="p8-ctx-menu">
         <div class="ctx-item" id="ctx-edit-global">Global Theme</div>
         <div class="ctx-item" id="ctx-edit-this">Edit This Element</div>
-        <div class="ctx-item" id="ctx-lock">Toggle Edit Mode (Lock/Unlock)</div>
+        <div class="ctx-item" id="ctx-lock">Lock/Unlock Layout</div>
+        <div class="ctx-item ctx-danger" id="ctx-reset">Reset System (Logout)</div>
     </div>
 
     <div id="style-editor">
@@ -116,7 +126,7 @@
 
     <script>
         const CLIENT_ID = "l1zvkm35dmtw4doj4y699nhnvx655c";
-        const REDIRECT_URI = "pixelb8.lol/testoverlay";
+        const REDIRECT_URI = window.location.origin + window.location.pathname;
         let isEditMode = true, dragTarget = null, currentTarget = null, offset = { x: 0, y: 0 };
 
         const styleSchema = [
@@ -144,9 +154,16 @@
             bindEvents();
         }
 
+        function systemReset() {
+            if(confirm("This will log you out and reset layout positions. Continue?")) {
+                localStorage.clear();
+                window.location.href = window.location.origin + window.location.pathname;
+            }
+        }
+
         function bindEvents() {
             document.getElementById("login-button").addEventListener("click", () => {
-                window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=chat:read+chat:edit`;
+                window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=chat:read+chat:edit`;
             });
 
             document.getElementById("obs-url-output").addEventListener("click", function() {
@@ -157,16 +174,14 @@
             });
 
             document.getElementById("ctx-edit-global").addEventListener("click", () => openEditor(null));
+            document.getElementById("quick-theme-btn").addEventListener("click", () => openEditor(null));
             document.getElementById("ctx-edit-this").addEventListener("click", () => openEditor(currentTarget));
+            document.getElementById("ctx-reset").addEventListener("click", systemReset);
+            document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
             
-            // Fix for the Toggle Lock
             document.getElementById("ctx-lock").addEventListener("click", () => {
                 isEditMode = !isEditMode;
-                if(isEditMode) {
-                    document.body.classList.add('edit-mode');
-                } else {
-                    document.body.classList.remove('edit-mode');
-                }
+                document.body.classList.toggle('edit-mode', isEditMode);
                 document.getElementById('p8-ctx-menu').style.display = 'none';
             });
 
@@ -183,7 +198,7 @@
             });
 
             window.addEventListener('mousedown', e => {
-                if (!isEditMode || e.button !== 0 || e.target.closest('input') || e.target.closest('.obs-box')) return;
+                if (!isEditMode || e.button !== 0 || e.target.closest('input') || e.target.closest('.obs-box') || e.target.closest('.setup-container')) return;
                 dragTarget = e.target.closest('.p8-widget');
                 if (dragTarget) {
                     const r = dragTarget.getBoundingClientRect();
@@ -253,13 +268,15 @@
                     headers: { "Authorization": `Bearer ${token}`, "Client-Id": CLIENT_ID }
                 });
                 const d = await res.json();
+                document.getElementById("auth-gate").style.display = "none";
                 document.getElementById("obs-instructions").style.display = "block";
-                document.getElementById("obs-url-output").innerText = `${window.location.origin}${window.location.pathname}?channel=${d.data[0].login}&token=${token}`;
+                document.getElementById("obs-url-output").innerText = `${REDIRECT_URI}?channel=${d.data[0].login}&token=${token}`;
+                // Clean URL hash
+                history.replaceState(null, "", REDIRECT_URI);
             }
         }
 
         function startTwitch(channel, token) {
-            // New Listener for Connection Status
             ComfyJS.onConnected = () => {
                 document.getElementById("status-indicator").innerText = "SYSTEM: ONLINE";
                 document.getElementById("status-indicator").style.color = "#00ff88";
