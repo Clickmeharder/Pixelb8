@@ -7,9 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <style>
         :root {
-            /* Global Theme Variables */
             --bg: rgba(24, 24, 27, 0.8);
-            --bgopacity: 0.8;
             --border-width: 2px;
             --border-style: solid;
             --border-color: #9146ff;
@@ -23,412 +21,255 @@
             background: transparent; 
             color: var(--text-color); 
             font-family: 'Segoe UI', system-ui, sans-serif; 
-            margin: 0; 
-            padding: 0;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            user-select: none;
+            margin: 0; padding: 0;
+            overflow: hidden; width: 100vw; height: 100vh;
         }
 
-        /* Setup/Portal Styles */
+        /* Setup UI */
         .setup-container { 
-            background: #18181b; 
-            border: 2px solid var(--accent);
-            padding: 40px; 
-            border-radius: 12px; 
-            max-width: 550px; 
-            margin: 50px auto; 
-            text-align: center; 
-            display: none;
-            position: relative;
-            z-index: 9999;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #18181b; border: 2px solid var(--accent);
+            padding: 40px; border-radius: 12px; max-width: 550px; 
+            margin: 50px auto; text-align: center; display: none;
+            position: relative; z-index: 9999;
         }
 
-        /* CMS Widget System */
+        /* Draggable Widgets */
         .p8-widget {
             position: absolute;
             background: var(--bg);
             border: var(--border-width) var(--border-style) var(--border-color);
             border-radius: var(--border-radius);
             font-size: var(--font-size);
-            min-width: 150px;
-            min-height: 50px;
-            padding: 15px;
-            cursor: grab;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            min-width: 200px; padding: 15px; 
+            cursor: grab; box-sizing: border-box;
         }
-
+        body.edit-mode .p8-widget { outline: 2px dashed rgba(255, 255, 255, 0.3); }
         .p8-widget:active { cursor: grabbing; }
-        
-        body.edit-mode .p8-widget {
-            outline: 2px dashed rgba(255, 255, 255, 0.5);
-            outline-offset: 4px;
-        }
-
-        /* Specific Content Areas */
-        #chat-feed {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column-reverse;
-            gap: 8px;
-        }
-
-        .chat-msg { animation: slideIn 0.3s ease-out; }
-        .chat-user { color: var(--accent); font-weight: bold; margin-right: 5px; }
 
         /* Context Menu */
         #p8-ctx-menu {
-            position: fixed;
-            background: #18181b;
-            border: 1px solid #3f3f46;
-            border-radius: 6px;
-            display: none;
-            z-index: 10000;
-            width: 200px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            position: fixed; background: #18181b; border: 1px solid #3f3f46;
+            border-radius: 6px; display: none; z-index: 10000; width: 200px;
         }
-
-        .ctx-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            font-size: 14px;
-            color: #e4e4e7;
-            transition: background 0.2s;
-        }
+        .ctx-item { padding: 10px 15px; cursor: pointer; font-size: 14px; color: #e4e4e7; }
         .ctx-item:hover { background: #27272a; color: var(--accent); }
-        .ctx-sep { border-top: 1px solid #3f3f46; margin: 5px 0; }
 
-        /* Style Editor Modal */
+        /* Editor Panel */
         #style-editor {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: #18181b;
-            border: 2px solid var(--accent);
-            padding: 25px;
-            display: none;
-            z-index: 10001;
-            width: 320px;
-            border-radius: 12px;
-            max-height: 85vh;
-            overflow-y: auto;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #18181b; border: 2px solid var(--accent);
+            padding: 25px; display: none; z-index: 10001; width: 320px;
+            border-radius: 12px; max-height: 85vh; overflow-y: auto;
+        }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 4px; }
+        .input-group input { width: 100%; background: #09090b; border: 1px solid #3f3f46; color: white; padding: 8px; border-radius: 4px; box-sizing: border-box; }
+
+        .obs-box { 
+            background: #000; padding: 12px; border: 1px dashed #444; 
+            margin-top: 10px; font-family: monospace; font-size: 12px; 
+            cursor: copy; color: #00ff88; word-break: break-all;
         }
 
-        .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 11px; text-transform: uppercase; color: #a1a1aa; margin-bottom: 5px; letter-spacing: 0.5px; }
-        .input-group input, .input-group select { 
-            width: 100%; background: #09090b; border: 1px solid #3f3f46; color: white; padding: 8px; border-radius: 4px; box-sizing: border-box;
-        }
-
-        .editor-btns { display: flex; gap: 10px; margin-top: 25px; }
-        .p8-btn {
-            flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: opacity 0.2s;
-        }
+        .p8-btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
         .save-btn { background: var(--accent); color: white; }
-        .cancel-btn { background: #3f3f46; color: white; }
-        .p8-btn:hover { opacity: 0.9; }
 
-        @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        .obs-box { background: #000; padding: 10px; border: 1px dashed #333; margin-top: 10px; font-family: monospace; font-size: 11px; cursor: pointer; }
+        #chat-feed { display: flex; flex-direction: column-reverse; max-height: 300px; overflow: hidden; }
+        .chat-msg { margin-bottom: 5px; font-size: 0.9em; }
+        .chat-user { color: var(--accent); font-weight: bold; }
     </style>
 </head>
 <body class="edit-mode">
 
-    <!-- SETUP SCREEN -->
     <div id="setup-interface" class="setup-container">
         <h2>PIXELB8 OMEGA</h2>
-        <p>CMS & Overlay Engine Configuration</p>
+        <p>Authorize to generate your draggable overlay link.</p>
         <button id="login-button" class="p8-btn save-btn">Connect Twitch</button>
         <div id="obs-instructions" style="display:none; margin-top: 20px;">
-            <p>Ready! Copy this into OBS Browser Source:</p>
-            <div id="obs-url-output" class="obs-box"></div>
-            <button id="toggle-edit-setup" class="p8-btn cancel-btn" style="margin-top:15px;">Enter Layout Mode</button>
+            <div id="obs-url-output" class="obs-box">Generating...</div>
+            <p style="font-size: 11px;">Click box to copy. Right-click anywhere to edit styles.</p>
         </div>
     </div>
 
-    <!-- OVERLAY LAYER -->
     <div id="overlay-wrapper" style="display:none;">
-        <div id="chat-widget" class="p8-widget" style="top: 500px; left: 20px; width: 400px; height: 300px;">
+        <div id="chat-widget" class="p8-widget" style="top: 500px; left: 20px; width: 400px;">
             <div id="chat-feed"></div>
         </div>
-
-        <div id="alert-widget" class="p8-widget" style="top: 50px; left: 50%; transform: translateX(-50%); width: 600px; text-align: center;">
-            <div id="alerts-panel" style="font-weight: 900; font-size: 1.5em;">Awaiting Activity...</div>
+        <div id="alert-widget" class="p8-widget" style="top: 50px; left: 500px; text-align: center;">
+            <div id="status-indicator">Connecting...</div>
+            <div id="overlay-ui">Waiting...</div>
         </div>
     </div>
 
-    <!-- CONTEXT MENU -->
+    <!-- Context Menu -->
     <div id="p8-ctx-menu">
-        <div class="ctx-item" id="ctx-edit-global">Theme Styles (Global)</div>
-        <div class="ctx-item" id="ctx-edit-this">This Element Styles</div>
-        <div class="ctx-sep"></div>
-        <div class="ctx-item" id="ctx-toggle-lock">Lock/Unlock Layout</div>
+        <div class="ctx-item" id="ctx-edit-global">Global Theme</div>
+        <div class="ctx-item" id="ctx-edit-this">Edit This Element</div>
+        <div class="ctx-item" id="ctx-lock">Toggle Edit Mode</div>
     </div>
 
-    <!-- STYLE EDITOR -->
+    <!-- Style Editor -->
     <div id="style-editor">
-        <div class="editor-header">
-            <h3 id="editor-title" style="margin:0;">Style Editor</h3>
-        </div>
+        <h3 style="margin-top:0">Editor</h3>
         <div id="controls-container"></div>
-        
-        <div class="input-group" id="theme-save-group">
-            <label>Save as New Theme Name</label>
-            <input type="text" id="new-theme-name" placeholder="e.g. Neon Nights">
-        </div>
-
-        <div class="editor-btns">
-            <button class="p8-btn save-btn" id="save-style-btn">Save Changes</button>
-            <button class="p8-btn cancel-btn" id="close-editor-btn">Cancel</button>
-        </div>
+        <button class="p8-btn save-btn" id="save-style-btn">Save & Close</button>
+        <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#666;">Cancel</button>
     </div>
 
     <script>
         const CLIENT_ID = "l1zvkm35dmtw4doj4y699nhnvx655c";
         const REDIRECT_URI = "pixelb8.lol/testoverlay";
-        
-        let isEditMode = true;
-        let dragTarget = null;
-        let currentTarget = null; // null = Global
-        let offset = { x: 0, y: 0 };
+        let isEditMode = true, dragTarget = null, currentTarget = null, offset = { x: 0, y: 0 };
 
         const styleSchema = [
             { id: 'bg', label: 'Background Color', type: 'color', var: '--bg' },
-            { id: 'bgopacity', label: 'BG Opacity', type: 'range', min:0, max:1, step:0.1, var: '--bgopacity' },
-            { id: 'border-width', label: 'Border Width (px)', type: 'number', var: '--border-width' },
+            { id: 'border-width', label: 'Border (px)', type: 'number', var: '--border-width' },
             { id: 'border-color', label: 'Border Color', type: 'color', var: '--border-color' },
-            { id: 'border-radius', label: 'Border Radius (px)', type: 'number', var: '--border-radius' },
+            { id: 'border-radius', label: 'Radius (px)', type: 'number', var: '--border-radius' },
             { id: 'font-size', label: 'Font Size (px)', type: 'number', var: '--font-size' }
         ];
 
-        // --- Core CMS Logic ---
-
         function init() {
-            loadAllSettings();
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const obsToken = urlParams.get("token");
-            const obsChannel = urlParams.get("channel");
+            loadPersistedSettings();
+            const params = new URLSearchParams(window.location.search);
+            const obsToken = params.get("token"), obsChannel = params.get("channel");
 
             if (obsToken && obsChannel) {
                 document.getElementById("overlay-wrapper").style.display = "block";
                 document.body.classList.remove('edit-mode');
                 isEditMode = false;
-                startTwitchBot(obsChannel, obsToken);
+                startTwitch(obsChannel, obsToken);
             } else {
                 document.getElementById("setup-interface").style.display = "block";
-                checkAuthCallback();
+                checkTwitchAuth();
             }
-
-            attachEventListeners();
+            bindEvents();
         }
 
-        function attachEventListeners() {
+        function bindEvents() {
+            // Login
             document.getElementById("login-button").addEventListener("click", () => {
-                const scopes = "chat:read chat:edit channel:read:redemptions";
-                window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(scopes)}`;
+                window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=chat:read+chat:edit`;
             });
 
-            document.getElementById("toggle-edit-setup").addEventListener("click", toggleEditMode);
-            document.getElementById("ctx-toggle-lock").addEventListener("click", toggleEditMode);
+            // Copy Link
+            document.getElementById("obs-url-output").addEventListener("click", function() {
+                navigator.clipboard.writeText(this.innerText);
+                const oldText = this.innerText;
+                this.innerText = "COPIED!";
+                setTimeout(() => this.innerText = oldText, 1500);
+            });
+
+            // Editor Logic
             document.getElementById("ctx-edit-global").addEventListener("click", () => openEditor(null));
             document.getElementById("ctx-edit-this").addEventListener("click", () => openEditor(currentTarget));
-            document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
-            document.getElementById("save-style-btn").addEventListener("click", saveStyleData);
-
-            window.addEventListener('contextmenu', handleContextMenu);
-            window.addEventListener('mousedown', startDrag);
-            window.addEventListener('mousemove', doDrag);
-            window.addEventListener('mouseup', endDrag);
-            window.addEventListener('click', () => document.getElementById('p8-ctx-menu').style.display = 'none');
-        }
-
-        // --- Style & Theme Engine ---
-
-        function openEditor(element) {
-            currentTarget = element;
-            const container = document.getElementById('controls-container');
-            const title = document.getElementById('editor-title');
-            const themeGroup = document.getElementById('theme-save-group');
-            
-            container.innerHTML = '';
-            title.innerText = element ? 'Element Styles' : 'Global Theme';
-            themeGroup.style.display = element ? 'none' : 'block';
-
-            styleSchema.forEach(s => {
-                const group = document.createElement('div');
-                group.className = 'input-group';
-                
-                const source = element || document.documentElement;
-                let currentVal = getComputedStyle(source).getPropertyValue(s.var).trim();
-                
-                // Cleanup numeric values for input[type=number]
-                if(s.type === 'number') currentVal = parseInt(currentVal) || 0;
-
-                group.innerHTML = `<label>${s.label}</label><input type="${s.type}" id="edit-${s.id}" value="${currentVal}" ${s.min !== undefined ? `min="${s.min}" max="${s.max}" step="${s.step}"` : ''}>`;
-                container.appendChild(group);
-
-                group.querySelector('input').addEventListener('input', (e) => {
-                    let val = e.target.value;
-                    if(s.id === 'bgopacity') {
-                        // Handle opacity specifically if linked to a color var (RGBA trick)
-                        const currentBg = getComputedStyle(source).getPropertyValue('--bg');
-                        // In a more complex build, we'd parse the HEX to RGBA here.
-                    }
-                    if(s.type === 'number') val += 'px';
-                    source.style.setProperty(s.var, val);
-                });
+            document.getElementById("ctx-lock").addEventListener("click", () => {
+                isEditMode = !isEditMode;
+                document.body.classList.toggle('edit-mode');
+                document.getElementById('p8-ctx-menu').style.display = 'none';
             });
 
+            document.getElementById("save-style-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
+            document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
+
+            // Global Drag & Context Listeners
+            window.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                currentTarget = e.target.closest('.p8-widget');
+                const menu = document.getElementById('p8-ctx-menu');
+                menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
+            });
+
+            window.addEventListener('mousedown', e => {
+                if (!isEditMode || e.button !== 0 || e.target.closest('input') || e.target.closest('.obs-box')) return;
+                dragTarget = e.target.closest('.p8-widget');
+                if (dragTarget) {
+                    const r = dragTarget.getBoundingClientRect();
+                    offset = { x: e.clientX - r.left, y: e.clientY - r.top };
+                }
+                document.getElementById('p8-ctx-menu').style.display = 'none';
+            });
+
+            window.addEventListener('mousemove', e => {
+                if (dragTarget) {
+                    dragTarget.style.left = (e.clientX - offset.x) + 'px';
+                    dragTarget.style.top = (e.clientY - offset.y) + 'px';
+                    dragTarget.style.transform = 'none';
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (dragTarget) {
+                    localStorage.setItem(`p8_pos_${dragTarget.id}`, JSON.stringify({top: dragTarget.style.top, left: dragTarget.style.left}));
+                    dragTarget = null;
+                }
+            });
+        }
+
+        function openEditor(el) {
+            const container = document.getElementById('controls-container');
+            container.innerHTML = '';
+            styleSchema.forEach(s => {
+                const source = el || document.documentElement;
+                let val = getComputedStyle(source).getPropertyValue(s.var).trim();
+                if(s.type === 'number') val = parseInt(val) || 0;
+                
+                const g = document.createElement('div');
+                g.className = 'input-group';
+                g.innerHTML = `<label>${s.label}</label><input type="${s.type}" value="${val}">`;
+                container.appendChild(g);
+
+                g.querySelector('input').addEventListener('input', e => {
+                    const finalVal = e.target.value + (s.type === 'number' ? 'px' : '');
+                    source.style.setProperty(s.var, finalVal);
+                    // Persistent Save
+                    const key = el ? `p8_elem_${el.id}` : 'p8_theme_global';
+                    let settings = JSON.parse(localStorage.getItem(key)) || {};
+                    settings[s.var] = finalVal;
+                    localStorage.setItem(key, JSON.stringify(settings));
+                });
+            });
             document.getElementById('style-editor').style.display = 'block';
             document.getElementById('p8-ctx-menu').style.display = 'none';
         }
 
-        function saveStyleData() {
-            if (!currentTarget) {
-                // Global Save
-                const name = document.getElementById('new-theme-name').value || 'Default';
-                const themeData = {};
-                styleSchema.forEach(s => {
-                    themeData[s.var] = document.getElementById(`edit-${s.id}`).value;
-                });
-                localStorage.setItem(`p8_theme_${name}`, JSON.stringify(themeData));
-                localStorage.setItem(`p8_active_theme`, name);
-            } else {
-                // Element Save
-                const elementData = {};
-                styleSchema.forEach(s => {
-                    elementData[s.var] = document.getElementById(`edit-${s.id}`).value;
-                });
-                localStorage.setItem(`p8_elem_${currentTarget.id}`, JSON.stringify(elementData));
-            }
-            
-            // Save positions as well
-            savePositions();
-            document.getElementById('style-editor').style.display = 'none';
-        }
-
-        function loadAllSettings() {
+        function loadPersistedSettings() {
             // Load Global
-            const activeTheme = localStorage.getItem('p8_active_theme') || 'Default';
-            const themeData = JSON.parse(localStorage.getItem(`p8_theme_${activeTheme}`));
-            if(themeData) {
-                Object.keys(themeData).forEach(key => {
-                    let val = themeData[key];
-                    if(!isNaN(val) && key !== '--bgopacity') val += 'px';
-                    document.documentElement.style.setProperty(key, val);
-                });
-            }
-
-            // Load Elements & Positions
+            const global = JSON.parse(localStorage.getItem('p8_theme_global'));
+            if(global) Object.keys(global).forEach(k => document.documentElement.style.setProperty(k, global[k]));
+            
+            // Load Widgets
             document.querySelectorAll('.p8-widget').forEach(el => {
                 const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
-                if(pos) {
-                    el.style.top = pos.top;
-                    el.style.left = pos.left;
-                }
+                if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
                 const styles = JSON.parse(localStorage.getItem(`p8_elem_${el.id}`));
-                if(styles) {
-                    Object.keys(styles).forEach(key => {
-                        let val = styles[key];
-                        if(!isNaN(val) && key !== '--bgopacity') val += 'px';
-                        el.style.setProperty(key, val);
-                    });
-                }
+                if(styles) Object.keys(styles).forEach(k => el.style.setProperty(k, styles[k]));
             });
         }
 
-        // --- Interaction Logic ---
-
-        function handleContextMenu(e) {
-            e.preventDefault();
-            const widget = e.target.closest('.p8-widget');
-            currentTarget = widget;
-
-            const menu = document.getElementById('p8-ctx-menu');
-            document.getElementById('ctx-edit-this').style.display = widget ? 'block' : 'none';
-            
-            menu.style.display = 'block';
-            menu.style.left = `${e.clientX}px`;
-            menu.style.top = `${e.clientY}px`;
-        }
-
-        function startDrag(e) {
-            if (!isEditMode || e.button !== 0) return;
-            const widget = e.target.closest('.p8-widget');
-            if (widget) {
-                dragTarget = widget;
-                const rect = widget.getBoundingClientRect();
-                offset.x = e.clientX - rect.left;
-                offset.y = e.clientY - rect.top;
-                widget.style.zIndex = 1000;
-            }
-        }
-
-        function doDrag(e) {
-            if (dragTarget) {
-                dragTarget.style.left = (e.clientX - offset.x) + 'px';
-                dragTarget.style.top = (e.clientY - offset.y) + 'px';
-                dragTarget.style.transform = 'none';
-            }
-        }
-
-        function endDrag() {
-            if (dragTarget) {
-                dragTarget.style.zIndex = 10;
-                dragTarget = null;
-                savePositions();
-            }
-        }
-
-        function savePositions() {
-            document.querySelectorAll('.p8-widget').forEach(w => {
-                localStorage.setItem(`p8_pos_${w.id}`, JSON.stringify({ top: w.style.top, left: w.style.left }));
-            });
-        }
-
-        function toggleEditMode() {
-            isEditMode = !isEditMode;
-            document.body.classList.toggle('edit-mode', isEditMode);
-            if (!isEditMode) savePositions();
-        }
-
-        // --- Twitch Integration ---
-
-        async function checkAuthCallback() {
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const token = hashParams.get("access_token");
+        async function checkTwitchAuth() {
+            const h = new URLSearchParams(window.location.hash.substring(1));
+            const token = h.get("access_token");
             if (token) {
-                document.getElementById("login-button").style.display = "none";
+                const res = await fetch("https://api.twitch.tv/helix/users", {
+                    headers: { "Authorization": `Bearer ${token}`, "Client-Id": CLIENT_ID }
+                });
+                const d = await res.json();
                 document.getElementById("obs-instructions").style.display = "block";
-                try {
-                    const res = await fetch("https://api.twitch.tv/helix/users", {
-                        headers: { "Authorization": `Bearer ${token}`, "Client-Id": CLIENT_ID }
-                    });
-                    const data = await res.json();
-                    const channel = data.data[0].login;
-                    document.getElementById("obs-url-output").innerText = `https://${REDIRECT_URI}?channel=${channel}&token=${token}`;
-                } catch (e) { console.error(e); }
+                document.getElementById("obs-url-output").innerText = `https://${REDIRECT_URI}?channel=${d.data[0].login}&token=${token}`;
             }
         }
 
-        function startTwitchBot(channel, token) {
+        function startTwitch(channel, token) {
             ComfyJS.onChat = (user, message) => {
                 const feed = document.getElementById("chat-feed");
-                const div = document.createElement("div");
-                div.className = "chat-msg";
-                div.innerHTML = `<span class="chat-user">${user}:</span> ${message}`;
-                feed.prepend(div);
-                if (feed.childNodes.length > 12) feed.lastChild.remove();
+                const m = document.createElement("div");
+                m.className = "chat-msg";
+                m.innerHTML = `<span class="chat-user">${user}:</span> ${message}`;
+                feed.prepend(m);
+                if (feed.childNodes.length > 10) feed.lastChild.remove();
             };
-            ComfyJS.Init(channel, `oauth:${token}`);
+            ComfyJS.Init(channel, token);
         }
 
         init();
