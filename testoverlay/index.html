@@ -537,7 +537,7 @@
                 const userColor = extra.userColor || 'var(--accent)';
                 m.innerHTML = `<span class="chat-user" style="color: ${userColor}">${user}:</span> ${message}`;
                 feed.prepend(m);
-                if (feed.childNodes.length > 12) feed.lastChild.remove();
+                if (feed.childNodes.length > 5) feed.lastChild.remove();
             };
 
             ComfyJS.onCommand = (user, command, message, flags, extra) => {
