@@ -4,31 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
-    <title>Pixelb8 Omega | Twitch Overlay CMS</title>
+    <title>Pixelb8 EzLay | Twitch Overlay CMS</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <style>
         :root {
-            --bg: rgba(24, 24, 27, 0.8);
+            /* Background Config */
+            --bg-1: rgba(24, 24, 27, 0.8);
+            --bg-2: rgba(24, 24, 27, 0.8);
+            --bg-grad-angle: 135deg;
+            /* Accent/Border Config */
+            --accent-1: #9146ff;
+            --accent-2: #9146ff;
+            --accent-grad-angle: 135deg;
+            /* Structural Config */
             --border-width: 2px;
             --border-style: solid;
-            --border-color: #9146ff;
             --border-radius: 12px;
             --font-size: 18px;
             --text-color: #ffffff;
-            --accent: #9146ff;
+            --font-family: 'Segoe UI', system-ui, sans-serif;
         }
 
         body { 
             background: transparent; 
             color: var(--text-color); 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
+            font-family: var(--font-family); 
             margin: 0; padding: 0;
             overflow: hidden; width: 100vw; height: 100vh;
         }
 
         /* Setup UI */
         .setup-container { 
-            background: #18181b; border: 2px solid var(--accent);
+            background: #18181b; border: 2px solid var(--accent-1);
             padding: 40px; border-radius: 12px; max-width: 550px; 
             margin: 50px auto; text-align: center; display: none;
             position: relative; z-index: 9999;
@@ -37,16 +44,21 @@
         /* Widget Core */
         .p8-widget {
             position: absolute;
-            background: var(--bg);
-            border: var(--border-width) var(--border-style) var(--border-color);
+            background: linear-gradient(var(--bg-grad-angle), var(--bg-1), var(--bg-2));
+            border: var(--border-width) var(--border-style);
+            border-image: linear-gradient(var(--accent-grad-angle), var(--accent-1), var(--accent-2)) 1;
             border-radius: var(--border-radius);
             font-size: var(--font-size);
             min-width: 200px; padding: 15px; 
             cursor: default; box-sizing: border-box;
             user-select: none;
             backdrop-filter: blur(4px);
+            color: var(--text-color);
         }
         
+        /* Utility to preserve radius when border-image is not a gradient */
+        .p8-widget[style*="solid"] { border-color: var(--accent-1); border-image: none; }
+
         body.edit-mode .p8-widget { 
             outline: 2px dashed rgba(145, 70, 255, 0.6); 
             cursor: grab; 
@@ -61,32 +73,37 @@
         }
         .ctx-item { padding: 10px 15px; cursor: pointer; font-size: 14px; color: #e4e4e7; border-bottom: 1px solid #27272a; }
         .ctx-item:last-child { border-bottom: none; }
-        .ctx-item:hover { background: var(--accent); color: white; }
+        .ctx-item:hover { background: var(--accent-1); color: white; }
         .ctx-danger { color: #ff4b4b !important; }
 
         /* Style Editor */
         #style-editor {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #18181b; border: 2px solid var(--accent);
-            padding: 20px; display: none; z-index: 10001; width: 350px;
+            background: #18181b; border: 2px solid var(--accent-1);
+            padding: 20px; display: none; z-index: 10001; width: 380px;
             border-radius: 12px; max-height: 85vh; overflow-y: auto;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
 
         .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group label { display: block; font-size: 10px; color: #a1a1aa; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
         
-        .p8-input { 
+        .p8-input, .p8-select { 
             width: 100%; background: #09090b; border: 1px solid #3f3f46; 
             color: white; padding: 10px; border-radius: 6px; box-sizing: border-box; 
-            font-size: 14px;
+            font-size: 13px;
         }
+
+        /* Color Control Row */
+        .color-row { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
+        .p8-color-btn { width: 45px; height: 35px; border: 1px solid #3f3f46; cursor: pointer; border-radius: 4px; padding: 0; background: none; }
+        .alpha-slider { flex-grow: 1; accent-color: var(--accent-1); height: 6px; cursor: pointer; }
 
         /* Custom Dropdown */
         .custom-select { position: relative; width: 100%; }
         .select-trigger { 
             background: #09090b; border: 1px solid #3f3f46; color: white; 
-            padding: 10px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between;
+            padding: 10px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; font-size: 13px;
         }
         .select-options { 
             position: absolute; top: 100%; left: 0; right: 0; background: #18181b; 
@@ -94,15 +111,7 @@
             max-height: 150px; overflow-y: auto;
         }
         .option-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #27272a; font-size: 13px; }
-        .option-item:hover { background: var(--accent); }
-
-        /* Color Picker Grid */
-        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 5px; }
-        .color-swatch { 
-            width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer; 
-            border: 1px solid rgba(255,255,255,0.1); 
-        }
-        .color-swatch:hover { transform: scale(1.1); border-color: white; }
+        .option-item:hover { background: var(--accent-1); }
 
         /* Modal system */
         #p8-modal-overlay {
@@ -111,20 +120,19 @@
             justify-content: center; align-items: center;
         }
         .p8-modal {
-            background: #18181b; border: 2px solid var(--accent); padding: 25px;
+            background: #18181b; border: 2px solid var(--accent-1); padding: 25px;
             border-radius: 12px; width: 320px; text-align: center;
         }
 
         .p8-btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: 0.2s; }
-        .save-btn { background: var(--accent); color: white; }
+        .save-btn { background: var(--accent-1); color: white; }
         .alt-btn { background: #27272a; color: #e4e4e7; border: 1px solid #3f3f46; }
         .del-btn { background: #450a0a; color: #f87171; font-size: 11px; margin-top: 20px; }
-        .del-btn:disabled { opacity: 0.2; cursor: not-allowed; }
 
         #chat-feed { display: flex; flex-direction: column-reverse; max-height: 300px; overflow: hidden; }
         .chat-msg { margin-bottom: 5px; font-size: 0.9em; line-height: 1.4; }
         .chat-user { font-weight: bold; }
-        #status-indicator { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
+        #status-indicator { font-weight: bold; color: var(--accent-1); margin-bottom: 5px; }
         #mode-badge { font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; color: #ffeb3b; }
         .obs-box { background: #000; padding: 12px; border: 1px dashed #444; margin: 10px 0; font-family: monospace; font-size: 12px; cursor: copy; color: #00ff88; word-break: break-all; }
     </style>
@@ -143,7 +151,7 @@
     </div>
 
     <div id="setup-interface" class="setup-container">
-        <h2 style="color: var(--accent); letter-spacing: 2px;">PIXELB8 OMEGA</h2>
+        <h2 style="color: var(--accent-1); letter-spacing: 2px;">PIXELB8 OMEGA</h2>
         <div id="auth-gate">
             <p>Authorize to generate your draggable overlay link.</p>
             <button id="login-button" class="p8-btn save-btn">Connect Twitch</button>
@@ -171,26 +179,51 @@
 
     <!-- Contextual Control -->
     <div id="p8-ctx-menu">
-        <div class="ctx-item" id="ctx-open-editor">Theme Manager</div>
+        <div class="ctx-item" id="ctx-open-editor">Style Engine</div>
         <div class="ctx-item" id="ctx-lock">Lock/Unlock Layout</div>
-        <div class="ctx-item ctx-danger" id="ctx-reset">Reset System (Logout)</div>
+        <div class="ctx-item ctx-danger" id="ctx-reset">Reset System</div>
     </div>
 
     <!-- Theme Manager Panel -->
     <div id="style-editor">
-        <h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent); text-transform: uppercase;">Style Engine</h3>
+        <h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent-1); text-transform: uppercase;">Style Engine</h3>
+        
         <div class="input-group">
-            <label>Profile</label>
+            <label>Active Profile</label>
             <div class="custom-select" id="theme-selector">
                 <div class="select-trigger" id="current-theme-display">Default</div>
                 <div class="select-options" id="theme-options"></div>
             </div>
         </div>
+
         <div class="input-group">
             <label>Profile Name</label>
             <input type="text" id="theme-name-input" class="p8-input" placeholder="Theme Name">
         </div>
+
+        <div class="input-group">
+            <label>Font Family</label>
+            <select id="font-family-select" class="p8-select" data-var="--font-family">
+                <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                <option value="'Courier New', monospace">Monospace</option>
+                <option value="'Georgia', serif">Serif</option>
+                <option value="'Impact', sans-serif">Impact</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Border Style</label>
+            <select id="border-style-select" class="p8-select" data-var="--border-style">
+                <option value="solid">Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+                <option value="double">Double</option>
+                <option value="none">None</option>
+            </select>
+        </div>
+
         <div id="variable-controls"></div>
+
         <button class="p8-btn save-btn" id="save-theme-btn">Update Profile</button>
         <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#71717a; font-size: 11px;">Hide Editor</button>
         <button class="p8-btn del-btn" id="delete-theme-btn">Purge Profile</button>
@@ -203,45 +236,55 @@
         
         let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 }, fadeTimeout;
 
-        // Persistent Registry
+        // Persistent Registry with Expanded Variables
         let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
             active: 'Default',
             themes: {
-                'Default': { '--bg': 'rgba(24, 24, 27, 0.8)', '--accent': '#9146ff', '--border-color': '#9146ff', '--border-radius': '12px', '--font-size': '18px' }
+                'Default': { 
+                    '--bg-1': 'rgba(24, 24, 27, 0.8)', '--bg-2': 'rgba(24, 24, 27, 0.8)', 
+                    '--accent-1': '#9146ff', '--accent-2': '#9146ff',
+                    '--text-color': '#ffffff', '--font-size': '18px', 
+                    '--border-radius': '12px', '--border-style': 'solid',
+                    '--font-family': "'Segoe UI', sans-serif"
+                }
             }
         };
 
         const styleConfig = [
-            { label: 'Background', var: '--bg', type: 'color' },
-            { label: 'Accent / Border', var: '--accent', type: 'color' },
+            { label: 'Background A', var: '--bg-1', type: 'complex-color' },
+            { label: 'Background B', var: '--bg-2', type: 'complex-color' },
+            { label: 'Accent A', var: '--accent-1', type: 'complex-color' },
+            { label: 'Accent B', var: '--accent-2', type: 'complex-color' },
+            { label: 'Text Color', var: '--text-color', type: 'complex-color' },
             { label: 'Font Size', var: '--font-size', type: 'range', min: 12, max: 48 },
             { label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
         ];
 
-        const palette = ['#9146ff', '#ff4b4b', '#00ff88', '#3b82f6', '#f59e0b', '#ec4899', '#ffffff', '#000000', 'rgba(0,0,0,0.5)', 'rgba(24,24,27,0.8)'];
+        // Color Utilities
+        function hexToRgba(hex, alpha) {
+            const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+        function rgbaToHex(rgba) {
+            const parts = rgba.match(/[\d.]+/g);
+            if (!parts) return "#9146ff";
+            return "#" + [parts[0], parts[1], parts[2]].map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+        }
+        function rgbaToAlpha(rgba) {
+            const parts = rgba.match(/[\d.]+/g);
+            return parts && parts[3] ? parts[3] : 1;
+        }
 
-        // Sovereign Modal Function
         async function p8Confirm(message, isAlert = false) {
             const overlay = document.getElementById('p8-modal-overlay');
-            const msgEl = document.getElementById('modal-msg');
-            const cancelBtn = document.getElementById('modal-cancel');
-            const confirmBtn = document.getElementById('modal-confirm');
-            
-            msgEl.innerText = message;
-            cancelBtn.style.display = isAlert ? 'none' : 'block';
+            document.getElementById('modal-msg').innerText = message;
+            document.getElementById('modal-cancel').style.display = isAlert ? 'none' : 'block';
             overlay.style.display = 'flex';
 
             return new Promise((resolve) => {
-                const cleanup = (val) => {
-                    overlay.style.display = 'none';
-                    confirmBtn.removeEventListener('click', onYes);
-                    cancelBtn.removeEventListener('click', onNo);
-                    resolve(val);
-                };
-                const onYes = (e) => { e.stopPropagation(); cleanup(true); };
-                const onNo = (e) => { e.stopPropagation(); cleanup(false); };
-                confirmBtn.addEventListener('click', onYes);
-                cancelBtn.addEventListener('click', onNo);
+                const cleanup = (val) => { overlay.style.display = 'none'; resolve(val); };
+                document.getElementById('modal-confirm').onclick = () => cleanup(true);
+                document.getElementById('modal-cancel').onclick = () => cleanup(false);
             });
         }
 
@@ -271,16 +314,8 @@
         function applyTheme(name) {
             const theme = registry.themes[name];
             Object.keys(theme).forEach(k => document.documentElement.style.setProperty(k, theme[k]));
-            if(theme['--accent']) document.documentElement.style.setProperty('--border-color', theme['--accent']);
             registry.active = name;
             localStorage.setItem('p8_registry', JSON.stringify(registry));
-        }
-
-        async function systemReset() {
-            if(await p8Confirm("This will disconnect your account and clear all local themes. Proceed?")) {
-                localStorage.clear();
-                window.location.href = FULL_REDIRECT;
-            }
         }
 
         function bindEvents() {
@@ -311,11 +346,15 @@
                 document.getElementById('p8-ctx-menu').style.display = 'none';
             });
 
-            document.getElementById("ctx-reset").addEventListener("click", systemReset);
-            document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
+            document.getElementById("ctx-reset").addEventListener("click", async () => {
+                if(await p8Confirm("Wipe all local themes and logout?")) {
+                    localStorage.clear(); window.location.href = FULL_REDIRECT;
+                }
+            });
+
+            document.getElementById("logout-btn-ui").addEventListener("click", () => localStorage.clear() || location.reload());
             document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
 
-            // Custom Select Toggle
             document.getElementById('current-theme-display').addEventListener('click', (e) => {
                 e.stopPropagation();
                 const opts = document.getElementById('theme-options');
@@ -324,12 +363,7 @@
 
             document.getElementById('save-theme-btn').addEventListener('click', async () => {
                 const newName = document.getElementById('theme-name-input').value.trim() || 'Untitled Profile';
-                if(!registry.themes[newName]) {
-                    registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
-                } else {
-                    // Update existing
-                    registry.themes[newName] = { ...registry.themes[registry.active] };
-                }
+                if(!registry.themes[newName]) registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
                 registry.active = newName;
                 localStorage.setItem('p8_registry', JSON.stringify(registry));
                 renderThemeList();
@@ -337,16 +371,13 @@
             });
 
             document.getElementById('delete-theme-btn').addEventListener('click', async (e) => {
-                e.stopPropagation();
                 if(registry.active === 'Default') return;
                 if(await p8Confirm(`Delete profile "${registry.active}"?`)) {
                     delete registry.themes[registry.active];
                     registry.active = 'Default';
-                    localStorage.setItem('p8_registry', JSON.stringify(registry));
                     applyTheme('Default');
                     renderThemeList();
                     renderThemeControls();
-                    await p8Confirm('Profile Deleted', true);
                 }
             });
 
@@ -357,7 +388,7 @@
                 if (menu.style.display === 'block' && !menu.contains(e.target)) menu.style.display = 'none';
                 if (opts.style.display === 'block' && !e.target.closest('#theme-selector')) opts.style.display = 'none';
                 
-                if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor') || e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
+                if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor') || e.target.closest('.setup-container')) return;
                 
                 dragTarget = e.target.closest('.p8-widget');
                 if (dragTarget) {
@@ -384,73 +415,79 @@
                 if (e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
                 e.preventDefault();
                 const menu = document.getElementById('p8-ctx-menu');
-                menu.style.display = 'block'; 
-                menu.style.left = e.clientX + 'px'; 
-                menu.style.top = e.clientY + 'px';
+                menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
             });
         }
 
         function renderThemeControls() {
             const container = document.getElementById('variable-controls');
             container.innerHTML = '';
+            const current = registry.themes[registry.active];
+
             styleConfig.forEach(item => {
                 const group = document.createElement('div');
                 group.className = 'input-group';
                 group.innerHTML = `<label>${item.label}</label>`;
 
-                if(item.type === 'color') {
-                    const grid = document.createElement('div');
-                    grid.className = 'color-grid';
-                    palette.forEach(color => {
-                        const swatch = document.createElement('div');
-                        swatch.className = 'color-swatch';
-                        swatch.style.background = color;
-                        swatch.addEventListener('click', () => {
-                            document.documentElement.style.setProperty(item.var, color);
-                            registry.themes[registry.active][item.var] = color;
-                            if(item.var === '--accent') {
-                                document.documentElement.style.setProperty('--border-color', color);
-                                registry.themes[registry.active]['--border-color'] = color;
-                            }
-                        });
-                        grid.appendChild(swatch);
-                    });
-                    group.appendChild(grid);
+                if(item.type === 'complex-color') {
+                    const val = current[item.var] || 'rgba(255,255,255,1)';
+                    const row = document.createElement('div');
+                    row.className = 'color-row';
+                    row.innerHTML = `
+                        <input type="color" class="p8-color-btn" value="${rgbaToHex(val)}">
+                        <input type="range" class="alpha-slider" min="0" max="1" step="0.01" value="${rgbaToAlpha(val)}">
+                    `;
+                    const cp = row.querySelector('.p8-color-btn');
+                    const ap = row.querySelector('.alpha-slider');
+                    const update = () => {
+                        const rgba = hexToRgba(cp.value, ap.value);
+                        document.documentElement.style.setProperty(item.var, rgba);
+                        registry.themes[registry.active][item.var] = rgba;
+                    };
+                    cp.oninput = ap.oninput = update;
+                    group.appendChild(row);
                 } else {
                     const range = document.createElement('input');
                     range.type = 'range'; range.className = 'p8-input';
                     range.min = item.min; range.max = item.max;
-                    range.value = parseInt(getComputedStyle(document.documentElement).getPropertyValue(item.var)) || item.min;
-                    range.addEventListener('input', (e) => {
-                        const val = e.target.value + 'px';
-                        document.documentElement.style.setProperty(item.var, val);
-                        registry.themes[registry.active][item.var] = val;
-                    });
+                    range.value = parseInt(current[item.var]) || item.min;
+                    range.oninput = (e) => {
+                        const v = e.target.value + 'px';
+                        document.documentElement.style.setProperty(item.var, v);
+                        registry.themes[registry.active][item.var] = v;
+                    };
                     group.appendChild(range);
                 }
                 container.appendChild(group);
+            });
+
+            ['font-family-select', 'border-style-select'].forEach(id => {
+                const el = document.getElementById(id);
+                el.value = current[el.dataset.var] || el.options[0].value;
+                el.onchange = () => {
+                    document.documentElement.style.setProperty(el.dataset.var, el.value);
+                    registry.themes[registry.active][el.dataset.var] = el.value;
+                };
             });
         }
 
         function renderThemeList() {
             const list = document.getElementById('theme-options');
             const display = document.getElementById('current-theme-display');
-            const nameInput = document.getElementById('theme-name-input');
-            const delBtn = document.getElementById('delete-theme-btn');
             list.innerHTML = '';
             display.innerText = registry.active;
-            nameInput.value = registry.active;
-            delBtn.disabled = (registry.active === 'Default');
+            document.getElementById('theme-name-input').value = registry.active;
+            
             Object.keys(registry.themes).forEach(name => {
                 const opt = document.createElement('div');
                 opt.className = 'option-item';
                 opt.innerText = name;
-                opt.addEventListener('click', () => {
+                opt.onclick = () => {
                     applyTheme(name);
                     renderThemeList();
                     renderThemeControls();
                     list.style.display = 'none';
-                });
+                };
                 list.appendChild(opt);
             });
         }
@@ -470,47 +507,28 @@
                     headers: { "Authorization": `Bearer ${token}`, "Client-Id": CLIENT_ID }
                 });
                 const d = await res.json();
-                const channelName = d.data[0].login;
+                const user = d.data[0].login;
                 document.getElementById("auth-gate").style.display = "none";
                 document.getElementById("obs-instructions").style.display = "block";
-                document.getElementById("obs-url-output").innerText = `${FULL_REDIRECT}?channel=${channelName}&token=${token}`;
+                document.getElementById("obs-url-output").innerText = `${FULL_REDIRECT}?channel=${user}&token=${token}`;
                 history.replaceState(null, "", FULL_REDIRECT);
             }
         }
 
         function startTwitch(channel, token) {
-            const formattedToken = token.startsWith("oauth:") ? token : `oauth:${token}`;
-            const overlayUi = document.getElementById("overlay-ui");
-
-            ComfyJS.onConnected = () => {
-                document.getElementById("status-indicator").innerText = "SYSTEM: ONLINE";
-                document.getElementById("status-indicator").style.color = "#00ff88";
-                overlayUi.innerText = `READY: ${channel.toUpperCase()}`;
-            };
-
-            ComfyJS.onChat = (user, message, flags, self, extra) => {
+            ComfyJS.onChat = (user, msg, flags, self, extra) => {
                 const feed = document.getElementById("chat-feed");
                 const m = document.createElement("div");
                 m.className = "chat-msg";
-                const userColor = extra.userColor || 'var(--accent)';
-                m.innerHTML = `<span class="chat-user" style="color: ${userColor}">${user}:</span> ${message}`;
+                m.innerHTML = `<span class="chat-user" style="color: ${extra.userColor || 'var(--accent-1)'}">${user}:</span> ${msg}`;
                 feed.prepend(m);
                 if (feed.childNodes.length > 15) feed.lastChild.remove();
             };
-
-            ComfyJS.onCommand = (user, command, message, flags, extra) => {
-                if (command === "hello") {
-                    overlayUi.innerText = `👋 Welcome, @${user}!`;
-                    overlayUi.style.opacity = "1";
-                    clearTimeout(fadeTimeout);
-                    fadeTimeout = setTimeout(() => {
-                        overlayUi.innerText = `LISTENING: ${channel.toUpperCase()}`;
-                    }, 6000);
-                    ComfyJS.Say(`Hello @${user}! Pixelb8 system check complete.`, channel);
-                }
-            }; 
-
-            ComfyJS.Init(channel, formattedToken);
+            ComfyJS.onConnected = () => {
+                document.getElementById("status-indicator").innerText = "SYSTEM: ONLINE";
+                document.getElementById("status-indicator").style.color = "#00ff88";
+            };
+            ComfyJS.Init(channel, token);
         }
 
         init();
