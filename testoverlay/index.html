@@ -80,7 +80,7 @@
             font-size: 14px;
         }
 
-        /* Custom Sovereign Dropdown */
+        /* Custom Dropdown */
         .custom-select { position: relative; width: 100%; }
         .select-trigger { 
             background: #09090b; border: 1px solid #3f3f46; color: white; 
@@ -94,7 +94,7 @@
         .option-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #27272a; font-size: 13px; }
         .option-item:hover { background: var(--accent); }
 
-        /* Sovereign Color Picker Grid */
+        /* Color Picker Grid */
         .color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 5px; }
         .color-swatch { 
             width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer; 
@@ -102,11 +102,15 @@
         }
         .color-swatch:hover { transform: scale(1.1); border-color: white; }
 
-        /* Utils */
-        .obs-box { 
-            background: #000; padding: 12px; border: 1px dashed #444; 
-            margin: 10px 0; font-family: monospace; font-size: 12px; 
-            cursor: copy; color: #00ff88; word-break: break-all;
+        /* Custom Alert Dialog */
+        #p8-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; z-index: 20000;
+            justify-content: center; align-items: center;
+        }
+        .p8-modal {
+            background: #18181b; border: 2px solid var(--accent); padding: 25px;
+            border-radius: 12px; width: 300px; text-align: center;
         }
 
         .p8-btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: 0.2s; }
@@ -120,9 +124,21 @@
         .chat-user { font-weight: bold; }
         #status-indicator { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
         #mode-badge { font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; color: #ffeb3b; }
+        .obs-box { background: #000; padding: 12px; border: 1px dashed #444; margin: 10px 0; font-family: monospace; font-size: 12px; cursor: copy; color: #00ff88; word-break: break-all; }
     </style>
 </head>
 <body class="edit-mode">
+
+    <!-- Custom Dialog Overlay -->
+    <div id="p8-modal-overlay">
+        <div class="p8-modal">
+            <div id="modal-msg" style="margin-bottom: 20px; font-size: 14px;"></div>
+            <div id="modal-actions" style="display: flex; gap: 10px;">
+                <button id="modal-cancel" class="p8-btn alt-btn">Cancel</button>
+                <button id="modal-confirm" class="p8-btn save-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
 
     <div id="setup-interface" class="setup-container">
         <h2>PIXELB8 OMEGA</h2>
@@ -157,10 +173,8 @@
         <div class="ctx-item ctx-danger" id="ctx-reset">Reset System (Logout)</div>
     </div>
 
-    <!-- THEME EDITOR -->
     <div id="style-editor">
         <h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Theme Manager</h3>
-        
         <div class="input-group">
             <label>Select Theme</label>
             <div class="custom-select" id="theme-selector">
@@ -168,14 +182,11 @@
                 <div class="select-options" id="theme-options"></div>
             </div>
         </div>
-
         <div class="input-group">
             <label>Theme Name</label>
             <input type="text" id="theme-name-input" class="p8-input" placeholder="Theme Name">
         </div>
-
         <div id="variable-controls"></div>
-
         <button class="p8-btn save-btn" id="save-theme-btn">Save Current Theme</button>
         <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#71717a; font-size: 12px;">Close Editor</button>
         <button class="p8-btn del-btn" id="delete-theme-btn">Delete This Theme</button>
@@ -188,7 +199,6 @@
         
         let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 };
 
-        // Registry for multiple themes
         let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
             active: 'Default',
             themes: {
@@ -205,20 +215,42 @@
 
         const palette = ['#9146ff', '#ff4b4b', '#00ff88', '#3b82f6', '#f59e0b', '#ec4899', '#ffffff', '#000000', 'rgba(0,0,0,0.5)', 'rgba(24,24,27,0.8)'];
 
+        // SOVEREIGN MODAL SYSTEM
+        async function p8Confirm(message, isAlert = false) {
+            const overlay = document.getElementById('p8-modal-overlay');
+            const msgEl = document.getElementById('modal-msg');
+            const cancelBtn = document.getElementById('modal-cancel');
+            const confirmBtn = document.getElementById('modal-confirm');
+            
+            msgEl.innerText = message;
+            cancelBtn.style.display = isAlert ? 'none' : 'block';
+            overlay.style.display = 'flex';
+
+            return new Promise((resolve) => {
+                const cleanup = (val) => {
+                    overlay.style.display = 'none';
+                    confirmBtn.removeEventListener('click', onYes);
+                    cancelBtn.removeEventListener('click', onNo);
+                    resolve(val);
+                };
+                const onYes = (e) => { e.stopPropagation(); cleanup(true); };
+                const onNo = (e) => { e.stopPropagation(); cleanup(false); };
+                confirmBtn.addEventListener('click', onYes);
+                cancelBtn.addEventListener('click', onNo);
+            });
+        }
+
         function init() {
             applyTheme(registry.active);
             const params = new URLSearchParams(window.location.search);
-            const obsToken = params.get("token"), obsChannel = params.get("channel");
-
-            if (obsToken && obsChannel) {
+            if (params.get("token") && params.get("channel")) {
                 document.getElementById("overlay-wrapper").style.display = "block";
                 setEditMode(false);
-                startTwitch(obsChannel, obsToken);
+                startTwitch(params.get("channel"), params.get("token"));
             } else {
                 document.getElementById("setup-interface").style.display = "block";
                 checkTwitchAuth();
             }
-            
             loadPositions();
             renderThemeControls();
             bindEvents();
@@ -226,30 +258,21 @@
 
         function setEditMode(state) {
             isEditMode = state;
+            document.body.classList.toggle('edit-mode', isEditMode);
             const badge = document.getElementById('mode-badge');
-            if (isEditMode) {
-                document.body.classList.add('edit-mode');
-                if(badge) badge.style.display = 'block';
-            } else {
-                document.body.classList.remove('edit-mode');
-                if(badge) badge.style.display = 'none';
-            }
+            if(badge) badge.style.display = isEditMode ? 'block' : 'none';
         }
 
         function applyTheme(name) {
             const theme = registry.themes[name];
-            Object.keys(theme).forEach(k => {
-                document.documentElement.style.setProperty(k, theme[k]);
-            });
-            // Ensure border color follows accent if not separately defined
+            Object.keys(theme).forEach(k => document.documentElement.style.setProperty(k, theme[k]));
             if(theme['--accent']) document.documentElement.style.setProperty('--border-color', theme['--accent']);
-            
             registry.active = name;
             localStorage.setItem('p8_registry', JSON.stringify(registry));
         }
 
-        function systemReset() {
-            if(confirm("Logout and reset all data?")) {
+        async function systemReset() {
+            if(await p8Confirm("Logout and reset all data?")) {
                 localStorage.clear();
                 window.location.href = FULL_REDIRECT;
             }
@@ -286,14 +309,13 @@
             document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
             document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
 
-            // Theme Management
             document.getElementById('current-theme-display').addEventListener('click', (e) => {
                 e.stopPropagation();
                 const opts = document.getElementById('theme-options');
                 opts.style.display = opts.style.display === 'block' ? 'none' : 'block';
             });
 
-            document.getElementById('save-theme-btn').addEventListener('click', () => {
+            document.getElementById('save-theme-btn').addEventListener('click', async () => {
                 const newName = document.getElementById('theme-name-input').value.trim() || 'Untitled';
                 if(!registry.themes[newName]) {
                     registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
@@ -301,43 +323,29 @@
                 registry.active = newName;
                 localStorage.setItem('p8_registry', JSON.stringify(registry));
                 renderThemeList();
-                alert('Theme Saved');
+                await p8Confirm('Theme Saved', true);
             });
 
-            document.getElementById('delete-theme-btn').addEventListener('click', (e) => {
-				// Prevent the event from bubbling up to global handlers
-				e.stopPropagation();
+            document.getElementById('delete-theme-btn').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if(registry.active === 'Default') return;
+                if(await p8Confirm(`Delete ${registry.active}?`)) {
+                    delete registry.themes[registry.active];
+                    registry.active = 'Default';
+                    localStorage.setItem('p8_registry', JSON.stringify(registry));
+                    applyTheme('Default');
+                    renderThemeList();
+                    renderThemeControls();
+                    await p8Confirm('Theme Deleted', true);
+                }
+            });
 
-				if(registry.active === 'Default') return;
-
-				if(confirm(`Delete ${registry.active}?`)) {
-					// 1. Remove the theme from the object
-					delete registry.themes[registry.active];
-					
-					// 2. Fall back to Default
-					registry.active = 'Default';
-					
-					// 3. Save the new state to LocalStorage (This was missing!)
-					localStorage.setItem('p8_registry', JSON.stringify(registry));
-					
-					// 4. Update UI
-					applyTheme('Default');
-					renderThemeList();
-					renderThemeControls();
-					
-					alert('Theme Deleted');
-				}
-			});
-
-            // Global Movement Controls
             window.addEventListener('mousedown', e => {
                 const menu = document.getElementById('p8-ctx-menu');
                 const opts = document.getElementById('theme-options');
                 if (menu.style.display === 'block' && !menu.contains(e.target)) menu.style.display = 'none';
                 if (opts.style.display === 'block' && !e.target.closest('#theme-selector')) opts.style.display = 'none';
-
-                if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor') || e.target.closest('.setup-container')) return;
-                
+                if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor') || e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
                 dragTarget = e.target.closest('.p8-widget');
                 if (dragTarget) {
                     const r = dragTarget.getBoundingClientRect();
@@ -360,7 +368,7 @@
             });
 
             window.addEventListener('contextmenu', e => {
-                if (e.target.closest('.setup-container')) return;
+                if (e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
                 e.preventDefault();
                 const menu = document.getElementById('p8-ctx-menu');
                 menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
@@ -414,14 +422,10 @@
             const display = document.getElementById('current-theme-display');
             const nameInput = document.getElementById('theme-name-input');
             const delBtn = document.getElementById('delete-theme-btn');
-
             list.innerHTML = '';
             display.innerText = registry.active;
             nameInput.value = registry.active;
-            
-            // Protect Default
             delBtn.disabled = (registry.active === 'Default');
-
             Object.keys(registry.themes).forEach(name => {
                 const opt = document.createElement('div');
                 opt.className = 'option-item';
@@ -466,7 +470,7 @@
                 document.getElementById("status-indicator").style.color = "#00ff88";
                 document.getElementById("overlay-ui").innerText = `CONNECTED TO: ${channel.toUpperCase()}`;
             };
-			//  CHAT LOGIC: Respond to !hello
+			 // CHAT LOGIC: Respond to !hello
             ComfyJS.onChat = (user, message, flags, self, extra) => {
                 const feed = document.getElementById("chat-feed");
                 const m = document.createElement("div");
@@ -476,8 +480,7 @@
                 feed.prepend(m);
                 if (feed.childNodes.length > 15) feed.lastChild.remove();
             };
-			
-			//  COMMAND LOGIC: Respond to !hello
+			 // COMMAND LOGIC: Respond to !hello
             ComfyJS.onCommand = (user, command, message, flags, extra) => {
                 if (command === "hello") {
                     overlayUi.innerText = `👋 Welcome, @${user}!`;
