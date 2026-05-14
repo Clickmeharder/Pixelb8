@@ -25,6 +25,7 @@
             overflow: hidden; width: 100vw; height: 100vh;
         }
 
+        /* Setup UI */
         .setup-container { 
             background: #18181b; border: 2px solid var(--accent);
             padding: 40px; border-radius: 12px; max-width: 550px; 
@@ -32,6 +33,7 @@
             position: relative; z-index: 9999;
         }
 
+        /* Widget Core */
         .p8-widget {
             position: absolute;
             background: var(--bg);
@@ -49,35 +51,67 @@
         }
         body.edit-mode .p8-widget:active { cursor: grabbing; }
 
+        /* Context Menu */
         #p8-ctx-menu {
             position: fixed; background: #18181b; border: 1px solid #3f3f46;
             border-radius: 6px; display: none; z-index: 10000; width: 200px;
         }
         .ctx-item { padding: 10px 15px; cursor: pointer; font-size: 14px; color: #e4e4e7; border-bottom: 1px solid #27272a; }
         .ctx-item:last-child { border-bottom: none; }
-        .ctx-item:hover { background: #27272a; color: var(--accent); }
+        .ctx-item:hover { background: var(--accent); color: white; }
         .ctx-danger { color: #ff4b4b !important; }
 
+        /* Sovereign Theme Editor */
         #style-editor {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #18181b; border: 2px solid var(--accent);
-            padding: 25px; display: none; z-index: 10001; width: 320px;
+            padding: 20px; display: none; z-index: 10001; width: 350px;
             border-radius: 12px; max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
-        .input-group { margin-bottom: 12px; text-align: left; }
-        .input-group label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 4px; }
-        .input-group input { width: 100%; background: #09090b; border: 1px solid #3f3f46; color: white; padding: 8px; border-radius: 4px; box-sizing: border-box; }
 
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .p8-input { 
+            width: 100%; background: #09090b; border: 1px solid #3f3f46; 
+            color: white; padding: 10px; border-radius: 6px; box-sizing: border-box; 
+            font-size: 14px;
+        }
+
+        /* Custom Sovereign Dropdown */
+        .custom-select { position: relative; width: 100%; }
+        .select-trigger { 
+            background: #09090b; border: 1px solid #3f3f46; color: white; 
+            padding: 10px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between;
+        }
+        .select-options { 
+            position: absolute; top: 100%; left: 0; right: 0; background: #18181b; 
+            border: 1px solid #3f3f46; border-top: none; z-index: 10; display: none;
+            max-height: 150px; overflow-y: auto;
+        }
+        .option-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #27272a; font-size: 13px; }
+        .option-item:hover { background: var(--accent); }
+
+        /* Sovereign Color Picker Grid */
+        .color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 5px; }
+        .color-swatch { 
+            width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer; 
+            border: 1px solid rgba(255,255,255,0.1); 
+        }
+        .color-swatch:hover { transform: scale(1.1); border-color: white; }
+
+        /* Utils */
         .obs-box { 
             background: #000; padding: 12px; border: 1px dashed #444; 
             margin: 10px 0; font-family: monospace; font-size: 12px; 
             cursor: copy; color: #00ff88; word-break: break-all;
         }
 
-        .p8-btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: opacity 0.2s; }
-        .p8-btn:hover { opacity: 0.8; }
+        .p8-btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: 0.2s; }
         .save-btn { background: var(--accent); color: white; }
         .alt-btn { background: #27272a; color: #e4e4e7; border: 1px solid #3f3f46; }
+        .del-btn { background: #450a0a; color: #f87171; font-size: 11px; margin-top: 20px; }
 
         #chat-feed { display: flex; flex-direction: column-reverse; max-height: 300px; overflow: hidden; }
         .chat-msg { margin-bottom: 5px; font-size: 0.9em; }
@@ -99,7 +133,7 @@
             <div id="obs-url-output" class="obs-box">Generating...</div>
             <p style="font-size: 11px; color: #71717a;">Copy this link into an OBS Browser Source.</p>
             <hr style="border: 0; border-top: 1px solid #27272a; margin: 20px 0;">
-            <button id="quick-theme-btn" class="p8-btn alt-btn">Open Theme Editor</button>
+            <button id="quick-theme-btn" class="p8-btn alt-btn">Open Theme Manager</button>
             <button id="logout-btn-ui" class="p8-btn" style="background:transparent; color:#ef4444; font-size: 12px;">Disconnect Account</button>
         </div>
     </div>
@@ -116,17 +150,33 @@
     </div>
 
     <div id="p8-ctx-menu">
-        <div class="ctx-item" id="ctx-edit-global">Global Theme</div>
-        <div class="ctx-item" id="ctx-edit-this">Edit This Element</div>
+        <div class="ctx-item" id="ctx-open-editor">Open Theme Manager</div>
         <div class="ctx-item" id="ctx-lock">Lock/Unlock Layout</div>
         <div class="ctx-item ctx-danger" id="ctx-reset">Reset System (Logout)</div>
     </div>
 
+    <!-- THEME EDITOR -->
     <div id="style-editor">
-        <h3 style="margin-top:0">Editor</h3>
-        <div id="controls-container"></div>
-        <button class="p8-btn save-btn" id="save-style-btn">Save & Close</button>
-        <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#666;">Cancel</button>
+        <h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Theme Manager</h3>
+        
+        <div class="input-group">
+            <label>Select Theme</label>
+            <div class="custom-select" id="theme-selector">
+                <div class="select-trigger" id="current-theme-display">Default</div>
+                <div class="select-options" id="theme-options"></div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Theme Name</label>
+            <input type="text" id="theme-name-input" class="p8-input" placeholder="Theme Name">
+        </div>
+
+        <div id="variable-controls"></div>
+
+        <button class="p8-btn save-btn" id="save-theme-btn">Save Current Theme</button>
+        <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#71717a; font-size: 12px;">Close Editor</button>
+        <button class="p8-btn del-btn" id="delete-theme-btn">Delete This Theme</button>
     </div>
 
     <script>
@@ -136,16 +186,25 @@
         
         let isEditMode = true, dragTarget = null, currentTarget = null, offset = { x: 0, y: 0 };
 
-        const styleSchema = [
-            { id: 'bg', label: 'Background Color', type: 'color', var: '--bg' },
-            { id: 'border-width', label: 'Border (px)', type: 'number', var: '--border-width' },
-            { id: 'border-color', label: 'Border Color', type: 'color', var: '--border-color' },
-            { id: 'border-radius', label: 'Radius (px)', type: 'number', var: '--border-radius' },
-            { id: 'font-size', label: 'Font Size (px)', type: 'number', var: '--font-size' }
+        // Registry for multiple themes
+        let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
+            active: 'Default',
+            themes: {
+                'Default': { '--bg': 'rgba(24, 24, 27, 0.8)', '--accent': '#9146ff', '--border-color': '#9146ff', '--border-radius': '12px', '--font-size': '18px' }
+            }
+        };
+
+        const styleConfig = [
+            { label: 'Background', var: '--bg', type: 'color' },
+            { label: 'Accent / Border', var: '--accent', type: 'color' },
+            { label: 'Font Size', var: '--font-size', type: 'range', min: 12, max: 48 },
+            { label: 'Roundness', var: '--border-radius', type: 'range', min: 0, max: 50 }
         ];
 
+        const palette = ['#9146ff', '#ff4b4b', '#00ff88', '#3b82f6', '#f59e0b', '#ec4899', '#ffffff', '#000000', 'rgba(0,0,0,0.5)', 'rgba(24,24,27,0.8)'];
+
         function init() {
-            loadPersistedSettings();
+            applyTheme(registry.active);
             const params = new URLSearchParams(window.location.search);
             const obsToken = params.get("token"), obsChannel = params.get("channel");
 
@@ -157,6 +216,9 @@
                 document.getElementById("setup-interface").style.display = "block";
                 checkTwitchAuth();
             }
+            
+            loadPositions();
+            renderThemeControls();
             bindEvents();
         }
 
@@ -170,36 +232,35 @@
                 document.body.classList.remove('edit-mode');
                 if(badge) badge.style.display = 'none';
             }
-            console.log("Edit Mode set to:", isEditMode);
         }
 
         function systemReset() {
-            if(confirm("This will log you out and reset layout positions. Continue?")) {
+            if(confirm("Logout and reset all data?")) {
                 localStorage.clear();
                 window.location.href = FULL_REDIRECT;
             }
         }
 
         function bindEvents() {
-            // Login Logic
             document.getElementById("login-button").addEventListener("click", () => {
                 window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(FULL_REDIRECT)}&response_type=token&scope=chat:read+chat:edit`;
             });
 
-            // OBS Copy Logic
             document.getElementById("obs-url-output").addEventListener("click", function() {
                 navigator.clipboard.writeText(this.innerText);
-                const oldText = this.innerText;
-                this.innerText = "COPIED!";
-                setTimeout(() => this.innerText = oldText, 1500);
+                const old = this.innerText; this.innerText = "COPIED!";
+                setTimeout(() => this.innerText = old, 1500);
             });
 
-            // Context Menu Actions
-            document.getElementById("ctx-edit-global").addEventListener("click", (e) => { e.stopPropagation(); openEditor(null); });
-            document.getElementById("quick-theme-btn").addEventListener("click", () => openEditor(null));
-            document.getElementById("ctx-edit-this").addEventListener("click", (e) => { e.stopPropagation(); openEditor(currentTarget); });
-            document.getElementById("ctx-reset").addEventListener("click", (e) => { e.stopPropagation(); systemReset(); });
-            document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
+            document.getElementById("ctx-open-editor").addEventListener("click", () => {
+                document.getElementById('style-editor').style.display = 'block';
+                renderThemeList();
+            });
+
+            document.getElementById("quick-theme-btn").addEventListener("click", () => {
+                document.getElementById('style-editor').style.display = 'block';
+                renderThemeList();
+            });
             
             document.getElementById("ctx-lock").addEventListener("click", (e) => {
                 e.stopPropagation();
@@ -207,29 +268,47 @@
                 document.getElementById('p8-ctx-menu').style.display = 'none';
             });
 
-            document.getElementById("save-style-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
+            document.getElementById("ctx-reset").addEventListener("click", systemReset);
+            document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
             document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
 
-            // Right Click for Context Menu
-            window.addEventListener('contextmenu', e => {
-                e.preventDefault();
-                currentTarget = e.target.closest('.p8-widget');
-                const menu = document.getElementById('p8-ctx-menu');
-                menu.style.display = 'block'; 
-                menu.style.left = e.clientX + 'px'; 
-                menu.style.top = e.clientY + 'px';
+            // Theme Management
+            document.getElementById('current-theme-display').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const opts = document.getElementById('theme-options');
+                opts.style.display = opts.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Dragging Logic
+            document.getElementById('save-theme-btn').addEventListener('click', () => {
+                const newName = document.getElementById('theme-name-input').value.trim() || 'Untitled';
+                if(newName !== registry.active) {
+                    registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
+                    registry.active = newName;
+                }
+                localStorage.setItem('p8_registry', JSON.stringify(registry));
+                renderThemeList();
+                alert('Theme Saved');
+            });
+
+            document.getElementById('delete-theme-btn').addEventListener('click', () => {
+                if(registry.active === 'Default') return;
+                if(confirm(`Delete ${registry.active}?`)) {
+                    delete registry.themes[registry.active];
+                    registry.active = 'Default';
+                    applyTheme('Default');
+                    renderThemeList();
+                    renderThemeControls();
+                }
+            });
+
+            // Global Clicks
             window.addEventListener('mousedown', e => {
                 const menu = document.getElementById('p8-ctx-menu');
-                
-                // If clicking outside menu, hide it
-                if (menu.style.display === 'block' && !menu.contains(e.target)) {
-                    menu.style.display = 'none';
-                }
+                const opts = document.getElementById('theme-options');
+                if (menu.style.display === 'block' && !menu.contains(e.target)) menu.style.display = 'none';
+                if (opts.style.display === 'block' && !e.target.closest('#theme-selector')) opts.style.display = 'none';
 
-                if (!isEditMode || e.button !== 0 || e.target.closest('input') || e.target.closest('.obs-box') || e.target.closest('.setup-container')) return;
+                if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor') || e.target.closest('.setup-container')) return;
                 
                 dragTarget = e.target.closest('.p8-widget');
                 if (dragTarget) {
@@ -251,43 +330,86 @@
                     dragTarget = null;
                 }
             });
-        }
 
-        function openEditor(el) {
-            const container = document.getElementById('controls-container');
-            container.innerHTML = '';
-            styleSchema.forEach(s => {
-                const source = el || document.documentElement;
-                let val = getComputedStyle(source).getPropertyValue(s.var).trim();
-                if(s.type === 'number') val = parseInt(val) || 0;
-                
-                const g = document.createElement('div');
-                g.className = 'input-group';
-                g.innerHTML = `<label>${s.label}</label><input type="${s.type}" value="${val}">`;
-                container.appendChild(g);
-
-                g.querySelector('input').addEventListener('input', e => {
-                    const finalVal = e.target.value + (s.type === 'number' ? 'px' : '');
-                    source.style.setProperty(s.var, finalVal);
-                    const key = el ? `p8_elem_${el.id}` : 'p8_theme_global';
-                    let settings = JSON.parse(localStorage.getItem(key)) || {};
-                    settings[s.var] = finalVal;
-                    localStorage.setItem(key, JSON.stringify(settings));
-                });
+            window.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                const menu = document.getElementById('p8-ctx-menu');
+                menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
             });
-            document.getElementById('style-editor').style.display = 'block';
-            document.getElementById('p8-ctx-menu').style.display = 'none';
         }
 
-        function loadPersistedSettings() {
-            const global = JSON.parse(localStorage.getItem('p8_theme_global'));
-            if(global) Object.keys(global).forEach(k => document.documentElement.style.setProperty(k, global[k]));
-            
+        function renderThemeControls() {
+            const container = document.getElementById('variable-controls');
+            container.innerHTML = '';
+            styleConfig.forEach(item => {
+                const group = document.createElement('div');
+                group.className = 'input-group';
+                group.innerHTML = `<label>${item.label}</label>`;
+
+                if(item.type === 'color') {
+                    const grid = document.createElement('div');
+                    grid.className = 'color-grid';
+                    palette.forEach(color => {
+                        const swatch = document.createElement('div');
+                        swatch.className = 'color-swatch';
+                        swatch.style.background = color;
+                        swatch.addEventListener('click', () => {
+                            document.documentElement.style.setProperty(item.var, color);
+                            if(item.var === '--accent') document.documentElement.style.setProperty('--border-color', color);
+                            registry.themes[registry.active][item.var] = color;
+                        });
+                        grid.appendChild(swatch);
+                    });
+                    group.appendChild(grid);
+                } else {
+                    const range = document.createElement('input');
+                    range.type = 'range'; range.className = 'p8-input';
+                    range.min = item.min; range.max = item.max;
+                    range.value = parseInt(getComputedStyle(document.documentElement).getPropertyValue(item.var)) || item.min;
+                    range.addEventListener('input', (e) => {
+                        const val = e.target.value + 'px';
+                        document.documentElement.style.setProperty(item.var, val);
+                        registry.themes[registry.active][item.var] = val;
+                    });
+                    group.appendChild(range);
+                }
+                container.appendChild(group);
+            });
+        }
+
+        function renderThemeList() {
+            const list = document.getElementById('theme-options');
+            const display = document.getElementById('current-theme-display');
+            const nameInput = document.getElementById('theme-name-input');
+            list.innerHTML = '';
+            display.innerText = registry.active;
+            nameInput.value = registry.active;
+
+            Object.keys(registry.themes).forEach(name => {
+                const opt = document.createElement('div');
+                opt.className = 'option-item';
+                opt.innerText = name;
+                opt.addEventListener('click', () => {
+                    registry.active = name;
+                    applyTheme(name);
+                    renderThemeList();
+                    renderThemeControls();
+                    list.style.display = 'none';
+                });
+                list.appendChild(opt);
+            });
+        }
+
+        function applyTheme(name) {
+            const theme = registry.themes[name];
+            Object.keys(theme).forEach(k => document.documentElement.style.setProperty(k, theme[k]));
+            localStorage.setItem('p8_registry', JSON.stringify(registry));
+        }
+
+        function loadPositions() {
             document.querySelectorAll('.p8-widget').forEach(el => {
                 const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
                 if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
-                const styles = JSON.parse(localStorage.getItem(`p8_elem_${el.id}`));
-                if(styles) Object.keys(styles).forEach(k => el.style.setProperty(k, styles[k]));
             });
         }
 
