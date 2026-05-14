@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
-    <title>Pixelb8 EzLay | Twitch Overlay CMS</title>
+    <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+    <title>Pixelb8 Omega | Twitch Overlay CMS</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <style>
         :root {
@@ -44,6 +44,7 @@
             min-width: 200px; padding: 15px; 
             cursor: default; box-sizing: border-box;
             user-select: none;
+            backdrop-filter: blur(4px);
         }
         
         body.edit-mode .p8-widget { 
@@ -56,13 +57,14 @@
         #p8-ctx-menu {
             position: fixed; background: #18181b; border: 1px solid #3f3f46;
             border-radius: 6px; display: none; z-index: 10000; width: 200px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         .ctx-item { padding: 10px 15px; cursor: pointer; font-size: 14px; color: #e4e4e7; border-bottom: 1px solid #27272a; }
         .ctx-item:last-child { border-bottom: none; }
         .ctx-item:hover { background: var(--accent); color: white; }
         .ctx-danger { color: #ff4b4b !important; }
 
-        /* Sovereign Theme Editor */
+        /* Style Editor */
         #style-editor {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #18181b; border: 2px solid var(--accent);
@@ -95,14 +97,14 @@
         .option-item:hover { background: var(--accent); }
 
         /* Color Picker Grid */
-        .color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 5px; }
+        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 5px; }
         .color-swatch { 
             width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer; 
             border: 1px solid rgba(255,255,255,0.1); 
         }
         .color-swatch:hover { transform: scale(1.1); border-color: white; }
 
-        /* Custom Alert Dialog */
+        /* Modal system */
         #p8-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); display: none; z-index: 20000;
@@ -110,7 +112,7 @@
         }
         .p8-modal {
             background: #18181b; border: 2px solid var(--accent); padding: 25px;
-            border-radius: 12px; width: 300px; text-align: center;
+            border-radius: 12px; width: 320px; text-align: center;
         }
 
         .p8-btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: 0.2s; }
@@ -120,7 +122,7 @@
         .del-btn:disabled { opacity: 0.2; cursor: not-allowed; }
 
         #chat-feed { display: flex; flex-direction: column-reverse; max-height: 300px; overflow: hidden; }
-        .chat-msg { margin-bottom: 5px; font-size: 0.9em; }
+        .chat-msg { margin-bottom: 5px; font-size: 0.9em; line-height: 1.4; }
         .chat-user { font-weight: bold; }
         #status-indicator { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
         #mode-badge { font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; color: #ffeb3b; }
@@ -129,10 +131,10 @@
 </head>
 <body class="edit-mode">
 
-    <!-- Custom Dialog Overlay -->
+    <!-- Sovereign Modal Overlay -->
     <div id="p8-modal-overlay">
         <div class="p8-modal">
-            <div id="modal-msg" style="margin-bottom: 20px; font-size: 14px;"></div>
+            <div id="modal-msg" style="margin-bottom: 20px; font-size: 14px; color: #efeff1;"></div>
             <div id="modal-actions" style="display: flex; gap: 10px;">
                 <button id="modal-cancel" class="p8-btn alt-btn">Cancel</button>
                 <button id="modal-confirm" class="p8-btn save-btn">Confirm</button>
@@ -141,7 +143,7 @@
     </div>
 
     <div id="setup-interface" class="setup-container">
-        <h2>PIXELB8 OMEGA</h2>
+        <h2 style="color: var(--accent); letter-spacing: 2px;">PIXELB8 OMEGA</h2>
         <div id="auth-gate">
             <p>Authorize to generate your draggable overlay link.</p>
             <button id="login-button" class="p8-btn save-btn">Connect Twitch</button>
@@ -149,10 +151,10 @@
         
         <div id="obs-instructions" style="display:none; margin-top: 20px;">
             <div id="obs-url-output" class="obs-box">Generating...</div>
-            <p style="font-size: 11px; color: #71717a;">Copy this link into an OBS Browser Source.</p>
+            <p style="font-size: 11px; color: #71717a;">Click above to copy. Paste into an OBS Browser Source.</p>
             <hr style="border: 0; border-top: 1px solid #27272a; margin: 20px 0;">
             <button id="quick-theme-btn" class="p8-btn alt-btn">Open Theme Manager</button>
-            <button id="logout-btn-ui" class="p8-btn" style="background:transparent; color:#ef4444; font-size: 12px;">Disconnect Account</button>
+            <button id="logout-btn-ui" class="p8-btn" style="background:transparent; color:#ef4444; font-size: 12px; text-decoration: underline;">Disconnect Account</button>
         </div>
     </div>
 
@@ -167,29 +169,31 @@
         </div>
     </div>
 
+    <!-- Contextual Control -->
     <div id="p8-ctx-menu">
-        <div class="ctx-item" id="ctx-open-editor">Open Theme Manager</div>
+        <div class="ctx-item" id="ctx-open-editor">Theme Manager</div>
         <div class="ctx-item" id="ctx-lock">Lock/Unlock Layout</div>
         <div class="ctx-item ctx-danger" id="ctx-reset">Reset System (Logout)</div>
     </div>
 
+    <!-- Theme Manager Panel -->
     <div id="style-editor">
-        <h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Theme Manager</h3>
+        <h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent); text-transform: uppercase;">Style Engine</h3>
         <div class="input-group">
-            <label>Select Theme</label>
+            <label>Profile</label>
             <div class="custom-select" id="theme-selector">
                 <div class="select-trigger" id="current-theme-display">Default</div>
                 <div class="select-options" id="theme-options"></div>
             </div>
         </div>
         <div class="input-group">
-            <label>Theme Name</label>
+            <label>Profile Name</label>
             <input type="text" id="theme-name-input" class="p8-input" placeholder="Theme Name">
         </div>
         <div id="variable-controls"></div>
-        <button class="p8-btn save-btn" id="save-theme-btn">Save Current Theme</button>
-        <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#71717a; font-size: 12px;">Close Editor</button>
-        <button class="p8-btn del-btn" id="delete-theme-btn">Delete This Theme</button>
+        <button class="p8-btn save-btn" id="save-theme-btn">Update Profile</button>
+        <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#71717a; font-size: 11px;">Hide Editor</button>
+        <button class="p8-btn del-btn" id="delete-theme-btn">Purge Profile</button>
     </div>
 
     <script>
@@ -197,8 +201,9 @@
         const REDIRECT_URI = "pixelb8.lol/testoverlay";
         const FULL_REDIRECT = "https://" + REDIRECT_URI;
         
-        let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 };
+        let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 }, fadeTimeout;
 
+        // Persistent Registry
         let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
             active: 'Default',
             themes: {
@@ -210,12 +215,12 @@
             { label: 'Background', var: '--bg', type: 'color' },
             { label: 'Accent / Border', var: '--accent', type: 'color' },
             { label: 'Font Size', var: '--font-size', type: 'range', min: 12, max: 48 },
-            { label: 'Roundness', var: '--border-radius', type: 'range', min: 0, max: 50 }
+            { label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
         ];
 
         const palette = ['#9146ff', '#ff4b4b', '#00ff88', '#3b82f6', '#f59e0b', '#ec4899', '#ffffff', '#000000', 'rgba(0,0,0,0.5)', 'rgba(24,24,27,0.8)'];
 
-        // SOVEREIGN MODAL SYSTEM
+        // Sovereign Modal Function
         async function p8Confirm(message, isAlert = false) {
             const overlay = document.getElementById('p8-modal-overlay');
             const msgEl = document.getElementById('modal-msg');
@@ -272,7 +277,7 @@
         }
 
         async function systemReset() {
-            if(await p8Confirm("Logout and reset all data?")) {
+            if(await p8Confirm("This will disconnect your account and clear all local themes. Proceed?")) {
                 localStorage.clear();
                 window.location.href = FULL_REDIRECT;
             }
@@ -285,12 +290,13 @@
 
             document.getElementById("obs-url-output").addEventListener("click", function() {
                 navigator.clipboard.writeText(this.innerText);
-                const old = this.innerText; this.innerText = "COPIED!";
+                const old = this.innerText; this.innerText = "COPIED TO CLIPBOARD";
                 setTimeout(() => this.innerText = old, 1500);
             });
 
             document.getElementById("ctx-open-editor").addEventListener("click", () => {
                 document.getElementById('style-editor').style.display = 'block';
+                document.getElementById('p8-ctx-menu').style.display = 'none';
                 renderThemeList();
             });
 
@@ -309,6 +315,7 @@
             document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
             document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
 
+            // Custom Select Toggle
             document.getElementById('current-theme-display').addEventListener('click', (e) => {
                 e.stopPropagation();
                 const opts = document.getElementById('theme-options');
@@ -316,36 +323,42 @@
             });
 
             document.getElementById('save-theme-btn').addEventListener('click', async () => {
-                const newName = document.getElementById('theme-name-input').value.trim() || 'Untitled';
+                const newName = document.getElementById('theme-name-input').value.trim() || 'Untitled Profile';
                 if(!registry.themes[newName]) {
                     registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
+                } else {
+                    // Update existing
+                    registry.themes[newName] = { ...registry.themes[registry.active] };
                 }
                 registry.active = newName;
                 localStorage.setItem('p8_registry', JSON.stringify(registry));
                 renderThemeList();
-                await p8Confirm('Theme Saved', true);
+                await p8Confirm('Profile Synced', true);
             });
 
             document.getElementById('delete-theme-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if(registry.active === 'Default') return;
-                if(await p8Confirm(`Delete ${registry.active}?`)) {
+                if(await p8Confirm(`Delete profile "${registry.active}"?`)) {
                     delete registry.themes[registry.active];
                     registry.active = 'Default';
                     localStorage.setItem('p8_registry', JSON.stringify(registry));
                     applyTheme('Default');
                     renderThemeList();
                     renderThemeControls();
-                    await p8Confirm('Theme Deleted', true);
+                    await p8Confirm('Profile Deleted', true);
                 }
             });
 
+            // Global Mouse Handling
             window.addEventListener('mousedown', e => {
                 const menu = document.getElementById('p8-ctx-menu');
                 const opts = document.getElementById('theme-options');
                 if (menu.style.display === 'block' && !menu.contains(e.target)) menu.style.display = 'none';
                 if (opts.style.display === 'block' && !e.target.closest('#theme-selector')) opts.style.display = 'none';
+                
                 if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor') || e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
+                
                 dragTarget = e.target.closest('.p8-widget');
                 if (dragTarget) {
                     const r = dragTarget.getBoundingClientRect();
@@ -371,7 +384,9 @@
                 if (e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
                 e.preventDefault();
                 const menu = document.getElementById('p8-ctx-menu');
-                menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
+                menu.style.display = 'block'; 
+                menu.style.left = e.clientX + 'px'; 
+                menu.style.top = e.clientY + 'px';
             });
         }
 
@@ -465,12 +480,14 @@
 
         function startTwitch(channel, token) {
             const formattedToken = token.startsWith("oauth:") ? token : `oauth:${token}`;
+            const overlayUi = document.getElementById("overlay-ui");
+
             ComfyJS.onConnected = () => {
                 document.getElementById("status-indicator").innerText = "SYSTEM: ONLINE";
                 document.getElementById("status-indicator").style.color = "#00ff88";
-                document.getElementById("overlay-ui").innerText = `CONNECTED TO: ${channel.toUpperCase()}`;
+                overlayUi.innerText = `READY: ${channel.toUpperCase()}`;
             };
-			 // CHAT LOGIC: Respond to !hello
+
             ComfyJS.onChat = (user, message, flags, self, extra) => {
                 const feed = document.getElementById("chat-feed");
                 const m = document.createElement("div");
@@ -480,20 +497,19 @@
                 feed.prepend(m);
                 if (feed.childNodes.length > 15) feed.lastChild.remove();
             };
-			 // COMMAND LOGIC: Respond to !hello
+
             ComfyJS.onCommand = (user, command, message, flags, extra) => {
                 if (command === "hello") {
                     overlayUi.innerText = `👋 Welcome, @${user}!`;
                     overlayUi.style.opacity = "1";
-
                     clearTimeout(fadeTimeout);
                     fadeTimeout = setTimeout(() => {
-                        overlayUi.style.opacity = "0";
+                        overlayUi.innerText = `LISTENING: ${channel.toUpperCase()}`;
                     }, 6000);
-
-                    ComfyJS.Say(`Hello @${user}! Your pixelb8 overlay app integration is working perfectly!`, channel);
+                    ComfyJS.Say(`Hello @${user}! Pixelb8 system check complete.`, channel);
                 }
             }; 
+
             ComfyJS.Init(channel, formattedToken);
         }
 
