@@ -40,9 +40,9 @@
             font-size: var(--font-size);
             min-width: 200px; padding: 15px; 
             cursor: default; box-sizing: border-box;
+            user-select: none;
         }
         
-        /* Edit Mode Styles */
         body.edit-mode .p8-widget { 
             outline: 2px dashed rgba(145, 70, 255, 0.6); 
             cursor: grab; 
@@ -83,7 +83,7 @@
         .chat-msg { margin-bottom: 5px; font-size: 0.9em; }
         .chat-user { color: var(--accent); font-weight: bold; }
         #status-indicator { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
-        #mode-badge { font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; }
+        #mode-badge { font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; color: #ffeb3b; }
     </style>
 </head>
 <body class="edit-mode">
@@ -162,13 +162,15 @@
 
         function setEditMode(state) {
             isEditMode = state;
+            const badge = document.getElementById('mode-badge');
             if (isEditMode) {
                 document.body.classList.add('edit-mode');
-                document.getElementById('mode-badge').style.display = 'block';
+                if(badge) badge.style.display = 'block';
             } else {
                 document.body.classList.remove('edit-mode');
-                document.getElementById('mode-badge').style.display = 'none';
+                if(badge) badge.style.display = 'none';
             }
+            console.log("Edit Mode set to:", isEditMode);
         }
 
         function systemReset() {
@@ -179,10 +181,12 @@
         }
 
         function bindEvents() {
+            // Login Logic
             document.getElementById("login-button").addEventListener("click", () => {
                 window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(FULL_REDIRECT)}&response_type=token&scope=chat:read+chat:edit`;
             });
 
+            // OBS Copy Logic
             document.getElementById("obs-url-output").addEventListener("click", function() {
                 navigator.clipboard.writeText(this.innerText);
                 const oldText = this.innerText;
@@ -190,13 +194,15 @@
                 setTimeout(() => this.innerText = oldText, 1500);
             });
 
-            document.getElementById("ctx-edit-global").addEventListener("click", () => openEditor(null));
+            // Context Menu Actions
+            document.getElementById("ctx-edit-global").addEventListener("click", (e) => { e.stopPropagation(); openEditor(null); });
             document.getElementById("quick-theme-btn").addEventListener("click", () => openEditor(null));
-            document.getElementById("ctx-edit-this").addEventListener("click", () => openEditor(currentTarget));
-            document.getElementById("ctx-reset").addEventListener("click", systemReset);
+            document.getElementById("ctx-edit-this").addEventListener("click", (e) => { e.stopPropagation(); openEditor(currentTarget); });
+            document.getElementById("ctx-reset").addEventListener("click", (e) => { e.stopPropagation(); systemReset(); });
             document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
             
-            document.getElementById("ctx-lock").addEventListener("click", () => {
+            document.getElementById("ctx-lock").addEventListener("click", (e) => {
+                e.stopPropagation();
                 setEditMode(!isEditMode);
                 document.getElementById('p8-ctx-menu').style.display = 'none';
             });
@@ -204,6 +210,7 @@
             document.getElementById("save-style-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
             document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
 
+            // Right Click for Context Menu
             window.addEventListener('contextmenu', e => {
                 e.preventDefault();
                 currentTarget = e.target.closest('.p8-widget');
@@ -213,14 +220,22 @@
                 menu.style.top = e.clientY + 'px';
             });
 
+            // Dragging Logic
             window.addEventListener('mousedown', e => {
+                const menu = document.getElementById('p8-ctx-menu');
+                
+                // If clicking outside menu, hide it
+                if (menu.style.display === 'block' && !menu.contains(e.target)) {
+                    menu.style.display = 'none';
+                }
+
                 if (!isEditMode || e.button !== 0 || e.target.closest('input') || e.target.closest('.obs-box') || e.target.closest('.setup-container')) return;
+                
                 dragTarget = e.target.closest('.p8-widget');
                 if (dragTarget) {
                     const r = dragTarget.getBoundingClientRect();
                     offset = { x: e.clientX - r.left, y: e.clientY - r.top };
                 }
-                document.getElementById('p8-ctx-menu').style.display = 'none';
             });
 
             window.addEventListener('mousemove', e => {
