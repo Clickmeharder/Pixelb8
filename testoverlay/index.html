@@ -85,7 +85,7 @@
 <body class="edit-mode">
 
     <div id="setup-interface" class="setup-container">
-        <h2>PIXELB8 OVERLAT TESTING GROUNDS</h2>
+        <h2>PIXELB8 OMEGA</h2>
         <div id="auth-gate">
             <p>Authorize to generate your draggable overlay link.</p>
             <button id="login-button" class="p8-btn save-btn">Connect Twitch</button>
@@ -126,7 +126,9 @@
 
     <script>
         const CLIENT_ID = "l1zvkm35dmtw4doj4y699nhnvx655c";
-        const REDIRECT_URI = window.location.origin + window.location.pathname;
+        const REDIRECT_URI = "pixelb8.lol/testoverlay"; // Restored original hardcoded URI
+        const FULL_REDIRECT = "https://" + REDIRECT_URI;
+        
         let isEditMode = true, dragTarget = null, currentTarget = null, offset = { x: 0, y: 0 };
 
         const styleSchema = [
@@ -157,13 +159,13 @@
         function systemReset() {
             if(confirm("This will log you out and reset layout positions. Continue?")) {
                 localStorage.clear();
-                window.location.href = window.location.origin + window.location.pathname;
+                window.location.href = FULL_REDIRECT;
             }
         }
 
         function bindEvents() {
             document.getElementById("login-button").addEventListener("click", () => {
-                window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=chat:read+chat:edit`;
+                window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(FULL_REDIRECT)}&response_type=token&scope=chat:read+chat:edit`;
             });
 
             document.getElementById("obs-url-output").addEventListener("click", function() {
@@ -268,15 +270,16 @@
                     headers: { "Authorization": `Bearer ${token}`, "Client-Id": CLIENT_ID }
                 });
                 const d = await res.json();
+                const channelName = d.data[0].login;
                 document.getElementById("auth-gate").style.display = "none";
                 document.getElementById("obs-instructions").style.display = "block";
-                document.getElementById("obs-url-output").innerText = `${REDIRECT_URI}?channel=${d.data[0].login}&token=${token}`;
-                // Clean URL hash
-                history.replaceState(null, "", REDIRECT_URI);
+                document.getElementById("obs-url-output").innerText = `${FULL_REDIRECT}?channel=${channelName}&token=${token}`;
+                history.replaceState(null, "", FULL_REDIRECT);
             }
         }
 
         function startTwitch(channel, token) {
+            const formattedToken = token.startsWith("oauth:") ? token : `oauth:${token}`;
             ComfyJS.onConnected = () => {
                 document.getElementById("status-indicator").innerText = "SYSTEM: ONLINE";
                 document.getElementById("status-indicator").style.color = "#00ff88";
@@ -291,7 +294,7 @@
                 feed.prepend(m);
                 if (feed.childNodes.length > 15) feed.lastChild.remove();
             };
-            ComfyJS.Init(channel, token);
+            ComfyJS.Init(channel, formattedToken);
         }
 
         init();
