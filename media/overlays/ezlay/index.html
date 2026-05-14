@@ -51,12 +51,13 @@
         </div>
     </div>
 
+<!--Context Menu-->
     <div id="p8-ctx-menu">
         <div class="ctx-item" id="ctx-open-editor">Open Theme Manager</div>
         <div class="ctx-item" id="ctx-lock">Lock/Unlock Layout</div>
         <div class="ctx-item ctx-danger" id="ctx-reset">Reset System (Logout)</div>
     </div>
-
+ <!--Theme Manager--->
     <div id="style-editor">
         <h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Theme Manager</h3>
         <div class="input-group">
@@ -76,6 +77,8 @@
         <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#71717a; font-size: 12px;">Close Editor</button>
         <button class="p8-btn del-btn" id="delete-theme-btn">Delete Active Theme</button>
     </div>
+
+
 
     <script>
         const CLIENT_ID = "l1zvkm35dmtw4doj4y699nhnvx655c";
@@ -100,14 +103,43 @@
         };
 
         const styleConfig = [
+aa		    { 
+				id: 'font', 
+				label: 'Font Family', 
+				var: '--font-family', 
+				type: 'select', 
+				options: [
+					/* Modern & Clean */
+					"'Segoe UI', system-ui, sans-serif", 
+					"Inter, 'Helvetica Neue', Arial, sans-serif",
+					
+					/* Terminal / Coding (Great for status widgets) */
+					"'Courier New', monospace", 
+					"'Lucida Console', Monaco, monospace",
+					"Consolas, 'Andale Mono', monospace",
+
+					/* Bold & Impactful (Good for alerts) */
+					"Impact, Charcoal, sans-serif", 
+					"'Arial Black', Gadget, sans-serif",
+					
+					/* Classic / Elegant */
+					"Georgia, serif", 
+					"'Times New Roman', Times, serif",
+					"'Palatino Linotype', 'Book Antiqua', serif",
+
+					/* Stylized / Creative */
+					"cursive", 
+					"'Comic Sans MS', 'Comic Sans', cursive",
+					"Trebuchet MS, sans-serif"
+				] 
+			},
             { id: 'bg', label: 'Widget Background', var: '--bg', type: 'hsla' },
             { id: 'accent', label: 'Accent & Border Color', var: '--accent', type: 'hsla' },
-            { id: 'font', label: 'Font Family', var: '--font-family', type: 'select', options: ["'Segoe UI', sans-serif", "'Courier New', monospace", "cursive", "Impact, sans-serif", "Georgia, serif"] },
             { id: 'bstyle', label: 'Border Style', var: '--border-style', type: 'select', options: ['solid', 'dashed', 'dotted', 'double', 'none'] },
             { id: 'size', label: 'Text Size', var: '--font-size', type: 'range', min: 12, max: 48 },
             { id: 'radius', label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
         ];
-
+		<!-- custom confirm -->
         async function p8Confirm(message, isAlert = false) {
             const overlay = document.getElementById('p8-modal-overlay');
             const msgEl = document.getElementById('modal-msg');
@@ -141,7 +173,6 @@
             else { r = "0x" + hex[1] + hex[2]; g = "0x" + hex[3] + hex[4]; b = "0x" + hex[5] + hex[6]; }
             return rgbToHSLA(r, g, b, 1);
         }
-
         function rgbToHSLA(r, g, b, a) {
             r /= 255; g /= 255; b /= 255;
             let cmin = Math.min(r,g,b), cmax = Math.max(r,g,b), delta = cmax - cmin, h = 0, s = 0, l = 0;
@@ -150,7 +181,6 @@
             l = (cmax + cmin) / 2; s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
             return { h, s: Math.round(s * 100), l: Math.round(l * 100), a: parseFloat(a) };
         }
-
         function parseHSLA(str) {
             const vals = str.match(/\d+(\.\d+)?/g);
             return { h: vals[0], s: vals[1], l: vals[2], a: vals[3] || 1 };
@@ -160,10 +190,14 @@
             applyTheme(registry.active);
             const params = new URLSearchParams(window.location.search);
             if (params.get("token") && params.get("channel")) {
+				document.body.style.backgroundColor = "transparent";
+				document.body.style.backgroundImage = "none";
                 document.getElementById("overlay-wrapper").style.display = "block";
                 setEditMode(false);
                 startTwitch(params.get("channel"), params.get("token"));
             } else {
+				document.body.style.backgroundColor = "#1a1a1a";
+				document.body.style.backgroundImage = "none";
                 document.getElementById("setup-interface").style.display = "block";
                 checkTwitchAuth();
             }
@@ -194,6 +228,7 @@
             }
         }
 
+		<!--event listeners-->
         function bindEvents() {
             document.getElementById("login-button").addEventListener("click", () => {
                 window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(FULL_REDIRECT)}&response_type=token&scope=chat:read+chat:edit`;
