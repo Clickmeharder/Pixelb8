@@ -25,7 +25,6 @@
             overflow: hidden; width: 100vw; height: 100vh;
         }
 
-        /* Setup UI */
         .setup-container { 
             background: #18181b; border: 2px solid var(--accent);
             padding: 40px; border-radius: 12px; max-width: 550px; 
@@ -33,7 +32,6 @@
             position: relative; z-index: 9999;
         }
 
-        /* Draggable Widgets */
         .p8-widget {
             position: absolute;
             background: var(--bg);
@@ -43,10 +41,12 @@
             min-width: 200px; padding: 15px; 
             cursor: grab; box-sizing: border-box;
         }
-        body.edit-mode .p8-widget { outline: 2px dashed rgba(255, 255, 255, 0.3); }
+        
+        /* Edit Mode Styles */
+        body.edit-mode .p8-widget { outline: 2px dashed rgba(145, 70, 255, 0.5); }
+        body:not(.edit-mode) .p8-widget { cursor: default; }
         .p8-widget:active { cursor: grabbing; }
 
-        /* Context Menu */
         #p8-ctx-menu {
             position: fixed; background: #18181b; border: 1px solid #3f3f46;
             border-radius: 6px; display: none; z-index: 10000; width: 200px;
@@ -54,7 +54,6 @@
         .ctx-item { padding: 10px 15px; cursor: pointer; font-size: 14px; color: #e4e4e7; }
         .ctx-item:hover { background: #27272a; color: var(--accent); }
 
-        /* Editor Panel */
         #style-editor {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #18181b; border: 2px solid var(--accent);
@@ -77,6 +76,7 @@
         #chat-feed { display: flex; flex-direction: column-reverse; max-height: 300px; overflow: hidden; }
         .chat-msg { margin-bottom: 5px; font-size: 0.9em; }
         .chat-user { color: var(--accent); font-weight: bold; }
+        #status-indicator { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
     </style>
 </head>
 <body class="edit-mode">
@@ -96,19 +96,17 @@
             <div id="chat-feed"></div>
         </div>
         <div id="alert-widget" class="p8-widget" style="top: 50px; left: 500px; text-align: center;">
-            <div id="status-indicator">Connecting...</div>
-            <div id="overlay-ui">Waiting...</div>
+            <div id="status-indicator">SYSTEM: OFFLINE</div>
+            <div id="overlay-ui">Awaiting Signal...</div>
         </div>
     </div>
 
-    <!-- Context Menu -->
     <div id="p8-ctx-menu">
         <div class="ctx-item" id="ctx-edit-global">Global Theme</div>
         <div class="ctx-item" id="ctx-edit-this">Edit This Element</div>
-        <div class="ctx-item" id="ctx-lock">Toggle Edit Mode</div>
+        <div class="ctx-item" id="ctx-lock">Toggle Edit Mode (Lock/Unlock)</div>
     </div>
 
-    <!-- Style Editor -->
     <div id="style-editor">
         <h3 style="margin-top:0">Editor</h3>
         <div id="controls-container"></div>
@@ -136,8 +134,8 @@
 
             if (obsToken && obsChannel) {
                 document.getElementById("overlay-wrapper").style.display = "block";
-                document.body.classList.remove('edit-mode');
                 isEditMode = false;
+                document.body.classList.remove('edit-mode');
                 startTwitch(obsChannel, obsToken);
             } else {
                 document.getElementById("setup-interface").style.display = "block";
@@ -147,12 +145,10 @@
         }
 
         function bindEvents() {
-            // Login
             document.getElementById("login-button").addEventListener("click", () => {
                 window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent('https://' + REDIRECT_URI)}&response_type=token&scope=chat:read+chat:edit`;
             });
 
-            // Copy Link
             document.getElementById("obs-url-output").addEventListener("click", function() {
                 navigator.clipboard.writeText(this.innerText);
                 const oldText = this.innerText;
@@ -160,24 +156,30 @@
                 setTimeout(() => this.innerText = oldText, 1500);
             });
 
-            // Editor Logic
             document.getElementById("ctx-edit-global").addEventListener("click", () => openEditor(null));
             document.getElementById("ctx-edit-this").addEventListener("click", () => openEditor(currentTarget));
+            
+            // Fix for the Toggle Lock
             document.getElementById("ctx-lock").addEventListener("click", () => {
                 isEditMode = !isEditMode;
-                document.body.classList.toggle('edit-mode');
+                if(isEditMode) {
+                    document.body.classList.add('edit-mode');
+                } else {
+                    document.body.classList.remove('edit-mode');
+                }
                 document.getElementById('p8-ctx-menu').style.display = 'none';
             });
 
             document.getElementById("save-style-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
             document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
 
-            // Global Drag & Context Listeners
             window.addEventListener('contextmenu', e => {
                 e.preventDefault();
                 currentTarget = e.target.closest('.p8-widget');
                 const menu = document.getElementById('p8-ctx-menu');
-                menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
+                menu.style.display = 'block'; 
+                menu.style.left = e.clientX + 'px'; 
+                menu.style.top = e.clientY + 'px';
             });
 
             window.addEventListener('mousedown', e => {
@@ -194,7 +196,6 @@
                 if (dragTarget) {
                     dragTarget.style.left = (e.clientX - offset.x) + 'px';
                     dragTarget.style.top = (e.clientY - offset.y) + 'px';
-                    dragTarget.style.transform = 'none';
                 }
             });
 
@@ -222,7 +223,6 @@
                 g.querySelector('input').addEventListener('input', e => {
                     const finalVal = e.target.value + (s.type === 'number' ? 'px' : '');
                     source.style.setProperty(s.var, finalVal);
-                    // Persistent Save
                     const key = el ? `p8_elem_${el.id}` : 'p8_theme_global';
                     let settings = JSON.parse(localStorage.getItem(key)) || {};
                     settings[s.var] = finalVal;
@@ -234,11 +234,9 @@
         }
 
         function loadPersistedSettings() {
-            // Load Global
             const global = JSON.parse(localStorage.getItem('p8_theme_global'));
             if(global) Object.keys(global).forEach(k => document.documentElement.style.setProperty(k, global[k]));
             
-            // Load Widgets
             document.querySelectorAll('.p8-widget').forEach(el => {
                 const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
                 if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
@@ -256,18 +254,25 @@
                 });
                 const d = await res.json();
                 document.getElementById("obs-instructions").style.display = "block";
-                document.getElementById("obs-url-output").innerText = `https://${REDIRECT_URI}?channel=${d.data[0].login}&token=${token}`;
+                document.getElementById("obs-url-output").innerText = `${window.location.origin}${window.location.pathname}?channel=${d.data[0].login}&token=${token}`;
             }
         }
 
         function startTwitch(channel, token) {
+            // New Listener for Connection Status
+            ComfyJS.onConnected = () => {
+                document.getElementById("status-indicator").innerText = "SYSTEM: ONLINE";
+                document.getElementById("status-indicator").style.color = "#00ff88";
+                document.getElementById("overlay-ui").innerText = `CONNECTED TO: ${channel.toUpperCase()}`;
+            };
+
             ComfyJS.onChat = (user, message) => {
                 const feed = document.getElementById("chat-feed");
                 const m = document.createElement("div");
                 m.className = "chat-msg";
                 m.innerHTML = `<span class="chat-user">${user}:</span> ${message}`;
                 feed.prepend(m);
-                if (feed.childNodes.length > 10) feed.lastChild.remove();
+                if (feed.childNodes.length > 15) feed.lastChild.remove();
             };
             ComfyJS.Init(channel, token);
         }
