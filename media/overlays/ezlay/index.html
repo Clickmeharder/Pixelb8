@@ -82,7 +82,7 @@
 
     <script>
         const CLIENT_ID = "l1zvkm35dmtw4doj4y699nhnvx655c";
-        const REDIRECT_URI = "pixelb8.lol/testoverlay";
+        const REDIRECT_URI = "pixelb8.lol/media/overlays/ezlay";
         const FULL_REDIRECT = "https://" + REDIRECT_URI;
         
         let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 }, fadeTimeout;
@@ -133,10 +133,11 @@
 					"Trebuchet MS, sans-serif"
 				] 
 			},
-            { id: 'bg', label: 'Widget Background', var: '--bg', type: 'hsla' },
-            { id: 'accent', label: 'Accent & Border Color', var: '--accent', type: 'hsla' },
-            { id: 'bstyle', label: 'Border Style', var: '--border-style', type: 'select', options: ['solid', 'dashed', 'dotted', 'double', 'none'] },
             { id: 'size', label: 'Text Size', var: '--font-size', type: 'range', min: 12, max: 48 },
+            { id: 'bg', label: 'Widget Background', var: '--bg', type: 'hsla' },
+			{ id: 'bstyle', label: 'Border Style', var: '--border-style', type: 'select', options: ['solid', 'dashed', 'dotted', 'double', 'none'] },
+            { id: 'accent', label: 'Accent & Border Color', var: '--accent', type: 'hsla' },
+
             { id: 'radius', label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
         ];
 		<!-- custom confirm -->
