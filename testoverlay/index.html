@@ -14,6 +14,7 @@
             --border-color: #9146ff;
             --border-radius: 12px;
             --font-size: 18px;
+            --font-family: 'Segoe UI', system-ui, sans-serif;
             --text-color: #ffffff;
             --accent: #9146ff;
         }
@@ -21,7 +22,7 @@
         body { 
             background: transparent; 
             color: var(--text-color); 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
+            font-family: var(--font-family); 
             margin: 0; padding: 0;
             overflow: hidden; width: 100vw; height: 100vh;
         }
@@ -72,18 +73,34 @@
         }
 
         .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group label { display: block; font-size: 10px; color: #a1a1aa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
         
         .p8-input { 
             width: 100%; background: #09090b; border: 1px solid #3f3f46; 
             color: white; padding: 10px; border-radius: 6px; box-sizing: border-box; 
-            font-size: 14px;
+            font-size: 13px;
         }
 
+        /* HSLA Precision Picker */
+        .hsla-picker { display: flex; flex-direction: column; gap: 8px; background: #09090b; padding: 10px; border-radius: 6px; border: 1px solid #3f3f46; }
+        .hsla-row { display: flex; align-items: center; gap: 10px; }
+        .hsla-row span { font-size: 10px; width: 12px; color: #71717a; font-family: monospace; }
+        .hsla-slider { flex-grow: 1; height: 6px; border-radius: 3px; -webkit-appearance: none; cursor: pointer; background: #27272a; }
+        .hsla-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: white; border-radius: 50%; border: 2px solid var(--accent); }
+        
+        .hue-slider { background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%); }
+        .opacity-slider { background: linear-gradient(to right, transparent, white), url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAAXNSR0IArs4c6QAAACFJREFUGFdjZEADJEYGhj9MUI4BwiAsBshEgArAZmARYAQA96ID7899mDkAAAAASUVORK5CYII='); }
+
+        .preview-chip { width: 100%; height: 24px; border-radius: 4px; margin-top: 5px; border: 1px solid #3f3f46; position: relative; overflow: hidden; }
+        .preview-bg { position: absolute; inset: 0; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAAXNSR0IArs4c6QAAACFJREFUGFdjZEADJEYGhj9MUI4BwiAsBshEgArAZmARYAQA96ID7899mDkAAAAASUVORK5CYII='); z-index: 1; }
+        .preview-color { position: absolute; inset: 0; z-index: 2; }
+
+        /* Select styling */
         .custom-select { position: relative; width: 100%; }
         .select-trigger { 
             background: #09090b; border: 1px solid #3f3f46; color: white; 
             padding: 10px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between;
+            font-size: 13px;
         }
         .select-options { 
             position: absolute; top: 100%; left: 0; right: 0; background: #18181b; 
@@ -92,13 +109,6 @@
         }
         .option-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #27272a; font-size: 13px; }
         .option-item:hover { background: var(--accent); }
-
-        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 5px; }
-        .color-swatch { 
-            width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer; 
-            border: 1px solid rgba(255,255,255,0.1); 
-        }
-        .color-swatch:hover { transform: scale(1.1); border-color: white; }
 
         #p8-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -184,6 +194,7 @@
             <label>Save As New Theme</label>
             <input type="text" id="theme-name-input" class="p8-input" placeholder="Theme Name">
         </div>
+        <hr style="border:0; border-top: 1px solid #27272a; margin: 15px 0;">
         <div id="variable-controls"></div>
         <button class="p8-btn save-btn" id="save-theme-btn">Save Changes</button>
         <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#71717a; font-size: 12px;">Close Editor</button>
@@ -200,18 +211,26 @@
         let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
             active: 'Default',
             themes: {
-                'Default': { '--bg': 'rgba(24, 24, 27, 0.8)', '--accent': '#9146ff', '--border-color': '#9146ff', '--border-radius': '12px', '--font-size': '18px' }
+                'Default': { 
+                    '--bg': 'rgba(24, 24, 27, 0.8)', 
+                    '--accent': '#9146ff', 
+                    '--border-color': '#9146ff', 
+                    '--border-radius': '12px', 
+                    '--font-size': '18px',
+                    '--font-family': "'Segoe UI', sans-serif",
+                    '--border-style': 'solid'
+                }
             }
         };
 
         const styleConfig = [
-            { label: 'Background Color', var: '--bg', type: 'color' },
-            { label: 'Accent / Border', var: '--accent', type: 'color' },
-            { label: 'Text Size', var: '--font-size', type: 'range', min: 12, max: 48 },
-            { label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
+            { id: 'bg', label: 'Widget Background', var: '--bg', type: 'hsla' },
+            { id: 'accent', label: 'Accent & Border Color', var: '--accent', type: 'hsla' },
+            { id: 'font', label: 'Font Family', var: '--font-family', type: 'select', options: ["'Segoe UI', sans-serif", "'Courier New', monospace", "cursive", "Impact, sans-serif", "Georgia, serif"] },
+            { id: 'bstyle', label: 'Border Style', var: '--border-style', type: 'select', options: ['solid', 'dashed', 'dotted', 'double', 'none'] },
+            { id: 'size', label: 'Text Size', var: '--font-size', type: 'range', min: 12, max: 48 },
+            { id: 'radius', label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
         ];
-
-        const palette = ['#9146ff', '#ff4b4b', '#00ff88', '#3b82f6', '#f59e0b', '#ec4899', '#ffffff', '#000000', 'rgba(0,0,0,0.5)', 'rgba(24,24,27,0.8)'];
 
         async function p8Confirm(message, isAlert = false) {
             const overlay = document.getElementById('p8-modal-overlay');
@@ -233,6 +252,32 @@
                 document.getElementById('modal-confirm').addEventListener('click', () => cleanup(true));
                 document.getElementById('modal-cancel').addEventListener('click', () => cleanup(false));
             });
+        }
+
+        function hexToHSLA(hex) {
+            if(!hex || hex.startsWith('hsla')) return parseHSLA(hex || 'hsla(0,0%,0%,1)');
+            if(hex.startsWith('rgba')) {
+                const vals = hex.match(/\d+(\.\d+)?/g);
+                return rgbToHSLA(vals[0], vals[1], vals[2], vals[3] || 1);
+            }
+            let r=0, g=0, b=0;
+            if (hex.length == 4) { r = "0x" + hex[1] + hex[1]; g = "0x" + hex[2] + hex[2]; b = "0x" + hex[3] + hex[3]; }
+            else { r = "0x" + hex[1] + hex[2]; g = "0x" + hex[3] + hex[4]; b = "0x" + hex[5] + hex[6]; }
+            return rgbToHSLA(r, g, b, 1);
+        }
+
+        function rgbToHSLA(r, g, b, a) {
+            r /= 255; g /= 255; b /= 255;
+            let cmin = Math.min(r,g,b), cmax = Math.max(r,g,b), delta = cmax - cmin, h = 0, s = 0, l = 0;
+            if (delta == 0) h = 0; else if (cmax == r) h = ((g - b) / delta) % 6; else if (cmax == g) h = (b - r) / delta + 2; else h = (r - g) / delta + 4;
+            h = Math.round(h * 60); if (h < 0) h += 360;
+            l = (cmax + cmin) / 2; s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+            return { h, s: Math.round(s * 100), l: Math.round(l * 100), a: parseFloat(a) };
+        }
+
+        function parseHSLA(str) {
+            const vals = str.match(/\d+(\.\d+)?/g);
+            return { h: vals[0], s: vals[1], l: vals[2], a: vals[3] || 1 };
         }
 
         function init() {
@@ -319,17 +364,6 @@
                 await p8Confirm('Theme Settings Saved', true);
             });
 
-            document.getElementById('delete-theme-btn').addEventListener('click', async () => {
-                if(registry.active === 'Default') return;
-                if(await p8Confirm(`Delete theme "${registry.active}"?`)) {
-                    delete registry.themes[registry.active];
-                    registry.active = 'Default';
-                    applyTheme('Default');
-                    renderThemeList();
-                    renderThemeControls();
-                }
-            });
-
             window.addEventListener('mousedown', e => {
                 const menu = document.getElementById('p8-ctx-menu');
                 const opts = document.getElementById('theme-options');
@@ -370,34 +404,63 @@
         function renderThemeControls() {
             const container = document.getElementById('variable-controls');
             container.innerHTML = '';
+            
             styleConfig.forEach(item => {
                 const group = document.createElement('div');
                 group.className = 'input-group';
                 group.innerHTML = `<label>${item.label}</label>`;
 
-                if(item.type === 'color') {
-                    const grid = document.createElement('div');
-                    grid.className = 'color-grid';
-                    palette.forEach(color => {
-                        const swatch = document.createElement('div');
-                        swatch.className = 'color-swatch';
-                        swatch.style.background = color;
-                        swatch.addEventListener('click', () => {
-                            document.documentElement.style.setProperty(item.var, color);
-                            registry.themes[registry.active][item.var] = color;
-                            if(item.var === '--accent') {
-                                document.documentElement.style.setProperty('--border-color', color);
-                                registry.themes[registry.active]['--border-color'] = color;
-                            }
-                        });
-                        grid.appendChild(swatch);
+                if (item.type === 'hsla') {
+                    const currentStr = registry.themes[registry.active][item.var];
+                    const val = hexToHSLA(currentStr);
+                    
+                    const picker = document.createElement('div');
+                    picker.className = 'hsla-picker';
+                    picker.innerHTML = `
+                        <div class="hsla-row"><span>H</span><input type="range" class="hsla-slider hue-slider" max="360" value="${val.h}"></div>
+                        <div class="hsla-row"><span>S</span><input type="range" class="hsla-slider" max="100" value="${val.s}"></div>
+                        <div class="hsla-row"><span>L</span><input type="range" class="hsla-slider" max="100" value="${val.l}"></div>
+                        <div class="hsla-row"><span>A</span><input type="range" class="hsla-slider opacity-slider" max="100" value="${val.a * 100}"></div>
+                        <div class="preview-chip"><div class="preview-bg"></div><div class="preview-color" id="prev-${item.id}"></div></div>
+                    `;
+                    
+                    const updateHSLA = () => {
+                        const [h, s, l, a] = Array.from(picker.querySelectorAll('input')).map(i => i.value);
+                        const hslaStr = `hsla(${h}, ${s}%, ${l}%, ${a/100})`;
+                        document.documentElement.style.setProperty(item.var, hslaStr);
+                        registry.themes[registry.active][item.var] = hslaStr;
+                        picker.querySelector('.preview-color').style.backgroundColor = hslaStr;
+                        if(item.var === '--accent') {
+                            document.documentElement.style.setProperty('--border-color', hslaStr);
+                            registry.themes[registry.active]['--border-color'] = hslaStr;
+                        }
+                    };
+
+                    picker.querySelectorAll('input').forEach(i => i.addEventListener('input', updateHSLA));
+                    picker.querySelector('.preview-color').style.backgroundColor = currentStr;
+                    group.appendChild(picker);
+                } 
+                else if (item.type === 'select') {
+                    const sel = document.createElement('select');
+                    sel.className = 'p8-input';
+                    item.options.forEach(o => {
+                        const opt = document.createElement('option');
+                        opt.value = o;
+                        opt.innerText = o.includes(',') ? o.split(',')[0].replace(/'/g, '') : o;
+                        if(registry.themes[registry.active][item.var] === o) opt.selected = true;
+                        sel.appendChild(opt);
                     });
-                    group.appendChild(grid);
-                } else {
+                    sel.addEventListener('change', (e) => {
+                        document.documentElement.style.setProperty(item.var, e.target.value);
+                        registry.themes[registry.active][item.var] = e.target.value;
+                    });
+                    group.appendChild(sel);
+                }
+                else {
                     const range = document.createElement('input');
                     range.type = 'range'; range.className = 'p8-input';
                     range.min = item.min; range.max = item.max;
-                    range.value = parseInt(getComputedStyle(document.documentElement).getPropertyValue(item.var)) || item.min;
+                    range.value = parseInt(registry.themes[registry.active][item.var]);
                     range.addEventListener('input', (e) => {
                         const val = e.target.value + 'px';
                         document.documentElement.style.setProperty(item.var, val);
