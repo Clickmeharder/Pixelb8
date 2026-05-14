@@ -39,12 +39,15 @@
             border-radius: var(--border-radius);
             font-size: var(--font-size);
             min-width: 200px; padding: 15px; 
-            cursor: grab; box-sizing: border-box;
+            cursor: default; box-sizing: border-box;
         }
         
-        body.edit-mode .p8-widget { outline: 2px dashed rgba(145, 70, 255, 0.5); }
-        body:not(.edit-mode) .p8-widget { cursor: default; }
-        .p8-widget:active { cursor: grabbing; }
+        /* Edit Mode Styles */
+        body.edit-mode .p8-widget { 
+            outline: 2px dashed rgba(145, 70, 255, 0.6); 
+            cursor: grab; 
+        }
+        body.edit-mode .p8-widget:active { cursor: grabbing; }
 
         #p8-ctx-menu {
             position: fixed; background: #18181b; border: 1px solid #3f3f46;
@@ -80,6 +83,7 @@
         .chat-msg { margin-bottom: 5px; font-size: 0.9em; }
         .chat-user { color: var(--accent); font-weight: bold; }
         #status-indicator { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
+        #mode-badge { font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; }
     </style>
 </head>
 <body class="edit-mode">
@@ -107,6 +111,7 @@
         <div id="alert-widget" class="p8-widget" style="top: 50px; left: 500px; text-align: center;">
             <div id="status-indicator">SYSTEM: OFFLINE</div>
             <div id="overlay-ui">Awaiting Signal...</div>
+            <div id="mode-badge">Edit Mode Active</div>
         </div>
     </div>
 
@@ -126,7 +131,7 @@
 
     <script>
         const CLIENT_ID = "l1zvkm35dmtw4doj4y699nhnvx655c";
-        const REDIRECT_URI = "pixelb8.lol/testoverlay"; // Restored original hardcoded URI
+        const REDIRECT_URI = "pixelb8.lol/testoverlay";
         const FULL_REDIRECT = "https://" + REDIRECT_URI;
         
         let isEditMode = true, dragTarget = null, currentTarget = null, offset = { x: 0, y: 0 };
@@ -146,14 +151,24 @@
 
             if (obsToken && obsChannel) {
                 document.getElementById("overlay-wrapper").style.display = "block";
-                isEditMode = false;
-                document.body.classList.remove('edit-mode');
+                setEditMode(false);
                 startTwitch(obsChannel, obsToken);
             } else {
                 document.getElementById("setup-interface").style.display = "block";
                 checkTwitchAuth();
             }
             bindEvents();
+        }
+
+        function setEditMode(state) {
+            isEditMode = state;
+            if (isEditMode) {
+                document.body.classList.add('edit-mode');
+                document.getElementById('mode-badge').style.display = 'block';
+            } else {
+                document.body.classList.remove('edit-mode');
+                document.getElementById('mode-badge').style.display = 'none';
+            }
         }
 
         function systemReset() {
@@ -182,8 +197,7 @@
             document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
             
             document.getElementById("ctx-lock").addEventListener("click", () => {
-                isEditMode = !isEditMode;
-                document.body.classList.toggle('edit-mode', isEditMode);
+                setEditMode(!isEditMode);
                 document.getElementById('p8-ctx-menu').style.display = 'none';
             });
 
