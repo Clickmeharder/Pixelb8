@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixelb8 Omega | CMS Overlay</title>
+	<link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+    <title>Pixelb8 EzLay | Twitch Overlay CMS</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <style>
         :root {
@@ -112,10 +113,11 @@
         .save-btn { background: var(--accent); color: white; }
         .alt-btn { background: #27272a; color: #e4e4e7; border: 1px solid #3f3f46; }
         .del-btn { background: #450a0a; color: #f87171; font-size: 11px; margin-top: 20px; }
+        .del-btn:disabled { opacity: 0.2; cursor: not-allowed; }
 
         #chat-feed { display: flex; flex-direction: column-reverse; max-height: 300px; overflow: hidden; }
         .chat-msg { margin-bottom: 5px; font-size: 0.9em; }
-        .chat-user { color: var(--accent); font-weight: bold; }
+        .chat-user { font-weight: bold; }
         #status-indicator { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
         #mode-badge { font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; color: #ffeb3b; }
     </style>
@@ -184,7 +186,7 @@
         const REDIRECT_URI = "pixelb8.lol/testoverlay";
         const FULL_REDIRECT = "https://" + REDIRECT_URI;
         
-        let isEditMode = true, dragTarget = null, currentTarget = null, offset = { x: 0, y: 0 };
+        let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 };
 
         // Registry for multiple themes
         let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
@@ -234,6 +236,18 @@
             }
         }
 
+        function applyTheme(name) {
+            const theme = registry.themes[name];
+            Object.keys(theme).forEach(k => {
+                document.documentElement.style.setProperty(k, theme[k]);
+            });
+            // Ensure border color follows accent if not separately defined
+            if(theme['--accent']) document.documentElement.style.setProperty('--border-color', theme['--accent']);
+            
+            registry.active = name;
+            localStorage.setItem('p8_registry', JSON.stringify(registry));
+        }
+
         function systemReset() {
             if(confirm("Logout and reset all data?")) {
                 localStorage.clear();
@@ -281,10 +295,10 @@
 
             document.getElementById('save-theme-btn').addEventListener('click', () => {
                 const newName = document.getElementById('theme-name-input').value.trim() || 'Untitled';
-                if(newName !== registry.active) {
+                if(!registry.themes[newName]) {
                     registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
-                    registry.active = newName;
                 }
+                registry.active = newName;
                 localStorage.setItem('p8_registry', JSON.stringify(registry));
                 renderThemeList();
                 alert('Theme Saved');
@@ -294,14 +308,13 @@
                 if(registry.active === 'Default') return;
                 if(confirm(`Delete ${registry.active}?`)) {
                     delete registry.themes[registry.active];
-                    registry.active = 'Default';
                     applyTheme('Default');
                     renderThemeList();
                     renderThemeControls();
                 }
             });
 
-            // Global Clicks
+            // Global Movement Controls
             window.addEventListener('mousedown', e => {
                 const menu = document.getElementById('p8-ctx-menu');
                 const opts = document.getElementById('theme-options');
@@ -332,6 +345,7 @@
             });
 
             window.addEventListener('contextmenu', e => {
+                if (e.target.closest('.setup-container')) return;
                 e.preventDefault();
                 const menu = document.getElementById('p8-ctx-menu');
                 menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
@@ -355,8 +369,11 @@
                         swatch.style.background = color;
                         swatch.addEventListener('click', () => {
                             document.documentElement.style.setProperty(item.var, color);
-                            if(item.var === '--accent') document.documentElement.style.setProperty('--border-color', color);
                             registry.themes[registry.active][item.var] = color;
+                            if(item.var === '--accent') {
+                                document.documentElement.style.setProperty('--border-color', color);
+                                registry.themes[registry.active]['--border-color'] = color;
+                            }
                         });
                         grid.appendChild(swatch);
                     });
@@ -381,16 +398,20 @@
             const list = document.getElementById('theme-options');
             const display = document.getElementById('current-theme-display');
             const nameInput = document.getElementById('theme-name-input');
+            const delBtn = document.getElementById('delete-theme-btn');
+
             list.innerHTML = '';
             display.innerText = registry.active;
             nameInput.value = registry.active;
+            
+            // Protect Default
+            delBtn.disabled = (registry.active === 'Default');
 
             Object.keys(registry.themes).forEach(name => {
                 const opt = document.createElement('div');
                 opt.className = 'option-item';
                 opt.innerText = name;
                 opt.addEventListener('click', () => {
-                    registry.active = name;
                     applyTheme(name);
                     renderThemeList();
                     renderThemeControls();
@@ -398,12 +419,6 @@
                 });
                 list.appendChild(opt);
             });
-        }
-
-        function applyTheme(name) {
-            const theme = registry.themes[name];
-            Object.keys(theme).forEach(k => document.documentElement.style.setProperty(k, theme[k]));
-            localStorage.setItem('p8_registry', JSON.stringify(registry));
         }
 
         function loadPositions() {
@@ -437,11 +452,12 @@
                 document.getElementById("overlay-ui").innerText = `CONNECTED TO: ${channel.toUpperCase()}`;
             };
 
-            ComfyJS.onChat = (user, message) => {
+            ComfyJS.onChat = (user, message, flags, self, extra) => {
                 const feed = document.getElementById("chat-feed");
                 const m = document.createElement("div");
                 m.className = "chat-msg";
-                m.innerHTML = `<span class="chat-user">${user}:</span> ${message}`;
+                const userColor = extra.userColor || 'var(--accent)';
+                m.innerHTML = `<span class="chat-user" style="color: ${userColor}">${user}:</span> ${message}`;
                 feed.prepend(m);
                 if (feed.childNodes.length > 15) feed.lastChild.remove();
             };
