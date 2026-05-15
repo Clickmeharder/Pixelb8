@@ -359,7 +359,7 @@
             });
 			document.getElementById("ctx-test-tts").addEventListener("click", (e) => {
 				e.stopPropagation(); // Prevent the menu from closing immediately if you want
-				
+				window.speechSynthesis.resume();
 				const testPhrases = [
 					"System check. Audio is fully operational.",
 					"Testing TTS. Ready to read chat messages.",
