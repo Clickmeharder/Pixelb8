@@ -358,8 +358,11 @@
                 await p8Confirm('Theme Settings Saved', true);
             });
 			document.getElementById("ctx-test-tts").addEventListener("click", (e) => {
-				e.stopPropagation(); // Prevent the menu from closing immediately if you want
+				e.stopPropagation(); 
+				
+				// Force the engine to wake up on the user gesture
 				window.speechSynthesis.resume();
+
 				const testPhrases = [
 					"System check. Audio is fully operational.",
 					"Testing TTS. Ready to read chat messages.",
@@ -369,15 +372,17 @@
 				
 				const randomPhrase = testPhrases[Math.floor(Math.random() * testPhrases.length)];
 				
-				// Call your existing speak function
-				speak(randomPhrase);
+				// Call the updated speak function with a 'user' label for your console
+				speak(randomPhrase, "System Test");
 				
-				// Optional: Visual feedback in the alertbox
-				alertbox.innerText = "🔊 Testing TTS Audio...";
-				alertbox.style.opacity = "1";
-				setTimeout(() => alertbox.style.opacity = "0", 3000);
+				// Visual feedback in your alertbox
+				if (typeof alertbox !== 'undefined') {
+					alertbox.innerText = "🔊 Testing TTS Audio...";
+					alertbox.style.opacity = "1";
+					setTimeout(() => alertbox.style.opacity = "0", 3000);
+				}
 				
-				// Close the context menu after clicking
+				// Close the context menu
 				document.getElementById('p8-ctx-menu').style.display = 'none';
 			});
             window.addEventListener('mousedown', e => {
@@ -635,9 +640,13 @@
 				console.warn("BotSay failed: ComfyJS not initialized or channel missing.");
 			}
 		}
-function speak(text) {
+function speak(text, user = "System") {
     const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
-    if (!cleanText) return;
+    
+    if (!cleanText) {
+        displayConsoleMessage(user, "TTS: Message empty after filtering.");
+        return;
+    }
 
     // 1. Critical: Wake up the engine
     window.speechSynthesis.cancel();
@@ -659,15 +668,23 @@ function speak(text) {
         utterance.rate = 1.0;
         utterance.pitch = 1.0;
 
-        // Debugging events for OBS console
-        utterance.onstart = () => console.log("TTS: Audio started");
-        utterance.onerror = (e) => console.error("TTS: Audio error", e);
+        // Debugging events for OBS and UI Console
+        utterance.onstart = () => {
+            console.log("TTS: Audio started");
+            displayConsoleMessage(user, "TTS: Audio started...");
+        };
+
+        utterance.onerror = (e) => {
+            console.error("TTS: Audio error", e);
+            displayConsoleMessage(user, `TTS Error: ${e.error}`);
+        };
 
         window.speechSynthesis.speak(utterance);
     };
 
     // 3. OBS Workaround: If voices aren't loaded yet, wait for them
     if (window.speechSynthesis.getVoices().length === 0) {
+        displayConsoleMessage(user, "TTS: Waiting for system voices...");
         window.speechSynthesis.onvoiceschanged = startSpeaking;
     } else {
         startSpeaking();
