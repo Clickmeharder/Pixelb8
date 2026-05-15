@@ -662,7 +662,14 @@
 				console.warn("BotSay failed: ComfyJS not initialized or channel missing.");
 			}
 		}
-const ttsQueue = [];
+// 1. The actual array of strings waiting to be spoken
+const ttsQueue = []; 
+
+// 2. The object tracking how many messages a user has left
+let ttsCredits = {}; 
+
+// 3. The object tracking timed access (for "Join the Convo" reward)
+let ttsSubscribers = {};
 let isSpeaking = false;
 
 function speak(text) {
@@ -684,23 +691,40 @@ function processQueue() {
     const msg = ttsQueue.shift();
     const player = document.getElementById('tts-player');
     
-    // Google TTS Endpoint
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(msg)}&tl=en&client=tw-ob`;
+    // 1. Use the "tws-ob" client and ensure the 'tl' (language) is set explicitly
+    // 2. We use 'https' to ensure there is no protocol mismatch
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(msg)}&tl=en-us&client=tw-ob`;
     
+    // IMPORTANT: Clear the previous source first to reset the media engine
+    player.pause();
+    player.src = ""; 
+    player.load();
+    
+    // Assign new source
     player.src = url;
+    
+    // Force a reload of the new source before playing
+    player.load(); 
+
     player.play().catch(e => {
-        console.error("OBS Audio blocked. Make sure to click 'Interact' once!", e);
+        // This is where the "No supported source" error usually gets caught
+        console.error("TTS Playback Error:", e.message);
         isSpeaking = false;
-        processQueue();
+        setTimeout(processQueue, 500); // Try the next item after a short delay
     });
 
-    // When this clip ends, move to the next one
     player.onended = () => {
         isSpeaking = false;
         processQueue();
     };
+
+    // If the source fails to load (the "No Supported Source" event)
+    player.onerror = () => {
+        console.error("Audio failed to load. The API might have throttled the request.");
+        isSpeaking = false;
+        processQueue();
+    };
 }
-		let ttsSubscribers = {}; // Stores timestamps: { "username": Date object }
 		function handlePixelCommands(user, command, message, flags) {
 			const isAdmin = flags.broadcaster || flags.mod;
 
@@ -758,16 +782,13 @@ function processQueue() {
             };
 
             ComfyJS.onChat = (user, message, flags, self, extra) => {
-			// 1. Process for UI and get the text for TTS
 				const processed = processMessageWithEmotes(message, extra.messageEmotes);
-				
-				// 2. Display to the overlay
 				displayChatMessage(user, message, flags, extra, processed); 
 
-				// 3. TTS Logic
 				const username = user.toLowerCase();
 				let shouldSpeak = false;
 
+				// Check for timed subscription
 				if (ttsSubscribers[username]) {
 					if (new Date() < ttsSubscribers[username]) {
 						shouldSpeak = true;
@@ -776,13 +797,14 @@ function processQueue() {
 					}
 				}
 
-				if (!shouldSpeak && ttsQueue[username] > 0) {
+				// Check for per-message credits
+				if (!shouldSpeak && ttsCredits[username] > 0) {
 					shouldSpeak = true;
-					ttsQueue[username]--;
-					if (ttsQueue[username] === 0) delete ttsQueue[username];
+					ttsCredits[username]--; // Deduct one credit
+					if (ttsCredits[username] === 0) delete ttsCredits[username];
 				}
 
-				// 4. Speak the processed text (if it's not empty after stripping emotes)
+				// Push to the actual Audio Queue
 				if (shouldSpeak && processed.ttsText.length > 0) {
 					speak(`${user} says: ${processed.ttsText}`);
 				}
@@ -793,22 +815,22 @@ function processQueue() {
 				// Trigger on-screen visual
 				alertbox.innerText = `✨ ${user} used ${reward}! ✨`;
 				alertbox.style.opacity = "1";
-				
+				const username = user.toLowerCase();
 				if (reward === "Hydrate") {
 					alertbox.innerText = `DRINK WATER, ${user.toUpperCase()}!`;
 				}
 				// Reward 1: Next 3 messages
-				if (reward === "TTS 3-Pack") { // Change this to your exact reward name
-					ttsQueue[user.toLowerCase()] = 3;
+				if (reward === "TTS 3-Pack") {
+					// Use the credits object, NOT the queue array
+					ttsCredits[username] = (ttsCredits[username] || 0) + 3;
 					botSay(`TTS Activated for @${user}! I'll read your next 3 messages.`);
 				}
 
-				// Reward 2: 30 Minute Conversation
-				if (reward === "Join the Convo") { // Change this to your exact reward name
+				if (reward === "Join the Convo") {
 					const expiry = new Date();
 					expiry.setMinutes(expiry.getMinutes() + 30);
-					ttsSubscribers[user.toLowerCase()] = expiry;
-					botSay(`@${user} joined the convo! I'll read all your messages for 30 minutes.`);
+					ttsSubscribers[username] = expiry;
+					botSay(`@${user} joined the convo for 30 minutes!`);
 				}
 				botSay(`@${user}! You just spent ${cost} points on ${reward}.`);
 				// Fade out after 8 seconds
