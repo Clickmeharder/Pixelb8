@@ -155,7 +155,7 @@
         .del-btn { background: #450a0a; color: #f87171; font-size: 11px; margin-top: 20px; }
         .del-btn:disabled { opacity: 0.2; cursor: not-allowed; }
 
-        #chat-feed { display: flex; flex-direction: column-reverse; max-height: 300px; overflow: hidden; }
+        #chat-feed { display: flex; flex-direction: column-reverse;height:300px; max-height: 300px; overflow: hidden;resize:vertical; }
         .chat-msg { margin-bottom: 5px; font-size: 0.9em; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
         .chat-user { font-weight: bold; margin-right: 5px; }
