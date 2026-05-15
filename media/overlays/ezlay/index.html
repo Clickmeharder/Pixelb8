@@ -641,6 +641,7 @@
 			}
 		}
 function speak(text, user = "System") {
+    // 1. Clean the text (Filter URLs and limit length)
     const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
     
     if (!cleanText) {
@@ -648,18 +649,20 @@ function speak(text, user = "System") {
         return;
     }
 
-    // 1. Critical: Wake up the engine
+    // 2. Critical: Reset and Wake up the speech engine
+    // cancel() stops any stuck queue; resume() clears browser-level pauses
     window.speechSynthesis.cancel();
     window.speechSynthesis.resume();
 
-    // 2. Wrap in a function to handle voice loading
+    // 3. Define the execution block
     const startSpeaking = () => {
         const utterance = new SpeechSynthesisUtterance(cleanText);
         const voices = window.speechSynthesis.getVoices();
         
-        // Find a voice - OBS often reports 0 voices initially
+        // OBS FIX: Re-fetch and bind voices. Browser Source often has 0 voices on load.
         if (voices.length > 0) {
-            utterance.voice = voices.find(v => v.lang.includes('en-US')) || 
+            // Find specific locales or default to the first available
+            utterance.voice = voices.find(v => v.lang === 'en-US') || 
                               voices.find(v => v.lang.includes('en')) || 
                               voices[0];
         }
@@ -668,7 +671,7 @@ function speak(text, user = "System") {
         utterance.rate = 1.0;
         utterance.pitch = 1.0;
 
-        // Debugging events for OBS and UI Console
+        // Visual feedback for your UI Console
         utterance.onstart = () => {
             console.log("TTS: Audio started");
             displayConsoleMessage(user, "TTS: Audio started...");
@@ -682,10 +685,15 @@ function speak(text, user = "System") {
         window.speechSynthesis.speak(utterance);
     };
 
-    // 3. OBS Workaround: If voices aren't loaded yet, wait for them
+    // 4. The OBS "Handshake":
+    // If the browser reports no voices, we must wait for the onvoiceschanged event
     if (window.speechSynthesis.getVoices().length === 0) {
-        displayConsoleMessage(user, "TTS: Waiting for system voices...");
-        window.speechSynthesis.onvoiceschanged = startSpeaking;
+        displayConsoleMessage(user, "TTS: Initializing system voices...");
+        window.speechSynthesis.onvoiceschanged = () => {
+            // Unbind to prevent multiple triggers if the list updates again
+            window.speechSynthesis.onvoiceschanged = null;
+            startSpeaking();
+        };
     } else {
         startSpeaking();
     }
