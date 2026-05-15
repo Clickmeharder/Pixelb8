@@ -80,7 +80,7 @@
         <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#71717a; font-size: 12px;">Close Editor</button>
         <button class="p8-btn del-btn" id="delete-theme-btn">Delete Active Theme</button>
     </div>
-
+	<audio id="tts-player" style="display:none;"></audio>
 
 
     <script>
@@ -662,30 +662,44 @@
 				console.warn("BotSay failed: ComfyJS not initialized or channel missing.");
 			}
 		}
-		function speak(text, user = "System") {
-			const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
-			if (!cleanText) return;
+const ttsQueue = [];
+let isSpeaking = false;
 
-			// OBS fix: Cancel any pending speech and force a resume
-			window.speechSynthesis.cancel();
-			
-			const utterance = new SpeechSynthesisUtterance(cleanText);
-			
-			// Select voice logic
-			const voices = window.speechSynthesis.getVoices();
-			if (voices.length > 0) {
-				utterance.voice = voices.find(v => v.lang === 'en-US') || voices[0];
-			}
+function speak(text) {
+    // 1. Clean the text (remove URLs, trim length)
+    const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
+    if (!cleanText) return;
 
-			utterance.onstart = () => console.log("TTS: Speaking message from " + user);
-			utterance.onerror = (e) => console.error("TTS Error:", e);
+    // 2. Add to queue
+    ttsQueue.push(cleanText);
+    
+    // 3. Try to play
+    processQueue();
+}
 
-			// The Magic Fix: Wrap in a timeout to let the engine "breath"
-			setTimeout(() => {
-				window.speechSynthesis.speak(utterance);
-			}, 50);
-		}
-		let ttsQueue = {};    // Stores message counts: { "username": 3 }
+function processQueue() {
+    if (isSpeaking || ttsQueue.length === 0) return;
+
+    isSpeaking = true;
+    const msg = ttsQueue.shift();
+    const player = document.getElementById('tts-player');
+    
+    // Google TTS Endpoint
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(msg)}&tl=en&client=tw-ob`;
+    
+    player.src = url;
+    player.play().catch(e => {
+        console.error("OBS Audio blocked. Make sure to click 'Interact' once!", e);
+        isSpeaking = false;
+        processQueue();
+    });
+
+    // When this clip ends, move to the next one
+    player.onended = () => {
+        isSpeaking = false;
+        processQueue();
+    };
+}
 		let ttsSubscribers = {}; // Stores timestamps: { "username": Date object }
 		function handlePixelCommands(user, command, message, flags) {
 			const isAdmin = flags.broadcaster || flags.mod;
