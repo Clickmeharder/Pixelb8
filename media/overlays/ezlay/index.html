@@ -666,37 +666,24 @@
 			const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
 			if (!cleanText) return;
 
+			// OBS fix: Cancel any pending speech and force a resume
 			window.speechSynthesis.cancel();
-			window.speechSynthesis.resume();
+			
+			const utterance = new SpeechSynthesisUtterance(cleanText);
+			
+			// Select voice logic
+			const voices = window.speechSynthesis.getVoices();
+			if (voices.length > 0) {
+				utterance.voice = voices.find(v => v.lang === 'en-US') || voices[0];
+			}
 
-			const startSpeaking = () => {
-				const utterance = new SpeechSynthesisUtterance(cleanText);
-				const voices = window.speechSynthesis.getVoices();
-				
-				if (voices.length > 0) {
-					utterance.voice = voices.find(v => v.lang === 'en-US') || 
-									  voices.find(v => v.lang.includes('en')) || 
-									  voices[0];
-				}
+			utterance.onstart = () => console.log("TTS: Speaking message from " + user);
+			utterance.onerror = (e) => console.error("TTS Error:", e);
 
-				utterance.onstart = () => console.log("TTS: Speaking now...");
-				utterance.onerror = (e) => console.error("TTS Error:", e.error);
-
+			// The Magic Fix: Wrap in a timeout to let the engine "breath"
+			setTimeout(() => {
 				window.speechSynthesis.speak(utterance);
-			};
-
-			// Aggressive OBS Voice Check
-			let voiceAttempts = 0;
-			const checkVoices = setInterval(() => {
-				voiceAttempts++;
-				if (window.speechSynthesis.getVoices().length > 0) {
-					clearInterval(checkVoices);
-					startSpeaking();
-				} else if (voiceAttempts > 30) { // Give up after 3 seconds
-					clearInterval(checkVoices);
-					console.warn("TTS: No voices found. Is Hardware Acceleration ON in OBS?");
-				}
-			}, 100);
+			}, 50);
 		}
 		let ttsQueue = {};    // Stores message counts: { "username": 3 }
 		let ttsSubscribers = {}; // Stores timestamps: { "username": Date object }
