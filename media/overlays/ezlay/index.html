@@ -635,39 +635,42 @@
 				console.warn("BotSay failed: ComfyJS not initialized or channel missing.");
 			}
 		}
-async function speak(text) {
-    // 1. Clean the text
+function speak(text) {
     const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
     if (!cleanText) return;
 
-    try {
-        // 2. Try the Web Audio API approach (More stable for OBS 32)
-        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=en&client=tw-ob`;
-        
-        const audio = new Audio();
-        audio.src = ttsUrl;
-        audio.crossOrigin = "anonymous"; // Helps with OBS security sandboxing
+    // 1. Critical: Wake up the engine
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.resume();
 
-        await audio.play();
-        console.log("TTS: Playing via Web Audio API");
-
-    } catch (err) {
-        console.warn("Web Audio failed, falling back to System TTS...", err);
-        
-        // 3. Fallback: If the URL is blocked, force the System Engine to wake up
-        window.speechSynthesis.cancel();
-        
+    // 2. Wrap in a function to handle voice loading
+    const startSpeaking = () => {
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.rate = 1.0;
-        utterance.volume = 1.0;
-
-        // Force OBS to find a voice if it's being lazy
         const voices = window.speechSynthesis.getVoices();
+        
+        // Find a voice - OBS often reports 0 voices initially
         if (voices.length > 0) {
-            utterance.voice = voices.find(v => v.lang.includes('en')) || voices[0];
+            utterance.voice = voices.find(v => v.lang.includes('en-US')) || 
+                              voices.find(v => v.lang.includes('en')) || 
+                              voices[0];
         }
 
+        utterance.volume = 1.0;
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        // Debugging events for OBS console
+        utterance.onstart = () => console.log("TTS: Audio started");
+        utterance.onerror = (e) => console.error("TTS: Audio error", e);
+
         window.speechSynthesis.speak(utterance);
+    };
+
+    // 3. OBS Workaround: If voices aren't loaded yet, wait for them
+    if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = startSpeaking;
+    } else {
+        startSpeaking();
     }
 }
 		let ttsQueue = {};    // Stores message counts: { "username": 3 }
