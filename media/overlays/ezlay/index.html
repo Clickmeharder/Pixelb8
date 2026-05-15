@@ -332,34 +332,6 @@
                 renderThemeList();
                 await p8Confirm('Theme Settings Saved', true);
             });
-			document.getElementById("ctx-test-tts").addEventListener("click", (e) => {
-				e.stopPropagation(); 
-				
-				// Force the engine to wake up on the user gesture
-				window.speechSynthesis.resume();
-
-				const testPhrases = [
-					"System check. Audio is fully operational.",
-					"Testing TTS. Ready to read chat messages.",
-					"Welcome back, Captain. The audio engine is active.",
-					"Is this thing on? Testing one two three."
-				];
-				
-				const randomPhrase = testPhrases[Math.floor(Math.random() * testPhrases.length)];
-				
-				// Call the updated speak function with a 'user' label for your console
-				speak(randomPhrase, "System Test");
-				
-				// Visual feedback in your alertbox
-				if (typeof alertbox !== 'undefined') {
-					alertbox.innerText = "🔊 Testing TTS Audio...";
-					alertbox.style.opacity = "1";
-					setTimeout(() => alertbox.style.opacity = "0", 3000);
-				}
-				
-				// Close the context menu
-				document.getElementById('p8-ctx-menu').style.display = 'none';
-			});
             window.addEventListener('mousedown', e => {
                 const menu = document.getElementById('p8-ctx-menu');
                 const opts = document.getElementById('theme-options');
@@ -662,45 +634,7 @@
 				console.warn("BotSay failed: ComfyJS not initialized or channel missing.");
 			}
 		}
-const ttsQueue = [];
-let ttsCredits = {}; 
-let ttsSubscribers = {}; 
-let isSpeaking = false;
-function speak(text) {
-    // Clean the text as before
-    const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
-    if (!cleanText) return;
 
-    ttsQueue.push(cleanText);
-    processQueue();
-}
-
-function processQueue() {
-    if (isSpeaking || ttsQueue.length === 0) return;
-
-    isSpeaking = true;
-    const msgText = ttsQueue.shift();
-    
-    // Use the built-in SpeechSynthesis instead of the <audio> tag
-    const utterance = new SpeechSynthesisUtterance(msgText);
-    
-    // Optional: Pick a specific voice or speed
-    utterance.rate = 1.0; 
-    utterance.pitch = 1.0;
-
-    utterance.onend = () => {
-        isSpeaking = false;
-        processQueue();
-    };
-
-    utterance.onerror = (event) => {
-        console.error("SpeechSynthesis Error:", event.error);
-        isSpeaking = false;
-        processQueue();
-    };
-
-    window.speechSynthesis.speak(utterance);
-}
 		function handlePixelCommands(user, command, message, flags) {
 			const isAdmin = flags.broadcaster || flags.mod;
 
@@ -760,30 +694,7 @@ function processQueue() {
             ComfyJS.onChat = (user, message, flags, self, extra) => {
 				const processed = processMessageWithEmotes(message, extra.messageEmotes);
 				displayChatMessage(user, message, flags, extra, processed); 
-
 				const username = user.toLowerCase();
-				let shouldSpeak = false;
-
-				// Check for timed subscription
-				if (ttsSubscribers[username]) {
-					if (new Date() < ttsSubscribers[username]) {
-						shouldSpeak = true;
-					} else {
-						delete ttsSubscribers[username];
-					}
-				}
-
-				// Check for per-message credits
-				if (!shouldSpeak && ttsCredits[username] > 0) {
-					shouldSpeak = true;
-					ttsCredits[username]--; // Deduct one credit
-					if (ttsCredits[username] === 0) delete ttsCredits[username];
-				}
-
-				// Push to the actual Audio Queue
-				if (shouldSpeak && processed.ttsText.length > 0) {
-					speak(`${user} says: ${processed.ttsText}`);
-				}
 			};
 			ComfyJS.onReward = (user, reward, cost, message, extra) => {
 				console.log(`${user} redeemed ${reward} for ${cost} points!`);

@@ -171,3 +171,25 @@
         }
         #mode-badge { font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; color: #ffeb3b; }
         .obs-box { background: #000; padding: 12px; border: 1px dashed #444; margin: 10px 0; font-family: monospace; font-size: 11px; cursor: copy; color: #00ff88; word-break: break-all; }
+		
+		
+		
+	#twitchChat {
+		color:;
+		background:;
+		border:;
+		box-shadow:;
+	}
+	.twitchEmote {
+		height: 1.5rem;
+		width: auto;
+		vertical-align: middle;
+		margin: 0 2px;
+	}
+	.floatingEmote {
+		position: fixed;
+		transition: transform 10s linear, opacity 8s ease-out; /* Slower floating effect */
+		opacity: 1;
+		pointer-events: none;
+		z-index: 999;
+	}
