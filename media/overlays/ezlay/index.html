@@ -635,31 +635,41 @@
 				console.warn("BotSay failed: ComfyJS not initialized or channel missing.");
 			}
 		}
-		function speak(text) {
-			// 1. Clean the text: Filter URLs and limit length (same as your original logic)
-			const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
-			
-			// 2. Safety check: Don't try to speak if the message is empty after filtering
-			if (!cleanText) return;
+async function speak(text) {
+    // 1. Clean the text
+    const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
+    if (!cleanText) return;
 
-			// 3. Construct the Google Translate TTS URL
-			// tl=en (Language), client=tw-ob (Required for the API to work)
-			const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=en&client=tw-ob`;
+    try {
+        // 2. Try the Web Audio API approach (More stable for OBS 32)
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=en&client=tw-ob`;
+        
+        const audio = new Audio();
+        audio.src = ttsUrl;
+        audio.crossOrigin = "anonymous"; // Helps with OBS security sandboxing
 
-			// 4. Create and play the audio object
-			const audio = new Audio(ttsUrl);
-			
-			// Set volume (optional, can be linked to your settings later)
-			audio.volume = 1.0;
+        await audio.play();
+        console.log("TTS: Playing via Web Audio API");
 
-			// 5. Play the audio
-			audio.play().then(() => {
-				console.log("TTS: Playing audio for ->", cleanText);
-			}).catch(err => {
-				// This usually triggers if the browser hasn't had a user "click" yet
-				console.error("TTS: Audio playback blocked. Interact with the overlay first!", err);
-			});
-		}
+    } catch (err) {
+        console.warn("Web Audio failed, falling back to System TTS...", err);
+        
+        // 3. Fallback: If the URL is blocked, force the System Engine to wake up
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.rate = 1.0;
+        utterance.volume = 1.0;
+
+        // Force OBS to find a voice if it's being lazy
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            utterance.voice = voices.find(v => v.lang.includes('en')) || voices[0];
+        }
+
+        window.speechSynthesis.speak(utterance);
+    }
+}
 		let ttsQueue = {};    // Stores message counts: { "username": 3 }
 		let ttsSubscribers = {}; // Stores timestamps: { "username": Date object }
 		function handlePixelCommands(user, command, message, flags) {
