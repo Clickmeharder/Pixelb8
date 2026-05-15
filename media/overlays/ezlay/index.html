@@ -662,25 +662,16 @@
 				console.warn("BotSay failed: ComfyJS not initialized or channel missing.");
 			}
 		}
-// 1. The actual array of strings waiting to be spoken
-const ttsQueue = []; 
-
-// 2. The object tracking how many messages a user has left
+const ttsQueue = [];
 let ttsCredits = {}; 
-
-// 3. The object tracking timed access (for "Join the Convo" reward)
-let ttsSubscribers = {};
+let ttsSubscribers = {}; 
 let isSpeaking = false;
-
 function speak(text) {
-    // 1. Clean the text (remove URLs, trim length)
+    // Clean the text as before
     const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
     if (!cleanText) return;
 
-    // 2. Add to queue
     ttsQueue.push(cleanText);
-    
-    // 3. Try to play
     processQueue();
 }
 
@@ -688,42 +679,27 @@ function processQueue() {
     if (isSpeaking || ttsQueue.length === 0) return;
 
     isSpeaking = true;
-    const msg = ttsQueue.shift();
-    const player = document.getElementById('tts-player');
+    const msgText = ttsQueue.shift();
     
-    // 1. Use the "tws-ob" client and ensure the 'tl' (language) is set explicitly
-    // 2. We use 'https' to ensure there is no protocol mismatch
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(msg)}&tl=en-us&client=tw-ob`;
+    // Use the built-in SpeechSynthesis instead of the <audio> tag
+    const utterance = new SpeechSynthesisUtterance(msgText);
     
-    // IMPORTANT: Clear the previous source first to reset the media engine
-    player.pause();
-    player.src = ""; 
-    player.load();
-    
-    // Assign new source
-    player.src = url;
-    
-    // Force a reload of the new source before playing
-    player.load(); 
+    // Optional: Pick a specific voice or speed
+    utterance.rate = 1.0; 
+    utterance.pitch = 1.0;
 
-    player.play().catch(e => {
-        // This is where the "No supported source" error usually gets caught
-        console.error("TTS Playback Error:", e.message);
-        isSpeaking = false;
-        setTimeout(processQueue, 500); // Try the next item after a short delay
-    });
-
-    player.onended = () => {
+    utterance.onend = () => {
         isSpeaking = false;
         processQueue();
     };
 
-    // If the source fails to load (the "No Supported Source" event)
-    player.onerror = () => {
-        console.error("Audio failed to load. The API might have throttled the request.");
+    utterance.onerror = (event) => {
+        console.error("SpeechSynthesis Error:", event.error);
         isSpeaking = false;
         processQueue();
     };
+
+    window.speechSynthesis.speak(utterance);
 }
 		function handlePixelCommands(user, command, message, flags) {
 			const isAdmin = flags.broadcaster || flags.mod;
