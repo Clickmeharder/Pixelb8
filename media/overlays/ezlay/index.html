@@ -636,33 +636,29 @@
 			}
 		}
 		function speak(text) {
-			if (!window.speechSynthesis) {
-				console.error("TTS: Speech Synthesis not supported in this browser.");
-				return;
-			}
-
-			// Cancel current to clear any 'stuck' states
-			window.speechSynthesis.cancel();
-
-			const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200);
-			const utterance = new SpeechSynthesisUtterance(cleanText);
+			// 1. Clean the text: Filter URLs and limit length (same as your original logic)
+			const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
 			
-			// Set properties
-			utterance.volume = 1.0;
-			utterance.rate = 1.0;
-			utterance.pitch = 1.0;
+			// 2. Safety check: Don't try to speak if the message is empty after filtering
+			if (!cleanText) return;
 
-			// OBS VOICE FIX: Sometimes the voice list is empty on first load
-			const voices = window.speechSynthesis.getVoices();
-			if (voices.length > 0) {
-				utterance.voice = voices[0];
-			}
+			// 3. Construct the Google Translate TTS URL
+			// tl=en (Language), client=tw-ob (Required for the API to work)
+			const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=en&client=tw-ob`;
 
-			// DEBUGGING LOGS (Viewable in OBS > Tools > Log Files)
-			utterance.onstart = () => console.log("TTS: Started speaking...");
-			utterance.onerror = (event) => console.error("TTS Error:", event.error);
+			// 4. Create and play the audio object
+			const audio = new Audio(ttsUrl);
+			
+			// Set volume (optional, can be linked to your settings later)
+			audio.volume = 1.0;
 
-			window.speechSynthesis.speak(utterance);
+			// 5. Play the audio
+			audio.play().then(() => {
+				console.log("TTS: Playing audio for ->", cleanText);
+			}).catch(err => {
+				// This usually triggers if the browser hasn't had a user "click" yet
+				console.error("TTS: Audio playback blocked. Interact with the overlay first!", err);
+			});
 		}
 		let ttsQueue = {};    // Stores message counts: { "username": 3 }
 		let ttsSubscribers = {}; // Stores timestamps: { "username": Date object }
