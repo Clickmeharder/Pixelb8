@@ -172,7 +172,30 @@
 
             { id: 'radius', label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
         ];
-		
+		// --- OBS CONSOLE BRIDGE ---
+		// This captures all console logs and redirects them to your UI
+		const originalLog = console.log;
+		const originalError = console.error;
+		const originalWarn = console.warn;
+
+		console.log = function(...args) {
+			originalLog.apply(console, args);
+			const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+			displayConsoleMessage("DEBUG", msg);
+		};
+
+		console.error = function(...args) {
+			originalError.apply(console, args);
+			const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+			displayConsoleMessage("ERROR", msg);
+		};
+
+		console.warn = function(...args) {
+			originalWarn.apply(console, args);
+			const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+			displayConsoleMessage("WARN", msg);
+		};
+		// --------------------------
 		<!-- custom confirm -->
         async function p8Confirm(message, isAlert = false) {
             const overlay = document.getElementById('p8-modal-overlay');
@@ -261,54 +284,6 @@
                 window.location.href = FULL_REDIRECT;
             }
         }
-
-
-
-		function displayConsoleMessage(user, message) {
-			if (!consoleMessages) return;  // If consoleMessages is false, do nothing
-
-			// Create a new console message element
-			const consoleContainer = document.getElementById("chat-feed");
-			const consoleMessage = document.createElement("div");
-			consoleMessage.classList.add("consoleMessage");
-
-			// Create the user element
-			const usernameSpan = document.createElement("span");
-			usernameSpan.classList.add("consoleUser");
-			usernameSpan.innerHTML = `${user}: `;  // Display user before message
-
-			// Create the message element
-			const messageSpan = document.createElement("span");
-			messageSpan.classList.add("consoleMessageText");
-			messageSpan.innerHTML = message;
-
-			// Append the username and message to the console message div
-			consoleMessage.appendChild(usernameSpan);
-			consoleMessage.appendChild(messageSpan);
-
-			// Append the console message to the console container
-			consoleContainer.appendChild(consoleMessage);
-
-			// Apply a fade effect after a delay
-			setTimeout(() => {
-				consoleMessage.style.opacity = '0'; // Fade out after 15 seconds
-			}, 15000);
-
-			setTimeout(() => {
-				consoleMessage.remove();
-			}, 15000); // Remove after 15 seconds
-
-			// Limit messages to the last 5
-			if (consoleContainer.children.length > 5) {
-				consoleContainer.removeChild(consoleContainer.firstChild);
-			}
-		}
-
-		function toggleConsoleMessages() {
-			consoleMessages = !consoleMessages;
-			saveSettings(); // Persistent!
-			console.log(`Console messages are now ${consoleMessages ? "enabled" : "disabled"}`);
-		}
 
 		<!--event listeners-->
         function bindEvents() {
@@ -540,8 +515,55 @@
                 history.replaceState(null, "", window.location.pathname);
             }
         }
+		function displayConsoleMessage(user, message) {
+			if (!consoleMessages) return;
+			const consoleContainer = document.getElementById("chat-feed");
+			if (!consoleContainer) return; // Safety check for early logs
+
+			// Create a new console message element
+			const consoleMessage = document.createElement("div");
+			consoleMessage.classList.add("consoleMessage");
+
+			// Create the user element
+			const usernameSpan = document.createElement("span");
+			usernameSpan.classList.add("consoleUser");
+			usernameSpan.innerHTML = `${user}: `;  // Display user before message
+
+			// Create the message element
+			const messageSpan = document.createElement("span");
+			messageSpan.classList.add("consoleMessageText");
+			messageSpan.innerHTML = message;
+
+			// Append the username and message to the console message div
+			consoleMessage.appendChild(usernameSpan);
+			consoleMessage.appendChild(messageSpan);
+
+			// Append the console message to the console container
+			consoleContainer.appendChild(consoleMessage);
+
+			// Apply a fade effect after a delay
+			setTimeout(() => {
+				consoleMessage.style.opacity = '0'; // Fade out after 15 seconds
+			}, 15000);
+
+			setTimeout(() => {
+				consoleMessage.remove();
+			}, 15000); // Remove after 15 seconds
+
+			// Limit messages to the last 5
+			if (consoleContainer.children.length > 5) {
+				consoleContainer.removeChild(consoleContainer.firstChild);
+			}
+		}
+
+		function toggleConsoleMessages() {
+			consoleMessages = !consoleMessages;
+			saveSettings(); // Persistent!
+			console.log(`Console messages are now ${consoleMessages ? "enabled" : "disabled"}`);
+		}
 
 		function displayChatMessage(user, message, flags = {}, extra = {}, processed = null) {
+			
 			const chatContainer = document.getElementById("chat-feed");
 
 			// 1. Create the main message wrapper
@@ -640,64 +662,42 @@
 				console.warn("BotSay failed: ComfyJS not initialized or channel missing.");
 			}
 		}
-function speak(text, user = "System") {
-    // 1. Clean the text (Filter URLs and limit length)
-    const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
-    
-    if (!cleanText) {
-        displayConsoleMessage(user, "TTS: Message empty after filtering.");
-        return;
-    }
+		function speak(text, user = "System") {
+			const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200).trim();
+			if (!cleanText) return;
 
-    // 2. Critical: Reset and Wake up the speech engine
-    // cancel() stops any stuck queue; resume() clears browser-level pauses
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.resume();
+			window.speechSynthesis.cancel();
+			window.speechSynthesis.resume();
 
-    // 3. Define the execution block
-    const startSpeaking = () => {
-        const utterance = new SpeechSynthesisUtterance(cleanText);
-        const voices = window.speechSynthesis.getVoices();
-        
-        // OBS FIX: Re-fetch and bind voices. Browser Source often has 0 voices on load.
-        if (voices.length > 0) {
-            // Find specific locales or default to the first available
-            utterance.voice = voices.find(v => v.lang === 'en-US') || 
-                              voices.find(v => v.lang.includes('en')) || 
-                              voices[0];
-        }
+			const startSpeaking = () => {
+				const utterance = new SpeechSynthesisUtterance(cleanText);
+				const voices = window.speechSynthesis.getVoices();
+				
+				if (voices.length > 0) {
+					utterance.voice = voices.find(v => v.lang === 'en-US') || 
+									  voices.find(v => v.lang.includes('en')) || 
+									  voices[0];
+				}
 
-        utterance.volume = 1.0;
-        utterance.rate = 1.0;
-        utterance.pitch = 1.0;
+				utterance.onstart = () => console.log("TTS: Speaking now...");
+				utterance.onerror = (e) => console.error("TTS Error:", e.error);
 
-        // Visual feedback for your UI Console
-        utterance.onstart = () => {
-            console.log("TTS: Audio started");
-            displayConsoleMessage(user, "TTS: Audio started...");
-        };
+				window.speechSynthesis.speak(utterance);
+			};
 
-        utterance.onerror = (e) => {
-            console.error("TTS: Audio error", e);
-            displayConsoleMessage(user, `TTS Error: ${e.error}`);
-        };
-
-        window.speechSynthesis.speak(utterance);
-    };
-
-    // 4. The OBS "Handshake":
-    // If the browser reports no voices, we must wait for the onvoiceschanged event
-    if (window.speechSynthesis.getVoices().length === 0) {
-        displayConsoleMessage(user, "TTS: Initializing system voices...");
-        window.speechSynthesis.onvoiceschanged = () => {
-            // Unbind to prevent multiple triggers if the list updates again
-            window.speechSynthesis.onvoiceschanged = null;
-            startSpeaking();
-        };
-    } else {
-        startSpeaking();
-    }
-}
+			// Aggressive OBS Voice Check
+			let voiceAttempts = 0;
+			const checkVoices = setInterval(() => {
+				voiceAttempts++;
+				if (window.speechSynthesis.getVoices().length > 0) {
+					clearInterval(checkVoices);
+					startSpeaking();
+				} else if (voiceAttempts > 30) { // Give up after 3 seconds
+					clearInterval(checkVoices);
+					console.warn("TTS: No voices found. Is Hardware Acceleration ON in OBS?");
+				}
+			}, 100);
+		}
 		let ttsQueue = {};    // Stores message counts: { "username": 3 }
 		let ttsSubscribers = {}; // Stores timestamps: { "username": Date object }
 		function handlePixelCommands(user, command, message, flags) {
