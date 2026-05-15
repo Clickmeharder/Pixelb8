@@ -160,5 +160,14 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
         .chat-user { font-weight: bold; margin-right: 5px; }
         #status-indicator { font-weight: bold; color: var(--accent); margin-bottom: 5px; transition: color 0.5s; }
+		
+		#overlay-ui { 
+            font-size: 3em; 
+            font-weight: 900;
+            text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000;
+            color: #ffffff;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
         #mode-badge { font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; color: #ffeb3b; }
         .obs-box { background: #000; padding: 12px; border: 1px dashed #444; margin: 10px 0; font-family: monospace; font-size: 11px; cursor: copy; color: #00ff88; word-break: break-all; }
