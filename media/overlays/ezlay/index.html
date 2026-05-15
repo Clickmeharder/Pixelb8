@@ -636,12 +636,32 @@
 			}
 		}
 		function speak(text) {
-			// Sanitize message: remove URLs and limit length to prevent trolling
+			if (!window.speechSynthesis) {
+				console.error("TTS: Speech Synthesis not supported in this browser.");
+				return;
+			}
+
+			// Cancel current to clear any 'stuck' states
+			window.speechSynthesis.cancel();
+
 			const cleanText = text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').substring(0, 200);
-			
 			const utterance = new SpeechSynthesisUtterance(cleanText);
-			utterance.rate = 1.0; 
+			
+			// Set properties
+			utterance.volume = 1.0;
+			utterance.rate = 1.0;
 			utterance.pitch = 1.0;
+
+			// OBS VOICE FIX: Sometimes the voice list is empty on first load
+			const voices = window.speechSynthesis.getVoices();
+			if (voices.length > 0) {
+				utterance.voice = voices[0];
+			}
+
+			// DEBUGGING LOGS (Viewable in OBS > Tools > Log Files)
+			utterance.onstart = () => console.log("TTS: Started speaking...");
+			utterance.onerror = (event) => console.error("TTS Error:", event.error);
+
 			window.speechSynthesis.speak(utterance);
 		}
 		let ttsQueue = {};    // Stores message counts: { "username": 3 }
