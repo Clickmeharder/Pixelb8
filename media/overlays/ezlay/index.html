@@ -57,6 +57,7 @@
         <div class="ctx-item" id="ctx-lock">Lock/Unlock Layout</div>
 		<div class="ctx-item" id="ctx-open-pixelpaint">open Paint Easel</div>
 		<div class="ctx-item" id="ctx-open-settings">open Settings</div>
+		<div class="ctx-item" id="ctx-test-tts">Test TTS Audio</div>
         <div class="ctx-item ctx-danger" id="ctx-reset">Reset System (Logout)</div>
     </div>
  <!--Theme Manager--->
@@ -356,7 +357,29 @@
                 renderThemeList();
                 await p8Confirm('Theme Settings Saved', true);
             });
-
+			document.getElementById("ctx-test-tts").addEventListener("click", (e) => {
+				e.stopPropagation(); // Prevent the menu from closing immediately if you want
+				
+				const testPhrases = [
+					"System check. Audio is fully operational.",
+					"Testing TTS. Ready to read chat messages.",
+					"Welcome back, Captain. The audio engine is active.",
+					"Is this thing on? Testing one two three."
+				];
+				
+				const randomPhrase = testPhrases[Math.floor(Math.random() * testPhrases.length)];
+				
+				// Call your existing speak function
+				speak(randomPhrase);
+				
+				// Optional: Visual feedback in the alertbox
+				alertbox.innerText = "🔊 Testing TTS Audio...";
+				alertbox.style.opacity = "1";
+				setTimeout(() => alertbox.style.opacity = "0", 3000);
+				
+				// Close the context menu after clicking
+				document.getElementById('p8-ctx-menu').style.display = 'none';
+			});
             window.addEventListener('mousedown', e => {
                 const menu = document.getElementById('p8-ctx-menu');
                 const opts = document.getElementById('theme-options');
@@ -675,7 +698,7 @@
             ComfyJS.onConnected = () => {
                 document.getElementById("status-indicator").innerText = "SYSTEM: ONLINE";
                 document.getElementById("status-indicator").style.color = "#00ff88";
-                overlayUi.innerText = `${channel.toUpperCase()}`;
+                alertbox.innerText = `${channel.toUpperCase()}`;
 				activeChannel = channel;
             };
 
