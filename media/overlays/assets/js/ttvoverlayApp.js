@@ -5,7 +5,10 @@ let settings = JSON.parse(localStorage.getItem('p8_settings')) || {
     cmdPrefix: "ezlay",
     useCmdPrefix: true,
     consoleMessages: true,
-    floatingEmotes: true
+    floatingEmotes: true,
+	chatHidden: false,
+    alertHidden: false,
+    statusHidden: true
 };
 let BOT_PREFIX = settings.botPrefix;
 let useBotPrefix = settings.useBotPrefix;
@@ -398,8 +401,12 @@ function loadPositions() {
         const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
         if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
     });
-}
 
+    // NEW: Apply the persistent visibility states on load
+    document.getElementById("chat-widget").style.display = settings.chatHidden ? "none" : "block";
+    document.getElementById("alert-widget").style.display = settings.alertHidden ? "none" : "block";
+    document.getElementById("status-widget").style.display = settings.statusHidden ? "none" : "block";
+}
 async function checkTwitchAuth() {
     const h = new URLSearchParams(window.location.hash.substring(1));
     const token = h.get("access_token");
@@ -555,7 +562,7 @@ const commandsRegistry = {
             botSay(`System active. Current prefix: !${useCmdPrefix ? CMD_PREFIX : '[NONE]'}`);
         }
     },
-    "toggle": {
+	"toggle": {
         adminOnly: true,
         execute: (user, message, flags) => {
             const target = message.toLowerCase().trim();
@@ -576,20 +583,24 @@ const commandsRegistry = {
                 floatingEmotes = !floatingEmotes;
                 botSay(`Floating Emotes are now: ${floatingEmotes ? "Enabled" : "Disabled"}`);
             }
+            // Updated Widget Logic: Toggles visibility style AND saves state to memory context
             else if (target === "chat") {
                 const w = document.getElementById("chat-widget");
-                w.style.display = (w.style.display === "none") ? "block" : "none";
-                botSay(`Chat Widget visibility toggled.`);
+                settings.chatHidden = !settings.chatHidden;
+                w.style.display = settings.chatHidden ? "none" : "block";
+                botSay(`Chat Widget visibility: ${settings.chatHidden ? "Hidden" : "Visible"}`);
             }
             else if (target === "alert" || target === "alerts") {
                 const w = document.getElementById("alert-widget");
-                w.style.display = (w.style.display === "none") ? "block" : "none";
-                botSay(`Alert Widget visibility toggled.`);
+                settings.alertHidden = !settings.alertHidden;
+                w.style.display = settings.alertHidden ? "none" : "block";
+                botSay(`Alert Widget visibility: ${settings.alertHidden ? "Hidden" : "Visible"}`);
             }
             else if (target === "status") {
                 const w = document.getElementById("status-widget");
-                w.style.display = (w.style.display === "none") ? "block" : "none";
-                botSay(`Status Widget visibility toggled.`);
+                settings.statusHidden = !settings.statusHidden;
+                w.style.display = settings.statusHidden ? "none" : "block";
+                botSay(`Status Widget visibility: ${settings.statusHidden ? "Hidden" : "Visible"}`);
             }
             saveSettings();
         }
