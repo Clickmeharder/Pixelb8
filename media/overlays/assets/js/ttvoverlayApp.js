@@ -547,12 +547,17 @@ function botSay(msg) {
 }
 
 // --- CORE COMMAND LOGIC & WIDGET VISIBILITY CONTROLS ---
-function handlePixelCommands(user, command, message, flags) {
-    const isAdmin = flags.broadcaster || flags.mod;
-
-    switch (command) {
-        case "toggle":
-            if (!isAdmin) return;
+// --- CENTRALIZED COMMAND REGISTRY ---
+const commandsRegistry = {
+    "hello": {
+        adminOnly: false,
+        execute: (user, message, flags) => {
+            botSay(`System active. Current prefix: !${useCmdPrefix ? CMD_PREFIX : '[NONE]'}`);
+        }
+    },
+    "toggle": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
             const target = message.toLowerCase().trim();
             
             if (target === "consolemessages") {
@@ -571,7 +576,6 @@ function handlePixelCommands(user, command, message, flags) {
                 floatingEmotes = !floatingEmotes;
                 botSay(`Floating Emotes are now: ${floatingEmotes ? "Enabled" : "Disabled"}`);
             }
-            // Dynamic Widget View Toggles
             else if (target === "chat") {
                 const w = document.getElementById("chat-widget");
                 w.style.display = (w.style.display === "none") ? "block" : "none";
@@ -588,49 +592,100 @@ function handlePixelCommands(user, command, message, flags) {
                 botSay(`Status Widget visibility toggled.`);
             }
             saveSettings();
-            break;
-
-        // Custom Streamer API Command: Allow creation of custom templates directly over chat!
-        // Syntax: !ezlay addreward [Reward Name] | [Alert Text Template]
-        case "addreward":
-            if (!isAdmin) return;
+        }
+    },
+    "addreward": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
             if (message.includes("|")) {
-                const parts = message.split("|");
+                let textPart = message;
+                let imageUrl = "";
+
+                if (message.includes("||")) {
+                    const imgSplit = message.split("||");
+                    textPart = imgSplit[0].trim();
+                    imageUrl = imgSplit[1].trim();
+                }
+
+                const parts = textPart.split("|");
                 const rewardName = parts[0].trim().toLowerCase();
                 const alertString = parts.slice(1).join("|").trim();
                 
-                rewardAlerts[rewardName] = { text: alertString, image: "" };
-                saveRewardAlerts();
-                botSay(`Registered custom reward template for [${parts[0].trim()}].`);
-            } else {
-                botSay(`Usage: !${CMD_PREFIX} addreward Reward Name | Your text template here. (Use {user} for variables)`);
-            }
-            break;
+                if (!rewardName || !alertString) {
+                    botSay(`Error parsing template. Ensure you have content before and after the single pipe '|'.`);
+                    return;
+                }
 
-        case "setcmdprefix":
-            if (!isAdmin) return;
+                rewardAlerts[rewardName] = { text: alertString, image: imageUrl };
+                saveRewardAlerts();
+
+                if (imageUrl) {
+                    botSay(`Registered custom alert with layout graphic for [${parts[0].trim()}].`);
+                } else {
+                    botSay(`Registered custom text alert for [${parts[0].trim()}].`);
+                }
+            } else {
+                botSay(`Usage: !${CMD_PREFIX} addreward Reward Name | Text Template [|| Optional Image/GIF URL]`);
+            }
+        }
+    },
+    "setcmdprefix": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
             if (message) {
                 CMD_PREFIX = message.trim().split(" ")[0]; 
                 saveSettings();
                 botSay(`Command keyword set to: !${CMD_PREFIX}`);
             }
-            break;
-
-        case "setbotprefix":
-            if (!isAdmin) return;
+        }
+    },
+    "setbotprefix": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
             if (message) {
                 BOT_PREFIX = message.trim();
                 saveSettings();
                 botSay(`Bot name set to: ${BOT_PREFIX}`);
             }
-            break;
+        }
+    },
+    "help": {
+        adminOnly: false,
+        execute: (user, message, flags) => {
+            const isAdmin = flags.broadcaster || flags.mod;
+            
+            // DYNAMIC SCANNING: Map out names based on current caller context permissions
+            const allowedCommands = Object.keys(commandsRegistry).filter(cmdName => {
+                const cmdConfig = commandsRegistry[cmdName];
+                return !cmdConfig.adminOnly || isAdmin;
+            });
 
-        case "hello":
-            botSay(`System active. Current prefix: !${useCmdPrefix ? CMD_PREFIX : '[NONE]'}`);
-            break;
+            const prefixStr = useCmdPrefix ? `!${CMD_PREFIX} ` : `!`;
+            const formattedList = allowedCommands.map(name => `${prefixStr}${name}`).join(", ");
+
+            botSay(`Available commands for your permission level: ${formattedList}`);
+        }
     }
-}
+};
 
+// Aliasing 'commands' to call the exact same logic as 'help' safely
+commandsRegistry["commands"] = commandsRegistry["help"];
+
+// --- REFACTORED CORE ROUTER ---
+function handlePixelCommands(user, command, message, flags) {
+    const targetCmd = command.toLowerCase().trim();
+    const cmdConfig = commandsRegistry[targetCmd];
+
+    // If command doesn't exist, exit quietly
+    if (!cmdConfig) return;
+
+    // Direct permission boundary check
+    const isAdmin = flags.broadcaster || flags.mod;
+    if (cmdConfig.adminOnly && !isAdmin) return;
+
+    // Process implementation callback
+    cmdConfig.execute(user, message, flags);
+}
 // --- TWITCH OVERLAY LIQUID CONTEXT ---
 function startTwitch(channel, token) {
     const formattedToken = token.startsWith("oauth:") ? token : `oauth:${token}`;
