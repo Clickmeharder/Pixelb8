@@ -85,7 +85,7 @@
         <button class="p8-btn del-btn" id="delete-theme-btn">Delete Active Theme</button>
     </div>
 	 <!--Channel Point Manager--->
-	<div id="rewards-manager" style="display: none; position: fixed; right: 20px; top: 20px; width: 320px; background: var(--bg); border: 2px solid var(--accent); border-radius: var(--border-radius); padding: 20px; color: #fff; font-family: var(--font-family); z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
+<div id="rewards-manager" style="display: none; position: fixed; right: 20px; top: 20px; width: 320px; background: var(--bg); border: 2px solid var(--accent); border-radius: var(--border-radius); padding: 20px; color: #fff; font-family: var(--font-family); z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
 		<h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Channel Point Redeems</h3>
 		
 		<div style="background: rgba(9,9,11,0.6); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
@@ -132,6 +132,41 @@
 					<select id="reward-img-out-anim" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
 				</div>
 			</div>
+
+			<div style="border-top: 1px solid #27272a; padding-top: 10px; margin-bottom: 12px;">
+				<label style="font-size: 11px; color: var(--accent); display: block; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Custom Alert Styling</label>
+				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+					<div>
+						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Size</label>
+						<input type="text" id="reward-font-size" class="p8-input" placeholder="e.g. 2.5em, 32px" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
+					</div>
+					<div>
+						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Color</label>
+						<div style="display: flex; gap: 4px;">
+							<input type="color" id="reward-font-color" style="padding:0; border:1px solid #27272a; background:transparent; width:24px; height:24px; cursor:pointer;" value="#ffffff">
+							<input type="text" id="reward-font-color-hex" class="p8-input" placeholder="#ffffff" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;" value="#ffffff">
+						</div>
+					</div>
+					<div>
+						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Outline</label>
+						<input type="text" id="reward-text-outline" class="p8-input" placeholder="e.g. 2px #000" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
+					</div>
+					<div>
+						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Weight</label>
+						<select id="reward-font-weight" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;">
+							<option value="normal">Normal (400)</option>
+							<option value="bold" selected>Bold (700)</option>
+							<option value="900">Black (900)</option>
+							<option value="300">Light (300)</option>
+						</select>
+					</div>
+					<div style="grid-column: span 2;">
+						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Max Width</label>
+						<input type="text" id="reward-img-size" class="p8-input" placeholder="e.g. 100%, 250px, 120px" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;" value="100%">
+					</div>
+				</div>
+			</div>
+
 			<div style="margin-top: 15px; margin-bottom: 15px; text-align: left; border-top: 1px dashed #27272a; padding-top: 15px;">
 				<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Sound Pool (Plays Randomly)</label>
 				

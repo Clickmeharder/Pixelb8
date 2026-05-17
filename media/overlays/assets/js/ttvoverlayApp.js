@@ -395,6 +395,26 @@ function bindRewardsManagerEvents() {
     const addSoundBtn = document.getElementById("push-sound-btn");
     const labelSoundBtn = document.getElementById("add-sound-file-btn");
 
+    // Form inputs for styling engine
+    const fontSizeInput = document.getElementById("reward-font-size");
+    const fontColorPicker = document.getElementById("reward-font-color");
+    const fontColorHex = document.getElementById("reward-font-color-hex");
+    const textOutlineInput = document.getElementById("reward-text-outline");
+    const fontWeightSelect = document.getElementById("reward-font-weight");
+    const imgSizeInput = document.getElementById("reward-img-size");
+
+    // Synchronize color picker with hex input field natively
+    if (fontColorPicker && fontColorHex) {
+        fontColorPicker.addEventListener("input", function() {
+            fontColorHex.value = this.value;
+        });
+        fontColorHex.addEventListener("input", function() {
+            if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+                fontColorPicker.value = this.value;
+            }
+        });
+    }
+
     // Initialize animation selector choices directly on application setup
     populateAnimationDropdowns();
     
@@ -402,28 +422,28 @@ function bindRewardsManagerEvents() {
     updateManagerBadgesUI();
 
     // Wire up the control deck toggle button click handler
-	const deckToggleBtn = document.getElementById("mgr-toggle-alert-btn");
-	if (deckToggleBtn) {
-		deckToggleBtn.addEventListener("click", () => {
-			alertHidden = !alertHidden;
-			saveSettings();
-			
-			// --- FIX: Instantly refresh the visual text badge on the control panel panel ---
-			updateManagerBadgesUI();
-			
-			// Sync active visibility changes instantly
-			if (alertWidget) {
-				if (alertHidden) {
-					alertWidget.style.display = "none";
-					alertWidget.style.opacity = "0";
-				} else {
-					// Restore default visibility state so upcoming redeems render natively
-					alertWidget.style.display = "block";
-					alertWidget.style.opacity = "1";
-				}
-			}
-		});
-	}
+    const deckToggleBtn = document.getElementById("mgr-toggle-alert-btn");
+    if (deckToggleBtn) {
+        deckToggleBtn.addEventListener("click", () => {
+            alertHidden = !alertHidden;
+            saveSettings();
+            
+            // Instantly refresh the visual text badge on the control panel panel
+            updateManagerBadgesUI();
+            
+            // Sync active visibility changes instantly
+            if (alertWidget) {
+                if (alertHidden) {
+                    alertWidget.style.display = "none";
+                    alertWidget.style.opacity = "0";
+                } else {
+                    // Restore default visibility state so upcoming redeems render natively
+                    alertWidget.style.display = "block";
+                    alertWidget.style.opacity = "1";
+                }
+            }
+        });
+    }
 
     // Open panel from context option
     document.getElementById("ctx-open-rewards").addEventListener("click", () => {
@@ -531,7 +551,13 @@ function bindRewardsManagerEvents() {
             textOutAnim: document.getElementById("reward-text-out-anim").value,
             imgInAnim: document.getElementById("reward-img-in-anim").value,
             imgOutAnim: document.getElementById("reward-img-out-anim").value,
-            sounds: [...stagedSoundsPool] 
+            sounds: [...stagedSoundsPool],
+            // Capture custom style configurations
+            fontSize: fontSizeInput.value.trim(),
+            fontColor: fontColorHex.value.trim(),
+            textOutline: textOutlineInput.value.trim(),
+            fontWeight: fontWeightSelect.value,
+            imgSize: imgSizeInput.value.trim() || "100%"
         };
         saveRewardAlerts();
 
@@ -546,6 +572,14 @@ function bindRewardsManagerEvents() {
         document.getElementById("reward-text-out-anim").value = "none";
         document.getElementById("reward-img-in-anim").value = "none";
         document.getElementById("reward-img-out-anim").value = "none";
+        
+        // Reset custom style fields to defaults
+        fontSizeInput.value = "";
+        fontColorPicker.value = "#ffffff";
+        fontColorHex.value = "#ffffff";
+        textOutlineInput.value = "";
+        fontWeightSelect.value = "bold";
+        imgSizeInput.value = "100%";
         
         stagedSoundsPool = [];
         if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
@@ -581,14 +615,22 @@ function renderRewardsList() {
         const iIn = rewardData.imgInAnim || "none";
         const iOut = rewardData.imgOutAnim || "none";
         const soundCount = rewardData.sounds ? rewardData.sounds.length : 0;
+        
+        // Style fallback indicators for UI display
+        const fSize = rewardData.fontSize || "[Default]";
+        const fColor = rewardData.fontColor || "#ffffff";
+        const fWeight = rewardData.fontWeight || "bold";
+        const tOutline = rewardData.textOutline || "[Default]";
+        const iSize = rewardData.imgSize || "100%";
 
         item.innerHTML = `
             <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">${key}</div>
             <div style="font-size: 12px; color: #e4e4e7; margin-bottom: 2px; word-break: break-word;"><strong>Txt:</strong> ${rewardData.text}</div>
             <div style="font-size: 11px; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>Asset:</strong> ${imageDisplaySrc}</div>
-            <div style="font-size: 10px; color: #71717a; margin-top: 4px; font-family: monospace;">
+            <div style="font-size: 10px; color: #71717a; margin-top: 4px; font-family: monospace; line-height: 1.4;">
                 Txt: [In: ${tIn} | Out: ${tOut}]<br>
                 Img: [In: ${iIn} | Out: ${iOut}]<br>
+                Style: [Sz: ${fSize} | Clr: ${fColor} | Wt: ${fWeight} | Outln: ${tOutline} | ImgSz: ${iSize}]<br>
                 Audio Pool: [${soundCount} active sounds]
             </div>
             <div style="display: flex; gap: 6px; margin-top: 8px;">
@@ -611,6 +653,14 @@ function renderRewardsList() {
             document.getElementById("reward-text-out-anim").value = tOut;
             document.getElementById("reward-img-in-anim").value = iIn;
             document.getElementById("reward-img-out-anim").value = iOut;
+            
+            // Populate form styling selectors on item edit
+            document.getElementById("reward-font-size").value = rewardData.fontSize || "";
+            document.getElementById("reward-font-color").value = rewardData.fontColor || "#ffffff";
+            document.getElementById("reward-font-color-hex").value = rewardData.fontColor || "#ffffff";
+            document.getElementById("reward-text-outline").value = rewardData.textOutline || "";
+            document.getElementById("reward-font-weight").value = rewardData.fontWeight || "bold";
+            document.getElementById("reward-img-size").value = rewardData.imgSize || "100%";
             
             if (isBase64) {
                 pendingImageBase64 = rewardData.image;
@@ -646,7 +696,6 @@ function renderRewardsList() {
         container.appendChild(item);
     });
 }
-
 // --- EVENT BINDING ---
 function bindEvents() {
     const SCOPES = "chat:read chat:edit channel:read:redemptions";
@@ -757,6 +806,12 @@ function triggerAlertPipeline(reward, user, cost, message) {
 
     if (!alertWidget || !alertText) return;
 
+    // Reset styles back to CSS theme defaults before parsing layout config overrides
+    alertText.style.fontSize = "";
+    alertText.style.color = "";
+    alertText.style.fontWeight = "";
+    alertText.style.textShadow = "";
+
     // Structural initialization defaults
     let config = {
         text: `✨ <strong>${user}</strong> spent ${cost || 0} points on <br><strong>${reward}</strong>! ✨`,
@@ -765,7 +820,12 @@ function triggerAlertPipeline(reward, user, cost, message) {
         textOutAnim: "fadeOut",
         imgInAnim: "fadeIn",
         imgOutAnim: "fadeOut",
-        sounds: [] 
+        sounds: [],
+        fontSize: "",
+        fontColor: "",
+        textOutline: "",
+        fontWeight: "bold",
+        imgSize: "100%"
     };
 
     // If custom configurations are discovered inside memory cache arrays, apply overrides
@@ -783,6 +843,34 @@ function triggerAlertPipeline(reward, user, cost, message) {
         if (custom.imgInAnim) config.imgInAnim = custom.imgInAnim;
         if (custom.imgOutAnim) config.imgOutAnim = custom.imgOutAnim;
         if (custom.sounds) config.sounds = custom.sounds; 
+
+        // Extract customized presentation configurations
+        config.fontSize = custom.fontSize || "";
+        config.fontColor = custom.fontColor || "";
+        config.textOutline = custom.textOutline || "";
+        config.fontWeight = custom.fontWeight || "bold";
+        config.imgSize = custom.imgSize || "100%";
+    }
+
+    // --- APPLY STYLE INJECTIONS TO OUTLET DOM ---
+    if (config.fontSize) alertText.style.fontSize = config.fontSize;
+    if (config.fontColor) alertText.style.color = config.fontColor;
+    if (config.fontWeight) alertText.style.fontWeight = config.fontWeight;
+    
+    if (config.textOutline) {
+        // Handle simplified "size color" syntax conversion (e.g. "2px #000") smoothly to a 4-way stroke
+        if (!config.textOutline.includes(",")) {
+            const parts = config.textOutline.trim().split(" ");
+            if (parts.length === 2) {
+                const size = parts[0];
+                const clr = parts[1];
+                alertText.style.textShadow = `${size} ${size} 0px ${clr}, -${size} -${size} 0px ${clr}, ${size} -${size} 0px ${clr}, -${size} ${size} 0px ${clr}`;
+            } else {
+                alertText.style.textShadow = config.textOutline;
+            }
+        } else {
+            alertText.style.textShadow = config.textOutline;
+        }
     }
 
     // --- HANDLE SOUND POOL SELECTION ---
@@ -811,10 +899,10 @@ function triggerAlertPipeline(reward, user, cost, message) {
     alertText.className = "";
     if (alertImage) alertImage.className = "";
 
-    // Step 2: Content Sync Injection
+    // Step 2: Content Sync Injection with dynamic inline max-width styling
     alertText.innerHTML = config.text;
     if (config.image && alertImage) {
-        alertImage.innerHTML = `<img src="${config.image}" style="max-width:100%; height:auto; margin-top:10px; display:block;">`;
+        alertImage.innerHTML = `<img src="${config.image}" style="max-width:${config.imgSize}; height:auto; margin-top:10px; display:block; margin-left:auto; margin-right:auto;">`;
     } else if (alertImage) {
         alertImage.innerHTML = "";
     }
@@ -861,7 +949,6 @@ function triggerAlertPipeline(reward, user, cost, message) {
         botSay(`@${user} spent ${cost || 0} points on ${reward}.`);
     }
 }
-
 function renderThemeControls() {
     const container = document.getElementById('variable-controls');
     container.innerHTML = '';
