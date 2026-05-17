@@ -552,12 +552,12 @@ function bindRewardsManagerEvents() {
             imgInAnim: document.getElementById("reward-img-in-anim").value,
             imgOutAnim: document.getElementById("reward-img-out-anim").value,
             sounds: [...stagedSoundsPool],
-            // Capture custom style configurations
+            // Capture custom style configurations cleanly
             fontSize: fontSizeInput.value.trim(),
             fontColor: fontColorHex.value.trim(),
             textOutline: textOutlineInput.value.trim(),
             fontWeight: fontWeightSelect.value,
-            imgSize: imgSizeInput.value.trim() || "100%"
+            imgSize: imgSizeInput.value.trim() || ""
         };
         saveRewardAlerts();
 
@@ -621,7 +621,7 @@ function renderRewardsList() {
         const fColor = rewardData.fontColor || "#ffffff";
         const fWeight = rewardData.fontWeight || "bold";
         const tOutline = rewardData.textOutline || "[Default]";
-        const iSize = rewardData.imgSize || "100%";
+        const iSize = rewardData.imgSize || "[Default]";
 
         item.innerHTML = `
             <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">${key}</div>
@@ -654,13 +654,13 @@ function renderRewardsList() {
             document.getElementById("reward-img-in-anim").value = iIn;
             document.getElementById("reward-img-out-anim").value = iOut;
             
-            // Populate form styling selectors on item edit
+            // Populate form styling selectors on item edit cleanly
             document.getElementById("reward-font-size").value = rewardData.fontSize || "";
             document.getElementById("reward-font-color").value = rewardData.fontColor || "#ffffff";
             document.getElementById("reward-font-color-hex").value = rewardData.fontColor || "#ffffff";
             document.getElementById("reward-text-outline").value = rewardData.textOutline || "";
             document.getElementById("reward-font-weight").value = rewardData.fontWeight || "bold";
-            document.getElementById("reward-img-size").value = rewardData.imgSize || "100%";
+            document.getElementById("reward-img-size").value = rewardData.imgSize || "";
             
             if (isBase64) {
                 pendingImageBase64 = rewardData.image;
@@ -806,7 +806,7 @@ function triggerAlertPipeline(reward, user, cost, message) {
 
     if (!alertWidget || !alertText) return;
 
-    // Reset styles back to CSS theme defaults before parsing layout config overrides
+    // --- RESET THE ARCHITECTURE BACK TO STYLESHEET DEFAULTS ---
     alertText.style.fontSize = "";
     alertText.style.color = "";
     alertText.style.fontWeight = "";
@@ -825,7 +825,7 @@ function triggerAlertPipeline(reward, user, cost, message) {
         fontColor: "",
         textOutline: "",
         fontWeight: "bold",
-        imgSize: "100%"
+        imgSize: ""
     };
 
     // If custom configurations are discovered inside memory cache arrays, apply overrides
@@ -849,18 +849,19 @@ function triggerAlertPipeline(reward, user, cost, message) {
         config.fontColor = custom.fontColor || "";
         config.textOutline = custom.textOutline || "";
         config.fontWeight = custom.fontWeight || "bold";
-        config.imgSize = custom.imgSize || "100%";
+        config.imgSize = custom.imgSize || "";
     }
 
-    // --- APPLY STYLE INJECTIONS TO OUTLET DOM ---
+    // --- FORCE INJECT OVERRIDE RENDERS INTO THE ALERT OUTLET ---
     if (config.fontSize) alertText.style.fontSize = config.fontSize;
     if (config.fontColor) alertText.style.color = config.fontColor;
     if (config.fontWeight) alertText.style.fontWeight = config.fontWeight;
     
+    // Process text outline settings cleanly
     if (config.textOutline) {
-        // Handle simplified "size color" syntax conversion (e.g. "2px #000") smoothly to a 4-way stroke
+        // If they type a simplified format like "3px #000000", expand it to a solid 4-way stroke override
         if (!config.textOutline.includes(",")) {
-            const parts = config.textOutline.trim().split(" ");
+            const parts = config.textOutline.trim().split(/\s+/);
             if (parts.length === 2) {
                 const size = parts[0];
                 const clr = parts[1];
@@ -871,6 +872,9 @@ function triggerAlertPipeline(reward, user, cost, message) {
         } else {
             alertText.style.textShadow = config.textOutline;
         }
+    } else {
+        // Fall back to original styles.css design layout explicitly if no custom outline was typed
+        alertText.style.textShadow = "3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000";
     }
 
     // --- HANDLE SOUND POOL SELECTION ---
@@ -899,10 +903,12 @@ function triggerAlertPipeline(reward, user, cost, message) {
     alertText.className = "";
     if (alertImage) alertImage.className = "";
 
-    // Step 2: Content Sync Injection with dynamic inline max-width styling
+    // Step 2: Content Sync Injection with variable size constraints forced down onto the node style layer
     alertText.innerHTML = config.text;
     if (config.image && alertImage) {
-        alertImage.innerHTML = `<img src="${config.image}" style="max-width:${config.imgSize}; height:auto; margin-top:10px; display:block; margin-left:auto; margin-right:auto;">`;
+        // Enforce both direct width/max-width logic rules to force images to blow up past 100% or scale down to px precisely
+        const finalSizeStyle = config.imgSize ? `width:${config.imgSize}; max-width:${config.imgSize};` : 'max-width:100%;';
+        alertImage.innerHTML = `<img src="${config.image}" style="${finalSizeStyle} height:auto; margin-top:10px; display:block; margin-left:auto; margin-right:auto;">`;
     } else if (alertImage) {
         alertImage.innerHTML = "";
     }
