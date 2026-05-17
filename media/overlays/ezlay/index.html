@@ -88,6 +88,18 @@
 	<div id="rewards-manager" style="display: none; position: fixed; right: 20px; top: 20px; width: 320px; background: var(--bg); border: 2px solid var(--accent); border-radius: var(--border-radius); padding: 20px; color: #fff; font-family: var(--font-family); z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
 		<h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Channel Point Redeems</h3>
 		
+		<div style="background: rgba(9,9,11,0.6); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
+			<div style="font-size: 10px; color: #71717a; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-bottom: 2px;">Overlay Master Controls</div>
+			
+			<div style="display: flex; justify-content: space-between; align-items: center; background: #18181b; padding: 6px 10px; border-radius: 4px; border: 1px solid #27272a;">
+				<span style="font-size: 11px; color: #e4e4e7;">Alert Layer Widget:</span>
+				<div style="display: flex; align-items: center; gap: 8px;">
+					<span id="mgr-alert-status-badge" style="font-size: 10px; font-family: monospace; padding: 2px 6px; border-radius: 4px; font-weight: bold;">---</span>
+					<button type="button" id="mgr-toggle-alert-btn" style="background: var(--accent); border: none; color: white; border-radius: 4px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: bold;">Toggle</button>
+				</div>
+			</div>
+		</div>
+
 		<div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #27272a;">
 			<p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold; color: #a1a1aa;">Add / New Template Config</p>
 			<input type="text" id="reward-name-input" class="p8-input" placeholder="Exact Reward Name" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">

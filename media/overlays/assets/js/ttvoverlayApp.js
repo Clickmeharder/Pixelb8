@@ -6,20 +6,22 @@ let settings = JSON.parse(localStorage.getItem('p8_settings')) || {
     useCmdPrefix: true,
     consoleMessages: true,
     floatingEmotes: true,
-	chatHidden: false,
+    chatHidden: false,
     alertHidden: false,
     statusHidden: true
 };
 let BOT_PREFIX = settings.botPrefix;
-let useBotPrefix = settings.useBotPrefix;
+let useBotPrefix = (String(settings.useBotPrefix) === "true");
 let CMD_PREFIX = settings.cmdPrefix;
-let useCmdPrefix = settings.useCmdPrefix;
-let floatingEmotes = settings.floatingEmotes;
-let consoleMessages = settings.consoleMessages;
-// --- FIX: Expose the structural hidden flags to the application layer ---
-let chatHidden = settings.chatHidden !== undefined ? settings.chatHidden : false;
-let alertHidden = settings.alertHidden !== undefined ? settings.alertHidden : false;
-let statusHidden = settings.statusHidden !== undefined ? settings.statusHidden : true;
+let useCmdPrefix = (String(settings.useCmdPrefix) === "true");
+let floatingEmotes = (String(settings.floatingEmotes) === "true");
+let consoleMessages = (String(settings.consoleMessages) === "true");
+
+// Strict casting layout fallback normalization loops
+let chatHidden = (String(settings.chatHidden) === "true");
+let alertHidden = (String(settings.alertHidden) === "true");
+let statusHidden = (String(settings.statusHidden) === "true"
+
 function saveSettings() {
     settings.botPrefix = BOT_PREFIX;
     settings.useBotPrefix = useBotPrefix;
@@ -27,11 +29,17 @@ function saveSettings() {
     settings.useCmdPrefix = useCmdPrefix;
     settings.consoleMessages = consoleMessages;
     settings.floatingEmotes = floatingEmotes;
-	// --- FIX: Ensure dynamic toggle mutations persist to storage ---
+    
     settings.chatHidden = chatHidden;
     settings.alertHidden = alertHidden;
     settings.statusHidden = statusHidden;
+    
     localStorage.setItem('p8_settings', JSON.stringify(settings));
+    
+    // Auto-refresh panel states inside active DOM elements if they exist
+    if (typeof updateManagerBadgesUI === "function") {
+        updateManagerBadgesUI();
+    }
 }
 
 // --- DYNAMIC REWARD ALERT REGISTRY ---
@@ -361,6 +369,22 @@ function populateAnimationDropdowns() {
 }
 
 // 1. Hook up UI Toggle Actions inside your bindEvents() function block
+// Helper tracking routine to update the control deck indicators
+function updateManagerBadgesUI() {
+    const badge = document.getElementById("mgr-alert-status-badge");
+    if (!badge) return;
+    
+    if (alertHidden) {
+        badge.innerText = "MUTED";
+        badge.style.background = "#7f1d1d";
+        badge.style.color = "#fecaca";
+    } else {
+        badge.innerText = "ACTIVE";
+        badge.style.background = "#064e3b";
+        badge.style.color = "#a7f3d0";
+    }
+}
+
 function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");
     const fileInput = document.getElementById("reward-file-input");
@@ -373,11 +397,39 @@ function bindRewardsManagerEvents() {
 
     // Initialize animation selector choices directly on application setup
     populateAnimationDropdowns();
+    
+    // Render initial settings states into the control badges
+    updateManagerBadgesUI();
+
+    // Wire up the control deck toggle button click handler
+	const deckToggleBtn = document.getElementById("mgr-toggle-alert-btn");
+	if (deckToggleBtn) {
+		deckToggleBtn.addEventListener("click", () => {
+			alertHidden = !alertHidden;
+			saveSettings();
+			
+			// --- FIX: Instantly refresh the visual text badge on the control panel panel ---
+			updateManagerBadgesUI();
+			
+			// Sync active visibility changes instantly
+			if (alertWidget) {
+				if (alertHidden) {
+					alertWidget.style.display = "none";
+					alertWidget.style.opacity = "0";
+				} else {
+					// Restore default visibility state so upcoming redeems render natively
+					alertWidget.style.display = "block";
+					alertWidget.style.opacity = "1";
+				}
+			}
+		});
+	}
 
     // Open panel from context option
     document.getElementById("ctx-open-rewards").addEventListener("click", () => {
         rewardsPanel.style.display = "block";
         document.getElementById('p8-ctx-menu').style.display = 'none';
+        updateManagerBadgesUI();
         renderRewardsList();
     });
 
@@ -414,7 +466,7 @@ function bindRewardsManagerEvents() {
 
     // --- SOUND FILE ASSET MONITORING LISTENERS ---
     let loadedAudioBase64 = "";
-    let loadedAudioName = ""; // Holds the human-readable filename
+    let loadedAudioName = ""; 
 
     soundFileInput.addEventListener("change", function(e) {
         const file = e.target.files[0];
@@ -427,11 +479,9 @@ function bindRewardsManagerEvents() {
             return;
         }
         
-        // Cache the filename directly from the operating system event
         loadedAudioName = file.name;
         labelSoundBtn.innerText = `📁 ${file.name}`;
         
-        // Convert target sound file into Base64 for local browser data streaming
         const reader = new FileReader();
         reader.onload = function(evt) {
             loadedAudioBase64 = evt.target.result;
@@ -444,14 +494,12 @@ function bindRewardsManagerEvents() {
     addSoundBtn.addEventListener("click", function() {
         if (!loadedAudioBase64) return;
         
-        // Save as an object mapping name, data stream, and initial volume level (1.0)
         stagedSoundsPool.push({
             name: loadedAudioName,
             data: loadedAudioBase64,
             volume: 1.0
         });
         
-        // Reset control values to prepare for next file choices
         loadedAudioBase64 = "";
         loadedAudioName = "";
         soundFileInput.value = "";
@@ -469,7 +517,6 @@ function bindRewardsManagerEvents() {
         const nameKey = nameEl.value.trim().toLowerCase();
         const alertText = textEl.value.trim();
         
-        // Determine if we use local file memory string or raw web layout link URL
         let finalImage = pendingImageBase64 ? pendingImageBase64 : urlInput.value.trim();
 
         if (!nameKey || !alertText) {
@@ -477,7 +524,6 @@ function bindRewardsManagerEvents() {
             return;
         }
 
-        // Save complete architectural schema layout to local state registry
         rewardAlerts[nameKey] = {
             text: alertText,
             image: finalImage,
@@ -485,7 +531,7 @@ function bindRewardsManagerEvents() {
             textOutAnim: document.getElementById("reward-text-out-anim").value,
             imgInAnim: document.getElementById("reward-img-in-anim").value,
             imgOutAnim: document.getElementById("reward-img-out-anim").value,
-            sounds: [...stagedSoundsPool] // Map dynamic sound pool directly into data item
+            sounds: [...stagedSoundsPool] 
         };
         saveRewardAlerts();
 
@@ -501,7 +547,6 @@ function bindRewardsManagerEvents() {
         document.getElementById("reward-img-in-anim").value = "none";
         document.getElementById("reward-img-out-anim").value = "none";
         
-        // Reset dynamic audio form elements completely for the next setup task
         stagedSoundsPool = [];
         if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
         soundFileInput.value = "";
@@ -1100,25 +1145,37 @@ const commandsRegistry = {
                 floatingEmotes = !floatingEmotes;
                 botSay(`Floating Emotes are now: ${floatingEmotes ? "Enabled" : "Disabled"}`);
             }
-            // Updated Widget Logic: Toggles visibility style AND saves state to memory context
+            // --- FIX: Sync with global variables and correct visual elements ---
             else if (target === "chat") {
-                const w = document.getElementById("chat-widget");
-                settings.chatHidden = !settings.chatHidden;
-                w.style.display = settings.chatHidden ? "none" : "block";
-                botSay(`Chat Widget visibility: ${settings.chatHidden ? "Hidden" : "Visible"}`);
+                chatHidden = !chatHidden;
+                
+                // Checks both common widget naming variations
+                const w = document.getElementById("chat-widget") || document.getElementById("chat-container") || document.getElementById("p8-chat-box");
+                if (w) w.style.display = chatHidden ? "none" : "block";
+                
+                botSay(`Chat Widget visibility: ${chatHidden ? "Hidden" : "Visible"}`);
             }
             else if (target === "alert" || target === "alerts") {
-                const w = document.getElementById("alert-widget");
-                settings.alertHidden = !settings.alertHidden;
-                w.style.display = settings.alertHidden ? "none" : "block";
-                botSay(`Alert Widget visibility: ${settings.alertHidden ? "Hidden" : "Visible"}`);
+                alertHidden = !alertHidden;
+                
+                const w = document.getElementById("alert-widget") || document.getElementById("alert-container") || alertWidget;
+                if (w) {
+                    w.style.display = alertHidden ? "none" : "block";
+                    if (alertHidden) w.style.opacity = "0";
+                }
+                
+                botSay(`Alert Widget visibility: ${alertHidden ? "Hidden" : "Visible"}`);
             }
             else if (target === "status") {
-                const w = document.getElementById("status-widget");
-                settings.statusHidden = !settings.statusHidden;
-                w.style.display = settings.statusHidden ? "none" : "block";
-                botSay(`Status Widget visibility: ${settings.statusHidden ? "Hidden" : "Visible"}`);
+                statusHidden = !statusHidden;
+                
+                const w = document.getElementById("status-widget") || document.getElementById("status-container") || document.getElementById("status-indicator");
+                if (w) w.style.display = statusHidden ? "none" : "block";
+                
+                botSay(`Status Widget visibility: ${statusHidden ? "Hidden" : "Visible"}`);
             }
+            
+            // This now safely synchronizes our updated global variables to localStorage
             saveSettings();
         }
     },
