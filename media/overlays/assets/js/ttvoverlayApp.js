@@ -20,7 +20,7 @@ let consoleMessages = (String(settings.consoleMessages) === "true");
 // Strict casting layout fallback normalization loops
 let chatHidden = (String(settings.chatHidden) === "true");
 let alertHidden = (String(settings.alertHidden) === "true");
-let statusHidden = (String(settings.statusHidden) === "true"
+let statusHidden = (String(settings.statusHidden) === "true");
 
 function saveSettings() {
     settings.botPrefix = BOT_PREFIX;
