@@ -544,28 +544,44 @@ function triggerAlertPipeline(reward, user, cost, message) {
 
     // Step 3: Trigger INTRO Transitions
     alertWidget.style.display = "block";
+    
+    // Force a minor DOM reflow layout flush to ensure the browser cleanly detects keyframe initialization
+    void alertWidget.offsetWidth; 
     alertWidget.style.opacity = "1";
     
     if (config.textInAnim !== "none") alertText.classList.add(config.textInAnim);
-    if (config.image && alertImage && config.imgInAnim !== "none") alertImage.classList.add(config.imgInAnim);
+    if (config.image && alertImage && config.imgInAnim !== "none") {
+        // Target the inner image asset element directly for smoother rendering calculations
+        const targetImg = alertImage.querySelector("img");
+        if (targetImg) targetImg.classList.add(config.imgInAnim);
+    }
 
     // Step 4: Queue OUTRO Transitions
     clearTimeout(window.fadeTimeout);
     window.fadeTimeout = setTimeout(() => {
-        // Remove Intro Classes safely
+        // Remove Intro Classes safely before applying entry rulesets
         if (config.textInAnim !== "none") alertText.classList.remove(config.textInAnim);
-        if (config.image && alertImage && config.imgInAnim !== "none") alertImage.classList.remove(config.imgInAnim);
+        
+        const targetImg = alertImage ? alertImage.querySelector("img") : null;
+        if (targetImg && config.imgInAnim !== "none") targetImg.classList.remove(config.imgInAnim);
 
         // Append Outro Transition Rulesets
         if (config.textOutAnim !== "none") alertText.classList.add(config.textOutAnim);
-        if (config.image && alertImage && config.imgOutAnim !== "none") alertImage.classList.add(config.imgOutAnim);
+        if (targetImg && config.imgOutAnim !== "none") targetImg.classList.add(config.imgOutAnim);
 
-        // Drop widget display layer entirely after transition duration passes
+        // Allow the CSS keyframe layouts to finish playing through their animation duration (1s buffer)
         setTimeout(() => {
-            if (alertWidget.style.opacity === "1" && window.fadeTimeout) {
+            if (window.fadeTimeout) {
                 alertWidget.style.opacity = "0";
+                
+                // Completely drop widget visibility display after style properties complete fading
+                setTimeout(() => {
+                    if (alertWidget.style.opacity === "0") {
+                        alertWidget.style.display = "none";
+                    }
+                }, 500);
             }
-        }, 1000); // 1-second transition padding buffer
+        }, 1000); 
     }, 8000);
 
     // Custom chat feedback responses matching system configurations
@@ -577,7 +593,6 @@ function triggerAlertPipeline(reward, user, cost, message) {
         botSay(`@${user} spent ${cost || 0} points on ${reward}.`);
     }
 }
-
 function renderThemeControls() {
     const container = document.getElementById('variable-controls');
     container.innerHTML = '';
