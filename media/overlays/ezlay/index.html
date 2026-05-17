@@ -93,12 +93,31 @@
 			<input type="text" id="reward-name-input" class="p8-input" placeholder="Exact Reward Name" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
 			<input type="text" id="reward-text-input" class="p8-input" placeholder="Alert Template (e.g. {user} did a thing!)" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
 			
-			<div style="margin-bottom: 8px;">
+			<div style="margin-bottom: 12px;">
 				<label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">Alert Graphic Asset</label>
 				<input type="text" id="reward-img-input" class="p8-input" placeholder="Web Image/GIF URL" style="width: 100%; margin-bottom: 4px; box-sizing: border-box;">
 				<div style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: #71717a;">
 					<span>OR</span>
 					<input type="file" id="reward-file-input" accept="image/*" style="font-size: 11px; color: #a1a1aa; background: transparent; border: none; padding: 0; width: 100%;">
+				</div>
+			</div>
+
+			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; border-top: 1px solid #27272a; padding-top: 10px;">
+				<div>
+					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text In Anim</label>
+					<select id="reward-text-in-anim" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
+				</div>
+				<div>
+					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Out Anim</label>
+					<select id="reward-text-out-anim" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
+				</div>
+				<div>
+					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image In Anim</label>
+					<select id="reward-img-in-anim" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
+				</div>
+				<div>
+					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Out Anim</label>
+					<select id="reward-img-out-anim" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
 				</div>
 			</div>
 
