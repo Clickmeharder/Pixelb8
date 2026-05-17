@@ -311,6 +311,11 @@ function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");
     const fileInput = document.getElementById("reward-file-input");
     const urlInput = document.getElementById("reward-img-input");
+    
+    // Core references for the audio pool form elements
+    const soundFileInput = document.getElementById("reward-sound-file");
+    const addSoundBtn = document.getElementById("push-sound-btn");
+    const labelSoundBtn = document.getElementById("add-sound-file-btn");
 
     // Initialize animation selector choices directly on application setup
     populateAnimationDropdowns();
@@ -353,6 +358,45 @@ function bindRewardsManagerEvents() {
         }
     });
 
+    // --- SOUND FILE ASSET MONITORING LISENTERS ---
+    let loadedAudioBase64 = "";
+
+    soundFileInput.addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        
+        if (!file) {
+            loadedAudioBase64 = "";
+            addSoundBtn.disabled = true;
+            labelSoundBtn.innerText = "🎵 Choose Sound Asset";
+            return;
+        }
+        
+        labelSoundBtn.innerText = `📁 ${file.name}`;
+        
+        // Convert target sound file into Base64 for local browser data streaming
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            loadedAudioBase64 = evt.target.result;
+            addSoundBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Push asset onto the active staged storage tracking pool registry
+    addSoundBtn.addEventListener("click", function() {
+        if (!loadedAudioBase64) return;
+        
+        stagedSoundsPool.push(loadedAudioBase64);
+        
+        // Reset control values to prepare for next file choices
+        loadedAudioBase64 = "";
+        soundFileInput.value = "";
+        labelSoundBtn.innerText = "🎵 Choose Sound Asset";
+        this.disabled = true;
+        
+        renderStagedSoundsUI();
+    });
+
     // Save and register configuration handler
     document.getElementById("save-reward-btn").addEventListener("click", () => {
         const nameEl = document.getElementById("reward-name-input");
@@ -393,12 +437,12 @@ function bindRewardsManagerEvents() {
         document.getElementById("reward-img-in-anim").value = "none";
         document.getElementById("reward-img-out-anim").value = "none";
         
-        // Reset dynamic audio form elements
+        // Reset dynamic audio form elements completely for the next setup task
         stagedSoundsPool = [];
         if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
-        document.getElementById("reward-sound-file").value = "";
-        document.getElementById("add-sound-file-btn").innerText = "🎵 Choose Sound Asset";
-        document.getElementById("push-sound-btn").disabled = true;
+        soundFileInput.value = "";
+        labelSoundBtn.innerText = "🎵 Choose Sound Asset";
+        addSoundBtn.disabled = true;
         
         renderRewardsList();
     });
