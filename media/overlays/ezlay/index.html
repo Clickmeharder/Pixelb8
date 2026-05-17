@@ -57,8 +57,9 @@
 
 <!--Context Menu-->
     <div id="p8-ctx-menu">
+		<div class="ctx-item" id="ctx-lock">Lock/Unlock Layout</div>
         <div class="ctx-item" id="ctx-open-editor">Open Theme Manager</div>
-        <div class="ctx-item" id="ctx-lock">Lock/Unlock Layout</div>
+		<div class="ctx-item" id="ctx-open-rewards">Channel Point Manager</div>
 		<div class="ctx-item" id="ctx-open-pixelpaint">open Paint Easel</div>
 		<div class="ctx-item" id="ctx-open-settings">open Settings</div>
         <div class="ctx-item ctx-danger" id="ctx-reset">Reset System (Logout)</div>
@@ -83,12 +84,26 @@
         <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#71717a; font-size: 12px;">Close Editor</button>
         <button class="p8-btn del-btn" id="delete-theme-btn">Delete Active Theme</button>
     </div>
+	 <!--Channel Point Manager--->
+	<div id="rewards-manager" style="display: none; position: fixed; right: 20px; top: 20px; width: 320px; background: var(--bg); border: 2px solid var(--accent); border-radius: var(--border-radius); padding: 20px; color: #fff; font-family: var(--font-family); z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
+		<h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Channel Point Redeems</h3>
+		
+		<div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #27272a;">
+			<p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold; color: #a1a1aa;">Add / New Template Config</p>
+			<input type="text" id="reward-name-input" class="p8-input" placeholder="Exact Reward Name" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+			<input type="text" id="reward-text-input" class="p8-input" placeholder="Alert Template (e.g. {user} did a thing!)" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+			<input type="text" id="reward-img-input" class="p8-input" placeholder="Optional Image/GIF URL" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+			<button class="p8-btn save-btn" id="save-reward-btn" style="width: 100%;">Save Reward Template</button>
+		</div>
 
+		<hr style="border:0; border-top: 1px solid #27272a; margin: 15px 0;">
+		
+		<label style="font-size: 12px; font-weight: bold; color: #a1a1aa; display: block; margin-bottom: 8px;">Registered Rewards</label>
+		<div id="rewards-list-container" style="display: flex; flex-direction: column; gap: 8px;">
+			</div>
 
-
-    <script>
-
-    </script>
+		<button class="p8-btn" id="close-rewards-btn" style="background:transparent; color:#71717a; font-size: 12px; width: 100%; margin-top: 15px;">Close Panel</button>
+	</div>
 	<script src="../assets/js/ttvoverlayApp.js"></script>
 	<script src="/assets/js/pixelpaint.js"></script>
 </body>

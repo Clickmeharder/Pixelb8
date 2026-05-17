@@ -190,6 +190,10 @@ function init() {
     }
     loadPositions();
     renderThemeControls();
+    
+    // Auto-populates registry array cache instantly on application kick-off
+    renderRewardsList(); 
+    
     bindEvents();
 }
 
@@ -214,6 +218,99 @@ async function systemReset() {
         window.location.href = FULL_REDIRECT;
     }
 }
+// 1. Hook up UI Toggle Actions inside your bindEvents() function block
+function bindRewardsManagerEvents() {
+    const rewardsPanel = document.getElementById("rewards-manager");
+
+    // Open panel from context option
+    document.getElementById("ctx-open-rewards").addEventListener("click", () => {
+        rewardsPanel.style.display = "block";
+        document.getElementById('p8-ctx-menu').style.display = 'none';
+        renderRewardsList();
+    });
+
+    // Close Button layout routine
+    document.getElementById("close-rewards-btn").addEventListener("click", () => {
+        rewardsPanel.style.display = "none";
+    });
+
+    // Save and register configuration handler
+    document.getElementById("save-reward-btn").addEventListener("click", () => {
+        const nameEl = document.getElementById("reward-name-input");
+        const textEl = document.getElementById("reward-text-input");
+        const imgEl = document.getElementById("reward-img-input");
+
+        const nameKey = nameEl.value.trim().toLowerCase();
+        const alertText = textEl.value.trim();
+        const imgUrl = imgEl.value.trim();
+
+        if (!nameKey || !alertText) {
+            alert("Reward Name and Alert Text are required!");
+            return;
+        }
+
+        // Mutation of configuration state
+        rewardAlerts[nameKey] = {
+            text: alertText,
+            image: imgUrl
+        };
+        saveRewardAlerts();
+
+        // UI Reset sequence
+        nameEl.value = "";
+        textEl.value = "";
+        imgEl.value = "";
+        
+        renderRewardsList();
+    });
+}
+
+// 2. Dynamic DOM Rendering Loop for active objects
+function renderRewardsList() {
+    const container = document.getElementById("rewards-list-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const keys = Object.keys(rewardAlerts);
+    if (keys.length === 0) {
+        container.innerHTML = `<div style="font-size: 12px; color: #71717a; text-align: center; padding: 10px;">No custom rewards mapped yet.</div>`;
+        return;
+    }
+
+    keys.forEach(key => {
+        const rewardData = rewardAlerts[key];
+        const item = document.createElement("div");
+        item.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border: 1px solid #27272a; position: relative;";
+        
+        item.innerHTML = `
+            <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">${key}</div>
+            <div style="font-size: 12px; color: #e4e4e7; margin-bottom: 2px; word-break: break-word;"><strong>Txt:</strong> ${rewardData.text}</div>
+            ${rewardData.image ? `<div style="font-size: 11px; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>Img:</strong> ${rewardData.image}</div>` : ''}
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+                <button class="p8-btn alt-btn" style="padding: 2px 8px; font-size: 11px;">Edit</button>
+                <button class="p8-btn" style="padding: 2px 8px; font-size: 11px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;">Delete</button>
+            </div>
+        `;
+
+        // Bind inner actions (Edit / Populate Form)
+        item.querySelector(".p8-btn.alt-btn").addEventListener("click", () => {
+            document.getElementById("reward-name-input").value = key;
+            document.getElementById("reward-text-input").value = rewardData.text;
+            document.getElementById("reward-img-input").value = rewardData.image;
+        });
+
+        // Bind delete processing
+        item.querySelector(".p8-btn:not(.alt-btn)").addEventListener("click", () => {
+            if (confirm(`Remove alert layout tracking for [${key}]?`)) {
+                delete rewardAlerts[key];
+                saveRewardAlerts();
+                renderRewardsList();
+            }
+        });
+
+        container.appendChild(item);
+    });
+}
 
 // --- EVENT BINDING ---
 function bindEvents() {
@@ -230,6 +327,7 @@ function bindEvents() {
 
     document.getElementById("ctx-open-editor").addEventListener("click", () => {
         document.getElementById('style-editor').style.display = 'block';
+        document.getElementById('p8-ctx-menu').style.display = 'none';
         renderThemeList();
     });
 
@@ -269,7 +367,8 @@ function bindEvents() {
         if (menu.style.display === 'block' && !menu.contains(e.target)) menu.style.display = 'none';
         if (opts.style.display === 'block' && !e.target.closest('#theme-selector')) opts.style.display = 'none';
         
-        if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor') || e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
+        // Safety guard: Added #rewards-manager so editing inputs doesn't clear element focuses
+        if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor') || e.target.closest('#rewards-manager') || e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
         
         dragTarget = e.target.closest('.p8-widget');
         if (dragTarget) {
@@ -298,6 +397,8 @@ function bindEvents() {
         const menu = document.getElementById('p8-ctx-menu');
         menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
     });
+
+    bindRewardsManagerEvents();
 }
 
 function renderThemeControls() {
