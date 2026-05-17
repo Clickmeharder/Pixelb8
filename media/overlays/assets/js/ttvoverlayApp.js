@@ -219,8 +219,12 @@ async function systemReset() {
     }
 }
 // 1. Hook up UI Toggle Actions inside your bindEvents() function block
+let pendingImageBase64 = "";
+
 function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");
+    const fileInput = document.getElementById("reward-file-input");
+    const urlInput = document.getElementById("reward-img-input");
 
     // Open panel from context option
     document.getElementById("ctx-open-rewards").addEventListener("click", () => {
@@ -234,38 +238,67 @@ function bindRewardsManagerEvents() {
         rewardsPanel.style.display = "none";
     });
 
+    // Convert local files to persistent Base64 Data Strings
+    fileInput.addEventListener("change", function() {
+        const file = this.files[0];
+        if (!file) {
+            pendingImageBase64 = "";
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            pendingImageBase64 = e.target.result; // Holds complete inline data:image/... base64 string
+            urlInput.value = ""; // Clear text input to show file asset takes priority
+            urlInput.placeholder = "Using selected local file asset...";
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Clear file selection if user goes back to typing a URL link
+    urlInput.addEventListener("input", function() {
+        if (this.value.trim() !== "") {
+            fileInput.value = "";
+            pendingImageBase64 = "";
+            urlInput.placeholder = "Web Image/GIF URL";
+        }
+    });
+
     // Save and register configuration handler
     document.getElementById("save-reward-btn").addEventListener("click", () => {
         const nameEl = document.getElementById("reward-name-input");
         const textEl = document.getElementById("reward-text-input");
-        const imgEl = document.getElementById("reward-img-input");
 
         const nameKey = nameEl.value.trim().toLowerCase();
         const alertText = textEl.value.trim();
-        const imgUrl = imgEl.value.trim();
+        
+        // Determine if we use local file memory string or raw web layout link URL
+        let finalImage = pendingImageBase64 ? pendingImageBase64 : urlInput.value.trim();
 
         if (!nameKey || !alertText) {
             alert("Reward Name and Alert Text are required!");
             return;
         }
 
-        // Mutation of configuration state
+        // Save structure block to memory array registry
         rewardAlerts[nameKey] = {
             text: alertText,
-            image: imgUrl
+            image: finalImage
         };
         saveRewardAlerts();
 
         // UI Reset sequence
         nameEl.value = "";
         textEl.value = "";
-        imgEl.value = "";
+        urlInput.value = "";
+        urlInput.placeholder = "Web Image/GIF URL";
+        fileInput.value = "";
+        pendingImageBase64 = "";
         
         renderRewardsList();
     });
 }
 
-// 2. Dynamic DOM Rendering Loop for active objects
 function renderRewardsList() {
     const container = document.getElementById("rewards-list-container");
     if (!container) return;
@@ -282,25 +315,44 @@ function renderRewardsList() {
         const item = document.createElement("div");
         item.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border: 1px solid #27272a; position: relative;";
         
+        const isBase64 = rewardData.image && rewardData.image.startsWith("data:");
+        const imageDisplaySrc = isBase64 ? "[Local Embedded File]" : rewardData.image;
+
         item.innerHTML = `
             <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">${key}</div>
             <div style="font-size: 12px; color: #e4e4e7; margin-bottom: 2px; word-break: break-word;"><strong>Txt:</strong> ${rewardData.text}</div>
-            ${rewardData.image ? `<div style="font-size: 11px; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>Img:</strong> ${rewardData.image}</div>` : ''}
+            ${rewardData.image ? `<div style="font-size: 11px; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>Img:</strong> ${imageDisplaySrc}</div>` : ''}
             <div style="display: flex; gap: 6px; margin-top: 8px;">
+                <button class="p8-btn test-btn" style="padding: 2px 8px; font-size: 11px; background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7;">Test</button>
                 <button class="p8-btn alt-btn" style="padding: 2px 8px; font-size: 11px;">Edit</button>
-                <button class="p8-btn" style="padding: 2px 8px; font-size: 11px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;">Delete</button>
+                <button class="p8-btn del-btn" style="padding: 2px 8px; font-size: 11px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;">Delete</button>
             </div>
         `;
 
-        // Bind inner actions (Edit / Populate Form)
-        item.querySelector(".p8-btn.alt-btn").addEventListener("click", () => {
+        // NEW: Trigger Simulated Alert Testing Function
+        item.querySelector(".test-btn").addEventListener("click", () => {
+            triggerAlertPipeline(key, "StreamerTest");
+        });
+
+        // Populate form layout parameters on Edit click
+        item.querySelector(".alt-btn").addEventListener("click", () => {
             document.getElementById("reward-name-input").value = key;
             document.getElementById("reward-text-input").value = rewardData.text;
-            document.getElementById("reward-img-input").value = rewardData.image;
+            
+            if (isBase64) {
+                pendingImageBase64 = rewardData.image;
+                document.getElementById("reward-img-input").value = "";
+                document.getElementById("reward-img-input").placeholder = "Using loaded local embedded file asset...";
+            } else {
+                pendingImageBase64 = "";
+                document.getElementById("reward-img-input").value = rewardData.image;
+                document.getElementById("reward-img-input").placeholder = "Web Image/GIF URL";
+            }
+            document.getElementById("reward-file-input").value = "";
         });
 
         // Bind delete processing
-        item.querySelector(".p8-btn:not(.alt-btn)").addEventListener("click", () => {
+        item.querySelector(".del-btn").addEventListener("click", () => {
             if (confirm(`Remove alert layout tracking for [${key}]?`)) {
                 delete rewardAlerts[key];
                 saveRewardAlerts();
@@ -399,6 +451,55 @@ function bindEvents() {
     });
 
     bindRewardsManagerEvents();
+}
+
+// --- CENTRALIZED ALERT PIPELINE ENGINE ---
+// Handles formatting, visual injections, animations, and chat confirmation outputs
+function triggerAlertPipeline(reward, user, cost, message) {
+    console.log(`${user} redeemed ${reward} for ${cost || 0} points!`);
+    
+    const lookupName = reward.toLowerCase().trim();
+    
+    if (alertWidget && alertText) {
+        // Check if user has registered a custom template for this specific reward name
+        if (rewardAlerts && rewardAlerts[lookupName]) {
+            const template = rewardAlerts[lookupName].text;
+            
+            // Evaluate simple runtime variables like user context safely
+            let parsedText = template
+                .replace(/{user}/gi, user)
+                .replace(/{user.toUpperCase\(\)}/gi, user.toUpperCase())
+                .replace(/{cost}/gi, cost || 0)
+                .replace(/{message}/gi, message || "");
+
+            alertText.innerHTML = parsedText;
+            
+            // Inject image element if explicitly defined (Works with both URLs and Base64 Data Links!)
+            if (rewardAlerts[lookupName].image && alertImage) {
+                alertImage.innerHTML = `<img src="${rewardAlerts[lookupName].image}" style="max-width:100%; height:auto; margin-top:10px;">`;
+            } else if (alertImage) {
+                alertImage.innerHTML = "";
+            }
+        } else {
+            // Default fallback alert container formatting if reward template isn't registered yet
+            alertText.innerHTML = `✨ <strong>${user}</strong> spent ${cost || 0} points on <br><strong>${reward}</strong>! ✨`;
+            if (alertImage) alertImage.innerHTML = "";
+        }
+
+        // Display animation fade routine
+        alertWidget.style.opacity = "1";
+        clearTimeout(window.fadeTimeout);
+        window.fadeTimeout = setTimeout(() => alertWidget.style.opacity = "0", 8000);
+    }
+
+    // Custom chat feedback responses matching your system commands
+    if (lookupName === "hydrate") {
+        botSay(`Drink up, Captain @${user}!`);
+    } else if (lookupName === "fart") {
+        botSay(`@${user}! You just stank up the whole feed.`);
+    } else {
+        botSay(`@${user} spent ${cost || 0} points on ${reward}.`);
+    }
 }
 
 function renderThemeControls() {
@@ -816,53 +917,11 @@ function startTwitch(channel, token) {
         displayChatMessage(user, message, flags, extra, processed); 
     };
 
-    // --- REWARD TRIGGER ENGINE ---
+    // --- CHANNEL POINT REWARD TRIGGER ---
     ComfyJS.onReward = (user, reward, cost, message, extra) => {
-        console.log(`${user} redeemed ${reward} for ${cost} points!`);
-        
-        const lookupName = reward.toLowerCase().trim();
-        
-        if (alertWidget && alertText) {
-            // Check if user has registered a custom template for this specific reward name
-            if (rewardAlerts[lookupName]) {
-                const template = rewardAlerts[lookupName].text;
-                // Evaluate simple runtime variables like user context safely
-                let parsedText = template
-                    .replace(/{user}/g, user)
-                    .replace(/{user.toUpperCase\(\)}/g, user.toUpperCase())
-                    .replace(/{cost}/g, cost)
-                    .replace(/{message}/g, message || "");
-
-                alertText.innerHTML = parsedText;
-                
-                // Inject image element if explicitly defined in the object mapping
-                if (rewardAlerts[lookupName].image && alertImage) {
-                    alertImage.innerHTML = `<img src="${rewardAlerts[lookupName].image}" style="max-width:100%; height:auto; margin-top:10px;">`;
-                } else if (alertImage) {
-                    alertImage.innerHTML = "";
-                }
-            } else {
-                // Default fallback alert container formatting if reward template isn't registered yet
-                alertText.innerHTML = `✨ <strong>${user}</strong> spent ${cost} points on <br><strong>${reward}</strong>! ✨`;
-                if(alertImage) alertImage.innerHTML = "";
-            }
-
-            // Display animation routine
-            alertWidget.style.opacity = "1";
-            clearTimeout(fadeTimeout);
-            fadeTimeout = setTimeout(() => alertWidget.style.opacity = "0", 8000);
-        }
-
-        // Custom responses
-        if (lookupName === "hydrate") {
-            botSay(`Drink up, Captain @${user}!`);
-        } else if (lookupName === "fart") {
-            botSay(`@${user}! You just stank up the whole feed.`);
-        } else {
-            botSay(`@${user} spent ${cost} points on ${reward}.`);
-        }
-    };
-    
+        // Pass live WebSocket event payloads directly down to our alert engine
+        triggerAlertPipeline(reward, user, cost, message);
+    }; 
     ComfyJS.onCommand = (user, command, message, flags, extra) => {
         let targetCommand = command.toLowerCase();
         let targetArgs = message;
