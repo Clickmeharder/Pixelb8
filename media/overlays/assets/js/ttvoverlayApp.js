@@ -16,7 +16,10 @@ let CMD_PREFIX = settings.cmdPrefix;
 let useCmdPrefix = settings.useCmdPrefix;
 let floatingEmotes = settings.floatingEmotes;
 let consoleMessages = settings.consoleMessages;
-
+// --- FIX: Expose the structural hidden flags to the application layer ---
+let chatHidden = settings.chatHidden !== undefined ? settings.chatHidden : false;
+let alertHidden = settings.alertHidden !== undefined ? settings.alertHidden : false;
+let statusHidden = settings.statusHidden !== undefined ? settings.statusHidden : true;
 function saveSettings() {
     settings.botPrefix = BOT_PREFIX;
     settings.useBotPrefix = useBotPrefix;
@@ -24,6 +27,10 @@ function saveSettings() {
     settings.useCmdPrefix = useCmdPrefix;
     settings.consoleMessages = consoleMessages;
     settings.floatingEmotes = floatingEmotes;
+	// --- FIX: Ensure dynamic toggle mutations persist to storage ---
+    settings.chatHidden = chatHidden;
+    settings.alertHidden = alertHidden;
+    settings.statusHidden = statusHidden;
     localStorage.setItem('p8_settings', JSON.stringify(settings));
 }
 
@@ -689,6 +696,20 @@ function triggerAlertPipeline(reward, user, cost, message) {
     console.log(`${user} redeemed ${reward} for ${cost || 0} points!`);
     
     const lookupName = reward.toLowerCase().trim();
+
+    // --- FIX: If alerts are muted/hidden globally, skip all visual/audio renderings ---
+    if (alertHidden) {
+        // Execute the chat logs anyway so the streamer doesn't lose context
+        if (lookupName === "hydrate") {
+            botSay(`Drink up, Captain @${user}!`);
+        } else if (lookupName === "fart") {
+            botSay(`@${user}! You just stank up the whole feed.`);
+        } else {
+            botSay(`@${user} spent ${cost || 0} points on ${reward}.`);
+        }
+        return; // Halt routine instantly!
+    }
+
     if (!alertWidget || !alertText) return;
 
     // Structural initialization defaults
@@ -699,7 +720,7 @@ function triggerAlertPipeline(reward, user, cost, message) {
         textOutAnim: "fadeOut",
         imgInAnim: "fadeIn",
         imgOutAnim: "fadeOut",
-        sounds: [] // Default empty sound array layout
+        sounds: [] 
     };
 
     // If custom configurations are discovered inside memory cache arrays, apply overrides
@@ -721,13 +742,11 @@ function triggerAlertPipeline(reward, user, cost, message) {
 
     // --- HANDLE SOUND POOL SELECTION ---
     if (config.sounds && config.sounds.length > 0) {
-        // Pick 1 random sound file out of the registered sound configuration pool
         const randomIndex = Math.floor(Math.random() * config.sounds.length);
         const chosenItem = config.sounds[randomIndex];
         
-        // Extract properties carefully depending on whether it is an object item or legacy raw string
         let targetAudioSource = "";
-        let targetVolume = 0.85; // Global operational layout default execution boundary
+        let targetVolume = 0.85; 
 
         if (chosenItem && typeof chosenItem === "object") {
             targetAudioSource = chosenItem.data || "";
@@ -738,7 +757,6 @@ function triggerAlertPipeline(reward, user, cost, message) {
             targetAudioSource = chosenItem;
         }
         
-        // Execute playback instantly with its customized volume setting
         if (targetAudioSource) {
             playSound(targetAudioSource, targetVolume);
         }
