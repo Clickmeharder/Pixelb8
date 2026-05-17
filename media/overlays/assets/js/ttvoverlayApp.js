@@ -149,6 +149,70 @@ async function p8Confirm(message, isAlert = false) {
     });
 }
 
+
+
+// Centralized Generic Audio Utility
+function playSound(audioSource, volume = 0.8) {
+    if (!audioSource) return;
+
+    try {
+        const audio = new Audio(audioSource);
+        audio.volume = Math.min(Math.max(volume, 0), 1); // Clamp volume between 0.0 and 1.0
+        
+        // Play the audio asset
+        audio.play().catch(err => {
+            console.error("Audio playback blocked or failed:", err);
+        });
+
+        // Cleanup memory once playback finishes
+        audio.onended = () => {
+            audio.remove();
+        };
+    } catch (e) {
+        console.error("Failed to initialize audio element:", e);
+    }
+}
+
+// Staged storage arrays for the current item actively open in the template form editor
+let stagedSoundsPool = [];
+
+// Helper utility to render active sound chips inside the editor panel
+function renderStagedSoundsUI() {
+    const listContainer = document.getElementById("reward-sounds-list");
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = "";
+    
+    if (stagedSoundsPool.length === 0) {
+        listContainer.innerHTML = `<div style="font-size: 11px; color: #52525b; font-style: italic; padding: 4px;">No custom audio assigned.</div>`;
+        return;
+    }
+    
+    stagedSoundsPool.forEach((soundData, index) => {
+        const soundRow = document.createElement("div");
+        soundRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: #09090b; border: 1px solid #27272a; padding: 6px 10px; border-radius: 6px; font-size: 11px;";
+        
+        // Identify if it's a raw base64 string or file path asset
+        const displayName = soundData.startsWith("data:") ? `🔊 Custom Sound #${index + 1}` : soundData.split('/').pop();
+        
+        soundRow.innerHTML = `
+            <span style="color: #e4e4e7; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 180px;">${displayName}</span>
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <button type="button" style="background: none; border: none; color: var(--accent); cursor: pointer; padding: 2px;" onclick="playSound('${soundData}', 0.7)">▶️</button>
+                <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 2px;" onclick="removeStagedSoundItem(${index})">❌</button>
+            </div>
+        `;
+        listContainer.appendChild(soundRow);
+    });
+}
+
+// Global hook execution to safely pull items out of memory cache via index position
+window.removeStagedSoundItem = function(index) {
+    stagedSoundsPool.splice(index, 1);
+    renderStagedSoundsUI();
+};
+
+
 function hexToHSLA(hex) {
     if(!hex || hex.startsWith('hsla')) return parseHSLA(hex || 'hsla(0,0%,0%,1)');
     if(hex.startsWith('rgba')) {
@@ -172,6 +236,9 @@ function parseHSLA(str) {
     const vals = str.match(/\d+(\.\d+)?/g);
     return { h: vals[0], s: vals[1], l: vals[2], a: vals[3] || 1 };
 }
+
+
+
 
 function init() {
     applyTheme(registry.active);
@@ -309,7 +376,8 @@ function bindRewardsManagerEvents() {
             textInAnim: document.getElementById("reward-text-in-anim").value,
             textOutAnim: document.getElementById("reward-text-out-anim").value,
             imgInAnim: document.getElementById("reward-img-in-anim").value,
-            imgOutAnim: document.getElementById("reward-img-out-anim").value
+            imgOutAnim: document.getElementById("reward-img-out-anim").value,
+            sounds: [...stagedSoundsPool] // Map dynamic sound pool directly into data item
         };
         saveRewardAlerts();
 
@@ -324,6 +392,13 @@ function bindRewardsManagerEvents() {
         document.getElementById("reward-text-out-anim").value = "none";
         document.getElementById("reward-img-in-anim").value = "none";
         document.getElementById("reward-img-out-anim").value = "none";
+        
+        // Reset dynamic audio form elements
+        stagedSoundsPool = [];
+        if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
+        document.getElementById("reward-sound-file").value = "";
+        document.getElementById("add-sound-file-btn").innerText = "🎵 Choose Sound Asset";
+        document.getElementById("push-sound-btn").disabled = true;
         
         renderRewardsList();
     });
@@ -353,13 +428,16 @@ function renderRewardsList() {
         const tOut = rewardData.textOutAnim || "none";
         const iIn = rewardData.imgInAnim || "none";
         const iOut = rewardData.imgOutAnim || "none";
+        const soundCount = rewardData.sounds ? rewardData.sounds.length : 0;
 
         item.innerHTML = `
             <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">${key}</div>
             <div style="font-size: 12px; color: #e4e4e7; margin-bottom: 2px; word-break: break-word;"><strong>Txt:</strong> ${rewardData.text}</div>
             <div style="font-size: 11px; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>Asset:</strong> ${imageDisplaySrc}</div>
             <div style="font-size: 10px; color: #71717a; margin-top: 4px; font-family: monospace;">
-                Txt: [In: ${tIn} | Out: ${tOut}]<br>Img: [In: ${iIn} | Out: ${iOut}]
+                Txt: [In: ${tIn} | Out: ${tOut}]<br>
+                Img: [In: ${iIn} | Out: ${iOut}]<br>
+                Audio Pool: [${soundCount} active sounds]
             </div>
             <div style="display: flex; gap: 6px; margin-top: 8px;">
                 <button class="p8-btn test-btn" style="padding: 2px 8px; font-size: 11px; background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7;">Test</button>
@@ -392,6 +470,16 @@ function renderRewardsList() {
                 document.getElementById("reward-img-input").placeholder = "Web Image/GIF URL";
             }
             document.getElementById("reward-file-input").value = "";
+
+            // --- LOAD PRE-EXISTING SOUNDS INTO THE POOL EDITOR ---
+            if (rewardData.sounds && Array.isArray(rewardData.sounds)) {
+                stagedSoundsPool = [...rewardData.sounds];
+            } else {
+                stagedSoundsPool = [];
+            }
+            if (typeof renderStagedSoundsUI === "function") {
+                renderStagedSoundsUI();
+            }
         });
 
         // Bind delete processing
@@ -495,7 +583,6 @@ function bindEvents() {
 
     bindRewardsManagerEvents();
 }
-
 // --- CENTRALIZED ALERT PIPELINE ENGINE ---
 // Handles formatting, visual injections, animations, and chat confirmation outputs
 function triggerAlertPipeline(reward, user, cost, message) {
@@ -511,7 +598,8 @@ function triggerAlertPipeline(reward, user, cost, message) {
         textInAnim: "fadeIn",
         textOutAnim: "fadeOut",
         imgInAnim: "fadeIn",
-        imgOutAnim: "fadeOut"
+        imgOutAnim: "fadeOut",
+        sounds: [] // Default empty sound array layout
     };
 
     // If custom configurations are discovered inside memory cache arrays, apply overrides
@@ -528,6 +616,17 @@ function triggerAlertPipeline(reward, user, cost, message) {
         if (custom.textOutAnim) config.textOutAnim = custom.textOutAnim;
         if (custom.imgInAnim) config.imgInAnim = custom.imgInAnim;
         if (custom.imgOutAnim) config.imgOutAnim = custom.imgOutAnim;
+        if (custom.sounds) config.sounds = custom.sounds; 
+    }
+
+    // --- NEW: HANDLE SOUND POOL SELECTION ---
+    if (config.sounds && config.sounds.length > 0) {
+        // Pick 1 random sound file out of the registered sound configuration pool
+        const randomIndex = Math.floor(Math.random() * config.sounds.length);
+        const chosenSound = config.sounds[randomIndex];
+        
+        // Execute playback instantly
+        playSound(chosenSound, 0.85);
     }
 
     // Step 1: Strip previous tracking keyframes cleanly before refiring
@@ -544,14 +643,11 @@ function triggerAlertPipeline(reward, user, cost, message) {
 
     // Step 3: Trigger INTRO Transitions
     alertWidget.style.display = "block";
-    
-    // Force a minor DOM reflow layout flush to ensure the browser cleanly detects keyframe initialization
-    void alertWidget.offsetWidth; 
+    void alertWidget.offsetWidth;
     alertWidget.style.opacity = "1";
     
     if (config.textInAnim !== "none") alertText.classList.add(config.textInAnim);
     if (config.image && alertImage && config.imgInAnim !== "none") {
-        // Target the inner image asset element directly for smoother rendering calculations
         const targetImg = alertImage.querySelector("img");
         if (targetImg) targetImg.classList.add(config.imgInAnim);
     }
@@ -559,32 +655,26 @@ function triggerAlertPipeline(reward, user, cost, message) {
     // Step 4: Queue OUTRO Transitions
     clearTimeout(window.fadeTimeout);
     window.fadeTimeout = setTimeout(() => {
-        // Remove Intro Classes safely before applying entry rulesets
         if (config.textInAnim !== "none") alertText.classList.remove(config.textInAnim);
         
         const targetImg = alertImage ? alertImage.querySelector("img") : null;
         if (targetImg && config.imgInAnim !== "none") targetImg.classList.remove(config.imgInAnim);
 
-        // Append Outro Transition Rulesets
         if (config.textOutAnim !== "none") alertText.classList.add(config.textOutAnim);
         if (targetImg && config.imgOutAnim !== "none") targetImg.classList.add(config.imgOutAnim);
 
-        // Allow the CSS keyframe layouts to finish playing through their animation duration (1s buffer)
         setTimeout(() => {
             if (window.fadeTimeout) {
                 alertWidget.style.opacity = "0";
-                
-                // Completely drop widget visibility display after style properties complete fading
                 setTimeout(() => {
                     if (alertWidget.style.opacity === "0") {
                         alertWidget.style.display = "none";
                     }
                 }, 500);
             }
-        }, 1000); 
+        }, 1000);
     }, 8000);
 
-    // Custom chat feedback responses matching system configurations
     if (lookupName === "hydrate") {
         botSay(`Drink up, Captain @${user}!`);
     } else if (lookupName === "fart") {
@@ -593,6 +683,7 @@ function triggerAlertPipeline(reward, user, cost, message) {
         botSay(`@${user} spent ${cost || 0} points on ${reward}.`);
     }
 }
+
 function renderThemeControls() {
     const container = document.getElementById('variable-controls');
     container.innerHTML = '';

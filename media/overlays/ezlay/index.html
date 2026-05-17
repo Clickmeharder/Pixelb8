@@ -120,7 +120,21 @@
 					<select id="reward-img-out-anim" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
 				</div>
 			</div>
-
+			<div style="margin-top: 15px; margin-bottom: 15px; text-align: left; border-top: 1px dashed #27272a; padding-top: 15px;">
+				<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Sound Pool (Plays Randomly)</label>
+				
+				<div id="reward-sounds-list" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; max-height: 120px; overflow-y: auto; padding-right: 4px;"></div>
+				
+				<div style="display: flex; gap: 8px; align-items: center;">
+					<input type="file" id="reward-sound-file" accept="audio/*" style="display: none;">
+					<button type="button" class="p8-btn alt-btn" id="add-sound-file-btn" style="margin-top: 0; padding: 8px 12px; font-size: 11px; flex-grow: 1;" onclick="document.getElementById('reward-sound-file').click()">
+						🎵 Choose Sound Asset
+					</button>
+					<button type="button" class="p8-btn save-btn" id="push-sound-btn" style="margin-top: 0; padding: 8px 12px; font-size: 11px; width: auto; aspect-ratio: 1;" disabled>
+						➕ Add
+					</button>
+				</div>
+			</div>
 			<button class="p8-btn save-btn" id="save-reward-btn" style="width: 100%;">Save Reward Template</button>
 		</div>
 
