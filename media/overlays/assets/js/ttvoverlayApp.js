@@ -190,28 +190,65 @@ function renderStagedSoundsUI() {
     
     stagedSoundsPool.forEach((soundItem, index) => {
         const soundRow = document.createElement("div");
-        soundRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: #09090b; border: 1px solid #27272a; padding: 6px 10px; border-radius: 6px; font-size: 11px;";
+        soundRow.style.cssText = "display: flex; gap: 8px; justify-content: space-between; align-items: center; background: #09090b; border: 1px solid #27272a; padding: 6px 10px; border-radius: 6px; font-size: 11px;";
         
-        // Fallback properties for fallback compatibility handling
+        // Fallback properties for safety configuration management
         let displayName = `🔊 Custom Sound #${index + 1}`;
         let audioPlayTarget = "";
+        let currentVol = 1.0;
 
         if (soundItem && typeof soundItem === "object") {
             displayName = soundItem.name || displayName;
             audioPlayTarget = soundItem.data || "";
+            currentVol = soundItem.volume !== undefined ? soundItem.volume : 1.0;
         } else if (typeof soundItem === "string") {
-            // Backward compatibility loop for legacy plain string assets
+            // Backward compatibility tracking loop for legacy data variants
             displayName = soundItem.startsWith("data:") ? `🔊 Custom Sound #${index + 1}` : soundItem.split('/').pop();
             audioPlayTarget = soundItem;
         }
         
         soundRow.innerHTML = `
-            <span style="color: #e4e4e7; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 180px;" title="${displayName}">${displayName}</span>
-            <div style="display: flex; gap: 6px; align-items: center;">
-                <button type="button" style="background: none; border: none; color: var(--accent); cursor: pointer; padding: 2px;" onclick="playSound('${audioPlayTarget}', 0.7)">▶️</button>
+            <div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0;">
+                <span style="color: #e4e4e7; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 160px; margin-bottom: 2px;" title="${displayName}">${displayName}</span>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 9px; color: #71717a; font-family: monospace; width: 24px;">Vol:</span>
+                    <input type="range" class="sound-vol-slider" min="0" max="1" step="0.05" value="${currentVol}" style="width: 70px; height: 3px; accent-color: var(--accent); cursor: pointer; margin: 0; padding: 0;">
+                    <span class="vol-label" style="font-size: 9px; color: #a1a1aa; font-family: monospace; width: 26px; text-align: right;">${Math.round(currentVol * 100)}%</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+                <button type="button" class="play-preview-btn" style="background: none; border: none; color: var(--accent); cursor: pointer; padding: 2px;">▶️</button>
                 <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 2px;" onclick="removeStagedSoundItem(${index})">❌</button>
             </div>
         `;
+
+        // Update volume value inside the data object array when the slider is dragged
+        const slider = soundRow.querySelector(".sound-vol-slider");
+        const volLabel = soundRow.querySelector(".vol-label");
+        
+        slider.addEventListener("input", function() {
+            const v = parseFloat(this.value);
+            volLabel.innerText = `${Math.round(v * 100)}%`;
+            
+            if (stagedSoundsPool[index] && typeof stagedSoundsPool[index] === "object") {
+                stagedSoundsPool[index].volume = v;
+            } else if (typeof stagedSoundsPool[index] === "string") {
+                // Upgrade string on-the-fly to prevent syntax runtime bugs if user slides an legacy object item
+                stagedSoundsPool[index] = {
+                    name: displayName,
+                    data: audioPlayTarget,
+                    volume: v
+                };
+            }
+        });
+
+        // Test play layout handler with specific assigned settings configuration
+        soundRow.querySelector(".play-preview-btn").addEventListener("click", () => {
+            const currentObj = stagedSoundsPool[index];
+            const targetVolume = (currentObj && typeof currentObj === "object" && currentObj.volume !== undefined) ? currentObj.volume : 0.7;
+            playSound(audioPlayTarget, targetVolume);
+        });
+
         listContainer.appendChild(soundRow);
     });
 }
@@ -400,10 +437,11 @@ function bindRewardsManagerEvents() {
     addSoundBtn.addEventListener("click", function() {
         if (!loadedAudioBase64) return;
         
-        // Save as an object mapping the real asset name to its data stream
+        // Save as an object mapping name, data stream, and initial volume level (1.0)
         stagedSoundsPool.push({
             name: loadedAudioName,
-            data: loadedAudioBase64
+            data: loadedAudioBase64,
+            volume: 1.0
         });
         
         // Reset control values to prepare for next file choices
@@ -687,12 +725,22 @@ function triggerAlertPipeline(reward, user, cost, message) {
         const randomIndex = Math.floor(Math.random() * config.sounds.length);
         const chosenItem = config.sounds[randomIndex];
         
-        // Extract raw data stream string whether entry layout is configured as an object or flat string
-        const targetAudioSource = (chosenItem && typeof chosenItem === "object") ? chosenItem.data : chosenItem;
+        // Extract properties carefully depending on whether it is an object item or legacy raw string
+        let targetAudioSource = "";
+        let targetVolume = 0.85; // Global operational layout default execution boundary
+
+        if (chosenItem && typeof chosenItem === "object") {
+            targetAudioSource = chosenItem.data || "";
+            if (chosenItem.volume !== undefined) {
+                targetVolume = chosenItem.volume;
+            }
+        } else if (typeof chosenItem === "string") {
+            targetAudioSource = chosenItem;
+        }
         
-        // Execute playback instantly
+        // Execute playback instantly with its customized volume setting
         if (targetAudioSource) {
-            playSound(targetAudioSource, 0.85);
+            playSound(targetAudioSource, targetVolume);
         }
     }
 
