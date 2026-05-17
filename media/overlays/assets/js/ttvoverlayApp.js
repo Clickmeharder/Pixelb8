@@ -188,17 +188,27 @@ function renderStagedSoundsUI() {
         return;
     }
     
-    stagedSoundsPool.forEach((soundData, index) => {
+    stagedSoundsPool.forEach((soundItem, index) => {
         const soundRow = document.createElement("div");
         soundRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: #09090b; border: 1px solid #27272a; padding: 6px 10px; border-radius: 6px; font-size: 11px;";
         
-        // Identify if it's a raw base64 string or file path asset
-        const displayName = soundData.startsWith("data:") ? `🔊 Custom Sound #${index + 1}` : soundData.split('/').pop();
+        // Fallback properties for fallback compatibility handling
+        let displayName = `🔊 Custom Sound #${index + 1}`;
+        let audioPlayTarget = "";
+
+        if (soundItem && typeof soundItem === "object") {
+            displayName = soundItem.name || displayName;
+            audioPlayTarget = soundItem.data || "";
+        } else if (typeof soundItem === "string") {
+            // Backward compatibility loop for legacy plain string assets
+            displayName = soundItem.startsWith("data:") ? `🔊 Custom Sound #${index + 1}` : soundItem.split('/').pop();
+            audioPlayTarget = soundItem;
+        }
         
         soundRow.innerHTML = `
-            <span style="color: #e4e4e7; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 180px;">${displayName}</span>
+            <span style="color: #e4e4e7; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 180px;" title="${displayName}">${displayName}</span>
             <div style="display: flex; gap: 6px; align-items: center;">
-                <button type="button" style="background: none; border: none; color: var(--accent); cursor: pointer; padding: 2px;" onclick="playSound('${soundData}', 0.7)">▶️</button>
+                <button type="button" style="background: none; border: none; color: var(--accent); cursor: pointer; padding: 2px;" onclick="playSound('${audioPlayTarget}', 0.7)">▶️</button>
                 <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 2px;" onclick="removeStagedSoundItem(${index})">❌</button>
             </div>
         `;
@@ -358,19 +368,23 @@ function bindRewardsManagerEvents() {
         }
     });
 
-    // --- SOUND FILE ASSET MONITORING LISENTERS ---
+    // --- SOUND FILE ASSET MONITORING LISTENERS ---
     let loadedAudioBase64 = "";
+    let loadedAudioName = ""; // Holds the human-readable filename
 
     soundFileInput.addEventListener("change", function(e) {
         const file = e.target.files[0];
         
         if (!file) {
             loadedAudioBase64 = "";
+            loadedAudioName = "";
             addSoundBtn.disabled = true;
             labelSoundBtn.innerText = "🎵 Choose Sound Asset";
             return;
         }
         
+        // Cache the filename directly from the operating system event
+        loadedAudioName = file.name;
         labelSoundBtn.innerText = `📁 ${file.name}`;
         
         // Convert target sound file into Base64 for local browser data streaming
@@ -386,10 +400,15 @@ function bindRewardsManagerEvents() {
     addSoundBtn.addEventListener("click", function() {
         if (!loadedAudioBase64) return;
         
-        stagedSoundsPool.push(loadedAudioBase64);
+        // Save as an object mapping the real asset name to its data stream
+        stagedSoundsPool.push({
+            name: loadedAudioName,
+            data: loadedAudioBase64
+        });
         
         // Reset control values to prepare for next file choices
         loadedAudioBase64 = "";
+        loadedAudioName = "";
         soundFileInput.value = "";
         labelSoundBtn.innerText = "🎵 Choose Sound Asset";
         this.disabled = true;
@@ -447,7 +466,6 @@ function bindRewardsManagerEvents() {
         renderRewardsList();
     });
 }
-
 function renderRewardsList() {
     const container = document.getElementById("rewards-list-container");
     if (!container) return;
@@ -663,14 +681,19 @@ function triggerAlertPipeline(reward, user, cost, message) {
         if (custom.sounds) config.sounds = custom.sounds; 
     }
 
-    // --- NEW: HANDLE SOUND POOL SELECTION ---
+    // --- HANDLE SOUND POOL SELECTION ---
     if (config.sounds && config.sounds.length > 0) {
         // Pick 1 random sound file out of the registered sound configuration pool
         const randomIndex = Math.floor(Math.random() * config.sounds.length);
-        const chosenSound = config.sounds[randomIndex];
+        const chosenItem = config.sounds[randomIndex];
+        
+        // Extract raw data stream string whether entry layout is configured as an object or flat string
+        const targetAudioSource = (chosenItem && typeof chosenItem === "object") ? chosenItem.data : chosenItem;
         
         // Execute playback instantly
-        playSound(chosenSound, 0.85);
+        if (targetAudioSource) {
+            playSound(targetAudioSource, 0.85);
+        }
     }
 
     // Step 1: Strip previous tracking keyframes cleanly before refiring
