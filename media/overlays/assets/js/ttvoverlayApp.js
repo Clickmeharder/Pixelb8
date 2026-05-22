@@ -432,14 +432,7 @@ async function systemReset() {
         window.location.href = FULL_REDIRECT;
     }
 }
-Here is the complete, untruncated updated workspace block.
 
-Key Updates Applied:
-Expanded Data Schema Definitions (CUSTOM_SELECT_DATA): Appended entries for "reward-font-weight" and "reward-img-mode" alongside their native values/labels configurations so they render correctly.
-
-Added Missing Config Mappings: Added entries for bit-tier-selector and all four custom bit animations fields (bit-text-in-anim, bit-text-out-anim, bit-img-in-anim, bit-img-out-anim) right into your tracking pipelines so your Bit / Cheer Manager fields can resolve, save, and change states synchronously.
-
-JavaScript
 // --- WORKSPACE DATA GRAPH & ANIMATION MANIFESTS ---
 let pendingImageBase64 = "";
 
