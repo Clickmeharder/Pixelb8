@@ -1692,43 +1692,45 @@ const commandsRegistry = {
         }
     },
 	"timer": {
-        adminOnly: true,
-        execute: (user, message, flags) => {
-            const parts = message.trim().toLowerCase().split(" ");
-            const action = parts[0];
-            const id = parts[1]; // Explicit ID provided by user
-			// Handle Help
-            if (action === "help") {
-                botSay(`Timer Help: ${prefix}countdown [seconds] [label] - Start | ${prefix}savecountdown [seconds] [name] - Save Preset | ${prefix}timer list - View Active | ${prefix}timer [pause|reset|stop|split] [id] - Control`);
-                return;
-            }
-            // Handle Listing
-            if (action === "list") {
-                const activeIds = Object.keys(activeTimers);
-                if (activeIds.length === 0) { 
-                    botSay("No timers are currently running."); 
-                    return; 
-                }
-                const list = activeIds.map(id => `[${id}: ${activeTimers[id].label}]`).join(", ");
-                botSay(`Active Timers: ${list}`);
-                return;
-            }
+		adminOnly: true,
+		execute: (user, message, flags) => {
+			const parts = message.trim().toLowerCase().split(" ");
+			const action = parts[0];
+			const id = parts[1];
 
-            // Handle Control Actions
-            if (!id || !activeTimers[id]) {
-                botSay(`Please specify a valid Timer ID. Use !timer list to see them.`);
-                return;
-            }
-            
-            switch(action) {
-                case "pause": pauseTimerInstance(id); botSay(`Paused ${activeTimers[id].type}: ${id}`); break;
-                case "reset": resetTimerInstance(id); botSay(`Reset ${activeTimers[id].type}: ${id}`); break;
-                case "stop": stopTimerInstance(id); botSay(`Stopped ${activeTimers[id].type}: ${id}`); break;
-                case "split": splitTimerInstance(id); break;
-                default: botSay("Action not recognized. Use: list, pause, reset, stop, or split.");
-            }
-        }
-    },
+			switch (action) {
+				case "help":
+					botSay(`Timer Help: !countdown [sec] [label] | !savecountdown [sec] [name] | !timer list | !timer [pause/reset/stop/split] [id]`);
+					break;
+
+				case "list":
+					const activeIds = Object.keys(activeTimers);
+					if (activeIds.length === 0) {
+						botSay("No timers are currently running.");
+					} else {
+						botSay(`Active Timers: ${activeIds.map(id => `[${id}: ${activeTimers[id].label}]`).join(", ")}`);
+					}
+					break;
+
+				case "pause":
+				case "reset":
+				case "stop":
+				case "split":
+					if (!id || !activeTimers[id]) {
+						botSay(`Please specify a valid Timer ID. Use 'timer list' to see active IDs.`);
+						return;
+					}
+					if (action === "pause") { pauseTimerInstance(id); botSay(`Paused ${activeTimers[id].type}: ${id}`); }
+					else if (action === "reset") { resetTimerInstance(id); botSay(`Reset ${activeTimers[id].type}: ${id}`); }
+					else if (action === "stop") { stopTimerInstance(id); botSay(`Stopped ${activeTimers[id].type}: ${id}`); }
+					else if (action === "split") { splitTimerInstance(id); }
+					break;
+
+				default:
+					botSay("Action not recognized. Use 'timer help' for a list of valid commands.");
+			}
+		}
+	},
     "countdown": {
         adminOnly: true,
         execute: (user, message, flags) => {
@@ -2748,4 +2750,4 @@ function bindEvents() {
 
 init();
 
-console.log("ttvoverlayapp.js version 0.11 finished loading");
+console.log("ttvoverlayapp.js version 0.111 finished loading");
