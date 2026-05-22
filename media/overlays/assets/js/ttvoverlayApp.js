@@ -2523,6 +2523,9 @@ function bindBitManagerEvents() {
 // ==========================================
 // --- MAIN EVENT LISTENER BINDING ENGINE ---
 // ==========================================
+// ==========================================
+// --- MAIN EVENT LISTENER BINDING ENGINE ---
+// ==========================================
 function bindEvents() {
     const SCOPES = "chat:read chat:edit channel:read:redemptions";
 
@@ -2567,10 +2570,10 @@ function bindEvents() {
     onSafeClick("ui-create-timer-btn", () => {
         const lblInput = document.getElementById("timer-label-input");
         const durInput = document.getElementById("timer-duration-input");
-       
+      
         const label = (lblInput && lblInput.value.trim()) ? lblInput.value.trim() : "UI Timer";
         const duration = (durInput && durInput.value) ? parseInt(durInput.value) : 0;
-       
+      
         if (duration > 0 && typeof savedCountdowns !== 'undefined') {
             savedCountdowns[label.toLowerCase()] = duration;
             saveCountdownsToStorage();
@@ -2578,9 +2581,8 @@ function bindEvents() {
                 botSay(`Saved countdown template: [${label}] (${duration}s)`);
             }
         }
-
         createTimerInstance(label, duration);
-       
+      
         if (lblInput) lblInput.value = "";
         if (durInput) durInput.value = "";
     });
@@ -2602,7 +2604,7 @@ function bindEvents() {
                 });
             }
         });
-    });
+    };
 
     // Simple Click Handlers
     SIMPLE_CLICK_MAPS.forEach(cfg => {
@@ -2624,12 +2626,12 @@ function bindEvents() {
     onSafeClick("save-theme-btn", async () => {
         const nameInput = document.getElementById('theme-name-input');
         const newName = (nameInput ? nameInput.value.trim() : '') || 'Custom Theme';
-       
+      
         if (typeof registry !== 'undefined' && registry.themes) {
             registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
             registry.active = newName;
             localStorage.setItem('p8_registry', JSON.stringify(registry));
-           
+          
             if (typeof renderThemeList === "function") renderThemeList();
             if (typeof p8Confirm === "function") await p8Confirm('Theme Settings Saved', true);
         }
@@ -2648,30 +2650,33 @@ function bindEvents() {
     window.addEventListener('mousedown', e => {
         const ctxMenu = document.getElementById('p8-ctx-menu');
         const themeOpts = document.getElementById('theme-options');
-       
-        if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) 
+      
+        if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) {
             closeContextMenu();
-        
-        if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) 
+        }
+       
+        if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) {
             themeOpts.style.display = 'none';
+        }
 
-        // Improved dropdown closing - only close if clicking outside
+        // Improved dropdown closing
         if (!e.target.closest('.custom-select-display') &&
             !e.target.closest('.select-trigger') &&
             !e.target.closest('.custom-select-options-box') &&
             !e.target.closest('.select-options') &&
             !e.target.closest('.option-item')) {
-            
+           
             document.querySelectorAll(".custom-select-options-box, .select-options").forEach(b => {
                 b.style.display = "none";
             });
         }
-       
-        // Drag logic
+      
+        // Drag logic - only allow dragging in edit mode outside of panels
         if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 ||
-            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, .timer-btn-group, .setup-container, .p8-modal')) 
+            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, .timer-btn-group, .setup-container, .p8-modal')) {
             return;
-       
+        }
+      
         dragTarget = e.target.closest('.p8-widget');
         if (dragTarget) {
             const r = dragTarget.getBoundingClientRect();
@@ -2689,9 +2694,9 @@ function bindEvents() {
 
     window.addEventListener('mouseup', () => {
         if (typeof dragTarget !== 'undefined' && dragTarget) {
-            localStorage.setItem(`p8_pos_${dragTarget.id}`, JSON.stringify({ 
-                top: dragTarget.style.top, 
-                left: dragTarget.style.left 
+            localStorage.setItem(`p8_pos_${dragTarget.id}`, JSON.stringify({
+                top: dragTarget.style.top,
+                left: dragTarget.style.left
             }));
             dragTarget = null;
         }
@@ -2713,6 +2718,8 @@ function bindEvents() {
     if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
     if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
 }
+
+
 init();
 
 console.log("ttvoverlayapp.js version 0.07 finished loading");
