@@ -846,23 +846,28 @@ function bindEvents() {
         await p8Confirm('Theme Settings Saved', true);
     });
 
-    window.addEventListener('mousedown', e => {
+	window.addEventListener('mousedown', e => {
         const menu = document.getElementById('p8-ctx-menu');
         const opts = document.getElementById('theme-options');
+        
+        // 1. GLOBAL CLOSING LOGIC (Runs on any click across the app)
         if (menu.style.display === 'block' && !menu.contains(e.target)) menu.style.display = 'none';
         if (opts.style.display === 'block' && !e.target.closest('#theme-selector')) opts.style.display = 'none';
         
-        // Safety guard: Added #rewards-manager so editing inputs doesn't clear element focuses
+        // Clear all dynamically generated theme controls options boxes if clicking abstractly
+        if (!e.target.closest('.custom-select-display')) {
+            document.querySelectorAll(".custom-select-options-box").forEach(b => b.style.display = "none");
+        }
+        
+        // 2. SAFETY INTERCEPT GUARD CLAUSE (Protects inputs and panels from breaking drag states)
         if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor') || e.target.closest('#rewards-manager') || e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
         
+        // 3. WIDGET DRAGGING SYSTEM
         dragTarget = e.target.closest('.p8-widget');
         if (dragTarget) {
             const r = dragTarget.getBoundingClientRect();
             offset = { x: e.clientX - r.left, y: e.clientY - r.top };
         }
-		if (!e.target.closest('.custom-select-display')) {
-			document.querySelectorAll(".custom-select-options-box").forEach(b => b.style.display = "none");
-		}
     });
 
     window.addEventListener('mousemove', e => {
@@ -1112,6 +1117,7 @@ function triggerAlertPipeline(reward, user, cost, message) {
 
 function renderThemeControls() {
     const container = document.getElementById('variable-controls');
+    if (!container) return;
     container.innerHTML = '';
     
     styleConfig.forEach(item => {
@@ -1149,21 +1155,68 @@ function renderThemeControls() {
             picker.querySelector('.preview-color').style.backgroundColor = currentStr;
             group.appendChild(picker);
         } 
+        // --- CONVERTED SELECT HANDLING ENGINE ---
         else if (item.type === 'select') {
-            const sel = document.createElement('select');
-            sel.className = 'p8-input custom-select';
-            item.options.forEach(o => {
-                const opt = document.createElement('option');
-                opt.value = o;
-                opt.innerText = o.includes(',') ? o.split(',')[0].replace(/'/g, '') : o;
-                if(registry.themes[registry.active][item.var] === o) opt.selected = true;
-                sel.appendChild(opt);
+            const currentValue = registry.themes[registry.active][item.var];
+            
+            // Build out your shared custom dropdown UI block architecture
+            const selectWorkspace = document.createElement('div');
+            selectWorkspace.className = 'custom-select-workspace';
+            selectWorkspace.id = `theme-select-${item.id}`;
+            selectWorkspace.style.cssText = "position: relative; width: 100%;";
+
+            // Resolve immediate visual display name (strip quote strings out of font declarations)
+            const fallbackLabel = currentValue.includes(',') ? currentValue.split(',')[0].replace(/'/g, '') : currentValue;
+
+            const displayEl = document.createElement('div');
+            displayEl.className = 'custom-select-display';
+            displayEl.id = `display-theme-select-${item.id}`;
+            displayEl.innerText = fallbackLabel;
+
+            const optionsBox = document.createElement('div');
+            optionsBox.className = 'custom-select-options-box';
+            optionsBox.id = `options-theme-select-${item.id}`;
+            optionsBox.style.cssText = "display: none; position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000; max-height: 200px; overflow-y: auto; background: #09090b; border: 1px solid #27272a; border-radius: 6px; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);";
+
+            // Populate items into the dropdown window list natively
+            item.options.forEach(optVal => {
+                const row = document.createElement('div');
+                row.className = 'option-item';
+                row.innerText = optVal.includes(',') ? optVal.split(',')[0].replace(/'/g, '') : optVal;
+                row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer; transition: background 0.2s;";
+
+                row.addEventListener("mouseenter", () => row.style.background = "rgba(255,255,255,0.05)");
+                row.addEventListener("mouseleave", () => row.style.background = "transparent");
+
+                // Process selections on click actions
+                row.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // Update layout values immediately
+                    document.documentElement.style.setProperty(item.var, optVal);
+                    registry.themes[registry.active][item.var] = optVal;
+                    
+                    // Synchronize Display Target Output 
+                    displayEl.innerText = row.innerText;
+                    optionsBox.style.display = 'none';
+                });
+                
+                optionsBox.appendChild(row);
             });
-            sel.addEventListener('change', (e) => {
-                document.documentElement.style.setProperty(item.var, e.target.value);
-                registry.themes[registry.active][item.var] = e.target.value;
+
+            // Bind workspace toggle state engine
+            displayEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close all existing custom menus anywhere on the overlay platform
+                document.querySelectorAll(".custom-select-options-box").forEach(box => {
+                    if (box !== optionsBox) box.style.display = "none";
+                });
+                optionsBox.style.display = optionsBox.style.display === 'block' ? 'none' : 'block';
             });
-            group.appendChild(sel);
+
+            selectWorkspace.appendChild(displayEl);
+            selectWorkspace.appendChild(optionsBox);
+            group.appendChild(selectWorkspace);
         }
         else {
             const range = document.createElement('input');
