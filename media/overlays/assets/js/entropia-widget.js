@@ -29,7 +29,7 @@ export class EntropiaWidget {
             globalHof: /Hall of Fame|Rare Item|ATH/i
         };
 
-        // DELAY DOM BINDING UNTIL THE PAGE LAYOUT IS STABLE
+        // Delay DOM binding until the page layout is completely stable
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.initDOM());
         } else {
@@ -49,44 +49,38 @@ export class EntropiaWidget {
     }
 
     initDOM() {
-        // Core Fix: Find our main container node first
-        const widgetContainer = document.getElementById('entropia-widget');
-        
-        if (!widgetContainer) {
-            console.error("❌ [Entropia Widget Error]: Parent container element #entropia-widget missing from HTML template.");
-            return;
-        }
+        this.logEvent("🔌 Initializing decoupled architecture (Manager Controls -> Dual Display Outputs)...");
 
-        this.logEvent("🔌 Initializing DOM structural bindings via scoped lookups...");
-
-        // Scope queries strictly within the widget element container to bypass duplicate IDs elsewhere
-        this.startBtn = widgetContainer.querySelector('#start-session-btn') || document.getElementById('start-session-btn');
-        this.browseBtn = widgetContainer.querySelector('#browseBtn') || document.getElementById('browseBtn');
-        this.manifestGrid = widgetContainer.querySelector('#manifest-grid') || document.getElementById('manifest-grid');
-        this.timerEl = widgetContainer.querySelector('#session-timer') || document.getElementById('session-timer');
-        
-        // Global document lookups for unique non-duplicated fallback configuration fields
+        // 1. Interactive Core Controls (Expected strictly inside your Widgets Manager panel)
+        this.browseBtn = document.getElementById('browseBtn');
+        this.startBtn = document.getElementById('start-session-btn');
         this.resetBtn = document.getElementById('btnReset');
         this.pathInput = document.getElementById('pathInput');
 
+        // 2. Dual Broadcast UI Viewports (Updates both the Manager Panel and the Twitch Overlay simultaneously)
+        this.manifestGrids = document.querySelectorAll('#manifest-grid');
+        this.timerElements = document.querySelectorAll('#session-timer');
+        this.grandTotalElements = document.querySelectorAll('#session-grand-total');
+
+        // Event Attachment Verification
         if (this.browseBtn) {
             this.browseBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.logEvent("Button Clicked: LINK LOG");
+                this.logEvent("Manager Action: LINK LOG Triggered");
                 this.handleBrowse();
             });
         } else {
-            console.error("❌ [Entropia Widget Error]: Element #browseBtn missing inside widget context.");
+            console.error("❌ [Entropia Widget Error]: Element #browseBtn missing from your manager layout.");
         }
 
         if (this.startBtn) {
             this.startBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.logEvent("Button Clicked: START SESSION");
+                this.logEvent("Manager Action: START SESSION Triggered");
                 this.toggleSession();
             });
         } else {
-            console.error("❌ [Entropia Widget Error]: Element #start-session-btn missing inside widget context.");
+            console.error("❌ [Entropia Widget Error]: Element #start-session-btn missing from your manager layout.");
         }
 
         if (this.resetBtn) {
@@ -103,7 +97,7 @@ export class EntropiaWidget {
             if (savedHandle) {
                 this.fileHandle = savedHandle;
                 if (this.pathInput) this.pathInput.value = savedHandle.name;
-                this.logEvent(`💾 AUTO_RECOVERY: Found link reference to ${savedHandle.name.toUpperCase()}`);
+                this.logEvent(`💾 AUTO_RECOVERY: Restored link pointer to ${savedHandle.name.toUpperCase()}`);
             }
         } catch (e) {
             console.error("Failed to recover log file handle:", e);
@@ -127,7 +121,7 @@ export class EntropiaWidget {
 
     async toggleSession() {
         if (!this.startBtn) return;
-        if (this.startBtn.textContent === "STOP SESSION") {
+        if (this.pollInterval) {
             this.stopSession();
         } else {
             this.startSession();
@@ -136,18 +130,9 @@ export class EntropiaWidget {
 
     async verifyPermission() {
         if (!this.fileHandle) return false;
-        
-        // Check if permission is already granted
         const opts = { mode: 'read' };
-        if ((await this.fileHandle.queryPermission(opts)) === 'granted') {
-            return true;
-        }
-        
-        // Request explicit user permission if needed
-        if ((await this.fileHandle.requestPermission(opts)) === 'granted') {
-            return true;
-        }
-        
+        if ((await this.fileHandle.queryPermission(opts)) === 'granted') return true;
+        if ((await this.fileHandle.requestPermission(opts)) === 'granted') return true;
         return false;
     }
 
@@ -161,8 +146,8 @@ export class EntropiaWidget {
         try {
             const hasPermission = await this.verifyPermission();
             if (!hasPermission) {
-                this.logEvent("❌ PERMISSION_DENIED: Browser blocked read access.", true);
-                alert("Browser access denied. Please click 'LINK LOG' again to authorize file reading.");
+                this.logEvent("❌ PERMISSION_DENIED: Browser blocked sandbox file-read.", true);
+                alert("Browser access denied. Please click 'LINK LOG' again to authorize folder polling.");
                 return;
             }
 
@@ -171,15 +156,16 @@ export class EntropiaWidget {
             this.sessionStartTime = Date.now();
             this.isPaused = false;
 
-            // Reset Internal Data Pools
+            // Clear data matrices on clean run initialization
             this.stats = { loot: {}, values: {}, skills: {}, deaths: 0, globals: 0 };
-            if (this.manifestGrid) this.manifestGrid.innerHTML = '';
+            this.manifestGrids.forEach(grid => grid.innerHTML = '');
 
-            // Engine Active UI Adjustments
-            this.startBtn.textContent = "STOP SESSION";
-            this.startBtn.style.background = "#d32f2f";
+            // Adjust active engine control panel configurations
+            if (this.startBtn) {
+                this.startBtn.textContent = "STOP SESSION";
+                this.startBtn.style.background = "#d32f2f";
+            }
 
-            // Start Tickers and Fast File Polling loops
             this.pollInterval = setInterval(() => this.pollWebLog(), 2000);
             this.sessionTickerInterval = setInterval(() => this.runSessionTicker(), 1000);
             
@@ -193,6 +179,9 @@ export class EntropiaWidget {
     stopSession() {
         clearInterval(this.pollInterval);
         clearInterval(this.sessionTickerInterval);
+        this.pollInterval = null;
+        this.sessionTickerInterval = null;
+
         if (this.startBtn) {
             this.startBtn.textContent = "START SESSION";
             this.startBtn.style.background = "#2e7d32";
@@ -205,12 +194,9 @@ export class EntropiaWidget {
         this.lastProcessedLine = "";
         if (this.sessionStartTime) this.sessionStartTime = Date.now();
         
-        if (this.manifestGrid) this.manifestGrid.innerHTML = '';
-        
-        const totalEl = document.getElementById('session-grand-total');
-        if (totalEl) totalEl.textContent = "0.0000";
-        
-        if (this.timerEl) this.timerEl.textContent = "00:00:00";
+        this.manifestGrids.forEach(grid => grid.innerHTML = '');
+        this.grandTotalElements.forEach(el => el.textContent = "0.0000");
+        this.timerElements.forEach(el => el.textContent = "00:00:00");
         
         this.logEvent("🧹 SESSION_STATS_CLEARED.");
     }
@@ -223,7 +209,7 @@ export class EntropiaWidget {
         const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
         const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
         
-        if (this.timerEl) this.timerEl.textContent = `${h}:${m}:${s}`;
+        this.timerElements.forEach(el => el.textContent = `${h}:${m}:${s}`);
         this.updateUI();
     }
 
@@ -295,7 +281,7 @@ export class EntropiaWidget {
     }
 
     updateUI() {
-        if (!this.manifestGrid || !this.sessionStartTime) return;
+        if (!this.sessionStartTime) return;
 
         let grandTotal = 0;
         const elapsedHours = (Date.now() - this.sessionStartTime) / 3600000;
@@ -307,36 +293,37 @@ export class EntropiaWidget {
 
             const safeKey = key.replace(/\s+/g, '-');
             
-            // Scope lookup strictly inside our grid layout element context
-            let sessionEl = this.manifestGrid.querySelector(`#session-${safeKey}`);
-            
-            if (!sessionEl) {
-                const row = document.createElement('div');
-                row.className = 'manifest-row';
-                row.innerHTML = `
-                    <span class="m-name">${key.toUpperCase()}</span>
-                    <span class="m-count" id="session-${safeKey}">0</span>
-                    <span class="m-rate" id="rate-${safeKey}">0/hr</span>
-                    <span class="m-val" id="val-${safeKey}">(0.0000)</span>
-                `;
-                this.manifestGrid.appendChild(row);
-                sessionEl = this.manifestGrid.querySelector(`#session-${safeKey}`);
-            }
-
-            if (sessionEl) {
-                sessionEl.textContent = count;
-                const valEl = this.manifestGrid.querySelector(`#val-${safeKey}`);
-                if (valEl) valEl.textContent = `(${totalValue.toFixed(4)})`;
-
-                const rateEl = this.manifestGrid.querySelector(`#rate-${safeKey}`);
-                if (rateEl) {
-                    const perHour = (count / Math.max(0.01, elapsedHours)).toFixed(1);
-                    rateEl.textContent = `${perHour}/hr`;
+            // Loop updates across all matching display destinations (manager panel grid & overlay grid)
+            this.manifestGrids.forEach(grid => {
+                let sessionEl = grid.querySelector(`.session-${safeKey}`);
+                
+                if (!sessionEl) {
+                    const row = document.createElement('div');
+                    row.className = 'manifest-row';
+                    row.innerHTML = `
+                        <span class="m-name">${key.toUpperCase()}</span>
+                        <span class="m-count session-${safeKey}">0</span>
+                        <span class="m-rate rate-${safeKey}">0/hr</span>
+                        <span class="m-val val-${safeKey}">(0.0000)</span>
+                    `;
+                    grid.appendChild(row);
+                    sessionEl = grid.querySelector(`.session-${safeKey}`);
                 }
-            }
+
+                if (sessionEl) {
+                    sessionEl.textContent = count;
+                    const valEl = grid.querySelector(`.val-${safeKey}`);
+                    if (valEl) valEl.textContent = `(${totalValue.toFixed(4)})`;
+
+                    const rateEl = grid.querySelector(`.rate-${safeKey}`);
+                    if (rateEl) {
+                        const perHour = (count / Math.max(0.01, elapsedHours)).toFixed(1);
+                        rateEl.textContent = `${perHour}/hr`;
+                    }
+                }
+            });
         });
 
-        const totalEl = document.getElementById('session-grand-total');
-        if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
+        this.grandTotalElements.forEach(el => el.textContent = grandTotal.toFixed(4));
     }
 }
