@@ -1155,23 +1155,24 @@ function renderThemeControls() {
             picker.querySelector('.preview-color').style.backgroundColor = currentStr;
             group.appendChild(picker);
         } 
-        // --- CONVERTED SELECT HANDLING ENGINE ---
+        // --- CONVERTED SELECT HANDLING ENGINE WITH SAFETY FALLBACKS ---
         else if (item.type === 'select') {
-            const currentValue = registry.themes[registry.active][item.var];
+            // Added safety fallback string to completely bypass undefined/unpopulated key runtime bugs
+            const currentValue = registry.themes[registry.active][item.var] || '';
             
-            // Build out your shared custom dropdown UI block architecture
+            // Build out shared custom dropdown UI block architecture
             const selectWorkspace = document.createElement('div');
             selectWorkspace.className = 'custom-select-workspace';
             selectWorkspace.id = `theme-select-${item.id}`;
             selectWorkspace.style.cssText = "position: relative; width: 100%;";
 
-            // Resolve immediate visual display name (strip quote strings out of font declarations)
+            // Resolve immediate visual display name (strip quote strings out of font declarations safely)
             const fallbackLabel = currentValue.includes(',') ? currentValue.split(',')[0].replace(/'/g, '') : currentValue;
 
             const displayEl = document.createElement('div');
             displayEl.className = 'custom-select-display';
             displayEl.id = `display-theme-select-${item.id}`;
-            displayEl.innerText = fallbackLabel;
+            displayEl.innerText = fallbackLabel || `Select ${item.label}...`;
 
             const optionsBox = document.createElement('div');
             optionsBox.className = 'custom-select-options-box';
@@ -1222,7 +1223,7 @@ function renderThemeControls() {
             const range = document.createElement('input');
             range.type = 'range'; range.className = 'p8-input';
             range.min = item.min; range.max = item.max;
-            range.value = parseInt(registry.themes[registry.active][item.var]);
+            range.value = parseInt(registry.themes[registry.active][item.var]) || 0;
             range.addEventListener('input', (e) => {
                 const val = e.target.value + 'px';
                 document.documentElement.style.setProperty(item.var, val);
