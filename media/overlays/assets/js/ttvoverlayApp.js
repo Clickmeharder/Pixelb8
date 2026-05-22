@@ -1938,7 +1938,26 @@ function initTimerEngine() {
     }
 }
 
+function updateTimerStyles() {
+    const colorValue = document.getElementById('tmr-color-text').value;
+    
+    // 1. Update the color picker if the user typed a valid hex
+    if (/^#[0-9A-F]{6}$/i.test(colorValue)) {
+        document.getElementById('tmr-color-picker').value = colorValue;
+    }
+
+    // 2. Apply to all active timer elements on the screen
+    const timers = document.querySelectorAll('.timer-instance-class'); // Replace with your actual timer class
+    timers.forEach(t => {
+        t.style.color = colorValue;
+    });
+
+    // 3. Optional: Save to your settings object
+    settings.timerColor = colorValue;
+    saveSettings();
+}
 // Unified instantiator function
+
 function createTimerInstance(label = "Timer", durationSeconds = 0, customStyles = {}) {
     const id = "tmr_" + Date.now();
     const type = parseInt(durationSeconds) > 0 ? "countdown" : "stopwatch";
@@ -2550,24 +2569,50 @@ function bindEvents() {
         }
     });
 
-    // Timer UI
-	onSafeClick("ui-create-timer-btn", () => {
-		const label = document.getElementById("timer-label-input").value.trim() || "Timer";
-		const duration = document.getElementById("timer-duration-input").value || 0;
-		
-		// Collect new settings
-		const config = {
-			labelFontSize: document.getElementById("tmr-label-fz").value || "14px",
-			labelFontWeight: document.getElementById("tmr-label-fw").value || "600",
-			timerFontSize: document.getElementById("tmr-fz").value || "24px",
-			timerFontColor: document.getElementById("tmr-color").value || "#ffffff",
-			showMode: document.getElementById("tmr-visibility").value || "always"
-		};
+    // --- Timer UI & Color Sync ---
+    const colorPicker = document.getElementById("tmr-color");
+    const colorText = document.getElementById("tmr-color-text");
 
-		createTimerInstance(label, duration, config);
-      
-        if (lblInput) lblInput.value = "";
-        if (durInput) durInput.value = "";
+    const updateTimerStyles = () => {
+        const color = colorText.value;
+        document.querySelectorAll('.p8-timer-widget').forEach(el => {
+            el.style.color = color;
+        });
+    };
+
+    if (colorPicker && colorText) {
+        colorPicker.addEventListener("input", (e) => {
+            colorText.value = e.target.value;
+            updateTimerStyles();
+        });
+
+        colorText.addEventListener("input", (e) => {
+            const val = e.target.value;
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                colorPicker.value = val;
+                updateTimerStyles();
+            }
+        });
+    }
+
+    onSafeClick("ui-create-timer-btn", () => {
+        const lblInput = document.getElementById("timer-label-input");
+        const durInput = document.getElementById("timer-duration-input");
+        
+        const label = lblInput.value.trim() || "Timer";
+        const duration = durInput.value || 0;
+        
+        const config = {
+            labelFontSize: document.getElementById("tmr-label-fz").value || "14px",
+            labelFontWeight: document.getElementById("tmr-label-fw").value || "600",
+            timerFontSize: document.getElementById("tmr-fz").value || "24px",
+            timerFontColor: colorText.value || "#ffffff",
+            showMode: document.getElementById("tmr-visibility").value || "always"
+        };
+
+        createTimerInstance(label, duration, config);
+        lblInput.value = "";
+        durInput.value = "";
     });
 
     onSafeClick("close-widgets-manager-btn", () => {
@@ -2587,7 +2632,7 @@ function bindEvents() {
                 });
             }
         });
-    };
+    }
 
     // Simple Click Handlers
     SIMPLE_CLICK_MAPS.forEach(cfg => {
@@ -2609,12 +2654,12 @@ function bindEvents() {
     onSafeClick("save-theme-btn", async () => {
         const nameInput = document.getElementById('theme-name-input');
         const newName = (nameInput ? nameInput.value.trim() : '') || 'Custom Theme';
-      
+        
         if (typeof registry !== 'undefined' && registry.themes) {
             registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
             registry.active = newName;
             localStorage.setItem('p8_registry', JSON.stringify(registry));
-          
+            
             if (typeof renderThemeList === "function") renderThemeList();
             if (typeof p8Confirm === "function") await p8Confirm('Theme Settings Saved', true);
         }
@@ -2629,37 +2674,35 @@ function bindEvents() {
         });
     }
 
-    // === GLOBAL MOUSEDOWN HANDLER (Improved Dropdown Logic) ===
+    // === GLOBAL MOUSEDOWN HANDLER ===
     window.addEventListener('mousedown', e => {
         const ctxMenu = document.getElementById('p8-ctx-menu');
         const themeOpts = document.getElementById('theme-options');
-      
+        
         if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) {
             closeContextMenu();
         }
-       
+        
         if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) {
             themeOpts.style.display = 'none';
         }
 
-        // Improved dropdown closing
         if (!e.target.closest('.custom-select-display') &&
             !e.target.closest('.select-trigger') &&
             !e.target.closest('.custom-select-options-box') &&
             !e.target.closest('.select-options') &&
             !e.target.closest('.option-item')) {
-           
+            
             document.querySelectorAll(".custom-select-options-box, .select-options").forEach(b => {
                 b.style.display = "none";
             });
         }
-      
-        // Drag logic - only allow dragging in edit mode outside of panels
+        
         if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 ||
             e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, .timer-btn-group, .setup-container, .p8-modal')) {
             return;
         }
-      
+        
         dragTarget = e.target.closest('.p8-widget');
         if (dragTarget) {
             const r = dragTarget.getBoundingClientRect();
@@ -2667,7 +2710,6 @@ function bindEvents() {
         }
     });
 
-    // Drag movement
     window.addEventListener('mousemove', e => {
         if (typeof dragTarget !== 'undefined' && dragTarget) {
             dragTarget.style.left = (e.clientX - offset.x) + 'px';
@@ -2685,7 +2727,6 @@ function bindEvents() {
         }
     });
 
-    // Context Menu
     window.addEventListener('contextmenu', e => {
         if (e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
         e.preventDefault();
@@ -2697,12 +2738,10 @@ function bindEvents() {
         }
     });
 
-    // Initialize manager panels
     if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
     if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
 }
 
-
 init();
 
-console.log("ttvoverlayapp.js version 0.09 finished loading");
+console.log("ttvoverlayapp.js version 0.10 finished loading");
