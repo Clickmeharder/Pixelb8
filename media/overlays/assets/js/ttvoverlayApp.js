@@ -1186,7 +1186,11 @@ function renderThemeControls() {
                 const row = document.createElement('div');
                 row.className = 'option-item';
                 row.innerText = optVal.includes(',') ? optVal.split(',')[0].replace(/'/g, '') : optVal;
-                row.style.cursor = 'pointer';
+                row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer; transition: background 0.2s;";
+
+                // Match hover states to UI standards
+                row.addEventListener('mouseenter', () => row.style.background = "var(--accent, #9146ff)");
+                row.addEventListener('mouseleave', () => row.style.background = "transparent");
 
                 // Process selections on click actions
                 row.addEventListener('click', (e) => {
@@ -1208,7 +1212,7 @@ function renderThemeControls() {
             displayEl.addEventListener('click', (e) => {
                 e.stopPropagation();
                 // Close all existing custom menus anywhere on the overlay platform
-                document.querySelectorAll(".select-options").forEach(box => {
+                document.querySelectorAll(".select-options, .custom-select-options-box").forEach(box => {
                     if (box !== optionsBox) box.style.display = "none";
                 });
                 optionsBox.style.display = optionsBox.style.display === 'block' ? 'none' : 'block';
@@ -1233,7 +1237,6 @@ function renderThemeControls() {
         container.appendChild(group);
     });
 }
-
 function renderThemeList() {
     const list = document.getElementById('theme-options');
     const display = document.getElementById('current-theme-display');
