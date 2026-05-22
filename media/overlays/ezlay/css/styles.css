@@ -137,6 +137,7 @@ body.edit-mode .p8-widget:active {
     top: -20px; 
     background: #09090b; 
     z-index: 10; 
+	margin:-20px;
     margin-top: -20px; 
     padding-top: 20px; 
     padding-bottom: 10px; 
@@ -168,7 +169,8 @@ body.edit-mode .p8-widget:active {
 #rewards-manager-header {
     display: flex; 
     justify-content: space-between; 
-    align-items: center; 
+    align-items: center;
+	margin: -20px;
     margin-bottom: 15px; 
     border-bottom: 1px solid #27272a; 
     padding-bottom: 10px; 
@@ -209,8 +211,9 @@ body.edit-mode .p8-widget:active {
     padding-bottom: 10px; 
     position: sticky; 
     top: -20px; 
-    background: var(--bg); 
-    z-index: 10; 
+    background: #09090b;
+    z-index: 10;
+	margin: -20px;
     margin-top: -20px; 
     padding-top: 20px;
     cursor: move;
