@@ -412,6 +412,10 @@ function setEditMode(state) {
     document.body.classList.toggle('edit-mode', isEditMode);
     const badge = document.getElementById('mode-badge');
     if(badge) badge.style.display = isEditMode ? 'block' : 'none';
+	// Dynamically update timer widget visibility context on mode switch
+    if (typeof updateTimerWidgetVisibility === "function") {
+        updateTimerWidgetVisibility();
+    }
 }
 
 function applyTheme(name) {
@@ -1847,6 +1851,24 @@ function saveActiveTimersToStorage() {
     localStorage.setItem('p8_active_timers', JSON.stringify(activeTimers));
 }
 
+// NEW: Centralized Visibility Engine Evaluator
+function updateTimerWidgetVisibility() {
+    const timerWidget = document.getElementById("timer-widget");
+    if (!timerWidget) return;
+
+    // Check if Edit Mode global state flag is true
+    const editModeActive = (typeof isEditMode !== "undefined" && isEditMode);
+    
+    // Check if there are any initialized tracking keys in memory/storage
+    const hasActiveTimers = Object.keys(activeTimers).length > 0;
+
+    if (editModeActive || hasActiveTimers) {
+        timerWidget.style.display = "block";
+    } else {
+        timerWidget.style.display = "none";
+    }
+}
+
 // Global Core Controller Initialization Wrapper
 function initTimerEngine() {
     // Restore runtime ticks if active instances are pulled from storage on load
@@ -1859,6 +1881,7 @@ function initTimerEngine() {
     }
 
     renderActiveTimersUI();
+    updateTimerWidgetVisibility(); // Force evaluation on boot
     
     // Set up a single robust delegated event listener for row control actions
     const listContainer = document.getElementById("active-timers-list");
@@ -1897,12 +1920,6 @@ function createTimerInstance(label = "Timer", durationSeconds = 0) {
     };
     
     saveActiveTimersToStorage();
-    
-    const overlay = document.getElementById("timer-overlay-widget");
-    if (overlay && window.getComputedStyle(overlay).display === "none") {
-        overlay.style.display = "block";
-    }
-    
     startTimerInstance(id);
     return id;
 }
@@ -1916,6 +1933,7 @@ function startTimerInstance(id) {
         timerIntervalId = setInterval(processTimersTick, 1000);
     }
     renderActiveTimersUI();
+    updateTimerWidgetVisibility();
 }
 
 function pauseTimerInstance(id) {
@@ -1923,6 +1941,7 @@ function pauseTimerInstance(id) {
     activeTimers[id].running = false;
     saveActiveTimersToStorage();
     renderActiveTimersUI();
+    updateTimerWidgetVisibility(); // Keeps open if paused, handles edit mode shifts
 }
 
 function resetTimerInstance(id) {
@@ -1941,10 +1960,9 @@ function stopTimerInstance(id) {
     if (Object.keys(activeTimers).length === 0) {
         clearInterval(timerIntervalId);
         timerIntervalId = null;
-        const overlay = document.getElementById("timer-overlay-widget");
-        if (overlay) overlay.style.display = "none";
     }
     renderActiveTimersUI();
+    updateTimerWidgetVisibility(); // Cleans up and hides element immediately if keys match 0
 }
 
 function splitTimerInstance(id) {
@@ -2066,7 +2084,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initTimerEngine();
 });
 
-// Utility helper to isolate matching instances by class profile
 function getLatestInstanceIdByType(type) {
     const keys = Object.keys(activeTimers);
     for (let i = keys.length - 1; i >= 0; i--) {
@@ -2434,7 +2451,7 @@ function bindEvents() {
     });
 
     // Manual Form Trigger for UI Core Timers Generation Pipeline
-	onSafeClick("ui-create-timer-btn", () => {
+    onSafeClick("ui-create-timer-btn", () => {
         const lblInput = document.getElementById("timer-label-input");
         const durInput = document.getElementById("timer-duration-input");
         
@@ -2457,6 +2474,7 @@ function bindEvents() {
         if (lblInput) lblInput.value = "";
         if (durInput) durInput.value = "";
     });
+
     onSafeClick("close-widgets-manager-btn", () => {
         const widgetWin = document.getElementById("widgets-manager");
         if (widgetWin) widgetWin.style.display = "none";
@@ -2528,9 +2546,9 @@ function bindEvents() {
             document.querySelectorAll(".select-options, .custom-select-options-box").forEach(b => b.style.display = "none");
         }
         
-        // Canvas editing exclusion logic protecting interactable management panels
+        // Canvas editing exclusion logic protecting interactable management panels (Updated target exclusion rule string matching)
         if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 || 
-            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, #timer-overlay-widget, .setup-container, .p8-modal')) return;
+            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, #timer-widget, .setup-container, .p8-modal')) return;
         
         dragTarget = e.target.closest('.p8-widget');
         if (dragTarget) {
@@ -2567,7 +2585,6 @@ function bindEvents() {
     if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
     if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
 }
-
 
 init();
 
