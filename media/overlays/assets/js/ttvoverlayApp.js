@@ -546,7 +546,7 @@ function populateCustomDropdowns() {
                           document.getElementById(`${id}-options`);
 
         if (!displayEl || !optionsEl) {
-            console.warn(`Dropdown elements not found for ID: ${id}`);
+            // console.warn(`Dropdown elements not found for ID: ${id}`);
             return;
         }
 
@@ -2523,9 +2523,7 @@ function bindBitManagerEvents() {
 // ==========================================
 // --- MAIN EVENT LISTENER BINDING ENGINE ---
 // ==========================================
-// ==========================================
-// --- MAIN EVENT LISTENER BINDING ENGINE ---
-// ==========================================
+
 function bindEvents() {
     const SCOPES = "chat:read chat:edit channel:read:redemptions";
 
@@ -2722,5 +2720,4 @@ function bindEvents() {
 
 init();
 
-console.log("ttvoverlayapp.js version 0.07 finished loading");
-console.log("welp I dun fucked it up");
+console.log("ttvoverlayapp.js version 0.08 finished loading");
