@@ -14,7 +14,7 @@ export class EntropiaWidget {
         this.sessionTickerInterval = null;
         this.pollInterval = null;
         
-        // Comprehensive internal state tracking
+        // Comprehensive internal state tracking matching old global schemas
         this.stats = {
             loot: {},
             values: {},
@@ -23,7 +23,7 @@ export class EntropiaWidget {
             globals: 0
         };
 
-        // Entropia Custom Regular Expression Library
+        // Entropia Custom Regular Expression Library (Restored legacy definitions)
         this.regex = {
             logLine: /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[([^\]]+)\]\s*(.*)$/,
             loot: /You received\s+\[?(.+?)\]?\s+x\s+\((\d+)\)\s+Value:\s*([\d.]+)\s*PED/i,
@@ -65,7 +65,7 @@ export class EntropiaWidget {
 
         // 2. Dual Broadcast UI Viewports (Updates both the Manager Panel and the Twitch Overlay simultaneously)
         this.manifestGrids = document.querySelectorAll('#manifest-grid');
-        this.timerElements = document.querySelectorAll('#session-timer');
+        this.timerElements = document.querySelectorAll('#session-timer, #overlay-timer');
         this.grandTotalElements = document.querySelectorAll('#session-grand-total');
 
         // Event Attachment Verification
@@ -92,6 +92,7 @@ export class EntropiaWidget {
         if (this.resetBtn) {
             this.resetBtn.addEventListener('click', (e) => {
                 e.preventDefault();
+                this.logEvent("Manager Action: RESET SESSION Triggered");
                 this.resetSession();
             });
         }
@@ -105,6 +106,22 @@ export class EntropiaWidget {
         }
     }
 
+    /**
+     * Wipes ONLY the log path and handle from storage.
+     * Mechanical Necessity: Clears stale handles without touching UI positioning.
+     */
+    async clearLogPath() {
+        await del(this.FILE_HANDLE_KEY);
+        this.fileHandle = null;
+        if (this.pathInput) this.pathInput.value = "";
+        if (this.startBtn) {
+            this.startBtn.style.background = "#555";
+            this.startBtn.style.boxShadow = "none";
+            this.startBtn.textContent = "START SESSION";
+        }
+        this.logEvent("🧹 STORAGE_CLEARED: Log path wiped from IndexedDB. Please re-browse.");
+    }
+
     async recoverSavedHandle() {
         try {
             // Recover file pointer handle
@@ -113,6 +130,24 @@ export class EntropiaWidget {
                 this.fileHandle = savedHandle;
                 if (this.pathInput) this.pathInput.value = savedHandle.name;
                 this.logEvent(`💾 AUTO_RECOVERY: Restored link pointer to ${savedHandle.name.toUpperCase()}`);
+                
+                try {
+                    const perm = await this.fileHandle.queryPermission({ mode: 'read' });
+                    if (this.startBtn) {
+                        this.startBtn.textContent = "START SESSION";
+                        if (perm === 'granted') {
+                            this.startBtn.style.background = "#2e7d32";
+                            this.startBtn.style.boxShadow = "0 0 10px #00ff00";
+                        } else {
+                            this.startBtn.style.background = "#555";
+                            if (this.browseBtn) this.browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
+                            this.logEvent("🔑 RE-AUTH_REQUIRED: Click Start Session to grant runtime access.");
+                        }
+                    }
+                } catch (err) {
+                    this.logEvent("⚠️ HANDLE_STALE: Resetting path reference...", true);
+                    await this.clearLogPath();
+                }
             }
 
             // Recover display visualization switch setting state
@@ -121,7 +156,6 @@ export class EntropiaWidget {
             
             if (this.visibilityToggle) {
                 this.visibilityToggle.checked = isVisible;
-                // Run background updates on slider elements if styled manually
                 const slider = this.visibilityToggle.nextElementSibling;
                 if (slider) slider.style.backgroundColor = isVisible ? '#0ea5e9' : '#3f3f46';
             }
@@ -138,7 +172,6 @@ export class EntropiaWidget {
             this.logEvent(`Visibility configuration applied: ${shouldShow ? 'VISIBLE' : 'HIDDEN'}`);
         }
         
-        // Dynamically style custom background trackers for manual sliders
         if (this.visibilityToggle && this.visibilityToggle.nextElementSibling) {
             this.visibilityToggle.nextElementSibling.style.backgroundColor = shouldShow ? '#0ea5e9' : '#3f3f46';
         }
@@ -158,6 +191,12 @@ export class EntropiaWidget {
             this.fileHandle = handle;
             if (this.pathInput) this.pathInput.value = handle.name;
             this.logEvent(`📂 LOG_LINKED: SUCCESS`);
+            if (this.browseBtn) this.browseBtn.style.boxShadow = "none";
+            if (this.startBtn) {
+                this.startBtn.style.background = "#2e7d32";
+                this.startBtn.style.boxShadow = "0 0 10px #00ff00";
+                this.startBtn.textContent = "START SESSION";
+            }
         } catch (err) {
             this.logEvent("❌ PICKER_CANCELLED", true);
         }
@@ -183,6 +222,7 @@ export class EntropiaWidget {
     async startSession() {
         if (!this.fileHandle) {
             this.logEvent("❌ ERROR: Link Chat.log first!", true);
+            if (this.browseBtn) this.browseBtn.style.boxShadow = "0 0 20px #ff0000";
             alert("Please click 'LINK LOG' first to select your Entropia Chat.log file.");
             return;
         }
@@ -200,14 +240,25 @@ export class EntropiaWidget {
             this.sessionStartTime = Date.now();
             this.isPaused = false;
 
-            // Clear data matrices on clean run initialization
+            // Clear any lingering background processes before spin-up
+            if (this.pollInterval) clearInterval(this.pollInterval);
+            if (this.sessionTickerInterval) clearInterval(this.sessionTickerInterval);
+
+            // Clean state parameters reset matrix
             this.stats = { loot: {}, values: {}, skills: {}, deaths: 0, globals: 0 };
             this.manifestGrids.forEach(grid => grid.innerHTML = '');
 
-            // Adjust active engine control panel configurations
+            // Adjust active control panel engine UI elements
             if (this.startBtn) {
                 this.startBtn.textContent = "STOP SESSION";
                 this.startBtn.style.background = "#d32f2f";
+                this.startBtn.style.boxShadow = "0 0 10px #ff0000";
+            }
+            if (this.browseBtn) this.browseBtn.style.boxShadow = "none";
+
+            // Prevent screen sleep during long streaming runs
+            if ('wakeLock' in navigator) {
+                try { await navigator.wakeLock.request('screen'); } catch (e) {}
             }
 
             this.pollInterval = setInterval(() => this.pollWebLog(), 2000);
@@ -216,7 +267,8 @@ export class EntropiaWidget {
             this.logEvent(`✅ SESSION_STARTED: ${file.name}`);
         } catch (e) {
             console.error("Critical Engine failure starting session: ", e);
-            this.logEvent(`❌ AUTH_FAIL: Path execution failure.`, true);
+            this.logEvent(`❌ AUTH_FAIL: Path execution failure. Hard reset triggered.`, true);
+            await this.clearLogPath();
         }
     }
 
@@ -239,20 +291,22 @@ export class EntropiaWidget {
         if (this.startBtn) {
             this.startBtn.textContent = "START SESSION";
             this.startBtn.style.background = "#2e7d32";
+            this.startBtn.style.boxShadow = "0 0 10px #00ff00";
         }
-        this.logEvent("🛑 SESSION_STOPPED");
+        this.logEvent("🛑 SESSION_STOPPED.");
     }
 
     resetSession() {
         this.stats = { loot: {}, values: {}, skills: {}, deaths: 0, globals: 0 };
         this.lastProcessedLine = "";
-        if (this.sessionStartTime) this.sessionStartTime = Date.now();
+        this.sessionStartTime = Date.now();
         
         this.manifestGrids.forEach(grid => grid.innerHTML = '');
         this.grandTotalElements.forEach(el => el.textContent = "0.0000");
         this.timerElements.forEach(el => el.textContent = "00:00:00");
         
         this.logEvent("🧹 SESSION_STATS_CLEARED.");
+        this.updateUI();
     }
 
     runSessionTicker() {
@@ -262,8 +316,9 @@ export class EntropiaWidget {
         const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
         const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
         const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+        const timeStr = `${h}:${m}:${s}`;
         
-        this.timerElements.forEach(el => el.textContent = `${h}:${m}:${s}`);
+        this.timerElements.forEach(el => el.textContent = timeStr);
         this.updateUI();
     }
 
@@ -286,8 +341,9 @@ export class EntropiaWidget {
             this.errorCount = 0;
         } catch (err) {
             if (++this.errorCount >= this.MAX_RETRIES) {
-                this.logEvent("❌ PERMISSION_STUCK: Auto Stopping.", true);
+                this.logEvent("❌ PERMISSION_STUCK: Automatic engine path shutdown.", true);
                 this.stopSession();
+                this.clearLogPath();
             }
         }
     }
@@ -304,20 +360,24 @@ export class EntropiaWidget {
         if (channel === 'System') {
             const lootMatch = message.match(this.regex.loot);
             if (lootMatch) {
-                const [__, name, amt, val] = lootMatch;
-                const itemName = name.trim();
-                this.stats.loot[itemName] = (this.stats.loot[itemName] || 0) + parseInt(amt);
-                this.stats.values[itemName] = (this.stats.values[itemName] || 0) + parseFloat(val);
+                const itemName = lootMatch[1].trim();
+                const amt = parseInt(lootMatch[2]);
+                const val = parseFloat(lootMatch[3]);
+
+                this.stats.loot[itemName] = (this.stats.loot[itemName] || 0) + amt;
+                this.stats.values[itemName] = (this.stats.values[itemName] || 0) + val;
+                
+                this.updateUI();
                 this.logEvent(`+ ${amt}x ${itemName}`);
                 return;
             }
 
             const xpMatch = message.match(this.regex.experience);
             if (xpMatch) {
-                const [__, xpVal, skillName] = xpMatch;
-                const sName = skillName.trim();
-                this.stats.skills[sName] = (this.stats.skills[sName] || 0) + parseFloat(xpVal);
-                this.logEvent(`✨ XP: +${xpVal} ${sName}`);
+                const xpVal = parseFloat(xpMatch[1]);
+                const skillName = xpMatch[2].trim();
+                this.stats.skills[skillName] = (this.stats.skills[skillName] || 0) + xpVal;
+                this.logEvent(`✨ XP: +${xpVal} ${skillName}`);
                 return;
             }
 
@@ -345,9 +405,10 @@ export class EntropiaWidget {
             const totalValue = this.stats.values[key] || 0;
             grandTotal += totalValue;
 
+            // Restored original exact whitespace replacement strategy logic safely
             const safeKey = key.replace(/\s+/g, '-');
             
-            // Loop updates across all matching display destinations (manager panel grid & overlay grid)
+            // Core loop update pipeline logic applied cross-viewport simultaneously
             this.manifestGrids.forEach(grid => {
                 let sessionEl = grid.querySelector(`.session-${safeKey}`);
                 
@@ -386,7 +447,7 @@ export class EntropiaWidget {
         return [
             {
                 name: 'eu',
-                adminOnly: false, // Core prefix routing remains open for viewer stat data inquiries
+                adminOnly: false,
                 description: 'Entropia Universe tracking overlay runtime routing module control console.',
                 execute: (user, message, flags) => {
                     const parts = message.trim().toLowerCase().split(/\s+/);
@@ -450,7 +511,7 @@ export class EntropiaWidget {
 
                             switch (targetElement) {
                                 case 'grid':
-                                case 'loot': // Covers '!eu toggle loot' to hide the itemized manifest grid
+                                case 'loot':
                                     this.manifestGrids.forEach(grid => {
                                         const currentDisplay = window.getComputedStyle(grid).display;
                                         grid.style.display = currentDisplay === 'none' ? 'grid' : 'none';
