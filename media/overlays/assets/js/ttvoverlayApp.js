@@ -1365,7 +1365,92 @@ function triggerAlertPipeline(reward, user, cost, message) {
         botSay(`@${user} spent ${cost || 0} points on ${reward}.`);
     }
 }
+// --- BITS ALERT PIPELINE EXECUTION ---
+function triggerBitAlertPipeline(user, bits, message) {
+    if (!registry.bits || alertHidden) return;
 
+    // 1. Find the highest matching threshold tier configured by the user
+    const tiers = Object.keys(registry.bits).map(Number).sort((a, b) => b - a);
+    let chosenTier = "1"; // Default fallback
+    
+    for (let tier of tiers) {
+        if (bits >= tier) {
+            chosenTier = String(tier);
+            break;
+        }
+    }
+
+    const tierData = registry.bits[chosenTier];
+    if (!tierData) return;
+
+    // 2. Clear any lingering timeout states to avoid blinking artifacts
+    if (fadeTimeout) clearTimeout(fadeTimeout);
+
+    // 3. Format text templates using regex variable replacement parsing
+    let parsedText = tierData.text || "{user} cheered {bits} bits!";
+    parsedText = parsedText.replace(/{user}/g, user)
+                           .replace(/{user\.toUpperCase\(\)}/g, user.toUpperCase())
+                           .replace(/{bits}/g, bits)
+                           .replace(/{message}/g, message || "");
+
+    // 4. Update the DOM elements with custom parameters
+    alertText.innerHTML = processedMessage || parsedText; 
+    alertText.style.fontSize = tierData.font_size || "2em";
+    alertText.style.color = tierData.font_color || "#ffffff";
+
+    if (tierData.img && alertImage) {
+        alertImage.innerHTML = `<img src="${tierData.img}" />`;
+        alertImage.style.display = "block";
+    } else if (alertImage) {
+        alertImage.innerHTML = "";
+        alertImage.style.display = "none";
+    }
+
+    // 5. Strip old transition utilities and apply Custom Entry Animation classes
+    alertText.className = "";
+    if (alertImage) alertImage.className = "";
+    
+    // Force a browser reflow trick to restart animations cleanly
+    void alertWidget.offsetWidth; 
+
+    if (tierData.anim_tx_in && tierData.anim_tx_in !== "none") {
+        alertText.classList.add(tierData.anim_tx_in);
+    }
+    if (tierData.img && alertImage && tierData.anim_im_in && tierData.anim_im_in !== "none") {
+        alertImage.classList.add(tierData.anim_im_in);
+    }
+
+    // Reveal the main structural widget frame
+    alertWidget.style.opacity = "1";
+    alertWidget.style.display = "block";
+
+    // 6. Clean lifecycle timeline management (Runs exit animations before hiding frame)
+    const duration = parseInt(tierData.duration) || 8000;
+    fadeTimeout = setTimeout(() => {
+        // Apply Exit Animations if configured
+        if (tierData.anim_tx_out && tierData.anim_tx_out !== "none") {
+            alertText.className = "";
+            alertText.classList.add(tierData.anim_tx_out);
+        }
+        if (tierData.img && alertImage && tierData.anim_im_out && tierData.anim_im_out !== "none") {
+            alertImage.className = "";
+            alertImage.classList.add(tierData.anim_im_out);
+        }
+
+        // Wait for the CSS animation track length to finish before killing opacity completely
+        setTimeout(() => {
+            alertWidget.style.opacity = "0";
+            fadeTimeout = setTimeout(() => {
+                alertWidget.style.display = "none";
+                alertText.className = "";
+                if (alertImage) {
+                    alertImage.className = "";
+                    alertImage.innerHTML = "";
+                }
+            }, 500); // Matches the fallback standard master fade transition time
+        }, 800); // Matches your CSS utility default animation length (.8s)
+    }, duration);
+}
 function renderThemeControls() {
     const container = document.getElementById('variable-controls');
     if (!container) return;
@@ -1935,7 +2020,11 @@ function startTwitch(channel, token) {
     ComfyJS.onReward = (user, reward, cost, message, extra) => {
         // Pass live WebSocket event payloads directly down to our alert engine
         triggerAlertPipeline(reward, user, cost, message);
-    }; 
+    };
+	ComfyJS.onCheer = (user, message, bits, flags, extra) => {
+		// Forward the real-time cheer metrics to the alert engine
+		triggerBitAlertPipeline(user, bits, message);
+	};
     ComfyJS.onCommand = (user, command, message, flags, extra) => {
         let targetCommand = command.toLowerCase();
         let targetArgs = message;
