@@ -1846,29 +1846,29 @@ function saveCountdownsToStorage() {
 
 // Global Core Controller Initialization Wrapper
 function initTimerEngine() {
-    // Bind UI Form Buttons safely
-    const uiCreateBtn = document.getElementById("ui-create-timer-btn");
-    if (uiCreateBtn) {
-        uiCreateBtn.onclick = () => {
-            const labelInput = document.getElementById("timer-label-input");
-            const durationInput = document.getElementById("timer-duration-input");
-            if (!labelInput) return;
-
-            const label = labelInput.value.trim() || "UI Timer";
-            const duration = parseInt(durationInput ? durationInput.value : 0) || 0;
-
-            if (duration > 0) {
-                // It's a countdown. Save it as a preset, then launch it
-                savedCountdowns[label.toLowerCase()] = duration;
-                saveCountdownsToStorage();
-                botSay(`Saved countdown template: [${label}] (${duration}s)`);
-            }
-            createTimerInstance(label, duration);
-            labelInput.value = "";
-            if (durationInput) durationInput.value = "";
-        };
-    }
+    // Render any structural states if active instances exist on load
     renderActiveTimersUI();
+    
+    // Set up a single robust delegated event listener for row control actions
+    // This fixes the delete/pause breaking on every clock tick!
+    const listContainer = document.getElementById("active-timers-list");
+    if (listContainer && !listContainer.dataset.delegated) {
+        listContainer.dataset.delegated = "true";
+        listContainer.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-action]");
+            if (!btn) return;
+            
+            e.stopPropagation();
+            const action = btn.getAttribute("data-action");
+            const targetId = btn.getAttribute("data-id");
+            
+            if (action === "start") startTimerInstance(targetId);
+            if (action === "pause") pauseTimerInstance(targetId);
+            if (action === "reset") resetTimerInstance(targetId);
+            if (action === "split") splitTimerInstance(targetId);
+            if (action === "stop")  stopTimerInstance(targetId);
+        });
+    }
 }
 
 // Unified instantiator function
@@ -1954,7 +1954,7 @@ function processTimersTick() {
             t.running = false;
             if (typeof p8Confirm === "function") {
                 p8Confirm(`⏰ Countdown Finished: [${t.label}]`, true);
-            } else {
+            } else if (typeof botSay === "function") {
                 botSay(`⏰ Countdown Finished: [${t.label}]!`);
             }
         }
@@ -1967,6 +1967,7 @@ function processTimersTick() {
     
     renderActiveTimersUI();
 }
+
 function formatTimeDigits(totalSeconds) {
     if (totalSeconds < 0) totalSeconds = 0;
     const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
@@ -1991,7 +1992,6 @@ function renderActiveTimersUI() {
         return;
     }
     
-    // Focus overlay presentation on the most recently interacted/created element
     const primaryTimer = activeTimers[keys[keys.length - 1]];
     if (primaryTimer) {
         const remaining = primaryTimer.type === "countdown" ? (primaryTimer.duration - primaryTimer.elapsed) : primaryTimer.elapsed;
@@ -2007,7 +2007,6 @@ function renderActiveTimersUI() {
         });
     }
     
-    // Populate layout mapping controls within widgets control hub window
     keys.forEach(id => {
         const t = activeTimers[id];
         const rem = t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed;
@@ -2035,24 +2034,9 @@ function renderActiveTimersUI() {
             </div>
         `;
         
-        // Dynamic event routing assignment loops
-        row.querySelectorAll("button").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const action = btn.getAttribute("data-action");
-                const targetId = btn.getAttribute("data-id");
-                if (action === "start") startTimerInstance(targetId);
-                if (action === "pause") pauseTimerInstance(targetId);
-                if (action === "reset") resetTimerInstance(targetId);
-                if (action === "split") splitTimerInstance(targetId);
-                if (action === "stop")  stopTimerInstance(targetId);
-            });
-        });
-        
         if (listContainer) listContainer.appendChild(row);
     });
 }
-
 // Make sure to call initTimerEngine() once your document DOM content completely compiles!
 document.addEventListener("DOMContentLoaded", () => {
     initTimerEngine();
@@ -2095,9 +2079,19 @@ const PANEL_NAVIGATION_MAPS = [
         triggerId: "ctx-open-settings", 
         targetId: "settings-window", 
         onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); } 
+    },
+    // REFACTORED IN: Bits Manager context trigger
+    { 
+        triggerId: "ctx-open-bits", 
+        targetId: "bit-manager",
+        onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); }
+    },
+    // REFACTORED IN: Widgets Manager context trigger
+    { 
+        triggerId: "ctx-open-widgets", 
+        targetId: "widgets-manager" 
     }
 ];
-
 // Maps HTML inputs/buttons to reactive parameters, executing automated mutations and context syncs
 const BOOLEAN_TOGGLE_MAPS = [
     { id: "settings-toggle-master-alerts", type: "change", valuePath: "checked", invert: true, assignTo: (val) => { alertHidden = val; }, onSync: () => syncAlertVisibilityState() },
@@ -2414,41 +2408,27 @@ function bindEvents() {
         }
     });
 
-    // 4. Dynamic Complex Fallback View Custom Triggers Bus
-    onSafeClick("ctx-open-bits", () => {
-        const bitWindow = document.getElementById("bit-manager");
-        if (bitWindow) {
-            const isHidden = window.getComputedStyle(bitWindow).display === "none";
-            bitWindow.style.display = isHidden ? "block" : "none";
-        }
-        closeContextMenu();
-    });
-
-    onSafeClick("ctx-open-widgets", () => {
-        const widgetWin = document.getElementById("widgets-manager");
-        if (widgetWin) {
-            const isHidden = window.getComputedStyle(widgetWin).display === "none";
-            widgetWin.style.display = isHidden ? "block" : "none";
-        }
-        closeContextMenu();
-    });
-
     // Manual Form Trigger for UI Core Timers Generation Pipeline
-    onSafeClick("ui-create-timer-btn", () => {
+	onSafeClick("ui-create-timer-btn", () => {
         const lblInput = document.getElementById("timer-label-input");
         const durInput = document.getElementById("timer-duration-input");
-        const label = lblInput ? lblInput.value.trim() : "Timer";
-        const duration = durInput ? parseInt(durInput.value) : 0;
         
-        // OPTIONAL SYNC: If it's a countdown, ensure it gets saved to your presets registry
+        const label = (lblInput && lblInput.value.trim()) ? lblInput.value.trim() : "UI Timer";
+        const duration = (durInput && durInput.value) ? parseInt(durInput.value) : 0;
+        
+        // Save to persistent localStorage templates if it's a structural countdown
         if (duration > 0 && typeof savedCountdowns !== 'undefined') {
             savedCountdowns[label.toLowerCase()] = duration;
-            if (typeof saveCountdownsToStorage === 'function') saveCountdownsToStorage();
+            saveCountdownsToStorage();
+            if (typeof botSay === "function") {
+                botSay(`Saved countdown template: [${label}] (${duration}s)`);
+            }
         }
 
-        // FIXED: Call the correct instantiation name
+        // Initialize the tracking engine instance context
         createTimerInstance(label, duration);
         
+        // Safely clear out the UI workspace controls
         if (lblInput) lblInput.value = "";
         if (durInput) durInput.value = "";
     });
