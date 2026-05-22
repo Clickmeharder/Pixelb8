@@ -386,6 +386,7 @@ function parseHSLA(str) {
 function init() {
     applyTheme(registry.active);
     const params = new URLSearchParams(window.location.search);
+    
     if (params.get("token") && params.get("channel")) {
         document.body.style.backgroundColor = "transparent";
         document.body.style.backgroundImage = "none";
@@ -398,15 +399,21 @@ function init() {
         document.getElementById("setup-interface").style.display = "block";
         checkTwitchAuth();
     }
+    
+    // Core Layout & Registry Loading
     loadPositions();
     renderThemeControls();
     
-    // Auto-populates registry array cache instantly on application kick-off
+    // Required: Initialize all custom UI dropdowns from the CUSTOM_SELECT_DATA manifest
+    // This fixes the issue where dropdowns were empty or unresponsive
+    populateCustomDropdowns(); 
+    
+    // Populate registry array caches for rewards and bits
     renderRewardsList(); 
     
+    // Bind all event listeners to the DOM
     bindEvents();
 }
-
 function setEditMode(state) {
     isEditMode = state;
     document.body.classList.toggle('edit-mode', isEditMode);
@@ -433,6 +440,7 @@ async function systemReset() {
     }
 }
 
+// --- WORKSPACE DATA GRAPH & ANIMATION MANIFESTS ---
 // --- WORKSPACE DATA GRAPH & ANIMATION MANIFESTS ---
 let pendingImageBase64 = "";
 
@@ -463,12 +471,12 @@ const CUSTOM_SELECT_DATA = {
         { value: "1000", label: "Tier 4 (1000+ Bits)" },
         { value: "5000", label: "Tier 5 (5000+ Bits)" }
     ],
+    // Explicitly binding the Bit Animation IDs so populateCustomDropdowns maps them safely
     "bit-text-in-anim": AVAILABLE_IN_ANIMATIONS,
     "bit-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
     "bit-img-in-anim": AVAILABLE_IN_ANIMATIONS,
     "bit-img-out-anim": AVAILABLE_OUT_ANIMATIONS
 };
-
 // State engine to track actively selected values since we don't have standard .value anymore
 let customSelectValues = {
     "reward-text-in-anim": "none",
@@ -492,6 +500,8 @@ function getCustomSelectValue(id) {
 
 function setCustomSelectValue(id, value) {
     customSelectValues[id] = value;
+    
+    // Support both fallback matching patterns
     const displayEl = document.getElementById(`display-${id}`) || document.getElementById(`current-${id}`);
     if (!displayEl) return;
 
@@ -504,12 +514,33 @@ function setCustomSelectValue(id, value) {
         displayEl.innerText = value;
     }
 
-    // Contextual Trigger: Fire custom change updates for the Bit Tier configuration loader if needed
-    if (id === "bit-tier-selector" && typeof loadBitTierConfig === "function") {
-        loadBitTierConfig(value);
+    // Contextual Trigger: Fire custom change updates for the Bit Tier configuration loader
+    if (id === "bit-tier-selector") {
+        if (typeof loadBitTierConfig === "function") {
+            loadBitTierConfig(value);
+        }
+        return;
+    }
+
+    // --- LIVE GRAPH REWRITE ENGINE MATCHES ---
+    // If we are configuring a Bit Alert Dropdown, update registry tracking immediately
+    if (id.startsWith("bit-")) {
+        const activeTier = customSelectValues["bit-tier-selector"] || "1";
+        if (registry.bits && registry.bits[activeTier]) {
+            // Map the internal field layout key (e.g., bit-text-in-anim -> anim_tx_in)
+            let targetKey = null;
+            if (id === "bit-text-in-anim") targetKey = "anim_tx_in";
+            if (id === "bit-text-out-anim") targetKey = "anim_tx_out";
+            if (id === "bit-img-in-anim") targetKey = "anim_im_in";
+            if (id === "bit-img-out-anim") targetKey = "anim_im_out";
+
+            if (targetKey) {
+                registry.bits[activeTier][targetKey] = value;
+                console.log(`Saved bit array transaction [Tier ${activeTier}]: ${targetKey} -> ${value}`);
+            }
+        }
     }
 }
-
 function populateCustomDropdowns() {
     Object.keys(CUSTOM_SELECT_DATA).forEach(id => {
         // Fallbacks to capture exact string IDs as keys or prefixed elements
