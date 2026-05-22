@@ -127,7 +127,6 @@ body.edit-mode .p8-widget:active {
     max-height: 50vh; 
     overflow-y: auto;
     box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-    position: relative; 
 }
 
 #theme-manager-header {
@@ -163,7 +162,6 @@ body.edit-mode .p8-widget:active {
     max-height: 80vh; 
     overflow-y: auto;   
     resize: vertical;
-    position: relative; 
 }
 
 #rewards-manager-header {
