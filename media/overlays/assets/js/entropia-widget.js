@@ -76,7 +76,7 @@ export class EntropiaWidget {
             if (savedHandle) {
                 this.fileHandle = savedHandle;
                 if (this.pathInput) this.pathInput.value = savedHandle.name;
-                this.logEvent(`💾 AUTO_RECOVERY: Linked to ${savedHandle.name.toUpperCase()}`);
+                this.logEvent(`💾 AUTO_RECOVERY: Found link reference to ${savedHandle.name.toUpperCase()}`);
             }
         } catch (e) {
             console.error("Failed to recover log file handle:", e);
@@ -107,16 +107,36 @@ export class EntropiaWidget {
         }
     }
 
+    async verifyPermission() {
+        if (!this.fileHandle) return false;
+        
+        // Check if permission is already granted
+        const opts = { mode: 'read' };
+        if ((await this.fileHandle.queryPermission(opts)) === 'granted') {
+            return true;
+        }
+        
+        // Request explicit user permission if needed
+        if ((await this.fileHandle.requestPermission(opts)) === 'granted') {
+            return true;
+        }
+        
+        return false;
+    }
+
     async startSession() {
         if (!this.fileHandle) {
             this.logEvent("❌ ERROR: Link Chat.log first!", true);
+            alert("Please click 'LINK LOG' first to select your Entropia Chat.log file.");
             return;
         }
 
         try {
-            const perm = await this.fileHandle.requestPermission({ mode: 'read' });
-            if (perm !== 'granted') {
-                this.logEvent("❌ PERMISSION_DENIED", true);
+            // FIXED: Verify permissions interactively to avoid silent browser security blocking
+            const hasPermission = await this.verifyPermission();
+            if (!hasPermission) {
+                this.logEvent("❌ PERMISSION_DENIED: Browser blocked read access.", true);
+                alert("Browser access denied. Please click 'LINK LOG' again to authorize file reading.");
                 return;
             }
 
@@ -139,7 +159,8 @@ export class EntropiaWidget {
             
             this.logEvent(`✅ SESSION_STARTED: ${file.name}`);
         } catch (e) {
-            this.logEvent("❌ AUTH_FAIL: Path reset.", true);
+            console.error("Critical Engine failure starting session: ", e);
+            this.logEvent(`❌ AUTH_FAIL: Path execution failure.`, true);
         }
     }
 

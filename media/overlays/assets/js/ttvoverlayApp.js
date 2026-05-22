@@ -1,7 +1,7 @@
 
 // --- MODULE IMPORTS ---
 import { EntropiaWidget } from './entropia-widget.js';
-console.log("🚀 [Module Load]: entropia-widget.js version 0.003 imported successfully without dependencies!");
+console.log("🚀 [Module Load]: entropia-widget.js version 0.004 imported successfully without dependencies!");
 
 
 // --- STORAGE & SETTINGS INITIALIZATION ---
@@ -421,9 +421,17 @@ function init() {
     loadPositions();
     renderThemeControls();
     
-    // --- INITIALIZE ENTROPIA WIDGET PARSER ---
-    window.entropiaLogParser = new EntropiaWidget();
-
+	// --- DEFENSIVE ENTROPIA WIDGET INITIALIZATION ---
+    // If the script didn't import, or the DOM elements aren't ready, the catch block absorbs it
+    try {
+        if (typeof EntropiaWidget !== 'undefined') {
+            window.entropiaLogParser = new EntropiaWidget();
+        } else {
+            console.warn("⚠️ [Init Warning]: EntropiaWidget class is not defined. Skipping instantiation.");
+        }
+    } catch (entropiaError) {
+        console.error("❌ [Init Error]: Failed to initialize Entropia Widget cleanly:", entropiaError);
+    }
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 
     populateCustomDropdowns();
@@ -431,6 +439,7 @@ function init() {
     // Bind all event listeners to the DOM
     bindEvents();
 	console.log("ttvoverlayapp.js version 0.112 finished loading");
+	
 }
 
 function setEditMode(state) {
