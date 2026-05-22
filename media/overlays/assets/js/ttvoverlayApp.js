@@ -573,101 +573,143 @@ function updateAllBadgesUI() {
         badge.style.color = "#a7f3d0";
     }
 } */
+//=========================================
+//==========================================
+// ==========================================
+// --- CORE UTILITIES & MAPS CONFIGURATIONS ---
+// ==========================================
+
+// Registry mapping overlay window elements to all actions that trigger their close event
+const WINDOW_CLOSE_MAPS = [
+    { win: "rewards-manager", triggers: ["close-rewards-btn", "close-rewards-top-btn"] },
+    { win: "bit-manager",     triggers: ["close-bit-manager-btn", "close-bits-top-btn"] },
+    { win: "settings-window",  triggers: ["close-settings-manager-btn", "close-settings-top-btn"] },
+    { win: "style-editor",     triggers: ["close-editor-btn", "close-editor-top-btn"] }
+];
+
+// Configuration layout matrix for the Custom Select dropdown boxes
+const DROPDOWN_CONFIGS = [
+    { display: "display-bit-text-in-anim",   options: "options-bit-text-in-anim",   list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
+    { display: "display-bit-text-out-anim",  options: "options-bit-text-out-anim",  list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] },
+    { display: "display-bit-img-in-anim",    options: "options-bit-img-in-anim",    list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
+    { display: "display-bit-img-out-anim",   options: "options-bit-img-out-anim",   list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] }
+];
+
+// Structural array mapping state variables to element inputs and persistent targets
+const REWARD_SELECTS_REGISTRY = [
+    { id: "reward-text-in-anim",  def: "none" },
+    { id: "reward-text-out-anim", def: "none" },
+    { id: "reward-img-in-anim",   def: "none" },
+    { id: "reward-img-out-anim",  def: "none" },
+    { id: "reward-font-weight",   def: "bold" },
+    { id: "reward-img-mode",      def: "loop" }
+];
+
+const REWARD_INPUTS_REGISTRY = [
+    { id: "reward-font-size",      type: "text" },
+    { id: "reward-text-outline",   type: "text" },
+    { id: "reward-img-size",       type: "text" },
+    { id: "reward-text-duration",  type: "text" },
+    { id: "reward-img-duration",   type: "text" }
+];
+
+/**
+ * Global utility to cleanly coordinate Master Alert visibility and states
+ */
+function syncAlertVisibilityState() {
+    saveSettings();
+    if (typeof updateManagerBadgesUI === "function") updateManagerBadgesUI();
+    if (alertWidget) {
+        alertWidget.style.display = alertHidden ? "none" : "block";
+        alertWidget.style.opacity = alertHidden ? "0" : "1";
+    }
+}
+
+/**
+ * Reusable dynamic initialization engine for rendering custom functional selection fields
+ */
+function setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
+    const displayEl = document.getElementById(displayId);
+    const optionsEl = document.getElementById(optionsId);
+    if (!displayEl || !optionsEl) return;
+
+    optionsEl.innerHTML = "";
+    optionItems.forEach(anim => {
+        const opt = document.createElement("div");
+        opt.className = "option-item";
+        opt.style.cssText = "padding: 4px 8px; cursor: pointer;";
+        opt.innerText = anim;
+        opt.addEventListener("click", (e) => {
+            e.stopPropagation();
+            displayEl.innerText = anim;
+            optionsEl.style.display = "none";
+            if (onSelectionCallback) onSelectionCallback(anim);
+        });
+        optionsEl.appendChild(opt);
+    });
+
+    displayEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        document.querySelectorAll(".custom-select-options-box").forEach(box => {
+            if (box !== optionsEl) box.style.display = "none";
+        });
+        optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
+    });
+}
+
+/**
+ * Inline file streaming parsing utility to cut file handler duplicate code blocks
+ */
+function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
+    if (!inputElement) return;
+    inputElement.addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (!file) {
+            onClearFallback();
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (evt) => onLoadedSuccess(evt.target.result, file.name);
+        reader.readAsDataURL(file);
+    });
+}
+//==========================================
+//=========================================
+// ==========================================
+// --- REWARDS MANAGER CONTROL ENGINE ---
+// ==========================================
 
 function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");
     const fileInput = document.getElementById("reward-file-input");
     const urlInput = document.getElementById("reward-img-input");
-    
-    // Core references for the audio pool form elements
+    const fontColorPicker = document.getElementById("reward-font-color");
+    const fontColorHex = document.getElementById("reward-font-color-hex");
+
     const soundFileInput = document.getElementById("reward-sound-file");
     const addSoundBtn = document.getElementById("push-sound-btn");
     const labelSoundBtn = document.getElementById("add-sound-file-btn");
 
-    // Style and Pipeline Lifetime Configuration Elements
-    const fontSizeInput = document.getElementById("reward-font-size");
-    const fontColorPicker = document.getElementById("reward-font-color");
-    const fontColorHex = document.getElementById("reward-font-color-hex");
-    const textOutlineInput = document.getElementById("reward-text-outline");
-    const imgSizeInput = document.getElementById("reward-img-size");
-    
-    // New Lifetime & GIF Playback Elements
-    const textDurationInput = document.getElementById("reward-text-duration");
-    const imgDurationInput = document.getElementById("reward-img-duration");
-
-    // Synchronize color picker with hex input field natively
     if (fontColorPicker && fontColorHex) {
-        fontColorPicker.addEventListener("input", function() {
-            fontColorHex.value = this.value;
-        });
+        fontColorPicker.addEventListener("input", function() { fontColorHex.value = this.value; });
         fontColorHex.addEventListener("input", function() {
-            if (/^#[0-9A-F]{6}$/i.test(this.value)) {
-                fontColorPicker.value = this.value;
-            }
+            if (/^#[0-9A-F]{6}$/i.test(this.value)) fontColorPicker.value = this.value;
         });
     }
 
-    // Initialize animation selector choices directly on application setup
-    populateCustomDropdowns();
-    
-    // Render initial settings states into the control badges
-    updateManagerBadgesUI();
+    if (typeof populateCustomDropdowns === "function") populateCustomDropdowns();
+    if (typeof updateManagerBadgesUI === "function") updateManagerBadgesUI();
 
-    // Wire up the control deck toggle button click handler
-    const deckToggleBtn = document.getElementById("mgr-toggle-alert-btn");
-    if (deckToggleBtn) {
-        deckToggleBtn.addEventListener("click", () => {
-            alertHidden = !alertHidden;
-            saveSettings();
-            
-            // Instantly refresh the visual text badge on the control panel panel
-            updateManagerBadgesUI();
-            
-            // Sync active visibility changes instantly
-            if (alertWidget) {
-                if (alertHidden) {
-                    alertWidget.style.display = "none";
-                    alertWidget.style.opacity = "0";
-                } else {
-                    // Restore default visibility state so upcoming redeems render natively
-                    alertWidget.style.display = "block";
-                    alertWidget.style.opacity = "1";
-                }
-            }
-        });
-    }
-
-    // Open panel from context option
-    document.getElementById("ctx-open-rewards").addEventListener("click", () => {
-        rewardsPanel.style.display = "block";
-        document.getElementById('p8-ctx-menu').style.display = 'none';
-        updateManagerBadgesUI();
-        renderRewardsList();
-    });
-
-    // Close Button layout routine
-    document.getElementById("close-rewards-btn").addEventListener("click", () => {
-        rewardsPanel.style.display = "none";
-    });
-
-    // Convert local files to persistent Base64 Data Strings
-    fileInput.addEventListener("change", function() {
-        const file = this.files[0];
-        if (!file) {
-            pendingImageBase64 = "";
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            pendingImageBase64 = e.target.result; // Holds complete inline data:image/... base64 string
-            urlInput.value = ""; // Clear text input to show file asset takes priority
+    // Streamlined baseline image upload parsing layout
+    bindBase64FileReader(fileInput, 
+        (base64) => {
+            pendingImageBase64 = base64;
+            urlInput.value = "";
             urlInput.placeholder = "Using selected local file asset...";
-        };
-        reader.readAsDataURL(file);
-    });
+        },
+        () => { pendingImageBase64 = ""; }
+    );
 
-    // Clear file selection if user goes back to typing a URL link
     urlInput.addEventListener("input", function() {
         if (this.value.trim() !== "") {
             fileInput.value = "";
@@ -676,182 +718,107 @@ function bindRewardsManagerEvents() {
         }
     });
 
-    // --- SOUND FILE ASSET MONITORING LISTENERS ---
+    // Streamlined baseline audio upload parsing layout
     let loadedAudioBase64 = "";
     let loadedAudioName = ""; 
 
-    soundFileInput.addEventListener("change", function(e) {
-        const file = e.target.files[0];
-        
-        if (!file) {
+    bindBase64FileReader(soundFileInput,
+        (base64, filename) => {
+            loadedAudioBase64 = base64;
+            loadedAudioName = filename;
+            labelSoundBtn.innerText = `📁 ${filename}`;
+            if (addSoundBtn) addSoundBtn.disabled = false;
+        },
+        () => {
             loadedAudioBase64 = "";
             loadedAudioName = "";
-            addSoundBtn.disabled = true;
+            if (addSoundBtn) addSoundBtn.disabled = true;
             labelSoundBtn.innerText = "🎵 Choose Sound Asset";
-            return;
         }
-        
-        loadedAudioName = file.name;
-        labelSoundBtn.innerText = `📁 ${file.name}`;
-        
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            loadedAudioBase64 = evt.target.result;
-            addSoundBtn.disabled = false;
-        };
-        reader.readAsDataURL(file);
-    });
+    );
 
-    // Push asset onto the active staged storage tracking pool registry
-    addSoundBtn.addEventListener("click", function() {
-        if (!loadedAudioBase64) return;
-        
-        stagedSoundsPool.push({
-            name: loadedAudioName,
-            data: loadedAudioBase64,
-            volume: 1.0
+    if (addSoundBtn) {
+        addSoundBtn.addEventListener("click", function() {
+            if (!loadedAudioBase64) return;
+            stagedSoundsPool.push({ name: loadedAudioName, data: loadedAudioBase64, volume: 1.0 });
+            loadedAudioBase64 = "";
+            loadedAudioName = "";
+            soundFileInput.value = "";
+            labelSoundBtn.innerText = "🎵 Choose Sound Asset";
+            this.disabled = true;
+            if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
         });
-        
-        loadedAudioBase64 = "";
-        loadedAudioName = "";
-        soundFileInput.value = "";
-        labelSoundBtn.innerText = "🎵 Choose Sound Asset";
-        this.disabled = true;
-        
-        renderStagedSoundsUI();
-    });
+    }
 
-    // Save and register configuration handler
     document.getElementById("save-reward-btn").addEventListener("click", () => {
         const nameEl = document.getElementById("reward-name-input");
         const textEl = document.getElementById("reward-text-input");
-
         const nameKey = nameEl.value.trim().toLowerCase();
         const alertText = textEl.value.trim();
-        
-        let finalImage = pendingImageBase64 ? pendingImageBase64 : urlInput.value.trim();
 
         if (!nameKey || !alertText) {
             alert("Reward Name and Alert Text are required!");
             return;
         }
 
-        rewardAlerts[nameKey] = {
+        const payload = {
             text: alertText,
-            image: finalImage,
-            textInAnim: getCustomSelectValue("reward-text-in-anim"),
-            textOutAnim: getCustomSelectValue("reward-text-out-anim"),
-            imgInAnim: getCustomSelectValue("reward-img-in-anim"),
-            imgOutAnim: getCustomSelectValue("reward-img-out-anim"),
+            image: pendingImageBase64 ? pendingImageBase64 : urlInput.value.trim(),
             sounds: [...stagedSoundsPool],
-            fontSize: fontSizeInput.value.trim(),
-            fontColor: fontColorHex.value.trim(),
-            textOutline: textOutlineInput.value.trim(),
-            fontWeight: getCustomSelectValue("reward-font-weight"),
-            imgSize: imgSizeInput.value.trim() || "",
-            textDuration: textDurationInput ? textDurationInput.value.trim() : "",
-            imgMode: getCustomSelectValue("reward-img-mode"),
-            imgDuration: imgDurationInput ? imgDurationInput.value.trim() : ""
+            fontColor: fontColorHex.value.trim()
         };
+
+        REWARD_SELECTS_REGISTRY.forEach(item => {
+            payload[item.id.replace("reward-", "").replace(/-([a-z])/g, g => g[1].toUpperCase())] = getCustomSelectValue(item.id);
+        });
+        REWARD_INPUTS_REGISTRY.forEach(item => {
+            const el = document.getElementById(item.id);
+            payload[item.id.replace("reward-", "").replace(/-([a-z])/g, g => g[1].toUpperCase())] = el ? el.value.trim() : "";
+        });
+
+        rewardAlerts[nameKey] = payload;
         saveRewardAlerts();
 
-        // UI Reset sequence
+        // Standardized cleanup cascade
         nameEl.value = "";
         textEl.value = "";
         urlInput.value = "";
         urlInput.placeholder = "Web Image/GIF URL";
         fileInput.value = "";
+        soundFileInput.value = "";
         pendingImageBase64 = "";
-        
-        // Dynamic resets to state-engine variable tracking entries
-        setCustomSelectValue("reward-text-in-anim", "none");
-        setCustomSelectValue("reward-text-out-anim", "none");
-        setCustomSelectValue("reward-img-in-anim", "none");
-        setCustomSelectValue("reward-img-out-anim", "none");
-        setCustomSelectValue("reward-font-weight", "bold");
-        setCustomSelectValue("reward-img-mode", "loop");
-        
-        fontSizeInput.value = "";
+        loadedAudioBase64 = "";
+        loadedAudioName = "";
+        labelSoundBtn.innerText = "🎵 Choose Sound Asset";
+        if (addSoundBtn) addSoundBtn.disabled = true;
         fontColorPicker.value = "#ffffff";
         fontColorHex.value = "#ffffff";
-        textOutlineInput.value = "";
-        imgSizeInput.value = "";
-        
-        if (textDurationInput) textDurationInput.value = "";
-        if (imgDurationInput) imgDurationInput.value = "";
-        
         stagedSoundsPool = [];
+
+        REWARD_SELECTS_REGISTRY.forEach(item => setCustomSelectValue(item.id, item.def));
+        REWARD_INPUTS_REGISTRY.forEach(item => { const el = document.getElementById(item.id); if (el) el.value = ""; });
+
         if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
-        soundFileInput.value = "";
-        labelSoundBtn.innerText = "🎵 Choose Sound Asset";
-        addSoundBtn.disabled = true;
-        
         renderRewardsList();
     });
 }
-// --- BITS MANAGER PANEL LOGIC & UI EVENTS ---
-// --- COMPLETE BITS CONFIGURATION ENGINE ---
+
+// ==========================================
+// --- BITS CONFIGURATION ENGINE ---
+// ==========================================
+
 function bindBitManagerEvents() {
     const bitManagerWindow = document.getElementById("bit-manager");
-    const closeBitsTopBtn = document.getElementById("close-bits-top-btn");
-    const closeBitManagerBtn = document.getElementById("close-bit-manager-btn");
-    
     if (!bitManagerWindow) return;
 
-    // Ensure active data attribute fallback is set
     const tierDisplay = document.getElementById("current-bit-tier-display");
     if (tierDisplay && !tierDisplay.getAttribute("data-selected-tier")) {
         tierDisplay.setAttribute("data-selected-tier", "1");
     }
 
-    // 1. Panel Close Controls
-    if (closeBitsTopBtn) closeBitsTopBtn.addEventListener("click", () => bitManagerWindow.style.display = "none");
-    if (closeBitManagerBtn) closeBitManagerBtn.addEventListener("click", () => bitManagerWindow.style.display = "none");
+    // Set up animation selectors via structural loop mapping
+    DROPDOWN_CONFIGS.forEach(cfg => setupCustomDropdownEngine(cfg.display, cfg.options, cfg.list));
 
-    // 2. Dynamic Animation Dropdowns Population
-    const animationLists = ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"];
-    const exitAnimationLists = ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"];
-
-    function setupBitAnimDropdown(displayId, optionsId, optionsArr) {
-        const displayEl = document.getElementById(displayId);
-        const optionsEl = document.getElementById(optionsId);
-        if (!displayEl || !optionsEl) return;
-
-        // Populate options box items
-        optionsEl.innerHTML = "";
-        optionsArr.forEach(anim => {
-            const opt = document.createElement("div");
-            opt.className = "option-item";
-            opt.style.padding = "4px 8px";
-            opt.style.cursor = "pointer";
-            opt.innerText = anim;
-            opt.addEventListener("click", (e) => {
-                e.stopPropagation();
-                displayEl.innerText = anim;
-                optionsEl.style.display = "none";
-            });
-            optionsEl.appendChild(opt);
-        });
-
-        // Toggle open state on click
-        displayEl.addEventListener("click", (e) => {
-            e.stopPropagation();
-            // Clear out any other open options boxes first
-            document.querySelectorAll(".custom-select-options-box").forEach(box => {
-                if (box !== optionsEl) box.style.display = "none";
-            });
-            const isOpen = optionsEl.style.display === "block";
-            optionsEl.style.display = isOpen ? "none" : "block";
-        });
-    }
-
-    // Initialize animation matrix mapping layouts
-    setupBitAnimDropdown("display-bit-text-in-anim", "options-bit-text-in-anim", animationLists);
-    setupBitAnimDropdown("display-bit-text-out-anim", "options-bit-text-out-anim", exitAnimationLists);
-    setupBitAnimDropdown("display-bit-img-in-anim", "options-bit-img-in-anim", animationLists);
-    setupBitAnimDropdown("display-bit-img-out-anim", "options-bit-img-out-anim", exitAnimationLists);
-
-    // 3. UI Sync Machine (Loads data out of registry into inputs)
     function loadBitTierToUI(tier) {
         if (!registry.bits || !registry.bits[tier]) return;
         const data = registry.bits[tier];
@@ -868,15 +835,13 @@ function bindBitManagerEvents() {
         document.getElementById("display-bit-img-out-anim").innerText = data.anim_im_out || "none";
     }
 
-    // 4. Main Threshold Tier Dropdown Selector Engine
     const tierSelector = document.getElementById("bit-tier-selector");
     const tierOptionsContainer = document.getElementById("bit-tier-options");
 
     if (tierSelector && tierOptionsContainer) {
         tierSelector.addEventListener("click", (e) => {
             e.stopPropagation();
-            const isOpen = tierOptionsContainer.style.display === "block";
-            tierOptionsContainer.style.display = isOpen ? "none" : "block";
+            tierOptionsContainer.style.display = tierOptionsContainer.style.display === "block" ? "none" : "block";
         });
 
         tierOptionsContainer.querySelectorAll(".option-item").forEach(item => {
@@ -886,22 +851,17 @@ function bindBitManagerEvents() {
                 tierDisplay.textContent = item.textContent;
                 tierDisplay.setAttribute("data-selected-tier", targetTier);
                 tierOptionsContainer.style.display = "none";
-                
-                // Synchronize data immediately on choice
                 loadBitTierToUI(targetTier);
             });
         });
     }
 
-    // 5. Data Core Save Handler Loop
     const saveBtn = document.getElementById("save-bit-config-btn");
     if (saveBtn) {
         saveBtn.addEventListener("click", async () => {
             const activeTier = tierDisplay.getAttribute("data-selected-tier") || "1";
-            
             if (!registry.bits) registry.bits = {};
             
-            // Build saved payload state from fields
             registry.bits[activeTier] = {
                 text: document.getElementById("bit-text-input").value.trim(),
                 img: document.getElementById("bit-img-input").value.trim(),
@@ -914,10 +874,8 @@ function bindBitManagerEvents() {
                 anim_im_out: document.getElementById("display-bit-img-out-anim").innerText
             };
 
-            // Commit transaction data changes locally
             localStorage.setItem('p8_registry', JSON.stringify(registry));
             
-            // Trigger confirmation dialog popups
             if (typeof p8Confirm === "function") {
                 await p8Confirm(`Tier Configuration (${activeTier}+ Bits) Saved Securely!`, true);
             } else {
@@ -926,9 +884,12 @@ function bindBitManagerEvents() {
         });
     }
 
-    // Initial default run on boot
     loadBitTierToUI(tierDisplay.getAttribute("data-selected-tier") || "1");
 }
+
+// ==========================================
+// --- REWARDS LIST GENERATION SYSTEM ---
+// ==========================================
 
 function renderRewardsList() {
     const container = document.getElementById("rewards-list-container");
@@ -961,7 +922,6 @@ function renderRewardsList() {
         const tOutline = rewardData.textOutline || "[Default]";
         const iSize = rewardData.imgSize || "[Default]";
         
-        // Runtime fallbacks for list visualization
         const tDur = rewardData.textDuration ? `${rewardData.textDuration}ms` : "8000ms [Def]";
         const iMode = rewardData.imgMode || "loop";
         const iDur = rewardData.imgDuration ? `${rewardData.imgDuration}ms` : (iMode === "once" ? "Once Match" : "Text Match");
@@ -983,31 +943,24 @@ function renderRewardsList() {
             </div>
         `;
 
-        // Trigger Simulated Alert Testing Pipeline
         item.querySelector(".test-btn").addEventListener("click", () => {
             triggerAlertPipeline(key, "StreamerTest", 500, "Testing my custom overlays!");
         });
 
-        // Populate form layout parameters on Edit click
         item.querySelector(".alt-btn").addEventListener("click", () => {
             document.getElementById("reward-name-input").value = key;
             document.getElementById("reward-text-input").value = rewardData.text;
-            
-            document.getElementById("reward-font-size").value = rewardData.fontSize || "";
             document.getElementById("reward-font-color").value = rewardData.fontColor || "#ffffff";
             document.getElementById("reward-font-color-hex").value = rewardData.fontColor || "#ffffff";
-            document.getElementById("reward-text-outline").value = rewardData.textOutline || "";
-            document.getElementById("reward-img-size").value = rewardData.imgSize || "";
-            
-            // Map configuration fields during target selection
-            if (document.getElementById("reward-text-duration")) {
-                document.getElementById("reward-text-duration").value = rewardData.textDuration || "";
-            }
-            if (document.getElementById("reward-img-duration")) {
-                document.getElementById("reward-img-duration").value = rewardData.imgDuration || "";
-            }
-            
-            // --- DROPDOWN WORKSPACE STATE ENGINES MAPPING REPLACEMENTS ---
+
+            REWARD_INPUTS_REGISTRY.forEach(param => {
+                const targetField = document.getElementById(param.id);
+                if (targetField) {
+                    const keyProp = param.id.replace("reward-", "").replace(/-([a-z])/g, g => g[1].toUpperCase());
+                    targetField.value = rewardData[keyProp] || "";
+                }
+            });
+
             setCustomSelectValue("reward-text-in-anim", tIn);
             setCustomSelectValue("reward-text-out-anim", tOut);
             setCustomSelectValue("reward-img-in-anim", iIn);
@@ -1026,18 +979,10 @@ function renderRewardsList() {
             }
             document.getElementById("reward-file-input").value = "";
 
-            // --- LOAD PRE-EXISTING SOUNDS INTO THE POOL EDITOR ---
-            if (rewardData.sounds && Array.isArray(rewardData.sounds)) {
-                stagedSoundsPool = [...rewardData.sounds];
-            } else {
-                stagedSoundsPool = [];
-            }
-            if (typeof renderStagedSoundsUI === "function") {
-                renderStagedSoundsUI();
-            }
+            stagedSoundsPool = (rewardData.sounds && Array.isArray(rewardData.sounds)) ? [...rewardData.sounds] : [];
+            if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
         });
 
-        // Bind delete processing
         item.querySelector(".del-btn").addEventListener("click", () => {
             if (confirm(`Remove alert layout tracking for [${key}]?`)) {
                 delete rewardAlerts[key];
@@ -1049,188 +994,220 @@ function renderRewardsList() {
         container.appendChild(item);
     });
 }
-
 // --- EVENT BINDING ---
 
 //=====  NOTE: ======
 // getting redundant lol make a more dynamic close buttons etc later
 //===================
+// ==========================================
+// --- CENTRAL MASTER APPLICATION ENGINE ---
+// ==========================================
+// =========================================================================
+// --- DECLARATIVE ROUTING MAPS (Predefined for Maximum Maintenance) ---
+// =========================================================================
+
+// Maps trigger elements to their target interface panels and optional callback lifecycle hooks
+const PANEL_NAVIGATION_MAPS = [
+    { 
+        triggerId: "ctx-open-editor", 
+        targetId: "style-editor", 
+        onOpen: () => { if (typeof renderThemeList === "function") renderThemeList(); } 
+    },
+    { 
+        triggerId: "quick-theme-btn", 
+        targetId: "style-editor", 
+        onOpen: () => { if (typeof renderThemeList === "function") renderThemeList(); } 
+    },
+    { 
+        triggerId: "ctx-open-rewards", 
+        targetId: "rewards-manager", 
+        onOpen: () => { 
+            if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); 
+            if (typeof renderRewardsList === "function") renderRewardsList(); 
+        } 
+    },
+    { 
+        triggerId: "ctx-open-settings", 
+        targetId: "settings-window", 
+        onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); } 
+    }
+];
+
+// Maps HTML inputs/buttons to reactive parameters, executing automated mutations and context syncs
+const BOOLEAN_TOGGLE_MAPS = [
+    { id: "settings-toggle-master-alerts", type: "change", valuePath: "checked", invert: true, assignTo: (val) => { alertHidden = val; }, onSync: () => syncAlertVisibilityState() },
+    { id: "mgr-toggle-alert-btn",          type: "click",  valuePath: null,      invert: false, assignTo: () => { alertHidden = !alertHidden; }, onSync: () => syncAlertVisibilityState() },
+    { id: "settings-toggle-rewards",       type: "change", valuePath: "checked", invert: false, assignTo: (val) => { rewardsEnabled = val; }, onSync: () => saveSettings() },
+    { id: "settings-toggle-bits",          type: "change", valuePath: "checked", invert: false, assignTo: (val) => { bitsEnabled = val; }, onSync: () => saveSettings() },
+    { id: "mgr-toggle-bits-btn",           type: "click",  valuePath: null,      invert: false, assignTo: () => { bitsEnabled = !bitsEnabled; }, onSync: () => saveSettings() }
+];
+
+// Straight utility mapping dictionary for clean event routing execution pipelines
+const SIMPLE_CLICK_MAPS = [
+    { id: "ctx-reset",     handler: () => systemReset() },
+    { id: "logout-btn-ui", handler: () => systemReset() },
+    { id: "ctx-lock",      handler: () => setEditMode(!isEditMode) }
+];
+
+// Configuration layout for elements requiring dynamic dragging parameters
+const DRAGGABLE_WINDOWS_CONFIG = [
+    { winId: "bit-manager",     headerId: "bit-manager-header" },
+    { winId: "settings-window", headerId: "settings-manager-header" }
+];
+
+// =========================================================================
+// --- MAIN REFACTORED APPLICATION EVENT BINDING ENGINE ---
+// =========================================================================
+// =========================================================================
+// --- DOM UTILITY & EVENT ROUTING HELPERS ---
+// =========================================================================
+
+/**
+ * Safely attaches a click listener to an element if it exists in the DOM.
+ */
+function onSafeClick(id, callback, stopPropagation = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("click", (e) => {
+        if (stopPropagation) e.stopPropagation();
+        callback(e, el);
+    });
+}
+
+/**
+ * Safely attaches a change listener to an input element if it exists in the DOM.
+ */
+function onSafeChange(id, callback) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", (e) => callback(e, el));
+}
+
+/**
+ * Unified context menu closer wrapper
+ */
+function closeContextMenu() {
+    const ctxMenu = document.getElementById('p8-ctx-menu');
+    if (ctxMenu) ctxMenu.style.display = 'none';
+}
+
+
+// =========================================================================
+// --- MAIN EVENT BINDING ENGINE ---
+// =========================================================================
 
 function bindEvents() {
     const SCOPES = "chat:read chat:edit channel:read:redemptions";
-    document.getElementById("login-button").addEventListener("click", () => {
+
+    // 1. Core Platform Auth & Clipboard Utility Wiring
+    onSafeClick("login-button", () => {
         window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(FULL_REDIRECT)}&response_type=token&scope=${encodeURIComponent(SCOPES)}`;
     });
 
-    document.getElementById("obs-url-output").addEventListener("click", function() {
-        navigator.clipboard.writeText(this.innerText);
-        const old = this.innerText; this.innerText = "COPIED TO CLIPBOARD!";
-        setTimeout(() => this.innerText = old, 1500);
+    onSafeClick("obs-url-output", (e, target) => {
+        navigator.clipboard.writeText(target.innerText);
+        const originalText = target.innerText; 
+        target.innerText = "COPIED TO CLIPBOARD!";
+        setTimeout(() => target.innerText = originalText, 1500);
     });
 
-    document.getElementById("ctx-open-editor").addEventListener("click", () => {
-        document.getElementById('style-editor').style.display = 'block';
-        document.getElementById('p8-ctx-menu').style.display = 'none';
-        renderThemeList();
-    });
-
-    document.getElementById("quick-theme-btn").addEventListener("click", () => {
-        document.getElementById('style-editor').style.display = 'block';
-        renderThemeList();
-    });
-    
-    document.getElementById("ctx-lock").addEventListener("click", (e) => {
-        e.stopPropagation();
-        setEditMode(!isEditMode);
-        document.getElementById('p8-ctx-menu').style.display = 'none';
-    });
-
-    // --- CONTEXT MENU TOOL PANEL TRIGGERS ---
-    const rewardsPanel = document.getElementById('rewards-manager');
-    document.getElementById("ctx-open-rewards").addEventListener("click", () => {
-        rewardsPanel.style.display = "block";
-        document.getElementById('p8-ctx-menu').style.display = 'none';
-        updateAllBadgesUI();
-        renderRewardsList();
-    });
-
-    const ctxOpenBits = document.getElementById("ctx-open-bits");
-    if (ctxOpenBits) {
-        ctxOpenBits.addEventListener("click", () => {
-            const bitWindow = document.getElementById("bit-manager");
-            bitWindow.style.display = bitWindow.style.display === "none" ? "block" : "none";
-            document.getElementById('p8-ctx-menu').style.display = 'none';
+    // 2. Loop-Bound Window View Navigation Manager 
+    PANEL_NAVIGATION_MAPS.forEach(cfg => {
+        onSafeClick(cfg.triggerId, () => {
+            const targetPanel = document.getElementById(cfg.targetId);
+            if (targetPanel) targetPanel.style.display = 'block';
+            closeContextMenu();
+            if (cfg.onOpen) cfg.onOpen();
         });
-    }
-
-    // Hook settings panel into the context menu button
-    document.getElementById('ctx-open-settings').addEventListener('click', () => {
-        document.getElementById('settings-window').style.display = 'block';
-        document.getElementById('p8-ctx-menu').style.display = 'none';
-        updateAllBadgesUI(); // Instantly checks or unchecks inputs based on real state
     });
 
-    // Close Button logic for Settings Panel overlay window
-    const closeSettingsBtn = document.getElementById("close-settings-manager-btn");
-    if (closeSettingsBtn) {
-        closeSettingsBtn.addEventListener("click", () => {
-            document.getElementById('settings-window').style.display = 'none';
-        });
-    }
-	// settings x button - 
-    const closeSettingsTopBtn = document.getElementById("close-settings-top-btn");
-    if (closeSettingsTopBtn) {
-        closeSettingsTopBtn.addEventListener("click", () => {
-            document.getElementById('settings-window').style.display = 'none';
-        });
-    }
-    // --- SETTINGS OVERLAY WINDOW INTERFACE TOGGLES ---
-    document.getElementById('settings-toggle-master-alerts').addEventListener('change', (e) => {
-        alertHidden = !e.target.checked;
-        saveSettings();
-        if (alertWidget) {
-            alertWidget.style.display = alertHidden ? "none" : "block";
-            alertWidget.style.opacity = alertHidden ? "0" : "1";
+    // 3. Loop-Bound Reactive App Parameters Settings Sync Engine
+    BOOLEAN_TOGGLE_MAPS.forEach(cfg => {
+        const handler = (e) => {
+            const incomingVal = cfg.valuePath ? e.target[cfg.valuePath] : null;
+            const finalVal = cfg.invert ? !incomingVal : incomingVal;
+            cfg.assignTo(finalVal);
+            if (cfg.onSync) cfg.onSync();
+        };
+
+        if (cfg.type === "change") {
+            onSafeChange(cfg.id, handler);
+        } else {
+            onSafeClick(cfg.id, handler);
         }
     });
 
-    document.getElementById('settings-toggle-rewards').addEventListener('change', (e) => {
-        rewardsEnabled = e.target.checked;
-        saveSettings();
+    // 4. Dynamic Complex Fallback View Custom Triggers Bus
+    onSafeClick("ctx-open-bits", () => {
+        const bitWindow = document.getElementById("bit-manager");
+        if (bitWindow) bitWindow.style.display = bitWindow.style.display === "none" ? "block" : "none";
+        closeContextMenu();
     });
 
-    document.getElementById('settings-toggle-bits').addEventListener('change', (e) => {
-        bitsEnabled = e.target.checked;
-        saveSettings();
+    // 5. Automated Global Window Panels Close Layout Router Loop
+    if (Array.isArray(WINDOW_CLOSE_MAPS)) {
+        WINDOW_CLOSE_MAPS.forEach(mapping => {
+            mapping.triggers.forEach(triggerId => {
+                onSafeClick(triggerId, () => {
+                    const targetWindow = document.getElementById(mapping.win);
+                    if (targetWindow) targetWindow.style.display = 'none';
+                });
+            });
+        });
+    }
+
+    // 6. Loop-Bound Simple Click Interface Bus Dispatcher
+    SIMPLE_CLICK_MAPS.forEach(cfg => {
+        const shouldStopPropagation = (cfg.id === "ctx-lock");
+        onSafeClick(cfg.id, () => {
+            cfg.handler();
+            if (cfg.id.startsWith("ctx-")) closeContextMenu();
+        }, shouldStopPropagation);
     });
 
-    // --- SYSTEM CONSOLE SYSTEM RESETS ---
-    document.getElementById("ctx-reset").addEventListener("click", systemReset);
-    document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
-    document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
-    
-    // Top right X close button for Theme Manager
-    document.getElementById("close-editor-top-btn").addEventListener("click", () => {
-        document.getElementById('style-editor').style.display = 'none';
+    // 7. Core Styling Custom Dropdown Elements Actions Setup
+    onSafeClick("current-theme-display", () => {
+        const themeOptions = document.getElementById('theme-options');
+        if (themeOptions) {
+            themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+        }
+    }, true); // Stop propagation to avoid immediate document body dismiss lifecycle hooks
+
+    onSafeClick("save-theme-btn", async () => {
+        const nameInput = document.getElementById('theme-name-input');
+        const newName = (nameInput ? nameInput.value.trim() : '') || 'Custom Theme';
+        
+        registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
+        registry.active = newName;
+        localStorage.setItem('p8_registry', JSON.stringify(registry));
+        
+        if (typeof renderThemeList === "function") renderThemeList();
+        if (typeof p8Confirm === "function") await p8Confirm('Theme Settings Saved', true);
     });
 
-    // Top right X close button for Channel Point Rewards Manager
-    document.getElementById("close-rewards-top-btn").addEventListener("click", () => {
-        document.getElementById('rewards-manager').style.display = 'none';
-    });
-
-    // --- SIDEBAR ACTIONS CONTROL MANAGEMENT DECKS ---
-    const deckToggleBtn = document.getElementById("mgr-toggle-alert-btn");
-    if (deckToggleBtn) {
-        deckToggleBtn.addEventListener("click", () => {
-            alertHidden = !alertHidden;
-            saveSettings();
-            if (alertWidget) {
-                alertWidget.style.display = alertHidden ? "none" : "block";
-                alertWidget.style.opacity = alertHidden ? "0" : "1";
+    // 8. Loop-Bound Initialization of Draggable Overlay Panels UI
+    if (typeof makeElementDraggable === "function") {
+        DRAGGABLE_WINDOWS_CONFIG.forEach(cfg => {
+            if (document.getElementById(cfg.winId)) {
+                makeElementDraggable(cfg.winId, cfg.headerId);
             }
         });
     }
 
-    const mgrToggleBitsBtn = document.getElementById("mgr-toggle-bits-btn");
-    if (mgrToggleBitsBtn) {
-        mgrToggleBitsBtn.addEventListener("click", () => {
-            bitsEnabled = !bitsEnabled;
-            saveSettings();
-        });
-    }
-
-    document.getElementById('current-theme-display').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const opts = document.getElementById('theme-options');
-        opts.style.display = opts.style.display === 'block' ? 'none' : 'block';
-    });
-
-    document.getElementById('save-theme-btn').addEventListener('click', async () => {
-        const newName = document.getElementById('theme-name-input').value.trim() || 'Custom Theme';
-        registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
-        registry.active = newName;
-        localStorage.setItem('p8_registry', JSON.stringify(registry));
-        renderThemeList();
-        await p8Confirm('Theme Settings Saved', true);
-    });
-
-    // --- WINDOW LAYOUT TOOL INITIALIZATIONS ---
-    if (typeof makeElementDraggable === "function") {
-        if (document.getElementById("bit-manager")) {
-            makeElementDraggable("bit-manager", "bit-manager-header");
-        }
-		if (document.getElementById("settings-window")) {
-            makeElementDraggable("settings-window", "settings-manager-header");
-        }
-    }
-
-    // --- MOUSE & DRAG ENGINE ---
+    // 9. Consolidated Unified Canvas Mouse Tracking and Drag Systems
     window.addEventListener('mousedown', e => {
-        const menu = document.getElementById('p8-ctx-menu');
-        const opts = document.getElementById('theme-options');
+        const ctxMenu = document.getElementById('p8-ctx-menu');
+        const themeOpts = document.getElementById('theme-options');
         
-        // 1. GLOBAL CLOSING LOGIC (Runs on any click across the app)
-        if (menu.style.display === 'block' && !menu.contains(e.target)) menu.style.display = 'none';
-        if (opts.style.display === 'block' && !e.target.closest('#theme-selector')) opts.style.display = 'none';
+        if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) closeContextMenu();
+        if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) themeOpts.style.display = 'none';
         
-        // Clear all standard or dynamic custom select menus if clicking abstractly away from any trigger
         if (!e.target.closest('.select-trigger') && !e.target.closest('.custom-select-display')) {
-            document.querySelectorAll(".select-options").forEach(b => b.style.display = "none");
-            document.querySelectorAll(".custom-select-options-box").forEach(b => b.style.display = "none");
+            document.querySelectorAll(".select-options, .custom-select-options-box").forEach(b => b.style.display = "none");
         }
         
-        // 2. SAFETY INTERCEPT GUARD CLAUSE (Protects inputs and panels from breaking drag states)
-        if (!isEditMode || 
-            e.button !== 0 || 
-            e.target.closest('#style-editor') || 
-            e.target.closest('#rewards-manager') || 
-            e.target.closest('#bit-manager') || 
-            e.target.closest('#settings-window') || // Ensure clicks inside your settings panels don't drag behind canvas elements
-            e.target.closest('.setup-container') || 
-            e.target.closest('.p8-modal')) return;
+        if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, .setup-container, .p8-modal')) return;
         
-        // 3. WIDGET DRAGGING SYSTEM
         dragTarget = e.target.closest('.p8-widget');
         if (dragTarget) {
             const r = dragTarget.getBoundingClientRect();
@@ -1247,7 +1224,7 @@ function bindEvents() {
 
     window.addEventListener('mouseup', () => {
         if (dragTarget) {
-            localStorage.setItem(`p8_pos_${dragTarget.id}`, JSON.stringify({top: dragTarget.style.top, left: dragTarget.style.left}));
+            localStorage.setItem(`p8_pos_${dragTarget.id}`, JSON.stringify({ top: dragTarget.style.top, left: dragTarget.style.left }));
             dragTarget = null;
         }
     });
@@ -1255,17 +1232,18 @@ function bindEvents() {
     window.addEventListener('contextmenu', e => {
         if (e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
         e.preventDefault();
-        const menu = document.getElementById('p8-ctx-menu');
-        menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
+        const ctxMenu = document.getElementById('p8-ctx-menu');
+        if (ctxMenu) {
+            ctxMenu.style.display = 'block'; 
+            ctxMenu.style.left = e.clientX + 'px'; 
+            ctxMenu.style.top = e.clientY + 'px';
+        }
     });
 
-    // Execute sub-panel initialization loops
-    bindRewardsManagerEvents();
-    if (typeof bindBitManagerEvents === "function") {
-        bindBitManagerEvents();
-    }
+    // Execute sub-panel initialization loop frameworks natively
+    if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
+    if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
 }
-
 // --- CENTRALIZED ALERT PIPELINE ENGINE ---
 // Handles formatting, visual injections, animations, and chat confirmation outputs
 function triggerAlertPipeline(reward, user, cost, message) {
