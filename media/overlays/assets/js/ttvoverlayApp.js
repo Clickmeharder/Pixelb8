@@ -1051,6 +1051,11 @@ function renderRewardsList() {
 }
 
 // --- EVENT BINDING ---
+
+//=====  NOTE: ======
+// getting redundant lol make a more dynamic close buttons etc later
+//===================
+
 function bindEvents() {
     const SCOPES = "chat:read chat:edit channel:read:redemptions";
     document.getElementById("login-button").addEventListener("click", () => {
@@ -1112,7 +1117,13 @@ function bindEvents() {
             document.getElementById('settings-window').style.display = 'none';
         });
     }
-
+	// settings x button - 
+    const closeSettingsTopBtn = document.getElementById("close-settings-top-btn");
+    if (closeSettingsTopBtn) {
+        closeSettingsTopBtn.addEventListener("click", () => {
+            document.getElementById('settings-window').style.display = 'none';
+        });
+    }
     // --- SETTINGS OVERLAY WINDOW INTERFACE TOGGLES ---
     document.getElementById('settings-toggle-master-alerts').addEventListener('change', (e) => {
         alertHidden = !e.target.checked;
@@ -1188,6 +1199,9 @@ function bindEvents() {
     if (typeof makeElementDraggable === "function") {
         if (document.getElementById("bit-manager")) {
             makeElementDraggable("bit-manager", "bit-manager-header");
+        }
+		if (document.getElementById("settings-window")) {
+            makeElementDraggable("settings-window", "settings-manager-header");
         }
     }
 
