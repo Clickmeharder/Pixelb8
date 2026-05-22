@@ -590,8 +590,11 @@ const WINDOW_CLOSE_MAPS = [
     { win: "rewards-manager", triggers: ["close-rewards-btn", "close-rewards-top-btn"] },
     { win: "bit-manager",     triggers: ["close-bit-manager-btn", "close-bits-top-btn"] },
     { win: "settings-window",  triggers: ["close-settings-manager-btn", "close-settings-top-btn"] },
-    { win: "style-editor",     triggers: ["close-editor-btn", "close-editor-top-btn"] }
+    { win: "style-editor",     triggers: ["close-editor-btn", "close-editor-top-btn"] },
+	{ win: "widgets-manager",     triggers: [//"close-widgets-manager-btn",
+	"close-widgets-top-btn"] }
 ];
+
 
 // Configuration layout matrix for the Custom Select dropdown boxes
 const DROPDOWN_CONFIGS = [
