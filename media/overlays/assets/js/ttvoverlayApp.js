@@ -1606,7 +1606,7 @@ const commandsRegistry = {
             }
         }
     },
-    "pause": {
+    "pausetimer": {
         adminOnly: true,
         execute: (user, message, flags) => {
             const keys = Object.keys(activeTimers || {});
@@ -1618,7 +1618,7 @@ const commandsRegistry = {
             }
         }
     },
-    "split": {
+    "splittimer": {
         adminOnly: true,
         execute: (user, message, flags) => {
             const keys = Object.keys(activeTimers || {});
@@ -1630,7 +1630,7 @@ const commandsRegistry = {
             }
         }
     },
-    "stop": {
+    "stoptimer": {
         adminOnly: true,
         execute: (user, message, flags) => {
             const keys = Object.keys(activeTimers || {});
