@@ -530,30 +530,34 @@ function toggleBits() {
 
 
 function updateAllBadgesUI() {
-    // 1. Sync the HTML variables natively into your Checkboxes if the window is open
-    const masterCheck = document.getElementById("settings-toggle-master-alerts");
-    const rewardsCheck = document.getElementById("settings-toggle-rewards");
-    const bitsCheck = document.getElementById("settings-toggle-bits");
+    // 1. Resolve State Flags
+    // Read variables matching your memory allocation rules
+    const isAlertActive = (String(alertHidden) !== "true"); 
+    const isRewardsActive = (String(rewardsEnabled) === "true");
+    const isBitsActive = (String(bitsEnabled) === "true");
 
-    if (masterCheck) masterCheck.checked = !alertHidden;
-    if (rewardsCheck) rewardsCheck.checked = rewardsEnabled;
-    if (bitsCheck) bitsCheck.checked = bitsEnabled;
-
-    // 2. Define the badge arrays used across different control manager decks
-    const badges = [
-        { id: "mgr-alert-status-badge", state: !alertHidden },
-        { id: "mgr-bit-status-badge", state: bitsEnabled },
-        { id: "mgr-reward-status-badge", state: rewardsEnabled }, // Ensure this matches your HTML badge ID
-        { id: "mgr-chat-status-badge", state: !chatHidden }
+    // 2. Helper Array Mapping to distribute classes evenly
+    const toggleTargets = [
+        { ids: ["mgr-alert-status-badge"], active: isAlertActive },
+        { ids: ["mgr-rewards-status-badge", "stg-rewards-status-badge"], active: isRewardsActive },
+        { ids: ["mgr-bits-status-badge", "stg-bits-status-badge"], active: isBitsActive },
+        { ids: ["stg-master-status-badge"], active: isAlertActive }
     ];
 
-    badges.forEach(b => {
-        const badge = document.getElementById(b.id);
-        if (!badge) return;
-
-        badge.innerText = b.state ? "ACTIVE" : "MUTED";
-        badge.style.background = b.state ? "#064e3b" : "#7f1d1d";
-        badge.style.color = b.state ? "#a7f3d0" : "#fecaca";
+    // 3. Render Status Updates Loops
+    toggleTargets.forEach(target => {
+        target.ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            
+            if (target.active) {
+                el.innerText = "ACTIVE";
+                el.className = "toggle-status-badge status-enabled";
+            } else {
+                el.innerText = "MUTED";
+                el.className = "toggle-status-badge status-disabled";
+            }
+        });
     });
 }
 //  old toggle
@@ -1006,6 +1010,10 @@ function renderRewardsList() {
 // --- DECLARATIVE ROUTING MAPS (Predefined for Maximum Maintenance) ---
 // =========================================================================
 
+// =========================================================================
+// --- CONFIGURATION MAPS & STRUCTS ---
+// =========================================================================
+
 // Maps trigger elements to their target interface panels and optional callback lifecycle hooks
 const PANEL_NAVIGATION_MAPS = [
     { 
@@ -1051,13 +1059,11 @@ const SIMPLE_CLICK_MAPS = [
 
 // Configuration layout for elements requiring dynamic dragging parameters
 const DRAGGABLE_WINDOWS_CONFIG = [
-    { winId: "bit-manager",     headerId: "bit-manager-header" },
+    { winId: "bit-manager",      headerId: "bit-manager-header" },
     { winId: "settings-window", headerId: "settings-manager-header" }
 ];
 
-// =========================================================================
-// --- MAIN REFACTORED APPLICATION EVENT BINDING ENGINE ---
-// =========================================================================
+
 // =========================================================================
 // --- DOM UTILITY & EVENT ROUTING HELPERS ---
 // =========================================================================
@@ -1093,7 +1099,7 @@ function closeContextMenu() {
 
 
 // =========================================================================
-// --- MAIN EVENT BINDING ENGINE ---
+// --- MAIN REFACTORED APPLICATION EVENT BINDING ENGINE ---
 // =========================================================================
 
 function bindEvents() {
@@ -1145,14 +1151,16 @@ function bindEvents() {
     });
 
     // 5. Automated Global Window Panels Close Layout Router Loop
-    if (Array.isArray(WINDOW_CLOSE_MAPS)) {
+    if (typeof WINDOW_CLOSE_MAPS !== 'undefined' && Array.isArray(WINDOW_CLOSE_MAPS)) {
         WINDOW_CLOSE_MAPS.forEach(mapping => {
-            mapping.triggers.forEach(triggerId => {
-                onSafeClick(triggerId, () => {
-                    const targetWindow = document.getElementById(mapping.win);
-                    if (targetWindow) targetWindow.style.display = 'none';
+            if (mapping && Array.isArray(mapping.triggers)) {
+                mapping.triggers.forEach(triggerId => {
+                    onSafeClick(triggerId, () => {
+                        const targetWindow = document.getElementById(mapping.win);
+                        if (targetWindow) targetWindow.style.display = 'none';
+                    });
                 });
-            });
+            }
         });
     }
 
@@ -1177,12 +1185,14 @@ function bindEvents() {
         const nameInput = document.getElementById('theme-name-input');
         const newName = (nameInput ? nameInput.value.trim() : '') || 'Custom Theme';
         
-        registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
-        registry.active = newName;
-        localStorage.setItem('p8_registry', JSON.stringify(registry));
-        
-        if (typeof renderThemeList === "function") renderThemeList();
-        if (typeof p8Confirm === "function") await p8Confirm('Theme Settings Saved', true);
+        if (typeof registry !== 'undefined' && registry.themes) {
+            registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
+            registry.active = newName;
+            localStorage.setItem('p8_registry', JSON.stringify(registry));
+            
+            if (typeof renderThemeList === "function") renderThemeList();
+            if (typeof p8Confirm === "function") await p8Confirm('Theme Settings Saved', true);
+        }
     });
 
     // 8. Loop-Bound Initialization of Draggable Overlay Panels UI
@@ -1199,14 +1209,18 @@ function bindEvents() {
         const ctxMenu = document.getElementById('p8-ctx-menu');
         const themeOpts = document.getElementById('theme-options');
         
+        // Context menu and theme select auto-dismiss rules
         if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) closeContextMenu();
         if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) themeOpts.style.display = 'none';
         
+        // Select boxes dismiss framework
         if (!e.target.closest('.select-trigger') && !e.target.closest('.custom-select-display')) {
             document.querySelectorAll(".select-options, .custom-select-options-box").forEach(b => b.style.display = "none");
         }
         
-        if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, .setup-container, .p8-modal')) return;
+        // Guard checking for element layout editor draggable canvas states
+        if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 || 
+            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, .setup-container, .p8-modal')) return;
         
         dragTarget = e.target.closest('.p8-widget');
         if (dragTarget) {
@@ -1216,14 +1230,14 @@ function bindEvents() {
     });
 
     window.addEventListener('mousemove', e => {
-        if (dragTarget) {
+        if (typeof dragTarget !== 'undefined' && dragTarget) {
             dragTarget.style.left = (e.clientX - offset.x) + 'px';
             dragTarget.style.top = (e.clientY - offset.y) + 'px';
         }
     });
 
     window.addEventListener('mouseup', () => {
-        if (dragTarget) {
+        if (typeof dragTarget !== 'undefined' && dragTarget) {
             localStorage.setItem(`p8_pos_${dragTarget.id}`, JSON.stringify({ top: dragTarget.style.top, left: dragTarget.style.left }));
             dragTarget = null;
         }
@@ -1244,6 +1258,7 @@ function bindEvents() {
     if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
     if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
 }
+
 // --- CENTRALIZED ALERT PIPELINE ENGINE ---
 // Handles formatting, visual injections, animations, and chat confirmation outputs
 function triggerAlertPipeline(reward, user, cost, message) {

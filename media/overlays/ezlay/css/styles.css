@@ -570,6 +570,75 @@ body.edit-mode .p8-widget:active {
     color: #ffeb3b; 
 }
 
+/* --- UNIFIED SHARED COMPONENT TOGGLE STYLES --- */
+.toggle-status-badge {
+    font-size: 10px;
+    font-family: monospace;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: inline-block;
+    min-width: 50px;
+    text-align: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Color indicators for active vs inactive state metrics */
+.toggle-status-badge.status-enabled {
+    background-color: rgba(34, 197, 94, 0.2) !important;
+    color: #4ade80 !important;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.toggle-status-badge.status-disabled {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.toggle-action-btn {
+    background: var(--accent);
+    border: none;
+    color: white;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+.toggle-action-btn:hover {
+    filter: brightness(1.15);
+}
+
+.toggle-action-btn:active {
+    transform: scale(0.96);
+}
+
+/* Settings window structural panel mapping */
+.settings-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #18181b;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #27272a;
+}
+
+.settings-toggle-label {
+    font-size: 11px;
+    color: #e4e4e7;
+}
+
+.settings-toggle-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .obs-box { 
     background: #000; 
     padding: 12px; 
@@ -717,3 +786,11 @@ body.edit-mode .p8-widget:active {
     background: var(--accent);
     color: #000 !important;
 }
+
+
+
+
+
+
+
+
