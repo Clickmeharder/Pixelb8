@@ -1265,6 +1265,88 @@ function renderThemeList() {
     });
 }
 
+function makeElementDraggable(targetId, handleId) {
+    const target = document.getElementById(targetId);
+    const handle = document.getElementById(handleId);
+
+    if (!target || !handle) return;
+
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    handle.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        // Only drag on left click
+        if (e.button !== 0) return;
+        
+        e.preventDefault();
+        
+        // Get the initial mouse cursor position
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        
+        // Attach event listeners for moving and releasing the mouse
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        
+        // Calculate the new cursor position
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        
+        // Clear center transforms on the style editor if it's the target
+        // This prevents the CSS 'transform: translate(-50%, -50%)' from fighting the new positions
+        if (target.style.transform) {
+            const rect = target.getBoundingClientRect();
+            target.style.transform = 'none';
+            target.style.left = rect.left + 'px';
+            target.style.top = rect.top + 'px';
+        }
+
+        // Set the element's new absolute position coordinates
+        let newTop = target.offsetTop - pos2;
+        let newLeft = target.offsetLeft - pos1;
+
+        // Optional boundary guard: Keep window inside the viewport
+        if (newTop < 0) newTop = 0;
+        if (newLeft < 0) newLeft = 0;
+        if (newLeft + target.offsetWidth > window.innerWidth) {
+            newLeft = window.innerWidth - target.offsetWidth;
+        }
+        if (newTop + target.offsetHeight > window.innerHeight) {
+            newTop = window.innerHeight - target.offsetHeight;
+        }
+
+        target.style.top = newTop + "px";
+        target.style.left = newLeft + "px";
+        
+        // Clear right/bottom anchors so they don't fight the explicit top/left styling
+        target.style.right = 'auto';
+        target.style.bottom = 'auto';
+    }
+
+    function closeDragElement() {
+        // Stop moving when mouse button is released
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+}
+
+// --- INITIALIZE DRAGGING FOR BOTH WINDOWS ---
+document.addEventListener("DOMContentLoaded", () => {
+    // Parameter 1: The Main Window Element ID
+    // Parameter 2: The Header/Handle Element ID
+    makeElementDraggable("style-editor", "theme-manager-header");
+    makeElementDraggable("rewards-manager", "rewards-manager-header");
+});
+
 function loadPositions() {
     document.querySelectorAll('.p8-widget').forEach(el => {
         const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
