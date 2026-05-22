@@ -1,3 +1,7 @@
+
+// --- MODULE IMPORTS ---
+import { EntropiaWidget } from './entropia-widget.js';
+
 // --- STORAGE & SETTINGS INITIALIZATION ---
 let settings = JSON.parse(localStorage.getItem('p8_settings')) || {
     botPrefix: "🤖[BOT]:",
@@ -414,12 +418,19 @@ function init() {
     // Core Layout & Registry Loading
     loadPositions();
     renderThemeControls();
+    
+    // --- INITIALIZE ENTROPIA WIDGET PARSER ---
+    window.entropiaLogParser = new EntropiaWidget();
+
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 
-	populateCustomDropdowns();
+    populateCustomDropdowns();
+    
     // Bind all event listeners to the DOM
     bindEvents();
+	console.log("ttvoverlayapp.js version 0.112 finished loading");
 }
+
 function setEditMode(state) {
     isEditMode = state;
     document.body.classList.toggle('edit-mode', isEditMode);
@@ -429,6 +440,7 @@ function setEditMode(state) {
 /*     if (typeof updateTimerWidgetVisibility === "function") {
         updateTimerWidgetVisibility();
     } */
+	
 }
 
 function applyTheme(name) {
@@ -2713,4 +2725,4 @@ function bindEvents() {
 
 init();
 
-console.log("ttvoverlayapp.js version 0.112 finished loading");
+
