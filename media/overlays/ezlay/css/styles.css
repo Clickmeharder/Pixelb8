@@ -295,7 +295,25 @@ body.edit-mode .p8-widget:active {
     overflow-y: auto;    
     box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
+#widgets-manager-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 15px; 
+    border-bottom: 1px solid #27272a; 
+    padding-bottom: 10px; 
+    position: sticky; 
+    top: -20px; 
+    background: #09090b;
+    z-index: 10;
+    margin: -20px;
+    margin-top: -20px;
+    margin-bottom: 15px;
+    padding-top: 20px;
+    cursor: move;
+    user-select: none;
 
+}
 .collapsible-section {
     border: 1px solid #27272a;
     border-radius: 6px;
@@ -394,7 +412,7 @@ body.edit-mode .p8-widget:active {
 /* Make headers look and feel like draggable windows */
 #theme-manager-header, 
 #rewards-manager-header,
-#bit-manager-header {
+#bit-manager-header, #widgets-manager-header {
     padding: 8px;
     cursor: move; 
     user-select: none; 
