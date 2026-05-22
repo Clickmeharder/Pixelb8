@@ -395,13 +395,18 @@ function bindRewardsManagerEvents() {
     const addSoundBtn = document.getElementById("push-sound-btn");
     const labelSoundBtn = document.getElementById("add-sound-file-btn");
 
-    // Form inputs for styling engine
+    // Style and Pipeline Lifetime Configuration Elements
     const fontSizeInput = document.getElementById("reward-font-size");
     const fontColorPicker = document.getElementById("reward-font-color");
     const fontColorHex = document.getElementById("reward-font-color-hex");
     const textOutlineInput = document.getElementById("reward-text-outline");
     const fontWeightSelect = document.getElementById("reward-font-weight");
     const imgSizeInput = document.getElementById("reward-img-size");
+    
+    // New Lifetime & GIF Playback Elements
+    const textDurationInput = document.getElementById("reward-text-duration");
+    const imgModeSelect = document.getElementById("reward-img-mode");
+    const imgDurationInput = document.getElementById("reward-img-duration");
 
     // Synchronize color picker with hex input field natively
     if (fontColorPicker && fontColorHex) {
@@ -552,12 +557,15 @@ function bindRewardsManagerEvents() {
             imgInAnim: document.getElementById("reward-img-in-anim").value,
             imgOutAnim: document.getElementById("reward-img-out-anim").value,
             sounds: [...stagedSoundsPool],
-            // Capture custom style configurations cleanly
             fontSize: fontSizeInput.value.trim(),
             fontColor: fontColorHex.value.trim(),
             textOutline: textOutlineInput.value.trim(),
             fontWeight: fontWeightSelect.value,
-            imgSize: imgSizeInput.value.trim() || ""
+            imgSize: imgSizeInput.value.trim() || "",
+            // Assign lifetime settings to storage template
+            textDuration: textDurationInput ? textDurationInput.value.trim() : "",
+            imgMode: imgModeSelect ? imgModeSelect.value : "loop",
+            imgDuration: imgDurationInput ? imgDurationInput.value.trim() : ""
         };
         saveRewardAlerts();
 
@@ -573,13 +581,16 @@ function bindRewardsManagerEvents() {
         document.getElementById("reward-img-in-anim").value = "none";
         document.getElementById("reward-img-out-anim").value = "none";
         
-        // Reset custom style fields to defaults
         fontSizeInput.value = "";
         fontColorPicker.value = "#ffffff";
         fontColorHex.value = "#ffffff";
         textOutlineInput.value = "";
         fontWeightSelect.value = "bold";
-        imgSizeInput.value = "100%";
+        imgSizeInput.value = "";
+        
+        if (textDurationInput) textDurationInput.value = "";
+        if (imgModeSelect) imgModeSelect.value = "loop";
+        if (imgDurationInput) imgDurationInput.value = "";
         
         stagedSoundsPool = [];
         if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
@@ -590,6 +601,7 @@ function bindRewardsManagerEvents() {
         renderRewardsList();
     });
 }
+
 function renderRewardsList() {
     const container = document.getElementById("rewards-list-container");
     if (!container) return;
@@ -609,27 +621,30 @@ function renderRewardsList() {
         const isBase64 = rewardData.image && rewardData.image.startsWith("data:");
         const imageDisplaySrc = isBase64 ? "[Local Embedded File]" : (rewardData.image || "[None]");
 
-        // Default configurations for backward compatibility with older saves
         const tIn = rewardData.textInAnim || "none";
         const tOut = rewardData.textOutAnim || "none";
         const iIn = rewardData.imgInAnim || "none";
         const iOut = rewardData.imgOutAnim || "none";
         const soundCount = rewardData.sounds ? rewardData.sounds.length : 0;
         
-        // Style fallback indicators for UI display
         const fSize = rewardData.fontSize || "[Default]";
         const fColor = rewardData.fontColor || "#ffffff";
         const fWeight = rewardData.fontWeight || "bold";
         const tOutline = rewardData.textOutline || "[Default]";
         const iSize = rewardData.imgSize || "[Default]";
+        
+        // Runtime fallbacks for list visualization
+        const tDur = rewardData.textDuration ? `${rewardData.textDuration}ms` : "8000ms [Def]";
+        const iMode = rewardData.imgMode || "loop";
+        const iDur = rewardData.imgDuration ? `${rewardData.imgDuration}ms` : (iMode === "once" ? "Once Match" : "Text Match");
 
         item.innerHTML = `
             <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">${key}</div>
             <div style="font-size: 12px; color: #e4e4e7; margin-bottom: 2px; word-break: break-word;"><strong>Txt:</strong> ${rewardData.text}</div>
             <div style="font-size: 11px; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>Asset:</strong> ${imageDisplaySrc}</div>
             <div style="font-size: 10px; color: #71717a; margin-top: 4px; font-family: monospace; line-height: 1.4;">
-                Txt: [In: ${tIn} | Out: ${tOut}]<br>
-                Img: [In: ${iIn} | Out: ${iOut}]<br>
+                Txt: [In: ${tIn} | Out: ${tOut}] (Dur: ${tDur})<br>
+                Img: [In: ${iIn} | Out: ${iOut}] (Playback: ${iMode} | Dur: ${iDur})<br>
                 Style: [Sz: ${fSize} | Clr: ${fColor} | Wt: ${fWeight} | Outln: ${tOutline} | ImgSz: ${iSize}]<br>
                 Audio Pool: [${soundCount} active sounds]
             </div>
@@ -654,13 +669,23 @@ function renderRewardsList() {
             document.getElementById("reward-img-in-anim").value = iIn;
             document.getElementById("reward-img-out-anim").value = iOut;
             
-            // Populate form styling selectors on item edit cleanly
             document.getElementById("reward-font-size").value = rewardData.fontSize || "";
             document.getElementById("reward-font-color").value = rewardData.fontColor || "#ffffff";
             document.getElementById("reward-font-color-hex").value = rewardData.fontColor || "#ffffff";
             document.getElementById("reward-text-outline").value = rewardData.textOutline || "";
             document.getElementById("reward-font-weight").value = rewardData.fontWeight || "bold";
             document.getElementById("reward-img-size").value = rewardData.imgSize || "";
+            
+            // Map configuration fields during target selection
+            if (document.getElementById("reward-text-duration")) {
+                document.getElementById("reward-text-duration").value = rewardData.textDuration || "";
+            }
+            if (document.getElementById("reward-img-mode")) {
+                document.getElementById("reward-img-mode").value = rewardData.imgMode || "loop";
+            }
+            if (document.getElementById("reward-img-duration")) {
+                document.getElementById("reward-img-duration").value = rewardData.imgDuration || "";
+            }
             
             if (isBase64) {
                 pendingImageBase64 = rewardData.image;
@@ -696,6 +721,7 @@ function renderRewardsList() {
         container.appendChild(item);
     });
 }
+
 // --- EVENT BINDING ---
 function bindEvents() {
     const SCOPES = "chat:read chat:edit channel:read:redemptions";
@@ -793,7 +819,6 @@ function triggerAlertPipeline(reward, user, cost, message) {
 
     // --- FIX: If alerts are muted/hidden globally, skip all visual/audio renderings ---
     if (alertHidden) {
-        // Execute the chat logs anyway so the streamer doesn't lose context
         if (lookupName === "hydrate") {
             botSay(`Drink up, Captain @${user}!`);
         } else if (lookupName === "fart") {
@@ -806,7 +831,11 @@ function triggerAlertPipeline(reward, user, cost, message) {
 
     if (!alertWidget || !alertText) return;
 
-    // --- RESET THE ARCHITECTURE BACK TO STYLESHEET DEFAULTS ---
+    // Clear tracking timeouts to prevent cascading visual collapses
+    clearTimeout(window.fadeTimeout);
+    clearTimeout(window.imgClearTimeout);
+
+    // Reset layout modifications back to global defaults
     alertText.style.fontSize = "";
     alertText.style.color = "";
     alertText.style.fontWeight = "";
@@ -825,10 +854,14 @@ function triggerAlertPipeline(reward, user, cost, message) {
         fontColor: "",
         textOutline: "",
         fontWeight: "bold",
-        imgSize: ""
+        imgSize: "",
+        // Lifecycles tracking parameters
+        textDuration: 8000, 
+        imgMode: "loop",
+        imgDuration: null
     };
 
-    // If custom configurations are discovered inside memory cache arrays, apply overrides
+    // Apply custom settings overrides if present in store matching records
     if (rewardAlerts && rewardAlerts[lookupName]) {
         const custom = rewardAlerts[lookupName];
         config.text = custom.text
@@ -844,22 +877,28 @@ function triggerAlertPipeline(reward, user, cost, message) {
         if (custom.imgOutAnim) config.imgOutAnim = custom.imgOutAnim;
         if (custom.sounds) config.sounds = custom.sounds; 
 
-        // Extract customized presentation configurations
         config.fontSize = custom.fontSize || "";
         config.fontColor = custom.fontColor || "";
         config.textOutline = custom.textOutline || "";
         config.fontWeight = custom.fontWeight || "bold";
         config.imgSize = custom.imgSize || "";
+        
+        // Parse custom durations smoothly
+        if (custom.textDuration && !isNaN(custom.textDuration)) {
+            config.textDuration = parseInt(custom.textDuration, 10);
+        }
+        if (custom.imgMode) config.imgMode = custom.imgMode;
+        if (custom.imgDuration && !isNaN(custom.imgDuration)) {
+            config.imgDuration = parseInt(custom.imgDuration, 10);
+        }
     }
 
-    // --- FORCE INJECT OVERRIDE RENDERS INTO THE ALERT OUTLET ---
+    // --- APPLY STYLE INJECTIONS TO OUTLET DOM ---
     if (config.fontSize) alertText.style.fontSize = config.fontSize;
     if (config.fontColor) alertText.style.color = config.fontColor;
     if (config.fontWeight) alertText.style.fontWeight = config.fontWeight;
     
-    // Process text outline settings cleanly
     if (config.textOutline) {
-        // If they type a simplified format like "3px #000000", expand it to a solid 4-way stroke override
         if (!config.textOutline.includes(",")) {
             const parts = config.textOutline.trim().split(/\s+/);
             if (parts.length === 2) {
@@ -873,7 +912,6 @@ function triggerAlertPipeline(reward, user, cost, message) {
             alertText.style.textShadow = config.textOutline;
         }
     } else {
-        // Fall back to original styles.css design layout explicitly if no custom outline was typed
         alertText.style.textShadow = "3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000";
     }
 
@@ -899,33 +937,70 @@ function triggerAlertPipeline(reward, user, cost, message) {
         }
     }
 
-    // Step 1: Strip previous tracking keyframes cleanly before refiring
+    // Strip previous animation state styles completely
     alertText.className = "";
     if (alertImage) alertImage.className = "";
 
-    // Step 2: Content Sync Injection with variable size constraints forced down onto the node style layer
+    // Inject alert payload strings
     alertText.innerHTML = config.text;
+    
     if (config.image && alertImage) {
-        // Enforce both direct width/max-width logic rules to force images to blow up past 100% or scale down to px precisely
         const finalSizeStyle = config.imgSize ? `width:${config.imgSize}; max-width:${config.imgSize};` : 'max-width:100%;';
-        alertImage.innerHTML = `<img src="${config.image}" style="${finalSizeStyle} height:auto; margin-top:10px; display:block; margin-left:auto; margin-right:auto;">`;
+        
+        // --- CACHE BUSTER FOR GIF PLAY ONCE ---
+        // Appending a distinct microsecond timestamp parameter forces browser render components to re-read frames from scratch
+        const cacheBusterUrl = config.image.startsWith("data:") ? config.image : `${config.image}${config.image.includes('?') ? '&' : '?'}_ts=${Date.now()}`;
+        
+        alertImage.innerHTML = `<img src="${cacheBusterUrl}" style="${finalSizeStyle} height:auto; margin-top:10px; display:block; margin-left:auto; margin-right:auto;">`;
     } else if (alertImage) {
         alertImage.innerHTML = "";
     }
 
-    // Step 3: Trigger INTRO Transitions
+    // Display container node layout instantly
     alertWidget.style.display = "block";
     void alertWidget.offsetWidth;
     alertWidget.style.opacity = "1";
     
+    // Fire intro animations
     if (config.textInAnim !== "none") alertText.classList.add(config.textInAnim);
     if (config.image && alertImage && config.imgInAnim !== "none") {
         const targetImg = alertImage.querySelector("img");
         if (targetImg) targetImg.classList.add(config.imgInAnim);
     }
 
-    // Step 4: Queue OUTRO Transitions
-    clearTimeout(window.fadeTimeout);
+    // --- MANAGE INDEPENDENT IMAGE LIFECYCLE CONTROLS ---
+    if (config.image && alertImage) {
+        const targetImg = alertImage.querySelector("img");
+        
+        // Calculate when the image asset should actively drop out
+        let targetImgClearDelay = null;
+        
+        if (config.imgDuration !== null) {
+            targetImgClearDelay = config.imgDuration;
+        } else if (config.imgMode === "once") {
+            // "Play Once" default safety boundary: clear asset after 2500ms if no exact duration value was supplied
+            targetImgClearDelay = 2500;
+        }
+
+        if (targetImgClearDelay !== null) {
+            window.imgClearTimeout = setTimeout(() => {
+                // If outbound animation configurations exist, apply them to the image node before tearing down
+                if (targetImg && config.imgOutAnim !== "none") {
+                    if (config.imgInAnim !== "none") targetImg.classList.remove(config.imgInAnim);
+                    targetImg.classList.add(config.imgOutAnim);
+                    
+                    // Allow outro animation to visually finish (500ms window) before wiping node elements
+                    setTimeout(() => {
+                        if (alertImage) alertImage.innerHTML = "";
+                    }, 500);
+                } else {
+                    if (alertImage) alertImage.innerHTML = "";
+                }
+            }, targetImgClearDelay);
+        }
+    }
+
+    // --- MANAGE TEXT & MAIN WIDGET LIFECYCLE CONTROLS ---
     window.fadeTimeout = setTimeout(() => {
         if (config.textInAnim !== "none") alertText.classList.remove(config.textInAnim);
         
@@ -941,11 +1016,12 @@ function triggerAlertPipeline(reward, user, cost, message) {
                 setTimeout(() => {
                     if (alertWidget.style.opacity === "0") {
                         alertWidget.style.display = "none";
+                        if (alertImage) alertImage.innerHTML = ""; // Complete cleanup
                     }
                 }, 500);
             }
         }, 1000);
-    }, 8000);
+    }, config.textDuration);
 
     if (lookupName === "hydrate") {
         botSay(`Drink up, Captain @${user}!`);
@@ -955,6 +1031,7 @@ function triggerAlertPipeline(reward, user, cost, message) {
         botSay(`@${user} spent ${cost || 0} points on ${reward}.`);
     }
 }
+
 function renderThemeControls() {
     const container = document.getElementById('variable-controls');
     container.innerHTML = '';
