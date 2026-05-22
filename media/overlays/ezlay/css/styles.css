@@ -158,7 +158,7 @@ body.edit-mode .p8-widget:active {
     padding: 20px; 
     color: #fff; 
     font-family: var(--font-family); 
-    z-index: 999; 
+    z-index: 10001; 
     box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
     max-height: 80vh; 
     overflow-y: auto;   
@@ -192,7 +192,7 @@ body.edit-mode .p8-widget:active {
     padding: 20px; 
     color: #fff; 
     font-family: var(--font-family); 
-    z-index: 9998; /* Sits right in the tool panel stack context */
+    z-index: 10001; 
     max-height: 80vh; 
     overflow-y: auto;   
     box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
