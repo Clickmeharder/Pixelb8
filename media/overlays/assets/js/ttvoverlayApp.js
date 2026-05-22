@@ -74,6 +74,7 @@ const statusText = document.getElementById("status-text");
 
 let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 }, fadeTimeout;
 
+// --- DYNAMIC THEMING & ALERTS DATA CORES ---
 let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
     active: 'Default',
     themes: {
@@ -88,6 +89,67 @@ let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
         }
     }
 };
+
+// DATA TRANSACTIONS INITIALIZATION MATRIX FOR BIT CHEERS 
+if (!registry.bits) {
+    registry.bits = {
+        "1": { 
+            text: "{user} cheered {bits} bits!", 
+            img: "", 
+            font_size: "2em", 
+            font_color: "#ffffff", 
+            duration: 8000, 
+            anim_tx_in: "none", 
+            anim_tx_out: "none", 
+            anim_im_in: "none", 
+            anim_im_out: "none" 
+        },
+        "100": { 
+            text: "{user} cheered {bits} bits!", 
+            img: "", 
+            font_size: "2em", 
+            font_color: "#ffffff", 
+            duration: 8000, 
+            anim_tx_in: "none", 
+            anim_tx_out: "none", 
+            anim_im_in: "none", 
+            anim_im_out: "none" 
+        },
+        "500": { 
+            text: "{user} cheered {bits} bits!", 
+            img: "", 
+            font_size: "2.5em", 
+            font_color: "#bc6ff1", 
+            duration: 8000, 
+            anim_tx_in: "none", 
+            anim_tx_out: "none", 
+            anim_im_in: "none", 
+            anim_im_out: "none" 
+        },
+        "1000": { 
+            text: "{user} cheered {bits} bits!", 
+            img: "", 
+            font_size: "2.5em", 
+            font_color: "#00f0ff", 
+            duration: 8000, 
+            anim_tx_in: "none", 
+            anim_tx_out: "none", 
+            anim_im_in: "none", 
+            anim_im_out: "none" 
+        },
+        "5000": { 
+            text: "{user} cheered {bits} bits!", 
+            img: "", 
+            font_size: "3em", 
+            font_color: "#ff0055", 
+            duration: 8000, 
+            anim_tx_in: "none", 
+            anim_tx_out: "none", 
+            anim_im_in: "none", 
+            anim_im_out: "none" 
+        }
+    };
+}
 
 const styleConfig = [
     { 
@@ -677,18 +739,86 @@ function bindRewardsManagerEvents() {
     });
 }
 // --- BITS MANAGER PANEL LOGIC & UI EVENTS ---
+// --- COMPLETE BITS CONFIGURATION ENGINE ---
 function bindBitManagerEvents() {
     const bitManagerWindow = document.getElementById("bit-manager");
     const closeBitsTopBtn = document.getElementById("close-bits-top-btn");
     const closeBitManagerBtn = document.getElementById("close-bit-manager-btn");
     
-    // 1. Structural window close routines
+    if (!bitManagerWindow) return;
+
+    // Ensure active data attribute fallback is set
+    const tierDisplay = document.getElementById("current-bit-tier-display");
+    if (tierDisplay && !tierDisplay.getAttribute("data-selected-tier")) {
+        tierDisplay.setAttribute("data-selected-tier", "1");
+    }
+
+    // 1. Panel Close Controls
     if (closeBitsTopBtn) closeBitsTopBtn.addEventListener("click", () => bitManagerWindow.style.display = "none");
     if (closeBitManagerBtn) closeBitManagerBtn.addEventListener("click", () => bitManagerWindow.style.display = "none");
 
-    // 2. Custom Dropdown Selector Functionality for Tiers
+    // 2. Dynamic Animation Dropdowns Population
+    const animationLists = ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"];
+    const exitAnimationLists = ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"];
+
+    function setupBitAnimDropdown(displayId, optionsId, optionsArr) {
+        const displayEl = document.getElementById(displayId);
+        const optionsEl = document.getElementById(optionsId);
+        if (!displayEl || !optionsEl) return;
+
+        // Populate options box items
+        optionsEl.innerHTML = "";
+        optionsArr.forEach(anim => {
+            const opt = document.createElement("div");
+            opt.className = "option-item";
+            opt.style.padding = "4px 8px";
+            opt.style.cursor = "pointer";
+            opt.innerText = anim;
+            opt.addEventListener("click", (e) => {
+                e.stopPropagation();
+                displayEl.innerText = anim;
+                optionsEl.style.display = "none";
+            });
+            optionsEl.appendChild(opt);
+        });
+
+        // Toggle open state on click
+        displayEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            // Clear out any other open options boxes first
+            document.querySelectorAll(".custom-select-options-box").forEach(box => {
+                if (box !== optionsEl) box.style.display = "none";
+            });
+            const isOpen = optionsEl.style.display === "block";
+            optionsEl.style.display = isOpen ? "none" : "block";
+        });
+    }
+
+    // Initialize animation matrix mapping layouts
+    setupBitAnimDropdown("display-bit-text-in-anim", "options-bit-text-in-anim", animationLists);
+    setupBitAnimDropdown("display-bit-text-out-anim", "options-bit-text-out-anim", exitAnimationLists);
+    setupBitAnimDropdown("display-bit-img-in-anim", "options-bit-img-in-anim", animationLists);
+    setupBitAnimDropdown("display-bit-img-out-anim", "options-bit-img-out-anim", exitAnimationLists);
+
+    // 3. UI Sync Machine (Loads data out of registry into inputs)
+    function loadBitTierToUI(tier) {
+        if (!registry.bits || !registry.bits[tier]) return;
+        const data = registry.bits[tier];
+
+        document.getElementById("bit-text-input").value = data.text || "";
+        document.getElementById("bit-img-input").value = data.img || "";
+        document.getElementById("bit-font-size").value = data.font_size || "2em";
+        document.getElementById("bit-font-color-hex").value = data.font_color || "#ffffff";
+        document.getElementById("bit-alert-duration").value = data.duration || 8000;
+
+        document.getElementById("display-bit-text-in-anim").innerText = data.anim_tx_in || "none";
+        document.getElementById("display-bit-text-out-anim").innerText = data.anim_tx_out || "none";
+        document.getElementById("display-bit-img-in-anim").innerText = data.anim_im_in || "none";
+        document.getElementById("display-bit-img-out-anim").innerText = data.anim_im_out || "none";
+    }
+
+    // 4. Main Threshold Tier Dropdown Selector Engine
     const tierSelector = document.getElementById("bit-tier-selector");
-    const tierDisplay = document.getElementById("current-bit-tier-display");
     const tierOptionsContainer = document.getElementById("bit-tier-options");
 
     if (tierSelector && tierOptionsContainer) {
@@ -701,15 +831,54 @@ function bindBitManagerEvents() {
         tierOptionsContainer.querySelectorAll(".option-item").forEach(item => {
             item.addEventListener("click", (e) => {
                 e.stopPropagation();
+                const targetTier = item.getAttribute("data-tier");
                 tierDisplay.textContent = item.textContent;
-                tierDisplay.setAttribute("data-selected-tier", item.getAttribute("data-tier"));
+                tierDisplay.setAttribute("data-selected-tier", targetTier);
                 tierOptionsContainer.style.display = "none";
                 
-                console.log(`Switched config view to Bit Tier threshold: ${item.getAttribute("data-tier")}`);
+                // Synchronize data immediately on choice
+                loadBitTierToUI(targetTier);
             });
         });
     }
+
+    // 5. Data Core Save Handler Loop
+    const saveBtn = document.getElementById("save-bit-config-btn");
+    if (saveBtn) {
+        saveBtn.addEventListener("click", async () => {
+            const activeTier = tierDisplay.getAttribute("data-selected-tier") || "1";
+            
+            if (!registry.bits) registry.bits = {};
+            
+            // Build saved payload state from fields
+            registry.bits[activeTier] = {
+                text: document.getElementById("bit-text-input").value.trim(),
+                img: document.getElementById("bit-img-input").value.trim(),
+                font_size: document.getElementById("bit-font-size").value.trim() || "2em",
+                font_color: document.getElementById("bit-font-color-hex").value.trim() || "#ffffff",
+                duration: parseInt(document.getElementById("bit-alert-duration").value) || 8000,
+                anim_tx_in: document.getElementById("display-bit-text-in-anim").innerText,
+                anim_tx_out: document.getElementById("display-bit-text-out-anim").innerText,
+                anim_im_in: document.getElementById("display-bit-img-in-anim").innerText,
+                anim_im_out: document.getElementById("display-bit-img-out-anim").innerText
+            };
+
+            // Commit transaction data changes locally
+            localStorage.setItem('p8_registry', JSON.stringify(registry));
+            
+            // Trigger confirmation dialog popups
+            if (typeof p8Confirm === "function") {
+                await p8Confirm(`Tier Configuration (${activeTier}+ Bits) Saved Securely!`, true);
+            } else {
+                alert("Configuration Saved!");
+            }
+        });
+    }
+
+    // Initial default run on boot
+    loadBitTierToUI(tierDisplay.getAttribute("data-selected-tier") || "1");
 }
+
 function renderRewardsList() {
     const container = document.getElementById("rewards-list-container");
     if (!container) return;

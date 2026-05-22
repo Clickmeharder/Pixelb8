@@ -142,7 +142,7 @@ body.edit-mode .p8-widget:active {
     padding-bottom: 10px; 
     border-bottom: 1px solid #27272a;
     margin-bottom: 15px;
-	/* resize: vertical; */
+    /* resize: vertical; */
 }
 
 /* Rewards Manager */
@@ -179,6 +179,7 @@ body.edit-mode .p8-widget:active {
     margin-top: -20px; 
     padding-top: 20px;
 }
+
 /* --- BITS MANAGER WINDOW --- */
 #bit-manager {
     display: none; 
@@ -215,6 +216,7 @@ body.edit-mode .p8-widget:active {
     cursor: move;
     user-select: none;
 }
+
 /* Make headers look and feel like draggable windows */
 #theme-manager-header, 
 #rewards-manager-header,
@@ -222,6 +224,7 @@ body.edit-mode .p8-widget:active {
     cursor: move; /* Shows the crosshair move cursor */
     user-select: none; /* Prevents text highlighting while dragging */
 }
+
 .input-group { 
     margin-bottom: 15px; 
     text-align: left; 
@@ -607,4 +610,26 @@ body.edit-mode .p8-widget:active {
 /* Fixed Widget Transitions for Master Fade fallback */
 #alert-widget {
     transition: opacity 0.5s ease-in-out;
+}
+
+/* --- ADDED: Custom Options Floating Boxes for Bit Animations Grid --- */
+.custom-select-options-box {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 4px;
+    z-index: 999;
+    max-height: 150px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    box-sizing: border-box;
+}
+
+.custom-select-options-box .option-item:hover {
+    background: var(--accent);
+    color: #000 !important;
 }
