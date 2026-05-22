@@ -1592,53 +1592,126 @@ const commandsRegistry = {
             }
         }
     },
-	"timer": {
+	// Generic Stopwatch Commands
+    "timer": {
         adminOnly: true,
         execute: (user, message, flags) => {
-            const parts = message.trim().split(" ");
-            const duration = parseInt(parts[0]) || 0;
-            const label = parts.slice(1).join(" ") || "Chat Timer";
-            
-            if (typeof createTimer === "function") {
-                createTimer(label, duration);
-            } else {
-                console.warn("createTimer execution failed: Engine missing.");
-            }
+            const label = message.trim() || "Generic Timer";
+            const id = createTimerInstance(label, 0); // 0 initializes standard stopwatch
+            botSay(`Started Stopwatch: [${label}]`);
         }
     },
     "pausetimer": {
         adminOnly: true,
         execute: (user, message, flags) => {
-            const keys = Object.keys(activeTimers || {});
-            if (keys.length === 0) return;
-            const currentActiveId = keys[keys.length - 1];
-            
-            if (typeof pauseTimerInstance === "function") {
-                pauseTimerInstance(currentActiveId);
+            const targetId = getLatestInstanceIdByType("stopwatch");
+            if (targetId) {
+                pauseTimerInstance(targetId);
+                botSay(`Paused active stopwatch.`);
             }
         }
     },
     "splittimer": {
         adminOnly: true,
         execute: (user, message, flags) => {
-            const keys = Object.keys(activeTimers || {});
-            if (keys.length === 0) return;
-            const currentActiveId = keys[keys.length - 1];
-            
-            if (typeof splitTimerInstance === "function") {
-                splitTimerInstance(currentActiveId);
+            const targetId = getLatestInstanceIdByType("stopwatch");
+            if (targetId) splitTimerInstance(targetId);
+        }
+    },
+    "resettimer": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
+            const targetId = getLatestInstanceIdByType("stopwatch");
+            if (targetId) {
+                resetTimerInstance(targetId);
+                botSay(`Reset active stopwatch time.`);
             }
         }
     },
     "stoptimer": {
         adminOnly: true,
         execute: (user, message, flags) => {
-            const keys = Object.keys(activeTimers || {});
-            if (keys.length === 0) return;
-            const currentActiveId = keys[keys.length - 1];
+            const targetId = getLatestInstanceIdByType("stopwatch");
+            if (targetId) {
+                stopTimerInstance(targetId);
+                botSay(`Stopped and removed stopwatch.`);
+            }
+        }
+    },
+
+    // Countdown Specific Commands
+    "countdown": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
+            const parts = message.trim().split(" ");
+            const firstArg = parts[0].toLowerCase();
             
-            if (typeof stopTimerInstance === "function") {
-                stopTimerInstance(currentActiveId);
+            // Sub-command check: Check if user is invoking a saved layout preset template
+            if (savedCountdowns[firstArg]) {
+                const duration = savedCountdowns[firstArg];
+                const label = parts.slice(1).join(" ") || parts[0];
+                createTimerInstance(label, duration);
+                botSay(`Launched template countdown [${parts[0]}] for ${duration}s.`);
+                return;
+            }
+
+            // Standard runtime direct configuration syntax parse loop
+            const duration = parseInt(parts[0]) || 0;
+            const label = parts.slice(1).join(" ") || "Countdown";
+            
+            if (duration <= 0) {
+                botSay(`Usage: !${CMD_PREFIX} countdown [seconds] [label] OR !${CMD_PREFIX} countdown [saved_name]`);
+                return;
+            }
+            
+            createTimerInstance(label, duration);
+            botSay(`Started Countdown: [${label}] (${duration}s)`);
+        }
+    },
+    "savecountdown": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
+            const parts = message.trim().split(" ");
+            const duration = parseInt(parts[0]) || 0;
+            const keyName = parts.slice(1).join(" ").trim().toLowerCase();
+
+            if (duration <= 0 || !keyName) {
+                botSay(`Usage: !${CMD_PREFIX} savecountdown [seconds] [name]`);
+                return;
+            }
+
+            savedCountdowns[keyName] = duration;
+            saveCountdownsToStorage();
+            botSay(`Preset Saved! Use: !${CMD_PREFIX} countdown ${keyName}`);
+        }
+    },
+    "pausecountdown": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
+            const targetId = getLatestInstanceIdByType("countdown");
+            if (targetId) {
+                pauseTimerInstance(targetId);
+                botSay(`Paused active countdown clock.`);
+            }
+        }
+    },
+    "resetcountdown": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
+            const targetId = getLatestInstanceIdByType("countdown");
+            if (targetId) {
+                resetTimerInstance(targetId);
+                botSay(`Reset active countdown clock back to starting duration.`);
+            }
+        }
+    },
+    "stopcountdown": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
+            const targetId = getLatestInstanceIdByType("countdown");
+            if (targetId) {
+                stopTimerInstance(targetId);
+                botSay(`Cleared countdown layout container element.`);
             }
         }
     },
@@ -1757,9 +1830,234 @@ function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
 // =========================================================================
 // --- TIMERS & RUNTIME CONTEXT ENGINE STATE ---
 // =========================================================================
-let activeTimers = {};
+
+let activeTimers = {}; // Holds running instances in memory
 let timerIntervalId = null;
 
+// Persistent configurations saved across sessions
+let savedCountdowns = JSON.parse(localStorage.getItem('p8_saved_countdowns')) || {};
+
+function saveCountdownsToStorage() {
+    localStorage.setItem('p8_saved_countdowns', JSON.stringify(savedCountdowns));
+}
+
+// Global Core Controller Initialization Wrapper
+function initTimerEngine() {
+    // Bind UI Form Buttons safely
+    const uiCreateBtn = document.getElementById("ui-create-timer-btn");
+    if (uiCreateBtn) {
+        uiCreateBtn.onclick = () => {
+            const labelInput = document.getElementById("timer-label-input");
+            const durationInput = document.getElementById("timer-duration-input");
+            if (!labelInput) return;
+
+            const label = labelInput.value.trim() || "UI Timer";
+            const duration = parseInt(durationInput ? durationInput.value : 0) || 0;
+
+            if (duration > 0) {
+                // It's a countdown. Save it as a preset, then launch it
+                savedCountdowns[label.toLowerCase()] = duration;
+                saveCountdownsToStorage();
+                botSay(`Saved countdown template: [${label}] (${duration}s)`);
+            }
+            createTimerInstance(label, duration);
+            labelInput.value = "";
+            if (durationInput) durationInput.value = "";
+        };
+    }
+    renderActiveTimersUI();
+}
+
+// Unified instantiator function
+function createTimerInstance(label = "Timer", durationSeconds = 0) {
+    const id = "tmr_" + Date.now();
+    const type = parseInt(durationSeconds) > 0 ? "countdown" : "stopwatch";
+    
+    activeTimers[id] = {
+        id: id,
+        label: label || (type === "stopwatch" ? "Generic Timer" : "Countdown"),
+        duration: parseInt(durationSeconds) || 0,
+        elapsed: 0,
+        running: false,
+        splits: [],
+        type: type
+    };
+    
+    const overlay = document.getElementById("timer-overlay-widget");
+    if (overlay && window.getComputedStyle(overlay).display === "none") {
+        overlay.style.display = "block";
+    }
+    
+    startTimerInstance(id);
+    return id;
+}
+
+function startTimerInstance(id) {
+    if (!activeTimers[id]) return;
+    activeTimers[id].running = true;
+    
+    if (!timerIntervalId) {
+        timerIntervalId = setInterval(processTimersTick, 1000);
+    }
+    renderActiveTimersUI();
+}
+
+function pauseTimerInstance(id) {
+    if (!activeTimers[id]) return;
+    activeTimers[id].running = false;
+    renderActiveTimersUI();
+}
+
+function resetTimerInstance(id) {
+    if (!activeTimers[id]) return;
+    activeTimers[id].elapsed = 0;
+    activeTimers[id].splits = [];
+    renderActiveTimersUI();
+}
+
+function stopTimerInstance(id) {
+    if (!activeTimers[id]) return;
+    delete activeTimers[id];
+    
+    if (Object.keys(activeTimers).length === 0) {
+        clearInterval(timerIntervalId);
+        timerIntervalId = null;
+        const overlay = document.getElementById("timer-overlay-widget");
+        if (overlay) overlay.style.display = "none";
+    }
+    renderActiveTimersUI();
+}
+
+function splitTimerInstance(id) {
+    const t = activeTimers[id];
+    if (!t || !t.running) return;
+    const currentDisplay = formatTimeDigits(t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed);
+    t.splits.push(currentDisplay);
+    renderActiveTimersUI();
+}
+
+function processTimersTick() {
+    let hasRunningTimers = false;
+    
+    Object.keys(activeTimers).forEach(id => {
+        const t = activeTimers[id];
+        if (!t.running) return;
+        
+        hasRunningTimers = true;
+        t.elapsed++;
+        
+        if (t.type === "countdown" && t.elapsed >= t.duration) {
+            t.elapsed = t.duration;
+            t.running = false;
+            if (typeof p8Confirm === "function") {
+                p8Confirm(`⏰ Countdown Finished: [${t.label}]`, true);
+            } else {
+                botSay(`⏰ Countdown Finished: [${t.label}]!`);
+            }
+        }
+    });
+    
+    if (!hasRunningTimers && timerIntervalId) {
+        clearInterval(timerIntervalId);
+        timerIntervalId = null;
+    }
+    
+    renderActiveTimersUI();
+}
+
+
+function renderActiveTimersUI() {
+    const listContainer = document.getElementById("active-timers-list");
+    const overlayDigits = document.getElementById("timer-display-digits");
+    const overlayTitle = document.getElementById("timer-widget-title");
+    const overlaySplits = document.getElementById("timer-splits-container");
+    
+    if (listContainer) listContainer.innerHTML = "";
+    if (overlaySplits) overlaySplits.innerHTML = "";
+    
+    const keys = Object.keys(activeTimers);
+    if (keys.length === 0) {
+        if (overlayDigits) overlayDigits.innerText = "00:00:00";
+        if (overlayTitle) overlayTitle.innerText = "⏱️ No Active Timers";
+        return;
+    }
+    
+    // Focus overlay presentation on the most recently interacted/created element
+    const primaryTimer = activeTimers[keys[keys.length - 1]];
+    if (primaryTimer) {
+        const remaining = primaryTimer.type === "countdown" ? (primaryTimer.duration - primaryTimer.elapsed) : primaryTimer.elapsed;
+        if (overlayDigits) overlayDigits.innerText = formatTimeDigits(remaining);
+        if (overlayTitle) overlayTitle.innerText = `${primaryTimer.type === 'stopwatch' ? '⏱️' : '⏳'} ${primaryTimer.label}`;
+        
+        primaryTimer.splits.forEach((splitVal, index) => {
+            const div = document.createElement("div");
+            div.style.borderBottom = "1px solid rgba(255, 255, 255, 0.05)";
+            div.style.padding = "2px 0";
+            div.innerText = `Split 🟢 ${index + 1}: ${splitVal}`;
+            if (overlaySplits) overlaySplits.appendChild(div);
+        });
+    }
+    
+    // Populate layout mapping controls within widgets control hub window
+    keys.forEach(id => {
+        const t = activeTimers[id];
+        const rem = t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed;
+        
+        const row = document.createElement("div");
+        row.className = "timer-control-row";
+        row.style.display = "flex";
+        row.style.alignItems = "center";
+        row.style.justifyContent = "space-between";
+        row.style.marginBottom = "5px";
+        row.style.background = "rgba(0,0,0,0.2)";
+        row.style.padding = "4px";
+        row.style.borderRadius = "4px";
+        
+        row.innerHTML = `
+            <span style="max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:${t.running ? 'var(--accent)' : '#a1a1aa'}">
+                ${t.type === 'stopwatch' ? '⏱️' : '⏳'} ${t.label} (${formatTimeDigits(rem)})
+            </span>
+            <div class="timer-btn-group" style="display:flex; gap:2px;">
+                <button type="button" data-action="start" data-id="${t.id}" title="Start" style="background:none; border:none; cursor:pointer;">▶️</button>
+                <button type="button" data-action="pause" data-id="${t.id}" title="Pause" style="background:none; border:none; cursor:pointer;">⏸️</button>
+                <button type="button" data-action="reset" data-id="${t.id}" title="Reset" style="background:none; border:none; cursor:pointer;">🔄</button>
+                <button type="button" data-action="split" data-id="${t.id}" title="Split Lap" style="background:none; border:none; cursor:pointer; ${t.type === 'countdown' ? 'display:none;' : ''}">✂️</button>
+                <button type="button" data-action="stop" data-id="${t.id}" title="Remove" style="background:none; border:none; cursor:pointer;">❌</button>
+            </div>
+        `;
+        
+        // Dynamic event routing assignment loops
+        row.querySelectorAll("button").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const action = btn.getAttribute("data-action");
+                const targetId = btn.getAttribute("data-id");
+                if (action === "start") startTimerInstance(targetId);
+                if (action === "pause") pauseTimerInstance(targetId);
+                if (action === "reset") resetTimerInstance(targetId);
+                if (action === "split") splitTimerInstance(targetId);
+                if (action === "stop")  stopTimerInstance(targetId);
+            });
+        });
+        
+        if (listContainer) listContainer.appendChild(row);
+    });
+}
+
+// Make sure to call initTimerEngine() once your document DOM content completely compiles!
+document.addEventListener("DOMContentLoaded", () => {
+    initTimerEngine();
+});
+// Utility helper to isolate matching instances by class profile
+function getLatestInstanceIdByType(type) {
+    const keys = Object.keys(activeTimers);
+    for (let i = keys.length - 1; i >= 0; i--) {
+        if (activeTimers[keys[i]].type === type) {
+            return keys[i];
+        }
+    }
+    return null;
+}
 // =========================================================================
 // --- CONFIGURATION MAPS & STRUCTS ---
 // =========================================================================
@@ -1846,171 +2144,6 @@ function onSafeChange(id, callback) {
 function closeContextMenu() {
     const ctxMenu = document.getElementById('p8-ctx-menu');
     if (ctxMenu) ctxMenu.style.display = 'none';
-}
-
-// =========================================================================
-// --- CENTRALIZED TIMERS & COOLDOWNS CONTROLLER ENGINE ---
-// =========================================================================
-
-function createTimer(label = "Timer", durationSeconds = 0) {
-    const id = "tmr_" + Date.now();
-    activeTimers[id] = {
-        id: id,
-        label: label || "Timer",
-        duration: parseInt(durationSeconds) || 0, // 0 implies continuous stopwatch loop
-        elapsed: 0,
-        running: false,
-        splits: [],
-        type: durationSeconds > 0 ? "countdown" : "stopwatch"
-    };
-    
-    const overlay = document.getElementById("timer-overlay-widget");
-    if (overlay && window.getComputedStyle(overlay).display === "none") {
-        overlay.style.display = "block";
-    }
-    
-    startTimerInstance(id);
-    renderActiveTimersUI();
-    return id;
-}
-
-function startTimerInstance(id) {
-    if (!activeTimers[id]) return;
-    activeTimers[id].running = true;
-    
-    if (!timerIntervalId) {
-        timerIntervalId = setInterval(processTimersTick, 1000);
-    }
-    renderActiveTimersUI();
-}
-
-function pauseTimerInstance(id) {
-    if (!activeTimers[id]) return;
-    activeTimers[id].running = false;
-    renderActiveTimersUI();
-}
-
-function stopTimerInstance(id) {
-    if (!activeTimers[id]) return;
-    delete activeTimers[id];
-    
-    if (Object.keys(activeTimers).length === 0) {
-        clearInterval(timerIntervalId);
-        timerIntervalId = null;
-        const overlay = document.getElementById("timer-overlay-widget");
-        if (overlay) overlay.style.display = "none";
-    }
-    renderActiveTimersUI();
-}
-
-function splitTimerInstance(id) {
-    const t = activeTimers[id];
-    if (!t || !t.running) return;
-    const currentDisplay = formatTimeDigits(t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed);
-    t.splits.push(currentDisplay);
-    renderActiveTimersUI();
-}
-
-function processTimersTick() {
-    let hasRunningTimers = false;
-    
-    Object.keys(activeTimers).forEach(id => {
-        const t = activeTimers[id];
-        if (!t.running) return;
-        
-        hasRunningTimers = true;
-        t.elapsed++;
-        
-        if (t.type === "countdown" && t.elapsed >= t.duration) {
-            t.elapsed = t.duration;
-            t.running = false;
-            if (typeof p8Confirm === "function") p8Confirm(`⏰ Timer Finished: [${t.label}]`, true);
-        }
-    });
-    
-    if (!hasRunningTimers && timerIntervalId) {
-        clearInterval(timerIntervalId);
-        timerIntervalId = null;
-    }
-    
-    renderActiveTimersUI();
-}
-
-function formatTimeDigits(totalSeconds) {
-    if (totalSeconds < 0) totalSeconds = 0;
-    const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-    const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const secs = String(totalSeconds % 60).padStart(2, '0');
-    return `${hrs}:${mins}:${secs}`;
-}
-
-function renderActiveTimersUI() {
-    const listContainer = document.getElementById("active-timers-list");
-    const overlayDigits = document.getElementById("timer-display-digits");
-    const overlayTitle = document.getElementById("timer-widget-title");
-    const overlaySplits = document.getElementById("timer-splits-container");
-    
-    if (listContainer) listContainer.innerHTML = "";
-    if (overlaySplits) overlaySplits.innerHTML = "";
-    
-    const keys = Object.keys(activeTimers);
-    if (keys.length === 0) {
-        if (overlayDigits) overlayDigits.innerText = "00:00:00";
-        if (overlayTitle) overlayTitle.innerText = "⏱️ No Active Timers";
-        return;
-    }
-    
-    // Most recent tracked element sets core presentation on runtime canvas
-    const primaryTimer = activeTimers[keys[keys.length - 1]];
-    if (primaryTimer) {
-        const remaining = primaryTimer.type === "countdown" ? (primaryTimer.duration - primaryTimer.elapsed) : primaryTimer.elapsed;
-        if (overlayDigits) overlayDigits.innerText = formatTimeDigits(remaining);
-        if (overlayTitle) overlayTitle.innerText = `⏱️ ${primaryTimer.label}`;
-        
-        primaryTimer.splits.forEach((splitVal, index) => {
-            const div = document.createElement("div");
-            div.style.borderBottom = "1px solid rgba(255, 255, 255, 0.05)";
-            div.style.padding = "2px 0";
-            div.innerText = `Split 🟢 ${index + 1}: ${splitVal}`;
-            overlaySplits.appendChild(div);
-        });
-    }
-    
-    // Populate layout mapping controls within widgets control hub window
-    keys.forEach(id => {
-        const t = activeTimers[id];
-        const rem = t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed;
-        
-        const row = document.createElement("div");
-        row.className = "timer-control-row";
-        row.style.marginBottom = "5px";
-        row.innerHTML = `
-            <span style="max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:${t.running ? 'var(--accent)' : '#a1a1aa'}">
-                ${t.label} (${formatTimeDigits(rem)})
-            </span>
-            <div class="timer-btn-group">
-                <button type="button" data-action="start" data-id="${t.id}">▶️</button>
-                <button type="button" data-action="pause" data-id="${t.id}">⏸️</button>
-                <button type="button" data-action="split" data-id="${t.id}">✂️</button>
-                <button type="button" data-action="stop" data-id="${t.id}">❌</button>
-            </div>
-        `;
-        
-        // Setup direct action listener bubbling inside dynamic control layout maps
-        row.querySelectorAll("button").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const action = btn.getAttribute("data-action");
-                const targetId = btn.getAttribute("data-id");
-                if (action === "start") startTimerInstance(targetId);
-                if (action === "pause") pauseTimerInstance(targetId);
-                if (action === "split") splitTimerInstance(targetId);
-                if (action === "stop")  stopTimerInstance(targetId);
-            });
-        });
-        
-        if (listContainer) listContainer.appendChild(row);
-    });
 }
 
 
