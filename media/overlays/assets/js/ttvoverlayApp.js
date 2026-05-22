@@ -2437,11 +2437,18 @@ function bindEvents() {
         const label = lblInput ? lblInput.value.trim() : "Timer";
         const duration = durInput ? parseInt(durInput.value) : 0;
         
-        createTimer(label, duration);
+        // OPTIONAL SYNC: If it's a countdown, ensure it gets saved to your presets registry
+        if (duration > 0 && typeof savedCountdowns !== 'undefined') {
+            savedCountdowns[label.toLowerCase()] = duration;
+            if (typeof saveCountdownsToStorage === 'function') saveCountdownsToStorage();
+        }
+
+        // FIXED: Call the correct instantiation name
+        createTimerInstance(label, duration);
+        
         if (lblInput) lblInput.value = "";
         if (durInput) durInput.value = "";
     });
-
     onSafeClick("close-widgets-manager-btn", () => {
         const widgetWin = document.getElementById("widgets-manager");
         if (widgetWin) widgetWin.style.display = "none";
