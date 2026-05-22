@@ -2649,4 +2649,5 @@ function bindEvents() {
 
 init();
 
-console.log("ttvoverlayapp.js version 0.04 finished loading");
+console.log("ttvoverlayapp.js version 0.05 finished loading");
+console.log("dev sucks at this lul");
