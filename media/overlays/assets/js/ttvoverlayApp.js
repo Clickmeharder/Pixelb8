@@ -537,58 +537,63 @@ function setCustomSelectValue(id, value) {
     }
 }
 function populateCustomDropdowns() {
-    // 1. Identify all dropdowns by looking at the configuration data keys
     Object.keys(CUSTOM_SELECT_DATA).forEach(id => {
-        
-        // Use a more robust selector lookup
         const displayEl = document.getElementById(`display-${id}`) || 
                           document.getElementById(`current-${id}`) || 
                           document.getElementById(id);
 
         const optionsEl = document.getElementById(`options-${id}`) || 
                           document.getElementById(`${id}-options`);
-                          
+
         if (!displayEl || !optionsEl) {
             console.warn(`Dropdown elements not found for ID: ${id}`);
             return;
         }
 
         const optionsData = CUSTOM_SELECT_DATA[id];
-        optionsEl.innerHTML = ""; // Clear existing
+        optionsEl.innerHTML = "";
 
         optionsData.forEach(item => {
             const val = typeof item === 'object' ? item.value : item;
             const text = typeof item === 'object' ? item.label : item;
-            
+
             const row = document.createElement("div");
             row.className = "option-item";
             row.innerText = text;
-            row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer; transition: background 0.2s;";
+            row.dataset.value = val;
+
+            row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer;";
 
             row.addEventListener("mouseenter", () => row.style.background = "var(--accent, #9146ff)");
             row.addEventListener("mouseleave", () => row.style.background = "transparent");
-            
-            // Fix: Use stopPropagation to prevent the click from closing the parent incorrectly
+
             row.addEventListener("click", (e) => {
-                e.stopPropagation();
+                e.stopImmediatePropagation();   // Crucial fix
                 setCustomSelectValue(id, val);
                 optionsEl.style.display = "none";
             });
+
             optionsEl.appendChild(row);
         });
 
-        // Fix: Toggle visibility without conflict
-        displayEl.addEventListener("click", (e) => {
-            e.stopPropagation();
-            // Close other dropdowns
-            document.querySelectorAll(".option-item").closest('.custom-select-options-box, .select-options')?.forEach(box => {
-                if(box !== optionsEl) box.style.display = "none";
+        // Attach click handler to display (only once)
+        if (!displayEl.dataset.dropdownInitialized) {
+            displayEl.dataset.dropdownInitialized = "true";
+
+            displayEl.addEventListener("click", (e) => {
+                e.stopImmediatePropagation();
+
+                // Close all other dropdowns
+                document.querySelectorAll(".custom-select-options-box, .select-options").forEach(box => {
+                    if (box !== optionsEl) box.style.display = "none";
+                });
+
+                optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
             });
-            
-            optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
-        });
+        }
     });
 }
+
 function toggleBits() {
     bitsEnabled = !bitsEnabled;
     saveSettings();
@@ -2263,6 +2268,7 @@ function closeContextMenu() {
 // ==========================================
 // --- REWARDS MANAGER CONTROL ENGINE ---
 // ==========================================
+
 function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");
     if (!rewardsPanel) return;
@@ -2271,25 +2277,23 @@ function bindRewardsManagerEvents() {
     const urlInput = document.getElementById("reward-img-input");
     const fontColorPicker = document.getElementById("reward-font-color");
     const fontColorHex = document.getElementById("reward-font-color-hex");
-
     const soundFileInput = document.getElementById("reward-sound-file");
     const addSoundBtn = document.getElementById("push-sound-btn");
     const labelSoundBtn = document.getElementById("add-sound-file-btn");
 
     // Initialize UI state
     if (fontColorPicker && fontColorHex) {
-        fontColorPicker.addEventListener("input", function() { fontColorHex.value = this.value; });
+        fontColorPicker.addEventListener("input", function() { 
+            fontColorHex.value = this.value; 
+        });
         fontColorHex.addEventListener("input", function() {
-            if (/^#[0-9A-F]{6}$/i.test(this.value)) fontColorPicker.value = this.value;
+            if (/^#[0-9A-F]{6}$/i.test(this.value)) 
+                fontColorPicker.value = this.value;
         });
     }
 
-    // Ensure dropdowns are populated on load
-    if (typeof populateCustomDropdowns === "function") populateCustomDropdowns();
-    if (typeof updateManagerBadgesUI === "function") updateManagerBadgesUI();
-
     // Image upload handler
-    bindBase64FileReader(fileInput, 
+    bindBase64FileReader(fileInput,
         (base64) => {
             pendingImageBase64 = base64;
             if(urlInput) {
@@ -2311,7 +2315,7 @@ function bindRewardsManagerEvents() {
 
     // Audio upload handler
     let loadedAudioBase64 = "";
-    let loadedAudioName = ""; 
+    let loadedAudioName = "";
 
     if (soundFileInput) {
         bindBase64FileReader(soundFileInput,
@@ -2333,8 +2337,13 @@ function bindRewardsManagerEvents() {
     if (addSoundBtn) {
         addSoundBtn.addEventListener("click", function() {
             if (!loadedAudioBase64 || typeof stagedSoundsPool === 'undefined') return;
-            stagedSoundsPool.push({ name: loadedAudioName, data: loadedAudioBase64, volume: 1.0 });
             
+            stagedSoundsPool.push({ 
+                name: loadedAudioName, 
+                data: loadedAudioBase64, 
+                volume: 1.0 
+            });
+
             // Reset audio UI
             loadedAudioBase64 = "";
             loadedAudioName = "";
@@ -2384,10 +2393,13 @@ function bindRewardsManagerEvents() {
             rewardAlerts[nameKey] = payload;
             saveRewardAlerts();
 
-            // UI Cleanup Cascade
+            // UI Cleanup
             nameEl.value = "";
             textEl.value = "";
-            if(urlInput) { urlInput.value = ""; urlInput.placeholder = "Web Image/GIF URL"; }
+            if(urlInput) { 
+                urlInput.value = ""; 
+                urlInput.placeholder = "Web Image/GIF URL"; 
+            }
             if(fileInput) fileInput.value = "";
             if(soundFileInput) soundFileInput.value = "";
             pendingImageBase64 = "";
@@ -2396,20 +2408,34 @@ function bindRewardsManagerEvents() {
             
             if (typeof stagedSoundsPool !== 'undefined') stagedSoundsPool = [];
 
-            // Reset dropdowns to defaults
-            REWARD_SELECTS_REGISTRY.forEach(item => setCustomSelectValue(item.id, item.def));
-            REWARD_INPUTS_REGISTRY.forEach(item => { const el = document.getElementById(item.id); if (el) el.value = ""; });
+            // Reset dropdowns
+            REWARD_SELECTS_REGISTRY.forEach(item => 
+                setCustomSelectValue(item.id, item.def)
+            );
+
+            REWARD_INPUTS_REGISTRY.forEach(item => { 
+                const el = document.getElementById(item.id); 
+                if (el) el.value = ""; 
+            });
 
             if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
             if (typeof renderRewardsList === "function") renderRewardsList();
         });
     }
-}
 
+    // Populate dropdowns AFTER the panel is fully loaded
+    setTimeout(() => {
+        if (typeof populateCustomDropdowns === "function") {
+            populateCustomDropdowns();
+        }
+        if (typeof updateManagerBadgesUI === "function") {
+            updateManagerBadgesUI();
+        }
+    }, 150);
+}
 // ==========================================
 // --- BITS CONFIGURATION ENGINE ---
 // ==========================================
-
 function bindBitManagerEvents() {
     const bitManagerWindow = document.getElementById("bit-manager");
     if (!bitManagerWindow) return;
@@ -2417,11 +2443,6 @@ function bindBitManagerEvents() {
     const tierDisplay = document.getElementById("current-bit-tier-display");
     if (tierDisplay && !tierDisplay.getAttribute("data-selected-tier")) {
         tierDisplay.setAttribute("data-selected-tier", "1");
-    }
-
-    // Set up animation selectors via structural loop mapping
-    if (typeof DROPDOWN_CONFIGS !== "undefined") {
-        DROPDOWN_CONFIGS.forEach(cfg => setupCustomDropdownEngine(cfg.display, cfg.options, cfg.list));
     }
 
     function loadBitTierToUI(tier) {
@@ -2440,18 +2461,17 @@ function bindBitManagerEvents() {
         document.getElementById("display-bit-img-out-anim").innerText = data.anim_im_out || "none";
     }
 
-    const tierSelector = document.getElementById("bit-tier-selector");
+    // Tier Selector (already in HTML)
     const tierOptionsContainer = document.getElementById("bit-tier-options");
-
-    if (tierSelector && tierOptionsContainer) {
-        tierSelector.addEventListener("click", (e) => {
-            e.stopPropagation();
+    if (tierDisplay && tierOptionsContainer) {
+        tierDisplay.addEventListener("click", (e) => {
+            e.stopImmediatePropagation();
             tierOptionsContainer.style.display = tierOptionsContainer.style.display === "block" ? "none" : "block";
         });
 
         tierOptionsContainer.querySelectorAll(".option-item").forEach(item => {
             item.addEventListener("click", (e) => {
-                e.stopPropagation();
+                e.stopImmediatePropagation();
                 const targetTier = item.getAttribute("data-tier");
                 tierDisplay.textContent = item.textContent;
                 tierDisplay.setAttribute("data-selected-tier", targetTier);
@@ -2461,12 +2481,20 @@ function bindBitManagerEvents() {
         });
     }
 
+    // Use unified dropdown system instead of old setupCustomDropdownEngine
+    setTimeout(() => {
+        if (typeof populateCustomDropdowns === "function") {
+            populateCustomDropdowns();
+        }
+    }, 200);
+
+    // Save button
     const saveBtn = document.getElementById("save-bit-config-btn");
     if (saveBtn) {
         saveBtn.addEventListener("click", async () => {
             const activeTier = tierDisplay.getAttribute("data-selected-tier") || "1";
             if (!registry.bits) registry.bits = {};
-            
+
             registry.bits[activeTier] = {
                 text: document.getElementById("bit-text-input").value.trim(),
                 img: document.getElementById("bit-img-input").value.trim(),
@@ -2480,7 +2508,7 @@ function bindBitManagerEvents() {
             };
 
             localStorage.setItem('p8_registry', JSON.stringify(registry));
-            
+
             if (typeof p8Confirm === "function") {
                 await p8Confirm(`Tier Configuration (${activeTier}+ Bits) Saved Securely!`, true);
             } else {
@@ -2489,9 +2517,9 @@ function bindBitManagerEvents() {
         });
     }
 
+    // Load initial tier
     loadBitTierToUI(tierDisplay.getAttribute("data-selected-tier") || "1");
 }
-
 // ==========================================
 // --- MAIN EVENT LISTENER BINDING ENGINE ---
 // ==========================================
@@ -2505,12 +2533,12 @@ function bindEvents() {
 
     onSafeClick("obs-url-output", (e, target) => {
         navigator.clipboard.writeText(target.innerText);
-        const originalText = target.innerText; 
+        const originalText = target.innerText;
         target.innerText = "COPIED TO CLIPBOARD!";
         setTimeout(() => target.innerText = originalText, 1500);
     });
 
-    // 2. Loop-Bound Window View Navigation Manager 
+    // 2. Window Navigation
     PANEL_NAVIGATION_MAPS.forEach(cfg => {
         onSafeClick(cfg.triggerId, () => {
             const targetPanel = document.getElementById(cfg.targetId);
@@ -2520,7 +2548,7 @@ function bindEvents() {
         });
     });
 
-    // 3. Loop-Bound Reactive App Parameters Settings Sync Engine
+    // 3. Boolean Toggles
     BOOLEAN_TOGGLE_MAPS.forEach(cfg => {
         const handler = (e) => {
             const incomingVal = cfg.valuePath ? e.target[cfg.valuePath] : null;
@@ -2528,7 +2556,6 @@ function bindEvents() {
             cfg.assignTo(finalVal);
             if (cfg.onSync) cfg.onSync();
         };
-
         if (cfg.type === "change") {
             onSafeChange(cfg.id, handler);
         } else {
@@ -2536,15 +2563,14 @@ function bindEvents() {
         }
     });
 
-    // Manual Form Trigger for UI Core Timers Generation Pipeline
+    // Timer UI
     onSafeClick("ui-create-timer-btn", () => {
         const lblInput = document.getElementById("timer-label-input");
         const durInput = document.getElementById("timer-duration-input");
-        
+       
         const label = (lblInput && lblInput.value.trim()) ? lblInput.value.trim() : "UI Timer";
         const duration = (durInput && durInput.value) ? parseInt(durInput.value) : 0;
-        
-        // Save to persistent localStorage templates if it's a structural countdown
+       
         if (duration > 0 && typeof savedCountdowns !== 'undefined') {
             savedCountdowns[label.toLowerCase()] = duration;
             saveCountdownsToStorage();
@@ -2553,10 +2579,8 @@ function bindEvents() {
             }
         }
 
-        // Initialize the tracking engine instance context
         createTimerInstance(label, duration);
-        
-        // Safely clear out the UI workspace controls
+       
         if (lblInput) lblInput.value = "";
         if (durInput) durInput.value = "";
     });
@@ -2566,7 +2590,7 @@ function bindEvents() {
         if (widgetWin) widgetWin.style.display = "none";
     });
 
-    // 5. Automated Global Window Panels Close Layout Router Loop
+    // Window Close Handlers
     if (typeof WINDOW_CLOSE_MAPS !== 'undefined' && Array.isArray(WINDOW_CLOSE_MAPS)) {
         WINDOW_CLOSE_MAPS.forEach(mapping => {
             if (mapping && Array.isArray(mapping.triggers)) {
@@ -2578,9 +2602,9 @@ function bindEvents() {
                 });
             }
         });
-    }
+    });
 
-    // 6. Loop-Bound Simple Click Interface Bus Dispatcher
+    // Simple Click Handlers
     SIMPLE_CLICK_MAPS.forEach(cfg => {
         const shouldStopPropagation = (cfg.id === "ctx-lock");
         onSafeClick(cfg.id, () => {
@@ -2589,29 +2613,29 @@ function bindEvents() {
         }, shouldStopPropagation);
     });
 
-    // 7. Core Styling Custom Dropdown Elements Actions Setup
+    // Theme Selector
     onSafeClick("current-theme-display", () => {
         const themeOptions = document.getElementById('theme-options');
         if (themeOptions) {
             themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
         }
-    }, true); 
+    }, true);
 
     onSafeClick("save-theme-btn", async () => {
         const nameInput = document.getElementById('theme-name-input');
         const newName = (nameInput ? nameInput.value.trim() : '') || 'Custom Theme';
-        
+       
         if (typeof registry !== 'undefined' && registry.themes) {
             registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
             registry.active = newName;
             localStorage.setItem('p8_registry', JSON.stringify(registry));
-            
+           
             if (typeof renderThemeList === "function") renderThemeList();
             if (typeof p8Confirm === "function") await p8Confirm('Theme Settings Saved', true);
         }
     });
 
-    // 8. Loop-Bound Initialization of Draggable Overlay Panels UI
+    // Draggable Windows
     if (typeof makeElementDraggable === "function") {
         DRAGGABLE_WINDOWS_CONFIG.forEach(cfg => {
             if (document.getElementById(cfg.winId)) {
@@ -2620,22 +2644,34 @@ function bindEvents() {
         });
     }
 
-    // 9. Consolidated Unified Canvas Mouse Tracking and Drag Systems
+    // === GLOBAL MOUSEDOWN HANDLER (Improved Dropdown Logic) ===
     window.addEventListener('mousedown', e => {
         const ctxMenu = document.getElementById('p8-ctx-menu');
         const themeOpts = document.getElementById('theme-options');
+       
+        if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) 
+            closeContextMenu();
         
-        if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) closeContextMenu();
-        if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) themeOpts.style.display = 'none';
-        
-        if (!e.target.closest('.select-trigger') && !e.target.closest('.custom-select-display')) {
-            document.querySelectorAll(".select-options, .custom-select-options-box").forEach(b => b.style.display = "none");
+        if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) 
+            themeOpts.style.display = 'none';
+
+        // Improved dropdown closing - only close if clicking outside
+        if (!e.target.closest('.custom-select-display') &&
+            !e.target.closest('.select-trigger') &&
+            !e.target.closest('.custom-select-options-box') &&
+            !e.target.closest('.select-options') &&
+            !e.target.closest('.option-item')) {
+            
+            document.querySelectorAll(".custom-select-options-box, .select-options").forEach(b => {
+                b.style.display = "none";
+            });
         }
-        
-        // Canvas editing exclusion logic protecting interactable management panels (Updated target exclusion rule string matching)
-        if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 || 
-            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, .timer-btn-group, .setup-container, .p8-modal')) return;
-        
+       
+        // Drag logic
+        if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 ||
+            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, .timer-btn-group, .setup-container, .p8-modal')) 
+            return;
+       
         dragTarget = e.target.closest('.p8-widget');
         if (dragTarget) {
             const r = dragTarget.getBoundingClientRect();
@@ -2643,6 +2679,7 @@ function bindEvents() {
         }
     });
 
+    // Drag movement
     window.addEventListener('mousemove', e => {
         if (typeof dragTarget !== 'undefined' && dragTarget) {
             dragTarget.style.left = (e.clientX - offset.x) + 'px';
@@ -2652,27 +2689,31 @@ function bindEvents() {
 
     window.addEventListener('mouseup', () => {
         if (typeof dragTarget !== 'undefined' && dragTarget) {
-            localStorage.setItem(`p8_pos_${dragTarget.id}`, JSON.stringify({ top: dragTarget.style.top, left: dragTarget.style.left }));
+            localStorage.setItem(`p8_pos_${dragTarget.id}`, JSON.stringify({ 
+                top: dragTarget.style.top, 
+                left: dragTarget.style.left 
+            }));
             dragTarget = null;
         }
     });
 
+    // Context Menu
     window.addEventListener('contextmenu', e => {
         if (e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
         e.preventDefault();
         const ctxMenu = document.getElementById('p8-ctx-menu');
         if (ctxMenu) {
-            ctxMenu.style.display = 'block'; 
-            ctxMenu.style.left = e.clientX + 'px'; 
+            ctxMenu.style.display = 'block';
+            ctxMenu.style.left = e.clientX + 'px';
             ctxMenu.style.top = e.clientY + 'px';
         }
     });
 
+    // Initialize manager panels
     if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
     if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
 }
-
 init();
 
-console.log("ttvoverlayapp.js version 0.06 finished loading");
+console.log("ttvoverlayapp.js version 0.07 finished loading");
 console.log("welp I dun fucked it up");
