@@ -276,6 +276,95 @@ body.edit-mode .p8-widget:active {
     cursor: move;
     user-select: none;
 }
+
+/* --- EXTRA WIDGETS MANAGER & COLLAPSIBLE STRUCTS --- */
+#widgets-manager {
+    display: none;
+    position: fixed; 
+    right: 360px; 
+    top: 250px; 
+    width: 320px;
+    background: #09090b; 
+    border: 2px solid var(--accent); 
+    border-radius: var(--border-radius); 
+    padding: 20px; 
+    color: #fff; 
+    font-family: var(--font-family); 
+    z-index: 10001; 
+    max-height: 80vh; 
+    overflow-y: auto;    
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.collapsible-section {
+    border: 1px solid #27272a;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background: #141417;
+    overflow: hidden;
+}
+
+.collapsible-header {
+    padding: 10px;
+    background: #1c1c1f;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    user-select: none;
+}
+
+.collapsible-header:hover {
+    background: #27272a;
+}
+
+.collapsible-header .collapse-icon {
+    transition: transform 0.2s ease;
+    font-size: 10px;
+    color: var(--accent);
+}
+
+.collapsible-section.collapsed .collapsible-content {
+    display: none;
+}
+
+.collapsible-section.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+.collapsible-content {
+    padding: 10px;
+    border-top: 1px solid #27272a;
+}
+
+/* Internal Dynamic Timer Tracking Rows */
+.timer-control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1c1c1f;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+.timer-btn-group {
+    display: flex;
+    gap: 3px;
+}
+.timer-btn-group button {
+    background: #27272a;
+    border: none;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.timer-btn-group button:hover {
+    background: var(--accent);
+}
+
 #settings-manager-header {
 	display: flex; 
     justify-content: space-between; 

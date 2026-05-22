@@ -53,14 +53,24 @@
             <div id="status-text">Awaiting Signal...</div>
             <div id="mode-badge">Edit Mode Active</div>
         </div>
+		<div id="timer-widget" class="p8-widget" style="display: none; position: fixed; left: 50px; top: 200px; min-width: 240px; padding: 15px; background: var(--bg); border: var(--border-width) var(--border-style) var(--border-color); border-radius: var(--border-radius); z-index: 999;">
+			<div id="timer-overlay-header" class="widget-header" style="cursor: move; padding-bottom: 5px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: var(--accent); display: flex; justify-content: space-between;">
+				<span id="timer-widget-title">⏱️ Active Timer</span>
+			</div>
+			<div id="timer-display-digits" style="font-size: 32px; font-weight: bold; text-align: center; font-family: monospace; color: #fff; margin: 5px 0;">00:00:00</div>
+			<div id="timer-splits-container" style="font-size: 12px; color: #a1a1aa; max-height: 80px; overflow-y: auto; margin-top: 5px;"></div>
+		</div>
     </div>
 
     <div id="p8-ctx-menu">
         <div class="ctx-item" id="ctx-lock">Lock/Unlock Layout</div>
+		<div class="ctx-item" id="ctx-open-pixelpaint">Open Paint Easel</div>
         <div class="ctx-item" id="ctx-open-editor">Open Theme Manager</div>
         <div class="ctx-item" id="ctx-open-rewards">Channel Point Manager</div>
 		<div class="ctx-item" id="ctx-open-bits">Configure Bits Alerts</div>
-        <div class="ctx-item" id="ctx-open-pixelpaint">Open Paint Easel</div>
+		
+		<div class="ctx-item" id="ctx-open-widgets">🛠️ Other Widgets</div>
+
         <div class="ctx-item" id="ctx-open-settings">Open Settings</div>
         <div class="ctx-item ctx-danger" id="ctx-reset">Reset System (Logout)</div>
     </div>
@@ -328,6 +338,43 @@
 
         <button class="p8-btn" id="close-bit-manager-btn" style="background:transparent; color:#71717a; font-size: 12px; width: 100%; margin-top: 5px;">Close Panel</button>
     </div>
+	<!-- Other Widgets -->
+	<div id="widgets-manager" class="p8-widget" style="display: none;">
+		<div id="widgets-manager-header" class="widget-header">
+			<span>🛠️ Other Widgets Manager</span>
+		</div>
+		
+		<div class="collapsible-section">
+			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
+				<span>⏱️ Timers & Cooldown Controls</span>
+				<span class="collapse-icon">▼</span>
+			</div>
+			<div class="collapsible-content">
+				<div style="display: flex; gap: 5px; margin-bottom: 10px;">
+					<input type="text" id="timer-label-input" placeholder="Timer Label (e.g., Buff, Run)" style="flex: 1; background: #18181b; border: 1px solid #3f3f46; color: #fff; padding: 5px; border-radius: 4px;">
+					<input type="number" id="timer-duration-input" placeholder="Secs (0 for stopwatch)" style="width: 70px; background: #18181b; border: 1px solid #3f3f46; color: #fff; padding: 5px; border-radius: 4px;">
+				</div>
+				<button class="p8-btn save-btn" id="ui-create-timer-btn" style="width: 100%; margin-bottom: 10px; padding: 6px;">Create New Timer</button>
+				
+				<div id="active-timers-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto;">
+					</div>
+			</div>
+		</div>
+
+		<div class="collapsible-section collapsed">
+			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
+				<span>🌐 Entropia Chat Polling (Future)</span>
+				<span class="collapse-icon">▼</span>
+			</div>
+			<div class="collapsible-content">
+				<p style="font-size: 12px; color: #a1a1aa; margin: 0 0 10px 0;">Placeholder for upcoming Entropia Universe local log polling & custom tracking nodes.</p>
+				<button class="p8-btn" style="width: 100%; opacity: 0.5; cursor: not-allowed;" disabled>Initialize Log Watcher</button>
+			</div>
+		</div>
+
+		<button class="p8-btn" id="close-widgets-manager-btn" style="background:transparent; color:#71717a; font-size: 12px; width: 100%; margin-top: 15px;">Close Panel</button>
+	</div>
+
 
 	<div id="settings-window">
 		<div id="settings-manager-header">
