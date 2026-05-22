@@ -2721,6 +2721,16 @@ function bindEvents() {
 
     if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
     if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
+
+	// --- ENTROPIA CONTROLS CONNECTOR ---
+    const uiResetBtn = document.getElementById('btnReset');
+    if (uiResetBtn) {
+        uiResetBtn.addEventListener('click', () => {
+            if (window.entropiaLogParser) {
+                window.entropiaLogParser.resetSession();
+            }
+        });
+    }
 }
 
 init();

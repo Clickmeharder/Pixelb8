@@ -7,6 +7,7 @@
     <title>Pixelb8 EzLay | Twitch Overlay CMS</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <link rel="stylesheet" href="css/styles.css">
+	<link rel="stylesheet" href="css/entropia-widget-styles.css">
     <style>
         /* Document overrides or local overrides can sit here if needed */
     </style>
@@ -391,12 +392,33 @@
 
 		<div class="collapsible-section collapsed">
 			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-				<span>🌐 Entropia Universe Widget (Future)</span>
+				<span>🌐 Entropia Universe Tracker</span>
 				<span class="collapse-icon">▼</span>
 			</div>
 			<div class="collapsible-content">
-				<p style="font-size: 12px; color: #a1a1aa; margin: 0 0 10px 0;">Placeholder for upcoming Entropia Universe local log polling & custom tracking nodes.</p>
-				<button class="p8-btn" style="width: 100%; opacity: 0.5; cursor: not-allowed;" disabled>Initialize Log Watcher</button>
+				<div style="display: flex; gap: 5px; margin-bottom: 10px;">
+					<input type="text" id="pathInput" class="p8-input" placeholder="Chat.log not linked..." readonly style="flex: 1; background: #141414; opacity: 0.8;">
+					<button id="browseBtn" class="p8-btn" style="padding: 6px 12px; background: #0ea5e9;">LINK LOG</button>
+				</div>
+
+				<div style="display: flex; justify-content: space-between; align-items: center; background: #141414; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #27272a;">
+					<span style="font-size: 12px; color: #a1a1aa;">Session Duration:</span>
+					<span id="session-timer" style="font-family: monospace; font-size: 14px; color: #00ffcc; font-weight: bold;">00:00:00</span>
+				</div>
+
+				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px;">
+					<button id="start-session-btn" class="p8-btn save-btn" style="padding: 8px; background: #2e7d32;">START SESSION</button>
+					<button id="btnReset" class="p8-btn alt-btn" style="padding: 8px; background: #dc2626;">RESET STATS</button>
+				</div>
+
+				<div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px;">📋 Live Loot Registry</div>
+				<div id="manifest-grid" style="display: flex; flex-direction: column; gap: 4px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 1px dashed #3f3f46;">
+					</div>
+
+				<div style="display: flex; justify-content: space-between; margin-top: 8px; padding-top: 6px; border-top: 1px solid #27272a; font-size: 12px;">
+					<span style="color: #a1a1aa;">Total Value:</span>
+					<span style="color: #eab308; font-weight: bold;"><span id="session-grand-total">0.0000</span> PED</span>
+				</div>
 			</div>
 		</div>
 

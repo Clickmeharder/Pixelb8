@@ -1,0 +1,30 @@
+/* Entropia Live Log Rows Grid */
+.manifest-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 4px;
+    align-items: center;
+    padding: 4px 6px;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: monospace;
+}
+
+.manifest-row .m-name {
+    color: #ffffff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.manifest-row .m-count {
+    color: #a855f7;
+    text-align: center;
+}
+
+.manifest-row .m-rate {
+    color: #71717a;
+    text-align: center;
+}
