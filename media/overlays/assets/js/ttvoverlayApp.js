@@ -403,14 +403,9 @@ function init() {
     // Core Layout & Registry Loading
     loadPositions();
     renderThemeControls();
-    
-    // Required: Initialize all custom UI dropdowns from the CUSTOM_SELECT_DATA manifest
-    // This fixes the issue where dropdowns were empty or unresponsive
-    populateCustomDropdowns(); 
-    
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 
-    
+	populateCustomDropdowns();
     // Bind all event listeners to the DOM
     bindEvents();
 }
@@ -542,24 +537,29 @@ function setCustomSelectValue(id, value) {
     }
 }
 function populateCustomDropdowns() {
+    // 1. Identify all dropdowns by looking at the configuration data keys
     Object.keys(CUSTOM_SELECT_DATA).forEach(id => {
-        // Fallbacks to capture exact string IDs as keys or prefixed elements
+        
+        // Use a more robust selector lookup
         const displayEl = document.getElementById(`display-${id}`) || 
                           document.getElementById(`current-${id}`) || 
-                          document.getElementById(id); // Added exact string lookup
+                          document.getElementById(id);
 
         const optionsEl = document.getElementById(`options-${id}`) || 
-                          document.getElementById(`${id.replace('-selector', '')}-options`) ||
-                          document.getElementById(`${id}-options`); // Added fallback suffix lookup
+                          document.getElementById(`${id}-options`);
                           
-        if (!displayEl || !optionsEl) return;
+        if (!displayEl || !optionsEl) {
+            console.warn(`Dropdown elements not found for ID: ${id}`);
+            return;
+        }
 
         const optionsData = CUSTOM_SELECT_DATA[id];
-        optionsEl.innerHTML = ""; // Flush template buffer
+        optionsEl.innerHTML = ""; // Clear existing
 
         optionsData.forEach(item => {
             const val = typeof item === 'object' ? item.value : item;
             const text = typeof item === 'object' ? item.label : item;
+            
             const row = document.createElement("div");
             row.className = "option-item";
             row.innerText = text;
@@ -568,6 +568,7 @@ function populateCustomDropdowns() {
             row.addEventListener("mouseenter", () => row.style.background = "var(--accent, #9146ff)");
             row.addEventListener("mouseleave", () => row.style.background = "transparent");
             
+            // Fix: Use stopPropagation to prevent the click from closing the parent incorrectly
             row.addEventListener("click", (e) => {
                 e.stopPropagation();
                 setCustomSelectValue(id, val);
@@ -576,17 +577,18 @@ function populateCustomDropdowns() {
             optionsEl.appendChild(row);
         });
 
+        // Fix: Toggle visibility without conflict
         displayEl.addEventListener("click", (e) => {
             e.stopPropagation();
-            // Close all other open instances first to prevent overlap issues
-            document.querySelectorAll(".custom-select-options-box, .select-options").forEach(box => {
+            // Close other dropdowns
+            document.querySelectorAll(".option-item").closest('.custom-select-options-box, .select-options')?.forEach(box => {
                 if(box !== optionsEl) box.style.display = "none";
             });
+            
             optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
         });
     });
 }
-
 function toggleBits() {
     bitsEnabled = !bitsEnabled;
     saveSettings();
@@ -701,9 +703,13 @@ function syncAlertVisibilityState() {
  * Reusable dynamic initialization engine for rendering custom functional selection fields
  */
 function setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
+	console.log(`Setting up: ${displayId}, Items count: ${optionItems ? optionItems.length : 'NULL'}`);
     const displayEl = document.getElementById(displayId);
     const optionsEl = document.getElementById(optionsId);
+	if (!displayEl) console.error(`Missing Display Element: ${displayId}`);
+    if (!optionsEl) console.error(`Missing Options Element: ${optionsId}`);
     if (!displayEl || !optionsEl) return;
+
 
     optionsEl.innerHTML = "";
     optionItems.forEach(anim => {
@@ -1267,6 +1273,7 @@ function renderThemeControls() {
         }
         container.appendChild(group);
     });
+
 }
 function renderThemeList() {
     const list = document.getElementById('theme-options');
@@ -2256,9 +2263,10 @@ function closeContextMenu() {
 // ==========================================
 // --- REWARDS MANAGER CONTROL ENGINE ---
 // ==========================================
-
 function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");
+    if (!rewardsPanel) return;
+
     const fileInput = document.getElementById("reward-file-input");
     const urlInput = document.getElementById("reward-img-input");
     const fontColorPicker = document.getElementById("reward-font-color");
@@ -2268,6 +2276,7 @@ function bindRewardsManagerEvents() {
     const addSoundBtn = document.getElementById("push-sound-btn");
     const labelSoundBtn = document.getElementById("add-sound-file-btn");
 
+    // Initialize UI state
     if (fontColorPicker && fontColorHex) {
         fontColorPicker.addEventListener("input", function() { fontColorHex.value = this.value; });
         fontColorHex.addEventListener("input", function() {
@@ -2275,110 +2284,126 @@ function bindRewardsManagerEvents() {
         });
     }
 
+    // Ensure dropdowns are populated on load
     if (typeof populateCustomDropdowns === "function") populateCustomDropdowns();
     if (typeof updateManagerBadgesUI === "function") updateManagerBadgesUI();
 
-    // Streamlined baseline image upload parsing layout
+    // Image upload handler
     bindBase64FileReader(fileInput, 
         (base64) => {
             pendingImageBase64 = base64;
-            urlInput.value = "";
-            urlInput.placeholder = "Using selected local file asset...";
+            if(urlInput) {
+                urlInput.value = "";
+                urlInput.placeholder = "Using local file...";
+            }
         },
         () => { pendingImageBase64 = ""; }
     );
 
-    urlInput.addEventListener("input", function() {
-        if (this.value.trim() !== "") {
-            fileInput.value = "";
-            pendingImageBase64 = "";
-            urlInput.placeholder = "Web Image/GIF URL";
-        }
-    });
+    if (urlInput) {
+        urlInput.addEventListener("input", function() {
+            if (this.value.trim() !== "") {
+                if(fileInput) fileInput.value = "";
+                pendingImageBase64 = "";
+            }
+        });
+    }
 
-    // Streamlined baseline audio upload parsing layout
+    // Audio upload handler
     let loadedAudioBase64 = "";
     let loadedAudioName = ""; 
 
-    bindBase64FileReader(soundFileInput,
-        (base64, filename) => {
-            loadedAudioBase64 = base64;
-            loadedAudioName = filename;
-            labelSoundBtn.innerText = `📁 ${filename}`;
-            if (addSoundBtn) addSoundBtn.disabled = false;
-        },
-        () => {
-            loadedAudioBase64 = "";
-            loadedAudioName = "";
-            if (addSoundBtn) addSoundBtn.disabled = true;
-            labelSoundBtn.innerText = "🎵 Choose Sound Asset";
-        }
-    );
+    if (soundFileInput) {
+        bindBase64FileReader(soundFileInput,
+            (base64, filename) => {
+                loadedAudioBase64 = base64;
+                loadedAudioName = filename;
+                if(labelSoundBtn) labelSoundBtn.innerText = `📁 ${filename}`;
+                if (addSoundBtn) addSoundBtn.disabled = false;
+            },
+            () => {
+                loadedAudioBase64 = "";
+                loadedAudioName = "";
+                if (addSoundBtn) addSoundBtn.disabled = true;
+                if(labelSoundBtn) labelSoundBtn.innerText = "🎵 Choose Sound Asset";
+            }
+        );
+    }
 
     if (addSoundBtn) {
         addSoundBtn.addEventListener("click", function() {
-            if (!loadedAudioBase64) return;
+            if (!loadedAudioBase64 || typeof stagedSoundsPool === 'undefined') return;
             stagedSoundsPool.push({ name: loadedAudioName, data: loadedAudioBase64, volume: 1.0 });
+            
+            // Reset audio UI
             loadedAudioBase64 = "";
             loadedAudioName = "";
-            soundFileInput.value = "";
-            labelSoundBtn.innerText = "🎵 Choose Sound Asset";
+            if(soundFileInput) soundFileInput.value = "";
+            if(labelSoundBtn) labelSoundBtn.innerText = "🎵 Choose Sound Asset";
             this.disabled = true;
+            
             if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
         });
     }
 
-    document.getElementById("save-reward-btn").addEventListener("click", () => {
-        const nameEl = document.getElementById("reward-name-input");
-        const textEl = document.getElementById("reward-text-input");
-        const nameKey = nameEl.value.trim().toLowerCase();
-        const alertText = textEl.value.trim();
+    // Save Logic
+    const saveBtn = document.getElementById("save-reward-btn");
+    if (saveBtn) {
+        saveBtn.addEventListener("click", () => {
+            const nameEl = document.getElementById("reward-name-input");
+            const textEl = document.getElementById("reward-text-input");
+            if (!nameEl || !textEl) return;
 
-        if (!nameKey || !alertText) {
-            alert("Reward Name and Alert Text are required!");
-            return;
-        }
+            const nameKey = nameEl.value.trim().toLowerCase();
+            const alertText = textEl.value.trim();
 
-        const payload = {
-            text: alertText,
-            image: pendingImageBase64 ? pendingImageBase64 : urlInput.value.trim(),
-            sounds: [...stagedSoundsPool],
-            fontColor: fontColorHex.value.trim()
-        };
+            if (!nameKey || !alertText) {
+                alert("Reward Name and Alert Text are required!");
+                return;
+            }
 
-        REWARD_SELECTS_REGISTRY.forEach(item => {
-            payload[item.id.replace("reward-", "").replace(/-([a-z])/g, g => g[1].toUpperCase())] = getCustomSelectValue(item.id);
+            const payload = {
+                text: alertText,
+                image: pendingImageBase64 || (urlInput ? urlInput.value.trim() : ""),
+                sounds: typeof stagedSoundsPool !== 'undefined' ? [...stagedSoundsPool] : [],
+                fontColor: fontColorHex ? fontColorHex.value.trim() : "#ffffff"
+            };
+
+            // Map registries to payload
+            REWARD_SELECTS_REGISTRY.forEach(item => {
+                const camelKey = item.id.replace("reward-", "").replace(/-([a-z])/g, g => g[1].toUpperCase());
+                payload[camelKey] = getCustomSelectValue(item.id);
+            });
+
+            REWARD_INPUTS_REGISTRY.forEach(item => {
+                const el = document.getElementById(item.id);
+                const camelKey = item.id.replace("reward-", "").replace(/-([a-z])/g, g => g[1].toUpperCase());
+                payload[camelKey] = el ? el.value.trim() : "";
+            });
+
+            rewardAlerts[nameKey] = payload;
+            saveRewardAlerts();
+
+            // UI Cleanup Cascade
+            nameEl.value = "";
+            textEl.value = "";
+            if(urlInput) { urlInput.value = ""; urlInput.placeholder = "Web Image/GIF URL"; }
+            if(fileInput) fileInput.value = "";
+            if(soundFileInput) soundFileInput.value = "";
+            pendingImageBase64 = "";
+            if (addSoundBtn) addSoundBtn.disabled = true;
+            if(labelSoundBtn) labelSoundBtn.innerText = "🎵 Choose Sound Asset";
+            
+            if (typeof stagedSoundsPool !== 'undefined') stagedSoundsPool = [];
+
+            // Reset dropdowns to defaults
+            REWARD_SELECTS_REGISTRY.forEach(item => setCustomSelectValue(item.id, item.def));
+            REWARD_INPUTS_REGISTRY.forEach(item => { const el = document.getElementById(item.id); if (el) el.value = ""; });
+
+            if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
+            if (typeof renderRewardsList === "function") renderRewardsList();
         });
-        REWARD_INPUTS_REGISTRY.forEach(item => {
-            const el = document.getElementById(item.id);
-            payload[item.id.replace("reward-", "").replace(/-([a-z])/g, g => g[1].toUpperCase())] = el ? el.value.trim() : "";
-        });
-
-        rewardAlerts[nameKey] = payload;
-        saveRewardAlerts();
-
-        // Standardized cleanup cascade
-        nameEl.value = "";
-        textEl.value = "";
-        urlInput.value = "";
-        urlInput.placeholder = "Web Image/GIF URL";
-        fileInput.value = "";
-        soundFileInput.value = "";
-        pendingImageBase64 = "";
-        loadedAudioBase64 = "";
-        loadedAudioName = "";
-        labelSoundBtn.innerText = "🎵 Choose Sound Asset";
-        if (addSoundBtn) addSoundBtn.disabled = true;
-        fontColorPicker.value = "#ffffff";
-        fontColorHex.value = "#ffffff";
-        stagedSoundsPool = [];
-
-        REWARD_SELECTS_REGISTRY.forEach(item => setCustomSelectValue(item.id, item.def));
-        REWARD_INPUTS_REGISTRY.forEach(item => { const el = document.getElementById(item.id); if (el) el.value = ""; });
-
-        if (typeof renderStagedSoundsUI === "function") renderStagedSoundsUI();
-        renderRewardsList();
-    });
+    }
 }
 
 // ==========================================
@@ -2649,5 +2674,5 @@ function bindEvents() {
 
 init();
 
-console.log("ttvoverlayapp.js version 0.05 finished loading");
-console.log("dev sucks at this lul");
+console.log("ttvoverlayapp.js version 0.06 finished loading");
+console.log("welp I dun fucked it up");
