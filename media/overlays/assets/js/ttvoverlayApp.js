@@ -1073,7 +1073,7 @@ function renderThemeControls() {
         } 
         else if (item.type === 'select') {
             const sel = document.createElement('select');
-            sel.className = 'p8-input';
+            sel.className = 'p8-input custom-select';
             item.options.forEach(o => {
                 const opt = document.createElement('option');
                 opt.value = o;
