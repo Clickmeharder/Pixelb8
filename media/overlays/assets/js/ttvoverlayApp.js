@@ -2154,8 +2154,7 @@ const SIMPLE_CLICK_MAPS = [
 const DRAGGABLE_WINDOWS_CONFIG = [
     { winId: "bit-manager",           headerId: "bit-manager-header" },
     { winId: "settings-window",       headerId: "settings-manager-header" },
-    { winId: "widgets-manager",       headerId: "widgets-manager-header" },
-    { winId: "timer-overlay-widget",  headerId: "timer-overlay-header" }
+    { winId: "widgets-manager",       headerId: "widgets-manager-header" }
 ];
 
 // =========================================================================
@@ -2548,7 +2547,7 @@ function bindEvents() {
         
         // Canvas editing exclusion logic protecting interactable management panels (Updated target exclusion rule string matching)
         if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 || 
-            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, #timer-widget, .setup-container, .p8-modal')) return;
+            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, .timer-btn-group, .setup-container, .p8-modal')) return;
         
         dragTarget = e.target.closest('.p8-widget');
         if (dragTarget) {
