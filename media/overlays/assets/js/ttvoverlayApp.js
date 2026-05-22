@@ -1567,6 +1567,13 @@ function botSay(msg) {
 
 // --- CORE COMMAND LOGIC & WIDGET VISIBILITY CONTROLS ---
 // --- CENTRALIZED COMMAND REGISTRY ---
+// Helper to parse ID or default to latest
+function resolveTargetId(message, type) {
+    const parts = message.trim().split(" ");
+    const id = parts[0]; // Assume first argument is the ID
+    return activeTimers[id] && activeTimers[id].type === type ? id : getLatestInstanceIdByType(type);
+}
+
 const commandsRegistry = {
     "hello": {
         adminOnly: false,
@@ -1684,80 +1691,54 @@ const commandsRegistry = {
             }
         }
     },
-	// Generic Stopwatch Commands
-    "timer": {
+	"timer": {
         adminOnly: true,
         execute: (user, message, flags) => {
-            const label = message.trim() || "Generic Timer";
-            const id = createTimerInstance(label, 0); // 0 initializes standard stopwatch
-            botSay(`Started Stopwatch: [${label}]`);
-        }
-    },
-    "pausetimer": {
-        adminOnly: true,
-        execute: (user, message, flags) => {
-            const targetId = getLatestInstanceIdByType("stopwatch");
-            if (targetId) {
-                pauseTimerInstance(targetId);
-                botSay(`Paused active stopwatch.`);
-            }
-        }
-    },
-    "splittimer": {
-        adminOnly: true,
-        execute: (user, message, flags) => {
-            const targetId = getLatestInstanceIdByType("stopwatch");
-            if (targetId) splitTimerInstance(targetId);
-        }
-    },
-    "resettimer": {
-        adminOnly: true,
-        execute: (user, message, flags) => {
-            const targetId = getLatestInstanceIdByType("stopwatch");
-            if (targetId) {
-                resetTimerInstance(targetId);
-                botSay(`Reset active stopwatch time.`);
-            }
-        }
-    },
-    "stoptimer": {
-        adminOnly: true,
-        execute: (user, message, flags) => {
-            const targetId = getLatestInstanceIdByType("stopwatch");
-            if (targetId) {
-                stopTimerInstance(targetId);
-                botSay(`Stopped and removed stopwatch.`);
-            }
-        }
-    },
+            const parts = message.trim().toLowerCase().split(" ");
+            const action = parts[0];
+            const id = parts[1]; // Explicit ID provided by user
 
-    // Countdown Specific Commands
+            // Handle Listing
+            if (action === "list") {
+                const activeIds = Object.keys(activeTimers);
+                if (activeIds.length === 0) { 
+                    botSay("No timers are currently running."); 
+                    return; 
+                }
+                const list = activeIds.map(id => `[${id}: ${activeTimers[id].label}]`).join(", ");
+                botSay(`Active Timers: ${list}`);
+                return;
+            }
+
+            // Handle Control Actions
+            if (!id || !activeTimers[id]) {
+                botSay(`Please specify a valid Timer ID. Use !timer list to see them.`);
+                return;
+            }
+            
+            switch(action) {
+                case "pause": pauseTimerInstance(id); botSay(`Paused ${activeTimers[id].type}: ${id}`); break;
+                case "reset": resetTimerInstance(id); botSay(`Reset ${activeTimers[id].type}: ${id}`); break;
+                case "stop": stopTimerInstance(id); botSay(`Stopped ${activeTimers[id].type}: ${id}`); break;
+                case "split": splitTimerInstance(id); break;
+                default: botSay("Action not recognized. Use: list, pause, reset, stop, or split.");
+            }
+        }
+    },
     "countdown": {
         adminOnly: true,
         execute: (user, message, flags) => {
             const parts = message.trim().split(" ");
             const firstArg = parts[0].toLowerCase();
-            
-            // Sub-command check: Check if user is invoking a saved layout preset template
             if (savedCountdowns[firstArg]) {
-                const duration = savedCountdowns[firstArg];
-                const label = parts.slice(1).join(" ") || parts[0];
-                createTimerInstance(label, duration);
-                botSay(`Launched template countdown [${parts[0]}] for ${duration}s.`);
+                createTimerInstance(parts.slice(1).join(" ") || firstArg, savedCountdowns[firstArg]);
+                botSay(`Launched template [${firstArg}].`);
                 return;
             }
-
-            // Standard runtime direct configuration syntax parse loop
             const duration = parseInt(parts[0]) || 0;
-            const label = parts.slice(1).join(" ") || "Countdown";
-            
-            if (duration <= 0) {
-                botSay(`Usage: !${CMD_PREFIX} countdown [seconds] [label] OR !${CMD_PREFIX} countdown [saved_name]`);
-                return;
-            }
-            
-            createTimerInstance(label, duration);
-            botSay(`Started Countdown: [${label}] (${duration}s)`);
+            if (duration <= 0) { botSay(`Usage: !${CMD_PREFIX} countdown [seconds] [label]`); return; }
+            createTimerInstance(parts.slice(1).join(" ") || "Countdown", duration);
+            botSay(`Started Countdown: (${duration}s)`);
         }
     },
     "savecountdown": {
@@ -1766,45 +1747,10 @@ const commandsRegistry = {
             const parts = message.trim().split(" ");
             const duration = parseInt(parts[0]) || 0;
             const keyName = parts.slice(1).join(" ").trim().toLowerCase();
-
-            if (duration <= 0 || !keyName) {
-                botSay(`Usage: !${CMD_PREFIX} savecountdown [seconds] [name]`);
-                return;
-            }
-
+            if (duration <= 0 || !keyName) { botSay(`Usage: !${CMD_PREFIX} savecountdown [seconds] [name]`); return; }
             savedCountdowns[keyName] = duration;
             saveCountdownsToStorage();
             botSay(`Preset Saved! Use: !${CMD_PREFIX} countdown ${keyName}`);
-        }
-    },
-    "pausecountdown": {
-        adminOnly: true,
-        execute: (user, message, flags) => {
-            const targetId = getLatestInstanceIdByType("countdown");
-            if (targetId) {
-                pauseTimerInstance(targetId);
-                botSay(`Paused active countdown clock.`);
-            }
-        }
-    },
-    "resetcountdown": {
-        adminOnly: true,
-        execute: (user, message, flags) => {
-            const targetId = getLatestInstanceIdByType("countdown");
-            if (targetId) {
-                resetTimerInstance(targetId);
-                botSay(`Reset active countdown clock back to starting duration.`);
-            }
-        }
-    },
-    "stopcountdown": {
-        adminOnly: true,
-        execute: (user, message, flags) => {
-            const targetId = getLatestInstanceIdByType("countdown");
-            if (targetId) {
-                stopTimerInstance(targetId);
-                botSay(`Cleared countdown layout container element.`);
-            }
         }
     },
     "help": {
