@@ -169,7 +169,18 @@ if (!registry.bits) {
         }
     };
 }
-
+// Add to your registry initialization in ttvoverlayApp.js
+if (!registry.timers) {
+    registry.timers = {
+        defaults: {
+            labelFontSize: "14px",
+            labelFontWeight: "600",
+            timerFontSize: "24px",
+            timerFontColor: "#ffffff",
+            showMode: "always" // Options: "always", "counting", "never"
+        }
+    };
+}
 const styleConfig = [
     { 
         id: 'font', 
@@ -1930,19 +1941,22 @@ function updateTimerWidgetVisibility() {
     const timerWidget = document.getElementById("timer-widget");
     if (!timerWidget) return;
 
-    // Check if Edit Mode global state flag is true
     const editModeActive = (typeof isEditMode !== "undefined" && isEditMode);
     
-    // Check if there are any initialized tracking keys in memory/storage
-    const hasActiveTimers = Object.keys(activeTimers).length > 0;
+    // Get the most recent timer's visibility setting
+    const keys = Object.keys(activeTimers);
+    const lastKey = keys[keys.length - 1];
+    const currentSettings = lastKey ? activeTimers[lastKey].settings : null;
 
-    if (editModeActive || hasActiveTimers) {
+    if (editModeActive) {
         timerWidget.style.display = "block";
-    } else {
+    } else if (currentSettings && currentSettings.showMode === "never") {
         timerWidget.style.display = "none";
+    } else {
+        // Fallback to existing logic
+        timerWidget.style.display = keys.length > 0 ? "block" : "none";
     }
 }
-
 // Global Core Controller Initialization Wrapper
 function initTimerEngine() {
     // Restore runtime ticks if active instances are pulled from storage on load
@@ -1979,25 +1993,32 @@ function initTimerEngine() {
 }
 
 // Unified instantiator function
-function createTimerInstance(label = "Timer", durationSeconds = 0) {
+function createTimerInstance(label = "Timer", durationSeconds = 0, customStyles = {}) {
     const id = "tmr_" + Date.now();
     const type = parseInt(durationSeconds) > 0 ? "countdown" : "stopwatch";
     
     activeTimers[id] = {
         id: id,
-        label: label || (type === "stopwatch" ? "Generic Timer" : "Countdown"),
+        label: label,
         duration: parseInt(durationSeconds) || 0,
         elapsed: 0,
         running: true,
         splits: [],
-        type: type
+        type: type,
+        // NEW: Persistence for custom settings
+        settings: {
+            labelFontSize: customStyles.labelFontSize || "14px",
+            labelFontWeight: customStyles.labelFontWeight || "600",
+            timerFontSize: customStyles.timerFontSize || "24px",
+            timerFontColor: customStyles.timerFontColor || "#ffffff",
+            showMode: customStyles.showMode || "always" // always, counting, never
+        }
     };
     
     saveActiveTimersToStorage();
     startTimerInstance(id);
     return id;
 }
-
 function startTimerInstance(id) {
     if (!activeTimers[id]) return;
     activeTimers[id].running = true;
@@ -2096,6 +2117,7 @@ function renderActiveTimersUI() {
     const overlayDigits = document.getElementById("timer-display-digits");
     const overlayTitle = document.getElementById("timer-widget-title");
     const overlaySplits = document.getElementById("timer-splits-container");
+    const timerWidget = document.getElementById("timer-widget");
     
     if (listContainer) listContainer.innerHTML = "";
     if (overlaySplits) overlaySplits.innerHTML = "";
@@ -2104,15 +2126,39 @@ function renderActiveTimersUI() {
     if (keys.length === 0) {
         if (overlayDigits) overlayDigits.innerText = "00:00:00";
         if (overlayTitle) overlayTitle.innerText = "⏱️ No Active Timers";
+        if (timerWidget) timerWidget.style.display = "none";
         return;
     }
     
     const primaryTimer = activeTimers[keys[keys.length - 1]];
     if (primaryTimer) {
+        const s = primaryTimer.settings || {}; // Ensure we have a settings object
         const remaining = primaryTimer.type === "countdown" ? (primaryTimer.duration - primaryTimer.elapsed) : primaryTimer.elapsed;
-        if (overlayDigits) overlayDigits.innerText = formatTimeDigits(remaining);
-        if (overlayTitle) overlayTitle.innerText = `${primaryTimer.type === 'stopwatch' ? '⏱️' : '⏳'} ${primaryTimer.label}`;
         
+        // 1. Apply Styles to Overlay Digits
+        if (overlayDigits) {
+            overlayDigits.innerText = formatTimeDigits(remaining);
+            overlayDigits.style.fontSize = s.timerFontSize || "24px";
+            overlayDigits.style.color = s.timerFontColor || "#ffffff";
+        }
+        
+        // 2. Apply Styles to Overlay Title
+        if (overlayTitle) {
+            overlayTitle.innerText = `${primaryTimer.type === 'stopwatch' ? '⏱️' : '⏳'} ${primaryTimer.label}`;
+            overlayTitle.style.fontSize = s.labelFontSize || "14px";
+            overlayTitle.style.fontWeight = s.labelFontWeight || "600";
+        }
+        
+        // 3. Visibility Logic
+        const editModeActive = (typeof isEditMode !== "undefined" && isEditMode);
+        const shouldShow = editModeActive ? true : (
+            s.showMode === "always" ? true :
+            s.showMode === "counting" ? primaryTimer.running :
+            false // "never"
+        );
+        if (timerWidget) timerWidget.style.display = shouldShow ? "block" : "none";
+        
+        // 4. Render Splits
         primaryTimer.splits.forEach((splitVal, index) => {
             const div = document.createElement("div");
             div.style.borderBottom = "1px solid rgba(255, 255, 255, 0.05)";
@@ -2122,19 +2168,14 @@ function renderActiveTimersUI() {
         });
     }
     
+    // Render list rows
     keys.forEach(id => {
         const t = activeTimers[id];
         const rem = t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed;
         
         const row = document.createElement("div");
         row.className = "timer-control-row";
-        row.style.display = "flex";
-        row.style.alignItems = "center";
-        row.style.justifyContent = "space-between";
-        row.style.marginBottom = "5px";
-        row.style.background = "rgba(0,0,0,0.2)";
-        row.style.padding = "4px";
-        row.style.borderRadius = "4px";
+        row.style.cssText = "display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; background:rgba(0,0,0,0.2); padding:4px; border-radius:4px;";
         
         row.innerHTML = `
             <span style="max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:${t.running ? 'var(--accent)' : '#a1a1aa'}">
@@ -2152,7 +2193,6 @@ function renderActiveTimersUI() {
         if (listContainer) listContainer.appendChild(row);
     });
 }
-
 // Make sure to call initTimerEngine() once your document DOM content completely compiles!
 document.addEventListener("DOMContentLoaded", () => {
     initTimerEngine();
@@ -2565,21 +2605,20 @@ function bindEvents() {
     });
 
     // Timer UI
-    onSafeClick("ui-create-timer-btn", () => {
-        const lblInput = document.getElementById("timer-label-input");
-        const durInput = document.getElementById("timer-duration-input");
-      
-        const label = (lblInput && lblInput.value.trim()) ? lblInput.value.trim() : "UI Timer";
-        const duration = (durInput && durInput.value) ? parseInt(durInput.value) : 0;
-      
-        if (duration > 0 && typeof savedCountdowns !== 'undefined') {
-            savedCountdowns[label.toLowerCase()] = duration;
-            saveCountdownsToStorage();
-            if (typeof botSay === "function") {
-                botSay(`Saved countdown template: [${label}] (${duration}s)`);
-            }
-        }
-        createTimerInstance(label, duration);
+	onSafeClick("ui-create-timer-btn", () => {
+		const label = document.getElementById("timer-label-input").value.trim() || "Timer";
+		const duration = document.getElementById("timer-duration-input").value || 0;
+		
+		// Collect new settings
+		const config = {
+			labelFontSize: document.getElementById("tmr-label-fz").value || "14px",
+			labelFontWeight: document.getElementById("tmr-label-fw").value || "600",
+			timerFontSize: document.getElementById("tmr-fz").value || "24px",
+			timerFontColor: document.getElementById("tmr-color").value || "#ffffff",
+			showMode: document.getElementById("tmr-visibility").value || "always"
+		};
+
+		createTimerInstance(label, duration, config);
       
         if (lblInput) lblInput.value = "";
         if (durInput) durInput.value = "";
@@ -2720,4 +2759,4 @@ function bindEvents() {
 
 init();
 
-console.log("ttvoverlayapp.js version 0.08 finished loading");
+console.log("ttvoverlayapp.js version 0.09 finished loading");
