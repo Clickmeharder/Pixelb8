@@ -87,73 +87,73 @@
 	
 	<!--Channel Point Manager--->
 	<div id="rewards-manager" style="display: none; position: fixed; right: 20px; top: 20px; width: 320px; background: var(--bg); border: 2px solid var(--accent); border-radius: var(--border-radius); padding: 20px; color: #fff; font-family: var(--font-family); z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
-		<h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Channel Point Redeems</h3>
+		<h3 id="rewards-manager-title" style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Channel Point Redeems</h3>
 		
-		<div style="background: rgba(9,9,11,0.6); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
-			<div style="font-size: 10px; color: #71717a; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-bottom: 2px;">Overlay Master Controls</div>
+		<div id="reward-master-controls-wrapper" style="background: rgba(9,9,11,0.6); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
+			<div id="reward-master-controls-header" style="font-size: 10px; color: #71717a; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-bottom: 2px;">Overlay Master Controls</div>
 			
-			<div style="display: flex; justify-content: space-between; align-items: center; background: #18181b; padding: 6px 10px; border-radius: 4px; border: 1px solid #27272a;">
-				<span style="font-size: 11px; color: #e4e4e7;">Alert Layer Widget:</span>
-				<div style="display: flex; align-items: center; gap: 8px;">
+			<div id="reward-status-row" style="display: flex; justify-content: space-between; align-items: center; background: #18181b; padding: 6px 10px; border-radius: 4px; border: 1px solid #27272a;">
+				<span id="reward-status-label" style="font-size: 11px; color: #e4e4e7;">Alert Layer Widget:</span>
+				<div id="reward-status-badge-container" style="display: flex; align-items: center; gap: 8px;">
 					<span id="mgr-alert-status-badge" style="font-size: 10px; font-family: monospace; padding: 2px 6px; border-radius: 4px; font-weight: bold;">---</span>
 					<button type="button" id="mgr-toggle-alert-btn" style="background: var(--accent); border: none; color: white; border-radius: 4px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: bold;">Toggle</button>
 				</div>
 			</div>
 		</div>
 
-		<div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #27272a;">
-			<p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold; color: #a1a1aa;">Add / New Template Config</p>
+		<div id="reward-template-config-wrapper" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #27272a;">
+			<p id="reward-config-section-title" style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold; color: #a1a1aa;">Add / New Template Config</p>
 			<input type="text" id="reward-name-input" class="p8-input" placeholder="Exact Reward Name" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
 			<input type="text" id="reward-text-input" class="p8-input" placeholder="Alert Template (e.g. {user} did a thing!)" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
 			
-			<div style="margin-bottom: 12px;">
-				<label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">Alert Graphic Asset</label>
+			<div id="reward-graphic-asset-group" style="margin-bottom: 12px;">
+				<label id="reward-graphic-asset-label" style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">Alert Graphic Asset</label>
 				<input type="text" id="reward-img-input" class="p8-input" placeholder="Web Image/GIF URL" style="width: 100%; margin-bottom: 4px; box-sizing: border-box;">
-				<div style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: #71717a;">
-					<span>OR</span>
+				<div id="reward-file-uploader-row" style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: #71717a;">
+					<span id="reward-uploader-separator">OR</span>
 					<input type="file" id="reward-file-input" accept="image/*" style="font-size: 11px; color: #a1a1aa; background: transparent; border: none; padding: 0; width: 100%;">
 				</div>
 			</div>
 
-			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; border-top: 1px solid #27272a; padding-top: 10px;">
-				<div>
-					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text In Anim</label>
+			<div id="reward-animations-grid-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; border-top: 1px solid #27272a; padding-top: 10px;">
+				<div id="reward-text-in-anim-wrapper">
+					<label id="reward-text-in-anim-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text In Anim</label>
 					<select id="reward-text-in-anim" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
 				</div>
-				<div>
-					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Out Anim</label>
+				<div id="reward-text-out-anim-wrapper">
+					<label id="reward-text-out-anim-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Out Anim</label>
 					<select id="reward-text-out-anim" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
 				</div>
-				<div>
-					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image In Anim</label>
+				<div id="reward-img-in-anim-wrapper">
+					<label id="reward-img-in-anim-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image In Anim</label>
 					<select id="reward-img-in-anim" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
 				</div>
-				<div>
-					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Out Anim</label>
+				<div id="reward-img-out-anim-wrapper">
+					<label id="reward-img-out-anim-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Out Anim</label>
 					<select id="reward-img-out-anim" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
 				</div>
 			</div>
 
-			<div style="border-top: 1px solid #27272a; padding-top: 10px; margin-bottom: 12px;">
-				<label style="font-size: 11px; color: var(--accent); display: block; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Custom Alert Styling</label>
-				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-					<div>
-						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Size</label>
+			<div id="reward-custom-styling-section" style="border-top: 1px solid #27272a; padding-top: 10px; margin-bottom: 12px;">
+				<label id="reward-custom-styling-label" style="font-size: 11px; color: var(--accent); display: block; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Custom Alert Styling</label>
+				<div id="reward-custom-styling-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+					<div id="reward-font-size-wrapper">
+						<label id="reward-font-size-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Size</label>
 						<input type="text" id="reward-font-size" class="p8-input" placeholder="e.g. 2.5em, 32px" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
 					</div>
-					<div>
-						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Color</label>
-						<div style="display: flex; gap: 4px;">
+					<div id="reward-font-color-wrapper">
+						<label id="reward-font-color-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Color</label>
+						<div id="reward-font-color-picker-row" style="display: flex; gap: 4px;">
 							<input type="color" id="reward-font-color" style="padding:0; border:1px solid #27272a; background:transparent; width:24px; height:24px; cursor:pointer;" value="#ffffff">
 							<input type="text" id="reward-font-color-hex" class="p8-input" placeholder="#ffffff" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;" value="#ffffff">
 						</div>
 					</div>
-					<div>
-						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Outline</label>
+					<div id="reward-text-outline-wrapper">
+						<label id="reward-text-outline-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Outline</label>
 						<input type="text" id="reward-text-outline" class="p8-input" placeholder="e.g. 2px #000" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
 					</div>
-					<div>
-						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Weight</label>
+					<div id="reward-font-weight-wrapper">
+						<label id="reward-font-weight-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Weight</label>
 						<select id="reward-font-weight" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;">
 							<option value="normal">Normal (400)</option>
 							<option value="bold" selected>Bold (700)</option>
@@ -161,40 +161,40 @@
 							<option value="300">Light (300)</option>
 						</select>
 					</div>
-					<div style="grid-column: span 2;">
-						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Max Width</label>
+					<div id="reward-img-size-wrapper" style="grid-column: span 2;">
+						<label id="reward-img-size-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Max Width</label>
 						<input type="text" id="reward-img-size" class="p8-input" placeholder="e.g. 100%, 250px, 120px" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;" value="100%">
 					</div>
 				</div>
 			</div>
 
-			<div style="border-top: 1px solid #27272a; padding-top: 10px; margin-bottom: 12px;">
-				<label style="font-size: 11px; color: var(--accent); display: block; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">⏱️ Lifecycles & Playback</label>
-				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-					<div style="grid-column: span 2;">
-						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Duration (ms)</label>
+			<div id="reward-lifecycle-playback-section" style="border-top: 1px solid #27272a; padding-top: 10px; margin-bottom: 12px;">
+				<label id="reward-lifecycle-playback-label" style="font-size: 11px; color: var(--accent); display: block; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">⏱️ Lifecycles & Playback</label>
+				<div id="reward-lifecycle-playback-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+					<div id="reward-text-duration-wrapper" style="grid-column: span 2;">
+						<label id="reward-text-duration-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Duration (ms)</label>
 						<input type="number" id="reward-text-duration" class="p8-input" placeholder="8000" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
 					</div>
-					<div>
-						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Mode</label>
+					<div id="reward-img-mode-wrapper">
+						<label id="reward-img-mode-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Mode</label>
 						<select id="reward-img-mode" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;">
 							<option value="loop">Loop Continuously</option>
 							<option value="once">Play Once (Reset)</option>
 						</select>
 					</div>
-					<div>
-						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Duration (ms)</label>
+					<div id="reward-img-duration-wrapper">
+						<label id="reward-img-duration-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Duration (ms)</label>
 						<input type="number" id="reward-img-duration" class="p8-input" placeholder="Match Text" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
 					</div>
 				</div>
 			</div>
 
-			<div style="margin-top: 15px; margin-bottom: 15px; text-align: left; border-top: 1px dashed #27272a; padding-top: 15px;">
-				<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Sound Pool (Plays Randomly)</label>
+			<div id="reward-audio-pool-section" style="margin-top: 15px; margin-bottom: 15px; text-align: left; border-top: 1px dashed #27272a; padding-top: 15px;">
+				<label id="reward-audio-pool-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Sound Pool (Plays Randomly)</label>
 				
 				<div id="reward-sounds-list" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; max-height: 150px; overflow-y: auto; padding-right: 4px;"></div>
 				
-				<div style="display: flex; gap: 8px; align-items: center;">
+				<div id="reward-audio-uploader-row" style="display: flex; gap: 8px; align-items: center;">
 					<input type="file" id="reward-sound-file" accept="audio/*" style="display: none;">
 					<button type="button" class="p8-btn alt-btn" id="add-sound-file-btn" style="margin-top: 0; padding: 8px 12px; font-size: 11px; flex-grow: 1;" onclick="document.getElementById('reward-sound-file').click()">
 						🎵 Choose Sound Asset
@@ -207,10 +207,12 @@
 			<button class="p8-btn save-btn" id="save-reward-btn" style="width: 100%;">Save Reward Template</button>
 		</div>
 
-		<hr style="border:0; border-top: 1px solid #27272a; margin: 15px 0;">
+		<hr id="rewards-manager-divider" style="border:0; border-top: 1px solid #27272a; margin: 15px 0;">
 		
-		<label style="font-size: 12px; font-weight: bold; color: #a1a1aa; display: block; margin-bottom: 8px;">Registered Rewards</label>
-		<div id="rewards-list-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+		<div id="reward-registered-templates-section">
+			<label id="reward-registered-list-label" style="font-size: 12px; font-weight: bold; color: #a1a1aa; display: block; margin-bottom: 8px;">Registered Rewards</label>
+			<div id="rewards-list-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+		</div>
 
 		<button class="p8-btn" id="close-rewards-btn" style="background:transparent; color:#71717a; font-size: 12px; width: 100%; margin-top: 15px;">Close Panel</button>
 	</div>
