@@ -846,7 +846,7 @@ function bindEvents() {
         await p8Confirm('Theme Settings Saved', true);
     });
 
-	window.addEventListener('mousedown', e => {
+    window.addEventListener('mousedown', e => {
         const menu = document.getElementById('p8-ctx-menu');
         const opts = document.getElementById('theme-options');
         
@@ -854,9 +854,9 @@ function bindEvents() {
         if (menu.style.display === 'block' && !menu.contains(e.target)) menu.style.display = 'none';
         if (opts.style.display === 'block' && !e.target.closest('#theme-selector')) opts.style.display = 'none';
         
-        // Clear all dynamically generated theme controls options boxes if clicking abstractly
-        if (!e.target.closest('.custom-select-display')) {
-            document.querySelectorAll(".custom-select-options-box").forEach(b => b.style.display = "none");
+        // Clear all standard or dynamic custom select menus if clicking abstractly away from any trigger
+        if (!e.target.closest('.select-trigger')) {
+            document.querySelectorAll(".select-options").forEach(b => b.style.display = "none");
         }
         
         // 2. SAFETY INTERCEPT GUARD CLAUSE (Protects inputs and panels from breaking drag states)
