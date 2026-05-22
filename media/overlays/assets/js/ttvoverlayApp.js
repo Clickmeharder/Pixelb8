@@ -1155,39 +1155,36 @@ function renderThemeControls() {
             picker.querySelector('.preview-color').style.backgroundColor = currentStr;
             group.appendChild(picker);
         } 
-        // --- CONVERTED SELECT HANDLING ENGINE WITH SAFETY FALLBACKS ---
+        // --- CONVERTED SELECT HANDLING ENGINE (STYLED TO MATCH ACTIVE THEME CUSTOM SELECT) ---
         else if (item.type === 'select') {
-            // Added safety fallback string to completely bypass undefined/unpopulated key runtime bugs
+            // Safety fallback string to completely bypass undefined/unpopulated key runtime bugs
             const currentValue = registry.themes[registry.active][item.var] || '';
             
-            // Build out shared custom dropdown UI block architecture
+            // Build out shared custom dropdown UI block architecture using standard theme classes
             const selectWorkspace = document.createElement('div');
-            selectWorkspace.className = 'custom-select-workspace';
+            selectWorkspace.className = 'custom-select';
             selectWorkspace.id = `theme-select-${item.id}`;
-            selectWorkspace.style.cssText = "position: relative; width: 100%;";
 
             // Resolve immediate visual display name (strip quote strings out of font declarations safely)
             const fallbackLabel = currentValue.includes(',') ? currentValue.split(',')[0].replace(/'/g, '') : currentValue;
 
             const displayEl = document.createElement('div');
-            displayEl.className = 'custom-select-display';
+            displayEl.className = 'select-trigger';
             displayEl.id = `display-theme-select-${item.id}`;
             displayEl.innerText = fallbackLabel || `Select ${item.label}...`;
 
             const optionsBox = document.createElement('div');
-            optionsBox.className = 'custom-select-options-box';
+            optionsBox.className = 'select-options';
             optionsBox.id = `options-theme-select-${item.id}`;
-            optionsBox.style.cssText = "display: none; position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000; max-height: 200px; overflow-y: auto; background: #09090b; border: 1px solid #27272a; border-radius: 6px; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);";
+            // Maintain display state inline toggle while relying on your style rules for structure layout
+            optionsBox.style.display = 'none'; 
 
             // Populate items into the dropdown window list natively
             item.options.forEach(optVal => {
                 const row = document.createElement('div');
                 row.className = 'option-item';
                 row.innerText = optVal.includes(',') ? optVal.split(',')[0].replace(/'/g, '') : optVal;
-                row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer; transition: background 0.2s;";
-
-                row.addEventListener("mouseenter", () => row.style.background = "rgba(255,255,255,0.05)");
-                row.addEventListener("mouseleave", () => row.style.background = "transparent");
+                row.style.cursor = 'pointer';
 
                 // Process selections on click actions
                 row.addEventListener('click', (e) => {
@@ -1209,7 +1206,7 @@ function renderThemeControls() {
             displayEl.addEventListener('click', (e) => {
                 e.stopPropagation();
                 // Close all existing custom menus anywhere on the overlay platform
-                document.querySelectorAll(".custom-select-options-box").forEach(box => {
+                document.querySelectorAll(".select-options").forEach(box => {
                     if (box !== optionsBox) box.style.display = "none";
                 });
                 optionsBox.style.display = optionsBox.style.display === 'block' ? 'none' : 'block';
