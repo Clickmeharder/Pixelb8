@@ -432,6 +432,14 @@ async function systemReset() {
         window.location.href = FULL_REDIRECT;
     }
 }
+Here is the complete, untruncated updated workspace block.
+
+Key Updates Applied:
+Expanded Data Schema Definitions (CUSTOM_SELECT_DATA): Appended entries for "reward-font-weight" and "reward-img-mode" alongside their native values/labels configurations so they render correctly.
+
+Added Missing Config Mappings: Added entries for bit-tier-selector and all four custom bit animations fields (bit-text-in-anim, bit-text-out-anim, bit-img-in-anim, bit-img-out-anim) right into your tracking pipelines so your Bit / Cheer Manager fields can resolve, save, and change states synchronously.
+
+JavaScript
 // --- WORKSPACE DATA GRAPH & ANIMATION MANIFESTS ---
 let pendingImageBase64 = "";
 
@@ -453,7 +461,19 @@ const CUSTOM_SELECT_DATA = {
     "reward-img-mode": [
         { value: "loop", label: "Loop Continuously" },
         { value: "once", label: "Play Once (Reset)" }
-    ]
+    ],
+    // Bit Cheer Manager Additions
+    "bit-tier-selector": [
+        { value: "1", label: "Tier 1 (1+ Bits)" },
+        { value: "100", label: "Tier 2 (100+ Bits)" },
+        { value: "500", label: "Tier 3 (500+ Bits)" },
+        { value: "1000", label: "Tier 4 (1000+ Bits)" },
+        { value: "5000", label: "Tier 5 (5000+ Bits)" }
+    ],
+    "bit-text-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "bit-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
+    "bit-img-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "bit-img-out-anim": AVAILABLE_OUT_ANIMATIONS
 };
 
 // State engine to track actively selected values since we don't have standard .value anymore
@@ -463,7 +483,13 @@ let customSelectValues = {
     "reward-img-in-anim": "none",
     "reward-img-out-anim": "none",
     "reward-font-weight": "bold",
-    "reward-img-mode": "loop"
+    "reward-img-mode": "loop",
+    // Bit Cheer Manager State Fallbacks
+    "bit-tier-selector": "1",
+    "bit-text-in-anim": "none",
+    "bit-text-out-anim": "none",
+    "bit-img-in-anim": "none",
+    "bit-img-out-anim": "none"
 };
 
 // Programmatic getter and setter wrappers to maintain backward compatibility with your save actions
@@ -473,23 +499,29 @@ function getCustomSelectValue(id) {
 
 function setCustomSelectValue(id, value) {
     customSelectValues[id] = value;
-    const displayEl = document.getElementById(`display-${id}`);
+    const displayEl = document.getElementById(`display-${id}`) || document.getElementById(`current-${id}`);
     if (!displayEl) return;
 
     // Resolve structural label representations if tracking raw object lists
     const dataset = CUSTOM_SELECT_DATA[id];
     if (dataset && typeof dataset[0] === 'object') {
-        const matched = dataset.find(item => item.value === value);
+        const matched = dataset.find(item => String(item.value) === String(value));
         displayEl.innerText = matched ? matched.label : value;
     } else {
         displayEl.innerText = value;
+    }
+
+    // Contextual Trigger: Fire custom change updates for the Bit Tier configuration loader if needed
+    if (id === "bit-tier-selector" && typeof loadBitTierConfig === "function") {
+        loadBitTierConfig(value);
     }
 }
 
 function populateCustomDropdowns() {
     Object.keys(CUSTOM_SELECT_DATA).forEach(id => {
-        const displayEl = document.getElementById(`display-${id}`);
-        const optionsEl = document.getElementById(`options-${id}`);
+        // Support both ID naming patterns: "display-reward-*" and "current-bit-*"
+        const displayEl = document.getElementById(`display-${id}`) || document.getElementById(`current-${id}`);
+        const optionsEl = document.getElementById(`options-${id}`) || document.getElementById(`${id.replace('-selector', '')}-options`);
         if (!displayEl || !optionsEl) return;
 
         const optionsData = CUSTOM_SELECT_DATA[id];
@@ -506,7 +538,7 @@ function populateCustomDropdowns() {
             row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer; transition: background 0.2s;";
             
             // Hover styles matching custom CSS style configurations
-            row.addEventListener("mouseenter", () => row.style.background = "rgba(255,255,255,0.05)");
+            row.addEventListener("mouseenter", () => row.style.background = "var(--accent, #9146ff)");
             row.addEventListener("mouseleave", () => row.style.background = "transparent");
 
             row.addEventListener("click", (e) => {
@@ -521,13 +553,14 @@ function populateCustomDropdowns() {
         displayEl.addEventListener("click", (e) => {
             e.stopPropagation();
             // Close all other open instances first to prevent stack issues
-            document.querySelectorAll(".custom-select-options-box").forEach(box => {
+            document.querySelectorAll(".custom-select-options-box, .select-options").forEach(box => {
                 if(box !== optionsEl) box.style.display = "none";
             });
             optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
         });
     });
 }
+
 function toggleBits() {
     bitsEnabled = !bitsEnabled;
     saveSettings();
