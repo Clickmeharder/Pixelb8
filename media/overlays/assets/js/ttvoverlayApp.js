@@ -1144,11 +1144,15 @@ function bindEvents() {
     });
 
     // 4. Dynamic Complex Fallback View Custom Triggers Bus
-    onSafeClick("ctx-open-bits", () => {
-        const bitWindow = document.getElementById("bit-manager");
-        if (bitWindow) bitWindow.style.display = bitWindow.style.display === "none" ? "block" : "none";
-        closeContextMenu();
-    });
+	onSafeClick("ctx-open-bits", () => {
+		const bitWindow = document.getElementById("bit-manager");
+		if (bitWindow) {
+			// Reads the real style from your stylesheet rather than looking for inline style attributes
+			const isHidden = window.getComputedStyle(bitWindow).display === "none";
+			bitWindow.style.display = isHidden ? "block" : "none";
+		}
+		closeContextMenu();
+	});
 
     // 5. Automated Global Window Panels Close Layout Router Loop
     if (typeof WINDOW_CLOSE_MAPS !== 'undefined' && Array.isArray(WINDOW_CLOSE_MAPS)) {

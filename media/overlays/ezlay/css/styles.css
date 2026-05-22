@@ -240,7 +240,7 @@ body.edit-mode .p8-widget:active {
 
 /* --- BITS MANAGER WINDOW --- */
 #bit-manager {
-    display: none; 
+    display: none;
     position: fixed; 
     right: 360px; 
     top: 20px; 
