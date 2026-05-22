@@ -353,19 +353,95 @@ let pendingImageBase64 = "";
 const AVAILABLE_IN_ANIMATIONS = ["none", "fadeIn", "bounceIn", "zoomIn", "slideInDown", "slideInUp"];
 const AVAILABLE_OUT_ANIMATIONS = ["none", "fadeOut", "bounceOut", "zoomOut", "slideOutUp", "slideOutDown"];
 
-function populateAnimationDropdowns() {
-    const textIn = document.getElementById("reward-text-in-anim");
-    const textOut = document.getElementById("reward-text-out-anim");
-    const imgIn = document.getElementById("reward-img-in-anim");
-    const imgOut = document.getElementById("reward-img-out-anim");
+// Data registries for the options blocks
+const CUSTOM_SELECT_DATA = {
+    "reward-text-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "reward-img-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "reward-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
+    "reward-img-out-anim": AVAILABLE_OUT_ANIMATIONS,
+    "reward-font-weight": [
+        { value: "normal", label: "Normal (400)" },
+        { value: "bold", label: "Bold (700)" },
+        { value: "900", label: "Black (900)" },
+        { value: "300", label: "Light (300)" }
+    ],
+    "reward-img-mode": [
+        { value: "loop", label: "Loop Continuously" },
+        { value: "once", label: "Play Once (Reset)" }
+    ]
+};
 
-    if (!textIn || !textOut || !imgIn || !imgOut) return;
+// State engine to track actively selected values since we don't have standard .value anymore
+let customSelectValues = {
+    "reward-text-in-anim": "none",
+    "reward-text-out-anim": "none",
+    "reward-img-in-anim": "none",
+    "reward-img-out-anim": "none",
+    "reward-font-weight": "bold",
+    "reward-img-mode": "loop"
+};
 
-    textIn.innerHTML = AVAILABLE_IN_ANIMATIONS.map(a => `<option value="${a}">${a}</option>`).join("");
-    imgIn.innerHTML = AVAILABLE_IN_ANIMATIONS.map(a => `<option value="${a}">${a}</option>`).join("");
-    
-    textOut.innerHTML = AVAILABLE_OUT_ANIMATIONS.map(a => `<option value="${a}">${a}</option>`).join("");
-    imgOut.innerHTML = AVAILABLE_OUT_ANIMATIONS.map(a => `<option value="${a}">${a}</option>`).join("");
+// Programmatic getter and setter wrappers to maintain backward compatibility with your save actions
+function getCustomSelectValue(id) {
+    return customSelectValues[id];
+}
+
+function setCustomSelectValue(id, value) {
+    customSelectValues[id] = value;
+    const displayEl = document.getElementById(`display-${id}`);
+    if (!displayEl) return;
+
+    // Resolve structural label representations if tracking raw object lists
+    const dataset = CUSTOM_SELECT_DATA[id];
+    if (dataset && typeof dataset[0] === 'object') {
+        const matched = dataset.find(item => item.value === value);
+        displayEl.innerText = matched ? matched.label : value;
+    } else {
+        displayEl.innerText = value;
+    }
+}
+
+function populateCustomDropdowns() {
+    Object.keys(CUSTOM_SELECT_DATA).forEach(id => {
+        const displayEl = document.getElementById(`display-${id}`);
+        const optionsEl = document.getElementById(`options-${id}`);
+        if (!displayEl || !optionsEl) return;
+
+        const optionsData = CUSTOM_SELECT_DATA[id];
+        optionsEl.innerHTML = ""; // Flush template buffer
+
+        // Generate elements dynamically matching the option-item class framework
+        optionsData.forEach(item => {
+            const val = typeof item === 'object' ? item.value : item;
+            const text = typeof item === 'object' ? item.label : item;
+            
+            const row = document.createElement("div");
+            row.className = "option-item";
+            row.innerText = text;
+            row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer; transition: background 0.2s;";
+            
+            // Hover styles matching custom CSS style configurations
+            row.addEventListener("mouseenter", () => row.style.background = "rgba(255,255,255,0.05)");
+            row.addEventListener("mouseleave", () => row.style.background = "transparent");
+
+            row.addEventListener("click", (e) => {
+                e.stopPropagation();
+                setCustomSelectValue(id, val);
+                optionsEl.style.display = "none";
+            });
+            optionsEl.appendChild(row);
+        });
+
+        // Click wrapper to toggle display layout state maps
+        displayEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            // Close all other open instances first to prevent stack issues
+            document.querySelectorAll(".custom-select-options-box").forEach(box => {
+                if(box !== optionsEl) box.style.display = "none";
+            });
+            optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
+        });
+    });
 }
 
 // 1. Hook up UI Toggle Actions inside your bindEvents() function block
@@ -400,12 +476,10 @@ function bindRewardsManagerEvents() {
     const fontColorPicker = document.getElementById("reward-font-color");
     const fontColorHex = document.getElementById("reward-font-color-hex");
     const textOutlineInput = document.getElementById("reward-text-outline");
-    const fontWeightSelect = document.getElementById("reward-font-weight");
     const imgSizeInput = document.getElementById("reward-img-size");
     
     // New Lifetime & GIF Playback Elements
     const textDurationInput = document.getElementById("reward-text-duration");
-    const imgModeSelect = document.getElementById("reward-img-mode");
     const imgDurationInput = document.getElementById("reward-img-duration");
 
     // Synchronize color picker with hex input field natively
@@ -421,7 +495,7 @@ function bindRewardsManagerEvents() {
     }
 
     // Initialize animation selector choices directly on application setup
-    populateAnimationDropdowns();
+    populateCustomDropdowns();
     
     // Render initial settings states into the control badges
     updateManagerBadgesUI();
@@ -552,19 +626,18 @@ function bindRewardsManagerEvents() {
         rewardAlerts[nameKey] = {
             text: alertText,
             image: finalImage,
-            textInAnim: document.getElementById("reward-text-in-anim").value,
-            textOutAnim: document.getElementById("reward-text-out-anim").value,
-            imgInAnim: document.getElementById("reward-img-in-anim").value,
-            imgOutAnim: document.getElementById("reward-img-out-anim").value,
+            textInAnim: getCustomSelectValue("reward-text-in-anim"),
+            textOutAnim: getCustomSelectValue("reward-text-out-anim"),
+            imgInAnim: getCustomSelectValue("reward-img-in-anim"),
+            imgOutAnim: getCustomSelectValue("reward-img-out-anim"),
             sounds: [...stagedSoundsPool],
             fontSize: fontSizeInput.value.trim(),
             fontColor: fontColorHex.value.trim(),
             textOutline: textOutlineInput.value.trim(),
-            fontWeight: fontWeightSelect.value,
+            fontWeight: getCustomSelectValue("reward-font-weight"),
             imgSize: imgSizeInput.value.trim() || "",
-            // Assign lifetime settings to storage template
             textDuration: textDurationInput ? textDurationInput.value.trim() : "",
-            imgMode: imgModeSelect ? imgModeSelect.value : "loop",
+            imgMode: getCustomSelectValue("reward-img-mode"),
             imgDuration: imgDurationInput ? imgDurationInput.value.trim() : ""
         };
         saveRewardAlerts();
@@ -576,20 +649,22 @@ function bindRewardsManagerEvents() {
         urlInput.placeholder = "Web Image/GIF URL";
         fileInput.value = "";
         pendingImageBase64 = "";
-        document.getElementById("reward-text-in-anim").value = "none";
-        document.getElementById("reward-text-out-anim").value = "none";
-        document.getElementById("reward-img-in-anim").value = "none";
-        document.getElementById("reward-img-out-anim").value = "none";
+        
+        // Dynamic resets to state-engine variable tracking entries
+        setCustomSelectValue("reward-text-in-anim", "none");
+        setCustomSelectValue("reward-text-out-anim", "none");
+        setCustomSelectValue("reward-img-in-anim", "none");
+        setCustomSelectValue("reward-img-out-anim", "none");
+        setCustomSelectValue("reward-font-weight", "bold");
+        setCustomSelectValue("reward-img-mode", "loop");
         
         fontSizeInput.value = "";
         fontColorPicker.value = "#ffffff";
         fontColorHex.value = "#ffffff";
         textOutlineInput.value = "";
-        fontWeightSelect.value = "bold";
         imgSizeInput.value = "";
         
         if (textDurationInput) textDurationInput.value = "";
-        if (imgModeSelect) imgModeSelect.value = "loop";
         if (imgDurationInput) imgDurationInput.value = "";
         
         stagedSoundsPool = [];
@@ -664,28 +739,28 @@ function renderRewardsList() {
         item.querySelector(".alt-btn").addEventListener("click", () => {
             document.getElementById("reward-name-input").value = key;
             document.getElementById("reward-text-input").value = rewardData.text;
-            document.getElementById("reward-text-in-anim").value = tIn;
-            document.getElementById("reward-text-out-anim").value = tOut;
-            document.getElementById("reward-img-in-anim").value = iIn;
-            document.getElementById("reward-img-out-anim").value = iOut;
             
             document.getElementById("reward-font-size").value = rewardData.fontSize || "";
             document.getElementById("reward-font-color").value = rewardData.fontColor || "#ffffff";
             document.getElementById("reward-font-color-hex").value = rewardData.fontColor || "#ffffff";
             document.getElementById("reward-text-outline").value = rewardData.textOutline || "";
-            document.getElementById("reward-font-weight").value = rewardData.fontWeight || "bold";
             document.getElementById("reward-img-size").value = rewardData.imgSize || "";
             
             // Map configuration fields during target selection
             if (document.getElementById("reward-text-duration")) {
                 document.getElementById("reward-text-duration").value = rewardData.textDuration || "";
             }
-            if (document.getElementById("reward-img-mode")) {
-                document.getElementById("reward-img-mode").value = rewardData.imgMode || "loop";
-            }
             if (document.getElementById("reward-img-duration")) {
                 document.getElementById("reward-img-duration").value = rewardData.imgDuration || "";
             }
+            
+            // --- DROPDOWN WORKSPACE STATE ENGINES MAPPING REPLACEMENTS ---
+            setCustomSelectValue("reward-text-in-anim", tIn);
+            setCustomSelectValue("reward-text-out-anim", tOut);
+            setCustomSelectValue("reward-img-in-anim", iIn);
+            setCustomSelectValue("reward-img-out-anim", iOut);
+            setCustomSelectValue("reward-font-weight", rewardData.fontWeight || "bold");
+            setCustomSelectValue("reward-img-mode", rewardData.imgMode || "loop");
             
             if (isBase64) {
                 pendingImageBase64 = rewardData.image;
@@ -785,6 +860,9 @@ function bindEvents() {
             const r = dragTarget.getBoundingClientRect();
             offset = { x: e.clientX - r.left, y: e.clientY - r.top };
         }
+		if (!e.target.closest('.custom-select-display')) {
+			document.querySelectorAll(".custom-select-options-box").forEach(b => b.style.display = "none");
+		}
     });
 
     window.addEventListener('mousemove', e => {

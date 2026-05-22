@@ -116,22 +116,31 @@
 			</div>
 
 			<div id="reward-animations-grid-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; border-top: 1px solid #27272a; padding-top: 10px;">
-				<div id="reward-text-in-anim-wrapper">
-					<label id="reward-text-in-anim-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text In Anim</label>
-					<select id="reward-text-in-anim" class="p8-input custom-select" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
+				
+				<div id="reward-text-in-anim-wrapper" style="position: relative;">
+					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text In Anim</label>
+					<div id="display-reward-text-in-anim" class="p8-input custom-select-display" style="padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a; border-radius: 4px; cursor: pointer; min-height: 16px;">none</div>
+					<div id="options-reward-text-in-anim" class="custom-select-options-box" style="display: none; position: absolute; left: 0; right: 0; top: 100%; background: #18181b; border: 1px solid #27272a; border-radius: 4px; z-index: 1000; max-height: 120px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"></div>
 				</div>
-				<div id="reward-text-out-anim-wrapper">
-					<label id="reward-text-out-anim-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Out Anim</label>
-					<select id="reward-text-out-anim" class="p8-input custom-select" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
+
+				<div id="reward-text-out-anim-wrapper" style="position: relative;">
+					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Out Anim</label>
+					<div id="display-reward-text-out-anim" class="p8-input custom-select-display" style="padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a; border-radius: 4px; cursor: pointer; min-height: 16px;">none</div>
+					<div id="options-reward-text-out-anim" class="custom-select-options-box" style="display: none; position: absolute; left: 0; right: 0; top: 100%; background: #18181b; border: 1px solid #27272a; border-radius: 4px; z-index: 1000; max-height: 120px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"></div>
 				</div>
-				<div id="reward-img-in-anim-wrapper">
-					<label id="reward-img-in-anim-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image In Anim</label>
-					<select id="reward-img-in-anim" class="p8-input custom-select" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
+
+				<div id="reward-img-in-anim-wrapper" style="position: relative;">
+					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image In Anim</label>
+					<div id="display-reward-img-in-anim" class="p8-input custom-select-display" style="padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a; border-radius: 4px; cursor: pointer; min-height: 16px;">none</div>
+					<div id="options-reward-img-in-anim" class="custom-select-options-box" style="display: none; position: absolute; left: 0; right: 0; top: 100%; background: #18181b; border: 1px solid #27272a; border-radius: 4px; z-index: 1000; max-height: 120px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"></div>
 				</div>
-				<div id="reward-img-out-anim-wrapper">
-					<label id="reward-img-out-anim-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Out Anim</label>
-					<select id="reward-img-out-anim" class="p8-input custom-select" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;"></select>
+
+				<div id="reward-img-out-anim-wrapper" style="position: relative;">
+					<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Out Anim</label>
+					<div id="display-reward-img-out-anim" class="p8-input custom-select-display" style="padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a; border-radius: 4px; cursor: pointer; min-height: 16px;">none</div>
+					<div id="options-reward-img-out-anim" class="custom-select-options-box" style="display: none; position: absolute; left: 0; right: 0; top: 100%; background: #18181b; border: 1px solid #27272a; border-radius: 4px; z-index: 1000; max-height: 120px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"></div>
 				</div>
+
 			</div>
 
 			<div id="reward-custom-styling-section" style="border-top: 1px solid #27272a; padding-top: 10px; margin-bottom: 12px;">
@@ -152,15 +161,13 @@
 						<label id="reward-text-outline-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Outline</label>
 						<input type="text" id="reward-text-outline" class="p8-input" placeholder="e.g. 2px #000" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
 					</div>
-					<div id="reward-font-weight-wrapper">
-						<label id="reward-font-weight-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Weight</label>
-						<select id="reward-font-weight" class="p8-input custom-select" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;">
-							<option value="normal">Normal (400)</option>
-							<option value="bold" selected>Bold (700)</option>
-							<option value="900">Black (900)</option>
-							<option value="300">Light (300)</option>
-						</select>
+					
+					<div id="reward-font-weight-wrapper" style="position: relative;">
+						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Font Weight</label>
+						<div id="display-reward-font-weight" class="p8-input custom-select-display" style="padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a; border-radius: 4px; cursor: pointer; min-height: 16px;">Bold (700)</div>
+						<div id="options-reward-font-weight" class="custom-select-options-box" style="display: none; position: absolute; left: 0; right: 0; top: 100%; background: #18181b; border: 1px solid #27272a; border-radius: 4px; z-index: 1000; max-height: 120px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"></div>
 					</div>
+
 					<div id="reward-img-size-wrapper" style="grid-column: span 2;">
 						<label id="reward-img-size-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Max Width</label>
 						<input type="text" id="reward-img-size" class="p8-input" placeholder="e.g. 100%, 250px, 120px" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;" value="100%">
@@ -175,13 +182,13 @@
 						<label id="reward-text-duration-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Duration (ms)</label>
 						<input type="number" id="reward-text-duration" class="p8-input" placeholder="8000" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
 					</div>
-					<div id="reward-img-mode-wrapper">
-						<label id="reward-img-mode-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Mode</label>
-						<select id="reward-img-mode" class="p8-input custom-select" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;">
-							<option value="loop">Loop Continuously</option>
-							<option value="once">Play Once (Reset)</option>
-						</select>
+					
+					<div id="reward-img-mode-wrapper" style="position: relative;">
+						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Mode</label>
+						<div id="display-reward-img-mode" class="p8-input custom-select-display" style="padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a; border-radius: 4px; cursor: pointer; min-height: 16px;">Loop Continuously</div>
+						<div id="options-reward-img-mode" class="custom-select-options-box" style="display: none; position: absolute; left: 0; right: 0; top: 100%; background: #18181b; border: 1px solid #27272a; border-radius: 4px; z-index: 1000; max-height: 120px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"></div>
 					</div>
+
 					<div id="reward-img-duration-wrapper">
 						<label id="reward-img-duration-label" style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Duration (ms)</label>
 						<input type="number" id="reward-img-duration" class="p8-input" placeholder="Match Text" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
