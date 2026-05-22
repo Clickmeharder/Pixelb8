@@ -217,7 +217,8 @@ body.edit-mode .p8-widget:active {
     background: #09090b;
     z-index: 10;
 	margin: -20px;
-    margin-top: -20px; 
+    margin-top: -20px;
+	margin-bottom: 15px; 
     padding-top: 20px;
     cursor: move;
     user-select: none;
