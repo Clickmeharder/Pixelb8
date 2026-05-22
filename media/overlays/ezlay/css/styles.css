@@ -117,7 +117,8 @@ body.edit-mode .p8-widget:active {
     top: 50%; 
     left: 50%; 
     transform: translate(-50%, -50%);
-    background: #09090b; 
+    background: #09090b;
+	/* background: var(--bg);  */
     border: 2px solid var(--accent);
     padding: 20px; 
     display: none; 
@@ -153,7 +154,8 @@ body.edit-mode .p8-widget:active {
     right: 20px; 
     top: 20px; 
     width: 320px; 
-    background: var(--bg); 
+    background: #09090b;
+    /* background: var(--bg);  */	
     border: 2px solid var(--accent); 
     border-radius: var(--border-radius); 
     padding: 20px; 
@@ -188,8 +190,9 @@ body.edit-mode .p8-widget:active {
     position: fixed; 
     right: 360px; /* Offset horizontally so it pops open right next to Ch Points */
     top: 20px; 
-    width: 320px; 
-    background: var(--bg); 
+    width: 320px;
+	background: #09090b; 
+    /* background: var(--bg);  */
     border: 2px solid var(--accent); 
     border-radius: var(--border-radius); 
     padding: 20px; 
