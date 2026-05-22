@@ -1795,3 +1795,5 @@ function startTwitch(channel, token) {
 }
 
 init();
+
+console.log("ttvoverlayapp.js version 0.02 finished loading");
