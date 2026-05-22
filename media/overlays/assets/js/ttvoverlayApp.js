@@ -426,9 +426,9 @@ function setEditMode(state) {
     const badge = document.getElementById('mode-badge');
     if(badge) badge.style.display = isEditMode ? 'block' : 'none';
 	// Dynamically update timer widget visibility context on mode switch
-    if (typeof updateTimerWidgetVisibility === "function") {
+/*     if (typeof updateTimerWidgetVisibility === "function") {
         updateTimerWidgetVisibility();
-    }
+    } */
 }
 
 function applyTheme(name) {
@@ -1888,27 +1888,6 @@ function saveActiveTimersToStorage() {
     localStorage.setItem('p8_active_timers', JSON.stringify(activeTimers));
 }
 
-// NEW: Centralized Visibility Engine Evaluator
-function updateTimerWidgetVisibility() {
-    const timerWidget = document.getElementById("timer-widget");
-    if (!timerWidget) return;
-
-    const editModeActive = (typeof isEditMode !== "undefined" && isEditMode);
-    
-    // Get the most recent timer's visibility setting
-    const keys = Object.keys(activeTimers);
-    const lastKey = keys[keys.length - 1];
-    const currentSettings = lastKey ? activeTimers[lastKey].settings : null;
-
-    if (editModeActive) {
-        timerWidget.style.display = "block";
-    } else if (currentSettings && currentSettings.showMode === "never") {
-        timerWidget.style.display = "none";
-    } else {
-        // Fallback to existing logic
-        timerWidget.style.display = keys.length > 0 ? "block" : "none";
-    }
-}
 // Global Core Controller Initialization Wrapper
 function initTimerEngine() {
     // Restore runtime ticks if active instances are pulled from storage on load
@@ -1920,8 +1899,8 @@ function initTimerEngine() {
         }
     }
 
+    // Render UI: This now handles the visibility logic internally
     renderActiveTimersUI();
-    updateTimerWidgetVisibility(); // Force evaluation on boot
     
     // Set up a single robust delegated event listener for row control actions
     const listContainer = document.getElementById("active-timers-list");
@@ -1947,22 +1926,18 @@ function initTimerEngine() {
 function updateTimerStyles() {
     const colorValue = document.getElementById('tmr-color-text').value;
     
-    // 1. Update the color picker if the user typed a valid hex
     if (/^#[0-9A-F]{6}$/i.test(colorValue)) {
         document.getElementById('tmr-color-picker').value = colorValue;
     }
 
-    // 2. Apply to all active timer elements on the screen
-    const timers = document.querySelectorAll('.timer-instance-class'); // Replace with your actual timer class
+    const timers = document.querySelectorAll('.timer-instance-class');
     timers.forEach(t => {
         t.style.color = colorValue;
     });
 
-    // 3. Optional: Save to your settings object
     settings.timerColor = colorValue;
     saveSettings();
 }
-// Unified instantiator function
 
 function createTimerInstance(label = "Timer", durationSeconds = 0, customStyles = {}) {
     const id = "tmr_" + Date.now();
@@ -1976,7 +1951,6 @@ function createTimerInstance(label = "Timer", durationSeconds = 0, customStyles 
         running: true,
         splits: [],
         type: type,
-        // NEW: Persistence for custom settings
         settings: {
             labelFontSize: customStyles.labelFontSize || "14px",
             labelFontWeight: customStyles.labelFontWeight || "600",
@@ -1990,6 +1964,7 @@ function createTimerInstance(label = "Timer", durationSeconds = 0, customStyles 
     startTimerInstance(id);
     return id;
 }
+
 function startTimerInstance(id) {
     if (!activeTimers[id]) return;
     activeTimers[id].running = true;
@@ -1999,7 +1974,6 @@ function startTimerInstance(id) {
         timerIntervalId = setInterval(processTimersTick, 1000);
     }
     renderActiveTimersUI();
-    updateTimerWidgetVisibility();
 }
 
 function pauseTimerInstance(id) {
@@ -2007,7 +1981,6 @@ function pauseTimerInstance(id) {
     activeTimers[id].running = false;
     saveActiveTimersToStorage();
     renderActiveTimersUI();
-    updateTimerWidgetVisibility(); // Keeps open if paused, handles edit mode shifts
 }
 
 function resetTimerInstance(id) {
@@ -2028,7 +2001,6 @@ function stopTimerInstance(id) {
         timerIntervalId = null;
     }
     renderActiveTimersUI();
-    updateTimerWidgetVisibility(); // Cleans up and hides element immediately if keys match 0
 }
 
 function splitTimerInstance(id) {
@@ -2063,9 +2035,7 @@ function processTimersTick() {
         }
     });
     
-    if (stateChanged) {
-        saveActiveTimersToStorage();
-    }
+    if (stateChanged) saveActiveTimersToStorage();
     
     if (!hasRunningTimers && timerIntervalId) {
         clearInterval(timerIntervalId);
@@ -2103,33 +2073,29 @@ function renderActiveTimersUI() {
     
     const primaryTimer = activeTimers[keys[keys.length - 1]];
     if (primaryTimer) {
-        const s = primaryTimer.settings || {}; // Ensure we have a settings object
+        const s = primaryTimer.settings || {};
         const remaining = primaryTimer.type === "countdown" ? (primaryTimer.duration - primaryTimer.elapsed) : primaryTimer.elapsed;
         
-        // 1. Apply Styles to Overlay Digits
         if (overlayDigits) {
             overlayDigits.innerText = formatTimeDigits(remaining);
             overlayDigits.style.fontSize = s.timerFontSize || "24px";
             overlayDigits.style.color = s.timerFontColor || "#ffffff";
         }
         
-        // 2. Apply Styles to Overlay Title
         if (overlayTitle) {
             overlayTitle.innerText = `${primaryTimer.type === 'stopwatch' ? '⏱️' : '⏳'} ${primaryTimer.label}`;
             overlayTitle.style.fontSize = s.labelFontSize || "14px";
             overlayTitle.style.fontWeight = s.labelFontWeight || "600";
         }
         
-        // 3. Visibility Logic
         const editModeActive = (typeof isEditMode !== "undefined" && isEditMode);
         const shouldShow = editModeActive ? true : (
             s.showMode === "always" ? true :
             s.showMode === "counting" ? primaryTimer.running :
-            false // "never"
+            false 
         );
         if (timerWidget) timerWidget.style.display = shouldShow ? "block" : "none";
         
-        // 4. Render Splits
         primaryTimer.splits.forEach((splitVal, index) => {
             const div = document.createElement("div");
             div.style.borderBottom = "1px solid rgba(255, 255, 255, 0.05)";
@@ -2139,11 +2105,9 @@ function renderActiveTimersUI() {
         });
     }
     
-    // Render list rows
     keys.forEach(id => {
         const t = activeTimers[id];
         const rem = t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed;
-        
         const row = document.createElement("div");
         row.className = "timer-control-row";
         row.style.cssText = "display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; background:rgba(0,0,0,0.2); padding:4px; border-radius:4px;";
@@ -2160,11 +2124,10 @@ function renderActiveTimersUI() {
                 <button type="button" data-action="stop" data-id="${t.id}" title="Remove" style="background:none; border:none; cursor:pointer;">❌</button>
             </div>
         `;
-        
         if (listContainer) listContainer.appendChild(row);
     });
 }
-// Make sure to call initTimerEngine() once your document DOM content completely compiles!
+
 document.addEventListener("DOMContentLoaded", () => {
     initTimerEngine();
 });
@@ -2750,4 +2713,4 @@ function bindEvents() {
 
 init();
 
-console.log("ttvoverlayapp.js version 0.111 finished loading");
+console.log("ttvoverlayapp.js version 0.112 finished loading");
