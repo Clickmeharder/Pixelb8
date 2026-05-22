@@ -512,28 +512,31 @@ function setCustomSelectValue(id, value) {
 
 function populateCustomDropdowns() {
     Object.keys(CUSTOM_SELECT_DATA).forEach(id => {
-        // Support both ID naming patterns: "display-reward-*" and "current-bit-*"
-        const displayEl = document.getElementById(`display-${id}`) || document.getElementById(`current-${id}`);
-        const optionsEl = document.getElementById(`options-${id}`) || document.getElementById(`${id.replace('-selector', '')}-options`);
+        // Fallbacks to capture exact string IDs as keys or prefixed elements
+        const displayEl = document.getElementById(`display-${id}`) || 
+                          document.getElementById(`current-${id}`) || 
+                          document.getElementById(id); // Added exact string lookup
+
+        const optionsEl = document.getElementById(`options-${id}`) || 
+                          document.getElementById(`${id.replace('-selector', '')}-options`) ||
+                          document.getElementById(`${id}-options`); // Added fallback suffix lookup
+                          
         if (!displayEl || !optionsEl) return;
 
         const optionsData = CUSTOM_SELECT_DATA[id];
         optionsEl.innerHTML = ""; // Flush template buffer
 
-        // Generate elements dynamically matching the option-item class framework
         optionsData.forEach(item => {
             const val = typeof item === 'object' ? item.value : item;
             const text = typeof item === 'object' ? item.label : item;
-            
             const row = document.createElement("div");
             row.className = "option-item";
             row.innerText = text;
             row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer; transition: background 0.2s;";
-            
-            // Hover styles matching custom CSS style configurations
+
             row.addEventListener("mouseenter", () => row.style.background = "var(--accent, #9146ff)");
             row.addEventListener("mouseleave", () => row.style.background = "transparent");
-
+            
             row.addEventListener("click", (e) => {
                 e.stopPropagation();
                 setCustomSelectValue(id, val);
@@ -542,10 +545,9 @@ function populateCustomDropdowns() {
             optionsEl.appendChild(row);
         });
 
-        // Click wrapper to toggle display layout state maps
         displayEl.addEventListener("click", (e) => {
             e.stopPropagation();
-            // Close all other open instances first to prevent stack issues
+            // Close all other open instances first to prevent overlap issues
             document.querySelectorAll(".custom-select-options-box, .select-options").forEach(box => {
                 if(box !== optionsEl) box.style.display = "none";
             });
