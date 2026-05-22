@@ -1834,23 +1834,33 @@ function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
 // --- TIMERS & RUNTIME CONTEXT ENGINE STATE ---
 // =========================================================================
 
-let activeTimers = {}; // Holds running instances in memory
-let timerIntervalId = null;
-
 // Persistent configurations saved across sessions
+let activeTimers = JSON.parse(localStorage.getItem('p8_active_timers')) || {}; 
+let timerIntervalId = null;
 let savedCountdowns = JSON.parse(localStorage.getItem('p8_saved_countdowns')) || {};
 
 function saveCountdownsToStorage() {
     localStorage.setItem('p8_saved_countdowns', JSON.stringify(savedCountdowns));
 }
 
+function saveActiveTimersToStorage() {
+    localStorage.setItem('p8_active_timers', JSON.stringify(activeTimers));
+}
+
 // Global Core Controller Initialization Wrapper
 function initTimerEngine() {
-    // Render any structural states if active instances exist on load
+    // Restore runtime ticks if active instances are pulled from storage on load
+    const keys = Object.keys(activeTimers);
+    if (keys.length > 0) {
+        const shouldRestart = keys.some(id => activeTimers[id].running);
+        if (shouldRestart && !timerIntervalId) {
+            timerIntervalId = setInterval(processTimersTick, 1000);
+        }
+    }
+
     renderActiveTimersUI();
     
     // Set up a single robust delegated event listener for row control actions
-    // This fixes the delete/pause breaking on every clock tick!
     const listContainer = document.getElementById("active-timers-list");
     if (listContainer && !listContainer.dataset.delegated) {
         listContainer.dataset.delegated = "true";
@@ -1881,10 +1891,12 @@ function createTimerInstance(label = "Timer", durationSeconds = 0) {
         label: label || (type === "stopwatch" ? "Generic Timer" : "Countdown"),
         duration: parseInt(durationSeconds) || 0,
         elapsed: 0,
-        running: false,
+        running: true,
         splits: [],
         type: type
     };
+    
+    saveActiveTimersToStorage();
     
     const overlay = document.getElementById("timer-overlay-widget");
     if (overlay && window.getComputedStyle(overlay).display === "none") {
@@ -1898,6 +1910,7 @@ function createTimerInstance(label = "Timer", durationSeconds = 0) {
 function startTimerInstance(id) {
     if (!activeTimers[id]) return;
     activeTimers[id].running = true;
+    saveActiveTimersToStorage();
     
     if (!timerIntervalId) {
         timerIntervalId = setInterval(processTimersTick, 1000);
@@ -1908,6 +1921,7 @@ function startTimerInstance(id) {
 function pauseTimerInstance(id) {
     if (!activeTimers[id]) return;
     activeTimers[id].running = false;
+    saveActiveTimersToStorage();
     renderActiveTimersUI();
 }
 
@@ -1915,12 +1929,14 @@ function resetTimerInstance(id) {
     if (!activeTimers[id]) return;
     activeTimers[id].elapsed = 0;
     activeTimers[id].splits = [];
+    saveActiveTimersToStorage();
     renderActiveTimersUI();
 }
 
 function stopTimerInstance(id) {
     if (!activeTimers[id]) return;
     delete activeTimers[id];
+    saveActiveTimersToStorage();
     
     if (Object.keys(activeTimers).length === 0) {
         clearInterval(timerIntervalId);
@@ -1936,11 +1952,13 @@ function splitTimerInstance(id) {
     if (!t || !t.running) return;
     const currentDisplay = formatTimeDigits(t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed);
     t.splits.push(currentDisplay);
+    saveActiveTimersToStorage();
     renderActiveTimersUI();
 }
 
 function processTimersTick() {
     let hasRunningTimers = false;
+    let stateChanged = false;
     
     Object.keys(activeTimers).forEach(id => {
         const t = activeTimers[id];
@@ -1948,6 +1966,7 @@ function processTimersTick() {
         
         hasRunningTimers = true;
         t.elapsed++;
+        stateChanged = true;
         
         if (t.type === "countdown" && t.elapsed >= t.duration) {
             t.elapsed = t.duration;
@@ -1959,6 +1978,10 @@ function processTimersTick() {
             }
         }
     });
+    
+    if (stateChanged) {
+        saveActiveTimersToStorage();
+    }
     
     if (!hasRunningTimers && timerIntervalId) {
         clearInterval(timerIntervalId);
@@ -2037,10 +2060,12 @@ function renderActiveTimersUI() {
         if (listContainer) listContainer.appendChild(row);
     });
 }
+
 // Make sure to call initTimerEngine() once your document DOM content completely compiles!
 document.addEventListener("DOMContentLoaded", () => {
     initTimerEngine();
 });
+
 // Utility helper to isolate matching instances by class profile
 function getLatestInstanceIdByType(type) {
     const keys = Object.keys(activeTimers);
