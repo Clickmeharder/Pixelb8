@@ -291,5 +291,3 @@ export class EntropiaWidget {
         if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
     }
 }
-
-console.log("entropia-widget.js version 0.003 finished loading without external dependencies!");
