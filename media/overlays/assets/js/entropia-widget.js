@@ -11,8 +11,9 @@ export class EntropiaWidget {
         this.MAX_RETRIES = 5;
         this.isPaused = false;
         this.sessionStartTime = null;
+        this.sessionTickerInterval = null;
         
-        // Internal state
+        // Comprehensive internal state tracking
         this.stats = {
             loot: {},
             values: {},
@@ -21,7 +22,16 @@ export class EntropiaWidget {
             globals: 0
         };
 
+        // Entropia Custom Regular Expression Library
+        this.regex = {
+            logLine: /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[([^\]]+)\]\s*(.*)$/,
+            loot: /You received\s+\[?(.+?)\]?\s+x\s+\((\d+)\)\s+Value:\s*([\d.]+)\s*PED/i,
+            experience: /You have gained\s+([\d.]+)\s+experience in your (.+) skill/i,
+            globalHof: /Hall of Fame|Rare Item|ATH/i
+        };
+
         this.initDOM();
+        this.recoverSavedHandle();
     }
 
     initDOM() {
@@ -29,9 +39,23 @@ export class EntropiaWidget {
         this.browseBtn = document.getElementById('browseBtn');
         this.manifestGrid = document.getElementById('manifest-grid');
         this.pathInput = document.getElementById('pathInput');
+        this.timerEl = document.getElementById('session-timer');
         
         if (this.browseBtn) this.browseBtn.addEventListener('click', () => this.handleBrowse());
         if (this.startBtn) this.startBtn.addEventListener('click', () => this.toggleSession());
+    }
+
+    async recoverSavedHandle() {
+        try {
+            const savedHandle = await get(this.FILE_HANDLE_KEY);
+            if (savedHandle) {
+                this.fileHandle = savedHandle;
+                if (this.pathInput) this.pathInput.value = savedHandle.name;
+                addLog(`💾 AUTO_RECOVERY: Linked to ${savedHandle.name.toUpperCase()}`);
+            }
+        } catch (e) {
+            console.error("Failed to recover log file handle:", e);
+        }
     }
 
     async handleBrowse() {
@@ -42,14 +66,15 @@ export class EntropiaWidget {
             });
             await set(this.FILE_HANDLE_KEY, handle);
             this.fileHandle = handle;
-            if(this.pathInput) this.pathInput.value = handle.name;
-            addLog(`📂 LOG_LINKED: ${handle.name}`);
+            if (this.pathInput) this.pathInput.value = handle.name;
+            addLog(`📂 LOG_LINKED: SUCCESS`);
         } catch (err) {
             addLog("❌ PICKER_CANCELLED");
         }
     }
 
     async toggleSession() {
+        if (!this.startBtn) return;
         if (this.startBtn.textContent === "STOP SESSION") {
             this.stopSession();
         } else {
@@ -65,24 +90,54 @@ export class EntropiaWidget {
 
         try {
             const perm = await this.fileHandle.requestPermission({ mode: 'read' });
-            if (perm !== 'granted') return;
+            if (perm !== 'granted') {
+                addLog("❌ PERMISSION_DENIED");
+                return;
+            }
 
             const file = await this.fileHandle.getFile();
             this.lastSize = file.size;
             this.sessionStartTime = Date.now();
-            
+            this.isPaused = false;
+
+            // Reset Internal Data Pools
+            this.stats = { loot: {}, values: {}, skills: {}, deaths: 0, globals: 0 };
+            if (this.manifestGrid) this.manifestGrid.innerHTML = '';
+
+            // Engine Active UI Adjustments
             this.startBtn.textContent = "STOP SESSION";
+            this.startBtn.style.background = "#d32f2f";
+
+            // Start Tickers and Fast File Polling loops
             this.pollInterval = setInterval(() => this.pollWebLog(), 2000);
-            addLog("✅ SESSION_STARTED");
+            this.sessionTickerInterval = setInterval(() => this.runSessionTicker(), 1000);
+            
+            addLog(`✅ SESSION_STARTED: ${file.name}`);
         } catch (e) {
-            addLog("❌ AUTH_FAIL: Re-link log.");
+            addLog("❌ AUTH_FAIL: Path reset.");
         }
     }
 
     stopSession() {
         clearInterval(this.pollInterval);
-        this.startBtn.textContent = "START SESSION";
+        clearInterval(this.sessionTickerInterval);
+        if (this.startBtn) {
+            this.startBtn.textContent = "START SESSION";
+            this.startBtn.style.background = "#2e7d32";
+        }
         addLog("🛑 SESSION_STOPPED");
+    }
+
+    runSessionTicker() {
+        if (this.isPaused || !this.sessionStartTime) return;
+
+        const elapsed = Date.now() - this.sessionStartTime;
+        const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
+        const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
+        const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+        
+        if (this.timerEl) this.timerEl.textContent = `${h}:${m}:${s}`;
+        this.updateUI();
     }
 
     async pollWebLog() {
@@ -97,28 +152,109 @@ export class EntropiaWidget {
                     if (line.trim()) this.parseLine(line);
                 });
                 this.lastSize = file.size;
+            } else if (file.size < this.lastSize) {
+                addLog("⚠️ ROTATION: Log shrink detected.");
+                this.lastSize = file.size;
             }
+            this.errorCount = 0;
         } catch (err) {
-            if (++this.errorCount >= this.MAX_RETRIES) this.stopSession();
+            if (++this.errorCount >= this.MAX_RETRIES) {
+                addLog("❌ PERMISSION_STUCK: Auto Stopping.");
+                this.stopSession();
+            }
         }
     }
 
     parseLine(line) {
-        // Regex logic encapsulated
-        const lootMatch = line.match(/You received\s+\[?(.+?)\]?\s+x\s+\((\d+)\)\s+Value:\s*([\d.]+)\s*PED/i);
-        if (lootMatch) {
-            const [_, name, amt, val] = lootMatch;
-            this.stats.loot[name] = (this.stats.loot[name] || 0) + parseInt(amt);
-            this.stats.values[name] = (this.stats.values[name] || 0) + parseFloat(val);
-            this.updateUI();
-            addLog(`+ ${amt}x ${name}`);
+        if (line === this.lastProcessedLine || !line.trim()) return;
+
+        const logMatch = line.match(this.regex.logLine);
+        if (!logMatch) return;
+
+        const [_, timestamp, channel, message] = logMatch;
+        this.lastProcessedLine = line;
+
+        if (channel === 'System') {
+            // 1. Loot Processing Rule
+            const lootMatch = message.match(this.regex.loot);
+            if (lootMatch) {
+                const [__, name, amt, val] = lootMatch;
+                const itemName = name.trim();
+                this.stats.loot[itemName] = (this.stats.loot[itemName] || 0) + parseInt(amt);
+                this.stats.values[itemName] = (this.stats.values[itemName] || 0) + parseFloat(val);
+                addLog(`+ ${amt}x ${itemName}`);
+                return;
+            }
+
+            // 2. Experience Gain Processing Rule
+            const xpMatch = message.match(this.regex.experience);
+            if (xpMatch) {
+                const [__, xpVal, skillName] = xpMatch;
+                const sName = skillName.trim();
+                this.stats.skills[sName] = (this.stats.skills[sName] || 0) + parseFloat(xpVal);
+                addLog(`✨ XP: +${xpVal} ${sName}`);
+                return;
+            }
+
+            // 3. Death Processing Rule
+            if (message.includes("You have been killed") || message.includes("You died")) {
+                this.stats.deaths++;
+                addLog("💀 DEATH REGISTERED");
+                return;
+            }
         }
-        // Add other regex matches here (XP, Global, etc.)
+
+        // 4. Global Broadcast Rule
+        if (channel === 'Globals' && this.regex.globalHofRegex.test(message)) {
+            this.stats.globals++;
+            addLog(`🏆 GLOBAL: ${message}`);
+        }
     }
 
     updateUI() {
-        if (!this.manifestGrid) return;
-        // Logic to update DOM nodes inside the widget
+        if (!this.manifestGrid || !this.sessionStartTime) return;
+
+        let grandTotal = 0;
+        const elapsedHours = (Date.now() - this.sessionStartTime) / 3600000;
+
+        Object.keys(this.stats.loot).forEach(key => {
+            const count = this.stats.loot[key] || 0;
+            const totalValue = this.stats.values[key] || 0;
+            grandTotal += totalValue;
+
+            const safeKey = key.replace(/\s+/g, '-');
+            let sessionEl = document.getElementById(`session-${safeKey}`);
+            
+            if (!sessionEl) {
+                const row = document.createElement('div');
+                row.className = 'manifest-row';
+                row.innerHTML = `
+                    <span class="m-name">${key.toUpperCase()}</span>
+                    <span class="m-count" id="session-${safeKey}">0</span>
+                    <span class="m-rate" id="rate-${safeKey}">0/hr</span>
+                    <span class="m-val" id="val-${safeKey}">(0.0000)</span>
+                `;
+                this.manifestGrid.appendChild(row);
+                sessionEl = document.getElementById(`session-${safeKey}`);
+            }
+
+            if (sessionEl) {
+                sessionEl.textContent = count;
+                const valEl = document.getElementById(`val-${safeKey}`);
+                if (valEl) valEl.textContent = `(${totalValue.toFixed(4)})`;
+
+                const rateEl = document.getElementById(`rate-${safeKey}`);
+                if (rateEl) {
+                    const perHour = (count / Math.max(0.01, elapsedHours)).toFixed(1);
+                    rateEl.textContent = `${perHour}/hr`;
+                }
+            }
+        });
+
+        const totalEl = document.getElementById('session-grand-total');
+        if (totalEl) totalEl.textContent = grandTotal.toFixed(4);
     }
-	console.log("entropia-widget.js version 0.001 finished loading");
 }
+
+// Log statement sits clean outside the class block
+console.log("entropia-widget.js version 0.001 finished loading");
