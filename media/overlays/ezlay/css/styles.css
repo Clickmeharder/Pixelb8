@@ -142,6 +142,7 @@ body.edit-mode .p8-widget:active {
     padding-bottom: 10px; 
     border-bottom: 1px solid #27272a;
     margin-bottom: 15px;
+	/* resize: vertical; */
 }
 
 /* Rewards Manager */
@@ -161,7 +162,7 @@ body.edit-mode .p8-widget:active {
     box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
     max-height: 80vh; 
     overflow-y: auto;   
-    resize: vertical;
+    /* resize: vertical; */
 }
 
 #rewards-manager-header {
