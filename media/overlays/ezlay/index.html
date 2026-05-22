@@ -358,6 +358,17 @@
 					<input type="text" id="timer-label-input" placeholder="Timer Label (e.g., Buff, Run)" style="flex: 1; background: #18181b; border: 1px solid #3f3f46; color: #fff; padding: 5px; border-radius: 4px;">
 					<input type="number" id="timer-duration-input" placeholder="Secs (0 for stopwatch)" style="width: 70px; background: #18181b; border: 1px solid #3f3f46; color: #fff; padding: 5px; border-radius: 4px;">
 				</div>
+				<div class="timer-settings-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+					<input type="text" id="tmr-label-fz" placeholder="Label Font Size (e.g., 14px)">
+					<input type="text" id="tmr-label-fw" placeholder="Label Weight (e.g., 600)">
+					<input type="text" id="tmr-fz" placeholder="Timer Font Size (e.g., 24px)">
+					<input type="color" id="tmr-color" value="#ffffff">
+					<select id="tmr-visibility">
+						<option value="always">Always Show</option>
+						<option value="counting">Show Only While Counting</option>
+						<option value="never">Hide</option>
+					</select>
+				</div>
 				<button class="p8-btn save-btn" id="ui-create-timer-btn" style="width: 100%; margin-bottom: 10px; padding: 6px;">Initialize Module Instance</button>
 				
 				<div id="active-timers-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto;">
