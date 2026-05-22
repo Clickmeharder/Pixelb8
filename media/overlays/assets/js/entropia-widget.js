@@ -1,4 +1,3 @@
-import { addLog, state } from './newapp.js';
 import { get, set, del } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 
 export class EntropiaWidget {
@@ -34,6 +33,15 @@ export class EntropiaWidget {
         this.recoverSavedHandle();
     }
 
+    // Helper method to log events directly inside our widget system
+    logEvent(message, isWarning = false) {
+        if (isWarning) {
+            console.warn(`[Entropia Widget]: ${message}`);
+        } else {
+            console.log(`[Entropia Widget]: ${message}`);
+        }
+    }
+
     initDOM() {
         this.startBtn = document.getElementById('start-session-btn');
         this.browseBtn = document.getElementById('browseBtn');
@@ -51,7 +59,7 @@ export class EntropiaWidget {
             if (savedHandle) {
                 this.fileHandle = savedHandle;
                 if (this.pathInput) this.pathInput.value = savedHandle.name;
-                addLog(`💾 AUTO_RECOVERY: Linked to ${savedHandle.name.toUpperCase()}`);
+                this.logEvent(`💾 AUTO_RECOVERY: Linked to ${savedHandle.name.toUpperCase()}`);
             }
         } catch (e) {
             console.error("Failed to recover log file handle:", e);
@@ -67,9 +75,9 @@ export class EntropiaWidget {
             await set(this.FILE_HANDLE_KEY, handle);
             this.fileHandle = handle;
             if (this.pathInput) this.pathInput.value = handle.name;
-            addLog(`📂 LOG_LINKED: SUCCESS`);
+            this.logEvent(`📂 LOG_LINKED: SUCCESS`);
         } catch (err) {
-            addLog("❌ PICKER_CANCELLED");
+            this.logEvent("❌ PICKER_CANCELLED", true);
         }
     }
 
@@ -84,14 +92,14 @@ export class EntropiaWidget {
 
     async startSession() {
         if (!this.fileHandle) {
-            addLog("❌ ERROR: Link Chat.log first!");
+            this.logEvent("❌ ERROR: Link Chat.log first!", true);
             return;
         }
 
         try {
             const perm = await this.fileHandle.requestPermission({ mode: 'read' });
             if (perm !== 'granted') {
-                addLog("❌ PERMISSION_DENIED");
+                this.logEvent("❌ PERMISSION_DENIED", true);
                 return;
             }
 
@@ -112,9 +120,9 @@ export class EntropiaWidget {
             this.pollInterval = setInterval(() => this.pollWebLog(), 2000);
             this.sessionTickerInterval = setInterval(() => this.runSessionTicker(), 1000);
             
-            addLog(`✅ SESSION_STARTED: ${file.name}`);
+            this.logEvent(`✅ SESSION_STARTED: ${file.name}`);
         } catch (e) {
-            addLog("❌ AUTH_FAIL: Path reset.");
+            this.logEvent("❌ AUTH_FAIL: Path reset.", true);
         }
     }
 
@@ -125,7 +133,7 @@ export class EntropiaWidget {
             this.startBtn.textContent = "START SESSION";
             this.startBtn.style.background = "#2e7d32";
         }
-        addLog("🛑 SESSION_STOPPED");
+        this.logEvent("🛑 SESSION_STOPPED");
     }
 
     runSessionTicker() {
@@ -153,13 +161,13 @@ export class EntropiaWidget {
                 });
                 this.lastSize = file.size;
             } else if (file.size < this.lastSize) {
-                addLog("⚠️ ROTATION: Log shrink detected.");
+                this.logEvent("⚠️ ROTATION: Log shrink detected.", true);
                 this.lastSize = file.size;
             }
             this.errorCount = 0;
         } catch (err) {
             if (++this.errorCount >= this.MAX_RETRIES) {
-                addLog("❌ PERMISSION_STUCK: Auto Stopping.");
+                this.logEvent("❌ PERMISSION_STUCK: Auto Stopping.", true);
                 this.stopSession();
             }
         }
@@ -182,7 +190,7 @@ export class EntropiaWidget {
                 const itemName = name.trim();
                 this.stats.loot[itemName] = (this.stats.loot[itemName] || 0) + parseInt(amt);
                 this.stats.values[itemName] = (this.stats.values[itemName] || 0) + parseFloat(val);
-                addLog(`+ ${amt}x ${itemName}`);
+                this.logEvent(`+ ${amt}x ${itemName}`);
                 return;
             }
 
@@ -192,22 +200,22 @@ export class EntropiaWidget {
                 const [__, xpVal, skillName] = xpMatch;
                 const sName = skillName.trim();
                 this.stats.skills[sName] = (this.stats.skills[sName] || 0) + parseFloat(xpVal);
-                addLog(`✨ XP: +${xpVal} ${sName}`);
+                this.logEvent(`✨ XP: +${xpVal} ${sName}`);
                 return;
             }
 
             // 3. Death Processing Rule
             if (message.includes("You have been killed") || message.includes("You died")) {
                 this.stats.deaths++;
-                addLog("💀 DEATH REGISTERED");
+                this.logEvent("💀 DEATH REGISTERED");
                 return;
             }
         }
 
         // 4. Global Broadcast Rule
-        if (channel === 'Globals' && this.regex.globalHofRegex.test(message)) {
+        if (channel === 'Globals' && this.regex.globalHof.test(message)) {
             this.stats.globals++;
-            addLog(`🏆 GLOBAL: ${message}`);
+            this.logEvent(`🏆 GLOBAL: ${message}`);
         }
     }
 
@@ -256,5 +264,4 @@ export class EntropiaWidget {
     }
 }
 
-// Log statement sits clean outside the class block
-console.log("entropia-widget.js version 0.001 finished loading");
+console.log("entropia-widget.js version 0.002 finished loading without external dependencies!");
