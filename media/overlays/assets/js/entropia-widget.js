@@ -382,6 +382,7 @@ export class EntropiaWidget {
     }
 
     // --- REFACTORED COMMAND REPOSITORY CONSOLE MAPPER ---
+// --- REFACTORED COMMAND REPOSITORY CONSOLE MAPPER ---
     getCommands(sendNotice) {
         return [
             {
@@ -389,12 +390,12 @@ export class EntropiaWidget {
                 adminOnly: false, // Core prefix routing remains open for viewer stat data inquiries
                 description: 'Entropia Universe tracking overlay runtime routing module control console.',
                 execute: (user, message, flags) => {
-                    const parts = message.trim().toLowerCase().split(" ");
+                    const parts = message.trim().toLowerCase().split(/\s+/);
                     const subCommand = parts[0];
                     const isAdmin = flags.broadcaster || flags.mod;
 
                     if (!subCommand) {
-                        sendNotice(`🤖 [EU Console]: Specify action parameters (!eu loot | ped | globals)`);
+                        sendNotice(`🤖 [EU Console]: Specify action parameters (!eu loot | ped | globals | toggle)`);
                         return;
                     }
 
@@ -425,6 +426,49 @@ export class EntropiaWidget {
                         case 'hofs':
                         case 'hof':
                             sendNotice(`🏆 Globals/HOFs hit this session: ${this.stats.globals} | Deaths: ${this.stats.deaths}`);
+                            break;
+
+                        // --- NESTED VISIBILITY TOGGLES ---
+                        case 'toggle':
+                            if (!isAdmin) return;
+                            const targetElement = parts[1];
+                            
+                            if (!targetElement) {
+                                sendNotice(`⚠️ [EU Console]: Specify what to toggle. Usage: !eu toggle [grid | sessiontimer | total]`);
+                                return;
+                            }
+
+                            switch (targetElement) {
+                                case 'grid':
+                                case 'loot': // Covers '!eu toggle loot' to hide the itemized manifest grid
+                                    this.manifestGrids.forEach(grid => {
+                                        const currentDisplay = window.getComputedStyle(grid).display;
+                                        grid.style.display = currentDisplay === 'none' ? 'grid' : 'none';
+                                        sendNotice(`👁️ [Overlay]: Manifest Data Grid display toggled.`);
+                                    });
+                                    break;
+
+                                case 'sessiontimer':
+                                case 'timer':
+                                    this.timerElements.forEach(el => {
+                                        const currentDisplay = window.getComputedStyle(el).display;
+                                        el.style.display = currentDisplay === 'none' ? 'block' : 'none';
+                                        sendNotice(`👁️ [Overlay]: Session Run Timer visibility toggled.`);
+                                    });
+                                    break;
+
+                                case 'grandtotal':
+                                case 'total':
+                                    this.grandTotalElements.forEach(el => {
+                                        const currentDisplay = window.getComputedStyle(el).display;
+                                        el.style.display = currentDisplay === 'none' ? 'block' : 'none';
+                                        sendNotice(`👁️ [Overlay]: Accumulator Grand Total counter visibility toggled.`);
+                                    });
+                                    break;
+
+                                default:
+                                    sendNotice(`❌ Layout target selector [${targetElement}] not found on widget canvas.`);
+                            }
                             break;
 
                         // --- PROTECTED PLATFORM MANAGEMENT EXECUTION CHANNELS ---
