@@ -45,12 +45,29 @@ export class EntropiaWidget {
     initDOM() {
         this.startBtn = document.getElementById('start-session-btn');
         this.browseBtn = document.getElementById('browseBtn');
+        this.resetBtn = document.getElementById('btnReset');
         this.manifestGrid = document.getElementById('manifest-grid');
         this.pathInput = document.getElementById('pathInput');
         this.timerEl = document.getElementById('session-timer');
         
-        if (this.browseBtn) this.browseBtn.addEventListener('click', () => this.handleBrowse());
-        if (this.startBtn) this.startBtn.addEventListener('click', () => this.toggleSession());
+        if (this.browseBtn) {
+            this.browseBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleBrowse();
+            });
+        }
+        if (this.startBtn) {
+            this.startBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleSession();
+            });
+        }
+        if (this.resetBtn) {
+            this.resetBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.resetSession();
+            });
+        }
     }
 
     async recoverSavedHandle() {
@@ -136,6 +153,21 @@ export class EntropiaWidget {
         this.logEvent("🛑 SESSION_STOPPED");
     }
 
+    resetSession() {
+        this.stats = { loot: {}, values: {}, skills: {}, deaths: 0, globals: 0 };
+        this.lastProcessedLine = "";
+        if (this.sessionStartTime) this.sessionStartTime = Date.now();
+        
+        if (this.manifestGrid) this.manifestGrid.innerHTML = '';
+        
+        const totalEl = document.getElementById('session-grand-total');
+        if (totalEl) totalEl.textContent = "0.0000";
+        
+        if (this.timerEl) this.timerEl.textContent = "00:00:00";
+        
+        this.logEvent("🧹 SESSION_STATS_CLEARED.");
+    }
+
     runSessionTicker() {
         if (this.isPaused || !this.sessionStartTime) return;
 
@@ -183,7 +215,6 @@ export class EntropiaWidget {
         this.lastProcessedLine = line;
 
         if (channel === 'System') {
-            // 1. Loot Processing Rule
             const lootMatch = message.match(this.regex.loot);
             if (lootMatch) {
                 const [__, name, amt, val] = lootMatch;
@@ -194,7 +225,6 @@ export class EntropiaWidget {
                 return;
             }
 
-            // 2. Experience Gain Processing Rule
             const xpMatch = message.match(this.regex.experience);
             if (xpMatch) {
                 const [__, xpVal, skillName] = xpMatch;
@@ -204,7 +234,6 @@ export class EntropiaWidget {
                 return;
             }
 
-            // 3. Death Processing Rule
             if (message.includes("You have been killed") || message.includes("You died")) {
                 this.stats.deaths++;
                 this.logEvent("💀 DEATH REGISTERED");
@@ -212,7 +241,6 @@ export class EntropiaWidget {
             }
         }
 
-        // 4. Global Broadcast Rule
         if (channel === 'Globals' && this.regex.globalHof.test(message)) {
             this.stats.globals++;
             this.logEvent(`🏆 GLOBAL: ${message}`);
@@ -264,4 +292,4 @@ export class EntropiaWidget {
     }
 }
 
-console.log("entropia-widget.js version 0.002 finished loading without external dependencies!");
+console.log("entropia-widget.js version 0.003 finished loading without external dependencies!");
