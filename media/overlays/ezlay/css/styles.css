@@ -86,7 +86,7 @@ body.edit-mode .p8-widget:active {
     border: 1px solid #3f3f46;
     border-radius: 6px; 
     display: none; 
-    z-index: 10000; 
+    z-index: 19999; 
     width: 200px;
 }
 
