@@ -49,14 +49,25 @@ export class EntropiaWidget {
     }
 
     initDOM() {
-        this.startBtn = document.getElementById('start-session-btn');
-        this.browseBtn = document.getElementById('browseBtn');
-        this.resetBtn = document.getElementById('btnReset');
-        this.manifestGrid = document.getElementById('manifest-grid');
-        this.pathInput = document.getElementById('pathInput');
-        this.timerEl = document.getElementById('session-timer');
+        // Core Fix: Find our main container node first
+        const widgetContainer = document.getElementById('entropia-widget');
         
-        this.logEvent("🔌 Initializing DOM structural bindings...");
+        if (!widgetContainer) {
+            console.error("❌ [Entropia Widget Error]: Parent container element #entropia-widget missing from HTML template.");
+            return;
+        }
+
+        this.logEvent("🔌 Initializing DOM structural bindings via scoped lookups...");
+
+        // Scope queries strictly within the widget element container to bypass duplicate IDs elsewhere
+        this.startBtn = widgetContainer.querySelector('#start-session-btn') || document.getElementById('start-session-btn');
+        this.browseBtn = widgetContainer.querySelector('#browseBtn') || document.getElementById('browseBtn');
+        this.manifestGrid = widgetContainer.querySelector('#manifest-grid') || document.getElementById('manifest-grid');
+        this.timerEl = widgetContainer.querySelector('#session-timer') || document.getElementById('session-timer');
+        
+        // Global document lookups for unique non-duplicated fallback configuration fields
+        this.resetBtn = document.getElementById('btnReset');
+        this.pathInput = document.getElementById('pathInput');
 
         if (this.browseBtn) {
             this.browseBtn.addEventListener('click', (e) => {
@@ -65,7 +76,7 @@ export class EntropiaWidget {
                 this.handleBrowse();
             });
         } else {
-            console.error("❌ [Entropia Widget Error]: Element #browseBtn missing from HTML template.");
+            console.error("❌ [Entropia Widget Error]: Element #browseBtn missing inside widget context.");
         }
 
         if (this.startBtn) {
@@ -75,7 +86,7 @@ export class EntropiaWidget {
                 this.toggleSession();
             });
         } else {
-            console.error("❌ [Entropia Widget Error]: Element #start-session-btn missing from HTML template.");
+            console.error("❌ [Entropia Widget Error]: Element #start-session-btn missing inside widget context.");
         }
 
         if (this.resetBtn) {
@@ -148,7 +159,6 @@ export class EntropiaWidget {
         }
 
         try {
-            // FIXED: Verify permissions interactively to avoid silent browser security blocking
             const hasPermission = await this.verifyPermission();
             if (!hasPermission) {
                 this.logEvent("❌ PERMISSION_DENIED: Browser blocked read access.", true);
@@ -296,7 +306,9 @@ export class EntropiaWidget {
             grandTotal += totalValue;
 
             const safeKey = key.replace(/\s+/g, '-');
-            let sessionEl = document.getElementById(`session-${safeKey}`);
+            
+            // Scope lookup strictly inside our grid layout element context
+            let sessionEl = this.manifestGrid.querySelector(`#session-${safeKey}`);
             
             if (!sessionEl) {
                 const row = document.createElement('div');
@@ -308,15 +320,15 @@ export class EntropiaWidget {
                     <span class="m-val" id="val-${safeKey}">(0.0000)</span>
                 `;
                 this.manifestGrid.appendChild(row);
-                sessionEl = document.getElementById(`session-${safeKey}`);
+                sessionEl = this.manifestGrid.querySelector(`#session-${safeKey}`);
             }
 
             if (sessionEl) {
                 sessionEl.textContent = count;
-                const valEl = document.getElementById(`val-${safeKey}`);
+                const valEl = this.manifestGrid.querySelector(`#val-${safeKey}`);
                 if (valEl) valEl.textContent = `(${totalValue.toFixed(4)})`;
 
-                const rateEl = document.getElementById(`rate-${safeKey}`);
+                const rateEl = this.manifestGrid.querySelector(`#rate-${safeKey}`);
                 if (rateEl) {
                     const perHour = (count / Math.max(0.01, elapsedHours)).toFixed(1);
                     rateEl.textContent = `${perHour}/hr`;
