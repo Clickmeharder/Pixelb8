@@ -111,6 +111,64 @@ body.edit-mode .p8-widget:active {
     color: #ff4b4b !important; 
 }
 
+/* --- SETTINGS MANAGER PANEL --- */
+#settings-window {
+    display: none;
+    position: fixed;
+    top: 50px;
+    left: 50px;
+    background: #18181b;
+    padding: 20px;
+    border: 1px solid #27272a;
+    z-index: 9999;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    width: 260px;
+    box-sizing: border-box;
+}
+
+#settings-window h3 {
+    margin-top: 0;
+    color: var(--accent, #a855f7);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 15px;
+}
+
+.settings-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #e4e4e7;
+}
+
+.settings-row-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+#close-settings-manager-btn {
+    background: transparent;
+    color: #71717a;
+    font-size: 12px;
+    width: 100%;
+    margin-top: 5px;
+    border: 1px solid #27272a;
+    padding: 4px;
+    cursor: pointer;
+}
+
+#close-settings-manager-btn:hover {
+    background: #27272a;
+    color: #ffffff;
+}
+
 /* Theme Editor */
 #style-editor {
     position: fixed; 
@@ -118,7 +176,6 @@ body.edit-mode .p8-widget:active {
     left: 50%; 
     transform: translate(-50%, -50%);
     background: #09090b;
-	/* background: var(--bg);  */
     border: 2px solid var(--accent);
     padding: 20px; 
     display: none; 
@@ -138,13 +195,12 @@ body.edit-mode .p8-widget:active {
     top: -20px; 
     background: #09090b; 
     z-index: 10; 
-	margin:-20px;
+    margin: -20px;
     margin-top: -20px; 
     padding-top: 20px; 
     padding-bottom: 10px; 
     border-bottom: 1px solid #27272a;
     margin-bottom: 15px;
-    /* resize: vertical; */
 }
 
 /* Rewards Manager */
@@ -155,7 +211,6 @@ body.edit-mode .p8-widget:active {
     top: 20px; 
     width: 320px; 
     background: #09090b;
-    /* background: var(--bg);  */	
     border: 2px solid var(--accent); 
     border-radius: var(--border-radius); 
     padding: 20px; 
@@ -164,15 +219,14 @@ body.edit-mode .p8-widget:active {
     z-index: 10001; 
     box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
     max-height: 80vh; 
-    overflow-y: auto;   
-    /* resize: vertical; */
+    overflow-y: auto;    
 }
 
 #rewards-manager-header {
     display: flex; 
     justify-content: space-between; 
     align-items: center;
-	margin: -20px;
+    margin: -20px;
     margin-bottom: 15px; 
     border-bottom: 1px solid #27272a; 
     padding-bottom: 10px; 
@@ -188,11 +242,10 @@ body.edit-mode .p8-widget:active {
 #bit-manager {
     display: none; 
     position: fixed; 
-    right: 360px; /* Offset horizontally so it pops open right next to Ch Points */
+    right: 360px; 
     top: 20px; 
     width: 320px;
-	background: #09090b; 
-    /* background: var(--bg);  */
+    background: #09090b; 
     border: 2px solid var(--accent); 
     border-radius: var(--border-radius); 
     padding: 20px; 
@@ -200,7 +253,7 @@ body.edit-mode .p8-widget:active {
     font-family: var(--font-family); 
     z-index: 10001; 
     max-height: 80vh; 
-    overflow-y: auto;   
+    overflow-y: auto;    
     box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
     resize: vertical;
 }
@@ -216,21 +269,29 @@ body.edit-mode .p8-widget:active {
     top: -20px; 
     background: #09090b;
     z-index: 10;
-	margin: -20px;
+    margin: -20px;
     margin-top: -20px;
-	margin-bottom: 15px;
+    margin-bottom: 15px;
     padding-top: 20px;
     cursor: move;
     user-select: none;
+}
+
+#bitToggleEl {
+    background: #18181b; 
+    padding: 6px 10px; 
+    border-radius: 4px; 
+    display: flex; 
+    justify-content: space-between;
 }
 
 /* Make headers look and feel like draggable windows */
 #theme-manager-header, 
 #rewards-manager-header,
 #bit-manager-header {
-	padding: 8px;
-    cursor: move; /* Shows the crosshair move cursor */
-    user-select: none; /* Prevents text highlighting while dragging */
+    padding: 8px;
+    cursor: move; 
+    user-select: none; 
 }
 
 .input-group { 
@@ -534,10 +595,8 @@ body.edit-mode .p8-widget:active {
     z-index: 999;
 }
 
-
 /* --- OVERLAY ANIMATION UTILITIES --- */
 
-/* Base configuration for animated elements */
 .fadeIn, .fadeOut, .bounceIn, .bounceOut, .zoomIn, .zoomOut, .slideInDown, .slideInUp, .slideOutUp, .slideOutDown {
     animation-duration: 0.8s;
     animation-fill-mode: both;

@@ -6,9 +6,15 @@ let settings = JSON.parse(localStorage.getItem('p8_settings')) || {
     useCmdPrefix: true,
     consoleMessages: true,
     floatingEmotes: true,
-    chatHidden: false,
+	chatHidden: false,
+    statusHidden: true,
     alertHidden: false,
-    statusHidden: true
+//----------------------------
+  // alert box element toggles
+	
+	rewardsEnabled: true,
+	bitsEnabled: true,
+//---------------------------
 };
 let BOT_PREFIX = settings.botPrefix;
 let useBotPrefix = (String(settings.useBotPrefix) === "true");
@@ -16,6 +22,9 @@ let CMD_PREFIX = settings.cmdPrefix;
 let useCmdPrefix = (String(settings.useCmdPrefix) === "true");
 let floatingEmotes = (String(settings.floatingEmotes) === "true");
 let consoleMessages = (String(settings.consoleMessages) === "true");
+let rewardsEnabled = (String(settings.rewardsEnabled) !== "false");
+let bitsEnabled = (String(settings.bitsEnabled) !== "false");
+
 
 // Strict casting layout fallback normalization loops
 let chatHidden = (String(settings.chatHidden) === "true");
@@ -31,14 +40,22 @@ function saveSettings() {
     settings.floatingEmotes = floatingEmotes;
     
     settings.chatHidden = chatHidden;
-    settings.alertHidden = alertHidden;
+
     settings.statusHidden = statusHidden;
-    
+    //---------------------------------------
+	// Alert Widget
+	settings.alertHidden = alertHidden;
+	settings.rewardsEnabled = rewardsEnabled;
+    settings.bitsEnabled = bitsEnabled;
+	// Add these lines to commit reward/bit values to disk
+
+	//---------------------------------------
     localStorage.setItem('p8_settings', JSON.stringify(settings));
     
     // Auto-refresh panel states inside active DOM elements if they exist
     if (typeof updateManagerBadgesUI === "function") {
         updateManagerBadgesUI();
+		updateAllBadgesUI();
     }
 }
 
@@ -505,10 +522,44 @@ function populateCustomDropdowns() {
         });
     });
 }
+function toggleBits() {
+    bitsEnabled = !bitsEnabled;
+    saveSettings();
+    // Optional: Update badge text color/label here
+}
 
-// 1. Hook up UI Toggle Actions inside your bindEvents() function block
+
+function updateAllBadgesUI() {
+    // 1. Sync the HTML variables natively into your Checkboxes if the window is open
+    const masterCheck = document.getElementById("settings-toggle-master-alerts");
+    const rewardsCheck = document.getElementById("settings-toggle-rewards");
+    const bitsCheck = document.getElementById("settings-toggle-bits");
+
+    if (masterCheck) masterCheck.checked = !alertHidden;
+    if (rewardsCheck) rewardsCheck.checked = rewardsEnabled;
+    if (bitsCheck) bitsCheck.checked = bitsEnabled;
+
+    // 2. Define the badge arrays used across different control manager decks
+    const badges = [
+        { id: "mgr-alert-status-badge", state: !alertHidden },
+        { id: "mgr-bit-status-badge", state: bitsEnabled },
+        { id: "mgr-reward-status-badge", state: rewardsEnabled }, // Ensure this matches your HTML badge ID
+        { id: "mgr-chat-status-badge", state: !chatHidden }
+    ];
+
+    badges.forEach(b => {
+        const badge = document.getElementById(b.id);
+        if (!badge) return;
+
+        badge.innerText = b.state ? "ACTIVE" : "MUTED";
+        badge.style.background = b.state ? "#064e3b" : "#7f1d1d";
+        badge.style.color = b.state ? "#a7f3d0" : "#fecaca";
+    });
+}
+//  old toggle
 // Helper tracking routine to update the control deck indicators
-function updateManagerBadgesUI() {
+
+/* function updateManagerBadgesUI() {
     const badge = document.getElementById("mgr-alert-status-badge");
     if (!badge) return;
     
@@ -521,7 +572,7 @@ function updateManagerBadgesUI() {
         badge.style.background = "#064e3b";
         badge.style.color = "#a7f3d0";
     }
-}
+} */
 
 function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");
@@ -1034,7 +1085,7 @@ function bindEvents() {
     document.getElementById("ctx-open-rewards").addEventListener("click", () => {
         rewardsPanel.style.display = "block";
         document.getElementById('p8-ctx-menu').style.display = 'none';
-        updateManagerBadgesUI();
+        updateAllBadgesUI();
         renderRewardsList();
     });
 
@@ -1047,6 +1098,42 @@ function bindEvents() {
         });
     }
 
+    // Hook settings panel into the context menu button
+    document.getElementById('ctx-open-settings').addEventListener('click', () => {
+        document.getElementById('settings-window').style.display = 'block';
+        document.getElementById('p8-ctx-menu').style.display = 'none';
+        updateAllBadgesUI(); // Instantly checks or unchecks inputs based on real state
+    });
+
+    // Close Button logic for Settings Panel overlay window
+    const closeSettingsBtn = document.getElementById("close-settings-manager-btn");
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener("click", () => {
+            document.getElementById('settings-window').style.display = 'none';
+        });
+    }
+
+    // --- SETTINGS OVERLAY WINDOW INTERFACE TOGGLES ---
+    document.getElementById('settings-toggle-master-alerts').addEventListener('change', (e) => {
+        alertHidden = !e.target.checked;
+        saveSettings();
+        if (alertWidget) {
+            alertWidget.style.display = alertHidden ? "none" : "block";
+            alertWidget.style.opacity = alertHidden ? "0" : "1";
+        }
+    });
+
+    document.getElementById('settings-toggle-rewards').addEventListener('change', (e) => {
+        rewardsEnabled = e.target.checked;
+        saveSettings();
+    });
+
+    document.getElementById('settings-toggle-bits').addEventListener('change', (e) => {
+        bitsEnabled = e.target.checked;
+        saveSettings();
+    });
+
+    // --- SYSTEM CONSOLE SYSTEM RESETS ---
     document.getElementById("ctx-reset").addEventListener("click", systemReset);
     document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
     document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
@@ -1060,6 +1147,27 @@ function bindEvents() {
     document.getElementById("close-rewards-top-btn").addEventListener("click", () => {
         document.getElementById('rewards-manager').style.display = 'none';
     });
+
+    // --- SIDEBAR ACTIONS CONTROL MANAGEMENT DECKS ---
+    const deckToggleBtn = document.getElementById("mgr-toggle-alert-btn");
+    if (deckToggleBtn) {
+        deckToggleBtn.addEventListener("click", () => {
+            alertHidden = !alertHidden;
+            saveSettings();
+            if (alertWidget) {
+                alertWidget.style.display = alertHidden ? "none" : "block";
+                alertWidget.style.opacity = alertHidden ? "0" : "1";
+            }
+        });
+    }
+
+    const mgrToggleBitsBtn = document.getElementById("mgr-toggle-bits-btn");
+    if (mgrToggleBitsBtn) {
+        mgrToggleBitsBtn.addEventListener("click", () => {
+            bitsEnabled = !bitsEnabled;
+            saveSettings();
+        });
+    }
 
     document.getElementById('current-theme-display').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1099,12 +1207,12 @@ function bindEvents() {
         }
         
         // 2. SAFETY INTERCEPT GUARD CLAUSE (Protects inputs and panels from breaking drag states)
-        // Updated to intercept clicks on #bit-manager to prevent widget canvas layout shifts while tweaking configs
         if (!isEditMode || 
             e.button !== 0 || 
             e.target.closest('#style-editor') || 
             e.target.closest('#rewards-manager') || 
             e.target.closest('#bit-manager') || 
+            e.target.closest('#settings-window') || // Ensure clicks inside your settings panels don't drag behind canvas elements
             e.target.closest('.setup-container') || 
             e.target.closest('.p8-modal')) return;
         
@@ -2018,11 +2126,11 @@ function startTwitch(channel, token) {
 
     // --- CHANNEL POINT REWARD TRIGGER ---
     ComfyJS.onReward = (user, reward, cost, message, extra) => {
-        // Pass live WebSocket event payloads directly down to our alert engine
+        if (!rewardsEnabled) return;
         triggerAlertPipeline(reward, user, cost, message);
     };
 	ComfyJS.onCheer = (user, message, bits, flags, extra) => {
-		// Forward the real-time cheer metrics to the alert engine
+		if (!bitsEnabled) return; 
 		triggerBitAlertPipeline(user, bits, message);
 	};
     ComfyJS.onCommand = (user, command, message, flags, extra) => {
@@ -2039,7 +2147,7 @@ function startTwitch(channel, token) {
             }
         }
         
-        if (targetCommand === "hello") {
+        if (targetCommand === "helloworld") {
             if (alertText && alertWidget) {
                 alertText.innerText = `👋 Welcome, @${user}!`;
                 alertWidget.style.opacity = "1";
