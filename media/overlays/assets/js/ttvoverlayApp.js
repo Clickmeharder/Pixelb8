@@ -421,25 +421,60 @@ function init() {
     loadPositions();
     renderThemeControls();
     
-	// --- DEFENSIVE ENTROPIA WIDGET INITIALIZATION ---
-    // If the script didn't import, or the DOM elements aren't ready, the catch block absorbs it
+    // --- DEFENSIVE ENTROPIA WIDGET INITIALIZATION ---
     try {
         if (typeof EntropiaWidget !== 'undefined') {
             window.entropiaLogParser = new EntropiaWidget();
+            
+            // AUTOMATED TWITCH COMMAND REGISTRY INJECTION
+            injectAllWidgetCommands();
         } else {
             console.warn("⚠️ [Init Warning]: EntropiaWidget class is not defined. Skipping instantiation.");
         }
     } catch (entropiaError) {
         console.error("❌ [Init Error]: Failed to initialize Entropia Widget cleanly:", entropiaError);
     }
+
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 
     populateCustomDropdowns();
     
     // Bind all event listeners to the DOM
     bindEvents();
-	console.log("ttvoverlayapp.js version 0.112 finished loading");
-	
+    console.log("ttvoverlayapp.js version 0.112 finished loading");
+}
+
+function injectAllWidgetCommands() {
+    const activeWidgets = [
+        window.entropiaLogParser
+        // Future extensions sit here elegantly: window.miningTracker, window.pixelKitty
+    ];
+
+    activeWidgets.forEach(widget => {
+        if (widget) {
+            injectWidgetCommands(widget);
+        }
+    });
+}
+
+function injectWidgetCommands(widgetInstance) {
+    // Pass the local botSay utility directly into the initialization layer
+    if (widgetInstance && typeof widgetInstance.getCommands === 'function') {
+        const widgetCommands = widgetInstance.getCommands(botSay);
+        
+        widgetCommands.forEach(cmd => {
+            const lookupKey = cmd.name.toLowerCase().trim();
+            
+            if (!commandsRegistry[lookupKey]) {
+                // Perfect, 1:1 schema assignment mirror
+                commandsRegistry[lookupKey] = {
+                    adminOnly: cmd.adminOnly || false,
+                    execute: cmd.execute
+                };
+                console.log(`📡 Registered Native Module Command: !${lookupKey} [AdminOnly: ${commandsRegistry[lookupKey].adminOnly}]`);
+            }
+        });
+    }
 }
 
 function setEditMode(state) {

@@ -369,4 +369,46 @@ export class EntropiaWidget {
 
         this.grandTotalElements.forEach(el => el.textContent = grandTotal.toFixed(4));
     }
+	// twitch commands
+    getCommands(sendNotice) {
+        return [
+            {
+                name: 'loot',
+                adminOnly: false,
+                description: 'Displays top session loot items and cumulative PED value.',
+                execute: (user, message, flags) => {
+                    const totalValue = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
+                    if (Object.keys(this.stats.loot).length === 0) {
+                        sendNotice(`@${user}, no loot tracked in this session yet.`);
+                        return;
+                    }
+                    
+                    const topLoot = Object.entries(this.stats.values)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 3)
+                        .map(([name, val]) => `${this.stats.loot[name]}x ${name}`)
+                        .join(', ');
+
+                    sendNotice(`📦 Session Loot: ${topLoot} | Total Value: ${totalValue.toFixed(2)} PED`);
+                }
+            },
+            {
+                name: 'ped',
+                adminOnly: false,
+                description: 'Displays current global PED accumulated balance.',
+                execute: (user, message, flags) => {
+                    const totalValue = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
+                    sendNotice(`💰 Current Session Value: ${totalValue.toFixed(4)} PED`);
+                }
+            },
+            {
+                name: 'globals',
+                adminOnly: false,
+                description: 'Returns session global metrics and casualty counters.',
+                execute: (user, message, flags) => {
+                    sendNotice(`🏆 Globals/HOFs hit this session: ${this.stats.globals} | Deaths: ${this.stats.deaths}`);
+                }
+            }
+        ];
+    }
 }
