@@ -1697,7 +1697,11 @@ const commandsRegistry = {
             const parts = message.trim().toLowerCase().split(" ");
             const action = parts[0];
             const id = parts[1]; // Explicit ID provided by user
-
+			// Handle Help
+            if (action === "help") {
+                botSay(`Timer Help: ${prefix}countdown [seconds] [label] - Start | ${prefix}savecountdown [seconds] [name] - Save Preset | ${prefix}timer list - View Active | ${prefix}timer [pause|reset|stop|split] [id] - Control`);
+                return;
+            }
             // Handle Listing
             if (action === "list") {
                 const activeIds = Object.keys(activeTimers);
@@ -2744,4 +2748,4 @@ function bindEvents() {
 
 init();
 
-console.log("ttvoverlayapp.js version 0.10 finished loading");
+console.log("ttvoverlayapp.js version 0.11 finished loading");
