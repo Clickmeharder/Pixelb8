@@ -179,9 +179,46 @@ body.edit-mode .p8-widget:active {
     margin-top: -20px; 
     padding-top: 20px;
 }
+/* --- BITS MANAGER WINDOW --- */
+#bit-manager {
+    display: none; 
+    position: fixed; 
+    right: 360px; /* Offset horizontally so it pops open right next to Ch Points */
+    top: 20px; 
+    width: 320px; 
+    background: var(--bg); 
+    border: 2px solid var(--accent); 
+    border-radius: var(--border-radius); 
+    padding: 20px; 
+    color: #fff; 
+    font-family: var(--font-family); 
+    z-index: 9998; /* Sits right in the tool panel stack context */
+    max-height: 80vh; 
+    overflow-y: auto;   
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+    resize: vertical;
+}
+
+#bit-manager-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 15px; 
+    border-bottom: 1px solid #27272a; 
+    padding-bottom: 10px; 
+    position: sticky; 
+    top: -20px; 
+    background: var(--bg); 
+    z-index: 10; 
+    margin-top: -20px; 
+    padding-top: 20px;
+    cursor: move;
+    user-select: none;
+}
 /* Make headers look and feel like draggable windows */
 #theme-manager-header, 
-#rewards-manager-header {
+#rewards-manager-header,
+#bit-manager-header {
     cursor: move; /* Shows the crosshair move cursor */
     user-select: none; /* Prevents text highlighting while dragging */
 }

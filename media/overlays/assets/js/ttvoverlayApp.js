@@ -676,7 +676,40 @@ function bindRewardsManagerEvents() {
         renderRewardsList();
     });
 }
+// --- BITS MANAGER PANEL LOGIC & UI EVENTS ---
+function bindBitManagerEvents() {
+    const bitManagerWindow = document.getElementById("bit-manager");
+    const closeBitsTopBtn = document.getElementById("close-bits-top-btn");
+    const closeBitManagerBtn = document.getElementById("close-bit-manager-btn");
+    
+    // 1. Structural window close routines
+    if (closeBitsTopBtn) closeBitsTopBtn.addEventListener("click", () => bitManagerWindow.style.display = "none");
+    if (closeBitManagerBtn) closeBitManagerBtn.addEventListener("click", () => bitManagerWindow.style.display = "none");
 
+    // 2. Custom Dropdown Selector Functionality for Tiers
+    const tierSelector = document.getElementById("bit-tier-selector");
+    const tierDisplay = document.getElementById("current-bit-tier-display");
+    const tierOptionsContainer = document.getElementById("bit-tier-options");
+
+    if (tierSelector && tierOptionsContainer) {
+        tierSelector.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = tierOptionsContainer.style.display === "block";
+            tierOptionsContainer.style.display = isOpen ? "none" : "block";
+        });
+
+        tierOptionsContainer.querySelectorAll(".option-item").forEach(item => {
+            item.addEventListener("click", (e) => {
+                e.stopPropagation();
+                tierDisplay.textContent = item.textContent;
+                tierDisplay.setAttribute("data-selected-tier", item.getAttribute("data-tier"));
+                tierOptionsContainer.style.display = "none";
+                
+                console.log(`Switched config view to Bit Tier threshold: ${item.getAttribute("data-tier")}`);
+            });
+        });
+    }
+}
 function renderRewardsList() {
     const container = document.getElementById("rewards-list-container");
     if (!container) return;
@@ -827,18 +860,38 @@ function bindEvents() {
         document.getElementById('p8-ctx-menu').style.display = 'none';
     });
 
+    // --- CONTEXT MENU TOOL PANEL TRIGGERS ---
+    const rewardsPanel = document.getElementById('rewards-manager');
+    document.getElementById("ctx-open-rewards").addEventListener("click", () => {
+        rewardsPanel.style.display = "block";
+        document.getElementById('p8-ctx-menu').style.display = 'none';
+        updateManagerBadgesUI();
+        renderRewardsList();
+    });
+
+    const ctxOpenBits = document.getElementById("ctx-open-bits");
+    if (ctxOpenBits) {
+        ctxOpenBits.addEventListener("click", () => {
+            const bitWindow = document.getElementById("bit-manager");
+            bitWindow.style.display = bitWindow.style.display === "none" ? "block" : "none";
+            document.getElementById('p8-ctx-menu').style.display = 'none';
+        });
+    }
+
     document.getElementById("ctx-reset").addEventListener("click", systemReset);
     document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
     document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
-	// Top right X close button for Theme Manager
+    
+    // Top right X close button for Theme Manager
     document.getElementById("close-editor-top-btn").addEventListener("click", () => {
         document.getElementById('style-editor').style.display = 'none';
     });
 
-    //Top right X close button for Channel Point Rewards Manager
+    // Top right X close button for Channel Point Rewards Manager
     document.getElementById("close-rewards-top-btn").addEventListener("click", () => {
         document.getElementById('rewards-manager').style.display = 'none';
     });
+
     document.getElementById('current-theme-display').addEventListener('click', (e) => {
         e.stopPropagation();
         const opts = document.getElementById('theme-options');
@@ -854,6 +907,14 @@ function bindEvents() {
         await p8Confirm('Theme Settings Saved', true);
     });
 
+    // --- WINDOW LAYOUT TOOL INITIALIZATIONS ---
+    if (typeof makeElementDraggable === "function") {
+        if (document.getElementById("bit-manager")) {
+            makeElementDraggable("bit-manager", "bit-manager-header");
+        }
+    }
+
+    // --- MOUSE & DRAG ENGINE ---
     window.addEventListener('mousedown', e => {
         const menu = document.getElementById('p8-ctx-menu');
         const opts = document.getElementById('theme-options');
@@ -863,12 +924,20 @@ function bindEvents() {
         if (opts.style.display === 'block' && !e.target.closest('#theme-selector')) opts.style.display = 'none';
         
         // Clear all standard or dynamic custom select menus if clicking abstractly away from any trigger
-        if (!e.target.closest('.select-trigger')) {
+        if (!e.target.closest('.select-trigger') && !e.target.closest('.custom-select-display')) {
             document.querySelectorAll(".select-options").forEach(b => b.style.display = "none");
+            document.querySelectorAll(".custom-select-options-box").forEach(b => b.style.display = "none");
         }
         
         // 2. SAFETY INTERCEPT GUARD CLAUSE (Protects inputs and panels from breaking drag states)
-        if (!isEditMode || e.button !== 0 || e.target.closest('#style-editor') || e.target.closest('#rewards-manager') || e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
+        // Updated to intercept clicks on #bit-manager to prevent widget canvas layout shifts while tweaking configs
+        if (!isEditMode || 
+            e.button !== 0 || 
+            e.target.closest('#style-editor') || 
+            e.target.closest('#rewards-manager') || 
+            e.target.closest('#bit-manager') || 
+            e.target.closest('.setup-container') || 
+            e.target.closest('.p8-modal')) return;
         
         // 3. WIDGET DRAGGING SYSTEM
         dragTarget = e.target.closest('.p8-widget');
@@ -899,8 +968,13 @@ function bindEvents() {
         menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
     });
 
+    // Execute sub-panel initialization loops
     bindRewardsManagerEvents();
+    if (typeof bindBitManagerEvents === "function") {
+        bindBitManagerEvents();
+    }
 }
+
 // --- CENTRALIZED ALERT PIPELINE ENGINE ---
 // Handles formatting, visual injections, animations, and chat confirmation outputs
 function triggerAlertPipeline(reward, user, cost, message) {
