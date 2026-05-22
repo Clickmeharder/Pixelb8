@@ -124,7 +124,7 @@ body.edit-mode .p8-widget:active {
     z-index: 10001; 
     width: 350px;
     border-radius: 12px; 
-    max-height: 50vh; 
+    max-height: 80vh;
     overflow-y: auto;
     box-shadow: 0 10px 30px rgba(0,0,0,0.8);
 }

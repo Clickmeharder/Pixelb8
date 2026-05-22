@@ -1286,6 +1286,17 @@ function makeElementDraggable(targetId, handleId) {
         pos3 = e.clientX;
         pos4 = e.clientY;
         
+        // If the element uses a centering transform (like the Theme Manager),
+        // capture its current bounding coordinates and strip the transform immediately
+        // BEFORE dragging starts to avoid jumping.
+        const computedStyle = window.getComputedStyle(target);
+        if (computedStyle.transform !== 'none' && !target.style.left) {
+            const rect = target.getBoundingClientRect();
+            target.style.transform = 'none';
+            target.style.left = rect.left + 'px';
+            target.style.top = rect.top + 'px';
+        }
+        
         // Attach event listeners for moving and releasing the mouse
         document.onmouseup = closeDragElement;
         document.onmousemove = elementDrag;
@@ -1300,30 +1311,29 @@ function makeElementDraggable(targetId, handleId) {
         pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
-        
-        // Clear center transforms on the style editor if it's the target
-        // This prevents the CSS 'transform: translate(-50%, -50%)' from fighting the new positions
-        if (target.style.transform) {
-            const rect = target.getBoundingClientRect();
-            target.style.transform = 'none';
-            target.style.left = rect.left + 'px';
-            target.style.top = rect.top + 'px';
-        }
 
         // Set the element's new absolute position coordinates
         let newTop = target.offsetTop - pos2;
         let newLeft = target.offsetLeft - pos1;
 
-        // Optional boundary guard: Keep window inside the viewport
+        // --- UPDATED BOUNDARY GUARDS ---
+        // Prevent window from getting lost off the top or left edge
         if (newTop < 0) newTop = 0;
         if (newLeft < 0) newLeft = 0;
+
+        // Prevent window from escaping past the right side of the screen
         if (newLeft + target.offsetWidth > window.innerWidth) {
             newLeft = window.innerWidth - target.offsetWidth;
         }
-        if (newTop + target.offsetHeight > window.innerHeight) {
-            newTop = window.innerHeight - target.offsetHeight;
+
+        // FIX: Allow the window to slide all the way to the bottom frame.
+        // It locks it right before the header handle (approx 40px) vanishes off-screen.
+        const minVisibleHeader = 40; 
+        if (newTop > window.innerHeight - minVisibleHeader) {
+            newTop = window.innerHeight - minVisibleHeader;
         }
 
+        // Apply new styles
         target.style.top = newTop + "px";
         target.style.left = newLeft + "px";
         
