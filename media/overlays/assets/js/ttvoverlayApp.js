@@ -2615,4 +2615,4 @@ function bindEvents() {
 
 init();
 
-console.log("ttvoverlayapp.js version 0.03 finished loading");
+console.log("ttvoverlayapp.js version 0.04 finished loading");
