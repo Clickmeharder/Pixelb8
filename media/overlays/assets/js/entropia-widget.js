@@ -382,7 +382,6 @@ export class EntropiaWidget {
     }
 
     // --- REFACTORED COMMAND REPOSITORY CONSOLE MAPPER ---
-// --- REFACTORED COMMAND REPOSITORY CONSOLE MAPPER ---
     getCommands(sendNotice) {
         return [
             {
@@ -395,11 +394,22 @@ export class EntropiaWidget {
                     const isAdmin = flags.broadcaster || flags.mod;
 
                     if (!subCommand) {
-                        sendNotice(`🤖 [EU Console]: Specify action parameters (!eu loot | ped | globals | toggle)`);
+                        sendNotice(`🤖 [EU Console]: Specify action parameters (!eu loot | ped | globals | toggle | help)`);
                         return;
                     }
 
                     switch (subCommand) {
+                        // --- HELP & DOCUMENTATION MODULE ---
+                        case 'help':
+                        case 'commands':
+                        case 'h':
+                            if (isAdmin) {
+                                sendNotice(`🛠️ [EU Admin Help]: !eu [start | pause | reset | stop] or Toggle Panels: !eu toggle [grid | sessiontimer | total]`);
+                            } else {
+                                sendNotice(`📦 [EU Public Help]: Available commands: !eu loot (Top Items) | !eu ped (Session Value) | !eu globals (Global Counter)`);
+                            }
+                            break;
+
                         // --- VIEW-ONLY DATA CHANNELS ---
                         case 'loot':
                             const totalValue = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
