@@ -2020,7 +2020,7 @@ function renderActiveTimersUI() {
         row.style.borderRadius = "4px";
         
         row.innerHTML = `
-            <span style="max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:${t.running ? 'var(--accent)' : '#a1a1aa'}">
+            <span style="max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:${t.running ? 'var(--accent)' : '#a1a1aa'}">
                 ${t.type === 'stopwatch' ? '⏱️' : '⏳'} ${t.label} (${formatTimeDigits(rem)})
             </span>
             <div class="timer-btn-group" style="display:flex; gap:2px;">
