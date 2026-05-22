@@ -66,7 +66,10 @@
     </div>
  <!--Theme Manager--->
     <div id="style-editor">
-        <h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Theme Manager</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+			<h3 id="theme-manager-title" style="margin: 0; font-size: 16px; color: var(--accent);">Theme Manager</h3>
+			<button id="close-editor-top-btn" style="background: transparent; border: none; color: #71717a; font-size: 18px; cursor: pointer; padding: 2px 6px; line-height: 1; transition: color 0.2s;" onmouseenter="this.style.color='#f87171'" onmouseleave="this.style.color='#71717a'">✕</button>
+		</div>
         <div class="input-group">
             <label>Active Theme</label>
             <div class="custom-select" id="theme-selector">
@@ -87,8 +90,10 @@
 	
 	<!--Channel Point Manager--->
 	<div id="rewards-manager" style="display: none; position: fixed; right: 20px; top: 20px; width: 320px; background: var(--bg); border: 2px solid var(--accent); border-radius: var(--border-radius); padding: 20px; color: #fff; font-family: var(--font-family); z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
-		<h3 id="rewards-manager-title" style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Channel Point Redeems</h3>
-		
+		<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #27272a; padding-bottom: 10px;">
+			<h3 id="rewards-manager-title" style="margin: 0; font-size: 16px; color: var(--accent);">Ch. Point Rewards Manager</h3>
+			<button id="close-rewards-top-btn" style="background: transparent; border: none; color: #71717a; font-size: 18px; cursor: pointer; padding: 2px 6px; line-height: 1; transition: color 0.2s;" onmouseenter="this.style.color='#f87171'" onmouseleave="this.style.color='#71717a'">✕</button>
+		</div>
 		<div id="reward-master-controls-wrapper" style="background: rgba(9,9,11,0.6); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
 			<div id="reward-master-controls-header" style="font-size: 10px; color: #71717a; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-bottom: 2px;">Overlay Master Controls</div>
 			

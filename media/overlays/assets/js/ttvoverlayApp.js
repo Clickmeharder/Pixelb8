@@ -830,7 +830,15 @@ function bindEvents() {
     document.getElementById("ctx-reset").addEventListener("click", systemReset);
     document.getElementById("logout-btn-ui").addEventListener("click", systemReset);
     document.getElementById("close-editor-btn").addEventListener("click", () => document.getElementById('style-editor').style.display = 'none');
+	// Top right X close button for Theme Manager
+    document.getElementById("close-editor-top-btn").addEventListener("click", () => {
+        document.getElementById('style-editor').style.display = 'none';
+    });
 
+    //Top right X close button for Channel Point Rewards Manager
+    document.getElementById("close-rewards-top-btn").addEventListener("click", () => {
+        document.getElementById('rewards-manager').style.display = 'none';
+    });
     document.getElementById('current-theme-display').addEventListener('click', (e) => {
         e.stopPropagation();
         const opts = document.getElementById('theme-options');
