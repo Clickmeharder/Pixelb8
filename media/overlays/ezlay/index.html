@@ -84,8 +84,9 @@
         <button class="p8-btn" id="close-editor-btn" style="background:transparent; color:#71717a; font-size: 12px;">Close Editor</button>
         <button class="p8-btn del-btn" id="delete-theme-btn">Delete Active Theme</button>
     </div>
-	 <!--Channel Point Manager--->
-<div id="rewards-manager" style="display: none; position: fixed; right: 20px; top: 20px; width: 320px; background: var(--bg); border: 2px solid var(--accent); border-radius: var(--border-radius); padding: 20px; color: #fff; font-family: var(--font-family); z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
+	
+	<!--Channel Point Manager--->
+	<div id="rewards-manager" style="display: none; position: fixed; right: 20px; top: 20px; width: 320px; background: var(--bg); border: 2px solid var(--accent); border-radius: var(--border-radius); padding: 20px; color: #fff; font-family: var(--font-family); z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
 		<h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent);">Channel Point Redeems</h3>
 		
 		<div style="background: rgba(9,9,11,0.6); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
@@ -163,6 +164,27 @@
 					<div style="grid-column: span 2;">
 						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Max Width</label>
 						<input type="text" id="reward-img-size" class="p8-input" placeholder="e.g. 100%, 250px, 120px" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;" value="100%">
+					</div>
+				</div>
+			</div>
+
+			<div style="border-top: 1px solid #27272a; padding-top: 10px; margin-bottom: 12px;">
+				<label style="font-size: 11px; color: var(--accent); display: block; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">⏱️ Lifecycles & Playback</label>
+				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+					<div style="grid-column: span 2;">
+						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Text Duration (ms)</label>
+						<input type="number" id="reward-text-duration" class="p8-input" placeholder="8000" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
+					</div>
+					<div>
+						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Mode</label>
+						<select id="reward-img-mode" class="p8-input" style="width:100%; padding: 4px; font-size: 11px; background:#18181b; color:white; border:1px solid #27272a;">
+							<option value="loop">Loop Continuously</option>
+							<option value="once">Play Once (Reset)</option>
+						</select>
+					</div>
+					<div>
+						<label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">Image Duration (ms)</label>
+						<input type="number" id="reward-img-duration" class="p8-input" placeholder="Match Text" style="width: 100%; padding: 4px; box-sizing: border-box; font-size: 11px;">
 					</div>
 				</div>
 			</div>
