@@ -29,7 +29,13 @@ export class EntropiaWidget {
             globalHof: /Hall of Fame|Rare Item|ATH/i
         };
 
-        this.initDOM();
+        // DELAY DOM BINDING UNTIL THE PAGE LAYOUT IS STABLE
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.initDOM());
+        } else {
+            this.initDOM();
+        }
+
         this.recoverSavedHandle();
     }
 
@@ -50,18 +56,28 @@ export class EntropiaWidget {
         this.pathInput = document.getElementById('pathInput');
         this.timerEl = document.getElementById('session-timer');
         
+        this.logEvent("🔌 Initializing DOM structural bindings...");
+
         if (this.browseBtn) {
             this.browseBtn.addEventListener('click', (e) => {
                 e.preventDefault();
+                this.logEvent("Button Clicked: LINK LOG");
                 this.handleBrowse();
             });
+        } else {
+            console.error("❌ [Entropia Widget Error]: Element #browseBtn missing from HTML template.");
         }
+
         if (this.startBtn) {
             this.startBtn.addEventListener('click', (e) => {
                 e.preventDefault();
+                this.logEvent("Button Clicked: START SESSION");
                 this.toggleSession();
             });
+        } else {
+            console.error("❌ [Entropia Widget Error]: Element #start-session-btn missing from HTML template.");
         }
+
         if (this.resetBtn) {
             this.resetBtn.addEventListener('click', (e) => {
                 e.preventDefault();

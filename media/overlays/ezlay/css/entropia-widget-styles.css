@@ -1,30 +1,45 @@
 /* Entropia Live Log Rows Grid */
+/* --- Entropia Live Tracker UI Grid Layouts --- */
 .manifest-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    grid-template-columns: 2fr 1fr 1fr 1.2fr;
     gap: 4px;
-    align-items: center;
-    padding: 4px 6px;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: rgba(39, 39, 42, 0.4);
+    padding: 4px 8px;
     border-radius: 4px;
-    font-size: 11px;
+    align-items: center;
+    border: 1px solid rgba(63, 63, 70, 0.3);
     font-family: monospace;
+    font-size: 11px;
 }
 
-.manifest-row .m-name {
-    color: #ffffff;
+.manifest-row:hover {
+    background: rgba(14, 165, 233, 0.1);
+    border-color: #0ea5e9;
+}
+
+.m-name {
+    color: #e4e4e7;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    font-weight: bold;
 }
 
-.manifest-row .m-count {
-    color: #a855f7;
-    text-align: center;
+.m-count {
+    color: #00ffcc;
+    text-align: right;
+    padding-right: 4px;
 }
 
-.manifest-row .m-rate {
+.m-rate {
     color: #71717a;
-    text-align: center;
+    text-align: right;
+    font-size: 10px;
+}
+
+.m-val {
+    color: #eab308;
+    text-align: right;
+    font-weight: bold;
 }
