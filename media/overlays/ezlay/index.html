@@ -355,15 +355,20 @@
 			</div>
 			<div class="collapsible-content">
 				<div style="display: flex; gap: 5px; margin-bottom: 10px;">
-					<input type="text" id="timer-label-input" placeholder="Timer Label (e.g., Buff, Run)" style="flex: 1; background: #18181b; border: 1px solid #3f3f46; color: #fff; padding: 5px; border-radius: 4px;">
-					<input type="number" id="timer-duration-input" placeholder="Secs (0 for stopwatch)" style="width: 70px; background: #18181b; border: 1px solid #3f3f46; color: #fff; padding: 5px; border-radius: 4px;">
+					<input type="text" id="timer-label-input" class="p8-input" placeholder="Timer Label (e.g., Buff, Run)" style="flex: 1;">
+					<input type="number" id="timer-duration-input" class="p8-input" placeholder="Secs (0 for stopwatch)" style="width: 70px;">
 				</div>
-				<div class="timer-settings-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-					<input type="text" id="tmr-label-fz" placeholder="Label Font Size (e.g., 14px)">
-					<input type="text" id="tmr-label-fw" placeholder="Label Weight (e.g., 600)">
-					<input type="text" id="tmr-fz" placeholder="Timer Font Size (e.g., 24px)">
-					<input type="color" id="tmr-color" value="#ffffff">
-					<select id="tmr-visibility">
+				<div class="timer-settings-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+					<input type="text" id="tmr-label-fz" class="p8-input" placeholder="Label Font Size (e.g., 14px)">
+					<input type="text" id="tmr-label-fw" class="p8-input" placeholder="Label Weight (e.g., 600)">
+					<input type="text" id="tmr-fz" class="p8-input" placeholder="Timer Font Size (e.g., 24px)">
+					
+					<div style="display: flex; gap: 4px; align-items: center; background: #18181b; border: 1px solid #3f3f46; padding: 4px; border-radius: 4px;">
+						<input type="color" id="tmr-color" value="#ffffff" style="border:none; background:transparent; width: 24px; height: 24px; cursor: pointer;">
+						<input type="text" class="p8-input" style="border:none; padding:0; background:transparent;" placeholder="#ffffff">
+					</div>
+					
+					<select id="tmr-visibility" class="p8-input" style="grid-column: span 2; padding: 4px;">
 						<option value="always">Always Show</option>
 						<option value="counting">Show Only While Counting</option>
 						<option value="never">Hide</option>
