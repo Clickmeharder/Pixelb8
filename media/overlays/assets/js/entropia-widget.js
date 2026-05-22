@@ -3,6 +3,7 @@ import { get, set, del } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
 export class EntropiaWidget {
     constructor() {
         this.FILE_HANDLE_KEY = "entropia_chat_handle";
+        this.VISIBILITY_KEY = "entropia_overlay_visible";
         this.fileHandle = null;
         this.lastSize = 0;
         this.lastProcessedLine = "";
@@ -56,6 +57,10 @@ export class EntropiaWidget {
         this.startBtn = document.getElementById('start-session-btn');
         this.resetBtn = document.getElementById('btnReset');
         this.pathInput = document.getElementById('pathInput');
+        this.visibilityToggle = document.getElementById('entropia-visibility-toggle');
+
+        // Target stream overlay widget wrapper node strictly outside of inputs context
+        this.overlayWidgetContainer = document.querySelector('#overlay-wrapper #entropia-widget') || document.getElementById('entropia-widget');
 
         // 2. Dual Broadcast UI Viewports (Updates both the Manager Panel and the Twitch Overlay simultaneously)
         this.manifestGrids = document.querySelectorAll('#manifest-grid');
@@ -89,18 +94,56 @@ export class EntropiaWidget {
                 this.resetSession();
             });
         }
+
+        if (this.visibilityToggle) {
+            this.visibilityToggle.addEventListener('change', (e) => {
+                this.handleVisibilityChange(e.target.checked);
+            });
+        } else {
+            console.warn("⚠️ [Entropia Widget]: #entropia-visibility-toggle not found in DOM.");
+        }
     }
 
     async recoverSavedHandle() {
         try {
+            // Recover file pointer handle
             const savedHandle = await get(this.FILE_HANDLE_KEY);
             if (savedHandle) {
                 this.fileHandle = savedHandle;
                 if (this.pathInput) this.pathInput.value = savedHandle.name;
                 this.logEvent(`💾 AUTO_RECOVERY: Restored link pointer to ${savedHandle.name.toUpperCase()}`);
             }
+
+            // Recover display visualization switch setting state
+            const savedVisibility = await get(this.VISIBILITY_KEY);
+            const isVisible = savedVisibility !== false; // Default to true if not initialized yet
+            
+            if (this.visibilityToggle) {
+                this.visibilityToggle.checked = isVisible;
+                // Run background updates on slider elements if styled manually
+                const slider = this.visibilityToggle.nextElementSibling;
+                if (slider) slider.style.backgroundColor = isVisible ? '#0ea5e9' : '#3f3f46';
+            }
+            this.handleVisibilityChange(isVisible, false);
+
         } catch (e) {
-            console.error("Failed to recover log file handle:", e);
+            console.error("Failed to recover persistent initialization configurations:", e);
+        }
+    }
+
+    handleVisibilityChange(shouldShow, persistState = true) {
+        if (this.overlayWidgetContainer) {
+            this.overlayWidgetContainer.style.display = shouldShow ? 'block' : 'none';
+            this.logEvent(`Visibility configuration applied: ${shouldShow ? 'VISIBLE' : 'HIDDEN'}`);
+        }
+        
+        // Dynamically style custom background trackers for manual sliders
+        if (this.visibilityToggle && this.visibilityToggle.nextElementSibling) {
+            this.visibilityToggle.nextElementSibling.style.backgroundColor = shouldShow ? '#0ea5e9' : '#3f3f46';
+        }
+
+        if (persistState) {
+            set(this.VISIBILITY_KEY, shouldShow).catch(e => console.error("Failed to cache visibility setting:", e));
         }
     }
 
