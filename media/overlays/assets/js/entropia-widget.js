@@ -306,7 +306,7 @@ export class EntropiaWidget {
         this.grandTotalElements.forEach(el => el.textContent = "0.0000");
         this.timerElements.forEach(el => el.textContent = "00:00:00");
         this.returnsElements.forEach(el => {
-            el.textContent = "0.00" + (el.tagName === 'SPAN' ? '' : '%');
+            el.textContent = "0.00";
             el.style.color = '#a1a1aa';
         });
         
@@ -410,10 +410,8 @@ export class EntropiaWidget {
             const totalValue = this.stats.values[key] || 0;
             grandTotal += totalValue;
 
-            // Restored original exact whitespace replacement strategy logic safely
             const safeKey = key.replace(/\s+/g, '-');
             
-            // Core loop update pipeline logic applied cross-viewport simultaneously
             this.manifestGrids.forEach(grid => {
                 let sessionEl = grid.querySelector(`.session-${safeKey}`);
                 
@@ -447,22 +445,16 @@ export class EntropiaWidget {
         this.grandTotalElements.forEach(el => el.textContent = grandTotal.toFixed(4));
 
         // --- LIVE SESSION RETURNS CALCULATION MATRIX ---
-        // Dynamically calculates returns percentage based on item values found
         let returnsPct = 0;
         if (grandTotal > 0) {
-            // Evaluates total tracked value against standard game baseline returns models
-            returnsPct = (grandTotal / Math.max(1, grandTotal)) * 100; 
-            // Optional engineering parameter adjustment: if integrating cost metrics later, 
-            // replace the denominator with total spent cost (e.g., ammo spent + decay)
+            // Initial placeholder engine logic baseline configuration
+            returnsPct = 100.00; 
+            // NOTE: When introducing dynamic hunt costs later, substitute with:
+            // returnsPct = (grandTotal / totalHuntCost) * 100;
         }
 
         this.returnsElements.forEach(el => {
-            // Clean conditional handling based on target markup configuration wrappers
-            if (el.id === 'session-returns' && el.tagName !== 'SPAN') {
-                el.textContent = returnsPct.toFixed(2);
-            } else {
-                el.textContent = returnsPct.toFixed(2);
-            }
+            el.textContent = returnsPct.toFixed(2);
 
             // Gamified color accent shading shift matching return threshold profiles
             if (returnsPct >= 100) {
