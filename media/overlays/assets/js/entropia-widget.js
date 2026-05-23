@@ -712,13 +712,32 @@ export class EntropiaWidget {
                             sendNotice(`📦 Session Loot: ${topLoot} | Total Value: ${totalValue.toFixed(2)} PED`);
                             break;
                         }
-
-                        case 'ped': {
+						
+						case 'returns':
+						case 'ped': {
                             const cumulativePed = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
-                            sendNotice(`💰 Current Session Value: ${cumulativePed.toFixed(4)} PED (Excludes Universal Ammo)`);
+                            const totalCost = this.stats.totalCost || 0;
+                            const netPed = cumulativePed - totalCost;
+                            
+                            // Calculate precise return percentage safely
+                            let returnsPct = 100.00;
+                            if (totalCost > 0) {
+                                returnsPct = (cumulativePed / totalCost) * 100;
+                            } else if (cumulativePed === 0 && totalCost === 0) {
+                                returnsPct = 0.00;
+                            }
+
+                            // Format the Net value with an explicit positive/negative sign
+                            const sign = netPed > 0 ? '+' : '';
+                            const statusMarker = netPed >= 0 ? '🟢' : '🔴';
+
+                            sendNotice(
+                                `${statusMarker} [Session Balance]: Loot: ${cumulativePed.toFixed(4)} PED | ` +
+                                `Cost: ${totalCost.toFixed(4)} PED | ` +
+                                `Net: ${sign}${netPed.toFixed(4)} PED (${returnsPct.toFixed(2)}% Returns)`
+                            );
                             break;
                         }
-
                         case 'ammo':
                         case 'ua':
                             sendNotice(`🔋 Universal Ammo looted this session: ${this.stats.universalAmmoValue.toFixed(4)} PED`);
