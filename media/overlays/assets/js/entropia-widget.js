@@ -23,12 +23,73 @@ export class EntropiaWidget {
             globals: 0
         };
 
-        // Entropia Custom Regular Expression Library (Restored legacy definitions)
+        // --- Consolidated Global Static Registries ---
+        this.FRUIT_NAMES = ['Papplon', 'Bombardo', 'Haimoros', 'Caroot'];
+        this.STONE_NAMES = ['Brukite', 'Sopur', 'Nissit', 'Kaldon', 'Truton'];
+
+        // --- Fully Consolidated Centralized Entropia Regular Expression Library ---
         this.regex = {
+            // Core Line Parsing Engine
             logLine: /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[([^\]]+)\]\s*(.*)$/,
             loot: /You received\s+\[?(.+?)\]?\s+x\s+\((\d+)\)\s+Value:\s*([\d.]+)\s*PED/i,
+            lootDetails: /You received\s+(.+?)\s+x\s+\((\d+)\)\s+Value:\s*([\d.]+)\s*PED/i,
             experience: /You have gained\s+([\d.]+)\s+experience in your (.+) skill/i,
-            globalHof: /Hall of Fame|Rare Item|ATH/i
+            
+            // Combat Math & Metrics Actions
+            inflicted: /inflicted\s+([\d.]+)/i,
+            took: /took\s+([\d.]+)/i,
+            healed: /You healed(?:\s+\w+)?\s+([\d.]+)/i,
+            criticalHit: /critical hit/i,
+            evade: /The target Evaded your attack/i,
+            dodge: /The target Dodged your attack/i,
+            miss: /You missed/i,
+            killedBy: /You were killed by/i,
+            enhancerBreak: /Your enhancer (.+?) on your (.+?) broke\. You have (\d+) enhancers remaining.*You received ([\d.]+) PED Shrapnel/i,
+            
+            // Crafting Mechanics
+            qrIncrease: /Your blueprint Quality Rating has improved/i,
+            
+            // Team Data Streams
+            teamTimestamp: /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[Team\] \[\]\s*(.*)$/,
+            teamJoined: /joined the team/i,
+            teamLeft: /left the team/i,
+            teamKilled: /was killed/i,
+            teamLoot: /^(.+?) received (?:a |an )?(.+?)(?: \((\d+)\))?$/,
+            
+            // Static Target Filters & Miscellaneous Drops
+            pedValue: /Value:/,
+            pedAmount: /([\d.]+)\s*PED/i,
+            lootTimestamp: /^(\d{2}:\d{2}:\d{2})/,
+            universalAmmo: /You received.*Universal Ammo/,
+            sweat: /You received.*Vibrant Sweat/,
+            pickup: /Picked up (.+?)(?: \((\d+)\))?$/,
+            dung: /Common Dung/i,
+            oil: /Crude Oil/i,
+            keg: /Motorhead Keg/i,
+            elysian: /Broken Elysian Technology/i,
+            token: /Reward Token \(Lime Green\)/i,
+            nawa: /Nawa Fragments/i,
+            
+            // Globals & HOF Events
+            globalHof: /Hall of Fame|Rare Item|ATH/i,
+            globalValue: /with a value of ([\d,.]+) PED/i,
+            
+            // Calypso Dynamic Event Lines
+            laharEvent: /Robot forces have launched an attack on Fort Lahar/i,
+            
+            // Mission Systems
+            missionReceived: /New Mission received \((.+?)\)/i,
+            missionCompleted: /Mission completed \((.+?)\)/i,
+            missionUpdated: /Mission updated \((.+?)\)/i,
+            
+            // Mining & Resource Extraction Mechanics
+            extract: /You received .* x \((\d+)\) Value: ([\d.]+) PED/,
+            claim: /You have claimed a resource! \((.*)\)/,
+            depleted: /This resource is depleted/,
+            
+            // Waypoint & Geolocation Navigation Parsers
+            lastKnownLocation: /\[([^,]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([^\]]+)\]/,
+            gameMapWaypoint: /(Added|Removed|Reached) waypoint (to|from|was removed from) map: \[position:[^$]+\$[^$]+\$(\d+),(\d+),(\d+)(?:\$([^\]]+))?\]/
         };
 
         // Delay DOM binding until the page layout is completely stable
@@ -245,7 +306,7 @@ export class EntropiaWidget {
             this.lastSize = file.size;
             this.sessionStartTime = Date.now();
             this.isPaused = false;
-            this.errorCount = 0; // Reset safe counters upon valid start gesture
+            this.errorCount = 0;
 
             // Clear any lingering background processes before spin-up
             if (this.pollInterval) clearInterval(this.pollInterval);
@@ -352,14 +413,13 @@ export class EntropiaWidget {
                 this.logEvent("⚠️ ROTATION: Log shrink detected.", true);
                 this.lastSize = file.size;
             }
-            this.errorCount = 0; // Successfully checked, clear intermittent errors
+            this.errorCount = 0;
         } catch (err) {
             this.logEvent(`⚠️ POLLING_LAG: Fault registered [${this.errorCount + 1}/${this.MAX_RETRIES}]. Retrying background hook...`, true);
             if (++this.errorCount >= this.MAX_RETRIES) {
                 this.logEvent("❌ PERMISSION_LOST: Continuous access pipeline broke. Suspending engine run loop.", true);
                 this.stopSession();
                 
-                // CRITICAL FIX: Retain handle in storage. Flag visually that a quick click click re-authorization check is required.
                 if (this.startBtn) {
                     this.startBtn.style.background = "#e65100";
                     this.startBtn.style.boxShadow = "0 0 15px #ff9800";
@@ -460,7 +520,6 @@ export class EntropiaWidget {
 
         this.grandTotalElements.forEach(el => el.textContent = grandTotal.toFixed(4));
 
-        // --- LIVE SESSION RETURNS CALCULATION MATRIX ---
         let returnsPct = 0;
         if (grandTotal > 0) {
             returnsPct = 100.00; 
@@ -470,18 +529,17 @@ export class EntropiaWidget {
             el.textContent = returnsPct.toFixed(2);
 
             if (returnsPct >= 100) {
-                el.style.color = '#22c55e'; // Profitable / Break-Even (Green)
+                el.style.color = '#22c55e';
             } else if (returnsPct >= 90) {
-                el.style.color = '#eab308'; // Expected Return Curve (Yellow)
+                el.style.color = '#eab308';
             } else if (returnsPct > 0) {
-                el.style.color = '#ef4444'; // Underperforming (Red)
+                el.style.color = '#ef4444';
             } else {
-                el.style.color = '#a1a1aa'; // Uninitialized Baseline (Zinc)
+                el.style.color = '#a1a1aa';
             }
         });
     }
 
-    // --- REFACTORED COMMAND REPOSITORY CONSOLE MAPPER ---
     getCommands(sendNotice) {
         return [
             {
@@ -499,7 +557,6 @@ export class EntropiaWidget {
                     }
 
                     switch (subCommand) {
-                        // --- HELP & DOCUMENTATION MODULE ---
                         case 'help':
                         case 'commands':
                         case 'h':
@@ -510,7 +567,6 @@ export class EntropiaWidget {
                             }
                             break;
 
-                        // --- VIEW-ONLY DATA CHANNELS ---
                         case 'loot': {
                             const totalValue = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
                             if (Object.keys(this.stats.loot).length === 0) {
@@ -540,7 +596,6 @@ export class EntropiaWidget {
                             sendNotice(`🏆 Globals/HOFs hit this session: ${this.stats.globals} | Deaths: ${this.stats.deaths}`);
                             break;
 
-                        // --- HARDENED NESTED VISIBILITY TOGGLES ---
                         case 'toggle':
                             if (!isAdmin) return;
                             const targetElement = parts[1];
@@ -550,42 +605,41 @@ export class EntropiaWidget {
                                 return;
                             }
 
-                    switch (targetElement) {
-                        case 'grid':
-                        case 'loot':
-                            this.manifestGrids.forEach(grid => {
-                                const currentDisplay = window.getComputedStyle(grid).display;
-                                grid.style.display = currentDisplay === 'none' ? 'grid' : 'none';
-                                sendNotice(`👁️ [Overlay]: Manifest Data Grid display toggled.`);
-                            });
+                            switch (targetElement) {
+                                case 'grid':
+                                case 'loot':
+                                    this.manifestGrids.forEach(grid => {
+                                        const currentDisplay = window.getComputedStyle(grid).display;
+                                        grid.style.display = currentDisplay === 'none' ? 'grid' : 'none';
+                                        sendNotice(`👁️ [Overlay]: Manifest Data Grid display toggled.`);
+                                    });
+                                    break;
+
+                                case 'sessiontimer':
+                                case 'timer':
+                                    this.timerElements.forEach(el => {
+                                        const target = el.closest('#entropia-timer-row, .timer-wrapper, .widget-card, .card, .stat-box') || el.parentElement || el;
+                                        const currentDisplay = window.getComputedStyle(target).display;
+                                        target.style.display = currentDisplay === 'none' ? 'block' : 'none';
+                                        sendNotice(`👁️ [Overlay]: Session Run Timer visibility toggled.`);
+                                    });
+                                    break;
+
+                                case 'grandtotal':
+                                case 'total':
+                                    this.grandTotalElements.forEach(el => {
+                                        const target = el.closest('#entropia-total-row, .total-wrapper, .widget-card, .card') || el.parentElement.parentElement || el;
+                                        const currentDisplay = window.getComputedStyle(target).display;
+                                        target.style.display = currentDisplay === 'none' ? 'flex' : 'none';
+                                        sendNotice(`👁️ [Overlay]: Accumulator Grand Total counter visibility toggled.`);
+                                    });
+                                    break;
+
+                                default:
+                                    sendNotice(`❌ Layout target selector [${targetElement}] not found on widget canvas.`);
+                            }
                             break;
 
-                        case 'sessiontimer':
-                        case 'timer':
-                            this.timerElements.forEach(el => {
-                                const target = el.closest('#entropia-timer-row, .timer-wrapper, .widget-card, .card, .stat-box') || el.parentElement || el;
-                                const currentDisplay = window.getComputedStyle(target).display;
-                                target.style.display = currentDisplay === 'none' ? 'block' : 'none';
-                                sendNotice(`👁️ [Overlay]: Session Run Timer visibility toggled.`);
-                            });
-                            break;
-
-                        case 'grandtotal':
-                        case 'total':
-                            this.grandTotalElements.forEach(el => {
-                                const target = el.closest('#entropia-total-row, .total-wrapper, .widget-card, .card') || el.parentElement.parentElement || el;
-                                const currentDisplay = window.getComputedStyle(target).display;
-                                target.style.display = currentDisplay === 'none' ? 'flex' : 'none';
-                                sendNotice(`👁️ [Overlay]: Accumulator Grand Total counter visibility toggled.`);
-                            });
-                            break;
-
-                        default:
-                            sendNotice(`❌ Layout target selector [${targetElement}] not found on widget canvas.`);
-                    }
-                    break;
-
-                        // --- PROTECTED PLATFORM MANAGEMENT EXECUTION CHANNELS ---
                         case 'startsession':
                         case 'start':
                             if (!isAdmin) return;
