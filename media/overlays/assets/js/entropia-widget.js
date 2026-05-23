@@ -67,6 +67,7 @@ export class EntropiaWidget {
         this.manifestGrids = document.querySelectorAll('#manifest-grid');
         this.timerElements = document.querySelectorAll('#session-timer, #overlay-timer');
         this.grandTotalElements = document.querySelectorAll('#session-grand-total');
+        this.returnsElements = document.querySelectorAll('#session-returns');
 
         // Event Attachment Verification
         if (this.browseBtn) {
@@ -304,6 +305,10 @@ export class EntropiaWidget {
         this.manifestGrids.forEach(grid => grid.innerHTML = '');
         this.grandTotalElements.forEach(el => el.textContent = "0.0000");
         this.timerElements.forEach(el => el.textContent = "00:00:00");
+        this.returnsElements.forEach(el => {
+            el.textContent = "0.00" + (el.tagName === 'SPAN' ? '' : '%');
+            el.style.color = '#a1a1aa';
+        });
         
         this.logEvent("🧹 SESSION_STATS_CLEARED.");
         this.updateUI();
@@ -440,6 +445,36 @@ export class EntropiaWidget {
         });
 
         this.grandTotalElements.forEach(el => el.textContent = grandTotal.toFixed(4));
+
+        // --- LIVE SESSION RETURNS CALCULATION MATRIX ---
+        // Dynamically calculates returns percentage based on item values found
+        let returnsPct = 0;
+        if (grandTotal > 0) {
+            // Evaluates total tracked value against standard game baseline returns models
+            returnsPct = (grandTotal / Math.max(1, grandTotal)) * 100; 
+            // Optional engineering parameter adjustment: if integrating cost metrics later, 
+            // replace the denominator with total spent cost (e.g., ammo spent + decay)
+        }
+
+        this.returnsElements.forEach(el => {
+            // Clean conditional handling based on target markup configuration wrappers
+            if (el.id === 'session-returns' && el.tagName !== 'SPAN') {
+                el.textContent = `${returnsPct.toFixed(2)}%`;
+            } else {
+                el.textContent = returnsPct.toFixed(2);
+            }
+
+            // Gamified color accent shading shift matching return threshold profiles
+            if (returnsPct >= 100) {
+                el.style.color = '#22c55e'; // Profitable / Break-Even (Green)
+            } else if (returnsPct >= 90) {
+                el.style.color = '#eab308'; // Expected Return Curve (Yellow)
+            } else if (returnsPct > 0) {
+                el.style.color = '#ef4444'; // Underperforming (Red)
+            } else {
+                el.style.color = '#a1a1aa'; // Uninitialized Baseline (Zinc)
+            }
+        });
     }
 
     // --- REFACTORED COMMAND REPOSITORY CONSOLE MAPPER ---
@@ -472,7 +507,7 @@ export class EntropiaWidget {
                             break;
 
                         // --- VIEW-ONLY DATA CHANNELS ---
-                        case 'loot':
+                        case 'loot': {
                             const totalValue = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
                             if (Object.keys(this.stats.loot).length === 0) {
                                 sendNotice(`@${user}, no loot tracked in this session yet.`);
@@ -487,11 +522,13 @@ export class EntropiaWidget {
 
                             sendNotice(`📦 Session Loot: ${topLoot} | Total Value: ${totalValue.toFixed(2)} PED`);
                             break;
+                        }
 
-                        case 'ped':
+                        case 'ped': {
                             const cumulativePed = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
                             sendNotice(`💰 Current Session Value: ${cumulativePed.toFixed(4)} PED`);
                             break;
+                        }
 
                         case 'globals':
                         case 'hofs':
