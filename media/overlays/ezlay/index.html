@@ -64,13 +64,14 @@
 		<div id="entropia-widget" class="p8-widget" style="top: 500px; left: 20px; display: none;">
 			<div class="widget-header">Entropia Tracker</div>
 			<div id="session-timer">00:00:00</div>
-			<div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin: 4px 0; padding: 2px 4px; background: rgba(0,0,0,0.4); border-radius: 4px;">
+			<div id="entropia-total-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin: 4px 0; padding: 2px 4px; background: rgba(0,0,0,0.4); border-radius: 4px;">
 				<span style="font-size: 1.1em; color: #a1a1aa;">Total Value:</span>
 				<span style="font-weight: bold; color: #eab308;"><span id="session-grand-total" style="font-size: 1.5em; font-family: monospace;">0.0000</span> PED</span>
 			</div>
-			<div style="display: flex; justify-content: space-between; font-size: 12px; margin: 4px 0; padding: 2px 4px; background: rgba(0,0,0,0.4); border-radius: 4px;">
+
+			<div id="entropia-returns-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin: 4px 0; padding: 2px 4px; background: rgba(0,0,0,0.4); border-radius: 4px;">
 				<span style="font-size: 1.1em; color: #a1a1aa;">Returns:</span>
-				<span style="font-weight: bold;"><span id="session-returns" style="font-size: 1.5em;font-weight: bold; color: #a1a1aa;">0.00</span>%</span>
+				<span style="font-weight: bold;"><span id="session-returns" style="font-size: 1.5em; font-weight: bold; color: #a1a1aa;">0.00</span>%</span>
 			</div>
 			<div id="manifest-grid"></div>
 		</div>
@@ -428,11 +429,12 @@
 				<div id="manifest-grid" style="display: flex; flex-direction: column; gap: 4px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 1px dashed #3f3f46;">
 				</div>
 
-				<div style="display: flex; justify-content: space-between; margin-top: 8px; padding-top: 6px; border-top: 1px solid #27272a; font-size: 12px;">
+				<div id="entropia-total-row" style="display: flex; justify-content: space-between; margin-top: 8px; padding-top: 6px; border-top: 1px solid #27272a; font-size: 12px;">
 					<span style="color: #a1a1aa;">Total Value:</span>
 					<span style="color: #eab308; font-weight: bold;"><span id="session-grand-total">0.0000</span> PED</span>
 				</div>
-				<div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 12px;">
+				
+				<div id="entropia-returns-row" style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 12px;">
 					<span style="color: #a1a1aa;">Session Returns:</span>
 					<span style="font-weight: bold;"><span id="session-returns">0.00</span>%</span>
 				</div>
