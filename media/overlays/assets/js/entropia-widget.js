@@ -585,7 +585,12 @@ export class EntropiaWidget {
                             this.pauseSession();
                             sendNotice(`🟡 [EU Tracker]: Polling queues paused by @${user}. Data updates are held in suspension.`);
                             break;
-
+                        case 'resumesession':
+                        case 'resume':
+                            if (!isAdmin) return;
+                            this.resumeSession();
+                            sendNotice(`🟡 [EU Tracker]: Polling queues paused by @${user}. Data updates are held in suspension.`);
+                            break;
                         case 'resetsession':
                         case 'reset':
                             if (!isAdmin) return;
