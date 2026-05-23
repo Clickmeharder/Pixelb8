@@ -547,8 +547,8 @@ export class EntropiaWidget {
                                 case 'sessiontimer':
                                 case 'timer':
                                     this.timerElements.forEach(el => {
-                                        // Hardened layout lookups: target explicit widget card structures, fallback directly to parent structural block layout element
-                                        const target = el.closest('.widget-card, .card, .stat-box, .timer-wrapper') || el.parentElement || el;
+                                        // Checks for explicit timer wrapper or parent layouts first, fallback to basic block styling
+                                        const target = el.closest('#entropia-timer-row, .timer-wrapper, .widget-card, .card, .stat-box') || el.parentElement || el;
                                         const currentDisplay = window.getComputedStyle(target).display;
                                         target.style.display = currentDisplay === 'none' ? 'block' : 'none';
                                     });
@@ -558,10 +558,10 @@ export class EntropiaWidget {
                                 case 'grandtotal':
                                 case 'total':
                                     this.grandTotalElements.forEach(el => {
-                                        // Hardened layout lookups: target explicit widget card structures, fallback directly to parent structural block layout element
-                                        const target = el.closest('.widget-card, .card, .stat-box, .total-wrapper') || el.parentElement || el;
+                                        // Target exact row block container ID explicitly, then falls back to parent cards. Uses 'flex' display output format.
+                                        const target = el.closest('#entropia-total-row, .total-wrapper, .widget-card, .card') || el.parentElement.parentElement || el;
                                         const currentDisplay = window.getComputedStyle(target).display;
-                                        target.style.display = currentDisplay === 'none' ? 'block' : 'none';
+                                        target.style.display = currentDisplay === 'none' ? 'flex' : 'none';
                                     });
                                     sendNotice(`👁️ [Overlay]: Accumulator Grand Total counter visibility toggled.`);
                                     break;
