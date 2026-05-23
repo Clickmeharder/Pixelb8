@@ -21,7 +21,7 @@ export class EntropiaWidget {
         this.stats = {
             loot: {},
             values: {},
-            skills: { total: 0 }, // Added 'total' tracker to mirror your new schema
+            skills: { total: 0 }, 
             deaths: 0,
             globals: 0
         };
@@ -99,7 +99,6 @@ export class EntropiaWidget {
             gameMapWaypoint: /(Added|Removed|Reached) waypoint (to|from|was removed from) map: \[position:[^$]+\$[^$]+\$(\d+),(\d+),(\d+)(?:\$([^\]]+))?\]/
         };
 
-        // Delay DOM binding until the page layout is completely stable
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.initDOM());
         } else {
@@ -109,7 +108,6 @@ export class EntropiaWidget {
         this.recoverSavedHandle();
     }
 
-    // Helper method to log events directly inside our widget system
     logEvent(message, isWarning = false) {
         if (isWarning) {
             console.warn(`[Entropia Widget]: ${message}`);
@@ -121,29 +119,24 @@ export class EntropiaWidget {
     initDOM() {
         this.logEvent("🔌 Initializing decoupled architecture (Manager Controls -> Dual Display Outputs)...");
 
-        // 1. Interactive Core Controls (Expected strictly inside your Widgets Manager panel)
         this.browseBtn = document.getElementById('browseBtn');
         this.startBtn = document.getElementById('start-session-btn');
         this.resetBtn = document.getElementById('btnReset');
         this.pathInput = document.getElementById('pathInput');
         this.visibilityToggle = document.getElementById('entropia-visibility-toggle');
 
-        // Avatar Filtering DOM Bindings
         this.avatarSelector = document.getElementById('eu-avatar-selector');
         this.avatarInput = document.getElementById('eu-avatar-input');
         this.avatarAddBtn = document.getElementById('eu-avatar-add-btn');
         this.avatarDelBtn = document.getElementById('eu-avatar-del-btn');
 
-        // Target stream overlay widget wrapper node strictly outside of inputs context
         this.overlayWidgetContainer = document.querySelector('#overlay-wrapper #entropia-widget') || document.getElementById('entropia-widget');
 
-        // 2. Dual Broadcast UI Viewports (Updates both the Manager Panel and the Twitch Overlay simultaneously)
         this.manifestGrids = document.querySelectorAll('#manifest-grid');
         this.timerElements = document.querySelectorAll('#session-timer, #overlay-timer');
         this.grandTotalElements = document.querySelectorAll('#session-grand-total');
         this.returnsElements = document.querySelectorAll('#session-returns');
 
-        // Event Attachment Verification
         if (this.browseBtn) {
             this.browseBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -180,7 +173,6 @@ export class EntropiaWidget {
             this.logEvent("#entropia-visibility-toggle not found in DOM.", true);
         }
 
-        // Avatar Management Event Listeners
         if (this.avatarAddBtn) {
             this.avatarAddBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -203,10 +195,6 @@ export class EntropiaWidget {
         }
     }
 
-    /**
-     * Wipes ONLY the log path and handle from storage.
-     * Mechanical Necessity: Clears stale handles without touching UI positioning.
-     */
     async clearLogPath() {
         await del(this.FILE_HANDLE_KEY);
         this.fileHandle = null;
@@ -221,7 +209,6 @@ export class EntropiaWidget {
 
     async recoverSavedHandle() {
         try {
-            // Recover file pointer handle
             const savedHandle = await get(this.FILE_HANDLE_KEY);
             if (savedHandle) {
                 this.fileHandle = savedHandle;
@@ -248,9 +235,8 @@ export class EntropiaWidget {
                 }
             }
 
-            // Recover display visualization switch setting state
             const savedVisibility = await get(this.VISIBILITY_KEY);
-            const isVisible = savedVisibility !== false; // Default to true if not initialized yet
+            const isVisible = savedVisibility !== false;
             
             if (this.visibilityToggle) {
                 this.visibilityToggle.checked = isVisible;
@@ -259,7 +245,6 @@ export class EntropiaWidget {
             }
             this.handleVisibilityChange(isVisible, false);
 
-            // Recover Avatar profiles filter matrix
             const savedAvatars = await get(this.AVATARS_KEY);
             if (Array.isArray(savedAvatars)) {
                 this.avatars = savedAvatars;
@@ -354,15 +339,12 @@ export class EntropiaWidget {
             this.isPaused = false;
             this.errorCount = 0;
 
-            // Clear any lingering background processes before spin-up
             if (this.pollInterval) clearInterval(this.pollInterval);
             if (this.sessionTickerInterval) clearInterval(this.sessionTickerInterval);
 
-            // Clean state parameters reset matrix
             this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0 };
             this.manifestGrids.forEach(grid => grid.innerHTML = '');
 
-            // Adjust active control panel engine UI elements
             if (this.startBtn) {
                 this.startBtn.textContent = "STOP SESSION";
                 this.startBtn.style.background = "#d32f2f";
@@ -370,7 +352,6 @@ export class EntropiaWidget {
             }
             if (this.browseBtn) this.browseBtn.style.boxShadow = "none";
 
-            // Prevent screen sleep during long streaming runs
             if ('wakeLock' in navigator) {
                 try { await navigator.wakeLock.request('screen'); } catch (e) {}
             }
@@ -475,10 +456,6 @@ export class EntropiaWidget {
         }
     }
 
-    /**
-     * Dedicated Parsing Engine for tracking Deaths & Experience updates safely
-     * without breaking local scope when matching lines from the System channel.
-     */
     parseDeathExpLine(message) {
         if (message.includes("You were killed by") || message.includes("You died")) {
             this.stats.deaths += 1;
@@ -511,7 +488,6 @@ export class EntropiaWidget {
         this.lastProcessedLine = line;
 
         if (channel === 'System') {
-            // First run message through the Death & XP evaluation system
             if (this.parseDeathExpLine(message)) {
                 return;
             }
@@ -532,7 +508,6 @@ export class EntropiaWidget {
         }
 
         if (channel === 'Globals' && this.regex.globalHof.test(message)) {
-            // Drop back out if a specific avatar filter string is active and the channel line does not match it
             if (this.selectedAvatar && !message.includes(this.selectedAvatar)) {
                 return; 
             }
@@ -606,7 +581,6 @@ export class EntropiaWidget {
         });
     }
 
-    // --- Avatar Management Methods ---
     addAvatarFilter() {
         if (!this.avatarInput) return;
         const val = this.avatarInput.value.trim();
@@ -614,7 +588,7 @@ export class EntropiaWidget {
 
         if (!this.avatars.includes(val)) {
             this.avatars.push(val);
-            this.selectedAvatar = val; // Default focus to the newly injected option
+            this.selectedAvatar = val; 
             this.avatarInput.value = "";
             this.saveAvatarsState();
         }
@@ -644,7 +618,6 @@ export class EntropiaWidget {
         if (!this.avatarSelector) return;
         this.avatarSelector.innerHTML = "";
 
-        // Add default catch-all unrestricted tracking option
         const baseOpt = document.createElement('option');
         baseOpt.value = "";
         baseOpt.textContent = "-- TRACK ALL GLOBALS --";
@@ -660,7 +633,6 @@ export class EntropiaWidget {
             this.avatarSelector.appendChild(opt);
         });
 
-        // Set baseline selection index fallback
         if (!this.selectedAvatar) {
             this.avatarSelector.value = "";
         }
@@ -722,9 +694,10 @@ export class EntropiaWidget {
                             sendNotice(`🏆 Globals/HOFs hit this session: ${this.stats.globals} | Deaths: ${this.stats.deaths}`);
                             break;
 
-                        case 'toggle':
+                        case 'toggle': {
                             if (!isAdmin) return;
                             const targetElement = parts[1];
+                            let currentDisplay; // Declared safely inside block scope
                             
                             if (!targetElement) {
                                 sendNotice(`⚠️ [EU Console]: Specify what to toggle. Usage: !eu toggle [grid | sessiontimer | total]`);
@@ -732,7 +705,6 @@ export class EntropiaWidget {
                             }
 
                             switch (targetElement) {
-                                var currentDisplay;
                                 case 'grid':
                                 case 'loot':
                                     this.manifestGrids.forEach(grid => {
@@ -766,6 +738,7 @@ export class EntropiaWidget {
                                     sendNotice(`❌ Layout target selector [${targetElement}] not found on widget canvas.`);
                             }
                             break;
+                        }
 
                         case 'startsession':
                         case 'start':
