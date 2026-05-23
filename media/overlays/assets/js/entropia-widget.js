@@ -177,7 +177,7 @@ export class EntropiaWidget {
             this.visibilityToggle.nextElementSibling.style.backgroundColor = shouldShow ? '#0ea5e9' : '#3f3f46';
         }
 
-        if (this.persistState) {
+        if (persistState) {
             set(this.VISIBILITY_KEY, shouldShow).catch(e => console.error("Failed to cache visibility setting:", e));
         }
     }
@@ -524,7 +524,7 @@ export class EntropiaWidget {
                             sendNotice(`🏆 Globals/HOFs hit this session: ${this.stats.globals} | Deaths: ${this.stats.deaths}`);
                             break;
 
-                        // --- NESTED VISIBILITY TOGGLES (Fixed to target wrappers/parents cleanly) ---
+                        // --- HARDENED NESTED VISIBILITY TOGGLES ---
                         case 'toggle':
                             if (!isAdmin) return;
                             const targetElement = parts[1];
@@ -538,7 +538,6 @@ export class EntropiaWidget {
                                 case 'grid':
                                 case 'loot':
                                     this.manifestGrids.forEach(grid => {
-                                        // The grid itself is the wrapper/container for item data logs
                                         const currentDisplay = window.getComputedStyle(grid).display;
                                         grid.style.display = currentDisplay === 'none' ? 'grid' : 'none';
                                         sendNotice(`👁️ [Overlay]: Manifest Data Grid display toggled.`);
@@ -548,8 +547,8 @@ export class EntropiaWidget {
                                 case 'sessiontimer':
                                 case 'timer':
                                     this.timerElements.forEach(el => {
-                                        // Crawl up to hide the parent layout wrapper card/container if present, else fallback to element
-                                        const target = el.closest('.widget-card, .card, .stat-box, .timer-wrapper') || el;
+                                        // Hardened layout lookups: target explicit widget card structures, fallback directly to parent structural block layout element
+                                        const target = el.closest('.widget-card, .card, .stat-box, .timer-wrapper') || el.parentElement || el;
                                         const currentDisplay = window.getComputedStyle(target).display;
                                         target.style.display = currentDisplay === 'none' ? 'block' : 'none';
                                     });
@@ -559,8 +558,8 @@ export class EntropiaWidget {
                                 case 'grandtotal':
                                 case 'total':
                                     this.grandTotalElements.forEach(el => {
-                                        // Crawl up to hide the parent layout wrapper card/container if present, else fallback to element
-                                        const target = el.closest('.widget-card, .card, .stat-box, .total-wrapper') || el;
+                                        // Hardened layout lookups: target explicit widget card structures, fallback directly to parent structural block layout element
+                                        const target = el.closest('.widget-card, .card, .stat-box, .total-wrapper') || el.parentElement || el;
                                         const currentDisplay = window.getComputedStyle(target).display;
                                         target.style.display = currentDisplay === 'none' ? 'block' : 'none';
                                     });
