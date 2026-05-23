@@ -42,34 +42,34 @@
     </div>
 
     <div id="overlay-wrapper" style="display:none;">
-        <div id="chat-widget" class="p8-widget" style="top: 400px; left: 20px; width: 350px;">
+        <div id="chat-widget" class="p8-widget" style="">
             <div id="chat-feed"></div>
         </div>
-        <div id="alert-widget" class="p8-widget" style="top: 50px; left: 250px; text-align: center;">
+        <div id="alert-widget" class="p8-widget" style="">
             <div id="alert-text"></div>
             <div id="alert-image"></div>
         </div>
-        <div id="status-widget" class="p8-widget" style="top: 50px; left: 500px; text-align: center;">
+        <div id="status-widget" class="p8-widget" style="">
             <div id="status-indicator">SYSTEM: OFFLINE</div>
             <div id="status-text">Awaiting Signal...</div>
             <div id="mode-badge">Edit Mode Active</div>
         </div>
-		<div id="timer-widget" class="p8-widget" style="left: 50px; top: 200px; text-align: center; display: none;">
-			<div id="timer-overlay-header" class="widget-header" style="cursor: move; padding-bottom: 5px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: var(--accent); display: flex; justify-content: space-between;">
+		<div id="timer-widget" class="p8-widget" style="display: none;">
+			<div id="timer-overlay-header" class="widget-header" style="">
 				<span id="timer-widget-title">⏱️ Active Timer</span>
 			</div>
-			<div id="timer-display-digits" style="font-size: 32px; font-weight: bold; text-align: center; font-family: monospace; color: #fff; margin: 5px 0;">00:00:00</div>
-			<div id="timer-splits-container" style="font-size: 12px; color: #a1a1aa; max-height: 80px; overflow-y: auto; margin-top: 5px;"></div>
+			<div id="timer-display-digits" style="">00:00:00</div>
+			<div id="timer-splits-container" style=""></div>
 		</div>
-		<div id="entropia-widget" class="p8-widget" style="top: 500px; left: 20px; display: none;">
+		<div id="entropia-widget" class="p8-widget" style="display: none;">
 			<div class="widget-header">Entropia Tracker</div>
 			<div id="session-timer">00:00:00</div>
-			<div id="entropia-total-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin: 4px 0; padding: 2px 4px; background: rgba(0,0,0,0.4); border-radius: 4px;">
+			<div id="entropia-total-row" style="">
 				<span style="font-size: 1.1em; color: #a1a1aa;">Total Value:</span>
 				<span style="font-weight: bold; color: #eab308;"><span id="session-grand-total" style="font-size: 1.5em; font-family: monospace;">0.0000</span> PED</span>
 			</div>
 
-			<div id="entropia-returns-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin: 4px 0; padding: 2px 4px; background: rgba(0,0,0,0.4); border-radius: 4px;">
+			<div id="entropia-returns-row" style="">
 				<span style="font-size: 1.1em; color: #a1a1aa;">Returns:</span>
 				<span style="font-weight: bold;"><span id="session-returns" style="font-size: 1.5em; font-weight: bold; color: #a1a1aa;">0.00</span>%</span>
 			</div>

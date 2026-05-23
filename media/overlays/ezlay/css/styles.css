@@ -627,6 +627,10 @@ body.edit-mode .p8-widget:active {
     cursor: not-allowed; 
 }
 
+/* CHAT widget */
+#chat-widget{
+	top: 400px; left: 20px; width: 350px;
+}
 /* Component Feed & Badges */
 #chat-feed { 
     display: flex; 
@@ -636,22 +640,76 @@ body.edit-mode .p8-widget:active {
     overflow: hidden;
     resize: vertical; 
 }
-
+.chat-user { 
+    font-weight: bold; 
+    margin-right: 5px; 
+}
 .chat-msg { 
     margin-bottom: 5px; 
     font-size: 0.9em; 
     animation: fadeIn 0.3s ease; 
+}  
+#twitchChat {
+    color: inherit;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
+.twitchEmote {
+    height: 1.5rem;
+    width: auto;
+    vertical-align: middle;
+    margin: 0 2px;
+}
+
+.floatingEmote {
+    position: fixed;
+    transition: transform 10s linear, opacity 8s ease-out; 
+    opacity: 1;
+    pointer-events: none;
+    z-index: 999;
+}
+
+#alert-widget {
+    top: 50px; left: 250px; text-align: center;
+    transition: opacity 0.5s ease-in-out;
+}
+#status-widget{
+	top: 50px; left: 500px; text-align: center;
+}
+#timer-widget{
+	left: 50px; top: 200px; text-align: center; 
+}
+#timer-overlay-header{
+	cursor: move; padding-bottom: 5px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: var(--accent); display: flex; justify-content: space-between;
+}
+#timer-display-digits{
+	font-size: 32px; font-weight: bold; text-align: center; font-family: monospace; color: #fff; margin: 5px 0;
+}
+#timer-splits-container{
+	font-size: 12px; color: #a1a1aa; max-height: 80px; overflow-y: auto; margin-top: 5px;
+}
+
+#entropia-widget{
+	top: 500px; left: 20px; 
+}
+#widget-header{}
+#session-timer{}
+#entropia-total-row{
+	display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin: 4px 0; padding: 2px 4px; background: rgba(0,0,0,0.4); border-radius: 4px;
+}
+#entropia-returns-row{
+	display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin: 4px 0; padding: 2px 4px; background: rgba(0,0,0,0.4); border-radius: 4px;
+}
+#{}
+#{}
 
 @keyframes fadeIn { 
     from { opacity: 0; transform: translateX(-10px); } 
     to { opacity: 1; transform: translateX(0); } 
 }
 
-.chat-user { 
-    font-weight: bold; 
-    margin-right: 5px; 
-}
+
 
 #status-indicator { 
     font-weight: bold; 
@@ -765,28 +823,6 @@ body.edit-mode .p8-widget:active {
     border-radius: var(--border-radius);
     object-fit: contain;
 }    
-        
-#twitchChat {
-    color: inherit;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-}
-
-.twitchEmote {
-    height: 1.5rem;
-    width: auto;
-    vertical-align: middle;
-    margin: 0 2px;
-}
-
-.floatingEmote {
-    position: fixed;
-    transition: transform 10s linear, opacity 8s ease-out; 
-    opacity: 1;
-    pointer-events: none;
-    z-index: 999;
-}
 
 /* --- OVERLAY ANIMATION UTILITIES --- */
 
@@ -867,10 +903,6 @@ body.edit-mode .p8-widget:active {
 }
 .slideOutDown { animation-name: slideOutDown; }
 
-/* Fixed Widget Transitions for Master Fade fallback */
-#alert-widget {
-    transition: opacity 0.5s ease-in-out;
-}
 
 /* --- ADDED: Custom Options Floating Boxes for Bit Animations Grid --- */
 .custom-select-options-box {
