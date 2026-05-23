@@ -17,13 +17,19 @@ export class EntropiaWidget {
         this.sessionTickerInterval = null;
         this.pollInterval = null;
         
+        // --- High Precision Event Debounce Variables ---
+        this.lastLootIncrementTime = 0;
+        this.LOOT_COOLDOWN_MS = 20;
+
         // Comprehensive internal state tracking matching old global schemas
         this.stats = {
             loot: {},
             values: {},
             skills: { total: 0 }, 
             deaths: 0,
-            globals: 0
+            globals: 0,
+            lootEvents: 0,          // Distinct combined looting events counter
+            universalAmmoValue: 0   // Segregated from baseline PED asset pool value
         };
 
         // --- Dynamic Avatar Filter State ---
@@ -67,7 +73,7 @@ export class EntropiaWidget {
             pedValue: /Value:/,
             pedAmount: /([\d.]+)\s*PED/i,
             lootTimestamp: /^(\d{2}:\d{2}:\d{2})/,
-            universalAmmo: /You received.*Universal Ammo/,
+            universalAmmo: /You received.*Universal Ammo/i,
             sweat: /You received.*Vibrant Sweat/,
             pickup: /Picked up (.+?)(?: \((\d+)\))?$/,
             dung: /Common Dung/i,
@@ -342,7 +348,7 @@ export class EntropiaWidget {
             if (this.pollInterval) clearInterval(this.pollInterval);
             if (this.sessionTickerInterval) clearInterval(this.sessionTickerInterval);
 
-            this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0 };
+            this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0, lootEvents: 0, universalAmmoValue: 0 };
             this.manifestGrids.forEach(grid => grid.innerHTML = '');
 
             if (this.startBtn) {
@@ -395,9 +401,10 @@ export class EntropiaWidget {
     }
 
     resetSession() {
-        this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0 };
+        this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0, lootEvents: 0, universalAmmoValue: 0 };
         this.lastProcessedLine = "";
         this.sessionStartTime = Date.now();
+        this.lastLootIncrementTime = 0;
         
         this.manifestGrids.forEach(grid => grid.innerHTML = '');
         this.grandTotalElements.forEach(el => el.textContent = "0.0000");
@@ -498,11 +505,28 @@ export class EntropiaWidget {
                 const amt = parseInt(lootMatch[2]);
                 const val = parseFloat(lootMatch[3]);
 
+                // --- High Resolution 20ms Window Grouping Evaluation ---
+                const currentTime = performance.now();
+                if (currentTime - this.lastLootIncrementTime > this.LOOT_COOLDOWN_MS) {
+                    this.stats.lootEvents += 1;
+                    this.logEvent(`🎯 DISTINCT LOOT EVENT REGISTERED (#${this.stats.lootEvents})`);
+                }
+                this.lastLootIncrementTime = currentTime;
+
+                // --- Segregated Universal Ammo Verification Path ---
+                if (this.regex.universalAmmo.test(message)) {
+                    this.stats.universalAmmoValue += val;
+                    this.logEvent(`🔋 AMMO INGESTED: +${val.toFixed(4)} PED (Stored Separately)`);
+                    this.updateUI();
+                    return; // Drop out completely to keep value isolated from general metrics
+                }
+
+                // Standard Loot Item Processing
                 this.stats.loot[itemName] = (this.stats.loot[itemName] || 0) + amt;
                 this.stats.values[itemName] = (this.stats.values[itemName] || 0) + val;
                 
                 this.updateUI();
-                this.logEvent(`+ ${amt}x ${itemName}`);
+                this.logEvent(`+ ${amt}x ${itemName} (${val.toFixed(4)} PED)`);
                 return;
             }
         }
@@ -650,7 +674,7 @@ export class EntropiaWidget {
                     const isAdmin = flags.broadcaster || flags.mod;
 
                     if (!subCommand) {
-                        sendNotice(`🤖 [EU Console]: Specify action parameters (!eu loot | ped | globals | toggle | help)`);
+                        sendNotice(`🤖 [EU Console]: Specify action parameters (!eu loot | ped | ammo | events | globals | deaths | skills | help)`);
                         return;
                     }
 
@@ -661,7 +685,7 @@ export class EntropiaWidget {
                             if (isAdmin) {
                                 sendNotice(`🛠️ [EU Admin Help]: !eu [start | pause | reset | stop] or Toggle Panels: !eu toggle [grid | sessiontimer | total]`);
                             } else {
-                                sendNotice(`📦 [EU Public Help]: Available commands: !eu loot (Top Items) | !eu ped (Session Value) | !eu globals (Global Counter)`);
+                                sendNotice(`📦 [EU Public Help]: Commands: !eu loot | !eu ped | !eu ammo | !eu events | !eu globals | !eu deaths | !eu skills`);
                             }
                             break;
 
@@ -684,22 +708,33 @@ export class EntropiaWidget {
 
                         case 'ped': {
                             const cumulativePed = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
-                            sendNotice(`💰 Current Session Value: ${cumulativePed.toFixed(4)} PED`);
+                            sendNotice(`💰 Current Session Value: ${cumulativePed.toFixed(4)} PED (Excludes Universal Ammo)`);
                             break;
                         }
+
+                        case 'ammo':
+                        case 'ua':
+                            sendNotice(`🔋 Universal Ammo looted this session: ${this.stats.universalAmmoValue.toFixed(4)} PED`);
+                            break;
+
+                        case 'events':
+                        case 'kills':
+                        case 'claims':
+                            sendNotice(`🎯 Total distinct loot event triggers registered: ${this.stats.lootEvents}`);
+                            break;
 
                         case 'globals':
                         case 'hofs':
                         case 'hof':
                             sendNotice(`🏆 Globals/HOFs hit this session: ${this.stats.globals} | Deaths: ${this.stats.deaths}`);
                             break;
-							
-						case 'deaths':
+
+                        case 'deaths':
                         case 'died':
                             sendNotice(`💀 Avatar deaths recorded this session: ${this.stats.deaths}`);
                             break;
-							
-						case 'skills':
+
+                        case 'skills':
                         case 'skill':
                         case 'xp': {
                             const totalXp = this.stats.skills.total || 0;
@@ -709,7 +744,6 @@ export class EntropiaWidget {
                                 return;
                             }
 
-                            // If user checked a specific skill (e.g., !eu skills rifle)
                             if (parts[1]) {
                                 const searchSkill = parts.slice(1).join(' ').toLowerCase();
                                 const exactMatchKey = Object.keys(this.stats.skills).find(
@@ -719,7 +753,6 @@ export class EntropiaWidget {
                                 if (exactMatchKey) {
                                     sendNotice(`✨ [Skill Tracker]: +${this.stats.skills[exactMatchKey].toFixed(4)} XP in ${exactMatchKey}`);
                                 } else {
-                                    // Fallback fuzzy search check
                                     const fuzzyMatchKey = Object.keys(this.stats.skills).find(
                                         key => key !== 'total' && key.toLowerCase().includes(searchSkill)
                                     );
@@ -732,7 +765,6 @@ export class EntropiaWidget {
                                 return;
                             }
 
-                            // Standard top-3 overall highlights return output string
                             const sortedSkills = Object.entries(this.stats.skills)
                                 .filter(([name]) => name !== 'total')
                                 .sort((a, b) => b[1] - a[1])
@@ -743,10 +775,11 @@ export class EntropiaWidget {
                             sendNotice(`✨ XP Gained: +${totalXp.toFixed(2)} Total Points | Top Gains: ${sortedSkills || 'None'}`);
                             break;
                         }
+
                         case 'toggle': {
                             if (!isAdmin) return;
                             const targetElement = parts[1];
-                            let currentDisplay; // Declared safely inside block scope
+                            let currentDisplay; 
                             
                             if (!targetElement) {
                                 sendNotice(`⚠️ [EU Console]: Specify what to toggle. Usage: !eu toggle [grid | sessiontimer | total]`);
@@ -806,7 +839,7 @@ export class EntropiaWidget {
                         case 'resume':
                             if (!isAdmin) return;
                             this.resumeSession();
-                            sendNotice(`🟡 [EU Tracker]: Polling queues paused by @${user}. Data updates are held in suspension.`);
+                            sendNotice(`🟢 [EU Tracker]: Log polling processing resumed by @${user}.`);
                             break;
                         case 'resetsession':
                         case 'reset':
