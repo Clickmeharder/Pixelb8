@@ -4,6 +4,9 @@ export class EntropiaWidget {
     constructor() {
         this.FILE_HANDLE_KEY = "entropia_chat_handle";
         this.VISIBILITY_KEY = "entropia_overlay_visible";
+        this.AVATARS_KEY = "entropia_filtered_avatars";
+        this.SELECTED_AVATAR_KEY = "entropia_selected_avatar";
+        
         this.fileHandle = null;
         this.lastSize = 0;
         this.lastProcessedLine = "";
@@ -18,10 +21,14 @@ export class EntropiaWidget {
         this.stats = {
             loot: {},
             values: {},
-            skills: {},
+            skills: { total: 0 }, // Added 'total' tracker to mirror your new schema
             deaths: 0,
             globals: 0
         };
+
+        // --- Dynamic Avatar Filter State ---
+        this.avatars = [];
+        this.selectedAvatar = "";
 
         // --- Consolidated Global Static Registries ---
         this.FRUIT_NAMES = ['Papplon', 'Bombardo', 'Haimoros', 'Caroot'];
@@ -121,6 +128,12 @@ export class EntropiaWidget {
         this.pathInput = document.getElementById('pathInput');
         this.visibilityToggle = document.getElementById('entropia-visibility-toggle');
 
+        // Avatar Filtering DOM Bindings
+        this.avatarSelector = document.getElementById('eu-avatar-selector');
+        this.avatarInput = document.getElementById('eu-avatar-input');
+        this.avatarAddBtn = document.getElementById('eu-avatar-add-btn');
+        this.avatarDelBtn = document.getElementById('eu-avatar-del-btn');
+
         // Target stream overlay widget wrapper node strictly outside of inputs context
         this.overlayWidgetContainer = document.querySelector('#overlay-wrapper #entropia-widget') || document.getElementById('entropia-widget');
 
@@ -165,6 +178,28 @@ export class EntropiaWidget {
             });
         } else {
             this.logEvent("#entropia-visibility-toggle not found in DOM.", true);
+        }
+
+        // Avatar Management Event Listeners
+        if (this.avatarAddBtn) {
+            this.avatarAddBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.addAvatarFilter();
+            });
+        }
+        if (this.avatarDelBtn) {
+            this.avatarDelBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.deleteAvatarFilter();
+            });
+        }
+        if (this.avatarSelector) {
+            this.avatarSelector.addEventListener('change', (e) => {
+                this.selectedAvatar = e.target.value;
+                set(this.SELECTED_AVATAR_KEY, this.selectedAvatar)
+                    .then(() => this.logEvent(`🎯 Selected active global avatar filter: "${this.selectedAvatar}"`))
+                    .catch(e => console.error("Failed to save selected avatar:", e));
+            });
         }
     }
 
@@ -223,6 +258,17 @@ export class EntropiaWidget {
                 if (slider) slider.style.backgroundColor = isVisible ? '#0ea5e9' : '#3f3f46';
             }
             this.handleVisibilityChange(isVisible, false);
+
+            // Recover Avatar profiles filter matrix
+            const savedAvatars = await get(this.AVATARS_KEY);
+            if (Array.isArray(savedAvatars)) {
+                this.avatars = savedAvatars;
+            }
+            const savedSelected = await get(this.SELECTED_AVATAR_KEY);
+            if (savedSelected) {
+                this.selectedAvatar = savedSelected;
+            }
+            this.updateAvatarDropdown();
 
         } catch (e) {
             console.error("Failed to recover persistent initialization configurations:", e);
@@ -313,7 +359,7 @@ export class EntropiaWidget {
             if (this.sessionTickerInterval) clearInterval(this.sessionTickerInterval);
 
             // Clean state parameters reset matrix
-            this.stats = { loot: {}, values: {}, skills: {}, deaths: 0, globals: 0 };
+            this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0 };
             this.manifestGrids.forEach(grid => grid.innerHTML = '');
 
             // Adjust active control panel engine UI elements
@@ -368,7 +414,7 @@ export class EntropiaWidget {
     }
 
     resetSession() {
-        this.stats = { loot: {}, values: {}, skills: {}, deaths: 0, globals: 0 };
+        this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0 };
         this.lastProcessedLine = "";
         this.sessionStartTime = Date.now();
         
@@ -429,6 +475,32 @@ export class EntropiaWidget {
         }
     }
 
+    /**
+     * Dedicated Parsing Engine for tracking Deaths & Experience updates safely
+     * without breaking local scope when matching lines from the System channel.
+     */
+    parseDeathExpLine(message) {
+        if (message.includes("You were killed by") || message.includes("You died")) {
+            this.stats.deaths += 1;
+            this.logEvent("💀 DEATH REGISTERED");
+            return true;
+        }
+
+        const xpMatch = message.match(this.regex.experience);
+        if (xpMatch) {
+            const xpVal = parseFloat(xpMatch[1]);
+            const skillName = xpMatch[2].trim();
+            
+            this.stats.skills[skillName] = (this.stats.skills[skillName] || 0) + xpVal;
+            this.stats.skills.total = (this.stats.skills.total || 0) + xpVal;
+            
+            this.logEvent(`✨ XP: +${xpVal} ${skillName}`);
+            return true;
+        }
+
+        return false;
+    }
+
     parseLine(line) {
         if (line === this.lastProcessedLine || !line.trim()) return;
 
@@ -439,6 +511,11 @@ export class EntropiaWidget {
         this.lastProcessedLine = line;
 
         if (channel === 'System') {
+            // First run message through the Death & XP evaluation system
+            if (this.parseDeathExpLine(message)) {
+                return;
+            }
+
             const lootMatch = message.match(this.regex.loot);
             if (lootMatch) {
                 const itemName = lootMatch[1].trim();
@@ -452,24 +529,13 @@ export class EntropiaWidget {
                 this.logEvent(`+ ${amt}x ${itemName}`);
                 return;
             }
-
-            const xpMatch = message.match(this.regex.experience);
-            if (xpMatch) {
-                const xpVal = parseFloat(xpMatch[1]);
-                const skillName = xpMatch[2].trim();
-                this.stats.skills[skillName] = (this.stats.skills[skillName] || 0) + xpVal;
-                this.logEvent(`✨ XP: +${xpVal} ${skillName}`);
-                return;
-            }
-
-            if (message.includes("You have been killed") || message.includes("You died")) {
-                this.stats.deaths++;
-                this.logEvent("💀 DEATH REGISTERED");
-                return;
-            }
         }
 
         if (channel === 'Globals' && this.regex.globalHof.test(message)) {
+            // Drop back out if a specific avatar filter string is active and the channel line does not match it
+            if (this.selectedAvatar && !message.includes(this.selectedAvatar)) {
+                return; 
+            }
             this.stats.globals++;
             this.logEvent(`🏆 GLOBAL: ${message}`);
         }
@@ -540,6 +606,66 @@ export class EntropiaWidget {
         });
     }
 
+    // --- Avatar Management Methods ---
+    addAvatarFilter() {
+        if (!this.avatarInput) return;
+        const val = this.avatarInput.value.trim();
+        if (!val) return;
+
+        if (!this.avatars.includes(val)) {
+            this.avatars.push(val);
+            this.selectedAvatar = val; // Default focus to the newly injected option
+            this.avatarInput.value = "";
+            this.saveAvatarsState();
+        }
+    }
+
+    deleteAvatarFilter() {
+        if (!this.avatarSelector) return;
+        const val = this.avatarSelector.value;
+        if (!val) return;
+
+        this.avatars = this.avatars.filter(av => av !== val);
+        this.selectedAvatar = this.avatars.length > 0 ? this.avatars[0] : "";
+        this.saveAvatarsState();
+    }
+
+    saveAvatarsState() {
+        Promise.all([
+            set(this.AVATARS_KEY, this.avatars),
+            set(this.SELECTED_AVATAR_KEY, this.selectedAvatar)
+        ]).then(() => {
+            this.updateAvatarDropdown();
+            this.logEvent(`💾 Avatar routing configurations synchronized to local cache.`);
+        }).catch(e => console.error("Failed to commit avatar stack to local profile storage:", e));
+    }
+
+    updateAvatarDropdown() {
+        if (!this.avatarSelector) return;
+        this.avatarSelector.innerHTML = "";
+
+        // Add default catch-all unrestricted tracking option
+        const baseOpt = document.createElement('option');
+        baseOpt.value = "";
+        baseOpt.textContent = "-- TRACK ALL GLOBALS --";
+        this.avatarSelector.appendChild(baseOpt);
+
+        this.avatars.forEach(av => {
+            const opt = document.createElement('option');
+            opt.value = av;
+            opt.textContent = av;
+            if (av === this.selectedAvatar) {
+                opt.selected = true;
+            }
+            this.avatarSelector.appendChild(opt);
+        });
+
+        // Set baseline selection index fallback
+        if (!this.selectedAvatar) {
+            this.avatarSelector.value = "";
+        }
+    }
+
     getCommands(sendNotice) {
         return [
             {
@@ -606,10 +732,11 @@ export class EntropiaWidget {
                             }
 
                             switch (targetElement) {
+                                var currentDisplay;
                                 case 'grid':
                                 case 'loot':
                                     this.manifestGrids.forEach(grid => {
-                                        const currentDisplay = window.getComputedStyle(grid).display;
+                                        currentDisplay = window.getComputedStyle(grid).display;
                                         grid.style.display = currentDisplay === 'none' ? 'grid' : 'none';
                                         sendNotice(`👁️ [Overlay]: Manifest Data Grid display toggled.`);
                                     });
@@ -619,7 +746,7 @@ export class EntropiaWidget {
                                 case 'timer':
                                     this.timerElements.forEach(el => {
                                         const target = el.closest('#entropia-timer-row, .timer-wrapper, .widget-card, .card, .stat-box') || el.parentElement || el;
-                                        const currentDisplay = window.getComputedStyle(target).display;
+                                        currentDisplay = window.getComputedStyle(target).display;
                                         target.style.display = currentDisplay === 'none' ? 'block' : 'none';
                                         sendNotice(`👁️ [Overlay]: Session Run Timer visibility toggled.`);
                                     });
@@ -629,7 +756,7 @@ export class EntropiaWidget {
                                 case 'total':
                                     this.grandTotalElements.forEach(el => {
                                         const target = el.closest('#entropia-total-row, .total-wrapper, .widget-card, .card') || el.parentElement.parentElement || el;
-                                        const currentDisplay = window.getComputedStyle(target).display;
+                                        currentDisplay = window.getComputedStyle(target).display;
                                         target.style.display = currentDisplay === 'none' ? 'flex' : 'none';
                                         sendNotice(`👁️ [Overlay]: Accumulator Grand Total counter visibility toggled.`);
                                     });

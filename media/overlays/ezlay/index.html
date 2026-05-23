@@ -365,7 +365,7 @@
 
 		<div class="collapsible-section collapsed">
 			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-				<span>⏱️ Timers & Cooldown Countdowns</span>
+				<span>⏱️ Timers &amp; Cooldown Countdowns</span>
 				<span class="collapse-icon">▼</span>
 			</div>
 			<div class="collapsible-content">
@@ -392,8 +392,7 @@
 				</div>
 				<button class="p8-btn save-btn" id="ui-create-timer-btn" style="width: 100%; margin-bottom: 10px; padding: 6px;">Initialize Module Instance</button>
 				
-				<div id="active-timers-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto;">
-					</div>
+				<div id="active-timers-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto;" data-delegated="true"></div>
 			</div>
 		</div>
 
@@ -407,12 +406,25 @@
 					<span style="font-size: 12px; color: #f4f4f5; font-weight: 500;">📺 Enable Overlay View</span>
 					<label style="position: relative; display: inline-block; width: 34px; height: 20px;">
 						<input type="checkbox" id="entropia-visibility-toggle" style="opacity: 0; width: 0; height: 0; peer">
-						<span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3f3f46; transition: .3s; border-radius: 20px;" onclick="const cb = this.previousElementSibling; setTimeout(() => cb.dispatchEvent(new Event('change')), 50)"></span>
+						<span style="position: absolute; cursor: pointer; inset: 0px; background-color: rgb(14, 165, 233); transition: 0.3s; border-radius: 20px;" onclick="const cb = this.previousElementSibling; setTimeout(() =&gt; cb.dispatchEvent(new Event('change')), 50)"></span>
 					</label>
 				</div>
+
+				<div style="background: #141414; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 6px;">
+					<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">👤 Filter Global Avatar</label>
+					<div style="display: flex; gap: 5px;">
+						<select id="eu-avatar-selector" class="p8-input" style="flex: 1; background: #1c1c1f; color: #fff; border: 1px solid #3f3f46; height: 28px; font-size: 12px; border-radius: 4px; padding: 0 4px;"></select>
+						<button type="button" id="eu-avatar-del-btn" class="p8-btn" style="padding: 0 8px; background: #991b1b; font-size: 11px; height: 28px; line-height: 28px; display: flex; align-items: center; border: none; cursor: pointer; border-radius: 4px;">❌</button>
+					</div>
+					<div style="display: flex; gap: 5px;">
+						<input type="text" id="eu-avatar-input" class="p8-input" placeholder="First 'Full' Lastname" style="flex: 1; background: #1c1c1f; border: 1px solid #3f3f46; height: 28px; font-size: 12px; border-radius: 4px; padding: 0 8px; color: #fff;">
+						<button type="button" id="eu-avatar-add-btn" class="p8-btn" style="padding: 0 10px; background: #075985; font-size: 11px; height: 28px; line-height: 28px; display: flex; align-items: center; border: none; cursor: pointer; border-radius: 4px;">ADD</button>
+					</div>
+				</div>
+
 				<div style="display: flex; gap: 5px; margin-bottom: 10px;">
-					<input type="text" id="pathInput" class="p8-input" placeholder="Chat.log not linked..." readonly style="flex: 1; background: #141414; opacity: 0.8;">
-					<button type="button" id="browseBtn" class="p8-btn" style="padding: 6px 12px; background: #0ea5e9;">LINK LOG</button>
+					<input type="text" id="pathInput" class="p8-input" placeholder="Chat.log not linked..." readonly="" style="flex: 1; background: #141414; opacity: 0.8;">
+					<button type="button" id="browseBtn" class="p8-btn" style="padding: 6px 12px; background: rgb(14, 165, 233); box-shadow: rgb(14, 195, 195) 0px 0px 15px;">LINK LOG</button>
 				</div>
 
 				<div style="display: flex; justify-content: space-between; align-items: center; background: #141414; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #27272a;">
@@ -421,7 +433,7 @@
 				</div>
 
 				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px;">
-					<button type="button" id="start-session-btn" class="p8-btn save-btn" style="padding: 8px; background: #2e7d32;">START SESSION</button>
+					<button type="button" id="start-session-btn" class="p8-btn save-btn" style="padding: 8px; background: rgb(85, 85, 85);">START SESSION</button>
 					<button type="button" id="btnReset" class="p8-btn alt-btn" style="padding: 8px; background: #dc2626;">RESET STATS</button>
 				</div>
 
@@ -443,7 +455,6 @@
 
 		<button class="p8-btn" id="close-widgets-manager-btn" style="background:transparent; color:#71717a; font-size: 12px; width: 100%; margin-top: 15px;">Close Panel</button>
 	</div>
-
 
 	<div id="settings-window">
 		<div id="settings-manager-header">
