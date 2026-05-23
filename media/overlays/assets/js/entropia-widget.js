@@ -29,7 +29,9 @@ export class EntropiaWidget {
             deaths: 0,
             globals: 0,
             lootEvents: 0,          // Distinct combined looting events counter
-            universalAmmoValue: 0   // Segregated from baseline PED asset pool value
+            universalAmmoValue: 0,  // Segregated from baseline PED asset pool value
+            totalCost: 0,           // Total accumulated expenses
+            expenses: []            // Array of items { label: string, amount: number, timestamp: number }
         };
 
         // --- Dynamic Avatar Filter State ---
@@ -348,7 +350,7 @@ export class EntropiaWidget {
             if (this.pollInterval) clearInterval(this.pollInterval);
             if (this.sessionTickerInterval) clearInterval(this.sessionTickerInterval);
 
-            this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0, lootEvents: 0, universalAmmoValue: 0 };
+            this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0, lootEvents: 0, universalAmmoValue: 0, totalCost: 0, expenses: [] };
             this.manifestGrids.forEach(grid => grid.innerHTML = '');
 
             if (this.startBtn) {
@@ -401,7 +403,7 @@ export class EntropiaWidget {
     }
 
     resetSession() {
-        this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0, lootEvents: 0, universalAmmoValue: 0 };
+        this.stats = { loot: {}, values: {}, skills: { total: 0 }, deaths: 0, globals: 0, lootEvents: 0, universalAmmoValue: 0, totalCost: 0, expenses: [] };
         this.lastProcessedLine = "";
         this.sessionStartTime = Date.now();
         this.lastLootIncrementTime = 0;
@@ -410,7 +412,7 @@ export class EntropiaWidget {
         this.grandTotalElements.forEach(el => el.textContent = "0.0000");
         this.timerElements.forEach(el => el.textContent = "00:00:00");
         this.returnsElements.forEach(el => {
-            el.textContent = "0.00";
+            el.textContent = "100.00";
             el.style.color = '#a1a1aa';
         });
         
@@ -505,7 +507,7 @@ export class EntropiaWidget {
                 const amt = parseInt(lootMatch[2]);
                 const val = parseFloat(lootMatch[3]);
 
-                // --- High Resolution 20ms Window Grouping Evaluation ---
+                // High Resolution 20ms Window Grouping Evaluation
                 const currentTime = performance.now();
                 if (currentTime - this.lastLootIncrementTime > this.LOOT_COOLDOWN_MS) {
                     this.stats.lootEvents += 1;
@@ -513,12 +515,12 @@ export class EntropiaWidget {
                 }
                 this.lastLootIncrementTime = currentTime;
 
-                // --- Segregated Universal Ammo Verification Path ---
+                // Segregated Universal Ammo Verification Path
                 if (this.regex.universalAmmo.test(message)) {
                     this.stats.universalAmmoValue += val;
                     this.logEvent(`🔋 AMMO INGESTED: +${val.toFixed(4)} PED (Stored Separately)`);
                     this.updateUI();
-                    return; // Drop out completely to keep value isolated from general metrics
+                    return; 
                 }
 
                 // Standard Loot Item Processing
@@ -585,20 +587,25 @@ export class EntropiaWidget {
 
         this.grandTotalElements.forEach(el => el.textContent = grandTotal.toFixed(4));
 
-        let returnsPct = 0;
-        if (grandTotal > 0) {
-            returnsPct = 100.00; 
+        // --- NEW ROI ENGINE NET RETURN CALCULATION BLOCK ---
+        let returnsPct = 100.00; // Baseline default percentage if cost profile is empty
+        if (this.stats.totalCost > 0) {
+            returnsPct = (grandTotal / this.stats.totalCost) * 100;
+        } else if (grandTotal > 0 && this.stats.totalCost === 0) {
+            returnsPct = 100.00;
+        } else if (grandTotal === 0 && this.stats.totalCost === 0) {
+            returnsPct = 0.00;
         }
 
         this.returnsElements.forEach(el => {
             el.textContent = returnsPct.toFixed(2);
 
             if (returnsPct >= 100) {
-                el.style.color = '#22c55e';
+                el.style.color = '#22c55e'; // Green (Profitable)
             } else if (returnsPct >= 90) {
-                el.style.color = '#eab308';
+                el.style.color = '#eab308'; // Yellow (Close to breaking even)
             } else if (returnsPct > 0) {
-                el.style.color = '#ef4444';
+                el.style.color = '#ef4444'; // Red (In the hole)
             } else {
                 el.style.color = '#a1a1aa';
             }
@@ -674,7 +681,7 @@ export class EntropiaWidget {
                     const isAdmin = flags.broadcaster || flags.mod;
 
                     if (!subCommand) {
-                        sendNotice(`🤖 [EU Console]: Specify action parameters (!eu loot | ped | ammo | events | globals | deaths | skills | help)`);
+                        sendNotice(`🤖 [EU Console]: Specify action parameters (!eu loot | ped | ammo | events | addcost | cost | costlist | help)`);
                         return;
                     }
 
@@ -683,9 +690,9 @@ export class EntropiaWidget {
                         case 'commands':
                         case 'h':
                             if (isAdmin) {
-                                sendNotice(`🛠️ [EU Admin Help]: !eu [start | pause | reset | stop] or Toggle Panels: !eu toggle [grid | sessiontimer | total]`);
+                                sendNotice(`🛠️ [EU Admin Help]: !eu [start|pause|reset|stop] or !eu addcost [label] {amount} or Toggle Panels: !eu toggle [grid|timer|total]`);
                             } else {
-                                sendNotice(`📦 [EU Public Help]: Commands: !eu loot | !eu ped | !eu ammo | !eu events | !eu globals | !eu deaths | !eu skills`);
+                                sendNotice(`📦 [EU Public Help]: Commands: !eu loot | !eu ped | !eu ammo | !eu events | !eu cost | !eu costlist | !eu skills`);
                             }
                             break;
 
@@ -722,6 +729,95 @@ export class EntropiaWidget {
                         case 'claims':
                             sendNotice(`🎯 Total distinct loot event triggers registered: ${this.stats.lootEvents}`);
                             break;
+
+                        // --- NEW COMMAND: !eu addcost [optional_label] {amount} ---
+                        case 'addcost':
+                        case 'spend': {
+                            if (!isAdmin) return;
+                            
+                            if (parts.length < 2) {
+                                sendNotice(`⚠️ Usage: !eu addcost [label] {amount} -> e.g. !eu addcost decay 4.25`);
+                                return;
+                            }
+
+                            let label = "";
+                            let rawAmountStr = "";
+
+                            // Determine if third parameter was passed or if we need a default fallback label
+                            if (parts.length >= 3) {
+                                label = parts[1].trim();
+                                rawAmountStr = parts[2].trim();
+                            } else {
+                                // Default naming fallback generation path if third parameter isn't given
+                                const fallbackIndex = this.stats.expenses.length + 1;
+                                label = `cost${fallbackIndex}`;
+                                rawAmountStr = parts[1].trim();
+                            }
+
+                            const parsedAmount = parseFloat(rawAmountStr);
+                            if (isNaN(parsedAmount) || parsedAmount <= 0) {
+                                sendNotice(`❌ Invalid expense value entered: "${rawAmountStr}". Please use numbers like 10.50 or 0.05`);
+                                return;
+                            }
+
+                            // Commit to structured memory ledger array
+                            this.stats.expenses.push({
+                                label: label,
+                                amount: parsedAmount,
+                                timestamp: Date.now()
+                            });
+
+                            this.stats.totalCost += parsedAmount;
+                            this.updateUI(); // Run full loop to recalibrate Returns % values instantly
+
+                            sendNotice(`💸 Added cost entry [${label.toUpperCase()}]: +${parsedAmount.toFixed(4)} PED. Total costs run: ${this.stats.totalCost.toFixed(4)} PED.`);
+                            break;
+                        }
+
+                        // --- NEW COMMAND: !eu cost or !eu totalcost ---
+                        case 'cost':
+                        case 'totalcost': {
+                            if (this.stats.expenses.length === 0) {
+                                sendNotice(`💸 Total Session Expense: 0.0000 PED. No decay or ammo costs logged yet.`);
+                                return;
+                            }
+
+                            // Grouping matching tags to rank top spend areas
+                            const combinedMap = {};
+                            this.stats.expenses.forEach(item => {
+                                combinedMap[item.label] = (combinedMap[item.label] || 0) + item.amount;
+                            });
+
+                            const topCosts = Object.entries(combinedMap)
+                                .sort((a, b) => b[1] - a[1])
+                                .slice(0, 3)
+                                .map(([lbl, val]) => `${lbl.toUpperCase()} (${val.toFixed(2)} PED)`)
+                                .join(', ');
+
+                            const distinctLabelsCount = Object.keys(combinedMap).length;
+
+                            sendNotice(`💸 Total cost overhead: ${this.stats.totalCost.toFixed(4)} PED Across ${this.stats.expenses.length} logs | Top Expense profiles: ${topCosts || 'None'}`);
+                            break;
+                        }
+
+                        // --- NEW COMMAND: !eu costlist ---
+                        case 'costlist':
+						case 'allcosts':
+						case 'listcosts':
+                        case 'costs': {
+                            if (this.stats.expenses.length === 0) {
+                                sendNotice(`📋 Expense log ledger is empty.`);
+                                return;
+                            }
+
+                            // Map list out to a scannable string format list
+                            const listStr = this.stats.expenses
+                                .map((item, idx) => `#${idx + 1} [${item.label.toUpperCase()}]: ${item.amount.toFixed(4)}`)
+                                .join(' | ');
+
+                            sendNotice(`📋 Cost ledger items (${this.stats.expenses.length} logs total): ${listStr} | Cumulative Grand Total Cost: ${this.stats.totalCost.toFixed(4)} PED`);
+                            break;
+                        }
 
                         case 'globals':
                         case 'hofs':
