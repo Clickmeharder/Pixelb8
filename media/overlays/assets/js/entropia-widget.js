@@ -712,30 +712,52 @@ export class EntropiaWidget {
                             sendNotice(`📦 Session Loot: ${topLoot} | Total Value: ${totalValue.toFixed(2)} PED`);
                             break;
                         }
-						
-						case 'returns':
-						case 'ped': {
+						case 'ped':
+                        case 'returns': {
+                            const cumulativePed = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
+                            const totalCost = this.stats.totalCost || 0;
+                            const netPed = cumulativePed - totalCost;
+                            const sign = netPed > 0 ? '+' : '';
+                            const statusMarker = netPed >= 0 ? '🟢' : '🔴';
+
+                            sendNotice(`${statusMarker} [Session Balance]: Loot: ${cumulativePed.toFixed(4)} PED | Cost: ${totalCost.toFixed(4)} PED | Net: ${sign}${netPed.toFixed(4)} PED`);
+                            break;
+                        }
+
+                        // --- Dedicated Pure ROI Command (Floor at 0%) ---
+                        case 'roi': {
+                            const cumulativePed = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
+                            const totalCost = this.stats.totalCost || 0;
+                            
+                            let roiPct = 100.00;
+                            if (totalCost > 0) {
+                                roiPct = (cumulativePed / totalCost) * 100;
+                            } else if (cumulativePed === 0 && totalCost === 0) {
+                                roiPct = 0.00;
+                            }
+
+                            sendNotice(`📊 [Session ROI]: ${roiPct.toFixed(2)}% (You have recovered ${roiPct.toFixed(2)}% of your total expenditures)`);
+                            break;
+                        }
+
+                        // --- Dedicated Profit/Loss Margin Command (Can be Negative %) ---
+                        case 'profit':
+                        case 'net': {
                             const cumulativePed = Object.values(this.stats.values).reduce((a, b) => a + b, 0);
                             const totalCost = this.stats.totalCost || 0;
                             const netPed = cumulativePed - totalCost;
                             
-                            // Calculate precise return percentage safely
-                            let returnsPct = 100.00;
+                            let profitMarginPct = 0.00;
                             if (totalCost > 0) {
-                                returnsPct = (cumulativePed / totalCost) * 100;
-                            } else if (cumulativePed === 0 && totalCost === 0) {
-                                returnsPct = 0.00;
+                                profitMarginPct = (netPed / totalCost) * 100;
+                            } else if (cumulativePed > 0 && totalCost === 0) {
+                                profitMarginPct = 100.00; // Infinite positive upside baseline
                             }
 
-                            // Format the Net value with an explicit positive/negative sign
-                            const sign = netPed > 0 ? '+' : '';
-                            const statusMarker = netPed >= 0 ? '🟢' : '🔴';
+                            const sign = profitMarginPct > 0 ? '+' : '';
+                            const statusMarker = netPed >= 0 ? '📈' : '📉';
 
-                            sendNotice(
-                                `${statusMarker} [Session Balance]: Loot: ${cumulativePed.toFixed(4)} PED | ` +
-                                `Cost: ${totalCost.toFixed(4)} PED | ` +
-                                `Net: ${sign}${netPed.toFixed(4)} PED (${returnsPct.toFixed(2)}% Returns)`
-                            );
+                            sendNotice(`${statusMarker} [Net Profit Growth]: ${sign}${profitMarginPct.toFixed(2)}% (${netPed >= 0 ? 'Gain' : 'Loss'} relative to your investment cost)`);
                             break;
                         }
                         case 'ammo':
