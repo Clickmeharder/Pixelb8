@@ -177,7 +177,7 @@ export class EntropiaWidget {
             this.visibilityToggle.nextElementSibling.style.backgroundColor = shouldShow ? '#0ea5e9' : '#3f3f46';
         }
 
-        if (persistState) {
+        if (this.persistState) {
             set(this.VISIBILITY_KEY, shouldShow).catch(e => console.error("Failed to cache visibility setting:", e));
         }
     }
@@ -447,16 +447,12 @@ export class EntropiaWidget {
         // --- LIVE SESSION RETURNS CALCULATION MATRIX ---
         let returnsPct = 0;
         if (grandTotal > 0) {
-            // Initial placeholder engine logic baseline configuration
             returnsPct = 100.00; 
-            // NOTE: When introducing dynamic hunt costs later, substitute with:
-            // returnsPct = (grandTotal / totalHuntCost) * 100;
         }
 
         this.returnsElements.forEach(el => {
             el.textContent = returnsPct.toFixed(2);
 
-            // Gamified color accent shading shift matching return threshold profiles
             if (returnsPct >= 100) {
                 el.style.color = '#22c55e'; // Profitable / Break-Even (Green)
             } else if (returnsPct >= 90) {
@@ -528,7 +524,7 @@ export class EntropiaWidget {
                             sendNotice(`🏆 Globals/HOFs hit this session: ${this.stats.globals} | Deaths: ${this.stats.deaths}`);
                             break;
 
-                        // --- NESTED VISIBILITY TOGGLES ---
+                        // --- NESTED VISIBILITY TOGGLES (Fixed to target wrappers/parents cleanly) ---
                         case 'toggle':
                             if (!isAdmin) return;
                             const targetElement = parts[1];
@@ -542,6 +538,7 @@ export class EntropiaWidget {
                                 case 'grid':
                                 case 'loot':
                                     this.manifestGrids.forEach(grid => {
+                                        // The grid itself is the wrapper/container for item data logs
                                         const currentDisplay = window.getComputedStyle(grid).display;
                                         grid.style.display = currentDisplay === 'none' ? 'grid' : 'none';
                                         sendNotice(`👁️ [Overlay]: Manifest Data Grid display toggled.`);
@@ -551,19 +548,23 @@ export class EntropiaWidget {
                                 case 'sessiontimer':
                                 case 'timer':
                                     this.timerElements.forEach(el => {
-                                        const currentDisplay = window.getComputedStyle(el).display;
-                                        el.style.display = currentDisplay === 'none' ? 'block' : 'none';
-                                        sendNotice(`👁️ [Overlay]: Session Run Timer visibility toggled.`);
+                                        // Crawl up to hide the parent layout wrapper card/container if present, else fallback to element
+                                        const target = el.closest('.widget-card, .card, .stat-box, .timer-wrapper') || el;
+                                        const currentDisplay = window.getComputedStyle(target).display;
+                                        target.style.display = currentDisplay === 'none' ? 'block' : 'none';
                                     });
+                                    sendNotice(`👁️ [Overlay]: Session Run Timer visibility toggled.`);
                                     break;
 
                                 case 'grandtotal':
                                 case 'total':
                                     this.grandTotalElements.forEach(el => {
-                                        const currentDisplay = window.getComputedStyle(el).display;
-                                        el.style.display = currentDisplay === 'none' ? 'block' : 'none';
-                                        sendNotice(`👁️ [Overlay]: Accumulator Grand Total counter visibility toggled.`);
+                                        // Crawl up to hide the parent layout wrapper card/container if present, else fallback to element
+                                        const target = el.closest('.widget-card, .card, .stat-box, .total-wrapper') || el;
+                                        const currentDisplay = window.getComputedStyle(target).display;
+                                        target.style.display = currentDisplay === 'none' ? 'block' : 'none';
                                     });
+                                    sendNotice(`👁️ [Overlay]: Accumulator Grand Total counter visibility toggled.`);
                                     break;
 
                                 default:

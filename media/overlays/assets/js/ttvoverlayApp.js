@@ -1,7 +1,7 @@
 
 // --- MODULE IMPORTS ---
 import { EntropiaWidget } from './entropia-widget.js';
-console.log("🚀 [Module Load]: entropia-widget.js version 0.001 imported successfully without dependencies!");
+console.log("🚀 [Module Load]: entropia-widget.js version 0.002 imported successfully without dependencies!");
 
 
 // --- STORAGE & SETTINGS INITIALIZATION ---
