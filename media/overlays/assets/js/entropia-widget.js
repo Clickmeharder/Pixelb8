@@ -693,7 +693,56 @@ export class EntropiaWidget {
                         case 'hof':
                             sendNotice(`🏆 Globals/HOFs hit this session: ${this.stats.globals} | Deaths: ${this.stats.deaths}`);
                             break;
+							
+						case 'deaths':
+                        case 'died':
+                            sendNotice(`💀 Avatar deaths recorded this session: ${this.stats.deaths}`);
+                            break;
+							
+						case 'skills':
+                        case 'skill':
+                        case 'xp': {
+                            const totalXp = this.stats.skills.total || 0;
+                            
+                            if (totalXp === 0) {
+                                sendNotice(`✨ @${user}, no skill experience has been gained this session yet.`);
+                                return;
+                            }
 
+                            // If user checked a specific skill (e.g., !eu skills rifle)
+                            if (parts[1]) {
+                                const searchSkill = parts.slice(1).join(' ').toLowerCase();
+                                const exactMatchKey = Object.keys(this.stats.skills).find(
+                                    key => key !== 'total' && key.toLowerCase() === searchSkill
+                                );
+
+                                if (exactMatchKey) {
+                                    sendNotice(`✨ [Skill Tracker]: +${this.stats.skills[exactMatchKey].toFixed(4)} XP in ${exactMatchKey}`);
+                                } else {
+                                    // Fallback fuzzy search check
+                                    const fuzzyMatchKey = Object.keys(this.stats.skills).find(
+                                        key => key !== 'total' && key.toLowerCase().includes(searchSkill)
+                                    );
+                                    if (fuzzyMatchKey) {
+                                        sendNotice(`✨ [Skill Tracker]: +${this.stats.skills[fuzzyMatchKey].toFixed(4)} XP in ${fuzzyMatchKey}`);
+                                    } else {
+                                        sendNotice(`🔍 [Skill Tracker]: No gains recorded for "${parts.slice(1).join(' ')}" this session.`);
+                                    }
+                                }
+                                return;
+                            }
+
+                            // Standard top-3 overall highlights return output string
+                            const sortedSkills = Object.entries(this.stats.skills)
+                                .filter(([name]) => name !== 'total')
+                                .sort((a, b) => b[1] - a[1])
+                                .slice(0, 3)
+                                .map(([name, val]) => `${name} (+${val.toFixed(2)})`)
+                                .join(', ');
+
+                            sendNotice(`✨ XP Gained: +${totalXp.toFixed(2)} Total Points | Top Gains: ${sortedSkills || 'None'}`);
+                            break;
+                        }
                         case 'toggle': {
                             if (!isAdmin) return;
                             const targetElement = parts[1];
