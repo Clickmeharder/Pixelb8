@@ -140,13 +140,14 @@ export class EntropiaWidget {
                             this.startBtn.style.background = "#2e7d32";
                             this.startBtn.style.boxShadow = "0 0 10px #00ff00";
                         } else {
-                            this.startBtn.style.background = "#555";
+                            this.startBtn.style.background = "#e65100";
+                            this.startBtn.style.boxShadow = "0 0 15px #ff9800";
                             if (this.browseBtn) this.browseBtn.style.boxShadow = "0 0 15px #0ec3c3";
                             this.logEvent("🔑 RE-AUTH_REQUIRED: Click Start Session to grant runtime access.");
                         }
                     }
                 } catch (err) {
-                    this.logEvent("⚠️ HANDLE_STALE: Resetting path reference...", true);
+                    this.logEvent("⚠️ HANDLE_STALE: Local token unrecoverable. Resetting path reference...", true);
                     await this.clearLogPath();
                 }
             }
@@ -232,7 +233,11 @@ export class EntropiaWidget {
             const hasPermission = await this.verifyPermission();
             if (!hasPermission) {
                 this.logEvent("❌ PERMISSION_DENIED: Browser blocked sandbox file-read.", true);
-                alert("Browser access denied. Please click 'LINK LOG' again to authorize folder polling.");
+                if (this.startBtn) {
+                    this.startBtn.style.background = "#b71c1c";
+                    this.startBtn.style.boxShadow = "0 0 15px #ff0000";
+                }
+                alert("Browser access denied. Please click 'START SESSION' again to grant folder polling permissions.");
                 return;
             }
 
@@ -240,6 +245,7 @@ export class EntropiaWidget {
             this.lastSize = file.size;
             this.sessionStartTime = Date.now();
             this.isPaused = false;
+            this.errorCount = 0; // Reset safe counters upon valid start gesture
 
             // Clear any lingering background processes before spin-up
             if (this.pollInterval) clearInterval(this.pollInterval);
@@ -268,8 +274,11 @@ export class EntropiaWidget {
             this.logEvent(`✅ SESSION_STARTED: ${file.name}`);
         } catch (e) {
             console.error("Critical Engine failure starting session: ", e);
-            this.logEvent(`❌ AUTH_FAIL: Path execution failure. Hard reset triggered.`, true);
-            await this.clearLogPath();
+            this.logEvent(`❌ AUTH_FAIL: Access error. Re-authentication required via action panel button.`, true);
+            if (this.startBtn) {
+                this.startBtn.style.background = "#e65100";
+                this.startBtn.textContent = "RE-AUTH REQ";
+            }
         }
     }
 
@@ -343,12 +352,19 @@ export class EntropiaWidget {
                 this.logEvent("⚠️ ROTATION: Log shrink detected.", true);
                 this.lastSize = file.size;
             }
-            this.errorCount = 0;
+            this.errorCount = 0; // Successfully checked, clear intermittent errors
         } catch (err) {
+            this.logEvent(`⚠️ POLLING_LAG: Fault registered [${this.errorCount + 1}/${this.MAX_RETRIES}]. Retrying background hook...`, true);
             if (++this.errorCount >= this.MAX_RETRIES) {
-                this.logEvent("❌ PERMISSION_STUCK: Automatic engine path shutdown.", true);
+                this.logEvent("❌ PERMISSION_LOST: Continuous access pipeline broke. Suspending engine run loop.", true);
                 this.stopSession();
-                this.clearLogPath();
+                
+                // CRITICAL FIX: Retain handle in storage. Flag visually that a quick click click re-authorization check is required.
+                if (this.startBtn) {
+                    this.startBtn.style.background = "#e65100";
+                    this.startBtn.style.boxShadow = "0 0 15px #ff9800";
+                    this.startBtn.textContent = "RE-AUTH SESSION";
+                }
             }
         }
     }
@@ -534,42 +550,40 @@ export class EntropiaWidget {
                                 return;
                             }
 
-                            switch (targetElement) {
-                                case 'grid':
-                                case 'loot':
-                                    this.manifestGrids.forEach(grid => {
-                                        const currentDisplay = window.getComputedStyle(grid).display;
-                                        grid.style.display = currentDisplay === 'none' ? 'grid' : 'none';
-                                        sendNotice(`👁️ [Overlay]: Manifest Data Grid display toggled.`);
-                                    });
-                                    break;
-
-                                case 'sessiontimer':
-                                case 'timer':
-                                    this.timerElements.forEach(el => {
-                                        // Checks for explicit timer wrapper or parent layouts first, fallback to basic block styling
-                                        const target = el.closest('#entropia-timer-row, .timer-wrapper, .widget-card, .card, .stat-box') || el.parentElement || el;
-                                        const currentDisplay = window.getComputedStyle(target).display;
-                                        target.style.display = currentDisplay === 'none' ? 'block' : 'none';
-                                    });
-                                    sendNotice(`👁️ [Overlay]: Session Run Timer visibility toggled.`);
-                                    break;
-
-                                case 'grandtotal':
-                                case 'total':
-                                    this.grandTotalElements.forEach(el => {
-                                        // Target exact row block container ID explicitly, then falls back to parent cards. Uses 'flex' display output format.
-                                        const target = el.closest('#entropia-total-row, .total-wrapper, .widget-card, .card') || el.parentElement.parentElement || el;
-                                        const currentDisplay = window.getComputedStyle(target).display;
-                                        target.style.display = currentDisplay === 'none' ? 'flex' : 'none';
-                                    });
-                                    sendNotice(`👁️ [Overlay]: Accumulator Grand Total counter visibility toggled.`);
-                                    break;
-
-                                default:
-                                    sendNotice(`❌ Layout target selector [${targetElement}] not found on widget canvas.`);
-                            }
+                    switch (targetElement) {
+                        case 'grid':
+                        case 'loot':
+                            this.manifestGrids.forEach(grid => {
+                                const currentDisplay = window.getComputedStyle(grid).display;
+                                grid.style.display = currentDisplay === 'none' ? 'grid' : 'none';
+                                sendNotice(`👁️ [Overlay]: Manifest Data Grid display toggled.`);
+                            });
                             break;
+
+                        case 'sessiontimer':
+                        case 'timer':
+                            this.timerElements.forEach(el => {
+                                const target = el.closest('#entropia-timer-row, .timer-wrapper, .widget-card, .card, .stat-box') || el.parentElement || el;
+                                const currentDisplay = window.getComputedStyle(target).display;
+                                target.style.display = currentDisplay === 'none' ? 'block' : 'none';
+                                sendNotice(`👁️ [Overlay]: Session Run Timer visibility toggled.`);
+                            });
+                            break;
+
+                        case 'grandtotal':
+                        case 'total':
+                            this.grandTotalElements.forEach(el => {
+                                const target = el.closest('#entropia-total-row, .total-wrapper, .widget-card, .card') || el.parentElement.parentElement || el;
+                                const currentDisplay = window.getComputedStyle(target).display;
+                                target.style.display = currentDisplay === 'none' ? 'flex' : 'none';
+                                sendNotice(`👁️ [Overlay]: Accumulator Grand Total counter visibility toggled.`);
+                            });
+                            break;
+
+                        default:
+                            sendNotice(`❌ Layout target selector [${targetElement}] not found on widget canvas.`);
+                    }
+                    break;
 
                         // --- PROTECTED PLATFORM MANAGEMENT EXECUTION CHANNELS ---
                         case 'startsession':
