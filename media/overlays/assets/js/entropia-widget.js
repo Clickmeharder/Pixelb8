@@ -459,7 +459,7 @@ export class EntropiaWidget {
         this.returnsElements.forEach(el => {
             // Clean conditional handling based on target markup configuration wrappers
             if (el.id === 'session-returns' && el.tagName !== 'SPAN') {
-                el.textContent = `${returnsPct.toFixed(2)}%`;
+                el.textContent = returnsPct.toFixed(2);
             } else {
                 el.textContent = returnsPct.toFixed(2);
             }
