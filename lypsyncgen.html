@@ -81,6 +81,7 @@
 
 <h1>🎙️ Drag-and-Trace Puppet LipSync</h1>
 
+<h2>Ver 0.0.0.0.0.0.0.0.1</h2>
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
@@ -141,7 +142,7 @@ let startX = 0;
 let startY = 0;
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 
-// NEW: Global flag to hide UI text/boxes during generation
+// Global flag to hide UI text/boxes during generation
 let isGeneratingVideo = false;
 
 // Offscreen canvas used to preserve the isolated chin layer cleanly
@@ -157,7 +158,7 @@ function drawCanvasPreview(mouthOffset = 0) {
         const { x, y, w, h } = mouthBox;
         
         if (w > 0 && h > 0) {
-            // FIXED: Reduced multiplier (0.10) and max cap (20) so it doesn't drop too far
+            // Reduced multiplier (0.10) and max cap (20) so it doesn't drop too far
             const dropValue = Math.min(mouthOffset * 0.10, 20); 
 
             if (dropValue > 1 || isGeneratingVideo) {
@@ -183,7 +184,7 @@ function drawCanvasPreview(mouthOffset = 0) {
                 ctx.drawImage(jawPieceCanvas, x, y + dropValue);
             } 
             
-            // FIXED: Only draw the helper green boxes if we are NOT actively recording a video
+            // Only draw the helper green boxes if we are NOT actively recording a video
             if (!isGeneratingVideo && dropValue <= 1) {
                 // Draw normal highlighting lines when idle
                 ctx.strokeStyle = "rgba(0, 255, 204, 0.8)";
@@ -222,25 +223,36 @@ function bakePuppetLayers() {
     jCtx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
 }
 
-// Mouse Event Listeners for click-and-drag tracing
+// Mouse Event Listeners for click-and-drag tracing with translation grid matrix fixes
 canvas.addEventListener('mousedown', (e) => {
     if (!avatarImg.src || isGeneratingVideo) return;
     const rect = canvas.getBoundingClientRect();
-    startX = e.clientX - rect.left;
-    startY = e.clientY - rect.top;
+    
+    // Recalculate layout offset variations relative to internal 500x500 canvas coordinates
+    startX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+    startY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+    
     isDrawing = true;
 });
 
 canvas.addEventListener('mousemove', (e) => {
     if (!isDrawing || isGeneratingVideo) return;
     const rect = canvas.getBoundingClientRect();
-    const currentX = e.clientX - rect.left;
-    const currentY = e.clientY - rect.top;
+    
+    // Recalculate visual positions down to matching grid pointers
+    const currentX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+    const currentY = ((e.clientY - rect.top) / rect.height) * canvas.height;
     
     mouthBox.x = Math.min(startX, currentX);
     mouthBox.y = Math.min(startY, currentY);
     mouthBox.w = Math.abs(startX - currentX);
     mouthBox.h = Math.abs(startY - currentY);
+    
+    // Sync values right into input tracking endpoints
+    document.getElementById('mX').value = Math.floor(mouthBox.x);
+    document.getElementById('mY').value = Math.floor(mouthBox.y);
+    document.getElementById('mW').value = Math.floor(mouthBox.w);
+    document.getElementById('mH').value = Math.floor(mouthBox.h);
     
     drawCanvasPreview();
 });
@@ -321,7 +333,7 @@ generateBtn.addEventListener('click', async () => {
     status.innerText = "Status: Mounting audio processing pipelines...";
     generateBtn.disabled = true;
     
-    // FIXED: Turn on video mode immediately to wipe UI markers from frame captures
+    // Turn on video mode immediately to wipe UI markers from frame captures
     isGeneratingVideo = true; 
     
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -356,7 +368,7 @@ generateBtn.addEventListener('click', async () => {
         a.click();
         document.body.removeChild(a);
         
-        // FIXED: Reset generating flag to show UI green box tool again for next project
+        // Reset generating flag to show UI green box tool again for next project
         isGeneratingVideo = false; 
         drawCanvasPreview();
         
