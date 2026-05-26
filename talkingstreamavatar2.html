@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Stream Puppet Avatar Studio Pro (Zoom Enabled)</title>
+<title>Live Stream Puppet Studio Pro (Idle Motions Enabled)</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -81,12 +81,11 @@
         border-color: #ff6b81;
     }
 
-    /* Zoom Mask Viewport Stage Container */
     .viewport-window {
         width: 500px;
         height: 500px;
         margin: 0 auto;
-        overflow: auto; /* Adds scrollbars naturally when zooming in */
+        overflow: auto;
         background: #090909;
         border: 2px solid #333;
         border-radius: 4px;
@@ -95,7 +94,7 @@
         position: relative;
         width: 500px;
         height: 500px;
-        transform-origin: top left; /* Scale from top-left for smooth scroll behavior */
+        transform-origin: top left;
         transform: scale(var(--zoom-level, 1.0));
     }
     canvas {
@@ -130,22 +129,25 @@
 </head>
 <body>
 
-<h1>🎙️ Live Stream Puppet Avatar Studio Pro</h1>
+<h1>🎙️ Live Stream Puppet Studio Pro</h1>
 
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
-            <strong>Stream Setup Tips:</strong><br>
-            1. Upload your portrait and trace the jaw line below.<br>
-            2. Use the **UI Editing Viewport Zoom** slider to make micro-adjustments.<br>
-            3. Hit <strong>"Connect Microphone Live"</strong> to animate.
+            <strong>✨ Pro-Stream Features Active:</strong><br>
+            • <strong>Procedural Swaying:</strong> The avatar gently breathes over time.<br>
+            • <strong>Eye Blink Targeting:</strong> Toggle the selection type to "Eyes Placement" to pinpoint where your character's eyes are so they blink automatically!
         </div>
 
         <div class="controls-group" style="margin-top: 20px;">
-            <label>Tracking Geometry Mode</label>
+            <label>Current Editing Canvas Target</label>
             <div class="toggle-row">
-                <button id="modeBoxBtn" class="active">🔲 Box Selection</button>
-                <button id="modeLassoBtn">⎋ Lasso Path Selection</button>
+                <button id="targetJawBtn" class="active">👄 Define Moving Jaw</button>
+                <button id="targetEyesBtn">👁️ Define Eyes Zone</button>
+            </div>
+            <div class="toggle-row" id="geometryModeRow">
+                <button id="modeBoxBtn" class="active" style="font-size:11px;">🔲 Box Mode</button>
+                <button id="modeLassoBtn" style="font-size:11px;">⎋ Lasso Mode</button>
             </div>
         </div>
 
@@ -157,43 +159,42 @@
         <button id="connectMicBtn" disabled style="background: #444; font-size: 16px; padding: 15px;">❌ Step 1: Upload Avatar Portrait</button>
 
         <div class="panel" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px;">
-            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">🔍 Editor Viewport Settings</h3>
+            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">🔍 Viewport & Idle Calibration</h3>
             <div class="controls-group">
                 <label>UI Editing Viewport Zoom <span id="valZoom" class="slider-value">1.0x</span></label>
                 <input type="range" id="zoomSlider" min="10" max="40" value="10">
             </div>
+            <div class="controls-group">
+                <label>Idle Breathing Intensity <span id="valSway" class="slider-value">1.5px</span></label>
+                <input type="range" id="swaySlider" min="0" max="50" value="15">
+            </div>
         </div>
 
         <div class="panel" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px;">
-            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">⚙️ Live Calibration Controls</h3>
+            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">⚙️ Live Dynamics Console</h3>
             
             <div class="controls-group">
                 <label>Line Blur / Edge Feathering <span id="valBlur" class="slider-value">4px</span></label>
                 <input type="range" id="blurSlider" min="0" max="25" value="4">
             </div>
-
             <div class="controls-group">
                 <label>Mic Sensitivity Boost <span id="valGain" class="slider-value">1.5x</span></label>
                 <input type="range" id="gainSlider" min="5" max="50" value="15">
             </div>
-
             <div class="controls-group">
                 <label>Noise Gate Threshold <span id="valGate" class="slider-value">10</span></label>
                 <input type="range" id="gateSlider" min="0" max="50" value="10">
             </div>
-
             <div class="controls-group">
                 <label>Max Jaw Drop Range <span id="valDropLimit" class="slider-value">25px</span></label>
                 <input type="range" id="dropLimitSlider" min="10" max="50" value="25">
             </div>
-
             <div class="controls-group">
-                <label>Head Rotation / Tilt Angle <span id="valTilt" class="slider-value">0°</span></label>
+                <label>Manual Head Rotation / Tilt <span id="valTilt" class="slider-value">0°</span></label>
                 <input type="range" id="tiltSlider" min="-45" max="45" value="0">
             </div>
-
             <div class="controls-group">
-                <label>Yaw Shift / 3D Turn Center <span id="valYaw" class="slider-value">0px</span></label>
+                <label>Manual Yaw Shift Center <span id="valYaw" class="slider-value">0px</span></label>
                 <input type="range" id="yawSlider" min="-30" max="30" value="0">
             </div>
         </div>
@@ -202,7 +203,7 @@
     </div>
 
     <div class="panel" style="max-width: 520px;">
-        <h3>Live Live Stream Viewport</h3>
+        <h3>Live Viewport Preview</h3>
         
         <div class="viewport-window">
             <div class="canvas-container" id="zoomContainer">
@@ -232,8 +233,9 @@ const uiCanvas = document.getElementById('uiCanvas');
 const uCtx = uiCanvas.getContext('2d');
 const zoomContainer = document.getElementById('zoomContainer');
 
-// Sliders Hooks
+// UI Controls Sliders Hooks
 const zoomSlider = document.getElementById('zoomSlider');
+const swaySlider = document.getElementById('swaySlider');
 const blurSlider = document.getElementById('blurSlider');
 const tiltSlider = document.getElementById('tiltSlider');
 const yawSlider = document.getElementById('yawSlider');
@@ -242,6 +244,7 @@ const gateSlider = document.getElementById('gateSlider');
 const dropLimitSlider = document.getElementById('dropLimitSlider');
 
 const valZoom = document.getElementById('valZoom');
+const valSway = document.getElementById('valSway');
 const valBlur = document.getElementById('valBlur');
 const valTilt = document.getElementById('valTilt');
 const valYaw = document.getElementById('valYaw');
@@ -249,18 +252,26 @@ const valGain = document.getElementById('valGain');
 const valGate = document.getElementById('valGate');
 const valDropLimit = document.getElementById('valDropLimit');
 
+const targetJawBtn = document.getElementById('targetJawBtn');
+const targetEyesBtn = document.getElementById('targetEyesBtn');
 const modeBoxBtn = document.getElementById('modeBoxBtn');
 const modeLassoBtn = document.getElementById('modeLassoBtn');
+const geometryModeRow = document.getElementById('geometryModeRow');
 
 let avatarImg = new Image();
 let audioCtx, analyser, micStream;
 
+let editTarget = 'jaw'; // 'jaw' or 'eyes'
 let currentMode = 'box'; 
 let isDrawing = false;
 let startX = 0; let startY = 0;
+
+// Geometries Cache Objects
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 let lassoPoints = []; 
+let eyesBox = { x: 0, y: 0, w: 0, h: 0 }; 
 
+// Automation Values Engine Coordinates
 let currentZoomScale = 1.0;
 let featherBlur = 4;
 let tiltAngle = 0;
@@ -268,37 +279,64 @@ let yawShift = 0;
 let gainMultiplier = 0.15;
 let noiseGateThreshold = 10;
 let maxDropLimit = 25;
+let swayAmplitude = 1.5; 
 let isMicLive = false;
 
-// Offscreen buffer canvas environments
+// Eye Blinking State Trackers
+let isBlinking = false;
+
+// Offscreen Buffer Environments 
 let featheredJawCanvas = document.createElement('canvas'); 
 let upperLipPatchCanvas = document.createElement('canvas'); 
 let skinTextureHealerCanvas = document.createElement('canvas'); 
 let sourceImageCacheCanvas = document.createElement('canvas');
 let sCtx = sourceImageCacheCanvas.getContext('2d');
 
+// Swap Layout Editing Focus Modes
+targetJawBtn.addEventListener('click', () => {
+    editTarget = 'jaw';
+    targetJawBtn.className = 'active';
+    targetEyesBtn.className = '';
+    geometryModeRow.style.display = 'flex';
+    updateAllViewports(0);
+});
+
+targetEyesBtn.addEventListener('click', () => {
+    editTarget = 'eyes';
+    targetEyesBtn.className = 'active';
+    targetJawBtn.className = '';
+    geometryModeRow.style.display = 'none'; // Eyes use basic bounding boxes
+    updateAllViewports(0);
+});
+
 modeBoxBtn.addEventListener('click', () => {
     currentMode = 'box';
     modeBoxBtn.className = 'active';
     modeLassoBtn.className = '';
-    resetSelectionData();
+    mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+    lassoPoints = [];
+    updateAllViewports(0);
 });
 
 modeLassoBtn.addEventListener('click', () => {
     currentMode = 'lasso';
     modeLassoBtn.className = 'active';
     modeBoxBtn.className = '';
-    resetSelectionData();
+    mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+    lassoPoints = [];
+    updateAllViewports(0);
 });
 
 function resetSelectionData() {
     mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+    eyesBox = { x: 0, y: 0, w: 0, h: 0 };
     lassoPoints = [];
     checkReadyState();
     updateAllViewports(0);
 }
 
-function runArtworkRenderPipeline(mouthOffset = 0) {
+// Main Draw Pipeline Engine
+function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
     rCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
     if (!avatarImg.src) {
         rCtx.fillStyle = '#222';
@@ -306,124 +344,164 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
         return;
     }
 
+    // 1. Calculate Procedural Micro Breathing Sway (Sine Wave Tracking)
+    const swayY = Math.sin(timestamp * 0.003) * swayAmplitude;
+    const swayX = Math.cos(timestamp * 0.0015) * (swayAmplitude * 0.3);
+
+    rCtx.save();
+    // Shift the entire workspace base layout by the soft breathing coordinates
+    rCtx.translate(swayX, swayY);
+
+    // 2. Render Main Avatar Skin Face Plate
     rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
     
     const { x, y, w, h } = mouthBox;
-    if (w <= 0 || h <= 0) return;
-
-    let calculatedDrop = 0;
-    if (mouthOffset > noiseGateThreshold) {
-        calculatedDrop = (mouthOffset - noiseGateThreshold) * gainMultiplier;
-    }
-    const dropValue = Math.min(calculatedDrop, maxDropLimit); 
-
-    rCtx.save();
-    rCtx.drawImage(skinTextureHealerCanvas, x - featherBlur * 2, y - featherBlur * 2);
-    rCtx.restore();
-
-    rCtx.save();
-    rCtx.beginPath();
-    if (currentMode === 'box') {
-        rCtx.rect(x + 2, y, w - 4, h + dropValue);
-    } else {
-        if (lassoPoints.length > 0) {
-            rCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
-            for (let i = 1; i < lassoPoints.length; i++) {
-                rCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
-            }
-            rCtx.lineTo(lassoPoints[lassoPoints.length - 1].x, lassoPoints[lassoPoints.length - 1].y + dropValue);
-            rCtx.lineTo(lassoPoints[0].x, lassoPoints[0].y + dropValue);
+    if (w > 0 && h > 0) {
+        let calculatedDrop = 0;
+        if (mouthOffset > noiseGateThreshold) {
+            calculatedDrop = (mouthOffset - noiseGateThreshold) * gainMultiplier;
         }
+        const dropValue = Math.min(calculatedDrop, maxDropLimit); 
+
+        // Draw structural skin healer plate behind jaw gaps
+        rCtx.save();
+        rCtx.drawImage(skinTextureHealerCanvas, x - featherBlur * 2, y - featherBlur * 2);
+        rCtx.restore();
+
+        // Inner Mouth Cave rendering elements
+        rCtx.save();
+        rCtx.beginPath();
+        if (currentMode === 'box' || editTarget === 'eyes') {
+            rCtx.rect(x + 2, y, w - 4, h + dropValue);
+        } else {
+            if (lassoPoints.length > 0) {
+                rCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
+                for (let i = 1; i < lassoPoints.length; i++) rCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+                rCtx.lineTo(lassoPoints[lassoPoints.length - 1].x, lassoPoints[lassoPoints.length - 1].y + dropValue);
+                rCtx.lineTo(lassoPoints[0].x, lassoPoints[0].y + dropValue);
+            }
+        }
+        rCtx.clip();
+
+        rCtx.fillStyle = '#2d080e'; 
+        rCtx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+
+        rCtx.fillStyle = '#ffffff';
+        rCtx.fillRect(x + 12, y, w - 24, 6); 
+        
+        rCtx.fillStyle = '#ff4d6d';
+        const tongueY = y + h - (h * 0.28) + (dropValue * 0.2);
+        const tongueH = h * 0.35;
+        rCtx.beginPath();
+        rCtx.ellipse(x + (w / 2), tongueY + (tongueH / 2), w * 0.38, tongueH * 0.5, 0, 0, 2 * Math.PI);
+        rCtx.fill();
+
+        rCtx.fillStyle = '#eeeeee';
+        rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
+        rCtx.restore();
+
+        // Render moving jaw segment layer
+        rCtx.save();
+        const centerX = x + (w / 2);
+        const centerY = y; 
+        rCtx.translate(centerX, centerY);
+        rCtx.rotate((tiltAngle * Math.PI) / 180);
+        rCtx.drawImage(featheredJawCanvas, -w/2 - featherBlur * 2 + yawShift, -featherBlur * 2 + dropValue);
+        rCtx.restore();
+        
+        // Render upper lip security shield
+        rCtx.save();
+        rCtx.translate(centerX, centerY);
+        rCtx.rotate((tiltAngle * Math.PI) / 180);
+        rCtx.drawImage(upperLipPatchCanvas, -w/2 + yawShift, -10);
+        rCtx.restore();
     }
-    rCtx.clip();
 
-    rCtx.fillStyle = '#2d080e'; 
-    rCtx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+    // 3. Render Procedural Blink Eyelid Masks if state triggers
+    if (isBlinking && eyesBox.w > 0) {
+        rCtx.save();
+        rCtx.fillStyle = '#111'; // Fallback base color block
+        
+        // Sampling procedural color patch structures right above specified eye box coordinates
+        rCtx.beginPath();
+        rCtx.rect(eyesBox.x, eyesBox.y, eyesBox.w, eyesBox.h);
+        rCtx.clip();
 
-    rCtx.fillStyle = '#ffffff';
-    rCtx.fillRect(x + 12, y, w - 24, 6); 
-    
-    rCtx.fillStyle = '#ff4d6d';
-    const tongueY = y + h - (h * 0.28) + (dropValue * 0.2);
-    const tongueH = h * 0.35;
-    
-    rCtx.beginPath();
-    rCtx.ellipse(x + (w / 2), tongueY + (tongueH / 2), w * 0.38, tongueH * 0.5, 0, 0, 2 * Math.PI);
-    rCtx.fill();
+        // Project skin tone match coordinates directly down over eye positions
+        rCtx.drawImage(sourceImageCacheCanvas, eyesBox.x, eyesBox.y - 15, eyesBox.w, eyesBox.h, eyesBox.x, eyesBox.y, eyesBox.w, eyesBox.h);
+        
+        // Draw a soft shadow line indicating closed eyelids eyelashes crease
+        rCtx.strokeStyle = 'rgba(0,0,0,0.35)';
+        rCtx.lineWidth = 2;
+        rCtx.beginPath();
+        rCtx.moveTo(eyesBox.x, eyesBox.y + (eyesBox.h / 2));
+        rCtx.lineTo(eyesBox.x + eyesBox.w, eyesBox.y + (eyesBox.h / 2));
+        rCtx.stroke();
+        
+        rCtx.restore();
+    }
 
-    rCtx.strokeStyle = '#d92b4b';
-    rCtx.lineWidth = 2.5;
-    rCtx.beginPath();
-    rCtx.moveTo(x + (w / 2), tongueY + 2);
-    rCtx.quadraticCurveTo(x + (w / 2) - 1, tongueY + (tongueH * 0.5), x + (w / 2), tongueY + tongueH - 2);
-    rCtx.stroke();
-
-    rCtx.fillStyle = '#eeeeee';
-    rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
-    rCtx.restore();
-
-    rCtx.save();
-    const centerX = x + (w / 2);
-    const centerY = y; 
-
-    rCtx.translate(centerX, centerY);
-    rCtx.rotate((tiltAngle * Math.PI) / 180);
-    
-    rCtx.filter = 'none';
-    rCtx.drawImage(featheredJawCanvas, -w/2 - featherBlur * 2 + yawShift, -featherBlur * 2 + dropValue);
-    rCtx.restore();
-    
-    rCtx.save();
-    rCtx.translate(centerX, centerY);
-    rCtx.rotate((tiltAngle * Math.PI) / 180);
-    rCtx.drawImage(upperLipPatchCanvas, -w/2 + yawShift, -10);
-    rCtx.restore();
+    rCtx.restore(); // Restore breathing layout translates cleanly
 }
 
 function runUIGuidePipeline() {
     uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
-    if (!avatarImg.src) {
-        uCtx.fillStyle = '#fff';
-        uCtx.font = '14px Arial';
-        uCtx.textAlign = 'center';
-        uCtx.fillText("Upload portrait to initialize puppet asset...", uiCanvas.width / 2, 250);
-        return;
-    }
+    if (!avatarImg.src) return;
 
-    const { x, y, w, h } = mouthBox;
-    if (w <= 0 || h <= 0 && lassoPoints.length === 0) return;
-
-    uCtx.save();
-    if (currentMode === 'box') {
-        const centerX = x + (w / 2);
-        const centerY = y;
-        uCtx.translate(centerX, centerY);
-        uCtx.rotate((tiltAngle * Math.PI) / 180);
-
-        uCtx.strokeStyle = isDrawing ? "rgba(255, 71, 87, 0.9)" : "rgba(0, 255, 204, 0.85)";
-        if (isDrawing) uCtx.setLineDash([6, 4]);
-        uCtx.lineWidth = 2;
-        uCtx.strokeRect(-w/2 + yawShift, 0, w, h);
-    } else {
-        uCtx.strokeStyle = isDrawing ? "rgba(255, 71, 87, 0.9)" : "rgba(0, 255, 204, 0.85)";
-        if (isDrawing) uCtx.setLineDash([6, 4]);
-        uCtx.lineWidth = 2.5;
-        
-        if (lassoPoints.length > 0) {
+    // Draw Jaw Guideline Path structures
+    if (mouthBox.w > 0) {
+        uCtx.save();
+        uCtx.strokeStyle = "rgba(0, 255, 204, 0.5)";
+        uCtx.lineWidth = 1.5;
+        if (currentMode === 'box') {
+            uCtx.strokeRect(mouthBox.x, mouthBox.y, mouthBox.w, mouthBox.h);
+        } else if (lassoPoints.length > 0) {
             uCtx.beginPath();
             uCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
-            for (let i = 1; i < lassoPoints.length; i++) {
-                uCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
-            }
-            if (!isDrawing) uCtx.closePath();
+            for(let i=1; i<lassoPoints.length; i++) uCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+            uCtx.closePath();
             uCtx.stroke();
         }
+        uCtx.restore();
     }
-    uCtx.restore();
+
+    // Draw active Eyes Region Target Guide paths
+    if (eyesBox.w > 0) {
+        uCtx.save();
+        uCtx.strokeStyle = "rgba(255, 234, 0, 0.65)";
+        uCtx.lineWidth = 1.5;
+        uCtx.strokeRect(eyesBox.x, eyesBox.y, eyesBox.w, eyesBox.h);
+        uCtx.fillStyle = "rgba(255, 234, 0, 0.1)";
+        uCtx.fillRect(eyesBox.x, eyesBox.y, eyesBox.w, eyesBox.h);
+        uCtx.restore();
+    }
+
+    // Draw current active placement operation track lines
+    if (isDrawing) {
+        uCtx.save();
+        uCtx.strokeStyle = "#ff4757";
+        uCtx.lineWidth = 2;
+        uCtx.setLineDash([4, 4]);
+        if (editTarget === 'jaw' && currentMode === 'lasso') {
+            if (lassoPoints.length > 0) {
+                uCtx.beginPath();
+                uCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
+                for(let i=1; i<lassoPoints.length; i++) uCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+                uCtx.stroke();
+            }
+        } else {
+            const curW = mouthBox.w || eyesBox.w;
+            const curH = mouthBox.h || eyesBox.h;
+            const curX = editTarget === 'jaw' ? mouthBox.x : eyesBox.x;
+            const curY = editTarget === 'jaw' ? mouthBox.y : eyesBox.y;
+            uCtx.strokeRect(curX, curY, curW, curH);
+        }
+        uCtx.restore();
+    }
 }
 
 function updateAllViewports(volume = 0) {
-    runArtworkRenderPipeline(volume);
+    runArtworkRenderPipeline(volume, performance.now());
     runUIGuidePipeline();
 }
 
@@ -447,13 +525,15 @@ function bakePuppetLayers() {
     if (currentMode === 'box') {
         mCtx.fillRect(pad, pad, w, h);
     } else {
-        mCtx.beginPath();
-        mCtx.moveTo(lassoPoints[0].x - x + pad, lassoPoints[0].y - y + pad);
-        for (let i = 1; i < lassoPoints.length; i++) {
-            mCtx.lineTo(lassoPoints[i].x - x + pad, lassoPoints[i].y - y + pad);
+        if(lassoPoints.length > 0) {
+            mCtx.beginPath();
+            mCtx.moveTo(lassoPoints[0].x - x + pad, lassoPoints[0].y - y + pad);
+            for (let i = 1; i < lassoPoints.length; i++) {
+                mCtx.lineTo(lassoPoints[i].x - x + pad, lassoPoints[i].y - y + pad);
+            }
+            mCtx.closePath();
+            mCtx.fill();
         }
-        mCtx.closePath();
-        mCtx.fill();
     }
 
     fCtx.save();
@@ -489,22 +569,46 @@ function bakePuppetLayers() {
     updateAllViewports(0);
 }
 
-function processLiveMicrophoneFeed() {
-    if (!isMicLive) return;
+// Global Core Realtime Render Loop Event Frame Hook
+function processLiveMicrophoneFeed(timestamp) {
+    let currentVolume = 0;
 
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    analyser.getByteFrequencyData(dataArray);
+    if (isMicLive && analyser) {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+        
+        let totalVolume = 0;
+        for (let i = 0; i < 15; i++) totalVolume += dataArray[i];
+        currentVolume = totalVolume / 15;
+
+        const meterPercentage = Math.min((currentVolume / 120) * 100, 100);
+        volMeter.style.width = `${meterPercentage}%`;
+    }
+
+    // Always keep drawing to process breathing and random eye blinking triggers smoothly
+    runArtworkRenderPipeline(currentVolume, timestamp);
     
-    let totalVolume = 0;
-    for (let i = 0; i < 15; i++) totalVolume += dataArray[i];
-    let currentVolume = totalVolume / 15;
-
-    const meterPercentage = Math.min((currentVolume / 120) * 100, 100);
-    volMeter.style.width = `${meterPercentage}%`;
-
-    runArtworkRenderPipeline(currentVolume);
     requestAnimationFrame(processLiveMicrophoneFeed);
+}
+
+// Asynchronous Randomized Natural Eye Blinking Logic Generator
+function triggerRandomBlinkCycle() {
+    if (!isMicLive) {
+        // Wait and poll until stream is active
+        setTimeout(triggerRandomBlinkCycle, 1000);
+        return;
+    }
+
+    // Blink down duration matches physical human speeds: 150 milliseconds
+    isBlinking = true;
+    
+    setTimeout(() => {
+        isBlinking = false;
+        // Schedule next random tracking calculation pause window safely (2 to 7 seconds out)
+        const nextBlinkDelay = Math.random() * 5000 + 2000;
+        setTimeout(triggerRandomBlinkCycle, nextBlinkDelay);
+    }, 150);
 }
 
 function checkReadyState() {
@@ -523,13 +627,16 @@ function checkReadyState() {
     }
 }
 
-// Zoom Multiplier Variable Injection
+// Sliders Event Triggers Configuration Listeners
 zoomSlider.addEventListener('input', (e) => {
     currentZoomScale = parseInt(e.target.value) / 10;
     valZoom.innerText = currentZoomScale.toFixed(1) + "x";
     zoomContainer.style.setProperty('--zoom-level', currentZoomScale);
 });
-
+swaySlider.addEventListener('input', (e) => {
+    swayAmplitude = parseInt(e.target.value) / 10;
+    valSway.innerText = swayAmplitude.toFixed(1) + "px";
+});
 blurSlider.addEventListener('input', (e) => {
     featherBlur = parseInt(e.target.value);
     valBlur.innerText = featherBlur + "px";
@@ -551,27 +658,18 @@ dropLimitSlider.addEventListener('input', (e) => {
 tiltSlider.addEventListener('input', (e) => {
     tiltAngle = parseInt(e.target.value);
     valTilt.innerText = tiltAngle + "°";
-    updateAllViewports(0);
 });
 yawSlider.addEventListener('input', (e) => {
     yawShift = parseInt(e.target.value);
     valYaw.innerText = yawShift + "px";
-    updateAllViewports(0);
 });
 
-// CRITICAL MATH FIX: Normalize tracking points across the CSS layout scaling matrix
 function getCanvasSpaceMouseCoords(e) {
     const rect = uiCanvas.getBoundingClientRect();
-    
-    // 1. Calculate relative interaction locations across the actual client rectangle bounds
-    const screenOffsetX = e.clientX - rect.left;
-    const screenOffsetY = e.clientY - rect.top;
-    
-    // 2. Divide tracking inputs cleanly against the real browser matrix scaling values
-    const normalizedX = (screenOffsetX / rect.width) * uiCanvas.width;
-    const normalizedY = (screenOffsetY / rect.height) * uiCanvas.height;
-    
-    return { x: normalizedX, y: normalizedY };
+    return {
+        x: ((e.clientX - rect.left) / rect.width) * uiCanvas.width,
+        y: ((e.clientY - rect.top) / rect.height) * uiCanvas.height
+    };
 }
 
 uiCanvas.addEventListener('mousedown', (e) => {
@@ -582,25 +680,35 @@ uiCanvas.addEventListener('mousedown', (e) => {
     startX = coords.x;
     startY = coords.y;
     
-    if (currentMode === 'box') {
-        mouthBox = { x: startX, y: startY, w: 0, h: 0 };
+    if (editTarget === 'jaw') {
+        if (currentMode === 'box') {
+            mouthBox = { x: startX, y: startY, w: 0, h: 0 };
+        } else {
+            lassoPoints = [{ x: startX, y: startY }];
+        }
     } else {
-        lassoPoints = [{ x: startX, y: startY }];
+        eyesBox = { x: startX, y: startY, w: 0, h: 0 };
     }
 });
 
 uiCanvas.addEventListener('mousemove', (e) => {
     if (!isDrawing) return;
-    
     const coords = getCanvasSpaceMouseCoords(e);
     
-    if (currentMode === 'box') {
-        mouthBox.x = Math.min(startX, coords.x);
-        mouthBox.y = Math.min(startY, coords.y);
-        mouthBox.w = Math.abs(startX - coords.x);
-        mouthBox.h = Math.abs(startY - coords.y);
+    if (editTarget === 'jaw') {
+        if (currentMode === 'box') {
+            mouthBox.x = Math.min(startX, coords.x);
+            mouthBox.y = Math.min(startY, coords.y);
+            mouthBox.w = Math.abs(startX - coords.x);
+            mouthBox.h = Math.abs(startY - coords.y);
+        } else {
+            lassoPoints.push({ x: coords.x, y: coords.y });
+        }
     } else {
-        lassoPoints.push({ x: coords.x, y: coords.y });
+        eyesBox.x = Math.min(startX, coords.x);
+        eyesBox.y = Math.min(startY, coords.y);
+        eyesBox.w = Math.abs(startX - coords.x);
+        eyesBox.h = Math.abs(startY - coords.y);
     }
     updateAllViewports(0);
 });
@@ -608,7 +716,8 @@ uiCanvas.addEventListener('mousemove', (e) => {
 uiCanvas.addEventListener('mouseup', () => {
     if (!isDrawing) return;
     isDrawing = false;
-    if (currentMode === 'lasso' && lassoPoints.length > 2) {
+    
+    if (editTarget === 'jaw' && currentMode === 'lasso' && lassoPoints.length > 2) {
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         lassoPoints.forEach(p => {
             if (p.x < minX) minX = p.x;
@@ -618,8 +727,10 @@ uiCanvas.addEventListener('mouseup', () => {
         });
         mouthBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
     }
-    bakePuppetLayers();
+    
+    if (editTarget === 'jaw') bakePuppetLayers();
     checkReadyState();
+    runUIGuidePipeline();
 });
 
 imageInput.addEventListener('change', (e) => {
@@ -632,14 +743,14 @@ imageInput.addEventListener('change', (e) => {
             sourceImageCacheCanvas.height = renderCanvas.height;
             sCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
             resetSelectionData();
-            status.innerText = "Status: Image ready. Zoom in and trace selection area.";
+            status.innerText = "Status: Image loaded. Trace jaw cutout, then map your eyes zone.";
         };
     }
 });
 
 connectMicBtn.addEventListener('click', async () => {
     try {
-        status.innerText = "Status: Initializing Live Audio Stream Core...";
+        status.innerText = "Status: Connecting Microphone Feed Arrays...";
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 256;
@@ -651,19 +762,20 @@ connectMicBtn.addEventListener('click', async () => {
         isMicLive = true;
         uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
         
-        connectMicBtn.innerText = "🟢 MIC ONLINE & LIVE";
+        connectMicBtn.innerText = "🟢 STREAM ENGINE ACTIVE";
         connectMicBtn.style.background = "#222";
         connectMicBtn.style.color = "#2ed573";
         connectMicBtn.style.border = "2px solid #2ed573";
-        status.innerText = "Status: Streaming tracking nodes live.";
+        status.innerText = "Status: Performance mode online. Guide borders cleared.";
 
-        processLiveMicrophoneFeed();
+        triggerRandomBlinkCycle(); // Ignite the blinking engine
     } catch (err) {
         status.innerText = `Error connecting mic stream: ${err.message}`;
     }
 });
 
-updateAllViewports(0);
+// Kick off continuous animation driver 
+requestAnimationFrame(processLiveMicrophoneFeed);
 </script>
 
 </body>
