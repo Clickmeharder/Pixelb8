@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Avatar LipSync Video Generator</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+        text-align: center;
+        padding: 20px;
+    }
+    .grid-layout {
+        display: flex;
+        max-width: 1000px;
+        margin: 0 auto;
+        gap: 20px;
+        justify-content: center;
+    }
+    .panel {
+        background: #1a1a1a;
+        padding: 20px;
+        border-radius: 8px;
+        flex: 1;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .controls-group {
+        margin: 15px 0;
+        text-align: left;
+    }
+    label {
+        font-size: 12px;
+        color: #ff4757;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+    input[type="file"], input[type="number"], button {
+        width: 100%;
+        padding: 10px;
+        background: #222;
+        color: #fff;
+        border: 1px solid #333;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    button {
+        background: #ff4757;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        margin-top: 10px;
+    }
+    button:hover { background: #ff6b81; }
+    button:disabled { background: #444; cursor: not-allowed; }
+    canvas {
+        background: #000;
+        max-width: 100%;
+        border-radius: 4px;
+    }
+    #status {
+        color: lime;
+        font-family: monospace;
+        margin-top: 15px;
+    }
+</style>
+</head>
+<body>
+
+<h1>🎙️ Avatar Audio LipSync Pipeline</h1>
+<p style="color: #aaa;">Isolate the mouth mapping boundaries to drive dynamic browser-side video exports.</p>
+
+<div class="grid-layout">
+    <div class="panel">
+        <div class="controls-group">
+            <label>1. Upload Avatar Portrait Image</label>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+        
+        <div class="controls-group">
+            <label>2. Provide Voiceover Track</label>
+            <input type="file" id="audioInput" accept="audio/*">
+            <button id="recordBtn" style="background: #333; border: 1px solid #ff4757;">🎤 Record Audio Live</button>
+        </div>
+
+        <hr style="border-color: #222; margin: 20px 0;">
+        <h3>Mouth Alignment Coordinates (Pixels)</h3>
+        <p style="font-size: 11px; color:#888; margin-top:-10px;">Set the bounding box exactly over your character's lips</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="controls-group">
+                <label>X Start Position</label>
+                <input type="number" id="mX" value="180">
+            </div>
+            <div class="controls-group">
+                <label>Y Start Position</label>
+                <input type="number" id="mY" value="240">
+            </div>
+            <div class="controls-group">
+                <label>Mouth Width</label>
+                <input type="number" id="mW" value="140">
+            </div>
+            <div class="controls-group">
+                <label>Mouth Height</label>
+                <input type="number" id="mH" value="60">
+            </div>
+        </div>
+
+        <button id="generateBtn" disabled>🎬 Generate & Download Video</button>
+        <div id="status">System Status: Idle</div>
+    </div>
+
+    <div class="panel" style="max-width: 480px;">
+        <h3>Output Render Canvas</h3>
+        <canvas id="viewscreen" width="500" height="500"></canvas>
+        <audio id="audioPlayback" controls style="width: 100%; margin-top: 15px; display: none;"></audio>
+    </div>
+</div>
+
+<script>
+const imageInput = document.getElementById('imageInput');
+const audioInput = document.getElementById('audioInput');
+const recordBtn = document.getElementById('recordBtn');
+const generateBtn = document.getElementById('generateBtn');
+const status = document.getElementById('status');
+const canvas = document.getElementById('viewscreen');
+const ctx = canvas.getContext('2d');
+const audioPlayback = document.getElementById('audioPlayback');
+
+let avatarImg = new Image();
+let audioBlob = null;
+let audioCtx, analyser, sourceNode;
+let mediaRecorder;
+let recordedChunks = [];
+let isRecordingInput = false;
+let localVoiceRecorder;
+let voiceChunks = [];
+
+// Redraw default placement guidelines
+function drawCanvasPreview(mouthOffset = 0) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (avatarImg.src) {
+        // Render base face layout background configuration
+        ctx.drawImage(avatarImg, 0, 0, canvas.width, canvas.height);
+        
+        // Grab boundary configuration values
+        const x = parseInt(document.getElementById('mX').value);
+        const y = parseInt(document.getElementById('mY').value);
+        const w = parseInt(document.getElementById('mW').value);
+        const h = parseInt(document.getElementById('mH').value);
+        
+        // Draw the jaw movement layer
+        ctx.drawImage(avatarImg, x, y, w, h, x, y + (mouthOffset * 0.25), w, h + (mouthOffset * 0.15));
+        
+        // Render guide box when idle
+        if (mouthOffset === 0) {
+            ctx.strokeStyle = "rgba(255, 71, 87, 0.7)";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, w, h);
+        }
+    } else {
+        ctx.fillStyle = '#222';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = '14px Arial';
+        ctx.fillText("Upload portrait to initialize template asset...", 100, 250);
+    }
+}
+
+// 1. Process Image upload
+imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            avatarImg.src = event.target.result;
+            avatarImg.onload = () => {
+                drawCanvasPreview();
+                checkReadyState();
+            };
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Update preview window interactively if boxes shift
+['mX', 'mY', 'mW', 'mH'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => drawCanvasPreview());
+});
+
+// 2. Process File Audio upload
+audioInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        audioBlob = file;
+        audioPlayback.src = URL.createObjectURL(file);
+        audioPlayback.style.display = 'block';
+        checkReadyState();
+    }
+});
+
+// 3. Microphone voice capture track logic
+recordBtn.addEventListener('click', async () => {
+    if (!isRecordingInput) {
+        voiceChunks = [];
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        localVoiceRecorder = new MediaRecorder(stream);
+        localVoiceRecorder.ondataavailable = e => voiceChunks.push(e.data);
+        localVoiceRecorder.onstop = () => {
+            audioBlob = new Blob(voiceChunks, { type: 'audio/mp3' });
+            audioPlayback.src = URL.createObjectURL(audioBlob);
+            audioPlayback.style.display = 'block';
+            checkReadyState();
+        };
+        localVoiceRecorder.start();
+        recordBtn.innerText = "⏹️ Stop Recording";
+        isRecordingInput = true;
+    } else {
+        localVoiceRecorder.stop();
+        recordBtn.innerText = "🎤 Record Audio Live";
+        isRecordingInput = false;
+    }
+});
+
+function checkReadyState() {
+    if (avatarImg.src && audioBlob) {
+        generateBtn.disabled = false;
+        status.innerText = "Status: Assets compiled! Ready to generate.";
+    }
+}
+
+// 4. Core Render Engine Pipeline execution loop
+generateBtn.addEventListener('click', async () => {
+    status.innerText = "Status: Mounting audio pipeline environment...";
+    generateBtn.disabled = true;
+    
+    // Create localized audio parsing instances
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    
+    // Initialize standard element node audio source routing configuration profiles
+    const internalAudio = new Audio(audioPlayback.src);
+    sourceNode = audioCtx.createMediaElementSource(internalAudio);
+    sourceNode.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    
+    // Set up Video Media Recorder straight off our Canvas tracking context
+    const canvasStream = canvas.captureStream(30); // 30 FPS Capture target
+    
+    // Mix track stream audio data layer right back into the Canvas capture stream layout
+    const dest = audioCtx.createMediaStreamDestination();
+    sourceNode.connect(dest);
+    canvasStream.addTrack(dest.stream.getAudioTracks()[0]);
+    
+    mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm;codecs=vp9' });
+    recordedChunks = [];
+    
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+        status.innerText = "Status: Exporting video project down to file packaging structure...";
+        const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+        const downloadUrl = URL.createObjectURL(videoBlob);
+        
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `avatar_talking_head_${Date.now()}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        status.innerText = "Success! Video download generated perfectly.";
+        generateBtn.disabled = false;
+    };
+    
+    // Execution animation track loop function
+    function renderSyncFrame() {
+        if (!internalAudio.paused && !internalAudio.ended) {
+            requestAnimationFrame(renderSyncFrame);
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            // Analyze the lower frequency bands to capture human voice resonance peaks
+            let totalVolume = 0;
+            for (let i = 0; i < 20; i++) {
+                totalVolume += dataArray[i];
+            }
+            const averageVolume = totalVolume / 20; // Scale range 0 - 255
+            
+            // Execute the mouth opening matrix offset calculations
+            drawCanvasPreview(averageVolume);
+        } else if (internalAudio.ended) {
+            mediaRecorder.stop();
+        }
+    }
+    
+    // Begin processes synchronization simultaneously
+    mediaRecorder.start();
+    internalAudio.play();
+    renderSyncFrame();
+    status.innerText = "🔴 RENDER RECORDING LIVE... Wait for audio clip duration length to finish.";
+});
+</script>
+
+</body>
+</html>
