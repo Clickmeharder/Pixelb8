@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Video → MP3 (GitHub Pages Edition)</title>
+<title>Platform Media Asset Converter</title>
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -11,68 +11,99 @@ body {
     text-align: center;
     padding: 40px;
 }
-input, button {
-    width: 80%;
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #1a1a1a;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+input, button, select {
+    width: 100%;
     padding: 12px;
-    margin: 10px;
+    margin: 10px 0;
     border-radius: 4px;
     border: 1px solid #333;
+    box-sizing: border-box;
 }
-input { background: #222; color: #fff; }
+input, select { background: #222; color: #fff; }
 button { background: #ff4757; color: white; font-weight: bold; cursor: pointer; border: none; }
 button:hover { background: #ff6b81; }
-#status { margin-top: 20px; color: lime; font-family: monospace; white-space: pre-wrap; }
+button:disabled { background: #444; cursor: not-allowed; }
+#status { margin-top: 20px; color: lime; font-family: monospace; white-space: pre-wrap; text-align: left; background: #000; padding: 10px; border-radius: 4px; max-height: 150px; overflow-y: auto;}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 </head>
 <body>
 
-<h1>🎧 Video → MP3 Converter (Static Host Fix)</h1>
-<input id="url" placeholder="Direct video URL" />
-<br>
-<button id="btn">Convert to MP3</button>
-<pre id="status">Idle</pre>
+<div class="container">
+    <h1>🎧 Platform Audio Extractor</h1>
+    <p style="color: #aaa; font-size: 14px;">Paste the raw video stream endpoint or direct asset URL below</p>
+
+    <select id="formatHint">
+        <option value="mp4">Source Asset is MP4 (.mp4)</option>
+        <option value="webm">Source Asset is WebM (.webm)</option>
+    </select>
+
+    <input id="url" placeholder="https://pixelb8.lol/assets/stream_01.mp4" />
+    <button id="btn">Extract Audio to MP3</button>
+    
+    <pre id="status">System Status: Idle</pre>
+</div>
 
 <script>
-// Grab the global instances exposed by the v0.11 script tag
 const { createFFmpeg, fetchFile } = FFmpeg;
-const ffmpeg = createFFmpeg({ log: true });
+
+const ffmpeg = createFFmpeg({ 
+    log: true,
+    corePath: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
+});
 
 const btn = document.getElementById("btn");
 const status = document.getElementById("status");
+const formatHint = document.getElementById("formatHint");
 
-// Handle internal logs
-ffmpeg.setLogger(({ type, message }) => {
+ffmpeg.setLogger(({ message }) => {
     console.log(message);
-    if (message.includes('Duration')) {
-        status.innerText = `Converting...\n${message}`;
+    if (message.includes('Duration') || message.includes('size=')) {
+        status.innerText = `Processing Audio Stream...\n${message}`;
     }
 });
 
 async function convert() {
     try {
         const url = document.getElementById("url").value.trim();
-        if (!url) return alert("Please enter a video URL");
+        if (!url) return alert("Please provide a valid source address.");
+        
+        // Protection alert explaining the cross-origin pipeline limits
+        if (url.includes("youtube.com") || url.includes("youtu.be")) {
+            return alert("Standard YouTube watch page strings cannot be processed entirely client-side without an active backend chunk-decoder. Please use a direct server file link!");
+        }
 
         btn.disabled = true;
         
         if (!ffmpeg.isLoaded()) {
-            status.innerText = "Loading single-threaded FFmpeg core...";
+            status.innerText = "Initializing WASM Audio Engine...";
             await ffmpeg.load();
         }
 
-        status.innerText = "Downloading video bytes...";
-        // Note: The source video URL must still allow CORS requests!
+        status.innerText = "Streaming resource bytes into client memory...";
         const file = await fetchFile(url);
 
-        status.innerText = "Writing to sandbox memory...";
-        ffmpeg.FS('writeFile', 'input.mp4', file);
+        // Detect extension preference
+        const extension = formatHint.value;
+        const inputName = `input.${extension}`;
 
-        status.innerText = "Extracting audio profile...";
-        await ffmpeg.run('-i', 'input.mp4', '-vn', '-acodec', 'libmp3lame', '-b:a', '192k', 'output.mp3');
+        status.innerText = "Allocating sandbox file system space...";
+        ffmpeg.FS('writeFile', inputName, file);
 
-        status.innerText = "Packaging audio file download...";
+        status.innerText = "Executing algorithmic audio demuxing step...";
+        // Strips visual track completely (-vn) and maps cleanly to continuous constant bitrate MP3
+        await ffmpeg.run('-i', inputName, '-vn', '-acodec', 'libmp3lame', '-b:a', '192k', 'output.mp3');
+
+        status.innerText = "Compiling file down to system download layer...";
         const data = ffmpeg.FS('readFile', 'output.mp3');
 
         const blob = new Blob([data.buffer], { type: 'audio/mp3' });
@@ -80,15 +111,15 @@ async function convert() {
 
         const a = document.createElement("a");
         a.href = downloadUrl;
-        a.download = `audio_${Date.now()}.mp3`;
+        a.download = `extracted_audio_${Date.now()}.mp3`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
 
-        status.innerText = "Done! Check your downloads window.";
+        status.innerText = "Success! Audio downloaded perfectly.";
     } catch (err) {
         console.error(err);
-        status.innerText = `Error: ${err.message}\nMake sure your video host allows CORS requests.`;
+        status.innerText = `Pipeline Error: ${err.message}\n\nTroubleshooting Tip: Verify that the source video's origin domain permits CORS sharing headers (Access-Control-Allow-Origin).`;
     } finally {
         btn.disabled = false;
     }
