@@ -85,7 +85,7 @@
 <body>
 
 <h1>🎙️ Drag-and-Trace Puppet LipSync</h1>
-<h2> version 3</h2>
+
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
@@ -159,7 +159,7 @@ let isGeneratingVideo = false;
 
 // Offscreen canvases for puppet manipulation
 let jawPieceCanvas = document.createElement('canvas');
-let upperLipPatchCanvas = document.createElement('canvas'); // Keeps upper lip pinned in front
+let upperLipPatchCanvas = document.createElement('canvas'); 
 
 function drawCanvasPreview(mouthOffset = 0) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -195,24 +195,23 @@ function drawCanvasPreview(mouthOffset = 0) {
 
                 // 3. SLIDE THE FEATHERED CHIN/JAW PIECE DOWN
                 ctx.save();
-                // Apply a slight blur filter overlay to smooth out the edge lines on movement
                 ctx.filter = 'blur(0.8px)';
                 ctx.drawImage(jawPieceCanvas, x, y + dropValue);
                 ctx.restore();
                 
-                // 4. FIX: Overlap original Upper Lip Patch back on top so teeth stay hidden underneath
+                // 4. Overlap original Upper Lip Patch back on top so teeth stay hidden underneath
                 ctx.drawImage(upperLipPatchCanvas, x, y - 10);
             } 
             
-            // Render UI helper elements
+            // FIX: If video generation pipeline is active, force-kill all guide boxes immediately
             if (!isGeneratingVideo) {
                 if (isDrawing) {
-                    // FIX: Visual feedback line shown in real-time WHILE dragging your mouse
+                    // Visual feedback lines shown in real-time WHILE dragging your mouse
                     ctx.strokeStyle = "rgba(255, 71, 87, 0.85)";
                     ctx.setLineDash([6, 4]);
                     ctx.lineWidth = 2;
                     ctx.strokeRect(x, y, w, h);
-                    ctx.setLineDash([]); // Reset line formatting
+                    ctx.setLineDash([]); 
                 } else if (dropValue <= 0.5) {
                     // Saved idle box state indicators
                     ctx.strokeStyle = "rgba(0, 255, 204, 0.8)";
@@ -243,14 +242,11 @@ function bakePuppetLayers() {
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
 
-    // 1. Bake the moving jaw component
     jawPieceCanvas.width = w;
     jawPieceCanvas.height = h;
     const jCtx = jawPieceCanvas.getContext('2d');
     jCtx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
     
-    // 2. FIX: Capture a safety patch of the upper lip zone (10px buffer above drag line)
-    // This allows the top lip to layer neatly over teeth if jaw moves out of place
     upperLipPatchCanvas.width = w;
     upperLipPatchCanvas.height = 15; 
     const uCtx = upperLipPatchCanvas.getContext('2d');
@@ -293,7 +289,6 @@ canvas.addEventListener('mouseup', () => {
     if (!isDrawing || isGeneratingVideo) return;
     isDrawing = false;
     bakePuppetLayers();
-    // Redraw once immediately to swap active drag outline with the saved state box
     drawCanvasPreview(); 
     checkReadyState();
 });
@@ -370,6 +365,7 @@ generateBtn.addEventListener('click', async () => {
     videoPlayback.style.display = 'none';
     previewTitle.style.display = 'none';
     
+    // FIX: Lock generation flags before stream pipeline is instantiated
     isGeneratingVideo = true; 
     drawCanvasPreview(0);
     
