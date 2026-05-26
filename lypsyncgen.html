@@ -280,8 +280,7 @@ let maxDropLimit = 25;
 let animationFrameId = null;
 
 // Offscreen buffer canvas environments
-let jawPieceCanvas = document.createElement('canvas');
-let featheredJawCanvas = document.createElement('canvas'); // FIXED: Secondary compositing buffer for crisp centers
+let featheredJawCanvas = document.createElement('canvas'); 
 let upperLipPatchCanvas = document.createElement('canvas'); 
 let skinTextureHealerCanvas = document.createElement('canvas'); 
 let sourceImageCacheCanvas = document.createElement('canvas');
@@ -326,7 +325,7 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
 
     // Step 1.5: Patch background layer void structures safely
     rCtx.save();
-    rCtx.drawImage(skinTextureHealerCanvas, x, y);
+    rCtx.drawImage(skinTextureHealerCanvas, x - featherBlur * 2, y - featherBlur * 2);
     rCtx.restore();
 
     // Step 2: Inner Mouth Cave Render Core
@@ -375,7 +374,7 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
     rCtx.restore();
 
-    // Step 3: Draw sliding jaw puppet layer with optimized edge-only feathering context
+    // Step 3: Draw sliding jaw puppet layer with the newly extracted extended-margin feather boundaries
     rCtx.save();
     const centerX = x + (w / 2);
     const centerY = y; 
@@ -383,9 +382,9 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.translate(centerX, centerY);
     rCtx.rotate((tiltAngle * Math.PI) / 180);
     
-    // Clear the rendering filter off the global layer context to prevent internal blur errors
     rCtx.filter = 'none';
-    rCtx.drawImage(featheredJawCanvas, -w/2 + yawShift, dropValue);
+    // Offset drawing position slightly to account for the feather margin added around the asset canvas boundaries
+    rCtx.drawImage(featheredJawCanvas, -w/2 - featherBlur * 2 + yawShift, -featherBlur * 2 + dropValue);
     rCtx.restore();
     
     // Step 4: Upper Lip Protector Layer
@@ -439,57 +438,73 @@ function runUIGuidePipeline() {
 }
 
 function updateAllViewports(volume = 0) {
-    // Generate feather blend pass immediately before screen paint frames loop execution
-    applyEdgeFeatherPass();
     runArtworkRenderPipeline(volume);
     runUIGuidePipeline();
 }
 
+// FIXED PIPELINE: Generates true two-way edge blending by pre-blurring a mask before source extraction
 function bakePuppetLayers() {
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
 
-    // Allocate sliding jaw environment layers
-    jawPieceCanvas.width = w;
-    jawPieceCanvas.height = h;
-    const jCtx = jawPieceCanvas.getContext('2d');
-    jCtx.clearRect(0, 0, w, h);
+    const pad = featherBlur * 2; // Create a safety margin buffer outside the bounding box
 
+    // 1. Setup Feathered Moving Jaw Offscreen Canvas
+    featheredJawCanvas.width = w + pad * 2;
+    featheredJawCanvas.height = h + pad * 2;
+    const fCtx = featheredJawCanvas.getContext('2d');
+    fCtx.clearRect(0, 0, featheredJawCanvas.width, featheredJawCanvas.height);
+
+    // 2. Build the blurred visibility matte mask
+    let maskCanvas = document.createElement('canvas');
+    maskCanvas.width = featheredJawCanvas.width;
+    maskCanvas.height = featheredJawCanvas.height;
+    const mCtx = maskCanvas.getContext('2d');
+
+    mCtx.fillStyle = '#ffffff';
     if (currentMode === 'box') {
-        jCtx.drawImage(sourceImageCacheCanvas, x, y, w, h, 0, 0, w, h);
+        mCtx.fillRect(pad, pad, w, h);
     } else {
-        jCtx.save();
-        jCtx.beginPath();
-        jCtx.moveTo(lassoPoints[0].x - x, lassoPoints[0].y - y);
+        mCtx.beginPath();
+        mCtx.moveTo(lassoPoints[0].x - x + pad, lassoPoints[0].y - y + pad);
         for (let i = 1; i < lassoPoints.length; i++) {
-            jCtx.lineTo(lassoPoints[i].x - x, lassoPoints[i].y - y);
+            mCtx.lineTo(lassoPoints[i].x - x + pad, lassoPoints[i].y - y + pad);
         }
-        jCtx.closePath();
-        jCtx.clip();
-        jCtx.drawImage(sourceImageCacheCanvas, x, y, w, h, 0, 0, w, h);
-        jCtx.restore();
+        mCtx.closePath();
+        mCtx.fill();
     }
+
+    // 3. Draw the blurred mask directly onto the jaw segment container
+    fCtx.save();
+    if (featherBlur > 0) {
+        fCtx.filter = `blur(${featherBlur}px)`;
+    }
+    fCtx.drawImage(maskCanvas, 0, 0);
+    fCtx.restore();
+
+    // 4. Extract skin textures safely over the blurred mask structure (Blends perfectly inside AND outside)
+    fCtx.save();
+    fCtx.globalCompositeOperation = 'source-in';
+    // Draw the image shifted to match the padding extension layout boundaries
+    fCtx.drawImage(sourceImageCacheCanvas, x - pad, y - pad, w + pad * 2, h + pad * 2, 0, 0, w + pad * 2, h + pad * 2);
+    fCtx.restore();
     
-    // Background patch generator logic safely
-    skinTextureHealerCanvas.width = w;
-    skinTextureHealerCanvas.height = h;
+    // 5. Update background restoration plate layout with padding compensation
+    skinTextureHealerCanvas.width = w + pad * 2;
+    skinTextureHealerCanvas.height = h + pad * 2;
     const hCtx = skinTextureHealerCanvas.getContext('2d');
-    hCtx.clearRect(0, 0, w, h);
+    hCtx.clearRect(0, 0, skinTextureHealerCanvas.width, skinTextureHealerCanvas.height);
     
     hCtx.save();
-    if (currentMode === 'lasso') {
-        hCtx.beginPath();
-        hCtx.moveTo(lassoPoints[0].x - x, lassoPoints[0].y - y);
-        for (let i = 1; i < lassoPoints.length; i++) {
-            hCtx.lineTo(lassoPoints[i].x - x, lassoPoints[i].y - y);
-        }
-        hCtx.closePath();
-        hCtx.clip();
-    }
-    hCtx.drawImage(sourceImageCacheCanvas, x, y + 15, w, h, 0, 0, w, h);
+    hCtx.drawImage(maskCanvas, 0, 0);
     hCtx.restore();
 
-    // Upper lip overlay guard shield execution
+    hCtx.save();
+    hCtx.globalCompositeOperation = 'source-in';
+    hCtx.drawImage(sourceImageCacheCanvas, x - pad, y - pad + 15, w + pad * 2, h + pad * 2, 0, 0, w + pad * 2, h + pad * 2);
+    hCtx.restore();
+
+    // 6. Bake standard safety upper lip overlay guard shield
     upperLipPatchCanvas.width = w;
     upperLipPatchCanvas.height = 15; 
     const uCtx = upperLipPatchCanvas.getContext('2d');
@@ -499,51 +514,11 @@ function bakePuppetLayers() {
     updateAllViewports(0);
 }
 
-// CRITICAL FIX PIPELINE: Isolate blur effects entirely to perimeter boundaries of asset mask 
-function applyEdgeFeatherPass() {
-    const { w, h } = mouthBox;
-    if (w <= 0 || h <= 0) return;
-
-    featheredJawCanvas.width = w;
-    featheredJawCanvas.height = h;
-    const fCtx = featheredJawCanvas.getContext('2d');
-    fCtx.clearRect(0, 0, w, h);
-
-    // 1. Draw raw clean crisp center pixels down first
-    fCtx.drawImage(jawPieceCanvas, 0, 0);
-
-    // 2. Composite an alpha alpha mask that feathers cleanly to background layout elements
-    if (featherBlur > 0) {
-        fCtx.save();
-        fCtx.globalCompositeOperation = 'destination-in';
-        
-        // Use a filter context strictly limited inside this offscreen canvas execution layer pass
-        fCtx.filter = `blur(${featherBlur}px)`;
-        
-        fCtx.fillStyle = '#ffffff';
-        if (currentMode === 'box') {
-            // Inset mask coordinates down slightly to pull blurring strictly to bounds perimeter
-            fCtx.fillRect(featherBlur, featherBlur, w - (featherBlur * 2), h - (featherBlur * 2));
-        } else {
-            fCtx.beginPath();
-            const startPtX = lassoPoints[0].x - mouthBox.x;
-            const startPtY = lassoPoints[0].y - mouthBox.y;
-            fCtx.moveTo(startPtX, startPtY);
-            for (let i = 1; i < lassoPoints.length; i++) {
-                fCtx.lineTo(lassoPoints[i].x - mouthBox.x, lassoPoints[i].y - mouthBox.y);
-            }
-            fCtx.closePath();
-            fCtx.fill();
-        }
-        fCtx.restore();
-    }
-}
-
 // Sliders Triggers Configuration Tuning Listeners
 blurSlider.addEventListener('input', (e) => {
     featherBlur = parseInt(e.target.value);
     valBlur.innerText = featherBlur + "px";
-    updateAllViewports(currentVolumeOffset);
+    if(mouthBox.w > 0) bakePuppetLayers(); // Re-bake structural margin sizes dynamically
 });
 gainSlider.addEventListener('input', (e) => {
     gainMultiplier = parseInt(e.target.value) / 100;
