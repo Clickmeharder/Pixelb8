@@ -989,16 +989,16 @@ function extractYouTubeId(url) {
     return (match && match[2].length === 11) ? match[2] : null;
 }
 
-// Global hook: Instantiates the player container immediately on load
+// Global hook: Instantiates the player container safely
 function onYouTubeIframeAPIReady() {
     console.log("⚓ YouTube IFrame API Mounted successfully.");
     ytPlayer = new YT.Player('ytPlayerNode', {
         height: '100%',
         width: '100%',
         playerVars: {
-            'autoplay': 0,
+            'autoplay': 1, // Tell YouTube we intend to play immediately
             'controls': 1,
-            'origin': window.location.origin
+            'origin': window.location.origin // Explicitly matches pixelb8.lol to reduce postMessage warnings
         },
         events: {
             'onReady': () => {
@@ -1011,6 +1011,12 @@ function onYouTubeIframeAPIReady() {
                     stopAudioFrequencyCaptureLoop();
                     playNextSong();
                 }
+            },
+            'onError': (err) => {
+                console.warn("YouTube Player error encountered:", err.data);
+                // Automatically skip broken/unembeddable videos so the queue doesn't lock up
+                stopAudioFrequencyCaptureLoop();
+                playNextSong();
             }
         }
     });
@@ -1086,8 +1092,8 @@ function playNextSong() {
         return;
     }
 
-    if (!ytPlayerReady || !ytPlayer) {
-        console.warn("Player frame context missing. Retrying in 500ms...");
+    if (!ytPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoById !== 'function') {
+        console.warn("Player frame context missing or unprimed. Retrying in 500ms...");
         setTimeout(playNextSong, 500);
         return;
     }
@@ -1096,31 +1102,40 @@ function playNextSong() {
     const nextSong = songQueue.shift();
     status.innerText = `🎶 Track Loading: "${nextSong.title}"`;
 
-    // Hot-swap parameters safely inside the already initialized player frame context
-    if (nextSong.type === 'id') {
-        ytPlayer.loadVideoById(nextSong.id);
-    } else {
-        ytPlayer.loadPlaylist({
-            listType: 'search',
-            list: nextSong.id,
-            index: 0
-        });
+    try {
+        if (nextSong.type === 'id') {
+            ytPlayer.loadVideoById(nextSong.id);
+        } else {
+            ytPlayer.loadPlaylist({
+                listType: 'search',
+                list: nextSong.id,
+                index: 0
+            });
+        }
+        startAudioFrequencyCaptureLoop();
+    } catch(e) {
+        console.error("Failed to inject tracking parameters into player context:", e);
+        isPlayingSong = false;
+        setTimeout(playNextSong, 1000);
     }
-    
-    startAudioFrequencyCaptureLoop();
 }
 
-// Simulated audio frequency loopback bridge
+// Simulated audio frequency loopback bridge with explicit method verification
 let captureTimer = null;
 function startAudioFrequencyCaptureLoop() {
     if (captureTimer) clearInterval(captureTimer);
     
     captureTimer = setInterval(() => {
         if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
-            const state = ytPlayer.getPlayerState();
-            if (state === 1) { // Playing
-                trackVolumeLevel = Math.random() * 45 + 25; 
-            } else {
+            try {
+                const state = ytPlayer.getPlayerState();
+                if (state === 1) { // 1 means Playing
+                    trackVolumeLevel = Math.random() * 45 + 25; 
+                } else {
+                    trackVolumeLevel = 0;
+                }
+            } catch (err) {
+                // Catch any rare mid-state loading errors silently to prevent halting the main thread
                 trackVolumeLevel = 0;
             }
         }
