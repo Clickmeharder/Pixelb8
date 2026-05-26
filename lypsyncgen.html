@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Avatar LipSync Video Generator</title>
+<title>Advanced Puppet LipSync Tool</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -37,7 +37,7 @@
         margin-bottom: 5px;
         text-transform: uppercase;
     }
-    input[type="file"], input[type="number"], button {
+    input[type="file"], button {
         width: 100%;
         padding: 10px;
         background: #222;
@@ -59,22 +59,37 @@
         background: #000;
         max-width: 100%;
         border-radius: 4px;
+        cursor: crosshair;
     }
     #status {
         color: lime;
         font-family: monospace;
         margin-top: 15px;
     }
+    .instructions {
+        font-size: 13px;
+        color: #aaa;
+        background: #000;
+        padding: 10px;
+        border-radius: 4px;
+        border-left: 3px solid #ff4757;
+        text-align: left;
+    }
 </style>
 </head>
 <body>
 
-<h1>🎙️ Avatar Audio LipSync Pipeline</h1>
-<p style="color: #aaa;">Isolate the mouth mapping boundaries to drive dynamic browser-side video exports.</p>
+<h1>🎙️ Advanced Puppet-Layer Avatar LipSync</h1>
 
 <div class="grid-layout">
     <div class="panel">
-        <div class="controls-group">
+        <div class="instructions">
+            <strong>🎯 How to Trace for the Puppet Layer:</strong><br>
+            Start your drag at the <strong>line where the top and bottom lips meet</strong>, and drag down to include the <strong>entire chin</strong>. <br><br>
+            The script will cut this chin out, place teeth/tongue behind it, and slide it down smoothly when audio plays!
+        </div>
+
+        <div class="controls-group" style="margin-top: 20px;">
             <label>1. Upload Avatar Portrait Image</label>
             <input type="file" id="imageInput" accept="image/*">
         </div>
@@ -85,35 +100,12 @@
             <button id="recordBtn" style="background: #333; border: 1px solid #ff4757;">🎤 Record Audio Live</button>
         </div>
 
-        <hr style="border-color: #222; margin: 20px 0;">
-        <h3>Mouth Alignment Coordinates (Pixels)</h3>
-        <p style="font-size: 11px; color:#888; margin-top:-10px;">Set the bounding box exactly over your character's lips</p>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div class="controls-group">
-                <label>X Start Position</label>
-                <input type="number" id="mX" value="180">
-            </div>
-            <div class="controls-group">
-                <label>Y Start Position</label>
-                <input type="number" id="mY" value="240">
-            </div>
-            <div class="controls-group">
-                <label>Mouth Width</label>
-                <input type="number" id="mW" value="140">
-            </div>
-            <div class="controls-group">
-                <label>Mouth Height</label>
-                <input type="number" id="mH" value="60">
-            </div>
-        </div>
-
         <button id="generateBtn" disabled>🎬 Generate & Download Video</button>
-        <div id="status">System Status: Idle</div>
+        <div id="status">System Status: Awaiting avatar upload...</div>
     </div>
 
     <div class="panel" style="max-width: 480px;">
-        <h3>Output Render Canvas</h3>
+        <h3>Click & Drag From Lip Line Down To Chin</h3>
         <canvas id="viewscreen" width="500" height="500"></canvas>
         <audio id="audioPlayback" controls style="width: 100%; margin-top: 15px; display: none;"></audio>
     </div>
@@ -138,174 +130,100 @@ let isRecordingInput = false;
 let localVoiceRecorder;
 let voiceChunks = [];
 
-// Redraw default placement guidelines
+let isDrawing = false;
+let startX = 0;
+let startY = 0;
+let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+
+// Offscreen canvases used to preserve layers clean
+let faceBaseCanvas = document.createElement('canvas');
+let jawPieceCanvas = document.createElement('canvas');
+
 function drawCanvasPreview(mouthOffset = 0) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (avatarImg.src) {
-        // Render base face layout background configuration
+        // 1. Draw original base background face
         ctx.drawImage(avatarImg, 0, 0, canvas.width, canvas.height);
         
-        // Grab boundary configuration values
-        const x = parseInt(document.getElementById('mX').value);
-        const y = parseInt(document.getElementById('mY').value);
-        const w = parseInt(document.getElementById('mW').value);
-        const h = parseInt(document.getElementById('mH').value);
+        const { x, y, w, h } = mouthBox;
         
-        // Draw the jaw movement layer
-        ctx.drawImage(avatarImg, x, y, w, h, x, y + (mouthOffset * 0.25), w, h + (mouthOffset * 0.15));
-        
-        // Render guide box when idle
-        if (mouthOffset === 0) {
-            ctx.strokeStyle = "rgba(255, 71, 87, 0.7)";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x, y, w, h);
+        if (w > 0 && h > 0) {
+            // Max movement displacement cap
+            const dropValue = Math.min(mouthOffset * 0.18, 35); 
+
+            if (dropValue > 2) {
+                // 2. DRAW THE MOUTH CAVE INTERIOR (Teeth, Throat, Tongue)
+                ctx.fillStyle = '#3a0a12'; // Dark throat interior
+                ctx.fillRect(x + 5, y, w - 10, h);
+
+                // Top Teeth Layer
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(x + 12, y, w - 24, 6); 
+                
+                // Tongue Layer
+                ctx.fillStyle = '#ff4d6d';
+                ctx.beginPath();
+                ctx.arc(x + (w / 2), y + h - 5, w / 3, 0, Math.PI, true);
+                ctx.fill();
+
+                // Bottom Teeth Layer (rides on top of the moving jaw)
+                ctx.fillStyle = '#eeeeee';
+                ctx.fillRect(x + 14, y + dropValue - 4, w - 28, 4);
+
+                // 3. SLIDE THE CHIN/JAW PIECE DOWN over the cave
+                ctx.drawImage(jawPieceCanvas, x, y + dropValue);
+            } else {
+                // Draw normal highlighting lines when idle
+                ctx.strokeStyle = "rgba(0, 255, 204, 0.8)";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, w, h);
+                
+                ctx.fillStyle = "rgba(0, 255, 204, 0.15)";
+                ctx.fillRect(x, y, w, h);
+                
+                ctx.fillStyle = "#00ffcc";
+                ctx.font = "bold 11px Arial";
+                ctx.fillText("JAW/CHIN PUPPET LAYER ACTIVE", x + 5, y - 7);
+            }
         }
     } else {
         ctx.fillStyle = '#222';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = '#fff';
         ctx.font = '14px Arial';
-        ctx.fillText("Upload portrait to initialize template asset...", 100, 250);
+        ctx.textAlign = 'center';
+        ctx.fillText("Upload portrait to initialize puppet asset...", canvas.width / 2, 250);
     }
 }
 
-// 1. Process Image upload
-imageInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            avatarImg.src = event.target.result;
-            avatarImg.onload = () => {
-                drawCanvasPreview();
-                checkReadyState();
-            };
-        };
-        reader.readAsDataURL(file);
-    }
-});
+// Extract layers dynamically on mouse release loop
+function bakePuppetLayers() {
+    const { x, y, w, h } = mouthBox;
+    if (w <= 0 || h <= 0) return;
 
-// Update preview window interactively if boxes shift
-['mX', 'mY', 'mW', 'mH'].forEach(id => {
-    document.getElementById(id).addEventListener('input', () => drawCanvasPreview());
-});
-
-// 2. Process File Audio upload
-audioInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        audioBlob = file;
-        audioPlayback.src = URL.createObjectURL(file);
-        audioPlayback.style.display = 'block';
-        checkReadyState();
-    }
-});
-
-// 3. Microphone voice capture track logic
-recordBtn.addEventListener('click', async () => {
-    if (!isRecordingInput) {
-        voiceChunks = [];
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        localVoiceRecorder = new MediaRecorder(stream);
-        localVoiceRecorder.ondataavailable = e => voiceChunks.push(e.data);
-        localVoiceRecorder.onstop = () => {
-            audioBlob = new Blob(voiceChunks, { type: 'audio/mp3' });
-            audioPlayback.src = URL.createObjectURL(audioBlob);
-            audioPlayback.style.display = 'block';
-            checkReadyState();
-        };
-        localVoiceRecorder.start();
-        recordBtn.innerText = "⏹️ Stop Recording";
-        isRecordingInput = true;
-    } else {
-        localVoiceRecorder.stop();
-        recordBtn.innerText = "🎤 Record Audio Live";
-        isRecordingInput = false;
-    }
-});
-
-function checkReadyState() {
-    if (avatarImg.src && audioBlob) {
-        generateBtn.disabled = false;
-        status.innerText = "Status: Assets compiled! Ready to generate.";
-    }
+    // Build the isolated moving chin template
+    jawPieceCanvas.width = w;
+    jawPieceCanvas.height = h;
+    const jCtx = jawPieceCanvas.getContext('2d');
+    
+    // Snip exactly what was inside the tracking bounding box box parameters
+    jCtx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
 }
 
-// 4. Core Render Engine Pipeline execution loop
-generateBtn.addEventListener('click', async () => {
-    status.innerText = "Status: Mounting audio pipeline environment...";
-    generateBtn.disabled = true;
-    
-    // Create localized audio parsing instances
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 256;
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    
-    // Initialize standard element node audio source routing configuration profiles
-    const internalAudio = new Audio(audioPlayback.src);
-    sourceNode = audioCtx.createMediaElementSource(internalAudio);
-    sourceNode.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    
-    // Set up Video Media Recorder straight off our Canvas tracking context
-    const canvasStream = canvas.captureStream(30); // 30 FPS Capture target
-    
-    // Mix track stream audio data layer right back into the Canvas capture stream layout
-    const dest = audioCtx.createMediaStreamDestination();
-    sourceNode.connect(dest);
-    canvasStream.addTrack(dest.stream.getAudioTracks()[0]);
-    
-    mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm;codecs=vp9' });
-    recordedChunks = [];
-    
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-        status.innerText = "Status: Exporting video project down to file packaging structure...";
-        const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
-        const downloadUrl = URL.createObjectURL(videoBlob);
-        
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `avatar_talking_head_${Date.now()}.webm`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        
-        status.innerText = "Success! Video download generated perfectly.";
-        generateBtn.disabled = false;
-    };
-    
-    // Execution animation track loop function
-    function renderSyncFrame() {
-        if (!internalAudio.paused && !internalAudio.ended) {
-            requestAnimationFrame(renderSyncFrame);
-            
-            analyser.getByteFrequencyData(dataArray);
-            
-            // Analyze the lower frequency bands to capture human voice resonance peaks
-            let totalVolume = 0;
-            for (let i = 0; i < 20; i++) {
-                totalVolume += dataArray[i];
-            }
-            const averageVolume = totalVolume / 20; // Scale range 0 - 255
-            
-            // Execute the mouth opening matrix offset calculations
-            drawCanvasPreview(averageVolume);
-        } else if (internalAudio.ended) {
-            mediaRecorder.stop();
-        }
-    }
-    
-    // Begin processes synchronization simultaneously
-    mediaRecorder.start();
-    internalAudio.play();
-    renderSyncFrame();
-    status.innerText = "🔴 RENDER RECORDING LIVE... Wait for audio clip duration length to finish.";
+canvas.addEventListener('mousedown', (e) => {
+    if (!avatarImg.src) return;
+    const rect = canvas.getBoundingClientRect();
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+    isDrawing = true;
 });
-</script>
 
-</body>
-</html>
+canvas.addEventListener('mousemove', (e) => {
+    if (!isDrawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const currentX = e.clientX - rect.left;
+    const currentY = e.clientY - rect.top;
+    
+    mouthBox.x = Math.min(startX, currentX);
+    mouthBox.y = Math.min(startY, current
