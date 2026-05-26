@@ -30,7 +30,7 @@ input, button {
 
 <h1>🎧 Video → MP3 Converter</h1>
 
-<input id="url" placeholder="Direct video URL (mp4/webm)" />
+<input id="url" placeholder="Direct mp4/webm URL" />
 <br>
 <button id="btn">Convert</button>
 
@@ -45,11 +45,14 @@ const ffmpeg = new FFmpeg();
 const btn = document.getElementById("btn");
 const status = document.getElementById("status");
 
-async function load() {
+async function loadFFmpeg() {
     if (!ffmpeg.loaded) {
         status.innerText = "Loading FFmpeg...";
+
         await ffmpeg.load({
             coreURL: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
+            wasmURL: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm",
+            workerURL: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/ffmpeg-core.worker.js"
         });
     }
 }
@@ -59,7 +62,7 @@ async function convert() {
         const url = document.getElementById("url").value;
         if (!url) return alert("Enter a video URL");
 
-        await load();
+        await loadFFmpeg();
 
         status.innerText = "Downloading video...";
 
@@ -79,10 +82,10 @@ async function convert() {
         const data = await ffmpeg.readFile("output.mp3");
 
         const blob = new Blob([data.buffer], { type: "audio/mp3" });
-        const link = URL.createObjectURL(blob);
+        const downloadUrl = URL.createObjectURL(blob);
 
         const a = document.createElement("a");
-        a.href = link;
+        a.href = downloadUrl;
         a.download = "audio.mp3";
         a.click();
 
