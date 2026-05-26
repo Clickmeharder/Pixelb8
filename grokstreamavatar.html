@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Live Stream Puppet Studio Pro (Unified Head Transform Update)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+        text-align: center;
+        padding: 20px;
+    }
+    .grid-layout {
+        display: flex;
+        max-width: 1200px;
+        margin: 0 auto;
+        gap: 20px;
+        justify-content: center;
+    }
+    .panel {
+        background: #1a1a1a;
+        padding: 20px;
+        border-radius: 8px;
+        flex: 1;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .controls-group {
+        margin: 15px 0;
+        text-align: left;
+    }
+    label {
+        font-size: 11px;
+        color: #ff4757;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    input[type="file"], button, input[type="range"], select {
+        width: 100%;
+        padding: 10px;
+        background: #222;
+        color: #fff;
+        border: 1px solid #333;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    input[type="range"] {
+        padding: 5px 0;
+        accent-color: #ff4757;
+    }
+    select {
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .slider-value {
+        float: right;
+        color: #00ffcc;
+        font-family: monospace;
+    }
+    button {
+        background: #ff4757;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        margin-top: 10px;
+    }
+    button:hover { background: #ff6b81; }
+    button:disabled { background: #444; cursor: not-allowed; }
+    
+    .toggle-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .toggle-row button {
+        margin-top: 0;
+        background: #2b2b2b;
+        border: 2px solid #444;
+    }
+    .toggle-row button.active {
+        background: #ff4757;
+        border-color: #ff6b81;
+    }
+
+    .viewport-window {
+        width: 500px;
+        height: 500px;
+        margin: 0 auto;
+        overflow: auto;
+        background: #090909;
+        border: 2px solid #333;
+        border-radius: 4px;
+    }
+    .canvas-container {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        transform-origin: top left;
+        transform: scale(var(--zoom-level, 1.0));
+    }
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 500px;
+        height: 500px;
+    }
+    #uiCanvas {
+        cursor: crosshair;
+        z-index: 2; 
+    }
+    #renderCanvas {
+        z-index: 1; 
+    }
+    #status {
+        color: lime;
+        font-family: monospace;
+        margin-top: 15px;
+    }
+    .instructions {
+        font-size: 13px;
+        color: #aaa;
+        background: #000;
+        padding: 10px;
+        border-radius: 4px;
+        border-left: 3px solid #ff4757;
+        text-align: left;
+    }
+</style>
+</head>
+<body>
+
+<h1>🎙️ Live Stream Puppet Studio Pro</h1>
+
+<div class="grid-layout">
+    <div class="panel">
+        <div class="instructions">
+            <strong>✨ Unified Transformation Architecture Matrix:</strong><br>
+            1. Target <strong>👄 Define Moving Jaw</strong> to slice the animated mouth overlay.<br>
+            2. Target <strong>👁️ Left/Right Eyes</strong> to set structural blinking zones.<br>
+            3. Switch to <strong>👤 Define Head Shape</strong> to draw the lasso path. Manual fixed tilts now move the entire head container securely without breaking the mouth coordinate alignment!
+        </div>
+
+        <div class="controls-group" style="margin-top: 20px;">
+            <label>Current Editing Canvas Target</label>
+            <div class="toggle-row" style="flex-wrap: wrap;">
+                <button id="targetJawBtn" class="active" style="flex: 1 1 100%;">👄 Define Moving Jaw</button>
+                <button id="targetLeftEyeBtn" style="flex: 1;">👁️ Left Eye</button>
+                <button id="targetRightEyeBtn" style="flex: 1;">👁️ Right Eye</button>
+                <button id="targetHeadBtn" style="flex: 1 1 100%;">👤 Define Head Shape (Lasso)</button>
+            </div>
+            <div class="toggle-row" id="geometryModeRow">
+                <button id="modeBoxBtn" class="active" style="font-size:11px;">🔲 Box Selection Mode</button>
+                <button id="modeLassoBtn" style="font-size:11px;">⎋ Lasso Path Mode</button>
+            </div>
+        </div>
+
+        <div class="controls-group">
+            <label>Upload Avatar Portrait Image</label>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+        
+        <button id="connectMicBtn" disabled style="background: #444; font-size: 16px; padding: 15px;">❌ Step 1: Upload Avatar Portrait</button>
+
+        <div class="panel" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px;">
+            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">🔍 Viewport & Global Mechanics</h3>
+            <div class="controls-group">
+                <label>UI Editing Viewport Zoom <span id="valZoom" class="slider-value">1.0x</span></label>
+                <input type="range" id="zoomSlider" min="10" max="40" value="10">
+            </div>
+            <div class="controls-group">
+                <label>Global Idle Breathing <span id="valSway" class="slider-value">1.5px</span></label>
+                <input type="range" id="swaySlider" min="0" max="50" value="15">
+            </div>
+            <div class="controls-group">
+                <label>Passive Head Wobble Intensity <span id="valHeadWobble" class="slider-value">0px</span></label>
+                <input type="range" id="headWobbleSlider" min="0" max="25" value="0">
+            </div>
+        </div>
+
+        <div class="panel" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px;">
+            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">⚙️ Automated Head Turn & Look-Away AI</h3>
+            
+            <div class="controls-group">
+                <label>Head Turn Behavioral Rule Target</label>
+                <select id="lookAwayBehaviorSelect">
+                    <option value="straight">Look straight only</option>
+                    <option value="left">Sometimes look left</option>
+                    <option value="right">Sometimes look right</option>
+                    <option value="both">Sometimes look both ways</option>
+                </select>
+            </div>
+            <div class="controls-group">
+                <label>Look-Away Frequency / Speed <span id="valLookAway" class="slider-value">0%</span></label>
+                <input type="range" id="lookAwaySlider" min="0" max="100" value="0">
+            </div>
+        </div>
+
+        <div class="panel" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px;">
+            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">👤 Unified Head Transform Layout</h3>
+            <div class="controls-group">
+                <label>Manual Head Rotation / Tilt <span id="valTilt" class="slider-value">0°</span></label>
+                <input type="range" id="tiltSlider" min="-45" max="45" value="0">
+            </div>
+            <div class="controls-group">
+                <label>Manual Fixed Head Horizontal Shift <span id="valYaw" class="slider-value">0px</span></label>
+                <input type="range" id="yawSlider" min="-50" max="50" value="0">
+            </div>
+        </div>
+
+        <div class="panel" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px;">
+            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">👄 Live Dynamics & Lip Sync Engine</h3>
+            
+            <div class="controls-group">
+                <label>Blink Closure Strength <span id="valBlinkIntensity" class="slider-value">100%</span></label>
+                <input type="range" id="blinkIntensitySlider" min="0" max="100" value="100">
+            </div>
+            <div class="controls-group">
+                <label>Smooth Talking Jaw Wobble <span id="valJawWobble" class="slider-value">0px</span></label>
+                <input type="range" id="jawWobbleSlider" min="0" max="30" value="0">
+            </div>
+            <div class="controls-group">
+                <label>Line Blur / Edge Feathering <span id="valBlur" class="slider-value">4px</span></label>
+                <input type="range" id="blurSlider" min="0" max="25" value="4">
+            </div>
+            <div class="controls-group">
+                <label>Mic Sensitivity Boost <span id="valGain" class="slider-value">1.5x</span></label>
+                <input type="range" id="gainSlider" min="5" max="50" value="15">
+            </div>
+            <div class="controls-group">
+                <label>Noise Gate Threshold <span id="valGate" class="slider-value">10</span></label>
+                <input type="range" id="gateSlider" min="0" max="50" value="10">
+            </div>
+            <div class="controls-group">
+                <label>Max Jaw Drop Range <span id="valDropLimit" class="slider-value">25px</span></label>
+                <input type="range" id="dropLimitSlider" min="10" max="50" value="25">
+            </div>
+        </div>
+
+        <div id="status">System Status: Awaiting avatar upload...</div>
+    </div>
+
+    <div class="panel" style="max-width: 520px;">
+        <h3>Live Viewport Preview</h3>
+        
+        <div class="viewport-window">
+            <div class="canvas-container" id="zoomContainer">
+                <canvas id="renderCanvas" width="500" height="500"></canvas>
+                <canvas id="uiCanvas" width="500" height="500"></canvas>
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px; text-align: left;">
+            <label>Live Mic Feed Voltmeter</label>
+            <div style="background: #222; width: 100%; height: 15px; border-radius: 4px; overflow: hidden; border: 1px solid #333;">
+                <div id="volMeter" style="background: lime; width: 0%; height: 100%; transition: width 0.05s ease;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const imageInput = document.getElementById('imageInput');
+const connectMicBtn = document.getElementById('connectMicBtn');
+const status = document.getElementById('status');
+const volMeter = document.getElementById('volMeter');
+
+const renderCanvas = document.getElementById('renderCanvas');
+const rCtx = renderCanvas.getContext('2d');
+const uiCanvas = document.getElementById('uiCanvas');
+const uCtx = uiCanvas.getContext('2d');
+const zoomContainer = document.getElementById('zoomContainer');
+
+// UI Sliders Hooks
+const zoomSlider = document.getElementById('zoomSlider');
+const swaySlider = document.getElementById('swaySlider');
+const headWobbleSlider = document.getElementById('headWobbleSlider');
+const blinkIntensitySlider = document.getElementById('blinkIntensitySlider');
+const jawWobbleSlider = document.getElementById('jawWobbleSlider');
+const lookAwaySlider = document.getElementById('lookAwaySlider');
+const lookAwayBehaviorSelect = document.getElementById('lookAwayBehaviorSelect');
+const blurSlider = document.getElementById('blurSlider');
+const tiltSlider = document.getElementById('tiltSlider');
+const yawSlider = document.getElementById('yawSlider');
+const gainSlider = document.getElementById('gainSlider');
+const gateSlider = document.getElementById('gateSlider');
+const dropLimitSlider = document.getElementById('dropLimitSlider');
+
+const valZoom = document.getElementById('valZoom');
+const valSway = document.getElementById('valSway');
+const valHeadWobble = document.getElementById('valHeadWobble');
+const valBlinkIntensity = document.getElementById('valBlinkIntensity');
+const valJawWobble = document.getElementById('valJawWobble');
+const valLookAway = document.getElementById('valLookAway');
+const valBlur = document.getElementById('valBlur');
+const valTilt = document.getElementById('valTilt');
+const valYaw = document.getElementById('valYaw');
+const valGain = document.getElementById('valGain');
+const valGate = document.getElementById('valGate');
+const valDropLimit = document.getElementById('valDropLimit');
+
+const targetJawBtn = document.getElementById('targetJawBtn');
+const targetLeftEyeBtn = document.getElementById('targetLeftEyeBtn');
+const targetRightEyeBtn = document.getElementById('targetRightEyeBtn');
+const targetHeadBtn = document.getElementById('targetHeadBtn');
+const modeBoxBtn = document.getElementById('modeBoxBtn');
+const modeLassoBtn = document.getElementById('modeLassoBtn');
+const geometryModeRow = document.getElementById('geometryModeRow');
+
+let avatarImg = new Image();
+let audioCtx, analyser, micStream;
+
+let editTarget = 'jaw'; 
+let currentMode = 'box'; 
+let isDrawing = false;
+let startX = 0; let startY = 0;
+
+// Geometries Objects
+let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+let lassoPoints = []; 
+let leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
+let rightEyeBox = { x: 0, y: 0, w: 0, h: 0 };
+let headLassoPoints = [];
+let headBox = { x: 0, y: 0, w: 0, h: 0 };
+
+// Dynamics Matrix Settings
+let currentZoomScale = 1.0;
+let featherBlur = 4;
+let tiltAngle = 0;
+let yawShift = 0;
+let gainMultiplier = 0.15;
+let noiseGateThreshold = 10;
+let maxDropLimit = 25;
+let swayAmplitude = 1.5; 
+let blinkIntensity = 1.0; 
+let jawWobbleMax = 0;     
+let headWobbleMax = 0;
+let isMicLive = false;
+let isBlinking = false;
+
+// Look Away Target Calculations
+let lookAwayIntensity = 0; 
+let currentGazeX = 0, currentGazeY = 0, currentGazeTilt = 0;
+let targetGazeX = 0, targetGazeY = 0, targetGazeTilt = 0;
+
+// Offscreen Canvases
+let featheredJawCanvas = document.createElement('canvas'); 
+let upperLipPatchCanvas = document.createElement('canvas'); 
+let skinTextureHealerCanvas = document.createElement('canvas'); 
+let isolatedHeadCanvas = document.createElement('canvas');
+let sourceImageCacheCanvas = document.createElement('canvas');
+let sCtx = sourceImageCacheCanvas.getContext('2d');
+
+function clearActiveTargets() {
+    targetJawBtn.className = '';
+    targetLeftEyeBtn.className = '';
+    targetRightEyeBtn.className = '';
+    targetHeadBtn.className = '';
+}
+
+targetJawBtn.addEventListener('click', () => {
+    editTarget = 'jaw';
+    clearActiveTargets();
+    targetJawBtn.className = 'active';
+    geometryModeRow.style.display = 'flex';
+    updateAllViewports(0);
+});
+
+targetLeftEyeBtn.addEventListener('click', () => {
+    editTarget = 'leftEye';
+    clearActiveTargets();
+    targetLeftEyeBtn.className = 'active';
+    geometryModeRow.style.display = 'none';
+    updateAllViewports(0);
+});
+
+targetRightEyeBtn.addEventListener('click', () => {
+    editTarget = 'rightEye';
+    clearActiveTargets();
+    targetRightEyeBtn.className = 'active';
+    geometryModeRow.style.display = 'none';
+    updateAllViewports(0);
+});
+
+targetHeadBtn.addEventListener('click', () => {
+    editTarget = 'head';
+    clearActiveTargets();
+    targetHeadBtn.className = 'active';
+    geometryModeRow.style.display = 'none';
+    updateAllViewports(0);
+});
+
+modeBoxBtn.addEventListener('click', () => {
+    currentMode = 'box';
+    modeBoxBtn.className = 'active';
+    modeLassoBtn.className = '';
+    mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+    lassoPoints = [];
+    updateAllViewports(0);
+});
+
+modeLassoBtn.addEventListener('click', () => {
+    currentMode = 'lasso';
+    modeLassoBtn.className = 'active';
+    modeBoxBtn.className = '';
+    mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+    lassoPoints = [];
+    updateAllViewports(0);
+});
+
+function resetSelectionData() {
+    mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+    leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
+    rightEyeBox = { x: 0, y: 0, w: 0, h: 0 };
+    lassoPoints = [];
+    headLassoPoints = [];
+    headBox = { x: 0, y: 0, w: 0, h: 0 };
+    checkReadyState();
+    updateAllViewports(0);
+}
+
+// Master Rendering Core Pipeline
+function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
+    rCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
+    if (!avatarImg.src) {
+        rCtx.fillStyle = '#222';
+        rCtx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+        return;
+    }
+
+    // Smooth Gaze Interpolation Calculations
+    currentGazeX += (targetGazeX - currentGazeX) * 0.08;
+    currentGazeY += (targetGazeY - currentGazeY) * 0.08;
+    currentGazeTilt += (targetGazeTilt - currentGazeTilt) * 0.08;
+
+    // Master Breath Translation
+    const swayY = Math.sin(timestamp * 0.0025) * swayAmplitude;
+    const swayX = Math.cos(timestamp * 0.0012) * (swayAmplitude * 0.2);
+
+    // Passive Oscillation Wobble
+    let headWobbleX = 0;
+    let headWobbleY = 0;
+    let headWobbleRot = 0;
+    if (headWobbleMax > 0 && headBox.w > 0) {
+        headWobbleX = Math.sin(timestamp * 0.0022) * headWobbleMax;
+        headWobbleY = Math.cos(timestamp * 0.0017) * (headWobbleMax * 0.4);
+        headWobbleRot = Math.sin(timestamp * 0.0011) * (headWobbleMax * 0.002); 
+    }
+
+    // 1. Draw Master Global Template Container Frame
+    rCtx.save();
+    rCtx.translate(swayX, swayY);
+    rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
+
+    // 2. Open Isolated Transformed Head Layer Block
+    rCtx.save();
+    
+    // Combine Manual fixed offsets AND dynamic tracking system values safely 
+    const finalHeadTranslateX = headWobbleX + currentGazeX + yawShift;
+    const finalHeadTranslateY = headWobbleY + currentGazeY;
+    const finalHeadRotationRad = headWobbleRot + ((currentGazeTilt + tiltAngle) * Math.PI / 180);
+
+    rCtx.translate(finalHeadTranslateX, finalHeadTranslateY);
+    
+    if (headBox.w > 0) {
+        const hCenterX = headBox.x + headBox.w / 2;
+        const hCenterY = headBox.y + headBox.h / 2;
+        
+        // Pivot structural coordinates cleanly
+        rCtx.translate(hCenterX, hCenterY);
+        rCtx.rotate(finalHeadRotationRad);
+        rCtx.translate(-hCenterX, -hCenterY);
+        
+        // Draw complete isolated head snapshot securely
+        rCtx.drawImage(isolatedHeadCanvas, 0, 0);
+    }
+
+    // Mouth Selection Scope Logic
+    const { x, y, w, h } = mouthBox;
+    if (w > 0 && h > 0) {
+        let calculatedDrop = 0;
+        if (mouthOffset > noiseGateThreshold) {
+            calculatedDrop = (mouthOffset - noiseGateThreshold) * gainMultiplier;
+        }
+        const dropValue = Math.min(calculatedDrop, maxDropLimit); 
+
+        // Soft Pendulum Talking Wobble
+        let calculatedJawWobbleX = 0;
+        let calculatedJawWobbleY = 0;
+        if (dropValue > 0 && jawWobbleMax > 0) {
+            const wobbleSpeedModifier = timestamp * 0.015;
+            calculatedJawWobbleX = Math.sin(wobbleSpeedModifier) * (dropValue / maxDropLimit) * jawWobbleMax;
+            calculatedJawWobbleY = Math.cos(wobbleSpeedModifier * 0.7) * (dropValue / maxDropLimit) * (jawWobbleMax * 0.2);
+        }
+
+        // Draw the local backdrop patches underneath the mouth
+        rCtx.save();
+        rCtx.drawImage(skinTextureHealerCanvas, x - featherBlur * 2, y - featherBlur * 2);
+        rCtx.restore();
+
+        // Mouth Cave Processing
+        rCtx.save();
+        rCtx.beginPath();
+        if (currentMode === 'box') {
+            rCtx.rect(x + 2, y, w - 4, h + dropValue);
+        } else {
+            if (lassoPoints.length > 0) {
+                rCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
+                for (let i = 1; i < lassoPoints.length; i++) rCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+                rCtx.lineTo(lassoPoints[lassoPoints.length - 1].x, lassoPoints[lassoPoints.length - 1].y + dropValue);
+                rCtx.lineTo(lassoPoints[0].x, lassoPoints[0].y + dropValue);
+            }
+        }
+        rCtx.clip();
+
+        rCtx.fillStyle = '#2d080e'; 
+        rCtx.fillRect(x, y, w, h + dropValue + 20);
+
+        rCtx.fillStyle = '#ffffff';
+        rCtx.fillRect(x + 12, y, w - 24, 6); 
+        
+        rCtx.fillStyle = '#ff4d6d';
+        const tongueY = y + h - (h * 0.28) + (dropValue * 0.2);
+        const tongueH = h * 0.35;
+        rCtx.beginPath();
+        rCtx.ellipse(x + (w / 2), tongueY + (tongueH / 2), w * 0.38, tongueH * 0.5, 0, 0, 2 * Math.PI);
+        rCtx.fill();
+
+        rCtx.fillStyle = '#eeeeee';
+        rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
+        rCtx.restore();
+
+        // Moving Jaw Render Layer (Drawn matching absolute target alignment coordinates)
+        rCtx.save();
+        rCtx.drawImage(featheredJawCanvas, x - featherBlur * 2 + calculatedJawWobbleX, y - featherBlur * 2 + dropValue + calculatedJawWobbleY);
+        rCtx.restore();
+        
+        // Static Lip Patch Guard Protection
+        rCtx.save();
+        rCtx.drawImage(upperLipPatchCanvas, x, y - 10);
+        rCtx.restore();
+    }
+
+    // Blinking Texture Overlay Matrix 
+    if (isBlinking && blinkIntensity > 0) {
+        [leftEyeBox, rightEyeBox].forEach(box => {
+            if (box.w > 0 && box.h > 0) {
+                rCtx.save();
+                
+                const effectiveBlinkHeight = box.h * blinkIntensity;
+                const verticalYOffset = box.y + (box.h - effectiveBlinkHeight) / 2;
+
+                rCtx.beginPath();
+                rCtx.rect(box.x, verticalYOffset, box.w, effectiveBlinkHeight);
+                rCtx.clip();
+
+                // Compensate slightly for eye parallax tracking
+                const eyeParallaxShiftX = currentGazeX * 0.25;
+                const eyeParallaxShiftY = currentGazeY * 0.15;
+
+                rCtx.drawImage(sourceImageCacheCanvas, box.x, box.y - 12, box.w, box.h, box.x + eyeParallaxShiftX, box.y + eyeParallaxShiftY, box.w, box.h);
+                
+                rCtx.strokeStyle = 'rgba(0,0,0,0.3)';
+                rCtx.lineWidth = 2;
+                rCtx.beginPath();
+                rCtx.moveTo(box.x, box.y + (box.h / 2));
+                rCtx.lineTo(box.x + box.w, box.y + (box.h / 2));
+                rCtx.stroke();
+                
+                rCtx.restore();
+            }
+        });
+    }
+
+    rCtx.restore(); // Close Isolated Head Translate Block
+    rCtx.restore(); // Close Global Breathing Scope
+}
+
+// Draw Selection Vector Outlines
+function runUIGuidePipeline() {
+    uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
+    if (!avatarImg.src) return;
+
+    if (mouthBox.w > 0) {
+        uCtx.save();
+        uCtx.strokeStyle = "rgba(0, 255, 204, 0.5)";
+        uCtx.lineWidth = 1.5;
+        if (currentMode === 'box') {
+            uCtx.strokeRect(mouthBox.x, mouthBox.y, mouthBox.w, mouthBox.h);
+        } else if (lassoPoints.length > 0) {
+            uCtx.beginPath();
+            uCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
+            for(let i=1; i<lassoPoints.length; i++) uCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+            uCtx.closePath();
+            uCtx.stroke();
+        }
+        uCtx.restore();
+    }
+
+    if (leftEyeBox.w > 0) {
+        uCtx.save();
+        uCtx.strokeStyle = "rgba(255, 234, 0, 0.65)";
+        uCtx.lineWidth = 1.5;
+        uCtx.strokeRect(leftEyeBox.x, leftEyeBox.y, leftEyeBox.w, leftEyeBox.h);
+        uCtx.restore();
+    }
+
+    if (rightEyeBox.w > 0) {
+        uCtx.save();
+        uCtx.strokeStyle = "rgba(0, 153, 255, 0.65)";
+        uCtx.lineWidth = 1.5;
+        uCtx.strokeRect(rightEyeBox.x, rightEyeBox.y, rightEyeBox.w, rightEyeBox.h);
+        uCtx.restore();
+    }
+
+    if (headLassoPoints.length > 0) {
+        uCtx.save();
+        uCtx.strokeStyle = "rgba(163, 73, 164, 0.85)";
+        uCtx.lineWidth = 2;
+        uCtx.beginPath();
+        uCtx.moveTo(headLassoPoints[0].x, headLassoPoints[0].y);
+        for(let i=1; i<headLassoPoints.length; i++) uCtx.lineTo(headLassoPoints[i].x, headLassoPoints[i].y);
+        uCtx.closePath();
+        uCtx.stroke();
+        uCtx.fillStyle = "rgba(163, 73, 164, 0.15)";
+        uCtx.fill();
+        uCtx.restore();
+    }
+
+    if (isDrawing) {
+        uCtx.save();
+        uCtx.strokeStyle = "#ff4757";
+        uCtx.lineWidth = 2;
+        uCtx.setLineDash([5, 4]);
+        
+        if (editTarget === 'jaw' && currentMode === 'lasso') {
+            if (lassoPoints.length > 0) {
+                uCtx.beginPath();
+                uCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
+                for(let i=1; i<lassoPoints.length; i++) uCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+                uCtx.stroke();
+            }
+        } else if (editTarget === 'head') {
+            if (headLassoPoints.length > 0) {
+                uCtx.beginPath();
+                uCtx.moveTo(headLassoPoints[0].x, headLassoPoints[0].y);
+                for(let i=1; i<headLassoPoints.length; i++) uCtx.lineTo(headLassoPoints[i].x, headLassoPoints[i].y);
+                uCtx.stroke();
+            }
+        } else {
+            let drawX, drawY, drawW, drawH;
+            if (editTarget === 'jaw') { drawX = mouthBox.x; drawY = mouthBox.y; drawW = mouthBox.w; drawH = mouthBox.h; }
+            else if (editTarget === 'leftEye') { drawX = leftEyeBox.x; drawY = leftEyeBox.y; drawW = leftEyeBox.w; drawH = leftEyeBox.h; }
+            else { drawX = rightEyeBox.x; drawY = rightEyeBox.y; drawW = rightEyeBox.w; drawH = rightEyeBox.h; }
+            uCtx.strokeRect(drawX, drawY, drawW, drawH);
+        }
+        uCtx.restore();
+    }
+}
+
+function updateAllViewports(volume = 0) {
+    runArtworkRenderPipeline(volume, performance.now());
+    runUIGuidePipeline();
+}
+
+// Compute Offscreen Buffer Asset Layers
+function bakePuppetLayers() {
+    const { x, y, w, h } = mouthBox;
+    if (w <= 0 || h <= 0) return;
+
+    const pad = featherBlur * 2; 
+    featheredJawCanvas.width = w + pad * 2;
+    featheredJawCanvas.height = h + pad * 2;
+    const fCtx = featheredJawCanvas.getContext('2d');
+    fCtx.clearRect(0, 0, featheredJawCanvas.width, featheredJawCanvas.height);
+
+    let maskCanvas = document.createElement('canvas');
+    maskCanvas.width = featheredJawCanvas.width;
+    maskCanvas.height = featheredJawCanvas.height;
+    const mCtx = maskCanvas.getContext('2d');
+
+    mCtx.fillStyle = '#ffffff';
+    if (currentMode === 'box') {
+        mCtx.fillRect(pad, pad, w, h);
+    } else {
+        if(lassoPoints.length > 0) {
+            mCtx.beginPath();
+            mCtx.moveTo(lassoPoints[0].x - x + pad, lassoPoints[0].y - y + pad);
+            for (let i = 1; i < lassoPoints.length; i++) {
+                mCtx.lineTo(lassoPoints[i].x - x + pad, lassoPoints[i].y - y + pad);
+            }
+            mCtx.closePath();
+            mCtx.fill();
+        }
+    }
+
+    fCtx.save();
+    if (featherBlur > 0) fCtx.filter = `blur(${featherBlur}px)`;
+    fCtx.drawImage(maskCanvas, 0, 0);
+    fCtx.restore();
+
+    fCtx.save();
+    fCtx.globalCompositeOperation = 'source-in';
+    fCtx.drawImage(sourceImageCacheCanvas, x - pad, y - pad, w + pad * 2, h + pad * 2, 0, 0, w + pad * 2, h + pad * 2);
+    fCtx.restore();
+    
+    skinTextureHealerCanvas.width = w + pad * 2;
+    skinTextureHealerCanvas.height = h + pad * 2;
+    const hCtx = skinTextureHealerCanvas.getContext('2d');
+    
+    hCtx.save();
+    hCtx.drawImage(maskCanvas, 0, 0);
+    hCtx.restore();
+
+    hCtx.save();
+    hCtx.globalCompositeOperation = 'source-in';
+    hCtx.drawImage(sourceImageCacheCanvas, x - pad, y - pad + 15, w + pad * 2, h + pad * 2, 0, 0, w + pad * 2, h + pad * 2);
+    hCtx.restore();
+
+    upperLipPatchCanvas.width = w;
+    upperLipPatchCanvas.height = 15; 
+    const uCtx = upperLipPatchCanvas.getContext('2d');
+    uCtx.drawImage(sourceImageCacheCanvas, x, y - 10, w, 15, 0, 0, w, 15);
+    
+    updateAllViewports(0);
+}
+
+function bakeIsolatedHeadLayer() {
+    if (headLassoPoints.length < 3) return;
+
+    isolatedHeadCanvas.width = renderCanvas.width;
+    isolatedHeadCanvas.height = renderCanvas.height;
+    const hCtx = isolatedHeadCanvas.getContext('2d');
+    hCtx.clearRect(0, 0, isolatedHeadCanvas.width, isolatedHeadCanvas.height);
+
+    let maskCanvas = document.createElement('canvas');
+    maskCanvas.width = renderCanvas.width;
+    maskCanvas.height = renderCanvas.height;
+    const mCtx = maskCanvas.getContext('2d');
+
+    mCtx.fillStyle = '#ffffff';
+    mCtx.beginPath();
+    mCtx.moveTo(headLassoPoints[0].x, headLassoPoints[0].y);
+    for (let i = 1; i < headLassoPoints.length; i++) {
+        mCtx.lineTo(headLassoPoints[i].x, headLassoPoints[i].y);
+    }
+    mCtx.closePath();
+    mCtx.fill();
+
+    hCtx.save();
+    hCtx.drawImage(maskCanvas, 0, 0);
+    hCtx.restore();
+
+    hCtx.save();
+    hCtx.globalCompositeOperation = 'source-in';
+    hCtx.drawImage(sourceImageCacheCanvas, 0, 0);
+    hCtx.restore();
+}
+
+function processLiveMicrophoneFeed(timestamp) {
+    let currentVolume = 0;
+    if (isMicLive && analyser) {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+        
+        let totalVolume = 0;
+        for (let i = 0; i < 15; i++) totalVolume += dataArray[i];
+        currentVolume = totalVolume / 15;
+
+        const meterPercentage = Math.min((currentVolume / 120) * 100, 100);
+        volMeter.style.width = `${meterPercentage}%`;
+    }
+
+    runArtworkRenderPipeline(currentVolume, timestamp);
+    requestAnimationFrame(processLiveMicrophoneFeed);
+}
+
+// Automated Behavior Machine Engine
+function triggerRandomLookAwayCycle() {
+    const selectedBehavior = lookAwayBehaviorSelect.value;
+
+    if (lookAwayIntensity > 0 && selectedBehavior !== 'straight') {
+        const returnToForwardCenter = Math.random() > 0.55;
+
+        if (returnToForwardCenter) {
+            targetGazeX = 0;
+            targetGazeY = 0;
+            targetGazeTilt = 0;
+        } else {
+            const motionRangeMax = 32; 
+            let directionPolarityMultiplier = 0; 
+
+            if (selectedBehavior === 'left') {
+                directionPolarityMultiplier = -1; 
+            } else if (selectedBehavior === 'right') {
+                directionPolarityMultiplier = 1;  
+            } else if (selectedBehavior === 'both') {
+                directionPolarityMultiplier = Math.random() > 0.5 ? 1 : -1;
+            }
+
+            targetGazeX = directionPolarityMultiplier * (0.4 + Math.random() * 0.6) * motionRangeMax;
+            targetGazeY = (Math.random() - 0.5) * (motionRangeMax * 0.25);
+            targetGazeTilt = directionPolarityMultiplier * (Math.random() * 8); 
+        }
+    } else {
+        targetGazeX = 0;
+        targetGazeY = 0;
+        targetGazeTilt = 0;
+    }
+
+    const basePaceDuration = 4500 - (lookAwayIntensity * 35); 
+    const randomizedVariance = Math.random() * 2500 + 1000;
+    
+    setTimeout(triggerRandomLookAwayCycle, Math.max(800, basePaceDuration + randomizedVariance));
+}
+
+function triggerRandomBlinkCycle() {
+    if (!isMicLive) {
+        setTimeout(triggerRandomBlinkCycle, 1000);
+        return;
+    }
+    isBlinking = true;
+    setTimeout(() => {
+        isBlinking = false;
+        setTimeout(triggerRandomBlinkCycle, Math.random() * 4500 + 1500);
+    }, 130);
+}
+
+function checkReadyState() {
+    if (!avatarImg.src) {
+        connectMicBtn.disabled = true;
+        connectMicBtn.innerText = "❌ Step 1: Upload Avatar Portrait";
+        connectMicBtn.style.background = "#444";
+    } else if (mouthBox.w <= 0) {
+        connectMicBtn.disabled = true;
+        connectMicBtn.innerText = "❌ Step 2: Cut Out Mouth Area";
+        connectMicBtn.style.background = "#444";
+    } else {
+        connectMicBtn.disabled = false;
+        connectMicBtn.innerText = "🎤 Connect Microphone Live";
+        connectMicBtn.style.background = "#2ed573";
+    }
+}
+
+// UI Event Binding Interceptors
+zoomSlider.addEventListener('input', (e) => {
+    currentZoomScale = parseInt(e.target.value) / 10;
+    valZoom.innerText = currentZoomScale.toFixed(1) + "x";
+    zoomContainer.style.setProperty('--zoom-level', currentZoomScale);
+});
+swaySlider.addEventListener('input', (e) => {
+    swayAmplitude = parseInt(e.target.value) / 10;
+    valSway.innerText = swayAmplitude.toFixed(1) + "px";
+});
+headWobbleSlider.addEventListener('input', (e) => {
+    headWobbleMax = parseInt(e.target.value) / 10;
+    valHeadWobble.innerText = headWobbleMax.toFixed(1) + "px";
+});
+blinkIntensitySlider.addEventListener('input', (e) => {
+    blinkIntensity = parseInt(e.target.value) / 100;
+    valBlinkIntensity.innerText = e.target.value + "%";
+});
+jawWobbleSlider.addEventListener('input', (e) => {
+    jawWobbleMax = parseInt(e.target.value);
+    valJawWobble.innerText = jawWobbleMax + "px";
+});
+lookAwaySlider.addEventListener('input', (e) => {
+    lookAwayIntensity = parseInt(e.target.value);
+    valLookAway.innerText = lookAwayIntensity + "%";
+    if (lookAwayIntensity === 0) {
+        targetGazeX = 0; targetGazeY = 0; targetGazeTilt = 0;
+    }
+});
+blurSlider.addEventListener('input', (e) => {
+    featherBlur = parseInt(e.target.value);
+    valBlur.innerText = featherBlur + "px";
+    if(mouthBox.w > 0) bakePuppetLayers();
+});
+gainSlider.addEventListener('input', (e) => {
+    gainMultiplier = parseInt(e.target.value) / 100;
+    valGain.innerText = (parseInt(e.target.value) / 10).toFixed(1) + "x";
+});
+gateSlider.addEventListener('input', (e) => {
+    noiseGateThreshold = parseInt(e.target.value);
+    valGate.innerText = noiseGateThreshold;
+});
+dropLimitSlider.addEventListener('input', (e) => {
+    maxDropLimit = parseInt(e.target.value);
+    valDropLimit.innerText = maxDropLimit + "px";
+    if(mouthBox.w > 0) bakePuppetLayers(); 
+});
+tiltSlider.addEventListener('input', (e) => {
+    tiltAngle = parseInt(e.target.value);
+    valTilt.innerText = tiltAngle + "°";
+});
+yawSlider.addEventListener('input', (e) => {
+    yawShift = parseInt(e.target.value);
+    valYaw.innerText = yawShift + "px";
+});
+
+function getCanvasSpaceMouseCoords(e) {
+    const rect = uiCanvas.getBoundingClientRect();
+    return {
+        x: ((e.clientX - rect.left) / rect.width) * uiCanvas.width,
+        y: ((e.clientY - rect.top) / rect.height) * uiCanvas.height
+    };
+}
+
+uiCanvas.addEventListener('mousedown', (e) => {
+    if (!avatarImg.src) return;
+    isDrawing = true;
+    
+    const coords = getCanvasSpaceMouseCoords(e);
+    startX = coords.x;
+    startY = coords.y;
+    
+    if (editTarget === 'jaw') {
+        if (currentMode === 'box') { mouthBox = { x: startX, y: startY, w: 0, h: 0 }; } 
+        else { lassoPoints = [{ x: startX, y: startY }]; }
+    } else if (editTarget === 'leftEye') {
+        leftEyeBox = { x: startX, y: startY, w: 0, h: 0 };
+    } else if (editTarget === 'rightEye') {
+        rightEyeBox = { x: startX, y: startY, w: 0, h: 0 };
+    } else if (editTarget === 'head') {
+        headLassoPoints = [{ x: startX, y: startY }];
+    }
+});
+
+uiCanvas.addEventListener('mousemove', (e) => {
+    if (!isDrawing) return;
+    const coords = getCanvasSpaceMouseCoords(e);
+    
+    if (editTarget === 'jaw') {
+        if (currentMode === 'box') {
+            mouthBox.x = Math.min(startX, coords.x);
+            mouthBox.y = Math.min(startY, coords.y);
+            mouthBox.w = Math.abs(startX - coords.x);
+            mouthBox.h = Math.abs(startY - coords.y);
+        } else {
+            lassoPoints.push({ x: coords.x, y: coords.y });
+        }
+    } else if (editTarget === 'leftEye') {
+        leftEyeBox.x = Math.min(startX, coords.x);
+        leftEyeBox.y = Math.min(startY, coords.y);
+        leftEyeBox.w = Math.abs(startX - coords.x);
+        leftEyeBox.h = Math.abs(startY - coords.y);
+    } else if (editTarget === 'rightEye') {
+        rightEyeBox.x = Math.min(startX, coords.x);
+        rightEyeBox.y = Math.min(startY, coords.y);
+        rightEyeBox.w = Math.abs(startX - coords.x);
+        rightEyeBox.h = Math.abs(startY - coords.y);
+    } else if (editTarget === 'head') {
+        headLassoPoints.push({ x: coords.x, y: coords.y });
+    }
+    updateAllViewports(0);
+});
+
+uiCanvas.addEventListener('mouseup', () => {
+    if (!isDrawing) return;
+    isDrawing = false;
+    
+    if (editTarget === 'jaw' && currentMode === 'lasso' && lassoPoints.length > 2) {
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        lassoPoints.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        });
+        mouthBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+    }
+    
+    if (editTarget === 'head' && headLassoPoints.length > 2) {
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        headLassoPoints.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        });
+        headBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+        bakeIsolatedHeadLayer();
+    }
+    
+    if (editTarget === 'jaw') bakePuppetLayers();
+    checkReadyState();
+    runUIGuidePipeline();
+});
+
+imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const objectURL = URL.createObjectURL(file);
+        avatarImg.src = objectURL;
+        avatarImg.onload = () => {
+            sourceImageCacheCanvas.width = renderCanvas.width;
+            sourceImageCacheCanvas.height = renderCanvas.height;
+            sCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
+            resetSelectionData();
+            status.innerText = "Status: Image loaded. Map layers to engage dynamic setup.";
+        };
+    }
+});
+
+connectMicBtn.addEventListener('click', async () => {
+    try {
+        status.innerText = "Status: Connecting Microphone Feed Arrays...";
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        const source = audioCtx.createMediaStreamSource(micStream);
+        source.connect(analyser);
+
+        isMicLive = true;
+        uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
+        
+        connectMicBtn.innerText = "🟢 SYSTEM LIVE";
+        connectMicBtn.style.background = "#222";
+        connectMicBtn.style.color = "#2ed573";
+        connectMicBtn.style.border = "2px solid #2ed573";
+        status.innerText = "Status: Running smoothly.";
+
+        triggerRandomBlinkCycle();
+    } catch (err) {
+        status.innerText = `Error connecting mic stream: ${err.message}`;
+    }
+});
+
+// Run Engines Loops
+setTimeout(triggerRandomLookAwayCycle, 2000);
+requestAnimationFrame(processLiveMicrophoneFeed);
+</script>
+
+</body>
+</html>
