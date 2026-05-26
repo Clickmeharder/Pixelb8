@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Video → MP3</title>
-
+<title>Video → MP3 (GitHub Pages Edition)</title>
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -12,7 +11,6 @@ body {
     text-align: center;
     padding: 40px;
 }
-
 input, button {
     width: 80%;
     padding: 12px;
@@ -20,101 +18,64 @@ input, button {
     border-radius: 4px;
     border: 1px solid #333;
 }
-
-input {
-    background: #222;
-    color: #fff;
-}
-
-button {
-    background: #ff4757;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-}
-
-button:hover {
-    background: #ff6b81;
-}
-
-#status {
-    margin-top: 20px;
-    color: lime;
-    font-family: monospace;
-    white-space: pre-wrap;
-}
+input { background: #222; color: #fff; }
+button { background: #ff4757; color: white; font-weight: bold; cursor: pointer; border: none; }
+button:hover { background: #ff6b81; }
+#status { margin-top: 20px; color: lime; font-family: monospace; white-space: pre-wrap; }
 </style>
-</head>
 
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+</head>
 <body>
 
-<h1>🎧 Video → MP3 Converter  gemini test </h1>
-
-<input id="url" placeholder="Direct video URL (e.g., https://mysite.com/video.mp4)" />
+<h1>🎧 Video → MP3 Converter (Static Host Fix)</h1>
+<input id="url" placeholder="Direct video URL" />
 <br>
 <button id="btn">Convert to MP3</button>
-
 <pre id="status">Idle</pre>
 
-<script type="module">
-import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js";
-import { fetchFile } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js";
+<script>
+// Grab the global instances exposed by the v0.11 script tag
+const { createFFmpeg, fetchFile } = FFmpeg;
+const ffmpeg = createFFmpeg({ log: true });
 
-const ffmpeg = new FFmpeg();
 const btn = document.getElementById("btn");
 const status = document.getElementById("status");
 
-// Track FFmpeg internal logs so you can see exactly what's wrong
-ffmpeg.on('log', ({ message }) => {
+// Handle internal logs
+ffmpeg.setLogger(({ type, message }) => {
     console.log(message);
-    if(message.includes('Duration')) {
-        status.innerText = `Converting...\n${message.trim()}`;
+    if (message.includes('Duration')) {
+        status.innerText = `Converting...\n${message}`;
     }
 });
-
-async function loadFFmpeg() {
-    if (!ffmpeg.loaded) {
-        status.innerText = "Loading FFmpeg WebAssembly cores...";
-        
-        // Using unpkg or cdnjs/jsdelivr matching versions cleanly
-        const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm";
-        await ffmpeg.load({
-            coreURL: `${baseURL}/ffmpeg-core.js`,
-            wasmURL: `${baseURL}/ffmpeg-core.wasm`,
-        });
-    }
-}
 
 async function convert() {
     try {
         const url = document.getElementById("url").value.trim();
-        if (!url) return alert("Enter a video URL");
+        if (!url) return alert("Please enter a video URL");
 
         btn.disabled = true;
-        await loadFFmpeg();
+        
+        if (!ffmpeg.isLoaded()) {
+            status.innerText = "Loading single-threaded FFmpeg core...";
+            await ffmpeg.load();
+        }
 
-        status.innerText = "Fetching raw video file bytes...";
-        // Note: Target video URL MUST have CORS headers allowed if on another domain
+        status.innerText = "Downloading video bytes...";
+        // Note: The source video URL must still allow CORS requests!
         const file = await fetchFile(url);
 
-        status.innerText = "Writing video to virtual sandbox file system...";
-        await ffmpeg.writeFile("input.mp4", file);
+        status.innerText = "Writing to sandbox memory...";
+        ffmpeg.FS('writeFile', 'input.mp4', file);
 
-        status.innerText = "Processing extraction audio layer...";
-        await ffmpeg.exec([
-            "-i", "input.mp4",
-            "-vn",
-            "-acodec", "libmp3lame",
-            "-b:a", "192k",
-            "output.mp3"
-        ]);
+        status.innerText = "Extracting audio profile...";
+        await ffmpeg.run('-i', 'input.mp4', '-vn', '-acodec', 'libmp3lame', '-b:a', '192k', 'output.mp3');
 
-        status.innerText = "Reading final output sound array...";
-        const data = await ffmpeg.readFile("output.mp3");
+        status.innerText = "Packaging audio file download...";
+        const data = ffmpeg.FS('readFile', 'output.mp3');
 
-        // Convert the clean UInt8Array block straight over to a standard audio download blob
-        const blob = new Blob([data], { type: "audio/mp3" });
+        const blob = new Blob([data.buffer], { type: 'audio/mp3' });
         const downloadUrl = URL.createObjectURL(blob);
 
         const a = document.createElement("a");
@@ -124,10 +85,10 @@ async function convert() {
         a.click();
         document.body.removeChild(a);
 
-        status.innerText = "Done! Check your downloads.";
+        status.innerText = "Done! Check your downloads window.";
     } catch (err) {
         console.error(err);
-        status.innerText = `Error: ${err.message}\nCheck your browser console logs for CORS/Header rejections.`;
+        status.innerText = `Error: ${err.message}\nMake sure your video host allows CORS requests.`;
     } finally {
         btn.disabled = false;
     }
