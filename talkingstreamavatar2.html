@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Stream Puppet Studio Pro (Idle Motions Enabled)</title>
+<title>Live Stream Puppet Studio Pro (Multi-Eye Update)</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -134,20 +134,21 @@
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
-            <strong>✨ Pro-Stream Features Active:</strong><br>
-            • <strong>Procedural Swaying:</strong> The avatar gently breathes over time.<br>
-            • <strong>Eye Blink Targeting:</strong> Toggle the selection type to "Eyes Placement" to pinpoint where your character's eyes are so they blink automatically!
+            <strong>✨ Calibration Steps:</strong><br>
+            1. Select <strong>👄 Define Moving Jaw</strong> and carve out the mouth selection.<br>
+            2. Use <strong>👁️ Left Eye</strong> and <strong>👁️ Right Eye</strong> modes to draw clean bounding boxes over each eye individually.
         </div>
 
         <div class="controls-group" style="margin-top: 20px;">
             <label>Current Editing Canvas Target</label>
-            <div class="toggle-row">
-                <button id="targetJawBtn" class="active">👄 Define Moving Jaw</button>
-                <button id="targetEyesBtn">👁️ Define Eyes Zone</button>
+            <div class="toggle-row" style="flex-wrap: wrap;">
+                <button id="targetJawBtn" class="active" style="flex: 1 1 100%;">👄 Define Moving Jaw</button>
+                <button id="targetLeftEyeBtn" style="flex: 1;">👁️ Left Eye</button>
+                <button id="targetRightEyeBtn" style="flex: 1;">👁️ Right Eye</button>
             </div>
             <div class="toggle-row" id="geometryModeRow">
-                <button id="modeBoxBtn" class="active" style="font-size:11px;">🔲 Box Mode</button>
-                <button id="modeLassoBtn" style="font-size:11px;">⎋ Lasso Mode</button>
+                <button id="modeBoxBtn" class="active" style="font-size:11px;">🔲 Box Selection Mode</button>
+                <button id="modeLassoBtn" style="font-size:11px;">⎋ Lasso Path Mode</button>
             </div>
         </div>
 
@@ -233,7 +234,7 @@ const uiCanvas = document.getElementById('uiCanvas');
 const uCtx = uiCanvas.getContext('2d');
 const zoomContainer = document.getElementById('zoomContainer');
 
-// UI Controls Sliders Hooks
+// UI Sliders Hooks
 const zoomSlider = document.getElementById('zoomSlider');
 const swaySlider = document.getElementById('swaySlider');
 const blurSlider = document.getElementById('blurSlider');
@@ -253,7 +254,8 @@ const valGate = document.getElementById('valGate');
 const valDropLimit = document.getElementById('valDropLimit');
 
 const targetJawBtn = document.getElementById('targetJawBtn');
-const targetEyesBtn = document.getElementById('targetEyesBtn');
+const targetLeftEyeBtn = document.getElementById('targetLeftEyeBtn');
+const targetRightEyeBtn = document.getElementById('targetRightEyeBtn');
 const modeBoxBtn = document.getElementById('modeBoxBtn');
 const modeLassoBtn = document.getElementById('modeLassoBtn');
 const geometryModeRow = document.getElementById('geometryModeRow');
@@ -261,17 +263,18 @@ const geometryModeRow = document.getElementById('geometryModeRow');
 let avatarImg = new Image();
 let audioCtx, analyser, micStream;
 
-let editTarget = 'jaw'; // 'jaw' or 'eyes'
+let editTarget = 'jaw'; // 'jaw', 'leftEye', or 'rightEye'
 let currentMode = 'box'; 
 let isDrawing = false;
 let startX = 0; let startY = 0;
 
-// Geometries Cache Objects
+// Geometries Cache
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 let lassoPoints = []; 
-let eyesBox = { x: 0, y: 0, w: 0, h: 0 }; 
+let leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
+let rightEyeBox = { x: 0, y: 0, w: 0, h: 0 };
 
-// Automation Values Engine Coordinates
+// Dynamics Adjusters
 let currentZoomScale = 1.0;
 let featherBlur = 4;
 let tiltAngle = 0;
@@ -281,31 +284,43 @@ let noiseGateThreshold = 10;
 let maxDropLimit = 25;
 let swayAmplitude = 1.5; 
 let isMicLive = false;
-
-// Eye Blinking State Trackers
 let isBlinking = false;
 
-// Offscreen Buffer Environments 
+// Offscreen Rendering Buffers (Preserving pure legacy mouth alignment)
 let featheredJawCanvas = document.createElement('canvas'); 
 let upperLipPatchCanvas = document.createElement('canvas'); 
 let skinTextureHealerCanvas = document.createElement('canvas'); 
 let sourceImageCacheCanvas = document.createElement('canvas');
 let sCtx = sourceImageCacheCanvas.getContext('2d');
 
-// Swap Layout Editing Focus Modes
+// Focus Mode Event Handlers
+function clearActiveTargets() {
+    targetJawBtn.className = '';
+    targetLeftEyeBtn.className = '';
+    targetRightEyeBtn.className = '';
+}
+
 targetJawBtn.addEventListener('click', () => {
     editTarget = 'jaw';
+    clearActiveTargets();
     targetJawBtn.className = 'active';
-    targetEyesBtn.className = '';
     geometryModeRow.style.display = 'flex';
     updateAllViewports(0);
 });
 
-targetEyesBtn.addEventListener('click', () => {
-    editTarget = 'eyes';
-    targetEyesBtn.className = 'active';
-    targetJawBtn.className = '';
-    geometryModeRow.style.display = 'none'; // Eyes use basic bounding boxes
+targetLeftEyeBtn.addEventListener('click', () => {
+    editTarget = 'leftEye';
+    clearActiveTargets();
+    targetLeftEyeBtn.className = 'active';
+    geometryModeRow.style.display = 'none';
+    updateAllViewports(0);
+});
+
+targetRightEyeBtn.addEventListener('click', () => {
+    editTarget = 'rightEye';
+    clearActiveTargets();
+    targetRightEyeBtn.className = 'active';
+    geometryModeRow.style.display = 'none';
     updateAllViewports(0);
 });
 
@@ -329,13 +344,14 @@ modeLassoBtn.addEventListener('click', () => {
 
 function resetSelectionData() {
     mouthBox = { x: 0, y: 0, w: 0, h: 0 };
-    eyesBox = { x: 0, y: 0, w: 0, h: 0 };
+    leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
+    rightEyeBox = { x: 0, y: 0, w: 0, h: 0 };
     lassoPoints = [];
     checkReadyState();
     updateAllViewports(0);
 }
 
-// Main Draw Pipeline Engine
+// RESTORED: Legacy High-Performance Rendering Pipeline Core
 function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
     rCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
     if (!avatarImg.src) {
@@ -344,15 +360,14 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         return;
     }
 
-    // 1. Calculate Procedural Micro Breathing Sway (Sine Wave Tracking)
+    // Procedural Sway Math
     const swayY = Math.sin(timestamp * 0.003) * swayAmplitude;
     const swayX = Math.cos(timestamp * 0.0015) * (swayAmplitude * 0.3);
 
     rCtx.save();
-    // Shift the entire workspace base layout by the soft breathing coordinates
     rCtx.translate(swayX, swayY);
 
-    // 2. Render Main Avatar Skin Face Plate
+    // Primary Plate Paint
     rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
     
     const { x, y, w, h } = mouthBox;
@@ -363,15 +378,15 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         }
         const dropValue = Math.min(calculatedDrop, maxDropLimit); 
 
-        // Draw structural skin healer plate behind jaw gaps
+        // Fix background plate reveal gaps
         rCtx.save();
         rCtx.drawImage(skinTextureHealerCanvas, x - featherBlur * 2, y - featherBlur * 2);
         rCtx.restore();
 
-        // Inner Mouth Cave rendering elements
+        // Inner Cave Rendering Bounds
         rCtx.save();
         rCtx.beginPath();
-        if (currentMode === 'box' || editTarget === 'eyes') {
+        if (currentMode === 'box') {
             rCtx.rect(x + 2, y, w - 4, h + dropValue);
         } else {
             if (lassoPoints.length > 0) {
@@ -396,20 +411,30 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         rCtx.ellipse(x + (w / 2), tongueY + (tongueH / 2), w * 0.38, tongueH * 0.5, 0, 0, 2 * Math.PI);
         rCtx.fill();
 
+        rCtx.strokeStyle = '#d92b4b';
+        rCtx.lineWidth = 2.5;
+        rCtx.beginPath();
+        rCtx.moveTo(x + (w / 2), tongueY + 2);
+        rCtx.quadraticCurveTo(x + (w / 2) - 1, tongueY + (tongueH * 0.5), x + (w / 2), tongueY + tongueH - 2);
+        rCtx.stroke();
+
         rCtx.fillStyle = '#eeeeee';
         rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
         rCtx.restore();
 
-        // Render moving jaw segment layer
+        // Moving Jaw Piece Translation
         rCtx.save();
         const centerX = x + (w / 2);
         const centerY = y; 
+
         rCtx.translate(centerX, centerY);
         rCtx.rotate((tiltAngle * Math.PI) / 180);
+        
+        rCtx.filter = 'none';
         rCtx.drawImage(featheredJawCanvas, -w/2 - featherBlur * 2 + yawShift, -featherBlur * 2 + dropValue);
         rCtx.restore();
         
-        // Render upper lip security shield
+        // Static Lip Guard Protection Mask
         rCtx.save();
         rCtx.translate(centerX, centerY);
         rCtx.rotate((tiltAngle * Math.PI) / 180);
@@ -417,38 +442,39 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         rCtx.restore();
     }
 
-    // 3. Render Procedural Blink Eyelid Masks if state triggers
-    if (isBlinking && eyesBox.w > 0) {
-        rCtx.save();
-        rCtx.fillStyle = '#111'; // Fallback base color block
-        
-        // Sampling procedural color patch structures right above specified eye box coordinates
-        rCtx.beginPath();
-        rCtx.rect(eyesBox.x, eyesBox.y, eyesBox.w, eyesBox.h);
-        rCtx.clip();
+    // Dual-Eye Independent Blink Pipeline
+    if (isBlinking) {
+        [leftEyeBox, rightEyeBox].forEach(box => {
+            if (box.w > 0 && box.h > 0) {
+                rCtx.save();
+                rCtx.beginPath();
+                rCtx.rect(box.x, box.y, box.w, box.h);
+                rCtx.clip();
 
-        // Project skin tone match coordinates directly down over eye positions
-        rCtx.drawImage(sourceImageCacheCanvas, eyesBox.x, eyesBox.y - 15, eyesBox.w, eyesBox.h, eyesBox.x, eyesBox.y, eyesBox.w, eyesBox.h);
-        
-        // Draw a soft shadow line indicating closed eyelids eyelashes crease
-        rCtx.strokeStyle = 'rgba(0,0,0,0.35)';
-        rCtx.lineWidth = 2;
-        rCtx.beginPath();
-        rCtx.moveTo(eyesBox.x, eyesBox.y + (eyesBox.h / 2));
-        rCtx.lineTo(eyesBox.x + eyesBox.w, eyesBox.y + (eyesBox.h / 2));
-        rCtx.stroke();
-        
-        rCtx.restore();
+                // Pull native skin texture mapping directly from above the specific eye location
+                rCtx.drawImage(sourceImageCacheCanvas, box.x, box.y - 12, box.w, box.h, box.x, box.y, box.w, box.h);
+                
+                rCtx.strokeStyle = 'rgba(0,0,0,0.3)';
+                rCtx.lineWidth = 2;
+                rCtx.beginPath();
+                rCtx.moveTo(box.x, box.y + (box.h / 2));
+                rCtx.lineTo(box.x + box.w, box.y + (box.h / 2));
+                rCtx.stroke();
+                
+                rCtx.restore();
+            }
+        });
     }
 
-    rCtx.restore(); // Restore breathing layout translates cleanly
+    rCtx.restore(); 
 }
 
+// Clean, Dashed Guide Vectors UI Pipeline
 function runUIGuidePipeline() {
     uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
     if (!avatarImg.src) return;
 
-    // Draw Jaw Guideline Path structures
+    // Mouth Track Guidelines
     if (mouthBox.w > 0) {
         uCtx.save();
         uCtx.strokeStyle = "rgba(0, 255, 204, 0.5)";
@@ -465,23 +491,35 @@ function runUIGuidePipeline() {
         uCtx.restore();
     }
 
-    // Draw active Eyes Region Target Guide paths
-    if (eyesBox.w > 0) {
+    // Left Eye Area Guide
+    if (leftEyeBox.w > 0) {
         uCtx.save();
         uCtx.strokeStyle = "rgba(255, 234, 0, 0.65)";
         uCtx.lineWidth = 1.5;
-        uCtx.strokeRect(eyesBox.x, eyesBox.y, eyesBox.w, eyesBox.h);
-        uCtx.fillStyle = "rgba(255, 234, 0, 0.1)";
-        uCtx.fillRect(eyesBox.x, eyesBox.y, eyesBox.w, eyesBox.h);
+        uCtx.strokeRect(leftEyeBox.x, leftEyeBox.y, leftEyeBox.w, leftEyeBox.h);
+        uCtx.fillStyle = "rgba(255, 234, 0, 0.08)";
+        uCtx.fillRect(leftEyeBox.x, leftEyeBox.y, leftEyeBox.w, leftEyeBox.h);
         uCtx.restore();
     }
 
-    // Draw current active placement operation track lines
+    // Right Eye Area Guide
+    if (rightEyeBox.w > 0) {
+        uCtx.save();
+        uCtx.strokeStyle = "rgba(0, 153, 255, 0.65)";
+        uCtx.lineWidth = 1.5;
+        uCtx.strokeRect(rightEyeBox.x, rightEyeBox.y, rightEyeBox.w, rightEyeBox.h);
+        uCtx.fillStyle = "rgba(0, 153, 255, 0.08)";
+        uCtx.fillRect(rightEyeBox.x, rightEyeBox.y, rightEyeBox.w, rightEyeBox.h);
+        uCtx.restore();
+    }
+
+    // Render Realtime Dynamic Drawing Trace Lines
     if (isDrawing) {
         uCtx.save();
         uCtx.strokeStyle = "#ff4757";
         uCtx.lineWidth = 2;
-        uCtx.setLineDash([4, 4]);
+        uCtx.setLineDash([5, 4]); // Clean visualization during drag operations
+        
         if (editTarget === 'jaw' && currentMode === 'lasso') {
             if (lassoPoints.length > 0) {
                 uCtx.beginPath();
@@ -490,11 +528,12 @@ function runUIGuidePipeline() {
                 uCtx.stroke();
             }
         } else {
-            const curW = mouthBox.w || eyesBox.w;
-            const curH = mouthBox.h || eyesBox.h;
-            const curX = editTarget === 'jaw' ? mouthBox.x : eyesBox.x;
-            const curY = editTarget === 'jaw' ? mouthBox.y : eyesBox.y;
-            uCtx.strokeRect(curX, curY, curW, curH);
+            // Get tracking endpoints dynamically based on the current context selection
+            let drawX, drawY, drawW, drawH;
+            if (editTarget === 'jaw') { drawX = mouthBox.x; drawY = mouthBox.y; drawW = mouthBox.w; drawH = mouthBox.h; }
+            else if (editTarget === 'leftEye') { drawX = leftEyeBox.x; drawY = leftEyeBox.y; drawW = leftEyeBox.w; drawH = leftEyeBox.h; }
+            else { drawX = rightEyeBox.x; drawY = rightEyeBox.y; drawW = rightEyeBox.w; drawH = rightEyeBox.h; }
+            uCtx.strokeRect(drawX, drawY, drawW, drawH);
         }
         uCtx.restore();
     }
@@ -569,10 +608,8 @@ function bakePuppetLayers() {
     updateAllViewports(0);
 }
 
-// Global Core Realtime Render Loop Event Frame Hook
 function processLiveMicrophoneFeed(timestamp) {
     let currentVolume = 0;
-
     if (isMicLive && analyser) {
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
@@ -586,29 +623,20 @@ function processLiveMicrophoneFeed(timestamp) {
         volMeter.style.width = `${meterPercentage}%`;
     }
 
-    // Always keep drawing to process breathing and random eye blinking triggers smoothly
     runArtworkRenderPipeline(currentVolume, timestamp);
-    
     requestAnimationFrame(processLiveMicrophoneFeed);
 }
 
-// Asynchronous Randomized Natural Eye Blinking Logic Generator
 function triggerRandomBlinkCycle() {
     if (!isMicLive) {
-        // Wait and poll until stream is active
         setTimeout(triggerRandomBlinkCycle, 1000);
         return;
     }
-
-    // Blink down duration matches physical human speeds: 150 milliseconds
     isBlinking = true;
-    
     setTimeout(() => {
         isBlinking = false;
-        // Schedule next random tracking calculation pause window safely (2 to 7 seconds out)
-        const nextBlinkDelay = Math.random() * 5000 + 2000;
-        setTimeout(triggerRandomBlinkCycle, nextBlinkDelay);
-    }, 150);
+        setTimeout(triggerRandomBlinkCycle, Math.random() * 4500 + 1500);
+    }, 130);
 }
 
 function checkReadyState() {
@@ -627,7 +655,7 @@ function checkReadyState() {
     }
 }
 
-// Sliders Event Triggers Configuration Listeners
+// Sliders Triggers listeners
 zoomSlider.addEventListener('input', (e) => {
     currentZoomScale = parseInt(e.target.value) / 10;
     valZoom.innerText = currentZoomScale.toFixed(1) + "x";
@@ -681,13 +709,12 @@ uiCanvas.addEventListener('mousedown', (e) => {
     startY = coords.y;
     
     if (editTarget === 'jaw') {
-        if (currentMode === 'box') {
-            mouthBox = { x: startX, y: startY, w: 0, h: 0 };
-        } else {
-            lassoPoints = [{ x: startX, y: startY }];
-        }
-    } else {
-        eyesBox = { x: startX, y: startY, w: 0, h: 0 };
+        if (currentMode === 'box') { mouthBox = { x: startX, y: startY, w: 0, h: 0 }; } 
+        else { lassoPoints = [{ x: startX, y: startY }]; }
+    } else if (editTarget === 'leftEye') {
+        leftEyeBox = { x: startX, y: startY, w: 0, h: 0 };
+    } else if (editTarget === 'rightEye') {
+        rightEyeBox = { x: startX, y: startY, w: 0, h: 0 };
     }
 });
 
@@ -704,11 +731,16 @@ uiCanvas.addEventListener('mousemove', (e) => {
         } else {
             lassoPoints.push({ x: coords.x, y: coords.y });
         }
-    } else {
-        eyesBox.x = Math.min(startX, coords.x);
-        eyesBox.y = Math.min(startY, coords.y);
-        eyesBox.w = Math.abs(startX - coords.x);
-        eyesBox.h = Math.abs(startY - coords.y);
+    } else if (editTarget === 'leftEye') {
+        leftEyeBox.x = Math.min(startX, coords.x);
+        leftEyeBox.y = Math.min(startY, coords.y);
+        leftEyeBox.w = Math.abs(startX - coords.x);
+        leftEyeBox.h = Math.abs(startY - coords.y);
+    } else if (editTarget === 'rightEye') {
+        rightEyeBox.x = Math.min(startX, coords.x);
+        rightEyeBox.y = Math.min(startY, coords.y);
+        rightEyeBox.w = Math.abs(startX - coords.x);
+        rightEyeBox.h = Math.abs(startY - coords.y);
     }
     updateAllViewports(0);
 });
@@ -743,14 +775,14 @@ imageInput.addEventListener('change', (e) => {
             sourceImageCacheCanvas.height = renderCanvas.height;
             sCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
             resetSelectionData();
-            status.innerText = "Status: Image loaded. Trace jaw cutout, then map your eyes zone.";
+            status.innerText = "Status: Image loaded. Map jaw, then configure left/right eyes.";
         };
     }
 });
 
 connectMicBtn.addEventListener('click', async () => {
     try {
-        status.innerText = "Status: Connecting Microphone Feed Arrays...";
+        status.innerText = "Status: Spawning Audio Processing Nodes...";
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 256;
@@ -762,19 +794,18 @@ connectMicBtn.addEventListener('click', async () => {
         isMicLive = true;
         uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
         
-        connectMicBtn.innerText = "🟢 STREAM ENGINE ACTIVE";
+        connectMicBtn.innerText = "🟢 SYSTEM LIVE";
         connectMicBtn.style.background = "#222";
         connectMicBtn.style.color = "#2ed573";
         connectMicBtn.style.border = "2px solid #2ed573";
-        status.innerText = "Status: Performance mode online. Guide borders cleared.";
+        status.innerText = "Status: Running smoothly.";
 
-        triggerRandomBlinkCycle(); // Ignite the blinking engine
+        triggerRandomBlinkCycle();
     } catch (err) {
         status.innerText = `Error connecting mic stream: ${err.message}`;
     }
 });
 
-// Kick off continuous animation driver 
 requestAnimationFrame(processLiveMicrophoneFeed);
 </script>
 
