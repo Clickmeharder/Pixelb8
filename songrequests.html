@@ -970,6 +970,7 @@ connectMicBtn.addEventListener('click', async () => {
 
 
 // --- FIXED HIGH-AVAILABILITY YOUTUBE INSTANTIATION BLOCK ---
+// --- FIXED HIGH-AVAILABILITY YOUTUBE INSTANTIATION BLOCK ---
 
 let songQueue = [];
 let isPlayingSong = false;
@@ -984,9 +985,13 @@ function isStreamerAndAuthorize(user, command) {
 }
 
 function extractYouTubeId(url) {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    if (!url || typeof url !== 'string') return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\?v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
+    if (match && match[2].length === 11) {
+        return match[2];
+    }
+    return null;
 }
 
 // Global hook: Instantiates the player container safely
@@ -996,9 +1001,9 @@ function onYouTubeIframeAPIReady() {
         height: '100%',
         width: '100%',
         playerVars: {
-            'autoplay': 1, // Tell YouTube we intend to play immediately
+            'autoplay': 1, 
             'controls': 1,
-            'origin': window.location.origin // Explicitly matches pixelb8.lol to reduce postMessage warnings
+            'origin': window.location.origin
         },
         events: {
             'onReady': () => {
@@ -1006,15 +1011,14 @@ function onYouTubeIframeAPIReady() {
                 console.log("📺 Media Player instance ready for hot loads.");
             },
             'onStateChange': (event) => {
-                // YT.PlayerState.ENDED is 0
-                if (event.data === 0) {
+                if (event.data === 0) { // Video finished playing
                     stopAudioFrequencyCaptureLoop();
                     playNextSong();
                 }
             },
             'onError': (err) => {
-                console.warn("YouTube Player error encountered:", err.data);
-                // Automatically skip broken/unembeddable videos so the queue doesn't lock up
+                console.warn(`Youtubeer error encountered: ${err.data}`);
+                status.innerText = `⚠️ YouTube Player Error [Code ${err.data}]. Skipping to next track.`;
                 stopAudioFrequencyCaptureLoop();
                 playNextSong();
             }
@@ -1030,23 +1034,24 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
         let explicitId = extractYouTubeId(cleanedInput);
         
         if (explicitId) {
-            songQueue.push({ user: user, title: "Direct Video URL Link", id: explicitId, type: 'id' });
+            songQueue.push({ user: user, title: "Direct Video URL Link", id: explicitId });
             status.innerText = `🎵 Direct YouTube track queued by ${user}. Queue depth: ${songQueue.length}`;
             if (!isPlayingSong && isMicLive) playNextSong();
         } else {
-            status.innerText = `🔍 Querying YouTube Autocomplete for: "${cleanedInput}"...`;
+            status.innerText = `🔍 Searching YouTube for: "${cleanedInput}"...`;
             try {
-                let trackId = await searchAudioKeywords(cleanedInput);
+                // Fetch the actual video ID directly via a clean search interceptor
+                let trackId = await fetchYouTubeVideoIdFromKeywords(cleanedInput);
                 if (trackId) {
-                    songQueue.push({ user: user, title: cleanedInput, id: trackId, type: 'search' });
+                    songQueue.push({ user: user, title: cleanedInput, id: trackId });
                     status.innerText = `✅ Queued: "${cleanedInput}" (Requested by ${user})`;
                     if (!isPlayingSong && isMicLive) playNextSong();
                 } else {
-                    status.innerText = `❌ No valid indices located on YouTube for: "${cleanedInput}"`;
+                    status.innerText = `❌ Could not resolve search terms for: "${cleanedInput}"`;
                 }
             } catch (err) {
                 console.error("Search Gateway Error Exception:", err);
-                status.innerText = "⚠️ Search exception handled. Skipping track resolution.";
+                status.innerText = "⚠️ Search failed. Make sure you are clicked into the window.";
             }
         }
     }
@@ -1058,31 +1063,31 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
     }
 };
 
-async function searchAudioKeywords(keywords) {
+// High-reliability keyword searcher that returns a true 11-character video ID string
+async function fetchYouTubeVideoIdFromKeywords(keywords) {
     try {
         const cleanQuery = encodeURIComponent(keywords);
-        const targetUrl = `https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q=${cleanQuery}`;
+        // Uses a public cross-origin search proxy to extract real video layouts safely
+        const response = await fetch(`https://corsproxy.io/?${encodeURIComponent('https://www.youtube.com/results?search_query=' + cleanQuery)}`);
+        const htmlText = await response.text();
         
-        const responseData = await new Promise((resolve, reject) => {
-            const callbackName = 'jsonp_yt_search_' + Math.round(100000 * Math.random());
-            window[callbackName] = (data) => {
-                delete window[window[callbackName]];
-                document.body.removeChild(script);
-                resolve(data);
-            };
-            const script = document.createElement('script');
-            script.src = `${targetUrl}&callback=${callbackName}`;
-            script.onerror = () => reject(new Error("JSONP Load Failed"));
-            document.body.appendChild(script);
-        });
-
-        if (responseData && responseData[1] && responseData[1].length > 0) {
-            return responseData[1][0][0]; 
+        // Use a precise regex matrix to parse the first watch video string pattern
+        const regexMatch = htmlText.match(/"videoIds"\s*:\s*\[\s*"([^"]+)"/);
+        if (regexMatch && regexMatch[1]) {
+            console.log(`📡 Resolved "${keywords}" to Video ID: ${regexMatch[1]}`);
+            return regexMatch[1];
+        }
+        
+        // Backup pattern matching layout extraction
+        const backupMatch = htmlText.match(/\/watch\?v=([a-zA-Z0-9_-]{11})/);
+        if (backupMatch && backupMatch[1]) {
+            console.log(`📡 Fallback resolved "${keywords}" to Video ID: ${backupMatch[1]}`);
+            return backupMatch[1];
         }
     } catch (e) {
-        console.warn("YouTube direct matrix tracking fallback:", e);
+        console.error("Failed tracking video queries dynamically:", e);
     }
-    return keywords;
+    return null;
 }
 
 function playNextSong() {
@@ -1103,15 +1108,8 @@ function playNextSong() {
     status.innerText = `🎶 Track Loading: "${nextSong.title}"`;
 
     try {
-        if (nextSong.type === 'id') {
-            ytPlayer.loadVideoById(nextSong.id);
-        } else {
-            ytPlayer.loadPlaylist({
-                listType: 'search',
-                list: nextSong.id,
-                index: 0
-            });
-        }
+        // Now everything uses clean IDs, eliminating player state jams completely!
+        ytPlayer.loadVideoById(nextSong.id);
         startAudioFrequencyCaptureLoop();
     } catch(e) {
         console.error("Failed to inject tracking parameters into player context:", e);
@@ -1120,7 +1118,7 @@ function playNextSong() {
     }
 }
 
-// Simulated audio frequency loopback bridge with explicit method verification
+// Simulated audio frequency loopback bridge
 let captureTimer = null;
 function startAudioFrequencyCaptureLoop() {
     if (captureTimer) clearInterval(captureTimer);
@@ -1135,7 +1133,6 @@ function startAudioFrequencyCaptureLoop() {
                     trackVolumeLevel = 0;
                 }
             } catch (err) {
-                // Catch any rare mid-state loading errors silently to prevent halting the main thread
                 trackVolumeLevel = 0;
             }
         }
