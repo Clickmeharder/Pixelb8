@@ -136,7 +136,7 @@
 </head>
 <body>
 
-<h1>🎙️ Production Puppet LipSync Studio Pro EXTREEEME</h1>
+<h1>🎙️ Production Puppet LipSync Studio Pro</h1>
 
 <div class="grid-layout">
     <div class="panel">
@@ -282,6 +282,7 @@ let animationFrameId = null;
 // Offscreen buffer canvas environments
 let jawPieceCanvas = document.createElement('canvas');
 let upperLipPatchCanvas = document.createElement('canvas'); 
+let skinTextureHealerCanvas = document.createElement('canvas'); // FIX: Backing repair canvas environment
 let sourceImageCacheCanvas = document.createElement('canvas');
 let sCtx = sourceImageCacheCanvas.getContext('2d');
 
@@ -314,13 +315,33 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
         return;
     }
 
-    // Step 1: Background Template Base
+    // Step 1: Background Base Image Layout
     rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
     
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
 
     const dropValue = Math.min(mouthOffset * gainMultiplier, maxDropLimit); 
+
+    // CRITICAL FIX STEP 1.5: Render Healing Skin Patch over the background to eliminate the cut-out gap look
+    rCtx.save();
+    rCtx.beginPath();
+    if (currentMode === 'box') {
+        rCtx.rect(x - 5, y - 5, w + 10, h + maxDropLimit + 10);
+    } else {
+        if (lassoPoints.length > 0) {
+            rCtx.moveTo(lassoPoints[0].x - 5, lassoPoints[0].y - 5);
+            for (let i = 1; i < lassoPoints.length; i++) {
+                rCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+            }
+            rCtx.lineTo(lassoPoints[lassoPoints.length - 1].x + 5, lassoPoints[lassoPoints.length - 1].y + maxDropLimit + 5);
+            rCtx.closePath();
+        }
+    }
+    rCtx.clip();
+    // Stretch real skin color pixels directly over the area behind the sliding jaw piece
+    rCtx.drawImage(skinTextureHealerCanvas, x, y, w, h + maxDropLimit);
+    rCtx.restore();
 
     // Step 2: Inner Mouth Cave Render Core
     rCtx.save();
@@ -368,7 +389,7 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
     rCtx.restore();
 
-    // Step 3: Draw sliding jaw puppet layer with custom transforms & line blurring shadow options
+    // Step 3: Draw sliding jaw puppet layer with dynamic blurring transformations
     rCtx.save();
     const centerX = x + (w / 2);
     const centerY = y; 
@@ -376,7 +397,6 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.translate(centerX, centerY);
     rCtx.rotate((tiltAngle * Math.PI) / 180);
     
-    // Core Blur Filter setup context combined with global baseline softening
     if (featherBlur > 0) {
         rCtx.filter = `blur(${featherBlur}px)`;
     } else {
@@ -460,6 +480,7 @@ function bakePuppetLayers() {
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
 
+    // Allocate sliding jaw environment layers
     jawPieceCanvas.width = w;
     jawPieceCanvas.height = h;
     const jCtx = jawPieceCanvas.getContext('2d');
@@ -481,6 +502,21 @@ function bakePuppetLayers() {
         jCtx.restore();
     }
     
+    // CRITICAL FIX STEP 2: Generate Content-Aware Backup Healing Texture Stretch Matrix
+    skinTextureHealerCanvas.width = w;
+    skinTextureHealerCanvas.height = h + maxDropLimit;
+    const hCtx = skinTextureHealerCanvas.getContext('2d');
+    hCtx.clearRect(0, 0, w, h + maxDropLimit);
+    
+    // Sample texture profile lines along selection perimeter borders and stretch them smoothly down
+    hCtx.drawImage(sourceImageCacheCanvas, x, y, w, Math.min(12, h), 0, 0, w, h + maxDropLimit);
+    if(h > 20) {
+        hCtx.globalAlpha = 0.4;
+        hCtx.drawImage(sourceImageCacheCanvas, x, y + h - 10, w, 10, 0, h, w, maxDropLimit);
+        hCtx.globalAlpha = 1.0;
+    }
+
+    // Bake standard safety upper lip overlay
     upperLipPatchCanvas.width = w;
     upperLipPatchCanvas.height = 15; 
     const uCtx = upperLipPatchCanvas.getContext('2d');
@@ -501,6 +537,7 @@ gainSlider.addEventListener('input', (e) => {
 dropLimitSlider.addEventListener('input', (e) => {
     maxDropLimit = parseInt(e.target.value);
     valDropLimit.innerText = maxDropLimit + "px";
+    if(mouthBox.w > 0) bakePuppetLayers(); // Re-bake healing patch limits dynamically
 });
 tiltSlider.addEventListener('input', (e) => {
     tiltAngle = parseInt(e.target.value);
