@@ -136,7 +136,7 @@
 </head>
 <body>
 
-<h1>🎙️ Production Puppet LipSync Studio Pro version 1.0.0.0</h1>
+<h1>🎙️ Production Puppet LipSync Studio Pro</h1>
 
 <div class="grid-layout">
     <div class="panel">
@@ -169,8 +169,8 @@
             <h3 style="margin-top:0; font-size:14px; color:#ff4757;">⚙️ Alignment & Dynamics Console</h3>
             
             <div class="controls-group">
-                <label>Line Blur / Edge Feathering <span id="valBlur" class="slider-value">2px</span></label>
-                <input type="range" id="blurSlider" min="0" max="15" value="2">
+                <label>Line Blur / Edge Feathering <span id="valBlur" class="slider-value">4px</span></label>
+                <input type="range" id="blurSlider" min="0" max="25" value="4">
             </div>
 
             <div class="controls-group">
@@ -272,7 +272,7 @@ let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 let lassoPoints = []; 
 
 let currentVolumeOffset = 0;
-let featherBlur = 2;
+let featherBlur = 4;
 let tiltAngle = 0;
 let yawShift = 0;
 let gainMultiplier = 0.10;
@@ -281,8 +281,9 @@ let animationFrameId = null;
 
 // Offscreen buffer canvas environments
 let jawPieceCanvas = document.createElement('canvas');
+let featheredJawCanvas = document.createElement('canvas'); // FIXED: Secondary compositing buffer for crisp centers
 let upperLipPatchCanvas = document.createElement('canvas'); 
-let skinTextureHealerCanvas = document.createElement('canvas'); // Clean environment map background plate
+let skinTextureHealerCanvas = document.createElement('canvas'); 
 let sourceImageCacheCanvas = document.createElement('canvas');
 let sCtx = sourceImageCacheCanvas.getContext('2d');
 
@@ -323,7 +324,7 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
 
     const dropValue = Math.min(mouthOffset * gainMultiplier, maxDropLimit); 
 
-    // FIXED STEP 1.5: Patch the void behind the selection using the original lower neck skin map instead of artificial stretching
+    // Step 1.5: Patch background layer void structures safely
     rCtx.save();
     rCtx.drawImage(skinTextureHealerCanvas, x, y);
     rCtx.restore();
@@ -374,7 +375,7 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
     rCtx.restore();
 
-    // Step 3: Draw sliding jaw puppet layer with custom edge blending properties
+    // Step 3: Draw sliding jaw puppet layer with optimized edge-only feathering context
     rCtx.save();
     const centerX = x + (w / 2);
     const centerY = y; 
@@ -382,12 +383,9 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.translate(centerX, centerY);
     rCtx.rotate((tiltAngle * Math.PI) / 180);
     
-    if (featherBlur > 0) {
-        rCtx.filter = `blur(${featherBlur}px)`;
-    } else {
-        rCtx.filter = 'blur(0.8px)';
-    }
-    rCtx.drawImage(jawPieceCanvas, -w/2 + yawShift, dropValue);
+    // Clear the rendering filter off the global layer context to prevent internal blur errors
+    rCtx.filter = 'none';
+    rCtx.drawImage(featheredJawCanvas, -w/2 + yawShift, dropValue);
     rCtx.restore();
     
     // Step 4: Upper Lip Protector Layer
@@ -422,14 +420,6 @@ function runUIGuidePipeline() {
         if (isDrawing) uCtx.setLineDash([6, 4]);
         uCtx.lineWidth = 2;
         uCtx.strokeRect(-w/2 + yawShift, 0, w, h);
-        
-        if (!isDrawing) {
-            uCtx.fillStyle = "rgba(0, 255, 204, 0.12)";
-            uCtx.fillRect(-w/2 + yawShift, 0, w, h);
-            uCtx.fillStyle = "#00ffcc";
-            uCtx.font = "bold 10px Arial";
-            uCtx.fillText("BOX TRACK MATRIX ACTIVE", -w/2 + yawShift + 5, -6);
-        }
     } else {
         uCtx.strokeStyle = isDrawing ? "rgba(255, 71, 87, 0.9)" : "rgba(0, 255, 204, 0.85)";
         if (isDrawing) uCtx.setLineDash([6, 4]);
@@ -443,20 +433,14 @@ function runUIGuidePipeline() {
             }
             if (!isDrawing) uCtx.closePath();
             uCtx.stroke();
-            
-            if (!isDrawing) {
-                uCtx.fillStyle = "rgba(0, 255, 204, 0.08)";
-                uCtx.fill();
-                uCtx.fillStyle = "#00ffcc";
-                uCtx.font = "bold 10px Arial";
-                uCtx.fillText("LASSO ALIGNED ALPHA MASK", lassoPoints[0].x, lassoPoints[0].y - 8);
-            }
         }
     }
     uCtx.restore();
 }
 
 function updateAllViewports(volume = 0) {
+    // Generate feather blend pass immediately before screen paint frames loop execution
+    applyEdgeFeatherPass();
     runArtworkRenderPipeline(volume);
     runUIGuidePipeline();
 }
@@ -482,18 +466,16 @@ function bakePuppetLayers() {
         }
         jCtx.closePath();
         jCtx.clip();
-        
         jCtx.drawImage(sourceImageCacheCanvas, x, y, w, h, 0, 0, w, h);
         jCtx.restore();
     }
     
-    // FIXED LOGIC MATRIX: Clean underlying repair plate generation 
+    // Background patch generator logic safely
     skinTextureHealerCanvas.width = w;
     skinTextureHealerCanvas.height = h;
     const hCtx = skinTextureHealerCanvas.getContext('2d');
     hCtx.clearRect(0, 0, w, h);
     
-    // Pull from the natural skin textures directly below the selection array mapping paths
     hCtx.save();
     if (currentMode === 'lasso') {
         hCtx.beginPath();
@@ -504,16 +486,57 @@ function bakePuppetLayers() {
         hCtx.closePath();
         hCtx.clip();
     }
-    // Shift image sampling down safely matching background structures cleanly
     hCtx.drawImage(sourceImageCacheCanvas, x, y + 15, w, h, 0, 0, w, h);
     hCtx.restore();
 
-    // Bake standard safety upper lip overlay
+    // Upper lip overlay guard shield execution
     upperLipPatchCanvas.width = w;
     upperLipPatchCanvas.height = 15; 
     const uCtx = upperLipPatchCanvas.getContext('2d');
     uCtx.clearRect(0, 0, w, 15);
     uCtx.drawImage(sourceImageCacheCanvas, x, y - 10, w, 15, 0, 0, w, 15);
+    
+    updateAllViewports(0);
+}
+
+// CRITICAL FIX PIPELINE: Isolate blur effects entirely to perimeter boundaries of asset mask 
+function applyEdgeFeatherPass() {
+    const { w, h } = mouthBox;
+    if (w <= 0 || h <= 0) return;
+
+    featheredJawCanvas.width = w;
+    featheredJawCanvas.height = h;
+    const fCtx = featheredJawCanvas.getContext('2d');
+    fCtx.clearRect(0, 0, w, h);
+
+    // 1. Draw raw clean crisp center pixels down first
+    fCtx.drawImage(jawPieceCanvas, 0, 0);
+
+    // 2. Composite an alpha alpha mask that feathers cleanly to background layout elements
+    if (featherBlur > 0) {
+        fCtx.save();
+        fCtx.globalCompositeOperation = 'destination-in';
+        
+        // Use a filter context strictly limited inside this offscreen canvas execution layer pass
+        fCtx.filter = `blur(${featherBlur}px)`;
+        
+        fCtx.fillStyle = '#ffffff';
+        if (currentMode === 'box') {
+            // Inset mask coordinates down slightly to pull blurring strictly to bounds perimeter
+            fCtx.fillRect(featherBlur, featherBlur, w - (featherBlur * 2), h - (featherBlur * 2));
+        } else {
+            fCtx.beginPath();
+            const startPtX = lassoPoints[0].x - mouthBox.x;
+            const startPtY = lassoPoints[0].y - mouthBox.y;
+            fCtx.moveTo(startPtX, startPtY);
+            for (let i = 1; i < lassoPoints.length; i++) {
+                fCtx.lineTo(lassoPoints[i].x - mouthBox.x, lassoPoints[i].y - mouthBox.y);
+            }
+            fCtx.closePath();
+            fCtx.fill();
+        }
+        fCtx.restore();
+    }
 }
 
 // Sliders Triggers Configuration Tuning Listeners
@@ -598,7 +621,6 @@ uiCanvas.addEventListener('mouseup', () => {
     }
     
     bakePuppetLayers();
-    updateAllViewports(0); 
     checkReadyState();
 });
 
