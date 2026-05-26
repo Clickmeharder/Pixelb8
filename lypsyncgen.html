@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Ultimate Production-Grade Puppet LipSync Studio Pro</title>
+<title>Ultimate Production-Grade Puppet LipSync Studio le Pro</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -282,7 +282,7 @@ let animationFrameId = null;
 // Offscreen buffer canvas environments
 let jawPieceCanvas = document.createElement('canvas');
 let upperLipPatchCanvas = document.createElement('canvas'); 
-let skinTextureHealerCanvas = document.createElement('canvas'); // FIX: Backing repair canvas environment
+let skinTextureHealerCanvas = document.createElement('canvas'); // Clean environment map background plate
 let sourceImageCacheCanvas = document.createElement('canvas');
 let sCtx = sourceImageCacheCanvas.getContext('2d');
 
@@ -315,7 +315,7 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
         return;
     }
 
-    // Step 1: Background Base Image Layout
+    // Step 1: Base Canvas Frame Image
     rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
     
     const { x, y, w, h } = mouthBox;
@@ -323,24 +323,9 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
 
     const dropValue = Math.min(mouthOffset * gainMultiplier, maxDropLimit); 
 
-    // CRITICAL FIX STEP 1.5: Render Healing Skin Patch over the background to eliminate the cut-out gap look
+    // FIXED STEP 1.5: Patch the void behind the selection using the original lower neck skin map instead of artificial stretching
     rCtx.save();
-    rCtx.beginPath();
-    if (currentMode === 'box') {
-        rCtx.rect(x - 5, y - 5, w + 10, h + maxDropLimit + 10);
-    } else {
-        if (lassoPoints.length > 0) {
-            rCtx.moveTo(lassoPoints[0].x - 5, lassoPoints[0].y - 5);
-            for (let i = 1; i < lassoPoints.length; i++) {
-                rCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
-            }
-            rCtx.lineTo(lassoPoints[lassoPoints.length - 1].x + 5, lassoPoints[lassoPoints.length - 1].y + maxDropLimit + 5);
-            rCtx.closePath();
-        }
-    }
-    rCtx.clip();
-    // Stretch real skin color pixels directly over the area behind the sliding jaw piece
-    rCtx.drawImage(skinTextureHealerCanvas, x, y, w, h + maxDropLimit);
+    rCtx.drawImage(skinTextureHealerCanvas, x, y);
     rCtx.restore();
 
     // Step 2: Inner Mouth Cave Render Core
@@ -389,7 +374,7 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
     rCtx.restore();
 
-    // Step 3: Draw sliding jaw puppet layer with dynamic blurring transformations
+    // Step 3: Draw sliding jaw puppet layer with custom edge blending properties
     rCtx.save();
     const centerX = x + (w / 2);
     const centerY = y; 
@@ -405,7 +390,7 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.drawImage(jawPieceCanvas, -w/2 + yawShift, dropValue);
     rCtx.restore();
     
-    // Step 4: Upper Lip Protector Guard Shield Layer
+    // Step 4: Upper Lip Protector Layer
     rCtx.save();
     rCtx.translate(centerX, centerY);
     rCtx.rotate((tiltAngle * Math.PI) / 180);
@@ -502,19 +487,26 @@ function bakePuppetLayers() {
         jCtx.restore();
     }
     
-    // CRITICAL FIX STEP 2: Generate Content-Aware Backup Healing Texture Stretch Matrix
+    // FIXED LOGIC MATRIX: Clean underlying repair plate generation 
     skinTextureHealerCanvas.width = w;
-    skinTextureHealerCanvas.height = h + maxDropLimit;
+    skinTextureHealerCanvas.height = h;
     const hCtx = skinTextureHealerCanvas.getContext('2d');
-    hCtx.clearRect(0, 0, w, h + maxDropLimit);
+    hCtx.clearRect(0, 0, w, h);
     
-    // Sample texture profile lines along selection perimeter borders and stretch them smoothly down
-    hCtx.drawImage(sourceImageCacheCanvas, x, y, w, Math.min(12, h), 0, 0, w, h + maxDropLimit);
-    if(h > 20) {
-        hCtx.globalAlpha = 0.4;
-        hCtx.drawImage(sourceImageCacheCanvas, x, y + h - 10, w, 10, 0, h, w, maxDropLimit);
-        hCtx.globalAlpha = 1.0;
+    // Pull from the natural skin textures directly below the selection array mapping paths
+    hCtx.save();
+    if (currentMode === 'lasso') {
+        hCtx.beginPath();
+        hCtx.moveTo(lassoPoints[0].x - x, lassoPoints[0].y - y);
+        for (let i = 1; i < lassoPoints.length; i++) {
+            hCtx.lineTo(lassoPoints[i].x - x, lassoPoints[i].y - y);
+        }
+        hCtx.closePath();
+        hCtx.clip();
     }
+    // Shift image sampling down safely matching background structures cleanly
+    hCtx.drawImage(sourceImageCacheCanvas, x, y + 15, w, h, 0, 0, w, h);
+    hCtx.restore();
 
     // Bake standard safety upper lip overlay
     upperLipPatchCanvas.width = w;
@@ -537,7 +529,7 @@ gainSlider.addEventListener('input', (e) => {
 dropLimitSlider.addEventListener('input', (e) => {
     maxDropLimit = parseInt(e.target.value);
     valDropLimit.innerText = maxDropLimit + "px";
-    if(mouthBox.w > 0) bakePuppetLayers(); // Re-bake healing patch limits dynamically
+    if(mouthBox.w > 0) bakePuppetLayers(); 
 });
 tiltSlider.addEventListener('input', (e) => {
     tiltAngle = parseInt(e.target.value);
