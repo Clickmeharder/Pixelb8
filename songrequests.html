@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Stream Puppet Studio Pro v10</title>
+<title>Live Stream Puppet Studio Pro (CORS Search Fix)</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -163,9 +163,10 @@
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
-            <strong>✨ CORS-Proof Live Audio Network Active:</strong><br>
-            • Search requests are securely parsed via fallback proxy gates to completely remove domain blocking rules.<br>
-            • Head mechanics are fully mapped to the dynamic matrix layout context.
+            <strong>✨ Multi-Target Layer Canvas Active:</strong><br>
+            • Use <strong>Define Entire Head</strong> to anchor the head group away from the backdrop.<br>
+            • Draw <strong>Moving Jaw</strong> lasso boundaries to isolate audio-reactive elements.<br>
+            • <strong>Fixed Search Gateway:</strong> Query encoding has been streamlined to prevent 400 Errors.
         </div>
 
         <div class="panel" id="comfycontrolBox" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px; text-align: left;">
@@ -179,8 +180,9 @@
 
         <div class="controls-group" style="margin-top: 20px;">
             <label>Current Editing Canvas Target</label>
-            <div class="toggle-row" style="flex-wrap: wrap;">
-                <button id="targetJawBtn" class="active" style="flex: 1 1 100%;">👄 Define Moving Jaw</button>
+            <div class="toggle-row" style="flex-wrap: wrap; gap: 8px;">
+                <button id="targetHeadBtn" class="active" style="flex: 1 1 100%;">👤 Define Entire Head</button>
+                <button id="targetJawBtn" style="flex: 1 1 100%;">👄 Define Moving Jaw</button>
                 <button id="targetLeftEyeBtn" style="flex: 1;">👁️ Left Eye</button>
                 <button id="targetRightEyeBtn" style="flex: 1;">👁️ Right Eye</button>
             </div>
@@ -298,6 +300,7 @@ const valGain = document.getElementById('valGain');
 const valGate = document.getElementById('valGate');
 const valDropLimit = document.getElementById('valDropLimit');
 
+const targetHeadBtn = document.getElementById('targetHeadBtn');
 const targetJawBtn = document.getElementById('targetJawBtn');
 const targetLeftEyeBtn = document.getElementById('targetLeftEyeBtn');
 const targetRightEyeBtn = document.getElementById('targetRightEyeBtn');
@@ -308,12 +311,14 @@ const geometryModeRow = document.getElementById('geometryModeRow');
 let avatarImg = new Image();
 let audioCtx, analyser, micStream;
 
-let editTarget = 'jaw'; 
+let editTarget = 'head'; 
 let currentMode = 'box'; 
 let isDrawing = false;
 let startX = 0; let startY = 0;
 
 // Geometries Cache Objects
+let headBox = { x: 0, y: 0, w: 0, h: 0 };
+let headLassoPoints = [];
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 let lassoPoints = []; 
 let leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
@@ -331,14 +336,8 @@ let swayAmplitude = 1.5;
 let isMicLive = false;
 let isBlinking = false;
 
-// Native Advanced Song Request Infrastructure States
-let songQueue = [];
-let isPlayingSong = false;
-let currentMediaElement = null;
-let audioSourceNode = null;
-let streamername = "jaedraze";
-
-// Offscreen Buffer Canvas Modules
+// Offscreen Buffer Canvas Frameworks
+let featheredHeadCanvas = document.createElement('canvas');
 let featheredJawCanvas = document.createElement('canvas'); 
 let upperLipPatchCanvas = document.createElement('canvas'); 
 let skinTextureHealerCanvas = document.createElement('canvas'); 
@@ -346,10 +345,19 @@ let sourceImageCacheCanvas = document.createElement('canvas');
 const sCtx = sourceImageCacheCanvas.getContext('2d');
 
 function clearActiveTargets() {
+    targetHeadBtn.className = '';
     targetJawBtn.className = '';
     targetLeftEyeBtn.className = '';
     targetRightEyeBtn.className = '';
 }
+
+targetHeadBtn.addEventListener('click', () => {
+    editTarget = 'head';
+    clearActiveTargets();
+    targetHeadBtn.className = 'active';
+    geometryModeRow.style.display = 'flex';
+    updateAllViewports(0);
+});
 
 targetJawBtn.addEventListener('click', () => {
     editTarget = 'jaw';
@@ -379,8 +387,8 @@ modeBoxBtn.addEventListener('click', () => {
     currentMode = 'box';
     modeBoxBtn.className = 'active';
     modeLassoBtn.className = '';
-    mouthBox = { x: 0, y: 0, w: 0, h: 0 };
-    lassoPoints = [];
+    if (editTarget === 'head') { headBox = { x: 0, y: 0, w: 0, h: 0 }; headLassoPoints = []; }
+    else if (editTarget === 'jaw') { mouthBox = { x: 0, y: 0, w: 0, h: 0 }; lassoPoints = []; }
     updateAllViewports(0);
 });
 
@@ -388,12 +396,14 @@ modeLassoBtn.addEventListener('click', () => {
     currentMode = 'lasso';
     modeLassoBtn.className = 'active';
     modeBoxBtn.className = '';
-    mouthBox = { x: 0, y: 0, w: 0, h: 0 };
-    lassoPoints = [];
+    if (editTarget === 'head') { headBox = { x: 0, y: 0, w: 0, h: 0 }; headLassoPoints = []; }
+    else if (editTarget === 'jaw') { mouthBox = { x: 0, y: 0, w: 0, h: 0 }; lassoPoints = []; }
     updateAllViewports(0);
 });
 
 function resetSelectionData() {
+    headBox = { x: 0, y: 0, w: 0, h: 0 };
+    headLassoPoints = [];
     mouthBox = { x: 0, y: 0, w: 0, h: 0 };
     leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
     rightEyeBox = { x: 0, y: 0, w: 0, h: 0 };
@@ -410,16 +420,34 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         return;
     }
 
-    // Dynamic Head Bobble / Sway Engine Calculation
+    // Restored Idle Animation Vectors
     const swayY = Math.sin(timestamp * 0.003) * swayAmplitude;
     const swayX = Math.cos(timestamp * 0.0015) * (swayAmplitude * 0.3);
 
-    rCtx.save();
-    rCtx.translate(swayX, swayY);
-
-    // Primary Base Frame Plate
+    // Render underlying base plate
     rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
     
+    rCtx.save();
+    
+    let pivotX = renderCanvas.width / 2;
+    let pivotY = renderCanvas.height / 2;
+    if (headBox.w > 0) {
+        pivotX = headBox.x + (headBox.w / 2);
+        pivotY = headBox.y + (headBox.h / 2);
+    }
+
+    // Apply translation using structural center axis point
+    rCtx.translate(pivotX + swayX, pivotY + swayY);
+    rCtx.rotate((tiltAngle * Math.PI) / 180);
+
+    // Process isolated Head transformation overlay maps
+    if (headBox.w > 0) {
+        rCtx.save();
+        rCtx.filter = 'none';
+        rCtx.drawImage(featheredHeadCanvas, -headBox.w / 2 - featherBlur * 2 + yawShift, -headBox.h / 2 - featherBlur * 2);
+        rCtx.restore();
+    }
+
     const { x, y, w, h } = mouthBox;
     if (w > 0 && h > 0) {
         let calculatedDrop = 0;
@@ -428,86 +456,85 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         }
         const dropValue = Math.min(calculatedDrop, maxDropLimit); 
 
-        // Apply skin background textures
+        const relMouthX = x - pivotX;
+        const relMouthY = y - pivotY;
+
         rCtx.save();
-        rCtx.drawImage(skinTextureHealerCanvas, x - featherBlur * 2, y - featherBlur * 2);
+        rCtx.drawImage(skinTextureHealerCanvas, relMouthX - featherBlur * 2, relMouthY - featherBlur * 2);
         rCtx.restore();
 
-        // Inner Cave Structuring Matrix
+        // Structural Cavity Generation Matrix
         rCtx.save();
         rCtx.beginPath();
         if (currentMode === 'box') {
-            rCtx.rect(x + 2, y, w - 4, h + dropValue);
+            rCtx.rect(relMouthX + 2, relMouthY, w - 4, h + dropValue);
         } else {
             if (lassoPoints.length > 0) {
-                rCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
-                for (let i = 1; i < lassoPoints.length; i++) rCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
-                rCtx.lineTo(lassoPoints[lassoPoints.length - 1].x, lassoPoints[lassoPoints.length - 1].y + dropValue);
-                rCtx.lineTo(lassoPoints[0].x, lassoPoints[0].y + dropValue);
+                rCtx.moveTo(lassoPoints[0].x - pivotX, lassoPoints[0].y - pivotY);
+                for (let i = 1; i < lassoPoints.length; i++) {
+                    rCtx.lineTo(lassoPoints[i].x - pivotX, lassoPoints[i].y - pivotY);
+                }
+                rCtx.lineTo(lassoPoints[lassoPoints.length - 1].x - pivotX, lassoPoints[lassoPoints.length - 1].y - pivotY + dropValue);
+                rCtx.lineTo(lassoPoints[0].x - pivotX, lassoPoints[0].y - pivotY + dropValue);
             }
         }
         rCtx.clip();
 
         rCtx.fillStyle = '#2d080e'; 
-        rCtx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+        rCtx.fillRect(relMouthX - 50, relMouthY - 50, w + 100, h + dropValue + 100);
 
         rCtx.fillStyle = '#ffffff';
-        rCtx.fillRect(x + 12, y, w - 24, 6); 
+        rCtx.fillRect(relMouthX + 12, relMouthY, w - 24, 6); 
         
         rCtx.fillStyle = '#ff4d6d';
-        const tongueY = y + h - (h * 0.28) + (dropValue * 0.2);
+        const tongueY = relMouthY + h - (h * 0.28) + (dropValue * 0.2);
         const tongueH = h * 0.35;
         rCtx.beginPath();
-        rCtx.ellipse(x + (w / 2), tongueY + (tongueH / 2), w * 0.38, tongueH * 0.5, 0, 0, 2 * Math.PI);
+        rCtx.ellipse(relMouthX + (w / 2), tongueY + (tongueH / 2), w * 0.38, tongueH * 0.5, 0, 0, 2 * Math.PI);
         rCtx.fill();
 
         rCtx.strokeStyle = '#d92b4b';
         rCtx.lineWidth = 2.5;
         rCtx.beginPath();
-        rCtx.moveTo(x + (w / 2), tongueY + 2);
-        rCtx.quadraticCurveTo(x + (w / 2) - 1, tongueY + (tongueH * 0.5), x + (w / 2), tongueY + tongueH - 2);
+        rCtx.moveTo(relMouthX + (w / 2), tongueY + 2);
+        rCtx.quadraticCurveTo(relMouthX + (w / 2) - 1, tongueY + (tongueH * 0.5), relMouthX + (w / 2), tongueY + tongueH - 2);
         rCtx.stroke();
 
         rCtx.fillStyle = '#eeeeee';
-        rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
+        rCtx.fillRect(relMouthX + 14, relMouthY + dropValue + 4, w - 28, 4);
         rCtx.restore();
 
-        // Moving Cut Jaw Transforms Engine (Head Tilt Integration)
+        // Cut Lower Jaw Render Transformations
         rCtx.save();
-        const centerX = x + (w / 2);
-        const centerY = y; 
-
-        rCtx.translate(centerX, centerY);
-        rCtx.rotate((tiltAngle * Math.PI) / 180);
-        
         rCtx.filter = 'none';
-        rCtx.drawImage(featheredJawCanvas, -w/2 - featherBlur * 2 + yawShift, -featherBlur * 2 + dropValue);
+        rCtx.drawImage(featheredJawCanvas, relMouthX - featherBlur * 2 + yawShift, relMouthY - featherBlur * 2 + dropValue);
         rCtx.restore();
         
-        // Static Lip Overlay Skin Fix
+        // Dynamic Overlay Patch Core Fix
         rCtx.save();
-        rCtx.translate(centerX, centerY);
-        rCtx.rotate((tiltAngle * Math.PI) / 180);
-        rCtx.drawImage(upperLipPatchCanvas, -w/2 + yawShift, -10);
+        rCtx.drawImage(upperLipPatchCanvas, relMouthX + yawShift, relMouthY - 10);
         rCtx.restore();
     }
 
-    // Eye Blink Pipeline Framework
+    // Eye Blinking Animation Engine
     if (isBlinking) {
         [leftEyeBox, rightEyeBox].forEach(box => {
             if (box.w > 0 && box.h > 0) {
+                const relEyeX = box.x - pivotX;
+                const relEyeY = box.y - pivotY;
+
                 rCtx.save();
                 rCtx.beginPath();
-                rCtx.rect(box.x, box.y, box.w, box.h);
+                rCtx.rect(relEyeX, relEyeY, box.w, box.h);
                 rCtx.clip();
 
-                rCtx.drawImage(sourceImageCacheCanvas, box.x, box.y - 12, box.w, box.h, box.x, box.y, box.w, box.h);
+                rCtx.drawImage(sourceImageCacheCanvas, box.x, box.y - 12, box.w, box.h, relEyeX, relEyeY, box.w, box.h);
                 
                 rCtx.strokeStyle = 'rgba(0,0,0,0.3)';
                 rCtx.lineWidth = 2;
                 rCtx.beginPath();
-                rCtx.moveTo(box.x, box.y + (box.h / 2));
-                rCtx.lineTo(box.x + box.w, box.y + (box.h / 2));
+                rCtx.moveTo(relEyeX, relEyeY + (box.h / 2));
+                rCtx.lineTo(relEyeX + box.w, relEyeY + (box.h / 2));
                 rCtx.stroke();
                 
                 rCtx.restore();
@@ -521,6 +548,22 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
 function runUIGuidePipeline() {
     uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
     if (!avatarImg.src) return;
+
+    if (headBox.w > 0) {
+        uCtx.save();
+        uCtx.strokeStyle = "rgba(163, 102, 255, 0.6)";
+        uCtx.lineWidth = 2;
+        if (headLassoPoints.length > 0) {
+            uCtx.beginPath();
+            uCtx.moveTo(headLassoPoints[0].x, headLassoPoints[0].y);
+            for(let i=1; i<headLassoPoints.length; i++) uCtx.lineTo(headLassoPoints[i].x, headLassoPoints[i].y);
+            uCtx.closePath();
+            uCtx.stroke();
+        } else {
+            uCtx.strokeRect(headBox.x, headBox.y, headBox.w, headBox.h);
+        }
+        uCtx.restore();
+    }
 
     if (mouthBox.w > 0) {
         uCtx.save();
@@ -564,7 +607,14 @@ function runUIGuidePipeline() {
         uCtx.lineWidth = 2;
         uCtx.setLineDash([5, 4]); 
         
-        if (editTarget === 'jaw' && currentMode === 'lasso') {
+        if (editTarget === 'head' && currentMode === 'lasso') {
+            if (headLassoPoints.length > 0) {
+                uCtx.beginPath();
+                uCtx.moveTo(headLassoPoints[0].x, headLassoPoints[0].y);
+                for(let i=1; i<headLassoPoints.length; i++) uCtx.lineTo(headLassoPoints[i].x, headLassoPoints[i].y);
+                uCtx.stroke();
+            }
+        } else if (editTarget === 'jaw' && currentMode === 'lasso') {
             if (lassoPoints.length > 0) {
                 uCtx.beginPath();
                 uCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
@@ -573,7 +623,8 @@ function runUIGuidePipeline() {
             }
         } else {
             let drawX, drawY, drawW, drawH;
-            if (editTarget === 'jaw') { drawX = mouthBox.x; drawY = mouthBox.y; drawW = mouthBox.w; drawH = mouthBox.h; }
+            if (editTarget === 'head') { drawX = headBox.x; drawY = headBox.y; drawW = headBox.w; drawH = headBox.h; }
+            else if (editTarget === 'jaw') { drawX = mouthBox.x; drawY = mouthBox.y; drawW = mouthBox.w; drawH = mouthBox.h; }
             else if (editTarget === 'leftEye') { drawX = leftEyeBox.x; drawY = leftEyeBox.y; drawW = leftEyeBox.w; drawH = leftEyeBox.h; }
             else { drawX = rightEyeBox.x; drawY = rightEyeBox.y; drawW = rightEyeBox.w; drawH = rightEyeBox.h; }
             uCtx.strokeRect(drawX, drawY, drawW, drawH);
@@ -588,10 +639,47 @@ function updateAllViewports(volume = 0) {
 }
 
 function bakePuppetLayers() {
+    const pad = featherBlur * 2;
+
+    // 1. Structural Entire Head Generation
+    if (headBox.w > 0 && headBox.h > 0) {
+        featheredHeadCanvas.width = headBox.w + pad * 2;
+        featheredHeadCanvas.height = headBox.h + pad * 2;
+        const hfCtx = featheredHeadCanvas.getContext('2d');
+        hfCtx.clearRect(0, 0, featheredHeadCanvas.width, featheredHeadCanvas.height);
+
+        let hMask = document.createElement('canvas');
+        hMask.width = featheredHeadCanvas.width;
+        hMask.height = featheredHeadCanvas.height;
+        const hmCtx = hMask.getContext('2d');
+        hmCtx.fillStyle = '#ffffff';
+
+        if (headLassoPoints.length > 0) {
+            hmCtx.beginPath();
+            hmCtx.moveTo(headLassoPoints[0].x - headBox.x + pad, headLassoPoints[0].y - headBox.y + pad);
+            for(let i=1; i<headLassoPoints.length; i++) {
+                hmCtx.lineTo(headLassoPoints[i].x - headBox.x + pad, headLassoPoints[i].y - headBox.y + pad);
+            }
+            hmCtx.closePath();
+            hmCtx.fill();
+        } else {
+            hmCtx.fillRect(pad, pad, headBox.w, headBox.h);
+        }
+
+        hfCtx.save();
+        if (featherBlur > 0) hfCtx.filter = `blur(${featherBlur}px)`;
+        hfCtx.drawImage(hMask, 0, 0);
+        hfCtx.restore();
+
+        hfCtx.save();
+        hfCtx.globalCompositeOperation = 'source-in';
+        hfCtx.drawImage(sourceImageCacheCanvas, headBox.x - pad, headBox.y - pad, headBox.w + pad * 2, headBox.h + pad * 2, 0, 0, headBox.w + pad * 2, headBox.h + pad * 2);
+        hfCtx.restore();
+    }
+
+    // 2. Structural Moving Lower Jaw Matrix Extraction
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
-
-    const pad = featherBlur * 2; 
 
     featheredJawCanvas.width = w + pad * 2;
     featheredJawCanvas.height = h + pad * 2;
@@ -604,7 +692,7 @@ function bakePuppetLayers() {
     const mCtx = maskCanvas.getContext('2d');
 
     mCtx.fillStyle = '#ffffff';
-    if (currentMode === 'box') {
+    if (currentMode === 'box' || editTarget !== 'jaw') {
         mCtx.fillRect(pad, pad, w, h);
     } else {
         if(lassoPoints.length > 0) {
@@ -711,7 +799,7 @@ swaySlider.addEventListener('input', (e) => {
 blurSlider.addEventListener('input', (e) => {
     featherBlur = parseInt(e.target.value);
     valBlur.innerText = featherBlur + "px";
-    if(mouthBox.w > 0) bakePuppetLayers();
+    if(mouthBox.w > 0 || headBox.w > 0) bakePuppetLayers();
 });
 gainSlider.addEventListener('input', (e) => {
     gainMultiplier = parseInt(e.target.value) / 100;
@@ -751,7 +839,10 @@ uiCanvas.addEventListener('mousedown', (e) => {
     startX = coords.x;
     startY = coords.y;
     
-    if (editTarget === 'jaw') {
+    if (editTarget === 'head') {
+        if (currentMode === 'box') { headBox = { x: startX, y: startY, w: 0, h: 0 }; }
+        else { headLassoPoints = [{ x: startX, y: startY }]; }
+    } else if (editTarget === 'jaw') {
         if (currentMode === 'box') { mouthBox = { x: startX, y: startY, w: 0, h: 0 }; } 
         else { lassoPoints = [{ x: startX, y: startY }]; }
     } else if (editTarget === 'leftEye') {
@@ -765,7 +856,16 @@ uiCanvas.addEventListener('mousemove', (e) => {
     if (!isDrawing) return;
     const coords = getCanvasSpaceMouseCoords(e);
     
-    if (editTarget === 'jaw') {
+    if (editTarget === 'head') {
+        if (currentMode === 'box') {
+            headBox.x = Math.min(startX, coords.x);
+            headBox.y = Math.min(startY, coords.y);
+            headBox.w = Math.abs(startX - coords.x);
+            headBox.h = Math.abs(startY - coords.y);
+        } else {
+            headLassoPoints.push({ x: coords.x, y: coords.y });
+        }
+    } else if (editTarget === 'jaw') {
         if (currentMode === 'box') {
             mouthBox.x = Math.min(startX, coords.x);
             mouthBox.y = Math.min(startY, coords.y);
@@ -792,6 +892,17 @@ uiCanvas.addEventListener('mouseup', () => {
     if (!isDrawing) return;
     isDrawing = false;
     
+    if (editTarget === 'head' && currentMode === 'lasso' && headLassoPoints.length > 2) {
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        headLassoPoints.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        });
+        headBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+    }
+    
     if (editTarget === 'jaw' && currentMode === 'lasso' && lassoPoints.length > 2) {
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         lassoPoints.forEach(p => {
@@ -803,7 +914,7 @@ uiCanvas.addEventListener('mouseup', () => {
         mouthBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
     }
     
-    if (editTarget === 'jaw') bakePuppetLayers();
+    bakePuppetLayers();
     checkReadyState();
     runUIGuidePipeline();
 });
@@ -818,7 +929,7 @@ imageInput.addEventListener('change', (e) => {
             sourceImageCacheCanvas.height = renderCanvas.height;
             sCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
             resetSelectionData();
-            status.innerText = "Status: Image loaded. Map jaw, then configure left/right eyes.";
+            status.innerText = "Status: Image loaded. Map entire head layout boundaries first.";
         };
     }
 });
@@ -841,7 +952,7 @@ connectMicBtn.addEventListener('click', async () => {
         connectMicBtn.style.background = "#222";
         connectMicBtn.style.color = "#2ed573";
         connectMicBtn.style.border = "2px solid #2ed573";
-        status.innerText = "Status: Running smoothly. CORS-Proof lookup engine operational.";
+        status.innerText = "Status: Running smoothly. Search cluster networks online.";
 
         triggerRandomBlinkCycle();
     } catch (err) {
@@ -850,7 +961,13 @@ connectMicBtn.addEventListener('click', async () => {
 });
 
 
-// --- PROXIED SONG REQUEST INFRASTRUCTURE ENGINE ---
+// --- OVERHAULED SOUND INFRASTRUCTURE & ENCODING ENGINES ---
+
+let songQueue = [];
+let isPlayingSong = false;
+let currentMediaElement = null;
+let audioSourceNode = null;
+let streamername = "jaedraze";
 
 function isStreamerAndAuthorize(user, command) {
     if (user.toLowerCase() !== streamername.toLowerCase()) {
@@ -883,7 +1000,7 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
         } else {
             let searchKeywords = cleanedInput.replace(/\.(mp3|mp4|wav|ogg|flac|m4a)$/i, '').trim();
             
-            status.innerText = `🔍 Searching proxy gateway for: "${searchKeywords}"...`;
+            status.innerText = `🔍 Querying proxy grid for: "${searchKeywords}"...`;
             try {
                 let trackData = await searchAudioKeywords(searchKeywords);
                 if (trackData) {
@@ -891,11 +1008,11 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
                     status.innerText = `✅ Queued: "${trackData.title}" (Requested by ${user})`;
                     if (!isPlayingSong && isMicLive) playNextSong();
                 } else {
-                    status.innerText = `❌ No unique results found for: "${searchKeywords}"`;
+                    status.innerText = `❌ Search error or no unique results found for: "${searchKeywords}"`;
                 }
             } catch (err) {
                 console.error("Search Gateway Error Exception:", err);
-                status.innerText = "⚠️ Search cluster error. Try another keyphrase.";
+                status.innerText = "⚠️ Proxy cluster timed out. Try again.";
             }
         }
     }
@@ -908,35 +1025,55 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
 };
 
 async function searchAudioKeywords(keywords) {
-    const instances = [
-        "https://inv.nadeko.net",
-        "https://invidious.perennialte.ch",
-        "https://iv.melmac.space",
-        "https://yewtu.be"
+    // Array of high-availability Piped API clusters + Invidious mirror layers
+    const targets = [
+        `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(keywords)}&filter=videos`,
+        `https://pipedapi.moomoo.me/search?q=${encodeURIComponent(keywords)}&filter=videos`,
+        `https://yewtu.be/api/v1/search?q=${encodeURIComponent(keywords)}&type=video`
+    ];
+
+    // High-availability CORS-bypass proxy array (bypassing allorigins 400 limitations)
+    const proxies = [
+        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
     ];
     
-    for (let base of instances) {
-        try {
-            const targetUrl = `${base}/api/v1/search?q=${encodeURIComponent(keywords)}&type=video`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-            
-            const res = await fetch(proxyUrl);
-            if (!res.ok) continue;
-            
-            const proxyData = await res.json();
-            if (!proxyData || !proxyData.contents) continue;
-            
-            const data = JSON.parse(proxyData.contents);
-            
-            if (data && data.length > 0) {
-                return {
-                    title: data[0].title,
-                    id: data[0].videoId,
-                    url: `https://pipedapi.kavin.rocks/stream/${data[0].videoId}`
-                };
+    for (let targetUrl of targets) {
+        for (let getProxy of proxies) {
+            try {
+                const proxyUrl = getProxy(targetUrl);
+                const res = await fetch(proxyUrl);
+                if (!res.ok) continue;
+                
+                let json;
+                if (proxyUrl.includes("allorigins")) {
+                    const raw = await res.json();
+                    if (!raw.contents) continue;
+                    json = JSON.parse(raw.contents);
+                } else {
+                    json = await res.json();
+                }
+                
+                // Process Piped API results schemas
+                if (json && json.items && json.items.length > 0) {
+                    const item = json.items[0];
+                    return {
+                        title: item.title,
+                        id: item.url.split("v=")[1] || item.id,
+                        url: `https://pipedapi.kavin.rocks/stream/${item.url.split("v=")[1] || item.id}`
+                    };
+                }
+                // Process classic Invidious results fallback schemas
+                if (json && Array.isArray(json) && json.length > 0) {
+                    return {
+                        title: json[0].title,
+                        id: json[0].videoId,
+                        url: `https://pipedapi.kavin.rocks/stream/${json[0].videoId}`
+                    };
+                }
+            } catch(e) {
+                console.warn(`Gateway mirror node down or blocked. Advancing structural matrix...`);
             }
-        } catch(e) {
-            console.warn(`Mirror gateway ${base} through proxy bypassed. Advancing node...`);
         }
     }
     return null;
@@ -945,7 +1082,7 @@ async function searchAudioKeywords(keywords) {
 function playNextSong() {
     if (songQueue.length === 0) {
         isPlayingSong = false;
-        status.innerText = "Status: Song queue exhausted. Awaiting stream inputs.";
+        status.innerText = "Status: Song queue completed. Awaiting stream inputs.";
         document.getElementById("videoWrapper").innerHTML = '<div id="videoPlaceholder" style="color: #555; font-size: 12px; font-family: monospace;">Media Player Idle</div>';
         return;
     }
@@ -998,7 +1135,7 @@ function executeAudioPlayback(songObj) {
             status.innerText = `🎶 Track Rendering: "${songObj.title}"`;
         })
         .catch(err => {
-            console.error("Hardware pipeline failed to mount audio nodes:", err);
+            console.error("Hardware pipeline error mounting nodes:", err);
             playNextSong(); 
         });
 
@@ -1015,18 +1152,18 @@ function skipCurrentSong() {
 }
 
 
-// --- TWITCH SYSTEM RUNTIME CONNECTIONS ---
+// --- TWITCH SYSTEM RUNTIME MANAGER MODULES ---
 
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
-    const input = document.querySelector("#comfycontrolBox input[type='text']");
+    const input = document.querySelector("#comfycontrolBox input[name='yourTextName']");
 
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim().toLowerCase();
         localStorage.setItem("lastStreamer", streamername);
         ComfyJS.Init(streamername);
-        console.log(`Connected to Twitch chat listener on channel: ${streamername}`);
+        console.log(`Connected to channel chat: ${streamername}`);
         
         button.style.display = "none";
         input.style.display = "none";
@@ -1039,20 +1176,20 @@ function setStreamer(newStreamer) {
 function connectStreamer() {
     const savedStreamer = localStorage.getItem("lastStreamer");
     if (savedStreamer) {
-        document.querySelector("#comfycontrolBox input[type='text']").value = savedStreamer;
+        document.querySelector("#comfycontrolBox input[name='yourTextName']").value = savedStreamer;
         setStreamer(savedStreamer);
     }
 }
 
 function disconnectBot() {
     const button = document.getElementById("streamersButt");
-    const input = document.querySelector("#comfycontrolBox input[type='text']");
+    const input = document.querySelector("#comfycontrolBox input[name='yourTextName']");
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     
     button.style.display = "block";
     input.style.display = "block";
     ComfyJS.Disconnect();
-    console.log("Bot disconnected safely from Twitch services.");
+    console.log("Bot disconnected cleanly.");
     localStorage.removeItem("lastStreamer");
     
     twitchdisconnectbutton.style.display = "none";
@@ -1061,7 +1198,7 @@ function disconnectBot() {
 }
 
 document.getElementById("streamersButt").addEventListener("click", function() {
-    let newStreamer = document.querySelector("#comfycontrolBox input[type='text']").value;
+    let newStreamer = document.querySelector("#comfycontrolBox input[name='yourTextName']").value;
     setStreamer(newStreamer);
 });
 
