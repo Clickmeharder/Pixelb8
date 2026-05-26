@@ -6,7 +6,7 @@
 
 <style>
 body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     background: #111;
     color: white;
     text-align: center;
@@ -15,84 +15,121 @@ body {
 
 input, button {
     width: 80%;
-    padding: 10px;
+    padding: 12px;
     margin: 10px;
+    border-radius: 4px;
+    border: 1px solid #333;
+}
+
+input {
+    background: #222;
+    color: #fff;
+}
+
+button {
+    background: #ff4757;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+
+button:hover {
+    background: #ff6b81;
 }
 
 #status {
     margin-top: 20px;
     color: lime;
+    font-family: monospace;
+    white-space: pre-wrap;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎧 Video → MP3 Converter test 2</h1>
+<h1>🎧 Video → MP3 Converter  gemini test </h1>
 
-<input id="url" placeholder="Direct mp4/webm URL" />
+<input id="url" placeholder="Direct video URL (e.g., https://mysite.com/video.mp4)" />
 <br>
-<button id="btn">Convert</button>
+<button id="btn">Convert to MP3</button>
 
-<p id="status">Idle</p>
+<pre id="status">Idle</pre>
 
 <script type="module">
 import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js";
 import { fetchFile } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js";
 
 const ffmpeg = new FFmpeg();
-
 const btn = document.getElementById("btn");
 const status = document.getElementById("status");
 
+// Track FFmpeg internal logs so you can see exactly what's wrong
+ffmpeg.on('log', ({ message }) => {
+    console.log(message);
+    if(message.includes('Duration')) {
+        status.innerText = `Converting...\n${message.trim()}`;
+    }
+});
+
 async function loadFFmpeg() {
     if (!ffmpeg.loaded) {
-        status.innerText = "Loading FFmpeg...";
-
+        status.innerText = "Loading FFmpeg WebAssembly cores...";
+        
+        // Using unpkg or cdnjs/jsdelivr matching versions cleanly
+        const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm";
         await ffmpeg.load({
-            coreURL: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
-            wasmURL: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm",
-            workerURL: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/ffmpeg-core.worker.js"
+            coreURL: `${baseURL}/ffmpeg-core.js`,
+            wasmURL: `${baseURL}/ffmpeg-core.wasm`,
         });
     }
 }
 
 async function convert() {
     try {
-        const url = document.getElementById("url").value;
+        const url = document.getElementById("url").value.trim();
         if (!url) return alert("Enter a video URL");
 
+        btn.disabled = true;
         await loadFFmpeg();
 
-        status.innerText = "Downloading video...";
-
+        status.innerText = "Fetching raw video file bytes...";
+        // Note: Target video URL MUST have CORS headers allowed if on another domain
         const file = await fetchFile(url);
 
+        status.innerText = "Writing video to virtual sandbox file system...";
         await ffmpeg.writeFile("input.mp4", file);
 
-        status.innerText = "Converting...";
-
+        status.innerText = "Processing extraction audio layer...";
         await ffmpeg.exec([
             "-i", "input.mp4",
             "-vn",
+            "-acodec", "libmp3lame",
             "-b:a", "192k",
             "output.mp3"
         ]);
 
+        status.innerText = "Reading final output sound array...";
         const data = await ffmpeg.readFile("output.mp3");
 
-        const blob = new Blob([data.buffer], { type: "audio/mp3" });
+        // Convert the clean UInt8Array block straight over to a standard audio download blob
+        const blob = new Blob([data], { type: "audio/mp3" });
         const downloadUrl = URL.createObjectURL(blob);
 
         const a = document.createElement("a");
         a.href = downloadUrl;
-        a.download = "audio.mp3";
+        a.download = `audio_${Date.now()}.mp3`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
 
-        status.innerText = "Done!";
+        status.innerText = "Done! Check your downloads.";
     } catch (err) {
         console.error(err);
-        status.innerText = "Error (check console)";
+        status.innerText = `Error: ${err.message}\nCheck your browser console logs for CORS/Header rejections.`;
+    } finally {
+        btn.disabled = false;
     }
 }
 
