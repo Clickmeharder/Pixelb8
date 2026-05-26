@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Stream Puppet Studio Pro (Eyelid Sampler Update)</title>
+<title>Live Stream Puppet Studio Pro (Dual-Eye Texture Update)</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -125,24 +125,6 @@
         border-left: 3px solid #ff4757;
         text-align: left;
     }
-    /* Color Sampler Row Layout */
-    .color-picker-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: #222;
-        padding: 6px;
-        border-radius: 4px;
-        border: 1px solid #333;
-    }
-    .color-picker-row input[type="color"] {
-        border: none;
-        background: transparent;
-        width: 40px;
-        height: 30px;
-        cursor: pointer;
-        padding: 0;
-    }
 </style>
 </head>
 <body>
@@ -152,9 +134,10 @@
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
-            <strong>🎨 Eyelid Color Picker Active:</strong><br>
-            • Switch target to <strong>Left Eye</strong> or <strong>Right Eye</strong>.<br>
-            • Click anywhere on your avatar image to sample that pixel color instantly for the eyelids, or use the manual color palette tile below.
+            <strong>✨ Dual-Eye Dynamic Texture Blinking Active:</strong><br>
+            1. Select <strong>👄 Define Moving Jaw</strong> and carve out the mouth selection.<br>
+            2. Switch targets to map your <strong>👁️ Left Eye</strong> and <strong>👁️ Right Eye</strong> zones independently.<br>
+            • When blinking triggers, skin pixels will be automatically sampled from right above each individual eye box coordinates.
         </div>
 
         <div class="controls-group" style="margin-top: 20px;">
@@ -167,15 +150,6 @@
             <div class="toggle-row" id="geometryModeRow">
                 <button id="modeBoxBtn" class="active" style="font-size:11px;">🔲 Box Selection Mode</button>
                 <button id="modeLassoBtn" style="font-size:11px;">⎋ Lasso Path Mode</button>
-            </div>
-        </div>
-
-        <div class="controls-group">
-            <label>Blink Eyelid Fill Color Override</label>
-            <div class="color-picker-row">
-                <input type="color" id="eyelidColorPicker" value="#332222">
-                <span id="colorHexLabel" style="font-family:monospace; font-size:13px; color:#00ffcc;">#332222</span>
-                <span style="font-size:11px; color:#888; margin-left:auto;">(Or click image to eye-drop sample)</span>
             </div>
         </div>
 
@@ -261,10 +235,6 @@ const uiCanvas = document.getElementById('uiCanvas');
 const uCtx = uiCanvas.getContext('2d');
 const zoomContainer = document.getElementById('zoomContainer');
 
-// Color Picker UI Targets
-const eyelidColorPicker = document.getElementById('eyelidColorPicker');
-const colorHexLabel = document.getElementById('colorHexLabel');
-
 // UI Sliders Hooks
 const zoomSlider = document.getElementById('zoomSlider');
 const swaySlider = document.getElementById('swaySlider');
@@ -299,16 +269,13 @@ let currentMode = 'box';
 let isDrawing = false;
 let startX = 0; let startY = 0;
 
-// Geometries Cache Engine
+// Geometries Cache Objects
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 let lassoPoints = []; 
 let leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
 let rightEyeBox = { x: 0, y: 0, w: 0, h: 0 };
 
-// Color Config State
-let eyelidColor = '#332222';
-
-// Dynamics Mechanics
+// Dynamics Settings
 let currentZoomScale = 1.0;
 let featherBlur = 4;
 let tiltAngle = 0;
@@ -320,7 +287,7 @@ let swayAmplitude = 1.5;
 let isMicLive = false;
 let isBlinking = false;
 
-// Offscreen Buffer Render Engines
+// Offscreen Buffer Real estates 
 let featheredJawCanvas = document.createElement('canvas'); 
 let upperLipPatchCanvas = document.createElement('canvas'); 
 let skinTextureHealerCanvas = document.createElement('canvas'); 
@@ -375,12 +342,6 @@ modeLassoBtn.addEventListener('click', () => {
     updateAllViewports(0);
 });
 
-eyelidColorPicker.addEventListener('input', (e) => {
-    eyelidColor = e.target.value;
-    colorHexLabel.innerText = eyelidColor.toUpperCase();
-    updateAllViewports(0);
-});
-
 function resetSelectionData() {
     mouthBox = { x: 0, y: 0, w: 0, h: 0 };
     leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
@@ -390,7 +351,7 @@ function resetSelectionData() {
     updateAllViewports(0);
 }
 
-// Pure Legacy High-Performance Mouth Alignment Engine
+// Legacy High-Performance Mouth & Dual Texture-Slam Blinking Pipeline Engine
 function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
     rCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
     if (!avatarImg.src) {
@@ -405,7 +366,7 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
     rCtx.save();
     rCtx.translate(swayX, swayY);
 
-    // Primary Avatar Layer
+    // Primary Canvas Base Image Plate
     rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
     
     const { x, y, w, h } = mouthBox;
@@ -416,7 +377,7 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         }
         const dropValue = Math.min(calculatedDrop, maxDropLimit); 
 
-        // Under-skin sealer reveal protection plate
+        // Fix background plate reveal gaps
         rCtx.save();
         rCtx.drawImage(skinTextureHealerCanvas, x - featherBlur * 2, y - featherBlur * 2);
         rCtx.restore();
@@ -460,7 +421,7 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
         rCtx.restore();
 
-        // Moving Jaw Piece 
+        // Moving Jaw Translation Elements
         rCtx.save();
         const centerX = x + (w / 2);
         const centerY = y; 
@@ -472,7 +433,7 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         rCtx.drawImage(featheredJawCanvas, -w/2 - featherBlur * 2 + yawShift, -featherBlur * 2 + dropValue);
         rCtx.restore();
         
-        // Static Lip Guard Shield Mask
+        // Static Lip Guard Protection Layer
         rCtx.save();
         rCtx.translate(centerX, centerY);
         rCtx.rotate((tiltAngle * Math.PI) / 180);
@@ -480,18 +441,19 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         rCtx.restore();
     }
 
-    // Upgraded Dual-Eye Independent Flat Color Blink Vector Pipeline
+    // ORIGINAL SPEC: Dual-Eye Independent Skin Offset Blinking Map Execution
     if (isBlinking) {
         [leftEyeBox, rightEyeBox].forEach(box => {
             if (box.w > 0 && box.h > 0) {
                 rCtx.save();
+                rCtx.beginPath();
+                rCtx.rect(box.x, box.y, box.w, box.h);
+                rCtx.clip();
+
+                // Dynamic sampling source texture slice from exactly 12px above the localized eye box bounds
+                rCtx.drawImage(sourceImageCacheCanvas, box.x, box.y - 12, box.w, box.h, box.x, box.y, box.w, box.h);
                 
-                // Paint clean solid chosen color override fill match over eye boxes
-                rCtx.fillStyle = eyelidColor;
-                rCtx.fillRect(box.x, box.y, box.w, box.h);
-                
-                // Overlay natural soft shadow lid crease
-                rCtx.strokeStyle = 'rgba(0,0,0,0.25)';
+                rCtx.strokeStyle = 'rgba(0,0,0,0.3)';
                 rCtx.lineWidth = 2;
                 rCtx.beginPath();
                 rCtx.moveTo(box.x, box.y + (box.h / 2));
@@ -506,7 +468,7 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
     rCtx.restore(); 
 }
 
-// Visual Dashed Trace Lines UI Pipeline
+// Guide Vectors Rendering Framework Layout Pipeline
 function runUIGuidePipeline() {
     uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
     if (!avatarImg.src) return;
@@ -551,7 +513,7 @@ function runUIGuidePipeline() {
         uCtx.save();
         uCtx.strokeStyle = "#ff4757";
         uCtx.lineWidth = 2;
-        uCtx.setLineDash([5, 4]); 
+        uCtx.setLineDash([5, 4]); // Clean visualization during layout drag processing operations
         
         if (editTarget === 'jaw' && currentMode === 'lasso') {
             if (lassoPoints.length > 0) {
@@ -687,7 +649,7 @@ function checkReadyState() {
     }
 }
 
-// Sliders Config Input Listeners
+// Sliders Triggers Inputs Config
 zoomSlider.addEventListener('input', (e) => {
     currentZoomScale = parseInt(e.target.value) / 10;
     valZoom.innerText = currentZoomScale.toFixed(1) + "x";
@@ -727,44 +689,16 @@ yawSlider.addEventListener('input', (e) => {
 function getCanvasSpaceMouseCoords(e) {
     const rect = uiCanvas.getBoundingClientRect();
     return {
-        x: Math.round(((e.clientX - rect.left) / rect.width) * uiCanvas.width),
-        y: Math.round(((e.clientY - rect.top) / rect.height) * uiCanvas.height)
+        x: ((e.clientX - rect.left) / rect.width) * uiCanvas.width,
+        y: ((e.clientY - rect.top) / rect.height) * uiCanvas.height
     };
-}
-
-// Helper: Converts pure integer pixel color buffers cleanly to standard Hex Strings
-function rgbToHex(r, g, b) {
-    return "#" + [r, g, b].map(x => {
-        const hex = x.toString(16);
-        return hex.length === 1 ? "0" + hex : hex;
-    }).join("");
 }
 
 uiCanvas.addEventListener('mousedown', (e) => {
     if (!avatarImg.src) return;
+    isDrawing = true;
     
     const coords = getCanvasSpaceMouseCoords(e);
-    
-    // NEW CRITICAL EYE DROP SAMPLER MECHANIC
-    // If setting eyes, sample the exact image color under the cursor automatically
-    if (editTarget === 'leftEye' || editTarget === 'rightEye') {
-        try {
-            // Safety clip boundaries to fit cleanly inside image arrays
-            const sampleX = Math.max(0, Math.min(coords.x, sourceImageCacheCanvas.width - 1));
-            const sampleY = Math.max(0, Math.min(coords.y, sourceImageCacheCanvas.height - 1));
-            
-            const pixelData = sCtx.getImageData(sampleX, sampleY, 1, 1).data;
-            eyelidColor = rgbToHex(pixelData[0], pixelData[1], pixelData[2]);
-            
-            // Sync with control elements
-            eyelidColorPicker.value = eyelidColor;
-            colorHexLabel.innerText = eyelidColor.toUpperCase();
-        } catch (err) {
-            console.warn("Cross-origin canvas safety check triggered on local asset sample: ", err);
-        }
-    }
-
-    isDrawing = true;
     startX = coords.x;
     startY = coords.y;
     
