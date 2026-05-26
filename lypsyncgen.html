@@ -79,14 +79,15 @@
 </head>
 <body>
 
-<h1>🎙️ Advanced Puppet-Layer Avatar LipSync</h1>
+<h1>🎙️ Drag-and-Trace Puppet LipSync</h1>
 
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
             <strong>🎯 How to Trace for the Puppet Layer:</strong><br>
-            Start your drag at the <strong>line where the top and bottom lips meet</strong>, and drag down to include the <strong>entire chin</strong>. <br><br>
-            The script will cut this chin out, place teeth/tongue behind it, and slide it down smoothly when audio plays!
+            1. Upload your screenshot image below.<br>
+            2. Start your click-and-drag exactly at the <strong>line where the top and bottom lips meet</strong>, and drag down to include the <strong>entire chin</strong>.<br>
+            3. Provide your audio file or record live, then hit Generate!
         </div>
 
         <div class="controls-group" style="margin-top: 20px;">
@@ -99,6 +100,11 @@
             <input type="file" id="audioInput" accept="audio/*">
             <button id="recordBtn" style="background: #333; border: 1px solid #ff4757;">🎤 Record Audio Live</button>
         </div>
+
+        <input type="hidden" id="mX" value="0">
+        <input type="hidden" id="mY" value="0">
+        <input type="hidden" id="mW" value="0">
+        <input type="hidden" id="mH" value="0">
 
         <button id="generateBtn" disabled>🎬 Generate & Download Video</button>
         <div id="status">System Status: Awaiting avatar upload...</div>
@@ -135,21 +141,20 @@ let startX = 0;
 let startY = 0;
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 
-// Offscreen canvases used to preserve layers clean
-let faceBaseCanvas = document.createElement('canvas');
+// Offscreen canvas used to preserve the isolated chin layer cleanly
 let jawPieceCanvas = document.createElement('canvas');
 
 function drawCanvasPreview(mouthOffset = 0) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (avatarImg.src) {
-        // 1. Draw original base background face
+        // 1. Draw the background face asset cleanly scaled
         ctx.drawImage(avatarImg, 0, 0, canvas.width, canvas.height);
         
         const { x, y, w, h } = mouthBox;
         
         if (w > 0 && h > 0) {
-            // Max movement displacement cap
+            // Max movement displacement cap to keep jaw from flying off screen
             const dropValue = Math.min(mouthOffset * 0.18, 35); 
 
             if (dropValue > 2) {
@@ -197,7 +202,7 @@ function drawCanvasPreview(mouthOffset = 0) {
     }
 }
 
-// Extract layers dynamically on mouse release loop
+// Extract jaw layer dynamically on mouse release
 function bakePuppetLayers() {
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
@@ -207,10 +212,11 @@ function bakePuppetLayers() {
     jawPieceCanvas.height = h;
     const jCtx = jawPieceCanvas.getContext('2d');
     
-    // Snip exactly what was inside the tracking bounding box box parameters
+    // Snip exactly what was inside the tracking bounding box from the canvas screen
     jCtx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
 }
 
+// Mouse Event Listeners for click-and-drag tracing
 canvas.addEventListener('mousedown', (e) => {
     if (!avatarImg.src) return;
     const rect = canvas.getBoundingClientRect();
@@ -226,4 +232,154 @@ canvas.addEventListener('mousemove', (e) => {
     const currentY = e.clientY - rect.top;
     
     mouthBox.x = Math.min(startX, currentX);
-    mouthBox.y = Math.min(startY, current
+    mouthBox.y = Math.min(startY, currentY);
+    mouthBox.w = Math.abs(startX - currentX);
+    mouthBox.h = Math.abs(startY - currentY);
+    
+    // Sync to hidden inputs
+    document.getElementById('mX').value = Math.floor(mouthBox.x);
+    document.getElementById('mY').value = Math.floor(mouthBox.y);
+    document.getElementById('mW').value = Math.floor(mouthBox.w);
+    document.getElementById('mH').value = Math.floor(mouthBox.h);
+    
+    drawCanvasPreview();
+});
+
+canvas.addEventListener('mouseup', () => {
+    isDrawing = false;
+    bakePuppetLayers();
+    checkReadyState();
+});
+
+// Fixed Object URL Image upload engine
+imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        status.innerText = "Status: Initializing secure memory pointer...";
+        const objectURL = URL.createObjectURL(file);
+        
+        avatarImg.src = objectURL;
+        avatarImg.onload = () => {
+            mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+            drawCanvasPreview();
+            status.innerText = "Status: Image loaded perfectly! Drag from Lip line down to Chin.";
+        };
+
+        avatarImg.onerror = () => {
+            console.error("Image loading failed.");
+            status.innerText = "Status: Error loading image asset file format. Try a standard .png or .jpg!";
+        };
+    }
+});
+
+// Process File Audio upload
+audioInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        audioBlob = file;
+        audioPlayback.src = URL.createObjectURL(file);
+        audioPlayback.style.display = 'block';
+        checkReadyState();
+    }
+});
+
+// Microphone audio processing rules
+recordBtn.addEventListener('click', async () => {
+    if (!isRecordingInput) {
+        voiceChunks = [];
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        localVoiceRecorder = new MediaRecorder(stream);
+        localVoiceRecorder.ondataavailable = e => voiceChunks.push(e.data);
+        localVoiceRecorder.onstop = () => {
+            audioBlob = new Blob(voiceChunks, { type: 'audio/mp3' });
+            audioPlayback.src = URL.createObjectURL(audioBlob);
+            audioPlayback.style.display = 'block';
+            checkReadyState();
+        };
+        localVoiceRecorder.start();
+        recordBtn.innerText = "⏹️ Stop Recording";
+        isRecordingInput = true;
+    } else {
+        localVoiceRecorder.stop();
+        recordBtn.innerText = "🎤 Record Audio Live";
+        isRecordingInput = false;
+    }
+});
+
+function checkReadyState() {
+    if (avatarImg.src && audioBlob && mouthBox.w > 0) {
+        generateBtn.disabled = false;
+        status.innerText = "Status: Puppet assets baked! Click Generate.";
+    } else if (avatarImg.src && mouthBox.w === 0) {
+        status.innerText = "Status: Please trace your mouse from the mouth line down to the chin.";
+    }
+}
+
+// Core Rendering Pipeline Engine
+generateBtn.addEventListener('click', async () => {
+    status.innerText = "Status: Mounting audio processing pipelines...";
+    generateBtn.disabled = true;
+    
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    
+    const internalAudio = new Audio(audioPlayback.src);
+    sourceNode = audioCtx.createMediaElementSource(internalAudio);
+    sourceNode.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    
+    const canvasStream = canvas.captureStream(30); 
+    const dest = audioCtx.createMediaStreamDestination();
+    sourceNode.connect(dest);
+    canvasStream.addTrack(dest.stream.getAudioTracks()[0]);
+    
+    mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm;codecs=vp9' });
+    recordedChunks = [];
+    
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+        status.innerText = "Status: Exporting asset download container loop...";
+        const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+        const downloadUrl = URL.createObjectURL(videoBlob);
+        
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `avatar_puppet_${Date.now()}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        status.innerText = "Success! Video track generated perfectly.";
+        generateBtn.disabled = false;
+    };
+    
+    function renderSyncFrame() {
+        if (!internalAudio.paused && !internalAudio.ended) {
+            requestAnimationFrame(renderSyncFrame);
+            analyser.getByteFrequencyData(dataArray);
+            
+            let totalVolume = 0;
+            // Scan low frequencies for natural voice volume tracking
+            for (let i = 0; i < 15; i++) {
+                totalVolume += dataArray[i];
+            }
+            const averageVolume = totalVolume / 15;
+            
+            drawCanvasPreview(averageVolume);
+        } else if (internalAudio.ended) {
+            mediaRecorder.stop();
+        }
+    }
+    
+    mediaRecorder.start();
+    internalAudio.play();
+    renderSyncFrame();
+    status.innerText = "🔴 PROCESSING CONVERSION ENGINE... Video will download when audio finishes.";
+});
+</script>
+
+</body>
+</html>
