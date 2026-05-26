@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Advanced Puppet LipSync Tool with Preview & Blending</title>
+<title>Ultimate Blueprint Puppet LipSync Tool</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -13,7 +13,7 @@
     }
     .grid-layout {
         display: flex;
-        max-width: 1000px;
+        max-width: 1100px;
         margin: 0 auto;
         gap: 20px;
         justify-content: center;
@@ -30,14 +30,15 @@
         text-align: left;
     }
     label {
-        font-size: 12px;
+        font-size: 11px;
         color: #ff4757;
         font-weight: bold;
         display: block;
         margin-bottom: 5px;
         text-transform: uppercase;
+        letter-spacing: 1px;
     }
-    input[type="file"], button {
+    input[type="file"], button, input[type="range"] {
         width: 100%;
         padding: 10px;
         background: #222;
@@ -45,6 +46,15 @@
         border: 1px solid #333;
         border-radius: 4px;
         box-sizing: border-box;
+    }
+    input[type="range"] {
+        padding: 5px 0;
+        accent-color: #ff4757;
+    }
+    .slider-value {
+        float: right;
+        color: #00ffcc;
+        font-family: monospace;
     }
     button {
         background: #ff4757;
@@ -55,11 +65,29 @@
     }
     button:hover { background: #ff6b81; }
     button:disabled { background: #444; cursor: not-allowed; }
-    canvas {
+    
+    /* Stack canvases perfectly on top of each other */
+    .canvas-container {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        margin: 0 auto;
         background: #000;
+        border-radius: 4px;
+    }
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
         max-width: 100%;
         border-radius: 4px;
+    }
+    #uiCanvas {
         cursor: crosshair;
+        z-index: 2; /* Sits on top to capture drag events and show lines */
+    }
+    #renderCanvas {
+        z-index: 1; /* Sits behind, completely pristine */
     }
     #status {
         color: lime;
@@ -84,15 +112,15 @@
 </head>
 <body>
 
-<h1>🎙️ Drag-and-Trace Puppet LipSync</h1>
+<h1>🎙️ Blueprint Puppet LipSync (Asymmetrical Face Engine)</h1>
 
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
-            <strong>🎯 How to Trace for the Puppet Layer:</strong><br>
-            1. Upload your screenshot image below.<br>
-            2. Start your click-and-drag exactly at the <strong>line where the top and bottom lips meet</strong>, and drag down to include the <strong>entire chin</strong>.<br>
-            3. Provide your audio file or record live, then hit Generate!
+            <strong>🎯 Processing Steps:</strong><br>
+            1. Load your avatar picture below.<br>
+            2. Click and drag your bounding box from the center lip seam down over the chin.<br>
+            3. Use the Fine Tuning controls below to align your box with tilted or turned faces!
         </div>
 
         <div class="controls-group" style="margin-top: 20px;">
@@ -106,22 +134,34 @@
             <button id="recordBtn" style="background: #333; border: 1px solid #ff4757;">🎤 Record Audio Live</button>
         </div>
 
-        <input type="hidden" id="mX" value="0">
-        <input type="hidden" id="mY" value="0">
-        <input type="hidden" id="mW" value="0">
-        <input type="hidden" id="mH" value="0">
+        <div class="panel" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px;">
+            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">⚙️ Perspective Alignment Controls</h3>
+            
+            <div class="controls-group">
+                <label>Head Rotation / Tilt Angle <span id="valTilt" class="slider-value">0°</span></label>
+                <input type="range" id="tiltSlider" min="-45" max="45" value="0">
+            </div>
+
+            <div class="controls-group">
+                <label>Yaw Shift / 3D Turn Center <span id="valYaw" class="slider-value">0px</span></label>
+                <input type="range" id="yawSlider" min="-30" max="30" value="0">
+            </div>
+        </div>
 
         <button id="generateBtn" disabled>🎬 Render Animation Preview</button>
         <button id="downloadBtn" style="background: #2ed573; display: none;">💾 Download Rendered Video</button>
         <div id="status">System Status: Awaiting avatar upload...</div>
     </div>
 
-    <div class="panel" style="max-width: 480px;">
-        <h3>Click & Drag From Lip Line Down To Chin</h3>
-        <canvas id="viewscreen" width="500" height="500"></canvas>
+    <div class="panel" style="max-width: 520px;">
+        <h3>Configuration Viewport</h3>
+        <div class="canvas-container">
+            <canvas id="renderCanvas" width="500" height="500"></canvas>
+            <canvas id="uiCanvas" width="500" height="500"></canvas>
+        </div>
         <audio id="audioPlayback" controls style="width: 100%; margin-top: 15px; display: none;"></audio>
         
-        <h3 id="previewTitle" style="display: none; margin-top: 20px; color: #00ffcc;">👀 Generated Video Preview</h3>
+        <h3 id="previewTitle" style="display: none; margin-top: 20px; color: #00ffcc;">👀 Clean Generated Video Preview</h3>
         <video id="videoPlayback" controls style="width: 100%; display: none;"></video>
     </div>
 </div>
@@ -133,11 +173,22 @@ const recordBtn = document.getElementById('recordBtn');
 const generateBtn = document.getElementById('generateBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const status = document.getElementById('status');
-const canvas = document.getElementById('viewscreen');
-const ctx = canvas.getContext('2d');
+
+// Canvas Split-Architecture Hook
+const renderCanvas = document.getElementById('renderCanvas');
+const rCtx = renderCanvas.getContext('2d');
+const uiCanvas = document.getElementById('uiCanvas');
+const uCtx = uiCanvas.getContext('2d');
+
 const audioPlayback = document.getElementById('audioPlayback');
 const videoPlayback = document.getElementById('videoPlayback');
 const previewTitle = document.getElementById('previewTitle');
+
+// Alignment Sliders Hooks
+const tiltSlider = document.getElementById('tiltSlider');
+const yawSlider = document.getElementById('yawSlider');
+const valTilt = document.getElementById('valTilt');
+const valYaw = document.getElementById('valYaw');
 
 let avatarImg = new Image();
 let audioBlob = null;
@@ -153,168 +204,213 @@ let isDrawing = false;
 let startX = 0;
 let startY = 0;
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+let currentVolumeOffset = 0;
 
-// Global flag to hide UI text/boxes during generation
-let isGeneratingVideo = false;
+// Transformation matrices parameters
+let tiltAngle = 0;
+let yawShift = 0;
 
-// Offscreen canvases for puppet manipulation
+// Offscreen buffer layers
 let jawPieceCanvas = document.createElement('canvas');
 let upperLipPatchCanvas = document.createElement('canvas'); 
 
-function drawCanvasPreview(mouthOffset = 0) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+// CORE RENDERING ENGINE: Draws ONLY visual puppet assets to the recordable canvas
+function runArtworkRenderPipeline(mouthOffset = 0) {
+    rCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
     
-    if (avatarImg.src) {
-        // 1. Draw the base portrait face asset
-        ctx.drawImage(avatarImg, 0, 0, canvas.width, canvas.height);
-        
-        const { x, y, w, h } = mouthBox;
-        
-        if (w > 0 && h > 0) {
-            const dropValue = Math.min(mouthOffset * 0.10, 20); 
-
-            if (dropValue > 0.5 || isGeneratingVideo) {
-                // 2. DRAW THE MOUTH CAVE INTERIOR
-                ctx.fillStyle = '#3a0a12'; 
-                ctx.fillRect(x + 4, y, w - 8, h);
-
-                // Top Teeth Layer
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(x + 12, y, w - 24, 6); 
-                
-                // Tongue Layer
-                ctx.fillStyle = '#ff4d6d';
-                ctx.beginPath();
-                ctx.arc(x + (w / 2), y + h - 5, w / 3, 0, Math.PI, true);
-                ctx.fill();
-
-                // Bottom Teeth Layer (rides safely clamped on moving jaw)
-                const teethDrop = Math.max(0, dropValue);
-                ctx.fillStyle = '#eeeeee';
-                ctx.fillRect(x + 14, y + teethDrop - 4, w - 28, 4);
-
-                // 3. SLIDE THE FEATHERED CHIN/JAW PIECE DOWN
-                ctx.save();
-                ctx.filter = 'blur(0.8px)';
-                ctx.drawImage(jawPieceCanvas, x, y + dropValue);
-                ctx.restore();
-                
-                // 4. Overlap original Upper Lip Patch back on top so teeth stay hidden underneath
-                ctx.drawImage(upperLipPatchCanvas, x, y - 10);
-            } 
-            
-            // FIX: If video generation pipeline is active, force-kill all guide boxes immediately
-            if (!isGeneratingVideo) {
-                if (isDrawing) {
-                    // Visual feedback lines shown in real-time WHILE dragging your mouse
-                    ctx.strokeStyle = "rgba(255, 71, 87, 0.85)";
-                    ctx.setLineDash([6, 4]);
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(x, y, w, h);
-                    ctx.setLineDash([]); 
-                } else if (dropValue <= 0.5) {
-                    // Saved idle box state indicators
-                    ctx.strokeStyle = "rgba(0, 255, 204, 0.8)";
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(x, y, w, h);
-                    
-                    ctx.fillStyle = "rgba(0, 255, 204, 0.15)";
-                    ctx.fillRect(x, y, w, h);
-                    
-                    ctx.fillStyle = "#00ffcc";
-                    ctx.font = "bold 11px Arial";
-                    ctx.fillText("JAW/CHIN PUPPET LAYER ACTIVE", x + 5, y - 7);
-                }
-            }
-        }
-    } else {
-        ctx.fillStyle = '#222';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#fff';
-        ctx.font = '14px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText("Upload portrait to initialize puppet asset...", canvas.width / 2, 250);
+    if (!avatarImg.src) {
+        rCtx.fillStyle = '#222';
+        rCtx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+        return;
     }
+
+    // Step 1: Draw pristine underlying face
+    rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
+    
+    const { x, y, w, h } = mouthBox;
+    if (w <= 0 || h <= 0) return;
+
+    const dropValue = Math.min(mouthOffset * 0.10, 20); 
+
+    // Step 2: Render interior cave system
+    rCtx.fillStyle = '#3a0a12'; 
+    rCtx.fillRect(x + 4, y, w - 8, h);
+
+    // Render Static Top Teeth Layer
+    rCtx.fillStyle = '#ffffff';
+    rCtx.fillRect(x + 12, y, w - 24, 6); 
+    
+    // Render Tongue
+    rCtx.fillStyle = '#ff4d6d';
+    rCtx.beginPath();
+    rCtx.arc(x + (w / 2), y + h - 5, w / 3, 0, Math.PI, true);
+    rCtx.fill();
+
+    // Render Bottom Teeth Layer linked to jaw drop matrix
+    const teethDrop = Math.max(0, dropValue);
+    rCtx.fillStyle = '#eeeeee';
+    rCtx.fillRect(x + 14, y + teethDrop - 4, w - 28, 4);
+
+    // Step 3: Composite and draw sliding jaw element with rotation matrices
+    rCtx.save();
+    
+    // Establish rotation pivot center point calculated from tracking frame coordinates
+    const centerX = x + (w / 2);
+    const centerY = y; 
+
+    // Compute transforms for skewed/turned anatomy paths
+    rCtx.translate(centerX, centerY);
+    rCtx.rotate((tiltAngle * Math.PI) / 180);
+    
+    rCtx.filter = 'blur(0.8px)';
+    // Render sliding jaw down along the rotated local Y axis plane, modified by horizontal Yaw shifts
+    rCtx.drawImage(jawPieceCanvas, -w/2 + yawShift, dropValue);
+    rCtx.restore();
+    
+    // Step 4: Layer Upper Lip Patch on top so teeth remain concealed underneath
+    rCtx.save();
+    rCtx.translate(centerX, centerY);
+    rCtx.rotate((tiltAngle * Math.PI) / 180);
+    rCtx.drawImage(upperLipPatchCanvas, -w/2 + yawShift, -10);
+    rCtx.restore();
 }
 
-// Extract layers dynamically on mouse release
+// UI RENDERING ENGINE: Draws interactive text, boxes, and dashed outlines
+function runUIGuidePipeline() {
+    uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
+    
+    if (!avatarImg.src) {
+        uCtx.fillStyle = '#fff';
+        uCtx.font = '14px Arial';
+        uCtx.textAlign = 'center';
+        uCtx.fillText("Upload portrait to initialize puppet asset...", uiCanvas.width / 2, 250);
+        return;
+    }
+
+    const { x, y, w, h } = mouthBox;
+    if (w <= 0 || h <= 0) return;
+
+    uCtx.save();
+    // Rotate UI guide bounds along with your slider adjustments
+    const centerX = x + (w / 2);
+    const centerY = y;
+    uCtx.translate(centerX, centerY);
+    uCtx.rotate((tiltAngle * Math.PI) / 180);
+
+    if (isDrawing) {
+        uCtx.strokeStyle = "rgba(255, 71, 87, 0.9)";
+        uCtx.setLineDash([6, 4]);
+        uCtx.lineWidth = 2;
+        uCtx.strokeRect(-w/2 + yawShift, 0, w, h);
+    } else {
+        uCtx.strokeStyle = "rgba(0, 255, 204, 0.85)";
+        uCtx.lineWidth = 2;
+        uCtx.strokeRect(-w/2 + yawShift, 0, w, h);
+        
+        uCtx.fillStyle = "rgba(0, 255, 204, 0.12)";
+        uCtx.fillRect(-w/2 + yawShift, 0, w, h);
+        
+        uCtx.fillStyle = "#00ffcc";
+        uCtx.font = "bold 10px Arial";
+        uCtx.fillText("ALIGNMENT PUPPET GEOMETRY", -w/2 + yawShift + 5, -6);
+    }
+    uCtx.restore();
+}
+
+// Global update pipeline trigger
+function updateAllViewports(volume = 0) {
+    runArtworkRenderPipeline(volume);
+    runUIGuidePipeline();
+}
+
+// Capture layers from clean state before matrix application
 function bakePuppetLayers() {
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
 
+    // Isolate clean canvas template
+    runArtworkRenderPipeline(0);
+
     jawPieceCanvas.width = w;
     jawPieceCanvas.height = h;
     const jCtx = jawPieceCanvas.getContext('2d');
-    jCtx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
+    jCtx.drawImage(renderCanvas, x, y, w, h, 0, 0, w, h);
     
     upperLipPatchCanvas.width = w;
     upperLipPatchCanvas.height = 15; 
     const uCtx = upperLipPatchCanvas.getContext('2d');
-    uCtx.drawImage(canvas, x, y - 10, w, 15, 0, 0, w, 15);
+    uCtx.drawImage(renderCanvas, x, y - 10, w, 15, 0, 0, w, 15);
 }
 
-// Mouse Event Listeners with precise translation tracking matrix configurations
-canvas.addEventListener('mousedown', (e) => {
-    if (!avatarImg.src || isGeneratingVideo) return;
-    const rect = canvas.getBoundingClientRect();
+// Live Controls Listeners
+tiltSlider.addEventListener('input', (e) => {
+    tiltAngle = parseInt(e.target.value);
+    valTilt.innerText = tiltAngle + "°";
+    updateAllViewports(currentVolumeOffset);
+});
+
+yawSlider.addEventListener('input', (e) => {
+    yawShift = parseInt(e.target.value);
+    valYaw.innerText = yawShift + "px";
+    updateAllViewports(currentVolumeOffset);
+});
+
+// Mouse Vector Event Interceptors on UI layer
+uiCanvas.addEventListener('mousedown', (e) => {
+    if (!avatarImg.src) return;
+    const rect = uiCanvas.getBoundingClientRect();
     
-    startX = ((e.clientX - rect.left) / rect.width) * canvas.width;
-    startY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+    startX = ((e.clientX - rect.left) / rect.width) * uiCanvas.width;
+    startY = ((e.clientY - rect.top) / rect.height) * uiCanvas.height;
     
     isDrawing = true;
     mouthBox = { x: startX, y: startY, w: 0, h: 0 };
 });
 
-canvas.addEventListener('mousemove', (e) => {
-    if (!isDrawing || isGeneratingVideo) return;
-    const rect = canvas.getBoundingClientRect();
+uiCanvas.addEventListener('mousemove', (e) => {
+    if (!isDrawing) return;
+    const rect = uiCanvas.getBoundingClientRect();
     
-    const currentX = ((e.clientX - rect.left) / rect.width) * canvas.width;
-    const currentY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+    const currentX = ((e.clientX - rect.left) / rect.width) * uiCanvas.width;
+    const currentY = ((e.clientY - rect.top) / rect.height) * uiCanvas.height;
     
     mouthBox.x = Math.min(startX, currentX);
     mouthBox.y = Math.min(startY, currentY);
     mouthBox.w = Math.abs(startX - currentX);
     mouthBox.h = Math.abs(startY - currentY);
     
-    document.getElementById('mX').value = Math.floor(mouthBox.x);
-    document.getElementById('mY').value = Math.floor(mouthBox.y);
-    document.getElementById('mW').value = Math.floor(mouthBox.w);
-    document.getElementById('mH').value = Math.floor(mouthBox.h);
-    
-    drawCanvasPreview();
+    updateAllViewports(0);
 });
 
-canvas.addEventListener('mouseup', () => {
-    if (!isDrawing || isGeneratingVideo) return;
+uiCanvas.addEventListener('mouseup', () => {
+    if (!isDrawing) return;
     isDrawing = false;
     bakePuppetLayers();
-    drawCanvasPreview(); 
+    updateAllViewports(0); 
     checkReadyState();
 });
 
-// Portrait input parsing 
+// Secure Object Pointer Image processing
 imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
-        status.innerText = "Status: Initializing secure memory pointer...";
+        status.innerText = "Status: Spooling image layer memory matrices...";
         const objectURL = URL.createObjectURL(file);
-        
         avatarImg.src = objectURL;
         avatarImg.onload = () => {
             mouthBox = { x: 0, y: 0, w: 0, h: 0 };
-            drawCanvasPreview();
-            status.innerText = "Status: Image loaded perfectly! Drag from Lip line down to Chin.";
-        };
-
-        avatarImg.onerror = () => {
-            console.error("Image loading failed.");
-            status.innerText = "Status: Error loading image asset file format. Try a standard .png or .jpg!";
+            tiltSlider.value = 0;
+            yawSlider.value = 0;
+            tiltAngle = 0;
+            yawShift = 0;
+            valTilt.innerText = "0°";
+            valYaw.innerText = "0px";
+            updateAllViewports(0);
+            status.innerText = "Status: Image loaded perfectly! Trace from Lip line down to Chin.";
         };
     }
 });
 
-// Audio track file parsing
 audioInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -325,7 +421,6 @@ audioInput.addEventListener('change', (e) => {
     }
 });
 
-// Live recording rules
 recordBtn.addEventListener('click', async () => {
     if (!isRecordingInput) {
         voiceChunks = [];
@@ -351,23 +446,21 @@ recordBtn.addEventListener('click', async () => {
 function checkReadyState() {
     if (avatarImg.src && audioBlob && mouthBox.w > 0) {
         generateBtn.disabled = false;
-        status.innerText = "Status: Puppet assets baked! Click Render.";
-    } else if (avatarImg.src && mouthBox.w === 0) {
-        status.innerText = "Status: Please trace your mouse from the mouth line down to the chin.";
+        status.innerText = "Status: Core puppet matrix aligned! Click Render.";
     }
 }
 
-// Core Rendering Pipeline Engine
+// Video Generation Pipeline Hooked directly into pristine canvas
 generateBtn.addEventListener('click', async () => {
-    status.innerText = "Status: Mounting audio processing pipelines...";
+    status.innerText = "Status: Opening clean layer recording nodes...";
     generateBtn.disabled = true;
     downloadBtn.style.display = 'none';
     videoPlayback.style.display = 'none';
     previewTitle.style.display = 'none';
     
-    // FIX: Lock generation flags before stream pipeline is instantiated
-    isGeneratingVideo = true; 
-    drawCanvasPreview(0);
+    // Instantly blank out the interactive UI layer completely so nothing blocks viewscreen
+    uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
+    runArtworkRenderPipeline(0);
     
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioCtx.createAnalyser();
@@ -380,7 +473,8 @@ generateBtn.addEventListener('click', async () => {
     sourceNode.connect(analyser);
     analyser.connect(audioCtx.destination);
     
-    const canvasStream = canvas.captureStream(30); 
+    // CRITICAL FIX: Capture stream ONLY from renderCanvas. UI lines are physically invisible to this line.
+    const canvasStream = renderCanvas.captureStream(30); 
     const dest = audioCtx.createMediaStreamDestination();
     sourceNode.connect(dest);
     canvasStream.addTrack(dest.stream.getAudioTracks()[0]);
@@ -390,7 +484,7 @@ generateBtn.addEventListener('click', async () => {
     
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
     mediaRecorder.onstop = () => {
-        status.innerText = "Status: Building instant preview stream link...";
+        status.innerText = "Status: Packaging output container link...";
         const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
         
         if(finalVideoUrl) URL.revokeObjectURL(finalVideoUrl);
@@ -399,13 +493,12 @@ generateBtn.addEventListener('click', async () => {
         videoPlayback.src = finalVideoUrl;
         videoPlayback.style.display = 'block';
         previewTitle.style.display = 'block';
-        
         downloadBtn.style.display = 'block';
         
-        isGeneratingVideo = false; 
-        drawCanvasPreview();
+        // Restore UI guides back onto the screen workspace
+        updateAllViewports(0);
         
-        status.innerText = "Success! Preview ready. Watch on right side panel or click Download.";
+        status.innerText = "Success! Pure artwork video track rendered flawlessly.";
         generateBtn.disabled = false;
     };
     
@@ -418,9 +511,10 @@ generateBtn.addEventListener('click', async () => {
             for (let i = 0; i < 15; i++) {
                 totalVolume += dataArray[i];
             }
-            const averageVolume = totalVolume / 15;
+            currentVolumeOffset = totalVolume / 15;
             
-            drawCanvasPreview(averageVolume);
+            // Render asset tracking frames cleanly
+            runArtworkRenderPipeline(currentVolumeOffset);
         } else if (internalAudio.ended) {
             mediaRecorder.stop();
         }
@@ -429,18 +523,20 @@ generateBtn.addEventListener('click', async () => {
     mediaRecorder.start();
     internalAudio.play();
     renderSyncFrame();
-    status.innerText = "🔴 RENDERING TRACK SYSTEM... Preview container will generate once the audio ends.";
 });
 
 downloadBtn.addEventListener('click', () => {
     if (!finalVideoUrl) return;
     const a = document.createElement('a');
     a.href = finalVideoUrl;
-    a.download = `avatar_puppet_project_${Date.now()}.webm`;
+    a.download = `avatar_clean_render_${Date.now()}.webm`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
 });
+
+// Initialize
+updateAllViewports(0);
 </script>
 
 </body>
