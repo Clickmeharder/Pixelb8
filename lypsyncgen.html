@@ -66,7 +66,6 @@
     button:hover { background: #ff6b81; }
     button:disabled { background: #444; cursor: not-allowed; }
     
-    /* Stack canvases perfectly on top of each other */
     .canvas-container {
         position: relative;
         width: 500px;
@@ -84,10 +83,10 @@
     }
     #uiCanvas {
         cursor: crosshair;
-        z-index: 2; /* Sits on top to capture drag events and show lines */
+        z-index: 2; 
     }
     #renderCanvas {
-        z-index: 1; /* Sits behind, completely pristine */
+        z-index: 1; 
     }
     #status {
         color: lime;
@@ -113,7 +112,7 @@
 <body>
 
 <h1>🎙️ Blueprint Puppet LipSync (Asymmetrical Face Engine)</h1>
-
+<h2>ver 1000</h2>
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
@@ -174,7 +173,6 @@ const generateBtn = document.getElementById('generateBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const status = document.getElementById('status');
 
-// Canvas Split-Architecture Hook
 const renderCanvas = document.getElementById('renderCanvas');
 const rCtx = renderCanvas.getContext('2d');
 const uiCanvas = document.getElementById('uiCanvas');
@@ -184,7 +182,6 @@ const audioPlayback = document.getElementById('audioPlayback');
 const videoPlayback = document.getElementById('videoPlayback');
 const previewTitle = document.getElementById('previewTitle');
 
-// Alignment Sliders Hooks
 const tiltSlider = document.getElementById('tiltSlider');
 const yawSlider = document.getElementById('yawSlider');
 const valTilt = document.getElementById('valTilt');
@@ -206,7 +203,6 @@ let startY = 0;
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 let currentVolumeOffset = 0;
 
-// Transformation matrices parameters
 let tiltAngle = 0;
 let yawShift = 0;
 
@@ -214,7 +210,10 @@ let yawShift = 0;
 let jawPieceCanvas = document.createElement('canvas');
 let upperLipPatchCanvas = document.createElement('canvas'); 
 
-// CORE RENDERING ENGINE: Draws ONLY visual puppet assets to the recordable canvas
+// Dedicated hidden asset memory cache to avoid capture stream cross-pollution
+let sourceImageCacheCanvas = document.createElement('canvas');
+let sCtx = sourceImageCacheCanvas.getContext('2d');
+
 function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
     
@@ -254,16 +253,13 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
     // Step 3: Composite and draw sliding jaw element with rotation matrices
     rCtx.save();
     
-    // Establish rotation pivot center point calculated from tracking frame coordinates
     const centerX = x + (w / 2);
     const centerY = y; 
 
-    // Compute transforms for skewed/turned anatomy paths
     rCtx.translate(centerX, centerY);
     rCtx.rotate((tiltAngle * Math.PI) / 180);
     
     rCtx.filter = 'blur(0.8px)';
-    // Render sliding jaw down along the rotated local Y axis plane, modified by horizontal Yaw shifts
     rCtx.drawImage(jawPieceCanvas, -w/2 + yawShift, dropValue);
     rCtx.restore();
     
@@ -275,7 +271,6 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.restore();
 }
 
-// UI RENDERING ENGINE: Draws interactive text, boxes, and dashed outlines
 function runUIGuidePipeline() {
     uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
     
@@ -291,7 +286,6 @@ function runUIGuidePipeline() {
     if (w <= 0 || h <= 0) return;
 
     uCtx.save();
-    // Rotate UI guide bounds along with your slider adjustments
     const centerX = x + (w / 2);
     const centerY = y;
     uCtx.translate(centerX, centerY);
@@ -317,32 +311,28 @@ function runUIGuidePipeline() {
     uCtx.restore();
 }
 
-// Global update pipeline trigger
 function updateAllViewports(volume = 0) {
     runArtworkRenderPipeline(volume);
     runUIGuidePipeline();
 }
 
-// Capture layers from clean state before matrix application
+// CRITICAL FIX: Extract layers safely out of the clean raw image cache canvas
 function bakePuppetLayers() {
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
 
-    // Isolate clean canvas template
-    runArtworkRenderPipeline(0);
-
     jawPieceCanvas.width = w;
     jawPieceCanvas.height = h;
     const jCtx = jawPieceCanvas.getContext('2d');
-    jCtx.drawImage(renderCanvas, x, y, w, h, 0, 0, w, h);
+    // Read directly from the raw original cached image to guarantee pixel availability
+    jCtx.drawImage(sourceImageCacheCanvas, x, y, w, h, 0, 0, w, h);
     
     upperLipPatchCanvas.width = w;
     upperLipPatchCanvas.height = 15; 
     const uCtx = upperLipPatchCanvas.getContext('2d');
-    uCtx.drawImage(renderCanvas, x, y - 10, w, 15, 0, 0, w, 15);
+    uCtx.drawImage(sourceImageCacheCanvas, x, y - 10, w, 15, 0, 0, w, 15);
 }
 
-// Live Controls Listeners
 tiltSlider.addEventListener('input', (e) => {
     tiltAngle = parseInt(e.target.value);
     valTilt.innerText = tiltAngle + "°";
@@ -355,7 +345,6 @@ yawSlider.addEventListener('input', (e) => {
     updateAllViewports(currentVolumeOffset);
 });
 
-// Mouse Vector Event Interceptors on UI layer
 uiCanvas.addEventListener('mousedown', (e) => {
     if (!avatarImg.src) return;
     const rect = uiCanvas.getBoundingClientRect();
@@ -390,7 +379,6 @@ uiCanvas.addEventListener('mouseup', () => {
     checkReadyState();
 });
 
-// Secure Object Pointer Image processing
 imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -398,6 +386,11 @@ imageInput.addEventListener('change', (e) => {
         const objectURL = URL.createObjectURL(file);
         avatarImg.src = objectURL;
         avatarImg.onload = () => {
+            // Save clean copy to hidden cache canvas
+            sourceImageCacheCanvas.width = renderCanvas.width;
+            sourceImageCacheCanvas.height = renderCanvas.height;
+            sCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
+
             mouthBox = { x: 0, y: 0, w: 0, h: 0 };
             tiltSlider.value = 0;
             yawSlider.value = 0;
@@ -450,7 +443,6 @@ function checkReadyState() {
     }
 }
 
-// Video Generation Pipeline Hooked directly into pristine canvas
 generateBtn.addEventListener('click', async () => {
     status.innerText = "Status: Opening clean layer recording nodes...";
     generateBtn.disabled = true;
@@ -458,7 +450,6 @@ generateBtn.addEventListener('click', async () => {
     videoPlayback.style.display = 'none';
     previewTitle.style.display = 'none';
     
-    // Instantly blank out the interactive UI layer completely so nothing blocks viewscreen
     uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
     runArtworkRenderPipeline(0);
     
@@ -473,7 +464,6 @@ generateBtn.addEventListener('click', async () => {
     sourceNode.connect(analyser);
     analyser.connect(audioCtx.destination);
     
-    // CRITICAL FIX: Capture stream ONLY from renderCanvas. UI lines are physically invisible to this line.
     const canvasStream = renderCanvas.captureStream(30); 
     const dest = audioCtx.createMediaStreamDestination();
     sourceNode.connect(dest);
@@ -495,7 +485,6 @@ generateBtn.addEventListener('click', async () => {
         previewTitle.style.display = 'block';
         downloadBtn.style.display = 'block';
         
-        // Restore UI guides back onto the screen workspace
         updateAllViewports(0);
         
         status.innerText = "Success! Pure artwork video track rendered flawlessly.";
@@ -513,7 +502,6 @@ generateBtn.addEventListener('click', async () => {
             }
             currentVolumeOffset = totalVolume / 15;
             
-            // Render asset tracking frames cleanly
             runArtworkRenderPipeline(currentVolumeOffset);
         } else if (internalAudio.ended) {
             mediaRecorder.stop();
@@ -535,7 +523,6 @@ downloadBtn.addEventListener('click', () => {
     document.body.removeChild(a);
 });
 
-// Initialize
 updateAllViewports(0);
 </script>
 
