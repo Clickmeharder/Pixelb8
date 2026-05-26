@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Advanced Puppet LipSync Tool with Preview</title>
+<title>Advanced Puppet LipSync Tool with Preview & Blending</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -85,7 +85,7 @@
 <body>
 
 <h1>🎙️ Drag-and-Trace Puppet LipSync</h1>
-<div>ver 2</div>
+<h2> version 3</h2>
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
@@ -141,7 +141,7 @@ const previewTitle = document.getElementById('previewTitle');
 
 let avatarImg = new Image();
 let audioBlob = null;
-let finalVideoUrl = null; // Stores preview pointer reference
+let finalVideoUrl = null; 
 let audioCtx, analyser, sourceNode;
 let mediaRecorder;
 let recordedChunks = [];
@@ -157,26 +157,26 @@ let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 // Global flag to hide UI text/boxes during generation
 let isGeneratingVideo = false;
 
-// Offscreen canvas used to preserve the isolated chin layer cleanly
+// Offscreen canvases for puppet manipulation
 let jawPieceCanvas = document.createElement('canvas');
+let upperLipPatchCanvas = document.createElement('canvas'); // Keeps upper lip pinned in front
 
 function drawCanvasPreview(mouthOffset = 0) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (avatarImg.src) {
-        // 1. Draw the background face asset cleanly scaled
+        // 1. Draw the base portrait face asset
         ctx.drawImage(avatarImg, 0, 0, canvas.width, canvas.height);
         
         const { x, y, w, h } = mouthBox;
         
         if (w > 0 && h > 0) {
-            // Reduced multiplier (0.10) and max cap (20) so it doesn't drop too far
             const dropValue = Math.min(mouthOffset * 0.10, 20); 
 
-            if (dropValue > 1 || isGeneratingVideo) {
-                // 2. DRAW THE MOUTH CAVE INTERIOR (Teeth, Throat, Tongue)
-                ctx.fillStyle = '#3a0a12'; // Dark throat interior
-                ctx.fillRect(x + 5, y, w - 10, h);
+            if (dropValue > 0.5 || isGeneratingVideo) {
+                // 2. DRAW THE MOUTH CAVE INTERIOR
+                ctx.fillStyle = '#3a0a12'; 
+                ctx.fillRect(x + 4, y, w - 8, h);
 
                 // Top Teeth Layer
                 ctx.fillStyle = '#ffffff';
@@ -188,19 +188,33 @@ function drawCanvasPreview(mouthOffset = 0) {
                 ctx.arc(x + (w / 2), y + h - 5, w / 3, 0, Math.PI, true);
                 ctx.fill();
 
-                // Clamped dropValue down to a floor of 0 so bottom teeth can never push above the lip line
+                // Bottom Teeth Layer (rides safely clamped on moving jaw)
                 const teethDrop = Math.max(0, dropValue);
                 ctx.fillStyle = '#eeeeee';
                 ctx.fillRect(x + 14, y + teethDrop - 4, w - 28, 4);
 
-                // 3. SLIDE THE CHIN/JAW PIECE DOWN over the cave
+                // 3. SLIDE THE FEATHERED CHIN/JAW PIECE DOWN
+                ctx.save();
+                // Apply a slight blur filter overlay to smooth out the edge lines on movement
+                ctx.filter = 'blur(0.8px)';
                 ctx.drawImage(jawPieceCanvas, x, y + dropValue);
+                ctx.restore();
+                
+                // 4. FIX: Overlap original Upper Lip Patch back on top so teeth stay hidden underneath
+                ctx.drawImage(upperLipPatchCanvas, x, y - 10);
             } 
             
-            // Explicitly check isGeneratingVideo first to guarantee UI boxes are stripped out completely
-            if (!isGeneratingVideo && !isDrawing) {
-                if (dropValue <= 1) {
-                    // Draw normal highlighting lines when idle
+            // Render UI helper elements
+            if (!isGeneratingVideo) {
+                if (isDrawing) {
+                    // FIX: Visual feedback line shown in real-time WHILE dragging your mouse
+                    ctx.strokeStyle = "rgba(255, 71, 87, 0.85)";
+                    ctx.setLineDash([6, 4]);
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x, y, w, h);
+                    ctx.setLineDash([]); // Reset line formatting
+                } else if (dropValue <= 0.5) {
+                    // Saved idle box state indicators
                     ctx.strokeStyle = "rgba(0, 255, 204, 0.8)";
                     ctx.lineWidth = 2;
                     ctx.strokeRect(x, y, w, h);
@@ -224,21 +238,26 @@ function drawCanvasPreview(mouthOffset = 0) {
     }
 }
 
-// Extract jaw layer dynamically on mouse release
+// Extract layers dynamically on mouse release
 function bakePuppetLayers() {
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
 
-    // Build the isolated moving chin template
+    // 1. Bake the moving jaw component
     jawPieceCanvas.width = w;
     jawPieceCanvas.height = h;
     const jCtx = jawPieceCanvas.getContext('2d');
-    
-    // Snip exactly what was inside the tracking bounding box from the canvas screen
     jCtx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
+    
+    // 2. FIX: Capture a safety patch of the upper lip zone (10px buffer above drag line)
+    // This allows the top lip to layer neatly over teeth if jaw moves out of place
+    upperLipPatchCanvas.width = w;
+    upperLipPatchCanvas.height = 15; 
+    const uCtx = upperLipPatchCanvas.getContext('2d');
+    uCtx.drawImage(canvas, x, y - 10, w, 15, 0, 0, w, 15);
 }
 
-// Mouse Event Listeners for click-and-drag tracing with translation grid matrix fixes
+// Mouse Event Listeners with precise translation tracking matrix configurations
 canvas.addEventListener('mousedown', (e) => {
     if (!avatarImg.src || isGeneratingVideo) return;
     const rect = canvas.getBoundingClientRect();
@@ -247,6 +266,7 @@ canvas.addEventListener('mousedown', (e) => {
     startY = ((e.clientY - rect.top) / rect.height) * canvas.height;
     
     isDrawing = true;
+    mouthBox = { x: startX, y: startY, w: 0, h: 0 };
 });
 
 canvas.addEventListener('mousemove', (e) => {
@@ -270,13 +290,15 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 canvas.addEventListener('mouseup', () => {
-    if (isGeneratingVideo) return;
+    if (!isDrawing || isGeneratingVideo) return;
     isDrawing = false;
     bakePuppetLayers();
+    // Redraw once immediately to swap active drag outline with the saved state box
+    drawCanvasPreview(); 
     checkReadyState();
 });
 
-// Fixed Object URL Image upload engine
+// Portrait input parsing 
 imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -297,7 +319,7 @@ imageInput.addEventListener('change', (e) => {
     }
 });
 
-// Process File Audio upload
+// Audio track file parsing
 audioInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -308,7 +330,7 @@ audioInput.addEventListener('change', (e) => {
     }
 });
 
-// Microphone audio processing rules
+// Live recording rules
 recordBtn.addEventListener('click', async () => {
     if (!isRecordingInput) {
         voiceChunks = [];
@@ -348,7 +370,6 @@ generateBtn.addEventListener('click', async () => {
     videoPlayback.style.display = 'none';
     previewTitle.style.display = 'none';
     
-    // Turn on video mode immediately and force-redraw canvas to clear the UI overlay completely
     isGeneratingVideo = true; 
     drawCanvasPreview(0);
     
@@ -376,19 +397,15 @@ generateBtn.addEventListener('click', async () => {
         status.innerText = "Status: Building instant preview stream link...";
         const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
         
-        // Save the URL to our global variable for later download execution
         if(finalVideoUrl) URL.revokeObjectURL(finalVideoUrl);
         finalVideoUrl = URL.createObjectURL(videoBlob);
         
-        // Pass the container link directly into our new video element
         videoPlayback.src = finalVideoUrl;
         videoPlayback.style.display = 'block';
         previewTitle.style.display = 'block';
         
-        // Unhide and expose the standalone download executor button
         downloadBtn.style.display = 'block';
         
-        // Reset generating flag to show UI green box tool again on configuration screen
         isGeneratingVideo = false; 
         drawCanvasPreview();
         
@@ -419,7 +436,6 @@ generateBtn.addEventListener('click', async () => {
     status.innerText = "🔴 RENDERING TRACK SYSTEM... Preview container will generate once the audio ends.";
 });
 
-// Isolated Standalone Download Button Click Handler
 downloadBtn.addEventListener('click', () => {
     if (!finalVideoUrl) return;
     const a = document.createElement('a');
