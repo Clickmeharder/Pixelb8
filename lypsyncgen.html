@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Ultimate Blueprint Puppet LipSync Tool</title>
+<title>Ultimate Production-Grade Puppet LipSync Studio Pro</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -13,7 +13,7 @@
     }
     .grid-layout {
         display: flex;
-        max-width: 1100px;
+        max-width: 1200px;
         margin: 0 auto;
         gap: 20px;
         justify-content: center;
@@ -66,6 +66,21 @@
     button:hover { background: #ff6b81; }
     button:disabled { background: #444; cursor: not-allowed; }
     
+    .toggle-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .toggle-row button {
+        margin-top: 0;
+        background: #2b2b2b;
+        border: 2px solid #444;
+    }
+    .toggle-row button.active {
+        background: #ff4757;
+        border-color: #ff6b81;
+    }
+
     .canvas-container {
         position: relative;
         width: 500px;
@@ -107,22 +122,39 @@
         border-radius: 4px;
         border: 1px solid #333;
     }
+    .playback-toolbar {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .playback-toolbar button {
+        margin-top: 0;
+        font-size: 12px;
+        padding: 8px;
+    }
 </style>
 </head>
 <body>
 
-<h1>🎙️ Blueprint Puppet LipSync (Asymmetrical Face Engine)</h1>
-<h2>ver 1000</h2>
+<h1>🎙️ Production Puppet LipSync Studio Pro EXTREEEME</h1>
+
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
-            <strong>🎯 Processing Steps:</strong><br>
-            1. Load your avatar picture below.<br>
-            2. Click and drag your bounding box from the center lip seam down over the chin.<br>
-            3. Use the Fine Tuning controls below to align your box with tilted or turned faces!
+            <strong>🎯 Processing Modes:</strong><br>
+            • <strong>Box Mode:</strong> Quick rectangular trace from lip line down to chin.<br>
+            • <strong>Lasso Mode:</strong> Freehand click-and-drag an organic shape along custom jaw lines. Use line blur to feather edges!
         </div>
 
         <div class="controls-group" style="margin-top: 20px;">
+            <label>Tracking Geometry Mode</label>
+            <div class="toggle-row">
+                <button id="modeBoxBtn" class="active">🔲 Box Selection</button>
+                <button id="modeLassoBtn">⎋ Lasso Path Selection</button>
+            </div>
+        </div>
+
+        <div class="controls-group">
             <label>1. Upload Avatar Portrait Image</label>
             <input type="file" id="imageInput" accept="image/*">
         </div>
@@ -134,8 +166,23 @@
         </div>
 
         <div class="panel" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px;">
-            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">⚙️ Perspective Alignment Controls</h3>
+            <h3 style="margin-top:0; font-size:14px; color:#ff4757;">⚙️ Alignment & Dynamics Console</h3>
             
+            <div class="controls-group">
+                <label>Line Blur / Edge Feathering <span id="valBlur" class="slider-value">2px</span></label>
+                <input type="range" id="blurSlider" min="0" max="15" value="2">
+            </div>
+
+            <div class="controls-group">
+                <label>Audio Sensitivity Gain <span id="valGain" class="slider-value">1.0x</span></label>
+                <input type="range" id="gainSlider" min="5" max="30" value="10">
+            </div>
+
+            <div class="controls-group">
+                <label>Max Jaw Drop Range <span id="valDropLimit" class="slider-value">25px</span></label>
+                <input type="range" id="dropLimitSlider" min="10" max="50" value="25">
+            </div>
+
             <div class="controls-group">
                 <label>Head Rotation / Tilt Angle <span id="valTilt" class="slider-value">0°</span></label>
                 <input type="range" id="tiltSlider" min="-45" max="45" value="0">
@@ -147,7 +194,7 @@
             </div>
         </div>
 
-        <button id="generateBtn" disabled>🎬 Render Animation Preview</button>
+        <button id="generateBtn" disabled>🎬 Render & Record Animation</button>
         <button id="downloadBtn" style="background: #2ed573; display: none;">💾 Download Rendered Video</button>
         <div id="status">System Status: Awaiting avatar upload...</div>
     </div>
@@ -159,6 +206,11 @@
             <canvas id="uiCanvas" width="500" height="500"></canvas>
         </div>
         <audio id="audioPlayback" controls style="width: 100%; margin-top: 15px; display: none;"></audio>
+        
+        <div id="runtimeControls" class="playback-toolbar" style="display: none;">
+            <button id="pauseRecordBtn" style="background: #eccc68; color: #111;">⏸️ Pause Processing</button>
+            <button id="stopRecordBtn" style="background: #ff4757;">⏹️ Stop & Save Now</button>
+        </div>
         
         <h3 id="previewTitle" style="display: none; margin-top: 20px; color: #00ffcc;">👀 Clean Generated Video Preview</h3>
         <video id="videoPlayback" controls style="width: 100%; display: none;"></video>
@@ -182,88 +234,158 @@ const audioPlayback = document.getElementById('audioPlayback');
 const videoPlayback = document.getElementById('videoPlayback');
 const previewTitle = document.getElementById('previewTitle');
 
+// Controls Sliders Hooks
+const blurSlider = document.getElementById('blurSlider');
 const tiltSlider = document.getElementById('tiltSlider');
 const yawSlider = document.getElementById('yawSlider');
+const gainSlider = document.getElementById('gainSlider');
+const dropLimitSlider = document.getElementById('dropLimitSlider');
+
+const valBlur = document.getElementById('valBlur');
 const valTilt = document.getElementById('valTilt');
 const valYaw = document.getElementById('valYaw');
+const valGain = document.getElementById('valGain');
+const valDropLimit = document.getElementById('valDropLimit');
+
+const modeBoxBtn = document.getElementById('modeBoxBtn');
+const modeLassoBtn = document.getElementById('modeLassoBtn');
+
+const runtimeControls = document.getElementById('runtimeControls');
+const pauseRecordBtn = document.getElementById('pauseRecordBtn');
+const stopRecordBtn = document.getElementById('stopRecordBtn');
 
 let avatarImg = new Image();
 let audioBlob = null;
 let finalVideoUrl = null; 
-let audioCtx, analyser, sourceNode;
+let audioCtx, analyser, sourceNode, internalAudio;
 let mediaRecorder;
 let recordedChunks = [];
 let isRecordingInput = false;
 let localVoiceRecorder;
 let voiceChunks = [];
 
+let currentMode = 'box'; 
 let isDrawing = false;
 let startX = 0;
 let startY = 0;
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
-let currentVolumeOffset = 0;
+let lassoPoints = []; 
 
+let currentVolumeOffset = 0;
+let featherBlur = 2;
 let tiltAngle = 0;
 let yawShift = 0;
+let gainMultiplier = 0.10;
+let maxDropLimit = 25;
+let animationFrameId = null;
 
-// Offscreen buffer layers
+// Offscreen buffer canvas environments
 let jawPieceCanvas = document.createElement('canvas');
 let upperLipPatchCanvas = document.createElement('canvas'); 
-
-// Dedicated hidden asset memory cache to avoid capture stream cross-pollution
 let sourceImageCacheCanvas = document.createElement('canvas');
 let sCtx = sourceImageCacheCanvas.getContext('2d');
 
+modeBoxBtn.addEventListener('click', () => {
+    currentMode = 'box';
+    modeBoxBtn.className = 'active';
+    modeLassoBtn.className = '';
+    resetSelectionData();
+});
+
+modeLassoBtn.addEventListener('click', () => {
+    currentMode = 'lasso';
+    modeLassoBtn.className = 'active';
+    modeBoxBtn.className = '';
+    resetSelectionData();
+});
+
+function resetSelectionData() {
+    mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+    lassoPoints = [];
+    generateBtn.disabled = true;
+    updateAllViewports(0);
+}
+
 function runArtworkRenderPipeline(mouthOffset = 0) {
     rCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
-    
     if (!avatarImg.src) {
         rCtx.fillStyle = '#222';
         rCtx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
         return;
     }
 
-    // Step 1: Draw pristine underlying face
+    // Step 1: Background Template Base
     rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
     
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
 
-    const dropValue = Math.min(mouthOffset * 0.10, 20); 
+    const dropValue = Math.min(mouthOffset * gainMultiplier, maxDropLimit); 
 
-    // Step 2: Render interior cave system
-    rCtx.fillStyle = '#3a0a12'; 
-    rCtx.fillRect(x + 4, y, w - 8, h);
+    // Step 2: Inner Mouth Cave Render Core
+    rCtx.save();
+    rCtx.beginPath();
+    if (currentMode === 'box') {
+        rCtx.rect(x + 2, y, w - 4, h + dropValue);
+    } else {
+        if (lassoPoints.length > 0) {
+            rCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
+            for (let i = 1; i < lassoPoints.length; i++) {
+                rCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+            }
+            rCtx.lineTo(lassoPoints[lassoPoints.length - 1].x, lassoPoints[lassoPoints.length - 1].y + dropValue);
+            rCtx.lineTo(lassoPoints[0].x, lassoPoints[0].y + dropValue);
+        }
+    }
+    rCtx.clip();
 
-    // Render Static Top Teeth Layer
+    rCtx.fillStyle = '#2d080e'; 
+    rCtx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+
+    // Teeth Top
     rCtx.fillStyle = '#ffffff';
     rCtx.fillRect(x + 12, y, w - 24, 6); 
     
-    // Render Tongue
+    // Tongue Setup
     rCtx.fillStyle = '#ff4d6d';
+    const tongueY = y + h - (h * 0.28) + (dropValue * 0.2);
+    const tongueH = h * 0.35;
+    
     rCtx.beginPath();
-    rCtx.arc(x + (w / 2), y + h - 5, w / 3, 0, Math.PI, true);
+    rCtx.ellipse(x + (w / 2), tongueY + (tongueH / 2), w * 0.38, tongueH * 0.5, 0, 0, 2 * Math.PI);
     rCtx.fill();
 
-    // Render Bottom Teeth Layer linked to jaw drop matrix
-    const teethDrop = Math.max(0, dropValue);
-    rCtx.fillStyle = '#eeeeee';
-    rCtx.fillRect(x + 14, y + teethDrop - 4, w - 28, 4);
+    // Crease Center Line shadow
+    rCtx.strokeStyle = '#d92b4b';
+    rCtx.lineWidth = 2.5;
+    rCtx.beginPath();
+    rCtx.moveTo(x + (w / 2), tongueY + 2);
+    rCtx.quadraticCurveTo(x + (w / 2) - 1, tongueY + (tongueH * 0.5), x + (w / 2), tongueY + tongueH - 2);
+    rCtx.stroke();
 
-    // Step 3: Composite and draw sliding jaw element with rotation matrices
+    // Lower Teeth
+    rCtx.fillStyle = '#eeeeee';
+    rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
+    rCtx.restore();
+
+    // Step 3: Draw sliding jaw puppet layer with custom transforms & line blurring shadow options
     rCtx.save();
-    
     const centerX = x + (w / 2);
     const centerY = y; 
 
     rCtx.translate(centerX, centerY);
     rCtx.rotate((tiltAngle * Math.PI) / 180);
     
-    rCtx.filter = 'blur(0.8px)';
+    // Core Blur Filter setup context combined with global baseline softening
+    if (featherBlur > 0) {
+        rCtx.filter = `blur(${featherBlur}px)`;
+    } else {
+        rCtx.filter = 'blur(0.8px)';
+    }
     rCtx.drawImage(jawPieceCanvas, -w/2 + yawShift, dropValue);
     rCtx.restore();
     
-    // Step 4: Layer Upper Lip Patch on top so teeth remain concealed underneath
+    // Step 4: Upper Lip Protector Guard Shield Layer
     rCtx.save();
     rCtx.translate(centerX, centerY);
     rCtx.rotate((tiltAngle * Math.PI) / 180);
@@ -273,7 +395,6 @@ function runArtworkRenderPipeline(mouthOffset = 0) {
 
 function runUIGuidePipeline() {
     uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
-    
     if (!avatarImg.src) {
         uCtx.fillStyle = '#fff';
         uCtx.font = '14px Arial';
@@ -283,30 +404,49 @@ function runUIGuidePipeline() {
     }
 
     const { x, y, w, h } = mouthBox;
-    if (w <= 0 || h <= 0) return;
+    if (w <= 0 || h <= 0 && lassoPoints.length === 0) return;
 
     uCtx.save();
-    const centerX = x + (w / 2);
-    const centerY = y;
-    uCtx.translate(centerX, centerY);
-    uCtx.rotate((tiltAngle * Math.PI) / 180);
+    if (currentMode === 'box') {
+        const centerX = x + (w / 2);
+        const centerY = y;
+        uCtx.translate(centerX, centerY);
+        uCtx.rotate((tiltAngle * Math.PI) / 180);
 
-    if (isDrawing) {
-        uCtx.strokeStyle = "rgba(255, 71, 87, 0.9)";
-        uCtx.setLineDash([6, 4]);
+        uCtx.strokeStyle = isDrawing ? "rgba(255, 71, 87, 0.9)" : "rgba(0, 255, 204, 0.85)";
+        if (isDrawing) uCtx.setLineDash([6, 4]);
         uCtx.lineWidth = 2;
         uCtx.strokeRect(-w/2 + yawShift, 0, w, h);
+        
+        if (!isDrawing) {
+            uCtx.fillStyle = "rgba(0, 255, 204, 0.12)";
+            uCtx.fillRect(-w/2 + yawShift, 0, w, h);
+            uCtx.fillStyle = "#00ffcc";
+            uCtx.font = "bold 10px Arial";
+            uCtx.fillText("BOX TRACK MATRIX ACTIVE", -w/2 + yawShift + 5, -6);
+        }
     } else {
-        uCtx.strokeStyle = "rgba(0, 255, 204, 0.85)";
-        uCtx.lineWidth = 2;
-        uCtx.strokeRect(-w/2 + yawShift, 0, w, h);
+        uCtx.strokeStyle = isDrawing ? "rgba(255, 71, 87, 0.9)" : "rgba(0, 255, 204, 0.85)";
+        if (isDrawing) uCtx.setLineDash([6, 4]);
+        uCtx.lineWidth = 2.5;
         
-        uCtx.fillStyle = "rgba(0, 255, 204, 0.12)";
-        uCtx.fillRect(-w/2 + yawShift, 0, w, h);
-        
-        uCtx.fillStyle = "#00ffcc";
-        uCtx.font = "bold 10px Arial";
-        uCtx.fillText("ALIGNMENT PUPPET GEOMETRY", -w/2 + yawShift + 5, -6);
+        if (lassoPoints.length > 0) {
+            uCtx.beginPath();
+            uCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
+            for (let i = 1; i < lassoPoints.length; i++) {
+                uCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+            }
+            if (!isDrawing) uCtx.closePath();
+            uCtx.stroke();
+            
+            if (!isDrawing) {
+                uCtx.fillStyle = "rgba(0, 255, 204, 0.08)";
+                uCtx.fill();
+                uCtx.fillStyle = "#00ffcc";
+                uCtx.font = "bold 10px Arial";
+                uCtx.fillText("LASSO ALIGNED ALPHA MASK", lassoPoints[0].x, lassoPoints[0].y - 8);
+            }
+        }
     }
     uCtx.restore();
 }
@@ -316,7 +456,6 @@ function updateAllViewports(volume = 0) {
     runUIGuidePipeline();
 }
 
-// CRITICAL FIX: Extract layers safely out of the clean raw image cache canvas
 function bakePuppetLayers() {
     const { x, y, w, h } = mouthBox;
     if (w <= 0 || h <= 0) return;
@@ -324,27 +463,57 @@ function bakePuppetLayers() {
     jawPieceCanvas.width = w;
     jawPieceCanvas.height = h;
     const jCtx = jawPieceCanvas.getContext('2d');
-    // Read directly from the raw original cached image to guarantee pixel availability
-    jCtx.drawImage(sourceImageCacheCanvas, x, y, w, h, 0, 0, w, h);
+    jCtx.clearRect(0, 0, w, h);
+
+    if (currentMode === 'box') {
+        jCtx.drawImage(sourceImageCacheCanvas, x, y, w, h, 0, 0, w, h);
+    } else {
+        jCtx.save();
+        jCtx.beginPath();
+        jCtx.moveTo(lassoPoints[0].x - x, lassoPoints[0].y - y);
+        for (let i = 1; i < lassoPoints.length; i++) {
+            jCtx.lineTo(lassoPoints[i].x - x, lassoPoints[i].y - y);
+        }
+        jCtx.closePath();
+        jCtx.clip();
+        
+        jCtx.drawImage(sourceImageCacheCanvas, x, y, w, h, 0, 0, w, h);
+        jCtx.restore();
+    }
     
     upperLipPatchCanvas.width = w;
     upperLipPatchCanvas.height = 15; 
     const uCtx = upperLipPatchCanvas.getContext('2d');
+    uCtx.clearRect(0, 0, w, 15);
     uCtx.drawImage(sourceImageCacheCanvas, x, y - 10, w, 15, 0, 0, w, 15);
 }
 
+// Sliders Triggers Configuration Tuning Listeners
+blurSlider.addEventListener('input', (e) => {
+    featherBlur = parseInt(e.target.value);
+    valBlur.innerText = featherBlur + "px";
+    updateAllViewports(currentVolumeOffset);
+});
+gainSlider.addEventListener('input', (e) => {
+    gainMultiplier = parseInt(e.target.value) / 100;
+    valGain.innerText = (parseInt(e.target.value) / 10).toFixed(1) + "x";
+});
+dropLimitSlider.addEventListener('input', (e) => {
+    maxDropLimit = parseInt(e.target.value);
+    valDropLimit.innerText = maxDropLimit + "px";
+});
 tiltSlider.addEventListener('input', (e) => {
     tiltAngle = parseInt(e.target.value);
     valTilt.innerText = tiltAngle + "°";
     updateAllViewports(currentVolumeOffset);
 });
-
 yawSlider.addEventListener('input', (e) => {
     yawShift = parseInt(e.target.value);
     valYaw.innerText = yawShift + "px";
     updateAllViewports(currentVolumeOffset);
 });
 
+// Canvas Selection Mouse Triggers
 uiCanvas.addEventListener('mousedown', (e) => {
     if (!avatarImg.src) return;
     const rect = uiCanvas.getBoundingClientRect();
@@ -353,27 +522,52 @@ uiCanvas.addEventListener('mousedown', (e) => {
     startY = ((e.clientY - rect.top) / rect.height) * uiCanvas.height;
     
     isDrawing = true;
-    mouthBox = { x: startX, y: startY, w: 0, h: 0 };
+    
+    if (currentMode === 'box') {
+        mouthBox = { x: startX, y: startY, w: 0, h: 0 };
+    } else {
+        lassoPoints = [{ x: startX, y: startY }];
+    }
 });
 
 uiCanvas.addEventListener('mousemove', (e) => {
     if (!isDrawing) return;
     const rect = uiCanvas.getBoundingClientRect();
-    
     const currentX = ((e.clientX - rect.left) / rect.width) * uiCanvas.width;
     const currentY = ((e.clientY - rect.top) / rect.height) * uiCanvas.height;
     
-    mouthBox.x = Math.min(startX, currentX);
-    mouthBox.y = Math.min(startY, currentY);
-    mouthBox.w = Math.abs(startX - currentX);
-    mouthBox.h = Math.abs(startY - currentY);
-    
+    if (currentMode === 'box') {
+        mouthBox.x = Math.min(startX, currentX);
+        mouthBox.y = Math.min(startY, currentY);
+        mouthBox.w = Math.abs(startX - currentX);
+        mouthBox.h = Math.abs(startY - currentY);
+    } else {
+        lassoPoints.push({ x: currentX, y: currentY });
+    }
     updateAllViewports(0);
 });
 
 uiCanvas.addEventListener('mouseup', () => {
     if (!isDrawing) return;
     isDrawing = false;
+    
+    if (currentMode === 'lasso' && lassoPoints.length > 2) {
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        lassoPoints.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        });
+        
+        mouthBox = {
+            x: minX,
+            y: minY,
+            w: maxX - minX,
+            h: maxY - minY
+        };
+    }
+    
     bakePuppetLayers();
     updateAllViewports(0); 
     checkReadyState();
@@ -386,20 +580,11 @@ imageInput.addEventListener('change', (e) => {
         const objectURL = URL.createObjectURL(file);
         avatarImg.src = objectURL;
         avatarImg.onload = () => {
-            // Save clean copy to hidden cache canvas
             sourceImageCacheCanvas.width = renderCanvas.width;
             sourceImageCacheCanvas.height = renderCanvas.height;
             sCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
-
-            mouthBox = { x: 0, y: 0, w: 0, h: 0 };
-            tiltSlider.value = 0;
-            yawSlider.value = 0;
-            tiltAngle = 0;
-            yawShift = 0;
-            valTilt.innerText = "0°";
-            valYaw.innerText = "0px";
-            updateAllViewports(0);
-            status.innerText = "Status: Image loaded perfectly! Trace from Lip line down to Chin.";
+            resetSelectionData();
+            status.innerText = "Status: Image loaded perfectly! Perform your path selection tracking.";
         };
     }
 });
@@ -439,16 +624,19 @@ recordBtn.addEventListener('click', async () => {
 function checkReadyState() {
     if (avatarImg.src && audioBlob && mouthBox.w > 0) {
         generateBtn.disabled = false;
-        status.innerText = "Status: Core puppet matrix aligned! Click Render.";
+        status.innerText = "Status: Target puppet metrics locked! Ready to render.";
     }
 }
 
+// ENCODE EXECUTIONS CONTAINER PIPELINES
 generateBtn.addEventListener('click', async () => {
     status.innerText = "Status: Opening clean layer recording nodes...";
     generateBtn.disabled = true;
     downloadBtn.style.display = 'none';
     videoPlayback.style.display = 'none';
     previewTitle.style.display = 'none';
+    runtimeControls.style.display = 'flex';
+    pauseRecordBtn.innerText = "⏸️ Pause Processing";
     
     uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
     runArtworkRenderPipeline(0);
@@ -459,7 +647,7 @@ generateBtn.addEventListener('click', async () => {
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
     
-    const internalAudio = new Audio(audioPlayback.src);
+    internalAudio = new Audio(audioPlayback.src);
     sourceNode = audioCtx.createMediaElementSource(internalAudio);
     sourceNode.connect(analyser);
     analyser.connect(audioCtx.destination);
@@ -474,6 +662,7 @@ generateBtn.addEventListener('click', async () => {
     
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
     mediaRecorder.onstop = () => {
+        runtimeControls.style.display = 'none';
         status.innerText = "Status: Packaging output container link...";
         const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
         
@@ -486,14 +675,13 @@ generateBtn.addEventListener('click', async () => {
         downloadBtn.style.display = 'block';
         
         updateAllViewports(0);
-        
         status.innerText = "Success! Pure artwork video track rendered flawlessly.";
         generateBtn.disabled = false;
     };
     
     function renderSyncFrame() {
         if (!internalAudio.paused && !internalAudio.ended) {
-            requestAnimationFrame(renderSyncFrame);
+            animationFrameId = requestAnimationFrame(renderSyncFrame);
             analyser.getByteFrequencyData(dataArray);
             
             let totalVolume = 0;
@@ -501,7 +689,6 @@ generateBtn.addEventListener('click', async () => {
                 totalVolume += dataArray[i];
             }
             currentVolumeOffset = totalVolume / 15;
-            
             runArtworkRenderPipeline(currentVolumeOffset);
         } else if (internalAudio.ended) {
             mediaRecorder.stop();
@@ -511,6 +698,45 @@ generateBtn.addEventListener('click', async () => {
     mediaRecorder.start();
     internalAudio.play();
     renderSyncFrame();
+});
+
+pauseRecordBtn.addEventListener('click', () => {
+    if (internalAudio && !internalAudio.paused) {
+        internalAudio.pause();
+        mediaRecorder.pause();
+        cancelAnimationFrame(animationFrameId);
+        pauseRecordBtn.innerText = "▶️ Resume Processing";
+        status.innerText = "🔴 RENDER PAUSED. Recording frozen in memory.";
+    } else if (internalAudio && internalAudio.paused) {
+        mediaRecorder.resume();
+        internalAudio.play();
+        
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        function resumeLoop() {
+            if (!internalAudio.paused && !internalAudio.ended) {
+                animationFrameId = requestAnimationFrame(resumeLoop);
+                analyser.getByteFrequencyData(dataArray);
+                let totalVolume = 0;
+                for (let i = 0; i < 15; i++) totalVolume += dataArray[i];
+                currentVolumeOffset = totalVolume / 15;
+                runArtworkRenderPipeline(currentVolumeOffset);
+            } else if (internalAudio.ended) {
+                mediaRecorder.stop();
+            }
+        }
+        animationFrameId = requestAnimationFrame(resumeLoop);
+        pauseRecordBtn.innerText = "⏸️ Pause Processing";
+        status.innerText = "🔴 RENDERING TRACK SYSTEM RESUMED...";
+    }
+});
+
+stopRecordBtn.addEventListener('click', () => {
+    if (internalAudio && mediaRecorder && mediaRecorder.state !== 'inactive') {
+        cancelAnimationFrame(animationFrameId);
+        internalAudio.pause();
+        mediaRecorder.stop();
+    }
 });
 
 downloadBtn.addEventListener('click', () => {
