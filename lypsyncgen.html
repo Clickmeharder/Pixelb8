@@ -141,6 +141,9 @@ let startX = 0;
 let startY = 0;
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 
+// NEW: Global flag to hide UI text/boxes during generation
+let isGeneratingVideo = false;
+
 // Offscreen canvas used to preserve the isolated chin layer cleanly
 let jawPieceCanvas = document.createElement('canvas');
 
@@ -154,10 +157,10 @@ function drawCanvasPreview(mouthOffset = 0) {
         const { x, y, w, h } = mouthBox;
         
         if (w > 0 && h > 0) {
-            // Max movement displacement cap to keep jaw from flying off screen
-            const dropValue = Math.min(mouthOffset * 0.18, 35); 
+            // FIXED: Reduced multiplier (0.10) and max cap (20) so it doesn't drop too far
+            const dropValue = Math.min(mouthOffset * 0.10, 20); 
 
-            if (dropValue > 2) {
+            if (dropValue > 1 || isGeneratingVideo) {
                 // 2. DRAW THE MOUTH CAVE INTERIOR (Teeth, Throat, Tongue)
                 ctx.fillStyle = '#3a0a12'; // Dark throat interior
                 ctx.fillRect(x + 5, y, w - 10, h);
@@ -178,7 +181,10 @@ function drawCanvasPreview(mouthOffset = 0) {
 
                 // 3. SLIDE THE CHIN/JAW PIECE DOWN over the cave
                 ctx.drawImage(jawPieceCanvas, x, y + dropValue);
-            } else {
+            } 
+            
+            // FIXED: Only draw the helper green boxes if we are NOT actively recording a video
+            if (!isGeneratingVideo && dropValue <= 1) {
                 // Draw normal highlighting lines when idle
                 ctx.strokeStyle = "rgba(0, 255, 204, 0.8)";
                 ctx.lineWidth = 2;
@@ -218,7 +224,7 @@ function bakePuppetLayers() {
 
 // Mouse Event Listeners for click-and-drag tracing
 canvas.addEventListener('mousedown', (e) => {
-    if (!avatarImg.src) return;
+    if (!avatarImg.src || isGeneratingVideo) return;
     const rect = canvas.getBoundingClientRect();
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
@@ -226,7 +232,7 @@ canvas.addEventListener('mousedown', (e) => {
 });
 
 canvas.addEventListener('mousemove', (e) => {
-    if (!isDrawing) return;
+    if (!isDrawing || isGeneratingVideo) return;
     const rect = canvas.getBoundingClientRect();
     const currentX = e.clientX - rect.left;
     const currentY = e.clientY - rect.top;
@@ -236,16 +242,11 @@ canvas.addEventListener('mousemove', (e) => {
     mouthBox.w = Math.abs(startX - currentX);
     mouthBox.h = Math.abs(startY - currentY);
     
-    // Sync to hidden inputs
-    document.getElementById('mX').value = Math.floor(mouthBox.x);
-    document.getElementById('mY').value = Math.floor(mouthBox.y);
-    document.getElementById('mW').value = Math.floor(mouthBox.w);
-    document.getElementById('mH').value = Math.floor(mouthBox.h);
-    
     drawCanvasPreview();
 });
 
 canvas.addEventListener('mouseup', () => {
+    if (isGeneratingVideo) return;
     isDrawing = false;
     bakePuppetLayers();
     checkReadyState();
@@ -320,6 +321,9 @@ generateBtn.addEventListener('click', async () => {
     status.innerText = "Status: Mounting audio processing pipelines...";
     generateBtn.disabled = true;
     
+    // FIXED: Turn on video mode immediately to wipe UI markers from frame captures
+    isGeneratingVideo = true; 
+    
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 256;
@@ -347,10 +351,14 @@ generateBtn.addEventListener('click', async () => {
         
         const a = document.createElement('a');
         a.href = downloadUrl;
-        a.download = `avatar_puppet_${Date.now()}.webm`;
+        a.download = `avatar_clean_puppet_${Date.now()}.webm`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        
+        // FIXED: Reset generating flag to show UI green box tool again for next project
+        isGeneratingVideo = false; 
+        drawCanvasPreview();
         
         status.innerText = "Success! Video track generated perfectly.";
         generateBtn.disabled = false;
@@ -362,7 +370,6 @@ generateBtn.addEventListener('click', async () => {
             analyser.getByteFrequencyData(dataArray);
             
             let totalVolume = 0;
-            // Scan low frequencies for natural voice volume tracking
             for (let i = 0; i < 15; i++) {
                 totalVolume += dataArray[i];
             }
