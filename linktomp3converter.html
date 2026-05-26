@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Video → MP3</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 40px;
+}
+
+input, button {
+    width: 80%;
+    padding: 10px;
+    margin: 10px;
+}
+
+#status {
+    margin-top: 20px;
+    color: lime;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎧 Video → MP3 Converter</h1>
+
+<input id="url" placeholder="Direct video URL (mp4/webm)" />
+<br>
+<button id="btn">Convert</button>
+
+<p id="status">Idle</p>
+
+<script type="module">
+import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js";
+import { fetchFile } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js";
+
+const ffmpeg = new FFmpeg();
+
+const btn = document.getElementById("btn");
+const status = document.getElementById("status");
+
+async function load() {
+    if (!ffmpeg.loaded) {
+        status.innerText = "Loading FFmpeg...";
+        await ffmpeg.load({
+            coreURL: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
+        });
+    }
+}
+
+async function convert() {
+    try {
+        const url = document.getElementById("url").value;
+        if (!url) return alert("Enter a video URL");
+
+        await load();
+
+        status.innerText = "Downloading video...";
+
+        const file = await fetchFile(url);
+
+        await ffmpeg.writeFile("input.mp4", file);
+
+        status.innerText = "Converting...";
+
+        await ffmpeg.exec([
+            "-i", "input.mp4",
+            "-vn",
+            "-b:a", "192k",
+            "output.mp3"
+        ]);
+
+        const data = await ffmpeg.readFile("output.mp3");
+
+        const blob = new Blob([data.buffer], { type: "audio/mp3" });
+        const link = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = link;
+        a.download = "audio.mp3";
+        a.click();
+
+        status.innerText = "Done!";
+    } catch (err) {
+        console.error(err);
+        status.innerText = "Error (check console)";
+    }
+}
+
+btn.addEventListener("click", convert);
+</script>
+
+</body>
+</html>
