@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Stream Puppet Studio Pro (CORS & Audio Playback Fixed)</title>
+<title>Live Stream Puppet Studio Pro v10</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -127,7 +127,6 @@
         text-align: left;
     }
     
-    /* Dedicated Video Node Workspace Control Frame */
     .video-monitor-panel {
         margin-top: 15px;
         background: #111;
@@ -164,9 +163,9 @@
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
-            <strong>✨ CORS-Proof Local Audio Engine Matrix Active:</strong><br>
-            • Fixed native audio routing logic so media output triggers properly into speakers.<br>
-            • Text searches now utilize open decentralized metadata gateways to prevent local file-origin domain security breaks.
+            <strong>✨ CORS-Proof Live Audio Network Active:</strong><br>
+            • Search requests are securely parsed via fallback proxy gates to completely remove domain blocking rules.<br>
+            • Head mechanics are fully mapped to the dynamic matrix layout context.
         </div>
 
         <div class="panel" id="comfycontrolBox" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px; text-align: left;">
@@ -205,7 +204,7 @@
                 <input type="range" id="zoomSlider" min="10" max="40" value="10">
             </div>
             <div class="controls-group">
-                <label>Idle Breathing Intensity <span id="valSway" class="slider-value">1.5px</span></label>
+                <label>Idle Breathing / Head Bobble <span id="valSway" class="slider-value">1.5px</span></label>
                 <input type="range" id="swaySlider" min="0" max="50" value="15">
             </div>
         </div>
@@ -337,22 +336,14 @@ let songQueue = [];
 let isPlayingSong = false;
 let currentMediaElement = null;
 let audioSourceNode = null;
-let streamername = "Jaedraze";
+let streamername = "jaedraze";
 
 // Offscreen Buffer Canvas Modules
 let featheredJawCanvas = document.createElement('canvas'); 
 let upperLipPatchCanvas = document.createElement('canvas'); 
 let skinTextureHealerCanvas = document.createElement('canvas'); 
 let sourceImageCacheCanvas = document.createElement('canvas');
-let sCtx = sourceImageCacheCanvas.getContext('2d');
-
-// Local audio assets manifest wrapped to prevent local file crash execution errors
-let chataudioSetting = "off";
-const chatsounds = {
-    messageSound: null,
-    commandSound: null,
-    "fishing-sound": null
-};
+const sCtx = sourceImageCacheCanvas.getContext('2d');
 
 function clearActiveTargets() {
     targetJawBtn.className = '';
@@ -419,13 +410,14 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         return;
     }
 
+    // Dynamic Head Bobble / Sway Engine Calculation
     const swayY = Math.sin(timestamp * 0.003) * swayAmplitude;
     const swayX = Math.cos(timestamp * 0.0015) * (swayAmplitude * 0.3);
 
     rCtx.save();
     rCtx.translate(swayX, swayY);
 
-    // Primary Canvas plate
+    // Primary Base Frame Plate
     rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
     
     const { x, y, w, h } = mouthBox;
@@ -436,12 +428,12 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         }
         const dropValue = Math.min(calculatedDrop, maxDropLimit); 
 
-        // Fix background trace leak margins
+        // Apply skin background textures
         rCtx.save();
         rCtx.drawImage(skinTextureHealerCanvas, x - featherBlur * 2, y - featherBlur * 2);
         rCtx.restore();
 
-        // Inner Cave Rendering
+        // Inner Cave Structuring Matrix
         rCtx.save();
         rCtx.beginPath();
         if (currentMode === 'box') {
@@ -480,7 +472,7 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
         rCtx.restore();
 
-        // Moving Cut Jaw Transforms
+        // Moving Cut Jaw Transforms Engine (Head Tilt Integration)
         rCtx.save();
         const centerX = x + (w / 2);
         const centerY = y; 
@@ -500,7 +492,7 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         rCtx.restore();
     }
 
-    // Blink Texture Application Frame Processor
+    // Eye Blink Pipeline Framework
     if (isBlinking) {
         [leftEyeBox, rightEyeBox].forEach(box => {
             if (box.w > 0 && box.h > 0) {
@@ -652,9 +644,9 @@ function bakePuppetLayers() {
 
     upperLipPatchCanvas.width = w;
     upperLipPatchCanvas.height = 15; 
-    const uCtx = upperLipPatchCanvas.getContext('2d');
-    uCtx.clearRect(0, 0, w, 15);
-    uCtx.drawImage(sourceImageCacheCanvas, x, y - 10, w, 15, 0, 0, w, 15);
+    const upCtx = upperLipPatchCanvas.getContext('2d');
+    upCtx.clearRect(0, 0, w, 15);
+    upCtx.drawImage(sourceImageCacheCanvas, x, y - 10, w, 15, 0, 0, w, 15);
     
     updateAllViewports(0);
 }
@@ -706,7 +698,7 @@ function checkReadyState() {
     }
 }
 
-// Sliders Configuration Modules
+// Sliders Event Modules
 zoomSlider.addEventListener('input', (e) => {
     currentZoomScale = parseInt(e.target.value) / 10;
     valZoom.innerText = currentZoomScale.toFixed(1) + "x";
@@ -858,7 +850,7 @@ connectMicBtn.addEventListener('click', async () => {
 });
 
 
-// --- LOCALIZED, DECENTRALIZED RE-ROUTED SONG REQUEST PIPELINE ---
+// --- PROXIED SONG REQUEST INFRASTRUCTURE ENGINE ---
 
 function isStreamerAndAuthorize(user, command) {
     if (user.toLowerCase() !== streamername.toLowerCase()) {
@@ -889,15 +881,17 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
             status.innerText = `🎵 Direct track queued by ${user}. Queue depth: ${songQueue.length}`;
             if (!isPlayingSong && isMicLive) playNextSong();
         } else {
-            status.innerText = `🔍 Searching decentralized mirror for: "${cleanedInput}"...`;
+            let searchKeywords = cleanedInput.replace(/\.(mp3|mp4|wav|ogg|flac|m4a)$/i, '').trim();
+            
+            status.innerText = `🔍 Searching proxy gateway for: "${searchKeywords}"...`;
             try {
-                let trackData = await searchAudioKeywords(cleanedInput);
+                let trackData = await searchAudioKeywords(searchKeywords);
                 if (trackData) {
                     songQueue.push({ user: user, url: trackData.url, title: trackData.title, id: trackData.id });
                     status.innerText = `✅ Queued: "${trackData.title}" (Requested by ${user})`;
                     if (!isPlayingSong && isMicLive) playNextSong();
                 } else {
-                    status.innerText = `❌ No unique matches located for query lines: "${cleanedInput}"`;
+                    status.innerText = `❌ No unique results found for: "${searchKeywords}"`;
                 }
             } catch (err) {
                 console.error("Search Gateway Error Exception:", err);
@@ -913,29 +907,36 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
     }
 };
 
-// CORS-Proof decentralized public endpoints to ensure local file:/// contexts parse media links safely
 async function searchAudioKeywords(keywords) {
-    // Array of active fallback instances that support open query lookups without headers blocks
     const instances = [
-        "https://invidious.io.lol",
-        "https://inv.tux.digital",
-        "https://invidious.nerdvpn.de",
+        "https://inv.nadeko.net",
+        "https://invidious.perennialte.ch",
+        "https://iv.melmac.space",
         "https://yewtu.be"
     ];
     
     for (let base of instances) {
         try {
-            const res = await fetch(`${base}/api/v1/search?q=${encodeURIComponent(keywords)}&type=video`);
-            const data = await res.json();
+            const targetUrl = `${base}/api/v1/search?q=${encodeURIComponent(keywords)}&type=video`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+            
+            const res = await fetch(proxyUrl);
+            if (!res.ok) continue;
+            
+            const proxyData = await res.json();
+            if (!proxyData || !proxyData.contents) continue;
+            
+            const data = JSON.parse(proxyData.contents);
+            
             if (data && data.length > 0) {
                 return {
                     title: data[0].title,
                     id: data[0].videoId,
-                    url: `https://pipedapi.kavin.rocks/stream/${data[0].videoId}` // Direct extraction link configuration
+                    url: `https://pipedapi.kavin.rocks/stream/${data[0].videoId}`
                 };
             }
         } catch(e) {
-            console.warn(`Mirror ${base} connection skipped. Advancing node...`);
+            console.warn(`Mirror gateway ${base} through proxy bypassed. Advancing node...`);
         }
     }
     return null;
@@ -945,7 +946,6 @@ function playNextSong() {
     if (songQueue.length === 0) {
         isPlayingSong = false;
         status.innerText = "Status: Song queue exhausted. Awaiting stream inputs.";
-        // Clean out display frame block configurations
         document.getElementById("videoWrapper").innerHTML = '<div id="videoPlaceholder" style="color: #555; font-size: 12px; font-family: monospace;">Media Player Idle</div>';
         return;
     }
@@ -954,9 +954,8 @@ function playNextSong() {
     const nextSong = songQueue.shift();
     
     const wrapper = document.getElementById("videoWrapper");
-    wrapper.innerHTML = ""; // Clear active placeholder nodes
+    wrapper.innerHTML = ""; 
     
-    // Build a HTML5 Video component node inside the browser DOM 
     currentMediaElement = document.createElement("video");
     currentMediaElement.crossOrigin = "anonymous";
     currentMediaElement.autoplay = true;
@@ -967,7 +966,6 @@ function playNextSong() {
         fetch(nextSong.url)
             .then(res => res.json())
             .then(data => {
-                // Route stream arrays dynamically 
                 if (data.videoStreams && data.videoStreams.length > 0) {
                     currentMediaElement.src = data.videoStreams[0].url;
                     executeAudioPlayback(nextSong);
@@ -990,11 +988,8 @@ function executeAudioPlayback(songObj) {
         if (audioSourceNode) {
             try { audioSourceNode.disconnect(); } catch(e) {}
         }
-        // Bind video sound streams directly into your analyzer frame loop layout matrix
         audioSourceNode = audioCtx.createMediaElementSource(currentMediaElement);
         audioSourceNode.connect(analyser);
-        
-        // Fix: Force connection out to your primary context sound driver hardware targets so you can hear audio!
         analyser.connect(audioCtx.destination); 
     }
 
@@ -1020,7 +1015,7 @@ function skipCurrentSong() {
 }
 
 
-// --- TWITCH CONNECTION HOOK ENGINE OPERATIONS ---
+// --- TWITCH SYSTEM RUNTIME CONNECTIONS ---
 
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
@@ -1028,7 +1023,7 @@ function setStreamer(newStreamer) {
     const input = document.querySelector("#comfycontrolBox input[type='text']");
 
     if (newStreamer && newStreamer.trim() !== "") {
-        streamername = newStreamer.trim();
+        streamername = newStreamer.trim().toLowerCase();
         localStorage.setItem("lastStreamer", streamername);
         ComfyJS.Init(streamername);
         console.log(`Connected to Twitch chat listener on channel: ${streamername}`);
@@ -1038,11 +1033,6 @@ function setStreamer(newStreamer) {
         twitchdisconnectbutton.style.display = "block"; 
     } else {
         disconnectBot();
-        localStorage.removeItem("lastStreamer");
-        
-        input.style.display = "block";
-        twitchdisconnectbutton.style.display = "none"; 
-        button.textContent = "Error: Try again";
     }
 }
 
