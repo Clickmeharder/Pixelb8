@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Stream Puppet Studio Pro (Multi-Eye Update)</title>
+<title>Live Stream Puppet Studio Pro (Eyelid Sampler Update)</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -125,6 +125,24 @@
         border-left: 3px solid #ff4757;
         text-align: left;
     }
+    /* Color Sampler Row Layout */
+    .color-picker-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #222;
+        padding: 6px;
+        border-radius: 4px;
+        border: 1px solid #333;
+    }
+    .color-picker-row input[type="color"] {
+        border: none;
+        background: transparent;
+        width: 40px;
+        height: 30px;
+        cursor: pointer;
+        padding: 0;
+    }
 </style>
 </head>
 <body>
@@ -134,9 +152,9 @@
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
-            <strong>✨ Calibration Steps:</strong><br>
-            1. Select <strong>👄 Define Moving Jaw</strong> and carve out the mouth selection.<br>
-            2. Use <strong>👁️ Left Eye</strong> and <strong>👁️ Right Eye</strong> modes to draw clean bounding boxes over each eye individually.
+            <strong>🎨 Eyelid Color Picker Active:</strong><br>
+            • Switch target to <strong>Left Eye</strong> or <strong>Right Eye</strong>.<br>
+            • Click anywhere on your avatar image to sample that pixel color instantly for the eyelids, or use the manual color palette tile below.
         </div>
 
         <div class="controls-group" style="margin-top: 20px;">
@@ -149,6 +167,15 @@
             <div class="toggle-row" id="geometryModeRow">
                 <button id="modeBoxBtn" class="active" style="font-size:11px;">🔲 Box Selection Mode</button>
                 <button id="modeLassoBtn" style="font-size:11px;">⎋ Lasso Path Mode</button>
+            </div>
+        </div>
+
+        <div class="controls-group">
+            <label>Blink Eyelid Fill Color Override</label>
+            <div class="color-picker-row">
+                <input type="color" id="eyelidColorPicker" value="#332222">
+                <span id="colorHexLabel" style="font-family:monospace; font-size:13px; color:#00ffcc;">#332222</span>
+                <span style="font-size:11px; color:#888; margin-left:auto;">(Or click image to eye-drop sample)</span>
             </div>
         </div>
 
@@ -234,6 +261,10 @@ const uiCanvas = document.getElementById('uiCanvas');
 const uCtx = uiCanvas.getContext('2d');
 const zoomContainer = document.getElementById('zoomContainer');
 
+// Color Picker UI Targets
+const eyelidColorPicker = document.getElementById('eyelidColorPicker');
+const colorHexLabel = document.getElementById('colorHexLabel');
+
 // UI Sliders Hooks
 const zoomSlider = document.getElementById('zoomSlider');
 const swaySlider = document.getElementById('swaySlider');
@@ -263,18 +294,21 @@ const geometryModeRow = document.getElementById('geometryModeRow');
 let avatarImg = new Image();
 let audioCtx, analyser, micStream;
 
-let editTarget = 'jaw'; // 'jaw', 'leftEye', or 'rightEye'
+let editTarget = 'jaw'; 
 let currentMode = 'box'; 
 let isDrawing = false;
 let startX = 0; let startY = 0;
 
-// Geometries Cache
+// Geometries Cache Engine
 let mouthBox = { x: 0, y: 0, w: 0, h: 0 };
 let lassoPoints = []; 
 let leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
 let rightEyeBox = { x: 0, y: 0, w: 0, h: 0 };
 
-// Dynamics Adjusters
+// Color Config State
+let eyelidColor = '#332222';
+
+// Dynamics Mechanics
 let currentZoomScale = 1.0;
 let featherBlur = 4;
 let tiltAngle = 0;
@@ -286,14 +320,13 @@ let swayAmplitude = 1.5;
 let isMicLive = false;
 let isBlinking = false;
 
-// Offscreen Rendering Buffers (Preserving pure legacy mouth alignment)
+// Offscreen Buffer Render Engines
 let featheredJawCanvas = document.createElement('canvas'); 
 let upperLipPatchCanvas = document.createElement('canvas'); 
 let skinTextureHealerCanvas = document.createElement('canvas'); 
 let sourceImageCacheCanvas = document.createElement('canvas');
 let sCtx = sourceImageCacheCanvas.getContext('2d');
 
-// Focus Mode Event Handlers
 function clearActiveTargets() {
     targetJawBtn.className = '';
     targetLeftEyeBtn.className = '';
@@ -342,6 +375,12 @@ modeLassoBtn.addEventListener('click', () => {
     updateAllViewports(0);
 });
 
+eyelidColorPicker.addEventListener('input', (e) => {
+    eyelidColor = e.target.value;
+    colorHexLabel.innerText = eyelidColor.toUpperCase();
+    updateAllViewports(0);
+});
+
 function resetSelectionData() {
     mouthBox = { x: 0, y: 0, w: 0, h: 0 };
     leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
@@ -351,7 +390,7 @@ function resetSelectionData() {
     updateAllViewports(0);
 }
 
-// RESTORED: Legacy High-Performance Rendering Pipeline Core
+// Pure Legacy High-Performance Mouth Alignment Engine
 function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
     rCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
     if (!avatarImg.src) {
@@ -360,14 +399,13 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         return;
     }
 
-    // Procedural Sway Math
     const swayY = Math.sin(timestamp * 0.003) * swayAmplitude;
     const swayX = Math.cos(timestamp * 0.0015) * (swayAmplitude * 0.3);
 
     rCtx.save();
     rCtx.translate(swayX, swayY);
 
-    // Primary Plate Paint
+    // Primary Avatar Layer
     rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
     
     const { x, y, w, h } = mouthBox;
@@ -378,12 +416,12 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         }
         const dropValue = Math.min(calculatedDrop, maxDropLimit); 
 
-        // Fix background plate reveal gaps
+        // Under-skin sealer reveal protection plate
         rCtx.save();
         rCtx.drawImage(skinTextureHealerCanvas, x - featherBlur * 2, y - featherBlur * 2);
         rCtx.restore();
 
-        // Inner Cave Rendering Bounds
+        // Inner Cave
         rCtx.save();
         rCtx.beginPath();
         if (currentMode === 'box') {
@@ -422,7 +460,7 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
         rCtx.restore();
 
-        // Moving Jaw Piece Translation
+        // Moving Jaw Piece 
         rCtx.save();
         const centerX = x + (w / 2);
         const centerY = y; 
@@ -434,7 +472,7 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         rCtx.drawImage(featheredJawCanvas, -w/2 - featherBlur * 2 + yawShift, -featherBlur * 2 + dropValue);
         rCtx.restore();
         
-        // Static Lip Guard Protection Mask
+        // Static Lip Guard Shield Mask
         rCtx.save();
         rCtx.translate(centerX, centerY);
         rCtx.rotate((tiltAngle * Math.PI) / 180);
@@ -442,19 +480,18 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         rCtx.restore();
     }
 
-    // Dual-Eye Independent Blink Pipeline
+    // Upgraded Dual-Eye Independent Flat Color Blink Vector Pipeline
     if (isBlinking) {
         [leftEyeBox, rightEyeBox].forEach(box => {
             if (box.w > 0 && box.h > 0) {
                 rCtx.save();
-                rCtx.beginPath();
-                rCtx.rect(box.x, box.y, box.w, box.h);
-                rCtx.clip();
-
-                // Pull native skin texture mapping directly from above the specific eye location
-                rCtx.drawImage(sourceImageCacheCanvas, box.x, box.y - 12, box.w, box.h, box.x, box.y, box.w, box.h);
                 
-                rCtx.strokeStyle = 'rgba(0,0,0,0.3)';
+                // Paint clean solid chosen color override fill match over eye boxes
+                rCtx.fillStyle = eyelidColor;
+                rCtx.fillRect(box.x, box.y, box.w, box.h);
+                
+                // Overlay natural soft shadow lid crease
+                rCtx.strokeStyle = 'rgba(0,0,0,0.25)';
                 rCtx.lineWidth = 2;
                 rCtx.beginPath();
                 rCtx.moveTo(box.x, box.y + (box.h / 2));
@@ -469,12 +506,11 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
     rCtx.restore(); 
 }
 
-// Clean, Dashed Guide Vectors UI Pipeline
+// Visual Dashed Trace Lines UI Pipeline
 function runUIGuidePipeline() {
     uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
     if (!avatarImg.src) return;
 
-    // Mouth Track Guidelines
     if (mouthBox.w > 0) {
         uCtx.save();
         uCtx.strokeStyle = "rgba(0, 255, 204, 0.5)";
@@ -491,7 +527,6 @@ function runUIGuidePipeline() {
         uCtx.restore();
     }
 
-    // Left Eye Area Guide
     if (leftEyeBox.w > 0) {
         uCtx.save();
         uCtx.strokeStyle = "rgba(255, 234, 0, 0.65)";
@@ -502,7 +537,6 @@ function runUIGuidePipeline() {
         uCtx.restore();
     }
 
-    // Right Eye Area Guide
     if (rightEyeBox.w > 0) {
         uCtx.save();
         uCtx.strokeStyle = "rgba(0, 153, 255, 0.65)";
@@ -513,12 +547,11 @@ function runUIGuidePipeline() {
         uCtx.restore();
     }
 
-    // Render Realtime Dynamic Drawing Trace Lines
     if (isDrawing) {
         uCtx.save();
         uCtx.strokeStyle = "#ff4757";
         uCtx.lineWidth = 2;
-        uCtx.setLineDash([5, 4]); // Clean visualization during drag operations
+        uCtx.setLineDash([5, 4]); 
         
         if (editTarget === 'jaw' && currentMode === 'lasso') {
             if (lassoPoints.length > 0) {
@@ -528,7 +561,6 @@ function runUIGuidePipeline() {
                 uCtx.stroke();
             }
         } else {
-            // Get tracking endpoints dynamically based on the current context selection
             let drawX, drawY, drawW, drawH;
             if (editTarget === 'jaw') { drawX = mouthBox.x; drawY = mouthBox.y; drawW = mouthBox.w; drawH = mouthBox.h; }
             else if (editTarget === 'leftEye') { drawX = leftEyeBox.x; drawY = leftEyeBox.y; drawW = leftEyeBox.w; drawH = leftEyeBox.h; }
@@ -655,7 +687,7 @@ function checkReadyState() {
     }
 }
 
-// Sliders Triggers listeners
+// Sliders Config Input Listeners
 zoomSlider.addEventListener('input', (e) => {
     currentZoomScale = parseInt(e.target.value) / 10;
     valZoom.innerText = currentZoomScale.toFixed(1) + "x";
@@ -695,16 +727,44 @@ yawSlider.addEventListener('input', (e) => {
 function getCanvasSpaceMouseCoords(e) {
     const rect = uiCanvas.getBoundingClientRect();
     return {
-        x: ((e.clientX - rect.left) / rect.width) * uiCanvas.width,
-        y: ((e.clientY - rect.top) / rect.height) * uiCanvas.height
+        x: Math.round(((e.clientX - rect.left) / rect.width) * uiCanvas.width),
+        y: Math.round(((e.clientY - rect.top) / rect.height) * uiCanvas.height)
     };
+}
+
+// Helper: Converts pure integer pixel color buffers cleanly to standard Hex Strings
+function rgbToHex(r, g, b) {
+    return "#" + [r, g, b].map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+    }).join("");
 }
 
 uiCanvas.addEventListener('mousedown', (e) => {
     if (!avatarImg.src) return;
-    isDrawing = true;
     
     const coords = getCanvasSpaceMouseCoords(e);
+    
+    // NEW CRITICAL EYE DROP SAMPLER MECHANIC
+    // If setting eyes, sample the exact image color under the cursor automatically
+    if (editTarget === 'leftEye' || editTarget === 'rightEye') {
+        try {
+            // Safety clip boundaries to fit cleanly inside image arrays
+            const sampleX = Math.max(0, Math.min(coords.x, sourceImageCacheCanvas.width - 1));
+            const sampleY = Math.max(0, Math.min(coords.y, sourceImageCacheCanvas.height - 1));
+            
+            const pixelData = sCtx.getImageData(sampleX, sampleY, 1, 1).data;
+            eyelidColor = rgbToHex(pixelData[0], pixelData[1], pixelData[2]);
+            
+            // Sync with control elements
+            eyelidColorPicker.value = eyelidColor;
+            colorHexLabel.innerText = eyelidColor.toUpperCase();
+        } catch (err) {
+            console.warn("Cross-origin canvas safety check triggered on local asset sample: ", err);
+        }
+    }
+
+    isDrawing = true;
     startX = coords.x;
     startY = coords.y;
     
@@ -782,7 +842,7 @@ imageInput.addEventListener('change', (e) => {
 
 connectMicBtn.addEventListener('click', async () => {
     try {
-        status.innerText = "Status: Spawning Audio Processing Nodes...";
+        status.innerText = "Status: Connecting Microphone Feed Arrays...";
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 256;
