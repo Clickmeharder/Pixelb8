@@ -160,9 +160,9 @@
 <div class="grid-layout">
     <div class="panel">
         <div class="instructions">
-            <strong>✨ Direct YouTube Search Array Engaged:</strong><br>
-            • Proxies are completely bypassed. Track requests pull raw targets directly via the autocomplete index.<br>
-            • Audio capturing uses the active window context audio loop back.
+            <strong>✨ Direct YouTube Autoplay Engine Activated:</strong><br>
+            • The media player initializes immediately to guarantee unblocked video playback context.<br>
+            • Audio capturing safely simulates volume data to drive jaw mechanics.
         </div>
 
         <div class="panel" id="comfycontrolBox" style="background: #111; border: 1px solid #222; margin-top:15px; padding: 12px; text-align: left;">
@@ -259,7 +259,7 @@
         <div class="video-monitor-panel">
             <label>📺 Song Request YouTube Frame</label>
             <div class="video-frame-container" id="videoWrapper">
-                <div id="videoPlaceholder" style="padding: 20px; color: #555; font-size: 12px; font-family: monospace;">Media Player Idle</div>
+                <div id="ytPlayerNode"></div>
             </div>
         </div>
     </div>
@@ -273,6 +273,7 @@ const firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 let ytPlayer = null;
+let ytPlayerReady = false;
 
 const imageInput = document.getElementById('imageInput');
 const connectMicBtn = document.getElementById('connectMicBtn');
@@ -737,7 +738,6 @@ function bakePuppetLayers() {
 function processLiveMicrophoneFeed(timestamp) {
     let combinedVolume = 0;
     
-    // Mix the live microphone inputs with the internal track volume level
     if (isMicLive && analyser) {
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
@@ -944,7 +944,7 @@ connectMicBtn.addEventListener('click', async () => {
         const source = audioCtx.createMediaStreamSource(micStream);
         source.connect(analyser);
 
-        // Setup a ScriptProcessorNode to safely track loopback/iframe audio frequencies via Web Audio API 
+        // Setup a ScriptProcessorNode to track frequencies safely via loopback audio
         javascriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
         javascriptNode.connect(audioCtx.destination);
 
@@ -958,13 +958,18 @@ connectMicBtn.addEventListener('click', async () => {
         status.innerText = "Status: Running smoothly. YouTube direct cluster engine online.";
 
         triggerRandomBlinkCycle();
+
+        // If the chat bot was connected before clicking "System Live", kickstart the player queue
+        if(songQueue.length > 0 && !isPlayingSong) {
+            playNextSong();
+        }
     } catch (err) {
         status.innerText = `Error connecting mic stream: ${err.message}`;
     }
 });
 
 
-// --- OVERHAULED HIGH-AVAILABILITY YOUTUBE DIRECT MATRIX ENGINE ---
+// --- FIXED HIGH-AVAILABILITY YOUTUBE INSTANTIATION BLOCK ---
 
 let songQueue = [];
 let isPlayingSong = false;
@@ -978,11 +983,37 @@ function isStreamerAndAuthorize(user, command) {
     return true;
 }
 
-// Extract Video ID string from standard URL types
 function extractYouTubeId(url) {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
+}
+
+// Global hook: Instantiates the player container immediately on load
+function onYouTubeIframeAPIReady() {
+    console.log("⚓ YouTube IFrame API Mounted successfully.");
+    ytPlayer = new YT.Player('ytPlayerNode', {
+        height: '100%',
+        width: '100%',
+        playerVars: {
+            'autoplay': 0,
+            'controls': 1,
+            'origin': window.location.origin
+        },
+        events: {
+            'onReady': () => {
+                ytPlayerReady = true;
+                console.log("📺 Media Player instance ready for hot loads.");
+            },
+            'onStateChange': (event) => {
+                // YT.PlayerState.ENDED is 0
+                if (event.data === 0) {
+                    stopAudioFrequencyCaptureLoop();
+                    playNextSong();
+                }
+            }
+        }
+    });
 }
 
 ComfyJS.onCommand = async (user, command, message, flags, extra) => {
@@ -993,7 +1024,7 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
         let explicitId = extractYouTubeId(cleanedInput);
         
         if (explicitId) {
-            songQueue.push({ user: user, title: "Direct Video URL Link", id: explicitId });
+            songQueue.push({ user: user, title: "Direct Video URL Link", id: explicitId, type: 'id' });
             status.innerText = `🎵 Direct YouTube track queued by ${user}. Queue depth: ${songQueue.length}`;
             if (!isPlayingSong && isMicLive) playNextSong();
         } else {
@@ -1001,7 +1032,7 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
             try {
                 let trackId = await searchAudioKeywords(cleanedInput);
                 if (trackId) {
-                    songQueue.push({ user: user, title: cleanedInput, id: trackId });
+                    songQueue.push({ user: user, title: cleanedInput, id: trackId, type: 'search' });
                     status.innerText = `✅ Queued: "${cleanedInput}" (Requested by ${user})`;
                     if (!isPlayingSong && isMicLive) playNextSong();
                 } else {
@@ -1021,93 +1052,65 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
     }
 };
 
-// High-Availability Bypassed Scraper using direct client inputs 
 async function searchAudioKeywords(keywords) {
     try {
-        // Step 1: Query the un-proxied, open JSONP suggestion engine
         const cleanQuery = encodeURIComponent(keywords);
         const targetUrl = `https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q=${cleanQuery}`;
         
-        // Step 2: Leverage standard cross-origin script injections to read the autocomplete array instantly
         const responseData = await new Promise((resolve, reject) => {
             const callbackName = 'jsonp_yt_search_' + Math.round(100000 * Math.random());
             window[callbackName] = (data) => {
-                delete window[callbackName];
+                delete window[window[callbackName]];
                 document.body.removeChild(script);
                 resolve(data);
             };
             const script = document.createElement('script');
             script.src = `${targetUrl}&callback=${callbackName}`;
-            script.onerror = () => reject(new Error("Network Error fallback tracking"));
+            script.onerror = () => reject(new Error("JSONP Load Failed"));
             document.body.appendChild(script);
         });
 
         if (responseData && responseData[1] && responseData[1].length > 0) {
-            // Take top prediction match string 
-            const bestMatchTitle = responseData[1][0][0];
-            
-            // Step 3: Fetch search-page data using an un-proxied fetch (allowed via no-cors mode, or scraping standard open routes)
-            // To ensure 100% monolithic stability inside standard browser security sandboxes, we convert the top title string directly into an automated playback lookup query
-            return encodeURIComponent(bestMatchTitle);
+            return responseData[1][0][0]; 
         }
     } catch (e) {
-        console.warn("YouTube direct matrix tracking error:", e);
+        console.warn("YouTube direct matrix tracking fallback:", e);
     }
-    // Fallback directly to keywords if search suggestion engine drops out
-    return encodeURIComponent(keywords);
-}
-
-// Global hook for YouTube IFrame Framework Mount
-function onYouTubeIframeAPIReady() {
-    console.log("⚓ YouTube IFrame API Mounted successfully.");
+    return keywords;
 }
 
 function playNextSong() {
     if (songQueue.length === 0) {
         isPlayingSong = false;
         status.innerText = "Status: Song queue completed. Awaiting stream inputs.";
-        document.getElementById("videoWrapper").innerHTML = '<div id="videoPlaceholder" style="padding: 20px; color: #555; font-size: 12px; font-family: monospace;">Media Player Idle</div>';
+        return;
+    }
+
+    if (!ytPlayerReady || !ytPlayer) {
+        console.warn("Player frame context missing. Retrying in 500ms...");
+        setTimeout(playNextSong, 500);
         return;
     }
 
     isPlayingSong = true;
     const nextSong = songQueue.shift();
-    
-    const wrapper = document.getElementById("videoWrapper");
-    wrapper.innerHTML = `<div id="ytPlayerNode"></div>`; 
+    status.innerText = `🎶 Track Loading: "${nextSong.title}"`;
 
-    // Handle whether track is query string or direct ID
-    let isExplicitId = (nextSong.id.length === 11);
+    // Hot-swap parameters safely inside the already initialized player frame context
+    if (nextSong.type === 'id') {
+        ytPlayer.loadVideoById(nextSong.id);
+    } else {
+        ytPlayer.loadPlaylist({
+            listType: 'search',
+            list: nextSong.id,
+            index: 0
+        });
+    }
     
-    ytPlayer = new YT.Player('ytPlayerNode', {
-        height: '100%',
-        width: '100%',
-        videoId: isExplicitId ? nextSong.id : '',
-        playerVars: {
-            'autoplay': 1,
-            'controls': 1,
-            'listType': isExplicitId ? undefined : 'search',
-            'list': isExplicitId ? undefined : nextSong.id,
-            'origin': window.location.origin
-        },
-        events: {
-            'onReady': (event) => {
-                event.target.playVideo();
-                status.innerText = `🎶 Track Rendering: "${nextSong.title}"`;
-                startAudioFrequencyCaptureLoop();
-            },
-            'onStateChange': (event) => {
-                // YT.PlayerState.ENDED is 0
-                if (event.data === 0) {
-                    stopAudioFrequencyCaptureLoop();
-                    playNextSong();
-                }
-            }
-        }
-    });
+    startAudioFrequencyCaptureLoop();
 }
 
-// Automated audio simulation bridge loop for avatar mapping synchronization
+// Simulated audio frequency loopback bridge
 let captureTimer = null;
 function startAudioFrequencyCaptureLoop() {
     if (captureTimer) clearInterval(captureTimer);
@@ -1116,8 +1119,6 @@ function startAudioFrequencyCaptureLoop() {
         if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
             const state = ytPlayer.getPlayerState();
             if (state === 1) { // Playing
-                // Safely simulate frequencies using continuous playback context
-                // This replaces proxy-blocked stream downloads entirely
                 trackVolumeLevel = Math.random() * 45 + 25; 
             } else {
                 trackVolumeLevel = 0;
