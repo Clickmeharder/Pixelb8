@@ -77,7 +77,8 @@ export class StreamJukebox {
         const buttons = {
             'jb-skip-btn': 'p8-btn',
             'jb-clear-btn': 'p8-btn danger-btn',
-            'jb-search-add-btn': 'p8-btn',
+            'jb-add-queue-btn': 'p8-btn',
+            'jb-add-fallback-btn': 'p8-btn alt-btn',
             'stg-toggle-jukebox-btn': 'p8-btn'
         };
         Object.keys(buttons).forEach(id => {
@@ -87,8 +88,11 @@ export class StreamJukebox {
     }
 
     bindControls() {
-        document.getElementById('jb-skip-btn').onclick = () => this.skipCurrentSong();
-        document.getElementById('jb-clear-btn').onclick = () => { this.queue = []; this.skipCurrentSong(); };
+        const skipBtn = document.getElementById('jb-skip-btn');
+        if(skipBtn) skipBtn.onclick = () => this.skipCurrentSong();
+
+        const clearBtn = document.getElementById('jb-clear-btn');
+        if(clearBtn) clearBtn.onclick = () => { this.queue = []; this.skipCurrentSong(); };
         
         const voteInput = document.getElementById('jb-vote-req-input');
         if (voteInput) {
@@ -96,29 +100,61 @@ export class StreamJukebox {
             voteInput.onchange = (e) => { this.VOTE_REQUIREMENT = parseInt(e.target.value); localStorage.setItem("jbVoteReq", this.VOTE_REQUIREMENT); };
         }
 
-        document.getElementById('jb-search-add-btn').onclick = () => {
+        // New: Add to Queue
+        const addQueueBtn = document.getElementById('jb-add-queue-btn');
+        if(addQueueBtn) addQueueBtn.onclick = () => {
             const val = document.getElementById('jb-search-input').value;
             if (val) { this.manualAddSong(val); document.getElementById('jb-search-input').value = ''; }
         };
 
-        document.getElementById('stg-toggle-jukebox-btn').onclick = () => {
+        // New: Add to Fallback
+        const addFallbackBtn = document.getElementById('jb-add-fallback-btn');
+        if(addFallbackBtn) addFallbackBtn.onclick = () => {
+            const val = document.getElementById('jb-search-input').value;
+            if (val) { this.handleAddFallback('System', val, (msg) => console.log(msg)); document.getElementById('jb-search-input').value = ''; }
+        };
+
+        const toggleBtn = document.getElementById('stg-toggle-jukebox-btn');
+        if(toggleBtn) toggleBtn.onclick = () => {
             this.setWidgetActiveState(!this.isEnabled);
         };
     }
 
-    renderFallbackList() {
-        const list = document.getElementById('jb-fallback-list');
-        if (!list) return;
-        list.innerHTML = '';
-        this.fallbackPlaylist.forEach((item) => {
-            const div = document.createElement('div');
-            div.className = "option-item";
-            div.style.cssText = "padding: 6px 10px; border-bottom: 1px solid #3f3f46; cursor: pointer; font-size: 11px;";
-            div.innerText = item.title;
-            div.onclick = () => { this.currentTrackData = item; this.ytPlayer.loadVideoById(item.id); };
-            list.appendChild(div);
-        });
-    }
+	renderFallbackList() {
+		const list = document.getElementById('jb-fallback-list');
+		if (!list) return;
+		list.innerHTML = '';
+
+		this.fallbackPlaylist.forEach((item, index) => {
+			const div = document.createElement('div');
+			div.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #3f3f46; font-size: 11px;";
+			
+			// Track Info (Title + Requestor)
+			const info = document.createElement('div');
+			info.style.cursor = 'pointer';
+			info.innerHTML = `<strong>${item.title}</strong><br><span style="color: #a1a1aa;">Req: ${item.user || 'System'}</span>`;
+			info.onclick = () => { 
+				this.currentTrackData = item; 
+				this.ytPlayer.loadVideoById(item.id); 
+			};
+
+			// Delete Button
+			const delBtn = document.createElement('button');
+			delBtn.innerText = '✕';
+			delBtn.className = 'p8-btn';
+			delBtn.style.cssText = "background: #991b1b; padding: 2px 8px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer;";
+			delBtn.onclick = (e) => {
+				e.stopPropagation(); // Prevents triggering play on click
+				this.fallbackPlaylist.splice(index, 1);
+				localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
+				this.renderFallbackList();
+			};
+
+			div.appendChild(info);
+			div.appendChild(delBtn);
+			list.appendChild(div);
+		});
+	}
 
     setWidgetActiveState(state) {
         this.isEnabled = state;
@@ -184,24 +220,28 @@ export class StreamJukebox {
             const next = this.queue.shift();
             this.currentTrackData = next.isSearch ? await this.fetchTrack(next.id) : { id: next.id, title: next.title };
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
-            document.getElementById('jb-current-title').innerText = this.currentTrackData.title;
+            const titleEl = document.getElementById('jb-current-title');
+            if(titleEl) titleEl.innerText = this.currentTrackData.title;
         } else if (this.fallbackPlaylist.length > 0) {
             this.isPlayingSong = true;
             this.currentTrackData = this.fallbackPlaylist[Math.floor(Math.random() * this.fallbackPlaylist.length)];
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
-            document.getElementById('jb-current-title').innerText = this.currentTrackData.title;
+            const titleEl = document.getElementById('jb-current-title');
+            if(titleEl) titleEl.innerText = this.currentTrackData.title;
         } else {
             this.isPlayingSong = false;
-            document.getElementById('jb-current-title').innerText = "No Track Loaded";
+            const titleEl = document.getElementById('jb-current-title');
+            if(titleEl) titleEl.innerText = "No Track Loaded";
         }
     }
 
-    saveFallbackItem(item) {
-        if (!this.fallbackPlaylist.some(e => e.id === item.id)) {
-            this.fallbackPlaylist.push(item);
-            localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
-        }
-    }
+	saveFallbackItem(item, username = 'System') {
+		if (!this.fallbackPlaylist.some(e => e.id === item.id)) {
+			this.fallbackPlaylist.push({ ...item, user: username });
+			localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
+			this.renderFallbackList();
+		}
+	}
 
     async fetchTrack(keywords) {
         const instances = ['https://invidious.flokinet.to', 'https://yewtu.be'];

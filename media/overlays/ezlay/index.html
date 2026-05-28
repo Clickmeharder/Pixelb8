@@ -489,9 +489,12 @@
 					<input type="number" id="jb-vote-req-input" class="p8-input" value="2" style="width: 100%;">
 				</div>
 
-				<div style="display: flex; gap: 5px; margin-bottom: 10px;">
-					<input type="text" id="jb-search-input" class="p8-input" placeholder="Search or YouTube URL..." style="flex: 1;">
-					<button id="jb-search-add-btn" class="p8-btn" style="width: 60px;">ADD</button>
+				<div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
+					<input type="text" id="jb-search-input" class="p8-input" placeholder="Search or YouTube URL...">
+					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+						<button id="jb-add-queue-btn" class="p8-btn">Add to Queue</button>
+						<button id="jb-add-fallback-btn" class="p8-btn alt-btn">Add to Fallback</button>
+					</div>
 				</div>
 
 				<div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px;">📋 Fallback Playlist</div>
