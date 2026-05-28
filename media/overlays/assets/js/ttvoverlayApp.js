@@ -2320,33 +2320,46 @@ const BOOLEAN_TOGGLE_MAPS = [
     { id: "mgr-toggle-bits-btn",           type: "click",  valuePath: null,      invert: false, assignTo: () => { bitsEnabled = !bitsEnabled; }, onSync: () => saveSettings() },
     
     // 🟢 ADDED: Stream Jukebox Engine Switch Row (Matches HTML id="stg-toggle-jukebox-btn")
-    { 
-        id: "stg-toggle-jukebox-btn", 
-        type: "click", 
-        valuePath: null, 
-        invert: false, 
-        assignTo: () => { 
-            if (typeof settings !== 'undefined') {
-                settings.jukeboxWidgetEnabled = !settings.jukeboxWidgetEnabled;
-            }
-        }, 
-        onSync: () => {
-            saveSettings();
-            
-            // Toggle the badge UI manually to match your layout style patterns
-            const badge = document.getElementById("stg-jukebox-status-badge");
-            const isEnabled = settings.jukeboxWidgetEnabled;
-            if (badge) {
-                badge.innerText = isEnabled ? "ENABLED" : "DISABLED";
-                badge.style.color = isEnabled ? "var(--accent)" : "#71717a";
-            }
-            
-            // Sync state with your decoupled jukebox ES Module instance
-            if (window.streamJukeboxEngine) {
-                window.streamJukeboxEngine.setWidgetActiveState(isEnabled);
-            }
-        } 
-    }
+	{ 
+		id: "stg-toggle-jukebox-btn", 
+		type: "click", 
+		valuePath: null, 
+		invert: false, 
+		assignTo: () => { 
+			if (typeof settings !== 'undefined') {
+				settings.jukeboxWidgetEnabled = !settings.jukeboxWidgetEnabled;
+			}
+		}, 
+		onSync: () => {
+			saveSettings();
+			
+			const isEnabled = settings.jukeboxWidgetEnabled;
+			
+			// 1. Update the Settings Badge
+			const badge = document.getElementById("stg-jukebox-status-badge");
+			if (badge) {
+				badge.className = `toggle-status-badge ${isEnabled ? 'status-enabled' : 'status-disabled'}`;
+				badge.innerText = isEnabled ? "ON" : "OFF";
+			}
+			
+			// 2. Sync state with your decoupled jukebox ES Module instance
+			if (window.streamJukeboxEngine) {
+				window.streamJukeboxEngine.setWidgetActiveState(isEnabled);
+			}
+			
+			// 3. NEW: Hide/Show the Widget Manager Controls
+			// This targets the container that holds the Jukebox buttons in the Widgets Manager
+			const widgetControls = document.getElementById("jukebox-widget-controls");
+			if (widgetControls) {
+				// Set display to 'none' if disabled, otherwise 'block' or 'flex' depending on your CSS
+				widgetControls.style.display = isEnabled ? "block" : "none";
+				
+				// Optional: Add a visual indicator in the manager that it's offline
+				widgetControls.style.opacity = isEnabled ? "1" : "0.5";
+				widgetControls.style.pointerEvents = isEnabled ? "auto" : "none";
+			}
+		}
+	}
 ];
 
 // Straight utility mapping dictionary for clean event routing execution pipelines
@@ -2867,13 +2880,22 @@ function bindEvents() {
     if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
     if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
 	if (window.streamJukeboxEngine && typeof settings !== 'undefined') {
-		window.streamJukeboxEngine.setWidgetActiveState(settings.jukeboxWidgetEnabled);
+		const isEnabled = settings.jukeboxWidgetEnabled;
 		
-		// Sync the visual badge on load
+		// 1. Sync the engine state
+		window.streamJukeboxEngine.setWidgetActiveState(isEnabled);
+		
+		// 2. Sync the visual badge
 		const badge = document.getElementById("stg-jukebox-status-badge");
 		if (badge) {
-			badge.innerText = settings.jukeboxWidgetEnabled ? "ENABLED" : "DISABLED";
-			badge.style.color = settings.jukeboxWidgetEnabled ? "var(--accent)" : "#71717a";
+			badge.className = `toggle-status-badge ${isEnabled ? 'status-enabled' : 'status-disabled'}`;
+			badge.innerText = isEnabled ? "ON" : "OFF";
+		}
+		
+		// 3. Sync the Widget Manager UI visibility
+		const widgetControls = document.getElementById("jukebox-widget-controls");
+		if (widgetControls) {
+			widgetControls.style.display = isEnabled ? "block" : "none";
 		}
 	}
 
