@@ -82,22 +82,22 @@
     }
     button:hover { background: #ff6b81; }
     
-    /* --- ULTRA-SIZED HIGH-VISIBILITY STATUS BAR --- */
+    /* Standard Base Dashboard View Status (Normal size) */
     #status {
         color: lime;
         font-family: monospace;
         background: #000000;
-        padding: 30px;
-        border-radius: 8px;
-        border-left: 12px solid #ff4757;
+        padding: 15px;
+        border-radius: 6px;
+        border-left: 6px solid #ff4757;
         margin: 20px 0;
         text-align: left;
         word-wrap: break-word;
-        word-break: break-word; /* Force stack titles inside narrow containers */
-        font-size: 42px; /* Massive size optimized for shrunk layout corner boxes */
-        font-weight: 900;
-        line-height: 1.3;
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        font-size: 16px;
+        font-weight: bold;
+        line-height: 1.4;
+        transition: opacity 0.5s ease;
+        opacity: 1;
     }
     
     .video-monitor-panel {
@@ -135,7 +135,7 @@
         position: absolute;
         top: 25px;
         left: 25px;
-        right: 25px; /* Allow stretch across full panel width if shrunk */
+        right: 25px;
         display: flex;
         flex-direction: column;
         gap: 20px;
@@ -148,7 +148,7 @@
         padding: 25px 35px;
         border-radius: 12px;
         font-weight: 900;
-        font-size: 36px; /* Drastically bumped size for clarity */
+        font-size: 36px;
         text-align: left;
         box-shadow: 0 10px 30px rgba(0,0,0,0.85);
         border-left: 15px solid #27ae60;
@@ -161,7 +161,7 @@
         animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.4s ease 4.6s forwards;
     }
     .vote-toast .toast-thumb {
-        font-size: 48px; /* High visibility scaling for interaction emoji */
+        font-size: 48px;
     }
     .milestone-popup-announcement {
         position: absolute;
@@ -172,7 +172,7 @@
         color: #111;
         padding: 35px 45px;
         border-radius: 16px;
-        font-size: 40px; /* Big center-screen takeover frame */
+        font-size: 40px;
         font-weight: 900;
         text-transform: uppercase;
         box-shadow: 0 15px 50px rgba(0,0,0,0.95);
@@ -220,7 +220,7 @@
         font-size: 14px;
     }
 
-    /* Dynamic UI Modifiers for OBS Browser View Mode */
+    /* --- CONDITIONAL OBS WIDGET VIEWPORT MODIFIERS --- */
     body.obs-widget-view {
         background: transparent !important;
         padding: 0;
@@ -259,10 +259,24 @@
     body.obs-widget-view .video-frame-container {
         flex: 1;
         margin-top: 0;
+        z-index: 1;
     }
+    
+    /* ONLY make status this big, overlapping, and absolute in OBS Widget View */
     body.obs-widget-view #status {
-        margin: 15px 0 0 0;
-        background: rgba(0, 0, 0, 0.9);
+        margin: 0;
+        margin-top: -85px; /* Negative margin pulls it up over the video player matrix */
+        background: rgba(0, 0, 0, 0.85);
+        padding: 20px 25px;
+        border-radius: 8px;
+        border-left: 12px solid #ff4757;
+        font-size: 42px; /* Massive size optimized for tiny OBS source scenes */
+        font-weight: 900;
+        line-height: 1.3;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        z-index: 5;
+        position: relative;
+        pointer-events: none; /* Allows click-through interaction on the player underneath */
     }
 
     /* Audio Only Operational System Tweaks */
@@ -273,6 +287,9 @@
         pointer-events: none;
         position: absolute;
         left: -9999px;
+    }
+    body.audio-only-mode.obs-widget-view #status {
+        margin-top: 0px !important; /* Reset overlap pull if video frame is hidden */
     }
 </style>
 
@@ -338,7 +355,8 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 let ytPlayer = null;
 let ytPlayerReady = false;
-const status = document.getElementById('status');
+const statusNode = document.getElementById('status');
+let statusFadeTimeout = null;
 
 let songQueue = [];
 let fallbackPlaylist = JSON.parse(localStorage.getItem("jukeboxFallbackPlaylist")) || [];
@@ -348,6 +366,28 @@ let streamername = "jaedraze";
 const VOTE_REQUIREMENT = 2; 
 let currentTrackVotes = new Set();
 let currentTrackData = null; 
+
+// --- INTELLIGENT TEXT TRUNCATION & TIMED FADE ENGINE ---
+function updateSystemStatusText(rawText) {
+    if (!rawText) return;
+    
+    let processedText = rawText.trim();
+    if (processedText.length > 30) {
+        processedText = processedText.substring(0, 27) + "...";
+    }
+    
+    // Revive visibility immediately on message update
+    statusNode.innerText = processedText;
+    statusNode.style.opacity = "1";
+    
+    // Clear out any stale pending fade operations
+    if (statusFadeTimeout) clearTimeout(statusFadeTimeout);
+    
+    // Set smooth transition downward after 15 seconds
+    statusFadeTimeout = setTimeout(() => {
+        statusNode.style.opacity = "0.1";
+    }, 15000);
+}
 
 function isStreamerAndAuthorize(user, command) {
     if (user.toLowerCase() !== streamername.toLowerCase()) {
@@ -384,7 +424,7 @@ function onYouTubeIframeAPIReady() {
         events: {
             'onReady': () => {
                 ytPlayerReady = true;
-                status.innerText = `Status: Player ready. Fallback pool: ${fallbackPlaylist.length} tracks.`;
+                updateSystemStatusText(`Ready. Pool: ${fallbackPlaylist.length} tracks.`);
                 if (!isPlayingSong) playNextSong();
             },
             'onStateChange': (event) => {
@@ -393,7 +433,7 @@ function onYouTubeIframeAPIReady() {
                 }
             },
             'onError': (err) => {
-                status.innerText = `⚠️ Player Error [Code ${err.data}]. Advancing queue...`;
+                updateSystemStatusText(`⚠️ Player Error [Code ${err.data}]. Advancing...`);
                 playNextSong();
             }
         }
@@ -417,7 +457,7 @@ async function fetchTrackIdFromKeywords(keywords) {
                 return { id: results[0].videoId, title: results[0].title || keywords };
             }
         } catch (e) {
-            console.warn(`Node failover routing event matrix encounter...`);
+            console.warn(`Node routing failover layout matrix...`);
         }
     }
     return null;
@@ -430,11 +470,11 @@ function queueTrackAsset(user, rawInput) {
     
     if (explicitId) {
         songQueue.push({ user: user, title: `Direct Asset Link`, id: explicitId, isSearch: false });
-        status.innerText = `🎵 Track ID [${explicitId}] queued by ${user}. Queue: ${songQueue.length}`;
+        updateSystemStatusText(`🎵 Link Queued by ${user}. Size: ${songQueue.length}`);
         if (!isPlayingSong) playNextSong();
     } else {
         songQueue.push({ user: user, title: cleanedInput, id: cleanedInput, isSearch: true });
-        status.innerText = `✅ Queued Search: "${cleanedInput}" (${user}). Queue: ${songQueue.length}`;
+        updateSystemStatusText(`✅ Queued: "${cleanedInput}"`);
         if (!isPlayingSong) playNextSong();
     }
 }
@@ -448,12 +488,12 @@ async function addTrackToFallbackRegistry(rawInput, executionContextName) {
         const item = { id: explicitId, title: `Direct Track Asset (${explicitId})` };
         saveFallbackItem(item, executionContextName);
     } else {
-        status.innerText = `🔍 Resolving fallback tracks: "${cleanedInput}"...`;
+        updateSystemStatusText(`🔍 Resolving: "${cleanedInput}"...`);
         const lookup = await fetchTrackIdFromKeywords(cleanedInput);
         if (lookup) {
             saveFallbackItem(lookup, executionContextName);
         } else {
-            status.innerText = `❌ Error resolving fallback: "${cleanedInput}"`;
+            updateSystemStatusText(`❌ Error resolving fallback: "${cleanedInput}"`);
         }
     }
 }
@@ -462,14 +502,13 @@ function saveFallbackItem(item, originUser) {
     if (!fallbackPlaylist.some(element => element.id === item.id)) {
         fallbackPlaylist.push(item);
         localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
-        status.innerText = `💾 Saved to Fallback: "${item.title}" (${originUser}). Pool: ${fallbackPlaylist.length}`;
+        updateSystemStatusText(`💾 Saved Fallback: "${item.title}"`);
         triggerMilestoneOverlay(item.title);
     } else {
-        status.innerText = `💡 Track "${item.title}" already inside fallback registry.`;
+        updateSystemStatusText(`💡 Track already in fallback.`);
     }
 }
 
-// --- ULTRA-SIZE INJECTION ENGINE INTERFACE ---
 function triggerVoteToastNotification(username, currentCount, targetCount) {
     const container = document.getElementById("alertToastContainer");
     if (!container) return;
@@ -488,7 +527,13 @@ function triggerMilestoneOverlay(songTitle) {
 
     const popup = document.createElement("div");
     popup.className = "milestone-popup-announcement";
-    popup.innerHTML = `🔥 Community Choice! <br><span style="font-size:26px; color:#fff; display:block; margin-top:12px; text-transform:none; font-weight:bold;">"${songTitle}" reached the threshold and hit the Fallback Playlist!</span>`;
+    
+    let truncatedTitle = songTitle;
+    if (truncatedTitle.length > 30) {
+        truncatedTitle = truncatedTitle.substring(0, 27) + "...";
+    }
+    
+    popup.innerHTML = `🔥 Community Choice! <br><span style="font-size:26px; color:#fff; display:block; margin-top:12px; text-transform:none; font-weight:bold;">"${truncatedTitle}" reached the threshold and hit the Fallback Playlist!</span>`;
     
     wrapper.appendChild(popup);
     setTimeout(() => { popup.remove(); }, 6500);
@@ -514,7 +559,7 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
                 if (!fallbackPlaylist.some(el => el.id === currentTrackData.id)) {
                     fallbackPlaylist.push({ id: currentTrackData.id, title: currentTrackData.title });
                     localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
-                    status.innerText = `🔥 Community Choice! "${currentTrackData.title}" reached upvote threshold and hit the Fallback Playlist! Pool: ${fallbackPlaylist.length}`;
+                    updateSystemStatusText(`🔥 Threshold Hit: "${currentTrackData.title}"`);
                     
                     triggerMilestoneOverlay(currentTrackData.title);
                 }
@@ -542,11 +587,11 @@ async function playNextSong() {
         const nextSong = songQueue.shift();
         
         if (nextSong.isSearch) {
-            status.innerText = `🔍 Resolving request: "${nextSong.title}"...`;
+            updateSystemStatusText(`🔍 Resolving: "${nextSong.title}"...`);
             const resolved = await fetchTrackIdFromKeywords(nextSong.id);
             
             if (resolved) {
-                status.innerText = `🎶 Now Playing: "${resolved.title}" (Requested by ${nextSong.user})`;
+                updateSystemStatusText(`🎶 Playing: "${resolved.title}"`);
                 currentTrackData = { id: resolved.id, title: resolved.title };
                 try {
                     const mainIframe = document.querySelector('#videoWrapper iframe');
@@ -558,11 +603,11 @@ async function playNextSong() {
                     playNextSong();
                 }
             } else {
-                status.innerText = `❌ Error resolving: "${nextSong.title}". Advancing...`;
+                updateSystemStatusText(`❌ Error resolving: "${nextSong.title}".`);
                 playNextSong();
             }
         } else {
-            status.innerText = `🎶 Now Playing Direct Track (Requested by ${nextSong.user})`;
+            updateSystemStatusText(`🎶 Playing Track Requested by ${nextSong.user}`);
             currentTrackData = { id: nextSong.id, title: nextSong.title };
             try {
                 const mainIframe = document.querySelector('#videoWrapper iframe');
@@ -583,7 +628,7 @@ async function playNextSong() {
         const randomIndex = Math.floor(Math.random() * fallbackPlaylist.length);
         const fallbackTrack = fallbackPlaylist[randomIndex];
         
-        status.innerText = `🔀 [Fallback Pool] Now Playing: "${fallbackTrack.title}"`;
+        updateSystemStatusText(`🔀 Playing Fallback: "${fallbackTrack.title}"`);
         currentTrackData = { id: fallbackTrack.id, title: fallbackTrack.title };
         
         try {
@@ -597,14 +642,14 @@ async function playNextSong() {
         }
     } else {
         isPlayingSong = false;
-        status.innerText = "Status: Live Queue dry & Fallback Playlist empty. Standing by...";
+        updateSystemStatusText("Queue dry. Standing by...");
     }
 }
 
 function skipCurrentSong() {
     if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
         ytPlayer.stopVideo();
-        status.innerText = "⏭️ Track skipped by streamer.";
+        updateSystemStatusText("⏭️ Track skipped by streamer.");
         playNextSong();
     }
 }
@@ -618,7 +663,7 @@ function setStreamer(newStreamer) {
         streamername = newStreamer.trim().toLowerCase();
         localStorage.setItem("lastStreamer", streamername);
         ComfyJS.Init(streamername);
-        status.innerText = `📡 Connected to channel: ${streamername}. Ready for requests.`;
+        updateSystemStatusText(`📡 Connected to channel: ${streamername}`);
         
         button.style.display = "none";
         input.style.display = "none";
@@ -644,7 +689,7 @@ function disconnectBot() {
     button.style.display = "block";
     input.style.display = "block";
     ComfyJS.Disconnect();
-    status.innerText = "System Status: Disconnected from Twitch. Bot idle.";
+    updateSystemStatusText("Disconnected from Twitch. Idle.");
     localStorage.removeItem("lastStreamer");
     
     twitchdisconnectbutton.style.display = "none";
@@ -700,6 +745,7 @@ if (localStorage.getItem("jukeboxDisplayType") === "audio-only") {
 toggleObsViewBtn.addEventListener("click", function() {
     document.body.classList.add("obs-widget-view");
     localStorage.setItem("jukeboxViewMode", "obs");
+    updateSystemStatusText(statusNode.innerText); // Refresh alignment logic
 });
 
 exitObsViewBtn.addEventListener("click", function() {
@@ -721,6 +767,8 @@ toggleAudioDisplayBtn.addEventListener("click", function() {
 
 window.onload = function () {
     connectStreamer();
+    // Kickstart the default fade configuration lifecycle for initial state message
+    updateSystemStatusText(statusNode.innerText);
 };
 </script>
 
