@@ -502,14 +502,15 @@ function init() {
         console.error("❌ [Init Error]: Failed to initialize Entropia Widget cleanly:", entropiaError);
     }
 	try {
-        if (typeof StreamJukebox !== 'undefined') {
-            window.streamJukeboxEngine = new StreamJukebox();
-        } else {
-            console.warn("⚠️ [Init Warning]: StreamJukebox class is not defined. Skipping instantiation.");
-        }
-    } catch (jukeboxError) {
-        console.error("❌ [Init Error]: Failed to initialize Jukebox Module cleanly:", jukeboxError);
-    }
+		if (typeof StreamJukebox !== 'undefined') {
+			window.streamJukeboxEngine = new StreamJukebox();
+			console.log("✅ Jukebox Instance:", window.streamJukeboxEngine); // ADD THIS
+		} else {
+			console.warn("⚠️ StreamJukebox class is not defined.");
+		}
+	} catch (jukeboxError) {
+		console.error("❌ Jukebox Init Error:", jukeboxError);
+	}
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 
     populateCustomDropdowns();
@@ -521,23 +522,30 @@ function init() {
 
 function injectAllWidgetCommands() {
     const activeWidgets = [
-        window.entropiaLogParser,
-        window.streamJukeboxEngine // 🟢 Added: Automatically scan and inject Jukebox commands on startup
-        // Future extensions sit here elegantly: window.miningTracker, window.pixelKitty
+        { name: "EntropiaParser", instance: window.entropiaLogParser },
+        { name: "StreamJukebox", instance: window.streamJukeboxEngine }
     ];
 
+    console.log("📡 [Command Registry]: Starting automated injection scan...");
+
     activeWidgets.forEach(widget => {
-        if (widget) {
-            injectWidgetCommands(widget);
+        if (widget.instance) {
+            console.log(`✅ [Command Registry]: Found active instance for ${widget.name}. Injecting...`);
+            injectWidgetCommands(widget.instance);
+        } else {
+            console.warn(`⚠️ [Command Registry]: Widget instance for ${widget.name} is null/undefined. Skipping.`);
         }
     });
+
+    console.log("🏁 [Command Registry]: Injection scan complete.");
 }
 
 function injectWidgetCommands(widgetInstance) {
     // Pass the local botSay utility directly into the initialization layer
+	console.log("🔍 Attempting to inject commands for:", widgetInstance);
     if (widgetInstance && typeof widgetInstance.getCommands === 'function') {
         const widgetCommands = widgetInstance.getCommands(botSay);
-        
+        console.log("📦 Commands received from widget:", widgetCommands);
         widgetCommands.forEach(cmd => {
             const lookupKey = cmd.name.toLowerCase().trim();
             
