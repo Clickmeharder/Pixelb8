@@ -23,10 +23,10 @@ export class StreamJukebox {
 
     // --- UI Notifications (Targets existing overlay elements) ---
     triggerVoteToast(username, currentCount, targetCount) {
-        // Appends to the overlay wrapper or a specific alert container
         const container = document.getElementById("overlay-wrapper");
         if (!container) return;
         const toast = document.createElement("div");
+        toast.className = "p8-toast";
         toast.style.cssText = "position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent); z-index: 1000; font-family: monospace; pointer-events: none;";
         toast.innerHTML = `👍 <strong>${username}</strong> liked this! <br> Progress: ${currentCount} / ${targetCount}`;
         container.appendChild(toast);
@@ -62,6 +62,7 @@ export class StreamJukebox {
                 events: {
                     'onReady': () => { 
                         this.ytPlayerReady = true; 
+                        this.applyButtonStyles();
                         this.bindControls(); 
                         this.renderFallbackList();
                         this.playNextSong(); 
@@ -72,8 +73,20 @@ export class StreamJukebox {
         };
     }
 
+    applyButtonStyles() {
+        const buttons = {
+            'jb-skip-btn': 'p8-btn',
+            'jb-clear-btn': 'p8-btn danger-btn',
+            'jb-search-add-btn': 'p8-btn',
+            'stg-toggle-jukebox-btn': 'p8-btn'
+        };
+        Object.keys(buttons).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.className = buttons[id];
+        });
+    }
+
     bindControls() {
-        // Widget Manager Controls
         document.getElementById('jb-skip-btn').onclick = () => this.skipCurrentSong();
         document.getElementById('jb-clear-btn').onclick = () => { this.queue = []; this.skipCurrentSong(); };
         
@@ -99,7 +112,8 @@ export class StreamJukebox {
         list.innerHTML = '';
         this.fallbackPlaylist.forEach((item) => {
             const div = document.createElement('div');
-            div.style.cssText = "padding: 5px; border-bottom: 1px solid #3f3f46; cursor: pointer; font-size: 11px;";
+            div.className = "option-item";
+            div.style.cssText = "padding: 6px 10px; border-bottom: 1px solid #3f3f46; cursor: pointer; font-size: 11px;";
             div.innerText = item.title;
             div.onclick = () => { this.currentTrackData = item; this.ytPlayer.loadVideoById(item.id); };
             list.appendChild(div);

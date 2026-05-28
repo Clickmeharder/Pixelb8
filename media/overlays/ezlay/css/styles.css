@@ -604,6 +604,13 @@ body.edit-mode .p8-widget:active {
     transition: 0.2s; 
 }
 
+/* #jukebox-widget .p8-btn {
+
+    background: var(--bg-color, #18181b);
+    border: 1px solid var(--border-color, #3f3f46);
+    color: var(--text-color, #fff);
+} */
+
 .save-btn { 
     background: var(--accent); 
     color: white; 
