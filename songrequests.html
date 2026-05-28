@@ -187,7 +187,7 @@ function onYouTubeIframeAPIReady() {
                 console.log("📺 Media Player instance ready for hot loads.");
             },
             'onStateChange': (event) => {
-                if (event.data === 0) { // Video ended
+                if (event.data === YT.PlayerState.ENDED) {
                     playNextSong();
                 }
             },
@@ -208,24 +208,13 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
         let explicitId = extractYouTubeId(cleanedInput);
         
         if (explicitId) {
-            songQueue.push({ user: user, title: "Direct Track Asset / Link", id: explicitId });
+            songQueue.push({ user: user, title: `Direct Link Asset (${explicitId})`, id: explicitId, isSearch: false });
             status.innerText = `🎵 Track ID [${explicitId}] queued by ${user}. Queue depth: ${songQueue.length}`;
             if (!isPlayingSong) playNextSong();
         } else {
-            status.innerText = `🔍 Searching YouTube for: "${cleanedInput}"...`;
-            try {
-                let trackId = await fetchYouTubeVideoIdFromKeywords(cleanedInput);
-                if (trackId) {
-                    songQueue.push({ user: user, title: cleanedInput, id: trackId });
-                    status.innerText = `✅ Queued: "${cleanedInput}" (Requested by ${user}). Queue depth: ${songQueue.length}`;
-                    if (!isPlayingSong) playNextSong();
-                } else {
-                    status.innerText = `❌ Could not resolve search terms for: "${cleanedInput}"`;
-                }
-            } catch (err) {
-                console.error("Search Gateway Error Exception:", err);
-                status.innerText = "⚠️ Search connection error. Check your network configuration.";
-            }
+            songQueue.push({ user: user, title: cleanedInput, id: cleanedInput, isSearch: true });
+            status.innerText = `✅ Queued Search Request: "${cleanedInput}" (Requested by ${user}). Queue depth: ${songQueue.length}`;
+            if (!isPlayingSong) playNextSong();
         }
     }
     
@@ -236,30 +225,6 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
     }
 };
 
-// High-reliability scraping layout interceptor using CORS-free pipeline
-async function fetchYouTubeVideoIdFromKeywords(keywords) {
-    try {
-        const cleanQuery = encodeURIComponent(keywords);
-        const response = await fetch(`https://corsproxy.io/?${encodeURIComponent('https://www.youtube.com/results?search_query=' + cleanQuery)}`);
-        const htmlText = await response.text();
-        
-        const regexMatch = htmlText.match(/"videoIds"\s*:\s*\[\s*"([^"]+)"/);
-        if (regexMatch && regexMatch[1]) {
-            console.log(`📡 Resolved "${keywords}" to Video ID: ${regexMatch[1]}`);
-            return regexMatch[1];
-        }
-        
-        const backupMatch = htmlText.match(/\/watch\?v=([a-zA-Z0-9_-]{11})/);
-        if (backupMatch && backupMatch[1]) {
-            console.log(`📡 Fallback resolved "${keywords}" to Video ID: ${backupMatch[1]}`);
-            return backupMatch[1];
-        }
-    } catch (e) {
-        console.error("Failed tracking video queries dynamically:", e);
-    }
-    return null;
-}
-
 function playNextSong() {
     if (songQueue.length === 0) {
         isPlayingSong = false;
@@ -267,7 +232,7 @@ function playNextSong() {
         return;
     }
 
-    if (!ytPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoById !== 'function') {
+    if (!ytPlayerReady || !ytPlayer) {
         console.warn("Player engine unprimed. Retrying in 500ms...");
         setTimeout(playNextSong, 500);
         return;
@@ -278,7 +243,16 @@ function playNextSong() {
     status.innerText = `🎶 Now Playing: "${nextSong.title}" (Requested by ${nextSong.user})`;
 
     try {
-        ytPlayer.loadVideoById(nextSong.id);
+        if (nextSong.isSearch) {
+            // Uses official search configuration natively, bypassing cross-origin restrictions completely
+            ytPlayer.loadPlaylist({
+                listType: 'search',
+                list: nextSong.id,
+                index: 0
+            });
+        } else {
+            ytPlayer.loadVideoById(nextSong.id);
+        }
     } catch(e) {
         console.error("Failed to load video into frame context:", e);
         isPlayingSong = false;
