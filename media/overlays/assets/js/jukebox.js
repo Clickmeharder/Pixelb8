@@ -23,6 +23,27 @@ export class StreamJukebox {
         console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
     }
 
+    // --- AUTOMATED COMMAND REGISTRY ---
+    getCommands(botSay) {
+        return [
+            {
+                name: "sr",
+                adminOnly: false,
+                execute: (user, message) => this.handleSongRequest(user, message, botSay)
+            },
+            {
+                name: "skipsong",
+                adminOnly: true,
+                execute: (user, message) => this.skipCurrentSong(botSay)
+            },
+            {
+                name: "likesong",
+                adminOnly: false,
+                execute: (user, message) => this.handleLikeSong(user, botSay)
+            }
+        ];
+    }
+
     // --- UI Helpers ---
     updateBadge(id, isActive) {
         const badge = document.getElementById(id);
@@ -101,7 +122,6 @@ export class StreamJukebox {
     }
 
     bindControls() {
-        // --- Buttons ---
         const skipBtn = document.getElementById('jb-skip-btn');
         if(skipBtn) skipBtn.onclick = () => this.skipCurrentSong((msg) => console.log(msg));
 
@@ -126,7 +146,6 @@ export class StreamJukebox {
             if (val) { this.handleAddFallback('System', val, (msg) => console.log(msg)); document.getElementById('jb-search-input').value = ''; }
         };
 
-        // --- Toggles ---
         const toggleCheckbox = document.getElementById('stg-toggle-jukebox-checkbox');
         if (toggleCheckbox) {
             toggleCheckbox.checked = this.isEnabled;
