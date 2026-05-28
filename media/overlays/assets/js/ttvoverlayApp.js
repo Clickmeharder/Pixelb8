@@ -2013,6 +2013,8 @@ function initTimerEngine() {
     const listContainer = document.getElementById("active-timers-list");
     if (listContainer && !listContainer.dataset.delegated) {
         listContainer.dataset.delegated = "true";
+        
+        // 🟢 FIX: Set capture to true so this runs completely ahead of global CMS dragging loops
         listContainer.addEventListener("click", (e) => {
             const btn = e.target.closest("button[data-action]");
             if (!btn) return;
@@ -2031,9 +2033,12 @@ function initTimerEngine() {
             if (action === "reset") resetTimerInstance(targetId);
             if (action === "split") splitTimerInstance(targetId);
             
-            // 🟢 FIX: Map the 'delete' action to your actual removal function!
-            if (action === "delete") stopTimerInstance(targetId);
-        });
+            // 🟢 FIX MATCH: Now catches both string variations securely 
+            if (action === "delete" || action === "stop") {
+                console.log(`❌ Executing removal for timer instance ID: ${targetId}`);
+                stopTimerInstance(targetId);
+            }
+        }, { capture: true }); 
     }
 }
 function updateTimerStyles() {
@@ -2225,6 +2230,7 @@ function renderActiveTimersUI() {
         row.className = "timer-control-row";
         row.style.cssText = "display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; background:rgba(0,0,0,0.2); padding:4px; border-radius:4px;";
         
+        // 🟢 FIX MATCH: Switched data-action to "delete" to perfectly route event data rules
         row.innerHTML = `
             <span style="max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:${t.running ? 'var(--accent)' : '#a1a1aa'}">
                 ${t.type === 'stopwatch' ? '⏱️' : '⏳'} ${t.label} (${formatTimeDigits(rem)})
@@ -2234,7 +2240,7 @@ function renderActiveTimersUI() {
                 <button type="button" data-action="pause" data-id="${t.id}" title="Pause" style="background:none; border:none; cursor:pointer;">⏸️</button>
                 <button type="button" data-action="reset" data-id="${t.id}" title="Reset" style="background:none; border:none; cursor:pointer;">🔄</button>
                 <button type="button" data-action="split" data-id="${t.id}" title="Split Lap" style="background:none; border:none; cursor:pointer; ${t.type === 'countdown' ? 'display:none;' : ''}">✂️</button>
-                <button type="button" data-action="stop" data-id="${t.id}" title="Remove" style="background:none; border:none; cursor:pointer;">❌</button>
+                <button type="button" data-action="delete" data-id="${t.id}" title="Remove" style="background:none; border:none; cursor:pointer;">❌</button>
             </div>
         `;
         if (listContainer) listContainer.appendChild(row);
