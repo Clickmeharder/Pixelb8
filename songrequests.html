@@ -82,6 +82,54 @@
     }
     button:hover { background: #ff6b81; }
     
+    /* Interactive Fallback Manager Panel */
+    .fallback-manager-panel {
+        background: #222;
+        border: 1px solid #3498db;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    .fallback-list {
+        max-height: 200px;
+        overflow-y: auto;
+        margin-top: 8px;
+        background: #111;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #333;
+    }
+    .fallback-track-item {
+        display: block;
+        width: 100%;
+        background: #1a1a1a;
+        color: #3498db;
+        border: 1px solid #2c3e50;
+        padding: 8px 12px;
+        text-align: left;
+        margin-bottom: 6px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: background 0.15s ease;
+    }
+    .fallback-track-item:hover {
+        background: #2c3e50;
+        color: #fff;
+    }
+    .fallback-empty-hint {
+        color: #555;
+        font-style: italic;
+        font-size: 13px;
+        padding: 10px;
+        text-align: center;
+    }
+
     /* Standard Base Dashboard View Status (Normal size) */
     #status {
         color: lime;
@@ -243,6 +291,7 @@
     }
     body.obs-widget-view h1,
     body.obs-widget-view .dashboard-panel,
+    body.obs-widget-view .fallback-manager-panel,
     body.obs-widget-view #comfycontrolBox,
     body.obs-widget-view .hint-box,
     body.obs-widget-view .video-monitor-panel > label {
@@ -262,21 +311,20 @@
         z-index: 1;
     }
     
-    /* ONLY make status this big, overlapping, and absolute in OBS Widget View */
     body.obs-widget-view #status {
         margin: 0;
-        margin-top: -85px; /* Negative margin pulls it up over the video player matrix */
+        margin-top: -85px; 
         background: rgba(0, 0, 0, 0.85);
         padding: 20px 25px;
         border-radius: 8px;
         border-left: 12px solid #ff4757;
-        font-size: 42px; /* Massive size optimized for tiny OBS source scenes */
+        font-size: 42px; 
         font-weight: 900;
         line-height: 1.3;
         box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         z-index: 5;
         position: relative;
-        pointer-events: none; /* Allows click-through interaction on the player underneath */
+        pointer-events: none; 
     }
 
     /* Audio Only Operational System Tweaks */
@@ -289,7 +337,7 @@
         left: -9999px;
     }
     body.audio-only-mode.obs-widget-view #status {
-        margin-top: 0px !important; /* Reset overlap pull if video frame is hidden */
+        margin-top: 0px !important; 
     }
 </style>
 
@@ -318,6 +366,11 @@
         </div>
 
         <button id="browserSkipBtn" style="background: #eccc68; color: #111; width: 100%; margin-top: 0px;">⏭️ Skip Current Song</button>
+    </div>
+
+    <div class="fallback-manager-panel">
+        <label>💾 Fallback Rotation Pool (Click track to play instantly)</label>
+        <div id="fallbackListContainer" class="fallback-list"></div>
     </div>
     
     <div id="comfycontrolBox">
@@ -367,7 +420,6 @@ const VOTE_REQUIREMENT = 2;
 let currentTrackVotes = new Set();
 let currentTrackData = null; 
 
-// --- INTELLIGENT TEXT TRUNCATION & TIMED FADE ENGINE ---
 function updateSystemStatusText(rawText) {
     if (!rawText) return;
     
@@ -376,17 +428,62 @@ function updateSystemStatusText(rawText) {
         processedText = processedText.substring(0, 27) + "...";
     }
     
-    // Revive visibility immediately on message update
     statusNode.innerText = processedText;
     statusNode.style.opacity = "1";
     
-    // Clear out any stale pending fade operations
     if (statusFadeTimeout) clearTimeout(statusFadeTimeout);
     
-    // Set smooth transition downward after 15 seconds
     statusFadeTimeout = setTimeout(() => {
         statusNode.style.opacity = "0.1";
     }, 15000);
+}
+
+// Render routine for interactive fallback list items
+function refreshFallbackPlaylistUI() {
+    const listContainer = document.getElementById("fallbackListContainer");
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = "";
+    
+    if (fallbackPlaylist.length === 0) {
+        listContainer.innerHTML = `<div class="fallback-empty-hint">No tracks in fallback rotation yet. Use !addfallback or upvote song requests!</div>`;
+        return;
+    }
+    
+    fallbackPlaylist.forEach((track, index) => {
+        const itemBtn = document.createElement("button");
+        itemBtn.className = "fallback-track-item";
+        itemBtn.title = `Click to play: ${track.title}`;
+        itemBtn.innerText = `${index + 1}. ${track.title}`;
+        
+        itemBtn.addEventListener("click", () => {
+            playSpecificTrack(track);
+        });
+        
+        listContainer.appendChild(itemBtn);
+    });
+}
+
+function playSpecificTrack(track) {
+    if (!ytPlayerReady || !ytPlayer) {
+        updateSystemStatusText("⚠️ Player engine not ready yet.");
+        return;
+    }
+    isPlayingSong = true;
+    currentTrackVotes.clear();
+    currentTrackData = { id: track.id, title: track.title };
+    
+    updateSystemStatusText(`🎯 Manual Play: "${track.title}"`);
+    try {
+        const mainIframe = document.querySelector('#videoWrapper iframe');
+        if (mainIframe) {
+            mainIframe.setAttribute('allow', 'autoplay; encrypted-media; compute-pressure');
+        }
+        ytPlayer.loadVideoById(track.id);
+    } catch(e) {
+        updateSystemStatusText("❌ Error loading manual selection.");
+        isPlayingSong = false;
+    }
 }
 
 function isStreamerAndAuthorize(user, command) {
@@ -425,7 +522,10 @@ function onYouTubeIframeAPIReady() {
             'onReady': () => {
                 ytPlayerReady = true;
                 updateSystemStatusText(`Ready. Pool: ${fallbackPlaylist.length} tracks.`);
-                if (!isPlayingSong) playNextSong();
+                // Force a check right away instead of hanging or logging an error screen on initial boot
+                if (!isPlayingSong) {
+                    playNextSong();
+                }
             },
             'onStateChange': (event) => {
                 if (event.data === YT.PlayerState.ENDED) {
@@ -503,6 +603,7 @@ function saveFallbackItem(item, originUser) {
         fallbackPlaylist.push(item);
         localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
         updateSystemStatusText(`💾 Saved Fallback: "${item.title}"`);
+        refreshFallbackPlaylistUI();
         triggerMilestoneOverlay(item.title);
     } else {
         updateSystemStatusText(`💡 Track already in fallback.`);
@@ -560,7 +661,7 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
                     fallbackPlaylist.push({ id: currentTrackData.id, title: currentTrackData.title });
                     localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
                     updateSystemStatusText(`🔥 Threshold Hit: "${currentTrackData.title}"`);
-                    
+                    refreshFallbackPlaylistUI();
                     triggerMilestoneOverlay(currentTrackData.title);
                 }
             }
@@ -745,7 +846,7 @@ if (localStorage.getItem("jukeboxDisplayType") === "audio-only") {
 toggleObsViewBtn.addEventListener("click", function() {
     document.body.classList.add("obs-widget-view");
     localStorage.setItem("jukeboxViewMode", "obs");
-    updateSystemStatusText(statusNode.innerText); // Refresh alignment logic
+    updateSystemStatusText(statusNode.innerText); 
 });
 
 exitObsViewBtn.addEventListener("click", function() {
@@ -767,7 +868,7 @@ toggleAudioDisplayBtn.addEventListener("click", function() {
 
 window.onload = function () {
     connectStreamer();
-    // Kickstart the default fade configuration lifecycle for initial state message
+    refreshFallbackPlaylistUI();
     updateSystemStatusText(statusNode.innerText);
 };
 </script>
