@@ -2026,24 +2026,29 @@ function initTimerEngine() {
     renderActiveTimersUI();
     
     // Set up a single robust delegated event listener for row control actions
-    const listContainer = document.getElementById("active-timers-list");
-    if (listContainer && !listContainer.dataset.delegated) {
-        listContainer.dataset.delegated = "true";
-        listContainer.addEventListener("click", (e) => {
-            const btn = e.target.closest("button[data-action]");
-            if (!btn) return;
-            
-            e.stopPropagation();
-            const action = btn.getAttribute("data-action");
-            const targetId = btn.getAttribute("data-id");
-            
-            if (action === "start") startTimerInstance(targetId);
-            if (action === "pause") pauseTimerInstance(targetId);
-            if (action === "reset") resetTimerInstance(targetId);
-            if (action === "split") splitTimerInstance(targetId);
-            if (action === "stop")  stopTimerInstance(targetId);
-        });
-    }
+	const listContainer = document.getElementById("active-timers-list");
+	if (listContainer && !listContainer.dataset.delegated) {
+		listContainer.dataset.delegated = "true";
+		listContainer.addEventListener("click", (e) => {
+			const btn = e.target.closest("button[data-action]");
+			if (!btn) return;
+			
+			e.stopPropagation();
+			e.preventDefault(); // Prevent any parent window panel propagation bugs
+			
+			const action = btn.getAttribute("data-action");
+			const targetId = btn.getAttribute("data-id");
+
+			if (action === "start") startTimerInstance(targetId);
+			if (action === "pause") pauseTimerInstance(targetId);
+			if (action === "reset") resetTimerInstance(targetId);
+			if (action === "split") splitTimerInstance(targetId);
+			
+			// FIX: Added explicit intercept mapping to route the "delete" action attribute
+			// to your actual delete cleanup method.
+			if (action === "delete") stopTimerInstance(targetId); 
+		});
+	}
 }
 
 function updateTimerStyles() {
