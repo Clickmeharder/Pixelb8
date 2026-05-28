@@ -76,36 +76,26 @@
 			<div id="manifest-grid"></div>
 		</div>
 		
-		<div id="jukebox-widget-controls" class="collapsible-section collapsed">
-			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-				<span>🎵 Song Request Jukebox</span>
-				<span class="collapse-icon">▼</span>
+		<div id="jukebox-widget" class="p8-widget" style="display: none; width: 300px; position: absolute; background: rgba(15,15,15,0.95); border: 1px solid var(--accent); border-radius: 4px; padding: 10px; color: #fff; font-family: monospace; z-index: 100;">
+			<div class="widget-drag-handle" style="cursor: move; font-size: 11px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--accent); display: flex; justify-content: space-between; user-select: none;">
+				<span>🎵 STREAM JUKEBOX WIDGET</span>
+				<span style="opacity: 0.5;">[DRAG]</span>
 			</div>
-			<div class="collapsible-content">
-				<div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
-					<div style="display: flex; justify-content: space-between; align-items: center;">
-						<span>Enabled</span>
-						<button id="stg-toggle-jukebox-btn" class="p8-btn">TOGGLE</button>
-					</div>
-					<label>Votes to add to Fallback (0 to disable):</label>
-					<input type="number" id="jb-vote-req-input" class="p8-input" value="2">
-				</div>
-
-				<div style="display: flex; gap: 4px; margin-bottom: 10px;">
-					<input type="text" id="jb-search-input" class="p8-input" placeholder="Search or URL...">
-					<button id="jb-search-add-btn" class="p8-btn">ADD</button>
-				</div>
-
-				<div class="collapsible-section collapsed" style="border: 1px solid #3f3f46;">
-					<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-						<span>📋 Fallback Playlist</span>
-						<span class="collapse-icon">▼</span>
-					</div>
-					<div id="jb-fallback-list" class="collapsible-content" style="max-height: 150px; overflow-y: auto;">
-						</div>
-				</div>
+			
+			<div id="jukebox-video-wrapper" style="width: 100%; height: 168px; margin-top: 8px; background: #000; border-radius: 2px; overflow: hidden;">
+				<div id="player"></div>
 			</div>
-		</div>
+
+			<div style="margin-top: 8px; font-size: 12px; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 2px;">
+				<div id="jb-current-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: var(--accent);">No Track Loaded</div>
+				<div id="jb-status-text" style="font-size: 10px; color: #a1a1aa; margin-top: 2px;">Status: Standby</div>
+			</div>
+			
+			<div style="display: flex; gap: 4px; margin-top: 6px;">
+				<button type="button" id="jb-skip-btn" style="flex: 1; font-size: 11px; padding: 4px; background: #27272a; border: 1px solid #3f3f46; color: #fff; cursor: pointer; border-radius: 2px;">Skip ⏭️</button>
+				<button type="button" id="jb-clear-btn" style="font-size: 11px; padding: 4px; background: rgba(239,68,68,0.15); border: 1px solid #ef4444; color: #ef4444; cursor: pointer; border-radius: 2px;">Clear Queue 🗑️</button>
+			</div>
+		</div>	
     </div>
 
     <div id="p8-ctx-menu">
@@ -489,18 +479,27 @@
 				<span class="collapse-icon">▼</span>
 			</div>
 			<div class="collapsible-content">
-				<div style="display: flex; justify-content: space-between; align-items: center; background: #1c1c1f; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #3f3f46;">
-					<div style="display: flex; flex-direction: column; gap: 2px;">
-						<span style="font-size: 12px; color: #f4f4f5; font-weight: 500;">Jukebox Module Status</span>
-						<span id="stg-jukebox-status-badge" style="font-size: 10px; color: #71717a; font-weight: bold; letter-spacing: 0.5px;">DISABLED</span>
+				<div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
+					<div style="display: flex; justify-content: space-between; align-items: center;">
+						<span>Enabled</span>
+						<button id="stg-toggle-jukebox-btn" class="p8-btn">TOGGLE</button>
 					</div>
-					<button type="button" id="stg-toggle-jukebox-btn" class="p8-btn" style="padding: 6px 14px; background: rgb(14, 165, 233); border: none; cursor: pointer; font-size: 11px; font-weight: bold; border-radius: 4px; width: auto; min-width: 80px;">TOGGLE</button>
+					<label>Votes to add to Fallback (0 to disable):</label>
+					<input type="number" id="jb-vote-req-input" class="p8-input" value="2">
 				</div>
 
-				<div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">🎛️ Manual Engine Controls</div>
-				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-					<button type="button" id="jb-skip-btn" class="p8-btn save-btn" style="padding: 8px; background: #27272a; border: 1px solid #3f3f46; font-size: 11px;">⏭️ SKIP TRACK</button>
-					<button type="button" id="jb-clear-btn" class="p8-btn alt-btn" style="padding: 8px; background: #991b1b; font-size: 11px;">🗑️ CLEAR QUEUE</button>
+				<div style="display: flex; gap: 4px; margin-bottom: 10px;">
+					<input type="text" id="jb-search-input" class="p8-input" placeholder="Search or URL...">
+					<button id="jb-search-add-btn" class="p8-btn">ADD</button>
+				</div>
+
+				<div class="collapsible-section collapsed" style="border: 1px solid #3f3f46;">
+					<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
+						<span>📋 Fallback Playlist</span>
+						<span class="collapse-icon">▼</span>
+					</div>
+					<div id="jb-fallback-list" class="collapsible-content" style="max-height: 150px; overflow-y: auto;">
+						</div>
 				</div>
 			</div>
 		</div>
