@@ -28,7 +28,6 @@ export class StreamJukebox {
         }
 
         window.onYouTubeIframeAPIReady = () => {
-            // Target the existing 'player' div inside your widget container
             this.ytPlayer = new YT.Player('player', {
                 height: '100%',
                 width: '100%',
@@ -36,11 +35,12 @@ export class StreamJukebox {
                     'autoplay': 1, 
                     'controls': 1, 
                     'enablejsapi': 1,
-                    'fs': 0 // Disable fullscreen button
+                    'fs': 0 
                 },
                 events: {
                     'onReady': () => { 
                         this.ytPlayerReady = true; 
+                        this.bindControls(); // Bind after player is ready
                         this.playNextSong(); 
                     },
                     'onStateChange': (e) => { 
@@ -51,10 +51,31 @@ export class StreamJukebox {
         };
     }
 
+    /**
+     * Self-contained event binding. 
+     * Finds all buttons with matching IDs and wires them to class methods.
+     */
+    bindControls() {
+        const skipBtns = document.querySelectorAll('#jb-skip-btn');
+        const clearBtns = document.querySelectorAll('#jb-clear-btn');
+
+        skipBtns.forEach(btn => {
+            btn.onclick = () => this.skipCurrentSong();
+        });
+
+        clearBtns.forEach(btn => {
+            btn.onclick = () => {
+                this.queue = [];
+                this.skipCurrentSong();
+            };
+        });
+
+        console.log("🎵 [Module]: Jukebox controls bound to DOM.");
+    }
+
     // --- Widget Control for Settings UI ---
     setWidgetActiveState(state) {
         this.isEnabled = state;
-        // Toggle the visibility of the widget container, not the player node directly
         const widget = document.getElementById('jukebox-widget');
         if (widget) widget.style.display = state ? "block" : "none";
         

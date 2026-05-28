@@ -2655,7 +2655,6 @@ function bindBitManagerEvents() {
 // ==========================================
 // --- MAIN EVENT LISTENER BINDING ENGINE ---
 // ==========================================
-
 function bindEvents() {
     const SCOPES = "chat:read chat:edit channel:read:redemptions";
 
@@ -2877,6 +2876,7 @@ function bindEvents() {
 			badge.style.color = settings.jukeboxWidgetEnabled ? "var(--accent)" : "#71717a";
 		}
 	}
+
 }
 
 init();
