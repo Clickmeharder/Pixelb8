@@ -2312,54 +2312,82 @@ const PANEL_NAVIGATION_MAPS = [
     }
 ];
 // Maps HTML inputs/buttons to reactive parameters, executing automated mutations and context syncs
-const BOOLEAN_TOGGLE_MAPS = [
-    { id: "settings-toggle-master-alerts", type: "change", valuePath: "checked", invert: true, assignTo: (val) => { alertHidden = val; }, onSync: () => syncAlertVisibilityState() },
-    { id: "mgr-toggle-alert-btn",          type: "click",  valuePath: null,      invert: false, assignTo: () => { alertHidden = !alertHidden; }, onSync: () => syncAlertVisibilityState() },
-    { id: "settings-toggle-rewards",       type: "change", valuePath: "checked", invert: false, assignTo: (val) => { rewardsEnabled = val; }, onSync: () => saveSettings() },
-    { id: "settings-toggle-bits",          type: "change", valuePath: "checked", invert: false, assignTo: (val) => { bitsEnabled = val; }, onSync: () => saveSettings() },
-    { id: "mgr-toggle-bits-btn",           type: "click",  valuePath: null,      invert: false, assignTo: () => { bitsEnabled = !bitsEnabled; }, onSync: () => saveSettings() },
+// Ensure this function exists globally in overlayapp.js
+function syncAllToggleUI() {
+    const s = typeof settings !== 'undefined' ? settings : {};
     
-    // 🟢 ADDED: Stream Jukebox Engine Switch Row (Matches HTML id="stg-toggle-jukebox-btn")
-	{ 
-		id: "stg-toggle-jukebox-btn", 
-		type: "click", 
-		valuePath: null, 
-		invert: false, 
-		assignTo: () => { 
-			if (typeof settings !== 'undefined') {
-				settings.jukeboxWidgetEnabled = !settings.jukeboxWidgetEnabled;
-			}
-		}, 
-		onSync: () => {
-			saveSettings();
-			
-			const isEnabled = settings.jukeboxWidgetEnabled;
-			
-			// 1. Update the Settings Badge
-			const badge = document.getElementById("stg-jukebox-status-badge");
-			if (badge) {
-				badge.className = `toggle-status-badge ${isEnabled ? 'status-enabled' : 'status-disabled'}`;
-				badge.innerText = isEnabled ? "ON" : "OFF";
-			}
-			
-			// 2. Sync state with your decoupled jukebox ES Module instance
-			if (window.streamJukeboxEngine) {
-				window.streamJukeboxEngine.setWidgetActiveState(isEnabled);
-			}
-			
-			// 3. NEW: Hide/Show the Widget Manager Controls
-			// This targets the container that holds the Jukebox buttons in the Widgets Manager
-			const widgetControls = document.getElementById("jukebox-widget-controls");
-			if (widgetControls) {
-				// Set display to 'none' if disabled, otherwise 'block' or 'flex' depending on your CSS
-				widgetControls.style.display = isEnabled ? "block" : "none";
-				
-				// Optional: Add a visual indicator in the manager that it's offline
-				widgetControls.style.opacity = isEnabled ? "1" : "0.5";
-				widgetControls.style.pointerEvents = isEnabled ? "auto" : "none";
-			}
-		}
-	}
+    // Helper to update specific badges
+    const updateBadge = (id, isActive) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
+            el.innerText = isActive ? "ON" : "OFF";
+        }
+    };
+
+    // 1. Master Alerts
+    updateBadge("stg-master-status-badge", !alertHidden); // Assuming alertHidden is inverted
+    updateBadge("mgr-alert-status-badge", !alertHidden);
+
+    // 2. Rewards
+    updateBadge("stg-rewards-status-badge", s.rewardsEnabled);
+    updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
+
+    // 3. Bits
+    updateBadge("stg-bits-status-badge", s.bitsEnabled);
+    updateBadge("mgr-bits-status-badge", s.bitsEnabled);
+
+    // 4. Jukebox
+    updateBadge("stg-jukebox-status-badge", s.jukeboxWidgetEnabled);
+    const jbControls = document.getElementById("jukebox-widget-controls");
+    if (jbControls) {
+        jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
+        jbControls.style.opacity = s.jukeboxWidgetEnabled ? "1" : "0.5";
+        jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
+    }
+
+    // Sync Engine States
+    if (window.streamJukeboxEngine) {
+        window.streamJukeboxEngine.setWidgetActiveState(s.jukeboxWidgetEnabled);
+    }
+}
+
+const BOOLEAN_TOGGLE_MAPS = [
+    { 
+        id: "settings-toggle-master-alerts", type: "change", valuePath: "checked", invert: true, 
+        assignTo: (val) => { alertHidden = val; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "mgr-toggle-alert-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { alertHidden = !alertHidden; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "stg-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { settings.rewardsEnabled = !settings.rewardsEnabled; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "mgr-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { settings.rewardsEnabled = !settings.rewardsEnabled; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "stg-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { settings.bitsEnabled = !settings.bitsEnabled; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "mgr-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { settings.bitsEnabled = !settings.bitsEnabled; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "stg-toggle-jukebox-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { settings.jukeboxWidgetEnabled = !settings.jukeboxWidgetEnabled; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    }
 ];
 
 // Straight utility mapping dictionary for clean event routing execution pipelines
@@ -2413,7 +2441,35 @@ function closeContextMenu() {
 // ==========================================
 // --- REWARDS MANAGER CONTROL ENGINE ---
 // ==========================================
+function syncAllToggleUI() {
+    const s = typeof settings !== 'undefined' ? settings : {};
 
+    // Helper to update specific badges
+    const updateBadge = (id, isActive) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
+            el.innerText = isActive ? "ON" : "OFF";
+        }
+    };
+
+    // 1. Sync Master Alert
+    updateBadge("stg-master-status-badge", s.masterAlertsEnabled);
+    updateBadge("mgr-alert-status-badge", s.masterAlertsEnabled); // Matches ID in Rewards Manager
+
+    // 2. Sync Rewards
+    updateBadge("stg-rewards-status-badge", s.rewardsEnabled);
+    updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
+
+    // 3. Sync Bits
+    updateBadge("stg-bits-status-badge", s.bitsEnabled);
+    updateBadge("mgr-bits-status-badge", s.bitsEnabled);
+
+    // 4. Sync Jukebox
+    updateBadge("stg-jukebox-status-badge", s.jukeboxWidgetEnabled);
+    const jbControls = document.getElementById("jukebox-widget-controls");
+    if (jbControls) jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
+}
 function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");
     if (!rewardsPanel) return;
@@ -2879,28 +2935,12 @@ function bindEvents() {
 
     if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
     if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
-	if (window.streamJukeboxEngine && typeof settings !== 'undefined') {
-		const isEnabled = settings.jukeboxWidgetEnabled;
-		
-		// 1. Sync the engine state
-		window.streamJukeboxEngine.setWidgetActiveState(isEnabled);
-		
-		// 2. Sync the visual badge
-		const badge = document.getElementById("stg-jukebox-status-badge");
-		if (badge) {
-			badge.className = `toggle-status-badge ${isEnabled ? 'status-enabled' : 'status-disabled'}`;
-			badge.innerText = isEnabled ? "ON" : "OFF";
-		}
-		
-		// 3. Sync the Widget Manager UI visibility
-		const widgetControls = document.getElementById("jukebox-widget-controls");
-		if (widgetControls) {
-			widgetControls.style.display = isEnabled ? "block" : "none";
-		}
-	}
-
+    
+    // NEW: Unified State Sync
+    if (typeof syncAllToggleUI === "function") {
+        syncAllToggleUI();
+    }
 }
-
 init();
 
 
