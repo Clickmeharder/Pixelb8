@@ -68,7 +68,7 @@ modes:
 // import { EntropiaWidget } from './entropia-widget.js';
 import { EntropiaWidget } from './entropia-widget-refactored.js';
 import { StreamJukebox } from './jukebox.js'; // 🟢 Added Jukebox Engine Module
-console.log("🚀 [Module Load]: entropia-widget.js version 0.002 imported successfully without dependencies!");
+console.log("🚀 [Module Load]: entropia-widget-refactored.js version 0.002 imported successfully without dependencies!");
 console.log("🚀 [Module Load]: jukebox.js version 1.000 imported successfully!");
 
 // --- STORAGE & SETTINGS INITIALIZATION ---
