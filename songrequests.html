@@ -82,20 +82,22 @@
     }
     button:hover { background: #ff6b81; }
     
-    /* --- SCALED UP HIGH-VISIBILITY STATUS BAR --- */
+    /* --- ULTRA-SIZED HIGH-VISIBILITY STATUS BAR --- */
     #status {
         color: lime;
         font-family: monospace;
-        background: #050505;
-        padding: 20px;
-        border-radius: 6px;
-        border-left: 6px solid #ff4757;
+        background: #000000;
+        padding: 30px;
+        border-radius: 8px;
+        border-left: 12px solid #ff4757;
         margin: 20px 0;
         text-align: left;
         word-wrap: break-word;
-        font-size: 22px; /* Amplified text size for easy stream reading */
-        font-weight: bold;
-        line-height: 1.4;
+        word-break: break-word; /* Force stack titles inside narrow containers */
+        font-size: 42px; /* Massive size optimized for shrunk layout corner boxes */
+        font-weight: 900;
+        line-height: 1.3;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
     }
     
     .video-monitor-panel {
@@ -128,58 +130,61 @@
         line-height: 1.4;
     }
 
-    /* --- SCALED UP VIBRANT POPUP ALERTS OVERLAY --- */
+    /* --- GIGANTIC VIBRANT POPUP ALERTS OVERLAY Matrix --- */
     .alert-toast-container {
         position: absolute;
-        top: 20px;
-        right: 20px;
+        top: 25px;
+        left: 25px;
+        right: 25px; /* Allow stretch across full panel width if shrunk */
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 20px;
         z-index: 9999;
         pointer-events: none;
-        max-width: 480px; /* Wider footprint to fit larger text gracefully */
     }
     .vote-toast {
         background: rgba(46, 204, 113, 0.98);
         color: #fff;
-        padding: 15px 25px;
-        border-radius: 8px;
-        font-weight: bold;
-        font-size: 20px; /* Significantly increased size */
+        padding: 25px 35px;
+        border-radius: 12px;
+        font-weight: 900;
+        font-size: 36px; /* Drastically bumped size for clarity */
         text-align: left;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.7);
-        border-left: 8px solid #27ae60;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+        border-left: 15px solid #27ae60;
         display: flex;
         align-items: center;
-        gap: 15px;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        gap: 25px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+        word-wrap: break-word;
+        word-break: break-word;
         animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.4s ease 4.6s forwards;
     }
     .vote-toast .toast-thumb {
-        font-size: 28px; /* Extra large emoji */
+        font-size: 48px; /* High visibility scaling for interaction emoji */
     }
     .milestone-popup-announcement {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: rgba(241, 196, 15, 0.98);
+        background: rgba(241, 196, 15, 0.99);
         color: #111;
-        padding: 25px 35px;
-        border-radius: 12px;
-        font-size: 24px; /* Big center-screen takeover font */
+        padding: 35px 45px;
+        border-radius: 16px;
+        font-size: 40px; /* Big center-screen takeover frame */
         font-weight: 900;
         text-transform: uppercase;
-        box-shadow: 0 12px 40px rgba(0,0,0,0.9);
-        border: 3px solid #fff;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.95);
+        border: 4px solid #fff;
         z-index: 10000;
         pointer-events: none;
         text-align: center;
-        width: 85%;
-        max-width: 550px;
+        width: 90%;
         letter-spacing: 0.5px;
-        line-height: 1.4;
+        line-height: 1.3;
+        word-wrap: break-word;
+        word-break: break-word;
         animation: popInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.5s ease 5.5s forwards;
     }
     @keyframes slideInRight {
@@ -191,7 +196,7 @@
         to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     }
     @keyframes fadeOut {
-        to { opacity: 0; transform: translateY(-15px); }
+        to { opacity: 0; transform: translateY(-25px); }
     }
 
     /* Floating Navigation HUD specific to OBS Overlays */
@@ -201,18 +206,18 @@
         top: 0;
         left: 0;
         right: 0;
-        background: rgba(26, 26, 26, 0.85);
+        background: rgba(26, 26, 26, 0.95);
         backdrop-filter: blur(4px);
-        padding: 6px 12px;
+        padding: 8px 16px;
         z-index: 9999;
         text-align: right;
-        border-bottom: 1px solid #333;
+        border-bottom: 2px solid #333;
     }
     #obsNavigationHud button {
         width: auto;
         margin: 0;
-        padding: 6px 12px;
-        font-size: 11px;
+        padding: 8px 16px;
+        font-size: 14px;
     }
 
     /* Dynamic UI Modifiers for OBS Browser View Mode */
@@ -231,7 +236,7 @@
         background: transparent !important;
         box-shadow: none;
         border-radius: 0;
-        padding: 45px 10px 10px 10px; 
+        padding: 60px 15px 15px 15px; 
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -256,8 +261,8 @@
         margin-top: 0;
     }
     body.obs-widget-view #status {
-        margin: 12px 0 0 0;
-        background: rgba(0, 0, 0, 0.85);
+        margin: 15px 0 0 0;
+        background: rgba(0, 0, 0, 0.9);
     }
 
     /* Audio Only Operational System Tweaks */
@@ -379,7 +384,7 @@ function onYouTubeIframeAPIReady() {
         events: {
             'onReady': () => {
                 ytPlayerReady = true;
-                status.innerText = `Status: Player ready. Fallback pool size: ${fallbackPlaylist.length} tracks.`;
+                status.innerText = `Status: Player ready. Fallback pool: ${fallbackPlaylist.length} tracks.`;
                 if (!isPlayingSong) playNextSong();
             },
             'onStateChange': (event) => {
@@ -412,7 +417,7 @@ async function fetchTrackIdFromKeywords(keywords) {
                 return { id: results[0].videoId, title: results[0].title || keywords };
             }
         } catch (e) {
-            console.warn(`Node failover encounter layout matrix routing...`);
+            console.warn(`Node failover routing event matrix encounter...`);
         }
     }
     return null;
@@ -457,24 +462,24 @@ function saveFallbackItem(item, originUser) {
     if (!fallbackPlaylist.some(element => element.id === item.id)) {
         fallbackPlaylist.push(item);
         localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
-        status.innerText = `💾 Saved to Fallback: "${item.title}" (${originUser}). Pool size: ${fallbackPlaylist.length}`;
+        status.innerText = `💾 Saved to Fallback: "${item.title}" (${originUser}). Pool: ${fallbackPlaylist.length}`;
         triggerMilestoneOverlay(item.title);
     } else {
         status.innerText = `💡 Track "${item.title}" already inside fallback registry.`;
     }
 }
 
-// --- HIGH-VISIBILITY INJECTION INTERFACE ENGINE ---
+// --- ULTRA-SIZE INJECTION ENGINE INTERFACE ---
 function triggerVoteToastNotification(username, currentCount, targetCount) {
     const container = document.getElementById("alertToastContainer");
     if (!container) return;
 
     const toast = document.createElement("div");
     toast.className = "vote-toast";
-    toast.innerHTML = `<span class="toast-thumb">👍</span> <div><strong>${username}</strong> liked this song!<br><span style="font-size:16px; opacity:0.9;">Progress: ${currentCount} / ${targetCount} votes</span></div>`;
+    toast.innerHTML = `<span class="toast-thumb">👍</span> <div><strong>${username}</strong> liked this song!<br><span style="font-size:26px; opacity:0.95; font-weight:bold;">Progress: ${currentCount} / ${targetCount} votes</span></div>`;
     
     container.appendChild(toast);
-    setTimeout(() => { toast.remove(); }, 5000); // Expanded view lifetime slightly for tracking
+    setTimeout(() => { toast.remove(); }, 5000);
 }
 
 function triggerMilestoneOverlay(songTitle) {
@@ -483,10 +488,10 @@ function triggerMilestoneOverlay(songTitle) {
 
     const popup = document.createElement("div");
     popup.className = "milestone-popup-announcement";
-    popup.innerHTML = `🔥 Community Choice! <br><span style="font-size:16px; color:#fff; display:block; margin-top:8px; text-transform:none; font-weight:normal;">"${songTitle}" reached the threshold and hit the Fallback Playlist!</span>`;
+    popup.innerHTML = `🔥 Community Choice! <br><span style="font-size:26px; color:#fff; display:block; margin-top:12px; text-transform:none; font-weight:bold;">"${songTitle}" reached the threshold and hit the Fallback Playlist!</span>`;
     
     wrapper.appendChild(popup);
-    setTimeout(() => { popup.remove(); }, 6000);
+    setTimeout(() => { popup.remove(); }, 6500);
 }
 
 ComfyJS.onCommand = async (user, command, message, flags, extra) => {
@@ -509,7 +514,7 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
                 if (!fallbackPlaylist.some(el => el.id === currentTrackData.id)) {
                     fallbackPlaylist.push({ id: currentTrackData.id, title: currentTrackData.title });
                     localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
-                    status.innerText = `🔥 Community Choice! "${currentTrackData.title}" reached upvote threshold and hit the Fallback Playlist! Pool size: ${fallbackPlaylist.length}`;
+                    status.innerText = `🔥 Community Choice! "${currentTrackData.title}" reached upvote threshold and hit the Fallback Playlist! Pool: ${fallbackPlaylist.length}`;
                     
                     triggerMilestoneOverlay(currentTrackData.title);
                 }
