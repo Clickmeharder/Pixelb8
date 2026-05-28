@@ -20,15 +20,7 @@ export class StreamJukebox {
     }
 
     init() {
-        // Ensure DOM container for player exists
-        if (!document.getElementById('ytPlayerNode')) {
-            const wrapper = document.getElementById('videoWrapper') || document.body;
-            const container = document.createElement('div');
-            container.id = 'ytPlayerNode';
-            wrapper.appendChild(container);
-        }
-
-        // Inject YouTube API
+        // Inject YouTube API if not already present
         if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
             const tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
@@ -36,13 +28,24 @@ export class StreamJukebox {
         }
 
         window.onYouTubeIframeAPIReady = () => {
-            this.ytPlayer = new YT.Player('ytPlayerNode', {
+            // Target the existing 'player' div inside your widget container
+            this.ytPlayer = new YT.Player('player', {
                 height: '100%',
                 width: '100%',
-                playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1 },
+                playerVars: { 
+                    'autoplay': 1, 
+                    'controls': 1, 
+                    'enablejsapi': 1,
+                    'fs': 0 // Disable fullscreen button
+                },
                 events: {
-                    'onReady': () => { this.ytPlayerReady = true; this.playNextSong(); },
-                    'onStateChange': (e) => { if (e.data === YT.PlayerState.ENDED) this.playNextSong(); }
+                    'onReady': () => { 
+                        this.ytPlayerReady = true; 
+                        this.playNextSong(); 
+                    },
+                    'onStateChange': (e) => { 
+                        if (e.data === YT.PlayerState.ENDED) this.playNextSong(); 
+                    }
                 }
             });
         };
@@ -51,8 +54,9 @@ export class StreamJukebox {
     // --- Widget Control for Settings UI ---
     setWidgetActiveState(state) {
         this.isEnabled = state;
-        const player = document.getElementById('ytPlayerNode');
-        if (player) player.style.display = state ? "block" : "none";
+        // Toggle the visibility of the widget container, not the player node directly
+        const widget = document.getElementById('jukebox-widget');
+        if (widget) widget.style.display = state ? "block" : "none";
         
         if (!state && this.ytPlayer) {
             this.ytPlayer.stopVideo();
