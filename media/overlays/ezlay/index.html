@@ -469,33 +469,39 @@
 				<span class="collapse-icon">▼</span>
 			</div>
 			<div class="collapsible-content">
-				<div style="display: flex; justify-content: space-between; align-items: center; background: #1c1c1f; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #3f3f46;">
-					<span style="font-size: 12px; color: #f4f4f5; font-weight: 500;">Jukebox Active</span>
-					<label style="position: relative; display: inline-block; width: 34px; height: 20px;">
-						<input type="checkbox" id="stg-toggle-jukebox-checkbox" checked style="opacity: 0; width: 0; height: 0;">
-						<span style="position: absolute; cursor: pointer; inset: 0px; background-color: rgb(63, 63, 70); transition: 0.3s; border-radius: 20px;" 
-							  onclick="const cb = document.getElementById('stg-toggle-jukebox-checkbox'); cb.click();">
-						</span>
-					</label>
+				<div class="settings-toggle-row" style="margin-bottom: 10px;">
+					<span class="settings-toggle-label">Jukebox Active</span>
+					<div class="settings-toggle-controls">
+						<span id="jb-status-badge" class="toggle-status-badge">ON</span>
+						<label style="position: relative; display: inline-block; width: 34px; height: 20px; cursor: pointer;">
+							<input type="checkbox" id="stg-toggle-jukebox-checkbox" style="opacity: 0; width: 0; height: 0;">
+							<span style="position: absolute; inset: 0px; background-color: #3f3f46; transition: 0.3s; border-radius: 20px;"></span>
+						</label>
+					</div>
 				</div>
-				<div style="display: flex; justify-content: space-between; align-items: center; background: #1c1c1f; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #3f3f46;">
-					<span style="font-size: 12px; color: #f4f4f5; font-weight: 500;">Accept Requests</span>
-					<label style="position: relative; display: inline-block; width: 34px; height: 20px;">
-						<input type="checkbox" id="stg-toggle-requests-checkbox" checked style="opacity: 0; width: 0; height: 0;">
-						<span style="position: absolute; cursor: pointer; inset: 0px; background-color: rgb(63, 63, 70); transition: 0.3s; border-radius: 20px;" 
-							  onclick="const cb = document.getElementById('stg-toggle-requests-checkbox'); cb.click();">
-						</span>
-					</label>
+
+				<div class="settings-toggle-row" style="margin-bottom: 10px;">
+					<span class="settings-toggle-label">Accept Requests</span>
+					<div class="settings-toggle-controls">
+						<span id="req-status-badge" class="toggle-status-badge">ON</span>
+						<label style="position: relative; display: inline-block; width: 34px; height: 20px; cursor: pointer;">
+							<input type="checkbox" id="stg-toggle-requests-checkbox" style="opacity: 0; width: 0; height: 0;">
+							<span style="position: absolute; inset: 0px; background-color: #3f3f46; transition: 0.3s; border-radius: 20px;"></span>
+						</label>
+					</div>
 				</div>
-				<div style="display: flex; justify-content: space-between; align-items: center; background: #1c1c1f; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #3f3f46;">
-					<span style="font-size: 12px; color: #f4f4f5; font-weight: 500;">Audio Only</span>
-					<label style="position: relative; display: inline-block; width: 34px; height: 20px;">
-						<input type="checkbox" id="stg-toggle-audio-only-checkbox" style="opacity: 0; width: 0; height: 0;">
-						<span style="position: absolute; cursor: pointer; inset: 0px; background-color: rgb(63, 63, 70); transition: 0.3s; border-radius: 20px;" 
-							  onclick="const cb = document.getElementById('stg-toggle-audio-only-checkbox'); cb.click();">
-						</span>
-					</label>
+
+				<div class="settings-toggle-row" style="margin-bottom: 10px;">
+					<span class="settings-toggle-label">Audio Only</span>
+					<div class="settings-toggle-controls">
+						<span id="audio-status-badge" class="toggle-status-badge">OFF</span>
+						<label style="position: relative; display: inline-block; width: 34px; height: 20px; cursor: pointer;">
+							<input type="checkbox" id="stg-toggle-audio-only-checkbox" style="opacity: 0; width: 0; height: 0;">
+							<span style="position: absolute; inset: 0px; background-color: #3f3f46; transition: 0.3s; border-radius: 20px;"></span>
+						</label>
+					</div>
 				</div>
+
 				<div style="background: #141414; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 6px;">
 					<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">⚙️ Vote Requirements</label>
 					<input type="number" id="jb-vote-req-input" class="p8-input" value="2" style="width: 100%;">
@@ -510,8 +516,7 @@
 				</div>
 
 				<div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px;">📋 Fallback Playlist</div>
-				<div id="jb-fallback-list" style="display: flex; flex-direction: column; gap: 4px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 1px dashed #3f3f46;">
-					</div>
+				<div id="jb-fallback-list" style="display: flex; flex-direction: column; gap: 4px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 1px dashed #3f3f46;"></div>
 				
 				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
 					<button id="jb-skip-btn" class="p8-btn p8-btn-warning" style="padding: 6px;">SKIP</button>

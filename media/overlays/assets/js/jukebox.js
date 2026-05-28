@@ -23,6 +23,14 @@ export class StreamJukebox {
         console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
     }
 
+    // --- UI Helpers ---
+    updateBadge(id, isActive) {
+        const badge = document.getElementById(id);
+        if (!badge) return;
+        badge.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
+        badge.innerText = isActive ? 'ON' : 'OFF';
+    }
+
     // --- UI Notifications ---
     triggerVoteToast(username, currentCount, targetCount) {
         const container = document.getElementById("overlay-wrapper");
@@ -93,6 +101,7 @@ export class StreamJukebox {
     }
 
     bindControls() {
+        // --- Buttons ---
         const skipBtn = document.getElementById('jb-skip-btn');
         if(skipBtn) skipBtn.onclick = () => this.skipCurrentSong((msg) => console.log(msg));
 
@@ -117,22 +126,35 @@ export class StreamJukebox {
             if (val) { this.handleAddFallback('System', val, (msg) => console.log(msg)); document.getElementById('jb-search-input').value = ''; }
         };
 
+        // --- Toggles ---
         const toggleCheckbox = document.getElementById('stg-toggle-jukebox-checkbox');
         if (toggleCheckbox) {
             toggleCheckbox.checked = this.isEnabled;
-            toggleCheckbox.onchange = (e) => this.setWidgetActiveState(e.target.checked);
+            this.updateBadge('jb-status-badge', this.isEnabled);
+            toggleCheckbox.onchange = (e) => {
+                this.setWidgetActiveState(e.target.checked);
+                this.updateBadge('jb-status-badge', e.target.checked);
+            };
         }
 
         const requestToggle = document.getElementById('stg-toggle-requests-checkbox');
         if (requestToggle) {
             requestToggle.checked = this.acceptRequests;
-            requestToggle.onchange = (e) => this.acceptRequests = e.target.checked;
+            this.updateBadge('req-status-badge', this.acceptRequests);
+            requestToggle.onchange = (e) => {
+                this.acceptRequests = e.target.checked;
+                this.updateBadge('req-status-badge', e.target.checked);
+            };
         }
 
-        // Audio Only toggle binding
         const audioToggle = document.getElementById('stg-toggle-audio-only-checkbox');
         if (audioToggle) {
-            audioToggle.onchange = (e) => this.toggleAudioOnly(e.target.checked);
+            audioToggle.checked = this.isAudioOnly;
+            this.updateBadge('audio-status-badge', this.isAudioOnly);
+            audioToggle.onchange = (e) => {
+                this.toggleAudioOnly(e.target.checked);
+                this.updateBadge('audio-status-badge', e.target.checked);
+            };
         }
     }
 
@@ -142,11 +164,8 @@ export class StreamJukebox {
         const wrapper = document.getElementById('jukebox-video-wrapper');
         
         if (playerContainer && wrapper) {
-            // Shrink player to 1px
             playerContainer.style.width = state ? "1px" : "100%";
             playerContainer.style.height = state ? "1px" : "100%";
-            
-            // Collapse the wrapper container
             wrapper.style.height = state ? "0px" : "168px";
             wrapper.style.opacity = state ? "0" : "1";
         }

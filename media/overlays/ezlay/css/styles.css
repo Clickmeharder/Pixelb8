@@ -747,7 +747,25 @@ body.edit-mode .p8-widget:active {
     transition: opacity 0.5s ease-in-out;
     opacity: 0;
 }
+input + span::before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
 
+input:checked + span::before {
+    transform: translateX(14px);
+}
+
+input:checked + span {
+    background-color: var(--accent) !important;
+}
 #mode-badge { 
     font-size: 10px; 
     opacity: 0.6; 
