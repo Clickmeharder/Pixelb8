@@ -521,7 +521,8 @@ function init() {
 
 function injectAllWidgetCommands() {
     const activeWidgets = [
-        window.entropiaLogParser
+        window.entropiaLogParser,
+        window.streamJukeboxEngine // 🟢 Added: Automatically scan and inject Jukebox commands on startup
         // Future extensions sit here elegantly: window.miningTracker, window.pixelKitty
     ];
 
@@ -1964,10 +1965,6 @@ function startTwitch(channel, token) {
             }
         }
         handlePixelCommands(user, targetCommand, targetArgs, flags);
-		// 🟢 Forward instructions securely down to Jukebox Instance layer
-		if (window.streamJukeboxEngine) {
-			window.streamJukeboxEngine.handleIncomingCommand(user, command, message, flags);
-		}
     };
 
     ComfyJS.Init(channel, formattedToken);

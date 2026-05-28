@@ -14,6 +14,27 @@ export class StreamJukebox {
         this.loadYouTubeAPI();
     }
 
+    // 🟢 EXPOSED API CONTRACT: Used by injectAllWidgetCommands() in ttvoverlayApp.js
+    getCommands(botSay) {
+        return [
+            {
+                name: "sr",
+                adminOnly: false,
+                execute: (user, message, flags) => this.handleIncomingCommand(user, "sr", message, flags)
+            },
+            {
+                name: "songrequest",
+                adminOnly: false,
+                execute: (user, message, flags) => this.handleIncomingCommand(user, "songrequest", message, flags)
+            },
+            {
+                name: "skip",
+                adminOnly: true,
+                execute: (user, message, flags) => this.handleIncomingCommand(user, "skip", message, flags)
+            }
+        ];
+    }
+
     initDOM() {
         // Cache your key visual interaction hooks safely
         this.titleEl = document.getElementById("jb-current-title");
@@ -44,27 +65,23 @@ export class StreamJukebox {
         }
 
         // 🟢 Robust Global Callback Multi-hook Management
-        // If another component already declared the ready hook, append our build call
         const originalCallback = window.onYouTubeIframeAPIReady;
         window.onYouTubeIframeAPIReady = () => {
             if (typeof originalCallback === 'function') originalCallback();
             this.buildPlayer();
         };
 
-        // If window.YT and YT.Player are already fully loaded, call buildPlayer immediately
         if (window.YT && window.YT.Player) {
             this.buildPlayer();
         }
     }
 
     buildPlayer() {
-        // 🟢 Defensive Retry Engine: If script exists but namespace isn't ready yet, retry in 200ms
         if (typeof YT === 'undefined' || !YT.Player) {
             setTimeout(() => this.buildPlayer(), 200);
             return;
         }
         
-        // Prevent duplicate player generation if it's already bound to the element
         if (this.player) return;
 
         this.player = new YT.Player('player', {
@@ -83,17 +100,15 @@ export class StreamJukebox {
                 'onStateChange': (e) => this.onPlayerStateChange(e),
                 'onError': (e) => {
                     console.error("⚠️ YouTube Player Error:", e.data);
-                    this.skipTrack(); // Advance automatically if block/copyright hits
+                    this.skipTrack();
                 }
             }
         });
     }
 
     onPlayerStateChange(event) {
-        // Only react to state transitions if the widget is actively enabled
         if (!this.isEnabled) return;
 
-        // YT.PlayerState.ENDED === 0
         if (event.data === 0) {
             this.skipTrack();
         } else if (event.data === 1) {
@@ -107,9 +122,7 @@ export class StreamJukebox {
         return (match && match[2].length === 11) ? match[2] : null;
     }
 
-    // Main interaction router linked directly inside your ComfyJS core commands loop
     handleIncomingCommand(user, command, message, flags) {
-        // Do not process requests if the widget setup panel checkbox is turned off
         if (!this.isEnabled) return;
 
         if (command === "sr" || command === "songrequest") {
@@ -177,7 +190,6 @@ export class StreamJukebox {
             this.queue = [];
             this.updateUI("No Track Loaded", "Standby");
         } else {
-            // Kickstart player build if the script loaded while the widget was disabled
             this.buildPlayer();
         }
     }
