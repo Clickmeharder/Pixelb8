@@ -23,6 +23,19 @@
         margin: 15px 0;
         text-align: left;
     }
+    .dashboard-panel {
+        background: #222;
+        border: 1px solid #ff4757;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    .dashboard-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 5px;
+    }
     label {
         font-size: 11px;
         color: #ff4757;
@@ -41,6 +54,14 @@
         border-radius: 4px;
         box-sizing: border-box;
         font-size: 14px;
+    }
+    .dashboard-row input[type="text"] {
+        flex: 1;
+    }
+    .dashboard-row button {
+        width: auto;
+        margin-top: 0;
+        white-space: nowrap;
     }
     button {
         background: #ff4757;
@@ -109,7 +130,16 @@
 <body>
 
 <div class="main-layout">
-    <h1>🎵 Pixel Stream Jukebox</h1>
+    <h1>🎵 Stream Jukebox</h1>
+    
+    <div class="dashboard-panel">
+        <label>🎛️ Streamer Control Dashboard</label>
+        <div class="dashboard-row">
+            <input type="text" id="browserSearchInput" placeholder="Enter song name, artist, YouTube URL, or Video ID...">
+            <button id="browserSubmitBtn" style="background: #ff4757; color: white;">Queue Song</button>
+        </div>
+        <button id="browserSkipBtn" style="background: #eccc68; color: #111; width: 100%; margin-top: 10px;">⏭️ Skip Current Song</button>
+    </div>
     
     <div id="comfycontrolBox">
         <div class="controls-group">
@@ -213,22 +243,27 @@ function onYouTubeIframeAPIReady() {
     });
 }
 
+// Central processing function to handle queue injection from either Chat or Browser Control Panel
+function queueTrackAsset(user, rawInput) {
+    if (!rawInput) return;
+    
+    let cleanedInput = rawInput.trim();
+    let explicitId = extractYouTubeId(cleanedInput);
+    
+    if (explicitId) {
+        songQueue.push({ user: user, title: `Direct Link Asset (${explicitId})`, id: explicitId, isSearch: false });
+        status.innerText = `🎵 Track ID [${explicitId}] queued by ${user}. Queue depth: ${songQueue.length}`;
+        if (!isPlayingSong) playNextSong();
+    } else {
+        songQueue.push({ user: user, title: cleanedInput, id: cleanedInput, isSearch: true });
+        status.innerText = `✅ Queued Search Request: "${cleanedInput}" (Requested by ${user}). Queue depth: ${songQueue.length}`;
+        if (!isPlayingSong) playNextSong();
+    }
+}
+
 ComfyJS.onCommand = async (user, command, message, flags, extra) => {
     if (command === "sr" || command === "songrequest") {
-        if (!message) return;
-        
-        let cleanedInput = message.trim();
-        let explicitId = extractYouTubeId(cleanedInput);
-        
-        if (explicitId) {
-            songQueue.push({ user: user, title: `Direct Link Asset (${explicitId})`, id: explicitId, isSearch: false });
-            status.innerText = `🎵 Track ID [${explicitId}] queued by ${user}. Queue depth: ${songQueue.length}`;
-            if (!isPlayingSong) playNextSong();
-        } else {
-            songQueue.push({ user: user, title: cleanedInput, id: cleanedInput, isSearch: true });
-            status.innerText = `✅ Queued Search Request: "${cleanedInput}" (Requested by ${user}). Queue depth: ${songQueue.length}`;
-            if (!isPlayingSong) playNextSong();
-        }
+        queueTrackAsset(user, message);
     }
     
     if (command === "skip") {
@@ -258,14 +293,12 @@ function playNextSong() {
     status.innerText = `🎶 Processing Request: "${nextSong.title}" (Requested by ${nextSong.user})`;
 
     if (nextSong.isSearch) {
-        // High availability text fallback layer using a background frame interface matrix
         const sandboxZone = document.getElementById('searchSandbox');
         sandboxZone.innerHTML = ''; 
 
         const searchFrameNode = document.createElement('iframe');
         const encodedQuery = encodeURIComponent(nextSong.id);
         
-        // This structural URL generates an automatic valid query index directly inside YouTube's cloud layout
         searchFrameNode.src = `https://www.youtube.com/embed?listType=search&list=${encodedQuery}&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
         
         let localSearchPlayer = new YT.Player(searchFrameNode, {
@@ -277,9 +310,8 @@ function playNextSong() {
                             const foundVideoId = compiledPlaylist[0];
                             status.innerText = `🎶 Now Playing: "${nextSong.title}" (Requested by ${nextSong.user})`;
                             ytPlayer.loadVideoById(foundVideoId);
-                            sandboxZone.innerHTML = ''; // Clean up container memory loop
+                            sandboxZone.innerHTML = ''; 
                         } else {
-                            // Fallback timeout engine interceptor if playlist matrix arrays latency loading
                             activeSearchTimeout = setTimeout(() => {
                                 try {
                                     const latePlaylist = localSearchPlayer.getPlaylist();
@@ -367,6 +399,26 @@ function disconnectBot() {
     
     twitchdisconnectbutton.style.display = "none";
 }
+
+// --- BROWSER DASHBOARD EVENT LISTENERS ---
+document.getElementById("browserSubmitBtn").addEventListener("click", function() {
+    const inputField = document.getElementById("browserSearchInput");
+    if (inputField.value.trim() !== "") {
+        queueTrackAsset("Streamer (Browser)", inputField.value);
+        inputField.value = ""; // Clear out text field on success
+    }
+});
+
+// Allow hitting the Enter key inside the field to submit instantly
+document.getElementById("browserSearchInput").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        document.getElementById("browserSubmitBtn").click();
+    }
+});
+
+document.getElementById("browserSkipBtn").addEventListener("click", function() {
+    skipCurrentSong();
+});
 
 document.getElementById("streamersButt").addEventListener("click", function() {
     let newStreamer = document.querySelector("#comfycontrolBox input[name='yourTextName']").value;
