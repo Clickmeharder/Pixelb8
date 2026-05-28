@@ -140,7 +140,7 @@ export class StreamJukebox {
             const delBtn = document.createElement('button');
             delBtn.innerText = '✕';
             delBtn.className = 'p8-btn';
-            delBtn.style.cssText = "background: #991b1b; padding: 2px 8px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer;";
+            delBtn.style.cssText = "background: #991b1b; padding: 2px 4px;width:32px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer;";
             delBtn.onclick = (e) => {
                 e.stopPropagation(); // Prevents triggering play on click
                 this.fallbackPlaylist.splice(index, 1);
