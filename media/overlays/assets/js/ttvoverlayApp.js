@@ -2867,7 +2867,16 @@ function bindEvents() {
 
     if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
     if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
-
+	if (window.streamJukeboxEngine && typeof settings !== 'undefined') {
+		window.streamJukeboxEngine.setWidgetActiveState(settings.jukeboxWidgetEnabled);
+		
+		// Sync the visual badge on load
+		const badge = document.getElementById("stg-jukebox-status-badge");
+		if (badge) {
+			badge.innerText = settings.jukeboxWidgetEnabled ? "ENABLED" : "DISABLED";
+			badge.style.color = settings.jukeboxWidgetEnabled ? "var(--accent)" : "#71717a";
+		}
+	}
 }
 
 init();

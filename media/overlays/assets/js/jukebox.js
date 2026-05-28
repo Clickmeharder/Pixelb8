@@ -13,12 +13,21 @@ export class StreamJukebox {
         this.VOTE_REQUIREMENT = 2;
         this.isPlayingSong = false;
         this.streamerName = "jaedraze";
+        this.isEnabled = true; // Default state for settings
 
         this.init();
         console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
     }
 
     init() {
+        // Ensure DOM container for player exists
+        if (!document.getElementById('ytPlayerNode')) {
+            const wrapper = document.getElementById('videoWrapper') || document.body;
+            const container = document.createElement('div');
+            container.id = 'ytPlayerNode';
+            wrapper.appendChild(container);
+        }
+
         // Inject YouTube API
         if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
             const tag = document.createElement('script');
@@ -39,6 +48,18 @@ export class StreamJukebox {
         };
     }
 
+    // --- Widget Control for Settings UI ---
+    setWidgetActiveState(state) {
+        this.isEnabled = state;
+        const player = document.getElementById('ytPlayerNode');
+        if (player) player.style.display = state ? "block" : "none";
+        
+        if (!state && this.ytPlayer) {
+            this.ytPlayer.stopVideo();
+            this.isPlayingSong = false;
+        }
+    }
+
     // --- Command Registry API ---
     getCommands(botSay) {
         return [
@@ -55,12 +76,12 @@ export class StreamJukebox {
             {
                 name: "likesong",
                 adminOnly: false,
-                execute: (user) => this.handleLikeSong(user, botSay)
+                execute: (user, message, botSay) => this.handleLikeSong(user, botSay)
             },
             {
                 name: "addfallback",
                 adminOnly: true,
-                execute: (user, message) => this.handleAddFallback(user, message, botSay)
+                execute: (user, message, botSay) => this.handleAddFallback(user, message, botSay)
             },
             {
                 name: "skip",
@@ -72,7 +93,7 @@ export class StreamJukebox {
 
     // --- Logic ---
     async handleSongRequest(user, message, botSay) {
-        if (!message) return;
+        if (!this.isEnabled || !message) return;
         const id = this.extractYouTubeId(message);
         this.queue.push({ user, title: id ? "Link" : message, id: id || message, isSearch: !id });
         botSay(`✅ Queued: "${message.substring(0, 30)}..."`);
@@ -85,7 +106,7 @@ export class StreamJukebox {
         this.currentTrackVotes.add(user.toLowerCase());
         if (this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
             this.saveFallbackItem(this.currentTrackData);
-            botSay(`🔥 "${this.currentTrackData.title}" reached threshold and added to fallbacks!`);
+            botSay(`🔥 "${this.currentTrackData.title}" added to fallback rotation!`);
         }
     }
 
@@ -98,26 +119,22 @@ export class StreamJukebox {
     }
 
     skipCurrentSong() {
-        if (this.ytPlayer) {
+        if (this.ytPlayer && this.isEnabled) {
             this.ytPlayer.stopVideo();
             this.playNextSong();
         }
     }
 
     async playNextSong() {
+        if (!this.isEnabled || !this.ytPlayerReady) return;
+
         this.currentTrackVotes.clear();
         this.currentTrackData = null;
-        if (!this.ytPlayerReady) { setTimeout(() => this.playNextSong(), 500); return; }
 
         if (this.queue.length > 0) {
             this.isPlayingSong = true;
             const next = this.queue.shift();
-            if (next.isSearch) {
-                const resolved = await this.fetchTrack(next.id);
-                this.currentTrackData = resolved || { id: next.id, title: next.title };
-            } else {
-                this.currentTrackData = { id: next.id, title: next.title };
-            }
+            this.currentTrackData = next.isSearch ? await this.fetchTrack(next.id) : { id: next.id, title: next.title };
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
         } else if (this.fallbackPlaylist.length > 0) {
             this.isPlayingSong = true;
