@@ -16,13 +16,14 @@ export class StreamJukebox {
         this.isPlayingSong = false;
         this.streamerName = "jaedraze";
         this.isEnabled = true; 
-        this.acceptRequests = true; // Added toggle state
+        this.acceptRequests = true; 
+        this.isAudioOnly = false; // New state
 
         this.init();
         console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
     }
 
-    // --- UI Notifications (Targets existing overlay elements) ---
+    // --- UI Notifications ---
     triggerVoteToast(username, currentCount, targetCount) {
         const container = document.getElementById("overlay-wrapper");
         if (!container) return;
@@ -30,7 +31,6 @@ export class StreamJukebox {
         toast.className = "p8-toast";
         toast.style.cssText = "position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent); z-index: 1000; font-family: monospace; pointer-events: none;";
         
-        // If VOTE_REQUIREMENT is 0, show infinity symbol
         const displayCount = this.VOTE_REQUIREMENT === 0 ? "∞" : targetCount;
         toast.innerHTML = `👍 <strong>${username}</strong> liked this! <br> Progress: ${currentCount} / ${displayCount}`;
         
@@ -123,11 +123,32 @@ export class StreamJukebox {
             toggleCheckbox.onchange = (e) => this.setWidgetActiveState(e.target.checked);
         }
 
-        // Added Request Toggle binding
         const requestToggle = document.getElementById('stg-toggle-requests-checkbox');
         if (requestToggle) {
             requestToggle.checked = this.acceptRequests;
             requestToggle.onchange = (e) => this.acceptRequests = e.target.checked;
+        }
+
+        // Audio Only toggle binding
+        const audioToggle = document.getElementById('stg-toggle-audio-only-checkbox');
+        if (audioToggle) {
+            audioToggle.onchange = (e) => this.toggleAudioOnly(e.target.checked);
+        }
+    }
+
+    toggleAudioOnly(state) {
+        this.isAudioOnly = state;
+        const playerContainer = document.getElementById('player');
+        const wrapper = document.getElementById('jukebox-video-wrapper');
+        
+        if (playerContainer && wrapper) {
+            // Shrink player to 1px
+            playerContainer.style.width = state ? "1px" : "100%";
+            playerContainer.style.height = state ? "1px" : "100%";
+            
+            // Collapse the wrapper container
+            wrapper.style.height = state ? "0px" : "168px";
+            wrapper.style.opacity = state ? "0" : "1";
         }
     }
 
@@ -175,7 +196,6 @@ export class StreamJukebox {
     async handleSongRequest(user, message, botSay) {
         if (!this.isEnabled || !message) return;
         
-        // Added check for request toggle
         if (!this.acceptRequests) {
             botSay(`🚫 Sorry @${user}, song requests are currently disabled.`);
             return;
@@ -204,7 +224,6 @@ export class StreamJukebox {
         this.currentTrackVotes.add(user.toLowerCase());
         this.triggerVoteToast(user, this.currentTrackVotes.size, this.VOTE_REQUIREMENT);
         
-        // Only save to fallback if requirement is met AND requirement is not 0
         if (this.VOTE_REQUIREMENT > 0 && this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
             this.saveFallbackItem(this.currentTrackData, "Community");
             botSay(`🔥 "${this.currentTrackData.title}" added to fallback!`);
