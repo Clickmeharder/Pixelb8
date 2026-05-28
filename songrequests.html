@@ -35,6 +35,7 @@
         display: flex;
         gap: 10px;
         margin-top: 5px;
+        margin-bottom: 10px;
     }
     label {
         font-size: 11px;
@@ -126,10 +127,11 @@
     <div class="dashboard-panel">
         <label>🎛️ Streamer Control Dashboard</label>
         <div class="dashboard-row">
-            <input type="text" id="browserSearchInput" placeholder="Enter song name, artist, YouTube URL, or Video ID...">
-            <button id="browserSubmitBtn" style="background: #ff4757; color: white;">Queue Song</button>
+            <input type="text" id="browserSearchInput" placeholder="Song request text, link, or video ID...">
+            <button id="browserSubmitBtn" style="background: #ff4757; color: white;">Queue Live</button>
+            <button id="browserFallbackBtn" style="background: #2f3542; color: white; border: 1px solid #57606f;">+ Fallback Playlist</button>
         </div>
-        <button id="browserSkipBtn" style="background: #eccc68; color: #111; width: 100%; margin-top: 10px;">⏭️ Skip Current Song</button>
+        <button id="browserSkipBtn" style="background: #eccc68; color: #111; width: 100%; margin-top: 0px;">⏭️ Skip Current Song</button>
     </div>
     
     <div id="comfycontrolBox">
@@ -152,9 +154,10 @@
 
     <div class="hint-box">
         <strong>💡 Commands Available:</strong><br>
-        • <code>!sr [song name / artist]</code> - Searches YouTube and plays the top match.<br>
-        • <code>!sr [YouTube or YT Music URL / Video ID]</code> - Queues specific track immediately.<br>
-        • <code>!skip</code> - Stops current track and cycles the queue (Streamer only).
+        • <code>!sr [keywords / link]</code> - Queues up a live user track request.<br>
+        • <code>!likesong</code> - Upvotes current track. Tracks reaching threshold hit permanent fallback registry.<br>
+        • <code>!addfallback [keywords / link]</code> - Directly adds track into fallback rotation (Streamer only).<br>
+        • <code>!skip</code> - Stops current track and advances state engine loop (Streamer only).
     </div>
 </div>
 
@@ -169,10 +172,16 @@ let ytPlayer = null;
 let ytPlayerReady = false;
 const status = document.getElementById('status');
 
-// --- HIGH-AVAILABILITY ENGINE VARIABLES ---
+// --- HIGH-AVAILABILITY ENGINE & FALLBACK ROTATION VARIABLES ---
 let songQueue = [];
+let fallbackPlaylist = JSON.parse(localStorage.getItem("jukeboxFallbackPlaylist")) || [];
 let isPlayingSong = false;
 let streamername = "jaedraze";
+
+// Voting Threshold Parameters
+const VOTE_REQUIREMENT = 2; // Unique users needed to save a song to fallback playlist
+let currentTrackVotes = new Set();
+let currentTrackData = null; // Caches active video details
 
 function isStreamerAndAuthorize(user, command) {
     if (user.toLowerCase() !== streamername.toLowerCase()) {
@@ -214,8 +223,10 @@ function onYouTubeIframeAPIReady() {
         events: {
             'onReady': () => {
                 ytPlayerReady = true;
-                status.innerText = "Status: Player ready and primed. Awaiting requests.";
+                status.innerText = `Status: Player ready. Fallback registry deep pool: ${fallbackPlaylist.length} tracks.`;
                 console.log("📺 Media Player instance ready for hot loads.");
+                // Instantly prime pipeline rotation loop on load if playlist pool is configured
+                if (!isPlayingSong) playNextSong();
             },
             'onStateChange': (event) => {
                 if (event.data === YT.PlayerState.ENDED) {
@@ -233,7 +244,6 @@ function onYouTubeIframeAPIReady() {
 
 // Distributed engine targeting high-performance open front-end nodes for native keyword text searches
 async function fetchTrackIdFromKeywords(keywords) {
-    // Array of fallback API mirrors to ensure 100% uptime architecture
     const instances = [
         'https://invidious.flokinet.to',
         'https://iv.melmac.space',
@@ -252,7 +262,7 @@ async function fetchTrackIdFromKeywords(keywords) {
             const results = await response.json();
             if (results && results.length > 0 && results[0].videoId) {
                 console.log(`✅ Core Matrix Resolved "${keywords}" to Track ID: ${results[0].videoId}`);
-                return results[0].videoId;
+                return { id: results[0].videoId, title: results[0].title || keywords };
             }
         } catch (e) {
             console.warn(`Node failover encounter at ${host}. Cycling structural routing...`);
@@ -268,19 +278,80 @@ function queueTrackAsset(user, rawInput) {
     let explicitId = extractYouTubeId(cleanedInput);
     
     if (explicitId) {
-        songQueue.push({ user: user, title: `Direct Link Asset (${explicitId})`, id: explicitId, isSearch: false });
-        status.innerText = `🎵 Track ID [${explicitId}] queued by ${user}. Queue depth: ${songQueue.length}`;
+        songQueue.push({ user: user, title: `Direct Asset Link`, id: explicitId, isSearch: false });
+        status.innerText = `🎵 Live Track ID [${explicitId}] queued by ${user}. Queue depth: ${songQueue.length}`;
         if (!isPlayingSong) playNextSong();
     } else {
         songQueue.push({ user: user, title: cleanedInput, id: cleanedInput, isSearch: true });
-        status.innerText = `✅ Queued Request: "${cleanedInput}" (Requested by ${user}). Queue depth: ${songQueue.length}`;
+        status.innerText = `✅ Queued Live Search: "${cleanedInput}" (Requested by ${user}). Queue depth: ${songQueue.length}`;
         if (!isPlayingSong) playNextSong();
     }
 }
 
+// Processes direct targets into the persistent storage local registry matrix array
+async function addTrackToFallbackRegistry(rawInput, executionContextName) {
+    if (!rawInput) return;
+    let cleanedInput = rawInput.trim();
+    let explicitId = extractYouTubeId(cleanedInput);
+
+    if (explicitId) {
+        const item = { id: explicitId, title: `Direct Track Asset (${explicitId})` };
+        saveFallbackItem(item, executionContextName);
+    } else {
+        status.innerText = `🔍 Resolving track details for Fallback Playlist: "${cleanedInput}"...`;
+        const lookup = await fetchTrackIdFromKeywords(cleanedInput);
+        if (lookup) {
+            saveFallbackItem(lookup, executionContextName);
+        } else {
+            status.innerText = `❌ Error: Could not resolve track match layout for fallback array: "${cleanedInput}"`;
+        }
+    }
+}
+
+function saveFallbackItem(item, originUser) {
+    // Prevent duplicated items inside the playlist array pool
+    if (!fallbackPlaylist.some(element => element.id === item.id)) {
+        fallbackPlaylist.push(item);
+        localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
+        status.innerText = `💾 Saved to Fallback Playlist: "${item.title}" (Added by ${originUser}). Total pool size: ${fallbackPlaylist.length}`;
+    } else {
+        status.innerText = `💡 Track "${item.title}" already exists inside fallback playlist database.`;
+    }
+}
+
 ComfyJS.onCommand = async (user, command, message, flags, extra) => {
+    // User Live Song Request Interceptor Layout
     if (command === "sr" || command === "songrequest") {
         queueTrackAsset(user, message);
+    }
+    
+    // Fallback Playlist Dynamic Add Command
+    if (command === "addfallback") {
+        if (isStreamerAndAuthorize(user, command)) {
+            addTrackToFallbackRegistry(message, user);
+        }
+    }
+
+    // Community Upvote Engagement System
+    if (command === "likesong") {
+        if (!currentTrackData) {
+            console.log("No active media engine track payload to upvote.");
+            return;
+        }
+        
+        if (!currentTrackVotes.has(user.toLowerCase())) {
+            currentTrackVotes.add(user.toLowerCase());
+            console.log(`Vote added by ${user}. Current unique count: ${currentTrackVotes.size}/${VOTE_REQUIREMENT}`);
+            
+            // Validate threshold execution criteria
+            if (currentTrackVotes.size >= VOTE_REQUIREMENT) {
+                if (!fallbackPlaylist.some(el => el.id === currentTrackData.id)) {
+                    fallbackPlaylist.push({ id: currentTrackData.id, title: currentTrackData.title });
+                    localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
+                    status.innerText = `🔥 Community Choice! "${currentTrackData.title}" reached upvote threshold and hit the Fallback Playlist! Pool size: ${fallbackPlaylist.length}`;
+                }
+            }
+        }
     }
     
     if (command === "skip") {
@@ -291,11 +362,9 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
 };
 
 async function playNextSong() {
-    if (songQueue.length === 0) {
-        isPlayingSong = false;
-        status.innerText = "Status: Queue empty. Ready for new requests.";
-        return;
-    }
+    // Reset track voting sets for every distinct execution context rotation pass
+    currentTrackVotes.clear();
+    currentTrackData = null;
 
     if (!ytPlayerReady || !ytPlayer) {
         console.warn("Player engine unprimed. Retrying in 500ms...");
@@ -303,34 +372,60 @@ async function playNextSong() {
         return;
     }
 
-    isPlayingSong = true;
-    const nextSong = songQueue.shift();
-    
-    if (nextSong.isSearch) {
-        status.innerText = `🔍 Resolving search match path for: "${nextSong.title}"...`;
-        const resolvedId = await fetchTrackIdFromKeywords(nextSong.id);
+    // STATE ONE: Live Queue Interceptor Processing Matrix (Highest Priority)
+    if (songQueue.length > 0) {
+        isPlayingSong = true;
+        const nextSong = songQueue.shift();
         
-        if (resolvedId) {
-            status.innerText = `🎶 Now Playing: "${nextSong.title}" (Requested by ${nextSong.user})`;
-            try {
-                ytPlayer.loadVideoById(resolvedId);
-            } catch (err) {
-                console.error("Frame core loading crash:", err);
+        if (nextSong.isSearch) {
+            status.innerText = `🔍 Resolving search match path for live request: "${nextSong.title}"...`;
+            const resolved = await fetchTrackIdFromKeywords(nextSong.id);
+            
+            if (resolved) {
+                status.innerText = `🎶 Now Playing: "${resolved.title}" (Requested by ${nextSong.user})`;
+                currentTrackData = { id: resolved.id, title: resolved.title };
+                try {
+                    ytPlayer.loadVideoById(resolved.id);
+                } catch (err) {
+                    playNextSong();
+                }
+            } else {
+                status.innerText = `❌ Error resolving live search: "${nextSong.title}". Advancing...`;
                 playNextSong();
             }
         } else {
-            status.innerText = `❌ Error resolving search query: "${nextSong.title}". Skipping item...`;
+            status.innerText = `🎶 Now Playing Direct Track (Requested by ${nextSong.user})`;
+            currentTrackData = { id: nextSong.id, title: nextSong.title };
+            try {
+                ytPlayer.loadVideoById(nextSong.id);
+            } catch(e) {
+                isPlayingSong = false;
+                setTimeout(playNextSong, 1000);
+            }
+        }
+        return;
+    }
+
+    // STATE TWO: Fallback Shuffle Engine Allocation (Zero Live Tracks Available)
+    if (fallbackPlaylist.length > 0) {
+        isPlayingSong = true;
+        // Seed index math selecting completely clean random indices from database records
+        const randomIndex = Math.floor(Math.random() * fallbackPlaylist.length);
+        const fallbackTrack = fallbackPlaylist[randomIndex];
+        
+        status.innerText = `🔀 [Fallback Rotation Pool] Now Playing: "${fallbackTrack.title}"`;
+        currentTrackData = { id: fallbackTrack.id, title: fallbackTrack.title };
+        
+        try {
+            ytPlayer.loadVideoById(fallbackTrack.id);
+        } catch (e) {
+            console.error("Failed loading target fallback data registry asset:", e);
             playNextSong();
         }
     } else {
-        status.innerText = `🎶 Now Playing: Direct Link Asset (Requested by ${nextSong.user})`;
-        try {
-            ytPlayer.loadVideoById(nextSong.id);
-        } catch(e) {
-            console.error("Direct link structural loading exception:", e);
-            isPlayingSong = false;
-            setTimeout(playNextSong, 1000);
-        }
+        // STATE THREE: Total System Silence (Both Queues Completely Dry)
+        isPlayingSong = false;
+        status.innerText = "Status: Live Queue dry & Fallback Playlist empty. Standing by for commands...";
     }
 }
 
@@ -391,6 +486,14 @@ document.getElementById("browserSubmitBtn").addEventListener("click", function()
     if (inputField.value.trim() !== "") {
         queueTrackAsset("Streamer (Browser)", inputField.value);
         inputField.value = ""; 
+    }
+});
+
+document.getElementById("browserFallbackBtn").addEventListener("click", function() {
+    const inputField = document.getElementById("browserSearchInput");
+    if (inputField.value.trim() !== "") {
+        addTrackToFallbackRegistry(inputField.value, "Streamer (Dashboard)");
+        inputField.value = "";
     }
 });
 
