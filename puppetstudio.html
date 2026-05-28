@@ -41,7 +41,7 @@
         text-transform: uppercase;
         letter-spacing: 1px;
     }
-    input[type="file"], button, input[type="range"], select {
+    input[type="file"], button, input[type="range"], select, input[type="text"] {
         width: 100%;
         padding: 10px;
         background: #222;
@@ -276,6 +276,30 @@
         transform-origin: center center;
         transform: scale(calc(var(--zoom-level, 1.0) * (min(100vw, 100vh) / 500)));
     }
+</style>       
+<style>
+	#settingsPanel::-webkit-scrollbar {
+		width: 8px;
+	}
+	#settingsPanel::-webkit-scrollbar-track {
+		background: #111;
+		border-radius: 4px;
+	}
+	#settingsPanel::-webkit-scrollbar-thumb {
+		background: #2b2b2b;
+		border: 1px solid #333;
+		border-radius: 4px;
+	}
+	#settingsPanel::-webkit-scrollbar-thumb:hover {
+		background: #ff4757;
+		border-color: #ff6b81;
+	}
+	/* Ensure smooth scroll mechanics inside container */
+	#settingsPanel {
+		scrollbar-width: thin;
+		scrollbar-color: #2b2b2b #111;
+		scroll-behavior: smooth;
+	}
 </style>
 </head>
 <body>
@@ -283,43 +307,86 @@
 <h1>🎙️ Live Stream Puppet Studio Pro</h1>
 
 <div class="grid-layout" id="mainGridLayout">
-    <div class="panel" id="settingsPanel">
-        <div class="instructions">
+	<div class="panel" id="settingsPanel" style="max-height: 820px; overflow-y: auto; padding-right: 12px; box-sizing: border-box; text-align: left;">
+
+		<details class="setting-section" id="sectionProfileManager">
+			<summary>💾 Puppet Profile Saved Manager</summary>
+			<div class="section-content">
+				<div class="controls-group" style="background: #111; padding: 12px; border-radius: 6px; border: 1px dashed #ff4757; margin: 0;">
+					<div class="toggle-row" style="margin-bottom: 8px; gap: 8px; margin-top: 5px;">
+						<input type="text" id="profileNameInput" placeholder="Puppet Name..." style="flex: 2; padding: 8px;">
+						<button id="saveWorkspaceBtn" style="flex: 1; margin-top: 0; background: #2ed573; color: white; padding: 8px;">Save Puppet</button>
+					</div>
+					<div class="toggle-row" style="margin-bottom: 0; gap: 8px;">
+						<select id="profileSelect" style="flex: 2; padding: 8px;">
+							<option value="">-- Load Saved Puppet Matrix --</option>
+						</select>
+						<button id="deleteWorkspaceBtn" style="flex: 1; margin-top: 0; background: #ff4757; color: white; padding: 8px;">Delete</button>
+					</div>
+					<button id="triggerManualTutorialBtn" style="width: 100%; background: #a349a4; color: white; padding: 8px; font-size: 11px; margin-top: 8px; border-radius: 4px;">🎓 Run Guided Setup Walkthrough</button>
+					<span id="storageStatus" style="font-size: 10px; color: #888; display: block; margin-top: 6px; font-family: monospace;">Database initialized.</span>
+				</div>
+			</div>
+		</details>
+
+        <div class="instructions" style="margin-bottom: 15px;">
             <strong>✨ Dynamic Studio Transform Architecture Matrix:</strong><br>
             • Draw structural maps on the primary <strong>Talking Avatar</strong> template.<br>
             • Optional: Add an <strong>Idle Portrait</strong> (e.g. side profile). The pipeline will blend seamlessly to the Talking profile when mic levels cross your noise gate!
         </div>
 
-        <button id="toggleAllSectionsBtn" style="background: #57606f; margin-bottom: 10px; font-size: 12px; padding: 8px;">↕️ Collapse All Settings Panels</button>
+        <button id="toggleAllSectionsBtn" style="width: 100%; background: #57606f; margin-bottom: 15px; font-size: 12px; padding: 8px; margin-top: 0;">↕️ Collapse All Settings Panels</button>
+		<button id="connectMicBtn" disabled style="background: #444; font-size: 16px; padding: 15px; width: 100%; margin-top: 15px; margin-bottom: 5px;">❌ Step 1: Upload Main Portrait</button>
+		
+		<details class="setting-section" id="sectionWorkspaceAssets" open>
+			<summary>🖼️ Puppet Portrait Studio Assets</summary>
+			<div class="section-content">
+				<div class="portrait-upload-grid" id="tutUploadGrid">
+					<div class="controls-group" style="background: #161616; padding: 10px; border-radius: 4px; margin: 0;">
+						<label>Main Talking Portrait (straight)</label>
+						<input type="file" id="imageInput" accept="image/*" style="margin-bottom: 8px;">
+						
+						<div class="toggle-row" style="margin-bottom: 8px;">
+							<button id="grabMainBtn" style="font-size:11px; padding: 6px;">✛ Grab & Move Main</button>
+						</div>
+						<label style="color: #00ffcc;">Main Size scale <span id="valMainScale" class="slider-value">1.00x</span></label>
+						<input type="range" id="mainScaleSlider" min="10" max="400" value="100">
+					</div>
+					
+					<div class="controls-group" style="background: #161616; padding: 10px; border-radius: 4px; margin: 0;">
+						<label>Optional Idle Portrait (side profile)</label>
+						<input type="file" id="idleImageInput" accept="image/*" style="margin-bottom: 8px;">
+						
+						<div class="toggle-row" style="margin-bottom: 8px;">
+							<button id="grabIdleBtn" style="font-size:11px; padding: 6px;">✛ Grab & Move Idle</button>
+						</div>
+						<label style="color: #00ffcc;">Idle Size scale <span id="valIdleScale" class="slider-value">1.00x</span></label>
+						<input type="range" id="idleScaleSlider" min="10" max="400" value="100">
+					</div>
+				</div>
+			</div>
+		</details>
 
-        <div class="controls-group" style="margin-top: 10px;">
-            <label>Current Editing Canvas Target</label>
-            <div class="toggle-row" style="flex-wrap: wrap;">
-                <button id="targetJawBtn" class="active" style="flex: 1 1 100%;">👄 Define Moving Jaw</button>
-                <button id="targetLeftEyeBtn" style="flex: 1;">👁️ Left Eye</button>
-                <button id="targetRightEyeBtn" style="flex: 1;">👁️ Right Eye</button>
-                <button id="targetHeadBtn" style="flex: 1 1 100%;">👤 Define Head Shape (Lasso)</button>
-            </div>
-            <div class="toggle-row" id="geometryModeRow">
-                <button id="modeBoxBtn" class="active" style="font-size:11px;">🔲 Box Selection Mode</button>
-                <button id="modeLassoBtn" style="font-size:11px;">⎋ Lasso Path Mode</button>
-            </div>
-        </div>
+		<details class="setting-section" id="sectionWorkspaceTargeting">
+			<summary>🎯 Mapping Tools & Canvas Targets</summary>
+			<div class="section-content">
+				<div class="controls-group" style="margin: 0;" id="tutTargetContainer">
+					<label>Current Editing Canvas Target</label>
+					<div class="toggle-row" style="flex-wrap: wrap;">
+						<button id="targetJawBtn" class="active" style="flex: 1 1 100%;">👄 Define Moving Jaw</button>
+						<button id="targetLeftEyeBtn" style="flex: 1;">👁️ Left Eye</button>
+						<button id="targetRightEyeBtn" style="flex: 1;">👁️ Right Eye</button>
+						<button id="targetHeadBtn" style="flex: 1 1 100%;">👤 Define Head Shape (Lasso)</button>
+					</div>
+					<div class="toggle-row" id="geometryModeRow" style="margin-bottom: 0;">
+						<button id="modeBoxBtn" class="active" style="font-size:11px;">🔲 Box Selection Mode</button>
+						<button id="modeLassoBtn" style="font-size:11px;">⎋ Lasso Path Mode</button>
+					</div>
+				</div>
+			</div>
+		</details>
 
-        <div class="portrait-upload-grid">
-            <div class="controls-group">
-                <label>Main Talking Portrait (straight)</label>
-                <input type="file" id="imageInput" accept="image/*">
-            </div>
-            <div class="controls-group">
-                <label>Optional Idle Portrait (side profile)</label>
-                <input type="file" id="idleImageInput" accept="image/*">
-            </div>
-        </div>
-        
-        <button id="connectMicBtn" disabled style="background: #444; font-size: 16px; padding: 15px;">❌ Step 1: Upload Main Portrait</button>
-
-        <details class="setting-section" open>
+		<details class="setting-section">
             <summary>🔍 Viewport & Global Mechanics</summary>
             <div class="section-content">
                 <div class="controls-group">
@@ -337,7 +404,7 @@
             </div>
         </details>
 
-        <details class="setting-section" open>
+		<details class="setting-section">
             <summary>🔀 Dual-Profile Blend Engine</summary>
             <div class="section-content">
                 <div class="controls-group">
@@ -350,7 +417,7 @@
             </div>
         </details>
 
-        <details class="setting-section" open>
+		<details class="setting-section">
             <summary>⚙️ Automated Head Turn & Look-Away AI</summary>
             <div class="section-content">
                 <div class="controls-group">
@@ -369,7 +436,7 @@
             </div>
         </details>
 
-        <details class="setting-section" open>
+		<details class="setting-section">
             <summary>👤 Unified Head Transform Layout</summary>
             <div class="section-content">
                 <div class="controls-group">
@@ -383,7 +450,7 @@
             </div>
         </details>
 
-        <details class="setting-section" open>
+		<details class="setting-section">
             <summary>👄 Live Dynamics & Lip Sync Engine</summary>
             <div class="section-content">
                 <div class="controls-group">
@@ -412,13 +479,11 @@
                 </div>
             </div>
         </details>
-
-        <div id="status">System Status: Awaiting avatar upload...</div>
-    </div>
+	</div>
 
     <div class="panel" style="max-width: 520px; min-width: 520px;" id="previewPanel">
         <h3>Live Viewport Preview</h3>
-        
+        <div id="status" style="margin-bottom: 10px;">System Status: Awaiting avatar upload...</div>
         <div class="viewport-window" id="viewportWindow">
             <div class="canvas-container" id="zoomContainer">
                 <canvas id="renderCanvas" width="500" height="500"></canvas>
@@ -439,8 +504,24 @@
         </div>
     </div>
 </div>
-
 <script>
+// Image Matrix Transform State Blocks
+let mainTransform = { x: 0, y: 0, scale: 1.0 };
+let idleTransform = { x: 0, y: 0, scale: 1.0 };
+
+let activeGrabTarget = null; // Can be 'main', 'idle', or null
+let isDraggingImage = false;
+let dragStartMouseX = 0;
+let dragStartMouseY = 0;
+
+// Grab Button Elements Hooks
+const grabMainBtn = document.getElementById('grabMainBtn');
+const grabIdleBtn = document.getElementById('grabIdleBtn');
+const mainScaleSlider = document.getElementById('mainScaleSlider');
+const idleScaleSlider = document.getElementById('idleScaleSlider');
+const valMainScale = document.getElementById('valMainScale');
+const valIdleScale = document.getElementById('valIdleScale');
+
 const imageInput = document.getElementById('imageInput');
 const idleImageInput = document.getElementById('idleImageInput');
 const connectMicBtn = document.getElementById('connectMicBtn');
@@ -504,7 +585,6 @@ const geometryModeRow = document.getElementById('geometryModeRow');
 let avatarImg = new Image();
 let idleImg = new Image();
 let hasIdleImage = false;
-<!-- let audioCtx, analyser, micStream; -->
 
 let editTarget = 'jaw'; 
 let currentMode = 'box'; 
@@ -524,9 +604,9 @@ let currentZoomScale = 1.0;
 let featherBlur = 4;
 let tiltAngle = 0;
 let yawShift = 0;
-//let gainMultiplier = 0.15;
+
 let audioCtx, analyser, micStream, hardwareGainNode;
-let gainMultiplier = 1.0; // Initialized to default 1.0x gain factor mapping
+let gainMultiplier = 1.0; 
 let noiseGateThreshold = 10;
 let maxDropLimit = 25;
 let swayAmplitude = 1.5; 
@@ -537,7 +617,7 @@ let isMicLive = false;
 let isBlinking = false;
 
 // Profile Morph State
-let currentBlendWeight = 0.0; // 0 = Pure Idle Profile, 1 = Pure Talking Profile
+let currentBlendWeight = 0.0; 
 let blendInterpolationSpeed = 0.12; 
 
 // Look Away Target Calculations
@@ -552,6 +632,15 @@ let skinTextureHealerCanvas = document.createElement('canvas');
 let isolatedHeadCanvas = document.createElement('canvas');
 let sourceImageCacheCanvas = document.createElement('canvas');
 let sCtx = sourceImageCacheCanvas.getContext('2d');
+
+// PERSISTENCE ENGINE GLOBALS
+let db;
+let activeProfileName = "";
+const profileNameInput = document.getElementById('profileNameInput');
+const saveWorkspaceBtn = document.getElementById('saveWorkspaceBtn');
+const profileSelect = document.getElementById('profileSelect');
+const deleteWorkspaceBtn = document.getElementById('deleteWorkspaceBtn');
+const storageStatus = document.getElementById('storageStatus');
 
 // Master Global Panel Toggle Trigger Logic
 toggleAllSectionsBtn.addEventListener('click', () => {
@@ -915,7 +1004,17 @@ function updateAllViewports(volume = 0) {
     runArtworkRenderPipeline(volume, performance.now());
     runUIGuidePipeline();
 }
-
+function bakeSourceCache() {
+    sCtx.clearRect(0, 0, sourceImageCacheCanvas.width, sourceImageCacheCanvas.height);
+    
+    if (avatarImg.src) {
+        sCtx.save();
+        sCtx.translate(mainTransform.x, mainTransform.y);
+        sCtx.scale(mainTransform.scale, mainTransform.scale);
+        sCtx.drawImage(avatarImg, 0, 0);
+        sCtx.restore();
+    }
+}
 // Compute Offscreen Buffer Asset Layers
 function bakePuppetLayers() {
     const { x, y, w, h } = mouthBox;
@@ -1130,14 +1229,10 @@ blurSlider.addEventListener('input', (e) => {
     valBlur.innerText = featherBlur + "px";
     if(mouthBox.w > 0) bakePuppetLayers();
 });
-<!-- gainSlider.addEventListener('input', (e) => { -->
-    <!-- gainMultiplier = parseInt(e.target.value) / 100; -->
-    <!-- valGain.innerText = (parseInt(e.target.value) / 10).toFixed(1) + "x"; -->
-<!-- }); -->
+
 // Gain Handler interacts directly with the GainNode inside active Web Audio streams
 gainSlider.addEventListener('input', (e) => {
     const rawVal = parseInt(e.target.value);
-    // Maps range 0-50 safely down to 0.0x - 5.0x variables
     gainMultiplier = rawVal / 10;
     valGain.innerText = gainMultiplier.toFixed(1) + "x";
     
@@ -1163,6 +1258,47 @@ yawSlider.addEventListener('input', (e) => {
     valYaw.innerText = yawShift + "px";
 });
 
+// Scaler Transform Interface Hook Links
+mainScaleSlider.addEventListener('input', (e) => {
+    mainTransform.scale = parseInt(e.target.value) / 100;
+    valMainScale.innerText = mainTransform.scale.toFixed(2) + "x";
+    bakeSourceCache();
+    if (mouthBox.w > 0) bakePuppetLayers();
+    if (headBox.w > 0) bakeIsolatedHeadLayer();
+    updateAllViewports(0);
+});
+
+idleScaleSlider.addEventListener('input', (e) => {
+    idleTransform.scale = parseInt(e.target.value) / 100;
+    valIdleScale.innerText = idleTransform.scale.toFixed(2) + "x";
+    updateAllViewports(0);
+});
+
+// Structural Grab Selection State Interceptors
+grabMainBtn.addEventListener('click', () => {
+    if (activeGrabTarget === 'main') {
+        activeGrabTarget = null;
+        grabMainBtn.classList.remove('active');
+    } else {
+        activeGrabTarget = 'main';
+        grabIdleBtn.classList.remove('active');
+        grabMainBtn.classList.add('active');
+        uiCanvas.style.cursor = "move";
+    }
+});
+
+grabIdleBtn.addEventListener('click', () => {
+    if (activeGrabTarget === 'idle') {
+        activeGrabTarget = null;
+        grabIdleBtn.classList.remove('active');
+    } else {
+        activeGrabTarget = 'idle';
+        grabMainBtn.classList.remove('active');
+        grabIdleBtn.classList.add('active');
+        uiCanvas.style.cursor = "move";
+    }
+});
+
 function getCanvasSpaceMouseCoords(e) {
     const rect = uiCanvas.getBoundingClientRect();
     return {
@@ -1173,9 +1309,17 @@ function getCanvasSpaceMouseCoords(e) {
 
 uiCanvas.addEventListener('mousedown', (e) => {
     if (!avatarImg.src || document.body.classList.contains('theater-active')) return;
-    isDrawing = true;
-    
     const coords = getCanvasSpaceMouseCoords(e);
+    
+    // Grab Move Interceptor Mode
+    if (activeGrabTarget) {
+        isDraggingImage = true;
+        dragStartMouseX = coords.x;
+        dragStartMouseY = coords.y;
+        return;
+    }
+    
+    isDrawing = true;
     startX = coords.x;
     startY = coords.y;
     
@@ -1192,8 +1336,32 @@ uiCanvas.addEventListener('mousedown', (e) => {
 });
 
 uiCanvas.addEventListener('mousemove', (e) => {
-    if (!isDrawing) return;
     const coords = getCanvasSpaceMouseCoords(e);
+
+    // Active Move Calculations
+    if (isDraggingImage && activeGrabTarget) {
+        const deltaX = coords.x - dragStartMouseX;
+        const deltaY = coords.y - dragStartMouseY;
+        
+        if (activeGrabTarget === 'main') {
+            mainTransform.x += deltaX;
+            mainTransform.y += deltaY;
+        } else if (activeGrabTarget === 'idle') {
+            idleTransform.x += deltaX;
+            idleTransform.y += deltaY;
+        }
+        
+        dragStartMouseX = coords.x;
+        dragStartMouseY = coords.y;
+        
+        bakeSourceCache();
+        if (mouthBox.w > 0) bakePuppetLayers();
+        if (headBox.w > 0) bakeIsolatedHeadLayer();
+        updateAllViewports(0);
+        return;
+    }
+
+    if (!isDrawing) return;
     
     if (editTarget === 'jaw') {
         if (currentMode === 'box') {
@@ -1221,6 +1389,10 @@ uiCanvas.addEventListener('mousemove', (e) => {
 });
 
 uiCanvas.addEventListener('mouseup', () => {
+    if (isDraggingImage) {
+        isDraggingImage = false;
+        return;
+    }
     if (!isDrawing) return;
     isDrawing = false;
     
@@ -1258,9 +1430,13 @@ imageInput.addEventListener('change', (e) => {
         const objectURL = URL.createObjectURL(file);
         avatarImg.src = objectURL;
         avatarImg.onload = () => {
+            mainTransform = { x: 0, y: 0, scale: 1.0 };
+            mainScaleSlider.value = 100;
+            valMainScale.innerText = "1.00x";
+            
             sourceImageCacheCanvas.width = renderCanvas.width;
             sourceImageCacheCanvas.height = renderCanvas.height;
-            sCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
+            bakeSourceCache();
             resetSelectionData();
             status.innerText = "Status: Talking portrait loaded. Configure structural elements.";
         };
@@ -1273,54 +1449,32 @@ idleImageInput.addEventListener('change', (e) => {
         const objectURL = URL.createObjectURL(file);
         idleImg.src = objectURL;
         idleImg.onload = () => {
+            idleTransform = { x: 0, y: 0, scale: 1.0 };
+            idleScaleSlider.value = 100;
+            valIdleScale.innerText = "1.00x";
+            
             hasIdleImage = true;
+            bakeSourceCache();
             status.innerText = "Status: Idle portrait loaded successfully. Dynamic blending engine active.";
             updateAllViewports(0);
         };
     }
 });
- <!-- connectMicBtn.addEventListener('click', async () => { -->
-    <!-- try { -->
-        <!-- status.innerText = "Status: Connecting Microphone Feed Arrays..."; -->
-        <!-- audioCtx = new (window.AudioContext || window.webkitAudioContext)(); -->
-        <!-- analyser = audioCtx.createAnalyser(); -->
-        <!-- analyser.fftSize = 256; -->
 
-        <!-- micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false }); -->
-        <!-- const source = audioCtx.createMediaStreamSource(micStream); -->
-        <!-- source.connect(analyser); -->
-
-        <!-- isMicLive = true; -->
-        <!-- uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height); -->
-        
-        <!-- connectMicBtn.innerText = "🟢 SYSTEM LIVE"; -->
-        <!-- connectMicBtn.style.background = "#222"; -->
-        <!-- connectMicBtn.style.color = "#2ed573"; -->
-        <!-- connectMicBtn.style.border = "2px solid #2ed573"; -->
-        <!-- status.innerText = "Status: Profiles calibrated. Running dynamic matrix."; -->
-
-        <!-- triggerRandomBlinkCycle(); -->
-    <!-- } catch (err) { -->
-        <!-- status.innerText = `Error connecting mic stream: ${err.message}`; -->
-    <!-- } -->
-<!-- }); --> 
 connectMicBtn.addEventListener('click', async () => {
     try {
         status.innerText = "Status: Connecting Microphone Feed Arrays...";
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        // 1. Instantiate the explicit Gain Stage filter Node
         hardwareGainNode = audioCtx.createGain();
         hardwareGainNode.gain.setValueAtTime(gainMultiplier, audioCtx.currentTime);
 
-        // 2. Setup standard parsing analyser parameters
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 256;
 
         micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         const source = audioCtx.createMediaStreamSource(micStream);
         
-        // 3. Complete structural sequence routing pipeline
         source.connect(hardwareGainNode);
         hardwareGainNode.connect(analyser);
 
@@ -1338,6 +1492,311 @@ connectMicBtn.addEventListener('click', async () => {
         status.innerText = `Error connecting mic stream: ${err.message}`;
     }
 });
+
+// ==========================================
+//   SOVEREIGN PERSISTENCE ENGINE (INDEXEDDB)
+// ==========================================
+const dbRequest = indexedDB.open("PuppetStudioDB", 2);
+
+dbRequest.onupgradeneeded = (e) => {
+    let database = e.target.result;
+    if (!database.objectStoreNames.contains("puppets")) {
+        database.createObjectStore("puppets", { keyPath: "name" });
+    }
+    if (!database.objectStoreNames.contains("state")) {
+        database.createObjectStore("state");
+    }
+};
+
+dbRequest.onsuccess = (e) => {
+    db = e.target.result;
+    console.log("IndexedDB Core initialized.");
+    refreshProfileList().then(() => {
+        // Find last used target pointer record tracking state
+        const transaction = db.transaction(["state"], "readonly");
+        const store = transaction.objectStore("state");
+        const request = store.get("lastActivePuppet");
+        request.onsuccess = () => {
+            if (request.result) {
+                loadPuppetProfile(request.result);
+            }
+        };
+    });
+};
+
+dbRequest.onerror = () => {
+    storageStatus.innerText = "Cache Engine Error: Initialization Failed.";
+};
+
+function getBase64(imgElement) {
+    if (!imgElement.src || imgElement.src.startsWith('blob:')) {
+        // Fallback or translate directly through an offscreen canvas capture matrix
+        const canvas = document.createElement("canvas");
+        canvas.width = imgElement.naturalWidth || 500;
+        canvas.height = imgElement.naturalHeight || 500;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(imgElement, 0, 0);
+        return canvas.toDataURL("image/png");
+    }
+    return imgElement.src;
+}
+
+function savePuppetProfile() {
+    let name = profileNameInput.value.trim();
+    if (!name) {
+        if (activeProfileName) {
+            name = activeProfileName;
+        } else {
+            alert("Please input a name label for your Puppet file matrix configuration before saving.");
+            return;
+        }
+    }
+
+    storageStatus.innerText = `Compressing system metrics for '${name}'...`;
+
+    const profileData = {
+        name: name,
+        timestamp: Date.now(),
+        mainTransform,
+        idleTransform,
+        mouthBox,
+        lassoPoints,
+        leftEyeBox,
+        rightEyeBox,
+        headLassoPoints,
+        headBox,
+        currentMode,
+        zoomValue: zoomSlider.value,
+        swayAmplitude,
+        headWobbleMax,
+        blendInterpolationSpeed,
+        blinkIntensity,
+        jawWobbleMax,
+        lookAwayIntensity,
+        lookAwayBehavior: lookAwayBehaviorSelect.value,
+        featherBlur,
+        gainMultiplier,
+        noiseGateThreshold,
+        maxDropLimit,
+        tiltAngle,
+        yawShift,
+        hasIdleImage,
+        avatarImgData: avatarImg.src ? getBase64(avatarImg) : null,
+        idleImgData: (hasIdleImage && idleImg.src) ? getBase64(idleImg) : null
+    };
+
+    const transaction = db.transaction(["puppets", "state"], "readwrite");
+    transaction.objectStore("puppets").put(profileData);
+    transaction.objectStore("state").put(name, "lastActivePuppet");
+
+    transaction.oncomplete = () => {
+        activeProfileName = name;
+        profileNameInput.value = name;
+        storageStatus.innerText = `🟢 Saved '${name}' securely to browser core database structure.`;
+        refreshProfileList().then(() => {
+            profileSelect.value = name;
+        });
+    };
+}
+
+function loadPuppetProfile(name) {
+    if (!name) return;
+    storageStatus.innerText = `Reconstructing layout components for '${name}'...`;
+
+    const transaction = db.transaction(["puppets", "state"], "readwrite");
+    transaction.objectStore("state").put(name, "lastActivePuppet");
+    
+    const request = transaction.objectStore("puppets").get(name);
+    request.onsuccess = () => {
+        const data = request.result;
+        if (!data) return;
+
+        activeProfileName = name;
+        profileNameInput.value = name;
+        profileSelect.value = name;
+
+        // Restore geometric boundaries mapping structural paths
+        mouthBox = data.mouthBox || { x: 0, y: 0, w: 0, h: 0 };
+        lassoPoints = data.lassoPoints || [];
+        leftEyeBox = data.leftEyeBox || { x: 0, y: 0, w: 0, h: 0 };
+        rightEyeBox = data.rightEyeBox || { x: 0, y: 0, w: 0, h: 0 };
+        headLassoPoints = data.headLassoPoints || [];
+        headBox = data.headBox || { x: 0, y: 0, w: 0, h: 0 };
+        currentMode = data.currentMode || 'box';
+
+        // Update UI Button states tracking current mode parameters
+        if (currentMode === 'box') {
+            modeBoxBtn.className = 'active';
+            modeLassoBtn.className = '';
+        } else {
+            modeLassoBtn.className = 'active';
+            modeBoxBtn.className = '';
+        }
+
+        // Restore positioning transforms
+        mainTransform = data.mainTransform || { x: 0, y: 0, scale: 1.0 };
+        idleTransform = data.idleTransform || { x: 0, y: 0, scale: 1.0 };
+        mainScaleSlider.value = Math.round(mainTransform.scale * 100);
+        valMainScale.innerText = mainTransform.scale.toFixed(2) + "x";
+        idleScaleSlider.value = Math.round(idleTransform.scale * 100);
+        valIdleScale.innerText = idleTransform.scale.toFixed(2) + "x";
+
+        // Restore functional sliders matrix variables
+        if(data.zoomValue !== undefined) {
+            zoomSlider.value = data.zoomValue;
+            currentZoomScale = parseInt(zoomSlider.value) / 10;
+            valZoom.innerText = currentZoomScale.toFixed(1) + "x";
+            zoomContainer.style.setProperty('--zoom-level', currentZoomScale);
+        }
+        swayAmplitude = data.swayAmplitude !== undefined ? data.swayAmplitude : 1.5;
+        swaySlider.value = Math.round(swayAmplitude * 10);
+        valSway.innerText = swayAmplitude.toFixed(1) + "px";
+
+        headWobbleMax = data.headWobbleMax !== undefined ? data.headWobbleMax : 0;
+        headWobbleSlider.value = Math.round(headWobbleMax * 10);
+        valHeadWobble.innerText = headWobbleMax.toFixed(1) + "px";
+
+        blendInterpolationSpeed = data.blendInterpolationSpeed !== undefined ? data.blendInterpolationSpeed : 0.12;
+        morphSpeedSlider.value = Math.round(blendInterpolationSpeed * 100);
+        valMorphSpeed.innerText = blendInterpolationSpeed.toFixed(2);
+
+        blinkIntensity = data.blinkIntensity !== undefined ? data.blinkIntensity : 1.0;
+        blinkIntensitySlider.value = Math.round(blinkIntensity * 100);
+        valBlinkIntensity.innerText = blinkIntensitySlider.value + "%";
+
+        jawWobbleMax = data.jawWobbleMax !== undefined ? data.jawWobbleMax : 0;
+        jawWobbleSlider.value = jawWobbleMax;
+        valJawWobble.innerText = jawWobbleMax + "px";
+
+        lookAwayIntensity = data.lookAwayIntensity !== undefined ? data.lookAwayIntensity : 0;
+        lookAwaySlider.value = lookAwayIntensity;
+        valLookAway.innerText = lookAwayIntensity + "%";
+        lookAwayBehaviorSelect.value = data.lookAwayBehavior || "straight";
+
+        featherBlur = data.featherBlur !== undefined ? data.featherBlur : 4;
+        blurSlider.value = featherBlur;
+        valBlur.innerText = featherBlur + "px";
+
+        gainMultiplier = data.gainMultiplier !== undefined ? data.gainMultiplier : 1.0;
+        gainSlider.value = Math.round(gainMultiplier * 10);
+        valGain.innerText = gainMultiplier.toFixed(1) + "x";
+
+        noiseGateThreshold = data.noiseGateThreshold !== undefined ? data.noiseGateThreshold : 10;
+        gateSlider.value = noiseGateThreshold;
+        valGate.innerText = noiseGateThreshold;
+
+        maxDropLimit = data.maxDropLimit !== undefined ? data.maxDropLimit : 25;
+        dropLimitSlider.value = maxDropLimit;
+        valDropLimit.innerText = maxDropLimit + "px";
+
+        tiltAngle = data.tiltAngle !== undefined ? data.tiltAngle : 0;
+        tiltSlider.value = tiltAngle;
+        valTilt.innerText = tiltAngle + "°";
+
+        yawShift = data.yawShift !== undefined ? data.yawShift : 0;
+        yawSlider.value = yawShift;
+        valYaw.innerText = yawShift + "px";
+
+        hasIdleImage = data.hasIdleImage || false;
+
+        // Load asset payload structures sequentially
+        if (data.avatarImgData) {
+            avatarImg.src = data.avatarImgData;
+            avatarImg.onload = () => {
+                sourceImageCacheCanvas.width = renderCanvas.width;
+                sourceImageCacheCanvas.height = renderCanvas.height;
+                bakeSourceCache();
+                
+                if (mouthBox.w > 0) bakePuppetLayers();
+                if (headBox.w > 0) bakeIsolatedHeadLayer();
+                
+                if (hasIdleImage && data.idleImgData) {
+                    idleImg.src = data.idleImgData;
+                    idleImg.onload = () => {
+                        storageStatus.innerText = `🟢 Profile '${name}' restored fully.`;
+                        checkReadyState();
+                        updateAllViewports(0);
+                    };
+                } else {
+                    hasIdleImage = false;
+                    idleImg = new Image();
+                    storageStatus.innerText = `🟢 Profile '${name}' loaded (No idle secondary frame detected).`;
+                    checkReadyState();
+                    updateAllViewports(0);
+                }
+            };
+        } else {
+            avatarImg = new Image();
+            idleImg = new Image();
+            hasIdleImage = false;
+            resetSelectionData();
+            storageStatus.innerText = "Profile initialized with blank character asset records.";
+        }
+    };
+}
+
+function deletePuppetProfile() {
+    const targetToDelete = profileSelect.value;
+    if (!targetToDelete) return;
+
+    if (confirm(`Are you completely sure you want to permanently delete the profile configuration metrics for '${targetToDelete}'?`)) {
+        const transaction = db.transaction(["puppets", "state"], "readwrite");
+        transaction.objectStore("puppets").delete(targetToDelete);
+        
+        if (activeProfileName === targetToDelete) {
+            transaction.objectStore("state").delete("lastActivePuppet");
+            activeProfileName = "";
+            profileNameInput.value = "";
+        }
+
+        transaction.oncomplete = () => {
+            storageStatus.innerText = `Wiped out '${targetToDelete}' cleanly.`;
+            refreshProfileList().then(() => {
+                if (activeProfileName) {
+                    profileSelect.value = activeProfileName;
+                } else {
+                    location.reload();
+                }
+            });
+        };
+    }
+}
+
+function refreshProfileList() {
+    return new Promise((resolve) => {
+        if (!db) return resolve();
+        const transaction = db.transaction(["puppets"], "readonly");
+        const store = transaction.objectStore("puppets");
+        const request = store.getAllKeys();
+
+        request.onsuccess = () => {
+            // Keep option index baseline template
+            profileSelect.innerHTML = '<option value="">-- Load Saved Puppet Matrix --</option>';
+            request.result.forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = key;
+                profileSelect.appendChild(opt);
+            });
+            resolve();
+        };
+    });
+}
+
+// Attach listeners to persistence management layout structures
+saveWorkspaceBtn.addEventListener('click', savePuppetProfile);
+profileSelect.addEventListener('change', (e) => {
+    if (e.target.value) loadPuppetProfile(e.target.value);
+});
+deleteWorkspaceBtn.addEventListener('click', deletePuppetProfile);
+
+// Periodic Automated Background State Sync Loop (Auto-saves every 15 seconds if an active profile exists)
+setInterval(() => {
+    if (db && activeProfileName && avatarImg.src) {
+        savePuppetProfile();
+    }
+}, 15000);
+
 // Run Engines Loops
 setTimeout(triggerRandomLookAwayCycle, 2000);
 requestAnimationFrame(processLiveMicrophoneFeed);
