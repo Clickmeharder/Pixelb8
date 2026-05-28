@@ -76,26 +76,26 @@
 			<div id="manifest-grid"></div>
 		</div>
 		
-		<div id="jukebox-widget" class="p8-widget" style="display: none; width: 320px; position: absolute; background: rgba(20,20,20,0.95); border: 1px solid var(--accent); border-radius: 4px; padding: 10px; color: #fff; font-family: monospace; z-index: 10;">
-			<div class="widget-drag-handle" style="cursor: move; font-size: 11px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--accent); display: flex; justify-content: space-between;">
+		<div id="jukebox-widget" class="p8-widget" style="display: none; width: 300px; position: absolute; background: rgba(15,15,15,0.95); border: 1px solid var(--accent); border-radius: 4px; padding: 10px; color: #fff; font-family: monospace; z-index: 100;">
+			<div class="widget-drag-handle" style="cursor: move; font-size: 11px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--accent); display: flex; justify-content: space-between; user-select: none;">
 				<span>🎵 STREAM JUKEBOX WIDGET</span>
 				<span style="opacity: 0.5;">[DRAG]</span>
 			</div>
 			
-			<div id="jukebox-video-wrapper" style="width: 100%; height: 180px; margin-top: 8px; background: #000; border-radius: 2px; overflow: hidden;">
-				<div id="player"></div> </div>
+			<div id="jukebox-video-wrapper" style="width: 100%; height: 168px; margin-top: 8px; background: #000; border-radius: 2px; overflow: hidden;">
+				<div id="player"></div>
+			</div>
 
-			<div style="margin-top: 8px; font-size: 12px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 2px;">
-				<div id="jb-current-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: #ff4757;">No Track Loaded</div>
+			<div style="margin-top: 8px; font-size: 12px; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 2px;">
+				<div id="jb-current-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: var(--accent);">No Track Loaded</div>
 				<div id="jb-status-text" style="font-size: 10px; color: #a1a1aa; margin-top: 2px;">Status: Standby</div>
 			</div>
 			
 			<div style="display: flex; gap: 4px; margin-top: 6px;">
-				<button type="button" id="jb-skip-btn" style="flex: 1; font-size: 11px; padding: 4px; background: #27272a; border: 1px solid #3f3f46; color: #fff; cursor: pointer; border-radius: 2px;">Skip Track ⏭️</button>
-				<button type="button" id="jb-clear-btn" style="font-size: 11px; padding: 4px; background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color: #ef4444; cursor: pointer; border-radius: 2px;">Clear Queue 🗑️</button>
+				<button type="button" id="jb-skip-btn" style="flex: 1; font-size: 11px; padding: 4px; background: #27272a; border: 1px solid #3f3f46; color: #fff; cursor: pointer; border-radius: 2px;">Skip ⏭️</button>
+				<button type="button" id="jb-clear-btn" style="font-size: 11px; padding: 4px; background: rgba(239,68,68,0.15); border: 1px solid #ef4444; color: #ef4444; cursor: pointer; border-radius: 2px;">Clear Queue 🗑️</button>
 			</div>
-		</div>
-	
+		</div>	
     </div>
 
     <div id="p8-ctx-menu">
@@ -473,7 +473,27 @@
 				</div>
 			</div>
 		</div>
+		<div id="jukebox-widget-controls" class="collapsible-section collapsed">
+			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
+				<span>🎵 Song Request Jukebox</span>
+				<span class="collapse-icon">▼</span>
+			</div>
+			<div class="collapsible-content">
+				<div style="display: flex; justify-content: space-between; align-items: center; background: #1c1c1f; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #3f3f46;">
+					<div style="display: flex; flex-direction: column; gap: 2px;">
+						<span style="font-size: 12px; color: #f4f4f5; font-weight: 500;">Jukebox Module Status</span>
+						<span id="stg-jukebox-status-badge" style="font-size: 10px; color: #71717a; font-weight: bold; letter-spacing: 0.5px;">DISABLED</span>
+					</div>
+					<button type="button" id="stg-toggle-jukebox-btn" class="p8-btn" style="padding: 6px 14px; background: rgb(14, 165, 233); border: none; cursor: pointer; font-size: 11px; font-weight: bold; border-radius: 4px; width: auto; min-width: 80px;">TOGGLE</button>
+				</div>
 
+				<div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">🎛️ Manual Engine Controls</div>
+				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+					<button type="button" id="jb-skip-btn" class="p8-btn save-btn" style="padding: 8px; background: #27272a; border: 1px solid #3f3f46; font-size: 11px;">⏭️ SKIP TRACK</button>
+					<button type="button" id="jb-clear-btn" class="p8-btn alt-btn" style="padding: 8px; background: #991b1b; font-size: 11px;">🗑️ CLEAR QUEUE</button>
+				</div>
+			</div>
+		</div>
 		<button class="p8-btn" id="close-widgets-manager-btn" style="background:transparent; color:#71717a; font-size: 12px; width: 100%; margin-top: 15px;">Close Panel</button>
 	</div>
 
@@ -508,9 +528,9 @@
                 </div>
             </div>
 			<div class="settings-toggle-row">
-				<span class="settings-toggle-label">Song Request Widget:</span>
+				<span class="settings-toggle-label">Song Request Jukebox:</span>
 				<div class="settings-toggle-controls">
-					<span id="stg-jukebox-status-badge" class="toggle-status-badge">DISABLED</span>
+					<span id="stg-jukebox-status-badge" class="toggle-status-badge">---</span>
 					<button type="button" id="stg-toggle-jukebox-btn" class="toggle-action-btn">Toggle</button>
 				</div>
 			</div>
