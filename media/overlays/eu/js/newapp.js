@@ -476,7 +476,29 @@ document.getElementById("btnReset")?.addEventListener("click", () => {
         location.reload(); 
     }
 });
-
+// Listens for clicks on any "X" button inside your timer container
+document.getElementById("overlay-timer")?.addEventListener("click", (e) => {
+    // Check if the clicked element is an X close button
+    // (Adjust the class/attribute selector below if your close button uses a different class or ID)
+    if (e.target.classList.contains("close-timer-btn") || e.target.textContent === "X") {
+        // Find the closest parent timer item element
+        const timerRow = e.target.closest(".timer-item") || e.target.parentElement;
+        
+        if (timerRow) {
+            // Optional: If you track active timers in an array/object, remove it from memory here
+            // e.g., delete window.activeTimers[timerRow.dataset.id];
+            
+            // Remove the timer element from the visible DOM layout
+            timerRow.remove();
+            
+            addLog("TIMER REMOVED BY STREAMER");
+            
+            // If you have logic syncing your timer instances to your saved state,
+            // call saveData() here to update LocalStorage.
+            saveData();
+        }
+    }
+});
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     // Auto-save interval
