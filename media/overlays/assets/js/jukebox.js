@@ -73,19 +73,21 @@ export class StreamJukebox {
         };
     }
 
-    applyButtonStyles() {
-        const buttons = {
-            'jb-skip-btn': 'p8-btn',
-            'jb-clear-btn': 'p8-btn danger-btn',
-            'jb-add-queue-btn': 'p8-btn',
-            'jb-add-fallback-btn': 'p8-btn alt-btn',
-            'stg-toggle-jukebox-btn': 'p8-btn'
-        };
-        Object.keys(buttons).forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.className = buttons[id];
-        });
-    }
+	applyButtonStyles() {
+		const buttons = {
+			'jb-skip-btn': 'p8-btn',
+			'jb-clear-btn': 'p8-btn danger-btn',
+			// Use the new green class here
+			'jb-add-queue-btn': 'p8-btn p8-btn-success',
+			'jb-add-fallback-btn': 'p8-btn p8-btn-success',
+			'stg-toggle-jukebox-btn': 'p8-btn'
+		};
+		
+		Object.keys(buttons).forEach(id => {
+			const el = document.getElementById(id);
+			if (el) el.className = buttons[id];
+		});
+	}
 
     bindControls() {
         const skipBtn = document.getElementById('jb-skip-btn');

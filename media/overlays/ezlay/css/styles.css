@@ -604,13 +604,17 @@ body.edit-mode .p8-widget:active {
     transition: 0.2s; 
 }
 
-/* #jukebox-widget .p8-btn {
+.p8-btn-success {
+    background-color: rgb(46, 125, 50) !important;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
 
-    background: var(--bg-color, #18181b);
-    border: 1px solid var(--border-color, #3f3f46);
-    color: var(--text-color, #fff);
-} */
-
+/* Optional: Add a hover effect */
+.p8-btn-success:hover {
+    background-color: rgb(35, 96, 38) !important;
+}
 .save-btn { 
     background: var(--accent); 
     color: white; 
