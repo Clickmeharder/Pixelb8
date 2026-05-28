@@ -178,6 +178,7 @@ function onYouTubeIframeAPIReady() {
         playerVars: {
             'autoplay': 1, 
             'controls': 1,
+            'enablejsapi': 1,
             'origin': window.location.origin
         },
         events: {
@@ -244,7 +245,7 @@ function playNextSong() {
 
     try {
         if (nextSong.isSearch) {
-            // Uses official search configuration natively, bypassing cross-origin restrictions completely
+            // Uses official search parameters layout natively, bypassing proxy blockers completely
             ytPlayer.loadPlaylist({
                 listType: 'search',
                 list: nextSong.id,
