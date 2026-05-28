@@ -2312,45 +2312,6 @@ const PANEL_NAVIGATION_MAPS = [
     }
 ];
 // Maps HTML inputs/buttons to reactive parameters, executing automated mutations and context syncs
-// Ensure this function exists globally in overlayapp.js
-function syncAllToggleUI() {
-    const s = typeof settings !== 'undefined' ? settings : {};
-    
-    // Helper to update specific badges
-    const updateBadge = (id, isActive) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
-            el.innerText = isActive ? "ON" : "OFF";
-        }
-    };
-
-    // 1. Master Alerts
-    updateBadge("stg-master-status-badge", !alertHidden); // Assuming alertHidden is inverted
-    updateBadge("mgr-alert-status-badge", !alertHidden);
-
-    // 2. Rewards
-    updateBadge("stg-rewards-status-badge", s.rewardsEnabled);
-    updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
-
-    // 3. Bits
-    updateBadge("stg-bits-status-badge", s.bitsEnabled);
-    updateBadge("mgr-bits-status-badge", s.bitsEnabled);
-
-    // 4. Jukebox
-    updateBadge("stg-jukebox-status-badge", s.jukeboxWidgetEnabled);
-    const jbControls = document.getElementById("jukebox-widget-controls");
-    if (jbControls) {
-        jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
-        jbControls.style.opacity = s.jukeboxWidgetEnabled ? "1" : "0.5";
-        jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
-    }
-
-    // Sync Engine States
-    if (window.streamJukeboxEngine) {
-        window.streamJukeboxEngine.setWidgetActiveState(s.jukeboxWidgetEnabled);
-    }
-}
 
 const BOOLEAN_TOGGLE_MAPS = [
     { 
@@ -2441,9 +2402,10 @@ function closeContextMenu() {
 // ==========================================
 // --- REWARDS MANAGER CONTROL ENGINE ---
 // ==========================================
+// Ensure this function exists globally in overlayapp.js
 function syncAllToggleUI() {
     const s = typeof settings !== 'undefined' ? settings : {};
-
+    
     // Helper to update specific badges
     const updateBadge = (id, isActive) => {
         const el = document.getElementById(id);
@@ -2453,23 +2415,33 @@ function syncAllToggleUI() {
         }
     };
 
-    // 1. Sync Master Alert
-    updateBadge("stg-master-status-badge", s.masterAlertsEnabled);
-    updateBadge("mgr-alert-status-badge", s.masterAlertsEnabled); // Matches ID in Rewards Manager
+    // 1. Master Alerts
+    updateBadge("stg-master-status-badge", !alertHidden); // Assuming alertHidden is inverted
+    updateBadge("mgr-alert-status-badge", !alertHidden);
 
-    // 2. Sync Rewards
+    // 2. Rewards
     updateBadge("stg-rewards-status-badge", s.rewardsEnabled);
     updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
 
-    // 3. Sync Bits
+    // 3. Bits
     updateBadge("stg-bits-status-badge", s.bitsEnabled);
     updateBadge("mgr-bits-status-badge", s.bitsEnabled);
 
-    // 4. Sync Jukebox
+    // 4. Jukebox
     updateBadge("stg-jukebox-status-badge", s.jukeboxWidgetEnabled);
     const jbControls = document.getElementById("jukebox-widget-controls");
-    if (jbControls) jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
+    if (jbControls) {
+        jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
+        jbControls.style.opacity = s.jukeboxWidgetEnabled ? "1" : "0.5";
+        jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
+    }
+
+    // Sync Engine States
+    if (window.streamJukeboxEngine) {
+        window.streamJukeboxEngine.setWidgetActiveState(s.jukeboxWidgetEnabled);
+    }
 }
+
 function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");
     if (!rewardsPanel) return;
