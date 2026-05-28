@@ -2020,37 +2020,35 @@ function initTimerEngine() {
         if (shouldRestart && !timerIntervalId) {
             timerIntervalId = setInterval(processTimersTick, 1000);
         }
+        renderActiveTimersUI();
     }
 
-    // Render UI: This now handles the visibility logic internally
-    renderActiveTimersUI();
-    
-    // Set up a single robust delegated event listener for row control actions
-	const listContainer = document.getElementById("active-timers-list");
-	if (listContainer && !listContainer.dataset.delegated) {
-		listContainer.dataset.delegated = "true";
-		listContainer.addEventListener("click", (e) => {
-			const btn = e.target.closest("button[data-action]");
-			if (!btn) return;
-			
-			e.stopPropagation();
-			e.preventDefault(); // Prevent any parent window panel propagation bugs
-			
-			const action = btn.getAttribute("data-action");
-			const targetId = btn.getAttribute("data-id");
+    // 2. FIX: Safely capture the UI elements container and hook interactions directly
+    const listContainer = document.getElementById("active-timers-list");
+    if (listContainer && !listContainer.dataset.delegated) {
+        listContainer.dataset.delegated = "true"; // Prevent duplicate handler mapping bugs
+        
+        listContainer.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-action]");
+            if (!btn) return;
+            
+            // Stop other navigation modules from intercepting or resetting the click state
+            e.stopPropagation();
+            e.preventDefault();
 
-			if (action === "start") startTimerInstance(targetId);
-			if (action === "pause") pauseTimerInstance(targetId);
-			if (action === "reset") resetTimerInstance(targetId);
-			if (action === "split") splitTimerInstance(targetId);
-			
-			// FIX: Added explicit intercept mapping to route the "delete" action attribute
-			// to your actual delete cleanup method.
-			if (action === "delete") stopTimerInstance(targetId); 
-		});
-	}
+            const action = btn.getAttribute("data-action");
+            const targetId = btn.getAttribute("data-id");
+
+            if (action === "start") startTimerInstance(targetId);
+            if (action === "pause") pauseTimerInstance(targetId);
+            if (action === "reset") resetTimerInstance(targetId);
+            if (action === "split") splitTimerInstance(targetId);
+            
+            // Map the "delete" markup action directly into your stop/elimination runtime engine
+            if (action === "delete") stopTimerInstance(targetId); 
+        });
+    }
 }
-
 function updateTimerStyles() {
     const colorValue = document.getElementById('tmr-color-text').value;
     
