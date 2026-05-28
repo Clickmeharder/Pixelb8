@@ -82,17 +82,20 @@
     }
     button:hover { background: #ff6b81; }
     
+    /* --- SCALED UP HIGH-VISIBILITY STATUS BAR --- */
     #status {
         color: lime;
         font-family: monospace;
         background: #050505;
-        padding: 15px;
-        border-radius: 4px;
-        border-left: 4px solid #ff4757;
+        padding: 20px;
+        border-radius: 6px;
+        border-left: 6px solid #ff4757;
         margin: 20px 0;
         text-align: left;
         word-wrap: break-word;
-        font-size: 13px;
+        font-size: 22px; /* Amplified text size for easy stream reading */
+        font-weight: bold;
+        line-height: 1.4;
     }
     
     .video-monitor-panel {
@@ -125,32 +128,36 @@
         line-height: 1.4;
     }
 
-    /* --- VIBRANT POPUP ALERTS MATRIX OVERLAY SYSTEM --- */
+    /* --- SCALED UP VIBRANT POPUP ALERTS OVERLAY --- */
     .alert-toast-container {
         position: absolute;
-        top: 15px;
-        right: 15px;
+        top: 20px;
+        right: 20px;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 15px;
         z-index: 9999;
         pointer-events: none;
-        max-width: 320px;
+        max-width: 480px; /* Wider footprint to fit larger text gracefully */
     }
     .vote-toast {
-        background: rgba(46, 204, 113, 0.95);
+        background: rgba(46, 204, 113, 0.98);
         color: #fff;
-        padding: 10px 15px;
-        border-radius: 6px;
+        padding: 15px 25px;
+        border-radius: 8px;
         font-weight: bold;
-        font-size: 13px;
+        font-size: 20px; /* Significantly increased size */
         text-align: left;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-        border-left: 5px solid #27ae60;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+        border-left: 8px solid #27ae60;
         display: flex;
         align-items: center;
-        gap: 10px;
-        animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.4s ease 3.6s forwards;
+        gap: 15px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.4s ease 4.6s forwards;
+    }
+    .vote-toast .toast-thumb {
+        font-size: 28px; /* Extra large emoji */
     }
     .milestone-popup-announcement {
         position: absolute;
@@ -159,21 +166,21 @@
         transform: translate(-50%, -50%);
         background: rgba(241, 196, 15, 0.98);
         color: #111;
-        padding: 20px 25px;
-        border-radius: 8px;
-        font-size: 16px;
+        padding: 25px 35px;
+        border-radius: 12px;
+        font-size: 24px; /* Big center-screen takeover font */
         font-weight: 900;
         text-transform: uppercase;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        border: 2px solid #fff;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.9);
+        border: 3px solid #fff;
         z-index: 10000;
         pointer-events: none;
         text-align: center;
-        width: 80%;
-        max-width: 450px;
+        width: 85%;
+        max-width: 550px;
         letter-spacing: 0.5px;
         line-height: 1.4;
-        animation: popInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.5s ease 4.5s forwards;
+        animation: popInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.5s ease 5.5s forwards;
     }
     @keyframes slideInRight {
         from { transform: translateX(120%); opacity: 0; }
@@ -184,7 +191,7 @@
         to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     }
     @keyframes fadeOut {
-        to { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 0; transform: translateY(-15px); }
     }
 
     /* Floating Navigation HUD specific to OBS Overlays */
@@ -224,7 +231,7 @@
         background: transparent !important;
         box-shadow: none;
         border-radius: 0;
-        padding: 35px 10px 10px 10px; 
+        padding: 45px 10px 10px 10px; 
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -249,8 +256,8 @@
         margin-top: 0;
     }
     body.obs-widget-view #status {
-        margin: 8px 0 0 0;
-        background: rgba(0, 0, 0, 0.8);
+        margin: 12px 0 0 0;
+        background: rgba(0, 0, 0, 0.85);
     }
 
     /* Audio Only Operational System Tweaks */
@@ -319,7 +326,6 @@
 </div>
 
 <script>
-// Load YouTube IFrame Player API globally
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -329,13 +335,11 @@ let ytPlayer = null;
 let ytPlayerReady = false;
 const status = document.getElementById('status');
 
-// --- HIGH-AVAILABILITY ENGINE & FALLBACK ROTATION VARIABLES ---
 let songQueue = [];
 let fallbackPlaylist = JSON.parse(localStorage.getItem("jukeboxFallbackPlaylist")) || [];
 let isPlayingSong = false;
 let streamername = "jaedraze";
 
-// Voting Threshold Parameters
 const VOTE_REQUIREMENT = 2; 
 let currentTrackVotes = new Set();
 let currentTrackData = null; 
@@ -350,12 +354,10 @@ function isStreamerAndAuthorize(user, command) {
 
 function extractYouTubeId(url) {
     if (!url || typeof url !== 'string') return null;
-    
     const cleanRawId = url.trim();
     if (cleanRawId.length === 11 && /^[a-zA-Z0-9_-]{11}$/.test(cleanRawId)) {
         return cleanRawId;
     }
-
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\?v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
     if (match && match[2].length === 11) {
@@ -365,7 +367,6 @@ function extractYouTubeId(url) {
 }
 
 function onYouTubeIframeAPIReady() {
-    console.log("⚓ YouTube IFrame API Mounted successfully.");
     ytPlayer = new YT.Player('ytPlayerNode', {
         height: '100%',
         width: '100%',
@@ -387,7 +388,6 @@ function onYouTubeIframeAPIReady() {
                 }
             },
             'onError': (err) => {
-                console.warn(`Youtubeer Interface Warning Signal: ${err.data}`);
                 status.innerText = `⚠️ Player Error [Code ${err.data}]. Advancing queue...`;
                 playNextSong();
             }
@@ -402,22 +402,17 @@ async function fetchTrackIdFromKeywords(keywords) {
         'https://yewtu.be',
         'https://invidious.projectsegfau.lt'
     ];
-    
     const cleanQuery = encodeURIComponent(keywords);
-    
     for (let host of instances) {
         try {
-            console.log(`📡 Querying fallback node layout matrix: ${host}`);
             const response = await fetch(`${host}/api/v1/search?q=${cleanQuery}&type=video`);
             if (!response.ok) continue;
-            
             const results = await response.json();
             if (results && results.length > 0 && results[0].videoId) {
-                console.log(`✅ Core Matrix Resolved "${keywords}" to Track ID: ${results[0].videoId}`);
                 return { id: results[0].videoId, title: results[0].title || keywords };
             }
         } catch (e) {
-            console.warn(`Node failover encounter at ${host}. Cycling structural routing...`);
+            console.warn(`Node failover encounter layout matrix routing...`);
         }
     }
     return null;
@@ -425,17 +420,16 @@ async function fetchTrackIdFromKeywords(keywords) {
 
 function queueTrackAsset(user, rawInput) {
     if (!rawInput) return;
-    
     let cleanedInput = rawInput.trim();
     let explicitId = extractYouTubeId(cleanedInput);
     
     if (explicitId) {
         songQueue.push({ user: user, title: `Direct Asset Link`, id: explicitId, isSearch: false });
-        status.innerText = `🎵 Live Track ID [${explicitId}] queued by ${user}. Queue depth: ${songQueue.length}`;
+        status.innerText = `🎵 Track ID [${explicitId}] queued by ${user}. Queue: ${songQueue.length}`;
         if (!isPlayingSong) playNextSong();
     } else {
         songQueue.push({ user: user, title: cleanedInput, id: cleanedInput, isSearch: true });
-        status.innerText = `✅ Queued Live Search: "${cleanedInput}" (Requested by ${user}). Queue depth: ${songQueue.length}`;
+        status.innerText = `✅ Queued Search: "${cleanedInput}" (${user}). Queue: ${songQueue.length}`;
         if (!isPlayingSong) playNextSong();
     }
 }
@@ -449,12 +443,12 @@ async function addTrackToFallbackRegistry(rawInput, executionContextName) {
         const item = { id: explicitId, title: `Direct Track Asset (${explicitId})` };
         saveFallbackItem(item, executionContextName);
     } else {
-        status.innerText = `🔍 Resolving track details for Fallback Playlist: "${cleanedInput}"...`;
+        status.innerText = `🔍 Resolving fallback tracks: "${cleanedInput}"...`;
         const lookup = await fetchTrackIdFromKeywords(cleanedInput);
         if (lookup) {
             saveFallbackItem(lookup, executionContextName);
         } else {
-            status.innerText = `❌ Error: Could not resolve track match layout for fallback array: "${cleanedInput}"`;
+            status.innerText = `❌ Error resolving fallback: "${cleanedInput}"`;
         }
     }
 }
@@ -463,24 +457,24 @@ function saveFallbackItem(item, originUser) {
     if (!fallbackPlaylist.some(element => element.id === item.id)) {
         fallbackPlaylist.push(item);
         localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
-        status.innerText = `💾 Saved to Fallback Playlist: "${item.title}" (Added by ${originUser}). Total pool size: ${fallbackPlaylist.length}`;
+        status.innerText = `💾 Saved to Fallback: "${item.title}" (${originUser}). Pool size: ${fallbackPlaylist.length}`;
         triggerMilestoneOverlay(item.title);
     } else {
-        status.innerText = `💡 Track "${item.title}" already exists inside fallback playlist database.`;
+        status.innerText = `💡 Track "${item.title}" already inside fallback registry.`;
     }
 }
 
-// --- VISUAL INTERFACE INJECTION METHODS ---
+// --- HIGH-VISIBILITY INJECTION INTERFACE ENGINE ---
 function triggerVoteToastNotification(username, currentCount, targetCount) {
     const container = document.getElementById("alertToastContainer");
     if (!container) return;
 
     const toast = document.createElement("div");
     toast.className = "vote-toast";
-    toast.innerHTML = `<span>👍</span> <div><strong>${username}</strong> liked this song! (${currentCount}/${targetCount})</div>`;
+    toast.innerHTML = `<span class="toast-thumb">👍</span> <div><strong>${username}</strong> liked this song!<br><span style="font-size:16px; opacity:0.9;">Progress: ${currentCount} / ${targetCount} votes</span></div>`;
     
     container.appendChild(toast);
-    setTimeout(() => { toast.remove(); }, 4000);
+    setTimeout(() => { toast.remove(); }, 5000); // Expanded view lifetime slightly for tracking
 }
 
 function triggerMilestoneOverlay(songTitle) {
@@ -489,30 +483,26 @@ function triggerMilestoneOverlay(songTitle) {
 
     const popup = document.createElement("div");
     popup.className = "milestone-popup-announcement";
-    popup.innerHTML = `🔥 Community Choice! <br><span style="font-size:12px; color:#fff; display:block; margin-top:5px; text-transform:none;">"${songTitle}" reached the threshold and hit the Fallback Playlist!</span>`;
+    popup.innerHTML = `🔥 Community Choice! <br><span style="font-size:16px; color:#fff; display:block; margin-top:8px; text-transform:none; font-weight:normal;">"${songTitle}" reached the threshold and hit the Fallback Playlist!</span>`;
     
     wrapper.appendChild(popup);
-    setTimeout(() => { popup.remove(); }, 5000);
+    setTimeout(() => { popup.remove(); }, 6000);
 }
 
 ComfyJS.onCommand = async (user, command, message, flags, extra) => {
     if (command === "sr" || command === "songrequest") {
         queueTrackAsset(user, message);
     }
-    
     if (command === "addfallback") {
         if (isStreamerAndAuthorize(user, command)) {
             addTrackToFallbackRegistry(message, user);
         }
     }
-
     if (command === "likesong") {
         if (!currentTrackData) return;
-        
         if (!currentTrackVotes.has(user.toLowerCase())) {
             currentTrackVotes.add(user.toLowerCase());
             
-            // Instantly spawn green floating upvote notice card over video node
             triggerVoteToastNotification(user, currentTrackVotes.size, VOTE_REQUIREMENT);
             
             if (currentTrackVotes.size >= VOTE_REQUIREMENT) {
@@ -521,13 +511,11 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
                     localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
                     status.innerText = `🔥 Community Choice! "${currentTrackData.title}" reached upvote threshold and hit the Fallback Playlist! Pool size: ${fallbackPlaylist.length}`;
                     
-                    // Spawn huge golden community center splash milestone overlay
                     triggerMilestoneOverlay(currentTrackData.title);
                 }
             }
         }
     }
-    
     if (command === "skip") {
         if (isStreamerAndAuthorize(user, command)) {
             skipCurrentSong();
@@ -544,13 +532,12 @@ async function playNextSong() {
         return;
     }
 
-    // STATE ONE: Live Queue Interceptor Processing Matrix (Highest Priority)
     if (songQueue.length > 0) {
         isPlayingSong = true;
         const nextSong = songQueue.shift();
         
         if (nextSong.isSearch) {
-            status.innerText = `🔍 Resolving search match path for live request: "${nextSong.title}"...`;
+            status.innerText = `🔍 Resolving request: "${nextSong.title}"...`;
             const resolved = await fetchTrackIdFromKeywords(nextSong.id);
             
             if (resolved) {
@@ -566,7 +553,7 @@ async function playNextSong() {
                     playNextSong();
                 }
             } else {
-                status.innerText = `❌ Error resolving live search: "${nextSong.title}". Advancing...`;
+                status.innerText = `❌ Error resolving: "${nextSong.title}". Advancing...`;
                 playNextSong();
             }
         } else {
@@ -586,13 +573,12 @@ async function playNextSong() {
         return;
     }
 
-    // STATE TWO: Fallback Shuffle Engine Allocation (Zero Live Tracks Available)
     if (fallbackPlaylist.length > 0) {
         isPlayingSong = true;
         const randomIndex = Math.floor(Math.random() * fallbackPlaylist.length);
         const fallbackTrack = fallbackPlaylist[randomIndex];
         
-        status.innerText = `🔀 [Fallback Rotation Pool] Now Playing: "${fallbackTrack.title}"`;
+        status.innerText = `🔀 [Fallback Pool] Now Playing: "${fallbackTrack.title}"`;
         currentTrackData = { id: fallbackTrack.id, title: fallbackTrack.title };
         
         try {
@@ -602,12 +588,11 @@ async function playNextSong() {
             }
             ytPlayer.loadVideoById(fallbackTrack.id);
         } catch (e) {
-            console.error("Failed loading target fallback data registry asset:", e);
             playNextSong();
         }
     } else {
         isPlayingSong = false;
-        status.innerText = "Status: Live Queue dry & Fallback Playlist empty. Standing by for commands...";
+        status.innerText = "Status: Live Queue dry & Fallback Playlist empty. Standing by...";
     }
 }
 
@@ -619,7 +604,6 @@ function skipCurrentSong() {
     }
 }
 
-// --- TWITCH CHAT RUNTIME INTERACTION ENGINE ---
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
@@ -629,7 +613,7 @@ function setStreamer(newStreamer) {
         streamername = newStreamer.trim().toLowerCase();
         localStorage.setItem("lastStreamer", streamername);
         ComfyJS.Init(streamername);
-        status.innerText = `📡 Jukebox connected to channel: ${streamername}. Ready for track requests.`;
+        status.innerText = `📡 Connected to channel: ${streamername}. Ready for requests.`;
         
         button.style.display = "none";
         input.style.display = "none";
@@ -661,7 +645,6 @@ function disconnectBot() {
     twitchdisconnectbutton.style.display = "none";
 }
 
-// --- BROWSER DASHBOARD EVENT LISTENERS ---
 document.getElementById("browserSubmitBtn").addEventListener("click", function() {
     const inputField = document.getElementById("browserSearchInput");
     if (inputField.value.trim() !== "") {
@@ -697,7 +680,6 @@ document.getElementById("twitchdisconnectButt").addEventListener("click", functi
     disconnectBot();
 });
 
-// --- OBS INTERFACE AND DISPLAY MATRIX VIEW ACTIONS ---
 const toggleObsViewBtn = document.getElementById("toggleObsViewBtn");
 const exitObsViewBtn = document.getElementById("exitObsViewBtn");
 const toggleAudioDisplayBtn = document.getElementById("toggleAudioDisplayBtn");
