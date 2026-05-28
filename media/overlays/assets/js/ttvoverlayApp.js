@@ -766,23 +766,7 @@ function updateAllBadgesUI() {
         });
     });
 }
-//  old toggle
-// Helper tracking routine to update the control deck indicators
 
-/* function updateManagerBadgesUI() {
-    const badge = document.getElementById("mgr-alert-status-badge");
-    if (!badge) return;
-    
-    if (alertHidden) {
-        badge.innerText = "MUTED";
-        badge.style.background = "#7f1d1d";
-        badge.style.color = "#fecaca";
-    } else {
-        badge.innerText = "ACTIVE";
-        badge.style.background = "#064e3b";
-        badge.style.color = "#a7f3d0";
-    }
-} */
 //=========================================
 //==========================================
 // ==========================================
@@ -2022,31 +2006,33 @@ function initTimerEngine() {
         }
     }
 
-    // Render UI lists instantly
+    // Render UI: This now handles the visibility logic internally
     renderActiveTimersUI();
 
-    // FIXED: Delegation attached directly to the main element wrapper
+    // Set up a single robust delegated event listener for row control actions
     const listContainer = document.getElementById("active-timers-list");
     if (listContainer && !listContainer.dataset.delegated) {
-        listContainer.dataset.delegated = "true"; // Prevent duplicate trigger assignments
-        
-        listContainer.addEventListener("click", function(e) {
-            // Find if the clicked element (or its icon) is inside a control button
+        listContainer.dataset.delegated = "true";
+        listContainer.addEventListener("click", (e) => {
             const btn = e.target.closest("button[data-action]");
             if (!btn) return;
-            
-            // Stop other panel navigation blocks from stealing the click hook
+
+            // Stop layout panels/context menus from intercepting click propagation
             e.stopPropagation();
             e.preventDefault();
 
             const action = btn.getAttribute("data-action");
             const targetId = btn.getAttribute("data-id");
 
+            console.log(`⏱️ Timer Action Triggered: ${action} on ID: ${targetId}`);
+
             if (action === "start") startTimerInstance(targetId);
             if (action === "pause") pauseTimerInstance(targetId);
             if (action === "reset") resetTimerInstance(targetId);
             if (action === "split") splitTimerInstance(targetId);
-            if (action === "delete") stopTimerInstance(targetId); // Maps X button to deletion
+            
+            // 🟢 FIX: Map the 'delete' action to your actual removal function!
+            if (action === "delete") stopTimerInstance(targetId);
         });
     }
 }
