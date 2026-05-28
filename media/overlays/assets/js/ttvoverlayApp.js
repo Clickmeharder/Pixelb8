@@ -503,7 +503,7 @@ function init() {
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 
     populateCustomDropdowns();
-    
+    initTimerEngine();
     // Bind all event listeners to the DOM
     bindEvents();
     console.log("ttvoverlayapp.js version 0.112 finished loading");
