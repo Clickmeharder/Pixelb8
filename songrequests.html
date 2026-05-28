@@ -368,6 +368,7 @@
         <button id="browserSkipBtn" style="background: #eccc68; color: #111; width: 100%; margin-top: 0px;">⏭️ Skip Current Song</button>
     </div>
 
+    <!-- Clickable Fallback Registry UI Container -->
     <div class="fallback-manager-panel">
         <label>💾 Fallback Rotation Pool (Click track to play instantly)</label>
         <div id="fallbackListContainer" class="fallback-list"></div>
@@ -420,15 +421,21 @@ const VOTE_REQUIREMENT = 2;
 let currentTrackVotes = new Set();
 let currentTrackData = null; 
 
+// Isolated song title truncation handler
+function truncateSongTitle(title, maxLen = 30) {
+    if (!title) return "";
+    let clean = title.trim();
+    if (clean.length > maxLen) {
+        return clean.substring(0, maxLen - 30 ? maxLen - 3 : 27) + "...";
+    }
+    return clean;
+}
+
+// System Status Text Handler with timed auto-fadeout
 function updateSystemStatusText(rawText) {
     if (!rawText) return;
     
-    let processedText = rawText.trim();
-    if (processedText.length > 30) {
-        processedText = processedText.substring(0, 27) + "...";
-    }
-    
-    statusNode.innerText = processedText;
+    statusNode.innerText = rawText.trim();
     statusNode.style.opacity = "1";
     
     if (statusFadeTimeout) clearTimeout(statusFadeTimeout);
@@ -473,7 +480,7 @@ function playSpecificTrack(track) {
     currentTrackVotes.clear();
     currentTrackData = { id: track.id, title: track.title };
     
-    updateSystemStatusText(`🎯 Manual Play: "${track.title}"`);
+    updateSystemStatusText(`🎯 Manual Play: "${truncateSongTitle(track.title)}"`);
     try {
         const mainIframe = document.querySelector('#videoWrapper iframe');
         if (mainIframe) {
@@ -522,7 +529,6 @@ function onYouTubeIframeAPIReady() {
             'onReady': () => {
                 ytPlayerReady = true;
                 updateSystemStatusText(`Ready. Pool: ${fallbackPlaylist.length} tracks.`);
-                // Force a check right away instead of hanging or logging an error screen on initial boot
                 if (!isPlayingSong) {
                     playNextSong();
                 }
@@ -574,7 +580,7 @@ function queueTrackAsset(user, rawInput) {
         if (!isPlayingSong) playNextSong();
     } else {
         songQueue.push({ user: user, title: cleanedInput, id: cleanedInput, isSearch: true });
-        updateSystemStatusText(`✅ Queued: "${cleanedInput}"`);
+        updateSystemStatusText(`✅ Queued: "${truncateSongTitle(cleanedInput)}"`);
         if (!isPlayingSong) playNextSong();
     }
 }
@@ -588,12 +594,12 @@ async function addTrackToFallbackRegistry(rawInput, executionContextName) {
         const item = { id: explicitId, title: `Direct Track Asset (${explicitId})` };
         saveFallbackItem(item, executionContextName);
     } else {
-        updateSystemStatusText(`🔍 Resolving: "${cleanedInput}"...`);
+        updateSystemStatusText(`🔍 Resolving Fallback: "${truncateSongTitle(cleanedInput)}"...`);
         const lookup = await fetchTrackIdFromKeywords(cleanedInput);
         if (lookup) {
             saveFallbackItem(lookup, executionContextName);
         } else {
-            updateSystemStatusText(`❌ Error resolving fallback: "${cleanedInput}"`);
+            updateSystemStatusText(`❌ Error resolving fallback: "${truncateSongTitle(cleanedInput)}"`);
         }
     }
 }
@@ -602,7 +608,7 @@ function saveFallbackItem(item, originUser) {
     if (!fallbackPlaylist.some(element => element.id === item.id)) {
         fallbackPlaylist.push(item);
         localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
-        updateSystemStatusText(`💾 Saved Fallback: "${item.title}"`);
+        updateSystemStatusText(`💾 Saved Fallback: "${truncateSongTitle(item.title)}"`);
         refreshFallbackPlaylistUI();
         triggerMilestoneOverlay(item.title);
     } else {
@@ -629,12 +635,7 @@ function triggerMilestoneOverlay(songTitle) {
     const popup = document.createElement("div");
     popup.className = "milestone-popup-announcement";
     
-    let truncatedTitle = songTitle;
-    if (truncatedTitle.length > 30) {
-        truncatedTitle = truncatedTitle.substring(0, 27) + "...";
-    }
-    
-    popup.innerHTML = `🔥 Community Choice! <br><span style="font-size:26px; color:#fff; display:block; margin-top:12px; text-transform:none; font-weight:bold;">"${truncatedTitle}" reached the threshold and hit the Fallback Playlist!</span>`;
+    popup.innerHTML = `🔥 Community Choice! <br><span style="font-size:26px; color:#fff; display:block; margin-top:12px; text-transform:none; font-weight:bold;">"${truncateSongTitle(songTitle)}" reached the threshold and hit the Fallback Playlist!</span>`;
     
     wrapper.appendChild(popup);
     setTimeout(() => { popup.remove(); }, 6500);
@@ -660,7 +661,7 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
                 if (!fallbackPlaylist.some(el => el.id === currentTrackData.id)) {
                     fallbackPlaylist.push({ id: currentTrackData.id, title: currentTrackData.title });
                     localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
-                    updateSystemStatusText(`🔥 Threshold Hit: "${currentTrackData.title}"`);
+                    updateSystemStatusText(`🔥 Threshold Hit: "${truncateSongTitle(currentTrackData.title)}"`);
                     refreshFallbackPlaylistUI();
                     triggerMilestoneOverlay(currentTrackData.title);
                 }
@@ -688,11 +689,11 @@ async function playNextSong() {
         const nextSong = songQueue.shift();
         
         if (nextSong.isSearch) {
-            updateSystemStatusText(`🔍 Resolving: "${nextSong.title}"...`);
+            updateSystemStatusText(`🔍 Resolving: "${truncateSongTitle(nextSong.title)}"...`);
             const resolved = await fetchTrackIdFromKeywords(nextSong.id);
             
             if (resolved) {
-                updateSystemStatusText(`🎶 Playing: "${resolved.title}"`);
+                updateSystemStatusText(`🎶 Playing: "${truncateSongTitle(resolved.title)}"`);
                 currentTrackData = { id: resolved.id, title: resolved.title };
                 try {
                     const mainIframe = document.querySelector('#videoWrapper iframe');
@@ -704,7 +705,7 @@ async function playNextSong() {
                     playNextSong();
                 }
             } else {
-                updateSystemStatusText(`❌ Error resolving: "${nextSong.title}".`);
+                updateSystemStatusText(`❌ Error resolving: "${truncateSongTitle(nextSong.title)}".`);
                 playNextSong();
             }
         } else {
@@ -729,7 +730,7 @@ async function playNextSong() {
         const randomIndex = Math.floor(Math.random() * fallbackPlaylist.length);
         const fallbackTrack = fallbackPlaylist[randomIndex];
         
-        updateSystemStatusText(`🔀 Playing Fallback: "${fallbackTrack.title}"`);
+        updateSystemStatusText(`🔀 Playing Fallback: "${truncateSongTitle(fallbackTrack.title)}"`);
         currentTrackData = { id: fallbackTrack.id, title: fallbackTrack.title };
         
         try {
