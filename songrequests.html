@@ -10,6 +10,8 @@
         color: white;
         text-align: center;
         padding: 20px;
+        margin: 0;
+        transition: background 0.2s ease, padding 0.2s ease;
     }
     .main-layout {
         max-width: 700px;
@@ -18,6 +20,7 @@
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        transition: all 0.2s ease;
     }
     .controls-group {
         margin: 15px 0;
@@ -35,6 +38,11 @@
         display: flex;
         gap: 10px;
         margin-top: 5px;
+        margin-bottom: 10px;
+    }
+    .view-modes-row {
+        display: flex;
+        gap: 10px;
         margin-bottom: 10px;
     }
     label {
@@ -102,6 +110,7 @@
         border-radius: 4px;
         position: relative;
         overflow: hidden;
+        transition: height 0.2s ease, opacity 0.2s ease;
     }
     iframe {
         width: 100%;
@@ -115,22 +124,108 @@
         margin-top: 15px;
         line-height: 1.4;
     }
+
+    /* Floating Navigation HUD specific to OBS Overlays */
+    #obsNavigationHud {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(26, 26, 26, 0.85);
+        backdrop-filter: blur(4px);
+        padding: 6px 12px;
+        z-index: 9999;
+        text-align: right;
+        border-bottom: 1px solid #333;
+    }
+    #obsNavigationHud button {
+        width: auto;
+        margin: 0;
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    /* Dynamic UI Modifiers for OBS Browser View Mode */
+    body.obs-widget-view {
+        background: transparent !important;
+        padding: 0;
+    }
+    body.obs-widget-view #obsNavigationHud {
+        display: block;
+    }
+    body.obs-widget-view .main-layout {
+        max-width: 100%;
+        width: 100%;
+        height: 100vh;
+        box-sizing: border-box;
+        background: transparent !important;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 35px 10px 10px 10px; /* Offset spacing context for floating utility bar */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+    body.obs-widget-view h1,
+    body.obs-widget-view .dashboard-panel,
+    body.obs-widget-view #comfycontrolBox,
+    body.obs-widget-view .hint-box,
+    body.obs-widget-view .video-monitor-panel > label {
+        display: none !important;
+    }
+    body.obs-widget-view .video-monitor-panel {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    body.obs-widget-view .video-frame-container {
+        flex: 1;
+        margin-top: 0;
+    }
+    body.obs-widget-view #status {
+        margin: 8px 0 0 0;
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    /* Audio Only Operational System Tweaks */
+    body.audio-only-mode .video-frame-container {
+        height: 1px !important;
+        width: 1px !important;
+        opacity: 0 !important;
+        pointer-events: none;
+        position: absolute;
+        left: -9999px;
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
 </head>
 <body>
 
+<div id="obsNavigationHud">
+    <button id="exitObsViewBtn" style="background: #3498db; color: white;">⚙️ Return to Dashboard View</button>
+</div>
+
 <div class="main-layout">
     <h1>🎵 Stream Jukebox</h1>
     
     <div class="dashboard-panel">
-        <label>🎛️ Streamer Control Dashboard</label>
+        <label>🎛 nighttime Streamer Control Dashboard</label>
         <div class="dashboard-row">
             <input type="text" id="browserSearchInput" placeholder="Song request text, link, or video ID...">
             <button id="browserSubmitBtn" style="background: #ff4757; color: white;">Queue Live</button>
             <button id="browserFallbackBtn" style="background: #2f3542; color: white; border: 1px solid #57606f;">+ Fallback Playlist</button>
         </div>
+        
+        <div class="view-modes-row">
+            <button id="toggleObsViewBtn" style="background: #8e44ad; color: white; flex: 1; margin-top: 0;">🖼️ Switch to OBS Widget View</button>
+            <button id="toggleAudioDisplayBtn" style="background: #16a085; color: white; flex: 1; margin-top: 0;">📺 Mode: Video + Audio</button>
+        </div>
+
         <button id="browserSkipBtn" style="background: #eccc68; color: #111; width: 100%; margin-top: 0px;">⏭️ Skip Current Song</button>
     </div>
     
@@ -143,14 +238,12 @@
         </div>
     </div>
 
-    
-
     <div class="video-monitor-panel">
         <label>📺 Live Media Player Monitor</label>
         <div class="video-frame-container" id="videoWrapper">
             <div id="ytPlayerNode"></div>
         </div>
-		<div id="status">System Status: Awaiting Twitch connection... Player unprimed.</div>
+        <div id="status">System Status: Awaiting Twitch connection... Player unprimed.</div>
     </div>
 
     <div class="hint-box">
@@ -180,9 +273,9 @@ let isPlayingSong = false;
 let streamername = "jaedraze";
 
 // Voting Threshold Parameters
-const VOTE_REQUIREMENT = 2; // Unique users needed to save a song to fallback playlist
+const VOTE_REQUIREMENT = 2; 
 let currentTrackVotes = new Set();
-let currentTrackData = null; // Caches active video details
+let currentTrackData = null; 
 
 function isStreamerAndAuthorize(user, command) {
     if (user.toLowerCase() !== streamername.toLowerCase()) {
@@ -192,7 +285,6 @@ function isStreamerAndAuthorize(user, command) {
     return true;
 }
 
-// Robust link parsing matrix targeting distinct 11-character video IDs
 function extractYouTubeId(url) {
     if (!url || typeof url !== 'string') return null;
     
@@ -209,7 +301,6 @@ function extractYouTubeId(url) {
     return null;
 }
 
-// Global initialization entry window hook
 function onYouTubeIframeAPIReady() {
     console.log("⚓ YouTube IFrame API Mounted successfully.");
     ytPlayer = new YT.Player('ytPlayerNode', {
@@ -225,8 +316,6 @@ function onYouTubeIframeAPIReady() {
             'onReady': () => {
                 ytPlayerReady = true;
                 status.innerText = `Status: Player ready. Fallback registry deep pool: ${fallbackPlaylist.length} tracks.`;
-                console.log("📺 Media Player instance ready for hot loads.");
-                // Instantly prime pipeline rotation loop on load if playlist pool is configured
                 if (!isPlayingSong) playNextSong();
             },
             'onStateChange': (event) => {
@@ -243,7 +332,6 @@ function onYouTubeIframeAPIReady() {
     });
 }
 
-// Distributed engine targeting high-performance open front-end nodes for native keyword text searches
 async function fetchTrackIdFromKeywords(keywords) {
     const instances = [
         'https://invidious.flokinet.to',
@@ -289,7 +377,6 @@ function queueTrackAsset(user, rawInput) {
     }
 }
 
-// Processes direct targets into the persistent storage local registry matrix array
 async function addTrackToFallbackRegistry(rawInput, executionContextName) {
     if (!rawInput) return;
     let cleanedInput = rawInput.trim();
@@ -310,7 +397,6 @@ async function addTrackToFallbackRegistry(rawInput, executionContextName) {
 }
 
 function saveFallbackItem(item, originUser) {
-    // Prevent duplicated items inside the playlist array pool
     if (!fallbackPlaylist.some(element => element.id === item.id)) {
         fallbackPlaylist.push(item);
         localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
@@ -321,30 +407,22 @@ function saveFallbackItem(item, originUser) {
 }
 
 ComfyJS.onCommand = async (user, command, message, flags, extra) => {
-    // User Live Song Request Interceptor Layout
     if (command === "sr" || command === "songrequest") {
         queueTrackAsset(user, message);
     }
     
-    // Fallback Playlist Dynamic Add Command
     if (command === "addfallback") {
         if (isStreamerAndAuthorize(user, command)) {
             addTrackToFallbackRegistry(message, user);
         }
     }
 
-    // Community Upvote Engagement System
     if (command === "likesong") {
-        if (!currentTrackData) {
-            console.log("No active media engine track payload to upvote.");
-            return;
-        }
+        if (!currentTrackData) return;
         
         if (!currentTrackVotes.has(user.toLowerCase())) {
             currentTrackVotes.add(user.toLowerCase());
-            console.log(`Vote added by ${user}. Current unique count: ${currentTrackVotes.size}/${VOTE_REQUIREMENT}`);
             
-            // Validate threshold execution criteria
             if (currentTrackVotes.size >= VOTE_REQUIREMENT) {
                 if (!fallbackPlaylist.some(el => el.id === currentTrackData.id)) {
                     fallbackPlaylist.push({ id: currentTrackData.id, title: currentTrackData.title });
@@ -363,12 +441,10 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
 };
 
 async function playNextSong() {
-    // Reset track voting sets for every distinct execution context rotation pass
     currentTrackVotes.clear();
     currentTrackData = null;
 
     if (!ytPlayerReady || !ytPlayer) {
-        console.warn("Player engine unprimed. Retrying in 500ms...");
         setTimeout(playNextSong, 500);
         return;
     }
@@ -386,7 +462,6 @@ async function playNextSong() {
                 status.innerText = `🎶 Now Playing: "${resolved.title}" (Requested by ${nextSong.user})`;
                 currentTrackData = { id: resolved.id, title: resolved.title };
                 try {
-                    // SILENCE PERMISSIONS ERROR: Inject policies directly into the player node before loading
                     const mainIframe = document.querySelector('#videoWrapper iframe');
                     if (mainIframe) {
                         mainIframe.setAttribute('allow', 'autoplay; encrypted-media; compute-pressure');
@@ -436,7 +511,6 @@ async function playNextSong() {
             playNextSong();
         }
     } else {
-        // STATE THREE: Total System Silence (Both Queues Completely Dry)
         isPlayingSong = false;
         status.innerText = "Status: Live Queue dry & Fallback Playlist empty. Standing by for commands...";
     }
@@ -527,6 +601,42 @@ document.getElementById("streamersButt").addEventListener("click", function() {
 
 document.getElementById("twitchdisconnectButt").addEventListener("click", function() {
     disconnectBot();
+});
+
+// --- OBS INTERFACE AND DISPLAY MATRIX VIEW ACTIONS ---
+const toggleObsViewBtn = document.getElementById("toggleObsViewBtn");
+const exitObsViewBtn = document.getElementById("exitObsViewBtn");
+const toggleAudioDisplayBtn = document.getElementById("toggleAudioDisplayBtn");
+
+// Check if persistent setup configuration profiles exist in storage
+if (localStorage.getItem("jukeboxViewMode") === "obs") {
+    document.body.classList.add("obs-widget-view");
+}
+if (localStorage.getItem("jukeboxDisplayType") === "audio-only") {
+    document.body.classList.add("audio-only-mode");
+    toggleAudioDisplayBtn.innerText = "🎧 Mode: Audio-Only (Hidden Video)";
+}
+
+toggleObsViewBtn.addEventListener("click", function() {
+    document.body.classList.add("obs-widget-view");
+    localStorage.setItem("jukeboxViewMode", "obs");
+});
+
+exitObsViewBtn.addEventListener("click", function() {
+    document.body.classList.remove("obs-widget-view");
+    localStorage.setItem("jukeboxViewMode", "normal");
+});
+
+toggleAudioDisplayBtn.addEventListener("click", function() {
+    if (document.body.classList.contains("audio-only-mode")) {
+        document.body.classList.remove("audio-only-mode");
+        toggleAudioDisplayBtn.innerText = "📺 Mode: Video + Audio";
+        localStorage.setItem("jukeboxDisplayType", "full");
+    } else {
+        document.body.classList.add("audio-only-mode");
+        toggleAudioDisplayBtn.innerText = "🎧 Mode: Audio-Only (Hidden Video)";
+        localStorage.setItem("jukeboxDisplayType", "audio-only");
+    }
 });
 
 window.onload = function () {
