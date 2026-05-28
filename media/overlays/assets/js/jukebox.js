@@ -100,14 +100,12 @@ export class StreamJukebox {
             voteInput.onchange = (e) => { this.VOTE_REQUIREMENT = parseInt(e.target.value); localStorage.setItem("jbVoteReq", this.VOTE_REQUIREMENT); };
         }
 
-        // New: Add to Queue
         const addQueueBtn = document.getElementById('jb-add-queue-btn');
         if(addQueueBtn) addQueueBtn.onclick = () => {
             const val = document.getElementById('jb-search-input').value;
             if (val) { this.manualAddSong(val); document.getElementById('jb-search-input').value = ''; }
         };
 
-        // New: Add to Fallback
         const addFallbackBtn = document.getElementById('jb-add-fallback-btn');
         if(addFallbackBtn) addFallbackBtn.onclick = () => {
             const val = document.getElementById('jb-search-input').value;
@@ -120,41 +118,41 @@ export class StreamJukebox {
         };
     }
 
-	renderFallbackList() {
-		const list = document.getElementById('jb-fallback-list');
-		if (!list) return;
-		list.innerHTML = '';
+    renderFallbackList() {
+        const list = document.getElementById('jb-fallback-list');
+        if (!list) return;
+        list.innerHTML = '';
 
-		this.fallbackPlaylist.forEach((item, index) => {
-			const div = document.createElement('div');
-			div.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #3f3f46; font-size: 11px;";
-			
-			// Track Info (Title + Requestor)
-			const info = document.createElement('div');
-			info.style.cursor = 'pointer';
-			info.innerHTML = `<strong>${item.title}</strong><br><span style="color: #a1a1aa;">Req: ${item.user || 'System'}</span>`;
-			info.onclick = () => { 
-				this.currentTrackData = item; 
-				this.ytPlayer.loadVideoById(item.id); 
-			};
+        this.fallbackPlaylist.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #3f3f46; font-size: 11px;";
+            
+            // Track Info (Title + Requestor)
+            const info = document.createElement('div');
+            info.style.cursor = 'pointer';
+            info.innerHTML = `<strong>${item.title}</strong><br><span style="color: #a1a1aa;">Req: ${item.user || 'System'}</span>`;
+            info.onclick = () => { 
+                this.currentTrackData = item; 
+                this.ytPlayer.loadVideoById(item.id); 
+            };
 
-			// Delete Button
-			const delBtn = document.createElement('button');
-			delBtn.innerText = '✕';
-			delBtn.className = 'p8-btn';
-			delBtn.style.cssText = "background: #991b1b; padding: 2px 8px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer;";
-			delBtn.onclick = (e) => {
-				e.stopPropagation(); // Prevents triggering play on click
-				this.fallbackPlaylist.splice(index, 1);
-				localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
-				this.renderFallbackList();
-			};
+            // Delete Button
+            const delBtn = document.createElement('button');
+            delBtn.innerText = '✕';
+            delBtn.className = 'p8-btn';
+            delBtn.style.cssText = "background: #991b1b; padding: 2px 8px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer;";
+            delBtn.onclick = (e) => {
+                e.stopPropagation(); // Prevents triggering play on click
+                this.fallbackPlaylist.splice(index, 1);
+                localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
+                this.renderFallbackList();
+            };
 
-			div.appendChild(info);
-			div.appendChild(delBtn);
-			list.appendChild(div);
-		});
-	}
+            div.appendChild(info);
+            div.appendChild(delBtn);
+            list.appendChild(div);
+        });
+    }
 
     setWidgetActiveState(state) {
         this.isEnabled = state;
@@ -190,7 +188,7 @@ export class StreamJukebox {
         this.triggerVoteToast(user, this.currentTrackVotes.size, this.VOTE_REQUIREMENT);
         
         if (this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
-            this.saveFallbackItem(this.currentTrackData);
+            this.saveFallbackItem(this.currentTrackData, user);
             botSay(`🔥 "${this.currentTrackData.title}" added to fallback!`);
             this.triggerMilestoneOverlay(this.currentTrackData.title);
             this.renderFallbackList();
@@ -200,7 +198,7 @@ export class StreamJukebox {
     async handleAddFallback(user, message, botSay) {
         const lookup = await this.fetchTrack(message);
         if (lookup) {
-            this.saveFallbackItem(lookup);
+            this.saveFallbackItem(lookup, user);
             botSay(`💾 Added "${lookup.title}" to fallback.`);
             this.renderFallbackList();
         }
@@ -235,13 +233,13 @@ export class StreamJukebox {
         }
     }
 
-	saveFallbackItem(item, username = 'System') {
-		if (!this.fallbackPlaylist.some(e => e.id === item.id)) {
-			this.fallbackPlaylist.push({ ...item, user: username });
-			localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
-			this.renderFallbackList();
-		}
-	}
+    saveFallbackItem(item, username = 'System') {
+        if (!this.fallbackPlaylist.some(e => e.id === item.id)) {
+            this.fallbackPlaylist.push({ ...item, user: username });
+            localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
+            this.renderFallbackList();
+        }
+    }
 
     async fetchTrack(keywords) {
         const instances = ['https://invidious.flokinet.to', 'https://yewtu.be'];
