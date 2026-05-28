@@ -1,196 +1,154 @@
 // =========================================================================
-// DECOUPLED STREAM JUKEBOX / SONG REQUEST ENGINE MODULE
+// DECOUPLED STREAM JUKEBOX MODULE (Class-Based)
 // =========================================================================
 
 export class StreamJukebox {
     constructor() {
         this.queue = [];
-        this.player = null;
-        this.currentTrack = null;
-        this.isEnabled = false;
-        
-        console.log("🎵 [Module Init]: StreamJukebox core instantiated successfully.");
-        this.initDOM();
-        this.loadYouTubeAPI();
+        this.fallbackPlaylist = JSON.parse(localStorage.getItem("jukeboxFallbackPlaylist")) || [];
+        this.ytPlayer = null;
+        this.ytPlayerReady = false;
+        this.currentTrackData = null;
+        this.currentTrackVotes = new Set();
+        this.VOTE_REQUIREMENT = 2;
+        this.isPlayingSong = false;
+        this.streamerName = "jaedraze";
+
+        this.init();
+        console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
     }
 
-    // 🟢 EXPOSED API CONTRACT: Used by injectAllWidgetCommands() in ttvoverlayApp.js
+    init() {
+        // Inject YouTube API
+        if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(tag);
+        }
+
+        window.onYouTubeIframeAPIReady = () => {
+            this.ytPlayer = new YT.Player('ytPlayerNode', {
+                height: '100%',
+                width: '100%',
+                playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1 },
+                events: {
+                    'onReady': () => { this.ytPlayerReady = true; this.playNextSong(); },
+                    'onStateChange': (e) => { if (e.data === YT.PlayerState.ENDED) this.playNextSong(); }
+                }
+            });
+        };
+    }
+
+    // --- Command Registry API ---
     getCommands(botSay) {
         return [
             {
                 name: "sr",
                 adminOnly: false,
-                execute: (user, message, flags) => this.handleIncomingCommand(user, "sr", message, flags)
+                execute: (user, message) => this.handleSongRequest(user, message, botSay)
             },
             {
                 name: "songrequest",
                 adminOnly: false,
-                execute: (user, message, flags) => this.handleIncomingCommand(user, "songrequest", message, flags)
+                execute: (user, message) => this.handleSongRequest(user, message, botSay)
+            },
+            {
+                name: "likesong",
+                adminOnly: false,
+                execute: (user) => this.handleLikeSong(user, botSay)
+            },
+            {
+                name: "addfallback",
+                adminOnly: true,
+                execute: (user, message) => this.handleAddFallback(user, message, botSay)
             },
             {
                 name: "skip",
                 adminOnly: true,
-                execute: (user, message, flags) => this.handleIncomingCommand(user, "skip", message, flags)
+                execute: () => this.skipCurrentSong()
             }
         ];
     }
 
-    initDOM() {
-        // Cache your key visual interaction hooks safely
-        this.titleEl = document.getElementById("jb-current-title");
-        this.statusEl = document.getElementById("jb-status-text");
-        this.widgetEl = document.getElementById("jukebox-widget");
-
-        // Bind quick click UI controls directly to bypass bubbling bugs
-        const skipBtn = document.getElementById("jb-skip-btn");
-        const clearBtn = document.getElementById("jb-clear-btn");
-
-        if (skipBtn) skipBtn.onclick = () => this.skipTrack();
-        if (clearBtn) {
-            clearBtn.onclick = () => {
-                this.queue = [];
-                this.skipTrack();
-                this.updateUI("Queue Cleared", "Standby");
-            };
-        }
+    // --- Logic ---
+    async handleSongRequest(user, message, botSay) {
+        if (!message) return;
+        const id = this.extractYouTubeId(message);
+        this.queue.push({ user, title: id ? "Link" : message, id: id || message, isSearch: !id });
+        botSay(`✅ Queued: "${message.substring(0, 30)}..."`);
+        if (!this.isPlayingSong) this.playNextSong();
     }
 
-    loadYouTubeAPI() {
-        // If the API script element isn't in the DOM yet, inject it
-        if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-            const tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        }
-
-        // 🟢 Robust Global Callback Multi-hook Management
-        const originalCallback = window.onYouTubeIframeAPIReady;
-        window.onYouTubeIframeAPIReady = () => {
-            if (typeof originalCallback === 'function') originalCallback();
-            this.buildPlayer();
-        };
-
-        if (window.YT && window.YT.Player) {
-            this.buildPlayer();
-        }
-    }
-
-    buildPlayer() {
-        if (typeof YT === 'undefined' || !YT.Player) {
-            setTimeout(() => this.buildPlayer(), 200);
-            return;
-        }
+    async handleLikeSong(user, botSay) {
+        if (!this.currentTrackData || this.currentTrackVotes.has(user.toLowerCase())) return;
         
-        if (this.player) return;
+        this.currentTrackVotes.add(user.toLowerCase());
+        if (this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
+            this.saveFallbackItem(this.currentTrackData);
+            botSay(`🔥 "${this.currentTrackData.title}" reached threshold and added to fallbacks!`);
+        }
+    }
 
-        this.player = new YT.Player('player', {
-            height: '100%',
-            width: '100%',
-            videoId: '',
-            playerVars: {
-                'autoplay': 1,
-                'controls': 1,
-                'disablekb': 1,
-                'fs': 0,
-                'modestbranding': 1,
-                'rel': 0
-            },
-            events: {
-                'onStateChange': (e) => this.onPlayerStateChange(e),
-                'onError': (e) => {
-                    console.error("⚠️ YouTube Player Error:", e.data);
-                    this.skipTrack();
-                }
+    async handleAddFallback(user, message, botSay) {
+        const lookup = await this.fetchTrack(message);
+        if (lookup) {
+            this.saveFallbackItem(lookup);
+            botSay(`💾 Added "${lookup.title}" to fallback rotation.`);
+        }
+    }
+
+    skipCurrentSong() {
+        if (this.ytPlayer) {
+            this.ytPlayer.stopVideo();
+            this.playNextSong();
+        }
+    }
+
+    async playNextSong() {
+        this.currentTrackVotes.clear();
+        this.currentTrackData = null;
+        if (!this.ytPlayerReady) { setTimeout(() => this.playNextSong(), 500); return; }
+
+        if (this.queue.length > 0) {
+            this.isPlayingSong = true;
+            const next = this.queue.shift();
+            if (next.isSearch) {
+                const resolved = await this.fetchTrack(next.id);
+                this.currentTrackData = resolved || { id: next.id, title: next.title };
+            } else {
+                this.currentTrackData = { id: next.id, title: next.title };
             }
-        });
-    }
-
-    onPlayerStateChange(event) {
-        if (!this.isEnabled) return;
-
-        if (event.data === 0) {
-            this.skipTrack();
-        } else if (event.data === 1) {
-            this.updateUI(this.currentTrack ? this.currentTrack.title : "Playing...", "LIVE");
-        }
-    }
-
-    parseYoutubeId(url) {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    handleIncomingCommand(user, command, message, flags) {
-        if (!this.isEnabled) return;
-
-        if (command === "sr" || command === "songrequest") {
-            if (!message) return;
-            const videoId = this.parseYoutubeId(message);
-            
-            if (!videoId) {
-                if (typeof window.botSay === "function") window.botSay(`@${user} -> Please submit a valid YouTube link.`);
-                return;
-            }
-
-            const newTrack = { id: videoId, title: `Track: ${videoId}`, requestedBy: user };
-            this.queue.push(newTrack);
-            
-            if (typeof window.botSay === "function") window.botSay(`🎵 Added track to overlay queue position #${this.queue.length}!`);
-            
-            if (!this.currentTrack) {
-                this.processNextTrack();
-            }
-        }
-
-        if (command === "skip") {
-            if (flags.broadcaster || flags.mod) {
-                this.skipTrack();
-                if (typeof window.botSay === "function") window.botSay(`⏭️ Track skipped by ${user}.`);
-            }
-        }
-    }
-
-    processNextTrack() {
-        if (!this.isEnabled) return;
-
-        if (this.queue.length === 0) {
-            this.currentTrack = null;
-            if (this.player && typeof this.player.stopVideo === "function") this.player.stopVideo();
-            this.updateUI("No Track Loaded", "Standby");
-            return;
-        }
-
-        this.currentTrack = this.queue.shift();
-        this.updateUI(this.currentTrack.title, "Loading...");
-
-        if (this.player && typeof this.player.loadVideoById === "function") {
-            this.player.loadVideoById(this.currentTrack.id);
-        }
-    }
-
-    skipTrack() {
-        this.processNextTrack();
-    }
-
-    updateUI(title, status) {
-        if (this.titleEl) this.titleEl.innerText = title;
-        if (this.statusEl) this.statusEl.innerText = `Status: ${status}`;
-    }
-
-    setWidgetActiveState(state) {
-        this.isEnabled = state;
-        if (this.widgetEl) {
-            this.widgetEl.style.display = state ? "block" : "none";
-        }
-        if (!state) {
-            if (this.player && typeof this.player.stopVideo === "function") this.player.stopVideo();
-            this.currentTrack = null;
-            this.queue = [];
-            this.updateUI("No Track Loaded", "Standby");
+            this.ytPlayer.loadVideoById(this.currentTrackData.id);
+        } else if (this.fallbackPlaylist.length > 0) {
+            this.isPlayingSong = true;
+            this.currentTrackData = this.fallbackPlaylist[Math.floor(Math.random() * this.fallbackPlaylist.length)];
+            this.ytPlayer.loadVideoById(this.currentTrackData.id);
         } else {
-            this.buildPlayer();
+            this.isPlayingSong = false;
         }
+    }
+
+    saveFallbackItem(item) {
+        if (!this.fallbackPlaylist.some(e => e.id === item.id)) {
+            this.fallbackPlaylist.push(item);
+            localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
+        }
+    }
+
+    async fetchTrack(keywords) {
+        const instances = ['https://invidious.flokinet.to', 'https://yewtu.be'];
+        for (let host of instances) {
+            try {
+                const res = await fetch(`${host}/api/v1/search?q=${encodeURIComponent(keywords)}&type=video`);
+                const data = await res.json();
+                if (data?.[0]?.videoId) return { id: data[0].videoId, title: data[0].title };
+            } catch (e) { continue; }
+        }
+        return null;
+    }
+
+    extractYouTubeId(url) {
+        const match = url.match(/^.*(youtu.be\/|v\/|watch\?v=)([^#\&\?]*).*/);
+        return (match && match[2].length === 11) ? match[2] : null;
     }
 }
