@@ -16,6 +16,7 @@ export class StreamJukebox {
         this.isPlayingSong = false;
         this.streamerName = "jaedraze";
         this.isEnabled = true; 
+        this.acceptRequests = true; // Added toggle state
 
         this.init();
         console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
@@ -28,7 +29,11 @@ export class StreamJukebox {
         const toast = document.createElement("div");
         toast.className = "p8-toast";
         toast.style.cssText = "position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent); z-index: 1000; font-family: monospace; pointer-events: none;";
-        toast.innerHTML = `👍 <strong>${username}</strong> liked this! <br> Progress: ${currentCount} / ${targetCount}`;
+        
+        // If VOTE_REQUIREMENT is 0, show infinity symbol
+        const displayCount = this.VOTE_REQUIREMENT === 0 ? "∞" : targetCount;
+        toast.innerHTML = `👍 <strong>${username}</strong> liked this! <br> Progress: ${currentCount} / ${displayCount}`;
+        
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 5000);
     }
@@ -65,48 +70,45 @@ export class StreamJukebox {
                         this.applyButtonStyles();
                         this.bindControls(); 
                         this.renderFallbackList();
-                        this.playNextSong(); 
+                        this.playNextSong((msg) => console.log(msg)); 
                     },
-                    'onStateChange': (e) => { if (e.data === YT.PlayerState.ENDED) this.playNextSong(); }
+                    'onStateChange': (e) => { if (e.data === YT.PlayerState.ENDED) this.playNextSong((msg) => console.log(msg)); }
                 }
             });
         };
     }
 
-	applyButtonStyles() {
-		const buttons = {
-			'jb-skip-btn': 'p8-btn p8-btn-warning', // Updated here
-			'jb-clear-btn': 'p8-btn danger-btn',
-			'jb-add-queue-btn': 'p8-btn p8-btn-success',
-			'jb-add-fallback-btn': 'p8-btn p8-btn-success'
-		};
-		
-		Object.keys(buttons).forEach(id => {
-			const el = document.getElementById(id);
-			if (el) el.className = buttons[id];
-		});
-	}
+    applyButtonStyles() {
+        const buttons = {
+            'jb-skip-btn': 'p8-btn p8-btn-warning',
+            'jb-clear-btn': 'p8-btn danger-btn',
+            'jb-add-queue-btn': 'p8-btn p8-btn-success',
+            'jb-add-fallback-btn': 'p8-btn p8-btn-success'
+        };
+        
+        Object.keys(buttons).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.className = buttons[id];
+        });
+    }
 
     bindControls() {
-        // Skip and Clear
         const skipBtn = document.getElementById('jb-skip-btn');
-        if(skipBtn) skipBtn.onclick = () => this.skipCurrentSong();
+        if(skipBtn) skipBtn.onclick = () => this.skipCurrentSong((msg) => console.log(msg));
 
         const clearBtn = document.getElementById('jb-clear-btn');
-        if(clearBtn) clearBtn.onclick = () => { this.queue = []; this.skipCurrentSong(); };
+        if(clearBtn) clearBtn.onclick = () => { this.queue = []; this.skipCurrentSong((msg) => console.log(msg)); };
         
-        // Vote requirement
         const voteInput = document.getElementById('jb-vote-req-input');
         if (voteInput) {
             voteInput.value = this.VOTE_REQUIREMENT;
             voteInput.onchange = (e) => { this.VOTE_REQUIREMENT = parseInt(e.target.value); localStorage.setItem("jbVoteReq", this.VOTE_REQUIREMENT); };
         }
 
-        // Add buttons
         const addQueueBtn = document.getElementById('jb-add-queue-btn');
         if(addQueueBtn) addQueueBtn.onclick = () => {
             const val = document.getElementById('jb-search-input').value;
-            if (val) { this.manualAddSong(val); document.getElementById('jb-search-input').value = ''; }
+            if (val) { this.manualAddSong(val, (msg) => console.log(msg)); document.getElementById('jb-search-input').value = ''; }
         };
 
         const addFallbackBtn = document.getElementById('jb-add-fallback-btn');
@@ -115,11 +117,17 @@ export class StreamJukebox {
             if (val) { this.handleAddFallback('System', val, (msg) => console.log(msg)); document.getElementById('jb-search-input').value = ''; }
         };
 
-        // Toggle Switch
         const toggleCheckbox = document.getElementById('stg-toggle-jukebox-checkbox');
         if (toggleCheckbox) {
             toggleCheckbox.checked = this.isEnabled;
             toggleCheckbox.onchange = (e) => this.setWidgetActiveState(e.target.checked);
+        }
+
+        // Added Request Toggle binding
+        const requestToggle = document.getElementById('stg-toggle-requests-checkbox');
+        if (requestToggle) {
+            requestToggle.checked = this.acceptRequests;
+            requestToggle.onchange = (e) => this.acceptRequests = e.target.checked;
         }
     }
 
@@ -166,35 +174,41 @@ export class StreamJukebox {
 
     async handleSongRequest(user, message, botSay) {
         if (!this.isEnabled || !message) return;
-        if (this.VOTE_REQUIREMENT === 0 && user.toLowerCase() !== this.streamerName.toLowerCase()) {
-            botSay("🚫 Only the streamer can add songs.");
+        
+        // Added check for request toggle
+        if (!this.acceptRequests) {
+            botSay(`🚫 Sorry @${user}, song requests are currently disabled.`);
             return;
         }
+
         const id = this.extractYouTubeId(message);
         this.queue.push({ user, title: id ? "Link" : message, id: id || message, isSearch: !id });
         botSay(`✅ Queued: "${message.substring(0, 30)}..."`);
-        if (!this.isPlayingSong) this.playNextSong();
+        if (!this.isPlayingSong) this.playNextSong(botSay);
     }
 
-    async manualAddSong(query) {
+    async manualAddSong(query, botSay) {
         const track = await this.fetchTrack(query);
         if (track) {
             this.queue.push({ user: 'System', title: track.title, id: track.id, isSearch: false });
-            if (!this.isPlayingSong) this.playNextSong();
+            if (botSay) botSay(`✅ Added to queue: "${track.title}"`);
+            if (!this.isPlayingSong) this.playNextSong(botSay);
+        } else {
+            if (botSay) botSay(`❌ Could not find: "${query}"`);
         }
     }
 
     async handleLikeSong(user, botSay) {
-        if (this.VOTE_REQUIREMENT <= 0 || !this.currentTrackData || this.currentTrackVotes.has(user.toLowerCase())) return;
-        this.currentTrackVotes.add(user.toLowerCase());
+        if (!this.currentTrackData || this.currentTrackVotes.has(user.toLowerCase())) return;
         
+        this.currentTrackVotes.add(user.toLowerCase());
         this.triggerVoteToast(user, this.currentTrackVotes.size, this.VOTE_REQUIREMENT);
         
-        if (this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
-            this.saveFallbackItem(this.currentTrackData, user);
+        // Only save to fallback if requirement is met AND requirement is not 0
+        if (this.VOTE_REQUIREMENT > 0 && this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
+            this.saveFallbackItem(this.currentTrackData, "Community");
             botSay(`🔥 "${this.currentTrackData.title}" added to fallback!`);
             this.triggerMilestoneOverlay(this.currentTrackData.title);
-            this.renderFallbackList();
         }
     }
 
@@ -204,14 +218,20 @@ export class StreamJukebox {
             this.saveFallbackItem(lookup, user);
             botSay(`💾 Added "${lookup.title}" to fallback.`);
             this.renderFallbackList();
+        } else {
+            botSay(`❌ Could not find fallback song: "${message}"`);
         }
     }
 
-    skipCurrentSong() {
-        if (this.ytPlayer && this.isEnabled) { this.ytPlayer.stopVideo(); this.playNextSong(); }
+    skipCurrentSong(botSay) {
+        if (this.ytPlayer && this.isEnabled) { 
+            this.ytPlayer.stopVideo(); 
+            if (botSay) botSay("⏭️ Skipping song...");
+            this.playNextSong(botSay); 
+        }
     }
 
-    async playNextSong() {
+    async playNextSong(botSay) {
         if (!this.isEnabled || !this.ytPlayerReady) return;
         this.currentTrackVotes.clear();
         this.currentTrackData = null;
@@ -233,6 +253,7 @@ export class StreamJukebox {
             this.isPlayingSong = false;
             const titleEl = document.getElementById('jb-current-title');
             if(titleEl) titleEl.innerText = "No Track Loaded";
+            if (botSay) botSay("📭 Jukebox queue empty.");
         }
     }
 
