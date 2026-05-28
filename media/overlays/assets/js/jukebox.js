@@ -21,6 +21,33 @@ export class StreamJukebox {
         console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
     }
 
+    // --- UI Notifications (Targets existing overlay elements) ---
+    triggerVoteToast(username, currentCount, targetCount) {
+        // Appends to the overlay wrapper or a specific alert container
+        const container = document.getElementById("overlay-wrapper");
+        if (!container) return;
+        const toast = document.createElement("div");
+        toast.style.cssText = "position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent); z-index: 1000; font-family: monospace; pointer-events: none;";
+        toast.innerHTML = `👍 <strong>${username}</strong> liked this! <br> Progress: ${currentCount} / ${targetCount}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    triggerMilestoneOverlay(songTitle) {
+        const widget = document.getElementById("alert-widget");
+        const text = document.getElementById("alert-text");
+        if (!widget || !text) return;
+        
+        const oldHtml = text.innerHTML;
+        widget.style.display = "block";
+        text.innerHTML = `<div style="color:#eab308;">🔥 Community Choice!</div><div style="margin-top:5px;">"${songTitle}" added to Fallback!</div>`;
+        
+        setTimeout(() => {
+            widget.style.display = "none";
+            text.innerHTML = oldHtml;
+        }, 6500);
+    }
+
     init() {
         if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
             const tag = document.createElement('script');
@@ -30,8 +57,7 @@ export class StreamJukebox {
 
         window.onYouTubeIframeAPIReady = () => {
             this.ytPlayer = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
+                height: '100%', width: '100%',
                 playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1, 'fs': 0 },
                 events: {
                     'onReady': () => { 
@@ -40,43 +66,31 @@ export class StreamJukebox {
                         this.renderFallbackList();
                         this.playNextSong(); 
                     },
-                    'onStateChange': (e) => { 
-                        if (e.data === YT.PlayerState.ENDED) this.playNextSong(); 
-                    }
+                    'onStateChange': (e) => { if (e.data === YT.PlayerState.ENDED) this.playNextSong(); }
                 }
             });
         };
     }
 
     bindControls() {
-        // Skip & Clear
-        document.querySelectorAll('#jb-skip-btn').forEach(btn => btn.onclick = () => this.skipCurrentSong());
-        document.querySelectorAll('#jb-clear-btn').forEach(btn => btn.onclick = () => {
-            this.queue = [];
-            this.skipCurrentSong();
-        });
-
-        // Vote Requirement Input
+        // Widget Manager Controls
+        document.getElementById('jb-skip-btn').onclick = () => this.skipCurrentSong();
+        document.getElementById('jb-clear-btn').onclick = () => { this.queue = []; this.skipCurrentSong(); };
+        
         const voteInput = document.getElementById('jb-vote-req-input');
         if (voteInput) {
             voteInput.value = this.VOTE_REQUIREMENT;
-            voteInput.onchange = (e) => {
-                this.VOTE_REQUIREMENT = parseInt(e.target.value);
-                localStorage.setItem("jbVoteReq", this.VOTE_REQUIREMENT);
-            };
+            voteInput.onchange = (e) => { this.VOTE_REQUIREMENT = parseInt(e.target.value); localStorage.setItem("jbVoteReq", this.VOTE_REQUIREMENT); };
         }
 
-        // Manual Search/Add
-        const searchBtn = document.getElementById('jb-search-add-btn');
-        const searchInput = document.getElementById('jb-search-input');
-        if (searchBtn && searchInput) {
-            searchBtn.onclick = () => {
-                if (searchInput.value) {
-                    this.manualAddSong(searchInput.value);
-                    searchInput.value = '';
-                }
-            };
-        }
+        document.getElementById('jb-search-add-btn').onclick = () => {
+            const val = document.getElementById('jb-search-input').value;
+            if (val) { this.manualAddSong(val); document.getElementById('jb-search-input').value = ''; }
+        };
+
+        document.getElementById('stg-toggle-jukebox-btn').onclick = () => {
+            this.setWidgetActiveState(!this.isEnabled);
+        };
     }
 
     renderFallbackList() {
@@ -85,12 +99,9 @@ export class StreamJukebox {
         list.innerHTML = '';
         this.fallbackPlaylist.forEach((item) => {
             const div = document.createElement('div');
-            div.style.cssText = "padding: 5px; border-bottom: 1px solid #3f3f46; cursor: pointer; font-size: 12px;";
+            div.style.cssText = "padding: 5px; border-bottom: 1px solid #3f3f46; cursor: pointer; font-size: 11px;";
             div.innerText = item.title;
-            div.onclick = () => {
-                this.currentTrackData = item;
-                this.ytPlayer.loadVideoById(item.id);
-            };
+            div.onclick = () => { this.currentTrackData = item; this.ytPlayer.loadVideoById(item.id); };
             list.appendChild(div);
         });
     }
@@ -99,22 +110,15 @@ export class StreamJukebox {
         this.isEnabled = state;
         const widget = document.getElementById('jukebox-widget');
         if (widget) widget.style.display = state ? "block" : "none";
-        
-        if (!state && this.ytPlayer) {
-            this.ytPlayer.stopVideo();
-            this.isPlayingSong = false;
-        }
+        if (!state && this.ytPlayer) { this.ytPlayer.stopVideo(); this.isPlayingSong = false; }
     }
 
     async handleSongRequest(user, message, botSay) {
         if (!this.isEnabled || !message) return;
-        
-        // If VOTE_REQUIREMENT is 0, restrict to streamer/admin
         if (this.VOTE_REQUIREMENT === 0 && user.toLowerCase() !== this.streamerName.toLowerCase()) {
-            botSay("🚫 Only the streamer can add songs right now.");
+            botSay("🚫 Only the streamer can add songs.");
             return;
         }
-
         const id = this.extractYouTubeId(message);
         this.queue.push({ user, title: id ? "Link" : message, id: id || message, isSearch: !id });
         botSay(`✅ Queued: "${message.substring(0, 30)}..."`);
@@ -130,12 +134,15 @@ export class StreamJukebox {
     }
 
     async handleLikeSong(user, botSay) {
-        if (this.VOTE_REQUIREMENT === 0 || !this.currentTrackData || this.currentTrackVotes.has(user.toLowerCase())) return;
-        
+        if (this.VOTE_REQUIREMENT <= 0 || !this.currentTrackData || this.currentTrackVotes.has(user.toLowerCase())) return;
         this.currentTrackVotes.add(user.toLowerCase());
+        
+        this.triggerVoteToast(user, this.currentTrackVotes.size, this.VOTE_REQUIREMENT);
+        
         if (this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
             this.saveFallbackItem(this.currentTrackData);
-            botSay(`🔥 "${this.currentTrackData.title}" added to fallback rotation!`);
+            botSay(`🔥 "${this.currentTrackData.title}" added to fallback!`);
+            this.triggerMilestoneOverlay(this.currentTrackData.title);
             this.renderFallbackList();
         }
     }
@@ -144,21 +151,17 @@ export class StreamJukebox {
         const lookup = await this.fetchTrack(message);
         if (lookup) {
             this.saveFallbackItem(lookup);
-            botSay(`💾 Added "${lookup.title}" to fallback rotation.`);
+            botSay(`💾 Added "${lookup.title}" to fallback.`);
             this.renderFallbackList();
         }
     }
 
     skipCurrentSong() {
-        if (this.ytPlayer && this.isEnabled) {
-            this.ytPlayer.stopVideo();
-            this.playNextSong();
-        }
+        if (this.ytPlayer && this.isEnabled) { this.ytPlayer.stopVideo(); this.playNextSong(); }
     }
 
     async playNextSong() {
         if (!this.isEnabled || !this.ytPlayerReady) return;
-
         this.currentTrackVotes.clear();
         this.currentTrackData = null;
 
@@ -167,12 +170,15 @@ export class StreamJukebox {
             const next = this.queue.shift();
             this.currentTrackData = next.isSearch ? await this.fetchTrack(next.id) : { id: next.id, title: next.title };
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
+            document.getElementById('jb-current-title').innerText = this.currentTrackData.title;
         } else if (this.fallbackPlaylist.length > 0) {
             this.isPlayingSong = true;
             this.currentTrackData = this.fallbackPlaylist[Math.floor(Math.random() * this.fallbackPlaylist.length)];
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
+            document.getElementById('jb-current-title').innerText = this.currentTrackData.title;
         } else {
             this.isPlayingSong = false;
+            document.getElementById('jb-current-title').innerText = "No Track Loaded";
         }
     }
 
