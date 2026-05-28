@@ -114,15 +114,6 @@
         margin-top: 15px;
         line-height: 1.4;
     }
-    /* Fully hidden sandbox zone for search compilation */
-    #searchSandbox {
-        width: 1px;
-        height: 1px;
-        position: absolute;
-        left: -9999px;
-        top: -9999px;
-        opacity: 0;
-    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
@@ -159,8 +150,6 @@
         </div>
     </div>
 
-    <div id="searchSandbox"></div>
-
     <div class="hint-box">
         <strong>💡 Commands Available:</strong><br>
         • <code>!sr [song name / artist]</code> - Searches YouTube and plays the top match.<br>
@@ -184,7 +173,6 @@ const status = document.getElementById('status');
 let songQueue = [];
 let isPlayingSong = false;
 let streamername = "jaedraze";
-let activeSearchTimeout = null;
 
 function isStreamerAndAuthorize(user, command) {
     if (user.toLowerCase() !== streamername.toLowerCase()) {
@@ -194,7 +182,7 @@ function isStreamerAndAuthorize(user, command) {
     return true;
 }
 
-// Robust layout extractor matrix targeting direct 11-char IDs from links and assets
+// Robust link parsing matrix targeting distinct 11-character video IDs
 function extractYouTubeId(url) {
     if (!url || typeof url !== 'string') return null;
     
@@ -211,7 +199,7 @@ function extractYouTubeId(url) {
     return null;
 }
 
-// Global initialization window hook
+// Global initialization entry window hook
 function onYouTubeIframeAPIReady() {
     console.log("⚓ YouTube IFrame API Mounted successfully.");
     ytPlayer = new YT.Player('ytPlayerNode', {
@@ -235,7 +223,7 @@ function onYouTubeIframeAPIReady() {
                 }
             },
             'onError': (err) => {
-                console.warn(`Youtubeer Error Core Signal: ${err.data}`);
+                console.warn(`Youtubeer Interface Warning Signal: ${err.data}`);
                 status.innerText = `⚠️ Player Error [Code ${err.data}]. Advancing queue...`;
                 playNextSong();
             }
@@ -243,7 +231,36 @@ function onYouTubeIframeAPIReady() {
     });
 }
 
-// Central processing function to handle queue injection from either Chat or Browser Control Panel
+// Distributed engine targeting high-performance open front-end nodes for native keyword text searches
+async function fetchTrackIdFromKeywords(keywords) {
+    // Array of fallback API mirrors to ensure 100% uptime architecture
+    const instances = [
+        'https://invidious.flokinet.to',
+        'https://iv.melmac.space',
+        'https://yewtu.be',
+        'https://invidious.projectsegfau.lt'
+    ];
+    
+    const cleanQuery = encodeURIComponent(keywords);
+    
+    for (let host of instances) {
+        try {
+            console.log(`📡 Querying fallback node layout matrix: ${host}`);
+            const response = await fetch(`${host}/api/v1/search?q=${cleanQuery}&type=video`);
+            if (!response.ok) continue;
+            
+            const results = await response.json();
+            if (results && results.length > 0 && results[0].videoId) {
+                console.log(`✅ Core Matrix Resolved "${keywords}" to Track ID: ${results[0].videoId}`);
+                return results[0].videoId;
+            }
+        } catch (e) {
+            console.warn(`Node failover encounter at ${host}. Cycling structural routing...`);
+        }
+    }
+    return null;
+}
+
 function queueTrackAsset(user, rawInput) {
     if (!rawInput) return;
     
@@ -256,7 +273,7 @@ function queueTrackAsset(user, rawInput) {
         if (!isPlayingSong) playNextSong();
     } else {
         songQueue.push({ user: user, title: cleanedInput, id: cleanedInput, isSearch: true });
-        status.innerText = `✅ Queued Search Request: "${cleanedInput}" (Requested by ${user}). Queue depth: ${songQueue.length}`;
+        status.innerText = `✅ Queued Request: "${cleanedInput}" (Requested by ${user}). Queue depth: ${songQueue.length}`;
         if (!isPlayingSong) playNextSong();
     }
 }
@@ -273,7 +290,7 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
     }
 };
 
-function playNextSong() {
+async function playNextSong() {
     if (songQueue.length === 0) {
         isPlayingSong = false;
         status.innerText = "Status: Queue empty. Ready for new requests.";
@@ -286,63 +303,31 @@ function playNextSong() {
         return;
     }
 
-    if (activeSearchTimeout) clearTimeout(activeSearchTimeout);
-
     isPlayingSong = true;
     const nextSong = songQueue.shift();
-    status.innerText = `🎶 Processing Request: "${nextSong.title}" (Requested by ${nextSong.user})`;
-
+    
     if (nextSong.isSearch) {
-        const sandboxZone = document.getElementById('searchSandbox');
-        sandboxZone.innerHTML = ''; 
-
-        const searchFrameNode = document.createElement('iframe');
-        const encodedQuery = encodeURIComponent(nextSong.id);
+        status.innerText = `🔍 Resolving search match path for: "${nextSong.title}"...`;
+        const resolvedId = await fetchTrackIdFromKeywords(nextSong.id);
         
-        searchFrameNode.src = `https://www.youtube.com/embed?listType=search&list=${encodedQuery}&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
-        
-        let localSearchPlayer = new YT.Player(searchFrameNode, {
-            events: {
-                'onReady': () => {
-                    try {
-                        const compiledPlaylist = localSearchPlayer.getPlaylist();
-                        if (compiledPlaylist && compiledPlaylist.length > 0) {
-                            const foundVideoId = compiledPlaylist[0];
-                            status.innerText = `🎶 Now Playing: "${nextSong.title}" (Requested by ${nextSong.user})`;
-                            ytPlayer.loadVideoById(foundVideoId);
-                            sandboxZone.innerHTML = ''; 
-                        } else {
-                            activeSearchTimeout = setTimeout(() => {
-                                try {
-                                    const latePlaylist = localSearchPlayer.getPlaylist();
-                                    if (latePlaylist && latePlaylist.length > 0) {
-                                        ytPlayer.loadVideoById(latePlaylist[0]);
-                                    } else {
-                                        status.innerText = `❌ No valid track matches found for search query.`;
-                                        playNextSong();
-                                    }
-                                } catch (e) {
-                                    playNextSong();
-                                }
-                            }, 1200);
-                        }
-                    } catch (err) {
-                        console.warn("Sandbox hook matrix validation fault:", err);
-                        playNextSong();
-                    }
-                },
-                'onError': () => {
-                    playNextSong();
-                }
+        if (resolvedId) {
+            status.innerText = `🎶 Now Playing: "${nextSong.title}" (Requested by ${nextSong.user})`;
+            try {
+                ytPlayer.loadVideoById(resolvedId);
+            } catch (err) {
+                console.error("Frame core loading crash:", err);
+                playNextSong();
             }
-        });
-
-        sandboxZone.appendChild(searchFrameNode);
+        } else {
+            status.innerText = `❌ Error resolving search query: "${nextSong.title}". Skipping item...`;
+            playNextSong();
+        }
     } else {
+        status.innerText = `🎶 Now Playing: Direct Link Asset (Requested by ${nextSong.user})`;
         try {
             ytPlayer.loadVideoById(nextSong.id);
         } catch(e) {
-            console.error("Direct loader engine failure context exception:", e);
+            console.error("Direct link structural loading exception:", e);
             isPlayingSong = false;
             setTimeout(playNextSong, 1000);
         }
@@ -405,11 +390,10 @@ document.getElementById("browserSubmitBtn").addEventListener("click", function()
     const inputField = document.getElementById("browserSearchInput");
     if (inputField.value.trim() !== "") {
         queueTrackAsset("Streamer (Browser)", inputField.value);
-        inputField.value = ""; // Clear out text field on success
+        inputField.value = ""; 
     }
 });
 
-// Allow hitting the Enter key inside the field to submit instantly
 document.getElementById("browserSearchInput").addEventListener("keydown", function(event) {
     if (event.key === "Enter") {
         document.getElementById("browserSubmitBtn").click();
