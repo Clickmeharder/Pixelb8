@@ -2020,19 +2020,22 @@ function initTimerEngine() {
         if (shouldRestart && !timerIntervalId) {
             timerIntervalId = setInterval(processTimersTick, 1000);
         }
-        renderActiveTimersUI();
     }
 
-    // 2. FIX: Safely capture the UI elements container and hook interactions directly
+    // Render UI lists instantly
+    renderActiveTimersUI();
+
+    // FIXED: Delegation attached directly to the main element wrapper
     const listContainer = document.getElementById("active-timers-list");
     if (listContainer && !listContainer.dataset.delegated) {
-        listContainer.dataset.delegated = "true"; // Prevent duplicate handler mapping bugs
+        listContainer.dataset.delegated = "true"; // Prevent duplicate trigger assignments
         
-        listContainer.addEventListener("click", (e) => {
+        listContainer.addEventListener("click", function(e) {
+            // Find if the clicked element (or its icon) is inside a control button
             const btn = e.target.closest("button[data-action]");
             if (!btn) return;
             
-            // Stop other navigation modules from intercepting or resetting the click state
+            // Stop other panel navigation blocks from stealing the click hook
             e.stopPropagation();
             e.preventDefault();
 
@@ -2043,9 +2046,7 @@ function initTimerEngine() {
             if (action === "pause") pauseTimerInstance(targetId);
             if (action === "reset") resetTimerInstance(targetId);
             if (action === "split") splitTimerInstance(targetId);
-            
-            // Map the "delete" markup action directly into your stop/elimination runtime engine
-            if (action === "delete") stopTimerInstance(targetId); 
+            if (action === "delete") stopTimerInstance(targetId); // Maps X button to deletion
         });
     }
 }
