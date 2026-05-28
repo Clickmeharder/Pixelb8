@@ -2006,40 +2006,8 @@ function initTimerEngine() {
         }
     }
 
-    // Render UI: This now handles the visibility logic internally
+    // Direct render draw call
     renderActiveTimersUI();
-
-    // Set up a single robust delegated event listener for row control actions
-    const listContainer = document.getElementById("active-timers-list");
-    if (listContainer && !listContainer.dataset.delegated) {
-        listContainer.dataset.delegated = "true";
-        
-        // 🟢 FIX: Set capture to true so this runs completely ahead of global CMS dragging loops
-        listContainer.addEventListener("click", (e) => {
-            const btn = e.target.closest("button[data-action]");
-            if (!btn) return;
-
-            // Stop layout panels/context menus from intercepting click propagation
-            e.stopPropagation();
-            e.preventDefault();
-
-            const action = btn.getAttribute("data-action");
-            const targetId = btn.getAttribute("data-id");
-
-            console.log(`⏱️ Timer Action Triggered: ${action} on ID: ${targetId}`);
-
-            if (action === "start") startTimerInstance(targetId);
-            if (action === "pause") pauseTimerInstance(targetId);
-            if (action === "reset") resetTimerInstance(targetId);
-            if (action === "split") splitTimerInstance(targetId);
-            
-            // 🟢 FIX MATCH: Now catches both string variations securely 
-            if (action === "delete" || action === "stop") {
-                console.log(`❌ Executing removal for timer instance ID: ${targetId}`);
-                stopTimerInstance(targetId);
-            }
-        }, { capture: true }); 
-    }
 }
 function updateTimerStyles() {
     const colorValue = document.getElementById('tmr-color-text').value;
@@ -2226,27 +2194,58 @@ function renderActiveTimersUI() {
     keys.forEach(id => {
         const t = activeTimers[id];
         const rem = t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed;
+        
         const row = document.createElement("div");
         row.className = "timer-control-row";
         row.style.cssText = "display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; background:rgba(0,0,0,0.2); padding:4px; border-radius:4px;";
         
-        // 🟢 FIX MATCH: Switched data-action to "delete" to perfectly route event data rules
         row.innerHTML = `
             <span style="max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:${t.running ? 'var(--accent)' : '#a1a1aa'}">
                 ${t.type === 'stopwatch' ? '⏱️' : '⏳'} ${t.label} (${formatTimeDigits(rem)})
             </span>
             <div class="timer-btn-group" style="display:flex; gap:2px;">
-                <button type="button" data-action="start" data-id="${t.id}" title="Start" style="background:none; border:none; cursor:pointer;">▶️</button>
-                <button type="button" data-action="pause" data-id="${t.id}" title="Pause" style="background:none; border:none; cursor:pointer;">⏸️</button>
-                <button type="button" data-action="reset" data-id="${t.id}" title="Reset" style="background:none; border:none; cursor:pointer;">🔄</button>
-                <button type="button" data-action="split" data-id="${t.id}" title="Split Lap" style="background:none; border:none; cursor:pointer; ${t.type === 'countdown' ? 'display:none;' : ''}">✂️</button>
-                <button type="button" data-action="delete" data-id="${t.id}" title="Remove" style="background:none; border:none; cursor:pointer;">❌</button>
+                <button type="button" class="t-start-btn" style="background:none; border:none; cursor:pointer;">▶️</button>
+                <button type="button" class="t-pause-btn" style="background:none; border:none; cursor:pointer;">⏸️</button>
+                <button type="button" class="t-reset-btn" style="background:none; border:none; cursor:pointer;">🔄</button>
+                <button type="button" class="t-split-btn" style="background:none; border:none; cursor:pointer; ${t.type === 'countdown' ? 'display:none;' : ''}">✂️</button>
+                <button type="button" class="t-delete-btn" style="background:none; border:none; cursor:pointer;">❌</button>
             </div>
         `;
+
+        // 🟢 DIRECT INLINE EVENT BINDING: Completely bypasses event delegation
+        row.querySelector(".t-start-btn").onclick = (e) => {
+            e.stopPropagation();
+            console.log(`⏱️ Start clicked for timer: ${t.id}`);
+            startTimerInstance(t.id);
+        };
+
+        row.querySelector(".t-pause-btn").onclick = (e) => {
+            e.stopPropagation();
+            console.log(`⏱️ Pause clicked for timer: ${t.id}`);
+            pauseTimerInstance(t.id);
+        };
+
+        row.querySelector(".t-reset-btn").onclick = (e) => {
+            e.stopPropagation();
+            console.log(`⏱️ Reset clicked for timer: ${t.id}`);
+            resetTimerInstance(t.id);
+        };
+
+        row.querySelector(".t-split-btn").onclick = (e) => {
+            e.stopPropagation();
+            console.log(`⏱️ Split clicked for timer: ${t.id}`);
+            splitTimerInstance(t.id);
+        };
+
+        row.querySelector(".t-delete-btn").onclick = (e) => {
+            e.stopPropagation();
+            console.log(`❌ Delete/Remove clicked for timer: ${t.id}`);
+            stopTimerInstance(t.id);
+        };
+
         if (listContainer) listContainer.appendChild(row);
     });
 }
-
 document.addEventListener("DOMContentLoaded", () => {
     initTimerEngine();
 });
