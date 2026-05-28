@@ -93,6 +93,15 @@
         margin-top: 15px;
         line-height: 1.4;
     }
+    /* Fully hidden sandbox zone for search compilation */
+    #searchSandbox {
+        width: 1px;
+        height: 1px;
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        opacity: 0;
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
@@ -100,7 +109,7 @@
 <body>
 
 <div class="main-layout">
-    <h1>🎵 Pixelb8 Stream Jukebox 🎵 </h1>
+    <h1>🎵 Pixel Stream Jukebox</h1>
     
     <div id="comfycontrolBox">
         <div class="controls-group">
@@ -119,6 +128,8 @@
             <div id="ytPlayerNode"></div>
         </div>
     </div>
+
+    <div id="searchSandbox"></div>
 
     <div class="hint-box">
         <strong>💡 Commands Available:</strong><br>
@@ -139,10 +150,11 @@ let ytPlayer = null;
 let ytPlayerReady = false;
 const status = document.getElementById('status');
 
-// --- HIGH-AVAILABILITY YOUTUBE INSTANTIATION BLOCK ---
+// --- HIGH-AVAILABILITY ENGINE VARIABLES ---
 let songQueue = [];
 let isPlayingSong = false;
 let streamername = "jaedraze";
+let activeSearchTimeout = null;
 
 function isStreamerAndAuthorize(user, command) {
     if (user.toLowerCase() !== streamername.toLowerCase()) {
@@ -152,7 +164,7 @@ function isStreamerAndAuthorize(user, command) {
     return true;
 }
 
-// Extraction parsing matrix for IDs from standard YT, short links, YT Music, and plain strings
+// Robust layout extractor matrix targeting direct 11-char IDs from links and assets
 function extractYouTubeId(url) {
     if (!url || typeof url !== 'string') return null;
     
@@ -169,7 +181,7 @@ function extractYouTubeId(url) {
     return null;
 }
 
-// Global hook: Instantiates the player container immediately on load
+// Global initialization window hook
 function onYouTubeIframeAPIReady() {
     console.log("⚓ YouTube IFrame API Mounted successfully.");
     ytPlayer = new YT.Player('ytPlayerNode', {
@@ -193,7 +205,7 @@ function onYouTubeIframeAPIReady() {
                 }
             },
             'onError': (err) => {
-                console.warn(`Youtubeer error encountered: ${err.data}`);
+                console.warn(`Youtubeer Error Core Signal: ${err.data}`);
                 status.innerText = `⚠️ Player Error [Code ${err.data}]. Advancing queue...`;
                 playNextSong();
             }
@@ -239,25 +251,69 @@ function playNextSong() {
         return;
     }
 
+    if (activeSearchTimeout) clearTimeout(activeSearchTimeout);
+
     isPlayingSong = true;
     const nextSong = songQueue.shift();
-    status.innerText = `🎶 Now Playing: "${nextSong.title}" (Requested by ${nextSong.user})`;
+    status.innerText = `🎶 Processing Request: "${nextSong.title}" (Requested by ${nextSong.user})`;
 
-    try {
-        if (nextSong.isSearch) {
-            // Uses official search parameters layout natively, bypassing proxy blockers completely
-            ytPlayer.loadPlaylist({
-                listType: 'search',
-                list: nextSong.id,
-                index: 0
-            });
-        } else {
+    if (nextSong.isSearch) {
+        // High availability text fallback layer using a background frame interface matrix
+        const sandboxZone = document.getElementById('searchSandbox');
+        sandboxZone.innerHTML = ''; 
+
+        const searchFrameNode = document.createElement('iframe');
+        const encodedQuery = encodeURIComponent(nextSong.id);
+        
+        // This structural URL generates an automatic valid query index directly inside YouTube's cloud layout
+        searchFrameNode.src = `https://www.youtube.com/embed?listType=search&list=${encodedQuery}&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
+        
+        let localSearchPlayer = new YT.Player(searchFrameNode, {
+            events: {
+                'onReady': () => {
+                    try {
+                        const compiledPlaylist = localSearchPlayer.getPlaylist();
+                        if (compiledPlaylist && compiledPlaylist.length > 0) {
+                            const foundVideoId = compiledPlaylist[0];
+                            status.innerText = `🎶 Now Playing: "${nextSong.title}" (Requested by ${nextSong.user})`;
+                            ytPlayer.loadVideoById(foundVideoId);
+                            sandboxZone.innerHTML = ''; // Clean up container memory loop
+                        } else {
+                            // Fallback timeout engine interceptor if playlist matrix arrays latency loading
+                            activeSearchTimeout = setTimeout(() => {
+                                try {
+                                    const latePlaylist = localSearchPlayer.getPlaylist();
+                                    if (latePlaylist && latePlaylist.length > 0) {
+                                        ytPlayer.loadVideoById(latePlaylist[0]);
+                                    } else {
+                                        status.innerText = `❌ No valid track matches found for search query.`;
+                                        playNextSong();
+                                    }
+                                } catch (e) {
+                                    playNextSong();
+                                }
+                            }, 1200);
+                        }
+                    } catch (err) {
+                        console.warn("Sandbox hook matrix validation fault:", err);
+                        playNextSong();
+                    }
+                },
+                'onError': () => {
+                    playNextSong();
+                }
+            }
+        });
+
+        sandboxZone.appendChild(searchFrameNode);
+    } else {
+        try {
             ytPlayer.loadVideoById(nextSong.id);
+        } catch(e) {
+            console.error("Direct loader engine failure context exception:", e);
+            isPlayingSong = false;
+            setTimeout(playNextSong, 1000);
         }
-    } catch(e) {
-        console.error("Failed to load video into frame context:", e);
-        isPlayingSong = false;
-        setTimeout(playNextSong, 1000);
     }
 }
 
