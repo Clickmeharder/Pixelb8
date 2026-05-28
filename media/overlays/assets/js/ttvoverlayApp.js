@@ -2314,43 +2314,54 @@ const PANEL_NAVIGATION_MAPS = [
 // Maps HTML inputs/buttons to reactive parameters, executing automated mutations and context syncs
 
 const BOOLEAN_TOGGLE_MAPS = [
+    // --- MASTER ALERTS ---
     { 
         id: "settings-toggle-master-alerts", type: "change", valuePath: "checked", invert: true, 
-        assignTo: (val) => { alertHidden = val; }, 
+        assignTo: (val) => { alertHidden = val; settings.alertHidden = val; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "stg-toggle-master-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { alertHidden = !alertHidden; settings.alertHidden = alertHidden; }, 
         onSync: () => { saveSettings(); syncAllToggleUI(); } 
     },
     { 
         id: "mgr-toggle-alert-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { alertHidden = !alertHidden; }, 
+        assignTo: () => { alertHidden = !alertHidden; settings.alertHidden = alertHidden; }, 
         onSync: () => { saveSettings(); syncAllToggleUI(); } 
     },
+
+    // --- REWARDS ---
     { 
         id: "stg-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { settings.rewardsEnabled = !settings.rewardsEnabled; }, 
+        assignTo: () => { rewardsEnabled = !rewardsEnabled; settings.rewardsEnabled = rewardsEnabled; }, 
         onSync: () => { saveSettings(); syncAllToggleUI(); } 
     },
     { 
         id: "mgr-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { settings.rewardsEnabled = !settings.rewardsEnabled; }, 
+        assignTo: () => { rewardsEnabled = !rewardsEnabled; settings.rewardsEnabled = rewardsEnabled; }, 
         onSync: () => { saveSettings(); syncAllToggleUI(); } 
     },
+
+    // --- BITS ---
     { 
         id: "stg-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { settings.bitsEnabled = !settings.bitsEnabled; }, 
+        assignTo: () => { bitsEnabled = !bitsEnabled; settings.bitsEnabled = bitsEnabled; }, 
         onSync: () => { saveSettings(); syncAllToggleUI(); } 
     },
     { 
         id: "mgr-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { settings.bitsEnabled = !settings.bitsEnabled; }, 
+        assignTo: () => { bitsEnabled = !bitsEnabled; settings.bitsEnabled = bitsEnabled; }, 
         onSync: () => { saveSettings(); syncAllToggleUI(); } 
     },
+
+    // --- JUKEBOX ---
     { 
         id: "stg-toggle-jukebox-btn", type: "click", valuePath: null, invert: false, 
         assignTo: () => { settings.jukeboxWidgetEnabled = !settings.jukeboxWidgetEnabled; }, 
         onSync: () => { saveSettings(); syncAllToggleUI(); } 
     }
 ];
-
 // Straight utility mapping dictionary for clean event routing execution pipelines
 const SIMPLE_CLICK_MAPS = [
     { id: "ctx-reset",     handler: () => systemReset() },
