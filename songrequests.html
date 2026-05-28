@@ -125,6 +125,68 @@
         line-height: 1.4;
     }
 
+    /* --- VIBRANT POPUP ALERTS MATRIX OVERLAY SYSTEM --- */
+    .alert-toast-container {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 9999;
+        pointer-events: none;
+        max-width: 320px;
+    }
+    .vote-toast {
+        background: rgba(46, 204, 113, 0.95);
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 13px;
+        text-align: left;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        border-left: 5px solid #27ae60;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.4s ease 3.6s forwards;
+    }
+    .milestone-popup-announcement {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(241, 196, 15, 0.98);
+        color: #111;
+        padding: 20px 25px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 900;
+        text-transform: uppercase;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        border: 2px solid #fff;
+        z-index: 10000;
+        pointer-events: none;
+        text-align: center;
+        width: 80%;
+        max-width: 450px;
+        letter-spacing: 0.5px;
+        line-height: 1.4;
+        animation: popInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.5s ease 4.5s forwards;
+    }
+    @keyframes slideInRight {
+        from { transform: translateX(120%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes popInScale {
+        from { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+        to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    @keyframes fadeOut {
+        to { opacity: 0; transform: translateY(-10px); }
+    }
+
     /* Floating Navigation HUD specific to OBS Overlays */
     #obsNavigationHud {
         display: none;
@@ -162,7 +224,7 @@
         background: transparent !important;
         box-shadow: none;
         border-radius: 0;
-        padding: 35px 10px 10px 10px; /* Offset spacing context for floating utility bar */
+        padding: 35px 10px 10px 10px; 
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -214,7 +276,7 @@
     <h1>🎵 Stream Jukebox</h1>
     
     <div class="dashboard-panel">
-        <label>🎛 nighttime Streamer Control Dashboard</label>
+        <label>🎛️ Streamer Control Dashboard</label>
         <div class="dashboard-row">
             <input type="text" id="browserSearchInput" placeholder="Song request text, link, or video ID...">
             <button id="browserSubmitBtn" style="background: #ff4757; color: white;">Queue Live</button>
@@ -241,6 +303,7 @@
     <div class="video-monitor-panel">
         <label>📺 Live Media Player Monitor</label>
         <div class="video-frame-container" id="videoWrapper">
+            <div id="alertToastContainer" class="alert-toast-container"></div>
             <div id="ytPlayerNode"></div>
         </div>
         <div id="status">System Status: Awaiting Twitch connection... Player unprimed.</div>
@@ -315,7 +378,7 @@ function onYouTubeIframeAPIReady() {
         events: {
             'onReady': () => {
                 ytPlayerReady = true;
-                status.innerText = `Status: Player ready. Fallback registry deep pool: ${fallbackPlaylist.length} tracks.`;
+                status.innerText = `Status: Player ready. Fallback pool size: ${fallbackPlaylist.length} tracks.`;
                 if (!isPlayingSong) playNextSong();
             },
             'onStateChange': (event) => {
@@ -401,9 +464,35 @@ function saveFallbackItem(item, originUser) {
         fallbackPlaylist.push(item);
         localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
         status.innerText = `💾 Saved to Fallback Playlist: "${item.title}" (Added by ${originUser}). Total pool size: ${fallbackPlaylist.length}`;
+        triggerMilestoneOverlay(item.title);
     } else {
         status.innerText = `💡 Track "${item.title}" already exists inside fallback playlist database.`;
     }
+}
+
+// --- VISUAL INTERFACE INJECTION METHODS ---
+function triggerVoteToastNotification(username, currentCount, targetCount) {
+    const container = document.getElementById("alertToastContainer");
+    if (!container) return;
+
+    const toast = document.createElement("div");
+    toast.className = "vote-toast";
+    toast.innerHTML = `<span>👍</span> <div><strong>${username}</strong> liked this song! (${currentCount}/${targetCount})</div>`;
+    
+    container.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 4000);
+}
+
+function triggerMilestoneOverlay(songTitle) {
+    const wrapper = document.getElementById("videoWrapper");
+    if (!wrapper) return;
+
+    const popup = document.createElement("div");
+    popup.className = "milestone-popup-announcement";
+    popup.innerHTML = `🔥 Community Choice! <br><span style="font-size:12px; color:#fff; display:block; margin-top:5px; text-transform:none;">"${songTitle}" reached the threshold and hit the Fallback Playlist!</span>`;
+    
+    wrapper.appendChild(popup);
+    setTimeout(() => { popup.remove(); }, 5000);
 }
 
 ComfyJS.onCommand = async (user, command, message, flags, extra) => {
@@ -423,11 +512,17 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
         if (!currentTrackVotes.has(user.toLowerCase())) {
             currentTrackVotes.add(user.toLowerCase());
             
+            // Instantly spawn green floating upvote notice card over video node
+            triggerVoteToastNotification(user, currentTrackVotes.size, VOTE_REQUIREMENT);
+            
             if (currentTrackVotes.size >= VOTE_REQUIREMENT) {
                 if (!fallbackPlaylist.some(el => el.id === currentTrackData.id)) {
                     fallbackPlaylist.push({ id: currentTrackData.id, title: currentTrackData.title });
                     localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(fallbackPlaylist));
                     status.innerText = `🔥 Community Choice! "${currentTrackData.title}" reached upvote threshold and hit the Fallback Playlist! Pool size: ${fallbackPlaylist.length}`;
+                    
+                    // Spawn huge golden community center splash milestone overlay
+                    triggerMilestoneOverlay(currentTrackData.title);
                 }
             }
         }
@@ -524,7 +619,6 @@ function skipCurrentSong() {
     }
 }
 
-
 // --- TWITCH CHAT RUNTIME INTERACTION ENGINE ---
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
@@ -608,7 +702,6 @@ const toggleObsViewBtn = document.getElementById("toggleObsViewBtn");
 const exitObsViewBtn = document.getElementById("exitObsViewBtn");
 const toggleAudioDisplayBtn = document.getElementById("toggleAudioDisplayBtn");
 
-// Check if persistent setup configuration profiles exist in storage
 if (localStorage.getItem("jukeboxViewMode") === "obs") {
     document.body.classList.add("obs-widget-view");
 }
