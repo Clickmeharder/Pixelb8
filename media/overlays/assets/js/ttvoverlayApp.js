@@ -66,8 +66,9 @@ modes:
 //==================================================
 // --- MODULE IMPORTS ---
 import { EntropiaWidget } from './entropia-widget.js';
+import { StreamJukebox } from './jukebox.js'; // 🟢 Added Jukebox Engine Module
 console.log("🚀 [Module Load]: entropia-widget.js version 0.002 imported successfully without dependencies!");
-
+console.log("🚀 [Module Load]: jukebox.js version 1.000 imported successfully!");
 
 // --- STORAGE & SETTINGS INITIALIZATION ---
 let settings = JSON.parse(localStorage.getItem('p8_settings')) || {
@@ -499,7 +500,15 @@ function init() {
     } catch (entropiaError) {
         console.error("❌ [Init Error]: Failed to initialize Entropia Widget cleanly:", entropiaError);
     }
-
+	try {
+        if (typeof StreamJukebox !== 'undefined') {
+            window.streamJukeboxEngine = new StreamJukebox();
+        } else {
+            console.warn("⚠️ [Init Warning]: StreamJukebox class is not defined. Skipping instantiation.");
+        }
+    } catch (jukeboxError) {
+        console.error("❌ [Init Error]: Failed to initialize Jukebox Module cleanly:", jukeboxError);
+    }
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 
     populateCustomDropdowns();
@@ -1954,6 +1963,10 @@ function startTwitch(channel, token) {
             }
         }
         handlePixelCommands(user, targetCommand, targetArgs, flags);
+		// 🟢 Forward instructions securely down to Jukebox Instance layer
+		if (window.streamJukeboxEngine) {
+			window.streamJukeboxEngine.handleIncomingCommand(user, command, message, flags);
+		}
     };
 
     ComfyJS.Init(channel, formattedToken);
@@ -2306,7 +2319,36 @@ const BOOLEAN_TOGGLE_MAPS = [
     { id: "mgr-toggle-alert-btn",          type: "click",  valuePath: null,      invert: false, assignTo: () => { alertHidden = !alertHidden; }, onSync: () => syncAlertVisibilityState() },
     { id: "settings-toggle-rewards",       type: "change", valuePath: "checked", invert: false, assignTo: (val) => { rewardsEnabled = val; }, onSync: () => saveSettings() },
     { id: "settings-toggle-bits",          type: "change", valuePath: "checked", invert: false, assignTo: (val) => { bitsEnabled = val; }, onSync: () => saveSettings() },
-    { id: "mgr-toggle-bits-btn",           type: "click",  valuePath: null,      invert: false, assignTo: () => { bitsEnabled = !bitsEnabled; }, onSync: () => saveSettings() }
+    { id: "mgr-toggle-bits-btn",           type: "click",  valuePath: null,      invert: false, assignTo: () => { bitsEnabled = !bitsEnabled; }, onSync: () => saveSettings() },
+    
+    // 🟢 ADDED: Stream Jukebox Engine Switch Row (Matches HTML id="stg-toggle-jukebox-btn")
+    { 
+        id: "stg-toggle-jukebox-btn", 
+        type: "click", 
+        valuePath: null, 
+        invert: false, 
+        assignTo: () => { 
+            if (typeof settings !== 'undefined') {
+                settings.jukeboxWidgetEnabled = !settings.jukeboxWidgetEnabled;
+            }
+        }, 
+        onSync: () => {
+            saveSettings();
+            
+            // Toggle the badge UI manually to match your layout style patterns
+            const badge = document.getElementById("stg-jukebox-status-badge");
+            const isEnabled = settings.jukeboxWidgetEnabled;
+            if (badge) {
+                badge.innerText = isEnabled ? "ENABLED" : "DISABLED";
+                badge.style.color = isEnabled ? "var(--accent)" : "#71717a";
+            }
+            
+            // Sync state with your decoupled jukebox ES Module instance
+            if (window.streamJukeboxEngine) {
+                window.streamJukeboxEngine.setWidgetActiveState(isEnabled);
+            }
+        } 
+    }
 ];
 
 // Straight utility mapping dictionary for clean event routing execution pipelines
