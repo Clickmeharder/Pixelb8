@@ -75,12 +75,10 @@ export class StreamJukebox {
 
 	applyButtonStyles() {
 		const buttons = {
-			'jb-skip-btn': 'p8-btn',
+			'jb-skip-btn': 'p8-btn p8-btn-warning', // Updated here
 			'jb-clear-btn': 'p8-btn danger-btn',
-			// Use the new green class here
 			'jb-add-queue-btn': 'p8-btn p8-btn-success',
-			'jb-add-fallback-btn': 'p8-btn p8-btn-success',
-			'stg-toggle-jukebox-btn': 'p8-btn'
+			'jb-add-fallback-btn': 'p8-btn p8-btn-success'
 		};
 		
 		Object.keys(buttons).forEach(id => {
@@ -90,18 +88,21 @@ export class StreamJukebox {
 	}
 
     bindControls() {
+        // Skip and Clear
         const skipBtn = document.getElementById('jb-skip-btn');
         if(skipBtn) skipBtn.onclick = () => this.skipCurrentSong();
 
         const clearBtn = document.getElementById('jb-clear-btn');
         if(clearBtn) clearBtn.onclick = () => { this.queue = []; this.skipCurrentSong(); };
         
+        // Vote requirement
         const voteInput = document.getElementById('jb-vote-req-input');
         if (voteInput) {
             voteInput.value = this.VOTE_REQUIREMENT;
             voteInput.onchange = (e) => { this.VOTE_REQUIREMENT = parseInt(e.target.value); localStorage.setItem("jbVoteReq", this.VOTE_REQUIREMENT); };
         }
 
+        // Add buttons
         const addQueueBtn = document.getElementById('jb-add-queue-btn');
         if(addQueueBtn) addQueueBtn.onclick = () => {
             const val = document.getElementById('jb-search-input').value;
@@ -114,10 +115,12 @@ export class StreamJukebox {
             if (val) { this.handleAddFallback('System', val, (msg) => console.log(msg)); document.getElementById('jb-search-input').value = ''; }
         };
 
-        const toggleBtn = document.getElementById('stg-toggle-jukebox-btn');
-        if(toggleBtn) toggleBtn.onclick = () => {
-            this.setWidgetActiveState(!this.isEnabled);
-        };
+        // Toggle Switch
+        const toggleCheckbox = document.getElementById('stg-toggle-jukebox-checkbox');
+        if (toggleCheckbox) {
+            toggleCheckbox.checked = this.isEnabled;
+            toggleCheckbox.onchange = (e) => this.setWidgetActiveState(e.target.checked);
+        }
     }
 
     renderFallbackList() {
@@ -129,7 +132,6 @@ export class StreamJukebox {
             const div = document.createElement('div');
             div.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #3f3f46; font-size: 11px;";
             
-            // Track Info (Title + Requestor)
             const info = document.createElement('div');
             info.style.cursor = 'pointer';
             info.innerHTML = `<strong>${item.title}</strong><br><span style="color: #a1a1aa;">Req: ${item.user || 'System'}</span>`;
@@ -138,13 +140,12 @@ export class StreamJukebox {
                 this.ytPlayer.loadVideoById(item.id); 
             };
 
-            // Delete Button
             const delBtn = document.createElement('button');
             delBtn.innerText = '✕';
             delBtn.className = 'p8-btn';
-            delBtn.style.cssText = "background: #991b1b; padding: 2px 4px;width:32px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer;";
+            delBtn.style.cssText = "background: #991b1b; padding: 2px 4px; width: 32px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer;";
             delBtn.onclick = (e) => {
-                e.stopPropagation(); // Prevents triggering play on click
+                e.stopPropagation();
                 this.fallbackPlaylist.splice(index, 1);
                 localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
                 this.renderFallbackList();

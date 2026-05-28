@@ -471,7 +471,12 @@
 			<div class="collapsible-content">
 				<div style="display: flex; justify-content: space-between; align-items: center; background: #1c1c1f; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #3f3f46;">
 					<span style="font-size: 12px; color: #f4f4f5; font-weight: 500;">Jukebox Active</span>
-					<button id="stg-toggle-jukebox-btn" class="p8-btn" style="height: 28px; padding: 0 12px;">TOGGLE</button>
+					<label style="position: relative; display: inline-block; width: 34px; height: 20px;">
+						<input type="checkbox" id="stg-toggle-jukebox-checkbox" checked style="opacity: 0; width: 0; height: 0;">
+						<span style="position: absolute; cursor: pointer; inset: 0px; background-color: rgb(63, 63, 70); transition: 0.3s; border-radius: 20px;" 
+							  onclick="const cb = document.getElementById('stg-toggle-jukebox-checkbox'); cb.click();">
+						</span>
+					</label>
 				</div>
 
 				<div style="background: #141414; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 6px;">
@@ -492,7 +497,7 @@
 					</div>
 				
 				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
-					<button id="jb-skip-btn" class="p8-btn" style="padding: 6px;">SKIP</button>
+					<button id="jb-skip-btn" class="p8-btn p8-btn-warning" style="padding: 6px;">SKIP</button>
 					<button id="jb-clear-btn" class="p8-btn" style="padding: 6px; background: #991b1b;">CLEAR QUEUE</button>
 				</div>
 			</div>

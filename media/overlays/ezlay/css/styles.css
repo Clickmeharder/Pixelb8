@@ -615,6 +615,16 @@ body.edit-mode .p8-widget:active {
 .p8-btn-success:hover {
     background-color: rgb(35, 96, 38) !important;
 }
+.p8-btn-warning {
+    background-color: #d97706 !important; /* Amber/Orange */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.p8-btn-warning:hover {
+    background-color: #b45309 !important;
+}
 .save-btn { 
     background: var(--accent); 
     color: white; 
