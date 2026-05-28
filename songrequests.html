@@ -143,13 +143,14 @@
         </div>
     </div>
 
-    <div id="status">System Status: Awaiting Twitch connection... Player unprimed.</div>
+    
 
     <div class="video-monitor-panel">
         <label>📺 Live Media Player Monitor</label>
         <div class="video-frame-container" id="videoWrapper">
             <div id="ytPlayerNode"></div>
         </div>
+		<div id="status">System Status: Awaiting Twitch connection... Player unprimed.</div>
     </div>
 
     <div class="hint-box">
@@ -385,6 +386,11 @@ async function playNextSong() {
                 status.innerText = `🎶 Now Playing: "${resolved.title}" (Requested by ${nextSong.user})`;
                 currentTrackData = { id: resolved.id, title: resolved.title };
                 try {
+                    // SILENCE PERMISSIONS ERROR: Inject policies directly into the player node before loading
+                    const mainIframe = document.querySelector('#videoWrapper iframe');
+                    if (mainIframe) {
+                        mainIframe.setAttribute('allow', 'autoplay; encrypted-media; compute-pressure');
+                    }
                     ytPlayer.loadVideoById(resolved.id);
                 } catch (err) {
                     playNextSong();
@@ -397,6 +403,10 @@ async function playNextSong() {
             status.innerText = `🎶 Now Playing Direct Track (Requested by ${nextSong.user})`;
             currentTrackData = { id: nextSong.id, title: nextSong.title };
             try {
+                const mainIframe = document.querySelector('#videoWrapper iframe');
+                if (mainIframe) {
+                    mainIframe.setAttribute('allow', 'autoplay; encrypted-media; compute-pressure');
+                }
                 ytPlayer.loadVideoById(nextSong.id);
             } catch(e) {
                 isPlayingSong = false;
@@ -409,7 +419,6 @@ async function playNextSong() {
     // STATE TWO: Fallback Shuffle Engine Allocation (Zero Live Tracks Available)
     if (fallbackPlaylist.length > 0) {
         isPlayingSong = true;
-        // Seed index math selecting completely clean random indices from database records
         const randomIndex = Math.floor(Math.random() * fallbackPlaylist.length);
         const fallbackTrack = fallbackPlaylist[randomIndex];
         
@@ -417,6 +426,10 @@ async function playNextSong() {
         currentTrackData = { id: fallbackTrack.id, title: fallbackTrack.title };
         
         try {
+            const mainIframe = document.querySelector('#videoWrapper iframe');
+            if (mainIframe) {
+                mainIframe.setAttribute('allow', 'autoplay; encrypted-media; compute-pressure');
+            }
             ytPlayer.loadVideoById(fallbackTrack.id);
         } catch (e) {
             console.error("Failed loading target fallback data registry asset:", e);
