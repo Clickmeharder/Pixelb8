@@ -17,29 +17,81 @@ export class StreamJukebox {
         this.streamerName = "jaedraze";
         this.isEnabled = true; 
         this.acceptRequests = true; 
-        this.isAudioOnly = false; // New state
+        this.isAudioOnly = false;
 
         this.init();
         console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
     }
 
-    // --- AUTOMATED COMMAND REGISTRY ---
-    getCommands(botSay) {
+    // --- COMMAND ROUTER (Aligned with Entropia-Widget Architecture) ---
+    getCommands(sendNotice) {
         return [
             {
-                name: "sr",
+                name: 'jb',
                 adminOnly: false,
-                execute: (user, message) => this.handleSongRequest(user, message, botSay)
-            },
-            {
-                name: "skipsong",
-                adminOnly: true,
-                execute: (user, message) => this.skipCurrentSong(botSay)
-            },
-            {
-                name: "likesong",
-                adminOnly: false,
-                execute: (user, message) => this.handleLikeSong(user, botSay)
+                description: 'Jukebox runtime routing module control console.',
+                execute: (user, message, flags) => {
+                    const parts = message.trim().toLowerCase().split(/\s+/);
+                    const subCommand = parts[0];
+                    const isAdmin = flags.broadcaster || flags.mod;
+
+                    if (!subCommand) {
+                        sendNotice(`🎵 [JB Console]: Available: !jb [sr | skip | like | status | help]`);
+                        return;
+                    }
+
+                    switch (subCommand) {
+                        case 'help':
+                        case 'h':
+                            sendNotice(`🎵 [JB Public Help]: !jb sr [link/query] | !jb like | !jb status`);
+                            if (isAdmin) sendNotice(`🛠️ [JB Admin Help]: !jb [skip | clear | toggle requests | setreq {num}]`);
+                            break;
+
+                        case 'sr':
+                        case 'request':
+                            const query = parts.slice(1).join(' ');
+                            this.handleSongRequest(user, query, sendNotice);
+                            break;
+
+                        case 'skip':
+                            if (isAdmin) this.skipCurrentSong(sendNotice);
+                            break;
+
+                        case 'like':
+                            this.handleLikeSong(user, sendNotice);
+                            break;
+
+                        case 'clear':
+                            if (isAdmin) { 
+                                this.queue = []; 
+                                this.skipCurrentSong(sendNotice); 
+                                sendNotice(`🧹 [JB]: Queue cleared.`);
+                            }
+                            break;
+
+                        case 'status':
+                            sendNotice(`🎵 [JB Status]: Playing: ${this.currentTrackData?.title || 'Nothing'} | Queue: ${this.queue.length} | Requests: ${this.acceptRequests ? 'Open' : 'Closed'}`);
+                            break;
+
+                        case 'toggle':
+                            if (!isAdmin) return;
+                            if (parts[1] === 'requests') {
+                                this.acceptRequests = !this.acceptRequests;
+                                sendNotice(`📢 [JB]: Requests are now ${this.acceptRequests ? 'ENABLED' : 'DISABLED'}.`);
+                            }
+                            break;
+
+                        case 'setreq':
+                            if (!isAdmin || !parts[1]) return;
+                            this.VOTE_REQUIREMENT = parseInt(parts[1]);
+                            localStorage.setItem("jbVoteReq", this.VOTE_REQUIREMENT);
+                            sendNotice(`🗳️ [JB]: Vote requirement updated to ${this.VOTE_REQUIREMENT}.`);
+                            break;
+
+                        default:
+                            sendNotice(`❌ Action !jb ${subCommand} unknown on target sub-routing stack.`);
+                    }
+                }
             }
         ];
     }
@@ -52,7 +104,6 @@ export class StreamJukebox {
         badge.innerText = isActive ? 'ON' : 'OFF';
     }
 
-    // --- UI Notifications ---
     triggerVoteToast(username, currentCount, targetCount) {
         const container = document.getElementById("overlay-wrapper");
         if (!container) return;
