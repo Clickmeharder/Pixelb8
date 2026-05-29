@@ -502,6 +502,17 @@
 					</div>
 				</div>
 
+				<div class="settings-toggle-row" style="margin-bottom: 10px;">
+					<span class="settings-toggle-label">Visualizer Overlay</span>
+					<div class="settings-toggle-controls">
+						<span id="av-status-badge" class="toggle-status-badge">OFF</span>
+						<label style="position: relative; display: inline-block; width: 34px; height: 20px; cursor: pointer;">
+							<input type="checkbox" id="stg-toggle-visualizer-checkbox" style="opacity: 0; width: 0; height: 0;">
+							<span style="position: absolute; inset: 0px; background-color: #3f3f46; transition: 0.3s; border-radius: 20px;"></span>
+						</label>
+					</div>
+				</div>
+
 				<div style="background: #141414; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 6px;">
 					<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">⚙️ Vote Requirements</label>
 					<input type="number" id="jb-vote-req-input" class="p8-input" value="2" style="width: 100%;">
