@@ -372,51 +372,78 @@ export class StreamJukebox {
         }
     }
 
-    toggleAudioOnly(state) {
+	toggleAudioOnly(state) {
         this.isAudioOnly = state;
         const playerContainer = document.getElementById('player');
         const wrapper = document.getElementById('jukebox-video-wrapper');
         
         if (playerContainer && wrapper) {
             if (state) {
-                // Audio Only Mode Active: Shrink standard layout frame boundaries
+                // Shrink the native YouTube player to a hidden pixel
                 playerContainer.style.width = "1px";
                 playerContainer.style.height = "1px";
-                wrapper.style.height = "168px"; 
-                wrapper.style.opacity = "1";
                 
-                // Inject overlay subpanel components if not present
+                // Change the wrapper to a short, modern horizontal bar layout
+                wrapper.style.height = "64px"; // Shorter height!
+                wrapper.style.opacity = "1";
+                wrapper.style.position = "relative";
+                wrapper.style.overflow = "hidden";
+                
+                // Inject or reset the sleek horizontal layout panel
                 let overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
                 if (!overlayTrackPanel) {
                     overlayTrackPanel = document.createElement('div');
                     overlayTrackPanel.id = 'jb-audio-overlay-panel';
-                    overlayTrackPanel.style.cssText = "position: absolute; top:0; left:0; width:100%; height:100%; background:#18181b; color:#f4f4f5; display:flex; flex-direction:column; justify-content:center; padding:16px; box-sizing:border-box; font-family:monospace; z-index:10;";
+                    
+                    // Flex row layout to spread everything out horizontally
+                    overlayTrackPanel.style.cssText = `
+                        position: absolute; 
+                        top: 0; 
+                        left: 0; 
+                        width: 100%; 
+                        height: 100%; 
+                        background: #18181b; 
+                        color: #f4f4f5; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: space-between; 
+                        padding: 0 16px; 
+                        box-sizing: border-box; 
+                        font-family: monospace; 
+                        z-index: 10;
+                        border: 1px solid #27272a;
+                        border-radius: 6px;
+                    `;
                     
                     overlayTrackPanel.innerHTML = `
-                        <div style="font-size: 11px; color: var(--accent, #a855f7); text-transform: uppercase; font-weight: bold; margin-bottom: 4px;">📻 Audio Mode Enabled</div>
-                        <div class="jb-current-title" style="font-size: 14px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 12px;">No Track Loaded</div>
-                        
-                        <div style="width: 100%; background: #3f3f46; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 4px; position: relative;">
-                            <div id="jb-audio-progress-bar" style="width: 0%; background: var(--accent, #a855f7); height: 100%; transition: width 0.25s linear;"></div>
+                        <div style="flex: 1; min-width: 0; padding-right: 16px; display: flex; flex-direction: column; justify-content: center;">
+                            <div class="jb-current-title" style="font-size: 13px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #f4f4f5;">No Track Loaded</div>
+                            <div style="font-size: 10px; color: #a1a1aa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px;">
+                                <span>⏭️ Next: </span><span id="jb-audio-next-title" style="color: #a855f7; font-weight: bold;">Nothing queued</span>
+                            </div>
                         </div>
-                        <div id="jb-audio-time-stamp" style="font-size: 10px; color: #a1a1aa; text-align: right; margin-bottom: 14px;">0:00 / 0:00</div>
                         
-                        <div style="font-size: 11px; border-top: 1px solid #27272a; padding-top: 8px; color: #a1a1aa;">
-                            <span>⏭️ Up Next: </span><span id="jb-audio-next-title" style="color: #f4f4f5; font-weight: bold;">Nothing queued</span>
+                        <div style="width: 240px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0;">
+                            <div style="width: 100%; background: #3f3f46; height: 5px; border-radius: 3px; overflow: hidden; position: relative; margin-bottom: 4px;">
+                                <div id="jb-audio-progress-bar" style="width: 0%; background: var(--accent, #a855f7); height: 100%; transition: width 0.25s linear;"></div>
+                            </div>
+                            <div id="jb-audio-time-stamp" style="font-size: 10px; color: #a1a1aa; font-variant-numeric: tabular-nums;">0:00 / 0:00</div>
                         </div>
                     `;
                     wrapper.appendChild(overlayTrackPanel);
                 } else {
                     overlayTrackPanel.style.display = 'flex';
                 }
+                
                 this.updatePlayerDisplay();
                 this.startAudioProgressTracking();
             } else {
-                // Standard mode restore parameters
+                // Restore standard taller proportions for the standard video block layout
                 playerContainer.style.width = "100%";
                 playerContainer.style.height = "100%";
-                this.stopAudioProgressTracking();
+                wrapper.style.height = "168px"; 
                 
+                this.stopAudioProgressTracking();
                 const overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
                 if (overlayTrackPanel) overlayTrackPanel.style.display = 'none';
             }
