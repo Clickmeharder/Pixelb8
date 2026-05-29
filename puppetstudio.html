@@ -1336,34 +1336,19 @@ uiCanvas.addEventListener('mousedown', (e) => {
 });
 
 uiCanvas.addEventListener('mousemove', (e) => {
-    const coords = getCanvasSpaceMouseCoords(e);
-
-    // Active Move Calculations
-    if (isDraggingImage && activeGrabTarget) {
-        const deltaX = coords.x - dragStartMouseX;
-        const deltaY = coords.y - dragStartMouseY;
-        
-        if (activeGrabTarget === 'main') {
-            mainTransform.x += deltaX;
-            mainTransform.y += deltaY;
-        } else if (activeGrabTarget === 'idle') {
-            idleTransform.x += deltaX;
-            idleTransform.y += deltaY;
-        }
-        
-        dragStartMouseX = coords.x;
-        dragStartMouseY = coords.y;
-        
-        bakeSourceCache();
-        if (mouthBox.w > 0) bakePuppetLayers();
-        if (headBox.w > 0) bakeIsolatedHeadLayer();
-        updateAllViewports(0);
-        return;
-    }
-
     if (!isDrawing) return;
+    const coords = getCanvasSpaceMouseCoords(e); // Ensure this function exists in your code
     
-    if (editTarget === 'jaw') {
+    if (editTarget === 'head') {
+        if (currentMode === 'box') {
+            headBox.x = Math.min(startX, coords.x);
+            headBox.y = Math.min(startY, coords.y);
+            headBox.w = Math.abs(startX - coords.x);
+            headBox.h = Math.abs(startY - coords.y);
+        } else {
+            headLassoPoints.push({ x: coords.x, y: coords.y });
+        }
+    } else if (editTarget === 'jaw') {
         if (currentMode === 'box') {
             mouthBox.x = Math.min(startX, coords.x);
             mouthBox.y = Math.min(startY, coords.y);
@@ -1382,20 +1367,27 @@ uiCanvas.addEventListener('mousemove', (e) => {
         rightEyeBox.y = Math.min(startY, coords.y);
         rightEyeBox.w = Math.abs(startX - coords.x);
         rightEyeBox.h = Math.abs(startY - coords.y);
-    } else if (editTarget === 'head') {
-        headLassoPoints.push({ x: coords.x, y: coords.y });
     }
     updateAllViewports(0);
 });
 
 uiCanvas.addEventListener('mouseup', () => {
-    if (isDraggingImage) {
-        isDraggingImage = false;
-        return;
-    }
     if (!isDrawing) return;
     isDrawing = false;
     
+    // Only finalize if we have a valid lasso path
+    if (editTarget === 'head' && currentMode === 'lasso' && headLassoPoints.length > 2) {
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        headLassoPoints.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        });
+        headBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+    }
+    
+    // Specifically handle the Jaw/Mouth logic here
     if (editTarget === 'jaw' && currentMode === 'lasso' && lassoPoints.length > 2) {
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         lassoPoints.forEach(p => {
@@ -1407,19 +1399,7 @@ uiCanvas.addEventListener('mouseup', () => {
         mouthBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
     }
     
-    if (editTarget === 'head' && headLassoPoints.length > 2) {
-        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-        headLassoPoints.forEach(p => {
-            if (p.x < minX) minX = p.x;
-            if (p.x > maxX) maxX = p.x;
-            if (p.y < minY) minY = p.y;
-            if (p.y > maxY) maxY = p.y;
-        });
-        headBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
-        bakeIsolatedHeadLayer();
-    }
-    
-    if (editTarget === 'jaw') bakePuppetLayers();
+    bakePuppetLayers();
     checkReadyState();
     runUIGuidePipeline();
 });
