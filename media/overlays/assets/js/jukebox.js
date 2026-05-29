@@ -202,23 +202,27 @@ export class StreamJukebox {
                         this.playNextSong((msg) => console.log(msg)); 
                     },
                     'onStateChange': (e) => {
-                        if (e.data === YT.PlayerState.ENDED) {
-                            this.playNextSong((msg) => console.log(msg));
-                        }
-                        
-                        // Capture the absolute source of truth directly from the active iframe frame
-                        if (e.data === YT.PlayerState.PLAYING) {
-                            const videoData = this.ytPlayer.getVideoData();
-                            if (videoData && videoData.title) {
-                                this.currentTrackData = { 
-                                    id: videoData.video_id, 
-                                    title: videoData.title 
-                                };
-                                // Force it straight to the DOM with a clean reference
-                                this.updatePlayerDisplay();
-                            }
-                        }
-                    }
+						if (e.data === YT.PlayerState.ENDED) {
+							this.playNextSong((msg) => console.log(msg));
+						}
+						
+						if (e.data === YT.PlayerState.PLAYING) {
+							const videoData = this.ytPlayer.getVideoData();
+							
+							// If we don't have local track data yet, or if the local title is a generic placeholder like "Link"
+							if (!this.currentTrackData || this.currentTrackData.title === "Link") {
+								if (videoData && videoData.title) {
+									this.currentTrackData = { 
+										id: videoData.video_id, 
+										title: videoData.title 
+									};
+								}
+							}
+							
+							// Force the display to update regardless using our verified local state data
+							this.updatePlayerDisplay();
+						}
+					}
                 }
             });
         };
