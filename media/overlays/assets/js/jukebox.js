@@ -14,7 +14,7 @@ export class StreamJukebox {
         // Load persistent settings
         this.VOTE_REQUIREMENT = parseInt(localStorage.getItem("jbVoteReq")) || 2;
         this.isPlayingSong = false;
-        this.streamerName = "jaedraze";
+        // this.streamerName = "jaedraze";
         this.isEnabled = true; 
         this.acceptRequests = true; 
         this.isAudioOnly = false;
