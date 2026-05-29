@@ -1,30 +1,36 @@
 // =========================================================================
-// DECOUPLED STREAM JUKEBOX MODULE (Class-Based)
+// DECOUPLED STREAM JUKEBOX MODULE (Class-Based - Route B Audio Engine)
 // =========================================================================
 
 export class StreamJukebox {
     constructor() {
         this.queue = [];
         this.fallbackPlaylist = JSON.parse(localStorage.getItem("jukeboxFallbackPlaylist")) || [];
-        this.ytPlayer = null;
-        this.ytPlayerReady = false;
+        
+        // --- ROUTE B MULTIMEDIA PROPERTIES ---
+        this.audioEngine = null;      // Native HTML5 Audio Element instance
+        this.audioCtx = null;         // Web Audio Context pipeline
+        this.analyser = null;         // Audio node tracking frequency data
+        this.audioSourceNode = null;  // Node bridge combining HTML5 tag into context
+        this.dataArray = null;        // Uint8Array structure storing active slice snapshots
+        
         this.currentTrackData = null;
         this.currentTrackVotes = new Set();
-        this.currentTrackSkipVotes = new Set(); // Tracks vote-skips for the active song
-        this.progressInterval = null; // Polling loop ticker for tracking progress bar
-        
+        this.currentTrackSkipVotes = new Set();
+        this.progressInterval = null; 
+
         // Load persistent settings
         this.VOTE_REQUIREMENT = parseInt(localStorage.getItem("jbVoteReq")) || 2;
         this.isPlayingSong = false;
         this.streamerName = "jaedraze";
         this.isEnabled = true; 
         this.acceptRequests = true; 
-        this.isAudioOnly = false;
-        this.showVisualizer = false; // State flag for visualizer
-        this.avAnimationId = null;   // Tracker loop instance for the canvas
+        this.isAudioOnly = true;      // Defaulting to Route B audio stream paradigm
+        this.showVisualizer = false;  
+        this.avAnimationId = null;   
 
         this.init();
-        console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
+        console.log("🎵 [Module Init]: StreamJukebox instantiated with true Web Audio reactivity.");
     }
 
     // --- COMMAND ROUTER ---
@@ -36,7 +42,7 @@ export class StreamJukebox {
         const jukeboxExecution = (user, message, flags) => {
             const parts = message.trim().toLowerCase().split(/\s+/);
             const subCommand = parts[0];
-            const isAdmin = flags.broadcaster || flags.mod; // Broadcaster and Mods count as Admin/Staff overrides
+            const isAdmin = flags.broadcaster || flags.mod;
 
             if (!subCommand) {
                 sendNotice(`🎵 [Jukebox]: Available: !jb [sr | skip | like | status | help | tilt/random | queue]`);
@@ -138,15 +144,10 @@ export class StreamJukebox {
             upNextString = "Random Fallback Selection";
         }
 
-        if (nextEl) {
-            nextEl.textContent = upNextString;
-        }
+        if (nextEl) nextEl.textContent = upNextString;
 
-        // Keep the Audio-Only track panel explicitly up to date
         const audioNextEl = document.getElementById('jb-audio-next-title');
-        if (audioNextEl) {
-            audioNextEl.textContent = upNextString;
-        }
+        if (audioNextEl) audioNextEl.textContent = upNextString;
     }
 
     // --- Core Logic ---
@@ -158,8 +159,11 @@ export class StreamJukebox {
         const track = await this.fetchTrack(keyword);
         
         if (track) {
-            this.handleSongRequest('System', track.id, sendNotice);
+            this.queue.push({ user: 'System', title: track.title, id: track.id, isSearch: false });
+            this.renderQueueList();
+            this.updatePlayerDisplay();
             sendNotice(`🎵 [JB]: Random track found: "${track.title}"`);
+            if (!this.isPlayingSong) this.playNextSong(sendNotice);
         } else {
             sendNotice(`❌ [JB]: Could not find a song for "${keyword}".`);
         }
@@ -205,73 +209,87 @@ export class StreamJukebox {
         }, 6500);
     }
 
+    // --- CORE INITIALIZATION ---
     init() {
-        if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-            const tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            document.head.appendChild(tag);
+        // Build or bind native HTML5 audio stream context container
+        let audioTag = document.getElementById('jukebox-audio-engine');
+        if (!audioTag) {
+            audioTag = document.createElement('audio');
+            audioTag.id = 'jukebox-audio-engine';
+            // CRITICAL: Bypasses CORS tracking boundaries across cross-origin streaming points
+            audioTag.crossOrigin = "anonymous"; 
+            audioTag.style.display = "none";
+            document.body.appendChild(audioTag);
         }
+        this.audioEngine = audioTag;
 
-        const setupPlayer = () => {
-            this.ytPlayer = new YT.Player('player', {
-                height: '100%', 
-                width: '100%',
-                playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1, 'fs': 0 },
-                events: {
-                    'onReady': () => { 
-                        this.ytPlayerReady = true; 
-                        this.applyButtonStyles();
-                        this.bindControls(); 
-                        this.renderFallbackList();
-                        this.renderQueueList();
-                        this.playNextSong((msg) => console.log(msg)); 
-                    },
-                    'onStateChange': (e) => {
-                        if (e.data === YT.PlayerState.ENDED) {
-                            this.playNextSong((msg) => console.log(msg));
-                        }
-                        
-                        if (e.data === YT.PlayerState.PLAYING) {
-                            const videoData = this.ytPlayer.getVideoData();
-                            
-                            if (videoData && videoData.title) {
-                                if (!this.currentTrackData || 
-                                    this.currentTrackData.title === "Link" || 
-                                    this.currentTrackData.title === "Searching...") {
-                                    
-                                    this.currentTrackData = { 
-                                        id: videoData.video_id || this.currentTrackData?.id, 
-                                        title: videoData.title 
-                                    };
-                                }
-                            }
-                            
-                            this.updatePlayerDisplay();
-                            this.startAudioProgressTracking();
-                        } else {
-                            // Clear or pause updates if player buffer pauses or stops
-                            this.stopAudioProgressTracking();
-                        }
-                    }
-                }
-            });
+        // Hook lifecycle tracking event registers directly into Native Audio engine
+        this.audioEngine.onended = () => {
+            this.playNextSong((msg) => console.log(msg));
         };
 
-        if (window.YT && window.YT.Player) {
-            setupPlayer();
-        } else {
-            window.onYouTubeIframeAPIReady = setupPlayer;
+        this.audioEngine.onplaying = () => {
+            this.isPlayingSong = true;
+            this.updatePlayerDisplay();
+            this.startAudioProgressTracking();
+            // Fire up true audio tracking nodes if visualizer toggle state matches layout
+            if (this.showVisualizer) this.startVisualizerLoop();
+        };
+
+        this.audioEngine.onpause = () => {
+            this.stopAudioProgressTracking();
+        };
+
+        // Inject initial interface wrapper structure rules safely
+        const wrapper = document.getElementById('jukebox-video-wrapper');
+        if (wrapper) {
+            // Remap obsolete native iframe blocks out of layout rendering tree
+            const oldPlayer = document.getElementById('player');
+            if (oldPlayer) oldPlayer.style.display = "none";
+            
+            // Forces panel configuration styles
+            this.toggleAudioOnly(this.isAudioOnly);
+        }
+
+        this.bindControls();
+        this.renderFallbackList();
+        this.renderQueueList();
+        
+        // Attempt early playback loop check
+        this.playNextSong((msg) => console.log(msg));
+    }
+
+    // --- AUDIO PIPELINE HOOK (Lazy Loaded Context initialization) ---
+    setupAudioContextPipeline() {
+        if (this.audioCtx) return; // Prevent breaking pipeline duplication loops
+
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            this.audioCtx = new AudioContextClass();
+            this.analyser = this.audioCtx.createAnalyser();
+            
+            // Connect native element to processing workspace node map
+            this.audioSourceNode = this.audioCtx.createMediaElementSource(this.audioEngine);
+            this.audioSourceNode.connect(this.analyser);
+            this.analyser.connect(this.audioCtx.destination); // Route stream out to physical speakers
+
+            // Configuration parameters for digital audio parsing loops
+            this.analyser.fftSize = 256; // 128 distinct frequency bins
+            const bufferLength = this.analyser.frequencyBinCount;
+            this.dataArray = new Uint8Array(bufferLength);
+        } catch (error) {
+            console.error("❌ Failed to instantiate Web Audio Context routing:", error);
         }
     }
 
-    // Interval Management for parsing playback time dynamically
+    // Interval tracking loop processing time updates
     startAudioProgressTracking() {
         this.stopAudioProgressTracking();
         this.progressInterval = setInterval(() => {
-            if (!this.ytPlayer || typeof this.ytPlayer.getCurrentTime !== 'function') return;
+            if (!this.audioEngine) return;
             
-            const elapsed = this.ytPlayer.getCurrentTime() || 0;
-            const total = this.ytPlayer.getDuration() || 0;
+            const elapsed = this.audioEngine.currentTime || 0;
+            const total = this.audioEngine.duration || 0;
             const bar = document.getElementById('jb-audio-progress-bar');
             const stamp = document.getElementById('jb-audio-time-stamp');
 
@@ -282,6 +300,7 @@ export class StreamJukebox {
 
             if (stamp) {
                 const formatTime = (seconds) => {
+                    if (isNaN(seconds)) return "0:00";
                     const mins = Math.floor(seconds / 60);
                     const secs = Math.floor(seconds % 60);
                     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -313,6 +332,7 @@ export class StreamJukebox {
     }
 
     bindControls() {
+        this.applyButtonStyles();
         const currentSkipBtn = document.getElementById('jb-current-skip');
         if(currentSkipBtn) currentSkipBtn.onclick = () => this.skipCurrentSong((msg) => console.log(msg));
 
@@ -386,79 +406,46 @@ export class StreamJukebox {
 
     toggleAudioOnly(state) {
         this.isAudioOnly = state;
-        const playerContainer = document.getElementById('player');
         const wrapper = document.getElementById('jukebox-video-wrapper');
         
-        if (playerContainer && wrapper) {
-            if (state) {
-                // Shrink the native YouTube player to a hidden pixel
-                playerContainer.style.width = "1px";
-                playerContainer.style.height = "1px";
+        if (wrapper) {
+            wrapper.style.height = "64px"; 
+            wrapper.style.opacity = "1";
+            wrapper.style.position = "relative";
+            wrapper.style.overflow = "hidden";
+            
+            let overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
+            if (!overlayTrackPanel) {
+                overlayTrackPanel = document.createElement('div');
+                overlayTrackPanel.id = 'jb-audio-overlay-panel';
+                overlayTrackPanel.style.cssText = `
+                    position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: #18181b; color: #f4f4f5; display: flex; align-items: center; 
+                    justify-content: space-between; padding: 0 16px; box-sizing: border-box; 
+                    font-family: monospace; z-index: 10; border: 1px solid #27272a; border-radius: 6px;
+                `;
                 
-                // Change the wrapper to a short, modern horizontal bar layout
-                wrapper.style.height = "64px"; // Shorter height!
-                wrapper.style.opacity = "1";
-                wrapper.style.position = "relative";
-                wrapper.style.overflow = "hidden";
-                
-                // Inject or reset the sleek horizontal layout panel
-                let overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
-                if (!overlayTrackPanel) {
-                    overlayTrackPanel = document.createElement('div');
-                    overlayTrackPanel.id = 'jb-audio-overlay-panel';
-                    
-                    // Flex row layout to spread everything out horizontally
-                    overlayTrackPanel.style.cssText = `
-                        position: absolute; 
-                        top: 0; 
-                        left: 0; 
-                        width: 100%; 
-                        height: 100%; 
-                        background: #18181b; 
-                        color: #f4f4f5; 
-                        display: flex; 
-                        align-items: center; 
-                        justify-content: space-between; 
-                        padding: 0 16px; 
-                        box-sizing: border-box; 
-                        font-family: monospace; 
-                        z-index: 10;
-                        border: 1px solid #27272a;
-                        border-radius: 6px;
-                    `;
-                    
-                    overlayTrackPanel.innerHTML = `
-                        <div style="flex: 1; min-width: 0; padding-right: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <div class="jb-current-title" style="font-size: 13px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #f4f4f5;">No Track Loaded</div>
-                            <div style="font-size: 10px; color: #a1a1aa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px;">
-                                <span>⏭️ Next: </span><span id="jb-audio-next-title" style="color: #a855f7; font-weight: bold;">Nothing queued</span>
-                            </div>
+                overlayTrackPanel.innerHTML = `
+                    <div style="flex: 1; min-width: 0; padding-right: 16px; display: flex; flex-direction: column; justify-content: center;">
+                        <div class="jb-current-title" style="font-size: 13px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #f4f4f5;">No Track Loaded</div>
+                        <div style="font-size: 10px; color: #a1a1aa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px;">
+                            <span>⏭️ Next: </span><span id="jb-audio-next-title" style="color: #a855f7; font-weight: bold;">Nothing queued</span>
                         </div>
-                        
-                        <div style="width: 240px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0;">
-                            <div style="width: 100%; background: #3f3f46; height: 5px; border-radius: 3px; overflow: hidden; position: relative; margin-bottom: 4px;">
-                                <div id="jb-audio-progress-bar" style="width: 0%; background: var(--accent, #a855f7); height: 100%; transition: width 0.25s linear;"></div>
-                            </div>
-                            <div id="jb-audio-time-stamp" style="font-size: 10px; color: #a1a1aa; font-variant-numeric: tabular-nums;">0:00 / 0:00</div>
+                    </div>
+                    <div style="width: 240px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0;">
+                        <div style="width: 100%; background: #3f3f46; height: 5px; border-radius: 3px; overflow: hidden; position: relative; margin-bottom: 4px;">
+                            <div id="jb-audio-progress-bar" style="width: 0%; background: var(--accent, #a855f7); height: 100%; transition: width 0.25s linear;"></div>
                         </div>
-                    `;
-                    wrapper.appendChild(overlayTrackPanel);
-                } else {
-                    overlayTrackPanel.style.display = 'flex';
-                }
-                
-                this.updatePlayerDisplay();
-                this.startAudioProgressTracking();
+                        <div id="jb-audio-time-stamp" style="font-size: 10px; color: #a1a1aa; font-variant-numeric: tabular-nums;">0:00 / 0:00</div>
+                    </div>
+                `;
+                wrapper.appendChild(overlayTrackPanel);
             } else {
-                // Restore standard taller proportions for the standard video block layout
-                playerContainer.style.width = "100%";
-                playerContainer.style.height = "100%";
-                wrapper.style.height = "168px"; 
-                
-                this.stopAudioProgressTracking();
-                const overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
-                if (overlayTrackPanel) overlayTrackPanel.style.display = 'none';
+                overlayTrackPanel.style.display = 'flex';
             }
+            
+            this.updatePlayerDisplay();
+            this.startAudioProgressTracking();
         }
     }
 
@@ -470,15 +457,18 @@ export class StreamJukebox {
         if (!container) return;
 
         if (state) {
-            // Build canvas if it doesn't exist
+            // Lazy load and configure operational audio contexts on initial activation interaction
+            this.setupAudioContextPipeline();
+            if (this.audioCtx && this.audioCtx.state === 'suspended') {
+                this.audioCtx.resume();
+            }
+
             if (!avWidget) {
                 avWidget = document.createElement('canvas');
                 avWidget.id = 'jukebox-av-widget';
-                // Stretch a thin bar all the way across the bottom cleanly
                 avWidget.style.cssText = "position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; pointer-events: none; z-index: 999; display: block;";
                 container.appendChild(avWidget);
                 
-                // Keep dimensions synchronized to screen resolutions
                 const resizeCanvas = () => {
                     avWidget.width = avWidget.parentElement.clientWidth || window.innerWidth;
                     avWidget.height = 40;
@@ -486,21 +476,17 @@ export class StreamJukebox {
                 window.addEventListener('resize', resizeCanvas);
                 resizeCanvas();
             }
-            
-            // Fire up rendering loop ticker
             this.startVisualizerLoop();
         } else {
-            // Clear loop animations and remove from DOM hierarchy
             if (this.avAnimationId) {
                 cancelAnimationFrame(this.avAnimationId);
                 this.avAnimationId = null;
             }
-            if (avWidget) {
-                avWidget.remove();
-            }
+            if (avWidget) avWidget.remove();
         }
     }
 
+    // --- TRUE DATA-DRIVEN AUDIO VISUALIZER LOOP ---
     startVisualizerLoop() {
         if (this.avAnimationId) cancelAnimationFrame(this.avAnimationId);
         
@@ -508,59 +494,54 @@ export class StreamJukebox {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         
-        let seedTicks = 0;
-        
         const render = () => {
             if (!this.showVisualizer) return;
             
+            this.avAnimationId = requestAnimationFrame(render);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Check current player performance mode metrics
-            let isMoving = false;
-            if (this.ytPlayer && typeof this.ytPlayer.getPlayerState === 'function') {
-                // YT.PlayerState.PLAYING is 1
-                isMoving = (this.ytPlayer.getPlayerState() === 1);
-            }
+            let isPlaying = this.audioEngine && !this.audioEngine.paused && !this.audioEngine.ended;
             
-            if (isMoving) {
-                seedTicks += 0.08; // Speeds up movement flow
+            if (isPlaying && this.analyser && this.dataArray) {
+                // Grab the actual physical raw audio frequency amplitudes!
+                this.analyser.getByteFrequencyData(this.dataArray);
             } else {
-                seedTicks += 0.005; // Slow chill ambient wave when paused
+                // Instantly zero out array values if the media track halts or buffers
+                if (this.dataArray) this.dataArray.fill(0);
             }
 
             const barWidth = 6;
             const barGap = 4;
             const totalBars = Math.ceil(canvas.width / (barWidth + barGap));
             
-            // Draw matching procedural equalization bars
+            // Map true data bytes across rendered spectrum bands
             for (let i = 0; i < totalBars; i++) {
-                // Combine math formulas to mimic sound energy thresholds
-                const baseWave1 = Math.sin(i * 0.15 + seedTicks);
-                const baseWave2 = Math.cos(i * 0.05 - seedTicks * 0.7);
-                let audioIntensity = Math.abs(baseWave1 * baseWave2);
+                let audioValue = 0;
                 
-                if (isMoving) {
-                    // Add subtle energetic jitter spikes to mimic rhythmic bounce changes
-                    audioIntensity += (Math.sin(i + seedTicks * 2) * 0.2);
-                    audioIntensity = Math.max(0.1, Math.min(audioIntensity, 1.0));
-                } else {
-                    // Pull intensity down close to a resting baseline flattening line
-                    audioIntensity *= 0.15;
+                if (this.dataArray) {
+                    // Pull indices from frequency array sequentially (wrap around if bars exceed buffer size)
+                    const dataIndex = i % this.dataArray.length;
+                    audioValue = this.dataArray[dataIndex]; 
                 }
-                
-                const barHeight = audioIntensity * (canvas.height - 10) + 2;
+
+                // If stream is active, use authentic values. If paused, run a tiny background drift
+                let normalizedHeight = 0;
+                if (isPlaying && audioValue > 0) {
+                    normalizedHeight = audioValue / 255; // 0.0 -> 1.0 range tracking mapping
+                } else {
+                    // Fall back to a minor ambient floating wave trace line so UI isn't flat static dead
+                    normalizedHeight = (Math.sin(i * 0.15 + Date.now() * 0.002) + 1) * 0.5 * 0.04;
+                }
+
+                const barHeight = normalizedHeight * (canvas.height - 6) + 2;
                 const xPos = i * (barWidth + barGap);
                 const yPos = canvas.height - barHeight;
                 
-                // Color matching accent (defaults to theme purple palette gradient mapping)
                 const hue = 270 + (i * 0.3) % 40; 
-                ctx.fillStyle = `hsla(${hue}, 85%, 65%, ${isMoving ? '0.75' : '0.35'})`;
+                ctx.fillStyle = `hsla(${hue}, 85%, 65%, ${isPlaying ? '0.85' : '0.25'})`;
                 
-                // Draw single visualizer brick band column strip
                 ctx.fillRect(xPos, yPos, barWidth, barHeight);
             }
-            
-            this.avAnimationId = requestAnimationFrame(render);
         };
         
         this.avAnimationId = requestAnimationFrame(render);
@@ -618,7 +599,7 @@ export class StreamJukebox {
                 this.currentTrackSkipVotes.clear();
                 this.currentTrackData = item; 
                 this.updatePlayerDisplay();
-                this.ytPlayer.loadVideoById(item.id); 
+                this.streamRouteBTrackSource(item.id); 
             };
 
             const delBtn = document.createElement('button');
@@ -642,13 +623,14 @@ export class StreamJukebox {
         this.isEnabled = state;
         const widget = document.getElementById('jukebox-widget');
         if (widget) widget.style.display = state ? "block" : "none";
-        if (!state && this.ytPlayer) { 
-            this.ytPlayer.stopVideo(); 
+        if (!state && this.audioEngine) { 
+            this.audioEngine.pause();
+            this.audioEngine.src = "";
             this.isPlayingSong = false;
             this.currentTrackData = null;
             this.updatePlayerDisplay();
             this.stopAudioProgressTracking();
-            this.toggleVisualizer(false); // Shut off animation loops cleanly if widget shuts down
+            this.toggleVisualizer(false); 
             const avToggle = document.getElementById('stg-toggle-visualizer-checkbox');
             if (avToggle) avToggle.checked = false;
             this.updateBadge('av-status-badge', false);
@@ -677,7 +659,6 @@ export class StreamJukebox {
         const track = await this.fetchTrack(query);
         if (track) {
             this.queue.push({ user: 'System', title: track.title, id: track.id, isSearch: false });
-            
             this.renderQueueList();
             this.updatePlayerDisplay();
             
@@ -716,68 +697,105 @@ export class StreamJukebox {
         if (this.VOTE_REQUIREMENT <= 1 || this.currentTrackSkipVotes.size >= this.VOTE_REQUIREMENT) {
             if (botSay) botSay(`🗳️ Vote skip passed for "${this.currentTrackData.title}"!`);
             this.skipCurrentSong(botSay);
-        } else {
-            if (botSay) botSay(`⏭️ @${user} voted to skip. Progress: ${this.currentTrackSkipVotes.size}/${this.VOTE_REQUIREMENT}`);
-        }
-    }
-
-    async handleAddFallback(user, message, botSay) {
-        const lookup = await this.fetchTrack(message);
-        if (lookup) {
-            this.saveFallbackItem(lookup, user);
-            botSay(`💾 Added "${lookup.title}" to fallback.`);
-            this.renderFallbackList();
-        } else {
-            botSay(`❌ Could not find fallback song: "${message}"`);
         }
     }
 
     skipCurrentSong(botSay) {
-        if (this.ytPlayer && this.isEnabled) { 
-            this.ytPlayer.stopVideo(); 
-            if (botSay) botSay("⏭️ Skipping song...");
-            this.playNextSong(botSay); 
-        }
+        this.playNextSong(botSay);
     }
 
+    // --- PLAY NEXT TRACK PARSER ENGINE ---
     async playNextSong(botSay) {
-        if (!this.isEnabled || !this.ytPlayerReady) return;
-        
-        this.currentTrackVotes.clear();
-        this.currentTrackSkipVotes.clear(); // Reset skip tracker clean for the next song
-        this.currentTrackData = null;
         this.stopAudioProgressTracking();
+        this.currentTrackVotes.clear();
+        this.currentTrackSkipVotes.clear();
 
         if (this.queue.length > 0) {
-            this.isPlayingSong = true;
-            const next = this.queue.shift();
-            
-            this.renderQueueList(); 
-            
-            let fetchedTrack = null;
-            if (next.isSearch) {
+            const nextTrack = this.queue.shift();
+            this.renderQueueList();
+
+            if (nextTrack.isSearch) {
                 this.updatePlayerDisplay("Searching...");
-                fetchedTrack = await this.fetchTrack(next.id);
+                const resolved = await this.fetchTrack(nextTrack.id);
+                if (resolved) {
+                    this.currentTrackData = { id: resolved.id, title: resolved.title, user: nextTrack.user };
+                } else {
+                    if (botSay) botSay(`❌ Skipping request "${nextTrack.id}" - search resolution failed.`);
+                    this.playNextSong(botSay);
+                    return;
+                }
             } else {
-                fetchedTrack = { id: next.id, title: next.title };
+                this.currentTrackData = nextTrack;
             }
+
+            if (this.currentTrackData.title === "Link") {
+                this.currentTrackData.title = `Track ID: ${this.currentTrackData.id}`;
+            }
+
+            this.isPlayingSong = true;
+            this.updatePlayerDisplay();
+            if (botSay) botSay(`🎵 Now Playing: "${this.currentTrackData.title}" (@${this.currentTrackData.user})`);
             
-            if (fetchedTrack) {
-                this.currentTrackData = fetchedTrack;
-                this.updatePlayerDisplay(); 
-                this.ytPlayer.loadVideoById(this.currentTrackData.id);
-            } else {
-                this.playNextSong(botSay);
-            }
+            this.streamRouteBTrackSource(this.currentTrackData.id);
+
         } else if (this.fallbackPlaylist.length > 0) {
             this.isPlayingSong = true;
             this.currentTrackData = this.fallbackPlaylist[Math.floor(Math.random() * this.fallbackPlaylist.length)];
             this.updatePlayerDisplay();
-            this.ytPlayer.loadVideoById(this.currentTrackData.id);
+            
+            this.streamRouteBTrackSource(this.currentTrackData.id);
         } else {
             this.isPlayingSong = false;
+            this.currentTrackData = null;
             this.updatePlayerDisplay("No Track Loaded");
+            if (this.audioEngine) this.audioEngine.src = "";
             if (botSay) botSay("📭 Jukebox queue empty.");
+        }
+    }
+
+    // --- ROUTE B INTERCEPT AND SOURCE RESOLVER ENGINE ---
+    async streamRouteBTrackSource(videoId) {
+        // Build parsing graph node structure safety fallback catch maps
+        this.setupAudioContextPipeline();
+        
+        // Ensure browser user permission gesture policies are bypassed cleanly
+        if (this.audioCtx && this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume();
+        }
+
+        const instances = ['https://invidious.flokinet.to', 'https://yewtu.be', 'https://invidious.perennialte.ch'];
+        let streamUrl = null;
+
+        // Query the video detail endpoint directly to pull raw media URLs out of host arrays
+        for (let host of instances) {
+            try {
+                const res = await fetch(`${host}/api/v1/videos/${encodeURIComponent(videoId)}`);
+                const data = await res.json();
+                
+                // Track down standard audio streams inside the adaptive audioFormat payload buckets
+                if (data?.audioStreams && data.audioStreams.length > 0) {
+                    // Sort by bitrate descending to catch high-quality streams
+                    data.audioStreams.sort((a, b) => parseInt(b.bitrate || 0) - parseInt(a.bitrate || 0));
+                    streamUrl = data.audioStreams[0].url;
+                    break;
+                }
+            } catch (e) {
+                continue; 
+            }
+        }
+
+        if (streamUrl) {
+            try {
+                this.audioEngine.src = streamUrl;
+                this.audioEngine.load();
+                this.audioEngine.play();
+            } catch (playError) {
+                console.error("Playback invocation blocked by pipeline structure mappings:", playError);
+                this.playNextSong((msg) => console.log(msg));
+            }
+        } else {
+            console.warn(`❌ Route B stream retrieval failed for Video ID: ${videoId}. Falling forward.`);
+            this.playNextSong((msg) => console.log(msg));
         }
     }
 
@@ -790,7 +808,7 @@ export class StreamJukebox {
     }
 
     async fetchTrack(keywords) {
-        const instances = ['https://invidious.flokinet.to', 'https://yewtu.be'];
+        const instances = ['https://invidious.flokinet.to', 'https://yewtu.be', 'https://invidious.perennialte.ch'];
         for (let host of instances) {
             try {
                 const res = await fetch(`${host}/api/v1/search?q=${encodeURIComponent(keywords)}&type=video`);
@@ -802,7 +820,9 @@ export class StreamJukebox {
     }
 
     extractYouTubeId(url) {
-        const match = url.match(/^.*(youtu.be\/|v\/|watch\?v=)([^#\&\?]*).*/);
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : null;
     }
 }
