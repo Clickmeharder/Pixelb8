@@ -178,7 +178,7 @@ export class StreamJukebox {
         }, 6500);
     }
 
-    init() {
+init() {
         if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
             const tag = document.createElement('script');
             const src = "https://www.youtube.com/iframe_api";
@@ -200,8 +200,28 @@ export class StreamJukebox {
                         this.playNextSong((msg) => console.log(msg)); 
                     },
                     'onStateChange': (e) => {
+                        // 1. Handle video ending
                         if (e.data === YT.PlayerState.ENDED) {
                             this.playNextSong((msg) => console.log(msg));
+                        }
+                        
+                        // 2. FORCE UI UPDATE WHEN THE TRACK ACTUALLY PLAYS
+                        if (e.data === YT.PlayerState.PLAYING) {
+                            try {
+                                const videoData = this.ytPlayer.getVideoData();
+                                if (videoData && videoData.title) {
+                                    // Update our internal tracking with the actual real title
+                                    if (this.currentTrackData) {
+                                        this.currentTrackData.title = videoData.title;
+                                    } else {
+                                        this.currentTrackData = { id: videoData.video_id, title: videoData.title };
+                                    }
+                                    // Push it to the UI elements
+                                    this.updatePlayerDisplay();
+                                }
+                            } catch (err) {
+                                console.error("Failed to fetch live video title:", err);
+                            }
                         }
                     }
                 }
