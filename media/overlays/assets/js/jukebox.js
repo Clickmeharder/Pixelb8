@@ -111,6 +111,24 @@ export class StreamJukebox {
         ];
     }
 
+    // --- UI DISPLAY ---
+    updatePlayerDisplay() {
+        const titleEl = document.getElementById('jb-current-title');
+        const nextEl = document.getElementById('jb-next-title');
+
+        // Update Current Title
+        if (titleEl) {
+            titleEl.innerText = this.currentTrackData?.title || "No Track Loaded";
+        }
+
+        // Update Up Next Title
+        if (nextEl) {
+            nextEl.innerText = (this.queue.length > 0) ? this.queue[0].title : "Nothing queued";
+        }
+        
+        console.log(`✅ [Jukebox UI]: Updated display.`);
+    }
+
     // --- Core Logic ---
     async playRandomYTSong(sendNotice, customKeyword = null) {
         const defaultKeywords = ['lofi hip hop', 'synthwave', 'chill beats', 'rock hits', 'jazz piano'];
@@ -282,24 +300,6 @@ export class StreamJukebox {
         }
     }
 
-// === UPDATED: FIXED NOW PLAYING UI ===
-	updateNowPlayingUI(title) {
-		const titleEl = document.getElementById('jb-current-title');
-		
-		if (titleEl) {
-			// Safety check: ensure title is a string and not undefined/null
-			const displayTitle = (title && typeof title === 'string') ? title : "No Track Loaded";
-			
-			titleEl.innerText = displayTitle;
-			titleEl.style.display = "block";
-			titleEl.style.color = "#fff";
-			
-			console.log(`✅ [Jukebox UI]: Updated display to: "${displayTitle}"`);
-		} else {
-			console.error("❌ [Jukebox UI]: Could not find element #jb-current-title");
-		}
-	}
-
     renderQueueList() {
         const list = document.getElementById('jb-queue-list');
         if (!list) return;
@@ -332,6 +332,9 @@ export class StreamJukebox {
             div.appendChild(btnGroup);
             list.appendChild(div);
         });
+        
+        // Refresh UI so "Up Next" updates
+        this.updatePlayerDisplay();
     }
 
     renderFallbackList() {
@@ -350,7 +353,7 @@ export class StreamJukebox {
                 this.isPlayingSong = true;
                 this.currentTrackVotes.clear();
                 this.currentTrackData = item; 
-                this.updateNowPlayingUI(item.title);
+                this.updatePlayerDisplay();
                 this.ytPlayer.loadVideoById(item.id); 
             };
 
@@ -377,8 +380,9 @@ export class StreamJukebox {
         if (widget) widget.style.display = state ? "block" : "none";
         if (!state && this.ytPlayer) { 
             this.ytPlayer.stopVideo(); 
-            this.isPlayingSong = false; 
-            this.updateNowPlayingUI("No Track Loaded");
+            this.isPlayingSong = false;
+            this.currentTrackData = null;
+            this.updatePlayerDisplay();
         }
     }
 
@@ -452,17 +456,17 @@ export class StreamJukebox {
         if (this.queue.length > 0) {
             this.isPlayingSong = true;
             const next = this.queue.shift();
-            this.renderQueueList();
+            this.renderQueueList(); // Automatically updates UI via the render call
             
             if (next.isSearch) {
-                this.updateNowPlayingUI("Searching & Loading Track...");
+                this.updatePlayerDisplay(); // Shows "Searching"
                 this.currentTrackData = await this.fetchTrack(next.id);
             } else {
                 this.currentTrackData = { id: next.id, title: next.title };
             }
             
             if (this.currentTrackData) {
-                this.updateNowPlayingUI(this.currentTrackData.title);
+                this.updatePlayerDisplay();
                 this.ytPlayer.loadVideoById(this.currentTrackData.id);
             } else {
                 this.playNextSong(botSay);
@@ -470,11 +474,11 @@ export class StreamJukebox {
         } else if (this.fallbackPlaylist.length > 0) {
             this.isPlayingSong = true;
             this.currentTrackData = this.fallbackPlaylist[Math.floor(Math.random() * this.fallbackPlaylist.length)];
-            this.updateNowPlayingUI(this.currentTrackData.title);
+            this.updatePlayerDisplay();
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
         } else {
             this.isPlayingSong = false;
-            this.updateNowPlayingUI("No Track Loaded");
+            this.updatePlayerDisplay();
             if (botSay) botSay("📭 Jukebox queue empty.");
         }
     }
