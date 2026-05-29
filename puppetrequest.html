@@ -351,19 +351,11 @@ let sourceImageCacheCanvas = document.createElement('canvas');
 const sCtx = sourceImageCacheCanvas.getContext('2d');
 
 function clearActiveTargets() {
-    targetHeadBtn.className = '';
     targetJawBtn.className = '';
     targetLeftEyeBtn.className = '';
     targetRightEyeBtn.className = '';
+    targetHeadBtn.className = '';
 }
-
-targetHeadBtn.addEventListener('click', () => {
-    editTarget = 'head';
-    clearActiveTargets();
-    targetHeadBtn.className = 'active';
-    geometryModeRow.style.display = 'flex';
-    updateAllViewports(0);
-});
 
 targetJawBtn.addEventListener('click', () => {
     editTarget = 'jaw';
@@ -389,12 +381,20 @@ targetRightEyeBtn.addEventListener('click', () => {
     updateAllViewports(0);
 });
 
+targetHeadBtn.addEventListener('click', () => {
+    editTarget = 'head';
+    clearActiveTargets();
+    targetHeadBtn.className = 'active';
+    geometryModeRow.style.display = 'none';
+    updateAllViewports(0);
+});
+
 modeBoxBtn.addEventListener('click', () => {
     currentMode = 'box';
     modeBoxBtn.className = 'active';
     modeLassoBtn.className = '';
-    if (editTarget === 'head') { headBox = { x: 0, y: 0, w: 0, h: 0 }; headLassoPoints = []; }
-    else if (editTarget === 'jaw') { mouthBox = { x: 0, y: 0, w: 0, h: 0 }; lassoPoints = []; }
+    mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+    lassoPoints = [];
     updateAllViewports(0);
 });
 
@@ -402,22 +402,22 @@ modeLassoBtn.addEventListener('click', () => {
     currentMode = 'lasso';
     modeLassoBtn.className = 'active';
     modeBoxBtn.className = '';
-    if (editTarget === 'head') { headBox = { x: 0, y: 0, w: 0, h: 0 }; headLassoPoints = []; }
-    else if (editTarget === 'jaw') { mouthBox = { x: 0, y: 0, w: 0, h: 0 }; lassoPoints = []; }
+    mouthBox = { x: 0, y: 0, w: 0, h: 0 };
+    lassoPoints = [];
     updateAllViewports(0);
 });
 
 function resetSelectionData() {
-    headBox = { x: 0, y: 0, w: 0, h: 0 };
-    headLassoPoints = [];
     mouthBox = { x: 0, y: 0, w: 0, h: 0 };
     leftEyeBox = { x: 0, y: 0, w: 0, h: 0 };
     rightEyeBox = { x: 0, y: 0, w: 0, h: 0 };
     lassoPoints = [];
+    headLassoPoints = [];
+    headBox = { x: 0, y: 0, w: 0, h: 0 };
     checkReadyState();
     updateAllViewports(0);
 }
-
+// Master Rendering Core Pipeline
 function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
     rCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
     if (!avatarImg.src) {
@@ -426,113 +426,163 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         return;
     }
 
-    const swayY = Math.sin(timestamp * 0.003) * swayAmplitude;
-    const swayX = Math.cos(timestamp * 0.0015) * (swayAmplitude * 0.3);
+    // Audio Threshold Check for Target Weight Allocation
+    let isTalking = (mouthOffset > noiseGateThreshold);
+    let targetWeight = isTalking ? 1.0 : 0.0;
 
-    rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
-    
-    rCtx.save();
-    
-    let pivotX = renderCanvas.width / 2;
-    let pivotY = renderCanvas.height / 2;
-    if (headBox.w > 0) {
-        pivotX = headBox.x + (headBox.w / 2);
-        pivotY = headBox.y + (headBox.h / 2);
+    // Fallback if no secondary profile setup is loaded
+    if (!hasIdleImage) {
+        targetWeight = 1.0; 
     }
 
-    rCtx.translate(pivotX + swayX, pivotY + swayY);
-    rCtx.rotate((tiltAngle * Math.PI) / 180);
+    // Smooth Morph Transition Calculations
+    currentBlendWeight += (targetWeight - currentBlendWeight) * blendInterpolationSpeed;
 
-    if (headBox.w > 0) {
+    // Smooth Gaze Interpolation Calculations
+    currentGazeX += (targetGazeX - currentGazeX) * 0.08;
+    currentGazeY += (targetGazeY - currentGazeY) * 0.08;
+    currentGazeTilt += (targetGazeTilt - currentGazeTilt) * 0.08;
+
+    // Master Breath Translation
+    const swayY = Math.sin(timestamp * 0.0025) * swayAmplitude;
+    const swayX = Math.cos(timestamp * 0.0012) * (swayAmplitude * 0.2);
+
+    // Passive Oscillation Wobble
+    let headWobbleX = 0;
+    let headWobbleY = 0;
+    let headWobbleRot = 0;
+    if (headWobbleMax > 0 && headBox.w > 0) {
+        headWobbleX = Math.sin(timestamp * 0.0022) * headWobbleMax;
+        headWobbleY = Math.cos(timestamp * 0.0017) * (headWobbleMax * 0.4);
+        headWobbleRot = Math.sin(timestamp * 0.0011) * (headWobbleMax * 0.002); 
+    }
+
+    // 1. Draw Master Global Template Base Layers
+    rCtx.save();
+    rCtx.translate(swayX, swayY);
+
+    // If an optional idle image is loaded, crossfade render base templates
+    if (hasIdleImage && currentBlendWeight < 0.99) {
         rCtx.save();
-        rCtx.filter = 'none';
-        rCtx.drawImage(featheredHeadCanvas, -headBox.w / 2 - featherBlur * 2 + yawShift, -headBox.h / 2 - featherBlur * 2);
+        rCtx.globalAlpha = 1.0 - currentBlendWeight;
+        rCtx.drawImage(idleImg, 0, 0, renderCanvas.width, renderCanvas.height);
+        rCtx.restore();
+    }
+    
+    if (currentBlendWeight > 0.01) {
+        rCtx.save();
+        rCtx.globalAlpha = currentBlendWeight;
+        rCtx.drawImage(avatarImg, 0, 0, renderCanvas.width, renderCanvas.height);
         rCtx.restore();
     }
 
+    // 2. Open Isolated Transformed Head Layer Block (Attached only to Talking state)
+    rCtx.save();
+    
+    const finalHeadTranslateX = headWobbleX + currentGazeX + yawShift;
+    const finalHeadTranslateY = headWobbleY + currentGazeY;
+    const finalHeadRotationRad = headWobbleRot + ((currentGazeTilt + tiltAngle) * Math.PI / 180);
+
+    rCtx.translate(finalHeadTranslateX, finalHeadTranslateY);
+    
+    // Apply crossfade to structural mapping layers as well
+    rCtx.globalAlpha = currentBlendWeight;
+
+    if (headBox.w > 0) {
+        const hCenterX = headBox.x + headBox.w / 2;
+        const hCenterY = headBox.y + headBox.h / 2;
+        
+        rCtx.translate(hCenterX, hCenterY);
+        rCtx.rotate(finalHeadRotationRad);
+        rCtx.translate(-hCenterX, -hCenterY);
+        
+        rCtx.drawImage(isolatedHeadCanvas, 0, 0);
+    }
+
+    // Mouth Selection Scope Logic
     const { x, y, w, h } = mouthBox;
     if (w > 0 && h > 0) {
         let calculatedDrop = 0;
-        if (mouthOffset > noiseGateThreshold) {
+        if (isTalking) {
             calculatedDrop = (mouthOffset - noiseGateThreshold) * gainMultiplier;
         }
         const dropValue = Math.min(calculatedDrop, maxDropLimit); 
 
-        const relMouthX = x - pivotX;
-        const relMouthY = y - pivotY;
+        let calculatedJawWobbleX = 0;
+        let calculatedJawWobbleY = 0;
+        if (dropValue > 0 && jawWobbleMax > 0) {
+            const wobbleSpeedModifier = timestamp * 0.015;
+            calculatedJawWobbleX = Math.sin(wobbleSpeedModifier) * (dropValue / maxDropLimit) * jawWobbleMax;
+            calculatedJawWobbleY = Math.cos(wobbleSpeedModifier * 0.7) * (dropValue / maxDropLimit) * (jawWobbleMax * 0.2);
+        }
 
         rCtx.save();
-        rCtx.drawImage(skinTextureHealerCanvas, relMouthX - featherBlur * 2, relMouthY - featherBlur * 2);
+        rCtx.drawImage(skinTextureHealerCanvas, x - featherBlur * 2, y - featherBlur * 2);
         rCtx.restore();
 
         rCtx.save();
         rCtx.beginPath();
         if (currentMode === 'box') {
-            rCtx.rect(relMouthX + 2, relMouthY, w - 4, h + dropValue);
+            rCtx.rect(x + 2, y, w - 4, h + dropValue);
         } else {
             if (lassoPoints.length > 0) {
-                rCtx.moveTo(lassoPoints[0].x - pivotX, lassoPoints[0].y - pivotY);
-                for (let i = 1; i < lassoPoints.length; i++) {
-                    rCtx.lineTo(lassoPoints[i].x - pivotX, lassoPoints[i].y - pivotY);
-                }
-                rCtx.lineTo(lassoPoints[lassoPoints.length - 1].x - pivotX, lassoPoints[lassoPoints.length - 1].y - pivotY + dropValue);
-                rCtx.lineTo(lassoPoints[0].x - pivotX, lassoPoints[0].y - pivotY + dropValue);
+                rCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
+                for (let i = 1; i < lassoPoints.length; i++) rCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+                rCtx.lineTo(lassoPoints[lassoPoints.length - 1].x, lassoPoints[lassoPoints.length - 1].y + dropValue);
+                rCtx.lineTo(lassoPoints[0].x, lassoPoints[0].y + dropValue);
             }
         }
         rCtx.clip();
 
         rCtx.fillStyle = '#2d080e'; 
-        rCtx.fillRect(relMouthX - 50, relMouthY - 50, w + 100, h + dropValue + 100);
+        rCtx.fillRect(x, y, w, h + dropValue + 20);
 
         rCtx.fillStyle = '#ffffff';
-        rCtx.fillRect(relMouthX + 12, relMouthY, w - 24, 6); 
+        rCtx.fillRect(x + 12, y, w - 24, 6); 
         
         rCtx.fillStyle = '#ff4d6d';
-        const tongueY = relMouthY + h - (h * 0.28) + (dropValue * 0.2);
+        const tongueY = y + h - (h * 0.28) + (dropValue * 0.2);
         const tongueH = h * 0.35;
         rCtx.beginPath();
-        rCtx.ellipse(relMouthX + (w / 2), tongueY + (tongueH / 2), w * 0.38, tongueH * 0.5, 0, 0, 2 * Math.PI);
+        rCtx.ellipse(x + (w / 2), tongueY + (tongueH / 2), w * 0.38, tongueH * 0.5, 0, 0, 2 * Math.PI);
         rCtx.fill();
 
-        rCtx.strokeStyle = '#d92b4b';
-        rCtx.lineWidth = 2.5;
-        rCtx.beginPath();
-        rCtx.moveTo(relMouthX + (w / 2), tongueY + 2);
-        rCtx.quadraticCurveTo(relMouthX + (w / 2) - 1, tongueY + (tongueH * 0.5), relMouthX + (w / 2), tongueY + tongueH - 2);
-        rCtx.stroke();
-
         rCtx.fillStyle = '#eeeeee';
-        rCtx.fillRect(relMouthX + 14, relMouthY + dropValue + 4, w - 28, 4);
+        rCtx.fillRect(x + 14, y + dropValue + 4, w - 28, 4);
         rCtx.restore();
 
         rCtx.save();
-        rCtx.filter = 'none';
-        rCtx.drawImage(featheredJawCanvas, relMouthX - featherBlur * 2 + yawShift, relMouthY - featherBlur * 2 + dropValue);
+        rCtx.drawImage(featheredJawCanvas, x - featherBlur * 2 + calculatedJawWobbleX, y - featherBlur * 2 + dropValue + calculatedJawWobbleY);
         rCtx.restore();
         
         rCtx.save();
-        rCtx.drawImage(upperLipPatchCanvas, relMouthX + yawShift, relMouthY - 10);
+        rCtx.drawImage(upperLipPatchCanvas, x, y - 10);
         rCtx.restore();
     }
 
-    if (isBlinking) {
+    // Blinking Texture Overlay Matrix 
+    if (isBlinking && blinkIntensity > 0) {
         [leftEyeBox, rightEyeBox].forEach(box => {
             if (box.w > 0 && box.h > 0) {
-                const relEyeX = box.x - pivotX;
-                const relEyeY = box.y - pivotY;
-
                 rCtx.save();
+                
+                const effectiveBlinkHeight = box.h * blinkIntensity;
+                const verticalYOffset = box.y + (box.h - effectiveBlinkHeight) / 2;
+
                 rCtx.beginPath();
-                rCtx.rect(relEyeX, relEyeY, box.w, box.h);
+                rCtx.rect(box.x, verticalYOffset, box.w, effectiveBlinkHeight);
                 rCtx.clip();
 
-                rCtx.drawImage(sourceImageCacheCanvas, box.x, box.y - 12, box.w, box.h, relEyeX, relEyeY, box.w, box.h);
+                const eyeParallaxShiftX = currentGazeX * 0.25;
+                const eyeParallaxShiftY = currentGazeY * 0.15;
+
+                rCtx.drawImage(sourceImageCacheCanvas, box.x, box.y - 12, box.w, box.h, box.x + eyeParallaxShiftX, box.y + eyeParallaxShiftY, box.w, box.h);
                 
                 rCtx.strokeStyle = 'rgba(0,0,0,0.3)';
                 rCtx.lineWidth = 2;
                 rCtx.beginPath();
-                rCtx.moveTo(relEyeX, relEyeY + (box.h / 2));
-                rCtx.lineTo(relEyeX + box.w, relEyeY + (box.h / 2));
+                rCtx.moveTo(box.x, box.y + (box.h / 2));
+                rCtx.lineTo(box.x + box.w, box.y + (box.h / 2));
                 rCtx.stroke();
                 
                 rCtx.restore();
@@ -540,28 +590,14 @@ function runArtworkRenderPipeline(mouthOffset = 0, timestamp = 0) {
         });
     }
 
-    rCtx.restore(); 
+    rCtx.restore(); // Close Head Translate Block
+    rCtx.restore(); // Close Global Breathing Scope
 }
 
+// Draw Selection Vector Outlines
 function runUIGuidePipeline() {
     uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
-    if (!avatarImg.src) return;
-
-    if (headBox.w > 0) {
-        uCtx.save();
-        uCtx.strokeStyle = "rgba(163, 102, 255, 0.6)";
-        uCtx.lineWidth = 2;
-        if (headLassoPoints.length > 0) {
-            uCtx.beginPath();
-            uCtx.moveTo(headLassoPoints[0].x, headLassoPoints[0].y);
-            for(let i=1; i<headLassoPoints.length; i++) uCtx.lineTo(headLassoPoints[i].x, headLassoPoints[i].y);
-            uCtx.closePath();
-            uCtx.stroke();
-        } else {
-            uCtx.strokeRect(headBox.x, headBox.y, headBox.w, headBox.h);
-        }
-        uCtx.restore();
-    }
+    if (!avatarImg.src || document.body.classList.contains('theater-active')) return;
 
     if (mouthBox.w > 0) {
         uCtx.save();
@@ -584,8 +620,6 @@ function runUIGuidePipeline() {
         uCtx.strokeStyle = "rgba(255, 234, 0, 0.65)";
         uCtx.lineWidth = 1.5;
         uCtx.strokeRect(leftEyeBox.x, leftEyeBox.y, leftEyeBox.w, leftEyeBox.h);
-        uCtx.fillStyle = "rgba(255, 234, 0, 0.08)";
-        uCtx.fillRect(leftEyeBox.x, leftEyeBox.y, leftEyeBox.w, leftEyeBox.h);
         uCtx.restore();
     }
 
@@ -594,8 +628,20 @@ function runUIGuidePipeline() {
         uCtx.strokeStyle = "rgba(0, 153, 255, 0.65)";
         uCtx.lineWidth = 1.5;
         uCtx.strokeRect(rightEyeBox.x, rightEyeBox.y, rightEyeBox.w, rightEyeBox.h);
-        uCtx.fillStyle = "rgba(0, 153, 255, 0.08)";
-        uCtx.fillRect(rightEyeBox.x, rightEyeBox.y, rightEyeBox.w, rightEyeBox.h);
+        uCtx.restore();
+    }
+
+    if (headLassoPoints.length > 0) {
+        uCtx.save();
+        uCtx.strokeStyle = "rgba(163, 73, 164, 0.85)";
+        uCtx.lineWidth = 2;
+        uCtx.beginPath();
+        uCtx.moveTo(headLassoPoints[0].x, headLassoPoints[0].y);
+        for(let i=1; i<headLassoPoints.length; i++) uCtx.lineTo(headLassoPoints[i].x, headLassoPoints[i].y);
+        uCtx.closePath();
+        uCtx.stroke();
+        uCtx.fillStyle = "rgba(163, 73, 164, 0.15)";
+        uCtx.fill();
         uCtx.restore();
     }
 
@@ -603,26 +649,21 @@ function runUIGuidePipeline() {
         uCtx.save();
         uCtx.strokeStyle = "#ff4757";
         uCtx.lineWidth = 2;
-        uCtx.setLineDash([5, 4]); 
+        uCtx.setLineDash([5, 4]);
         
-        if (editTarget === 'head' && currentMode === 'lasso') {
-            if (headLassoPoints.length > 0) {
-                uCtx.beginPath();
-                uCtx.moveTo(headLassoPoints[0].x, headLassoPoints[0].y);
-                for(let i=1; i<headLassoPoints.length; i++) uCtx.lineTo(headLassoPoints[i].x, headLassoPoints[i].y);
-                uCtx.stroke();
-            }
-        } else if (editTarget === 'jaw' && currentMode === 'lasso') {
-            if (lassoPoints.length > 0) {
-                uCtx.beginPath();
-                uCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
-                for(let i=1; i<lassoPoints.length; i++) uCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
-                uCtx.stroke();
-            }
+        if (editTarget === 'jaw' && currentMode === 'lasso' && lassoPoints.length > 0) {
+            uCtx.beginPath();
+            uCtx.moveTo(lassoPoints[0].x, lassoPoints[0].y);
+            for(let i=1; i<lassoPoints.length; i++) uCtx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
+            uCtx.stroke();
+        } else if (editTarget === 'head' && headLassoPoints.length > 0) {
+            uCtx.beginPath();
+            uCtx.moveTo(headLassoPoints[0].x, headLassoPoints[0].y);
+            for(let i=1; i<headLassoPoints.length; i++) uCtx.lineTo(headLassoPoints[i].x, headLassoPoints[i].y);
+            uCtx.stroke();
         } else {
             let drawX, drawY, drawW, drawH;
-            if (editTarget === 'head') { drawX = headBox.x; drawY = headBox.y; drawW = headBox.w; drawH = headBox.h; }
-            else if (editTarget === 'jaw') { drawX = mouthBox.x; drawY = mouthBox.y; drawW = mouthBox.w; drawH = mouthBox.h; }
+            if (editTarget === 'jaw') { drawX = mouthBox.x; drawY = mouthBox.y; drawW = mouthBox.w; drawH = mouthBox.h; }
             else if (editTarget === 'leftEye') { drawX = leftEyeBox.x; drawY = leftEyeBox.y; drawW = leftEyeBox.w; drawH = leftEyeBox.h; }
             else { drawX = rightEyeBox.x; drawY = rightEyeBox.y; drawW = rightEyeBox.w; drawH = rightEyeBox.h; }
             uCtx.strokeRect(drawX, drawY, drawW, drawH);
