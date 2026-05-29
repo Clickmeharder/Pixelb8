@@ -159,7 +159,7 @@ export class StreamJukebox {
         }
     }
 
-    // --- CORE LOGIC ---
+    // --- Core Logic ---
     async playRandomYTSong(sendNotice, customKeyword = null) {
         const defaultKeywords = ['lofi hip hop', 'synthwave', 'chill beats', 'rock hits', 'jazz piano'];
         const keyword = customKeyword || defaultKeywords[Math.floor(Math.random() * defaultKeywords.length)];
@@ -256,7 +256,7 @@ export class StreamJukebox {
                                 }
                             }
                             
-                            // Parse deterministic visual coefficients linked explicitly to this video ID
+                            // Immediately parse deterministic mathematical signature values mapped to this ID
                             this.generateTrackVisualSignature();
                             
                             this.updatePlayerDisplay();
@@ -276,10 +276,11 @@ export class StreamJukebox {
         }
     }
 
-    // Generates a completely customized mathematical identity map based on the active Video ID
+    // Generates a completely customized mathematical frequency map based on the active Video ID
     generateTrackVisualSignature() {
         const trackId = this.currentTrackData?.id || "default";
         
+        // Simple string hashing function
         let hash = 0;
         for (let i = 0; i < trackId.length; i++) {
             hash = trackId.charCodeAt(i) + ((hash << 5) - hash);
@@ -287,14 +288,14 @@ export class StreamJukebox {
         hash = Math.abs(hash);
 
         this.visualSignature = {
-            baseHue: hash % 360,                               // Baseline color coordinates
-            waveFreq1: 0.08 + ((hash % 100) / 1000),           // Micro noise configuration offset factor 1
-            waveFreq2: 0.03 + (((hash >> 4) % 100) / 1000),    // Micro noise configuration offset factor 2
-            speedScale: 0.05 + (((hash >> 8) % 100) / 1500)    // Customized base tempo structural pace scalar
+            baseHue: hash % 360,                               // Pick a baseline color palette coordinate
+            waveFreq1: 0.08 + ((hash % 100) / 1000),           // Wave multiplication frequency step 1
+            waveFreq2: 0.03 + (((hash >> 4) % 100) / 1000),    // Wave multiplication frequency step 2
+            speedScale: 0.05 + (((hash >> 8) % 100) / 1500)    // Customized structural tempo modifier
         };
     }
 
-    // Interval Management for updating tracker progress values smoothly
+    // Interval Management for parsing playback time dynamically
     startAudioProgressTracking() {
         this.stopAudioProgressTracking();
         this.startAudioFrequencyCaptureLoop();
@@ -451,11 +452,11 @@ export class StreamJukebox {
         
         if (playerContainer && wrapper) {
             if (state) {
-                // Shrink native iframe player to an unnoticeable pixel node
+                // Shrink the native YouTube player to a hidden pixel
                 playerContainer.style.width = "1px";
                 playerContainer.style.height = "1px";
                 
-                // Retool wrapper container sizing layout bounds
+                // Change the wrapper to a short, modern horizontal bar layout
                 wrapper.style.height = "64px";
                 wrapper.style.opacity = "1";
                 wrapper.style.position = "relative";
@@ -538,7 +539,6 @@ export class StreamJukebox {
         }
     }
 
-    // Advanced Timeline Procedural Audio Voltmeter Emulator
     startVisualizerLoop() {
         if (this.avAnimationId) cancelAnimationFrame(this.avAnimationId);
         
@@ -546,152 +546,51 @@ export class StreamJukebox {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         
-        let lastTime = performance.now();
-        let animationTime = 0;
-        
-        // High-precision linear hashing modifier script to establish per-bar identity vectors
-        const hashSeed = (s) => {
-            const x = Math.sin(s) * 43758.5453123;
-            return x - Math.floor(x);
-        };
-
-        const render = (now) => {
+        const render = () => {
             if (!this.showVisualizer) return;
-            
-            const deltaTime = (now - lastTime) / 1000;
-            lastTime = now;
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             let isMoving = false;
-            let currentTime = 0;
-            let totalDuration = 1; 
+            let currentPlaytime = 0;
             
             if (this.ytPlayer && typeof this.ytPlayer.getPlayerState === 'function') {
                 isMoving = (this.ytPlayer.getPlayerState() === 1);
-                currentTime = this.ytPlayer.getCurrentTime() || 0;
-                totalDuration = this.ytPlayer.getDuration() || 240;
+                // Extract real playback timestamps to link wave positions explicitly to video progress
+                currentPlaytime = this.ytPlayer.getCurrentTime() || 0;
             }
             
-            const sig = this.visualSignature || { baseHue: 270, speedScale: 0.08, waveFreq1: 0.15, waveFreq2: 0.05 };
-            const volumeModifier = this.trackVolumeLevel > 0 ? (this.trackVolumeLevel / 70) : 0;
+            const motionModifier = this.trackVolumeLevel > 0 ? (this.trackVolumeLevel / 70) : 0;
             
-            // -----------------------------------------------------------------
-            // ⚡ TIMELINE ENERGY MATRIX DECODER (Simulated Voltmeter)
-            // -----------------------------------------------------------------
-            const songProgressRatio = currentTime / totalDuration;
-            let structuralEnergy = 0.5 + Math.sin(songProgressRatio * Math.PI * 4 + (sig.baseHue * 0.01)) * 0.3;
-            let structuralPhase = "verse";
+            // Map the timeline parameter directly to the unique visual speed scalar assigned to this track
+            const synchronizedTimeTicker = currentPlaytime * (this.visualSignature.speedScale * 40);
 
-            if (songProgressRatio < 0.10) {
-                structuralPhase = "intro";      
-                structuralEnergy *= 0.5;
-            } else if (songProgressRatio >= 0.25 && songProgressRatio < 0.33) {
-                structuralPhase = "buildup";    
-                structuralEnergy *= 1.4;
-            } else if ((songProgressRatio >= 0.33 && songProgressRatio < 0.55) || (songProgressRatio >= 0.70 && songProgressRatio < 0.88)) {
-                structuralPhase = "chorus";     
-                structuralEnergy *= 1.8;
-            } else if (songProgressRatio >= 0.55 && songProgressRatio < 0.70) {
-                structuralPhase = "bridge";     
-                structuralEnergy *= 0.6;
-            } else if (songProgressRatio >= 0.88) {
-                structuralPhase = "outro";      
-                structuralEnergy *= 0.4;
-            }
-
-            const realTimeVoltage = Math.max(0.1, (volumeModifier * 0.4) + (structuralEnergy * 0.6));
-
-            // Throttle clock ticker speed dependent on structural intensity phase levels
-            if (isMoving) {
-                let tempoMultiplier = 1.0;
-                if (structuralPhase === "buildup") tempoMultiplier = 1.6;
-                if (structuralPhase === "chorus")  tempoMultiplier = 2.2; 
-                if (structuralPhase === "intro" || structuralPhase === "outro") tempoMultiplier = 0.4; 
-                
-                animationTime += deltaTime * (sig.speedScale * 8.0) * tempoMultiplier;
-            } else {
-                animationTime += deltaTime * 0.1;
-            }
-
-            // -----------------------------------------------------------------
-            // 🎨 RENDERING SPECTRUM ENGINE NODES
-            // -----------------------------------------------------------------
             const barWidth = 6;
             const barGap = 4;
             const totalBars = Math.ceil(canvas.width / (barWidth + barGap));
             
-            const hueCenter = sig.baseHue;
-            const trackRandomFactor = sig.waveFreq1 * 100;
-
             for (let i = 0; i < totalBars; i++) {
-                const barSeed = hashSeed(i + trackRandomFactor);
-                const noiseFactor = hashSeed(i * 12.9898 + barSeed * 78.233);
-                const horizontalPositionRatio = i / totalBars;
+                // Synthesize the deterministic song dimensions with the exact playhead position
+                const baseWave1 = Math.sin(i * this.visualSignature.waveFreq1 + synchronizedTimeTicker);
+                const baseWave2 = Math.cos(i * this.visualSignature.waveFreq2 - synchronizedTimeTicker * 0.7);
+                let audioIntensity = Math.abs(baseWave1 * baseWave2);
                 
-                let audioIntensity = 0;
-
-                if (isMoving) {
-                    if (structuralPhase === "chorus") {
-                        // CHORUS MODE: Explosive, maximum amplitude across all spectrum blocks
-                        const chaoticDrive = Math.sin(animationTime * 4.0 + barSeed * 20.0);
-                        audioIntensity = Math.abs(chaoticDrive) * (0.6 + noiseFactor * 0.6) * realTimeVoltage;
-                        if (noiseFactor > 0.7) audioIntensity += (Math.random() * 0.3 * volumeModifier);
-                    } 
-                    else if (structuralPhase === "buildup") {
-                        // BUILDUP MODE: Accelerated geometric compression pulse sweeps
-                        const compressionWave = Math.sin(animationTime * 6.0 - (horizontalPositionRatio * 15.0));
-                        audioIntensity = (0.3 + Math.abs(compressionWave) * 0.7) * realTimeVoltage;
-                    } 
-                    else {
-                        // REGULAR PHASE MODE: Segment visualizer into discrete frequency buckets
-                        if (horizontalPositionRatio < 0.3) {
-                            // Left-Side: Bass nodes
-                            const bassPulse = Math.sin(animationTime * 1.5 + barSeed * 6.28);
-                            audioIntensity = Math.abs(bassPulse) * (0.4 + noiseFactor * 0.6) * realTimeVoltage;
-                        } else if (horizontalPositionRatio < 0.75) {
-                            // Center-Side: Vocal / Mid melodies
-                            const midWave1 = Math.sin(animationTime * 2.8 + barSeed * 12.0);
-                            const midWave2 = Math.cos(animationTime * 1.7 - barSeed * 8.5);
-                            audioIntensity = Math.abs(midWave1 * midWave2) * 1.1 * realTimeVoltage;
-                        } else {
-                            // Right-Side: High-frequency percussion jitters
-                            const sharpFlicker = Math.sin(animationTime * 6.5 * (1.0 + noiseFactor) + i);
-                            audioIntensity = Math.abs(sharpFlicker) * (0.1 + realTimeVoltage * 0.9);
-                        }
-                    }
-
-                    audioIntensity = Math.max(0.05, Math.min(audioIntensity, 1.3));
+                if (isMoving && this.trackVolumeLevel > 0) {
+                    const jitterAmount = (this.trackVolumeLevel / 100); 
+                    audioIntensity += (Math.sin(i + synchronizedTimeTicker * 2) * jitterAmount);
+                    audioIntensity = Math.max(0.1, Math.min(audioIntensity, 1.2));
                 } else {
-                    audioIntensity = (0.05 + Math.sin(animationTime + i * 0.1) * 0.04);
+                    audioIntensity *= 0.15;
                 }
                 
-                const barHeight = audioIntensity * (canvas.height - 8) + 2;
+                const barHeight = audioIntensity * (canvas.height - 10) + 2;
                 const xPos = i * (barWidth + barGap);
                 const yPos = canvas.height - barHeight;
                 
-                // Color adjustments determined dynamically by active energy states
-                let finalHue = (hueCenter + (horizontalPositionRatio * 50) * (sig.waveFreq2 * 10) + (Math.sin(animationTime * 0.5) * 15)) % 360;
-                let saturation = "85%";
-                let lightness = "60%";
-                let alpha = isMoving ? "0.80" : "0.30";
-
-                if (isMoving) {
-                    if (structuralPhase === "chorus") {
-                        finalHue = (finalHue + 40) % 360; 
-                        lightness = "68%";               
-                        alpha = "0.95";                  
-                    } else if (structuralPhase === "buildup") {
-                        saturation = "100%";             
-                        alpha = "0.85";
-                    } else if (structuralPhase === "intro" || structuralPhase === "outro") {
-                        saturation = "50%";              
-                        lightness = "45%";
-                        alpha = "0.50";
-                    }
-                }
+                // Track Hue mapping shifts baseline colors entirely dependent on the video ID signature
+                const hue = (this.visualSignature.baseHue + (i * 0.4)) % 360; 
+                ctx.fillStyle = `hsla(${hue}, 85%, 65%, ${isMoving ? '0.75' : '0.35'})`;
                 
-                ctx.fillStyle = `hsla(${finalHue}, ${saturation}, ${lightness}, ${alpha})`;
                 ctx.fillRect(xPos, yPos, barWidth, barHeight);
             }
             
