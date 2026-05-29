@@ -178,7 +178,7 @@ export class StreamJukebox {
         }, 6500);
     }
 
-    init() {
+	init() {
         if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
             const tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
@@ -205,17 +205,24 @@ export class StreamJukebox {
                         }
                         
                         if (e.data === YT.PlayerState.PLAYING) {
+                            // Fetch real-time video info straight from the active player instance
                             const videoData = this.ytPlayer.getVideoData();
                             
-                            // Safe upgrade condition for raw URLs that were left labeled as "Link"
-                            if (videoData && videoData.title && (!this.currentTrackData || this.currentTrackData.title === "Link")) {
-                                this.currentTrackData = { 
-                                    id: videoData.video_id, 
-                                    title: videoData.title 
-                                };
+                            // Safe upgrade condition: If we have video data, and either we don't have a track, 
+                            // or the track title was missing/placeholder ("Link" / "Searching..."), override it with the real YouTube Title.
+                            if (videoData && videoData.title) {
+                                if (!this.currentTrackData || 
+                                    this.currentTrackData.title === "Link" || 
+                                    this.currentTrackData.title === "Searching...") {
+                                    
+                                    this.currentTrackData = { 
+                                        id: videoData.video_id || this.currentTrackData?.id, 
+                                        title: videoData.title 
+                                    };
+                                }
                             }
                             
-                            // Synchronize execution path back to DOM layout immediately
+                            // Force-sync UI changes right back to DOM layout immediately
                             this.updatePlayerDisplay();
                         }
                     }
