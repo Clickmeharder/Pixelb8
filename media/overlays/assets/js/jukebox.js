@@ -116,23 +116,14 @@ export class StreamJukebox {
 		const titleEl = document.getElementById('jb-current-title');
 		const nextEl = document.getElementById('jb-next-title');
 
-		// ADD THIS LOG
-		console.log('--- UI UPDATE TRIGGERED ---');
-		console.log('Custom Title:', customTitle);
-		console.log('Current Track Data:', this.currentTrackData);
-		console.log('Queue Length:', this.queue.length);
-
-		// Update Current Title
+		// Use textContent instead of innerText
 		if (titleEl) {
-			// Use an explicit fallback check
 			const displayTitle = customTitle || (this.currentTrackData ? this.currentTrackData.title : "No Track Loaded");
-			titleEl.innerText = displayTitle;
-			console.log('Set Element Text to:', displayTitle); // Verify the DOM actually received the text
+			titleEl.textContent = displayTitle; 
 		}
 
-		// Update Up Next Title
 		if (nextEl) {
-			nextEl.innerText = (this.queue.length > 0) ? this.queue[0].title : "Nothing queued";
+			nextEl.textContent = (this.queue.length > 0) ? this.queue[0].title : "Nothing queued";
 		}
 	}
 
