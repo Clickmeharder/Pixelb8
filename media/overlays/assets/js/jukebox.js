@@ -200,17 +200,17 @@ export class StreamJukebox {
                         this.playNextSong((msg) => console.log(msg)); 
                     },
                     'onStateChange': (e) => {
-						if (e.data === YT.PlayerState.ENDED) {
-							this.playNextSong((msg) => console.log(msg));
-						}
-						
-						// Explicitly update whenever a video successfully transitions into buffering or playing states
-						if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING) {
-							if (this.currentTrackData) {
-								this.updatePlayerDisplay();
-							}
+					if (e.data === YT.PlayerState.ENDED) {
+						this.playNextSong((msg) => console.log(msg));
+					}
+					
+					// Explicitly update whenever a video successfully transitions into buffering or playing states
+					if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING) {
+						if (this.currentTrackData) {
+							this.updatePlayerDisplay();
 						}
 					}
+				}
                 }
             });
         };
