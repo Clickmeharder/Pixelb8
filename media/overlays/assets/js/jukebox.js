@@ -20,6 +20,8 @@ export class StreamJukebox {
         this.isEnabled = true; 
         this.acceptRequests = true; 
         this.isAudioOnly = false;
+        this.showVisualizer = false; // State flag for visualizer
+        this.avAnimationId = null;   // Tracker loop instance for the canvas
 
         this.init();
         console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
@@ -370,9 +372,19 @@ export class StreamJukebox {
                 this.updateBadge('audio-status-badge', e.target.checked);
             };
         }
+
+        const avToggle = document.getElementById('stg-toggle-visualizer-checkbox');
+        if (avToggle) {
+            avToggle.checked = this.showVisualizer;
+            this.updateBadge('av-status-badge', this.showVisualizer);
+            avToggle.onchange = (e) => {
+                this.toggleVisualizer(e.target.checked);
+                this.updateBadge('av-status-badge', e.target.checked);
+            };
+        }
     }
 
-	toggleAudioOnly(state) {
+    toggleAudioOnly(state) {
         this.isAudioOnly = state;
         const playerContainer = document.getElementById('player');
         const wrapper = document.getElementById('jukebox-video-wrapper');
@@ -448,6 +460,110 @@ export class StreamJukebox {
                 if (overlayTrackPanel) overlayTrackPanel.style.display = 'none';
             }
         }
+    }
+
+    toggleVisualizer(state) {
+        this.showVisualizer = state;
+        const container = document.getElementById('overlay-wrapper');
+        let avWidget = document.getElementById('jukebox-av-widget');
+
+        if (!container) return;
+
+        if (state) {
+            // Build canvas if it doesn't exist
+            if (!avWidget) {
+                avWidget = document.createElement('canvas');
+                avWidget.id = 'jukebox-av-widget';
+                // Stretch a thin bar all the way across the bottom cleanly
+                avWidget.style.cssText = "position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; pointer-events: none; z-index: 999; display: block;";
+                container.appendChild(avWidget);
+                
+                // Keep dimensions synchronized to screen resolutions
+                const resizeCanvas = () => {
+                    avWidget.width = avWidget.parentElement.clientWidth || window.innerWidth;
+                    avWidget.height = 40;
+                };
+                window.addEventListener('resize', resizeCanvas);
+                resizeCanvas();
+            }
+            
+            // Fire up rendering loop ticker
+            this.startVisualizerLoop();
+        } else {
+            // Clear loop animations and remove from DOM hierarchy
+            if (this.avAnimationId) {
+                cancelAnimationFrame(this.avAnimationId);
+                this.avAnimationId = null;
+            }
+            if (avWidget) {
+                avWidget.remove();
+            }
+        }
+    }
+
+    startVisualizerLoop() {
+        if (this.avAnimationId) cancelAnimationFrame(this.avAnimationId);
+        
+        const canvas = document.getElementById('jukebox-av-widget');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        let seedTicks = 0;
+        
+        const render = () => {
+            if (!this.showVisualizer) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Check current player performance mode metrics
+            let isMoving = false;
+            if (this.ytPlayer && typeof this.ytPlayer.getPlayerState === 'function') {
+                // YT.PlayerState.PLAYING is 1
+                isMoving = (this.ytPlayer.getPlayerState() === 1);
+            }
+            
+            if (isMoving) {
+                seedTicks += 0.08; // Speeds up movement flow
+            } else {
+                seedTicks += 0.005; // Slow chill ambient wave when paused
+            }
+
+            const barWidth = 6;
+            const barGap = 4;
+            const totalBars = Math.ceil(canvas.width / (barWidth + barGap));
+            
+            // Draw matching procedural equalization bars
+            for (let i = 0; i < totalBars; i++) {
+                // Combine math formulas to mimic sound energy thresholds
+                const baseWave1 = Math.sin(i * 0.15 + seedTicks);
+                const baseWave2 = Math.cos(i * 0.05 - seedTicks * 0.7);
+                let audioIntensity = Math.abs(baseWave1 * baseWave2);
+                
+                if (isMoving) {
+                    // Add subtle energetic jitter spikes to mimic rhythmic bounce changes
+                    audioIntensity += (Math.sin(i + seedTicks * 2) * 0.2);
+                    audioIntensity = Math.max(0.1, Math.min(audioIntensity, 1.0));
+                } else {
+                    // Pull intensity down close to a resting baseline flattening line
+                    audioIntensity *= 0.15;
+                }
+                
+                const barHeight = audioIntensity * (canvas.height - 10) + 2;
+                const xPos = i * (barWidth + barGap);
+                const yPos = canvas.height - barHeight;
+                
+                // Color matching accent (defaults to theme purple palette gradient mapping)
+                const hue = 270 + (i * 0.3) % 40; 
+                ctx.fillStyle = `hsla(${hue}, 85%, 65%, ${isMoving ? '0.75' : '0.35'})`;
+                
+                // Draw single visualizer brick band column strip
+                ctx.fillRect(xPos, yPos, barWidth, barHeight);
+            }
+            
+            this.avAnimationId = requestAnimationFrame(render);
+        };
+        
+        this.avAnimationId = requestAnimationFrame(render);
     }
 
     renderQueueList() {
@@ -532,6 +648,10 @@ export class StreamJukebox {
             this.currentTrackData = null;
             this.updatePlayerDisplay();
             this.stopAudioProgressTracking();
+            this.toggleVisualizer(false); // Shut off animation loops cleanly if widget shuts down
+            const avToggle = document.getElementById('stg-toggle-visualizer-checkbox');
+            if (avToggle) avToggle.checked = false;
+            this.updateBadge('av-status-badge', false);
         }
     }
 
