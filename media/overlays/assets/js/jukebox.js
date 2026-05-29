@@ -509,7 +509,7 @@ export class StreamJukebox {
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
         } else {
             this.isPlayingSong = false;
-            this.updatePlayerDisplay("No Track Loaded");
+            this.updatePlayerDisplay("-");
             if (botSay) botSay("📭 Jukebox queue empty.");
         }
     }
