@@ -283,11 +283,14 @@ export class StreamJukebox {
     }
 
     updateNowPlayingUI(title) {
-        const titleEl = document.getElementById('jb-current-title');
-        if (titleEl) {
-            titleEl.innerText = title || "No Track Loaded";
-        }
-    }
+		const titleEl = document.getElementById('jb-current-title');
+		console.log("DEBUG: Target element:", titleEl); // <--- Check the console
+		if (titleEl) {
+			titleEl.innerText = title || "No Track Loaded";
+		} else {
+			console.error("DEBUG: Element #jb-current-title not found!");
+		}
+	}
 
     renderQueueList() {
         const list = document.getElementById('jb-queue-list');
