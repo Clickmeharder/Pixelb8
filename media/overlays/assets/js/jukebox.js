@@ -178,17 +178,19 @@ export class StreamJukebox {
         }, 6500);
     }
 
-init() {
+	init() {
+        // Ensure global initialization array or handler exists cleanly
         if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
             const tag = document.createElement('script');
-            const src = "https://www.youtube.com/iframe_api";
-            tag.src = src;
+            tag.src = "https://www.youtube.com/iframe_api";
             document.head.appendChild(tag);
         }
 
-        window.onYouTubeIframeAPIReady = () => {
+        // Bind the handler explicitly to this specific instance context
+        const setupPlayer = () => {
             this.ytPlayer = new YT.Player('player', {
-                height: '100%', width: '100%',
+                height: '100%', 
+                width: '100%',
                 playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1, 'fs': 0 },
                 events: {
                     'onReady': () => { 
@@ -200,33 +202,34 @@ init() {
                         this.playNextSong((msg) => console.log(msg)); 
                     },
                     'onStateChange': (e) => {
-                        // 1. Handle video ending
                         if (e.data === YT.PlayerState.ENDED) {
                             this.playNextSong((msg) => console.log(msg));
                         }
                         
-                        // 2. FORCE UI UPDATE WHEN THE TRACK ACTUALLY PLAYS
+                        // Capture the absolute source of truth directly from the active iframe frame
                         if (e.data === YT.PlayerState.PLAYING) {
-                            try {
-                                const videoData = this.ytPlayer.getVideoData();
-                                if (videoData && videoData.title) {
-                                    // Update our internal tracking with the actual real title
-                                    if (this.currentTrackData) {
-                                        this.currentTrackData.title = videoData.title;
-                                    } else {
-                                        this.currentTrackData = { id: videoData.video_id, title: videoData.title };
-                                    }
-                                    // Push it to the UI elements
-                                    this.updatePlayerDisplay();
-                                }
-                            } catch (err) {
-                                console.error("Failed to fetch live video title:", err);
+                            const videoData = this.ytPlayer.getVideoData();
+                            if (videoData && videoData.title) {
+                                this.currentTrackData = { 
+                                    id: videoData.video_id, 
+                                    title: videoData.title 
+                                };
+                                // Force it straight to the DOM with a clean reference
+                                this.updatePlayerDisplay();
                             }
                         }
                     }
                 }
             });
         };
+
+        // If API is already initialized by window elsewhere, run setup immediately
+        if (window.YT && window.YT.Player) {
+            setupPlayer();
+        } else {
+            // Otherwise capture the global assignment cleanly without dropping class instance context
+            window.onYouTubeIframeAPIReady = setupPlayer;
+        }
     }
 
     applyButtonStyles() {
