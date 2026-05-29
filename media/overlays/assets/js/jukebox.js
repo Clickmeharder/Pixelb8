@@ -181,7 +181,8 @@ export class StreamJukebox {
     init() {
         if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
             const tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
+            const src = "https://www.youtube.com/iframe_api";
+            tag.src = src;
             document.head.appendChild(tag);
         }
 
@@ -201,12 +202,6 @@ export class StreamJukebox {
                     'onStateChange': (e) => {
                         if (e.data === YT.PlayerState.ENDED) {
                             this.playNextSong((msg) => console.log(msg));
-                        }
-                        
-                        if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING) {
-                            if (this.currentTrackData) {
-                                this.updatePlayerDisplay();
-                            }
                         }
                     }
                 }
@@ -481,6 +476,7 @@ export class StreamJukebox {
             if (fetchedTrack) {
                 this.currentTrackData = fetchedTrack;
                 this.ytPlayer.loadVideoById(this.currentTrackData.id);
+                this.updatePlayerDisplay(); // <--- ADDED LINE
             } else {
                 this.playNextSong(botSay);
             }
