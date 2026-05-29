@@ -10,11 +10,12 @@ export class StreamJukebox {
         this.ytPlayerReady = false;
         this.currentTrackData = null;
         this.currentTrackVotes = new Set();
+        this.currentTrackSkipVotes = new Set(); // Tracks vote-skips for the active song
         
         // Load persistent settings
         this.VOTE_REQUIREMENT = parseInt(localStorage.getItem("jbVoteReq")) || 2;
         this.isPlayingSong = false;
-        // this.streamerName = "jaedraze";
+        this.streamerName = "jaedraze";
         this.isEnabled = true; 
         this.acceptRequests = true; 
         this.isAudioOnly = false;
@@ -32,7 +33,7 @@ export class StreamJukebox {
         const jukeboxExecution = (user, message, flags) => {
             const parts = message.trim().toLowerCase().split(/\s+/);
             const subCommand = parts[0];
-            const isAdmin = flags.broadcaster || flags.mod;
+            const isAdmin = flags.broadcaster || flags.mod; // Broadcaster and Mods count as Admin/Staff overrides
 
             if (!subCommand) {
                 sendNotice(`🎵 [Jukebox]: Available: !jb [sr | skip | like | status | help | tilt/random | queue]`);
@@ -42,8 +43,8 @@ export class StreamJukebox {
             switch (subCommand) {
                 case 'help':
                 case 'h':
-                    sendNotice(`🎵 [Jukebox Help]: !sr [link/query] | !jb like | !jb status | !jb tilt [keyword] | !jb queue`);
-                    if (isAdmin) sendNotice(`🛠️ [Admin]: !jb [skip | clear | toggle requests | setreq {num}]`);
+                    sendNotice(`🎵 [Jukebox Help]: !sr [link/query] | !jb like | !jb skip | !jb status | !jb tilt [keyword] | !jb queue`);
+                    if (isAdmin) sendNotice(`🛠️ [Admin]: !jb [clear | toggle requests | setreq {num}]`);
                     break;
 
                 case 'sr':
@@ -63,7 +64,11 @@ export class StreamJukebox {
                     break;
 
                 case 'skip':
-                    if (isAdmin) this.skipCurrentSong(sendNotice);
+                    if (isAdmin) {
+                        this.skipCurrentSong(sendNotice);
+                    } else {
+                        this.handleVoteSkip(user, sendNotice);
+                    }
                     break;
 
                 case 'like':
@@ -106,6 +111,7 @@ export class StreamJukebox {
         return [
             { name: 'jb', adminOnly: false, execute: jukeboxExecution },
             { name: 'jukebox', adminOnly: false, execute: jukeboxExecution },
+            { name: 'skip', adminOnly: false, execute: (user, message, flags) => jukeboxExecution(user, 'skip', flags) },
             { name: 'sr', adminOnly: false, execute: handleRequest },
             { name: 'request', adminOnly: false, execute: handleRequest }
         ];
@@ -113,7 +119,6 @@ export class StreamJukebox {
 
     // --- UI DISPLAY ---
     updatePlayerDisplay(customTitle = null) {
-        // Target all items sharing your new class layout selector
         const titleElements = document.querySelectorAll('.jb-current-title');
         const nextEl = document.getElementById('jb-next-title');
 
@@ -151,7 +156,7 @@ export class StreamJukebox {
         badge.innerText = isActive ? 'ON' : 'OFF';
     }
 
-    triggerVoteToast(username, currentCount, targetCount) {
+    triggerVoteToast(username, currentCount, targetCount, isSkipVote = false) {
         const container = document.getElementById("overlay-wrapper");
         if (!container) return;
         const toast = document.createElement("div");
@@ -159,7 +164,11 @@ export class StreamJukebox {
         toast.style.cssText = "position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent); z-index: 1000; font-family: monospace; pointer-events: none;";
         
         const displayCount = this.VOTE_REQUIREMENT === 0 ? "∞" : targetCount;
-        toast.innerHTML = `👍 <strong>${username}</strong> liked this! <br> Progress: ${currentCount} / ${displayCount}`;
+        if (isSkipVote) {
+            toast.innerHTML = `⏭️ <strong>${username}</strong> voted to skip! <br> Progress: ${currentCount} / ${displayCount}`;
+        } else {
+            toast.innerHTML = `👍 <strong>${username}</strong> liked this! <br> Progress: ${currentCount} / ${displayCount}`;
+        }
         
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 5000);
@@ -373,6 +382,7 @@ export class StreamJukebox {
             info.onclick = () => { 
                 this.isPlayingSong = true;
                 this.currentTrackVotes.clear();
+                this.currentTrackSkipVotes.clear();
                 this.currentTrackData = item; 
                 this.updatePlayerDisplay();
                 this.ytPlayer.loadVideoById(item.id); 
@@ -447,12 +457,29 @@ export class StreamJukebox {
         if (this.currentTrackVotes.has(voter)) return;
         
         this.currentTrackVotes.add(voter);
-        this.triggerVoteToast(user, this.currentTrackVotes.size, this.VOTE_REQUIREMENT);
+        this.triggerVoteToast(user, this.currentTrackVotes.size, this.VOTE_REQUIREMENT, false);
         
         if (this.VOTE_REQUIREMENT <= 1 || this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
             this.saveFallbackItem(this.currentTrackData, "Community");
             if (botSay) botSay(`🔥 "${this.currentTrackData.title}" added to fallback!`);
             this.triggerMilestoneOverlay(this.currentTrackData.title);
+        }
+    }
+
+    async handleVoteSkip(user, botSay) {
+        if (!this.currentTrackData) return;
+
+        const voter = user.toLowerCase();
+        if (this.currentTrackSkipVotes.has(voter)) return;
+
+        this.currentTrackSkipVotes.add(voter);
+        this.triggerVoteToast(user, this.currentTrackSkipVotes.size, this.VOTE_REQUIREMENT, true);
+
+        if (this.VOTE_REQUIREMENT <= 1 || this.currentTrackSkipVotes.size >= this.VOTE_REQUIREMENT) {
+            if (botSay) botSay(`🗳️ Vote skip passed for "${this.currentTrackData.title}"!`);
+            this.skipCurrentSong(botSay);
+        } else {
+            if (botSay) botSay(`⏭️ @${user} voted to skip. Progress: ${this.currentTrackSkipVotes.size}/${this.VOTE_REQUIREMENT}`);
         }
     }
 
@@ -479,6 +506,7 @@ export class StreamJukebox {
         if (!this.isEnabled || !this.ytPlayerReady) return;
         
         this.currentTrackVotes.clear();
+        this.currentTrackSkipVotes.clear(); // Reset skip tracker clean for the next song
         this.currentTrackData = null;
 
         if (this.queue.length > 0) {
@@ -509,7 +537,7 @@ export class StreamJukebox {
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
         } else {
             this.isPlayingSong = false;
-            this.updatePlayerDisplay("-");
+            this.updatePlayerDisplay("No Track Loaded");
             if (botSay) botSay("📭 Jukebox queue empty.");
         }
     }
