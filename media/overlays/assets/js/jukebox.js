@@ -112,20 +112,19 @@ export class StreamJukebox {
     }
 
     // --- UI DISPLAY ---
-	updatePlayerDisplay(customTitle = null) {
-		const titleEl = document.getElementById('jb-current-title');
-		const nextEl = document.getElementById('jb-next-title');
+    updatePlayerDisplay(customTitle = null) {
+        const titleEl = document.getElementById('jb-current-title');
+        const nextEl = document.getElementById('jb-next-title');
 
-		// Use textContent instead of innerText
-		if (titleEl) {
-			const displayTitle = customTitle || (this.currentTrackData ? this.currentTrackData.title : "No Track Loaded");
-			titleEl.textContent = displayTitle; 
-		}
+        if (titleEl) {
+            const displayTitle = customTitle || (this.currentTrackData ? this.currentTrackData.title : "No Track Loaded");
+            titleEl.textContent = displayTitle; 
+        }
 
-		if (nextEl) {
-			nextEl.textContent = (this.queue.length > 0) ? this.queue[0].title : "Nothing queued";
-		}
-	}
+        if (nextEl) {
+            nextEl.textContent = (this.queue.length > 0) ? this.queue[0].title : "Nothing queued";
+        }
+    }
 
     // --- Core Logic ---
     async playRandomYTSong(sendNotice, customKeyword = null) {
@@ -200,17 +199,16 @@ export class StreamJukebox {
                         this.playNextSong((msg) => console.log(msg)); 
                     },
                     'onStateChange': (e) => {
-					if (e.data === YT.PlayerState.ENDED) {
-						this.playNextSong((msg) => console.log(msg));
-					}
-					
-					// Explicitly update whenever a video successfully transitions into buffering or playing states
-					if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING) {
-						if (this.currentTrackData) {
-							this.updatePlayerDisplay();
-						}
-					}
-				}
+                        if (e.data === YT.PlayerState.ENDED) {
+                            this.playNextSong((msg) => console.log(msg));
+                        }
+                        
+                        if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING) {
+                            if (this.currentTrackData) {
+                                this.updatePlayerDisplay();
+                            }
+                        }
+                    }
                 }
             });
         };
@@ -329,7 +327,7 @@ export class StreamJukebox {
             const del = document.createElement('button');
             del.innerText = '✕';
             del.style.cssText = "color: #991b1b; background: transparent; border: none; cursor: pointer; font-size: 12px; font-weight: bold;";
-            del.onclick = () => { this.queue.splice(index, 1); this.renderQueueList(); };
+            del.onclick = () => { this.queue.splice(index, 1); this.renderQueueList(); this.updatePlayerDisplay(); };
             
             btnGroup.appendChild(heart);
             btnGroup.appendChild(del);
@@ -337,7 +335,6 @@ export class StreamJukebox {
             div.appendChild(btnGroup);
             list.appendChild(div);
         });
-
     }
 
     renderFallbackList() {
@@ -399,7 +396,11 @@ export class StreamJukebox {
 
         const id = this.extractYouTubeId(message);
         this.queue.push({ user, title: id ? "Link" : message, id: id || message, isSearch: !id });
+        
+        // Update layout lists explicitly
         this.renderQueueList();
+        this.updatePlayerDisplay();
+        
         botSay(`✅ Queued: "${message.substring(0, 30)}..."`);
         if (!this.isPlayingSong) this.playNextSong(botSay);
     }
@@ -408,7 +409,11 @@ export class StreamJukebox {
         const track = await this.fetchTrack(query);
         if (track) {
             this.queue.push({ user: 'System', title: track.title, id: track.id, isSearch: false });
+            
+            // Sync layout updates
             this.renderQueueList();
+            this.updatePlayerDisplay();
+            
             if (botSay) botSay(`✅ Added to queue: "${track.title}"`);
             if (!this.isPlayingSong) this.playNextSong(botSay);
         } else {
@@ -451,46 +456,46 @@ export class StreamJukebox {
         }
     }
 
-	async playNextSong(botSay) {
-		if (!this.isEnabled || !this.ytPlayerReady) return;
-		
-		// 1. Immediately indicate we are transitioning
-		this.updatePlayerDisplay("Searching...");
-		
-		this.currentTrackVotes.clear();
-		this.currentTrackData = null;
+    async playNextSong(botSay) {
+        if (!this.isEnabled || !this.ytPlayerReady) return;
+        
+        this.updatePlayerDisplay("Searching...");
+        this.currentTrackVotes.clear();
+        this.currentTrackData = null;
 
-		if (this.queue.length > 0) {
-			this.isPlayingSong = true;
-			const next = this.queue.shift();
-			
-			this.renderQueueList(); 
-			
-			let fetchedTrack = null;
-			if (next.isSearch) {
-				fetchedTrack = await this.fetchTrack(next.id);
-			} else {
-				fetchedTrack = { id: next.id, title: next.title };
-			}
-			
-			if (fetchedTrack) {
-				// Assign the object right before loading the video
-				this.currentTrackData = fetchedTrack;
-				this.ytPlayer.loadVideoById(this.currentTrackData.id);
-				// Let the onStateChange PLAYING event handle the updatePlayerDisplay() call naturally
-			} else {
-				this.playNextSong(botSay);
-			}
-		} else if (this.fallbackPlaylist.length > 0) {
-			this.isPlayingSong = true;
-			this.currentTrackData = this.fallbackPlaylist[Math.floor(Math.random() * this.fallbackPlaylist.length)];
-			this.ytPlayer.loadVideoById(this.currentTrackData.id);
-		} else {
-			this.isPlayingSong = false;
-			this.updatePlayerDisplay("No Track Loaded");
-			if (botSay) botSay("📭 Jukebox queue empty.");
-		}
-	}
+        if (this.queue.length > 0) {
+            this.isPlayingSong = true;
+            const next = this.queue.shift();
+            
+            // Render the updated queue layout and the up next text instantly
+            this.renderQueueList(); 
+            this.updatePlayerDisplay("Searching...");
+            
+            let fetchedTrack = null;
+            if (next.isSearch) {
+                fetchedTrack = await this.fetchTrack(next.id);
+            } else {
+                fetchedTrack = { id: next.id, title: next.title };
+            }
+            
+            if (fetchedTrack) {
+                this.currentTrackData = fetchedTrack;
+                this.ytPlayer.loadVideoById(this.currentTrackData.id);
+            } else {
+                this.playNextSong(botSay);
+            }
+        } else if (this.fallbackPlaylist.length > 0) {
+            this.isPlayingSong = true;
+            this.currentTrackData = this.fallbackPlaylist[Math.floor(Math.random() * this.fallbackPlaylist.length)];
+            // Make sure the up-next updates even when falling back
+            this.updatePlayerDisplay();
+            this.ytPlayer.loadVideoById(this.currentTrackData.id);
+        } else {
+            this.isPlayingSong = false;
+            this.updatePlayerDisplay("No Track Loaded");
+            if (botSay) botSay("📭 Jukebox queue empty.");
+        }
+    }
 
     saveFallbackItem(item, username = 'System') {
         if (!this.fallbackPlaylist.some(e => e.id === item.id)) {
