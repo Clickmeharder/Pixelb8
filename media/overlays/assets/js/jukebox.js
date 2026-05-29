@@ -112,22 +112,29 @@ export class StreamJukebox {
     }
 
     // --- UI DISPLAY ---
-    updatePlayerDisplay(customTitle = null) {
-        const titleEl = document.getElementById('jb-current-title');
-        const nextEl = document.getElementById('jb-next-title');
+	updatePlayerDisplay(customTitle = null) {
+		const titleEl = document.getElementById('jb-current-title');
+		const nextEl = document.getElementById('jb-next-title');
 
-        // Update Current Title
-        if (titleEl) {
-            titleEl.innerText = customTitle || this.currentTrackData?.title || "No Track Loaded";
-        }
+		// ADD THIS LOG
+		console.log('--- UI UPDATE TRIGGERED ---');
+		console.log('Custom Title:', customTitle);
+		console.log('Current Track Data:', this.currentTrackData);
+		console.log('Queue Length:', this.queue.length);
 
-        // Update Up Next Title
-        if (nextEl) {
-            nextEl.innerText = (this.queue.length > 0) ? this.queue[0].title : "Nothing queued";
-        }
-        
-        console.log(`✅ [Jukebox UI]: Updated display.`);
-    }
+		// Update Current Title
+		if (titleEl) {
+			// Use an explicit fallback check
+			const displayTitle = customTitle || (this.currentTrackData ? this.currentTrackData.title : "No Track Loaded");
+			titleEl.innerText = displayTitle;
+			console.log('Set Element Text to:', displayTitle); // Verify the DOM actually received the text
+		}
+
+		// Update Up Next Title
+		if (nextEl) {
+			nextEl.innerText = (this.queue.length > 0) ? this.queue[0].title : "Nothing queued";
+		}
+	}
 
     // --- Core Logic ---
     async playRandomYTSong(sendNotice, customKeyword = null) {
