@@ -449,15 +449,17 @@ export class StreamJukebox {
         this.isAudioOnly = state;
         const playerContainer = document.getElementById('player');
         const wrapper = document.getElementById('jukebox-video-wrapper');
+        const statusContainer = document.getElementById('jb-status-container');
         
         if (playerContainer && wrapper) {
             if (state) {
-                // Shrink the native player so it doesn't take up space, but keep it active for the YouTube API
+                // 1. Shrink the native player and hide the original UI
                 playerContainer.style.width = "0px";
                 playerContainer.style.height = "0px";
                 playerContainer.style.visibility = "hidden";
+                if (statusContainer) statusContainer.style.display = "none";
                 
-                // Set the wrapper to a clean, slim profile
+                // 2. Set the wrapper to a clean, slim profile
                 wrapper.style.height = "72px";
                 wrapper.style.transition = "all 0.3s ease";
                 wrapper.style.position = "relative";
@@ -466,7 +468,6 @@ export class StreamJukebox {
                 if (!overlayTrackPanel) {
                     overlayTrackPanel = document.createElement('div');
                     overlayTrackPanel.id = 'jb-audio-overlay-panel';
-                    // Glassmorphism styling: cleaner borders, better spacing, subtle shadow
                     overlayTrackPanel.style.cssText = `
                         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
                         background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
@@ -509,10 +510,12 @@ export class StreamJukebox {
                 this.updatePlayerDisplay();
                 this.startAudioProgressTracking();
             } else {
-                // Restore original video player size
+                // 1. Restore original player size and original UI
                 playerContainer.style.width = "100%";
                 playerContainer.style.height = "100%";
                 playerContainer.style.visibility = "visible";
+                if (statusContainer) statusContainer.style.display = "block";
+                
                 wrapper.style.height = "168px"; 
                 
                 this.stopAudioProgressTracking();
