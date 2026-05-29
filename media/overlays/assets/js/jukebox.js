@@ -10,17 +10,34 @@ export class StreamJukebox {
         this.ytPlayerReady = false;
         this.currentTrackData = null;
         this.currentTrackVotes = new Set();
-        
+       
         // Load persistent settings
         this.VOTE_REQUIREMENT = parseInt(localStorage.getItem("jbVoteReq")) || 2;
         this.isPlayingSong = false;
         this.streamerName = "jaedraze";
-        this.isEnabled = true; 
-        this.acceptRequests = true; 
+        this.isEnabled = true;
+        this.acceptRequests = true;
         this.isAudioOnly = false;
 
         this.init();
         console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
+    }
+
+    // --- Helper: Wait for DOM element ---
+    waitForElement(selector, callback, maxAttempts = 20) {
+        let attempts = 0;
+        const interval = setInterval(() => {
+            attempts++;
+            const el = document.getElementById(selector);
+            
+            if (el) {
+                clearInterval(interval);
+                callback(el);
+            } else if (attempts >= maxAttempts) {
+                clearInterval(interval);
+                console.error(`❌ Element #${selector} not found after ${maxAttempts} attempts`);
+            }
+        }, 250);
     }
 
     // --- COMMAND ROUTER ---
@@ -54,7 +71,7 @@ export class StreamJukebox {
 
                 case 'tilt':
                 case 'random':
-                    const keyword = parts.slice(1).join(' '); 
+                    const keyword = parts.slice(1).join(' ');
                     this.playRandomYTSong(sendNotice, keyword);
                     break;
 
@@ -115,10 +132,10 @@ export class StreamJukebox {
     async playRandomYTSong(sendNotice, customKeyword = null) {
         const defaultKeywords = ['lofi hip hop', 'synthwave', 'chill beats', 'rock hits', 'jazz piano'];
         const keyword = customKeyword || defaultKeywords[Math.floor(Math.random() * defaultKeywords.length)];
-        
+       
         sendNotice(`🎲 [JB]: Searching for: ${keyword}...`);
         const track = await this.fetchTrack(keyword);
-        
+       
         if (track) {
             this.handleSongRequest('System', track.id, sendNotice);
             sendNotice(`🎵 [JB]: Random track found: "${track.title}"`);
@@ -140,10 +157,10 @@ export class StreamJukebox {
         const toast = document.createElement("div");
         toast.className = "p8-toast";
         toast.style.cssText = "position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent); z-index: 1000; font-family: monospace; pointer-events: none;";
-        
+       
         const displayCount = this.VOTE_REQUIREMENT === 0 ? "∞" : targetCount;
         toast.innerHTML = `👍 <strong>${username}</strong> liked this! <br> Progress: ${currentCount} / ${displayCount}`;
-        
+       
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 5000);
     }
@@ -152,11 +169,11 @@ export class StreamJukebox {
         const widget = document.getElementById("alert-widget");
         const text = document.getElementById("alert-text");
         if (!widget || !text) return;
-        
+       
         const oldHtml = text.innerHTML;
         widget.style.display = "block";
         text.innerHTML = `<div style="color:#eab308;">🔥 Community Choice!</div><div style="margin-top:5px;">"${songTitle}" added to Fallback!</div>`;
-        
+       
         setTimeout(() => {
             widget.style.display = "none";
             text.innerHTML = oldHtml;
@@ -181,7 +198,12 @@ export class StreamJukebox {
                         this.bindControls(); 
                         this.renderFallbackList();
                         this.renderQueueList();
-                        this.playNextSong((msg) => console.log(msg)); 
+
+                        // Small delay to ensure widget HTML is fully in DOM
+                        setTimeout(() => {
+                            this.updateNowPlayingUI("No Track Loaded");
+                            this.playNextSong((msg) => console.log(msg));
+                        }, 800);
                     },
                     'onStateChange': (e) => { 
                         if (e.data === YT.PlayerState.ENDED) {
@@ -200,7 +222,7 @@ export class StreamJukebox {
             'jb-add-queue-btn': 'p8-btn p8-btn-success',
             'jb-add-fallback-btn': 'p8-btn p8-btn-success'
         };
-        
+       
         Object.keys(buttons).forEach(id => {
             const el = document.getElementById(id);
             if (el) el.className = buttons[id];
@@ -208,6 +230,7 @@ export class StreamJukebox {
     }
 
     bindControls() {
+        // ... (your existing bindControls code - unchanged for brevity)
         const currentSkipBtn = document.getElementById('jb-current-skip');
         if(currentSkipBtn) currentSkipBtn.onclick = () => this.skipCurrentSong((msg) => console.log(msg));
 
@@ -219,7 +242,7 @@ export class StreamJukebox {
 
         const clearBtn = document.getElementById('jb-clear-btn');
         if(clearBtn) clearBtn.onclick = () => { this.queue = []; this.renderQueueList(); this.skipCurrentSong((msg) => console.log(msg)); };
-        
+       
         const voteInput = document.getElementById('jb-vote-req-input');
         if (voteInput) {
             voteInput.value = this.VOTE_REQUIREMENT;
@@ -273,7 +296,7 @@ export class StreamJukebox {
         this.isAudioOnly = state;
         const playerContainer = document.getElementById('player');
         const wrapper = document.getElementById('jukebox-video-wrapper');
-        
+       
         if (playerContainer && wrapper) {
             playerContainer.style.width = state ? "1px" : "100%";
             playerContainer.style.height = state ? "1px" : "100%";
@@ -282,27 +305,17 @@ export class StreamJukebox {
         }
     }
 
-	updateNowPlayingUI(title) {
-		// 1. Force a fresh lookup every single time
-		const titleEl = document.getElementById('jb-current-title');
+    // === FIXED NOW PLAYING UI ===
+    updateNowPlayingUI(title) {
+        this.waitForElement('jb-current-title', (titleEl) => {
+            titleEl.innerText = title || "No Track Loaded";
+            titleEl.style.display = "block";
+            titleEl.style.color = "#fff";
+            console.log(`✅ Now Playing updated: "${title}"`);
+        });
+    }
 
-		// 2. Debugging: Log exactly what we found
-		console.log("DEBUG: Checking for #jb-current-title...");
-		console.log("DEBUG: Found element?", titleEl);
-		console.log("DEBUG: Input title value:", title);
-
-		if (titleEl) {
-			// 3. Update the text
-			titleEl.innerText = title || "No Track Loaded";
-			
-			// 4. Force a style reset to ensure it's not hidden by the widget's CSS
-			titleEl.style.display = "block";
-			titleEl.style.color = "#fff";
-		} else {
-			console.error("CRITICAL: #jb-current-title was NOT found in the DOM.");
-		}
-	}
-
+    // Rest of your methods (renderQueueList, renderFallbackList, etc.) remain the same
     renderQueueList() {
         const list = document.getElementById('jb-queue-list');
         if (!list) return;
@@ -310,12 +323,12 @@ export class StreamJukebox {
         this.queue.forEach((item, index) => {
             const div = document.createElement('div');
             div.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; border-bottom: 1px solid #27272a; font-size: 10px;";
-            
+           
             const info = document.createElement('span');
             info.innerText = `${index + 1}. ${item.title.substring(0, 20)} (@${item.user})`;
-            
+           
             const btnGroup = document.createElement('div');
-            
+           
             const heart = document.createElement('button');
             heart.innerText = '❤';
             heart.style.cssText = "margin-right: 6px; color: #e11d48; background: transparent; border: none; cursor: pointer; font-size: 12px;";
@@ -323,12 +336,12 @@ export class StreamJukebox {
                 const track = item.isSearch ? await this.fetchTrack(item.id) : item;
                 if (track) this.saveFallbackItem(track, item.user);
             };
-            
+           
             const del = document.createElement('button');
             del.innerText = '✕';
             del.style.cssText = "color: #991b1b; background: transparent; border: none; cursor: pointer; font-size: 12px; font-weight: bold;";
             del.onclick = () => { this.queue.splice(index, 1); this.renderQueueList(); };
-            
+           
             btnGroup.appendChild(heart);
             btnGroup.appendChild(del);
             div.appendChild(info);
@@ -345,7 +358,7 @@ export class StreamJukebox {
         this.fallbackPlaylist.forEach((item, index) => {
             const div = document.createElement('div');
             div.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #3f3f46; font-size: 11px;";
-            
+           
             const info = document.createElement('div');
             info.style.cursor = 'pointer';
             info.innerHTML = `<strong>${item.title}</strong><br><span style="color: #a1a1aa;">Req: ${item.user || 'System'}</span>`;
@@ -385,9 +398,13 @@ export class StreamJukebox {
         }
     }
 
+    // ... [All your other methods: handleSongRequest, manualAddSong, handleLikeSong, 
+    // handleAddFallback, skipCurrentSong, playNextSong, saveFallbackItem, fetchTrack, 
+    // extractYouTubeId remain exactly the same as you provided]
+
     async handleSongRequest(user, message, botSay) {
         if (!this.isEnabled || !message) return;
-        
+       
         if (!this.acceptRequests) {
             botSay(`🚫 Sorry @${user}, song requests are currently disabled.`);
             return;
@@ -414,13 +431,13 @@ export class StreamJukebox {
 
     async handleLikeSong(user, botSay) {
         if (!this.currentTrackData) return;
-        
+       
         const voter = user.toLowerCase();
         if (this.currentTrackVotes.has(voter)) return;
-        
+       
         this.currentTrackVotes.add(voter);
         this.triggerVoteToast(user, this.currentTrackVotes.size, this.VOTE_REQUIREMENT);
-        
+       
         if (this.VOTE_REQUIREMENT <= 1 || this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
             this.saveFallbackItem(this.currentTrackData, "Community");
             if (botSay) botSay(`🔥 "${this.currentTrackData.title}" added to fallback!`);
@@ -456,14 +473,14 @@ export class StreamJukebox {
             this.isPlayingSong = true;
             const next = this.queue.shift();
             this.renderQueueList();
-            
+           
             if (next.isSearch) {
                 this.updateNowPlayingUI("Searching & Loading Track...");
                 this.currentTrackData = await this.fetchTrack(next.id);
             } else {
                 this.currentTrackData = { id: next.id, title: next.title };
             }
-            
+           
             if (this.currentTrackData) {
                 this.updateNowPlayingUI(this.currentTrackData.title);
                 this.ytPlayer.loadVideoById(this.currentTrackData.id);
