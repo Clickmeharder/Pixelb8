@@ -478,13 +478,14 @@ export class StreamJukebox {
                     `;
                     
                     overlayTrackPanel.innerHTML = `
-                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
-                            <div class="jb-current-title" style="font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px;">No Track Loaded</div>
-                            <div style="font-size: 11px; color: #a1a1aa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                <span style="opacity: 0.7;">UP NEXT: </span><span id="jb-audio-next-title" style="color: #a855f7; font-weight: 500;">Nothing queued</span>
+                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; overflow: hidden;">
+                            <div class="jb-current-title" style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;">No Track Loaded</div>
+                            <div style="font-size: 11px; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex;">
+                                <span style="margin-right: 4px; opacity: 0.7; flex-shrink: 0;">⏭️ NEXT:</span>
+                                <span id="jb-audio-next-title" style="color: #a855f7; font-weight: 500; overflow: hidden; text-overflow: ellipsis;">Nothing queued</span>
                             </div>
                         </div>
-                        <div style="width: 200px; margin-left: 20px; display: flex; flex-direction: column; justify-content: center;">
+                        <div style="width: 140px; margin-left: 16px; display: flex; flex-direction: column; justify-content: center; flex-shrink: 0;">
                             <div style="width: 100%; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; overflow: hidden; margin-bottom: 6px;">
                                 <div id="jb-audio-progress-bar" style="width: 0%; background: #a855f7; height: 100%; transition: width 0.3s linear; border-radius: 2px;"></div>
                             </div>
