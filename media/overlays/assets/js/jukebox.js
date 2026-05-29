@@ -332,9 +332,7 @@ export class StreamJukebox {
             div.appendChild(btnGroup);
             list.appendChild(div);
         });
-        
-        // Refresh UI so "Up Next" updates
-        this.updatePlayerDisplay();
+
     }
 
     renderFallbackList() {
@@ -448,8 +446,12 @@ export class StreamJukebox {
         }
     }
 
-    async playNextSong(botSay) {
+	async playNextSong(botSay) {
         if (!this.isEnabled || !this.ytPlayerReady) return;
+        
+        // Indicate searching
+        this.updatePlayerDisplay("Searching...");
+        
         this.currentTrackVotes.clear();
         this.currentTrackData = null;
 
@@ -457,8 +459,7 @@ export class StreamJukebox {
             this.isPlayingSong = true;
             const next = this.queue.shift();
             
-            // UI Update: Search Status
-            this.updatePlayerDisplay("Searching for track...");
+            // Only update queue UI here
             this.renderQueueList(); 
             
             if (next.isSearch) {
@@ -468,9 +469,10 @@ export class StreamJukebox {
             }
             
             if (this.currentTrackData) {
-                this.updatePlayerDisplay(); // Updates to the real title
+                this.updatePlayerDisplay(); // Final update
                 this.ytPlayer.loadVideoById(this.currentTrackData.id);
             } else {
+                // If search failed, try next item
                 this.playNextSong(botSay);
             }
         } else if (this.fallbackPlaylist.length > 0) {
@@ -480,7 +482,7 @@ export class StreamJukebox {
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
         } else {
             this.isPlayingSong = false;
-            this.updatePlayerDisplay();
+            this.updatePlayerDisplay("No Track Loaded");
             if (botSay) botSay("📭 Jukebox queue empty.");
         }
     }
