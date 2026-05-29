@@ -11,6 +11,7 @@ export class StreamJukebox {
         this.currentTrackData = null;
         this.currentTrackVotes = new Set();
         this.currentTrackSkipVotes = new Set(); // Tracks vote-skips for the active song
+        this.progressInterval = null; // Polling loop ticker for tracking progress bar
         
         // Load persistent settings
         this.VOTE_REQUIREMENT = parseInt(localStorage.getItem("jbVoteReq")) || 2;
@@ -128,8 +129,21 @@ export class StreamJukebox {
             el.textContent = displayTitle;
         });
 
+        let upNextString = "Nothing queued";
+        if (this.queue.length > 0) {
+            upNextString = this.queue[0].title;
+        } else if (this.fallbackPlaylist.length > 0) {
+            upNextString = "Random Fallback Selection";
+        }
+
         if (nextEl) {
-            nextEl.textContent = (this.queue.length > 0) ? this.queue[0].title : "Nothing queued";
+            nextEl.textContent = upNextString;
+        }
+
+        // Keep the Audio-Only track panel explicitly up to date
+        const audioNextEl = document.getElementById('jb-audio-next-title');
+        if (audioNextEl) {
+            audioNextEl.textContent = upNextString;
         }
     }
 
@@ -231,6 +245,10 @@ export class StreamJukebox {
                             }
                             
                             this.updatePlayerDisplay();
+                            this.startAudioProgressTracking();
+                        } else {
+                            // Clear or pause updates if player buffer pauses or stops
+                            this.stopAudioProgressTracking();
                         }
                     }
                 }
@@ -241,6 +259,40 @@ export class StreamJukebox {
             setupPlayer();
         } else {
             window.onYouTubeIframeAPIReady = setupPlayer;
+        }
+    }
+
+    // Interval Management for parsing playback time dynamically
+    startAudioProgressTracking() {
+        this.stopAudioProgressTracking();
+        this.progressInterval = setInterval(() => {
+            if (!this.ytPlayer || typeof this.ytPlayer.getCurrentTime !== 'function') return;
+            
+            const elapsed = this.ytPlayer.getCurrentTime() || 0;
+            const total = this.ytPlayer.getDuration() || 0;
+            const bar = document.getElementById('jb-audio-progress-bar');
+            const stamp = document.getElementById('jb-audio-time-stamp');
+
+            if (bar && total > 0) {
+                const percentage = (elapsed / total) * 100;
+                bar.style.width = `${percentage}%`;
+            }
+
+            if (stamp) {
+                const formatTime = (seconds) => {
+                    const mins = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                };
+                stamp.textContent = `${formatTime(elapsed)} / ${formatTime(total)}`;
+            }
+        }, 250);
+    }
+
+    stopAudioProgressTracking() {
+        if (this.progressInterval) {
+            clearInterval(this.progressInterval);
+            this.progressInterval = null;
         }
     }
 
@@ -326,10 +378,48 @@ export class StreamJukebox {
         const wrapper = document.getElementById('jukebox-video-wrapper');
         
         if (playerContainer && wrapper) {
-            playerContainer.style.width = state ? "1px" : "100%";
-            playerContainer.style.height = state ? "1px" : "100%";
-            wrapper.style.height = state ? "0px" : "168px";
-            wrapper.style.opacity = state ? "0" : "1";
+            if (state) {
+                // Audio Only Mode Active: Shrink standard layout frame boundaries
+                playerContainer.style.width = "1px";
+                playerContainer.style.height = "1px";
+                wrapper.style.height = "168px"; 
+                wrapper.style.opacity = "1";
+                
+                // Inject overlay subpanel components if not present
+                let overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
+                if (!overlayTrackPanel) {
+                    overlayTrackPanel = document.createElement('div');
+                    overlayTrackPanel.id = 'jb-audio-overlay-panel';
+                    overlayTrackPanel.style.cssText = "position: absolute; top:0; left:0; width:100%; height:100%; background:#18181b; color:#f4f4f5; display:flex; flex-direction:column; justify-content:center; padding:16px; box-sizing:border-box; font-family:monospace; z-index:10;";
+                    
+                    overlayTrackPanel.innerHTML = `
+                        <div style="font-size: 11px; color: var(--accent, #a855f7); text-transform: uppercase; font-weight: bold; margin-bottom: 4px;">📻 Audio Mode Enabled</div>
+                        <div class="jb-current-title" style="font-size: 14px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 12px;">No Track Loaded</div>
+                        
+                        <div style="width: 100%; background: #3f3f46; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 4px; position: relative;">
+                            <div id="jb-audio-progress-bar" style="width: 0%; background: var(--accent, #a855f7); height: 100%; transition: width 0.25s linear;"></div>
+                        </div>
+                        <div id="jb-audio-time-stamp" style="font-size: 10px; color: #a1a1aa; text-align: right; margin-bottom: 14px;">0:00 / 0:00</div>
+                        
+                        <div style="font-size: 11px; border-top: 1px solid #27272a; padding-top: 8px; color: #a1a1aa;">
+                            <span>⏭️ Up Next: </span><span id="jb-audio-next-title" style="color: #f4f4f5; font-weight: bold;">Nothing queued</span>
+                        </div>
+                    `;
+                    wrapper.appendChild(overlayTrackPanel);
+                } else {
+                    overlayTrackPanel.style.display = 'flex';
+                }
+                this.updatePlayerDisplay();
+                this.startAudioProgressTracking();
+            } else {
+                // Standard mode restore parameters
+                playerContainer.style.width = "100%";
+                playerContainer.style.height = "100%";
+                this.stopAudioProgressTracking();
+                
+                const overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
+                if (overlayTrackPanel) overlayTrackPanel.style.display = 'none';
+            }
         }
     }
 
@@ -414,6 +504,7 @@ export class StreamJukebox {
             this.isPlayingSong = false;
             this.currentTrackData = null;
             this.updatePlayerDisplay();
+            this.stopAudioProgressTracking();
         }
     }
 
@@ -508,6 +599,7 @@ export class StreamJukebox {
         this.currentTrackVotes.clear();
         this.currentTrackSkipVotes.clear(); // Reset skip tracker clean for the next song
         this.currentTrackData = null;
+        this.stopAudioProgressTracking();
 
         if (this.queue.length > 0) {
             this.isPlayingSong = true;
