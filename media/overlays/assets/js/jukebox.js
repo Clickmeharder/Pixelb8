@@ -112,13 +112,13 @@ export class StreamJukebox {
     }
 
     // --- UI DISPLAY ---
-    updatePlayerDisplay() {
+    updatePlayerDisplay(customTitle = null) {
         const titleEl = document.getElementById('jb-current-title');
         const nextEl = document.getElementById('jb-next-title');
 
         // Update Current Title
         if (titleEl) {
-            titleEl.innerText = this.currentTrackData?.title || "No Track Loaded";
+            titleEl.innerText = customTitle || this.currentTrackData?.title || "No Track Loaded";
         }
 
         // Update Up Next Title
@@ -456,17 +456,19 @@ export class StreamJukebox {
         if (this.queue.length > 0) {
             this.isPlayingSong = true;
             const next = this.queue.shift();
-            this.renderQueueList(); // Automatically updates UI via the render call
+            
+            // UI Update: Search Status
+            this.updatePlayerDisplay("Searching for track...");
+            this.renderQueueList(); 
             
             if (next.isSearch) {
-                this.updatePlayerDisplay(); // Shows "Searching"
                 this.currentTrackData = await this.fetchTrack(next.id);
             } else {
                 this.currentTrackData = { id: next.id, title: next.title };
             }
             
             if (this.currentTrackData) {
-                this.updatePlayerDisplay();
+                this.updatePlayerDisplay(); // Updates to the real title
                 this.ytPlayer.loadVideoById(this.currentTrackData.id);
             } else {
                 this.playNextSong(botSay);
