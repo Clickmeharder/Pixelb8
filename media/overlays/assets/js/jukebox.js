@@ -35,14 +35,14 @@ export class StreamJukebox {
             const isAdmin = flags.broadcaster || flags.mod;
 
             if (!subCommand) {
-                sendNotice(`🎵 [Jukebox]: Available: !jb [sr | skip | like | status | help | tilt/random]`);
+                sendNotice(`🎵 [Jukebox]: Available: !jb [sr | skip | like | status | help | tilt/random | queue]`);
                 return;
             }
 
             switch (subCommand) {
                 case 'help':
                 case 'h':
-                    sendNotice(`🎵 [Jukebox Help]: !sr [link/query] | !jb like | !jb status | !jb tilt [keyword]`);
+                    sendNotice(`🎵 [Jukebox Help]: !sr [link/query] | !jb like | !jb status | !jb tilt [keyword] | !jb queue`);
                     if (isAdmin) sendNotice(`🛠️ [Admin]: !jb [skip | clear | toggle requests | setreq {num}]`);
                     break;
 
@@ -58,6 +58,10 @@ export class StreamJukebox {
                     this.playRandomYTSong(sendNotice, keyword);
                     break;
 
+                case 'queue':
+                    sendNotice(`🎵 [Jukebox]: Current queue length: ${this.queue.length}.`);
+                    break;
+
                 case 'skip':
                     if (isAdmin) this.skipCurrentSong(sendNotice);
                     break;
@@ -69,6 +73,7 @@ export class StreamJukebox {
                 case 'clear':
                     if (isAdmin) { 
                         this.queue = []; 
+                        this.renderQueueList();
                         this.skipCurrentSong(sendNotice); 
                         sendNotice(`🧹 [Jukebox]: Queue cleared.`);
                     }
@@ -177,6 +182,7 @@ export class StreamJukebox {
                         this.applyButtonStyles();
                         this.bindControls(); 
                         this.renderFallbackList();
+                        this.renderQueueList();
                         this.playNextSong((msg) => console.log(msg)); 
                     },
                     'onStateChange': (e) => { if (e.data === YT.PlayerState.ENDED) this.playNextSong((msg) => console.log(msg)); }
@@ -204,7 +210,7 @@ export class StreamJukebox {
         if(skipBtn) skipBtn.onclick = () => this.skipCurrentSong((msg) => console.log(msg));
 
         const clearBtn = document.getElementById('jb-clear-btn');
-        if(clearBtn) clearBtn.onclick = () => { this.queue = []; this.skipCurrentSong((msg) => console.log(msg)); };
+        if(clearBtn) clearBtn.onclick = () => { this.queue = []; this.renderQueueList(); this.skipCurrentSong((msg) => console.log(msg)); };
         
         const voteInput = document.getElementById('jb-vote-req-input');
         if (voteInput) {
@@ -268,6 +274,18 @@ export class StreamJukebox {
         }
     }
 
+    renderQueueList() {
+        const list = document.getElementById('jb-queue-list');
+        if (!list) return;
+        list.innerHTML = '';
+        this.queue.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.style.cssText = "padding: 4px; border-bottom: 1px solid #27272a; font-size: 10px;";
+            div.innerText = `${index + 1}. ${item.title} (@${item.user})`;
+            list.appendChild(div);
+        });
+    }
+
     renderFallbackList() {
         const list = document.getElementById('jb-fallback-list');
         if (!list) return;
@@ -319,6 +337,7 @@ export class StreamJukebox {
 
         const id = this.extractYouTubeId(message);
         this.queue.push({ user, title: id ? "Link" : message, id: id || message, isSearch: !id });
+        this.renderQueueList();
         botSay(`✅ Queued: "${message.substring(0, 30)}..."`);
         if (!this.isPlayingSong) this.playNextSong(botSay);
     }
@@ -327,6 +346,7 @@ export class StreamJukebox {
         const track = await this.fetchTrack(query);
         if (track) {
             this.queue.push({ user: 'System', title: track.title, id: track.id, isSearch: false });
+            this.renderQueueList();
             if (botSay) botSay(`✅ Added to queue: "${track.title}"`);
             if (!this.isPlayingSong) this.playNextSong(botSay);
         } else {
@@ -374,6 +394,7 @@ export class StreamJukebox {
         if (this.queue.length > 0) {
             this.isPlayingSong = true;
             const next = this.queue.shift();
+            this.renderQueueList();
             this.currentTrackData = next.isSearch ? await this.fetchTrack(next.id) : { id: next.id, title: next.title };
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
             const titleEl = document.getElementById('jb-current-title');
