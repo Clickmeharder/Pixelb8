@@ -201,11 +201,18 @@ export class StreamJukebox {
                         this.renderQueueList();
                         this.playNextSong((msg) => console.log(msg)); 
                     },
-                    'onStateChange': (e) => { 
-                        if (e.data === YT.PlayerState.ENDED) {
-                            this.playNextSong((msg) => console.log(msg)); 
-                        }
-                    }
+                    'onStateChange': (e) => {
+						// 1. If the video ends, move to the next one
+						if (e.data === YT.PlayerState.ENDED) {
+							this.playNextSong((msg) => console.log(msg));
+						}
+						
+						// 2. If the video starts playing, update the UI
+						// This catches the initial load on reload AND when songs change
+						if (e.data === YT.PlayerState.PLAYING) {
+							this.updatePlayerDisplay();
+						}
+					}
                 }
             });
         };
@@ -461,7 +468,7 @@ export class StreamJukebox {
             
             // Only update queue UI here
             this.renderQueueList(); 
-            this.updatePlayerDisplay();
+            
             if (next.isSearch) {
                 this.currentTrackData = await this.fetchTrack(next.id);
             } else {
