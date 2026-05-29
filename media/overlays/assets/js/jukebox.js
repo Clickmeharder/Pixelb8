@@ -23,7 +23,7 @@ export class StreamJukebox {
         console.log("🎵 [Module Init]: StreamJukebox core instantiated.");
     }
 
-    // --- COMMAND ROUTER (Aligned with Entropia-Widget Architecture) ---
+    // --- COMMAND ROUTER ---
     getCommands(sendNotice) {
         const handleRequest = (user, message, flags) => {
             this.handleSongRequest(user, message, sendNotice);
@@ -111,13 +111,12 @@ export class StreamJukebox {
         ];
     }
 
-    // --- Random Song Logic ---
+    // --- Core Logic ---
     async playRandomYTSong(sendNotice, customKeyword = null) {
         const defaultKeywords = ['lofi hip hop', 'synthwave', 'chill beats', 'rock hits', 'jazz piano'];
         const keyword = customKeyword || defaultKeywords[Math.floor(Math.random() * defaultKeywords.length)];
         
         sendNotice(`🎲 [JB]: Searching for: ${keyword}...`);
-        
         const track = await this.fetchTrack(keyword);
         
         if (track) {
@@ -128,7 +127,6 @@ export class StreamJukebox {
         }
     }
 
-    // --- UI Helpers & Original Methods ---
     updateBadge(id, isActive) {
         const badge = document.getElementById(id);
         if (!badge) return;
@@ -274,7 +272,7 @@ export class StreamJukebox {
         }
     }
 
-	renderQueueList() {
+    renderQueueList() {
         const list = document.getElementById('jb-queue-list');
         if (!list) return;
         list.innerHTML = '';
@@ -287,13 +285,14 @@ export class StreamJukebox {
             
             const btnGroup = document.createElement('div');
             
-            // Heart Button (Add to Fallback)
             const heart = document.createElement('button');
             heart.innerText = '❤';
             heart.style.cssText = "margin-right: 6px; color: #e11d48; background: transparent; border: none; cursor: pointer; font-size: 12px;";
-            heart.onclick = () => { this.saveFallbackItem(item, item.user); };
+            heart.onclick = async () => { 
+                const track = item.isSearch ? await this.fetchTrack(item.id) : item;
+                if (track) this.saveFallbackItem(track, item.user);
+            };
             
-            // Delete Button (Remove from Queue)
             const del = document.createElement('button');
             del.innerText = '✕';
             del.style.cssText = "color: #991b1b; background: transparent; border: none; cursor: pointer; font-size: 12px; font-weight: bold;";
