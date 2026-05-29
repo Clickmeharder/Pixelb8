@@ -488,38 +488,42 @@ function init() {
     loadPositions();
     renderThemeControls();
     
-    // --- DEFENSIVE ENTROPIA WIDGET INITIALIZATION ---
+    // 1. INSTANTIATE WIDGETS
     try {
         if (typeof EntropiaWidget !== 'undefined') {
             window.entropiaLogParser = new EntropiaWidget();
-            
-            // AUTOMATED TWITCH COMMAND REGISTRY INJECTION
-            injectAllWidgetCommands();
+            console.log("✅ Entropia Widget Instance created.");
         } else {
-            console.warn("⚠️ [Init Warning]: EntropiaWidget class is not defined. Skipping instantiation.");
+            console.warn("⚠️ [Init Warning]: EntropiaWidget class is not defined.");
         }
     } catch (entropiaError) {
-        console.error("❌ [Init Error]: Failed to initialize Entropia Widget cleanly:", entropiaError);
+        console.error("❌ [Init Error]: Failed to initialize Entropia Widget:", entropiaError);
     }
-	try {
-		if (typeof StreamJukebox !== 'undefined') {
-			window.streamJukeboxEngine = new StreamJukebox();
-			console.log("✅ Jukebox Instance:", window.streamJukeboxEngine); // ADD THIS
-		} else {
-			console.warn("⚠️ StreamJukebox class is not defined.");
-		}
-	} catch (jukeboxError) {
-		console.error("❌ Jukebox Init Error:", jukeboxError);
-	}
+
+    try {
+        if (typeof StreamJukebox !== 'undefined') {
+            window.streamJukeboxEngine = new StreamJukebox();
+            console.log("✅ Jukebox Instance created.");
+        } else {
+            console.warn("⚠️ [Init Warning]: StreamJukebox class is not defined.");
+        }
+    } catch (jukeboxError) {
+        console.error("❌ [Init Error]: Failed to initialize Jukebox Module:", jukeboxError);
+    }
+
+    // 2. NOW inject commands (only after both instances are guaranteed to exist)
+    console.log("📡 [Command Registry]: Starting injection scan...");
+    injectAllWidgetCommands();
+
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 
     populateCustomDropdowns();
     initTimerEngine();
+    
     // Bind all event listeners to the DOM
     bindEvents();
     console.log("ttvoverlayapp.js version 0.112 finished loading");
 }
-
 function injectAllWidgetCommands() {
     const activeWidgets = [
         { name: "EntropiaParser", instance: window.entropiaLogParser },
