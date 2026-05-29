@@ -282,13 +282,24 @@ export class StreamJukebox {
         }
     }
 
-    updateNowPlayingUI(title) {
+	updateNowPlayingUI(title) {
+		// 1. Force a fresh lookup every single time
 		const titleEl = document.getElementById('jb-current-title');
-		console.log("DEBUG: Target element:", titleEl); // <--- Check the console
+
+		// 2. Debugging: Log exactly what we found
+		console.log("DEBUG: Checking for #jb-current-title...");
+		console.log("DEBUG: Found element?", titleEl);
+		console.log("DEBUG: Input title value:", title);
+
 		if (titleEl) {
+			// 3. Update the text
 			titleEl.innerText = title || "No Track Loaded";
+			
+			// 4. Force a style reset to ensure it's not hidden by the widget's CSS
+			titleEl.style.display = "block";
+			titleEl.style.color = "#fff";
 		} else {
-			console.error("DEBUG: Element #jb-current-title not found!");
+			console.error("CRITICAL: #jb-current-title was NOT found in the DOM.");
 		}
 	}
 
