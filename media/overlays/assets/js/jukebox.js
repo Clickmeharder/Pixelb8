@@ -539,18 +539,16 @@ export class StreamJukebox {
         }
     }
 
-    startVisualizerLoop() {
+	startVisualizerLoop() {
         if (this.avAnimationId) cancelAnimationFrame(this.avAnimationId);
         
         const canvas = document.getElementById('jukebox-av-widget');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         
-        // Use a continuous high-precision loop timer for smooth movement independent of raw YouTube latency jumps
         let lastTime = performance.now();
         let animationTime = 0;
         
-        // Helper function: Generates a deterministic pseudo-random float [0.0, 1.0] based on a numeric seed input
         const hashSeed = (s) => {
             const x = Math.sin(s) * 43758.5453123;
             return x - Math.floor(x);
@@ -559,87 +557,149 @@ export class StreamJukebox {
         const render = (now) => {
             if (!this.showVisualizer) return;
             
-            const deltaTime = (now - lastTime) / 1000; // Convert to seconds
+            const deltaTime = (now - lastTime) / 1000;
             lastTime = now;
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             let isMoving = false;
+            let currentTime = 0;
+            let totalDuration = 1; // Prevent division by zero
+            
             if (this.ytPlayer && typeof this.ytPlayer.getPlayerState === 'function') {
                 isMoving = (this.ytPlayer.getPlayerState() === 1);
+                currentTime = this.ytPlayer.getCurrentTime() || 0;
+                totalDuration = this.ytPlayer.getDuration() || 240; // Default to a standard 4-min song if unavailable
             }
             
-            // Extract track data or fallback to defaults if nothing is loaded yet
             const sig = this.visualSignature || { baseHue: 270, speedScale: 0.08, waveFreq1: 0.15, waveFreq2: 0.05 };
             const volumeModifier = this.trackVolumeLevel > 0 ? (this.trackVolumeLevel / 70) : 0;
             
-            // Increment the custom clock loop. Slow songs now crawl elegantly; fast songs step briskly.
-            if (isMoving) {
-                const globalTempo = sig.speedScale * 8.0; // Scaled down to prevent frantic patterns on chill music
-                animationTime += deltaTime * globalTempo * (0.3 + volumeModifier * 0.7);
-            } else {
-                animationTime += deltaTime * 0.1; // Gentle ambient drifting when paused
+            // -----------------------------------------------------------------
+            // ⚡ THE SIMULATED AUDIO VOLTMETER LAYER
+            // -----------------------------------------------------------------
+            const songProgressRatio = currentTime / totalDuration;
+            
+            // Baseline structural energy calculation matching the song signature 
+            // We weave a low-frequency macro wave to simulate rising and falling energy blocks over minutes
+            let structuralEnergy = 0.5 + Math.sin(songProgressRatio * Math.PI * 4 + (sig.baseHue * 0.01)) * 0.3;
+            
+            // Map typical structural timelines across a song (Intro -> Build -> Drop/Chorus -> Bridge -> Chorus -> Outro)
+            let structuralPhase = "verse";
+            if (songProgressRatio < 0.10) {
+                structuralPhase = "intro";      // Low energy entry
+                structuralEnergy *= 0.5;
+            } else if (songProgressRatio >= 0.25 && songProgressRatio < 0.33) {
+                structuralPhase = "buildup";    // Energy ramping up dramatically
+                structuralEnergy *= 1.4;
+            } else if ((songProgressRatio >= 0.33 && songProgressRatio < 0.55) || (songProgressRatio >= 0.70 && songProgressRatio < 0.88)) {
+                structuralPhase = "chorus";     // The primary high-energy peak (The drop)
+                structuralEnergy *= 1.8;
+            } else if (songProgressRatio >= 0.55 && songProgressRatio < 0.70) {
+                structuralPhase = "bridge";     // Mid-song chill section
+                structuralEnergy *= 0.6;
+            } else if (songProgressRatio >= 0.88) {
+                structuralPhase = "outro";      // Winding down to a resting stop
+                structuralEnergy *= 0.4;
             }
 
+            // Combine micro-volume jitter with macro song energy structural targets
+            const realTimeVoltage = Math.max(0.1, (volumeModifier * 0.4) + (structuralEnergy * 0.6));
+
+            // Adjust master ticker pacing based on the active structural phase energy
+            if (isMoving) {
+                let tempoMultiplier = 1.0;
+                if (structuralPhase === "buildup") tempoMultiplier = 1.6; // Speed flashes faster
+                if (structuralPhase === "chorus")  tempoMultiplier = 2.2; // Full kinetic speed output
+                if (structuralPhase === "intro" || structuralPhase === "outro") tempoMultiplier = 0.4; // Soft lazy crawl
+                
+                animationTime += deltaTime * (sig.speedScale * 8.0) * tempoMultiplier;
+            } else {
+                animationTime += deltaTime * 0.1;
+            }
+
+            // -----------------------------------------------------------------
+            // 🎨 RENDERING THE WAVESHAPE CONFIGURATION WITH CONTROLLER LOGIC
+            // -----------------------------------------------------------------
             const barWidth = 6;
             const barGap = 4;
             const totalBars = Math.ceil(canvas.width / (barWidth + barGap));
             
-            // Base layout configs derived from the unique song signature
             const hueCenter = sig.baseHue;
             const trackRandomFactor = sig.waveFreq1 * 100;
 
             for (let i = 0; i < totalBars; i++) {
-                // Break the rolling wave layout by creating separate per-bar random identity parameters
                 const barSeed = hashSeed(i + trackRandomFactor);
                 const noiseFactor = hashSeed(i * 12.9898 + barSeed * 78.233);
-                
-                // Assign behaviors to different ranges of bars (Low Bass on left, High Mids/Treble on right)
                 const horizontalPositionRatio = i / totalBars;
+                
                 let audioIntensity = 0;
 
                 if (isMoving) {
-                    // Simulate frequency clusters across the visual spectrum
-                    if (horizontalPositionRatio < 0.3) {
-                        // Left Section: Bass Nodes (Heavy, slow, deep rhythmic swells)
-                        const bassPulse = Math.sin(animationTime * 1.5 + barSeed * 6.28);
-                        audioIntensity = Math.abs(bassPulse) * (0.4 + noiseFactor * 0.6);
-                    } else if (horizontalPositionRatio < 0.75) {
-                        // Center Section: Melodic Midrange (Balanced overlapping rhythms)
-                        const midWave1 = Math.sin(animationTime * 2.8 + barSeed * 12.0);
-                        const midWave2 = Math.cos(animationTime * 1.7 - barSeed * 8.5);
-                        audioIntensity = Math.abs(midWave1 * midWave2) * 1.1;
-                    } else {
-                        // Right Section: Treble / High-Hat Jitter (Rapid, sharp flickers)
-                        const sharpFlicker = Math.sin(animationTime * 5.5 * (1.0 + noiseFactor) + i);
-                        audioIntensity = Math.abs(sharpFlicker) * (0.2 + volumeModifier * 0.8);
+                    // Branch behavior based on Voltmeter Energy thresholds
+                    if (structuralPhase === "chorus") {
+                        // CHORUS MODE: Heavy, high-amplitude spikes over the entire visualizer spectrum
+                        const chaoticDrive = Math.sin(animationTime * 4.0 + barSeed * 20.0);
+                        audioIntensity = Math.abs(chaoticDrive) * (0.6 + noiseFactor * 0.6) * realTimeVoltage;
+                        
+                        // Inject random explosive frequency kicks to bass and mid nodes
+                        if (noiseFactor > 0.7) {
+                            audioIntensity += (Math.random() * 0.3 * volumeModifier);
+                        }
+                    } 
+                    else if (structuralPhase === "buildup") {
+                        // BUILDUP MODE: Rhythmic geometric compression marching from left to right across screen
+                        const compressionWave = Math.sin(animationTime * 6.0 - (horizontalPositionRatio * 15.0));
+                        audioIntensity = (0.3 + Math.abs(compressionWave) * 0.7) * realTimeVoltage;
+                    } 
+                    else {
+                        // STANDARD ELEMENTAL VIEW (Verse/Intro/Bridge/Outro)
+                        if (horizontalPositionRatio < 0.3) {
+                            const bassPulse = Math.sin(animationTime * 1.5 + barSeed * 6.28);
+                            audioIntensity = Math.abs(bassPulse) * (0.4 + noiseFactor * 0.6) * realTimeVoltage;
+                        } else if (horizontalPositionRatio < 0.75) {
+                            const midWave1 = Math.sin(animationTime * 2.8 + barSeed * 12.0);
+                            const midWave2 = Math.cos(animationTime * 1.7 - barSeed * 8.5);
+                            audioIntensity = Math.abs(midWave1 * midWave2) * 1.1 * realTimeVoltage;
+                        } else {
+                            const sharpFlicker = Math.sin(animationTime * 6.5 * (1.0 + noiseFactor) + i);
+                            audioIntensity = Math.abs(sharpFlicker) * (0.1 + realTimeVoltage * 0.9);
+                        }
                     }
 
-                    // Apply the micro-jitter and scale based on simulated volume updates
-                    const bounceFactor = 0.4 + (volumeModifier * 0.6);
-                    audioIntensity *= bounceFactor;
-
-                    // Final touch: Introduce chaotic amplitude variations unique to this song profile
-                    if (noiseFactor > 0.82) {
-                        audioIntensity += (Math.sin(animationTime * 8.0 + i) * 0.25 * volumeModifier);
-                    }
-
-                    audioIntensity = Math.max(0.05, Math.min(audioIntensity, 1.2));
+                    audioIntensity = Math.max(0.05, Math.min(audioIntensity, 1.3));
                 } else {
-                    // Smooth, micro-floating line idling when the player is idle
                     audioIntensity = (0.05 + Math.sin(animationTime + i * 0.1) * 0.04);
                 }
                 
-                // Calculate size dimensions
+                // Calculate dimensions
                 const barHeight = audioIntensity * (canvas.height - 8) + 2;
                 const xPos = i * (barWidth + barGap);
                 const yPos = canvas.height - barHeight;
                 
-                // Dynamic shifting palettes: Shifts hues organically across the canvas based on custom seeds
-                const localHueShift = (horizontalPositionRatio * 50) * (sig.waveFreq2 * 10);
-                const finalHue = (hueCenter + localHueShift + (Math.sin(animationTime * 0.5) * 15)) % 360;
+                // COLOR CONDITIONAL LOGIC: Adapt visual saturation entirely based on the song profile
+                let finalHue = (hueCenter + (horizontalPositionRatio * 50) * (sig.waveFreq2 * 10) + (Math.sin(animationTime * 0.5) * 15)) % 360;
+                let saturation = "85%";
+                let lightness = "60%";
+                let alpha = isMoving ? "0.80" : "0.30";
+
+                if (isMoving) {
+                    if (structuralPhase === "chorus") {
+                        // Flash neon brightness adjustments or shift hues during a drop
+                        finalHue = (finalHue + 40) % 360; // Dynamic Hue Shift on drops
+                        lightness = "68%";               // Supercharged glow look
+                        alpha = "0.95";                  // Solid crisp opacity
+                    } else if (structuralPhase === "buildup") {
+                        saturation = "100%";             // Max intensity coloring
+                        alpha = "0.85";
+                    } else if (structuralPhase === "intro" || structuralPhase === "outro") {
+                        saturation = "50%";              // Desaturate to match chill intro vibes
+                        lightness = "45%";
+                        alpha = "0.50";
+                    }
+                }
                 
-                ctx.fillStyle = `hsla(${finalHue}, 85%, 60%, ${isMoving ? '0.80' : '0.30'})`;
+                ctx.fillStyle = `hsla(${finalHue}, ${saturation}, ${lightness}, ${alpha})`;
                 ctx.fillRect(xPos, yPos, barWidth, barHeight);
             }
             
