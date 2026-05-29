@@ -25,78 +25,105 @@ export class StreamJukebox {
 
     // --- COMMAND ROUTER (Aligned with Entropia-Widget Architecture) ---
     getCommands(sendNotice) {
-        return [
-            {
-                name: 'jb',
-                adminOnly: false,
-                description: 'Jukebox runtime routing module control console.',
-                execute: (user, message, flags) => {
-                    const parts = message.trim().toLowerCase().split(/\s+/);
-                    const subCommand = parts[0];
-                    const isAdmin = flags.broadcaster || flags.mod;
+        const handleRequest = (user, message, flags) => {
+            this.handleSongRequest(user, message, sendNotice);
+        };
 
-                    if (!subCommand) {
-                        sendNotice(`🎵 [JB Console]: Available: !jb [sr | skip | like | status | help]`);
-                        return;
-                    }
+        const jukeboxExecution = (user, message, flags) => {
+            const parts = message.trim().toLowerCase().split(/\s+/);
+            const subCommand = parts[0];
+            const isAdmin = flags.broadcaster || flags.mod;
 
-                    switch (subCommand) {
-                        case 'help':
-                        case 'h':
-                            sendNotice(`🎵 [JB Public Help]: !jb sr [link/query] | !jb like | !jb status`);
-                            if (isAdmin) sendNotice(`🛠️ [JB Admin Help]: !jb [skip | clear | toggle requests | setreq {num}]`);
-                            break;
-
-                        case 'sr':
-                        case 'request':
-                            const query = parts.slice(1).join(' ');
-                            this.handleSongRequest(user, query, sendNotice);
-                            break;
-
-                        case 'skip':
-                            if (isAdmin) this.skipCurrentSong(sendNotice);
-                            break;
-
-                        case 'like':
-                            this.handleLikeSong(user, sendNotice);
-                            break;
-
-                        case 'clear':
-                            if (isAdmin) { 
-                                this.queue = []; 
-                                this.skipCurrentSong(sendNotice); 
-                                sendNotice(`🧹 [JB]: Queue cleared.`);
-                            }
-                            break;
-
-                        case 'status':
-                            sendNotice(`🎵 [JB Status]: Playing: ${this.currentTrackData?.title || 'Nothing'} | Queue: ${this.queue.length} | Requests: ${this.acceptRequests ? 'Open' : 'Closed'}`);
-                            break;
-
-                        case 'toggle':
-                            if (!isAdmin) return;
-                            if (parts[1] === 'requests') {
-                                this.acceptRequests = !this.acceptRequests;
-                                sendNotice(`📢 [JB]: Requests are now ${this.acceptRequests ? 'ENABLED' : 'DISABLED'}.`);
-                            }
-                            break;
-
-                        case 'setreq':
-                            if (!isAdmin || !parts[1]) return;
-                            this.VOTE_REQUIREMENT = parseInt(parts[1]);
-                            localStorage.setItem("jbVoteReq", this.VOTE_REQUIREMENT);
-                            sendNotice(`🗳️ [JB]: Vote requirement updated to ${this.VOTE_REQUIREMENT}.`);
-                            break;
-
-                        default:
-                            sendNotice(`❌ Action !jb ${subCommand} unknown on target sub-routing stack.`);
-                    }
-                }
+            if (!subCommand) {
+                sendNotice(`🎵 [Jukebox]: Available: !jb [sr | skip | like | status | help | tilt/random]`);
+                return;
             }
+
+            switch (subCommand) {
+                case 'help':
+                case 'h':
+                    sendNotice(`🎵 [Jukebox Help]: !sr [link/query] | !jb like | !jb status | !jb tilt [keyword]`);
+                    if (isAdmin) sendNotice(`🛠️ [Admin]: !jb [skip | clear | toggle requests | setreq {num}]`);
+                    break;
+
+                case 'sr':
+                case 'request':
+                    const query = parts.slice(1).join(' ');
+                    this.handleSongRequest(user, query, sendNotice);
+                    break;
+
+                case 'tilt':
+                case 'random':
+                    const keyword = parts.slice(1).join(' '); 
+                    this.playRandomYTSong(sendNotice, keyword);
+                    break;
+
+                case 'skip':
+                    if (isAdmin) this.skipCurrentSong(sendNotice);
+                    break;
+
+                case 'like':
+                    this.handleLikeSong(user, sendNotice);
+                    break;
+
+                case 'clear':
+                    if (isAdmin) { 
+                        this.queue = []; 
+                        this.skipCurrentSong(sendNotice); 
+                        sendNotice(`🧹 [Jukebox]: Queue cleared.`);
+                    }
+                    break;
+
+                case 'status':
+                    sendNotice(`🎵 [Status]: Playing: ${this.currentTrackData?.title || 'Nothing'} | Queue: ${this.queue.length} | Requests: ${this.acceptRequests ? 'Open' : 'Closed'}`);
+                    break;
+
+                case 'toggle':
+                    if (!isAdmin) return;
+                    if (parts[1] === 'requests') {
+                        this.acceptRequests = !this.acceptRequests;
+                        sendNotice(`📢 [Jukebox]: Requests are now ${this.acceptRequests ? 'ENABLED' : 'DISABLED'}.`);
+                    }
+                    break;
+
+                case 'setreq':
+                    if (!isAdmin || !parts[1]) return;
+                    this.VOTE_REQUIREMENT = parseInt(parts[1]);
+                    localStorage.setItem("jbVoteReq", this.VOTE_REQUIREMENT);
+                    sendNotice(`🗳️ [Jukebox]: Vote requirement updated to ${this.VOTE_REQUIREMENT}.`);
+                    break;
+
+                default:
+                    sendNotice(`❌ Action !jb ${subCommand} unknown.`);
+            }
+        };
+
+        return [
+            { name: 'jb', adminOnly: false, execute: jukeboxExecution },
+            { name: 'jukebox', adminOnly: false, execute: jukeboxExecution },
+            { name: 'sr', adminOnly: false, execute: handleRequest },
+            { name: 'request', adminOnly: false, execute: handleRequest }
         ];
     }
 
-    // --- UI Helpers ---
+    // --- Random Song Logic ---
+    async playRandomYTSong(sendNotice, customKeyword = null) {
+        const defaultKeywords = ['lofi hip hop', 'synthwave', 'chill beats', 'rock hits', 'jazz piano'];
+        const keyword = customKeyword || defaultKeywords[Math.floor(Math.random() * defaultKeywords.length)];
+        
+        sendNotice(`🎲 [JB]: Searching for: ${keyword}...`);
+        
+        const track = await this.fetchTrack(keyword);
+        
+        if (track) {
+            this.handleSongRequest('System', track.id, sendNotice);
+            sendNotice(`🎵 [JB]: Random track found: "${track.title}"`);
+        } else {
+            sendNotice(`❌ [JB]: Could not find a song for "${keyword}".`);
+        }
+    }
+
+    // --- UI Helpers & Original Methods ---
     updateBadge(id, isActive) {
         const badge = document.getElementById(id);
         if (!badge) return;
