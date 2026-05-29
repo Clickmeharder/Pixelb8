@@ -113,13 +113,15 @@ export class StreamJukebox {
 
     // --- UI DISPLAY ---
     updatePlayerDisplay(customTitle = null) {
-        const titleEl = document.getElementById('jb-current-title');
+        // Target all items sharing your new class layout selector
+        const titleElements = document.querySelectorAll('.jb-current-title');
         const nextEl = document.getElementById('jb-next-title');
 
-        if (titleEl) {
-            const displayTitle = customTitle || (this.currentTrackData ? this.currentTrackData.title : "No Track Loaded");
-            titleEl.textContent = displayTitle; 
-        }
+        const displayTitle = customTitle || (this.currentTrackData ? this.currentTrackData.title : "No Track Loaded");
+        
+        titleElements.forEach(el => {
+            el.textContent = displayTitle;
+        });
 
         if (nextEl) {
             nextEl.textContent = (this.queue.length > 0) ? this.queue[0].title : "Nothing queued";
@@ -178,7 +180,7 @@ export class StreamJukebox {
         }, 6500);
     }
 
-	init() {
+    init() {
         if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
             const tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
@@ -205,11 +207,8 @@ export class StreamJukebox {
                         }
                         
                         if (e.data === YT.PlayerState.PLAYING) {
-                            // Fetch real-time video info straight from the active player instance
                             const videoData = this.ytPlayer.getVideoData();
                             
-                            // Safe upgrade condition: If we have video data, and either we don't have a track, 
-                            // or the track title was missing/placeholder ("Link" / "Searching..."), override it with the real YouTube Title.
                             if (videoData && videoData.title) {
                                 if (!this.currentTrackData || 
                                     this.currentTrackData.title === "Link" || 
@@ -222,7 +221,6 @@ export class StreamJukebox {
                                 }
                             }
                             
-                            // Force-sync UI changes right back to DOM layout immediately
                             this.updatePlayerDisplay();
                         }
                     }
