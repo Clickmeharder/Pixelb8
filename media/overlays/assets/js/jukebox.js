@@ -15,6 +15,14 @@ export class StreamJukebox {
         this.captureTimer = null;     // Background simulated frequency calculation ticker
         this.trackVolumeLevel = 0;    // Real-time simulated audio intensity baseline
         
+        // Synchronized track-specific visualization signature seeds (generated per song ID)
+        this.visualSignature = {
+            baseHue: 270,
+            waveFreq1: 0.15,
+            waveFreq2: 0.05,
+            speedScale: 0.08
+        };
+        
         // Load persistent settings
         this.VOTE_REQUIREMENT = parseInt(localStorage.getItem("jbVoteReq")) || 2;
         this.isPlayingSong = false;
@@ -248,10 +256,12 @@ export class StreamJukebox {
                                 }
                             }
                             
+                            // Immediately parse deterministic mathematical signature values mapped to this ID
+                            this.generateTrackVisualSignature();
+                            
                             this.updatePlayerDisplay();
                             this.startAudioProgressTracking();
                         } else {
-                            // Clear or pause updates if player buffer pauses or stops
                             this.stopAudioProgressTracking();
                         }
                     }
@@ -266,11 +276,28 @@ export class StreamJukebox {
         }
     }
 
+    // Generates a completely customized mathematical frequency map based on the active Video ID
+    generateTrackVisualSignature() {
+        const trackId = this.currentTrackData?.id || "default";
+        
+        // Simple string hashing function
+        let hash = 0;
+        for (let i = 0; i < trackId.length; i++) {
+            hash = trackId.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        hash = Math.abs(hash);
+
+        this.visualSignature = {
+            baseHue: hash % 360,                               // Pick a baseline color palette coordinate
+            waveFreq1: 0.08 + ((hash % 100) / 1000),           // Wave multiplication frequency step 1
+            waveFreq2: 0.03 + (((hash >> 4) % 100) / 1000),    // Wave multiplication frequency step 2
+            speedScale: 0.05 + (((hash >> 8) % 100) / 1500)    // Customized structural tempo modifier
+        };
+    }
+
     // Interval Management for parsing playback time dynamically
     startAudioProgressTracking() {
         this.stopAudioProgressTracking();
-        
-        // Fire up the continuous audio frequency simulation mapping loop
         this.startAudioFrequencyCaptureLoop();
 
         this.progressInterval = setInterval(() => {
@@ -302,7 +329,6 @@ export class StreamJukebox {
             clearInterval(this.progressInterval);
             this.progressInterval = null;
         }
-        // Tear down the simulation thread cleanly
         this.stopAudioFrequencyCaptureLoop();
     }
 
@@ -431,35 +457,20 @@ export class StreamJukebox {
                 playerContainer.style.height = "1px";
                 
                 // Change the wrapper to a short, modern horizontal bar layout
-                wrapper.style.height = "64px"; // Shorter height!
+                wrapper.style.height = "64px";
                 wrapper.style.opacity = "1";
                 wrapper.style.position = "relative";
                 wrapper.style.overflow = "hidden";
                 
-                // Inject or reset the sleek horizontal layout panel
                 let overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
                 if (!overlayTrackPanel) {
                     overlayTrackPanel = document.createElement('div');
                     overlayTrackPanel.id = 'jb-audio-overlay-panel';
-                    
-                    // Flex row layout to spread everything out horizontally
                     overlayTrackPanel.style.cssText = `
-                        position: absolute; 
-                        top: 0; 
-                        left: 0; 
-                        width: 100%; 
-                        height: 100%; 
-                        background: #18181b; 
-                        color: #f4f4f5; 
-                        display: flex; 
-                        align-items: center; 
-                        justify-content: space-between; 
-                        padding: 0 16px; 
-                        box-sizing: border-box; 
-                        font-family: monospace; 
-                        z-index: 10;
-                        border: 1px solid #27272a;
-                        border-radius: 6px;
+                        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                        background: #18181b; color: #f4f4f5; display: flex; align-items: center; 
+                        justify-content: space-between; padding: 0 16px; box-sizing: border-box; 
+                        font-family: monospace; z-index: 10; border: 1px solid #27272a; border-radius: 6px;
                     `;
                     
                     overlayTrackPanel.innerHTML = `
@@ -469,7 +480,6 @@ export class StreamJukebox {
                                 <span>⏭️ Next: </span><span id="jb-audio-next-title" style="color: #a855f7; font-weight: bold;">Nothing queued</span>
                             </div>
                         </div>
-                        
                         <div style="width: 240px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0;">
                             <div style="width: 100%; background: #3f3f46; height: 5px; border-radius: 3px; overflow: hidden; position: relative; margin-bottom: 4px;">
                                 <div id="jb-audio-progress-bar" style="width: 0%; background: var(--accent, #a855f7); height: 100%; transition: width 0.25s linear;"></div>
@@ -485,7 +495,6 @@ export class StreamJukebox {
                 this.updatePlayerDisplay();
                 this.startAudioProgressTracking();
             } else {
-                // Restore standard taller proportions for the standard video block layout
                 playerContainer.style.width = "100%";
                 playerContainer.style.height = "100%";
                 wrapper.style.height = "168px"; 
@@ -505,15 +514,12 @@ export class StreamJukebox {
         if (!container) return;
 
         if (state) {
-            // Build canvas if it doesn't exist
             if (!avWidget) {
                 avWidget = document.createElement('canvas');
                 avWidget.id = 'jukebox-av-widget';
-                // Stretch a thin bar all the way across the bottom cleanly
                 avWidget.style.cssText = "position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; pointer-events: none; z-index: 999; display: block;";
                 container.appendChild(avWidget);
                 
-                // Keep dimensions synchronized to screen resolutions
                 const resizeCanvas = () => {
                     avWidget.width = avWidget.parentElement.clientWidth || window.innerWidth;
                     avWidget.height = 40;
@@ -521,11 +527,8 @@ export class StreamJukebox {
                 window.addEventListener('resize', resizeCanvas);
                 resizeCanvas();
             }
-            
-            // Fire up rendering loop ticker
             this.startVisualizerLoop();
         } else {
-            // Clear loop animations and remove from DOM hierarchy
             if (this.avAnimationId) {
                 cancelAnimationFrame(this.avAnimationId);
                 this.avAnimationId = null;
@@ -543,46 +546,40 @@ export class StreamJukebox {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         
-        let seedTicks = 0;
-        
         const render = () => {
             if (!this.showVisualizer) return;
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Check current player performance mode metrics
             let isMoving = false;
+            let currentPlaytime = 0;
+            
             if (this.ytPlayer && typeof this.ytPlayer.getPlayerState === 'function') {
                 isMoving = (this.ytPlayer.getPlayerState() === 1);
+                // Extract real playback timestamps to link wave positions explicitly to video progress
+                currentPlaytime = this.ytPlayer.getCurrentTime() || 0;
             }
             
-            // Map the trackVolumeLevel value (0 - 70) to a gentle 0.0 - 1.0 multiplier for animation fluid speeds
             const motionModifier = this.trackVolumeLevel > 0 ? (this.trackVolumeLevel / 70) : 0;
-
-            if (isMoving && motionModifier > 0) {
-                seedTicks += 0.08 * motionModifier; // Dynamic speed adjustment matching audio strength updates
-            } else {
-                seedTicks += 0.005; // Slow chill ambient wave when paused
-            }
+            
+            // Map the timeline parameter directly to the unique visual speed scalar assigned to this track
+            const synchronizedTimeTicker = currentPlaytime * (this.visualSignature.speedScale * 40);
 
             const barWidth = 6;
             const barGap = 4;
             const totalBars = Math.ceil(canvas.width / (barWidth + barGap));
             
-            // Draw matching procedural equalization bars
             for (let i = 0; i < totalBars; i++) {
-                // Combine math formulas to mimic sound energy thresholds
-                const baseWave1 = Math.sin(i * 0.15 + seedTicks);
-                const baseWave2 = Math.cos(i * 0.05 - seedTicks * 0.7);
+                // Synthesize the deterministic song dimensions with the exact playhead position
+                const baseWave1 = Math.sin(i * this.visualSignature.waveFreq1 + synchronizedTimeTicker);
+                const baseWave2 = Math.cos(i * this.visualSignature.waveFreq2 - synchronizedTimeTicker * 0.7);
                 let audioIntensity = Math.abs(baseWave1 * baseWave2);
                 
                 if (isMoving && this.trackVolumeLevel > 0) {
-                    // Inject a variable energy bounce height scalar based on current simulated capture thresholds
                     const jitterAmount = (this.trackVolumeLevel / 100); 
-                    audioIntensity += (Math.sin(i + seedTicks * 2) * jitterAmount);
+                    audioIntensity += (Math.sin(i + synchronizedTimeTicker * 2) * jitterAmount);
                     audioIntensity = Math.max(0.1, Math.min(audioIntensity, 1.2));
                 } else {
-                    // Pull intensity down close to a resting baseline flattening line
                     audioIntensity *= 0.15;
                 }
                 
@@ -590,11 +587,10 @@ export class StreamJukebox {
                 const xPos = i * (barWidth + barGap);
                 const yPos = canvas.height - barHeight;
                 
-                // Color matching accent (defaults to theme purple palette gradient mapping)
-                const hue = 270 + (i * 0.3) % 40; 
+                // Track Hue mapping shifts baseline colors entirely dependent on the video ID signature
+                const hue = (this.visualSignature.baseHue + (i * 0.4)) % 360; 
                 ctx.fillStyle = `hsla(${hue}, 85%, 65%, ${isMoving ? '0.75' : '0.35'})`;
                 
-                // Draw single visualizer brick band column strip
                 ctx.fillRect(xPos, yPos, barWidth, barHeight);
             }
             
@@ -686,7 +682,7 @@ export class StreamJukebox {
             this.currentTrackData = null;
             this.updatePlayerDisplay();
             this.stopAudioProgressTracking();
-            this.toggleVisualizer(false); // Shut off animation loops cleanly if widget shuts down
+            this.toggleVisualizer(false);
             const avToggle = document.getElementById('stg-toggle-visualizer-checkbox');
             if (avToggle) avToggle.checked = false;
             this.updateBadge('av-status-badge', false);
@@ -782,7 +778,7 @@ export class StreamJukebox {
         if (!this.isEnabled || !this.ytPlayerReady) return;
         
         this.currentTrackVotes.clear();
-        this.currentTrackSkipVotes.clear(); // Reset skip tracker clean for the next song
+        this.currentTrackSkipVotes.clear(); 
         this.currentTrackData = null;
         this.stopAudioProgressTracking();
 
