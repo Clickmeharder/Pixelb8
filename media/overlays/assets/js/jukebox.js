@@ -178,15 +178,13 @@ export class StreamJukebox {
         }, 6500);
     }
 
-	init() {
-        // Ensure global initialization array or handler exists cleanly
+    init() {
         if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
             const tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
             document.head.appendChild(tag);
         }
 
-        // Bind the handler explicitly to this specific instance context
         const setupPlayer = () => {
             this.ytPlayer = new YT.Player('player', {
                 height: '100%', 
@@ -202,36 +200,32 @@ export class StreamJukebox {
                         this.playNextSong((msg) => console.log(msg)); 
                     },
                     'onStateChange': (e) => {
-						if (e.data === YT.PlayerState.ENDED) {
-							this.playNextSong((msg) => console.log(msg));
-						}
-						
-						if (e.data === YT.PlayerState.PLAYING) {
-							const videoData = this.ytPlayer.getVideoData();
-							
-							// If we don't have local track data yet, or if the local title is a generic placeholder like "Link"
-							if (!this.currentTrackData || this.currentTrackData.title === "Link") {
-								if (videoData && videoData.title) {
-									this.currentTrackData = { 
-										id: videoData.video_id, 
-										title: videoData.title 
-									};
-								}
-							}
-							
-							// Force the display to update regardless using our verified local state data
-							this.updatePlayerDisplay();
-						}
-					}
+                        if (e.data === YT.PlayerState.ENDED) {
+                            this.playNextSong((msg) => console.log(msg));
+                        }
+                        
+                        if (e.data === YT.PlayerState.PLAYING) {
+                            const videoData = this.ytPlayer.getVideoData();
+                            
+                            // Safe upgrade condition for raw URLs that were left labeled as "Link"
+                            if (videoData && videoData.title && (!this.currentTrackData || this.currentTrackData.title === "Link")) {
+                                this.currentTrackData = { 
+                                    id: videoData.video_id, 
+                                    title: videoData.title 
+                                };
+                            }
+                            
+                            // Synchronize execution path back to DOM layout immediately
+                            this.updatePlayerDisplay();
+                        }
+                    }
                 }
             });
         };
 
-        // If API is already initialized by window elsewhere, run setup immediately
         if (window.YT && window.YT.Player) {
             setupPlayer();
         } else {
-            // Otherwise capture the global assignment cleanly without dropping class instance context
             window.onYouTubeIframeAPIReady = setupPlayer;
         }
     }
@@ -419,7 +413,6 @@ export class StreamJukebox {
         const id = this.extractYouTubeId(message);
         this.queue.push({ user, title: id ? "Link" : message, id: id || message, isSearch: !id });
         
-        // Update layout lists explicitly
         this.renderQueueList();
         this.updatePlayerDisplay();
         
@@ -432,7 +425,6 @@ export class StreamJukebox {
         if (track) {
             this.queue.push({ user: 'System', title: track.title, id: track.id, isSearch: false });
             
-            // Sync layout updates
             this.renderQueueList();
             this.updatePlayerDisplay();
             
@@ -481,7 +473,6 @@ export class StreamJukebox {
     async playNextSong(botSay) {
         if (!this.isEnabled || !this.ytPlayerReady) return;
         
-        this.updatePlayerDisplay("Searching...");
         this.currentTrackVotes.clear();
         this.currentTrackData = null;
 
@@ -489,12 +480,11 @@ export class StreamJukebox {
             this.isPlayingSong = true;
             const next = this.queue.shift();
             
-            // Render the updated queue layout and the up next text instantly
             this.renderQueueList(); 
-            this.updatePlayerDisplay("Searching...");
             
             let fetchedTrack = null;
             if (next.isSearch) {
+                this.updatePlayerDisplay("Searching...");
                 fetchedTrack = await this.fetchTrack(next.id);
             } else {
                 fetchedTrack = { id: next.id, title: next.title };
@@ -502,15 +492,14 @@ export class StreamJukebox {
             
             if (fetchedTrack) {
                 this.currentTrackData = fetchedTrack;
+                this.updatePlayerDisplay(); 
                 this.ytPlayer.loadVideoById(this.currentTrackData.id);
-                this.updatePlayerDisplay(); // <--- ADDED LINE
             } else {
                 this.playNextSong(botSay);
             }
         } else if (this.fallbackPlaylist.length > 0) {
             this.isPlayingSong = true;
             this.currentTrackData = this.fallbackPlaylist[Math.floor(Math.random() * this.fallbackPlaylist.length)];
-            // Make sure the up-next updates even when falling back
             this.updatePlayerDisplay();
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
         } else {
