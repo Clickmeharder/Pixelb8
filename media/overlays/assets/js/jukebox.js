@@ -274,14 +274,35 @@ export class StreamJukebox {
         }
     }
 
-    renderQueueList() {
+	renderQueueList() {
         const list = document.getElementById('jb-queue-list');
         if (!list) return;
         list.innerHTML = '';
         this.queue.forEach((item, index) => {
             const div = document.createElement('div');
-            div.style.cssText = "padding: 4px; border-bottom: 1px solid #27272a; font-size: 10px;";
-            div.innerText = `${index + 1}. ${item.title} (@${item.user})`;
+            div.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; border-bottom: 1px solid #27272a; font-size: 10px;";
+            
+            const info = document.createElement('span');
+            info.innerText = `${index + 1}. ${item.title.substring(0, 20)} (@${item.user})`;
+            
+            const btnGroup = document.createElement('div');
+            
+            // Heart Button (Add to Fallback)
+            const heart = document.createElement('button');
+            heart.innerText = '❤';
+            heart.style.cssText = "margin-right: 6px; color: #e11d48; background: transparent; border: none; cursor: pointer; font-size: 12px;";
+            heart.onclick = () => { this.saveFallbackItem(item, item.user); };
+            
+            // Delete Button (Remove from Queue)
+            const del = document.createElement('button');
+            del.innerText = '✕';
+            del.style.cssText = "color: #991b1b; background: transparent; border: none; cursor: pointer; font-size: 12px; font-weight: bold;";
+            del.onclick = () => { this.queue.splice(index, 1); this.renderQueueList(); };
+            
+            btnGroup.appendChild(heart);
+            btnGroup.appendChild(del);
+            div.appendChild(info);
+            div.appendChild(btnGroup);
             list.appendChild(div);
         });
     }
