@@ -461,7 +461,7 @@ export class StreamJukebox {
             
             // Only update queue UI here
             this.renderQueueList(); 
-            
+            this.updatePlayerDisplay();
             if (next.isSearch) {
                 this.currentTrackData = await this.fetchTrack(next.id);
             } else {
