@@ -445,46 +445,50 @@ export class StreamJukebox {
         }
     }
 
-    toggleAudioOnly(state) {
+	toggleAudioOnly(state) {
         this.isAudioOnly = state;
         const playerContainer = document.getElementById('player');
         const wrapper = document.getElementById('jukebox-video-wrapper');
         
         if (playerContainer && wrapper) {
             if (state) {
-                // Shrink the native YouTube player to a hidden pixel
-                playerContainer.style.width = "1px";
-                playerContainer.style.height = "1px";
+                // Shrink the native player so it doesn't take up space, but keep it active for the YouTube API
+                playerContainer.style.width = "0px";
+                playerContainer.style.height = "0px";
+                playerContainer.style.visibility = "hidden";
                 
-                // Change the wrapper to a short, modern horizontal bar layout
-                wrapper.style.height = "64px";
-                wrapper.style.opacity = "1";
+                // Set the wrapper to a clean, slim profile
+                wrapper.style.height = "72px";
+                wrapper.style.transition = "all 0.3s ease";
                 wrapper.style.position = "relative";
-                wrapper.style.overflow = "hidden";
                 
                 let overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
                 if (!overlayTrackPanel) {
                     overlayTrackPanel = document.createElement('div');
                     overlayTrackPanel.id = 'jb-audio-overlay-panel';
+                    // Glassmorphism styling: cleaner borders, better spacing, subtle shadow
                     overlayTrackPanel.style.cssText = `
                         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-                        background: #18181b; color: #f4f4f5; display: flex; align-items: center; 
-                        justify-content: space-between; padding: 0 16px; box-sizing: border-box; 
-                        font-family: monospace; z-index: 10; border: 1px solid #27272a; border-radius: 6px;
+                        background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+                        color: #ffffff; display: flex; align-items: center; 
+                        padding: 0 20px; box-sizing: border-box; 
+                        font-family: 'Inter', sans-serif; z-index: 10; 
+                        border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
                     `;
                     
                     overlayTrackPanel.innerHTML = `
-                        <div style="flex: 1; min-width: 0; padding-right: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <div class="jb-current-title" style="font-size: 13px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #f4f4f5;">No Track Loaded</div>
-                            <div style="font-size: 10px; color: #a1a1aa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px;">
-                                <span>⏭️ Next: </span><span id="jb-audio-next-title" style="color: #a855f7; font-weight: bold;">Nothing queued</span>
+                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
+                            <div class="jb-current-title" style="font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px;">No Track Loaded</div>
+                            <div style="font-size: 11px; color: #a1a1aa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span style="opacity: 0.7;">UP NEXT: </span><span id="jb-audio-next-title" style="color: #a855f7; font-weight: 500;">Nothing queued</span>
                             </div>
                         </div>
-                        <div style="width: 240px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0;">
-                            <div style="width: 100%; background: #3f3f46; height: 5px; border-radius: 3px; overflow: hidden; position: relative; margin-bottom: 4px;">
-                                <div id="jb-audio-progress-bar" style="width: 0%; background: var(--accent, #a855f7); height: 100%; transition: width 0.25s linear;"></div>
+                        <div style="width: 200px; margin-left: 20px; display: flex; flex-direction: column; justify-content: center;">
+                            <div style="width: 100%; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; overflow: hidden; margin-bottom: 6px;">
+                                <div id="jb-audio-progress-bar" style="width: 0%; background: #a855f7; height: 100%; transition: width 0.3s linear; border-radius: 2px;"></div>
                             </div>
-                            <div id="jb-audio-time-stamp" style="font-size: 10px; color: #a1a1aa; font-variant-numeric: tabular-nums;">0:00 / 0:00</div>
+                            <div id="jb-audio-time-stamp" style="font-size: 10px; color: #71717a; text-align: right; font-variant-numeric: tabular-nums;">0:00 / 0:00</div>
                         </div>
                     `;
                     wrapper.appendChild(overlayTrackPanel);
@@ -495,8 +499,10 @@ export class StreamJukebox {
                 this.updatePlayerDisplay();
                 this.startAudioProgressTracking();
             } else {
+                // Restore original video player size
                 playerContainer.style.width = "100%";
                 playerContainer.style.height = "100%";
+                playerContainer.style.visibility = "visible";
                 wrapper.style.height = "168px"; 
                 
                 this.stopAudioProgressTracking();
@@ -505,7 +511,6 @@ export class StreamJukebox {
             }
         }
     }
-
     toggleVisualizer(state) {
         this.showVisualizer = state;
         const container = document.getElementById('overlay-wrapper');
