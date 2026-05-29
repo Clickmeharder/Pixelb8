@@ -1,3 +1,4 @@
+@ -0,0 +1,1806 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1004,7 +1005,17 @@ function updateAllViewports(volume = 0) {
     runArtworkRenderPipeline(volume, performance.now());
     runUIGuidePipeline();
 }
-
+function bakeSourceCache() {
+    sCtx.clearRect(0, 0, sourceImageCacheCanvas.width, sourceImageCacheCanvas.height);
+    
+    if (avatarImg.src) {
+        sCtx.save();
+        sCtx.translate(mainTransform.x, mainTransform.y);
+        sCtx.scale(mainTransform.scale, mainTransform.scale);
+        sCtx.drawImage(avatarImg, 0, 0);
+        sCtx.restore();
+    }
+}
 // Compute Offscreen Buffer Asset Layers
 function bakePuppetLayers() {
     const { x, y, w, h } = mouthBox;
@@ -1252,7 +1263,7 @@ yawSlider.addEventListener('input', (e) => {
 mainScaleSlider.addEventListener('input', (e) => {
     mainTransform.scale = parseInt(e.target.value) / 100;
     valMainScale.innerText = mainTransform.scale.toFixed(2) + "x";
-
+    bakeSourceCache();
     if (mouthBox.w > 0) bakePuppetLayers();
     if (headBox.w > 0) bakeIsolatedHeadLayer();
     updateAllViewports(0);
@@ -1326,19 +1337,34 @@ uiCanvas.addEventListener('mousedown', (e) => {
 });
 
 uiCanvas.addEventListener('mousemove', (e) => {
-    if (!isDrawing) return;
-    const coords = getCanvasSpaceMouseCoords(e); // Ensure this function exists in your code
-    
-    if (editTarget === 'head') {
-        if (currentMode === 'box') {
-            headBox.x = Math.min(startX, coords.x);
-            headBox.y = Math.min(startY, coords.y);
-            headBox.w = Math.abs(startX - coords.x);
-            headBox.h = Math.abs(startY - coords.y);
-        } else {
-            headLassoPoints.push({ x: coords.x, y: coords.y });
+    const coords = getCanvasSpaceMouseCoords(e);
+
+    // Active Move Calculations
+    if (isDraggingImage && activeGrabTarget) {
+        const deltaX = coords.x - dragStartMouseX;
+        const deltaY = coords.y - dragStartMouseY;
+        
+        if (activeGrabTarget === 'main') {
+            mainTransform.x += deltaX;
+            mainTransform.y += deltaY;
+        } else if (activeGrabTarget === 'idle') {
+            idleTransform.x += deltaX;
+            idleTransform.y += deltaY;
         }
-    } else if (editTarget === 'jaw') {
+        
+        dragStartMouseX = coords.x;
+        dragStartMouseY = coords.y;
+        
+        bakeSourceCache();
+        if (mouthBox.w > 0) bakePuppetLayers();
+        if (headBox.w > 0) bakeIsolatedHeadLayer();
+        updateAllViewports(0);
+        return;
+    }
+
+    if (!isDrawing) return;
+    
+    if (editTarget === 'jaw') {
         if (currentMode === 'box') {
             mouthBox.x = Math.min(startX, coords.x);
             mouthBox.y = Math.min(startY, coords.y);
@@ -1357,27 +1383,20 @@ uiCanvas.addEventListener('mousemove', (e) => {
         rightEyeBox.y = Math.min(startY, coords.y);
         rightEyeBox.w = Math.abs(startX - coords.x);
         rightEyeBox.h = Math.abs(startY - coords.y);
+    } else if (editTarget === 'head') {
+        headLassoPoints.push({ x: coords.x, y: coords.y });
     }
     updateAllViewports(0);
 });
 
 uiCanvas.addEventListener('mouseup', () => {
+    if (isDraggingImage) {
+        isDraggingImage = false;
+        return;
+    }
     if (!isDrawing) return;
     isDrawing = false;
     
-    // Only finalize if we have a valid lasso path
-    if (editTarget === 'head' && currentMode === 'lasso' && headLassoPoints.length > 2) {
-        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-        headLassoPoints.forEach(p => {
-            if (p.x < minX) minX = p.x;
-            if (p.x > maxX) maxX = p.x;
-            if (p.y < minY) minY = p.y;
-            if (p.y > maxY) maxY = p.y;
-        });
-        headBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
-    }
-    
-    // Specifically handle the Jaw/Mouth logic here
     if (editTarget === 'jaw' && currentMode === 'lasso' && lassoPoints.length > 2) {
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         lassoPoints.forEach(p => {
@@ -1389,7 +1408,19 @@ uiCanvas.addEventListener('mouseup', () => {
         mouthBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
     }
     
-    bakePuppetLayers();
+    if (editTarget === 'head' && headLassoPoints.length > 2) {
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        headLassoPoints.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        });
+        headBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+        bakeIsolatedHeadLayer();
+    }
+    
+    if (editTarget === 'jaw') bakePuppetLayers();
     checkReadyState();
     runUIGuidePipeline();
 });
@@ -1406,7 +1437,7 @@ imageInput.addEventListener('change', (e) => {
             
             sourceImageCacheCanvas.width = renderCanvas.width;
             sourceImageCacheCanvas.height = renderCanvas.height;
-
+            bakeSourceCache();
             resetSelectionData();
             status.innerText = "Status: Talking portrait loaded. Configure structural elements.";
         };
@@ -1424,7 +1455,7 @@ idleImageInput.addEventListener('change', (e) => {
             valIdleScale.innerText = "1.00x";
             
             hasIdleImage = true;
-
+            bakeSourceCache();
             status.innerText = "Status: Idle portrait loaded successfully. Dynamic blending engine active.";
             updateAllViewports(0);
         };
@@ -1675,7 +1706,7 @@ function loadPuppetProfile(name) {
             avatarImg.onload = () => {
                 sourceImageCacheCanvas.width = renderCanvas.width;
                 sourceImageCacheCanvas.height = renderCanvas.height;
-
+                bakeSourceCache();
                 
                 if (mouthBox.w > 0) bakePuppetLayers();
                 if (headBox.w > 0) bakeIsolatedHeadLayer();
