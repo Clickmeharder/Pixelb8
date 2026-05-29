@@ -1046,6 +1046,7 @@ function bakePuppetLayers() {
         }
     }
 
+    // 1. Draw Feathered Jaw
     fCtx.save();
     if (featherBlur > 0) fCtx.filter = `blur(${featherBlur}px)`;
     fCtx.drawImage(maskCanvas, 0, 0);
@@ -1056,6 +1057,7 @@ function bakePuppetLayers() {
     fCtx.drawImage(sourceImageCacheCanvas, x - pad, y - pad, w + pad * 2, h + pad * 2, 0, 0, w + pad * 2, h + pad * 2);
     fCtx.restore();
     
+    // 2. Fix for Healer Canvas: Removed the "+ 15" offset to prevent grabbing pixels from above the jaw
     skinTextureHealerCanvas.width = w + pad * 2;
     skinTextureHealerCanvas.height = h + pad * 2;
     const hCtx = skinTextureHealerCanvas.getContext('2d');
@@ -1066,13 +1068,15 @@ function bakePuppetLayers() {
 
     hCtx.save();
     hCtx.globalCompositeOperation = 'source-in';
-    hCtx.drawImage(sourceImageCacheCanvas, x - pad, y - pad + 15, w + pad * 2, h + pad * 2, 0, 0, w + pad * 2, h + pad * 2);
+    // Removed "+ 15" from y-coordinate
+    hCtx.drawImage(sourceImageCacheCanvas, x - pad, y - pad, w + pad * 2, h + pad * 2, 0, 0, w + pad * 2, h + pad * 2);
     hCtx.restore();
 
+    // 3. Keep Lip Patch for structural definition
     upperLipPatchCanvas.width = w;
     upperLipPatchCanvas.height = 15; 
     const uCtx = upperLipPatchCanvas.getContext('2d');
-    uCtx.drawImage(sourceImageCacheCanvas, x, y - 10, w, 15, 0, 0, w, 15);
+    uCtx.drawImage(sourceImageCache, x, y - 5, w, 15, 0, 0, w, 15); // Slightly adjusted overlap
     
     updateAllViewports(0);
 }
