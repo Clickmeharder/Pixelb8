@@ -85,6 +85,8 @@ export class StreamJukebox {
                     break;
 
                 case 'like':
+				case 'likesong':
+				case 'love':
                     this.handleLikeSong(user, sendNotice);
                     break;
 
@@ -207,7 +209,7 @@ export class StreamJukebox {
         
         const oldHtml = text.innerHTML;
         widget.style.display = "block";
-        text.innerHTML = `<div style="color:#eab308;">🔥 Community Choice!</div><div style="margin-top:5px;">"${songTitle}" added to Fallback!</div>`;
+        text.innerHTML = `<div style="color:#eab308;">🔥 Community Choice!</div><div style="margin-top:5px;">"${songTitle}" added to playlist!</div>`;
         
         setTimeout(() => {
             widget.style.display = "none";
