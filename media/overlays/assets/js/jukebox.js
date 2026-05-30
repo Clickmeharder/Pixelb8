@@ -230,6 +230,8 @@ export class StreamJukebox {
                 events: {
                     'onReady': () => { 
                         this.ytPlayerReady = true; 
+						const savedVol = localStorage.getItem("jbVolume") || 50;
+						this.ytPlayer.setVolume(parseInt(savedVol));
                         this.applyButtonStyles();
                         this.bindControls(); 
                         this.renderFallbackList();
@@ -443,7 +445,25 @@ export class StreamJukebox {
                 this.updateBadge('av-status-badge', e.target.checked);
             };
         }
-    }
+		const volSlider = document.getElementById('jb-volume-slider');
+		if (volSlider) {
+			// Sync slider to current player volume on init
+			if (this.ytPlayer && typeof this.ytPlayer.getVolume === 'function') {
+				volSlider.value = this.ytPlayer.getVolume();
+			}
+
+			volSlider.oninput = (e) => {
+				const vol = parseInt(e.target.value);
+				if (this.ytPlayer && typeof this.ytPlayer.setVolume === 'function') {
+					this.ytPlayer.setVolume(vol);
+					
+					// Optional: Save volume to localStorage so it persists
+					localStorage.setItem("jbVolume", vol);
+				}
+			};
+		}
+
+	}
 
 	toggleAudioOnly(state) {
         this.isAudioOnly = state;
