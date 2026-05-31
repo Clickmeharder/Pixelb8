@@ -805,8 +805,6 @@ const WINDOW_CLOSE_MAPS = [
 	{ win: "widgets-manager",     triggers: [//"close-widgets-manager-btn",
 	"close-widgets-top-btn"] }
 ];
-
-
 // Configuration layout matrix for the Custom Select dropdown boxes
 const DROPDOWN_CONFIGS = [
     { display: "display-bit-text-in-anim",   options: "options-bit-text-in-anim",   list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
@@ -814,7 +812,6 @@ const DROPDOWN_CONFIGS = [
     { display: "display-bit-img-in-anim",    options: "options-bit-img-in-anim",    list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
     { display: "display-bit-img-out-anim",   options: "options-bit-img-out-anim",   list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] }
 ];
-
 // Structural array mapping state variables to element inputs and persistent targets
 const REWARD_SELECTS_REGISTRY = [
     { id: "reward-text-in-anim",  def: "none" },
@@ -824,7 +821,6 @@ const REWARD_SELECTS_REGISTRY = [
     { id: "reward-font-weight",   def: "bold" },
     { id: "reward-img-mode",      def: "loop" }
 ];
-
 const REWARD_INPUTS_REGISTRY = [
     { id: "reward-font-size",      type: "text" },
     { id: "reward-text-outline",   type: "text" },
@@ -833,51 +829,149 @@ const REWARD_INPUTS_REGISTRY = [
     { id: "reward-img-duration",   type: "text" }
 ];
 
-/**
- * Global utility to cleanly coordinate Master Alert visibility and states
- */
-function syncAlertVisibilityState() {
-    saveSettings();
-    if (typeof updateManagerBadgesUI === "function") updateManagerBadgesUI();
-    if (alertWidget) {
-        alertWidget.style.display = alertHidden ? "none" : "block";
-        alertWidget.style.opacity = alertHidden ? "0" : "1";
-    }
-}
+function renderThemeControls() {
+    const container = document.getElementById('variable-controls');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    styleConfig.forEach(item => {
+        const group = document.createElement('div');
+        group.className = 'input-group';
+        group.innerHTML = `<label>${item.label}</label>`;
 
-/**
- * Reusable dynamic initialization engine for rendering custom functional selection fields
- */
-function setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
-	console.log(`Setting up: ${displayId}, Items count: ${optionItems ? optionItems.length : 'NULL'}`);
-    const displayEl = document.getElementById(displayId);
-    const optionsEl = document.getElementById(optionsId);
-	if (!displayEl) console.error(`Missing Display Element: ${displayId}`);
-    if (!optionsEl) console.error(`Missing Options Element: ${optionsId}`);
-    if (!displayEl || !optionsEl) return;
+        if (item.type === 'hsla') {
+            const currentStr = registry.themes[registry.active][item.var];
+            const val = hexToHSLA(currentStr);
+            
+            const picker = document.createElement('div');
+            picker.className = 'hsla-picker';
+            picker.innerHTML = `
+                <div class="hsla-row"><span>H</span><input type="range" class="hsla-slider hue-slider" max="360" value="${val.h}"></div>
+                <div class="hsla-row"><span>S</span><input type="range" class="hsla-slider" max="100" value="${val.s}"></div>
+                <div class="hsla-row"><span>L</span><input type="range" class="hsla-slider" max="100" value="${val.l}"></div>
+                <div class="hsla-row"><span>A</span><input type="range" class="hsla-slider opacity-slider" max="100" value="${val.a * 100}"></div>
+                <div class="preview-chip"><div class="preview-bg"></div><div class="preview-color" id="prev-${item.id}"></div></div>
+            `;
+            
+            const updateHSLA = () => {
+                const [h, s, l, a] = Array.from(picker.querySelectorAll('input')).map(i => i.value);
+                const hslaStr = `hsla(${h}, ${s}%, ${l}%, ${a/100})`;
+                document.documentElement.style.setProperty(item.var, hslaStr);
+                registry.themes[registry.active][item.var] = hslaStr;
+                picker.querySelector('.preview-color').style.backgroundColor = hslaStr;
+                if(item.var === '--accent') {
+                    document.documentElement.style.setProperty('--border-color', hslaStr);
+                    registry.themes[registry.active]['--border-color'] = hslaStr;
+                }
+            };
 
+            picker.querySelectorAll('input').forEach(i => i.addEventListener('input', updateHSLA));
+            picker.querySelector('.preview-color').style.backgroundColor = currentStr;
+            group.appendChild(picker);
+        } 
+        // --- CONVERTED SELECT HANDLING ENGINE (STYLED TO MATCH ACTIVE THEME CUSTOM SELECT) ---
+        else if (item.type === 'select') {
+            // Safety fallback string to completely bypass undefined/unpopulated key runtime bugs
+            const currentValue = registry.themes[registry.active][item.var] || '';
+            
+            // Build out shared custom dropdown UI block architecture using standard theme classes
+            const selectWorkspace = document.createElement('div');
+            selectWorkspace.className = 'custom-select';
+            selectWorkspace.id = `theme-select-${item.id}`;
 
-    optionsEl.innerHTML = "";
-    optionItems.forEach(anim => {
-        const opt = document.createElement("div");
-        opt.className = "option-item";
-        opt.style.cssText = "padding: 4px 8px; cursor: pointer;";
-        opt.innerText = anim;
-        opt.addEventListener("click", (e) => {
-            e.stopPropagation();
-            displayEl.innerText = anim;
-            optionsEl.style.display = "none";
-            if (onSelectionCallback) onSelectionCallback(anim);
-        });
-        optionsEl.appendChild(opt);
+            // Resolve immediate visual display name (strip quote strings out of font declarations safely)
+            const fallbackLabel = currentValue.includes(',') ? currentValue.split(',')[0].replace(/'/g, '') : currentValue;
+
+            const displayEl = document.createElement('div');
+            displayEl.className = 'select-trigger';
+            displayEl.id = `display-theme-select-${item.id}`;
+            displayEl.innerText = fallbackLabel || `Select ${item.label}...`;
+
+            const optionsBox = document.createElement('div');
+            optionsBox.className = 'select-options';
+            optionsBox.id = `options-theme-select-${item.id}`;
+            // Maintain display state inline toggle while relying on your style rules for structure layout
+            optionsBox.style.display = 'none'; 
+
+            // Populate items into the dropdown window list natively
+            item.options.forEach(optVal => {
+                const row = document.createElement('div');
+                row.className = 'option-item';
+                row.innerText = optVal.includes(',') ? optVal.split(',')[0].replace(/'/g, '') : optVal;
+                row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer; transition: background 0.2s;";
+
+                // Match hover states to UI standards
+                row.addEventListener('mouseenter', () => row.style.background = "var(--accent, #9146ff)");
+                row.addEventListener('mouseleave', () => row.style.background = "transparent");
+
+                // Process selections on click actions
+                row.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // Update layout values immediately
+                    document.documentElement.style.setProperty(item.var, optVal);
+                    registry.themes[registry.active][item.var] = optVal;
+                    
+                    // Synchronize Display Target Output 
+                    displayEl.innerText = row.innerText;
+                    optionsBox.style.display = 'none';
+                });
+                
+                optionsBox.appendChild(row);
+            });
+
+            // Bind workspace toggle state engine
+            displayEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close all existing custom menus anywhere on the overlay platform
+                document.querySelectorAll(".select-options, .custom-select-options-box").forEach(box => {
+                    if (box !== optionsBox) box.style.display = "none";
+                });
+                optionsBox.style.display = optionsBox.style.display === 'block' ? 'none' : 'block';
+            });
+
+            selectWorkspace.appendChild(displayEl);
+            selectWorkspace.appendChild(optionsBox);
+            group.appendChild(selectWorkspace);
+        }
+        else {
+            const range = document.createElement('input');
+            range.type = 'range'; range.className = 'p8-input';
+            range.min = item.min; range.max = item.max;
+            range.value = parseInt(registry.themes[registry.active][item.var]) || 0;
+            range.addEventListener('input', (e) => {
+                const val = e.target.value + 'px';
+                document.documentElement.style.setProperty(item.var, val);
+                registry.themes[registry.active][item.var] = val;
+            });
+            group.appendChild(range);
+        }
+        container.appendChild(group);
     });
 
-    displayEl.addEventListener("click", (e) => {
-        e.stopPropagation();
-        document.querySelectorAll(".custom-select-options-box").forEach(box => {
-            if (box !== optionsEl) box.style.display = "none";
+}
+function renderThemeList() {
+    const list = document.getElementById('theme-options');
+    const display = document.getElementById('current-theme-display');
+    const nameInput = document.getElementById('theme-name-input');
+    const delBtn = document.getElementById('delete-theme-btn');
+    
+    list.innerHTML = '';
+    display.innerText = registry.active;
+    nameInput.value = registry.active;
+    delBtn.disabled = (registry.active === 'Default');
+    
+    Object.keys(registry.themes).forEach(name => {
+        const opt = document.createElement('div');
+        opt.className = 'option-item';
+        opt.innerText = name;
+        opt.addEventListener('click', () => {
+            applyTheme(name);
+            renderThemeList();
+            renderThemeControls();
+            list.style.display = 'none';
         });
-        optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
+        list.appendChild(opt);
     });
 }
 
@@ -989,10 +1083,6 @@ function renderRewardsList() {
     });
 }
 // --- EVENT BINDING ---
-
-
-
-
 // --- CENTRALIZED ALERT PIPELINE ENGINE ---
 // Handles formatting, visual injections, animations, and chat confirmation outputs
 function triggerAlertPipeline(reward, user, cost, message) {
@@ -1300,152 +1390,78 @@ function triggerBitAlertPipeline(user, bits, message) {
         }, 800); // Matches your CSS utility default animation length (.8s)
     }, duration);
 }
-function renderThemeControls() {
-    const container = document.getElementById('variable-controls');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    styleConfig.forEach(item => {
-        const group = document.createElement('div');
-        group.className = 'input-group';
-        group.innerHTML = `<label>${item.label}</label>`;
 
-        if (item.type === 'hsla') {
-            const currentStr = registry.themes[registry.active][item.var];
-            const val = hexToHSLA(currentStr);
-            
-            const picker = document.createElement('div');
-            picker.className = 'hsla-picker';
-            picker.innerHTML = `
-                <div class="hsla-row"><span>H</span><input type="range" class="hsla-slider hue-slider" max="360" value="${val.h}"></div>
-                <div class="hsla-row"><span>S</span><input type="range" class="hsla-slider" max="100" value="${val.s}"></div>
-                <div class="hsla-row"><span>L</span><input type="range" class="hsla-slider" max="100" value="${val.l}"></div>
-                <div class="hsla-row"><span>A</span><input type="range" class="hsla-slider opacity-slider" max="100" value="${val.a * 100}"></div>
-                <div class="preview-chip"><div class="preview-bg"></div><div class="preview-color" id="prev-${item.id}"></div></div>
-            `;
-            
-            const updateHSLA = () => {
-                const [h, s, l, a] = Array.from(picker.querySelectorAll('input')).map(i => i.value);
-                const hslaStr = `hsla(${h}, ${s}%, ${l}%, ${a/100})`;
-                document.documentElement.style.setProperty(item.var, hslaStr);
-                registry.themes[registry.active][item.var] = hslaStr;
-                picker.querySelector('.preview-color').style.backgroundColor = hslaStr;
-                if(item.var === '--accent') {
-                    document.documentElement.style.setProperty('--border-color', hslaStr);
-                    registry.themes[registry.active]['--border-color'] = hslaStr;
-                }
-            };
 
-            picker.querySelectorAll('input').forEach(i => i.addEventListener('input', updateHSLA));
-            picker.querySelector('.preview-color').style.backgroundColor = currentStr;
-            group.appendChild(picker);
-        } 
-        // --- CONVERTED SELECT HANDLING ENGINE (STYLED TO MATCH ACTIVE THEME CUSTOM SELECT) ---
-        else if (item.type === 'select') {
-            // Safety fallback string to completely bypass undefined/unpopulated key runtime bugs
-            const currentValue = registry.themes[registry.active][item.var] || '';
-            
-            // Build out shared custom dropdown UI block architecture using standard theme classes
-            const selectWorkspace = document.createElement('div');
-            selectWorkspace.className = 'custom-select';
-            selectWorkspace.id = `theme-select-${item.id}`;
 
-            // Resolve immediate visual display name (strip quote strings out of font declarations safely)
-            const fallbackLabel = currentValue.includes(',') ? currentValue.split(',')[0].replace(/'/g, '') : currentValue;
 
-            const displayEl = document.createElement('div');
-            displayEl.className = 'select-trigger';
-            displayEl.id = `display-theme-select-${item.id}`;
-            displayEl.innerText = fallbackLabel || `Select ${item.label}...`;
-
-            const optionsBox = document.createElement('div');
-            optionsBox.className = 'select-options';
-            optionsBox.id = `options-theme-select-${item.id}`;
-            // Maintain display state inline toggle while relying on your style rules for structure layout
-            optionsBox.style.display = 'none'; 
-
-            // Populate items into the dropdown window list natively
-            item.options.forEach(optVal => {
-                const row = document.createElement('div');
-                row.className = 'option-item';
-                row.innerText = optVal.includes(',') ? optVal.split(',')[0].replace(/'/g, '') : optVal;
-                row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer; transition: background 0.2s;";
-
-                // Match hover states to UI standards
-                row.addEventListener('mouseenter', () => row.style.background = "var(--accent, #9146ff)");
-                row.addEventListener('mouseleave', () => row.style.background = "transparent");
-
-                // Process selections on click actions
-                row.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    
-                    // Update layout values immediately
-                    document.documentElement.style.setProperty(item.var, optVal);
-                    registry.themes[registry.active][item.var] = optVal;
-                    
-                    // Synchronize Display Target Output 
-                    displayEl.innerText = row.innerText;
-                    optionsBox.style.display = 'none';
-                });
-                
-                optionsBox.appendChild(row);
-            });
-
-            // Bind workspace toggle state engine
-            displayEl.addEventListener('click', (e) => {
-                e.stopPropagation();
-                // Close all existing custom menus anywhere on the overlay platform
-                document.querySelectorAll(".select-options, .custom-select-options-box").forEach(box => {
-                    if (box !== optionsBox) box.style.display = "none";
-                });
-                optionsBox.style.display = optionsBox.style.display === 'block' ? 'none' : 'block';
-            });
-
-            selectWorkspace.appendChild(displayEl);
-            selectWorkspace.appendChild(optionsBox);
-            group.appendChild(selectWorkspace);
-        }
-        else {
-            const range = document.createElement('input');
-            range.type = 'range'; range.className = 'p8-input';
-            range.min = item.min; range.max = item.max;
-            range.value = parseInt(registry.themes[registry.active][item.var]) || 0;
-            range.addEventListener('input', (e) => {
-                const val = e.target.value + 'px';
-                document.documentElement.style.setProperty(item.var, val);
-                registry.themes[registry.active][item.var] = val;
-            });
-            group.appendChild(range);
-        }
-        container.appendChild(group);
+function loadPositions() {
+    document.querySelectorAll('.p8-widget').forEach(el => {
+        const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
+        if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
     });
 
+    // NEW: Apply the persistent visibility states on load
+    document.getElementById("chat-widget").style.display = settings.chatHidden ? "none" : "block";
+    document.getElementById("alert-widget").style.display = settings.alertHidden ? "none" : "block";
+    document.getElementById("status-widget").style.display = settings.statusHidden ? "none" : "block";
 }
-function renderThemeList() {
-    const list = document.getElementById('theme-options');
-    const display = document.getElementById('current-theme-display');
-    const nameInput = document.getElementById('theme-name-input');
-    const delBtn = document.getElementById('delete-theme-btn');
+/**
+ * Global utility to cleanly coordinate Master Alert visibility and states
+ */
+function syncAlertVisibilityState() {
+    saveSettings();
+    if (typeof updateManagerBadgesUI === "function") updateManagerBadgesUI();
+    if (alertWidget) {
+        alertWidget.style.display = alertHidden ? "none" : "block";
+        alertWidget.style.opacity = alertHidden ? "0" : "1";
+    }
+}
+function syncAllToggleUI() {
+    const s = typeof settings !== 'undefined' ? settings : {};
     
-    list.innerHTML = '';
-    display.innerText = registry.active;
-    nameInput.value = registry.active;
-    delBtn.disabled = (registry.active === 'Default');
-    
-    Object.keys(registry.themes).forEach(name => {
-        const opt = document.createElement('div');
-        opt.className = 'option-item';
-        opt.innerText = name;
-        opt.addEventListener('click', () => {
-            applyTheme(name);
-            renderThemeList();
-            renderThemeControls();
-            list.style.display = 'none';
-        });
-        list.appendChild(opt);
-    });
+    // Helper to update specific badges
+    const updateBadge = (id, isActive) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
+            el.innerText = isActive ? "ON" : "OFF";
+        }
+    };
+
+    // 1. Master Alerts
+    updateBadge("stg-master-status-badge", !alertHidden); // Assuming alertHidden is inverted
+    updateBadge("mgr-alert-status-badge", !alertHidden);
+
+    // 2. Rewards
+    updateBadge("stg-rewards-status-badge", s.rewardsEnabled);
+    updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
+
+    // 3. Bits
+    updateBadge("stg-bits-status-badge", s.bitsEnabled);
+    updateBadge("mgr-bits-status-badge", s.bitsEnabled);
+
+    // 4. Jukebox
+    updateBadge("stg-jukebox-status-badge", s.jukeboxWidgetEnabled);
+    const jbControls = document.getElementById("jukebox-widget-controls");
+    if (jbControls) {
+        jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
+        jbControls.style.opacity = s.jukeboxWidgetEnabled ? "1" : "0.5";
+        jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
+    }
+
+    // Sync Engine States
+    if (window.streamJukeboxEngine) {
+        window.streamJukeboxEngine.setWidgetActiveState(s.jukeboxWidgetEnabled);
+    }
 }
 
+// --- INITIALIZE DRAGGING FOR BOTH WINDOWS ---
+document.addEventListener("DOMContentLoaded", () => {
+    // Parameter 1: The Main Window Element ID
+    // Parameter 2: The Header/Handle Element ID
+    makeElementDraggable("style-editor", "theme-manager-header");
+    makeElementDraggable("rewards-manager", "rewards-manager-header");
+});
 function makeElementDraggable(targetId, handleId) {
     const target = document.getElementById(targetId);
     const handle = document.getElementById(handleId);
@@ -1529,43 +1545,38 @@ function makeElementDraggable(targetId, handleId) {
         document.onmousemove = null;
     }
 }
+function setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
+	console.log(`Setting up: ${displayId}, Items count: ${optionItems ? optionItems.length : 'NULL'}`);
+    const displayEl = document.getElementById(displayId);
+    const optionsEl = document.getElementById(optionsId);
+	if (!displayEl) console.error(`Missing Display Element: ${displayId}`);
+    if (!optionsEl) console.error(`Missing Options Element: ${optionsId}`);
+    if (!displayEl || !optionsEl) return;
 
-// --- INITIALIZE DRAGGING FOR BOTH WINDOWS ---
-document.addEventListener("DOMContentLoaded", () => {
-    // Parameter 1: The Main Window Element ID
-    // Parameter 2: The Header/Handle Element ID
-    makeElementDraggable("style-editor", "theme-manager-header");
-    makeElementDraggable("rewards-manager", "rewards-manager-header");
-});
 
-function loadPositions() {
-    document.querySelectorAll('.p8-widget').forEach(el => {
-        const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
-        if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
+    optionsEl.innerHTML = "";
+    optionItems.forEach(anim => {
+        const opt = document.createElement("div");
+        opt.className = "option-item";
+        opt.style.cssText = "padding: 4px 8px; cursor: pointer;";
+        opt.innerText = anim;
+        opt.addEventListener("click", (e) => {
+            e.stopPropagation();
+            displayEl.innerText = anim;
+            optionsEl.style.display = "none";
+            if (onSelectionCallback) onSelectionCallback(anim);
+        });
+        optionsEl.appendChild(opt);
     });
 
-    // NEW: Apply the persistent visibility states on load
-    document.getElementById("chat-widget").style.display = settings.chatHidden ? "none" : "block";
-    document.getElementById("alert-widget").style.display = settings.alertHidden ? "none" : "block";
-    document.getElementById("status-widget").style.display = settings.statusHidden ? "none" : "block";
-}
-async function checkTwitchAuth() {
-    const h = new URLSearchParams(window.location.hash.substring(1));
-    const token = h.get("access_token");
-    if (token) {
-        const res = await fetch("https://api.twitch.tv/helix/users", {
-            headers: { "Authorization": `Bearer ${token}`, "Client-Id": CLIENT_ID }
+    displayEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        document.querySelectorAll(".custom-select-options-box").forEach(box => {
+            if (box !== optionsEl) box.style.display = "none";
         });
-        const d = await res.json();
-        const channelName = d.data[0].login;
-        document.getElementById("auth-gate").style.display = "none";
-        document.getElementById("obs-instructions").style.display = "block";
-        document.getElementById("obs-url-output").innerText = `${FULL_REDIRECT}?channel=${channelName}&token=${token}`;
-        history.replaceState(null, "", window.location.pathname);
-    }
+        optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
+    });
 }
-
-// --- WIDGET RENDERING ENGINE ---
 function displayConsoleMessage(user, message) {
     if (!consoleMessages) return;
     const consoleContainer = document.getElementById("chat-feed");
@@ -1593,7 +1604,6 @@ function displayConsoleMessage(user, message) {
         consoleContainer.removeChild(consoleContainer.firstChild);
     }
 }
-
 function displayChatMessage(user, message, flags = {}, extra = {}, processed = null) {
     const chatContainer = document.getElementById("chat-feed");
     if (!chatContainer) return;
@@ -1635,7 +1645,6 @@ function displayChatMessage(user, message, flags = {}, extra = {}, processed = n
         chatContainer.removeChild(chatContainer.lastChild);
     }
 }
-
 function processMessageWithEmotes(message, messageEmotes) {
     if (!messageEmotes) return { message, emoteList: [] };
 
@@ -1657,7 +1666,6 @@ function processMessageWithEmotes(message, messageEmotes) {
 
     return { message: messageArray.join(''), emoteList };
 }
-
 function animateFloatingEmote(emoteURL) {
     if (!floatingEmotes) return;
     const emote = document.createElement("img");
@@ -1685,7 +1693,6 @@ function animateFloatingEmote(emoteURL) {
 
     setTimeout(() => emote.remove(), 7000);
 }
-
 function botSay(msg) {
     if (typeof ComfyJS !== "undefined" && activeChannel) {
         const finalMessage = useBotPrefix ? `${BOT_PREFIX} ${msg}` : msg;
@@ -1693,6 +1700,53 @@ function botSay(msg) {
     } else {
         console.warn("BotSay failed: ComfyJS not initialized or channel missing.");
     }
+}
+
+// =========================================================================
+// --- DOM UTILITY & EVENT ROUTING HELPERS ---
+// =========================================================================
+/**
+ * Safely attaches a click listener to an element if it exists in the DOM.
+ */
+function onSafeClick(id, callback, stopPropagation = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("click", (e) => {
+        if (stopPropagation) e.stopPropagation();
+        callback(e, el);
+    });
+}
+/**
+ * Safely attaches a change listener to an input element if it exists in the DOM.
+ */
+function onSafeChange(id, callback) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", (e) => callback(e, el));
+}
+
+/**
+ * Unified context menu closer wrapper
+ */
+function closeContextMenu() {
+    const ctxMenu = document.getElementById('p8-ctx-menu');
+    if (ctxMenu) ctxMenu.style.display = 'none';
+}
+/**
+ * Inline file streaming parsing utility to cut file handler duplicate code blocks
+ */
+function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
+    if (!inputElement) return;
+    inputElement.addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (!file) {
+            onClearFallback();
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (evt) => onLoadedSuccess(evt.target.result, file.name);
+        reader.readAsDataURL(file);
+    });
 }
 
 // --- CORE COMMAND LOGIC & WIDGET VISIBILITY CONTROLS ---
@@ -1907,10 +1961,8 @@ const commandsRegistry = {
         }
     }
 };
-
 // Aliasing 'commands' to call the exact same logic as 'help' safely
 commandsRegistry["commands"] = commandsRegistry["help"];
-
 // --- REFACTORED CORE ROUTER ---
 function handlePixelCommands(user, command, message, flags) {
     const targetCmd = command.toLowerCase().trim();
@@ -1927,8 +1979,23 @@ function handlePixelCommands(user, command, message, flags) {
     cmdConfig.execute(user, message, flags);
 }
 
-
 // --- TWITCH OVERLAY LIQUID CONTEXT ---
+async function checkTwitchAuth() {
+    const h = new URLSearchParams(window.location.hash.substring(1));
+    const token = h.get("access_token");
+    if (token) {
+        const res = await fetch("https://api.twitch.tv/helix/users", {
+            headers: { "Authorization": `Bearer ${token}`, "Client-Id": CLIENT_ID }
+        });
+        const d = await res.json();
+        const channelName = d.data[0].login;
+        document.getElementById("auth-gate").style.display = "none";
+        document.getElementById("obs-instructions").style.display = "block";
+        document.getElementById("obs-url-output").innerText = `${FULL_REDIRECT}?channel=${channelName}&token=${token}`;
+        history.replaceState(null, "", window.location.pathname);
+    }
+}
+
 function startTwitch(channel, token) {
     const formattedToken = token.startsWith("oauth:") ? token : `oauth:${token}`;
     
@@ -1984,40 +2051,20 @@ function startTwitch(channel, token) {
 
 
 
-/**
- * Inline file streaming parsing utility to cut file handler duplicate code blocks
- */
-function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
-    if (!inputElement) return;
-    inputElement.addEventListener("change", function(e) {
-        const file = e.target.files[0];
-        if (!file) {
-            onClearFallback();
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = (evt) => onLoadedSuccess(evt.target.result, file.name);
-        reader.readAsDataURL(file);
-    });
-}
 
 // =========================================================================
 // --- TIMERS & RUNTIME CONTEXT ENGINE STATE ---
 // =========================================================================
-
 // Persistent configurations saved across sessions
 let activeTimers = JSON.parse(localStorage.getItem('p8_active_timers')) || {}; 
 let timerIntervalId = null;
 let savedCountdowns = JSON.parse(localStorage.getItem('p8_saved_countdowns')) || {};
-
 function saveCountdownsToStorage() {
     localStorage.setItem('p8_saved_countdowns', JSON.stringify(savedCountdowns));
 }
-
 function saveActiveTimersToStorage() {
     localStorage.setItem('p8_active_timers', JSON.stringify(activeTimers));
 }
-
 // Global Core Controller Initialization Wrapper
 function initTimerEngine() {
     // Restore runtime ticks if active instances are pulled from storage on load
@@ -2047,7 +2094,6 @@ function updateTimerStyles() {
     settings.timerColor = colorValue;
     saveSettings();
 }
-
 function createTimerInstance(label = "Timer", durationSeconds = 0, customStyles = {}) {
     const id = "tmr_" + Date.now();
     const type = parseInt(durationSeconds) > 0 ? "countdown" : "stopwatch";
@@ -2073,7 +2119,6 @@ function createTimerInstance(label = "Timer", durationSeconds = 0, customStyles 
     startTimerInstance(id);
     return id;
 }
-
 function startTimerInstance(id) {
     if (!activeTimers[id]) return;
     activeTimers[id].running = true;
@@ -2084,14 +2129,12 @@ function startTimerInstance(id) {
     }
     renderActiveTimersUI();
 }
-
 function pauseTimerInstance(id) {
     if (!activeTimers[id]) return;
     activeTimers[id].running = false;
     saveActiveTimersToStorage();
     renderActiveTimersUI();
 }
-
 function resetTimerInstance(id) {
     if (!activeTimers[id]) return;
     activeTimers[id].elapsed = 0;
@@ -2099,7 +2142,6 @@ function resetTimerInstance(id) {
     saveActiveTimersToStorage();
     renderActiveTimersUI();
 }
-
 function stopTimerInstance(id) {
     if (!activeTimers[id]) return;
     delete activeTimers[id];
@@ -2111,7 +2153,6 @@ function stopTimerInstance(id) {
     }
     renderActiveTimersUI();
 }
-
 function splitTimerInstance(id) {
     const t = activeTimers[id];
     if (!t || !t.running) return;
@@ -2120,7 +2161,6 @@ function splitTimerInstance(id) {
     saveActiveTimersToStorage();
     renderActiveTimersUI();
 }
-
 function processTimersTick() {
     let hasRunningTimers = false;
     let stateChanged = false;
@@ -2153,7 +2193,6 @@ function processTimersTick() {
     
     renderActiveTimersUI();
 }
-
 function formatTimeDigits(totalSeconds) {
     if (totalSeconds < 0) totalSeconds = 0;
     const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
@@ -2161,7 +2200,6 @@ function formatTimeDigits(totalSeconds) {
     const secs = String(totalSeconds % 60).padStart(2, '0');
     return `${hrs}:${mins}:${secs}`;
 }
-
 function renderActiveTimersUI() {
     const listContainer = document.getElementById("active-timers-list");
     const overlayDigits = document.getElementById("timer-display-digits");
@@ -2272,7 +2310,6 @@ function renderActiveTimersUI() {
 document.addEventListener("DOMContentLoaded", () => {
     initTimerEngine();
 });
-
 function getLatestInstanceIdByType(type) {
     const keys = Object.keys(activeTimers);
     for (let i = keys.length - 1; i >= 0; i--) {
@@ -2282,10 +2319,10 @@ function getLatestInstanceIdByType(type) {
     }
     return null;
 }
+
 // =========================================================================
 // --- CONFIGURATION MAPS & STRUCTS ---
 // =========================================================================
-
 // Maps trigger elements to their target interface panels and optional callback lifecycle hooks
 const PANEL_NAVIGATION_MAPS = [
     { 
@@ -2388,82 +2425,10 @@ const DRAGGABLE_WINDOWS_CONFIG = [
     { winId: "widgets-manager",       headerId: "widgets-manager-header" }
 ];
 
-// =========================================================================
-// --- DOM UTILITY & EVENT ROUTING HELPERS ---
-// =========================================================================
-
-/**
- * Safely attaches a click listener to an element if it exists in the DOM.
- */
-function onSafeClick(id, callback, stopPropagation = false) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener("click", (e) => {
-        if (stopPropagation) e.stopPropagation();
-        callback(e, el);
-    });
-}
-
-/**
- * Safely attaches a change listener to an input element if it exists in the DOM.
- */
-function onSafeChange(id, callback) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener("change", (e) => callback(e, el));
-}
-
-/**
- * Unified context menu closer wrapper
- */
-function closeContextMenu() {
-    const ctxMenu = document.getElementById('p8-ctx-menu');
-    if (ctxMenu) ctxMenu.style.display = 'none';
-}
-
-
 // ==========================================
 // --- REWARDS MANAGER CONTROL ENGINE ---
 // ==========================================
 // Ensure this function exists globally in overlayapp.js
-function syncAllToggleUI() {
-    const s = typeof settings !== 'undefined' ? settings : {};
-    
-    // Helper to update specific badges
-    const updateBadge = (id, isActive) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
-            el.innerText = isActive ? "ON" : "OFF";
-        }
-    };
-
-    // 1. Master Alerts
-    updateBadge("stg-master-status-badge", !alertHidden); // Assuming alertHidden is inverted
-    updateBadge("mgr-alert-status-badge", !alertHidden);
-
-    // 2. Rewards
-    updateBadge("stg-rewards-status-badge", s.rewardsEnabled);
-    updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
-
-    // 3. Bits
-    updateBadge("stg-bits-status-badge", s.bitsEnabled);
-    updateBadge("mgr-bits-status-badge", s.bitsEnabled);
-
-    // 4. Jukebox
-    updateBadge("stg-jukebox-status-badge", s.jukeboxWidgetEnabled);
-    const jbControls = document.getElementById("jukebox-widget-controls");
-    if (jbControls) {
-        jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
-        jbControls.style.opacity = s.jukeboxWidgetEnabled ? "1" : "0.5";
-        jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
-    }
-
-    // Sync Engine States
-    if (window.streamJukeboxEngine) {
-        window.streamJukeboxEngine.setWidgetActiveState(s.jukeboxWidgetEnabled);
-    }
-}
 
 function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");
