@@ -1417,10 +1417,15 @@ function loadPositions() {
         if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
     });
 
-    // 🏎️ OPTIMIZED: Using predefined element variables instead of query lookups
+    // 🏎️ OPTIMIZED: Forcing height restoration on visible state transitions
     if (chatWidget) {
-        chatWidget.style.display = settings.chatHidden ? "none" : "block";
-        if (chatHeight) chatWidget.style.height = chatHeight;
+        const isHidden = !!settings.chatHidden;
+        chatWidget.style.display = isHidden ? "none" : "block";
+        
+        // FIX: Ensure the height is reassigned whenever it's being drawn active
+        if (!isHidden && chatHeight) { 
+            chatWidget.style.height = chatHeight; 
+        }
     }
     if (alertWidget) { alertWidget.style.display = settings.alertHidden ? "none" : "block"; }
     if (statusWidget) { statusWidget.style.display = settings.statusHidden ? "none" : "block"; }
@@ -2557,13 +2562,20 @@ function renderSettingsWindow() {
             get: () => floatingEmotes, 
             set: (v) => { floatingEmotes = v; saveSettings(); } 
         },
-        { 
+		{ 
             label: "Show Twitch Chat Widget", 
             idKey: "chat-widget", 
             get: () => !chatHidden, 
             set: (v) => { 
                 chatHidden = !v; 
-                if (chatWidget) chatWidget.style.display = chatHidden ? "none" : "block";
+                if (chatWidget) {
+                    chatWidget.style.display = chatHidden ? "none" : "block";
+                    
+                    // FIX: Reinject your stored custom tracking height back into the DOM style properties
+                    if (!chatHidden && typeof chatHeight !== 'undefined' && chatHeight) {
+                        chatWidget.style.height = chatHeight;
+                    }
+                }
                 saveSettings();
             }
         },
