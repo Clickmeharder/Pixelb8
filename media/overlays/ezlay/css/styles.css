@@ -650,7 +650,7 @@ body.edit-mode .p8-widget:active {
 
 /* CHAT widget */
 #chat-widget{
-	top: 400px; left: 20px; width: 350px;min-height: 32px;
+	top: 400px; left: 20px; width: 350px;min-height: 32px;height:auto;
 }
 /* Component Feed & Badges */
 #chat-feed { 
