@@ -166,6 +166,7 @@ const statusWidget = document.getElementById('status-widget');
 const statusIndicator = document.getElementById("status-indicator");
 const statusText = document.getElementById("status-text");
 const chatWidget = document.getElementById('chat-widget');
+const chatFeed = document.getElementById('chat-feed');
 let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 }, fadeTimeout;
 
 // --- DYNAMIC THEMING & ALERTS DATA CORES ---
@@ -1417,14 +1418,14 @@ function loadPositions() {
         if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
     });
 
-    // 🏎️ OPTIMIZED: Forcing height restoration on visible state transitions
+    // 🏎️ Target the inner feed for height restorations
     if (chatWidget) {
         const isHidden = !!settings.chatHidden;
         chatWidget.style.display = isHidden ? "none" : "block";
         
-        // FIX: Ensure the height is reassigned whenever it's being drawn active
-        if (!isHidden && chatHeight) { 
-            chatWidget.style.height = chatHeight; 
+        // Apply saved custom height to the feed element instead of the parent container
+        if (!isHidden && chatFeed && chatHeight) { 
+            chatFeed.style.height = chatHeight; 
         }
     }
     if (alertWidget) { alertWidget.style.display = settings.alertHidden ? "none" : "block"; }
@@ -2571,9 +2572,9 @@ function renderSettingsWindow() {
                 if (chatWidget) {
                     chatWidget.style.display = chatHidden ? "none" : "block";
                     
-                    // FIX: Reinject your stored custom tracking height back into the DOM style properties
-                    if (!chatHidden && typeof chatHeight !== 'undefined' && chatHeight) {
-                        chatWidget.style.height = chatHeight;
+                    // Direct the stored height layout right into the active resizer target
+                    if (!chatHidden && chatFeed && typeof chatHeight !== 'undefined' && chatHeight) {
+                        chatFeed.style.height = chatHeight;
                     }
                 }
                 saveSettings();
@@ -3079,24 +3080,31 @@ function bindEvents() {
             dragTarget = null;
         }
     });
-	// 🆕 NEW: Automated Resize Tracking for Native CSS Resize Handlers
-
-    if (chatWidget) {
+	// 🆕 NEW: Automated Resize Tracking for Native CSS Resize Handlers (Targeting Inner Chat Feed)
+    if (chatFeed) {
         let resizeTimeout;
         const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 // Debounce the save logic slightly so it doesn't slam localStorage on every pixel shift
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
-                    // Pull the height value out of the style rules
-                    chatHeight = chatWidget.style.height;
+                    
+                    // Capture the exact real-time dragged height in pixels
+                    chatHeight = `${Math.round(entry.contentRect.height)}px`;
+                    
+                    // Sync to global settings profile if your structure uses an object wrap
+                    if (typeof settings !== 'undefined') {
+                        settings.chatHeight = chatHeight;
+                    }
+
                     if (typeof saveSettings === "function") {
                         saveSettings();
                     }
                 }, 200); // Wait 200ms after dragging stops to commit to disk
             }
         });
-        resizeObserver.observe(chatWidget);
+        // Observe the inner feed wrapper where the native 'resize: vertical' handle lives
+        resizeObserver.observe(chatFeed);
     }
     window.addEventListener('contextmenu', e => {
         if (e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
