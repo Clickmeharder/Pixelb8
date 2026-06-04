@@ -3082,18 +3082,22 @@ function bindEvents() {
         }
     });
 	// 🆕 NEW: Automated Resize Tracking for Native CSS Resize Handlers (Targeting Inner Chat Feed)
+	// 🆕 FIXED: Automated Resize Tracking with Safety Guards for Toggle States
     if (chatFeed) {
         let resizeTimeout;
         const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
-                // Debounce the save logic slightly so it doesn't slam localStorage on every pixel shift
+                const currentHeight = entry.contentRect.height;
+
+                // 🛑 SAFETY FILTER: If the height is 0, the widget was likely hidden.
+                // Do not overwrite the streamer's real saved height setting!
+                if (currentHeight <= 0) continue;
+
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
+                    // Capture the real, positive dragged height in pixels
+                    chatHeight = `${Math.round(currentHeight)}px`;
                     
-                    // Capture the exact real-time dragged height in pixels
-                    chatHeight = `${Math.round(entry.contentRect.height)}px`;
-                    
-                    // Sync to global settings profile if your structure uses an object wrap
                     if (typeof settings !== 'undefined') {
                         settings.chatHeight = chatHeight;
                     }
@@ -3101,10 +3105,9 @@ function bindEvents() {
                     if (typeof saveSettings === "function") {
                         saveSettings();
                     }
-                }, 200); // Wait 200ms after dragging stops to commit to disk
+                }, 200);
             }
         });
-        // Observe the inner feed wrapper where the native 'resize: vertical' handle lives
         resizeObserver.observe(chatFeed);
     }
     window.addEventListener('contextmenu', e => {
