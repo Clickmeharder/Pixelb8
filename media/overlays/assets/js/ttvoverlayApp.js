@@ -80,6 +80,7 @@ let settings = JSON.parse(localStorage.getItem('p8_settings')) || {
     consoleMessages: true,
     floatingEmotes: true,
 	chatHidden: false,
+	chatHeight: "350px",
     statusHidden: true,
     alertHidden: false,
 //----------------------------
@@ -103,7 +104,7 @@ let bitsEnabled = (String(settings.bitsEnabled) !== "false");
 let chatHidden = (String(settings.chatHidden) === "true");
 let alertHidden = (String(settings.alertHidden) === "true");
 let statusHidden = (String(settings.statusHidden) === "true");
-
+let chatHeight = settings.chatHeight || "350px";
 
 
 function saveSettings() {
@@ -123,7 +124,7 @@ function saveSettings() {
 	settings.rewardsEnabled = rewardsEnabled;
     settings.bitsEnabled = bitsEnabled;
 	// Add these lines to commit reward/bit values to disk
-
+	settings.chatHeight = chatHeight;
 	//---------------------------------------
     localStorage.setItem('p8_settings', JSON.stringify(settings));
     
@@ -161,9 +162,10 @@ let activeChannel = "";
 const alertWidget = document.getElementById("alert-widget");
 const alertText = document.getElementById("alert-text");
 const alertImage = document.getElementById("alert-image");
+const statusWidget = document.getElementById('status-widget');
 const statusIndicator = document.getElementById("status-indicator");
 const statusText = document.getElementById("status-text");
-
+const chatWidget = document.getElementById('chat-widget');
 let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 }, fadeTimeout;
 
 // --- DYNAMIC THEMING & ALERTS DATA CORES ---
@@ -1393,7 +1395,7 @@ function triggerBitAlertPipeline(user, bits, message) {
 
 
 
-
+/* 
 function loadPositions() {
     document.querySelectorAll('.p8-widget').forEach(el => {
         const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
@@ -1404,6 +1406,24 @@ function loadPositions() {
     document.getElementById("chat-widget").style.display = settings.chatHidden ? "none" : "block";
     document.getElementById("alert-widget").style.display = settings.alertHidden ? "none" : "block";
     document.getElementById("status-widget").style.display = settings.statusHidden ? "none" : "block";
+	const chatContainer = document.getElementById('chat-widget'); // Matching your chat layout ID
+    if (chatContainer && chatHeight) {
+        chatContainer.style.height = chatHeight;
+    }
+} */
+function loadPositions() {
+    document.querySelectorAll('.p8-widget').forEach(el => {
+        const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
+        if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
+    });
+
+    // 🏎️ OPTIMIZED: Using predefined element variables instead of query lookups
+    if (chatWidget) {
+        chatWidget.style.display = settings.chatHidden ? "none" : "block";
+        if (chatHeight) chatWidget.style.height = chatHeight;
+    }
+    if (alertWidget) { alertWidget.style.display = settings.alertHidden ? "none" : "block"; }
+    if (statusWidget) { statusWidget.style.display = settings.statusHidden ? "none" : "block"; }
 }
 /**
  * Global utility to cleanly coordinate Master Alert visibility and states
@@ -1419,7 +1439,7 @@ function syncAlertVisibilityState() {
 function syncAllToggleUI() {
     const s = typeof settings !== 'undefined' ? settings : {};
     
-    // Helper to update specific badges
+    // Helper to update specific badges (Uses your clean class assignment setup!)
     const updateBadge = (id, isActive) => {
         const el = document.getElementById(id);
         if (el) {
@@ -1429,7 +1449,7 @@ function syncAllToggleUI() {
     };
 
     // 1. Master Alerts
-    updateBadge("stg-master-status-badge", !alertHidden); // Assuming alertHidden is inverted
+    updateBadge("stg-master-status-badge", !alertHidden); 
     updateBadge("mgr-alert-status-badge", !alertHidden);
 
     // 2. Rewards
@@ -1449,12 +1469,19 @@ function syncAllToggleUI() {
         jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
     }
 
+    // 5. 🆕 New Core System Variables Added to Your Sync Pipeline
+    updateBadge("stg-console-status-badge", consoleMessages);
+    updateBadge("stg-prefix-check-status-badge", useCmdPrefix);
+    updateBadge("stg-bot-visibility-status-badge", useBotPrefix);
+    updateBadge("stg-emotes-status-badge", floatingEmotes);
+    updateBadge("stg-chat-widget-status-badge", !chatHidden);
+    updateBadge("stg-status-widget-status-badge", !statusHidden);
+
     // Sync Engine States
     if (window.streamJukeboxEngine) {
         window.streamJukeboxEngine.setWidgetActiveState(s.jukeboxWidgetEnabled);
     }
 }
-
 // --- INITIALIZE DRAGGING FOR BOTH WINDOWS ---
 document.addEventListener("DOMContentLoaded", () => {
     // Parameter 1: The Main Window Element ID
@@ -1765,7 +1792,7 @@ const commandsRegistry = {
             botSay(`System active. Current prefix: !${useCmdPrefix ? CMD_PREFIX : '[NONE]'}`);
         }
     },
-	"toggle": {
+/* 	"toggle": {
         adminOnly: true,
         execute: (user, message, flags) => {
             const target = message.toLowerCase().trim();
@@ -1787,36 +1814,79 @@ const commandsRegistry = {
                 botSay(`Floating Emotes are now: ${floatingEmotes ? "Enabled" : "Disabled"}`);
             }
             // --- FIX: Sync with global variables and correct visual elements ---
-            else if (target === "chat") {
-                chatHidden = !chatHidden;
-                
-                // Checks both common widget naming variations
-                const w = document.getElementById("chat-widget") || document.getElementById("chat-container") || document.getElementById("p8-chat-box");
-                if (w) w.style.display = chatHidden ? "none" : "block";
-                
+			else if (target === "chat") {
+                chatHidden = !chatHidden; 
+                if (chatWidget) { chatWidget.style.display = chatHidden ? "none" : "block"; }
                 botSay(`Chat Widget visibility: ${chatHidden ? "Hidden" : "Visible"}`);
             }
             else if (target === "alert" || target === "alerts") {
                 alertHidden = !alertHidden;
-                
-                const w = document.getElementById("alert-widget") || document.getElementById("alert-container") || alertWidget;
-                if (w) {
-                    w.style.display = alertHidden ? "none" : "block";
-                    if (alertHidden) w.style.opacity = "0";
+                if (alertWidget) {
+                    alertWidget.style.display = alertHidden ? "none" : "block";
+                    if (alertHidden) alertWidget.style.opacity = "0";
                 }
-                
                 botSay(`Alert Widget visibility: ${alertHidden ? "Hidden" : "Visible"}`);
             }
             else if (target === "status") {
                 statusHidden = !statusHidden;
-                
-                const w = document.getElementById("status-widget") || document.getElementById("status-container") || document.getElementById("status-indicator");
-                if (w) w.style.display = statusHidden ? "none" : "block";
-                
+                if (statusWidget) { statusWidget.style.display = statusHidden ? "none" : "block"; }
                 botSay(`Status Widget visibility: ${statusHidden ? "Hidden" : "Visible"}`);
             }
-            
             // This now safely synchronizes our updated global variables to localStorage
+            saveSettings();
+        }
+    }, */
+	"toggle": {
+        adminOnly: true,
+        execute: (user, message, flags) => {
+            const target = message.toLowerCase().trim();
+            
+            // 🏎️ Self-contained mapping dictionary of only your targets
+            const toggleMap = {
+                "consolemessages": { name: "Console messages", get: () => consoleMessages, set: v => consoleMessages = v },
+                "floatingemotes":  { name: "Floating Emotes",  get: () => floatingEmotes,  set: v => floatingEmotes = v },
+                "botprefix":       { name: "Bot Prefix visibility", get: () => useBotPrefix, set: v => useBotPrefix = v },
+                "chat":            { name: "Chat Widget visibility", get: () => chatHidden, set: v => chatHidden = v, element: chatWidget, invertUI: true },
+                "status":          { name: "Status Widget visibility", get: () => statusHidden, set: v => statusHidden = v, element: statusWidget, invertUI: true },
+                "alert":           { name: "Alert Widget visibility", get: () => alertHidden, set: v => alertHidden = v, element: alertWidget, invertUI: true, isAlert: true },
+                "alerts":          { name: "Alert Widget visibility", get: () => alertHidden, set: v => alertHidden = v, element: alertWidget, invertUI: true, isAlert: true }
+            };
+
+            // 1. Handle the one outlier command that requires a unique string format
+            if (target === "cmdprefix") {
+                useCmdPrefix = !useCmdPrefix;
+                botSay(`Prefix Mode: ${useCmdPrefix ? "REQUIRED (!" + CMD_PREFIX + ")" : "Disabled"}`);
+                saveSettings();
+                return;
+            }
+
+            // 2. Look up the match in our map
+            const targetConfig = toggleMap[target];
+            if (!targetConfig) {
+                botSay(`Toggle target [${target}] not recognized.`);
+                return;
+            }
+
+            // 3. Execute the variable flip
+            const nextVal = !targetConfig.get();
+            targetConfig.set(nextVal);
+
+            // 4. Update the predefined element's display style if it exists in the map
+            if (targetConfig.element) {
+                targetConfig.element.style.display = nextVal ? "none" : "block";
+                if (targetConfig.isAlert && nextVal) {
+                    targetConfig.element.style.opacity = "0";
+                }
+            }
+
+            // 5. Output the streamlined confirmation message
+            const stateLabel = targetConfig.invertUI 
+                ? (nextVal ? "Hidden" : "Visible") 
+                : (nextVal ? "Enabled" : "Disabled");
+                
+            botSay(`${targetConfig.name}: ${stateLabel}`);
+
+            // 6. Commit everything safely to disk
             saveSettings();
         }
     },
@@ -2425,6 +2495,122 @@ const DRAGGABLE_WINDOWS_CONFIG = [
     { winId: "widgets-manager",       headerId: "widgets-manager-header" }
 ];
 
+function renderSettingsWindow() {
+    const stackContainer = document.querySelector('#settings-window .settings-stack');
+    if (!stackContainer) return;
+    
+    // Clear the stack before drawing to ensure fresh state on re-renders
+    stackContainer.innerHTML = '';
+
+    // The configuration schema, tailored to match your precise variable lookups and global side effects
+    const settingsSchema = [
+        { 
+            label: "Master Alert Visibility", 
+            idKey: "master", 
+            get: () => !alertHidden, 
+            set: (v) => { 
+                alertHidden = !v; 
+                settings.alertHidden = !v; 
+                // Leverages your existing global coordinator for opacity, display, and manager updates
+                syncAlertVisibilityState(); 
+            }
+        },
+        { 
+            label: "Channel Point Alerts", 
+            idKey: "rewards", 
+            get: () => rewardsEnabled, 
+            set: (v) => { rewardsEnabled = v; settings.rewardsEnabled = v; saveSettings(); } 
+        },
+        { 
+            label: "Bit Cheer Alerts", 
+            idKey: "bits", 
+            get: () => bitsEnabled, 
+            set: (v) => { bitsEnabled = v; settings.bitsEnabled = v; saveSettings(); } 
+        },
+        { 
+            label: "Song Request Jukebox", 
+            idKey: "jukebox", 
+            get: () => !!settings.jukeboxWidgetEnabled, 
+            set: (v) => { settings.jukeboxWidgetEnabled = v; saveSettings(); } 
+        },
+        { 
+            label: "Console Logging", 
+            idKey: "console", 
+            get: () => consoleMessages, 
+            set: (v) => { consoleMessages = v; saveSettings(); } 
+        },
+        { 
+            label: "Command Prefix Check", 
+            idKey: "prefix-check", 
+            get: () => useCmdPrefix, 
+            set: (v) => { useCmdPrefix = v; saveSettings(); } 
+        },
+        { 
+            label: "Show Bot Prefixes", 
+            idKey: "bot-visibility", 
+            get: () => useBotPrefix, 
+            set: (v) => { useBotPrefix = v; saveSettings(); } 
+        },
+        { 
+            label: "Floating Chat Emotes", 
+            idKey: "emotes", 
+            get: () => floatingEmotes, 
+            set: (v) => { floatingEmotes = v; saveSettings(); } 
+        },
+        { 
+            label: "Show Twitch Chat Widget", 
+            idKey: "chat-widget", 
+            get: () => !chatHidden, 
+            set: (v) => { 
+                chatHidden = !v; 
+                if (chatWidget) chatWidget.style.display = chatHidden ? "none" : "block";
+                saveSettings();
+            }
+        },
+        { 
+            label: "Show Stream Status Indicator", 
+            idKey: "status-widget", 
+            get: () => !statusHidden, 
+            set: (v) => { 
+                statusHidden = !v; 
+                if (statusWidget) statusWidget.style.display = statusHidden ? "none" : "block";
+                saveSettings();
+            }
+        }
+    ];
+
+    // Build each row dynamically using your design syntax
+    settingsSchema.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'settings-toggle-row';
+        row.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;";
+
+        row.innerHTML = `
+            <span class="settings-toggle-label" style="font-size: 12px; color: #e4e4e7;">${item.label}:</span>
+            <div class="settings-toggle-controls" style="display: flex; align-items: center; gap: 8px;">
+                <span id="stg-${item.idKey}-status-badge" class="toggle-status-badge">---</span>
+                <button type="button" id="stg-toggle-${item.idKey}-btn" class="toggle-action-btn">Toggle</button>
+            </div>
+        `;
+
+        // Direct event attachment on element creation
+        const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                const currentVal = item.get();
+                // Commit state mutation
+                item.set(!currentVal);
+                // Use your existing global layout UI syncing function to update all panel badges and engine components
+                syncAllToggleUI();
+            });
+        }
+
+        stackContainer.appendChild(row);
+    });
+
+    // Run your existing tracker update logic so the buttons show the true state instantly on window draw
+    syncAllToggleUI();
+}
 // ==========================================
 // --- REWARDS MANAGER CONTROL ENGINE ---
 // ==========================================
@@ -2881,7 +3067,25 @@ function bindEvents() {
             dragTarget = null;
         }
     });
+	// 🆕 NEW: Automated Resize Tracking for Native CSS Resize Handlers
 
+    if (chatWidget) {
+        let resizeTimeout;
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                // Debounce the save logic slightly so it doesn't slam localStorage on every pixel shift
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    // Pull the height value out of the style rules
+                    chatHeight = chatWidget.style.height;
+                    if (typeof saveSettings === "function") {
+                        saveSettings();
+                    }
+                }, 200); // Wait 200ms after dragging stops to commit to disk
+            }
+        });
+        resizeObserver.observe(chatWidget);
+    }
     window.addEventListener('contextmenu', e => {
         if (e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
         e.preventDefault();

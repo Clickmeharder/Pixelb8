@@ -1130,10 +1130,6 @@ blurSlider.addEventListener('input', (e) => {
     valBlur.innerText = featherBlur + "px";
     if(mouthBox.w > 0) bakePuppetLayers();
 });
-<!-- gainSlider.addEventListener('input', (e) => { -->
-    <!-- gainMultiplier = parseInt(e.target.value) / 100; -->
-    <!-- valGain.innerText = (parseInt(e.target.value) / 10).toFixed(1) + "x"; -->
-<!-- }); -->
 // Gain Handler interacts directly with the GainNode inside active Web Audio streams
 gainSlider.addEventListener('input', (e) => {
     const rawVal = parseInt(e.target.value);
@@ -1145,6 +1141,10 @@ gainSlider.addEventListener('input', (e) => {
         hardwareGainNode.gain.setValueAtTime(gainMultiplier, audioCtx.currentTime);
     }
 });
+<!-- gainSlider.addEventListener('input', (e) => { -->
+    <!-- gainMultiplier = parseInt(e.target.value) / 100; -->
+    <!-- valGain.innerText = (parseInt(e.target.value) / 10).toFixed(1) + "x"; -->
+<!-- }); -->
 gateSlider.addEventListener('input', (e) => {
     noiseGateThreshold = parseInt(e.target.value);
     valGate.innerText = noiseGateThreshold;
@@ -1279,31 +1279,7 @@ idleImageInput.addEventListener('change', (e) => {
         };
     }
 });
- <!-- connectMicBtn.addEventListener('click', async () => { -->
-    <!-- try { -->
-        <!-- status.innerText = "Status: Connecting Microphone Feed Arrays..."; -->
-        <!-- audioCtx = new (window.AudioContext || window.webkitAudioContext)(); -->
-        <!-- analyser = audioCtx.createAnalyser(); -->
-        <!-- analyser.fftSize = 256; -->
 
-        <!-- micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false }); -->
-        <!-- const source = audioCtx.createMediaStreamSource(micStream); -->
-        <!-- source.connect(analyser); -->
-
-        <!-- isMicLive = true; -->
-        <!-- uCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height); -->
-        
-        <!-- connectMicBtn.innerText = "🟢 SYSTEM LIVE"; -->
-        <!-- connectMicBtn.style.background = "#222"; -->
-        <!-- connectMicBtn.style.color = "#2ed573"; -->
-        <!-- connectMicBtn.style.border = "2px solid #2ed573"; -->
-        <!-- status.innerText = "Status: Profiles calibrated. Running dynamic matrix."; -->
-
-        <!-- triggerRandomBlinkCycle(); -->
-    <!-- } catch (err) { -->
-        <!-- status.innerText = `Error connecting mic stream: ${err.message}`; -->
-    <!-- } -->
-<!-- }); --> 
 connectMicBtn.addEventListener('click', async () => {
     try {
         status.innerText = "Status: Connecting Microphone Feed Arrays...";

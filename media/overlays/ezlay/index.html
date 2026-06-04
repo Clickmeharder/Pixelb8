@@ -54,6 +54,7 @@
             <div id="status-text">Awaiting Signal...</div>
             <div id="mode-badge">Edit Mode Active</div>
         </div>
+
 		<div id="timer-widget" class="p8-widget" style="display: none;">
 			<div id="timer-overlay-header" class="widget-header" style="">
 				<span id="timer-widget-title">⏱️ Active Timer</span>
@@ -61,6 +62,7 @@
 			<div id="timer-display-digits" style="">00:00:00</div>
 			<div id="timer-splits-container" style=""></div>
 		</div>
+
 		<div id="entropia-widget" class="p8-widget" style="display: none;">
 			<div class="widget-header">Entropia Tracker</div>
 			<div id="session-timer">00:00:00</div>
@@ -107,14 +109,14 @@
             <button id="close-editor-top-btn" style="background: transparent; border: none; color: #71717a; font-size: 18px; cursor: pointer; padding: 2px 6px; line-height: 1; transition: color 0.2s;" onmouseenter="this.style.color='#f87171'" onmouseleave="this.style.color='#71717a'">✕</button>
         </div>
         <div class="input-group">
-            <label>Active Theme</label>
+            <label>Active Theme:</label>
             <div class="custom-select" id="theme-selector">
                 <div class="select-trigger" id="current-theme-display">Default</div>
                 <div class="select-options" id="theme-options"></div>
             </div>
         </div>
         <div class="input-group">
-            <label>Save As New Theme</label>
+            <label>Save As New Theme:</label>
             <input type="text" id="theme-name-input" class="p8-input" placeholder="Theme Name">
         </div>
         <hr style="border:0; border-top: 1px solid #27272a; margin: 15px 0;">
@@ -558,43 +560,11 @@
 			<h3 id="settings-manager-title" style="margin: 0; font-size: 16px; color: var(--accent);">⚙️ Overlay Settings</h3>
 			<button id="close-settings-top-btn" style="background: transparent; border: none; color: #71717a; font-size: 18px; cursor: pointer; padding: 2px 6px; line-height: 1; transition: color 0.2s;" onmouseenter="this.style.color='#f87171'" onmouseleave="this.style.color='#71717a'">✕</button>
 		</div>
-		<div class="settings-stack" style="padding-top: 10px; display: flex; flex-direction: column; gap: 8px;">
-            
-            <div class="settings-toggle-row">
-                <span class="settings-toggle-label">Master Alert Visibility:</span>
-                <div class="settings-toggle-controls">
-                    <span id="stg-master-status-badge" class="toggle-status-badge">---</span>
-                    <button type="button" id="stg-toggle-master-btn" class="toggle-action-btn">Toggle</button>
-                </div>
-            </div>
-
-            <div class="settings-toggle-row">
-                <span class="settings-toggle-label">Channel Point Alerts:</span>
-                <div class="settings-toggle-controls">
-                    <span id="stg-rewards-status-badge" class="toggle-status-badge">---</span>
-                    <button type="button" id="stg-toggle-rewards-btn" class="toggle-action-btn">Toggle</button>
-                </div>
-            </div>
-
-            <div class="settings-toggle-row">
-                <span class="settings-toggle-label">Bit Cheer Alerts:</span>
-                <div class="settings-toggle-controls">
-                    <span id="stg-bits-status-badge" class="toggle-status-badge">---</span>
-                    <button type="button" id="stg-toggle-bits-btn" class="toggle-action-btn">Toggle</button>
-                </div>
-            </div>
-			<div class="settings-toggle-row">
-				<span class="settings-toggle-label">Song Request Jukebox:</span>
-				<div class="settings-toggle-controls">
-					<span id="stg-jukebox-status-badge" class="toggle-status-badge">---</span>
-					<button type="button" id="stg-toggle-jukebox-btn" class="toggle-action-btn">Toggle</button>
-				</div>
-			</div>
-
-		</div>
+		
+		<div class="settings-stack" style="padding-top: 10px; display: flex; flex-direction: column; gap: 8px;"></div>
+		
 		<button class="p8-btn" id="close-settings-manager-btn" style="background:transparent; color:#71717a; font-size: 12px; width: 100%; margin-top: 15px;">Close Panel</button>
 	</div>
-
     <script type="module" src="../assets/js/ttvoverlayApp.js"></script>
 	<!-- <script type="module" src="../assets/js/entropia-widget.js"></script> -->
 	<!-- <script type="module" src="../assets/js/entropia-widget-refactored.js"></script> -->
