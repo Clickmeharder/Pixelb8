@@ -489,6 +489,7 @@ function init() {
     
     // Core Layout & Registry Loading
     loadPositions();
+	renderSettingsWindow();
     renderThemeControls();
     
     // 1. INSTANTIATE WIDGETS
@@ -517,7 +518,7 @@ function init() {
     // 2. NOW inject commands (only after both instances are guaranteed to exist)
     console.log("📡 [Command Registry]: Starting injection scan...");
     injectAllWidgetCommands();
-
+	
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 
     populateCustomDropdowns();
