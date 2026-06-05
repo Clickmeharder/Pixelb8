@@ -1922,130 +1922,152 @@ export class StreamPet {
     // ==========================================
     // NEW COMPANION ADDITION 2: SPIDER COMPANION
     // ==========================================
-    drawSpider(t, scale) {
-        this.ctx.save();
-        
-        // Spider handles inversion mapping layout calculations smoothly
-        this.ctx.translate(this.state.x, this.state.y);
-        this.ctx.scale(this.state.facing * scale, scale);
+	drawSpider(t, scale) {
+		this.ctx.save();
+		
+		// Translation to position the spider
+		this.ctx.translate(this.state.x, this.state.y);
 
-        let spiderColor = this.activePet.isDead ? "#777777" : this.activePet.color;
-        if(this.activePet.isDead) this.ctx.globalAlpha = 0.3;
-        this.ctx.fillStyle = spiderColor;
-        this.ctx.strokeStyle = spiderColor;
-        this.ctx.lineWidth = 3;
+		// Apply "Dance" rotation: a slight wiggle back and forth
+		if (this.state.action === "dance") {
+			this.ctx.rotate(Math.sin(t * 0.5) * 0.5);
+		}
 
-        // Ceil ceiling support hanging web element thread lines
-        this.ctx.strokeStyle = "rgba(255,255,255,0.15)";
-        this.ctx.lineWidth = 1;
-        this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0, -this.state.y); this.ctx.stroke();
+		this.ctx.scale(this.state.facing * scale, scale);
 
-        this.ctx.fillStyle = spiderColor;
-        this.ctx.strokeStyle = spiderColor;
-        this.ctx.lineWidth = 3.5;
+		let spiderColor = this.activePet.isDead ? "#777777" : this.activePet.color;
+		if (this.activePet.isDead) this.ctx.globalAlpha = 0.3;
+		this.ctx.fillStyle = spiderColor;
+		this.ctx.strokeStyle = spiderColor;
+		this.ctx.lineWidth = 3.5; // Slightly thicker for legs
 
-        // Base structural body spheres: Abdomen & Cephalothorax
-        this.ctx.beginPath(); this.ctx.arc(-16, 0, 18, 0, Math.PI*2); this.ctx.fill(); // Main abdomen sphere
-        this.ctx.beginPath(); this.ctx.arc(8, -2, 12, 0, Math.PI*2); this.ctx.fill();  // Head cluster body sphere
+		// Ceil ceiling support hanging web element thread lines
+		this.ctx.strokeStyle = "rgba(255,255,255,0.15)";
+		this.ctx.lineWidth = 1;
+		this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0, -this.state.y); this.ctx.stroke();
 
-        // Dynamic multi-leg procedural animation arrays loops
-        const legWave = (this.state.action === "walk") ? Math.sin(t * 0.25) * 8 : 0;
-        
-        for(let i=0; i<4; i++) {
-            let offsetPhase = i * 0.4;
-            let dynamicSwing = (this.state.action === "walk") ? Math.sin(t * 0.22 + offsetPhase) * 12 : 0;
+		this.ctx.fillStyle = spiderColor;
+		this.ctx.strokeStyle = spiderColor;
+		this.ctx.lineWidth = 3.5;
 
-            // Left Side Extended Legs Representation Matrix Channels
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, -2);
-            this.ctx.lineTo(-10 - (i*8), -24 - (Math.sin(t*0.1 + i)*4) + dynamicSwing);
-            this.ctx.lineTo(-20 - (i*14), 18 + legWave);
-            this.ctx.stroke();
+		// Base structural body spheres
+		this.ctx.beginPath(); this.ctx.arc(-16, 0, 18, 0, Math.PI*2); this.ctx.fill();
+		this.ctx.beginPath(); this.ctx.arc(8, -2, 12, 0, Math.PI*2); this.ctx.fill();
 
-            // Right Side Legs Representation Matrix Channels
-            this.ctx.beginPath();
-            this.ctx.moveTo(4, -2);
-            this.ctx.lineTo(15 + (i*8), -22 - (Math.cos(t*0.1 + i)*4) - dynamicSwing);
-            this.ctx.lineTo(24 + (i*14), 18 - legWave);
-            this.ctx.stroke();
-        }
+		// Dynamic multi-leg procedural animation
+		// Define leg motion based on action
+		const isWalking = (this.state.action === "walk");
+		const isDancing = (this.state.action === "dance");
+		
+		const legWave = isWalking ? Math.sin(t * 0.25) * 8 : (isDancing ? Math.sin(t * 0.8) * 20 : 0);
+		
+		for(let i = 0; i < 4; i++) {
+			let offsetPhase = i * 0.4;
+			// Legs move much faster and wider during dance
+			let dynamicSwing = isWalking ? Math.sin(t * 0.22 + offsetPhase) * 12 : 
+							   (isDancing ? Math.sin(t * 0.6 + offsetPhase) * 25 : 0);
 
-        // Spider Red Arachnid Eye Clusters Array Rendering
-        this.ctx.fillStyle = this.activePet.isDead ? "black" : "#ff1744";
-        let eyeOffsets = [[12, -6], [16, -5], [14, -2], [18, -1], [10, -2], [14, 2]];
-        eyeOffsets.forEach(pos => {
-            this.ctx.beginPath(); this.ctx.arc(pos[0], pos[1], 1.5, 0, Math.PI*2); this.ctx.fill();
-        });
+			// Left Side Legs
+			this.ctx.beginPath();
+			this.ctx.moveTo(0, -2);
+			this.ctx.lineTo(-10 - (i*8), -24 - (Math.sin(t*0.1 + i)*4) + dynamicSwing);
+			this.ctx.lineTo(-20 - (i*14), 18 + legWave);
+			this.ctx.stroke();
 
-        if (this.state.action === "special") this.drawYarn(25, 10, t);
+			// Right Side Legs
+			this.ctx.beginPath();
+			this.ctx.moveTo(4, -2);
+			this.ctx.lineTo(15 + (i*8), -22 - (Math.cos(t*0.1 + i)*4) - dynamicSwing);
+			this.ctx.lineTo(24 + (i*14), 18 - legWave);
+			this.ctx.stroke();
+		}
 
-        this.ctx.restore();
-    }
+		// Spider Red Arachnid Eye Clusters
+		this.ctx.fillStyle = this.activePet.isDead ? "black" : "#ff1744";
+		// If dancing, make the eyes "pulse" by changing size based on time
+		let eyePulse = isDancing ? Math.abs(Math.sin(t * 0.2)) * 1.5 : 1;
+		let eyeOffsets = [[12, -6], [16, -5], [14, -2], [18, -1], [10, -2], [14, 2]];
+		eyeOffsets.forEach(pos => {
+			this.ctx.beginPath(); this.ctx.arc(pos[0], pos[1], 1.5 * eyePulse, 0, Math.PI*2); this.ctx.fill();
+		});
 
+		if (this.state.action === "special") this.drawYarn(25, 10, t);
+
+		this.ctx.restore();
+	}
     // ==========================================
     // NEW COMPANION ADDITION 3: GOLDFISH MODULE
     // ==========================================
-    drawGoldfish(t, scale) {
-        this.ctx.save();
-        
-        // Float logic vector transformation mapping rules
-        this.ctx.translate(this.state.x, this.state.y);
-        this.ctx.scale(this.state.facing * scale, scale);
+	drawGoldfish(t, scale) {
+		this.ctx.save();
+		
+		// Translation to position the fish
+		this.ctx.translate(this.state.x, this.state.y);
 
-        let fishColor = this.activePet.isDead ? "#e0e0e0" : this.activePet.color;
-        if(this.activePet.isDead) {
-            this.ctx.globalAlpha = 0.4;
-            this.ctx.rotate(Math.PI); // Float inverted upside down if deceased
-        }
-        this.ctx.fillStyle = fishColor;
+		// Apply rotation only if in 'dance' mode (somersault effect)
+		// t * 0.2 makes it spin based on time
+		if (this.state.action === "dance") {
+			this.ctx.rotate(t * 0.2);
+		}
 
-        // Main structural streamlined fluid teardrop body mesh representation
-        this.ctx.beginPath(); 
-        this.ctx.ellipse(0, 0, 36, 22, 0, 0, Math.PI*2); 
-        this.ctx.fill();
+		// Apply scaling/facing
+		this.ctx.scale(this.state.facing * scale, scale);
 
-        // Elegant wavy tail fin architecture loops
-        const tailWiggle = Math.sin(t * 0.28) * 12;
-        this.ctx.beginPath();
-        this.ctx.moveTo(-32, 0);
-        this.ctx.bezierCurveTo(-55, -25 + tailWiggle, -65, -10 + tailWiggle, -58, tailWiggle);
-        this.ctx.bezierCurveTo(-65, 10 + tailWiggle, -55, 25 + tailWiggle, -32, 0);
-        this.ctx.fillStyle = fishColor;
-        this.ctx.fill();
-        
-        // Secondary sheer internal accent layer mapping lines for fins
-        this.ctx.fillStyle = "rgba(255,255,255,0.3)";
-        this.ctx.beginPath();
-        this.ctx.moveTo(-32,0);
-        this.ctx.lineTo(-52, -15 + tailWiggle);
-        this.ctx.lineTo(-50, 15 + tailWiggle);
-        this.ctx.fill();
+		let fishColor = this.activePet.isDead ? "#e0e0e0" : this.activePet.color;
+		if (this.activePet.isDead) {
+			this.ctx.globalAlpha = 0.4;
+			this.ctx.rotate(Math.PI); // Float inverted upside down if deceased
+		}
+		this.ctx.fillStyle = fishColor;
 
-        // Dorsal Top fin architecture layer
-        this.ctx.fillStyle = fishColor;
-        this.ctx.beginPath();
-        this.ctx.moveTo(-10, -20);
-        this.ctx.bezierCurveTo(-5, -38, -25, -32, -22, -14);
-        this.ctx.fill();
+		// Main structural streamlined fluid teardrop body mesh representation
+		this.ctx.beginPath();
+		this.ctx.ellipse(0, 0, 36, 22, 0, 0, Math.PI * 2);
+		this.ctx.fill();
 
-        // Pectoral steering fin animation wave parameters
-        const finWave = Math.sin(t * 0.12) * 8;
-        this.ctx.save();
-        this.ctx.translate(10, 8);
-        this.ctx.rotate(finWave * Math.PI / 180);
-        this.ctx.beginPath(); this.ctx.ellipse(0, 0, 14, 8, 0.5, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.restore();
+		// Elegant wavy tail fin architecture loops
+		const tailWiggle = Math.sin(t * 0.28) * 12;
+		this.ctx.beginPath();
+		this.ctx.moveTo(-32, 0);
+		this.ctx.bezierCurveTo(-55, -25 + tailWiggle, -65, -10 + tailWiggle, -58, tailWiggle);
+		this.ctx.bezierCurveTo(-65, 10 + tailWiggle, -55, 25 + tailWiggle, -32, 0);
+		this.ctx.fillStyle = fishColor;
+		this.ctx.fill();
 
-        // Large glassy aquatic eye sockets arrays logic
-        this.ctx.fillStyle = "white";
-        this.ctx.beginPath(); this.ctx.arc(20, -6, 7, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.fillStyle = "black";
-        this.ctx.beginPath(); this.ctx.arc(22, -6, 3.5, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.fillStyle = "white";
-        this.ctx.beginPath(); this.ctx.arc(24, -8, 1, 0, Math.PI*2); this.ctx.fill(); // Highlight node
+		// Secondary sheer internal accent layer mapping lines for fins
+		this.ctx.fillStyle = "rgba(255,255,255,0.3)";
+		this.ctx.beginPath();
+		this.ctx.moveTo(-32, 0);
+		this.ctx.lineTo(-52, -15 + tailWiggle);
+		this.ctx.lineTo(-50, 15 + tailWiggle);
+		this.ctx.fill();
 
-        if (this.state.action === "special") this.drawYarn(30, -5, t);
+		// Dorsal Top fin architecture layer
+		this.ctx.fillStyle = fishColor;
+		this.ctx.beginPath();
+		this.ctx.moveTo(-10, -20);
+		this.ctx.bezierCurveTo(-5, -38, -25, -32, -22, -14);
+		this.ctx.fill();
 
-        this.ctx.restore();
-    }
+		// Pectoral steering fin animation wave parameters
+		const finWave = Math.sin(t * 0.12) * 8;
+		this.ctx.save();
+		this.ctx.translate(10, 8);
+		this.ctx.rotate(finWave * Math.PI / 180);
+		this.ctx.beginPath(); this.ctx.ellipse(0, 0, 14, 8, 0.5, 0, Math.PI * 2); this.ctx.fill();
+		this.ctx.restore();
+
+		// Large glassy aquatic eye sockets arrays logic
+		this.ctx.fillStyle = "white";
+		this.ctx.beginPath(); this.ctx.arc(20, -6, 7, 0, Math.PI * 2); this.ctx.fill();
+		this.ctx.fillStyle = "black";
+		this.ctx.beginPath(); this.ctx.arc(22, -6, 3.5, 0, Math.PI * 2); this.ctx.fill();
+		this.ctx.fillStyle = "white";
+		this.ctx.beginPath(); this.ctx.arc(24, -8, 1, 0, Math.PI * 2); this.ctx.fill(); // Highlight node
+
+		if (this.state.action === "special") this.drawYarn(30, -5, t);
+
+		this.ctx.restore();
+	}
+
 }
