@@ -32,7 +32,7 @@
 	#companionCanvas { 
 		display: block; 
 		width: 96%; 
-		height: 96%; 
+		height: 95%; 
 		outline: none;
 		image-rendering: pixelated; 
 		pointer-events: auto; 
@@ -121,6 +121,7 @@
 .p8-widget#pet-widget {
     background: transparent;
 	border: var(--border-width) var(--border-style) var(--border-color);
+	background: var(--bg);
     border-radius: var(--border-radius);
     font-size: var(--font-size);
 	overflow:visible;
@@ -177,7 +178,7 @@ body.edit-mode .p8-widget #companionCanvas {
 
 /* Explicitly target the resizer for browsers that support it */
 body.edit-mode .p8-widget#pet-widget::-webkit-resizer {
-    pointer-events: auto !important;
+
 }
     </style>
 </head>
