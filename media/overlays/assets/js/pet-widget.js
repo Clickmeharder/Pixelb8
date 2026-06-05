@@ -610,7 +610,7 @@ export class StreamPet {
 		if (borderToggle) {
 			borderToggle.addEventListener("change", (e) => {
 				this.state.hideBorder = e.target.checked;
-				this.applyBorderState(); // Run update helper instantly
+				this.applyVisibilityStates(); 
 				this.saveData(); // Commit to localStorage
 			});
 		}
