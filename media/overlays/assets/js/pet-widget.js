@@ -354,8 +354,7 @@ export class StreamPet {
         }
         console.log("🐾 [Pet Widget]: Interface Injected into control panel hierarchy.");
 
-        // Ready for attaching inputs, color swatches, and setting-row loop bindings!
-        this.bindUIEventListeners();
+
     }
 
 	// --- SOUND COMPONENT HANDLERS ---
