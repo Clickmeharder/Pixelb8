@@ -298,10 +298,7 @@ const AVAILABLE_OUT_ANIMATIONS = ["none", "fadeOut", "bounceOut", "zoomOut", "sl
 // --- CONFIGURATION MAPS & STRUCTS ---
 // =========================================================================
 
-// =========================================================================
 // 🌐 GLOBAL CORE CONFIGURATION LAYER (Single Source of Truth)
-// =========================================================================
-
 const SETTINGS_SCHEMA = [
     {
         groupName: "🔔 Alert Core Management",
