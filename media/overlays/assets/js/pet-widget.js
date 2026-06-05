@@ -1082,32 +1082,66 @@ export class StreamPet {
         this.playSound('nyanSound');
         this.say("NYAN OVERDRIVE ACTIVATED! 🌈");
     }
+	explodePet() {
+		// 1. Mark as dead immediately so other AI loops stop
+		this.activePet.isDead = true;
+		this.activePet.hunger = 100; // Force max hunger as it's now a carcass
+		this.state.action = "dead";
+		
+		// 2. Clear out any specific action timers or ongoing animations
+		this.state.actionTimer = 0;
+		this.stopSound('nyanSound'); 
 
-    revivePet() {
-        if (this.activePet.isDead) {
-            this.activePet.isDead = false;
-            this.activePet.hunger = 50; 
-            this.state.action = "special";
-            this.state.actionTimer = 200;
-            this.activePet.lastHungerTick = Date.now();
-            this.say("I'M ALIVE! 💖");
-            this.saveData();
-            
-            for(let i=0; i<20; i++) {
-                this.state.particles.push({
-                    x: this.state.x, 
-                    y: this.state.y, 
-                    vx: (Math.random() - 0.5) * 10, 
-                    vy: (Math.random() - 0.5) * 10, 
-                    s: 4, 
-                    c: "#ff77aa", 
-                    life: 40
-                });
-            }
-        } else {
-            this.say("Already healthy! ✨");
-        }
-    }
+		// 3. Trigger the gore explosion (particles)
+		const numParticles = 60;
+		for (let i = 0; i < numParticles; i++) {
+			this.state.particles.push({
+				x: this.state.x,
+				y: this.state.y,
+				vx: (Math.random() - 0.5) * 20,
+				vy: (Math.random() - 0.5) * 20,
+				s: 3 + Math.random() * 5, 
+				c: "#8b0000", // Bloody Red
+				life: 80 + Math.random() * 40
+			});
+		}
+
+		// 4. Set the "carcass" flag for the renderer
+		// This tells your draw function to render the ribcage instead of the pet
+		this.state.showCarcass = true;
+		
+		this.say("...");
+		console.log("The pet has exploded into a carcass.");
+	}
+	revivePet() {
+		if (this.activePet.isDead) {
+			this.activePet.isDead = false;
+			this.activePet.hunger = 50; 
+			this.state.action = "special";
+			this.state.actionTimer = 200;
+			this.activePet.lastHungerTick = Date.now();
+			
+			// --- Carcass Cleanup ---
+			this.state.showCarcass = false;
+			this.state.particles = [];
+			this.say("I'M ALIVE! 💖");
+			this.saveData();
+			
+			for(let i=0; i<20; i++) {
+				this.state.particles.push({
+					x: this.state.x, 
+					y: this.state.y, 
+					vx: (Math.random() - 0.5) * 10, 
+					vy: (Math.random() - 0.5) * 10, 
+					s: 4, 
+					c: "#ff77aa", 
+					life: 40
+				});
+			}
+		} else {
+			this.say("Already healthy! ✨");
+		}
+	}
 	updateAI(t) {
 		if (this.activePet.isDead) return;
 		this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
@@ -1211,6 +1245,13 @@ export class StreamPet {
 					this.state.hasFood = false; 
 					this.activePet.hunger = Math.max(0, this.activePet.hunger - 15); 
 					this.activePet.digestive += 1; 
+                    
+					// Explode if digestion count is too high (e.g., 5 is the limit)
+					if (this.activePet.digestive > 5) {
+						this.explodePet();
+						return; // Stop further processing for this pet
+					}
+
 					this.activePet.exp += 20; 
 					this.state.action = "idle"; 
 					this.state.actionTimer = 300;
