@@ -1395,9 +1395,13 @@ export class StreamPet {
         this.ctx.restore();
     }
 
-    drawEnvironment(t) {
+	drawEnvironment(t) {
         const visibleW = this.canvas.width;
         const visibleH = this.canvas.height;
+
+        // ========================================================
+        // PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
+        // ========================================================
 
         // Draw structural spider webs if tracking arrays populated
         this.state.spiderWebs.forEach(web => {
@@ -1412,14 +1416,64 @@ export class StreamPet {
             this.ctx.stroke();
         });
 
-        // Bed structural block render updates
-        const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-        this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.fillStyle = this.state.layout.bedColor;
-        this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
+        // ========================================================
+        // PHASE 2: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
+        // ========================================================
+        const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
+        const boxW = 150;
 
-        // Object Prop Variant: Cat Tower vs Castle/Coral
+        if (this.registry.activeSpecies === "puppy") {
+            // 🌿 Fresh Sod Grass Patch Variant for Canines
+            // Base Underlay Dirt Shadow Matrix
+            this.ctx.fillStyle = "#4e342e"; 
+            this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
+            
+            // Vibrant Grass Turf Slabs
+            this.ctx.fillStyle = "#2e7d32"; 
+            this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
+            
+            // Procedural Blade Clusters Accent Details
+            this.ctx.fillStyle = "#4caf50";
+            for (let i = 0; i < 6; i++) {
+                let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
+                this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
+                this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
+            }
+            
+            // Miniature Backyard Decorative Picket Border Trim (Shifted perfectly on top of grass)
+            this.ctx.fillStyle = "#f5f5f5";
+            
+            // 1. Vertical posts: Started at lPos.y - 20 with a height of 24 so they terminate exactly at lPos.y + 4
+            for(let p = 0; p <= boxW; p += 15) {
+                this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
+            }
+            
+            // 2. Rails: Shifted upward to fit proportionally within the new picket area height
+            this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   // Top rail
+            this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    // Bottom rail
+        } else {
+            // 🐈 Standard Feline Sand Litter Box Enclosure
+            this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
+            this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
+            this.ctx.fillStyle = "#2c3e50"; 
+            this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
+            this.ctx.fillStyle = "#95a5a6"; 
+            this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
+        }
+        
+        // Render associated waste units uniformly relative to localized coordinate indexes
+        this.activePet.poops.forEach(p => {
+            let poopyY = p.isCeil ? 90 : lPos.y + 24;
+            let poopyX = (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40);
+            this.ctx.font = "14px Arial";
+            this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
+        });
+
+        // ========================================================
+        // PHASE 3: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
+        // ========================================================
+
+        // Object Prop Variant: Cat Tower vs Castle/Coral vs Doghouse
         if (this.state.layout.showTower) {
             const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
             
@@ -1480,6 +1534,22 @@ export class StreamPet {
                 this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
             }
         }
+
+        // ========================================================
+        // PHASE 4: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
+        // ========================================================
+        
+        // Bed structural block render updates
+        const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
+        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+        this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.fillStyle = this.state.layout.bedColor;
+        this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
+
+        // ========================================================
+        // PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
+        // ========================================================
+        
         // Bowl processing map updates
         const fPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
         this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); this.ctx.fill();
@@ -1495,59 +1565,10 @@ export class StreamPet {
             this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
         }
 
-        // Environment Sandbox Litter Box Layout Map
-		// ========================================================
-        // POLYMORPHIC POTTY SANITARY MATRIX (Litter Box vs Grass Patch)
         // ========================================================
-        const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
-        const boxW = 150;
+        // PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
+        // ========================================================
 
-		if (this.registry.activeSpecies === "puppy") {
-            // 🌿 Fresh Sod Grass Patch Variant for Canines
-            // Base Underlay Dirt Shadow Matrix
-            this.ctx.fillStyle = "#4e342e"; 
-            this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
-            
-            // Vibrant Grass Turf Slabs
-            this.ctx.fillStyle = "#2e7d32"; 
-            this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
-            
-            // Procedural Blade Clusters Accent Details
-            this.ctx.fillStyle = "#4caf50";
-            for (let i = 0; i < 6; i++) {
-                let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
-                this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
-                this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
-            }
-            
-            // Miniature Backyard Decorative Picket Border Trim (Shifted on top of grass)
-            this.ctx.fillStyle = "#f5f5f5";
-            
-            // 1. Vertical posts: Started at lPos.y - 20 with a height of 24 so they terminate exactly at lPos.y + 4
-            for(let p = 0; p <= boxW; p += 15) {
-                this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
-            }
-            
-            // 2. Rails: Shifted upward to fit proportionally within the new picket area height
-            this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   // Top rail
-            this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    // Bottom rail
-        } else {
-            // 🐈 Standard Feline Sand Litter Box Enclosure
-            this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
-            this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
-            this.ctx.fillStyle = "#2c3e50"; 
-            this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
-            this.ctx.fillStyle = "#95a5a6"; 
-            this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
-        }
-        
-        // Render associated waste units uniformly relative to localized coordinate indexes
-        this.activePet.poops.forEach(p => {
-            let poopyY = p.isCeil ? 90 : lPos.y + 24;
-            let poopyX = (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40);
-            this.ctx.font = "14px Arial";
-            this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
-        });
         // Fluid Goldfish bubble update execution loops
         if (this.registry.activeSpecies === "goldfish") {
             this.state.goldfishBubbles.forEach((bubble, idx) => {
@@ -1586,7 +1607,6 @@ export class StreamPet {
             if(p.life <= 0) this.state.particles.splice(i, 1);
         });
     }
-
     // ==========================================
     // CORE VISUAL RENDERING ROUTERS PER SPECIES
     // ==========================================
