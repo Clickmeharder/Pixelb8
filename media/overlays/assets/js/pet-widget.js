@@ -132,6 +132,7 @@ export class StreamPet {
             hideNameplate: false,
             hideBackground: false,
             originalPos: { x: 0, y: 0 },
+			tummylimit: 5,
             nyanTimer: 0,
             nyanPhase: "takeoff",
             x: 200,
@@ -661,6 +662,14 @@ export class StreamPet {
 									</div>
 									<input type="range" id="canvasZoom" min="-2" max="2" step="0.1" value="0" style="width: 100%;">
 								</div>
+								<div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
+									<div style="display: flex; justify-content: space-between; align-items: center;">
+										<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">Explosion Threshold</label>
+										<span id="tummyLimitValue" style="color: #ea580c; font-weight: bold; font-size: 12px;">5</span>
+									</div>
+									<input type="range" id="tummyLimitRange" min="1" max="15" value="5" style="width: 100%;" 
+										   oninput="document.getElementById('tummyLimitValue').innerText = this.value; petManager.setTummyLimit(this.value);">
+								</div>
 								<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
 									<span>Hide Outer Border</span>
 									<input type="checkbox" id="hideBorderToggle">
@@ -757,7 +766,11 @@ export class StreamPet {
         const currentNote = document.getElementById(`${this.registry.activeSpecies}ContextNotes`);
         if (currentNote) currentNote.style.display = "block";
     }
-
+	setTummyLimit(newLimit) {
+		this.state.tummylimit = parseInt(newLimit);
+		console.log(`Tummy limit updated to: ${this.state.tummylimit}`);
+		this.saveData(); // Assuming you have a persistence method
+	}
     initSwatches() {
         const swatchContainer = document.getElementById("bedColorSwatches");
         if (!swatchContainer) return;
@@ -1083,36 +1096,39 @@ export class StreamPet {
         this.say("NYAN OVERDRIVE ACTIVATED! 🌈");
     }
 	explodePet() {
-		// 1. Mark as dead immediately so other AI loops stop
+		// 1. Mark as dead 
 		this.activePet.isDead = true;
-		this.activePet.hunger = 100; // Force max hunger as it's now a carcass
-		this.state.action = "dead";
-		
-		// 2. Clear out any specific action timers or ongoing animations
-		this.state.actionTimer = 0;
-		this.stopSound('nyanSound'); 
+		this.activePet.hunger = 100;
+		this.stopSound('nyanSound');
 
-		// 3. Trigger the gore explosion (particles)
-		const numParticles = 60;
-		for (let i = 0; i < numParticles; i++) {
-			this.state.particles.push({
-				x: this.state.x,
-				y: this.state.y,
-				vx: (Math.random() - 0.5) * 20,
-				vy: (Math.random() - 0.5) * 20,
-				s: 3 + Math.random() * 5, 
-				c: "#8b0000", // Bloody Red
-				life: 80 + Math.random() * 40
-			});
-		}
+		// 2. Bloat Animation: Wait 2 seconds, then explode
+		setTimeout(() => {
+			// Trigger the gore particles
+			const numParticles = 60;
+			for (let i = 0; i < numParticles; i++) {
+				this.state.particles.push({
+					x: this.state.x, y: this.state.y,
+					vx: (Math.random() - 0.5) * 20,
+					vy: (Math.random() - 0.5) * 20,
+					s: 3 + Math.random() * 5, 
+					c: "#8b0000",
+					life: 80 + Math.random() * 40
+				});
+			}
+			
+			this.state.showCarcass = true;
+			this.say("...");
 
-		// 4. Set the "carcass" flag for the renderer
-		// This tells your draw function to render the ribcage instead of the pet
-		this.state.showCarcass = true;
-		
-		this.say("...");
-		console.log("The pet has exploded into a carcass.");
+			// 3. Ghost Walk: After explosion, show ghost for 3 seconds
+			this.state.isGhost = true; 
+			setTimeout(() => {
+				this.state.isGhost = false; // Finished, stop rendering ghost
+				this.state.action = "dead";
+			}, 3000);
+
+		}, 2000); // 2 seconds of bloating
 	}
+
 	revivePet() {
 		if (this.activePet.isDead) {
 			this.activePet.isDead = false;
@@ -1247,9 +1263,9 @@ export class StreamPet {
 					this.activePet.digestive += 1; 
                     
 					// Explode if digestion count is too high (e.g., 5 is the limit)
-					if (this.activePet.digestive > 5) {
+					if (this.activePet.digestive > this.state.tummylimit) {
 						this.explodePet();
-						return; // Stop further processing for this pet
+						return;
 					}
 
 					this.activePet.exp += 20; 
