@@ -1438,24 +1438,50 @@ function syncAlertVisibilityState() {
     }
 }
 function syncAllToggleUI() {
-    // 1. Safely resolve your settings object fallback
+    // 1. Safely resolve global variables and settings fallbacks
     const s = typeof settings !== 'undefined' ? settings : {};
     
-    // 2. Clear, error-protected badge updater helper
+    // Fallback sync between global floating scopes and settings object state
+    const isMasterOn = typeof alertHidden !== 'undefined' ? !alertHidden : !s.alertHidden;
+    const isRewardsOn = typeof rewardsEnabled !== 'undefined' ? rewardsEnabled : !!s.rewardsEnabled;
+    const isBitsOn = typeof bitsEnabled !== 'undefined' ? bitsEnabled : !!s.bitsEnabled;
+    const isJukeboxOn = !!s.jukeboxWidgetEnabled;
+
+    // 2. Safe, error-protected badge updater helper
     const updateBadge = (id, isActive) => {
         const el = document.getElementById(id);
         if (!el) return; // Exit cleanly if the element isn't currently rendered on screen
         
-        // Ensure standard fallback classes are applied alongside the state
         el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
         el.innerText = isActive ? "ON" : "OFF";
     };
 
-    // 3. AUTOMATED SCHEMA LOOP: Syncs all dynamic elements created by your settings window
+    // 3. SYNC MASTER CORES (Updates BOTH management panel badges and settings window badges)
+    // Master Alert Visibility
+    updateBadge("mgr-toggle-alert-btn", isMasterOn); // If the manager button itself acts as a badge
+    updateBadge("mgr-alert-status-badge", isMasterOn);
+    updateBadge("stg-master-status-badge", isMasterOn);
+    
+    // Channel Points Toggles
+    updateBadge("mgr-toggle-rewards-btn", isRewardsOn);
+    updateBadge("mgr-rewards-status-badge", isRewardsOn);
+    updateBadge("stg-rewards-status-badge", isRewardsOn);
+    
+    // Bit Cheer Toggles
+    updateBadge("mgr-bits-status-badge", isBitsOn);
+    updateBadge("stg-bits-status-badge", isBitsOn);
+
+    // Jukebox Toggles
+    updateBadge("stg-jukebox-status-badge", isJukeboxOn);
+
+    // 4. AUTOMATED SCHEMA RENDERING LOOP (Handles the Chat, UI, and Bot Prefix Badges dynamically)
     if (typeof SETTINGS_SCHEMA !== 'undefined' && Array.isArray(SETTINGS_SCHEMA)) {
         SETTINGS_SCHEMA.forEach(group => {
             if (group && group.items) {
                 group.items.forEach(item => {
+                    // Skip the alert core ones we manually mapped above to prevent race conditions
+                    if (["master", "rewards", "bits", "jukebox"].includes(item.idKey)) return;
+
                     if (item && item.idKey && typeof item.get === 'function') {
                         updateBadge(`stg-${item.idKey}-status-badge`, item.get());
                     }
@@ -1464,29 +1490,17 @@ function syncAllToggleUI() {
         });
     }
 
-    // 4. INDEPENDENT PANELS SYNC: Safely sync the multi-window/manager badges if they exist
-    const isAlertActive = (typeof alertHidden !== 'undefined') ? !alertHidden : true;
-    updateBadge("mgr-alert-status-badge", isAlertActive);
-    updateBadge("stg-master-status-badge", isAlertActive);
-    
-    updateBadge("mgr-rewards-status-badge", !!s.rewardsEnabled);
-    updateBadge("stg-rewards-status-badge", !!s.rewardsEnabled);
-    
-    updateBadge("mgr-bits-status-badge", !!s.bitsEnabled);
-    updateBadge("stg-bits-status-badge", !!s.bitsEnabled);
-
-    // 5. JUKEBOX VISUAL SIDE-EFFECTS (Protected against missing nodes)
+    // 5. JUKEBOX VISUAL SIDE-EFFECTS (Protected against missing DOM elements)
     const jbControls = document.getElementById("jukebox-widget-controls");
     if (jbControls) {
-        const jbEnabled = !!s.jukeboxWidgetEnabled;
-        jbControls.style.display = jbEnabled ? "block" : "none";
-        jbControls.style.opacity = jbEnabled ? "1" : "0.5";
-        jbControls.style.pointerEvents = jbEnabled ? "auto" : "none";
+        jbControls.style.display = isJukeboxOn ? "block" : "none";
+        jbControls.style.opacity = isJukeboxOn ? "1" : "0.5";
+        jbControls.style.pointerEvents = isJukeboxOn ? "auto" : "none";
     }
 
-    // 6. CORE AUDIO ENGINE SYNC
+    // 6. AUDIO CORE JUKEBOX ENGINE TRIGGER
     if (window.streamJukeboxEngine && typeof window.streamJukeboxEngine.setWidgetActiveState === 'function') {
-        window.streamJukeboxEngine.setWidgetActiveState(!!s.jukeboxWidgetEnabled);
+        window.streamJukeboxEngine.setWidgetActiveState(isJukeboxOn);
     }
 }
 function updateAllBadgesUI() {
