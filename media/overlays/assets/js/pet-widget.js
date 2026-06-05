@@ -326,7 +326,7 @@ export class StreamPet {
                                             <span style="font-size: 11px; color: #fff;">${label}</span>
                                             <input type="checkbox" checked>
                                         </div>
-                                        <div style="display: flex; gap: 4px;">
+                                        <div style="display: flex;flex-direction:column; gap: 4px;">
                                             <button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
                                             <button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
                                             <input type="file" class="hidden-file-input" accept="audio/*" style="display: none;">
@@ -935,7 +935,14 @@ export class StreamPet {
         bindClick("btnDance", () => { if(!this.state.isDead) { this.state.action = "dance"; this.state.actionTimer = 300; this.say("Dance! ✨"); } });
         bindClick("btnTreat", () => { if(!this.state.isDead) { this.state.hunger = Math.max(0, this.state.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM NOM! 🍗"); } });
         bindClick("btnClear", () => { this.state.poops = []; this.say("Fresh sand! ✨"); });
-        bindClick("btnReset", () => { localStorage.clear(); location.reload(); });
+        bindClick("btnReset", () => { 
+			// 😺 Destroys only the pet's core data key
+			localStorage.removeItem("greta_ultra_v10"); 
+			// Optional: If you also want to reset custom sound associations mapped for this pet
+			// localStorage.removeItem("pixelkitty_sound_settings");
+			// Force application refresh to re-initialize defaults
+			location.reload(); 
+		});
 
         // Sound Engine Context Elements
         const masterToggle = document.getElementById("masterEnabled");
