@@ -1388,42 +1388,55 @@ function syncAlertVisibilityState() {
     }
 }
 function syncAllToggleUI() {
+    // 1. Safely resolve your settings object fallback
     const s = typeof settings !== 'undefined' ? settings : {};
     
-    // Helper to update specific badges (Preserves your clean class style naming assignments!)
+    // 2. Clear, error-protected badge updater helper
     const updateBadge = (id, isActive) => {
         const el = document.getElementById(id);
-        if (el) {
-            el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
-            el.innerText = isActive ? "ON" : "OFF";
-        }
+        if (!el) return; // Exit cleanly if the element isn't currently rendered on screen
+        
+        // Ensure standard fallback classes are applied alongside the state
+        el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
+        el.innerText = isActive ? "ON" : "OFF";
     };
 
-    // 🤖 AUTOMATED LOOP: Automatically updates every badge inside your settings window schema!
-    if (typeof SETTINGS_SCHEMA !== 'undefined') {
+    // 3. AUTOMATED SCHEMA LOOP: Syncs all dynamic elements created by your settings window
+    if (typeof SETTINGS_SCHEMA !== 'undefined' && Array.isArray(SETTINGS_SCHEMA)) {
         SETTINGS_SCHEMA.forEach(group => {
-            group.items.forEach(item => {
-                updateBadge(`stg-${item.idKey}-status-badge`, item.get());
-            });
+            if (group && group.items) {
+                group.items.forEach(item => {
+                    if (item && item.idKey && typeof item.get === 'function') {
+                        updateBadge(`stg-${item.idKey}-status-badge`, item.get());
+                    }
+                });
+            }
         });
     }
 
-    // 🎯 INDEPENDENT MANAGEMENT SYNC: Handles your multi-window alerts manager panel badges
-    updateBadge("mgr-alert-status-badge", !alertHidden);
-    updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
-    updateBadge("mgr-bits-status-badge", s.bitsEnabled);
+    // 4. INDEPENDENT PANELS SYNC: Safely sync the multi-window/manager badges if they exist
+    const isAlertActive = (typeof alertHidden !== 'undefined') ? !alertHidden : true;
+    updateBadge("mgr-alert-status-badge", isAlertActive);
+    updateBadge("stg-master-status-badge", isAlertActive);
+    
+    updateBadge("mgr-rewards-status-badge", !!s.rewardsEnabled);
+    updateBadge("stg-rewards-status-badge", !!s.rewardsEnabled);
+    
+    updateBadge("mgr-bits-status-badge", !!s.bitsEnabled);
+    updateBadge("stg-bits-status-badge", !!s.bitsEnabled);
 
-    // 🎸 JUKEBOX VISUAL SIDE-EFFECTS: Handles the opacity/interaction changes on your player element
+    // 5. JUKEBOX VISUAL SIDE-EFFECTS (Protected against missing nodes)
     const jbControls = document.getElementById("jukebox-widget-controls");
     if (jbControls) {
-        jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
-        jbControls.style.opacity = s.jukeboxWidgetEnabled ? "1" : "0.5";
-        jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
+        const jbEnabled = !!s.jukeboxWidgetEnabled;
+        jbControls.style.display = jbEnabled ? "block" : "none";
+        jbControls.style.opacity = jbEnabled ? "1" : "0.5";
+        jbControls.style.pointerEvents = jbEnabled ? "auto" : "none";
     }
 
-    // 🏎️ CORE AUDIO ENGINE SYNC
-    if (window.streamJukeboxEngine) {
-        window.streamJukeboxEngine.setWidgetActiveState(s.jukeboxWidgetEnabled);
+    // 6. CORE AUDIO ENGINE SYNC
+    if (window.streamJukeboxEngine && typeof window.streamJukeboxEngine.setWidgetActiveState === 'function') {
+        window.streamJukeboxEngine.setWidgetActiveState(!!s.jukeboxWidgetEnabled);
     }
 }
 function updateAllBadgesUI() {
