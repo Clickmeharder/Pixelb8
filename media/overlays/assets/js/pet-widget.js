@@ -1124,26 +1124,13 @@ export class StreamPet {
         const visibleW = this.canvas.width;
         const visibleH = this.canvas.height;
         
-        let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
-        let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
-        const anchorX = visibleW / 2;
-        const anchorY = visibleH - this.BASE_FLOOR_Y;
-
-        const getUnscaledPos = (pctX, pctY) => {
-            const targetX = (pctX / 100) * visibleW;
-            const targetY = (pctY / 100) * visibleH;
-            return {
-                x: anchorX + (targetX - anchorX) / scaleVal,
-                y: anchorY + (targetY - anchorY) / scaleVal
-            };
-        };
-
-        const bowlPos = getUnscaledPos(this.state.layout.bowlX, this.state.layout.bowlY);
-        const bedPos = getUnscaledPos(this.state.layout.bedX, this.state.layout.bedY);
-        const litPos = getUnscaledPos(this.state.layout.litterX, this.state.layout.litterY);
+        // ⭐ FIX: Feed percentages directly into your master tracking engine so paths follow zoom scaling
+        const bowlPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
+        const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
+        const litPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
 
         // 🕷️ Refined Outer Perimeter Bounds
-        const CEIL_Y = 30; // Shifted higher so he climbs to the absolute top edge
+        const CEIL_Y = 30; 
         const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
         const LEFT_X = 40;
         const RIGHT_X = visibleW - 40;
@@ -1200,6 +1187,7 @@ export class StreamPet {
 
             case "walk_to_food":
                 let foodTargetX = bowlPos.x;
+                // If spider, lock baseline to ground level. For land animals, step directly to scaled bowl center.
                 let foodTargetY = (this.registry.activeSpecies === "spider") ? FLOOR_Y : bowlPos.y;
                 
                 if (this.registry.activeSpecies === "spider") {
@@ -1419,7 +1407,6 @@ export class StreamPet {
                         this.state.x += this.state.facing * 1.5;
                         if (Math.random() < 0.08) this.state.y += (Math.random() > 0.5 ? 2 : -2);
                     } 
-                    // 🕷️ Fixed Edge Detection and Interlocking Corner Switches
                     else if (Math.abs(this.state.y - CEIL_Y) <= 4) { 
                         this.state.y = CEIL_Y; 
                         this.state.x += dir * 1.8;
@@ -1467,7 +1454,6 @@ export class StreamPet {
                 break;
         }
     }
-
     animate = () => {
         this.state.animT++;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -1534,7 +1520,7 @@ export class StreamPet {
         // PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
         // ========================================================
 
-        // Render structural perimeter webs at their exact dropped location coords
+        // Render structural perimeter webs at their exact dropped locations
         this.state.spiderWebs.forEach(web => {
             this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
             this.ctx.lineWidth = 1;
@@ -1552,8 +1538,8 @@ export class StreamPet {
             this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
             this.ctx.lineWidth = 1.2;
             this.ctx.beginPath();
-            // Connect line from ceiling anchor down to spider's live center position position
-            this.ctx.moveTo(this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x, 70);
+            // Connect line from ceiling anchor down to spider's live center position
+            this.ctx.moveTo(this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x, 30); // Bound tightly to true CEIL_Y
             this.ctx.lineTo(this.state.x, this.state.y);
             this.ctx.stroke();
         }
@@ -1605,15 +1591,16 @@ export class StreamPet {
                 if (p.y === undefined) p.y = this.state.y;
                 if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
 
-                if (p.y > 80) p.y -= 0.2; 
+                p.y -= 0.2; // Float up naturally in pixel canvas space
                 p.swimOffset += 0.03;
                 let finalX = p.x + Math.sin(p.swimOffset) * 5;
 
                 this.ctx.font = "14px Arial";
                 this.ctx.fillText("💩", finalX, p.y);
             } else if (this.registry.activeSpecies === "spider") {
-                // Spiders loop via permanent structural web arrays instead.
+                // Spiders leave permanent webs handled above in Phase 1
             } else {
+                // ⭐ FIX: Instead of static offsets, tie poop elements explicitly to the zoomed lPos tracking matrix
                 let poopyY = p.isCeil ? 90 : lPos.y + 24;
                 let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
                 this.ctx.font = "14px Arial";
@@ -1624,8 +1611,6 @@ export class StreamPet {
         // ========================================================
         // PHASE 3: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
         // ========================================================
-        
-        // Render large furniture towers ONLY if species is NOT a spider
         if (this.state.layout.showTower && this.registry.activeSpecies !== "spider") {
             const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
             
@@ -1754,7 +1739,6 @@ export class StreamPet {
             if(p.life <= 0) this.state.particles.splice(i, 1);
         });
     }
-
     // ==========================================
     // CORE VISUAL RENDERING ROUTERS PER SPECIES
     // ==========================================
