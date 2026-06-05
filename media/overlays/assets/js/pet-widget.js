@@ -445,7 +445,7 @@ export class StreamPet {
 		
 		// 🐈 KITTY MODULE TEMPLATE
 		const kittyModule = `
-			<details style="border: 1px solid #27272a; border-radius: 6px; background: #111114;" open>
+			<details style="border: 1px solid #27272a; border-radius: 6px; background: #111114;">
 				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🐈 Kitty-Specific Parameters</summary>
 				<div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 12px;">
 					
