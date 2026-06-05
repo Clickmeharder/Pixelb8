@@ -148,23 +148,33 @@ export class StreamPet {
         let isDragging = false;
         let startX, startY, initialLeft, initialTop;
 
-        this.widgetContainer.addEventListener("mousedown", (e) => {
-            if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" || e.target.closest("a, .swatch")) return;
-            
-            // Check if clicking edge resize bounds area (bottom-right pointer corridor)
-            const rect = this.widgetContainer.getBoundingClientRect();
-            if (e.clientX > rect.right - 15 && e.clientY > rect.bottom - 15) return;
+		this.widgetContainer.addEventListener("mousedown", (e) => {
+			if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" || e.target.closest("a, .swatch")) return;
 
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            initialLeft = parseInt(this.widgetContainer.style.left, 10) || rect.left;
-            initialTop = parseInt(this.widgetContainer.style.top, 10) || rect.top;
-            
-            this.widgetContainer.style.cursor = "grabbing";
-            e.preventDefault();
-        });
+			// --- FIX: DETECT RESIZER CLICK MORE ACCURATELY ---
+			// The native resize handle is roughly 15-20px. 
+			// We get the local coordinates of the click relative to the widget
+			const rect = this.widgetContainer.getBoundingClientRect();
+			const localX = e.clientX - rect.left;
+			const localY = e.clientY - rect.top;
 
+			// If the click is in the bottom-right corner, EXIT the function
+			// so the native 'resize' behavior takes over.
+			if (localX > this.widgetContainer.clientWidth - 20 && 
+				localY > this.widgetContainer.clientHeight - 20) {
+				return; 
+			}
+
+			// Otherwise, proceed with custom dragging
+			isDragging = true;
+			startX = e.clientX;
+			startY = e.clientY;
+			initialLeft = parseInt(this.widgetContainer.style.left, 10) || rect.left;
+			initialTop = parseInt(this.widgetContainer.style.top, 10) || rect.top;
+			
+			this.widgetContainer.style.cursor = "grabbing";
+			e.preventDefault();
+		});
         window.addEventListener("mousemove", (e) => {
             if (!isDragging) return;
             const deltaX = e.clientX - startX;
