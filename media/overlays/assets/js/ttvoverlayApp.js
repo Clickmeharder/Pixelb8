@@ -466,52 +466,43 @@ const BOOLEAN_TOGGLE_MAPS = [
     // --- MASTER ALERTS ---
     { 
         id: "settings-toggle-master-alerts", type: "change", valuePath: "checked", invert: true, 
-        assignTo: (val) => { alertHidden = val; settings.alertHidden = val; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
-    { 
-        id: "stg-toggle-master-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { alertHidden = !alertHidden; settings.alertHidden = alertHidden; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+        assignTo: (val) => { alertHidden = val; if (typeof settings !== 'undefined') settings.alertHidden = val; }, 
+        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
     },
     { 
         id: "mgr-toggle-alert-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { alertHidden = !alertHidden; settings.alertHidden = alertHidden; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+        assignTo: () => { alertHidden = !alertHidden; if (typeof settings !== 'undefined') settings.alertHidden = alertHidden; }, 
+        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
     },
 
-    // --- REWARDS ---
-    { 
-        id: "stg-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { rewardsEnabled = !rewardsEnabled; settings.rewardsEnabled = rewardsEnabled; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
+    // --- REWARDS MANAGER CORES ---
     { 
         id: "mgr-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { rewardsEnabled = !rewardsEnabled; settings.rewardsEnabled = rewardsEnabled; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+        assignTo: () => { 
+            if (typeof rewardsEnabled !== 'undefined') {
+                rewardsEnabled = !rewardsEnabled; 
+                if (typeof settings !== 'undefined') settings.rewardsEnabled = rewardsEnabled; 
+            } else if (typeof settings !== 'undefined') {
+                settings.rewardsEnabled = !settings.rewardsEnabled;
+            }
+        }, 
+        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
     },
 
-    // --- BITS ---
-    { 
-        id: "stg-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { bitsEnabled = !bitsEnabled; settings.bitsEnabled = bitsEnabled; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
+    // --- BITS MANAGER CORES ---
     { 
         id: "mgr-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { bitsEnabled = !bitsEnabled; settings.bitsEnabled = bitsEnabled; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
-
-    // --- JUKEBOX ---
-    { 
-        id: "stg-toggle-jukebox-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { settings.jukeboxWidgetEnabled = !settings.jukeboxWidgetEnabled; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+        assignTo: () => { 
+            if (typeof bitsEnabled !== 'undefined') {
+                bitsEnabled = !bitsEnabled; 
+                if (typeof settings !== 'undefined') settings.bitsEnabled = bitsEnabled; 
+            } else if (typeof settings !== 'undefined') {
+                settings.bitsEnabled = !settings.bitsEnabled;
+            }
+        }, 
+        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
     }
-];
-// Straight utility mapping dictionary for clean event routing execution pipelines
+];// Straight utility mapping dictionary for clean event routing execution pipelines
 const SIMPLE_CLICK_MAPS = [
     { id: "ctx-reset",     handler: () => systemReset() },
     { id: "logout-btn-ui", handler: () => systemReset() },
@@ -1079,14 +1070,14 @@ function renderSettingsWindow() {
             `;
 
             const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', () => {
-                    const currentVal = item.get();
-                    item.set(!currentVal);
-                    syncAllToggleUI(); 
-                });
-            }
-
+			if (toggleBtn) {
+				toggleBtn.addEventListener('click', () => {
+					// Pure schema action execution—no multi-bound racing events!
+					const currentVal = item.get();
+					item.set(!currentVal); 
+					syncAllToggleUI(); 
+				});
+			}
             innerPanel.appendChild(row);
         });
 
