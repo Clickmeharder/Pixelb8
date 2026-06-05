@@ -1,4 +1,3 @@
-
 /**
  * 🐾 StreamPet Widget Module
  * Follows the hot-swappable monolithic component structure.
@@ -79,7 +78,10 @@ export class StreamPet {
         this.audioAssets = {};
         Object.keys(this.defaultPaths).forEach(key => this.refreshAudioInstance(key));
 
-        // --- 3. RUN LIFECYCLE INITIALIZATION ---
+        // --- 3. DYNAMIC UI INJECTION ---
+        this.injectUI();
+
+        // --- 4. RUN LIFECYCLE INITIALIZATION ---
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
@@ -91,6 +93,165 @@ export class StreamPet {
         this.animate();
 
         this.bindEvents();
+    }
+
+    // --- DYNAMIC UI INJECTION ENGINE ---
+    injectUI() {
+        const manager = document.getElementById("widgets-manager");
+        if (!manager) {
+            console.warn("⚠️ [Pet Widget]: #widgets-manager wrapper not found. Skipping UI injection.");
+            return;
+        }
+
+        // Prevent duplicating if the module initializes multiple times
+        if (document.getElementById("pet-widget-controls")) return;
+
+        const petSection = document.createElement("div");
+        petSection.id = "pet-widget-controls";
+        petSection.className = "collapsible-section collapsed";
+
+        petSection.innerHTML = `
+            <div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                <span>🐾 Interactive Pet Module</span>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="collapsible-content" style="display: flex; flex-direction: column; gap: 12px;">
+                
+                <div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">Identity & Feed</label>
+                    <input type="text" id="nameInput" class="p8-input" placeholder="Pet Name (e.g., Greta)" style="background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 4px;">
+                    
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="streamerInput" class="p8-input" placeholder="Twitch Channel Name" style="flex: 1; background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 4px;">
+                        <button type="button" id="connectBtn" class="p8-btn" style="padding: 0 10px; background: rgb(14, 165, 233); font-size: 11px; height: 28px; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; width: 80px;">CONNECT</button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <button type="button" id="btnFeed" class="p8-btn" style="padding: 6px 0; background: #1e3a8a; border: 1px solid #3b82f6; font-size: 11px;">🐟 FEED FISH</button>
+                    <button type="button" id="btnTreat" class="p8-btn" style="padding: 6px 0; background: #7c2d12; border: 1px solid #ea580c; font-size: 11px;">🍗 GIVE TREAT</button>
+                    <button type="button" id="btnPlay" class="p8-btn" style="padding: 6px 0; background: #581c87; border: 1px solid #a855f7; font-size: 11px;">🧶 PLAY YARN</button>
+                    <button type="button" id="btnDance" class="p8-btn" style="padding: 6px 0; background: #065f46; border: 1px solid #10b981; font-size: 11px;">✨ DANCE</button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <button type="button" id="btnClear" class="p8-btn alt-btn" style="padding: 6px 0; background: #27272a; font-size: 11px;">🧹 CLEAN LITTER</button>
+                    <button type="button" id="btnRevive" class="p8-btn" style="padding: 6px 0; background: #991b1b; font-size: 11px;" onclick="if(window.petWidgetInstance) window.petWidgetInstance.revivekitty();">💖 REVIVE PET</button>
+                </div>
+
+                <details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
+                    <summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">📐 Layout & Environment</summary>
+                    <div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+                            <span style="font-size: 11px; color: #a1a1aa;">Show Cat Tower</span>
+                            <input type="checkbox" id="showTower" checked>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                            <span style="font-size: 11px; color: #a1a1aa;">Bed Fabric Accent Color:</span>
+                            <div id="bedColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px;"></div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px; border-top: 1px solid #27272a; padding-top: 8px;">
+                            <span style="font-size: 10px; color: #71717a; text-transform: uppercase; font-weight: bold;">Screen Placement Metrics (%)</span>
+                            
+                            <div style="display: grid; grid-template-columns: 70px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
+								<span>Nameplate X/Y</span>
+								<div style="display: flex; gap: 4px;"><input type="range" id="nameX" min="0" max="100" value="50" style="flex:1;"><input type="range" id="nameY" min="0" max="100" value="70" style="flex:1;"></div>
+								
+								<span>Stats X/Y</span>
+								<div style="display: flex; gap: 4px;"><input type="range" id="statsX" min="0" max="100" value="50" style="flex:1;"><input type="range" id="statsY" min="0" max="100" value="90" style="flex:1;"></div>
+
+								<span>Cat Bed X/Y</span>
+								<div style="display: flex; gap: 4px;"><input type="range" id="bedX" min="0" max="100" value="20" style="flex:1;"><input type="range" id="bedY" min="-100" max="100" value="0" style="flex:1;"></div>
+
+								<span>Food Bowl X/Y</span>
+								<div style="display: flex; gap: 4px;"><input type="range" id="bowlX" min="0" max="100" value="45" style="flex:1;"><input type="range" id="bowlY" min="-100" max="100" value="0" style="flex:1;"></div>
+
+								<span>Litter Box X/Y</span>
+								<div style="display: flex; gap: 4px;"><input type="range" id="litterX" min="0" max="100" value="90" style="flex:1;"><input type="range" id="litterY" min="-100" max="100" value="0" style="flex:1;"></div>
+
+								<span>Tower X/Y</span>
+								<div style="display: flex; gap: 4px;"><input type="range" id="towerX" min="0" max="100" value="70" style="flex:1;"><input type="range" id="towerY" min="-100" max="100" value="0" style="flex:1;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
+                    <summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🔊 Audio Configurations</summary>
+                    <div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 10px;">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+                            <span style="font-size: 11px; color: #a1a1aa; font-weight: bold;">Master Audio Engine</span>
+                            <input type="checkbox" id="masterEnabled" checked>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <div class="setting-row" data-key="meowSound" style="display: flex; flex-direction: column; gap: 4px; background: #141414; padding: 6px; border-radius: 4px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 11px; color: #fff;">😺 Standard Meow</span>
+                                    <input type="checkbox" checked>
+                                </div>
+                                <div style="display: flex; gap: 4px;">
+                                    <button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
+                                    <button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
+                                    <input type="file" class="hidden-file-input" accept="audio/*" style="display: none;">
+                                </div>
+                            </div>
+
+                            <div class="setting-row" data-key="mewSound" style="display: flex; flex-direction: column; gap: 4px; background: #141414; padding: 6px; border-radius: 4px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 11px; color: #fff;">😾 Baby Mew</span>
+                                    <input type="checkbox" checked>
+                                </div>
+                                <div style="display: flex; gap: 4px;">
+                                    <button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
+                                    <button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
+                                    <input type="file" class="hidden-file-input" accept="audio/*" style="display: none;">
+                                </div>
+                            </div>
+
+                            <div class="setting-row" data-key="purrSound" style="display: flex; flex-direction: column; gap: 4px; background: #141414; padding: 6px; border-radius: 4px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 11px; color: #fff;">💤 Content Purr</span>
+                                    <input type="checkbox" checked>
+                                </div>
+                                <div style="display: flex; gap: 4px;">
+                                    <button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
+                                    <button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
+                                    <input type="file" class="hidden-file-input" accept="audio/*" style="display: none;">
+                                </div>
+                            </div>
+
+                            <div class="setting-row" data-key="nyanSound" style="display: flex; flex-direction: column; gap: 4px; background: #141414; padding: 6px; border-radius: 4px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 11px; color: #fff;">🌈 Space Nyan Theme Loop</span>
+                                    <input type="checkbox" checked>
+                                </div>
+                                <div style="display: flex; gap: 4px;">
+                                    <button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
+                                    <button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
+                                    <input type="file" class="hidden-file-input" accept="audio/*" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <button type="button" id="btnReset" class="p8-btn" style="background: #991b1b; padding: 6px 0; font-size: 11px; margin-top: 5px;">⚠️ FACTORY RESET DATA</button>
+            </div>
+        `;
+
+        // Safely append before the "Close Panel" button at the bottom of the manager
+        const closeBtn = document.getElementById("close-widgets-manager-btn");
+        if (closeBtn) {
+            manager.insertBefore(petSection, closeBtn);
+        } else {
+            manager.appendChild(petSection);
+        }
+        console.log("🐾 [Pet Widget]: Interface Injected into DOM.");
     }
 
     // --- SOUND COMPONENT HANDLERS ---
@@ -140,7 +301,6 @@ export class StreamPet {
         b.style.top = (this.state.y - 140) + "px";
         b.classList.add("show"); 
         
-        // Clear previous timeouts cleanly if overlapping calls execute fast
         if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
         this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
 
@@ -164,24 +324,16 @@ export class StreamPet {
         this.state.animT++;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Update Game Frame Physics & Logic State Machine
         this.updateAI(this.state.animT);
-
-        // Render Static Environmental Props
         this.drawEnvironment(this.state.animT);
 
-        // Compute Structural Scaling Values based on Development Stage
         let petScale = 1.0;
         if (this.state.stage === "Baby") petScale = 0.6;
         if (this.state.stage === "Juvenile") petScale = 0.8;
 
-        // Render Character Layer Canvas Layout Pipeline
         this.drawKitty(this.state.animT, petScale);
-
-        // Push Raw State Metrics to DOM Text Textures
         this.updateUI();
 
-        // Recursively Request Next Available Frame
         requestAnimationFrame(this.animate);
     }
 
@@ -193,7 +345,7 @@ export class StreamPet {
         this.ctx.fillStyle = "rgba(0,0,0,0.1)";
         this.ctx.beginPath(); this.ctx.ellipse(0, 15, 15, 5, 0, 0, Math.PI*2); this.ctx.fill();
         this.ctx.fillStyle = "#e74c3c";
-        this.ctx.beginPath(); this.ctx.arc(0, 0, 12, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.arc(0, 12, 12, 0, Math.PI*2); this.ctx.fill();
         this.ctx.strokeStyle = "#c0392b";
         this.ctx.lineWidth = 2;
         this.ctx.beginPath(); this.ctx.arc(0, 0, 8, 0, Math.PI); this.ctx.stroke();
@@ -503,7 +655,6 @@ export class StreamPet {
                 else { this.state.hunger = potentialHunger; this.state.lastHungerTick = now - (msOffline % this.HUNGER_TICK_MS); }
             }
             
-            // Safe Syncing with form controls (if present in window context)
             const nameIn = document.getElementById("nameInput"); if(nameIn) nameIn.value = this.state.name;
             const checkT = document.getElementById("showTower"); if(checkT) checkT.checked = this.state.layout.showTower;
             
@@ -567,7 +718,6 @@ export class StreamPet {
 
     // --- DISCRETE BOUND INTERFACES ---
     bindEvents() {
-        // Safe binding layout sliders and action buttons (Dashboard UI context)
         const bindClick = (id, callback) => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('click', callback);
@@ -662,4 +812,3 @@ export class StreamPet {
         });
     }
 }
-
