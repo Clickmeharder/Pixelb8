@@ -921,6 +921,12 @@ export class StreamPet {
         let sTxt = this.state.isDead ? "DECEASED" : (this.state.poops.length > 5 ? "SICK" : "HEALTHY");
         statsEl.innerHTML = `${this.state.name} (${this.state.species.toUpperCase()}) | Age: ${this.state.ageDays}d | Hunger: ${this.state.hunger}%<br>Status: ${sTxt} | EXP: ${this.state.exp}`;
 		nameEl.textContent = this.state.isDead ? `${this.state.name.toUpperCase()}'S GHOST` : this.state.name.toUpperCase();
+		const propLabel = document.querySelector('label[for="showTower"]') || document.getElementById("showTower")?.previousElementSibling;
+		if (propLabel) {
+			if (this.state.species === "puppy") propLabel.textContent = "Show Doghouse";
+			else if (this.state.species === "goldfish") propLabel.textContent = "Show Castle/Coral";
+			else propLabel.textContent = "Show Cat Tower";
+		}
     }
 
 	applyEditModeStyles() {
@@ -1342,26 +1348,66 @@ export class StreamPet {
         this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
 
         // Object Prop Variant: Cat Tower vs Castle/Coral
-        if (this.state.layout.showTower) {
-            const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
-            if (this.state.species === "goldfish") {
-                // Aquarium Castle/Coral layout block
-                this.ctx.fillStyle = "#ffb74d"; 
-                this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
-                this.ctx.fillStyle = "#e65100";
-                this.ctx.fillRect(tPos.x - 50, tPos.y - 110, 30, 30);
-                this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
-                this.ctx.fillStyle = "#4e342e"; // Main gateway door open
-                this.ctx.beginPath(); this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); this.ctx.fill();
-            } else {
-                // Standard Feline Tower framework block
-                this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
-                this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 50, tPos.y - 5, 100, 15); 
-                this.ctx.fillStyle = "#a67c52"; this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
-                this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
-            }
-        }
-
+		if (this.state.layout.showTower) {
+			const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
+			
+			if (this.state.species === "goldfish") {
+				// Aquarium Castle/Coral layout block
+				this.ctx.fillStyle = "#ffb74d"; 
+				this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
+				this.ctx.fillStyle = "#e65100";
+				this.ctx.fillRect(tPos.x - 50, tPos.y - 110, 30, 30);
+				this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
+				this.ctx.fillStyle = "#4e342e"; // Main gateway door open
+				this.ctx.beginPath(); this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); this.ctx.fill();
+				
+			} else if (this.state.species === "puppy") {
+				// 🐕 Cozy Doghouse Asset Block
+				this.ctx.save();
+				
+				// Base Shadow
+				this.ctx.fillStyle = "rgba(0,0,0,0.15)";
+				this.ctx.fillRect(tPos.x - 55, tPos.y + 5, 110, 15);
+				
+				// Main Wood Structure Walls
+				this.ctx.fillStyle = "#d7ccc8"; // Light brown/cream walls
+				this.ctx.fillRect(tPos.x - 45, tPos.y - 65, 90, 70);
+				
+				// Front Doorway Arch (Dark interior)
+				this.ctx.fillStyle = "#3e2723"; 
+				this.ctx.beginPath();
+				this.ctx.arc(tPos.x, tPos.y - 25, 20, Math.PI, 0, false);
+				this.ctx.fillRect(tPos.x - 20, tPos.y - 25, 40, 30);
+				this.ctx.fill();
+				
+				// Triangular Peak Wall Fill
+				this.ctx.fillStyle = "#d7ccc8";
+				this.ctx.beginPath();
+				this.ctx.moveTo(tPos.x - 45, tPos.y - 65);
+				this.ctx.lineTo(tPos.x, tPos.y - 95);
+				this.ctx.lineTo(tPos.x + 45, tPos.y - 65);
+				this.ctx.fill();
+				
+				// Overhanging Roof Slats (Classic Red Doghouse Roof)
+				this.ctx.strokeStyle = "#d32f2f";
+				this.ctx.lineWidth = 8;
+				this.ctx.lineCap = "round";
+				this.ctx.beginPath();
+				this.ctx.moveTo(tPos.x - 55, tPos.y - 60);
+				this.ctx.lineTo(tPos.x, tPos.y - 98);
+				this.ctx.lineTo(tPos.x + 55, tPos.y - 60);
+				this.ctx.stroke();
+				
+				this.ctx.restore();
+				
+			} else {
+				// Standard Feline Tower framework block (Kitty / Spider fallback)
+				this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
+				this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 55, tPos.y - 5, 110, 15); 
+				this.ctx.fillStyle = "#a67c52"; this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
+				this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
+			}
+		}
         // Bowl processing map updates
         const fPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
         this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); this.ctx.fill();
