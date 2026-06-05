@@ -686,10 +686,30 @@ export class StreamPet {
 			return true;
 		};
 
-		const bowlPos = this.getPos(this.state.layout.bowlX, 100, -this.BASE_FLOOR_Y + this.state.layout.bowlY);
-		const bedPos = this.getPos(this.state.layout.bedX, 100, -this.BASE_FLOOR_Y + this.state.layout.bedY);
-		const litPos = this.getPos(this.state.layout.litterX, 100, -this.BASE_FLOOR_Y + this.state.layout.litterY);
-		const towerPos = this.getPos(this.state.layout.towerX, 100, -this.BASE_FLOOR_Y + this.state.layout.towerY);
+		// --- 🛠️ FIX: Dynamic Y Boundary Percentage Mapping Matrices ---
+		const floorY = window.innerHeight - this.BASE_FLOOR_Y;
+		const ceilingY = 150; // Keeps objects from vanishing past the top of the canvas
+		const usableHeight = floorY - ceilingY;
+
+		// Convert layout percentages (0-100) to precise viewport pixels
+		const getObjectY = (sliderY) => ceilingY + ((sliderY / 100) * usableHeight);
+
+		const bowlPos = { 
+			x: (this.state.layout.bowlX / 100) * window.innerWidth, 
+			y: getObjectY(this.state.layout.bowlY) 
+		};
+		const bedPos = { 
+			x: (this.state.layout.bedX / 100) * window.innerWidth, 
+			y: getObjectY(this.state.layout.bedY) 
+		};
+		const litPos = { 
+			x: (this.state.layout.litterX / 100) * window.innerWidth, 
+			y: getObjectY(this.state.layout.litterY) 
+		};
+		const towerPos = { 
+			x: (this.state.layout.towerX / 100) * window.innerWidth, 
+			y: getObjectY(this.state.layout.towerY) 
+		};
 
 		if (this.state.actionTimer > 0) this.state.actionTimer--;
 		if (this.state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(this.state.action)) this.state.action = "walk_to_food";
@@ -748,6 +768,7 @@ export class StreamPet {
 				if (walkToPoint(towerPos.x - 15, towerPos.y)) { this.state.facing = 1; this.state.action = "scratching"; this.state.actionTimer = 200; this.say("Scritch! 🐾"); }
 				break;
 			case "walk_to_tower_climb":
+				// Keeps relative offset to the tower canvas coordinate tree
 				if (walkToPoint(towerPos.x, towerPos.y - 145)) { this.state.action = "tower_sleep"; this.state.actionTimer = 1500; }
 				break;
 			case "scratching":
@@ -756,6 +777,9 @@ export class StreamPet {
 				 break;
 			case "idle":
 				if (this.state.actionTimer <= 0) {
+					// Ensure cat resets down perfectly flat to floor line when resuming defaults
+					this.state.y = window.innerHeight - this.BASE_FLOOR_Y;
+
 					if (Math.random() < 0.20) {
 						let sound = "Meow!";
 						if (this.state.hunger < 20) sound = "Purrr... ❤️";
@@ -774,6 +798,7 @@ export class StreamPet {
 				}
 				break;
 			case "walk":
+				this.state.y = window.innerHeight - this.BASE_FLOOR_Y; // Ground safety fallback
 				this.state.x += this.state.facing * 1.2;
 				if (this.state.x < 100 || this.state.x > window.innerWidth - 100) this.state.facing *= -1;
 				if (this.state.actionTimer <= 0) { this.state.action = "idle"; this.state.actionTimer = 500; }
@@ -789,7 +814,6 @@ export class StreamPet {
 				break;
 		}
 	}
-
 	// --- DOM TEXT METADATA UPDATES ---
 	updateUI() {
 		const nameEl = document.getElementById("nameplate");
