@@ -334,18 +334,10 @@ const SETTINGS_SCHEMA = [
                     if (typeof settings !== 'undefined') settings.bitsEnabled = v; 
                     if (typeof saveSettings === "function") saveSettings(); 
                 } 
-            },
-            { 
-                label: "Enable Jukebox", 
-                idKey: "jukebox", 
-                get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
-                set: (v) => { 
-                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                } 
             }
         ]
     },
+
     {
         groupName: "💬 Chat & UI Displays",
         items: [
@@ -421,6 +413,30 @@ const SETTINGS_SCHEMA = [
                     if (typeof saveSettings === "function") saveSettings(); 
                 } 
             }
+        ]
+    },
+    {
+        // 🆕 NEW COMPONENT BLOCK
+        groupName: "🧩 Widgets Settings",
+        items: [
+            { 
+                label: "Enable Jukebox", 
+                idKey: "jukebox", 
+                get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
+                set: (v) => { 
+                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                } 
+            },
+			{ 
+				label: "Enable Entropia Tracker", 
+				idKey: "entropia-widget", 
+				get: () => (settings ? !!settings.entropiaWidgetEnabled : false), 
+				set: (v) => { 
+					if (typeof settings !== 'undefined') settings.entropiaWidgetEnabled = v; 
+					if (typeof saveSettings === "function") saveSettings(); 
+				} 
+			}
         ]
     }
 ];
@@ -1408,7 +1424,7 @@ function syncAlertVisibilityState() {
 function syncAllToggleUI() {
     const s = typeof settings !== 'undefined' ? settings : {};
     
-    // Helper to update specific badges (Preserves your clean class style naming assignments!)
+    // Helper to update specific badges
     const updateBadge = (id, isActive) => {
         const el = document.getElementById(id);
         if (el) {
@@ -1431,12 +1447,26 @@ function syncAllToggleUI() {
     updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
     updateBadge("mgr-bits-status-badge", s.bitsEnabled);
 
-    // 🎸 JUKEBOX VISUAL SIDE-EFFECTS: Handles the opacity/interaction changes on your player element
+    // 🎸 JUKEBOX VISUAL SIDE-EFFECTS
     const jbControls = document.getElementById("jukebox-widget-controls");
     if (jbControls) {
         jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
         jbControls.style.opacity = s.jukeboxWidgetEnabled ? "1" : "0.5";
         jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
+    }
+
+    // 🎯 ENTROPIA TRACKER VISUAL SIDE-EFFECTS (Matches Jukebox style rules perfectly)
+    const entControls = document.getElementById("entropia-widget-controls");
+    if (entControls) {
+        entControls.style.display = s.entropiaWidgetEnabled ? "block" : "none";
+        entControls.style.opacity = s.entropiaWidgetEnabled ? "1" : "0.5";
+        entControls.style.pointerEvents = s.entropiaWidgetEnabled ? "auto" : "none";
+    }
+
+    // (If you have a main overlay panel wrapper element for the stream layout itself)
+    const entWidget = document.getElementById("entropia-widget");
+    if (entWidget) {
+        entWidget.style.display = s.entropiaWidgetEnabled ? "block" : "none";
     }
 
     // 🏎️ CORE AUDIO ENGINE SYNC
