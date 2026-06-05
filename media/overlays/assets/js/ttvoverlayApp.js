@@ -68,9 +68,8 @@ modes:
 // --- MODULE IMPORTS ---
 // import { EntropiaWidget } from './entropia-widget.js';
 //import { EntropiaWidget } from './entropia-widget-refactored.js';
-//import { StreamJukebox } from './jukebox.js'; // 🟢 Added Jukebox Engine Module
-// import { EntropiaWidget } from './entropia-widget-refactored.js';
-// import { StreamJukebox } from './jukebox.js';
+//import { StreamJukebox } from './jukebox.js';
+
 
 async function bootstrapWidgets() {
     const s = typeof settings !== 'undefined' ? settings : {};
@@ -473,52 +472,74 @@ const SETTINGS_SCHEMA = [
         ]
     },
 	{
-		groupName: "🧩 Widgets Settings",
-		items: [
-			{ 
-				label: "Jukebox", 
-				idKey: "jukebox", 
-				get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
-				set: (v) => { 
-					if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
-					if (typeof saveSettings === "function") saveSettings(); 
-					
-					// Alert user that a hardware state change requires a reload
-					if (confirm(`Jukebox ${v ? 'Enabled' : 'Disabled'}. A page reload is required to apply changes and optimize performance. Reload now?`)) {
-						window.location.reload();
-					}
-				} 
-			},
-			{ 
-				label: "Entropia Widget", 
-				idKey: "entropia-widget", 
-				get: () => (settings ? !!settings.entropiaWidgetEnabled : false), 
-				set: (v) => { 
-					if (typeof settings !== 'undefined') settings.entropiaWidgetEnabled = v; 
-					if (typeof saveSettings === "function") saveSettings(); 
-					
-					if (confirm(`Entropia Tracker ${v ? 'Enabled' : 'Disabled'}. A page reload is required to apply changes and optimize performance. Reload now?`)) {
-						window.location.reload();
-					}
-				} 
-			},
-			{ 
-				label: "Timers", 
-				idKey: "timer-widget", 
-				get: () => (settings ? !!settings.timerWidgetEnabled : false), 
-				set: (v) => { 
-					if (typeof settings !== 'undefined') settings.timerWidgetEnabled = v; 
-					if (typeof saveSettings === "function") saveSettings(); 
-					
-					// If your timer is baked into your core file right now, you don't *strictly* need a reload, 
-					// but keeping it consistent prevents confusion!
-					if (confirm(`Stream Timer ${v ? 'Enabled' : 'Disabled'}. Reload page to update layout elements?`)) {
-						window.location.reload();
-					}
-				} 
-			}
-		]
-	}
+        groupName: "🧩 Widgets Settings",
+        items: [
+            { 
+                label: "Enable Jukebox", 
+                idKey: "jukebox", 
+                get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
+                set: async (v) => { // 🔄 Marked async for on-the-fly streaming
+                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    
+                    // If turning ON and it hasn't been imported yet, load and instantiate it now!
+                    if (v && typeof window.streamJukeboxEngine === 'undefined') {
+                        try {
+                            const module = await import('./jukebox.js');
+                            window.StreamJukebox = module.StreamJukebox;
+                            window.streamJukeboxEngine = new module.StreamJukebox();
+                            
+                            // Hot-inject the new commands into your active chat listener
+                            if (typeof injectAllWidgetCommands === 'function') injectAllWidgetCommands();
+                            console.log("🎸 Jukebox Hot-Loaded and Instantiated mid-session!");
+                        } catch (err) {
+                            console.error("❌ Failed to hot-load Jukebox:", err);
+                        }
+                    }
+                    
+                    // Always sync up the visibility across windows instantly
+                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+                } 
+            },
+            { 
+                label: "Enable Entropia Tracker", 
+                idKey: "entropia-widget", 
+                get: () => (settings ? !!settings.entropiaWidgetEnabled : false), 
+                set: async (v) => { // 🔄 Marked async for on-the-fly streaming
+                    if (typeof settings !== 'undefined') settings.entropiaWidgetEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    
+                    // If turning ON and it hasn't been imported yet, load and instantiate it now!
+                    if (v && typeof window.entropiaLogParser === 'undefined') {
+                        try {
+                            const module = await import('./entropia-widget-refactored.js');
+                            window.EntropiaWidget = module.EntropiaWidget;
+                            window.entropiaLogParser = new module.EntropiaWidget();
+                            
+                            // Hot-inject the new commands into your active chat listener
+                            if (typeof injectAllWidgetCommands === 'function') injectAllWidgetCommands();
+                            console.log("🎯 Entropia Tracker Hot-Loaded and Instantiated mid-session!");
+                        } catch (err) {
+                            console.error("❌ Failed to hot-load Entropia Tracker:", err);
+                        }
+                    }
+                    
+                    // Always sync up the visibility across windows instantly
+                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+                } 
+            },
+            { 
+                label: "Enable Stream Timer", 
+                idKey: "timer-widget", 
+                get: () => (settings ? !!settings.timerWidgetEnabled : false), 
+                set: (v) => { 
+                    if (typeof settings !== 'undefined') settings.timerWidgetEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+                } 
+            }
+        ]
+    }
 	
 ];
 // Maps trigger elements to their target interface panels and optional callback lifecycle hooks
@@ -746,60 +767,32 @@ async function init() {
     const s = typeof settings !== 'undefined' ? settings : {};
 
     // =========================================================================
-    // ⚙️ HARDWARE OPTIMIZATION: CONDITIONAL LAZY-LOADING PACKS
+    // ⚙️ INITIAL BOOT LAZY-LOADING (Only runs if enabled on start)
     // =========================================================================
-    
-    // 🎯 Dynamic Entropia Fetch
     if (s.entropiaWidgetEnabled) {
         try {
-            // This pulls the module across the network only if it's turned ON
             const module = await import('./entropia-widget-refactored.js');
-            // Assign the class to window scope so your existing try/catch block below works perfectly
             window.EntropiaWidget = module.EntropiaWidget;
-            console.log("📦 Entropia Widget file dynamically imported.");
+            window.entropiaLogParser = new module.EntropiaWidget();
+            console.log("✅ Entropia Widget Loaded on boot.");
         } catch (err) {
-            console.error("❌ Failed to stream Entropia script source:", err);
+            console.error("❌ Failed to boot Entropia Tracker:", err);
         }
     }
 
-    // 🎸 Dynamic Jukebox Fetch
     if (s.jukeboxWidgetEnabled) {
         try {
             const module = await import('./jukebox.js');
             window.StreamJukebox = module.StreamJukebox;
-            console.log("📦 Jukebox Engine file dynamically imported.");
+            window.streamJukeboxEngine = new module.StreamJukebox();
+            console.log("✅ Jukebox Loaded on boot.");
         } catch (err) {
-            console.error("❌ Failed to stream Jukebox script source:", err);
+            console.error("❌ Failed to boot Jukebox Module:", err);
         }
     }
     
-    // =========================================================================
-    // 1. INSTANTIATE WIDGETS (Your original architecture runs unchanged!)
-    // =========================================================================
-    try {
-        if (typeof EntropiaWidget !== 'undefined') {
-            window.entropiaLogParser = new EntropiaWidget();
-            console.log("✅ Entropia Widget Instance created.");
-        } else {
-            console.warn("⚠️ [Init Warning]: EntropiaWidget class is not loaded (Widget is disabled).");
-        }
-    } catch (entropiaError) {
-        console.error("❌ [Init Error]: Failed to initialize Entropia Widget:", entropiaError);
-    }
-
-    try {
-        if (typeof StreamJukebox !== 'undefined') {
-            window.streamJukeboxEngine = new StreamJukebox();
-            console.log("✅ Jukebox Instance created.");
-        } else {
-            console.warn("⚠️ [Init Warning]: StreamJukebox class is not loaded (Widget is disabled).");
-        }
-    } catch (jukeboxError) {
-        console.error("❌ [Init Error]: Failed to initialize Jukebox Module:", jukeboxError);
-    }
-
-    // 2. NOW inject commands (only after both instances are guaranteed to exist or safely skip)
-    console.log("📡 [Command Registry]: Starting injection scan...");
+    // 2. Scan and inject any commands that were loaded during boot
+    console.log("📡 [Command Registry]: Running boot scan...");
     injectAllWidgetCommands();
     
     // Populate registry array caches for rewards and bits
