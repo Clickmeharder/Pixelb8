@@ -63,7 +63,7 @@ export class StreamPet {
             poops: [],
             hasFood: false,
             particles: [],
-            zoom: 1.0, // 🔍 Added default zoom scaling property
+            zoom: 0, // Default range value matching input slider base slider 0
             dimensions: {
                 width: "", height: "", left: "", top: ""
             },
@@ -126,12 +126,8 @@ export class StreamPet {
             const subCommand = parts[0];
             const isAdmin = flags.broadcaster || flags.mod;
 
-            // Handle root commands (e.g., if someone types "!feed" instead of "!pet feed")
-            // We shift the subcommand if they ran a direct command alias
-            // (Passed down by the individual array mappings below)
             let actualSub = subCommand;
             
-            // 🪦 CRITICAL BUGFIX: Allow 'revive' through the death check!
             if (this.state.isDead && actualSub !== 'revive' && actualSub !== 'status' && actualSub !== 'stats') {
                 sendNotice(`🪦 [Pet]: ${this.state.name} is currently deceased. Use !pet revive or use the control panel to save them!`);
                 return;
@@ -199,7 +195,7 @@ export class StreamPet {
 
                 case 'revive':
                     if (isAdmin || this.state.exp > 100) {
-                        this.reviveKitty(); // Ensuring it targets your renamed method casing if applicable
+                        this.reviveKitty();
                         sendNotice(`💖 [Pet]: ${this.state.name} was successfully revived by ${user}!`);
                     } else {
                         sendNotice(`❌ [Pet]: Only staff or high EXP users can revive ${this.state.name}!`);
@@ -218,13 +214,9 @@ export class StreamPet {
             }
         };
 
-        // 📦 EXPOSE ALL MISSING COMMANDS TO THE OVERLAY APPLICATION LOGS
         return [
-            // Core Base Commands Matrix
             { name: 'pet', adminOnly: false, execute: petExecution },
             { name: 'kitty', adminOnly: false, execute: petExecution },
-            
-            // Direct Quick Action Shortcuts Matrix
             { name: 'feed', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'feed', flags) },
             { name: 'play', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'play', flags) },
             { name: 'dance', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'dance', flags) },
@@ -234,20 +226,18 @@ export class StreamPet {
             { name: 'nyan', adminOnly: true, execute: (user, message, flags) => petExecution(user, 'nyan', flags) },
             { name: 'revive', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'revive', flags) }
         ];
-    }
-    // --- 1. SEPARATED RAW TEMPLATE MATRIX ---
-	static get controlsTemplate() {
-        // Define positioning sliders: [idPrefix, label, defaultX, defaultY, minY (optional)]
-	const layoutMetrics = [
-		["name", "Nameplate X/Y", 50, 70, 0, 100],
-		["stats", "Stats X/Y", 50, 90, 0, 100],
-		["bed", "Cat Bed X/Y", 20, 100, 0, 100],     // Min 0, Max 100, Default 100
-		["bowl", "Food Bowl X/Y", 45, 100, 0, 100],   // Min 0, Max 100, Default 100
-		["litter", "Litter Box X/Y", 90, 100, 0, 100], // Min 0, Max 100, Default 100
-		["tower", "Tower X/Y", 70, 100, 0, 100]       // Min 0, Max 100, Default 100
-	];
+	}
 
-        // Define audio track configuration rows
+	static get controlsTemplate() {
+		const layoutMetrics = [
+			["name", "Nameplate X/Y", 50, 70, 0, 100],
+			["stats", "Stats X/Y", 50, 90, 0, 100],
+			["bed", "Cat Bed X/Y", 20, 100, 0, 100],     
+			["bowl", "Food Bowl X/Y", 45, 100, 0, 100],   
+			["litter", "Litter Box X/Y", 90, 100, 0, 100], 
+			["tower", "Tower X/Y", 70, 100, 0, 100]       
+		];
+
         const audioTracks = [
             { key: "meowSound", label: "😺 Standard Meow" },
             { key: "mewSound", label: "😾 Baby Mew" },
@@ -341,8 +331,8 @@ export class StreamPet {
                 </div>
             </div>
         `;
-    }
-    // --- DYNAMIC UI INJECTION ENGINE ---
+	}
+
 	injectUI() {
         const wrapper = document.getElementById("widget-control-wrapper");
         if (!wrapper) {
@@ -364,11 +354,8 @@ export class StreamPet {
             wrapper.appendChild(petSection);
         }
         console.log("🐾 [Pet Widget]: Interface Injected into control panel hierarchy.");
+	}
 
-
-    }
-
-	// --- SOUND COMPONENT HANDLERS ---
 	refreshAudioInstance(key) {
 		const source = window.soundSettings.customPaths[key] || this.defaultPaths[key];
 		if (source) {
@@ -394,40 +381,28 @@ export class StreamPet {
 		}
 	}
 
-	// --- UTILITIES ---
 	resize() {
-		// Look at the window client sizes
 		const parentW = window.innerWidth;
 		const parentH = window.innerHeight;
 
-		// 🛠️ BUFFER OVERFLOW FIX: Expand the internal resolution matrix out past boundaries
-		// This gives the drawing engine an extra 100px safe padding on all sides.
 		this.canvas.width = parentW + 200;
 		this.canvas.height = parentH + 200;
-
-		// Reset context state changes from previous size contexts
 		this.ctx.imageSmoothingEnabled = false;
 	}
 
 	getPos(pctX, pctY, offY = 0) {
-		// 1. Core visual workspace bounds (ignoring the 200px bleed padding)
 		const visibleW = this.canvas.width - 200;
 		const visibleH = this.canvas.height - 200;
 
-		// 2. Exact scale calculation mirroring your animate loop logic
 		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
 		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
 
-		// 3. Define the exact zoom transformation center anchor points
 		const anchorX = visibleW / 2;
 		const anchorY = visibleH - this.BASE_FLOOR_Y;
 
-		// 4. Determine target pixel coordinates on the active browser window
 		const targetX = (pctX / 100) * window.innerWidth;
 		const targetY = (pctY / 100) * window.innerHeight;
 
-		// 5. Reverse transform the coordinates relative to the zoom anchor
-		// (This ensures that when the context scales out from the center, it hits the exact target)
 		const finalX = anchorX + (targetX - anchorX) / scaleVal;
 		const finalY = anchorY + (targetY - anchorY) / scaleVal;
 
@@ -436,6 +411,7 @@ export class StreamPet {
 			y: finalY + offY
 		};
 	}
+
 	say(txt) {
 		const b = document.getElementById("bubble");
 		if (!b) return;
@@ -462,8 +438,6 @@ export class StreamPet {
 		this.say("NYAN NYAN NYAN! 🌈");
 	}
 
-	// --- MAIN ANIMATION INTERFACE LOOP ---
-
 	animate = () => {
 		this.state.animT++;
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -472,26 +446,20 @@ export class StreamPet {
 
 		this.ctx.save();
 		
-		// 🛠️ BUFFER OVERFLOW SHIFT: Push drawing coordinate grid 0,0 inward by 100px.
-		// This centers the standard screen coordinates while keeping the 100px bleed padding alive!
 		this.ctx.translate(100, 100);
 
-		// Calculate true scale multiplier values (mirroring your getPos logic)
 		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
 		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
 
-		// Anchor calculations use relative workspace limits (subtracting overflow padding margins)
 		const visibleW = this.canvas.width - 200;
 		const visibleH = this.canvas.height - 200;
 		const anchorX = visibleW / 2;
 		const anchorY = visibleH - this.BASE_FLOOR_Y;
 
-		// Perform scale context adjustments from the custom floor anchor point
 		this.ctx.translate(anchorX, anchorY);
 		this.ctx.scale(scaleVal, scaleVal);
 		this.ctx.translate(-anchorX, -anchorY);
 
-		// Render the assets safely under the modified transformation matrix
 		this.drawEnvironment(this.state.animT);
 
 		let petScale = 1.0;
@@ -500,14 +468,13 @@ export class StreamPet {
 
 		this.drawKitty(this.state.animT, petScale);
 		
-		// Remove scale transformations and bleed translations
 		this.ctx.restore();
 
 		this.updateUI();
 
 		requestAnimationFrame(this.animate);
 	}
-	// --- DRAWING & RENDERING PROCEDURES ---
+
 	drawYarn(x, y, t) {
 		const roll = Math.sin(t * 0.15) * 40;
 		this.ctx.save();
@@ -525,14 +492,12 @@ export class StreamPet {
 	}
 
 	drawEnvironment(t) {
-		// 🛏️ 1. Cat Bed (Derived directly via percentage layouts)
 		const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
 		this.ctx.fillStyle = "rgba(0,0,0,0.1)";
 		this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
 		this.ctx.fillStyle = this.state.layout.bedColor;
 		this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
 
-		// 🏰 2. Cat Tower
 		if (this.state.layout.showTower) {
 			const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
 			this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
@@ -541,7 +506,6 @@ export class StreamPet {
 			this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
 		}
 
-		// 🐟 3. Food Bowl
 		const fPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
 		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); this.ctx.fill();
 		this.ctx.fillStyle = "#ecf0f1"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); this.ctx.fill();
@@ -551,7 +515,6 @@ export class StreamPet {
 			this.ctx.font = "18px Arial"; this.ctx.fillText("🐟", fPos.x - 10, fPos.y - 6);
 		}
 
-		// 💩 4. Litter Box
 		const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
 		const boxW = 150;
 		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 50);
@@ -559,7 +522,6 @@ export class StreamPet {
 		this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 5, boxW - 16, 38);
 		this.state.poops.forEach(p => this.ctx.fillText("💩", (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40), lPos.y + 30));
 
-		// 🌈 5. Nyan Drive Rainbow Trail Overlay
 		if (this.state.action === "nyan") {
 			const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
 			const visibleW = this.canvas.width - 200;
@@ -578,7 +540,6 @@ export class StreamPet {
 			this.ctx.globalAlpha = 1.0;
 		}
 
-		// ✨ 6. Local Scratch/Poop Dig Sand Particles System
 		this.state.particles.forEach((p, i) => {
 			this.ctx.fillStyle = p.c; this.ctx.globalAlpha = p.life / 30;
 			this.ctx.fillRect(p.x, p.y, p.s, p.s); this.ctx.globalAlpha = 1.0;
@@ -586,6 +547,7 @@ export class StreamPet {
 			if(p.life <= 0) this.state.particles.splice(i, 1);
 		});
 	}
+
 	drawKitty(t, scale) {
 		this.ctx.save();
 		let bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
@@ -644,13 +606,14 @@ export class StreamPet {
 		}
 		this.ctx.restore();
 	}
+
 	drawkittyEars(x, y, color, sleeping) {
 		this.ctx.fillStyle = color;
 		if (sleeping) {
 			this.ctx.beginPath(); this.ctx.moveTo(x - 15, y - 8); this.ctx.lineTo(x - 22, y + 2); this.ctx.lineTo(x - 5, y + 5); this.ctx.fill();
 			this.ctx.beginPath(); this.ctx.moveTo(x + 15, y - 8); this.ctx.lineTo(x + 22, y + 2); this.ctx.lineTo(x + 5, y + 5); this.ctx.fill();
 		} else {
-			this.ctx.beginPath(); this.ctx.moveTo(x - 20, y - 10); this.ctx.lineTo(x - 12, y - 40); this.ctx.lineTo(x - 2, y - 15); this.ctx.fill();
+			this.ctx.beginPath(); this.ctx.moveTo(x - 20, y - 10); this.ctx.lineTo(x - 12, y - 40); this.lineTo(x - 2, y - 15); this.ctx.fill();
 			this.ctx.beginPath(); this.ctx.moveTo(x + 20, y - 10); this.ctx.lineTo(x + 12, y - 40); this.ctx.lineTo(x + 2, y - 15); this.ctx.fill();
 		}
 	}
@@ -673,6 +636,7 @@ export class StreamPet {
 		if (begging) { this.ctx.beginPath(); this.ctx.arc(x+1, y+8, 4, 0, Math.PI*2); this.ctx.fill(); }
 		else { this.ctx.beginPath(); this.ctx.moveTo(x+1, y+3); this.ctx.lineTo(x-2, y); this.ctx.lineTo(x+4, y); this.ctx.fill(); }
 	}
+
 	reviveKitty() {
 		if (this.state.isDead) {
 			this.state.isDead = false;
@@ -699,7 +663,6 @@ export class StreamPet {
 		}
 	}
 
-	// --- STATE SIMULATION SYSTEM ---
 	updateAI(t) {
 		if (this.state.isDead) return;
 		this.state.ageDays = Math.floor((Date.now() - this.state.birthday) / 86400000);
@@ -724,15 +687,31 @@ export class StreamPet {
 			return true;
 		};
 
-		// Workspace resolution math (canvas width bounds minus our padding frame boundaries)
+		// Workspace resolution math 
 		const visibleW = this.canvas.width - 200;
 		const visibleH = this.canvas.height - 200;
 		const floorLineY = visibleH - this.BASE_FLOOR_Y;
 		
-		const bowlPos = { x: (this.state.layout.bowlX / 100) * visibleW, y: floorLineY + this.state.layout.bowlY };
-		const bedPos = { x: (this.state.layout.bedX / 100) * visibleW, y: floorLineY + this.state.layout.bedY };
-		const litPos = { x: (this.state.layout.litterX / 100) * visibleW, y: floorLineY + this.state.layout.litterY };
-		const towerPos = { x: (this.state.layout.towerX / 100) * visibleW, y: floorLineY + this.state.layout.towerY };
+		// 🛠️ SCALE INVERSION FOR AI DESTINATIONS:
+		// Ensures the pathfinding algorithm targets unscaled canvas spots so it matches the transformed render pipeline.
+		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
+		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
+		const anchorX = visibleW / 2;
+		const anchorY = visibleH - this.BASE_FLOOR_Y;
+
+		const getUnscaledPos = (pctX, pctY, offY) => {
+			const targetX = (pctX / 100) * window.innerWidth;
+			const targetY = (pctY / 100) * window.innerHeight;
+			return {
+				x: anchorX + (targetX - anchorX) / scaleVal,
+				y: anchorY + (targetY - anchorY) / scaleVal + offY
+			};
+		};
+
+		const bowlPos = getUnscaledPos(this.state.layout.bowlX, this.state.layout.bowlY, 0);
+		const bedPos = getUnscaledPos(this.state.layout.bedX, this.state.layout.bedY, 0);
+		const litPos = getUnscaledPos(this.state.layout.litterX, this.state.layout.litterY, 0);
+		const towerPos = getUnscaledPos(this.state.layout.towerX, this.state.layout.towerY, 0);
 
 		if (this.state.actionTimer > 0) this.state.actionTimer--;
 		if (this.state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(this.state.action)) this.state.action = "walk_to_food";
@@ -832,7 +811,7 @@ export class StreamPet {
 				break;
 		}
 	}
-	// --- DOM TEXT METADATA UPDATES ---
+
 	updateUI() {
 		const nameEl = document.getElementById("nameplate");
 		const statsEl = document.getElementById("status");
@@ -871,7 +850,6 @@ export class StreamPet {
 			const checkT = document.getElementById("showTower"); 
 			if (checkT) checkT.checked = this.state.layout.showTower;
 			
-			// --- ZOOM SLIDER SETUP ---
 			const zoomSlider = document.getElementById("canvasZoom");
 			const zoomDisplay = document.getElementById("zoomValue");
 			if (zoomSlider) {
@@ -880,7 +858,6 @@ export class StreamPet {
 				let scaleVal = savedZoom >= 0 ? 1.0 + (savedZoom * 0.5) : 1.0 + (savedZoom * 0.25);
 				if (zoomDisplay) zoomDisplay.textContent = `${scaleVal.toFixed(1)}x`;
 
-				// Wire up listeners safely if not already assigned
 				if (!zoomSlider.dataset.listenerWired) {
 					zoomSlider.addEventListener("input", (e) => {
 						const val = parseFloat(e.target.value);
@@ -895,8 +872,6 @@ export class StreamPet {
 				}
 			}
 
-			// --- ENVIRONMENT LAYOUT METRICS MATRIX RE-SYNC ---
-			// Dynamically matches state layout properties (e.g. bedX, bedY) back to inputs (#bedX, #bedY)
 			Object.keys(this.state.layout).forEach(k => { 
 				if (k === 'showTower' || k === 'bedColor') return;
 				const el = document.getElementById(k);
@@ -905,7 +880,7 @@ export class StreamPet {
 				}
 			});
 		}
-		
+
 		const el = document.getElementById("pet-widget");
         if (el && this.state.dimensions) {
             if (this.state.dimensions.width) el.style.width = this.state.dimensions.width;
@@ -915,25 +890,22 @@ export class StreamPet {
         }
 		this.initSwatches(); 
 	}
-	
+
 	initPersistenceObservers() {
         const el = document.getElementById("pet-widget");
         if (!el) return;
 
-        // 1. WATCH POSITION (Listens for changes made by your main JS dragging engine)
         const mutationObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === "attributes" && mutation.attributeName === "style") {
                     this.state.dimensions.left = el.style.left;
                     this.state.dimensions.top = el.style.top;
-                    // Will be caught natively by your 5-second save interval or manual triggers
                 }
             });
         });
         
         mutationObserver.observe(el, { attributes: true, attributeFilter: ["style"] });
 
-        // 2. WATCH SIZE (Listens for native CSS resize drag handle actions)
         if (window.ResizeObserver) {
             const resizeObserver = new ResizeObserver((entries) => {
                 for (let entry of entries) {
@@ -942,11 +914,9 @@ export class StreamPet {
                     const newW = entry.target.clientWidth;
                     const newH = entry.target.clientHeight;
 
-                    // 📐 Update state string parameters for localStorage persistence profiles
                     this.state.dimensions.width = `${newW}px`;
                     this.state.dimensions.height = `${newH}px`;
 
-                    // ⚡ Force internal resolution grid properties to update 1:1 with DOM sizes
                     if (this.canvas.width !== newW || this.canvas.height !== newH) {
                         this.canvas.width = newW;
                         this.canvas.height = newH;
@@ -956,6 +926,7 @@ export class StreamPet {
             resizeObserver.observe(el);
         }
     }
+
 	initSwatches() {
 		const swatchContainer = document.getElementById("bedColorSwatches");
 		if (!swatchContainer) return;
@@ -974,19 +945,18 @@ export class StreamPet {
 		});
 	}
 
-	// --- 3. DISCRETE BOUND UI INTERFACES ---
     bindUIEventListeners() {
         const bindClick = (id, callback) => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('click', callback);
         };
 
-        // Sliders Group Mapping
         const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY", "towerX", "towerY"];
         sliders.forEach(id => {
             const el = document.getElementById(id);
             if(el) el.addEventListener("input", (e) => this.state.layout[id] = parseInt(e.target.value));
         });
+
 		const zoomSlider = document.getElementById("canvasZoom");
         const zoomDisplay = document.getElementById("zoomValue");
         if (zoomSlider) {
@@ -994,34 +964,28 @@ export class StreamPet {
                 const val = parseFloat(e.target.value);
                 this.state.zoom = val;
                 if (zoomDisplay) zoomDisplay.textContent = `${val.toFixed(1)}x`;
-                // No need to manually repaint here since animate loop runs continually
             });
             zoomSlider.addEventListener("change", () => {
-                this.saveData(); // Explicit save to local storage when they let go
+                this.saveData();
             });
         }
+
         const st = document.getElementById("showTower");
         if (st) st.addEventListener("change", (e) => {
             this.state.layout.showTower = e.target.checked;
             if(!this.state.layout.showTower && this.state.action.includes("tower")) this.state.action = "idle";
         });
 
-        // Action Buttons
         bindClick("btnFeed", () => { if(!this.state.isDead && !this.state.hasFood) { this.state.hasFood = true; this.say("Food! 🐟"); } });
         bindClick("btnPlay", () => { if(!this.state.isDead) { this.state.action = "special"; this.state.actionTimer = 350; this.say("Play! 🧶"); } });
         bindClick("btnDance", () => { if(!this.state.isDead) { this.state.action = "dance"; this.state.actionTimer = 300; this.say("Dance! ✨"); } });
         bindClick("btnTreat", () => { if(!this.state.isDead) { this.state.hunger = Math.max(0, this.state.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM NOM! 🍗"); } });
         bindClick("btnClear", () => { this.state.poops = []; this.say("Fresh sand! ✨"); });
         bindClick("btnReset", () => { 
-			// 😺 Destroys only the pet's core data key
 			localStorage.removeItem("greta_ultra_v10"); 
-			// Optional: If you also want to reset custom sound associations mapped for this pet
-			// localStorage.removeItem("pixelkitty_sound_settings");
-			// Force application refresh to re-initialize defaults
 			location.reload(); 
 		});
 
-        // Sound Engine Context Elements
         const masterToggle = document.getElementById("masterEnabled");
         if (masterToggle) {
             masterToggle.checked = window.soundSettings.masterEnabled;
@@ -1031,7 +995,6 @@ export class StreamPet {
             });
         }
 
-        // Loop Row Direct Binding for Sounds
         document.querySelectorAll('.setting-row[data-key]').forEach(row => {
             const key = row.getAttribute('data-key');
             const checkbox = row.querySelector('input[type="checkbox"]');
