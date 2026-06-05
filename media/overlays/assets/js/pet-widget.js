@@ -126,62 +126,25 @@ export class StreamPet {
     // ==========================================
     // SECTION 2: INPUT, BOUNDS & DATA PERSISTENCE
     // ==========================================
-    initContainerListeners() {
-        if (!this.widgetContainer) return;
+	initContainerListeners() {
+		if (!this.widgetContainer) return;
 
-        // Mutation Observer watches style adjustments handled via native CSS resizing interaction
-        const styleObserver = new MutationObserver(() => {
-            this.widgetBounds.width = this.widgetContainer.style.width;
-            this.widgetBounds.height = this.widgetContainer.style.height;
-            this.widgetBounds.left = this.widgetContainer.style.left;
-            this.widgetBounds.top = this.widgetContainer.style.top;
-            localStorage.setItem("greta_widget_bounds", JSON.stringify(this.widgetBounds));
-            this.resize(); // Re-sync high density scaling parameters safely
-        });
+		// Use a single observer to track both position and size changes
+		const config = { attributes: true, attributeFilter: ["style"] };
 
-        styleObserver.observe(this.widgetContainer, { 
-            attributes: true, 
-            attributeFilter: ["style"] 
-        });
+		const observer = new MutationObserver((mutations) => {
+			// Debounce or just save directly to localStorage
+			this.widgetBounds.width = this.widgetContainer.style.width;
+			this.widgetBounds.height = this.widgetContainer.style.height;
+			this.widgetBounds.left = this.widgetContainer.style.left;
+			this.widgetBounds.top = this.widgetContainer.style.top;
+			
+			localStorage.setItem("greta_widget_bounds", JSON.stringify(this.widgetBounds));
+			this.resize();
+		});
 
-        // Draggable Title/Grab Handle behavior logic
-        let isDragging = false;
-        let startX, startY, initialLeft, initialTop;
-
-        this.widgetContainer.addEventListener("mousedown", (e) => {
-            if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" || e.target.closest("a, .swatch")) return;
-            
-            // Check if clicking edge resize bounds area (bottom-right pointer corridor)
-            const rect = this.widgetContainer.getBoundingClientRect();
-            if (e.clientX > rect.right - 15 && e.clientY > rect.bottom - 15) return;
-
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            initialLeft = parseInt(this.widgetContainer.style.left, 10) || rect.left;
-            initialTop = parseInt(this.widgetContainer.style.top, 10) || rect.top;
-            
-            this.widgetContainer.style.cursor = "grabbing";
-            e.preventDefault();
-        });
-
-        window.addEventListener("mousemove", (e) => {
-            if (!isDragging) return;
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            
-            this.widgetContainer.style.left = `${initialLeft + deltaX}px`;
-            this.widgetContainer.style.top = `${initialTop + deltaY}px`;
-        });
-
-        window.addEventListener("mouseup", () => {
-            if (isDragging) {
-                isDragging = false;
-                if (this.widgetContainer) this.widgetContainer.style.cursor = "auto";
-            }
-        });
-    }
-
+		observer.observe(this.widgetContainer, config);
+	}
     saveData() { 
         localStorage.setItem("greta_ultra_v10", JSON.stringify(this.state)); 
     }
