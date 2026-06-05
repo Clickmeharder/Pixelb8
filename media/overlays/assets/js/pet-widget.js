@@ -1376,28 +1376,28 @@ export class StreamPet {
 					}
 
 					const r = Math.random();
-					// 1. Walk (50% chance)
-					if (r < 0.50) { 
+					// 1. Walk (70% chance - increased)
+					if (r < 0.70) { 
 						this.state.action = "walk"; 
 						this.state.spiderDir = Math.random() > 0.5 ? 1 : -1;
 						this.state.actionTimer = 250 + Math.random() * 250; 
 					} 
-					// 2. Dance (Added: 15% chance)
-					else if (r < 0.65) {
+					// 2. Dance (5% chance)
+					else if (r < 0.75) {
 						this.state.action = "dance";
 						this.state.actionTimer = 150;
 					}
 					// 3. Bed (10% chance)
-					else if (r < 0.75) {
+					else if (r < 0.85) {
 						this.state.action = "walk_to_bed";
 					}
-					// 4. Rappel (Spider)
+					// 4. Rappel (Spider - 5% chance)
 					else if (r < 0.90 && this.registry.activeSpecies === "spider" && Math.abs(this.state.y - CEIL_Y) < 4) {
 						this.state.action = "rappel_drop";
 						this.state.rappelAnchor = { x: this.state.x, y: this.state.y };
 						this.state.rappelDepth = CEIL_Y + 80 + Math.random() * 140;
 					}
-					// 5. Idle
+					// 5. Idle/Stay (10% chance)
 					else {
 						this.state.actionTimer = 300 + Math.random() * 400;
 					}
