@@ -242,11 +242,6 @@ export class StreamJukebox {
 						
 						// 2. Start tracking future resizes
 						this.bindResizePersistence(); 
-
-						const savedVol = localStorage.getItem("jbVolume") || 50;
-						this.ytPlayer.setVolume(parseInt(savedVol));
-						this.applyButtonStyles();
-						this.bindControls();
 						const savedVol = localStorage.getItem("jbVolume") || 50;
 						this.ytPlayer.setVolume(parseInt(savedVol));
                         this.applyButtonStyles();
