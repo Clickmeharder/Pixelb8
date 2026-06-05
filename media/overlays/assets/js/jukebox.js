@@ -240,8 +240,7 @@ export class StreamJukebox {
 						
 						// Bind the listener to keep tracking changes
 						this.bindResizePersistence();
-
-						const savedVol = localStorage.getItem("jbVolume") || 50;						
+			
 						const savedVol = localStorage.getItem("jbVolume") || 50;
 						this.ytPlayer.setVolume(parseInt(savedVol));
                         this.applyButtonStyles();
