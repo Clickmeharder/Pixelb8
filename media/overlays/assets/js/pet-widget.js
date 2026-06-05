@@ -149,31 +149,35 @@ export class StreamPet {
         let startX, startY, initialLeft, initialTop;
 
 		this.widgetContainer.addEventListener("mousedown", (e) => {
+			// 1. Ignore interactions on UI controls
 			if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" || e.target.closest("a, .swatch")) return;
 
-			// --- FIX: DETECT RESIZER CLICK MORE ACCURATELY ---
-			// The native resize handle is roughly 15-20px. 
-			// We get the local coordinates of the click relative to the widget
+			// 2. Define the Resize Handle Hit-box
+			// We use offsetWidth/Height to include borders, which is safer than clientWidth
+			const handleSize = 20; 
 			const rect = this.widgetContainer.getBoundingClientRect();
 			const localX = e.clientX - rect.left;
 			const localY = e.clientY - rect.top;
 
-			// If the click is in the bottom-right corner, EXIT the function
-			// so the native 'resize' behavior takes over.
-			if (localX > this.widgetContainer.clientWidth - 20 && 
-				localY > this.widgetContainer.clientHeight - 20) {
-				return; 
-			}
+			// 3. Detect if the user clicked the resize handle area
+			const isResizing = (localX > this.widgetContainer.offsetWidth - handleSize && 
+								localY > this.widgetContainer.offsetHeight - handleSize);
 
-			// Otherwise, proceed with custom dragging
+			// If resizing, DO NOT prevent default and DO NOT start dragging
+			if (isResizing) return; 
+
+			// 4. Proceed with custom dragging
 			isDragging = true;
 			startX = e.clientX;
 			startY = e.clientY;
-			initialLeft = parseInt(this.widgetContainer.style.left, 10) || rect.left;
-			initialTop = parseInt(this.widgetContainer.style.top, 10) || rect.top;
+			
+			// Use getComputedStyle for accurate initial positions
+			const style = window.getComputedStyle(this.widgetContainer);
+			initialLeft = parseInt(style.left, 10);
+			initialTop = parseInt(style.top, 10);
 			
 			this.widgetContainer.style.cursor = "grabbing";
-			e.preventDefault();
+			e.preventDefault(); // Prevents text selection while dragging
 		});
         window.addEventListener("mousemove", (e) => {
             if (!isDragging) return;

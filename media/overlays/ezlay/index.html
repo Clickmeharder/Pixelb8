@@ -116,71 +116,59 @@
 	
 	
 	
-/*p8-widget pet widget style overrides*/
+/* p8-widget pet widget style overrides */
 
 .p8-widget#pet-widget {
     background: transparent;
-	border: var(--border-width) var(--border-style) var(--border-color);
+    border: var(--border-width) var(--border-style) var(--border-color);
     border-radius: var(--border-radius);
     font-size: var(--font-size);
-	overflow:visible;
+    overflow: visible;
 }
+
 .p8-widget #nameplate { 
-	position: absolute; 
-	background: var(--bg);
-	color: var(--text-color);
-	border: var(--border-width) var(--border-style) var(--border-color);
-	border-radius: var(--border-radius);
-	padding: 4px 8px; 
-	font-size: 11px; 
-
-	pointer-events: auto; 
-	white-space: nowrap; 
-	transform: translate(-50%, -50%); 
-	z-index: 1000; 
-	cursor: pointer; 
-	transition: background 0.2s, transform 0.1s;
-}
-
-body.edit-mode .p8-widget#pet-widget { 
-	overflow: hidden;
-	resize:both;
-}
-body.edit-mode .p8-widget #companionCanvas { 
-	outline:1px dashed orange;
-}
-/* 1. Reset pointer-events to default for the widget container */
-body.edit-mode .p8-widget#pet-widget {
+    position: absolute; 
+    background: var(--bg);
+    color: var(--text-color);
+    border: var(--border-width) var(--border-style) var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 4px 8px; 
+    font-size: 11px; 
     pointer-events: auto; 
-    resize: both;
-    overflow: hidden;
+    white-space: nowrap; 
+    transform: translate(-50%, -50%); 
+    z-index: 1000; 
+    cursor: pointer; 
+    transition: background 0.2s, transform 0.1s;
 }
 
-/* 2. Make the container "transparent" to clicks, 
-      EXCEPT for the bottom-right corner (where the resizer lives) 
-      and the internal elements */
-body.edit-mode .p8-widget#pet-widget {
-    /* We use a background-clip trick or simply ensure the 
-       padding area doesn't swallow clicks */
-    pointer-events: all;
-}
-
-/* 3. Ensure the internal canvas and UI don't block the drag handle */
-body.edit-mode .p8-widget #companionCanvas,
-body.edit-mode .p8-widget #nameplate,
-body.edit-mode .p8-widget #status {
-    pointer-events: auto; /* Ensure these are clickable */
-}
-body.edit-mode .p8-widget#pet-widget {
+/* Edit Mode Overrides */
+body.edit-mode .p8-widget#pet-widget { 
+    pointer-events: auto;
+    resize: both !important;
+    overflow: auto !important; /* 'auto' ensures the resize handle is not clipped */
     min-width: 100px;
     min-height: 100px;
-    /* Ensure the handle area is specifically clickable */
-    padding-bottom: 20px; 
-    padding-right: 20px;
+    padding: 0;
 }
+
+body.edit-mode .p8-widget #companionCanvas { 
+    outline: 1px dashed orange;
+    pointer-events: auto;
+    /* Use margin to pull the canvas away from the bottom-right resize handle */
+    margin-right: 20px;
+    margin-bottom: 20px;
+}
+
+body.edit-mode .p8-widget #nameplate,
+body.edit-mode .p8-widget #status {
+    pointer-events: auto; 
+}
+
+/* Make the resize handle explicitly interactable and visible */
 body.edit-mode .p8-widget#pet-widget::-webkit-resizer {
     pointer-events: auto !important;
-    background-color: rgba(255, 255, 255, 0.5); /* Make it visible for testing */
+    background-color: rgba(255, 255, 255, 0.5); 
 }
     </style>
 </head>
