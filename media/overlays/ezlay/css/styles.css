@@ -672,6 +672,11 @@ body.edit-mode .p8-widget:active {
 	overflow:hidden;
 	overflow-y:scroll;
     max-height: 300px; 
+	scrollbar-width: none; /* Firefox */
+}
+
+#chat-feed::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
 }
 .chat-user { 
     font-weight: bold; 
