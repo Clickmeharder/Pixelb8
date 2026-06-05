@@ -741,19 +741,17 @@ export class StreamPet {
 		if (this.widgetContainer) {
 			if (this.state.hideBorder) {
 				this.widgetContainer.style.border = "none";
-				this.widgetContainer.style.background = "transparent";
 				this.widgetContainer.style.boxShadow = "none";
 			} else {
 				this.widgetContainer.style.border = "";
-				this.widgetContainer.style.background = "";
 				this.widgetContainer.style.boxShadow = "";
 			}
 
-			// 🔳 Add: Explicit backdrop visibility execution
+			// 🔳 Handle Background separately so it doesn't get highjacked by hideBorder
 			if (this.state.hideBackground) {
 				this.widgetContainer.style.setProperty("background", "transparent", "important");
-			} else if (!this.state.hideBorder) {
-				this.widgetContainer.style.background = ""; // Restore default theme rules
+			} else {
+				this.widgetContainer.style.background = ""; // Restores your native layout stylesheet background
 			}
 		}
 
