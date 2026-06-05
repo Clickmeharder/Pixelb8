@@ -3,17 +3,36 @@
  * Follows the hot-swappable monolithic component structure.
  */
 export class StreamPet {
-    constructor() {
+	constructor() {
         console.log("🐾 [Pet Widget]: Initializing Core...");
         
-        // --- 1. CORE CANVAS & STATE ---
-        this.canvas = document.getElementById("companionCanvas");
-        if (!this.canvas) {
-            console.error("❌ [Pet Widget Error]: #companionCanvas element not found in DOM.");
+        // --- 1. DYNAMIC VIEWPORT INJECTION ---
+        const overlayWrapper = document.getElementById("overlay-wrapper");
+        if (!overlayWrapper) {
+            console.error("❌ [Pet Widget Error]: #overlay-wrapper element not found in DOM.");
             return;
         }
+
+        // Only inject if it doesn't already exist
+        if (!document.getElementById("pet-widget")) {
+            const petViewport = document.createElement("div");
+            petViewport.id = "pet-widget";
+            petViewport.style.zIndex = "101";
+            petViewport.innerHTML = `
+                <div id="bubble" class="chat-bubble"></div>
+                <div id="nameplate">Loading...</div>
+                <canvas id="companionCanvas"></canvas>
+                <div id="status">❤️ Greta | EXP 0</div>
+            `;
+            overlayWrapper.appendChild(petViewport);
+            console.log("🐾 [Pet Widget]: Viewport DOM elements injected into overlay-wrapper.");
+        }
+
+        // Now safe to pull nodes out of our newly generated markup
+        this.canvas = document.getElementById("companionCanvas");
         this.ctx = this.canvas.getContext("2d");
 
+        // --- 2. CORE STATE SETUP ---
         this.KITTY_COLORS = ["#E67E22", "#95A5A6", "#2C3E50", "#ECF0F1", "#BDC3C7", "#D35400"];
         this.BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
         this.HUNGER_TICK_MS = 144000; 
