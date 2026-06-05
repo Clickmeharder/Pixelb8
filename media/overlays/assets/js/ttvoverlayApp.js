@@ -322,7 +322,7 @@ const SETTINGS_SCHEMA = [
                 set: (v) => { bitsEnabled = v; settings.bitsEnabled = v; saveSettings(); } 
             },
             { 
-                label: "Song Request Jukebox", 
+                label: "Enable Jukebox", 
                 idKey: "jukebox", 
                 get: () => !!settings.jukeboxWidgetEnabled, 
                 set: (v) => { settings.jukeboxWidgetEnabled = v; saveSettings(); } 
@@ -333,7 +333,7 @@ const SETTINGS_SCHEMA = [
         groupName: "💬 Chat & UI Displays",
         items: [
             { 
-                label: "Show Twitch Chat Widget", 
+                label: "Show Twitch Chat", 
                 idKey: "chat-widget", 
                 get: () => !chatHidden, 
                 set: (v) => { 
@@ -348,7 +348,7 @@ const SETTINGS_SCHEMA = [
                 }
             },
             { 
-                label: "Show Stream Status Indicator", 
+                label: "Show Stream Status", 
                 idKey: "status-widget", 
                 get: () => !statusHidden, 
                 set: (v) => { statusHidden = !v; if (statusWidget) statusWidget.style.display = statusHidden ? "none" : "block"; saveSettings(); }
