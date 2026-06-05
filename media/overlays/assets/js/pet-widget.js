@@ -1109,253 +1109,245 @@ export class StreamPet {
         }
     }
 	updateAI(t) {
-        if (this.activePet.isDead) return;
-        this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
-        this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
+		if (this.activePet.isDead) return;
+		this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
+		this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
 
-        const now = Date.now();
-        const msElapsed = now - this.activePet.lastHungerTick;
-        if (msElapsed >= this.HUNGER_TICK_MS) {
-            this.activePet.hunger = Math.min(100, this.activePet.hunger + Math.floor(msElapsed / this.HUNGER_TICK_MS)); 
-            this.activePet.lastHungerTick = now - (msElapsed % this.HUNGER_TICK_MS);
-        }
-        if (this.activePet.hunger === 100) this.activePet.isDead = true;
+		const now = Date.now();
+		const msElapsed = now - this.activePet.lastHungerTick;
+		if (msElapsed >= this.HUNGER_TICK_MS) {
+			this.activePet.hunger = Math.min(100, this.activePet.hunger + Math.floor(msElapsed / this.HUNGER_TICK_MS)); 
+			this.activePet.lastHungerTick = now - (msElapsed % this.HUNGER_TICK_MS);
+		}
+		if (this.activePet.hunger === 100) this.activePet.isDead = true;
 
-        const visibleW = this.canvas.width;
-        const visibleH = this.canvas.height;
-        
-        // ⭐ FIX: Feed percentages directly into your master tracking engine so paths follow zoom scaling
-        const bowlPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
-        const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-        const litPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
+		
+		const bowlPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
+		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
+		const litPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
 
-        // 🕷️ Refined Outer Perimeter Bounds
-        const CEIL_Y = 30; 
-        const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
-        const LEFT_X = 40;
-        const RIGHT_X = visibleW - 40;
+		const CEIL_Y = 30; 
+		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
+		const LEFT_X = 40;
+		const RIGHT_X = visibleW - 40;
 
-        const walkToPoint = (targetX, targetY, speed = 2) => {
-            const dx = targetX - this.state.x; 
-            const dy = targetY - this.state.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > 12) {
-                this.state.facing = dx > 0 ? 1 : -1;
-                this.state.x += (dx / dist) * speed; 
-                this.state.y += (dy / dist) * speed;
-                return false;
-            }
-            return true;
-        };
+		const walkToPoint = (targetX, targetY, speed = 2) => {
+			const dx = targetX - this.state.x; 
+			const dy = targetY - this.state.y;
+			const dist = Math.sqrt(dx * dx + dy * dy);
+			if (dist > 12) {
+				this.state.facing = dx > 0 ? 1 : -1;
+				this.state.x += (dx / dist) * speed; 
+				this.state.y += (dy / dist) * speed;
+				return false;
+			}
+			return true;
+		};
 
-        if (this.state.actionTimer > 0) this.state.actionTimer--;
-        
-        if (this.state.hasFood && !["nyan", "eating", "potty", "walk_to_litter", "rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
-            this.state.action = "walk_to_food";
-        }
+		if (this.state.actionTimer > 0) this.state.actionTimer--;
+		
+		if (this.state.hasFood && !["nyan", "eating", "potty", "walk_to_litter", "rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
+			this.state.action = "walk_to_food";
+		}
 
-        // ========================================================
-        // COMPANION SPECIES FSM ENGINE
-        // ========================================================
-        switch(this.state.action) {
-            case "nyan":
-                if (this.state.nyanPhase === "takeoff") {
-                    const targetY = visibleH / 2;
-                    this.state.y += (targetY - this.state.y) * 0.05; 
-                    this.state.x += this.state.facing * 5;
-                    if (Math.abs(this.state.y - targetY) < 15) this.state.nyanPhase = "flying";
-                } else if (this.state.nyanPhase === "flying") {
-                    this.state.x += this.state.facing * 10; 
-                    this.state.y = (visibleH / 2) + Math.sin(t * 0.1) * 100;
-                    if (this.state.actionTimer < 80) this.state.nyanPhase = "landing";
-                } else if (this.state.nyanPhase === "landing") {
-                    this.state.x += (this.state.originalPos.x - this.state.x) * 0.08; 
-                    this.state.y += (this.state.originalPos.y - this.state.y) * 0.08;
-                }
-                if (this.state.nyanPhase !== "landing") {
-                    if (this.state.x > visibleW + 150) this.state.x = -150;
-                    if (this.state.x < -150) this.state.x = visibleW + 150;
-                }
-                if (this.state.actionTimer <= 0) {
-                    this.stopSound('nyanSound');
-                    this.state.x = this.state.originalPos.x; 
-                    this.state.y = this.state.originalPos.y;
-                    this.state.action = "idle"; 
-                    this.state.actionTimer = 200;
-                }
-                break;
+		switch(this.state.action) {
+			case "nyan":
+				if (this.state.nyanPhase === "takeoff") {
+					const targetY = visibleH / 2;
+					this.state.y += (targetY - this.state.y) * 0.05; 
+					this.state.x += this.state.facing * 5;
+					if (Math.abs(this.state.y - targetY) < 15) this.state.nyanPhase = "flying";
+				} else if (this.state.nyanPhase === "flying") {
+					this.state.x += this.state.facing * 10; 
+					this.state.y = (visibleH / 2) + Math.sin(t * 0.1) * 100;
+					if (this.state.actionTimer < 80) this.state.nyanPhase = "landing";
+				} else if (this.state.nyanPhase === "landing") {
+					this.state.x += (this.state.originalPos.x - this.state.x) * 0.08; 
+					this.state.y += (this.state.originalPos.y - this.state.y) * 0.08;
+				}
+				if (this.state.nyanPhase !== "landing") {
+					if (this.state.x > visibleW + 150) this.state.x = -150;
+					if (this.state.x < -150) this.state.x = visibleW + 150;
+				}
+				if (this.state.actionTimer <= 0) {
+					this.stopSound('nyanSound');
+					this.state.x = this.state.originalPos.x; 
+					this.state.y = this.state.originalPos.y;
+					this.state.action = "idle"; 
+					this.state.actionTimer = 200;
+				}
+				break;
 
-            case "walk_to_food":
-                let foodTargetX = bowlPos.x;
-                // If spider, lock baseline to ground level. For land animals, step directly to scaled bowl center.
-                let foodTargetY = (this.registry.activeSpecies === "spider") ? FLOOR_Y : bowlPos.y;
-                
-                if (this.registry.activeSpecies === "spider") {
-                    if (this.state.y < FLOOR_Y - 5) {
-                        foodTargetX = (this.state.x < visibleW / 2) ? LEFT_X : RIGHT_X;
-                        foodTargetY = FLOOR_Y;
-                    }
-                }
+			case "walk_to_food":
+				let foodTargetX = bowlPos.x;
+				let foodTargetY = (this.registry.activeSpecies === "spider") ? FLOOR_Y : bowlPos.y;
+				
+				if (this.registry.activeSpecies === "spider") {
+					if (this.state.y < FLOOR_Y - 5) {
+						foodTargetX = (this.state.x < visibleW / 2) ? LEFT_X : RIGHT_X;
+						foodTargetY = FLOOR_Y;
+					}
+				}
 
-                if (walkToPoint(foodTargetX, foodTargetY, 2.5)) { 
-                    if (this.registry.activeSpecies === "spider" && Math.abs(this.state.y - FLOOR_Y) < 5 && Math.abs(this.state.x - bowlPos.x) > 15) {
-                        walkToPoint(bowlPos.x, FLOOR_Y, 2.5);
-                        return;
-                    }
-                    if (this.state.hasFood) { 
-                        this.state.action = "eating"; 
-                        this.state.actionTimer = 140; 
-                    } else { 
-                        this.state.action = "idle";
-                    }
-                }
-                break;
+				if (walkToPoint(foodTargetX, foodTargetY, 2.5)) { 
+					if (this.registry.activeSpecies === "spider" && Math.abs(this.state.y - FLOOR_Y) < 5 && Math.abs(this.state.x - bowlPos.x) > 15) {
+						walkToPoint(bowlPos.x, FLOOR_Y, 2.5);
+						return;
+					}
+					if (this.state.hasFood) { 
+						this.state.action = "eating"; 
+						this.state.actionTimer = 140; 
+					} else { 
+						this.state.action = "idle";
+					}
+				}
+				break;
 
-            case "eating":
-                if (this.state.actionTimer <= 0) {
-                    this.state.hasFood = false; 
-                    this.activePet.hunger = Math.max(0, this.activePet.hunger - 15); 
-                    this.activePet.digestive += 1; 
-                    this.activePet.exp += 20; 
-                    this.state.action = "idle"; 
-                    this.state.actionTimer = 300;
-                }
-                break;
+			case "eating":
+				if (this.state.actionTimer <= 0) {
+					this.state.hasFood = false; 
+					this.activePet.hunger = Math.max(0, this.activePet.hunger - 15); 
+					this.activePet.digestive += 1; 
+					this.activePet.exp += 20; 
+					this.state.action = "idle"; 
+					this.state.actionTimer = 300;
+				}
+				break;
 
-            case "walk_to_litter":
-                if (this.registry.activeSpecies === "goldfish") {
-                    if (!this.state.aquaticPottyTarget) {
-                        this.state.aquaticPottyTarget = {
-                            x: 100 + Math.random() * (visibleW - 200),
-                            y: 120 + Math.random() * (visibleH - 240)
-                        };
-                    }
-                    if (walkToPoint(this.state.aquaticPottyTarget.x, this.state.aquaticPottyTarget.y, 1.8)) {
-                        this.state.aquaticPottyTarget = null;
-                        this.state.action = "potty";
-                        this.state.actionTimer = 90;
-                    }
-                } else if (this.registry.activeSpecies === "spider") {
-                    if (!this.state.spiderPottyTarget) {
-                        const r = Math.random();
-                        if (r < 0.25) this.state.spiderPottyTarget = { x: LEFT_X + Math.random() * (RIGHT_X - LEFT_X), y: CEIL_Y };
-                        else if (r < 0.50) this.state.spiderPottyTarget = { x: LEFT_X + Math.random() * (RIGHT_X - LEFT_X), y: FLOOR_Y };
-                        else if (r < 0.75) this.state.spiderPottyTarget = { x: LEFT_X, y: CEIL_Y + Math.random() * (FLOOR_Y - CEIL_Y) };
-                        else this.state.spiderPottyTarget = { x: RIGHT_X, y: CEIL_Y + Math.random() * (FLOOR_Y - CEIL_Y) };
-                    }
-                    
-                    if (walkToPoint(this.state.spiderPottyTarget.x, this.state.spiderPottyTarget.y, 2.2)) {
-                        this.state.spiderPottyTarget = null;
-                        this.state.action = "potty";
-                        this.state.actionTimer = 100;
-                    }
-                } else {
-                    if (walkToPoint(litPos.x, litPos.y)) { 
-                        this.state.action = "potty"; 
-                        this.state.actionTimer = 120; 
-                    }
-                }
-                break;
+			case "walk_to_litter":
+				if (this.registry.activeSpecies === "goldfish") {
+					if (!this.state.aquaticPottyTarget) {
+						this.state.aquaticPottyTarget = {
+							x: 100 + Math.random() * (visibleW - 200),
+							y: 120 + Math.random() * (visibleH - 240)
+						};
+					}
+					if (walkToPoint(this.state.aquaticPottyTarget.x, this.state.aquaticPottyTarget.y, 1.8)) {
+						this.state.aquaticPottyTarget = null;
+						this.state.action = "potty";
+						this.state.actionTimer = 90;
+					}
+				} else if (this.registry.activeSpecies === "spider") {
+					if (!this.state.spiderPottyTarget) {
+						const r = Math.random();
+						if (r < 0.25) this.state.spiderPottyTarget = { x: LEFT_X + Math.random() * (RIGHT_X - LEFT_X), y: CEIL_Y };
+						else if (r < 0.50) this.state.spiderPottyTarget = { x: LEFT_X + Math.random() * (RIGHT_X - LEFT_X), y: FLOOR_Y };
+						else if (r < 0.75) this.state.spiderPottyTarget = { x: LEFT_X, y: CEIL_Y + Math.random() * (FLOOR_Y - CEIL_Y) };
+						else this.state.spiderPottyTarget = { x: RIGHT_X, y: CEIL_Y + Math.random() * (FLOOR_Y - CEIL_Y) };
+					}
+					
+					if (walkToPoint(this.state.spiderPottyTarget.x, this.state.spiderPottyTarget.y, 2.2)) {
+						this.state.spiderPottyTarget = null;
+						this.state.action = "potty";
+						this.state.actionTimer = 100;
+					}
+				} else {
+					if (walkToPoint(litPos.x, litPos.y)) { 
+						this.state.action = "potty"; 
+						this.state.actionTimer = 120; 
+					}
+				}
+				break;
 
-            case "potty":
-                if (this.state.actionTimer <= 0) { 
-                    if (this.registry.activeSpecies === "goldfish") {
-                        this.activePet.poops.push({
-                            x: this.state.x - (this.state.facing * 10), y: this.state.y + 5,
-                            ox: Math.random() * 100, swimOffset: Math.random() * Math.PI * 2
-                        });
-                        this.activePet.digestive = 0;
-                        this.state.action = "idle"; 
-                        this.state.actionTimer = 250;
-                    } else if (this.registry.activeSpecies === "spider") {
-                        let cleanX = this.state.x;
-                        let cleanY = this.state.y;
-                        
-                        if (cleanX > LEFT_X + 10 && cleanX < RIGHT_X - 10 && cleanY > CEIL_Y + 10 && cleanY < FLOOR_Y - 10) {
-                            let distToLeft = cleanX - LEFT_X;
-                            let distToRight = RIGHT_X - cleanX;
-                            let distToCeil = cleanY - CEIL_Y;
-                            let distToFloor = FLOOR_Y - cleanY;
-                            let minDist = Math.min(distToLeft, distToRight, distToCeil, distToFloor);
-                            
-                            if (minDist === distToLeft) cleanX = LEFT_X;
-                            else if (minDist === distToRight) cleanX = RIGHT_X;
-                            else if (minDist === distToCeil) cleanY = CEIL_Y;
-                            else cleanY = FLOOR_Y;
-                        }
+			case "potty":
+				if (this.state.actionTimer <= 0) { 
+					if (this.registry.activeSpecies === "goldfish") {
+						this.activePet.poops.push({
+							x: this.state.x - (this.state.facing * 10), y: this.state.y + 5,
+							ox: Math.random() * 100, swimOffset: Math.random() * Math.PI * 2
+						});
+						this.activePet.digestive = 0;
+						this.state.action = "idle"; 
+						this.state.actionTimer = 250;
+					} else if (this.registry.activeSpecies === "spider") {
+						let cleanX = this.state.x;
+						let cleanY = this.state.y;
+						
+						if (cleanX > LEFT_X + 10 && cleanX < RIGHT_X - 10 && cleanY > CEIL_Y + 10 && cleanY < FLOOR_Y - 10) {
+							let distToLeft = cleanX - LEFT_X;
+							let distToRight = RIGHT_X - cleanX;
+							let distToCeil = cleanY - CEIL_Y;
+							let distToFloor = FLOOR_Y - cleanY;
+							let minDist = Math.min(distToLeft, distToRight, distToCeil, distToFloor);
+							
+							if (minDist === distToLeft) cleanX = LEFT_X;
+							else if (minDist === distToRight) cleanX = RIGHT_X;
+							else if (minDist === distToCeil) cleanY = CEIL_Y;
+							else cleanY = FLOOR_Y;
+						}
 
-                        this.state.spiderWebs.push({
-                            x: cleanX, y: cleanY,
-                            size: 20 + Math.random() * 15
-                        });
-                        this.activePet.digestive = 0;
-                        this.state.action = "idle"; 
-                        this.state.actionTimer = 200;
-                    } else {
-                        this.activePet.poops.push({ox: Math.random()*100, isCeil: false}); 
-                        this.activePet.digestive = 0; 
-                        this.state.action = "walk_to_kick"; 
-                    }
-                }
-                break;
+						this.state.spiderWebs.push({
+							x: cleanX, y: cleanY,
+							size: 20 + Math.random() * 15
+						});
+						this.activePet.digestive = 0;
+						this.state.action = "idle"; 
+						this.state.actionTimer = 200;
+					} else {
+						this.activePet.poops.push({ox: Math.random()*100, isCeil: false}); 
+						this.activePet.digestive = 0; 
+						this.state.action = "walk_to_kick"; 
+					}
+				}
+				break;
 
-            case "walk_to_kick":
-                if (walkToPoint(litPos.x - 50, litPos.y)) { 
-                    this.state.facing = 1; 
-                    this.state.action = "kicking"; 
-                    this.state.actionTimer = 80; 
-                }
-                break;
+			case "walk_to_kick":
+				if (walkToPoint(litPos.x - 50, litPos.y)) { 
+					this.state.facing = 1; 
+					this.state.action = "kicking"; 
+					this.state.actionTimer = 80; 
+				}
+				break;
 
-            case "kicking":
-                if (t % 2 === 0) {
-                    this.state.particles.push({x: this.state.x - 10, y: this.state.y + 20, vx: 5 + Math.random()*6, vy: -4, s: 2.5, c: "#bdc3c7", life: 25});
-                }
-                if (this.state.actionTimer <= 0) { 
-                    this.state.action = "idle"; 
-                    this.state.actionTimer = 300; 
-                }
-                break;
+			case "kicking":
+				if (t % 2 === 0) {
+					this.state.particles.push({x: this.state.x - 10, y: this.state.y + 20, vx: 5 + Math.random()*6, vy: -4, s: 2.5, c: "#bdc3c7", life: 25});
+				}
+				if (this.state.actionTimer <= 0) { 
+					this.state.action = "idle"; 
+					this.state.actionTimer = 300; 
+				}
+				break;
 
-            case "walk_to_bed":
-                let bedTargetX = bedPos.x;
-                let bedTargetY = (this.registry.activeSpecies === "spider") ? FLOOR_Y : bedPos.y;
-                if (walkToPoint(bedTargetX, bedTargetY)) { 
-                    this.state.action = "sleep"; 
-                    this.state.actionTimer = 1000; 
-                }
-                break;
+			case "walk_to_bed":
+				let bedTargetX = bedPos.x;
+				let bedTargetY = (this.registry.activeSpecies === "spider") ? FLOOR_Y : bedPos.y;
+				if (walkToPoint(bedTargetX, bedTargetY)) { 
+					this.state.action = "sleep"; 
+					this.state.actionTimer = 1000; 
+				}
+				break;
 
-            case "rappel_drop":
-                this.state.y += 3.5; 
-                if (this.state.y >= this.state.rappelDepth) {
-                    this.state.action = "rappel_hang";
-                    this.state.actionTimer = 180 + Math.random() * 200;
-                }
-                break;
+			case "rappel_drop":
+				this.state.y += 3.5; 
+				if (this.state.y >= this.state.rappelDepth) {
+					this.state.action = "rappel_hang";
+					this.state.actionTimer = 180 + Math.random() * 200;
+				}
+				break;
 
-            case "rappel_hang":
-                this.state.x += Math.sin(t * 0.05) * 0.4;
-                if (this.state.actionTimer <= 0) {
-                    this.state.action = "rappel_rise";
-                }
-                break;
+			case "rappel_hang":
+				this.state.x += Math.sin(t * 0.05) * 0.4;
+				if (this.state.actionTimer <= 0) {
+					this.state.action = "rappel_rise";
+				}
+				break;
 
-            case "rappel_rise":
-                this.state.y -= 2.5; 
-                if (this.state.y <= CEIL_Y) {
-                    this.state.y = CEIL_Y;
-                    this.state.action = "idle";
-                    this.state.actionTimer = 200;
-                }
-                break;
+			case "rappel_rise":
+				this.state.y -= 2.5; 
+				if (this.state.y <= CEIL_Y) {
+					this.state.y = CEIL_Y;
+					this.state.action = "idle";
+					this.state.actionTimer = 200;
+				}
+				break;
 
-            case "idle":
+			case "idle":
 				if (this.registry.activeSpecies === "goldfish") {
 					this.state.y = (visibleH / 2) + Math.sin(t * 0.04) * 40;
-					
-					// --- ADD THIS TO GENERATE BUBBLES ---
-					if (Math.random() < 0.05) { // 5% chance per frame to spawn a bubble
+					if (Math.random() < 0.05) { 
 						this.state.goldfishBubbles.push({
 							x: this.state.x,
 							y: this.state.y,
@@ -1363,108 +1355,115 @@ export class StreamPet {
 							alpha: 0.8
 						});
 					}
-					// ------------------------------------
 				}
 
-                if (this.registry.activeSpecies === "spider") {
-                    let currentWeb = this.state.spiderWebs.find(w => Math.sqrt((w.x - this.state.x)**2 + (w.y - this.state.y)**2) < w.size);
-                    if (!currentWeb && !["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
-                        if (this.state.x > LEFT_X + 5 && this.state.x < RIGHT_X - 5 && this.state.y > CEIL_Y + 5 && this.state.y < FLOOR_Y - 5) {
-                            if (this.state.y < CEIL_Y + 40) this.state.y = CEIL_Y;
-                            else if (this.state.y > FLOOR_Y - 40) this.state.y = FLOOR_Y;
-                            else if (this.state.x < visibleW / 2) this.state.x = LEFT_X;
-                            else this.state.x = RIGHT_X;
-                        }
-                    }
-                }
+				if (this.registry.activeSpecies === "spider") {
+					let currentWeb = this.state.spiderWebs.find(w => Math.sqrt((w.x - this.state.x)**2 + (w.y - this.state.y)**2) < w.size);
+					if (!currentWeb && !["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
+						if (this.state.x > LEFT_X + 5 && this.state.x < RIGHT_X - 5 && this.state.y > CEIL_Y + 5 && this.state.y < FLOOR_Y - 5) {
+							if (this.state.y < CEIL_Y + 40) this.state.y = CEIL_Y;
+							else if (this.state.y > FLOOR_Y - 40) this.state.y = FLOOR_Y;
+							else if (this.state.x < visibleW / 2) this.state.x = LEFT_X;
+							else this.state.x = RIGHT_X;
+						}
+					}
+				}
 
-                if (this.state.actionTimer <= 0) {
-                    if (this.activePet.digestive >= 3) { 
-                        this.state.action = "walk_to_litter"; 
-                        return;
-                    }
+				if (this.state.actionTimer <= 0) {
+					if (this.activePet.digestive >= 3) { 
+						this.state.action = "walk_to_litter"; 
+						return;
+					}
 
-                    const r = Math.random();
-                    if (r < 0.50) { 
-                        this.state.action = "walk"; 
-                        this.state.spiderDir = Math.random() > 0.5 ? 1 : -1;
-                        this.state.actionTimer = 250 + Math.random() * 250; 
-                    } 
-                    else if (r < 0.70) {
-                        this.state.action = "walk_to_bed";
-                    }
-                    else if (r < 0.90 && this.registry.activeSpecies === "spider" && Math.abs(this.state.y - CEIL_Y) < 4) {
-                        this.state.action = "rappel_drop";
-                        this.state.rappelAnchor = { x: this.state.x, y: this.state.y };
-                        this.state.rappelDepth = CEIL_Y + 80 + Math.random() * 140;
-                    }
-                    else {
-                        this.state.actionTimer = 300 + Math.random() * 400;
-                    }
-                }
-                break;
+					const r = Math.random();
+					// 1. Walk (50% chance)
+					if (r < 0.50) { 
+						this.state.action = "walk"; 
+						this.state.spiderDir = Math.random() > 0.5 ? 1 : -1;
+						this.state.actionTimer = 250 + Math.random() * 250; 
+					} 
+					// 2. Dance (Added: 15% chance)
+					else if (r < 0.65) {
+						this.state.action = "dance";
+						this.state.actionTimer = 150;
+					}
+					// 3. Bed (10% chance)
+					else if (r < 0.75) {
+						this.state.action = "walk_to_bed";
+					}
+					// 4. Rappel (Spider)
+					else if (r < 0.90 && this.registry.activeSpecies === "spider" && Math.abs(this.state.y - CEIL_Y) < 4) {
+						this.state.action = "rappel_drop";
+						this.state.rappelAnchor = { x: this.state.x, y: this.state.y };
+						this.state.rappelDepth = CEIL_Y + 80 + Math.random() * 140;
+					}
+					// 5. Idle
+					else {
+						this.state.actionTimer = 300 + Math.random() * 400;
+					}
+				}
+				break;
 
-            case "walk":
-                if (this.registry.activeSpecies === "spider") {
-                    let dir = this.state.spiderDir || 1;
+			case "walk":
+				if (this.registry.activeSpecies === "spider") {
+					let dir = this.state.spiderDir || 1;
+					let activeWebNode = this.state.spiderWebs.find(web => {
+						let dx = web.x - this.state.x;
+						let dy = web.y - this.state.y;
+						return Math.sqrt(dx*dx + dy*dy) < web.size + 10;
+					});
 
-                    let activeWebNode = this.state.spiderWebs.find(web => {
-                        let dx = web.x - this.state.x;
-                        let dy = web.y - this.state.y;
-                        return Math.sqrt(dx*dx + dy*dy) < web.size + 10;
-                    });
+					if (activeWebNode) {
+						this.state.x += this.state.facing * 1.5;
+						if (Math.random() < 0.08) this.state.y += (Math.random() > 0.5 ? 2 : -2);
+					} 
+					else if (Math.abs(this.state.y - CEIL_Y) <= 4) { 
+						this.state.y = CEIL_Y; 
+						this.state.x += dir * 1.8;
+						this.state.facing = dir;
+						if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.y = CEIL_Y + 4; }
+						if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.y = CEIL_Y + 4; }
+					} else if (Math.abs(this.state.y - FLOOR_Y) <= 4) { 
+						this.state.y = FLOOR_Y; 
+						this.state.x += dir * 1.8;
+						this.state.facing = dir;
+						if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.y = FLOOR_Y - 4; }
+						if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.y = FLOOR_Y - 4; }
+					} else if (Math.abs(this.state.x - LEFT_X) <= 4) { 
+						this.state.x = LEFT_X; 
+						this.state.y += dir * 1.8;
+						if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.x = LEFT_X + 4; }
+						if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.x = LEFT_X + 4; }
+					} else if (Math.abs(this.state.x - RIGHT_X) <= 4) { 
+						this.state.x = RIGHT_X; 
+						this.state.y += dir * 1.8;
+						if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.x = RIGHT_X - 4; }
+						if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.x = RIGHT_X - 4; }
+					} else {
+						if (this.state.y < (visibleH / 2)) this.state.y = CEIL_Y;
+						else this.state.y = FLOOR_Y;
+					}
+				} else {
+					this.state.x += this.state.facing * 1.5;
+					if (this.registry.activeSpecies === "goldfish") {
+						this.state.y = (visibleH / 2) + Math.sin(t * 0.07) * 50;
+					}
+					if (this.state.x < LEFT_X || this.state.x > RIGHT_X) this.state.facing *= -1;
+				}
 
-                    if (activeWebNode) {
-                        this.state.x += this.state.facing * 1.5;
-                        if (Math.random() < 0.08) this.state.y += (Math.random() > 0.5 ? 2 : -2);
-                    } 
-                    else if (Math.abs(this.state.y - CEIL_Y) <= 4) { 
-                        this.state.y = CEIL_Y; 
-                        this.state.x += dir * 1.8;
-                        this.state.facing = dir;
-                        if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.y = CEIL_Y + 4; }
-                        if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.y = CEIL_Y + 4; }
-                    } else if (Math.abs(this.state.y - FLOOR_Y) <= 4) { 
-                        this.state.y = FLOOR_Y; 
-                        this.state.x += dir * 1.8;
-                        this.state.facing = dir;
-                        if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.y = FLOOR_Y - 4; }
-                        if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.y = FLOOR_Y - 4; }
-                    } else if (Math.abs(this.state.x - LEFT_X) <= 4) { 
-                        this.state.x = LEFT_X; 
-                        this.state.y += dir * 1.8;
-                        if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.x = LEFT_X + 4; }
-                        if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.x = LEFT_X + 4; }
-                    } else if (Math.abs(this.state.x - RIGHT_X) <= 4) { 
-                        this.state.x = RIGHT_X; 
-                        this.state.y += dir * 1.8;
-                        if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.x = RIGHT_X - 4; }
-                        if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.x = RIGHT_X - 4; }
-                    } else {
-                        if (this.state.y < (visibleH / 2)) this.state.y = CEIL_Y;
-                        else this.state.y = FLOOR_Y;
-                    }
-                } else {
-                    this.state.x += this.state.facing * 1.5;
-                    if (this.registry.activeSpecies === "goldfish") {
-                        this.state.y = (visibleH / 2) + Math.sin(t * 0.07) * 50;
-                    }
-                    if (this.state.x < LEFT_X || this.state.x > RIGHT_X) this.state.facing *= -1;
-                }
+				if (this.state.actionTimer <= 0) { 
+					this.state.action = "idle"; 
+					this.state.actionTimer = 400; 
+				}
+				break;
 
-                if (this.state.actionTimer <= 0) { 
-                    this.state.action = "idle"; 
-                    this.state.actionTimer = 400; 
-                }
-                break;
-
-            case "sleep":
-            case "dance":
-            case "special":
-                if (this.state.actionTimer <= 0) this.state.action = "idle";
-                break;
-        }
-    }
+			case "sleep":
+			case "dance":
+			case "special":
+				if (this.state.actionTimer <= 0) this.state.action = "idle";
+				break;
+		}
+	}
     animate = () => {
         this.state.animT++;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
