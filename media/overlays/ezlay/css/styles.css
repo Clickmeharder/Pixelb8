@@ -667,7 +667,9 @@ body.edit-mode .p8-widget:active {
 #chat-feed { 
     display: flex; 
     flex-direction: column-reverse;
-    height: 175px; 
+    height: 175px;
+	overflow:hidden;
+	overflow-y:scroll;
     max-height: 300px; 
 }
 .chat-user { 
