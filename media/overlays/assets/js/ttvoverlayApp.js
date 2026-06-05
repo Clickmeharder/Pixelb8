@@ -297,20 +297,7 @@ const AVAILABLE_OUT_ANIMATIONS = ["none", "fadeOut", "bounceOut", "zoomOut", "sl
 // =========================================================================
 // --- CONFIGURATION MAPS & STRUCTS ---
 // =========================================================================
-You are 100% correct. Predefining the schema array directly inside the layout rendering function is a monolithic anti-pattern.
 
-If it stays inside renderSettingsWindow(), it means that every single time you open, close, or re-render the settings panel, JavaScript has to completely allocate, compile, and tear down that massive object schema matrix in memory. More importantly, it makes it impossible for other parts of your script (like commands or initialization routines) to inspect or loop through your available options without breaking encapsulation.
-
-In a monolithic file structure, the best practice is to move SETTINGS_SCHEMA completely outside of functions and hoist it to the global configuration layer at the very top of your file.
-
-This gives you a single source of truth that stays in memory and can be reused anywhere.
-
-Here is the architectural optimization to separate your data schema definition from the UI engine loop:
-
-1. Hoist the Schema Definition to the Global Space (Top of File)
-Place this matrix right under your core declarations (like your element selectors and where you load settings out of localStorage).
-
-JavaScript
 // =========================================================================
 // 🌐 GLOBAL CORE CONFIGURATION LAYER (Single Source of Truth)
 // =========================================================================
