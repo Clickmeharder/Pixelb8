@@ -16,21 +16,27 @@
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
 
+/* 📦 Changed from full screen viewport parameters to absolute boundaries */
         #companion-container { 
-            position: fixed; 
+            position: absolute; 
             top: 0; 
             left: 0; 
-            width: 100vw; 
-            height: 100vh; 
+            width: 100%; 
+            height: 100%; 
             pointer-events: none; 
+            overflow: hidden; /* Keeps scaled rendering artifacts clean */
         }
 
+        /* 🎨 Spans perfectly 1:1 inside the container */
         #companionCanvas { 
+            display: block; /* Removes baseline inline layout spacing gaps */
             width: 100%; 
             height: 100%; 
             image-rendering: pixelated; 
             pointer-events: auto; 
-            position: relative; 
+            position: absolute; 
+            top: 0;
+            left: 0;
             z-index: 100; 
         }
         

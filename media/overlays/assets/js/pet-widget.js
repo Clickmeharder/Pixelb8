@@ -861,8 +861,19 @@ export class StreamPet {
             const resizeObserver = new ResizeObserver((entries) => {
                 for (let entry of entries) {
                     if (entry.contentRect.width === 0 || entry.contentRect.height === 0) continue;
-                    this.state.dimensions.width = `${entry.target.clientWidth}px`;
-                    this.state.dimensions.height = `${entry.target.clientHeight}px`;
+                    
+                    const newW = entry.target.clientWidth;
+                    const newH = entry.target.clientHeight;
+
+                    // 📐 Update state string parameters for localStorage persistence profiles
+                    this.state.dimensions.width = `${newW}px`;
+                    this.state.dimensions.height = `${newH}px`;
+
+                    // ⚡ Force internal resolution grid properties to update 1:1 with DOM sizes
+                    if (this.canvas.width !== newW || this.canvas.height !== newH) {
+                        this.canvas.width = newW;
+                        this.canvas.height = newH;
+                    }
                 }
             });
             resizeObserver.observe(el);
