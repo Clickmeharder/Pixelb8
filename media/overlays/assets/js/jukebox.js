@@ -231,16 +231,7 @@ export class StreamJukebox {
                 playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1, 'fs': 0 },
                 events: {
                     'onReady': () => { 
-                        this.ytPlayerReady = true;
-						const savedHeight = localStorage.getItem("jb_wrapper_height");
-						const wrapper = document.getElementById('jukebox-video-wrapper');
-						if (wrapper && savedHeight) {
-							wrapper.style.height = savedHeight;
-						}
-						
-						// Bind the listener to keep tracking changes
-						this.bindResizePersistence();
-			
+                        this.ytPlayerReady = true; 
 						const savedVol = localStorage.getItem("jbVolume") || 50;
 						this.ytPlayer.setVolume(parseInt(savedVol));
                         this.applyButtonStyles();
@@ -287,17 +278,6 @@ export class StreamJukebox {
         } else {
             window.onYouTubeIframeAPIReady = setupPlayer;
         }
-		const savedSettings = JSON.parse(localStorage.getItem("jb_settings"));
-		if (savedSettings) {
-			this.isAudioOnly = savedSettings.isAudioOnly;
-			// Restore size
-			const wrapper = document.getElementById('jukebox-video-wrapper');
-			if (wrapper && savedSettings.wrapperHeight) {
-				wrapper.style.height = savedSettings.wrapperHeight;
-			}
-			// Restore UI states
-			if (this.isAudioOnly) this.toggleAudioOnly(true);
-		}
     }
 
     // Generates a completely customized mathematical frequency map based on the active Video ID
@@ -484,19 +464,9 @@ export class StreamJukebox {
 				}
 			};
 		}
-		
-	}
-	bindResizePersistence() {
-		const wrapper = document.getElementById('jukebox-video-wrapper');
-		if (!wrapper) return;
 
-		// Listen for when the user stops resizing
-		wrapper.addEventListener('mouseup', () => {
-			const newHeight = wrapper.style.height;
-			localStorage.setItem("jb_wrapper_height", newHeight);
-			console.log("💾 Jukebox height saved:", newHeight);
-		});
 	}
+
 	toggleAudioOnly(state) {
 		this.isAudioOnly = state;
 		const playerContainer = document.getElementById('player');
@@ -537,7 +507,6 @@ export class StreamJukebox {
 				if (overlayTrackPanel) overlayTrackPanel.style.display = 'none';
 			}
 		}
-	this.saveJukeboxSettings();
 	}
     toggleVisualizer(state) {
         this.showVisualizer = state;
@@ -721,15 +690,7 @@ export class StreamJukebox {
             this.updateBadge('av-status-badge', false);
         }
     }
-	saveJukeboxSettings() {
-		const settings = {
-			isAudioOnly: this.isAudioOnly,
-			showVisualizer: this.showVisualizer,
-			// Save the wrapper height if it exists
-			wrapperHeight: document.getElementById('jukebox-video-wrapper')?.style.height
-		};
-		localStorage.setItem("jb_settings", JSON.stringify(settings));
-	}
+
     async handleSongRequest(user, message, botSay) {
         if (!this.isEnabled || !message) return;
         
