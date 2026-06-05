@@ -257,7 +257,7 @@ export class StreamPet {
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                         <button type="button" id="btnClear" class="p8-btn alt-btn" style="padding: 6px 0; background: #27272a; font-size: 11px;">🧹 CLEAN LITTER</button>
-                        <button type="button" id="btnRevive" class="p8-btn" style="padding: 6px 0; background: #991b1b; font-size: 11px;" onclick="if(window.petWidgetInstance) window.petWidgetInstance.revivekitty();">💖 REVIVE PET</button>
+                        <button type="button" id="btnRevive" class="p8-btn" style="padding: 6px 0; background: #991b1b; font-size: 11px;" onclick="if(window.petWidgetInstance) window.petWidgetInstance.reviveKitty();">💖 REVIVE PET</button>
                     </div>
 
                     <details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
@@ -774,7 +774,7 @@ export class StreamPet {
 	}
 
 	// --- SEPARATED CONTROL ACTIONS ---
-	revivekitty() {
+	reviveKitty() {
 		if (this.state.isDead) {
 			this.state.isDead = false;
 			this.state.hunger = 50; 
