@@ -278,6 +278,17 @@ export class StreamJukebox {
         } else {
             window.onYouTubeIframeAPIReady = setupPlayer;
         }
+		const savedSettings = JSON.parse(localStorage.getItem("jb_settings"));
+		if (savedSettings) {
+			this.isAudioOnly = savedSettings.isAudioOnly;
+			// Restore size
+			const wrapper = document.getElementById('jukebox-video-wrapper');
+			if (wrapper && savedSettings.wrapperHeight) {
+				wrapper.style.height = savedSettings.wrapperHeight;
+			}
+			// Restore UI states
+			if (this.isAudioOnly) this.toggleAudioOnly(true);
+		}
     }
 
     // Generates a completely customized mathematical frequency map based on the active Video ID
@@ -468,84 +479,47 @@ export class StreamJukebox {
 	}
 
 	toggleAudioOnly(state) {
-        this.isAudioOnly = state;
-        const playerContainer = document.getElementById('player');
-        const wrapper = document.getElementById('jukebox-video-wrapper');
-        const statusContainer = document.getElementById('jb-status-container');
-        
-        if (playerContainer && wrapper) {
-            if (state) {
-                // 1. Shrink the native player and hide the original UI
-                playerContainer.style.width = "0px";
-                playerContainer.style.height = "0px";
-                playerContainer.style.visibility = "hidden";
-                if (statusContainer) statusContainer.style.display = "none";
-                
-                // 2. Set the wrapper to a clean, slim profile
-                wrapper.style.height = "72px";
-                wrapper.style.transition = "all 0.3s ease";
-                wrapper.style.position = "relative";
-                
-                let overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
-                if (!overlayTrackPanel) {
-                    overlayTrackPanel = document.createElement('div');
-                    overlayTrackPanel.id = 'jb-audio-overlay-panel';
-                    overlayTrackPanel.style.cssText = `
-                        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-                        background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
-                        color: #ffffff; display: flex; align-items: center; 
-                        padding: 0 20px; box-sizing: border-box; 
-                        font-family: 'Inter', sans-serif; z-index: 10; 
-                        border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);
-                        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-                    `;
-                    
-                    overlayTrackPanel.innerHTML = `
-                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; overflow: hidden; padding: 4px 0;">
-                            <div style="margin-bottom: 6px;">
-                                <div class="jb-current-title" style="font-size: 15px; font-weight: 700; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">
-                                    No Track Loaded
-                                </div>
-                            </div>
-                            
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                                    <div style="width: 100%; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; overflow: hidden; margin-bottom: 3px;">
-                                        <div id="jb-audio-progress-bar" style="width: 0%; background: #a855f7; height: 100%; transition: width 0.3s linear; border-radius: 2px;"></div>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                        <div id="jb-audio-time-stamp" style="font-size: 9px; color: #71717a; font-variant-numeric: tabular-nums;">0:00 / 0:00</div>
-                                        <div style="font-size: 10px; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right;">
-                                            <span style="opacity: 0.6;">NEXT:</span> 
-                                            <span id="jb-audio-next-title" style="color: #a855f7; font-weight: 500;">Nothing queued</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    wrapper.appendChild(overlayTrackPanel);
-                } else {
-                    overlayTrackPanel.style.display = 'flex';
-                }
-                
-                this.updatePlayerDisplay();
-                this.startAudioProgressTracking();
-            } else {
-                // 1. Restore original player size and original UI
-                playerContainer.style.width = "100%";
-                playerContainer.style.height = "100%";
-                playerContainer.style.visibility = "visible";
-                if (statusContainer) statusContainer.style.display = "block";
-                
-                wrapper.style.height = "168px"; 
-                
-                this.stopAudioProgressTracking();
-                const overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
-                if (overlayTrackPanel) overlayTrackPanel.style.display = 'none';
-            }
-        }
-    }
+		this.isAudioOnly = state;
+		const playerContainer = document.getElementById('player');
+		const wrapper = document.getElementById('jukebox-video-wrapper');
+		const statusContainer = document.getElementById('jb-status-container');
+		
+		if (playerContainer && wrapper) {
+			if (state) {
+				// Store current height before shrinking so we can restore it exactly
+				wrapper.dataset.originalHeight = wrapper.style.height;
+
+				playerContainer.style.width = "0px";
+				playerContainer.style.height = "0px";
+				playerContainer.style.visibility = "hidden";
+				if (statusContainer) statusContainer.style.display = "none";
+				
+				// Set a fixed height for audio-only mode, but remove the constraint for manual resizing
+				wrapper.style.height = "72px"; 
+				wrapper.style.minHeight = "72px"; // Ensure it doesn't vanish
+				wrapper.style.transition = "all 0.3s ease";
+				
+				// ... (rest of your overlay creation code stays same)
+				this.updatePlayerDisplay();
+				this.startAudioProgressTracking();
+			} else {
+				// 1. Restore original player size
+				playerContainer.style.width = "100%";
+				playerContainer.style.height = "100%";
+				playerContainer.style.visibility = "visible";
+				if (statusContainer) statusContainer.style.display = "block";
+				
+				// 2. CRITICAL FIX: Restore the user's custom height
+				wrapper.style.minHeight = "auto";
+				wrapper.style.height = wrapper.dataset.originalHeight || "168px"; 
+				
+				this.stopAudioProgressTracking();
+				const overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
+				if (overlayTrackPanel) overlayTrackPanel.style.display = 'none';
+			}
+		}
+	this.saveJukeboxSettings();
+	}
     toggleVisualizer(state) {
         this.showVisualizer = state;
         const container = document.getElementById('overlay-wrapper');
@@ -728,7 +702,15 @@ export class StreamJukebox {
             this.updateBadge('av-status-badge', false);
         }
     }
-
+	saveJukeboxSettings() {
+		const settings = {
+			isAudioOnly: this.isAudioOnly,
+			showVisualizer: this.showVisualizer,
+			// Save the wrapper height if it exists
+			wrapperHeight: document.getElementById('jukebox-video-wrapper')?.style.height
+		};
+		localStorage.setItem("jb_settings", JSON.stringify(settings));
+	}
     async handleSongRequest(user, message, botSay) {
         if (!this.isEnabled || !message) return;
         
