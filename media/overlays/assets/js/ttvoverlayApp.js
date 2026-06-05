@@ -3130,14 +3130,6 @@ function bindEvents() {
     }
 }
 init();
-// Clean up all possible old height tracking variants
-localStorage.removeItem('p8_chat_height');
-if(localStorage.getItem('settings')) {
-    let s = JSON.parse(localStorage.getItem('settings'));
-    delete s.chatHeight;
-    localStorage.setItem('settings', JSON.stringify(s));
-}
-console.log("Storage cleared! Reloading...");
-location.reload();
+
 
 
