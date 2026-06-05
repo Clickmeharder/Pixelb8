@@ -1441,14 +1441,22 @@ export class StreamPet {
 						else this.state.y = FLOOR_Y;
 					}
 				} else {
-					this.state.x += this.state.facing * 1.5;
-					if (this.registry.activeSpecies === "goldfish") {
-						this.state.y = (visibleH / 2) + Math.sin(t * 0.07) * 50;
-						if(t % 5 === 0) this.state.goldfishBubbles.push({x: this.state.x, y: this.state.y, r: 2, alpha: 0.8});
+					// Goldfish Full-Tank Swimming Logic
+					if (!this.state.swimTargetX) {
+						this.state.swimTargetX = LEFT_X + Math.random() * (visibleW - (LEFT_X + RIGHT_X));
 					}
-					// Boundary fix: force position to limit to prevent snapping
-					if (this.state.x < 80) { this.state.x = 80; this.state.facing = 1; }
-					if (this.state.x > visibleW - 80) { this.state.x = visibleW - 80; this.state.facing = -1; }
+
+					this.state.x += (this.state.swimTargetX - this.state.x) * 0.02;
+					this.state.facing = (this.state.swimTargetX > this.state.x) ? 1 : -1;
+
+					if (this.registry.activeSpecies === "goldfish") {
+						this.state.y = (visibleH / 2) + Math.sin(t * 0.03) * 60;
+						if(t % 20 === 0) this.state.goldfishBubbles.push({x: this.state.x, y: this.state.y, r: 2, alpha: 0.8});
+					}
+					
+					if (Math.abs(this.state.x - this.state.swimTargetX) < 10) {
+						this.state.swimTargetX = null;
+					}
 				}
 
 				if (this.state.actionTimer <= 0) { 
@@ -1468,7 +1476,6 @@ export class StreamPet {
 				break;
 		}
 	}
-
     animate = () => {
         this.state.animT++;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
