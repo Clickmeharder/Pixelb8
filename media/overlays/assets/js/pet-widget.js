@@ -238,14 +238,14 @@ export class StreamPet {
     // --- 1. SEPARATED RAW TEMPLATE MATRIX ---
 	static get controlsTemplate() {
         // Define positioning sliders: [idPrefix, label, defaultX, defaultY, minY (optional)]
-		const layoutMetrics = [
-            ["name", "Nameplate X/Y", 50, 70, 0, 100],
-            ["stats", "Stats X/Y", 50, 90, 0, 100],
-            ["bed", "Cat Bed X/Y", 20, 0, -100, 100],
-            ["bowl", "Food Bowl X/Y", 45, 0, -100, 100],
-            ["litter", "Litter Box X/Y", 90, 0, -100, 100],
-            ["tower", "Tower X/Y", 70, 0, -100, 100]
-        ];
+	const layoutMetrics = [
+		["name", "Nameplate X/Y", 50, 70, 0, 100],
+		["stats", "Stats X/Y", 50, 90, 0, 100],
+		["bed", "Cat Bed X/Y", 20, 100, 0, 100],     // Min 0, Max 100, Default 100
+		["bowl", "Food Bowl X/Y", 45, 100, 0, 100],   // Min 0, Max 100, Default 100
+		["litter", "Litter Box X/Y", 90, 100, 0, 100], // Min 0, Max 100, Default 100
+		["tower", "Tower X/Y", 70, 100, 0, 100]       // Min 0, Max 100, Default 100
+	];
 
         // Define audio track configuration rows
         const audioTracks = [
