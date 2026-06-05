@@ -93,11 +93,12 @@ body.edit-mode .p8-widget:active {
 .p8-widget #nameplate { 
 	position: absolute; 
 	background: var(--bg);
-	color: #0ec3c3; 
-	padding: 8px 15px; 
-	font-size: 11px; 
+	color: var(--text-color);
 	border: var(--border-width) var(--border-style) var(--border-color);
 	border-radius: var(--border-radius);
+	padding: 8px 8px; 
+	font-size: 11px; 
+
 	pointer-events: auto; 
 	white-space: nowrap; 
 	transform: translate(-50%, -50%); 
