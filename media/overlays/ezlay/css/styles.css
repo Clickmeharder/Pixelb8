@@ -75,7 +75,7 @@ body {
 	border: var(--border-width) var(--border-style) var(--border-color);
     border-radius: var(--border-radius);
     font-size: var(--font-size);
-
+	resize:both;
 }
 
 body.edit-mode .p8-widget { 
