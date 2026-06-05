@@ -95,7 +95,104 @@ export class StreamPet {
         this.bindEvents();
     }
 
+    // --- CHAT COMMAND ROUTER ---
+    getCommands(sendNotice) {
+        const petExecution = (user, message, flags) => {
+            if (this.state.isDead) {
+                sendNotice(`🪦 [Pet]: ${this.state.name} is currently deceased. Use !pet revive or use the control panel to save them!`);
+                return;
+            }
 
+            const parts = message.trim().toLowerCase().split(/\s+/);
+            const subCommand = parts[0];
+            const isAdmin = flags.broadcaster || flags.mod;
+
+            if (!subCommand) {
+                sendNotice(`🐾 [Pet]: Available options: !pet [feed | play | dance | treat | status]`);
+                return;
+            }
+
+            switch (subCommand) {
+                case 'help':
+                case 'h':
+                    sendNotice(`🐾 [Pet Help]: !pet feed | !pet play | !pet dance | !pet treat | !pet status`);
+                    if (isAdmin) sendNotice(`🛠️ [Admin]: !pet [nyan | revive | clear]`);
+                    break;
+
+                case 'feed':
+                case 'food':
+                case 'fish':
+                    if (!this.state.hasFood) {
+                        this.state.hasFood = true;
+                        this.say("Food! 🐟");
+                        sendNotice(`🐟 [Pet]: ${user} dropped a fish for ${this.state.name}!`);
+                    } else {
+                        sendNotice(`🍽️ [Pet]: There is already food in the bowl!`);
+                    }
+                    break;
+
+                case 'play':
+                case 'yarn':
+                    this.state.action = "special";
+                    this.state.actionTimer = 350;
+                    this.say("Play! 🧶");
+                    sendNotice(`🧶 [Pet]: ${user} tossed a ball of yarn to ${this.state.name}!`);
+                    break;
+
+                case 'dance':
+                    this.state.action = "dance";
+                    this.state.actionTimer = 300;
+                    this.say("Dance! ✨");
+                    break;
+
+                case 'treat':
+                case 'nom':
+                    this.state.hunger = Math.max(0, this.state.hunger - 5);
+                    this.state.action = "special";
+                    this.state.actionTimer = 200;
+                    this.say("NOM NOM NOM! 🍗");
+                    break;
+
+                case 'status':
+                case 'stats':
+                    let healthTxt = this.state.poops.length > 5 ? "SICK" : "HEALTHY";
+                    sendNotice(`🐾 [${this.state.name}]: Age: ${this.state.ageDays}d | Hunger: ${this.state.hunger}% | Mood: ${healthTxt} | EXP: ${this.state.exp}`);
+                    break;
+
+                case 'nyan':
+                case 'rainbow':
+                    if (isAdmin) {
+                        this.triggerNyan();
+                        sendNotice(`🌈 [Pet]: NYAN OVERDRIVE ACTIVATED BY STAFF!`);
+                    }
+                    break;
+
+                case 'revive':
+                    if (isAdmin || this.state.exp > 100) { // Example condition allowing high-tier viewers or staff
+                        this.revivekitty();
+                        sendNotice(`💖 [Pet]: ${this.state.name} was successfully revived by ${user}!`);
+                    }
+                    break;
+
+                case 'clear':
+                case 'clean':
+                    this.state.poops = [];
+                    this.say("Fresh sand! ✨");
+                    sendNotice(`🧹 [Pet]: ${user} scooped the litter box!`);
+                    break;
+
+                default:
+                    sendNotice(`❌ Action !pet ${subCommand} unknown.`);
+            }
+        };
+
+        return [
+            { name: 'pet', adminOnly: false, execute: petExecution },
+            { name: 'kitty', adminOnly: false, execute: petExecution },
+            { name: 'feed', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'feed', flags) },
+            { name: 'nyan', adminOnly: true, execute: (user, message, flags) => petExecution(user, 'nyan', flags) }
+        ];
+    }
     // --- 1. SEPARATED RAW TEMPLATE MATRIX ---
 	static get controlsTemplate() {
         // Define positioning sliders: [idPrefix, label, defaultX, defaultY, minY (optional)]
@@ -631,10 +728,6 @@ export class StreamPet {
 			const nameIn = document.getElementById("nameInput"); if(nameIn) nameIn.value = this.state.name;
 			const checkT = document.getElementById("showTower"); if(checkT) checkT.checked = this.state.layout.showTower;
 			
-			if(this.state.twitchUser && document.getElementById("streamerInput")) { 
-				document.getElementById("streamerInput").value = this.state.twitchUser; 
-				if (window.ComfyJS) ComfyJS.Init(this.state.twitchUser);
-			}
 			
 			Object.keys(this.state.layout).forEach(k => { 
 				const el = document.getElementById(k);
@@ -695,18 +788,6 @@ export class StreamPet {
             const el = document.getElementById(id);
             if (el) el.addEventListener('click', callback);
         };
-
-        // Inputs & Setup Links
-        const ni = document.getElementById("nameInput");
-        if (ni) ni.addEventListener("input", (e) => this.state.name = e.target.value || "Greta");
-
-        bindClick("connectBtn", () => {
-            const sInput = document.getElementById("streamerInput");
-            if(sInput) {
-                const u = sInput.value.trim();
-                if(u) { this.state.twitchUser = u; this.saveData(); if(window.ComfyJS) ComfyJS.Init(u); this.say("Meow! Connected"); }
-            }
-        });
 
         // Sliders Group Mapping
         const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY", "towerX", "towerY"];
