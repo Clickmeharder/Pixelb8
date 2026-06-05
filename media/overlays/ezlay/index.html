@@ -149,25 +149,38 @@ body.edit-mode .p8-widget#pet-widget {
 body.edit-mode .p8-widget #companionCanvas { 
 	outline:1px dashed orange;
 }
-/* 1. Prevent the container from stealing clicks from internal elements */
+/* 1. Reset pointer-events to default for the widget container */
 body.edit-mode .p8-widget#pet-widget {
-    pointer-events: none; /* Ignore clicks on the background of the widget */
+    pointer-events: auto; 
     resize: both;
     overflow: hidden;
 }
 
-/* 2. Re-enable pointer events for the internal UI elements */
-body.edit-mode .p8-widget#pet-widget > * {
-    pointer-events: auto; /* Allow clicks on canvas, text, etc. */
+/* 2. Make the container "transparent" to clicks, 
+      EXCEPT for the bottom-right corner (where the resizer lives) 
+      and the internal elements */
+body.edit-mode .p8-widget#pet-widget {
+    /* We use a background-clip trick or simply ensure the 
+       padding area doesn't swallow clicks */
+    pointer-events: all;
 }
 
-/* 3. Ensure the resize handle is interactable */
-/* Note: The browser's native resize handle is part of the element's layout,
-   so we keep pointer-events: auto on the container ONLY when interacting with the handle. 
-   However, since CSS doesn't have a "pseudo-class" for just the handle, 
-   we can just ensure the container is 'auto' during an active resize action. */
-body.edit-mode .p8-widget#pet-widget:active {
-    pointer-events: auto; 
+/* 3. Ensure the internal canvas and UI don't block the drag handle */
+body.edit-mode .p8-widget #companionCanvas,
+body.edit-mode .p8-widget #nameplate,
+body.edit-mode .p8-widget #status {
+    pointer-events: auto; /* Ensure these are clickable */
+}
+body.edit-mode .p8-widget#pet-widget {
+    min-width: 100px;
+    min-height: 100px;
+    /* Ensure the handle area is specifically clickable */
+    padding-bottom: 20px; 
+    padding-right: 20px;
+}
+body.edit-mode .p8-widget#pet-widget::-webkit-resizer {
+    pointer-events: auto !important;
+    background-color: rgba(255, 255, 255, 0.5); /* Make it visible for testing */
 }
     </style>
 </head>
