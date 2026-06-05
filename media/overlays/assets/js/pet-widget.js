@@ -890,7 +890,7 @@ export class StreamPet {
 				}
 			});
 		}
-	}
+		
 		const el = document.getElementById("pet-widget");
         if (el && this.state.dimensions) {
             if (this.state.dimensions.width) el.style.width = this.state.dimensions.width;
@@ -900,6 +900,7 @@ export class StreamPet {
         }
 		this.initSwatches(); 
 	}
+	
 	initPersistenceObservers() {
         const el = document.getElementById("pet-widget");
         if (!el) return;
@@ -1050,5 +1051,4 @@ export class StreamPet {
             }
         });
     }
-
 }
