@@ -63,6 +63,7 @@ export class StreamPet {
         // Default Fallback State Configuration
         this.state = {
             twitchUser: "",
+			hideBorder: false,
             name: "Greta",
             isDead: false,
             birthday: Date.now(),
@@ -206,7 +207,10 @@ export class StreamPet {
             
             const nameIn = document.getElementById("nameInput"); 
             if (nameIn) nameIn.value = this.state.name;
-            
+            const hideBorderCheck = document.getElementById("hideBorderToggle");
+			if (hideBorderCheck) {
+				hideBorderCheck.checked = this.state.hideBorder || false;
+			}
             const checkT = document.getElementById("showTower"); 
             if (checkT) checkT.checked = this.state.layout.showTower;
             
@@ -235,6 +239,7 @@ export class StreamPet {
                 if (el) el.value = this.state.layout[k];
             });
         }
+		this.applyBorderState();
         this.initSwatches(); 
     }
 
@@ -482,7 +487,10 @@ export class StreamPet {
                                 </div>
                                 <input type="range" id="canvasZoom" min="-2" max="2" step="0.1" value="0" style="width: 100%;">
                             </div>
-
+							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+								<span>Hide Outer Border</span>
+								<input type="checkbox" id="hideBorderToggle">
+							</div>
                             <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
                                 <span>Show Cat Tower</span>
                                 <input type="checkbox" id="showTower" checked>
@@ -600,7 +608,14 @@ export class StreamPet {
                 this.saveData();
             });
         }
-
+		const borderToggle = document.getElementById("hideBorderToggle");
+		if (borderToggle) {
+			borderToggle.addEventListener("change", (e) => {
+				this.state.hideBorder = e.target.checked;
+				this.applyBorderState(); // Run update helper instantly
+				this.saveData(); // Commit to localStorage
+			});
+		}
         const st = document.getElementById("showTower");
         if (st) st.addEventListener("change", (e) => {
             this.state.layout.showTower = e.target.checked;
@@ -689,6 +704,20 @@ export class StreamPet {
         nameEl.textContent = (this.state.isDead ? "GHOST " : this.state.stage.toUpperCase() + " ") + this.state.name.toUpperCase();
     }
 
+	applyBorderState() {
+		if (!this.widgetContainer) return;
+		
+		if (this.state.hideBorder) {
+			this.widgetContainer.style.border = "none";
+			this.widgetContainer.style.background = "transparent"; // Optional: removes background if desired
+			this.widgetContainer.style.boxShadow = "none"; // Optional: drops any drop-shadow glow accents
+		} else {
+			// Revert back to your global CSS stylesheet defaults
+			this.widgetContainer.style.border = "";
+			this.widgetContainer.style.background = "";
+			this.widgetContainer.style.boxShadow = "";
+		}
+	}
     // ==========================================
     // SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
     // ==========================================
