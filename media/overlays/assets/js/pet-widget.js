@@ -1,11 +1,10 @@
-
 /**
  * 🐾 StreamPet Widget Module
  * Follows the hot-swappable monolithic component structure.
  */
 export class StreamPet {
     constructor() {
-        console.log("🐾 [Pet Widget]: Initializing Core...");
+        console.log("🐾 [Pet Widget]: Initializing Core Ecosystem...");
         
         // ==========================================
         // SECTION 1: CORE INITIALIZATION & DOM INJECTION
@@ -54,14 +53,20 @@ export class StreamPet {
         this.canvas = document.getElementById("companionCanvas");
         this.ctx = this.canvas.getContext("2d");
 
-        // Core Static Presets
+        // Core Static Presets & Palettes
+        this.PET_SPECIES = ["kitty", "puppy", "spider", "goldfish"];
         this.KITTY_COLORS = ["#E67E22", "#95A5A6", "#2C3E50", "#ECF0F1", "#BDC3C7", "#D35400"];
+        this.PUPPY_COLORS = ["#D2B48C", "#8B4513", "#F5DEB3", "#3E2723", "#FFF8DC", "#795548"];
+        this.SPIDER_COLORS = ["#1A1A1A", "#3A1A1A", "#1A3A1A", "#2E1C47", "#004D40", "#424242"];
+        this.GOLDFISH_COLORS = ["#FF5722", "#FF9800", "#FFC107", "#E91E63", "#FF3D00", "#FFFFFF"];
         this.BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
+        
         this.HUNGER_TICK_MS = 144000; 
         this.BASE_FLOOR_Y = 110;
 
         // Default Fallback State Configuration
         this.state = {
+            species: "kitty", // Runtime core router variant
             twitchUser: "",
 			hideBorder: false,
 			hideStatus: false,
@@ -90,6 +95,12 @@ export class StreamPet {
             hasFood: false,
             particles: [],
             zoom: 0, 
+            
+            // Dynamic secondary matrix for specific simulation profiles
+            spiderWebs: [],
+            goldfishBubbles: [],
+            puppyBones: [],
+
             layout: {
                 nameX: 50, nameY: 70,
                 statsX: 50, statsY: 90,
@@ -130,9 +141,6 @@ export class StreamPet {
 	initContainerListeners() {
 		if (!this.widgetContainer) return;
 
-		// This observer will catch changes made by BOTH:
-		// 1. Your global drag-and-drop script
-		// 2. The native browser resize handle
 		const observer = new MutationObserver((mutations) => {
 			this.widgetBounds = {
 				left: this.widgetContainer.style.left,
@@ -149,6 +157,7 @@ export class StreamPet {
 			attributeFilter: ["style"] 
 		});
 	}
+
     saveData() { 
         localStorage.setItem("greta_ultra_v10", JSON.stringify(this.state)); 
     }
@@ -176,23 +185,21 @@ export class StreamPet {
             
             const nameIn = document.getElementById("nameInput"); 
             if (nameIn) nameIn.value = this.state.name;
+
+            const speciesSel = document.getElementById("speciesSelect");
+            if (speciesSel) speciesSel.value = this.state.species || "kitty";
+
             const hideBorderCheck = document.getElementById("hideBorderToggle");
-			if (hideBorderCheck) {
-				hideBorderCheck.checked = this.state.hideBorder || false;
-			}
+			if (hideBorderCheck) hideBorderCheck.checked = this.state.hideBorder || false;
+
 			const hideBackgroundCheck = document.getElementById("hideBackgroundToggle");
-			if (hideBackgroundCheck) {
-				hideBackgroundCheck.checked = this.state.hideBackground || false;
-			}
-			// Inside loadData() after your other checkbox checks
+			if (hideBackgroundCheck) hideBackgroundCheck.checked = this.state.hideBackground || false;
+
 			const hideStatusCheck = document.getElementById("hideStatusToggle");
-			if (hideStatusCheck) {
-				hideStatusCheck.checked = this.state.hideStatus || false;
-			}
+			if (hideStatusCheck) hideStatusCheck.checked = this.state.hideStatus || false;
+
 			const hideNameplateCheck = document.getElementById("hideNameplateToggle");
-			if (hideNameplateCheck) {
-				hideNameplateCheck.checked = this.state.hideNameplate || false;
-			}
+			if (hideNameplateCheck) hideNameplateCheck.checked = this.state.hideNameplate || false;
 
             const checkT = document.getElementById("showTower"); 
             if (checkT) checkT.checked = this.state.layout.showTower;
@@ -225,6 +232,7 @@ export class StreamPet {
 		this.applyEditModeStyles();
 		this.applyVisibilityStates();
         this.initSwatches(); 
+        this.syncSpeciesInterfaceToggle();
     }
 
     resize() {
@@ -263,6 +271,10 @@ export class StreamPet {
             purrSound: true,
             nyanSound: true,
             mewSound: true,
+            barkSound: true,
+            whineSound: true,
+            clickSound: true,
+            bubbleSound: true,
             customPaths: {}
         };
 
@@ -270,7 +282,11 @@ export class StreamPet {
             meowSound: '../assets/sounds/meowSound.mp3',
             mewSound: '../assets/sounds/mewSound.mp3',
             purrSound: '../assets/sounds/purrSound.mp3',
-            nyanSound: '../assets/sounds/nyanSound.mp3'
+            nyanSound: '../assets/sounds/nyanSound.mp3',
+            barkSound: '../assets/sounds/barkSound.mp3',
+            whineSound: '../assets/sounds/whineSound.mp3',
+            clickSound: '../assets/sounds/clickSound.mp3',
+            bubbleSound: '../assets/sounds/bubbleSound.mp3'
         };
 
         const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
@@ -322,24 +338,30 @@ export class StreamPet {
             }
 
             if (!actualSub) {
-                sendNotice(`🐾 [Pet]: Available options: !pet [feed | play | dance | treat | status]`);
+                sendNotice(`🐾 [Pet]: Available options: !pet [feed | play | dance | treat | status | trick]`);
                 return;
             }
 
             switch (actualSub) {
                 case 'help':
                 case 'h':
-                    sendNotice(`🐾 [Pet Help]: !pet feed | !pet play | !pet dance | !pet treat | !pet status`);
-                    if (isAdmin) sendNotice(`🛠️ [Admin]: !pet [nyan | revive | clear]`);
+                    sendNotice(`🐾 [Pet Help]: !pet feed | !pet play | !pet dance | !pet treat | !pet status | !pet trick`);
+                    if (isAdmin) sendNotice(`🛠️ [Admin]: !pet [nyan | revive | clear | species]`);
                     break;
 
                 case 'feed':
                 case 'food':
                 case 'fish':
+                case 'meat':
+                case 'bugs':
+                case 'flakes':
                     if (!this.state.hasFood) {
                         this.state.hasFood = true;
-                        this.say("Food! 🐟");
-                        sendNotice(`🐟 [Pet]: ${user} dropped a fish for ${this.state.name}!`);
+                        if (this.state.species === "kitty") this.say("Food! 🐟");
+                        if (this.state.species === "puppy") this.say("BONE! 🍖");
+                        if (this.state.species === "spider") this.say("CRICKET! 🪰");
+                        if (this.state.species === "goldfish") this.say("FLAKES! 🍤");
+                        sendNotice(`🍽️ [Pet]: ${user} dropped food for ${this.state.name}!`);
                     } else {
                         sendNotice(`🍽️ [Pet]: There is already food in the bowl!`);
                     }
@@ -347,10 +369,15 @@ export class StreamPet {
 
                 case 'play':
                 case 'yarn':
+                case 'ball':
+                case 'web':
                     this.state.action = "special";
                     this.state.actionTimer = 350;
-                    this.say("Play! 🧶");
-                    sendNotice(`🧶 [Pet]: ${user} tossed a ball of yarn to ${this.state.name}!`);
+                    if (this.state.species === "kitty") this.say("Play! 🧶");
+                    if (this.state.species === "puppy") this.say("FETCH! 🥎");
+                    if (this.state.species === "spider") this.say("SPIN! 🕸️");
+                    if (this.state.species === "goldfish") this.say("LOOP! 🫧");
+                    sendNotice(`🥎 [Pet]: ${user} actively engaged with ${this.state.name}!`);
                     break;
 
                 case 'dance':
@@ -367,10 +394,20 @@ export class StreamPet {
                     this.say("NOM NOM NOM! 🍗");
                     break;
 
+                case 'trick':
+                    if (this.state.isDead) return;
+                    this.state.action = "trick";
+                    this.state.actionTimer = 250;
+                    if (this.state.species === "puppy") { this.say("BACKFLIP! 🤸"); this.state.exp += 25; }
+                    else if (this.state.species === "kitty") { this.say("PURR SLIDE! 🛷"); this.state.exp += 20; }
+                    else if (this.state.species === "spider") { this.say("PARACHUTE! 🪂"); this.state.exp += 30; }
+                    else if (this.state.species === "goldfish") { this.say("SPLASH FLIP! 🌊"); this.state.exp += 25; }
+                    break;
+
                 case 'status':
                 case 'stats':
                     let healthTxt = this.state.poops.length > 5 ? "SICK" : "HEALTHY";
-                    sendNotice(`🐾 [${this.state.name}]: Age: ${this.state.ageDays}d | Hunger: ${this.state.hunger}% | Mood: ${healthTxt} | EXP: ${this.state.exp}`);
+                    sendNotice(`🐾 [${this.state.name}]: Species: ${this.state.species.toUpperCase()} | Age: ${this.state.ageDays}d | Hunger: ${this.state.hunger}% | Mood: ${healthTxt} | EXP: ${this.state.exp}`);
                     break;
 
                 case 'nyan':
@@ -378,6 +415,19 @@ export class StreamPet {
                     if (isAdmin) {
                         this.triggerNyan();
                         sendNotice(`🌈 [Pet]: NYAN OVERDRIVE ACTIVATED BY STAFF!`);
+                    }
+                    break;
+
+                case 'species':
+                    if (isAdmin && parts[1] && this.PET_SPECIES.includes(parts[1])) {
+                        this.state.species = parts[1];
+                        if (this.state.species === "kitty") this.state.color = this.KITTY_COLORS[0];
+                        if (this.state.species === "puppy") this.state.color = this.PUPPY_COLORS[0];
+                        if (this.state.species === "spider") this.state.color = this.SPIDER_COLORS[0];
+                        if (this.state.species === "goldfish") this.state.color = this.GOLDFISH_COLORS[0];
+                        this.saveData();
+                        this.loadData();
+                        sendNotice(`🧬 [Pet]: Species hot-swapped to ${parts[1].toUpperCase()}!`);
                     }
                     break;
 
@@ -393,8 +443,10 @@ export class StreamPet {
                 case 'clear':
                 case 'clean':
                     this.state.poops = [];
+                    this.state.spiderWebs = [];
+                    this.state.goldfishBubbles = [];
                     this.say("Fresh sand! ✨");
-                    sendNotice(`🧹 [Pet]: ${user} scooped the litter box!`);
+                    sendNotice(`🧹 [Pet]: ${user} scooped the environment layout parameters!`);
                     break;
 
                 default:
@@ -409,6 +461,7 @@ export class StreamPet {
             { name: 'play', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'play', flags) },
             { name: 'dance', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'dance', flags) },
             { name: 'treat', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'treat', flags) },
+            { name: 'trick', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'trick', flags) },
             { name: 'clean', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'clean', flags) },
             { name: 'status', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'status', flags) },
             { name: 'nyan', adminOnly: true, execute: (user, message, flags) => petExecution(user, 'nyan', flags) },
@@ -420,180 +473,146 @@ export class StreamPet {
     // SECTION 5: UI ASSEMBLY, TEMPLATES & BINDINGS
     // ==========================================
 	static get controlsTemplate() {
-		// ========================================================
-		// 1. COMPONENT STATE & TRACK DATA MAPS
-		// ========================================================
 		const layoutMetrics = [
 			["name", "Nameplate X/Y", 50, 70, 0, 100],
 			["stats", "Stats X/Y", 50, 90, 0, 100],
-			["bed", "Cat Bed X/Y", 20, 100, 0, 100],     
+			["bed", "Cat/Dog Bed X/Y", 20, 100, 0, 100],     
 			["bowl", "Food Bowl X/Y", 45, 100, 0, 100],   
 			["litter", "Litter Box X/Y", 90, 100, 0, 100], 
-			["tower", "Tower X/Y", 70, 100, 0, 100]        
+			["tower", "Tower / Castle X/Y", 70, 100, 0, 100]        
 		];
 
 		const audioTracks = [
 			{ key: "meowSound", label: "😺 Standard Meow" },
 			{ key: "mewSound", label: "😾 Baby Mew" },
 			{ key: "purrSound", label: "💤 Content Purr" },
+            { key: "barkSound", label: "🐕 Puppy Bark" },
+            { key: "whineSound", label: "🥺 Puppy Whine" },
+            { key: "clickSound", label: "🕷️ Spider Click" },
+            { key: "bubbleSound", label: "🐟 Fish Bubble" },
 			{ key: "nyanSound", label: "🌈 Space Nyan Theme Loop" }
 		];
 
-		// ========================================================
-		// 2. MODULAR PET INTERFACE BLOCKS
-		// ========================================================
-		
-		// 🐈 KITTY MODULE TEMPLATE
-		const kittyModule = `
-			<details style="border: 1px solid #27272a; border-radius: 6px; background: #111114;">
-				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🐈 Kitty-Specific Parameters</summary>
-				<div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 12px;">
-					
-					<div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
-						<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">Identity & Feed</label>
-						<input type="text" id="nameInput" class="p8-input" placeholder="Pet Name (e.g., Greta)" style="background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 4px;">
-					</div>
-
-					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-						<button type="button" id="btnFeed" class="p8-btn" style="padding: 6px 0; background: #1e3a8a; border: 1px solid #3b82f6; font-size: 11px;">🐟 FEED FISH</button>
-						<button type="button" id="btnTreat" class="p8-btn" style="padding: 6px 0; background: #7c2d12; border: 1px solid #ea580c; font-size: 11px;">🍗 GIVE TREAT</button>
-						<button type="button" id="btnPlay" class="p8-btn" style="padding: 6px 0; background: #581c87; border: 1px solid #a855f7; font-size: 11px;">🧶 PLAY YARN</button>
-						<button type="button" id="btnDance" class="p8-btn" style="padding: 6px 0; background: #065f46; border: 1px solid #10b981; font-size: 11px;">✨ DANCE</button>
-					</div>
-
-					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-						<button type="button" id="btnClear" class="p8-btn alt-btn" style="padding: 6px 0; background: #27272a; font-size: 11px;">🧹 CLEAN LITTER</button>
-						<button type="button" id="btnRevive" class="p8-btn" style="padding: 6px 0; background: #991b1b; font-size: 11px;">💖 REVIVE PET</button>
-					</div>
-
-					<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
-						<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">📐 Layout & Environment</summary>
-						<div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
-							<div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid #27272a;">
-								<div style="display: flex; justify-content: space-between; font-size: 11px; color: #a1a1aa;">
-									<span>Canvas Zoom Scaling</span>
-									<span id="zoomValue" style="color: #0ec3c3; font-weight: bold;">1.0x</span>
-								</div>
-								<input type="range" id="canvasZoom" min="-2" max="2" step="0.1" value="0" style="width: 100%;">
-							</div>
-							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
-								<span>Hide Outer Border</span>
-								<input type="checkbox" id="hideBorderToggle">
-							</div>
-							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
-								<span>Hide Background</span>
-								<input type="checkbox" id="hideBackgroundToggle">
-							</div>
-							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
-								<span>Hide Status Text</span>
-								<input type="checkbox" id="hideStatusToggle">
-							</div>
-							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
-								<span>Hide Nameplate Text</span>
-								<input type="checkbox" id="hideNameplateToggle">
-							</div>
-							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
-								<span>Show Cat Tower</span>
-								<input type="checkbox" id="showTower" checked>
-							</div>
-							<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-								<span style="font-size: 11px; color: #a1a1aa;">Bed Fabric Accent Color:</span>
-								<div id="bedColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px;"></div>
-							</div>
-							<div style="display: grid; grid-template-columns: 90px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
-								${layoutMetrics.map(([id, label, xVal, yVal, minY, maxY]) => `
-									<span>${label}</span>
-									<div style="display: flex; flex-direction:column; gap: 4px;">
-										<input type="range" id="${id}X" min="0" max="100" value="${xVal}" style="width:100%;">
-										<input type="range" id="${id}Y" min="${minY}" max="${maxY}" value="${yVal}" style="width:100%;">
-									</div>
-								`).join('')}
-							</div>
-						</div>
-					</details>
-				</div>
-			</details>
-		`;
-
-		// 🐕 PUPPY MODULE TEMPLATE
-		const puppyModule = `
-			<details style="border: 1px solid #27272a; border-radius: 6px; background: #111114;">
-				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🐕 Puppy-Specific Parameters</summary>
-				<div style="padding: 10px; border-top: 1px solid #27272a; color: #a1a1aa; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
-					<div>Puppy Engine Framework Placeholder</div>
-					<div style="font-size: 10px; color: #71717a; font-style: italic;">Awaiting sprite rendering pipeline assignment and trick configurations...</div>
-				</div>
-			</details>
-		`;
-
-		// 🕷️ SPIDER MODULE TEMPLATE
-		const spiderModule = `
-			<details style="border: 1px solid #27272a; border-radius: 6px; background: #111114;">
-				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🕷️ Spider-Specific Parameters</summary>
-				<div style="padding: 10px; border-top: 1px solid #27272a; color: #a1a1aa; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
-					<div>Spider Engine Framework Placeholder</div>
-					<div style="font-size: 10px; color: #71717a; font-style: italic;">Awaiting pathfinding matrix setup, web configurations, and multi-leg animation arrays...</div>
-				</div>
-			</details>
-		`;
-
-		// 🐟 GOLDFISH MODULE TEMPLATE
-		const goldfishModule = `
-			<details style="border: 1px solid #27272a; border-radius: 6px; background: #111114;">
-				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🐟 Goldfish-Specific Parameters</summary>
-				<div style="padding: 10px; border-top: 1px solid #27272a; color: #a1a1aa; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
-					<div>Goldfish Engine Framework Placeholder</div>
-					<div style="font-size: 10px; color: #71717a; font-style: italic;">Awaiting fluid physics container mapping, bowl decorations, and swimming loop logic...</div>
-				</div>
-			</details>
-		`;
-
-		// ========================================================
-		// 3. GLOBAL CONFIG PANELS (AUDIO & SYSTEM RESET)
-		// ========================================================
-		const globalAudioModule = `
-			<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
-				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🔊 Audio Configurations</summary>
-				<div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 10px;">
-					<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
-						<span style="font-size: 11px; color: #a1a1aa; font-weight: bold;">Master Audio Engine</span>
-						<input type="checkbox" id="masterEnabled" checked>
-					</div>
-					<div style="display: flex; flex-direction: column; gap: 6px;">
-						${audioTracks.map(({ key, label }) => `
-							<div class="setting-row" data-key="${key}" style="display: flex; flex-direction: column; gap: 4px; background: #141414; padding: 6px; border-radius: 4px;">
-								<div style="display: flex; justify-content: space-between; align-items: center;">
-									<span style="font-size: 11px; color: #fff;">${label}</span>
-									<input type="checkbox" checked>
-								</div>
-								<div style="display: flex; gap: 4px;">
-									<button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
-									<button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
-									<input type="file" class="hidden-file-input" accept="audio/*" style="display: none;">
-								</div>
-							</div>
-						`).join('')}
-					</div>
-				</div>
-			</details>
-		`;
-
-		// ========================================================
-		// 4. COMBINE AND RETURN THE FULL APPLICATION SHEET
-		// ========================================================
 		return `
 			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-				<span>🐾 Interactive Pet Module</span>
+				<span>🐾 Interactive Multi-Pet Companion Module</span>
 				<span class="collapse-icon">▼</span>
 			</div>
 			<div class="collapsible-content">
 				<div style="display: flex; flex-direction: column; gap: 12px;">
 					
-					${kittyModule}
-					${puppyModule}
-					${spiderModule}
-					${goldfishModule}
-					${globalAudioModule}
+                    <div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Select Companion Species</label>
+                        <select id="speciesSelect" class="p8-input" style="background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 32px; padding: 0 8px; font-size: 12px; border-radius: 4px; width: 100%;">
+                            <option value="kitty">🐈 Kitty (Feline Engine v10)</option>
+                            <option value="puppy">🐕 Puppy (Canine Kinematics Engine)</option>
+                            <option value="spider">🕷️ Spider (Arachnid Procedural Pathing)</option>
+                            <option value="goldfish">🐟 Goldfish (Aquatic Fluid Physics)</option>
+                        </select>
+                    </div>
+
+					<div style="background: #111114; border: 1px solid #27272a; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 12px;">
+						<div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
+							<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">Identity Parameters</label>
+							<input type="text" id="nameInput" class="p8-input" placeholder="Pet Name (e.g., Greta)" style="background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 4px;">
+						</div>
+
+						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+							<button type="button" id="btnFeed" class="p8-btn" style="padding: 6px 0; background: #1e3a8a; border: 1px solid #3b82f6; font-size: 11px;">🐟 DISPENSE FOOD</button>
+							<button type="button" id="btnTreat" class="p8-btn" style="padding: 6px 0; background: #7c2d12; border: 1px solid #ea580c; font-size: 11px;">🍗 GIVE TREAT</button>
+							<button type="button" id="btnPlay" class="p8-btn" style="padding: 6px 0; background: #581c87; border: 1px solid #a855f7; font-size: 11px;">🧶 COMPANION PLAY</button>
+							<button type="button" id="btnDance" class="p8-btn" style="padding: 6px 0; background: #065f46; border: 1px solid #10b981; font-size: 11px;">✨ LIVE DANCE</button>
+						</div>
+
+						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+							<button type="button" id="btnClear" class="p8-btn alt-btn" style="padding: 6px 0; background: #27272a; font-size: 11px;">🧹 CLEAN ENVIRONMENT</button>
+							<button type="button" id="btnRevive" class="p8-btn" style="padding: 6px 0; background: #991b1b; font-size: 11px;">💖 REVIVE PET</button>
+						</div>
+
+                        <div id="kittyContextNotes" class="species-note" style="font-size:11px; color:#a1a1aa; background:#18181b; padding:8px; border-radius:4px; border-left:3px solid #e67e22;">
+                            <strong>Kitty Active:</strong> Enabled climbing updates for the Cat Tower, litter-box target tracking, and audio meow nodes.
+                        </div>
+                        <div id="puppyContextNotes" class="species-note" style="font-size:11px; color:#a1a1aa; background:#18181b; padding:8px; border-radius:4px; border-left:3px solid #d2b48c; display:none;">
+                            <strong>Puppy Active:</strong> Canine engine tracks tail animations, active bone generation points, and dynamic ground friction parameters.
+                        </div>
+                        <div id="spiderContextNotes" class="species-note" style="font-size:11px; color:#a1a1aa; background:#18181b; padding:8px; border-radius:4px; border-left:3px solid #9c27b0; display:none;">
+                            <strong>Spider Active:</strong> Inverting standard gravity matrix. Spider paths directly along roof layers and injects geometric web nets.
+                        </div>
+                        <div id="goldfishContextNotes" class="species-note" style="font-size:11px; color:#a1a1aa; background:#18181b; padding:8px; border-radius:4px; border-left:3px solid #2196f3; display:none;">
+                            <strong>Goldfish Active:</strong> Floats viewport container parameters inside hydrodynamic swimming bounds. Disables standard walking algorithms.
+                        </div>
+
+						<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
+							<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">📐 Layout & Environment Settings</summary>
+							<div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
+								<div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid #27272a;">
+									<div style="display: flex; justify-content: space-between; font-size: 11px; color: #a1a1aa;">
+										<span>Canvas Zoom Scaling</span>
+										<span id="zoomValue" style="color: #0ec3c3; font-weight: bold;">1.0x</span>
+									</div>
+									<input type="range" id="canvasZoom" min="-2" max="2" step="0.1" value="0" style="width: 100%;">
+								</div>
+								<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+									<span>Hide Outer Border</span>
+									<input type="checkbox" id="hideBorderToggle">
+								</div>
+								<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+									<span>Hide Background</span>
+									<input type="checkbox" id="hideBackgroundToggle">
+								</div>
+								<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+									<span>Hide Status Text</span>
+									<input type="checkbox" id="hideStatusToggle">
+								</div>
+								<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+									<span>Hide Nameplate Text</span>
+									<input type="checkbox" id="hideNameplateToggle">
+								</div>
+								<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+									<span>Show Props/Tower</span>
+									<input type="checkbox" id="showTower" checked>
+								</div>
+								<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+									<span style="font-size: 11px; color: #a1a1aa;">Bed Fabric Accent Color:</span>
+									<div id="bedColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px;"></div>
+								</div>
+								<div style="display: grid; grid-template-columns: 100px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
+									${layoutMetrics.map(([id, label, xVal, yVal, minY, maxY]) => `
+										<span>${label}</span>
+										<div style="display: flex; flex-direction:column; gap: 4px;">
+											<input type="range" id="${id}X" min="0" max="100" value="${xVal}" style="width:100%;">
+											<input type="range" id="${id}Y" min="${minY}" max="${maxY}" value="${yVal}" style="width:100%;">
+										</div>
+									`).join('')}
+								</div>
+							</div>
+						</details>
+					</div>
+
+					<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
+						<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🔊 Audio Configurations</summary>
+						<div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 10px;">
+							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+								<span style="font-size: 11px; color: #a1a1aa; font-weight: bold;">Master Audio Engine</span>
+								<input type="checkbox" id="masterEnabled" checked>
+							</div>
+							<div style="display: flex; flex-direction: column; gap: 6px;">
+								${audioTracks.map(({ key, label }) => `
+									<div class="setting-row" data-key="${key}" style="display: flex; flex-direction: column; gap: 4px; background: #141414; padding: 6px; border-radius: 4px;">
+										<div style="display: flex; justify-content: space-between; align-items: center;">
+											<span style="font-size: 11px; color: #fff;">${label}</span>
+											<input type="checkbox" checked>
+										</div>
+										<div style="display: flex; gap: 4px;">
+											<button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
+											<button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
+											<input type="file" class="hidden-file-input" accept="audio/*" style="display: none;">
+										</div>
+									</div>
+								`).join('')}
+							</div>
+						</div>
+					</details>
 
 					<button type="button" id="btnReset" class="p8-btn" style="background: #991b1b; padding: 6px 0; font-size: 11px; margin-top: 5px;">⚠️ FACTORY RESET DATA</button>
 				</div>
@@ -621,7 +640,13 @@ export class StreamPet {
         } else {
             wrapper.appendChild(petSection);
         }
-        console.log("🐾 [Pet Widget]: Interface Injected into control panel hierarchy.");
+        console.log("🐾 [Pet Widget]: Global Multi-Pet Interface Injected.");
+    }
+
+    syncSpeciesInterfaceToggle() {
+        document.querySelectorAll(".species-note").forEach(el => el.style.display = "none");
+        const currentNote = document.getElementById(`${this.state.species}ContextNotes`);
+        if (currentNote) currentNote.style.display = "block";
     }
 
     initSwatches() {
@@ -632,10 +657,16 @@ export class StreamPet {
             const btn = document.createElement("div");
             btn.className = "swatch" + (this.state.layout.bedColor === color ? " active" : "");
             btn.style.backgroundColor = color;
+            btn.style.width = "20px";
+            btn.style.height = "20px";
+            btn.style.borderRadius = "4px";
+            btn.style.cursor = "pointer";
+            btn.style.border = this.state.layout.bedColor === color ? "2px solid #fff" : "1px solid #333";
+            
             btn.addEventListener("click", () => {
                 this.state.layout.bedColor = color;
-                document.querySelectorAll(".swatch").forEach(s => s.classList.remove("active"));
-                btn.classList.add("active");
+                document.querySelectorAll(".swatch").forEach(s => s.style.border = "1px solid #333");
+                btn.style.border = "2px solid #fff";
                 this.say("Comfy! ✨");
             });
             swatchContainer.appendChild(btn);
@@ -654,6 +685,27 @@ export class StreamPet {
             if(el) el.addEventListener("input", (e) => this.state.layout[id] = parseInt(e.target.value));
         });
 
+        const speciesSel = document.getElementById("speciesSelect");
+        if (speciesSel) {
+            speciesSel.addEventListener("change", (e) => {
+                this.state.species = e.target.value;
+                if (this.state.species === "kitty") this.state.color = this.KITTY_COLORS[0];
+                if (this.state.species === "puppy") this.state.color = this.PUPPY_COLORS[0];
+                if (this.state.species === "spider") this.state.color = this.SPIDER_COLORS[0];
+                if (this.state.species === "goldfish") this.state.color = this.GOLDFISH_COLORS[0];
+                
+                // Teleport to species-relevant safe anchor line inside bounds instantly
+                const visibleH = this.canvas.height;
+                if (this.state.species === "spider") this.state.y = 80; 
+                else if (this.state.species === "goldfish") this.state.y = visibleH / 2;
+                else this.state.y = visibleH - this.BASE_FLOOR_Y;
+
+                this.syncSpeciesInterfaceToggle();
+                this.saveData();
+                this.say(`Swapped to ${this.state.species}!`);
+            });
+        }
+
         const zoomSlider = document.getElementById("canvasZoom");
         const zoomDisplay = document.getElementById("zoomValue");
         if (zoomSlider) {
@@ -662,53 +714,66 @@ export class StreamPet {
                 this.state.zoom = val;
                 if (zoomDisplay) zoomDisplay.textContent = `${val.toFixed(1)}x`;
             });
-            zoomSlider.addEventListener("change", () => {
-                this.saveData();
-            });
+            zoomSlider.addEventListener("change", () => this.saveData());
         }
+
 		const borderToggle = document.getElementById("hideBorderToggle");
 		if (borderToggle) {
 			borderToggle.addEventListener("change", (e) => {
 				this.state.hideBorder = e.target.checked;
 				this.applyVisibilityStates(); 
-				this.saveData(); // Commit to localStorage
+				this.saveData();
 			});
 		}
+
 		const hideBGCheck = document.getElementById("hideBackgroundToggle");
         if (hideBGCheck) {
             hideBGCheck.addEventListener("change", (e) => {
                 this.state.hideBackground = e.target.checked;
                 this.applyVisibilityStates();
-                this.saveData(); // Persist the changes immediately
+                this.saveData();
             });
         }
+
 		const statusToggle = document.getElementById("hideStatusToggle");
 		if (statusToggle) {
 			statusToggle.addEventListener("change", (e) => {
 				this.state.hideStatus = e.target.checked;
-				this.applyVisibilityStates(); // Fire style update instantly
+				this.applyVisibilityStates();
 				this.saveData();
 			});
 		}
+
 		const NameplateToggle = document.getElementById("hideNameplateToggle");
 		if (NameplateToggle) {
 			NameplateToggle.addEventListener("change", (e) => {
 				this.state.hideNameplate = e.target.checked;
-				this.applyVisibilityStates(); // Fire style update instantly
+				this.applyVisibilityStates();
 				this.saveData();
 			});
 		}
+
         const st = document.getElementById("showTower");
         if (st) st.addEventListener("change", (e) => {
             this.state.layout.showTower = e.target.checked;
             if(!this.state.layout.showTower && this.state.action.includes("tower")) this.state.action = "idle";
         });
 
-        bindClick("btnFeed", () => { if(!this.state.isDead && !this.state.hasFood) { this.state.hasFood = true; this.say("Food! 🐟"); } });
-        bindClick("btnPlay", () => { if(!this.state.isDead) { this.state.action = "special"; this.state.actionTimer = 350; this.say("Play! 🧶"); } });
+        bindClick("btnFeed", () => { 
+            if(!this.state.isDead && !this.state.hasFood) { 
+                this.state.hasFood = true; 
+                this.say("Yum! Food dropped!"); 
+            } 
+        });
+        bindClick("btnPlay", () => { if(!this.state.isDead) { this.state.action = "special"; this.state.actionTimer = 350; this.say("Playing! ✨"); } });
         bindClick("btnDance", () => { if(!this.state.isDead) { this.state.action = "dance"; this.state.actionTimer = 300; this.say("Dance! ✨"); } });
-        bindClick("btnTreat", () => { if(!this.state.isDead) { this.state.hunger = Math.max(0, this.state.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM NOM! 🍗"); } });
-        bindClick("btnClear", () => { this.state.poops = []; this.say("Fresh sand! ✨"); });
+        bindClick("btnTreat", () => { if(!this.state.isDead) { this.state.hunger = Math.max(0, this.state.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM! 🍗"); } });
+        bindClick("btnClear", () => { 
+            this.state.poops = []; 
+            this.state.spiderWebs = [];
+            this.state.goldfishBubbles = [];
+            this.say("Cleared and Scoured! 🧹"); 
+        });
         bindClick("btnReset", () => { 
             localStorage.removeItem("greta_widget_bounds");
             localStorage.removeItem("greta_ultra_v10"); 
@@ -770,34 +835,39 @@ export class StreamPet {
         if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
         this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
 
-        if (txt.includes("Meow")) this.playSound('meowSound');
+        if (txt.includes("Meow") || txt.includes("Kitty")) this.playSound('meowSound');
         if (txt.includes("Mew")) this.playSound('mewSound');
-        if (txt.includes("Purrr")) this.playSound('purrSound');
+        if (txt.includes("Purrr") || txt.includes("Comfy")) this.playSound('purrSound');
+        if (txt.includes("BARK") || txt.includes("FETCH")) this.playSound('barkSound');
+        if (txt.includes("Hungry") && this.state.species === "puppy") this.playSound('whineSound');
+        if (txt.includes("SPIN") || this.state.species === "spider" && Math.random() < 0.3) this.playSound('clickSound');
+        if (txt.includes("LOOP") || txt.includes("FLAKES") || this.state.species === "goldfish") this.playSound('bubbleSound');
     }
 
     updateUI() {
         const nameEl = document.getElementById("nameplate");
         const statsEl = document.getElementById("status");
         if(!nameEl || !statsEl) return;
-        nameEl.style.left = this.state.layout.nameX + "%"; nameEl.style.top = this.state.layout.nameY + "%";
-        statsEl.style.left = this.state.layout.statsX + "%"; statsEl.style.top = this.state.layout.statsY + "%";
+        
+        nameEl.style.left = this.state.layout.nameX + "%"; 
+        nameEl.style.top = this.state.layout.nameY + "%";
+        statsEl.style.left = this.state.layout.statsX + "%"; 
+        statsEl.style.top = this.state.layout.statsY + "%";
+        
         let sTxt = this.state.isDead ? "DECEASED" : (this.state.poops.length > 5 ? "SICK" : "HEALTHY");
-        statsEl.innerHTML = `${this.state.name} | Age: ${this.state.ageDays}d | Hunger: ${this.state.hunger}%<br>Status: ${sTxt} | EXP: ${this.state.exp}`;
-        // nameEl.textContent = (this.state.isDead ? "GHOST " : this.state.stage.toUpperCase() + " ") + this.state.name.toUpperCase();
+        statsEl.innerHTML = `${this.state.name} (${this.state.species.toUpperCase()}) | Age: ${this.state.ageDays}d | Hunger: ${this.state.hunger}%<br>Status: ${sTxt} | EXP: ${this.state.exp}`;
 		nameEl.textContent = this.state.isDead ? `${this.state.name.toUpperCase()}'S GHOST` : this.state.name.toUpperCase();
     }
+
 	applyEditModeStyles() {
 		const el = document.getElementById("pet-widget");
 		if (!el) return;
-
-		// This ensures that when in edit mode, the canvas inside the widget
-		// remains clickable for your UI events.
 		if (document.body.classList.contains('edit-mode')) {
 			el.style.pointerEvents = "auto"; 
 		}
 	}
+
 	applyVisibilityStates() {
-		// 1. Handle Widget Border States
 		if (this.widgetContainer) {
 			if (this.state.hideBorder) {
 				this.widgetContainer.style.border = "none";
@@ -807,24 +877,20 @@ export class StreamPet {
 				this.widgetContainer.style.boxShadow = "";
 			}
 
-			// 🔳 Handle Background separately so it doesn't get highjacked by hideBorder
 			if (this.state.hideBackground) {
 				this.widgetContainer.style.setProperty("background", "transparent", "important");
 			} else {
-				this.widgetContainer.style.background = ""; // Restores your native layout stylesheet background
+				this.widgetContainer.style.background = ""; 
 			}
 		}
 
-		// 2. Handle Status Element Display State
 		const statusEl = document.getElementById("status");
-		if (statusEl) {
-			statusEl.style.display = this.state.hideStatus ? "none" : "block";
-		}
+		if (statusEl) statusEl.style.display = this.state.hideStatus ? "none" : "block";
+		
 		const nameplateEl = document.getElementById("nameplate");
-		if (nameplateEl) {
-			nameplateEl.style.display = this.state.hideNameplate ? "none" : "block";
-		}
+		if (nameplateEl) nameplateEl.style.display = this.state.hideNameplate ? "none" : "block";
 	}
+
     // ==========================================
     // SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
     // ==========================================
@@ -835,7 +901,7 @@ export class StreamPet {
         this.state.nyanPhase = "takeoff";
         this.state.actionTimer = 400;
         this.playSound('nyanSound');
-        this.say("NYAN NYAN NYAN! 🌈");
+        this.say("NYAN OVERDRIVE ACTIVATED! 🌈");
     }
 
     reviveKitty() {
@@ -877,20 +943,8 @@ export class StreamPet {
         }
         if (this.state.hunger === 100) this.state.isDead = true;
 
-        const walkToPoint = (targetX, targetY, speed = 2) => {
-            const dx = targetX - this.state.x; const dy = targetY - this.state.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > 10) {
-                this.state.facing = dx > 0 ? 1 : -1;
-                this.state.x += (dx / dist) * speed; this.state.y += (dy / dist) * speed;
-                return false;
-            }
-            return true;
-        };
-
         const visibleW = this.canvas.width;
         const visibleH = this.canvas.height;
-        const floorLineY = visibleH - this.BASE_FLOOR_Y;
         
         let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
         let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
@@ -911,20 +965,49 @@ export class StreamPet {
         const litPos = getUnscaledPos(this.state.layout.litterX, this.state.layout.litterY);
         const towerPos = getUnscaledPos(this.state.layout.towerX, this.state.layout.towerY);
 
-        if (this.state.actionTimer > 0) this.state.actionTimer--;
-        if (this.state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(this.state.action)) this.state.action = "walk_to_food";
+        // Species Anchor Re-scoping
+        let groundY = visibleH - this.BASE_FLOOR_Y;
+        if (this.state.species === "spider") {
+            groundY = 70; // Ceil-mount tracking line
+        }
 
+        const walkToPoint = (targetX, targetY, speed = 2) => {
+            const dx = targetX - this.state.x; 
+            const dy = targetY - this.state.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 12) {
+                this.state.facing = dx > 0 ? 1 : -1;
+                this.state.x += (dx / dist) * speed; 
+                this.state.y += (dy / dist) * speed;
+                return false;
+            }
+            return true;
+        };
+
+        if (this.state.actionTimer > 0) this.state.actionTimer--;
+        
+        // Feed trigger processing intercept
+        if (this.state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(this.state.action)) {
+            this.state.action = "walk_to_food";
+        }
+
+        // ========================================================
+        // COMPANION SPECIES FSM ENGINE
+        // ========================================================
         switch(this.state.action) {
             case "nyan":
                 if (this.state.nyanPhase === "takeoff") {
                     const targetY = visibleH / 2;
-                    this.state.y += (targetY - this.state.y) * 0.05; this.state.x += this.state.facing * 5;
+                    this.state.y += (targetY - this.state.y) * 0.05; 
+                    this.state.x += this.state.facing * 5;
                     if (Math.abs(this.state.y - targetY) < 15) this.state.nyanPhase = "flying";
                 } else if (this.state.nyanPhase === "flying") {
-                    this.state.x += this.state.facing * 10; this.state.y = (visibleH / 2) + Math.sin(t * 0.1) * 100;
+                    this.state.x += this.state.facing * 10; 
+                    this.state.y = (visibleH / 2) + Math.sin(t * 0.1) * 100;
                     if (this.state.actionTimer < 80) this.state.nyanPhase = "landing";
                 } else if (this.state.nyanPhase === "landing") {
-                    this.state.x += (this.state.originalPos.x - this.state.x) * 0.08; this.state.y += (this.state.originalPos.y - this.state.y) * 0.08;
+                    this.state.x += (this.state.originalPos.x - this.state.x) * 0.08; 
+                    this.state.y += (this.state.originalPos.y - this.state.y) * 0.08;
                 }
                 if (this.state.nyanPhase !== "landing") {
                     if (this.state.x > visibleW + 150) this.state.x = -150;
@@ -932,78 +1015,180 @@ export class StreamPet {
                 }
                 if (this.state.actionTimer <= 0) {
                     this.stopSound('nyanSound');
-                    this.state.x = this.state.originalPos.x; this.state.y = this.state.originalPos.y;
-                    this.state.action = "dance"; this.state.actionTimer = 200;
+                    this.state.x = this.state.originalPos.x; 
+                    this.state.y = this.state.originalPos.y;
+                    this.state.action = "dance"; 
+                    this.state.actionTimer = 200;
                 }
                 break;
+
             case "walk_to_food":
-                if (walkToPoint(bowlPos.x, bowlPos.y)) { 
-                    if (this.state.hasFood) { this.state.action = "eating"; this.state.actionTimer = 150; }
-                    else { this.state.action = "beg"; this.state.actionTimer = 150; this.say("Hungry! 🐟"); }
+                let destY = (this.state.species === "spider") ? 70 : bowlPos.y;
+                if (walkToPoint(bowlPos.x, destY, 2.5)) { 
+                    if (this.state.hasFood) { 
+                        this.state.action = "eating"; 
+                        this.state.actionTimer = 140; 
+                    } else { 
+                        this.state.action = "beg"; 
+                        this.state.actionTimer = 120; 
+                        this.say("Feed me! 🍽️"); 
+                    }
                 }
                 break;
+
             case "eating":
                 if (this.state.actionTimer <= 0) {
-                    this.state.hasFood = false; this.state.hunger = Math.max(0, this.state.hunger - 10); 
-                    this.state.digestive++; this.state.exp += 15; this.state.action = "idle"; this.state.actionTimer = 400;
+                    this.state.hasFood = false; 
+                    this.state.hunger = Math.max(0, this.state.hunger - 15); 
+                    this.state.digestive += 1; 
+                    this.state.exp += 20; 
+                    this.state.action = "idle"; 
+                    this.state.actionTimer = 300;
+                    if(this.state.species === "goldfish") {
+                        this.playSound("bubbleSound");
+                        this.state.goldfishBubbles.push({x: this.state.x, y: this.state.y, r: 6, alpha: 1});
+                    }
                 }
                 break;
+
             case "walk_to_litter":
-                if (walkToPoint(litPos.x, litPos.y)) { this.state.action = "potty"; this.state.actionTimer = 150; }
+                let litterDestY = (this.state.species === "spider") ? 70 : litPos.y;
+                if (walkToPoint(litPos.x, litterDestY)) { 
+                    this.state.action = "potty"; 
+                    this.state.actionTimer = 120; 
+                }
                 break;
+
             case "potty":
-                if (this.state.actionTimer <= 0) { this.state.poops.push({ox: Math.random()*100}); this.state.digestive = 0; this.state.action = "walk_to_kick"; }
+                if (this.state.actionTimer <= 0) { 
+                    this.state.poops.push({ox: Math.random()*100, isCeil: (this.state.species === "spider")}); 
+                    this.state.digestive = 0; 
+                    this.state.action = (this.state.species === "spider") ? "idle" : "walk_to_kick"; 
+                    if (this.state.species === "spider") this.say("Dropped silk line! 🕸️");
+                }
                 break;
+
             case "walk_to_kick":
-                if (walkToPoint(litPos.x - 60, litPos.y)) { this.state.facing = 1; this.state.action = "kicking"; this.state.actionTimer = 100; }
+                if (walkToPoint(litPos.x - 50, litPos.y)) { 
+                    this.state.facing = 1; 
+                    this.state.action = "kicking"; 
+                    this.state.actionTimer = 80; 
+                }
                 break;
+
             case "kicking":
-                if (t % 2 === 0) this.state.particles.push({x: this.state.x - 10, y: this.state.y + 25, vx: 6 + Math.random()*8, vy: -5, s: 2, c: "#bdc3c7", life: 30});
-                if (this.state.actionTimer <= 0) { this.state.action = "idle"; this.state.actionTimer = 400; this.say("I made a Poopy!"); }
+                if (t % 2 === 0) {
+                    this.state.particles.push({x: this.state.x - 10, y: this.state.y + 20, vx: 5 + Math.random()*6, vy: -4, s: 2.5, c: "#bdc3c7", life: 25});
+                }
+                if (this.state.actionTimer <= 0) { 
+                    this.state.action = "idle"; 
+                    this.state.actionTimer = 300; 
+                    this.say("All cleaned! ✨"); 
+                }
                 break;
+
             case "walk_to_bed":
-                if (walkToPoint(bedPos.x, bedPos.y)) { this.state.action = "sleep"; this.state.actionTimer = 1200; }
+                let bedDestY = (this.state.species === "spider") ? 70 : bedPos.y;
+                if (walkToPoint(bedPos.x, bedDestY)) { 
+                    this.state.action = "sleep"; 
+                    this.state.actionTimer = 1000; 
+                }
                 break;
+
             case "walk_to_tower_scratch":
-                if (walkToPoint(towerPos.x - 15, towerPos.y)) { this.state.facing = 1; this.state.action = "scratching"; this.state.actionTimer = 200; this.say("Scritch! 🐾"); }
+                let propY = (this.state.species === "spider") ? 70 : towerPos.y;
+                if (walkToPoint(towerPos.x - 20, propY)) { 
+                    this.state.facing = 1; 
+                    this.state.action = "scratching"; 
+                    this.state.actionTimer = 180; 
+                    this.say(this.state.species === "spider" ? "Spinning web asset! 🕸️" : "Scritch scratch! 🐾"); 
+                }
                 break;
+
             case "walk_to_tower_climb":
-                if (walkToPoint(towerPos.x, towerPos.y - 145)) { this.state.action = "tower_sleep"; this.state.actionTimer = 1500; }
+                let climbY = (this.state.species === "spider") ? 90 : towerPos.y - 140;
+                if (walkToPoint(towerPos.x, climbY)) { 
+                    this.state.action = "tower_sleep"; 
+                    this.state.actionTimer = 1200; 
+                }
                 break;
+
             case "scratching":
-                 if (t % 3 === 0) this.state.particles.push({x: this.state.x + 10, y: this.state.y - 10, vx: Math.random()*4, vy: -2, s: 2, c: "#d2b48c", life: 15});
-                 if (this.state.actionTimer <= 0) this.state.action = "idle";
+                 if (t % 3 === 0) {
+                     let pColor = (this.state.species === "spider") ? "#ffffff" : "#a67c52";
+                     this.state.particles.push({x: this.state.x + 15, y: this.state.y, vx: (Math.random()-0.5)*4, vy: -2, s: 2, c: pColor, life: 15});
+                 }
+                 if (this.state.actionTimer <= 0) {
+                     if (this.state.species === "spider") {
+                         this.state.spiderWebs.push({x: this.state.x, y: this.state.y, size: 30});
+                     }
+                     this.state.action = "idle";
+                 }
                  break;
+
+            case "trick":
+                if (this.state.actionTimer <= 0) this.state.action = "idle";
+                break;
+
             case "idle":
-                if (this.state.actionTimer <= 0) {
-                    if (Math.random() < 0.20) {
-                        let sound = "Meow!";
-                        if (this.state.hunger < 20) sound = "Purrr... ❤️";
-                        if (this.state.hunger > 70) sound = "Mew? (Hungry)";
-                        this.say("Meow! 🐾");
+                // Internal structural float loop for fish
+                if (this.state.species === "goldfish") {
+                    this.state.y = (visibleH / 2) + Math.sin(t * 0.04) * 40;
+                    if (Math.random() < 0.02) {
+                        this.state.goldfishBubbles.push({x: this.state.x + this.state.facing*20, y: this.state.y - 10, r: 2 + Math.random()*4, alpha: 1});
                     }
-                    if (Math.random() < 0.5) { this.state.actionTimer = 600 + Math.random() * 600; return; }
-                    if (this.state.digestive >= 3) { this.state.action = "walk_to_litter"; } 
-                    else {
+                }
+
+                if (this.state.actionTimer <= 0) {
+                    if (Math.random() < 0.15) {
+                        if (this.state.species === "kitty") this.say("Meow! 🐾");
+                        if (this.state.species === "puppy") this.say("BARK! 🐶");
+                        if (this.state.species === "spider") this.say("Click-click... 🕷️");
+                        if (this.state.species === "goldfish") this.say("Blub... 🫧");
+                    }
+                    
+                    if (Math.random() < 0.4) { 
+                        this.state.actionTimer = 400 + Math.random() * 400; 
+                        return; 
+                    }
+
+                    if (this.state.digestive >= 3) { 
+                        this.state.action = "walk_to_litter"; 
+                    } else {
                         const r = Math.random();
-                        if (r < 0.15) { this.state.action = "walk"; this.state.facing = Math.random() > 0.5 ? 1 : -1; this.state.actionTimer = 400 + Math.random() * 400; }
-                        else if (r < 0.25) this.state.action = "walk_to_bed";
-                        else if (r < 0.40 && this.state.layout.showTower) this.state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
-                        else this.state.actionTimer = 800 + Math.random() * 1000;
+                        if (r < 0.20) { 
+                            this.state.action = "walk"; 
+                            this.state.facing = Math.random() > 0.5 ? 1 : -1; 
+                            this.state.actionTimer = 300 + Math.random() * 300; 
+                        }
+                        else if (r < 0.40) this.state.action = "walk_to_bed";
+                        else if (r < 0.60 && this.state.layout.showTower) {
+                            this.state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
+                        }
+                        else this.state.actionTimer = 500 + Math.random() * 500;
                     }
                 }
                 break;
+
             case "walk":
-                this.state.x += this.state.facing * 1.2;
-                if (this.state.x < 100 || this.state.x > visibleW - 100) this.state.facing *= -1;
-                if (this.state.actionTimer <= 0) { this.state.action = "idle"; this.state.actionTimer = 500; }
+                this.state.x += this.state.facing * 1.5;
+                if (this.state.species === "goldfish") {
+                    this.state.y = (visibleH / 2) + Math.sin(t * 0.07) * 50;
+                    if(t % 5 === 0) this.state.goldfishBubbles.push({x: this.state.x, y: this.state.y, r: 2, alpha: 0.8});
+                }
+                if (this.state.x < 80 || this.state.x > visibleW - 80) this.state.facing *= -1;
+                if (this.state.actionTimer <= 0) { 
+                    this.state.action = "idle"; 
+                    this.state.actionTimer = 400; 
+                }
                 break;
+
             case "sleep":
             case "tower_sleep":
             case "dance":
             case "special":
                 if (this.state.actionTimer <= 0) { 
-                    if(this.state.action === "tower_sleep") this.state.y = floorLineY;
+                    if(this.state.action === "tower_sleep") this.state.y = groundY;
                     this.state.action = "idle"; 
                 }
                 break;
@@ -1030,63 +1215,134 @@ export class StreamPet {
 		this.drawEnvironment(this.state.animT);
 
 		let petScale = (this.state.stage === "Baby") ? 0.6 : (this.state.stage === "Juvenile") ? 0.8 : 1.0;
-		this.drawKitty(this.state.animT, petScale);
+		
+        // ========================================================
+        // RENDERING SPECIES DELEGATION ROUTER
+        // ========================================================
+        if (this.state.species === "kitty") {
+            this.drawKitty(this.state.animT, petScale);
+        } else if (this.state.species === "puppy") {
+            this.drawPuppy(this.state.animT, petScale);
+        } else if (this.state.species === "spider") {
+            this.drawSpider(this.state.animT, petScale);
+        } else if (this.state.species === "goldfish") {
+            this.drawGoldfish(this.state.animT, petScale);
+        }
 		
 		this.ctx.restore();
 		this.updateUI();
 		requestAnimationFrame(this.animate);
 	}
+
     drawYarn(x, y, t) {
         const roll = Math.sin(t * 0.15) * 40;
         this.ctx.save();
         this.ctx.translate(x + roll, y);
         this.ctx.fillStyle = "rgba(0,0,0,0.1)";
         this.ctx.beginPath(); this.ctx.ellipse(0, 15, 15, 5, 0, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.fillStyle = "#e74c3c";
+        
+        let ballColor = "#e74c3c";
+        if (this.state.species === "puppy") ballColor = "#ffeb3b"; // Tennis ball variant
+        if (this.state.species === "spider") ballColor = "#9c27b0";
+        
+        this.ctx.fillStyle = ballColor;
         this.ctx.beginPath(); this.ctx.arc(0, 12, 12, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.strokeStyle = "#c0392b";
-        this.ctx.lineWidth = 2;
+        this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        this.ctx.lineWidth = 1.5;
         this.ctx.beginPath(); this.ctx.arc(0, 0, 8, 0, Math.PI); this.ctx.stroke();
-        this.ctx.beginPath(); this.ctx.moveTo(-12, 0); this.ctx.lineTo(12, -5); this.ctx.stroke();
-        this.ctx.beginPath(); this.ctx.moveTo(-12, 5); this.ctx.bezierCurveTo(-20, 15, -30, 0, -45, 10); this.ctx.stroke();
         this.ctx.restore();
     }
 
     drawEnvironment(t) {
+        const visibleW = this.canvas.width;
+        const visibleH = this.canvas.height;
+
+        // Draw structural spider webs if tracking arrays populated
+        this.state.spiderWebs.forEach(web => {
+            this.ctx.strokeStyle = "rgba(255,255,255,0.25)";
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+            for(let i=0; i<8; i++) {
+                let angle = (i / 8) * Math.PI * 2;
+                this.ctx.moveTo(web.x, web.y);
+                this.ctx.lineTo(web.x + Math.cos(angle)*web.size, web.y + Math.sin(angle)*web.size);
+            }
+            this.ctx.stroke();
+        });
+
+        // Bed structural block render updates
         const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
         this.ctx.fillStyle = "rgba(0,0,0,0.1)";
         this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
         this.ctx.fillStyle = this.state.layout.bedColor;
         this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
 
+        // Object Prop Variant: Cat Tower vs Castle/Coral
         if (this.state.layout.showTower) {
             const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
-            this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
-            this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 50, tPos.y - 5, 100, 15); 
-            this.ctx.fillStyle = "#a67c52"; this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
-            this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
+            if (this.state.species === "goldfish") {
+                // Aquarium Castle/Coral layout block
+                this.ctx.fillStyle = "#ffb74d"; 
+                this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
+                this.ctx.fillStyle = "#e65100";
+                this.ctx.fillRect(tPos.x - 50, tPos.y - 110, 30, 30);
+                this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
+                this.ctx.fillStyle = "#4e342e"; // Main gateway door open
+                this.ctx.beginPath(); this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); this.ctx.fill();
+            } else {
+                // Standard Feline Tower framework block
+                this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
+                this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 50, tPos.y - 5, 100, 15); 
+                this.ctx.fillStyle = "#a67c52"; this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
+                this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
+            }
         }
 
+        // Bowl processing map updates
         const fPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
         this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); this.ctx.fill();
         this.ctx.fillStyle = "#ecf0f1"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); this.ctx.fill();
         this.ctx.fillStyle = "#bdc3c7"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); this.ctx.fill();
         if(this.state.hasFood) {
             this.ctx.fillStyle = "#d35400"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.font = "18px Arial"; this.ctx.fillText("🐟", fPos.x - 10, fPos.y - 6);
+            this.ctx.font = "16px Arial";
+            let foodIcon = "🐟";
+            if (this.state.species === "puppy") foodIcon = "🍖";
+            if (this.state.species === "spider") foodIcon = "🪰";
+            if (this.state.species === "goldfish") foodIcon = "🍤";
+            this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
         }
 
+        // Environment Sandbox Litter Box Layout Map
         const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
         const boxW = 150;
-        this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 50);
-        this.ctx.fillStyle = "#2c3e50"; this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 50);
-        this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 5, boxW - 16, 38);
-        this.state.poops.forEach(p => this.ctx.fillText("💩", (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40), lPos.y + 30));
+        this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
+        this.ctx.fillStyle = "#2c3e50"; this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
+        this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
+        
+        this.state.poops.forEach(p => {
+            let poopyY = p.isCeil ? 90 : lPos.y + 24;
+            let poopyX = (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40);
+            this.ctx.font = "14px Arial";
+            this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
+        });
 
+        // Fluid Goldfish bubble update execution loops
+        if (this.state.species === "goldfish") {
+            this.state.goldfishBubbles.forEach((bubble, idx) => {
+                bubble.y -= 1.2;
+                bubble.x += Math.sin(t*0.05 + idx)*0.5;
+                this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
+                this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
+                this.ctx.beginPath(); this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI*2);
+                this.ctx.fill(); this.ctx.stroke();
+                if(bubble.y < 50) this.state.goldfishBubbles.splice(idx,1);
+            });
+        }
+
+        // Global Nyan Overlay Frame Generation Engine Matrix
         if (this.state.action === "nyan") {
             const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
-            const visibleW = this.canvas.width;
-            const visibleH = this.canvas.height;
             this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
             for (let segment = 0; segment < 8; segment++) {
                 const segOffset = segment * 35;
@@ -1101,6 +1357,7 @@ export class StreamPet {
             this.ctx.globalAlpha = 1.0;
         }
 
+        // Global Particle Physics Array Stack Processing
         this.state.particles.forEach((p, i) => {
             this.ctx.fillStyle = p.c; this.ctx.globalAlpha = p.life / 30;
             this.ctx.fillRect(p.x, p.y, p.s, p.s); this.ctx.globalAlpha = 1.0;
@@ -1109,20 +1366,16 @@ export class StreamPet {
         });
     }
 
-	drawKitty(t, scale) {
+    // ==========================================
+    // CORE VISUAL RENDERING ROUTERS PER SPECIES
+    // ==========================================
+	
+    drawKitty(t, scale) {
 		this.ctx.save();
-		
-		// Maps actions to vertical offsets to compensate for sprite transparency/centering
-		// Adjust these numbers if the cat looks like it's floating/sinking in specific modes
-		const stateOffsets = {
-			"sleep": 15, "tower_sleep": 15,
-			"walk": 5, "idle": 0, "beg": 0, "groom": 0, "kicking": 0
-		};
-		
+		const stateOffsets = { "sleep": 15, "tower_sleep": 15, "walk": 5, "idle": 0 };
 		const baseOffset = stateOffsets[this.state.action] || 0;
 		const bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
 		
-		// Translate with baseOffset to lock feet to the ground
 		this.ctx.translate(this.state.x, this.state.y - bounce + baseOffset);
 		this.ctx.scale(this.state.facing * scale, scale);
 		
@@ -1140,13 +1393,14 @@ export class StreamPet {
 			this.ctx.beginPath(); this.ctx.lineWidth = 11; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
 			this.ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); this.ctx.stroke();
 			this.drawkittyEars(15, 8, finalColor, true); this.drawkittyFace(15, 8, false, true);
-		} else if (this.state.action === "special" || this.state.action === "scratching") {
+		} else if (this.state.action === "special" || this.state.action === "scratching" || this.state.action === "trick") {
 			if (this.state.action === "special") this.drawYarn(30, 20, t);
 			const shake = (this.state.action === "scratching") ? Math.sin(t*0.5)*5 : 0;
-			this.ctx.translate(shake, 0);
+            let rot = (this.state.action === "trick") ? (t * 0.25) : 0;
+            this.ctx.rotate(rot);
+
 			this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
 			this.ctx.beginPath(); this.ctx.arc(0, -45, 24, 0, Math.PI*2); this.ctx.fill();
-			this.ctx.fillStyle = finalColor;
 			if (this.state.action === "special") {
 				const reach = Math.sin(t * 0.2) * 15;
 				this.ctx.fillRect(10, -5 + reach, 10, 15); this.ctx.fillRect(-20, -5 - reach, 10, 15);
@@ -1154,13 +1408,6 @@ export class StreamPet {
 				this.ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15); this.ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
 			}
 			this.drawkittyEars(0, -45, finalColor, false); this.drawkittyFace(0, -45, false, false);
-		} else if (["groom", "potty", "kicking", "beg"].includes(this.state.action)) {
-			this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
-			this.ctx.beginPath(); this.ctx.arc(0, -45, 24, 0, Math.PI*2); this.ctx.fill();
-			if (this.state.action === "kicking") {
-				this.ctx.fillStyle = finalColor; this.ctx.fillRect(10, 10 + Math.sin(t * 0.5) * 15, 10, 15);
-			}
-			this.drawkittyEars(0, -45, finalColor, false); this.drawkittyFace(0, -45, this.state.action === "beg", false);
 		} else {
 			this.ctx.beginPath(); this.ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); this.ctx.fill();
 			this.ctx.beginPath(); this.ctx.arc(35, -15, 24, 0, Math.PI*2); this.ctx.fill();
@@ -1171,7 +1418,7 @@ export class StreamPet {
 			});
 			this.ctx.beginPath(); this.ctx.lineWidth = 8; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
 			this.ctx.moveTo(-45, 0); this.ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); this.ctx.stroke();
-			this.drawkittyFace(35, -15, false, false);
+			this.drawkittyFace(35, -15, this.state.action === "beg", false);
 		}
 		this.ctx.restore();
 	}
@@ -1196,7 +1443,7 @@ export class StreamPet {
             this.ctx.fillStyle = "white"; this.ctx.beginPath(); this.ctx.arc(x - 7, y - 5, 6, 0, Math.PI*2); this.ctx.arc(x + 9, y - 5, 6, 0, Math.PI*2); this.ctx.fill();
             this.ctx.fillStyle = "black"; this.ctx.beginPath(); this.ctx.arc(x - 6, y - 5, 2.5, 0, Math.PI*2); this.ctx.arc(x + 10, y - 5, 2.5, 0, Math.PI*2); this.ctx.fill();
         }
-        this.ctx.strokeStyle = "rgba(255,255,255,0.6)"; this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = "rgba(255,255,255,0.4)"; this.ctx.lineWidth = 1;
         [0, 1, 2].forEach(i => {
            this.ctx.beginPath(); this.ctx.moveTo(x+12, y+2*i); this.ctx.lineTo(x+30, y-8+8*i); this.ctx.stroke();
            this.ctx.beginPath(); this.ctx.moveTo(x-10, y+2*i); this.ctx.lineTo(x-28, y-8+8*i); this.ctx.stroke();
@@ -1204,5 +1451,211 @@ export class StreamPet {
         this.ctx.fillStyle = "#ffaaaa";
         if (begging) { this.ctx.beginPath(); this.ctx.arc(x+1, y+8, 4, 0, Math.PI*2); this.ctx.fill(); }
         else { this.ctx.beginPath(); this.ctx.moveTo(x+1, y+3); this.ctx.lineTo(x-2, y); this.ctx.lineTo(x+4, y); this.ctx.fill(); }
+    }
+
+    // ==========================================
+    // NEW COMPANION ADDITION 1: PUPPY ENGINE
+    // ==========================================
+    drawPuppy(t, scale) {
+        this.ctx.save();
+        const bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.25)) * 20 : 0;
+        let rotationAngle = (this.state.action === "trick") ? (t * 0.2) : 0;
+
+        this.ctx.translate(this.state.x, this.state.y - bounce);
+        this.ctx.rotate(rotationAngle);
+        this.ctx.scale(this.state.facing * scale, scale);
+
+        // Ground shadow
+        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+        this.ctx.beginPath(); this.ctx.ellipse(0, 25, 48, 14, 0, 0, Math.PI*2); this.ctx.fill();
+
+        let baseColor = this.state.isDead ? "#dddddd" : (this.state.poops.length > 5 ? "#a1d95d" : this.state.color);
+        if(this.state.isDead) this.ctx.globalAlpha = 0.4;
+        this.ctx.fillStyle = baseColor;
+
+        if (this.state.action === "sleep" || this.state.action === "tower_sleep") {
+            // Curled up sleeping puppy dog matrix
+            const breath = Math.sin(t * 0.04) * 2;
+            this.ctx.beginPath(); this.ctx.ellipse(0, 10, 46 + breath, 34 + breath, 0, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.fillStyle = "#5d4037"; // Dark snout spot preset
+            this.ctx.beginPath(); this.ctx.arc(20, 14, 10, 0, Math.PI*2); this.ctx.fill();
+        } else {
+            // Standard dynamic standing/walking framework puppy body
+            this.ctx.beginPath(); this.ctx.ellipse(-5, 2, 45, 28, 0, 0, Math.PI*2); this.ctx.fill();
+            
+            // Canine head structure positioning
+            this.ctx.beginPath(); this.ctx.arc(30, -22, 22, 0, Math.PI*2); this.ctx.fill();
+            
+            // Snout / Muzzle asset layer injection
+            this.ctx.fillStyle = "rgba(255,255,255,0.2)";
+            this.ctx.beginPath(); this.ctx.ellipse(40, -18, 12, 9, 0, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.fillStyle = "black";
+            this.ctx.beginPath(); this.ctx.arc(48, -20, 3, 0, Math.PI*2); this.ctx.fill(); // Nose node
+
+            // Floppy canine ear rendering logic arrays
+            this.ctx.fillStyle = baseColor;
+            this.ctx.beginPath(); this.ctx.ellipse(22, -24, 8, 18, 0.2, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.fillStyle = "#3e2723"; // Inner contrast ear profile
+            this.ctx.beginPath(); this.ctx.ellipse(22, -22, 5, 12, 0.2, 0, Math.PI*2); this.ctx.fill();
+
+            // Eyes injection matrix
+            this.ctx.fillStyle = "white";
+            this.ctx.beginPath(); this.ctx.arc(34, -28, 5, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.fillStyle = "black";
+            this.ctx.beginPath(); this.ctx.arc(36, -28, 2, 0, Math.PI*2); this.ctx.fill();
+
+            // Happy tail wag engine logic loop speed mapping
+            const wagSpeed = (this.state.action === "walk" || this.state.hasFood) ? 0.6 : 0.2;
+            const tailWag = Math.sin(t * wagSpeed) * 0.4 - 0.5;
+            this.ctx.save();
+            this.ctx.translate(-42, -5);
+            this.ctx.rotate(tailWag);
+            this.ctx.fillStyle = baseColor;
+            this.ctx.fillRect(-22, -6, 24, 10);
+            this.ctx.restore();
+
+            // Dynamic walking kinematic legs matrix mapping array strings
+            const legSwing = (this.state.action === "walk") ? Math.sin(t * 0.22) * 10 : 0;
+            this.ctx.fillStyle = baseColor;
+            this.ctx.fillRect(-35, 15, 11, 16 + legSwing);
+            this.ctx.fillRect(-15, 15, 11, 16 - legSwing);
+            this.ctx.fillRect(10, 15, 11, 16 + legSwing);
+            this.ctx.fillRect(25, 15, 11, 16 - legSwing);
+
+            if (this.state.action === "special") this.drawYarn(40, 0, t);
+        }
+        this.ctx.restore();
+    }
+
+    // ==========================================
+    // NEW COMPANION ADDITION 2: SPIDER COMPANION
+    // ==========================================
+    drawSpider(t, scale) {
+        this.ctx.save();
+        
+        // Spider handles inversion mapping layout calculations smoothly
+        this.ctx.translate(this.state.x, this.state.y);
+        this.ctx.scale(this.state.facing * scale, scale);
+
+        let spiderColor = this.state.isDead ? "#777777" : this.state.color;
+        if(this.state.isDead) this.ctx.globalAlpha = 0.3;
+        this.ctx.fillStyle = spiderColor;
+        this.ctx.strokeStyle = spiderColor;
+        this.ctx.lineWidth = 3;
+
+        // Ceil ceiling support hanging web element thread lines
+        this.ctx.strokeStyle = "rgba(255,255,255,0.15)";
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0, -this.state.y); this.ctx.stroke();
+
+        this.ctx.fillStyle = spiderColor;
+        this.ctx.strokeStyle = spiderColor;
+        this.ctx.lineWidth = 3.5;
+
+        // Base structural body spheres: Abdomen & Cephalothorax
+        this.ctx.beginPath(); this.ctx.arc(-16, 0, 18, 0, Math.PI*2); this.ctx.fill(); // Main abdomen sphere
+        this.ctx.beginPath(); this.ctx.arc(8, -2, 12, 0, Math.PI*2); this.ctx.fill();  // Head cluster body sphere
+
+        // Dynamic multi-leg procedural animation arrays loops
+        // Generates 8 independent jointed paths mapping against walking cycle waves
+        const legWave = (this.state.action === "walk") ? Math.sin(t * 0.25) * 8 : 0;
+        
+        for(let i=0; i<4; i++) {
+            // Front cluster direction offsets
+            let offsetPhase = i * 0.4;
+            let dynamicSwing = (this.state.action === "walk") ? Math.sin(t * 0.22 + offsetPhase) * 12 : 0;
+
+            // Left Side Extended Legs Representation Matrix Channels
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, -2);
+            this.ctx.lineTo(-10 - (i*8), -24 - (Math.sin(t*0.1 + i)*4) + dynamicSwing);
+            this.ctx.lineTo(-20 - (i*14), 18 + legWave);
+            this.ctx.stroke();
+
+            // Right Side Legs Representation Matrix Channels
+            this.ctx.beginPath();
+            this.ctx.moveTo(4, -2);
+            this.ctx.lineTo(15 + (i*8), -22 - (Math.cos(t*0.1 + i)*4) - dynamicSwing);
+            this.ctx.lineTo(24 + (i*14), 18 - legWave);
+            this.ctx.stroke();
+        }
+
+        // Spider Red Arachnid Eye Clusters Array Rendering
+        this.ctx.fillStyle = this.state.isDead ? "black" : "#ff1744";
+        let eyeOffsets = [[12, -6], [16, -5], [14, -2], [18, -1], [10, -2], [14, 2]];
+        eyeOffsets.forEach(pos => {
+            this.ctx.beginPath(); this.ctx.arc(pos[0], pos[1], 1.5, 0, Math.PI*2); this.ctx.fill();
+        });
+
+        if (this.state.action === "special") this.drawYarn(25, 10, t);
+
+        this.ctx.restore();
+    }
+
+    // ==========================================
+    // NEW COMPANION ADDITION 3: GOLDFISH MODULE
+    // ==========================================
+    drawGoldfish(t, scale) {
+        this.ctx.save();
+        
+        // Float logic vector transformation mapping rules
+        this.ctx.translate(this.state.x, this.state.y);
+        this.ctx.scale(this.state.facing * scale, scale);
+
+        let fishColor = this.state.isDead ? "#e0e0e0" : this.state.color;
+        if(this.state.isDead) {
+            this.ctx.globalAlpha = 0.4;
+            this.ctx.rotate(Math.PI); // Float inverted upside down if deceased
+        }
+        this.ctx.fillStyle = fishColor;
+
+        // Main structural streamlined fluid teardrop body mesh representation
+        this.ctx.beginPath(); 
+        this.ctx.ellipse(0, 0, 36, 22, 0, 0, Math.PI*2); 
+        this.ctx.fill();
+
+        // Elegant wavy tail fin architecture loops
+        const tailWiggle = Math.sin(t * 0.28) * 12;
+        this.ctx.beginPath();
+        this.ctx.moveTo(-32, 0);
+        this.ctx.bezierCurveTo(-55, -25 + tailWiggle, -65, -10 + tailWiggle, -58, tailWiggle);
+        this.ctx.bezierCurveTo(-65, 10 + tailWiggle, -55, 25 + tailWiggle, -32, 0);
+        this.ctx.fillStyle = fishColor;
+        this.ctx.fill();
+        
+        // Secondary sheer internal accent layer mapping lines for fins
+        this.ctx.fillStyle = "rgba(255,255,255,0.3)";
+        this.ctx.beginPath();
+        this.ctx.moveTo(-32,0);
+        this.ctx.lineTo(-52, -15 + tailWiggle);
+        this.ctx.lineTo(-50, 15 + tailWiggle);
+        this.ctx.fill();
+
+        // Dorsal Top fin architecture layer
+        this.ctx.fillStyle = fishColor;
+        this.ctx.beginPath();
+        this.ctx.moveTo(-10, -20);
+        this.ctx.bezierCurveTo(-5, -38, -25, -32, -22, -14);
+        this.ctx.fill();
+
+        // Pectoral steering fin animation wave parameters
+        const finWave = Math.sin(t * 0.12) * 8;
+        this.ctx.save();
+        this.ctx.translate(10, 8);
+        this.ctx.rotate(finWave * Math.PI / 180);
+        this.ctx.beginPath(); this.ctx.ellipse(0, 0, 14, 8, 0.5, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.restore();
+
+        // Large glassy aquatic eye sockets arrays logic
+        this.ctx.fillStyle = "white";
+        this.ctx.beginPath(); this.ctx.arc(20, -6, 7, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.fillStyle = "black";
+        this.ctx.beginPath(); this.ctx.arc(22, -6, 3.5, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.fillStyle = "white";
+        this.ctx.beginPath(); this.ctx.arc(24, -8, 1, 0, Math.PI*2); this.ctx.fill(); // Highlight node
+
+        if (this.state.action === "special") this.drawYarn(30, -5, t);
+
+        this.ctx.restore();
     }
 }
