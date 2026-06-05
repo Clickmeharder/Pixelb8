@@ -63,12 +63,9 @@ export class StreamPet {
             poops: [],
             hasFood: false,
             particles: [],
-            // 📐 Add default dimensions tracking here
+            zoom: 1.0, // 🔍 Added default zoom scaling property
             dimensions: {
-                width: "",
-                height: "",
-                left: "",
-                top: ""
+                width: "", height: "", left: "", top: ""
             },
             layout: {
                 nameX: 50, nameY: 70,
@@ -81,7 +78,6 @@ export class StreamPet {
                 bedColor: "#e74c3c"
             }
         };
-
         // --- 2. SOUND SYSTEM INITIALIZATION ---
         const defaultSoundSettings = {
             masterEnabled: true,
@@ -287,8 +283,16 @@ export class StreamPet {
                     <details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
                         <summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">📐 Layout & Environment</summary>
                         <div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid #27272a;">
+                                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #a1a1aa;">
+                                    <span>Canvas Zoom Scaling</span>
+                                    <span id="zoomValue" style="color: #0ec3c3; font-weight: bold;">1.0x</span>
+                                </div>
+                                <input type="range" id="canvasZoom" min="0.5" max="3.0" step="0.1" value="1.0" style="width: 100%;">
+                            </div>
+
                             <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
-                                <span style="font-size: 11px; color: #a1a1aa;">Show Cat Tower</span>
+                                <span>Show Cat Tower</span>
                                 <input type="checkbox" id="showTower" checked>
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
@@ -433,21 +437,41 @@ export class StreamPet {
 
 	// --- MAIN ANIMATION INTERFACE LOOP ---
 	animate = () => {
-		this.state.animT++;
-		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.state.animT++;
+        
+        // Wipe previous frame clean
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-		this.updateAI(this.state.animT);
-		this.drawEnvironment(this.state.animT);
+        // Run non-rendering state calculations
+        this.updateAI(this.state.animT);
 
-		let petScale = 1.0;
-		if (this.state.stage === "Baby") petScale = 0.6;
-		if (this.state.stage === "Juvenile") petScale = 0.8;
+        // 🔍 Isolate context modifications so they don't multiply infinitely or bleed into other elements
+        this.ctx.save();
+        
+        // Fetch the loaded slider scale value (fallback to 1.0)
+        const scaleVal = this.state.zoom || 1.0;
+        this.ctx.scale(scaleVal, scaleVal);
 
-		this.drawKitty(this.state.animT, petScale);
-		this.updateUI();
+        // Render environment objects (Bed, Bowl, Tower, Litter Box, Particles, etc.)
+        this.drawEnvironment(this.state.animT);
 
-		requestAnimationFrame(this.animate);
-	}
+        // Calculate visual growth scaling based on life stages
+        let petScale = 1.0;
+        if (this.state.stage === "Baby") petScale = 0.6;
+        if (this.state.stage === "Juvenile") petScale = 0.8;
+
+        // Render the pet inside the zoomed matrix layout
+        this.drawKitty(this.state.animT, petScale);
+
+        // Reset context transformations back to standard 1:1 pixel grid for the next frame
+        this.ctx.restore();
+
+        // Refresh UI Text Layers (Nameplate status bar strings, etc.)
+        this.updateUI();
+
+        // Cycle the main drawing frame thread
+        requestAnimationFrame(this.animate);
+    }
 	// --- DRAWING & RENDERING PROCEDURES ---
 	drawYarn(x, y, t) {
 		const roll = Math.sin(t * 0.15) * 40;
@@ -793,7 +817,10 @@ export class StreamPet {
 			
 			const nameIn = document.getElementById("nameInput"); if(nameIn) nameIn.value = this.state.name;
 			const checkT = document.getElementById("showTower"); if(checkT) checkT.checked = this.state.layout.showTower;
-			
+			const zoomSlider = document.getElementById("canvasZoom");
+            const zoomDisplay = document.getElementById("zoomValue");
+            if (zoomSlider) zoomSlider.value = this.state.zoom || 1.0;
+            if (zoomDisplay) zoomDisplay.textContent = `${(this.state.zoom || 1.0).toFixed(1)}x`;
 			
 			Object.keys(this.state.layout).forEach(k => { 
 				const el = document.getElementById(k);
@@ -869,7 +896,19 @@ export class StreamPet {
             const el = document.getElementById(id);
             if(el) el.addEventListener("input", (e) => this.state.layout[id] = parseInt(e.target.value));
         });
-
+		const zoomSlider = document.getElementById("canvasZoom");
+        const zoomDisplay = document.getElementById("zoomValue");
+        if (zoomSlider) {
+            zoomSlider.addEventListener("input", (e) => {
+                const val = parseFloat(e.target.value);
+                this.state.zoom = val;
+                if (zoomDisplay) zoomDisplay.textContent = `${val.toFixed(1)}x`;
+                // No need to manually repaint here since animate loop runs continually
+            });
+            zoomSlider.addEventListener("change", () => {
+                this.saveData(); // Explicit save to local storage when they let go
+            });
+        }
         const st = document.getElementById("showTower");
         if (st) st.addEventListener("change", (e) => {
             this.state.layout.showTower = e.target.checked;
