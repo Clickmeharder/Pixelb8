@@ -463,7 +463,7 @@ const SETTINGS_SCHEMA = [
                     
                     if (typeof syncAllToggleUI === "function") syncAllToggleUI();
                 } 
-            }
+            },
             { 
                 label: "Enable Jukebox Widget", 
                 idKey: "jukebox", 
