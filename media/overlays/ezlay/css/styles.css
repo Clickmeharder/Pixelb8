@@ -75,6 +75,10 @@ body.edit-mode .p8-widget {
     outline: 2px dashed rgba(145, 70, 255, 0.6);
     cursor: grab; 
 }
+body.edit-mode .p8-widget#jukebox-widget { 
+	overflow:hidden;
+	resize:vertical;
+}
 body.edit-mode .p8-widget #chat-feed { 
 	overflow:hidden;
 	resize:vertical;
