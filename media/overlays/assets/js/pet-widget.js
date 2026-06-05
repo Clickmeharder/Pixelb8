@@ -419,58 +419,63 @@ export class StreamPet {
     // ==========================================
     // SECTION 5: UI ASSEMBLY, TEMPLATES & BINDINGS
     // ==========================================
-    static get controlsTemplate() {
-        const layoutMetrics = [
-            ["name", "Nameplate X/Y", 50, 70, 0, 100],
-            ["stats", "Stats X/Y", 50, 90, 0, 100],
-            ["bed", "Cat Bed X/Y", 20, 100, 0, 100],     
-            ["bowl", "Food Bowl X/Y", 45, 100, 0, 100],   
-            ["litter", "Litter Box X/Y", 90, 100, 0, 100], 
-            ["tower", "Tower X/Y", 70, 100, 0, 100]       
-        ];
+	static get controlsTemplate() {
+		// ========================================================
+		// 1. COMPONENT STATE & TRACK DATA MAPS
+		// ========================================================
+		const layoutMetrics = [
+			["name", "Nameplate X/Y", 50, 70, 0, 100],
+			["stats", "Stats X/Y", 50, 90, 0, 100],
+			["bed", "Cat Bed X/Y", 20, 100, 0, 100],     
+			["bowl", "Food Bowl X/Y", 45, 100, 0, 100],   
+			["litter", "Litter Box X/Y", 90, 100, 0, 100], 
+			["tower", "Tower X/Y", 70, 100, 0, 100]        
+		];
 
-        const audioTracks = [
-            { key: "meowSound", label: "😺 Standard Meow" },
-            { key: "mewSound", label: "😾 Baby Mew" },
-            { key: "purrSound", label: "💤 Content Purr" },
-            { key: "nyanSound", label: "🌈 Space Nyan Theme Loop" }
-        ];
+		const audioTracks = [
+			{ key: "meowSound", label: "😺 Standard Meow" },
+			{ key: "mewSound", label: "😾 Baby Mew" },
+			{ key: "purrSound", label: "💤 Content Purr" },
+			{ key: "nyanSound", label: "🌈 Space Nyan Theme Loop" }
+		];
 
-        return `
-            <div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-                <span>🐾 Interactive Pet Module</span>
-                <span class="collapse-icon">▼</span>
-            </div>
-            <div class="collapsible-content">
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    
-                    <div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
-                        <label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">Identity & Feed</label>
-                        <input type="text" id="nameInput" class="p8-input" placeholder="Pet Name (e.g., Greta)" style="background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 4px;">
-                    </div>
+		// ========================================================
+		// 2. MODULAR PET INTERFACE BLOCKS
+		// ========================================================
+		
+		// 🐈 KITTY MODULE TEMPLATE
+		const kittyModule = `
+			<details style="border: 1px solid #27272a; border-radius: 6px; background: #111114;" open>
+				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🐈 Kitty-Specific Parameters</summary>
+				<div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 12px;">
+					
+					<div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
+						<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">Identity & Feed</label>
+						<input type="text" id="nameInput" class="p8-input" placeholder="Pet Name (e.g., Greta)" style="background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 4px;">
+					</div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                        <button type="button" id="btnFeed" class="p8-btn" style="padding: 6px 0; background: #1e3a8a; border: 1px solid #3b82f6; font-size: 11px;">🐟 FEED FISH</button>
-                        <button type="button" id="btnTreat" class="p8-btn" style="padding: 6px 0; background: #7c2d12; border: 1px solid #ea580c; font-size: 11px;">🍗 GIVE TREAT</button>
-                        <button type="button" id="btnPlay" class="p8-btn" style="padding: 6px 0; background: #581c87; border: 1px solid #a855f7; font-size: 11px;">🧶 PLAY YARN</button>
-                        <button type="button" id="btnDance" class="p8-btn" style="padding: 6px 0; background: #065f46; border: 1px solid #10b981; font-size: 11px;">✨ DANCE</button>
-                    </div>
+					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+						<button type="button" id="btnFeed" class="p8-btn" style="padding: 6px 0; background: #1e3a8a; border: 1px solid #3b82f6; font-size: 11px;">🐟 FEED FISH</button>
+						<button type="button" id="btnTreat" class="p8-btn" style="padding: 6px 0; background: #7c2d12; border: 1px solid #ea580c; font-size: 11px;">🍗 GIVE TREAT</button>
+						<button type="button" id="btnPlay" class="p8-btn" style="padding: 6px 0; background: #581c87; border: 1px solid #a855f7; font-size: 11px;">🧶 PLAY YARN</button>
+						<button type="button" id="btnDance" class="p8-btn" style="padding: 6px 0; background: #065f46; border: 1px solid #10b981; font-size: 11px;">✨ DANCE</button>
+					</div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                        <button type="button" id="btnClear" class="p8-btn alt-btn" style="padding: 6px 0; background: #27272a; font-size: 11px;">🧹 CLEAN LITTER</button>
-                        <button type="button" id="btnRevive" class="p8-btn" style="padding: 6px 0; background: #991b1b; font-size: 11px;">💖 REVIVE PET</button>
-                    </div>
+					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+						<button type="button" id="btnClear" class="p8-btn alt-btn" style="padding: 6px 0; background: #27272a; font-size: 11px;">🧹 CLEAN LITTER</button>
+						<button type="button" id="btnRevive" class="p8-btn" style="padding: 6px 0; background: #991b1b; font-size: 11px;">💖 REVIVE PET</button>
+					</div>
 
-                    <details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;" open>
-                        <summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">📐 Layout & Environment</summary>
-                        <div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
-                            <div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid #27272a;">
-                                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #a1a1aa;">
-                                    <span>Canvas Zoom Scaling</span>
-                                    <span id="zoomValue" style="color: #0ec3c3; font-weight: bold;">1.0x</span>
-                                </div>
-                                <input type="range" id="canvasZoom" min="-2" max="2" step="0.1" value="0" style="width: 100%;">
-                            </div>
+					<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;" open>
+						<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">📐 Layout & Environment</summary>
+						<div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
+							<div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid #27272a;">
+								<div style="display: flex; justify-content: space-between; font-size: 11px; color: #a1a1aa;">
+									<span>Canvas Zoom Scaling</span>
+									<span id="zoomValue" style="color: #0ec3c3; font-weight: bold;">1.0x</span>
+								</div>
+								<input type="range" id="canvasZoom" min="-2" max="2" step="0.1" value="0" style="width: 100%;">
+							</div>
 							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
 								<span>Hide Outer Border</span>
 								<input type="checkbox" id="hideBorderToggle">
@@ -483,63 +488,118 @@ export class StreamPet {
 								<span>Hide Status Text</span>
 								<input type="checkbox" id="hideStatusToggle">
 							</div>
-							
 							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
 								<span>Hide Nameplate Text</span>
 								<input type="checkbox" id="hideNameplateToggle">
 							</div>
-							
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
-                                <span>Show Cat Tower</span>
-                                <input type="checkbox" id="showTower" checked>
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-                                <span style="font-size: 11px; color: #a1a1aa;">Bed Fabric Accent Color:</span>
-                                <div id="bedColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px;"></div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 90px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
-                                    ${layoutMetrics.map(([id, label, xVal, yVal, minY, maxY]) => `
-                                        <span>${label}</span>
-                                        <div style="display: flex; flex-direction:column; gap: 4px;">
-                                            <input type="range" id="${id}X" min="0" max="100" value="${xVal}" style="width:100%;">
-                                            <input type="range" id="${id}Y" min="${minY}" max="${maxY}" value="${yVal}" style="width:100%;">
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    </details>
+							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+								<span>Show Cat Tower</span>
+								<input type="checkbox" id="showTower" checked>
+							</div>
+							<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+								<span style="font-size: 11px; color: #a1a1aa;">Bed Fabric Accent Color:</span>
+								<div id="bedColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px;"></div>
+							</div>
+							<div style="display: grid; grid-template-columns: 90px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
+								${layoutMetrics.map(([id, label, xVal, yVal, minY, maxY]) => `
+									<span>${label}</span>
+									<div style="display: flex; flex-direction:column; gap: 4px;">
+										<input type="range" id="${id}X" min="0" max="100" value="${xVal}" style="width:100%;">
+										<input type="range" id="${id}Y" min="${minY}" max="${maxY}" value="${yVal}" style="width:100%;">
+									</div>
+								`).join('')}
+							</div>
+						</div>
+					</details>
+				</div>
+			</details>
+		`;
 
-                    <details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
-                        <summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🔊 Audio Configurations</summary>
-                        <div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 10px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
-                                <span style="font-size: 11px; color: #a1a1aa; font-weight: bold;">Master Audio Engine</span>
-                                <input type="checkbox" id="masterEnabled" checked>
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 6px;">
-                                ${audioTracks.map(({ key, label }) => `
-                                    <div class="setting-row" data-key="${key}" style="display: flex; flex-direction: column; gap: 4px; background: #141414; padding: 6px; border-radius: 4px;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                                            <span style="font-size: 11px; color: #fff;">${label}</span>
-                                            <input type="checkbox" checked>
-                                        </div>
-                                        <div style="display: flex; gap: 4px;">
-                                            <button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
-                                            <button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
-                                            <input type="file" class="hidden-file-input" accept="audio/*" style="display: none;">
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </details>
+		// 🐕 PUPPY MODULE TEMPLATE
+		const puppyModule = `
+			<details style="border: 1px solid #27272a; border-radius: 6px; background: #111114;">
+				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🐕 Puppy-Specific Parameters</summary>
+				<div style="padding: 10px; border-top: 1px solid #27272a; color: #a1a1aa; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
+					<div>Puppy Engine Framework Placeholder</div>
+					<div style="font-size: 10px; color: #71717a; font-style: italic;">Awaiting sprite rendering pipeline assignment and trick configurations...</div>
+				</div>
+			</details>
+		`;
 
-                    <button type="button" id="btnReset" class="p8-btn" style="background: #991b1b; padding: 6px 0; font-size: 11px; margin-top: 5px;">⚠️ FACTORY RESET DATA</button>
-                </div>
-            </div>
-        `;
-    }
+		// 🕷️ SPIDER MODULE TEMPLATE
+		const spiderModule = `
+			<details style="border: 1px solid #27272a; border-radius: 6px; background: #111114;">
+				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🕷️ Spider-Specific Parameters</summary>
+				<div style="padding: 10px; border-top: 1px solid #27272a; color: #a1a1aa; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
+					<div>Spider Engine Framework Placeholder</div>
+					<div style="font-size: 10px; color: #71717a; font-style: italic;">Awaiting pathfinding matrix setup, web configurations, and multi-leg animation arrays...</div>
+				</div>
+			</details>
+		`;
+
+		// 🐟 GOLDFISH MODULE TEMPLATE
+		const goldfishModule = `
+			<details style="border: 1px solid #27272a; border-radius: 6px; background: #111114;">
+				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🐟 Goldfish-Specific Parameters</summary>
+				<div style="padding: 10px; border-top: 1px solid #27272a; color: #a1a1aa; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
+					<div>Goldfish Engine Framework Placeholder</div>
+					<div style="font-size: 10px; color: #71717a; font-style: italic;">Awaiting fluid physics container mapping, bowl decorations, and swimming loop logic...</div>
+				</div>
+			</details>
+		`;
+
+		// ========================================================
+		// 3. GLOBAL CONFIG PANELS (AUDIO & SYSTEM RESET)
+		// ========================================================
+		const globalAudioModule = `
+			<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
+				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🔊 Audio Configurations</summary>
+				<div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 10px;">
+					<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+						<span style="font-size: 11px; color: #a1a1aa; font-weight: bold;">Master Audio Engine</span>
+						<input type="checkbox" id="masterEnabled" checked>
+					</div>
+					<div style="display: flex; flex-direction: column; gap: 6px;">
+						${audioTracks.map(({ key, label }) => `
+							<div class="setting-row" data-key="${key}" style="display: flex; flex-direction: column; gap: 4px; background: #141414; padding: 6px; border-radius: 4px;">
+								<div style="display: flex; justify-content: space-between; align-items: center;">
+									<span style="font-size: 11px; color: #fff;">${label}</span>
+									<input type="checkbox" checked>
+								</div>
+								<div style="display: flex; gap: 4px;">
+									<button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
+									<button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
+									<input type="file" class="hidden-file-input" accept="audio/*" style="display: none;">
+								</div>
+							</div>
+						`).join('')}
+					</div>
+				</div>
+			</details>
+		`;
+
+		// ========================================================
+		// 4. COMBINE AND RETURN THE FULL APPLICATION SHEET
+		// ========================================================
+		return `
+			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
+				<span>🐾 Interactive Pet Module</span>
+				<span class="collapse-icon">▼</span>
+			</div>
+			<div class="collapsible-content">
+				<div style="display: flex; flex-direction: column; gap: 12px;">
+					
+					${kittyModule}
+					${puppyModule}
+					${spiderModule}
+					${goldfishModule}
+					${globalAudioModule}
+
+					<button type="button" id="btnReset" class="p8-btn" style="background: #991b1b; padding: 6px 0; font-size: 11px; margin-top: 5px;">⚠️ FACTORY RESET DATA</button>
+				</div>
+			</div>
+		`;
+	}
 
     injectUI() {
         const wrapper = document.getElementById("widget-control-wrapper");
