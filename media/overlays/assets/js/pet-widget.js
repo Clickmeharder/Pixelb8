@@ -174,7 +174,7 @@ export class StreamPet {
         // Load runtime memory maps
         this.loadData();
         this.initContainerListeners(); 
-        
+        this.initPetPlacement();
         // Kick off intervals and processing thread loops
         this.saveInterval = setInterval(() => this.saveData(), 5000);
         this.animate = this.animate.bind(this);
@@ -186,6 +186,32 @@ export class StreamPet {
     // ==========================================
     // SECTION 2: INPUT, BOUNDS & DATA PERSISTENCE
     // ==========================================
+	// ⭐ FIX: Added internal Snap Placement handler inside the class structure
+    initPetPlacement() {
+        if (!this.canvas) return;
+        const visibleW = this.canvas.width;
+        const visibleH = this.canvas.height;
+        
+        const CEIL_Y = 30; 
+        const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
+
+        this.state.action = "idle";
+        this.state.actionTimer = 200;
+
+        if (this.registry.activeSpecies === "spider") {
+            this.state.x = visibleW / 2;
+            this.state.y = CEIL_Y;
+        } else if (this.registry.activeSpecies === "goldfish") {
+            this.state.x = visibleW / 2;
+            this.state.y = visibleH / 2; // Perfectly centered vertical horizon lane
+        } else {
+            this.state.x = visibleW / 2;
+            this.state.y = FLOOR_Y; // Ground level for kitty/puppy
+        }
+
+        this.state.originalPos = { x: this.state.x, y: this.state.y };
+        console.log(`🎯 [Pet Positioner]: Snapped ${this.registry.activeSpecies} cleanly to start position.`);
+    }
     initContainerListeners() {
         if (!this.widgetContainer) return;
 
@@ -796,8 +822,8 @@ export class StreamPet {
                 this.activePet.name = e.target.value || "Companion";
             });
         }
-
-        const speciesOptions = [
+		
+		const speciesOptions = [
             "🐈 Kitty (Feline Engine v10)",
             "🐕 Puppy (Canine Kinematics Engine)",
             "🕷️ Spider (Arachnid Procedural Pathing)",
@@ -810,16 +836,14 @@ export class StreamPet {
             if (selectedText.includes("Spider")) chosenSpecies = "spider";
             if (selectedText.includes("Goldfish")) chosenSpecies = "goldfish";
 
+            // Set the new species pointer
             this.registry.activeSpecies = chosenSpecies;
             
             // Re-sync name interface field value dynamically to reflect current animal
             if (nameIn) nameIn.value = this.activePet.name;
 
-            // Floor anchor adjustment rules
-            const visibleH = this.canvas.height;
-            if (chosenSpecies === "spider") this.state.y = 80;
-            else if (chosenSpecies === "goldfish") this.state.y = visibleH / 2;
-            else this.state.y = visibleH - this.BASE_FLOOR_Y;
+            // ⭐ FIX: Instead of old, floating hardcoded logic, call the snap positioning system 
+            this.initPetPlacement();
 
             this.syncSpeciesInterfaceToggle();
             this.saveData();
