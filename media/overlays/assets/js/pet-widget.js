@@ -120,6 +120,7 @@ export class StreamPet {
         this.animate();
 
         this.bindUIEventListeners();
+		this.initPersistenceObservers();
     }
 
     // --- CHAT COMMAND ROUTER ---
@@ -808,7 +809,35 @@ export class StreamPet {
         }
 		this.initSwatches(); 
 	}
+	initPersistenceObservers() {
+        const el = document.getElementById("pet-widget");
+        if (!el) return;
 
+        // 1. WATCH POSITION (Listens for changes made by your main JS dragging engine)
+        const mutationObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === "attributes" && mutation.attributeName === "style") {
+                    this.state.dimensions.left = el.style.left;
+                    this.state.dimensions.top = el.style.top;
+                    // Will be caught natively by your 5-second save interval or manual triggers
+                }
+            });
+        });
+        
+        mutationObserver.observe(el, { attributes: true, attributeFilter: ["style"] });
+
+        // 2. WATCH SIZE (Listens for native CSS resize drag handle actions)
+        if (window.ResizeObserver) {
+            const resizeObserver = new ResizeObserver((entries) => {
+                for (let entry of entries) {
+                    if (entry.contentRect.width === 0 || entry.contentRect.height === 0) continue;
+                    this.state.dimensions.width = `${entry.target.clientWidth}px`;
+                    this.state.dimensions.height = `${entry.target.clientHeight}px`;
+                }
+            });
+            resizeObserver.observe(el);
+        }
+    }
 	initSwatches() {
 		const swatchContainer = document.getElementById("bedColorSwatches");
 		if (!swatchContainer) return;
