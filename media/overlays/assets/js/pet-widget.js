@@ -1502,7 +1502,7 @@ export class StreamPet {
         const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
         const boxW = 150;
 
-        if (this.registry.activeSpecies === "puppy") {
+		if (this.registry.activeSpecies === "puppy") {
             // 🌿 Fresh Sod Grass Patch Variant for Canines
             // Base Underlay Dirt Shadow Matrix
             this.ctx.fillStyle = "#4e342e"; 
@@ -1520,14 +1520,17 @@ export class StreamPet {
                 this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
             }
             
-            // Miniature Backyard Decorative Picket Border Trim
+            // Miniature Backyard Decorative Picket Border Trim (Shifted on top of grass)
             this.ctx.fillStyle = "#f5f5f5";
-            for(let p = 0; p <= boxW; p += 15) {
-                this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y + 2, 4, 36); // Vertical posts
-            }
-            this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 8, boxW, 4);   // Top rail
-            this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 26, boxW, 4);  // Bottom rail
             
+            // 1. Vertical posts: Started at lPos.y - 20 with a height of 24 so they terminate exactly at lPos.y + 4
+            for(let p = 0; p <= boxW; p += 15) {
+                this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
+            }
+            
+            // 2. Rails: Shifted upward to fit proportionally within the new picket area height
+            this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   // Top rail
+            this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    // Bottom rail
         } else {
             // 🐈 Standard Feline Sand Litter Box Enclosure
             this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
