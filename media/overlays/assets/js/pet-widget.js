@@ -129,21 +129,24 @@ export class StreamPet {
 	initContainerListeners() {
 		if (!this.widgetContainer) return;
 
-		// Use a single observer to track both position and size changes
-		const config = { attributes: true, attributeFilter: ["style"] };
-
+		// This observer will catch changes made by BOTH:
+		// 1. Your global drag-and-drop script
+		// 2. The native browser resize handle
 		const observer = new MutationObserver((mutations) => {
-			// Debounce or just save directly to localStorage
-			this.widgetBounds.width = this.widgetContainer.style.width;
-			this.widgetBounds.height = this.widgetContainer.style.height;
-			this.widgetBounds.left = this.widgetContainer.style.left;
-			this.widgetBounds.top = this.widgetContainer.style.top;
-			
+			this.widgetBounds = {
+				left: this.widgetContainer.style.left,
+				top: this.widgetContainer.style.top,
+				width: this.widgetContainer.style.width,
+				height: this.widgetContainer.style.height
+			};
 			localStorage.setItem("greta_widget_bounds", JSON.stringify(this.widgetBounds));
-			this.resize();
+			this.resize(); // Re-sync the canvas internal resolution
 		});
 
-		observer.observe(this.widgetContainer, config);
+		observer.observe(this.widgetContainer, { 
+			attributes: true, 
+			attributeFilter: ["style"] 
+		});
 	}
     saveData() { 
         localStorage.setItem("greta_ultra_v10", JSON.stringify(this.state)); 
