@@ -1206,9 +1206,22 @@ export class StreamPet {
                         this.state.action = "potty";
                         this.state.actionTimer = 90;
                     }
+                } else if (this.registry.activeSpecies === "spider") {
+                    // 🕷️ Spider routing step: Pick a random spot in the upper ceiling tracking zone to lay a web
+                    if (!this.state.spiderPottyTarget) {
+                        this.state.spiderPottyTarget = {
+                            x: 80 + Math.random() * (visibleW - 160),
+                            y: 70 + Math.random() * 80
+                        };
+                    }
+                    if (walkToPoint(this.state.spiderPottyTarget.x, this.state.spiderPottyTarget.y, 2.0)) {
+                        this.state.spiderPottyTarget = null;
+                        this.state.action = "potty";
+                        this.state.actionTimer = 100;
+                    }
                 } else {
                     // Standard floor anchor animal pathing
-                    let litterDestY = (this.registry.activeSpecies === "spider") ? 70 : litPos.y;
+                    let litterDestY = litPos.y;
                     if (walkToPoint(litPos.x, litterDestY)) { 
                         this.state.action = "potty"; 
                         this.state.actionTimer = 120; 
@@ -1230,12 +1243,22 @@ export class StreamPet {
                         this.activePet.digestive = 0;
                         this.state.action = "idle"; // Bypass sand kicking loops completely
                         this.state.actionTimer = 250;
+                    } else if (this.registry.activeSpecies === "spider") {
+                        // 🕷️ Instead of dropping physical floor feces, spawn a permanent structural decorative web!
+                        this.state.spiderWebs.push({
+                            x: this.state.x,
+                            y: this.state.y,
+                            size: 25 + Math.random() * 15
+                        });
+                        this.activePet.digestive = 0;
+                        this.state.action = "idle"; // Bypass sand kicking loops completely
+                        this.state.actionTimer = 200;
+                        this.say("Spun a fresh web! 🕸️");
                     } else {
-                        // Land animal/spider legacy execution drop arrays
-                        this.activePet.poops.push({ox: Math.random()*100, isCeil: (this.registry.activeSpecies === "spider")}); 
+                        // Land animal legacy execution drop arrays
+                        this.activePet.poops.push({ox: Math.random()*100, isCeil: false}); 
                         this.activePet.digestive = 0; 
-                        this.state.action = (this.registry.activeSpecies === "spider") ? "idle" : "walk_to_kick"; 
-                        if (this.registry.activeSpecies === "spider") this.say("Dropped silk line! 🕸️");
+                        this.state.action = "walk_to_kick"; 
                     }
                 }
                 break;
@@ -1451,8 +1474,8 @@ export class StreamPet {
         const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
         const boxW = 150;
 
-        // Only draw the litter box or grass patch if the pet is NOT a goldfish
-        if (this.registry.activeSpecies !== "goldfish") {
+        // Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
+        if (this.registry.activeSpecies !== "goldfish" && this.registry.activeSpecies !== "spider") {
             if (this.registry.activeSpecies === "puppy") {
                 // 🌿 Fresh Sod Grass Patch Variant for Canines
                 this.ctx.fillStyle = "#4e342e"; 
@@ -1509,6 +1532,8 @@ export class StreamPet {
                 this.ctx.font = "14px Arial";
                 this.ctx.fillText("💩", finalX, p.y);
 
+            } else if (this.registry.activeSpecies === "spider") {
+                // Spiders loop via custom structural web arrays; standard array waste is bypassed.
             } else {
                 // Land Animal Static Render Pass (Anchored to Litterbox / Grass Patch relative layouts)
                 let poopyY = p.isCeil ? 90 : lPos.y + 24;
@@ -1522,11 +1547,35 @@ export class StreamPet {
         // PHASE 3: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
         // ========================================================
 
-        // Object Prop Variant: Cat Tower vs Castle/Coral vs Doghouse
+        // Object Prop Variant: Cat Tower vs Castle/Coral vs Doghouse vs Web Nest
         if (this.state.layout.showTower) {
             const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
             
-            if (this.registry.activeSpecies === "goldfish") {
+            if (this.registry.activeSpecies === "spider") {
+                // 🕸️ Tower Transformation: Large, ornate hanging structural web nest architecture
+                this.ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+                this.ctx.lineWidth = 1.5;
+                
+                // Support lines running up to the upper structural tracking boundaries
+                this.ctx.beginPath();
+                this.ctx.moveTo(tPos.x, tPos.y - 140); this.ctx.lineTo(tPos.x - 70, tPos.y);
+                this.ctx.moveTo(tPos.x, tPos.y - 140); this.ctx.lineTo(tPos.x + 70, tPos.y);
+                this.ctx.moveTo(tPos.x, tPos.y - 140); this.ctx.lineTo(tPos.x, tPos.y);
+                this.ctx.stroke();
+
+                // Concentric structural web rings
+                for (let r = 20; r <= 80; r += 20) {
+                    this.ctx.beginPath();
+                    this.ctx.arc(tPos.x, tPos.y - 70, r, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+                
+                // Asset identity text metadata layer
+                this.ctx.fillStyle = "rgba(255,255,255,0.7)";
+                this.ctx.font = "12px Courier New";
+                this.ctx.fillText("🕸️ Web Nest", tPos.x - 35, tPos.y + 15);
+
+            } else if (this.registry.activeSpecies === "goldfish") {
                 // Aquarium Castle/Coral layout block
                 this.ctx.fillStyle = "#ffb74d"; 
                 this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
@@ -1576,7 +1625,7 @@ export class StreamPet {
                 this.ctx.restore();
                 
             } else {
-                // Standard Feline Tower framework block (Kitty / Spider fallback)
+                // Standard Feline Tower framework block (Kitty fallback)
                 this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
                 this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 55, tPos.y - 5, 110, 15); 
                 this.ctx.fillStyle = "#a67c52"; this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
@@ -1587,13 +1636,35 @@ export class StreamPet {
         // ========================================================
         // PHASE 4: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
         // ========================================================
-        
-        // Bed structural block render updates
         const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-        this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.fillStyle = this.state.layout.bedColor;
-        this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
+        
+        if (this.registry.activeSpecies === "spider") {
+            // 🕸️ Bed Transformation: Intricate horizontal spiral geometry woven flat into an ambient corner hammock
+            this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
+            this.ctx.lineWidth = 1;
+            
+            // Layout Main Radial Spokes
+            this.ctx.beginPath();
+            for (let i = 0; i < 8; i++) {
+                let angle = (i / 8) * Math.PI * 2;
+                this.ctx.moveTo(bPos.x, bPos.y + 5);
+                this.ctx.lineTo(bPos.x + Math.cos(angle) * 55, bPos.y + 5 + Math.sin(angle) * 18);
+            }
+            this.ctx.stroke();
+
+            // Elliptical Concentric Binding Rings
+            for (let r = 10; r <= 50; r += 12) {
+                this.ctx.beginPath();
+                this.ctx.ellipse(bPos.x, bPos.y + 5, r, r * 0.35, 0, 0, Math.PI * 2);
+                this.ctx.stroke();
+            }
+        } else {
+            // Bed structural block render updates for standard terrestrial/aquatic targets
+            this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+            this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.fillStyle = this.state.layout.bedColor;
+            this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
+        }
 
         // ========================================================
         // PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
