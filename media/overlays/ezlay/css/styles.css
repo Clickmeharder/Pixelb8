@@ -124,6 +124,10 @@ body.edit-mode .p8-widget:active {
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     width: 324px;
+	height:425px;
+	overflow:hidden;
+	overflow-y:scroll;
+	resize:both;
     box-sizing: border-box;
 }
 
