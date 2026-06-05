@@ -187,7 +187,7 @@ export class StreamPet {
     // SECTION 2: INPUT, BOUNDS & DATA PERSISTENCE
     // ==========================================
 	// ⭐ FIX: Added internal Snap Placement handler inside the class structure
-    initPetPlacement() {
+	initPetPlacement() {
 		if (!this.canvas) return;
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
@@ -196,33 +196,35 @@ export class StreamPet {
 		const CEIL_Y = 30; 
 		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
 
-		// 🛏️ Dynamic Bed Tracking Coordinates
-		// Convert layout grid percentage integers (e.g., 20, 100) directly into canvas pixel positions
-		const bedPixelX = (this.state.layout.bedX / 100) * visibleW;
-		const bedPixelY = (this.state.layout.bedY / 100) * visibleH;
+		// 🛏️ Dynamic Bed Tracking Coordinates via your Zoom Engine
+		// This feeds the percentages into getPos() to properly inherit all zoom transforms
+		const bedCoordinates = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
 
 		this.state.action = "idle";
 		this.state.actionTimer = 200;
 
 		if (this.registry.activeSpecies === "spider") {
-			// Spiders still drop onto the ceiling directly above the bed anchor
-			this.state.x = bedPixelX;
+			// Spiders drop directly above the bed's scaled X position on the roof
+			this.state.x = bedCoordinates.x;
 			this.state.y = CEIL_Y;
 		} else if (this.registry.activeSpecies === "goldfish") {
-			// Goldfish sit comfortably in their horizon swimming lane directly above the bed
-			this.state.x = bedPixelX;
+			// Goldfish float in the mid-water horizon lane right over the bed's scaled X position
+			this.state.x = bedCoordinates.x;
 			this.state.y = visibleH / 2; 
 		} else {
-			// Terrestrial pets (Puppy, Kitty) spawn directly curled up on the ground floor bed line
-			this.state.x = bedPixelX;
-			// If your custom bed layout slider pushes y to 100%, match the true ground level
-			this.state.y = this.state.layout.bedY >= 100 ? FLOOR_Y : bedPixelY;
+			// Terrestrial pets (Puppy, Kitty) land precisely on the scaled bed positions
+			this.state.x = bedCoordinates.x;
+			
+			// If the bed is pushed all the way down to the floor, lock to true FLOOR_Y
+			// Otherwise, use the dynamically scaled bed Y coordinate
+			this.state.y = this.state.layout.bedY >= 100 ? FLOOR_Y : bedCoordinates.y;
 		}
 
-		// Lock position values into the system memory cache
+		// Cache the resolved matrix positions
 		this.state.originalPos = { x: this.state.x, y: this.state.y };
-		console.log(`🎯 [Pet Positioner]: Snapped ${this.registry.activeSpecies} cleanly to the Bed matching coordinate axis.`);
+		console.log(`🎯 [Pet Positioner]: Cleanly snapped ${this.registry.activeSpecies} to Bed with Zoom transformations accounted for.`);
 	}
+
     initContainerListeners() {
         if (!this.widgetContainer) return;
 
