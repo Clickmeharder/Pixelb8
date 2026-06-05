@@ -167,15 +167,6 @@ const statusIndicator = document.getElementById("status-indicator");
 const statusText = document.getElementById("status-text");
 const chatWidget = document.getElementById('chat-widget');
 const chatFeed = document.getElementById('chat-feed');
-    const rewardsPanel = document.getElementById("rewards-manager");
-    const fileInput = document.getElementById("reward-file-input");
-    const urlInput = document.getElementById("reward-img-input");
-    const fontColorPicker = document.getElementById("reward-font-color");
-    const fontColorHex = document.getElementById("reward-font-color-hex");
-    const soundFileInput = document.getElementById("reward-sound-file");
-    const addSoundBtn = document.getElementById("push-sound-btn");
-    const labelSoundBtn = document.getElementById("add-sound-file-btn");
-
 let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 }, fadeTimeout;
 
 // --- DYNAMIC THEMING & ALERTS DATA CORES ---
@@ -316,44 +307,25 @@ const SETTINGS_SCHEMA = [
                 label: "Master Alert Visibility", 
                 idKey: "master", 
                 get: () => !alertHidden, 
-                set: (v) => { 
-                    alertHidden = !v; 
-                    if (typeof settings !== 'undefined') settings.alertHidden = !v; 
-                    if (typeof syncAlertVisibilityState === "function") syncAlertVisibilityState(); 
-                    syncAllToggleUI();
-                }
+                set: (v) => { alertHidden = !v; settings.alertHidden = !v; syncAlertVisibilityState(); }
             },
             { 
                 label: "Channel Point Alerts", 
                 idKey: "rewards", 
-                get: () => (typeof rewardsEnabled !== 'undefined' ? rewardsEnabled : !!settings.rewardsEnabled), 
-                set: (v) => { 
-                    if (typeof rewardsEnabled !== 'undefined') rewardsEnabled = v; 
-                    if (typeof settings !== 'undefined') settings.rewardsEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                    syncAllToggleUI();
-                } 
+                get: () => rewardsEnabled, 
+                set: (v) => { rewardsEnabled = v; settings.rewardsEnabled = v; saveSettings(); } 
             },
             { 
                 label: "Bit Cheer Alerts", 
                 idKey: "bits", 
-                get: () => (typeof bitsEnabled !== 'undefined' ? bitsEnabled : !!settings.bitsEnabled), 
-                set: (v) => { 
-                    if (typeof bitsEnabled !== 'undefined') bitsEnabled = v; 
-                    if (typeof settings !== 'undefined') settings.bitsEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                    syncAllToggleUI();
-                } 
+                get: () => bitsEnabled, 
+                set: (v) => { bitsEnabled = v; settings.bitsEnabled = v; saveSettings(); } 
             },
             { 
                 label: "Enable Jukebox", 
                 idKey: "jukebox", 
                 get: () => !!settings.jukeboxWidgetEnabled, 
-                set: (v) => { 
-                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                    syncAllToggleUI();
-                } 
+                set: (v) => { settings.jukeboxWidgetEnabled = v; saveSettings(); } 
             }
         ]
     },
@@ -366,42 +338,26 @@ const SETTINGS_SCHEMA = [
                 get: () => !chatHidden, 
                 set: (v) => { 
                     chatHidden = !v; 
-                    if (typeof settings !== 'undefined') settings.chatHidden = chatHidden;
-                    
-                    if (typeof chatWidget !== 'undefined' && chatWidget) {
+                    if (chatWidget) {
                         chatWidget.style.display = chatHidden ? "none" : "block";
-                        if (!chatHidden && typeof chatFeed !== 'undefined' && chatFeed && typeof chatHeight !== 'undefined' && chatHeight) {
+                        if (!chatHidden && chatFeed && typeof chatHeight !== 'undefined' && chatHeight) {
                             chatFeed.style.height = chatHeight;
                         }
                     }
-                    if (typeof saveSettings === "function") saveSettings();
-                    syncAllToggleUI();
+                    saveSettings();
                 }
             },
             { 
                 label: "Show Stream Status", 
                 idKey: "status-widget", 
                 get: () => !statusHidden, 
-                set: (v) => { 
-                    statusHidden = !v; 
-                    if (typeof settings !== 'undefined') settings.statusHidden = statusHidden;
-                    if (typeof statusWidget !== 'undefined' && statusWidget) {
-                        statusWidget.style.display = statusHidden ? "none" : "block";
-                    }
-                    if (typeof saveSettings === "function") saveSettings(); 
-                    syncAllToggleUI();
-                }
+                set: (v) => { statusHidden = !v; if (statusWidget) statusWidget.style.display = statusHidden ? "none" : "block"; saveSettings(); }
             },
             { 
                 label: "Floating Chat Emotes", 
                 idKey: "emotes", 
                 get: () => floatingEmotes, 
-                set: (v) => { 
-                    floatingEmotes = v; 
-                    if (typeof settings !== 'undefined') settings.floatingEmotes = v;
-                    if (typeof saveSettings === "function") saveSettings(); 
-                    syncAllToggleUI();
-                } 
+                set: (v) => { floatingEmotes = v; saveSettings(); } 
             }
         ]
     },
@@ -412,34 +368,19 @@ const SETTINGS_SCHEMA = [
                 label: "Command Prefix Check", 
                 idKey: "prefix-check", 
                 get: () => useCmdPrefix, 
-                set: (v) => { 
-                    useCmdPrefix = v; 
-                    if (typeof settings !== 'undefined') settings.useCmdPrefix = v;
-                    if (typeof saveSettings === "function") saveSettings(); 
-                    syncAllToggleUI();
-                } 
+                set: (v) => { useCmdPrefix = v; saveSettings(); } 
             },
             { 
                 label: "Show Bot Prefixes", 
                 idKey: "bot-visibility", 
                 get: () => useBotPrefix, 
-                set: (v) => { 
-                    useBotPrefix = v; 
-                    if (typeof settings !== 'undefined') settings.useBotPrefix = v;
-                    if (typeof saveSettings === "function") saveSettings(); 
-                    syncAllToggleUI();
-                } 
+                set: (v) => { useBotPrefix = v; saveSettings(); } 
             },
             { 
                 label: "Console Logging", 
                 idKey: "console", 
                 get: () => consoleMessages, 
-                set: (v) => { 
-                    consoleMessages = v; 
-                    if (typeof settings !== 'undefined') settings.consoleMessages = v;
-                    if (typeof saveSettings === "function") saveSettings(); 
-                    syncAllToggleUI();
-                } 
+                set: (v) => { consoleMessages = v; saveSettings(); } 
             }
         ]
     }
@@ -1098,14 +1039,11 @@ function renderSettingsWindow() {
                 </div>
             `;
 
-		const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
+            const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', () => {
                     const currentVal = item.get();
                     item.set(!currentVal);
-                    
-                    // 🎯 FIX: Only sync the visual statuses/badges. 
-                    // DO NOT re-call renderSettingsWindow() here or save flags that reconstruct the DOM tree.
                     syncAllToggleUI(); 
                 });
             }
@@ -1438,69 +1376,42 @@ function syncAlertVisibilityState() {
     }
 }
 function syncAllToggleUI() {
-    // 1. Safely resolve global variables and settings fallbacks
     const s = typeof settings !== 'undefined' ? settings : {};
     
-    // Fallback sync between global floating scopes and settings object state
-    const isMasterOn = typeof alertHidden !== 'undefined' ? !alertHidden : !s.alertHidden;
-    const isRewardsOn = typeof rewardsEnabled !== 'undefined' ? rewardsEnabled : !!s.rewardsEnabled;
-    const isBitsOn = typeof bitsEnabled !== 'undefined' ? bitsEnabled : !!s.bitsEnabled;
-    const isJukeboxOn = !!s.jukeboxWidgetEnabled;
-
-    // 2. Safe, error-protected badge updater helper
+    // Helper to update specific badges (Preserves your clean class style naming assignments!)
     const updateBadge = (id, isActive) => {
         const el = document.getElementById(id);
-        if (!el) return; // Exit cleanly if the element isn't currently rendered on screen
-        
-        el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
-        el.innerText = isActive ? "ON" : "OFF";
+        if (el) {
+            el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
+            el.innerText = isActive ? "ON" : "OFF";
+        }
     };
 
-    // 3. SYNC MASTER CORES (Updates BOTH management panel badges and settings window badges)
-    // Master Alert Visibility
-    updateBadge("mgr-toggle-alert-btn", isMasterOn); // If the manager button itself acts as a badge
-    updateBadge("mgr-alert-status-badge", isMasterOn);
-    updateBadge("stg-master-status-badge", isMasterOn);
-    
-    // Channel Points Toggles
-    updateBadge("mgr-toggle-rewards-btn", isRewardsOn);
-    updateBadge("mgr-rewards-status-badge", isRewardsOn);
-    updateBadge("stg-rewards-status-badge", isRewardsOn);
-    
-    // Bit Cheer Toggles
-    updateBadge("mgr-bits-status-badge", isBitsOn);
-    updateBadge("stg-bits-status-badge", isBitsOn);
-
-    // Jukebox Toggles
-    updateBadge("stg-jukebox-status-badge", isJukeboxOn);
-
-    // 4. AUTOMATED SCHEMA RENDERING LOOP (Handles the Chat, UI, and Bot Prefix Badges dynamically)
-    if (typeof SETTINGS_SCHEMA !== 'undefined' && Array.isArray(SETTINGS_SCHEMA)) {
+    // 🤖 AUTOMATED LOOP: Automatically updates every badge inside your settings window schema!
+    if (typeof SETTINGS_SCHEMA !== 'undefined') {
         SETTINGS_SCHEMA.forEach(group => {
-            if (group && group.items) {
-                group.items.forEach(item => {
-                    // Skip the alert core ones we manually mapped above to prevent race conditions
-                    if (["master", "rewards", "bits", "jukebox"].includes(item.idKey)) return;
-
-                    if (item && item.idKey && typeof item.get === 'function') {
-                        updateBadge(`stg-${item.idKey}-status-badge`, item.get());
-                    }
-                });
-            }
+            group.items.forEach(item => {
+                updateBadge(`stg-${item.idKey}-status-badge`, item.get());
+            });
         });
     }
 
-    // 5. JUKEBOX VISUAL SIDE-EFFECTS (Protected against missing DOM elements)
+    // 🎯 INDEPENDENT MANAGEMENT SYNC: Handles your multi-window alerts manager panel badges
+    updateBadge("mgr-alert-status-badge", !alertHidden);
+    updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
+    updateBadge("mgr-bits-status-badge", s.bitsEnabled);
+
+    // 🎸 JUKEBOX VISUAL SIDE-EFFECTS: Handles the opacity/interaction changes on your player element
     const jbControls = document.getElementById("jukebox-widget-controls");
     if (jbControls) {
-        jbControls.style.display = isJukeboxOn ? "block" : "none";
-        jbControls.style.opacity = isJukeboxOn ? "1" : "0.5";
-        jbControls.style.pointerEvents = isJukeboxOn ? "auto" : "none";
+        jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
+        jbControls.style.opacity = s.jukeboxWidgetEnabled ? "1" : "0.5";
+        jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
     }
 
-    // 6. AUDIO CORE JUKEBOX ENGINE TRIGGER
-    if (window.streamJukeboxEngine && typeof window.streamJukeboxEngine.setWidgetActiveState === 'function') {
-        window.streamJukeboxEngine.setWidgetActiveState(isJukeboxOn);
+    // 🏎️ CORE AUDIO ENGINE SYNC
+    if (window.streamJukeboxEngine) {
+        window.streamJukeboxEngine.setWidgetActiveState(s.jukeboxWidgetEnabled);
     }
 }
 function updateAllBadgesUI() {
@@ -2706,8 +2617,16 @@ function getLatestInstanceIdByType(type) {
 // Ensure this function exists globally in overlayapp.js
 
 function bindRewardsManagerEvents() {
-
+    const rewardsPanel = document.getElementById("rewards-manager");
     if (!rewardsPanel) return;
+
+    const fileInput = document.getElementById("reward-file-input");
+    const urlInput = document.getElementById("reward-img-input");
+    const fontColorPicker = document.getElementById("reward-font-color");
+    const fontColorHex = document.getElementById("reward-font-color-hex");
+    const soundFileInput = document.getElementById("reward-sound-file");
+    const addSoundBtn = document.getElementById("push-sound-btn");
+    const labelSoundBtn = document.getElementById("add-sound-file-btn");
 
     // Initialize UI state
     if (fontColorPicker && fontColorHex) {
@@ -2851,34 +2770,13 @@ function bindRewardsManagerEvents() {
         });
     }
 
-    // 🎯 MASTER OVERLAY LAYER CONTROLS (Syncs State variables + Badges globally across panels)
-    const mgrAlertBtn = document.getElementById("mgr-toggle-alert-btn");
-    if (mgrAlertBtn) {
-        mgrAlertBtn.addEventListener("click", () => {
-            alertHidden = !alertHidden;
-            if (typeof syncAlertVisibilityState === "function") syncAlertVisibilityState();
-            if (typeof syncAllToggleUI === "function") syncAllToggleUI();
-        });
-    }
-
-    const mgrRewardsBtn = document.getElementById("mgr-toggle-rewards-btn");
-    if (mgrRewardsBtn) {
-        mgrRewardsBtn.addEventListener("click", () => {
-            if (typeof settings !== 'undefined') {
-                settings.rewardsEnabled = !settings.rewardsEnabled;
-                if (typeof saveSettings === "function") saveSettings();
-                if (typeof syncAllToggleUI === "function") syncAllToggleUI();
-            }
-        });
-    }
-
     // Populate dropdowns AFTER the panel is fully loaded
     setTimeout(() => {
         if (typeof populateCustomDropdowns === "function") {
             populateCustomDropdowns();
         }
-        if (typeof syncAllToggleUI === "function") {
-            syncAllToggleUI();
+        if (typeof updateManagerBadgesUI === "function") {
+            updateManagerBadgesUI();
         }
     }, 150);
 }
