@@ -316,25 +316,44 @@ const SETTINGS_SCHEMA = [
                 label: "Master Alert Visibility", 
                 idKey: "master", 
                 get: () => !alertHidden, 
-                set: (v) => { alertHidden = !v; settings.alertHidden = !v; syncAlertVisibilityState(); }
+                set: (v) => { 
+                    alertHidden = !v; 
+                    if (typeof settings !== 'undefined') settings.alertHidden = !v; 
+                    if (typeof syncAlertVisibilityState === "function") syncAlertVisibilityState(); 
+                    syncAllToggleUI();
+                }
             },
             { 
                 label: "Channel Point Alerts", 
                 idKey: "rewards", 
-                get: () => rewardsEnabled, 
-                set: (v) => { rewardsEnabled = v; settings.rewardsEnabled = v; saveSettings(); } 
+                get: () => (typeof rewardsEnabled !== 'undefined' ? rewardsEnabled : !!settings.rewardsEnabled), 
+                set: (v) => { 
+                    if (typeof rewardsEnabled !== 'undefined') rewardsEnabled = v; 
+                    if (typeof settings !== 'undefined') settings.rewardsEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    syncAllToggleUI();
+                } 
             },
             { 
                 label: "Bit Cheer Alerts", 
                 idKey: "bits", 
-                get: () => bitsEnabled, 
-                set: (v) => { bitsEnabled = v; settings.bitsEnabled = v; saveSettings(); } 
+                get: () => (typeof bitsEnabled !== 'undefined' ? bitsEnabled : !!settings.bitsEnabled), 
+                set: (v) => { 
+                    if (typeof bitsEnabled !== 'undefined') bitsEnabled = v; 
+                    if (typeof settings !== 'undefined') settings.bitsEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    syncAllToggleUI();
+                } 
             },
             { 
                 label: "Enable Jukebox", 
                 idKey: "jukebox", 
                 get: () => !!settings.jukeboxWidgetEnabled, 
-                set: (v) => { settings.jukeboxWidgetEnabled = v; saveSettings(); } 
+                set: (v) => { 
+                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    syncAllToggleUI();
+                } 
             }
         ]
     },
@@ -347,26 +366,42 @@ const SETTINGS_SCHEMA = [
                 get: () => !chatHidden, 
                 set: (v) => { 
                     chatHidden = !v; 
-                    if (chatWidget) {
+                    if (typeof settings !== 'undefined') settings.chatHidden = chatHidden;
+                    
+                    if (typeof chatWidget !== 'undefined' && chatWidget) {
                         chatWidget.style.display = chatHidden ? "none" : "block";
-                        if (!chatHidden && chatFeed && typeof chatHeight !== 'undefined' && chatHeight) {
+                        if (!chatHidden && typeof chatFeed !== 'undefined' && chatFeed && typeof chatHeight !== 'undefined' && chatHeight) {
                             chatFeed.style.height = chatHeight;
                         }
                     }
-                    saveSettings();
+                    if (typeof saveSettings === "function") saveSettings();
+                    syncAllToggleUI();
                 }
             },
             { 
                 label: "Show Stream Status", 
                 idKey: "status-widget", 
                 get: () => !statusHidden, 
-                set: (v) => { statusHidden = !v; if (statusWidget) statusWidget.style.display = statusHidden ? "none" : "block"; saveSettings(); }
+                set: (v) => { 
+                    statusHidden = !v; 
+                    if (typeof settings !== 'undefined') settings.statusHidden = statusHidden;
+                    if (typeof statusWidget !== 'undefined' && statusWidget) {
+                        statusWidget.style.display = statusHidden ? "none" : "block";
+                    }
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    syncAllToggleUI();
+                }
             },
             { 
                 label: "Floating Chat Emotes", 
                 idKey: "emotes", 
                 get: () => floatingEmotes, 
-                set: (v) => { floatingEmotes = v; saveSettings(); } 
+                set: (v) => { 
+                    floatingEmotes = v; 
+                    if (typeof settings !== 'undefined') settings.floatingEmotes = v;
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    syncAllToggleUI();
+                } 
             }
         ]
     },
@@ -377,19 +412,34 @@ const SETTINGS_SCHEMA = [
                 label: "Command Prefix Check", 
                 idKey: "prefix-check", 
                 get: () => useCmdPrefix, 
-                set: (v) => { useCmdPrefix = v; saveSettings(); } 
+                set: (v) => { 
+                    useCmdPrefix = v; 
+                    if (typeof settings !== 'undefined') settings.useCmdPrefix = v;
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    syncAllToggleUI();
+                } 
             },
             { 
                 label: "Show Bot Prefixes", 
                 idKey: "bot-visibility", 
                 get: () => useBotPrefix, 
-                set: (v) => { useBotPrefix = v; saveSettings(); } 
+                set: (v) => { 
+                    useBotPrefix = v; 
+                    if (typeof settings !== 'undefined') settings.useBotPrefix = v;
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    syncAllToggleUI();
+                } 
             },
             { 
                 label: "Console Logging", 
                 idKey: "console", 
                 get: () => consoleMessages, 
-                set: (v) => { consoleMessages = v; saveSettings(); } 
+                set: (v) => { 
+                    consoleMessages = v; 
+                    if (typeof settings !== 'undefined') settings.consoleMessages = v;
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    syncAllToggleUI();
+                } 
             }
         ]
     }
