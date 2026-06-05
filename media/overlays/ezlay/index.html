@@ -15,14 +15,6 @@
 		/* pixelkitty styles  */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
-        body { 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            background: transparent; 
-            font-family: 'Press Start 2P', cursive; 
-            user-select: none; 
-        }
 
         #companion-container { 
             position: fixed; 
@@ -98,23 +90,7 @@
 
         .chat-bubble.show { opacity: 1; }
         
-        #comfycontrolContainer { 
-			position: fixed;
-			top: 1px;
-			right: 132px;
-			background: rgba(0, 0, 0, 0.95);
-			border: 3px solid #4f4e4c;
-			padding: 15px;
-			width: 300px;
-			color: #fff;
-			display: none;
-			z-index: 2000;
-			max-height: 35vh;
-			overflow-y: auto;
-        }
 
-        #comfycontrolContainer.active { display: block; }
-        
         .settings-group { margin-top: 15px; padding-top: 10px; border-top: 1px solid #444; }
         .setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 8px; }
         .setting-row label { width: 45%; }
