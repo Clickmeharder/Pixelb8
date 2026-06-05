@@ -972,35 +972,343 @@ export class StreamPet {
         if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.playSound('bubbleSound');
     }
 
-	updateUI() {
-		const nameEl = document.getElementById("nameplate");
-		const statsEl = document.getElementById("status");
-		if(!nameEl || !statsEl) return;
-		
-		nameEl.style.left = this.state.layout.nameX + "%"; 
-		nameEl.style.top = this.state.layout.nameY + "%";
-		statsEl.style.left = this.state.layout.statsX + "%"; 
-		statsEl.style.top = this.state.layout.statsY + "%";
-		
-		let sTxt = this.activePet.isDead ? "DECEASED" : (this.activePet.poops.length > 5 ? "SICK" : "HEALTHY");
-		statsEl.innerHTML = `${this.activePet.name} (${this.registry.activeSpecies.toUpperCase()}) | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} | EXP: ${this.activePet.exp}`;
-		nameEl.textContent = this.activePet.isDead ? `${this.activePet.name.toUpperCase()}'S GHOST` : this.activePet.name.toUpperCase();
-		
-		// Dynamic Form Option Label Management
-		const propLabel = document.querySelector('label[for="showTower"]') || document.getElementById("showTower")?.previousElementSibling;
-		if (propLabel) {
-			if (this.registry.activeSpecies === "puppy") propLabel.textContent = "Show Doghouse";
-			else if (this.registry.activeSpecies === "goldfish") propLabel.textContent = "Show Castle/Coral";
-			else propLabel.textContent = "Show Cat Tower";
-		}
+	updateAI(t) {
+        if (this.activePet.isDead) return;
+        this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
+        this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
 
-		// NEW: Dynamic Multi-Species Potty Label Swap
-		const litterLabel = Array.from(document.querySelectorAll('span')).find(el => el.textContent.includes("Litter Box"));
-		if (litterLabel) {
-			litterLabel.textContent = (this.registry.activeSpecies === "puppy") ? "Grass Patch X/Y" : "Litter Box X/Y";
-		}
-	}
+        const now = Date.now();
+        const msElapsed = now - this.activePet.lastHungerTick;
+        if (msElapsed >= this.HUNGER_TICK_MS) {
+            this.activePet.hunger = Math.min(100, this.activePet.hunger + Math.floor(msElapsed / this.HUNGER_TICK_MS)); 
+            this.activePet.lastHungerTick = now - (msElapsed % this.HUNGER_TICK_MS);
+        }
+        if (this.activePet.hunger === 100) this.activePet.isDead = true;
 
+        const visibleW = this.canvas.width;
+        const visibleH = this.canvas.height;
+        
+        let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
+        let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
+        const anchorX = visibleW / 2;
+        const anchorY = visibleH - this.BASE_FLOOR_Y;
+
+        const getUnscaledPos = (pctX, pctY) => {
+            const targetX = (pctX / 100) * visibleW;
+            const targetY = (pctY / 100) * visibleH;
+            return {
+                x: anchorX + (targetX - anchorX) / scaleVal,
+                y: anchorY + (targetY - anchorY) / scaleVal
+            };
+        };
+
+        const bowlPos = getUnscaledPos(this.state.layout.bowlX, this.state.layout.bowlY);
+        const bedPos = getUnscaledPos(this.state.layout.bedX, this.state.layout.bedY);
+        const litPos = getUnscaledPos(this.state.layout.litterX, this.state.layout.litterY);
+
+        // Boundary Coordinates
+        const CEIL_Y = 70;
+        const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
+        const LEFT_X = 60;
+        const RIGHT_X = visibleW - 60;
+
+        const walkToPoint = (targetX, targetY, speed = 2) => {
+            const dx = targetX - this.state.x; 
+            const dy = targetY - this.state.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 12) {
+                this.state.facing = dx > 0 ? 1 : -1;
+                this.state.x += (dx / dist) * speed; 
+                this.state.y += (dy / dist) * speed;
+                return false;
+            }
+            return true;
+        };
+
+        if (this.state.actionTimer > 0) this.state.actionTimer--;
+        
+        // Intercept food state if bowl is occupied
+        if (this.state.hasFood && !["nyan", "eating", "potty", "walk_to_litter", "rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
+            this.state.action = "walk_to_food";
+        }
+
+        // ========================================================
+        // COMPANION SPECIES FSM ENGINE
+        // ========================================================
+        switch(this.state.action) {
+            case "nyan":
+                if (this.state.nyanPhase === "takeoff") {
+                    const targetY = visibleH / 2;
+                    this.state.y += (targetY - this.state.y) * 0.05; 
+                    this.state.x += this.state.facing * 5;
+                    if (Math.abs(this.state.y - targetY) < 15) this.state.nyanPhase = "flying";
+                } else if (this.state.nyanPhase === "flying") {
+                    this.state.x += this.state.facing * 10; 
+                    this.state.y = (visibleH / 2) + Math.sin(t * 0.1) * 100;
+                    if (this.state.actionTimer < 80) this.state.nyanPhase = "landing";
+                } else if (this.state.nyanPhase === "landing") {
+                    this.state.x += (this.state.originalPos.x - this.state.x) * 0.08; 
+                    this.state.y += (this.state.originalPos.y - this.state.y) * 0.08;
+                }
+                if (this.state.nyanPhase !== "landing") {
+                    if (this.state.x > visibleW + 150) this.state.x = -150;
+                    if (this.state.x < -150) this.state.x = visibleW + 150;
+                }
+                if (this.state.actionTimer <= 0) {
+                    this.stopSound('nyanSound');
+                    this.state.x = this.state.originalPos.x; 
+                    this.state.y = this.state.originalPos.y;
+                    this.state.action = "idle"; 
+                    this.state.actionTimer = 200;
+                }
+                break;
+
+            case "walk_to_food":
+                // Spiders can traverse down side walls or paths to reach food matrix on ground level
+                if (walkToPoint(bowlPos.x, bowlPos.y, 2.5)) { 
+                    if (this.state.hasFood) { 
+                        this.state.action = "eating"; 
+                        this.state.actionTimer = 140; 
+                    } else { 
+                        this.state.action = "idle";
+                    }
+                }
+                break;
+
+            case "eating":
+                if (this.state.actionTimer <= 0) {
+                    this.state.hasFood = false; 
+                    this.activePet.hunger = Math.max(0, this.activePet.hunger - 15); 
+                    this.activePet.digestive += 1; 
+                    this.activePet.exp += 20; 
+                    this.state.action = "idle"; 
+                    this.state.actionTimer = 300;
+                }
+                break;
+
+            case "walk_to_litter":
+                if (this.registry.activeSpecies === "goldfish") {
+                    if (!this.state.aquaticPottyTarget) {
+                        this.state.aquaticPottyTarget = {
+                            x: 100 + Math.random() * (visibleW - 200),
+                            y: 120 + Math.random() * (visibleH - 240)
+                        };
+                    }
+                    if (walkToPoint(this.state.aquaticPottyTarget.x, this.state.aquaticPottyTarget.y, 1.8)) {
+                        this.state.aquaticPottyTarget = null;
+                        this.state.action = "potty";
+                        this.state.actionTimer = 90;
+                    }
+                } else if (this.registry.activeSpecies === "spider") {
+                    // Lock target specifically to perimeter borders
+                    if (!this.state.spiderPottyTarget) {
+                        const r = Math.random();
+                        if (r < 0.25) this.state.spiderPottyTarget = { x: LEFT_X + Math.random() * (RIGHT_X - LEFT_X), y: CEIL_Y };
+                        else if (r < 0.50) this.state.spiderPottyTarget = { x: LEFT_X + Math.random() * (RIGHT_X - LEFT_X), y: FLOOR_Y };
+                        else if (r < 0.75) this.state.spiderPottyTarget = { x: LEFT_X, y: CEIL_Y + Math.random() * (FLOOR_Y - CEIL_Y) };
+                        else this.state.spiderPottyTarget = { x: RIGHT_X, y: CEIL_Y + Math.random() * (FLOOR_Y - CEIL_Y) };
+                    }
+                    if (walkToPoint(this.state.spiderPottyTarget.x, this.state.spiderPottyTarget.y, 2.2)) {
+                        this.state.spiderPottyTarget = null;
+                        this.state.action = "potty";
+                        this.state.actionTimer = 100;
+                    }
+                } else {
+                    if (walkToPoint(litPos.x, litPos.y)) { 
+                        this.state.action = "potty"; 
+                        this.state.actionTimer = 120; 
+                    }
+                }
+                break;
+
+            case "potty":
+                if (this.state.actionTimer <= 0) { 
+                    if (this.registry.activeSpecies === "goldfish") {
+                        this.activePet.poops.push({
+                            x: this.state.x - (this.state.facing * 10), y: this.state.y + 5,
+                            ox: Math.random() * 100, swimOffset: Math.random() * Math.PI * 2
+                        });
+                        this.activePet.digestive = 0;
+                        this.state.action = "idle"; 
+                        this.state.actionTimer = 250;
+                    } else if (this.registry.activeSpecies === "spider") {
+                        // Weave structural fast-travel node web exactly where it stands
+                        this.state.spiderWebs.push({
+                            x: this.state.x, y: this.state.y,
+                            size: 20 + Math.random() * 15
+                        });
+                        this.activePet.digestive = 0;
+                        this.state.action = "idle"; 
+                        this.state.actionTimer = 200;
+                    } else {
+                        this.activePet.poops.push({ox: Math.random()*100, isCeil: false}); 
+                        this.activePet.digestive = 0; 
+                        this.state.action = "walk_to_kick"; 
+                    }
+                }
+                break;
+
+            case "walk_to_kick":
+                if (walkToPoint(litPos.x - 50, litPos.y)) { 
+                    this.state.facing = 1; 
+                    this.state.action = "kicking"; 
+                    this.state.actionTimer = 80; 
+                }
+                break;
+
+            case "kicking":
+                if (t % 2 === 0) {
+                    this.state.particles.push({x: this.state.x - 10, y: this.state.y + 20, vx: 5 + Math.random()*6, vy: -4, s: 2.5, c: "#bdc3c7", life: 25});
+                }
+                if (this.state.actionTimer <= 0) { 
+                    this.state.action = "idle"; 
+                    this.state.actionTimer = 300; 
+                }
+                break;
+
+            case "walk_to_bed":
+                // Spiders can walk directly onto the mesh hammock bed
+                if (walkToPoint(bedPos.x, bedPos.y)) { 
+                    this.state.action = "sleep"; 
+                    this.state.actionTimer = 1000; 
+                }
+                break;
+
+            // ========================================================
+            // SPIDER EXTENDED GEOMETRIC SILK RAPPEL STATES
+            // ========================================================
+            case "rappel_drop":
+                this.state.y += 3.5; // Slide downward smoothly
+                if (this.state.y >= this.state.rappelDepth) {
+                    this.state.action = "rappel_hang";
+                    this.state.actionTimer = 180 + Math.random() * 200;
+                }
+                break;
+
+            case "rappel_hang":
+                // Dynamic subtle air current swaying while suspended in mid-air
+                this.state.x += Math.sin(t * 0.05) * 0.4;
+                if (this.state.actionTimer <= 0) {
+                    this.state.action = "rappel_rise";
+                }
+                break;
+
+            case "rappel_rise":
+                this.state.y -= 2.5; // Ascend backward back up toward ceiling anchor
+                if (this.state.y <= CEIL_Y) {
+                    this.state.y = CEIL_Y;
+                    this.state.action = "idle";
+                    this.state.actionTimer = 200;
+                }
+                break;
+
+            case "idle":
+                if (this.registry.activeSpecies === "goldfish") {
+                    this.state.y = (visibleH / 2) + Math.sin(t * 0.04) * 40;
+                }
+
+                if (this.state.actionTimer <= 0) {
+                    if (Math.random() < 0.12) {
+                        if (this.registry.activeSpecies === "spider") this.say("Click-click... 🕷️");
+                        if (this.registry.activeSpecies === "goldfish") this.say("Blub... 🫧");
+                    }
+                    
+                    if (this.activePet.digestive >= 3) { 
+                        this.state.action = "walk_to_litter"; 
+                        return;
+                    }
+
+                    const r = Math.random();
+                    if (r < 0.35) { 
+                        this.state.action = "walk"; 
+                        // Setup dynamic direction choices for perimeter movement boundaries
+                        this.state.spiderDir = Math.random() > 0.5 ? 1 : -1;
+                        this.state.actionTimer = 200 + Math.random() * 250; 
+                    } 
+                    else if (r < 0.55) {
+                        this.state.action = "walk_to_bed";
+                    }
+                    // Ceiling Check: Trigger dropping down vertically on a line thread
+                    else if (r < 0.80 && this.registry.activeSpecies === "spider" && Math.abs(this.state.y - CEIL_Y) < 5) {
+                        this.state.action = "rappel_drop";
+                        this.state.rappelAnchor = { x: this.state.x, y: this.state.y };
+                        this.state.rappelDepth = CEIL_Y + 80 + Math.random() * 140; // Mid-air scope limit
+                    }
+                    else {
+                        this.state.actionTimer = 300 + Math.random() * 400;
+                    }
+                }
+                break;
+
+            case "walk":
+                if (this.registry.activeSpecies === "spider") {
+                    // ========================================================
+                    // SPIDER PERIMETER TRAVERSAL ENGINE
+                    // ========================================================
+                    let dir = this.state.spiderDir || 1;
+
+                    // 1. Is the spider currently walking on one of its custom woven internal webs?
+                    let onWebNode = this.state.spiderWebs.find(web => {
+                        let dx = web.x - this.state.x;
+                        let dy = web.y - this.state.y;
+                        return Math.sqrt(dx*dx + dy*dy) < web.size;
+                    });
+
+                    if (onWebNode) {
+                        // Allow crossing interior whitespace if following a chain of nodes
+                        this.state.x += this.state.facing * 1.5;
+                        if (Math.random() < 0.05) this.state.y += (Math.random() - 0.5) * 4;
+                    } 
+                    // 2. Otherwise standard tracking constraints pin it directly to the room's hard bounds
+                    else if (Math.abs(this.state.y - CEIL_Y) < 6) { // On Ceiling
+                        this.state.y = CEIL_Y;
+                        this.state.x += dir * 1.8;
+                        this.state.facing = dir;
+                        if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.y += 2; }
+                        if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.y += 2; }
+                    } else if (Math.abs(this.state.y - FLOOR_Y) < 6) { // On Floor
+                        this.state.y = FLOOR_Y;
+                        this.state.x += dir * 1.8;
+                        this.state.facing = dir;
+                        if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.y -= 2; }
+                        if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.y -= 2; }
+                    } else if (Math.abs(this.state.x - LEFT_X) < 6) { // On Left Wall
+                        this.state.x = LEFT_X;
+                        this.state.y += dir * 1.8;
+                        if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.x += 2; }
+                        if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.x += 2; }
+                    } else if (Math.abs(this.state.x - RIGHT_X) < 6) { // On Right Wall
+                        this.state.x = RIGHT_X;
+                        this.state.y += dir * 1.8;
+                        if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.x -= 2; }
+                        if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.x -= 2; }
+                    } else {
+                        // Fallback adjustment snap to nearest boundary line
+                        if (this.state.y < visibleH / 2) this.state.y = CEIL_Y;
+                        else this.state.y = FLOOR_Y;
+                    }
+                } else {
+                    // Terrestrial standard linear pathing
+                    this.state.x += this.state.facing * 1.5;
+                    if (this.registry.activeSpecies === "goldfish") {
+                        this.state.y = (visibleH / 2) + Math.sin(t * 0.07) * 50;
+                    }
+                    if (this.state.x < LEFT_X || this.state.x > RIGHT_X) this.state.facing *= -1;
+                }
+
+                if (this.state.actionTimer <= 0) { 
+                    this.state.action = "idle"; 
+                    this.state.actionTimer = 400; 
+                }
+                break;
+
+            case "sleep":
+            case "dance":
+            case "special":
+                if (this.state.actionTimer <= 0) this.state.action = "idle";
+                break;
+        }
+    }
     applyEditModeStyles() {
         const el = document.getElementById("pet-widget");
         if (!el) return;
@@ -1464,11 +1772,10 @@ export class StreamPet {
         // PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
         // ========================================================
 
-        // Render structural spider webs at their exact dropped location coords
+        // Render structural perimeter webs at their exact dropped location coords
         this.state.spiderWebs.forEach(web => {
-            this.ctx.strokeStyle = "rgba(255,255,255,0.25)";
+            this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
             this.ctx.lineWidth = 1;
-            this.ctx.getLineDash && this.ctx.setLineDash([2, 3]); // Give wild perimeter webs a sheer thread texture
             this.ctx.beginPath();
             for(let i=0; i<8; i++) {
                 let angle = (i / 8) * Math.PI * 2;
@@ -1476,8 +1783,18 @@ export class StreamPet {
                 this.ctx.lineTo(web.x + Math.cos(angle)*web.size, web.y + Math.sin(angle)*web.size);
             }
             this.ctx.stroke();
-            this.ctx.setLineDash && this.ctx.setLineDash([]); // Reset line formatting styles instantly
         });
+
+        // Draw active silk dropping strand if the spider is currently rappelling
+        if (this.registry.activeSpecies === "spider" && ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
+            this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+            this.ctx.lineWidth = 1.2;
+            this.ctx.beginPath();
+            // Connect line from ceiling anchor down to spider's live center position position
+            this.ctx.moveTo(this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x, 70);
+            this.ctx.lineTo(this.state.x, this.state.y);
+            this.ctx.stroke();
+        }
 
         // ========================================================
         // PHASE 2: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
@@ -1526,18 +1843,14 @@ export class StreamPet {
                 if (p.y === undefined) p.y = this.state.y;
                 if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
 
-                if (p.y > 80) {
-                    p.y -= 0.2; 
-                }
-
+                if (p.y > 80) p.y -= 0.2; 
                 p.swimOffset += 0.03;
                 let finalX = p.x + Math.sin(p.swimOffset) * 5;
 
                 this.ctx.font = "14px Arial";
                 this.ctx.fillText("💩", finalX, p.y);
-
             } else if (this.registry.activeSpecies === "spider") {
-                // Spiders bypass standard array waste elements completely.
+                // Spiders loop via permanent structural web arrays instead.
             } else {
                 let poopyY = p.isCeil ? 90 : lPos.y + 24;
                 let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
@@ -1549,40 +1862,12 @@ export class StreamPet {
         // ========================================================
         // PHASE 3: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
         // ========================================================
-        if (this.state.layout.showTower) {
+        
+        // Render large furniture towers ONLY if species is NOT a spider
+        if (this.state.layout.showTower && this.registry.activeSpecies !== "spider") {
             const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
             
-            if (this.registry.activeSpecies === "spider") {
-                // 🕸️ Geometric Hanging Hub Nest Architecture
-                this.ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
-                this.ctx.lineWidth = 1.2;
-                
-                // Outer web core frame anchorage strings running to canvas borders
-                this.ctx.beginPath();
-                this.ctx.moveTo(tPos.x, tPos.y - 70); this.ctx.lineTo(tPos.x - 110, tPos.y - 130);
-                this.ctx.moveTo(tPos.x, tPos.y - 70); this.ctx.lineTo(tPos.x + 110, tPos.y - 130);
-                this.ctx.moveTo(tPos.x, tPos.y - 70); this.ctx.lineTo(tPos.x - 120, tPos.y + 10);
-                this.ctx.moveTo(tPos.x, tPos.y - 70); this.ctx.lineTo(tPos.x + 120, tPos.y + 10);
-                this.ctx.stroke();
-
-                // Concentric inner ring lines mapping layout paths for progressive hub access steps
-                for (let r = 15; r <= 85; r += 18) {
-                    this.ctx.beginPath();
-                    this.ctx.ellipse(tPos.x, tPos.y - 70, r, r * 0.75, 0, 0, Math.PI * 2);
-                    this.ctx.stroke();
-                }
-
-                // Core density silk center visual marker block
-                this.ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
-                this.ctx.beginPath();
-                this.ctx.arc(tPos.x, tPos.y - 70, 12, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                this.ctx.fillStyle = "rgba(255,255,255,0.6)";
-                this.ctx.font = "11px monospace";
-                this.ctx.fillText("🕸️ CORE MATRIX", tPos.x - 42, tPos.y + 35);
-
-            } else if (this.registry.activeSpecies === "goldfish") {
+            if (this.registry.activeSpecies === "goldfish") {
                 this.ctx.fillStyle = "#ffb74d"; 
                 this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
                 this.ctx.fillStyle = "#e65100";
@@ -1590,28 +1875,23 @@ export class StreamPet {
                 this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
                 this.ctx.fillStyle = "#4e342e"; 
                 this.ctx.beginPath(); this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); this.ctx.fill();
-                
             } else if (this.registry.activeSpecies === "puppy") {
                 this.ctx.save();
                 this.ctx.fillStyle = "rgba(0,0,0,0.15)";
                 this.ctx.fillRect(tPos.x - 55, tPos.y + 5, 110, 15);
-                
                 this.ctx.fillStyle = "#d7ccc8"; 
                 this.ctx.fillRect(tPos.x - 45, tPos.y - 65, 90, 70);
-                
                 this.ctx.fillStyle = "#3e2723"; 
                 this.ctx.beginPath();
                 this.ctx.arc(tPos.x, tPos.y - 25, 20, Math.PI, 0, false);
                 this.ctx.fillRect(tPos.x - 20, tPos.y - 25, 40, 30);
                 this.ctx.fill();
-                
                 this.ctx.fillStyle = "#d7ccc8";
                 this.ctx.beginPath();
                 this.ctx.moveTo(tPos.x - 45, tPos.y - 65);
                 this.ctx.lineTo(tPos.x, tPos.y - 95);
                 this.ctx.lineTo(tPos.x + 45, tPos.y - 65);
                 this.ctx.fill();
-                
                 this.ctx.strokeStyle = "#d32f2f";
                 this.ctx.lineWidth = 8;
                 this.ctx.lineCap = "round";
@@ -1621,7 +1901,6 @@ export class StreamPet {
                 this.ctx.lineTo(tPos.x + 55, tPos.y - 60);
                 this.ctx.stroke();
                 this.ctx.restore();
-                
             } else {
                 this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
                 this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 55, tPos.y - 5, 110, 15); 
@@ -1713,7 +1992,7 @@ export class StreamPet {
             if(p.life <= 0) this.state.particles.splice(i, 1);
         });
     }
-    // ==========================================
+	// ==========================================
     // CORE VISUAL RENDERING ROUTERS PER SPECIES
     // ==========================================
     
