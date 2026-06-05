@@ -1,3 +1,4 @@
+
 /**
  * 🐾 StreamPet Widget Module
  * Follows the hot-swappable monolithic component structure.
@@ -29,7 +30,7 @@ export class StreamPet {
             console.log("🐾 [Pet Widget]: Viewport DOM elements injected into overlay-wrapper.");
         }
 
-        // Now safe to pull nodes out of our newly generated markup
+        // Pull nodes out of our markup safely
         this.canvas = document.getElementById("companionCanvas");
         this.ctx = this.canvas.getContext("2d");
 
@@ -63,22 +64,20 @@ export class StreamPet {
             poops: [],
             hasFood: false,
             particles: [],
-            zoom: 0, // Default range value matching input slider base slider 0
-            dimensions: {
-                width: "", height: "", left: "", top: ""
-            },
+            zoom: 0, 
             layout: {
                 nameX: 50, nameY: 70,
                 statsX: 50, statsY: 90,
-                bedX: 20, bedY: 0,
-                bowlX: 45, bowlY: 0,
-                litterX: 90, litterY: 0,
-                towerX: 70, towerY: 0,
+                bedX: 20, bedY: 100,
+                bowlX: 45, bowlY: 100,
+                litterX: 90, litterY: 100,
+                towerX: 70, towerY: 100,
                 showTower: true,
                 bedColor: "#e74c3c"
             }
         };
-        // --- 2. SOUND SYSTEM INITIALIZATION ---
+
+        // --- 3. SOUND SYSTEM INITIALIZATION ---
         const defaultSoundSettings = {
             masterEnabled: true,
             meowSound: true,
@@ -101,10 +100,10 @@ export class StreamPet {
         this.audioAssets = {};
         Object.keys(this.defaultPaths).forEach(key => this.refreshAudioInstance(key));
 
-        // --- 3. DYNAMIC UI INJECTION ---
+        // --- 4. DYNAMIC UI INJECTION ---
         this.injectUI();
 
-        // --- 4. RUN LIFECYCLE INITIALIZATION ---
+        // --- 5. RUN LIFECYCLE INITIALIZATION ---
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
@@ -116,7 +115,6 @@ export class StreamPet {
         this.animate();
 
         this.bindUIEventListeners();
-		this.initPersistenceObservers();
     }
 
     // --- CHAT COMMAND ROUTER ---
@@ -129,7 +127,7 @@ export class StreamPet {
             let actualSub = subCommand;
             
             if (this.state.isDead && actualSub !== 'revive' && actualSub !== 'status' && actualSub !== 'stats') {
-                sendNotice(`🪦 [Pet]: ${this.state.name} is currently deceased. Use !pet revive or use the control panel to save them!`);
+                sendNotice(`🪦 [Pet]: ${this.state.name} is currently deceased. Use !pet revive to save them!`);
                 return;
             }
 
@@ -267,10 +265,10 @@ export class StreamPet {
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                         <button type="button" id="btnClear" class="p8-btn alt-btn" style="padding: 6px 0; background: #27272a; font-size: 11px;">🧹 CLEAN LITTER</button>
-                        <button type="button" id="btnRevive" class="p8-btn" style="padding: 6px 0; background: #991b1b; font-size: 11px;" onclick="if(window.petWidgetInstance) window.petWidgetInstance.reviveKitty();">💖 REVIVE PET</button>
+                        <button type="button" id="btnRevive" class="p8-btn" style="padding: 6px 0; background: #991b1b; font-size: 11px;">💖 REVIVE PET</button>
                     </div>
 
-                    <details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
+                    <details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;" open>
                         <summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">📐 Layout & Environment</summary>
                         <div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid #27272a;">
@@ -289,12 +287,12 @@ export class StreamPet {
                                 <span style="font-size: 11px; color: #a1a1aa;">Bed Fabric Accent Color:</span>
                                 <div id="bedColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px;"></div>
                             </div>
-                            <div style="display: grid; grid-template-columns: 70px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
+                            <div style="display: grid; grid-template-columns: 90px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
                                     ${layoutMetrics.map(([id, label, xVal, yVal, minY, maxY]) => `
                                         <span>${label}</span>
-                                        <div style="display: flex;flex-direction:column; gap: 4px;">
-                                            <input type="range" id="${id}X" min="0" max="100" value="${xVal}" style="flex:1;">
-                                            <input type="range" id="${id}Y" min="${minY}" max="${maxY}" value="${yVal}" style="flex:1;">
+                                        <div style="display: flex; flex-direction:column; gap: 4px;">
+                                            <input type="range" id="${id}X" min="0" max="100" value="${xVal}" style="width:100%;">
+                                            <input type="range" id="${id}Y" min="${minY}" max="${maxY}" value="${yVal}" style="width:100%;">
                                         </div>
                                     `).join('')}
                                 </div>
@@ -344,7 +342,7 @@ export class StreamPet {
 
         const petSection = document.createElement("div");
         petSection.id = "pet-widget-controls";
-        petSection.className = "collapsible-section collapsed";
+        petSection.className = "collapsible-section";
         petSection.innerHTML = StreamPet.controlsTemplate;
 
         const entropiaBox = document.getElementById("entropia-widget-controls");
@@ -382,11 +380,8 @@ export class StreamPet {
 	}
 
 	resize() {
-		const parentW = window.innerWidth;
-		const parentH = window.innerHeight;
-
-		this.canvas.width = parentW + 200;
-		this.canvas.height = parentH + 200;
+		this.canvas.width = window.innerWidth + 200;
+		this.canvas.height = window.innerHeight + 200;
 		this.ctx.imageSmoothingEnabled = false;
 	}
 
@@ -400,8 +395,8 @@ export class StreamPet {
 		const anchorX = visibleW / 2;
 		const anchorY = visibleH - this.BASE_FLOOR_Y;
 
-		const targetX = (pctX / 100) * window.innerWidth;
-		const targetY = (pctY / 100) * window.innerHeight;
+		const targetX = (pctX / 100) * visibleW;
+		const targetY = (pctY / 100) * visibleH;
 
 		const finalX = anchorX + (targetX - anchorX) / scaleVal;
 		const finalY = anchorY + (targetY - anchorY) / scaleVal;
@@ -613,7 +608,7 @@ export class StreamPet {
 			this.ctx.beginPath(); this.ctx.moveTo(x - 15, y - 8); this.ctx.lineTo(x - 22, y + 2); this.ctx.lineTo(x - 5, y + 5); this.ctx.fill();
 			this.ctx.beginPath(); this.ctx.moveTo(x + 15, y - 8); this.ctx.lineTo(x + 22, y + 2); this.ctx.lineTo(x + 5, y + 5); this.ctx.fill();
 		} else {
-			this.ctx.beginPath(); this.ctx.moveTo(x - 20, y - 10); this.ctx.lineTo(x - 12, y - 40); this.lineTo(x - 2, y - 15); this.ctx.fill();
+			this.ctx.beginPath(); this.ctx.moveTo(x - 20, y - 10); this.ctx.lineTo(x - 12, y - 40); this.ctx.lineTo(x - 2, y - 15); this.ctx.fill();
 			this.ctx.beginPath(); this.ctx.moveTo(x + 20, y - 10); this.ctx.lineTo(x + 12, y - 40); this.ctx.lineTo(x + 2, y - 15); this.ctx.fill();
 		}
 	}
@@ -687,31 +682,30 @@ export class StreamPet {
 			return true;
 		};
 
-		// Workspace resolution math 
+		// Workspace resolution mapping definitions
 		const visibleW = this.canvas.width - 200;
 		const visibleH = this.canvas.height - 200;
 		const floorLineY = visibleH - this.BASE_FLOOR_Y;
 		
-		// 🛠️ SCALE INVERSION FOR AI DESTINATIONS:
-		// Ensures the pathfinding algorithm targets unscaled canvas spots so it matches the transformed render pipeline.
 		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
 		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
 		const anchorX = visibleW / 2;
 		const anchorY = visibleH - this.BASE_FLOOR_Y;
 
-		const getUnscaledPos = (pctX, pctY, offY) => {
-			const targetX = (pctX / 100) * window.innerWidth;
-			const targetY = (pctY / 100) * window.innerHeight;
+		// Inverse-matrix setup matching target positions precisely
+		const getUnscaledPos = (pctX, pctY) => {
+			const targetX = (pctX / 100) * visibleW;
+			const targetY = (pctY / 100) * visibleH;
 			return {
 				x: anchorX + (targetX - anchorX) / scaleVal,
-				y: anchorY + (targetY - anchorY) / scaleVal + offY
+				y: anchorY + (targetY - anchorY) / scaleVal
 			};
 		};
 
-		const bowlPos = getUnscaledPos(this.state.layout.bowlX, this.state.layout.bowlY, 0);
-		const bedPos = getUnscaledPos(this.state.layout.bedX, this.state.layout.bedY, 0);
-		const litPos = getUnscaledPos(this.state.layout.litterX, this.state.layout.litterY, 0);
-		const towerPos = getUnscaledPos(this.state.layout.towerX, this.state.layout.towerY, 0);
+		const bowlPos = getUnscaledPos(this.state.layout.bowlX, this.state.layout.bowlY);
+		const bedPos = getUnscaledPos(this.state.layout.bedX, this.state.layout.bedY);
+		const litPos = getUnscaledPos(this.state.layout.litterX, this.state.layout.litterY);
+		const towerPos = getUnscaledPos(this.state.layout.towerX, this.state.layout.towerY);
 
 		if (this.state.actionTimer > 0) this.state.actionTimer--;
 		if (this.state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(this.state.action)) this.state.action = "walk_to_food";
@@ -865,9 +859,6 @@ export class StreamPet {
 						let dynamicScale = val >= 0 ? 1.0 + (val * 0.5) : 1.0 + (val * 0.25);
 						if (zoomDisplay) zoomDisplay.textContent = `${dynamicScale.toFixed(1)}x`;
 					});
-					zoomSlider.addEventListener("change", () => {
-						this.saveData();
-					});
 					zoomSlider.dataset.listenerWired = "true";
 				}
 			}
@@ -880,52 +871,8 @@ export class StreamPet {
 				}
 			});
 		}
-
-		const el = document.getElementById("pet-widget");
-        if (el && this.state.dimensions) {
-            if (this.state.dimensions.width) el.style.width = this.state.dimensions.width;
-            if (this.state.dimensions.height) el.style.height = this.state.dimensions.height;
-            if (this.state.dimensions.left) el.style.left = this.state.dimensions.left;
-            if (this.state.dimensions.top) el.style.top = this.state.dimensions.top;
-        }
 		this.initSwatches(); 
 	}
-
-	initPersistenceObservers() {
-        const el = document.getElementById("pet-widget");
-        if (!el) return;
-
-        const mutationObserver = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === "attributes" && mutation.attributeName === "style") {
-                    this.state.dimensions.left = el.style.left;
-                    this.state.dimensions.top = el.style.top;
-                }
-            });
-        });
-        
-        mutationObserver.observe(el, { attributes: true, attributeFilter: ["style"] });
-
-        if (window.ResizeObserver) {
-            const resizeObserver = new ResizeObserver((entries) => {
-                for (let entry of entries) {
-                    if (entry.contentRect.width === 0 || entry.contentRect.height === 0) continue;
-                    
-                    const newW = entry.target.clientWidth;
-                    const newH = entry.target.clientHeight;
-
-                    this.state.dimensions.width = `${newW}px`;
-                    this.state.dimensions.height = `${newH}px`;
-
-                    if (this.canvas.width !== newW || this.canvas.height !== newH) {
-                        this.canvas.width = newW;
-                        this.canvas.height = newH;
-                    }
-                }
-            });
-            resizeObserver.observe(el);
-        }
-    }
 
 	initSwatches() {
 		const swatchContainer = document.getElementById("bedColorSwatches");
