@@ -96,23 +96,29 @@ export class StreamPet {
     }
 
     // --- CHAT COMMAND ROUTER ---
-    getCommands(sendNotice) {
+	getCommands(sendNotice) {
         const petExecution = (user, message, flags) => {
-            if (this.state.isDead) {
-                sendNotice(`🪦 [Pet]: ${this.state.name} is currently deceased. Use !pet revive or use the control panel to save them!`);
-                return;
-            }
-
             const parts = message.trim().toLowerCase().split(/\s+/);
             const subCommand = parts[0];
             const isAdmin = flags.broadcaster || flags.mod;
 
-            if (!subCommand) {
+            // Handle root commands (e.g., if someone types "!feed" instead of "!pet feed")
+            // We shift the subcommand if they ran a direct command alias
+            // (Passed down by the individual array mappings below)
+            let actualSub = subCommand;
+            
+            // 🪦 CRITICAL BUGFIX: Allow 'revive' through the death check!
+            if (this.state.isDead && actualSub !== 'revive' && actualSub !== 'status' && actualSub !== 'stats') {
+                sendNotice(`🪦 [Pet]: ${this.state.name} is currently deceased. Use !pet revive or use the control panel to save them!`);
+                return;
+            }
+
+            if (!actualSub) {
                 sendNotice(`🐾 [Pet]: Available options: !pet [feed | play | dance | treat | status]`);
                 return;
             }
 
-            switch (subCommand) {
+            switch (actualSub) {
                 case 'help':
                 case 'h':
                     sendNotice(`🐾 [Pet Help]: !pet feed | !pet play | !pet dance | !pet treat | !pet status`);
@@ -168,9 +174,11 @@ export class StreamPet {
                     break;
 
                 case 'revive':
-                    if (isAdmin || this.state.exp > 100) { // Example condition allowing high-tier viewers or staff
-                        this.revivekitty();
+                    if (isAdmin || this.state.exp > 100) {
+                        this.reviveKitty(); // Ensuring it targets your renamed method casing if applicable
                         sendNotice(`💖 [Pet]: ${this.state.name} was successfully revived by ${user}!`);
+                    } else {
+                        sendNotice(`❌ [Pet]: Only staff or high EXP users can revive ${this.state.name}!`);
                     }
                     break;
 
@@ -182,15 +190,25 @@ export class StreamPet {
                     break;
 
                 default:
-                    sendNotice(`❌ Action !pet ${subCommand} unknown.`);
+                    sendNotice(`❌ Action !pet ${actualSub} unknown.`);
             }
         };
 
+        // 📦 EXPOSE ALL MISSING COMMANDS TO THE OVERLAY APPLICATION LOGS
         return [
+            // Core Base Commands Matrix
             { name: 'pet', adminOnly: false, execute: petExecution },
             { name: 'kitty', adminOnly: false, execute: petExecution },
+            
+            // Direct Quick Action Shortcuts Matrix
             { name: 'feed', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'feed', flags) },
-            { name: 'nyan', adminOnly: true, execute: (user, message, flags) => petExecution(user, 'nyan', flags) }
+            { name: 'play', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'play', flags) },
+            { name: 'dance', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'dance', flags) },
+            { name: 'treat', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'treat', flags) },
+            { name: 'clean', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'clean', flags) },
+            { name: 'status', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'status', flags) },
+            { name: 'nyan', adminOnly: true, execute: (user, message, flags) => petExecution(user, 'nyan', flags) },
+            { name: 'revive', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'revive', flags) }
         ];
     }
     // --- 1. SEPARATED RAW TEMPLATE MATRIX ---
