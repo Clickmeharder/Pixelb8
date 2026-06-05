@@ -77,7 +77,7 @@ body.edit-mode .p8-widget {
 }
 body.edit-mode .p8-widget #jukebox-video-wrapper { 
 	overflow:hidden;
-	resize:vertical;
+	resize:both;
 }
 body.edit-mode .p8-widget #chat-feed { 
 	overflow:hidden;
