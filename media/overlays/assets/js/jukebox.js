@@ -231,7 +231,21 @@ export class StreamJukebox {
                 playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1, 'fs': 0 },
                 events: {
                     'onReady': () => { 
-                        this.ytPlayerReady = true; 
+                        this.ytPlayerReady = true;
+						// --- RESTORE SAVED HEIGHT ---
+						const savedHeight = localStorage.getItem("jb_wrapper_height");
+						const wrapper = document.getElementById('jukebox-video-wrapper');
+						if (wrapper && savedHeight) {
+							wrapper.style.height = savedHeight;
+						}
+						
+						// Start tracking future resizes
+						this.bindResizePersistence(); 
+
+						const savedVol = localStorage.getItem("jbVolume") || 50;
+						this.ytPlayer.setVolume(parseInt(savedVol));
+						this.applyButtonStyles();
+						this.bindControls();
 						const savedVol = localStorage.getItem("jbVolume") || 50;
 						this.ytPlayer.setVolume(parseInt(savedVol));
                         this.applyButtonStyles();
@@ -531,21 +545,41 @@ export class StreamJukebox {
                 
                 this.updatePlayerDisplay();
                 this.startAudioProgressTracking();
-            } else {
-                // 1. Restore original player size and original UI
-                playerContainer.style.width = "100%";
-                playerContainer.style.height = "100%";
-                playerContainer.style.visibility = "visible";
-                if (statusContainer) statusContainer.style.display = "block";
-                
-                wrapper.style.height = "168px"; 
-                
-                this.stopAudioProgressTracking();
-                const overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
-                if (overlayTrackPanel) overlayTrackPanel.style.display = 'none';
-            }
+		  } else {
+				// Restore original player size
+				playerContainer.style.width = "100%";
+				playerContainer.style.height = "100%";
+				playerContainer.style.visibility = "visible";
+				if (statusContainer) statusContainer.style.display = "block";
+				
+				// Restore from localStorage, or default to 168px if nothing saved
+				const savedHeight = localStorage.getItem("jb_wrapper_height") || "168px";
+				wrapper.style.height = savedHeight; 
+				
+				this.stopAudioProgressTracking();
+				const overlayTrackPanel = document.getElementById('jb-audio-overlay-panel');
+				if (overlayTrackPanel) overlayTrackPanel.style.display = 'none';
+		  }
         }
     }
+	// Add this new method to the StreamJukebox class
+	bindResizePersistence() {
+		const wrapper = document.getElementById('jukebox-video-wrapper');
+		if (!wrapper) return;
+
+		// Use ResizeObserver to automatically detect when the user drags the resizer
+		const observer = new ResizeObserver(entries => {
+			for (let entry of entries) {
+				const newHeight = entry.contentRect.height;
+				// Only save if it's not the "Audio Only" collapsed height
+				if (newHeight > 75) {
+					localStorage.setItem("jb_wrapper_height", `${newHeight}px`);
+				}
+			}
+		});
+
+		observer.observe(wrapper);
+	}
     toggleVisualizer(state) {
         this.showVisualizer = state;
         const container = document.getElementById('overlay-wrapper');
