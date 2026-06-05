@@ -231,15 +231,16 @@ export class StreamJukebox {
                 playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1, 'fs': 0 },
                 events: {
                     'onReady': () => { 
-                        this.ytPlayerReady = true;
-						// --- RESTORE SAVED HEIGHT ---
+						this.ytPlayerReady = true; 
+						
+						// 1. Restore saved height from localStorage
 						const savedHeight = localStorage.getItem("jb_wrapper_height");
 						const wrapper = document.getElementById('jukebox-video-wrapper');
 						if (wrapper && savedHeight) {
 							wrapper.style.height = savedHeight;
 						}
 						
-						// Start tracking future resizes
+						// 2. Start tracking future resizes
 						this.bindResizePersistence(); 
 
 						const savedVol = localStorage.getItem("jbVolume") || 50;
@@ -567,17 +568,16 @@ export class StreamJukebox {
 		const wrapper = document.getElementById('jukebox-video-wrapper');
 		if (!wrapper) return;
 
-		// Use ResizeObserver to automatically detect when the user drags the resizer
+		// This detects the manual resize and saves it immediately
 		const observer = new ResizeObserver(entries => {
 			for (let entry of entries) {
 				const newHeight = entry.contentRect.height;
-				// Only save if it's not the "Audio Only" collapsed height
-				if (newHeight > 75) {
+				// Only save if it's a valid, non-collapsed height
+				if (newHeight > 50) {
 					localStorage.setItem("jb_wrapper_height", `${newHeight}px`);
 				}
 			}
 		});
-
 		observer.observe(wrapper);
 	}
     toggleVisualizer(state) {
