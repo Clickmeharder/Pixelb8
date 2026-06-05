@@ -261,10 +261,6 @@ export class StreamPet {
                     <div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
                         <label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">Identity & Feed</label>
                         <input type="text" id="nameInput" class="p8-input" placeholder="Pet Name (e.g., Greta)" style="background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 4px;">
-                        <div style="display: flex; gap: 5px;">
-                            <input type="text" id="streamerInput" class="p8-input" placeholder="Twitch Channel Name" style="flex: 1; background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 4px;">
-                            <button type="button" id="connectBtn" class="p8-btn" style="padding: 0 10px; background: rgb(14, 165, 233); font-size: 11px; height: 28px; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; width: 80px;">CONNECT</button>
-                        </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
@@ -295,7 +291,7 @@ export class StreamPet {
                                 <div style="display: grid; grid-template-columns: 70px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
                                     ${layoutMetrics.map(([id, label, xVal, yVal, minY]) => `
                                         <span>${label}</span>
-                                        <div style="display: flex; gap: 4px;">
+                                        <div style="display: flex;flex-direction:column; gap: 4px;">
                                             <input type="range" id="${id}X" min="0" max="100" value="${xVal}" style="flex:1;">
                                             <input type="range" id="${id}Y" min="${minY}" max="100" value="${yVal}" style="flex:1;">
                                         </div>
