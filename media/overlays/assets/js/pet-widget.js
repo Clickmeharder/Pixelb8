@@ -466,7 +466,7 @@ export class StreamPet {
 						<button type="button" id="btnRevive" class="p8-btn" style="padding: 6px 0; background: #991b1b; font-size: 11px;">💖 REVIVE PET</button>
 					</div>
 
-					<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;" open>
+					<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
 						<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">📐 Layout & Environment</summary>
 						<div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
 							<div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid #27272a;">
