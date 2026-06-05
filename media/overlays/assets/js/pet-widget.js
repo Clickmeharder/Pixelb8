@@ -782,7 +782,7 @@ export class StreamPet {
         }
     }
 
-    updateAI(t) {
+	updateAI(t) {
         if (this.state.isDead) return;
         this.state.ageDays = Math.floor((Date.now() - this.state.birthday) / 86400000);
         this.state.stage = this.state.ageDays < 2 ? "Baby" : this.state.ageDays < 5 ? "Juvenile" : "Adult";
@@ -809,6 +809,16 @@ export class StreamPet {
         const visibleW = this.canvas.width;
         const visibleH = this.canvas.height;
         const floorLineY = visibleH - this.BASE_FLOOR_Y;
+        const towerLineY = floorLineY - 145;
+
+        // --- POSITION CLAMPING ---
+        // Force the cat to the correct level based on current action
+        if (this.state.action === "tower_sleep" || this.state.action === "walk_to_tower_climb") {
+            this.state.y = towerLineY;
+        } else if (this.state.action !== "nyan") { // Nyan cat handles its own Y
+            this.state.y = floorLineY; 
+        }
+        // -------------------------
         
         let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
         let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
@@ -921,48 +931,37 @@ export class StreamPet {
             case "dance":
             case "special":
                 if (this.state.actionTimer <= 0) { 
-                    if(this.state.action === "tower_sleep") this.state.y = floorLineY;
                     this.state.action = "idle"; 
                 }
                 break;
         }
     }
+	animate = () => {
+		this.state.animT++;
+		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    animate = () => {
-        this.state.animT++;
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		this.updateAI(this.state.animT);
 
-        this.updateAI(this.state.animT);
+		this.ctx.save();
+		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
+		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
 
-        this.ctx.save();
-        
-        let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
-        let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
+		const anchorX = this.canvas.width / 2;
+		const anchorY = this.canvas.height - this.BASE_FLOOR_Y;
 
-        const visibleW = this.canvas.width;
-        const visibleH = this.canvas.height;
-        const anchorX = visibleW / 2;
-        const anchorY = visibleH - this.BASE_FLOOR_Y;
+		this.ctx.translate(anchorX, anchorY);
+		this.ctx.scale(scaleVal, scaleVal);
+		this.ctx.translate(-anchorX, -anchorY);
 
-        this.ctx.translate(anchorX, anchorY);
-        this.ctx.scale(scaleVal, scaleVal);
-        this.ctx.translate(-anchorX, -anchorY);
+		this.drawEnvironment(this.state.animT);
 
-        this.drawEnvironment(this.state.animT);
-
-        let petScale = 1.0;
-        if (this.state.stage === "Baby") petScale = 0.6;
-        if (this.state.stage === "Juvenile") petScale = 0.8;
-
-        this.drawKitty(this.state.animT, petScale);
-        
-        this.ctx.restore();
-
-        this.updateUI();
-
-        requestAnimationFrame(this.animate);
-    }
-
+		let petScale = (this.state.stage === "Baby") ? 0.6 : (this.state.stage === "Juvenile") ? 0.8 : 1.0;
+		this.drawKitty(this.state.animT, petScale);
+		
+		this.ctx.restore();
+		this.updateUI();
+		requestAnimationFrame(this.animate);
+	}
     drawYarn(x, y, t) {
         const roll = Math.sin(t * 0.15) * 40;
         this.ctx.save();
@@ -1036,65 +1035,73 @@ export class StreamPet {
         });
     }
 
-    drawKitty(t, scale) {
-        this.ctx.save();
-        let bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
-        this.ctx.translate(this.state.x, this.state.y - bounce);
-        this.ctx.scale(this.state.facing * scale, scale);
-        
-        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-        this.ctx.beginPath(); this.ctx.ellipse(0, 30 + bounce, 45, 12, 0, 0, Math.PI*2); this.ctx.fill();
+	drawKitty(t, scale) {
+		this.ctx.save();
+		
+		// Maps actions to vertical offsets to compensate for sprite transparency/centering
+		// Adjust these numbers if the cat looks like it's floating/sinking in specific modes
+		const stateOffsets = {
+			"sleep": 15, "tower_sleep": 15,
+			"walk": 5, "idle": 0, "beg": 0, "groom": 0, "kicking": 0
+		};
+		
+		const baseOffset = stateOffsets[this.state.action] || 0;
+		const bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
+		
+		// Translate with baseOffset to lock feet to the ground
+		this.ctx.translate(this.state.x, this.state.y - bounce + baseOffset);
+		this.ctx.scale(this.state.facing * scale, scale);
+		
+		this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+		this.ctx.beginPath(); this.ctx.ellipse(0, 30 + bounce - baseOffset, 45, 12, 0, 0, Math.PI*2); this.ctx.fill();
 
-        let finalColor = this.state.isDead ? "#ffffff" : (this.state.poops.length > 5 ? "#8edb4b" : this.state.color);
-        if(this.state.isDead) this.ctx.globalAlpha = 0.5;
-        this.ctx.fillStyle = finalColor;
+		let finalColor = this.state.isDead ? "#ffffff" : (this.state.poops.length > 5 ? "#8edb4b" : this.state.color);
+		if(this.state.isDead) this.ctx.globalAlpha = 0.5;
+		this.ctx.fillStyle = finalColor;
 
-        if (this.state.action === "sleep" || this.state.action === "tower_sleep") {
-            const breathing = Math.sin(t * 0.03) * 2.5;
-            this.ctx.beginPath(); this.ctx.ellipse(0, 12, 42 + breathing, 32 + breathing, 0, 0, Math.PI * 2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.arc(15, 8, 22, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.lineWidth = 11; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
-            this.ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); this.ctx.stroke();
-            this.drawkittyEars(15, 8, finalColor, true); this.drawkittyFace(15, 8, false, true);
-        } 
-        else if (this.state.action === "special" || this.state.action === "scratching") {
-            if (this.state.action === "special") this.drawYarn(30, 20, t);
-            const shake = (this.state.action === "scratching") ? Math.sin(t*0.5)*5 : 0;
-            this.ctx.translate(shake, 0);
-            this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.arc(0, -45, 24, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.fillStyle = finalColor;
-            if (this.state.action === "special") {
-                const reach = Math.sin(t * 0.2) * 15;
-                this.ctx.fillRect(10, -5 + reach, 10, 15); this.ctx.fillRect(-20, -5 - reach, 10, 15);
-            } else {
-                this.ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15); this.ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
-            }
-            this.drawkittyEars(0, -45, finalColor, false); this.drawkittyFace(0, -45, false, false);
-        }
-        else if (["groom", "potty", "kicking", "beg"].includes(this.state.action)) {
-            this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.arc(0, -45, 24, 0, Math.PI*2); this.ctx.fill();
-            if (this.state.action === "kicking") {
-                this.ctx.fillStyle = finalColor; this.ctx.fillRect(10, 10 + Math.sin(t * 0.5) * 15, 10, 15);
-            }
-            this.drawkittyEars(0, -45, finalColor, false); this.drawkittyFace(0, -45, this.state.action === "beg", false);
-        }
-        else {
-            this.ctx.beginPath(); this.ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.arc(35, -15, 24, 0, Math.PI*2); this.ctx.fill();
-            this.drawkittyEars(35, -15, finalColor, false);
-            const walkCycle = (this.state.action.includes("walk")) ? Math.sin(t * 0.18) : 0;
-            [[-35, 12], [-12, 12], [10, 12], [28, 12]].forEach((p, i) => {
-                this.ctx.fillRect(p[0], p[1], 9, 16 + (i % 2 === 0 ? walkCycle : -walkCycle) * 8);
-            });
-            this.ctx.beginPath(); this.ctx.lineWidth = 8; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
-            this.ctx.moveTo(-45, 0); this.ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); this.ctx.stroke();
-            this.drawkittyFace(35, -15, false, false);
-        }
-        this.ctx.restore();
-    }
-
+		if (this.state.action === "sleep" || this.state.action === "tower_sleep") {
+			const breathing = Math.sin(t * 0.03) * 2.5;
+			this.ctx.beginPath(); this.ctx.ellipse(0, 12, 42 + breathing, 32 + breathing, 0, 0, Math.PI * 2); this.ctx.fill();
+			this.ctx.beginPath(); this.ctx.arc(15, 8, 22, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.beginPath(); this.ctx.lineWidth = 11; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
+			this.ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); this.ctx.stroke();
+			this.drawkittyEars(15, 8, finalColor, true); this.drawkittyFace(15, 8, false, true);
+		} else if (this.state.action === "special" || this.state.action === "scratching") {
+			if (this.state.action === "special") this.drawYarn(30, 20, t);
+			const shake = (this.state.action === "scratching") ? Math.sin(t*0.5)*5 : 0;
+			this.ctx.translate(shake, 0);
+			this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
+			this.ctx.beginPath(); this.ctx.arc(0, -45, 24, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = finalColor;
+			if (this.state.action === "special") {
+				const reach = Math.sin(t * 0.2) * 15;
+				this.ctx.fillRect(10, -5 + reach, 10, 15); this.ctx.fillRect(-20, -5 - reach, 10, 15);
+			} else {
+				this.ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15); this.ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
+			}
+			this.drawkittyEars(0, -45, finalColor, false); this.drawkittyFace(0, -45, false, false);
+		} else if (["groom", "potty", "kicking", "beg"].includes(this.state.action)) {
+			this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
+			this.ctx.beginPath(); this.ctx.arc(0, -45, 24, 0, Math.PI*2); this.ctx.fill();
+			if (this.state.action === "kicking") {
+				this.ctx.fillStyle = finalColor; this.ctx.fillRect(10, 10 + Math.sin(t * 0.5) * 15, 10, 15);
+			}
+			this.drawkittyEars(0, -45, finalColor, false); this.drawkittyFace(0, -45, this.state.action === "beg", false);
+		} else {
+			this.ctx.beginPath(); this.ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); this.ctx.fill();
+			this.ctx.beginPath(); this.ctx.arc(35, -15, 24, 0, Math.PI*2); this.ctx.fill();
+			this.drawkittyEars(35, -15, finalColor, false);
+			const walkCycle = (this.state.action.includes("walk")) ? Math.sin(t * 0.18) : 0;
+			[[-35, 12], [-12, 12], [10, 12], [28, 12]].forEach((p, i) => {
+				this.ctx.fillRect(p[0], p[1], 9, 16 + (i % 2 === 0 ? walkCycle : -walkCycle) * 8);
+			});
+			this.ctx.beginPath(); this.ctx.lineWidth = 8; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
+			this.ctx.moveTo(-45, 0); this.ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); this.ctx.stroke();
+			this.drawkittyFace(35, -15, false, false);
+		}
+		this.ctx.restore();
+	}
+	
     drawkittyEars(x, y, color, sleeping) {
         this.ctx.fillStyle = color;
         if (sleeping) {
