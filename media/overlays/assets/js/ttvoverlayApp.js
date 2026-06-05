@@ -286,6 +286,301 @@ const styleConfig = [
     { id: 'radius', label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
 ];
 
+// ==========================================
+// --- CORE MAPS CONFIGURATIONS ---
+// ==========================================
+
+let pendingImageBase64 = "";
+
+const AVAILABLE_IN_ANIMATIONS = ["none", "fadeIn", "bounceIn", "zoomIn", "slideInDown", "slideInUp"];
+const AVAILABLE_OUT_ANIMATIONS = ["none", "fadeOut", "bounceOut", "zoomOut", "slideOutUp", "slideOutDown"];
+// =========================================================================
+// --- CONFIGURATION MAPS & STRUCTS ---
+// =========================================================================
+You are 100% correct. Predefining the schema array directly inside the layout rendering function is a monolithic anti-pattern.
+
+If it stays inside renderSettingsWindow(), it means that every single time you open, close, or re-render the settings panel, JavaScript has to completely allocate, compile, and tear down that massive object schema matrix in memory. More importantly, it makes it impossible for other parts of your script (like commands or initialization routines) to inspect or loop through your available options without breaking encapsulation.
+
+In a monolithic file structure, the best practice is to move SETTINGS_SCHEMA completely outside of functions and hoist it to the global configuration layer at the very top of your file.
+
+This gives you a single source of truth that stays in memory and can be reused anywhere.
+
+Here is the architectural optimization to separate your data schema definition from the UI engine loop:
+
+1. Hoist the Schema Definition to the Global Space (Top of File)
+Place this matrix right under your core declarations (like your element selectors and where you load settings out of localStorage).
+
+JavaScript
+// =========================================================================
+// 🌐 GLOBAL CORE CONFIGURATION LAYER (Single Source of Truth)
+// =========================================================================
+
+const SETTINGS_SCHEMA = [
+    {
+        groupName: "🔔 Alert Core Management",
+        items: [
+            { 
+                label: "Master Alert Visibility", 
+                idKey: "master", 
+                get: () => !alertHidden, 
+                set: (v) => { alertHidden = !v; settings.alertHidden = !v; syncAlertVisibilityState(); }
+            },
+            { 
+                label: "Channel Point Alerts", 
+                idKey: "rewards", 
+                get: () => rewardsEnabled, 
+                set: (v) => { rewardsEnabled = v; settings.rewardsEnabled = v; saveSettings(); } 
+            },
+            { 
+                label: "Bit Cheer Alerts", 
+                idKey: "bits", 
+                get: () => bitsEnabled, 
+                set: (v) => { bitsEnabled = v; settings.bitsEnabled = v; saveSettings(); } 
+            },
+            { 
+                label: "Song Request Jukebox", 
+                idKey: "jukebox", 
+                get: () => !!settings.jukeboxWidgetEnabled, 
+                set: (v) => { settings.jukeboxWidgetEnabled = v; saveSettings(); } 
+            }
+        ]
+    },
+    {
+        groupName: "💬 Chat & UI Displays",
+        items: [
+            { 
+                label: "Show Twitch Chat Widget", 
+                idKey: "chat-widget", 
+                get: () => !chatHidden, 
+                set: (v) => { 
+                    chatHidden = !v; 
+                    if (chatWidget) {
+                        chatWidget.style.display = chatHidden ? "none" : "block";
+                        if (!chatHidden && chatFeed && typeof chatHeight !== 'undefined' && chatHeight) {
+                            chatFeed.style.height = chatHeight;
+                        }
+                    }
+                    saveSettings();
+                }
+            },
+            { 
+                label: "Show Stream Status Indicator", 
+                idKey: "status-widget", 
+                get: () => !statusHidden, 
+                set: (v) => { statusHidden = !v; if (statusWidget) statusWidget.style.display = statusHidden ? "none" : "block"; saveSettings(); }
+            },
+            { 
+                label: "Floating Chat Emotes", 
+                idKey: "emotes", 
+                get: () => floatingEmotes, 
+                set: (v) => { floatingEmotes = v; saveSettings(); } 
+            }
+        ]
+    },
+    {
+        groupName: "🤖 Bot & Core Backend Settings",
+        items: [
+            { 
+                label: "Command Prefix Check", 
+                idKey: "prefix-check", 
+                get: () => useCmdPrefix, 
+                set: (v) => { useCmdPrefix = v; saveSettings(); } 
+            },
+            { 
+                label: "Show Bot Prefixes", 
+                idKey: "bot-visibility", 
+                get: () => useBotPrefix, 
+                set: (v) => { useBotPrefix = v; saveSettings(); } 
+            },
+            { 
+                label: "Console Logging", 
+                idKey: "console", 
+                get: () => consoleMessages, 
+                set: (v) => { consoleMessages = v; saveSettings(); } 
+            }
+        ]
+    }
+];
+// Maps trigger elements to their target interface panels and optional callback lifecycle hooks
+const PANEL_NAVIGATION_MAPS = [
+    { 
+        triggerId: "ctx-open-editor", 
+        targetId: "style-editor", 
+        onOpen: () => { if (typeof renderThemeList === "function") renderThemeList(); } 
+    },
+    { 
+        triggerId: "quick-theme-btn", 
+        targetId: "style-editor", 
+        onOpen: () => { if (typeof renderThemeList === "function") renderThemeList(); } 
+    },
+    { 
+        triggerId: "ctx-open-rewards", 
+        targetId: "rewards-manager", 
+        onOpen: () => { 
+            if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); 
+            if (typeof renderRewardsList === "function") renderRewardsList(); 
+        } 
+    },
+    { 
+        triggerId: "ctx-open-settings", 
+        targetId: "settings-window", 
+        onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); } 
+    },
+    // REFACTORED IN: Bits Manager context trigger
+    { 
+        triggerId: "ctx-open-bits", 
+        targetId: "bit-manager",
+        onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); }
+    },
+    // REFACTORED IN: Widgets Manager context trigger
+    { 
+        triggerId: "ctx-open-widgets", 
+        targetId: "widgets-manager" 
+    }
+];
+// Maps HTML inputs/buttons to reactive parameters, executing automated mutations and context syncs
+const BOOLEAN_TOGGLE_MAPS = [
+    // --- MASTER ALERTS ---
+    { 
+        id: "settings-toggle-master-alerts", type: "change", valuePath: "checked", invert: true, 
+        assignTo: (val) => { alertHidden = val; settings.alertHidden = val; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "stg-toggle-master-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { alertHidden = !alertHidden; settings.alertHidden = alertHidden; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "mgr-toggle-alert-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { alertHidden = !alertHidden; settings.alertHidden = alertHidden; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+
+    // --- REWARDS ---
+    { 
+        id: "stg-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { rewardsEnabled = !rewardsEnabled; settings.rewardsEnabled = rewardsEnabled; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "mgr-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { rewardsEnabled = !rewardsEnabled; settings.rewardsEnabled = rewardsEnabled; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+
+    // --- BITS ---
+    { 
+        id: "stg-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { bitsEnabled = !bitsEnabled; settings.bitsEnabled = bitsEnabled; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+    { 
+        id: "mgr-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { bitsEnabled = !bitsEnabled; settings.bitsEnabled = bitsEnabled; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    },
+
+    // --- JUKEBOX ---
+    { 
+        id: "stg-toggle-jukebox-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { settings.jukeboxWidgetEnabled = !settings.jukeboxWidgetEnabled; }, 
+        onSync: () => { saveSettings(); syncAllToggleUI(); } 
+    }
+];
+// Straight utility mapping dictionary for clean event routing execution pipelines
+const SIMPLE_CLICK_MAPS = [
+    { id: "ctx-reset",     handler: () => systemReset() },
+    { id: "logout-btn-ui", handler: () => systemReset() },
+    { id: "ctx-lock",      handler: () => setEditMode(!isEditMode) }
+];
+// Configuration layout for elements requiring dynamic dragging parameters
+const DRAGGABLE_WINDOWS_CONFIG = [
+    { winId: "bit-manager",           headerId: "bit-manager-header" },
+    { winId: "settings-window",       headerId: "settings-manager-header" },
+    { winId: "widgets-manager",       headerId: "widgets-manager-header" }
+];
+
+// Data registries for the options blocks
+const CUSTOM_SELECT_DATA = {
+    "reward-text-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "reward-img-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "reward-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
+    "reward-img-out-anim": AVAILABLE_OUT_ANIMATIONS,
+    "reward-font-weight": [
+        { value: "normal", label: "Normal (400)" },
+        { value: "bold", label: "Bold (700)" },
+        { value: "900", label: "Black (900)" },
+        { value: "300", label: "Light (300)" }
+    ],
+    "reward-img-mode": [
+        { value: "loop", label: "Loop Continuously" },
+        { value: "once", label: "Play Once (Reset)" }
+    ],
+    // Bit Cheer Manager Additions
+    "bit-tier-selector": [
+        { value: "1", label: "Tier 1 (1+ Bits)" },
+        { value: "100", label: "Tier 2 (100+ Bits)" },
+        { value: "500", label: "Tier 3 (500+ Bits)" },
+        { value: "1000", label: "Tier 4 (1000+ Bits)" },
+        { value: "5000", label: "Tier 5 (5000+ Bits)" }
+    ],
+    // Explicitly binding the Bit Animation IDs so populateCustomDropdowns maps them safely
+    "bit-text-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "bit-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
+    "bit-img-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "bit-img-out-anim": AVAILABLE_OUT_ANIMATIONS
+};
+// State engine to track actively selected values since we don't have standard .value anymore
+let customSelectValues = {
+    "reward-text-in-anim": "none",
+    "reward-text-out-anim": "none",
+    "reward-img-in-anim": "none",
+    "reward-img-out-anim": "none",
+    "reward-font-weight": "bold",
+    "reward-img-mode": "loop",
+    // Bit Cheer Manager State Fallbacks
+    "bit-tier-selector": "1",
+    "bit-text-in-anim": "none",
+    "bit-text-out-anim": "none",
+    "bit-img-in-anim": "none",
+    "bit-img-out-anim": "none"
+};
+
+// Registry mapping overlay window elements to all actions that trigger their close event
+const WINDOW_CLOSE_MAPS = [
+    { win: "rewards-manager", triggers: ["close-rewards-btn", "close-rewards-top-btn"] },
+    { win: "bit-manager",     triggers: ["close-bit-manager-btn", "close-bits-top-btn"] },
+    { win: "settings-window",  triggers: ["close-settings-manager-btn", "close-settings-top-btn"] },
+    { win: "style-editor",     triggers: ["close-editor-btn", "close-editor-top-btn"] },
+	{ win: "widgets-manager",     triggers: [//"close-widgets-manager-btn",
+	"close-widgets-top-btn"] }
+];
+// Configuration layout matrix for the Custom Select dropdown boxes
+const DROPDOWN_CONFIGS = [
+    { display: "display-bit-text-in-anim",   options: "options-bit-text-in-anim",   list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
+    { display: "display-bit-text-out-anim",  options: "options-bit-text-out-anim",  list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] },
+    { display: "display-bit-img-in-anim",    options: "options-bit-img-in-anim",    list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
+    { display: "display-bit-img-out-anim",   options: "options-bit-img-out-anim",   list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] }
+];
+// Structural array mapping state variables to element inputs and persistent targets
+const REWARD_SELECTS_REGISTRY = [
+    { id: "reward-text-in-anim",  def: "none" },
+    { id: "reward-text-out-anim", def: "none" },
+    { id: "reward-img-in-anim",   def: "none" },
+    { id: "reward-img-out-anim",  def: "none" },
+    { id: "reward-font-weight",   def: "bold" },
+    { id: "reward-img-mode",      def: "loop" }
+];
+const REWARD_INPUTS_REGISTRY = [
+    { id: "reward-font-size",      type: "text" },
+    { id: "reward-text-outline",   type: "text" },
+    { id: "reward-img-size",       type: "text" },
+    { id: "reward-text-duration",  type: "text" },
+    { id: "reward-img-duration",   type: "text" }
+];
+
+
 // --- OBS CONSOLE BRIDGE ---
 const originalLog = console.log;
 const originalError = console.error;
@@ -309,163 +604,7 @@ console.warn = function(...args) {
     displayConsoleMessage("WARN", msg);
 };
 
-// --- MODAL & HELPERS ---
-async function p8Confirm(message, isAlert = false) {
-    const overlay = document.getElementById('p8-modal-overlay');
-    const msgEl = document.getElementById('modal-msg');
-    const cancelBtn = document.getElementById('modal-cancel');
-    const confirmBtn = document.getElementById('modal-confirm');
-    
-    msgEl.innerText = message;
-    cancelBtn.style.display = isAlert ? 'none' : 'block';
-    overlay.style.display = 'flex';
 
-    return new Promise((resolve) => {
-        const cleanup = (val) => {
-            overlay.style.display = 'none';
-            confirmBtn.replaceWith(confirmBtn.cloneNode(true));
-            cancelBtn.replaceWith(cancelBtn.cloneNode(true));
-            resolve(val);
-        };
-        document.getElementById('modal-confirm').addEventListener('click', () => cleanup(true));
-        document.getElementById('modal-cancel').addEventListener('click', () => cleanup(false));
-    });
-}
-
-
-
-// Centralized Generic Audio Utility
-function playSound(audioSource, volume = 0.8) {
-    if (!audioSource) return;
-
-    try {
-        const audio = new Audio(audioSource);
-        audio.volume = Math.min(Math.max(volume, 0), 1); // Clamp volume between 0.0 and 1.0
-        
-        // Play the audio asset
-        audio.play().catch(err => {
-            console.error("Audio playback blocked or failed:", err);
-        });
-
-        // Cleanup memory once playback finishes
-        audio.onended = () => {
-            audio.remove();
-        };
-    } catch (e) {
-        console.error("Failed to initialize audio element:", e);
-    }
-}
-
-// Staged storage arrays for the current item actively open in the template form editor
-let stagedSoundsPool = [];
-
-// Helper utility to render active sound chips inside the editor panel
-function renderStagedSoundsUI() {
-    const listContainer = document.getElementById("reward-sounds-list");
-    if (!listContainer) return;
-    
-    listContainer.innerHTML = "";
-    
-    if (stagedSoundsPool.length === 0) {
-        listContainer.innerHTML = `<div style="font-size: 11px; color: #52525b; font-style: italic; padding: 4px;">No custom audio assigned.</div>`;
-        return;
-    }
-    
-    stagedSoundsPool.forEach((soundItem, index) => {
-        const soundRow = document.createElement("div");
-        soundRow.style.cssText = "display: flex; gap: 8px; justify-content: space-between; align-items: center; background: #09090b; border: 1px solid #27272a; padding: 6px 10px; border-radius: 6px; font-size: 11px;";
-        
-        // Fallback properties for safety configuration management
-        let displayName = `🔊 Custom Sound #${index + 1}`;
-        let audioPlayTarget = "";
-        let currentVol = 1.0;
-
-        if (soundItem && typeof soundItem === "object") {
-            displayName = soundItem.name || displayName;
-            audioPlayTarget = soundItem.data || "";
-            currentVol = soundItem.volume !== undefined ? soundItem.volume : 1.0;
-        } else if (typeof soundItem === "string") {
-            // Backward compatibility tracking loop for legacy data variants
-            displayName = soundItem.startsWith("data:") ? `🔊 Custom Sound #${index + 1}` : soundItem.split('/').pop();
-            audioPlayTarget = soundItem;
-        }
-        
-        soundRow.innerHTML = `
-            <div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0;">
-                <span style="color: #e4e4e7; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 160px; margin-bottom: 2px;" title="${displayName}">${displayName}</span>
-                <div style="display: flex; align-items: center; gap: 4px;">
-                    <span style="font-size: 9px; color: #71717a; font-family: monospace; width: 24px;">Vol:</span>
-                    <input type="range" class="sound-vol-slider" min="0" max="1" step="0.05" value="${currentVol}" style="width: 70px; height: 3px; accent-color: var(--accent); cursor: pointer; margin: 0; padding: 0;">
-                    <span class="vol-label" style="font-size: 9px; color: #a1a1aa; font-family: monospace; width: 26px; text-align: right;">${Math.round(currentVol * 100)}%</span>
-                </div>
-            </div>
-            <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
-                <button type="button" class="play-preview-btn" style="background: none; border: none; color: var(--accent); cursor: pointer; padding: 2px;">▶️</button>
-                <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 2px;" onclick="removeStagedSoundItem(${index})">❌</button>
-            </div>
-        `;
-
-        // Update volume value inside the data object array when the slider is dragged
-        const slider = soundRow.querySelector(".sound-vol-slider");
-        const volLabel = soundRow.querySelector(".vol-label");
-        
-        slider.addEventListener("input", function() {
-            const v = parseFloat(this.value);
-            volLabel.innerText = `${Math.round(v * 100)}%`;
-            
-            if (stagedSoundsPool[index] && typeof stagedSoundsPool[index] === "object") {
-                stagedSoundsPool[index].volume = v;
-            } else if (typeof stagedSoundsPool[index] === "string") {
-                // Upgrade string on-the-fly to prevent syntax runtime bugs if user slides an legacy object item
-                stagedSoundsPool[index] = {
-                    name: displayName,
-                    data: audioPlayTarget,
-                    volume: v
-                };
-            }
-        });
-
-        // Test play layout handler with specific assigned settings configuration
-        soundRow.querySelector(".play-preview-btn").addEventListener("click", () => {
-            const currentObj = stagedSoundsPool[index];
-            const targetVolume = (currentObj && typeof currentObj === "object" && currentObj.volume !== undefined) ? currentObj.volume : 0.7;
-            playSound(audioPlayTarget, targetVolume);
-        });
-
-        listContainer.appendChild(soundRow);
-    });
-}
-
-// Global hook execution to safely pull items out of memory cache via index position
-window.removeStagedSoundItem = function(index) {
-    stagedSoundsPool.splice(index, 1);
-    renderStagedSoundsUI();
-};
-
-
-function hexToHSLA(hex) {
-    if(!hex || hex.startsWith('hsla')) return parseHSLA(hex || 'hsla(0,0%,0%,1)');
-    if(hex.startsWith('rgba')) {
-        const vals = hex.match(/\d+(\.\d+)?/g);
-        return rgbToHSLA(vals[0], vals[1], vals[2], vals[3] || 1);
-    }
-    let r=0, g=0, b=0;
-    if (hex.length == 4) { r = "0x" + hex[1] + hex[1]; g = "0x" + hex[2] + hex[2]; b = "0x" + hex[3] + hex[3]; }
-    else { r = "0x" + hex[1] + hex[2]; g = "0x" + hex[3] + hex[4]; b = "0x" + hex[5] + hex[6]; }
-    return rgbToHSLA(r, g, b, 1);
-}
-function rgbToHSLA(r, g, b, a) {
-    r /= 255; g /= 255; b /= 255;
-    let cmin = Math.min(r,g,b), cmax = Math.max(r,g,b), delta = cmax - cmin, h = 0, s = 0, l = 0;
-    if (delta == 0) h = 0; else if (cmax == r) h = ((g - b) / delta) % 6; else if (cmax == g) h = (b - r) / delta + 2; else h = (r - g) / delta + 4;
-    h = Math.round(h * 60); if (h < 0) h += 360;
-    l = (cmax + cmin) / 2; s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-    return { h, s: Math.round(s * 100), l: Math.round(l * 100), a: parseFloat(a) };
-}
-function parseHSLA(str) {
-    const vals = str.match(/\d+(\.\d+)?/g);
-    return { h: vals[0], s: vals[1], l: vals[2], a: vals[3] || 1 };
-}
 
 
 
@@ -547,7 +686,6 @@ function injectAllWidgetCommands() {
 
     console.log("🏁 [Command Registry]: Injection scan complete.");
 }
-
 function injectWidgetCommands(widgetInstance) {
     // Pass the local botSay utility directly into the initialization layer
 	console.log("🔍 Attempting to inject commands for:", widgetInstance);
@@ -580,7 +718,30 @@ function setEditMode(state) {
     } */
 	
 }
+function loadPositions() {
+    document.querySelectorAll('.p8-widget').forEach(el => {
+        const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
+        if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
+    });
 
+    // 🏎️ Target the inner feed for height restorations
+    if (chatWidget) {
+        const isHidden = !!settings.chatHidden;
+        chatWidget.style.display = isHidden ? "none" : "block";
+        
+        // Apply saved custom height to the feed element instead of the parent container
+        if (!isHidden && chatFeed) { 
+            // 🛑 CRITICAL FALLBACK: If height is missing or less than 32px, reset to a clean default
+            if (!chatHeight || parseInt(chatHeight) < 32) {
+                chatHeight = "175px";
+                if (typeof settings !== 'undefined') settings.chatHeight = "175px";
+            }
+            chatFeed.style.height = chatHeight; 
+        }
+    }
+    if (alertWidget) { alertWidget.style.display = settings.alertHidden ? "none" : "block"; }
+    if (statusWidget) { statusWidget.style.display = settings.statusHidden ? "none" : "block"; }
+}
 function applyTheme(name) {
     const theme = registry.themes[name];
     Object.keys(theme).forEach(k => document.documentElement.style.setProperty(k, theme[k]));
@@ -589,250 +750,11 @@ function applyTheme(name) {
     localStorage.setItem('p8_registry', JSON.stringify(registry));
 }
 
-async function systemReset() {
-    if(await p8Confirm("This will logout and reset your local settings. Proceed?")) {
-        localStorage.clear();
-        window.location.href = FULL_REDIRECT;
-    }
-}
-
-// --- WORKSPACE DATA GRAPH & ANIMATION MANIFESTS ---
-// --- WORKSPACE DATA GRAPH & ANIMATION MANIFESTS ---
-let pendingImageBase64 = "";
-
-const AVAILABLE_IN_ANIMATIONS = ["none", "fadeIn", "bounceIn", "zoomIn", "slideInDown", "slideInUp"];
-const AVAILABLE_OUT_ANIMATIONS = ["none", "fadeOut", "bounceOut", "zoomOut", "slideOutUp", "slideOutDown"];
-
-// Data registries for the options blocks
-const CUSTOM_SELECT_DATA = {
-    "reward-text-in-anim": AVAILABLE_IN_ANIMATIONS,
-    "reward-img-in-anim": AVAILABLE_IN_ANIMATIONS,
-    "reward-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
-    "reward-img-out-anim": AVAILABLE_OUT_ANIMATIONS,
-    "reward-font-weight": [
-        { value: "normal", label: "Normal (400)" },
-        { value: "bold", label: "Bold (700)" },
-        { value: "900", label: "Black (900)" },
-        { value: "300", label: "Light (300)" }
-    ],
-    "reward-img-mode": [
-        { value: "loop", label: "Loop Continuously" },
-        { value: "once", label: "Play Once (Reset)" }
-    ],
-    // Bit Cheer Manager Additions
-    "bit-tier-selector": [
-        { value: "1", label: "Tier 1 (1+ Bits)" },
-        { value: "100", label: "Tier 2 (100+ Bits)" },
-        { value: "500", label: "Tier 3 (500+ Bits)" },
-        { value: "1000", label: "Tier 4 (1000+ Bits)" },
-        { value: "5000", label: "Tier 5 (5000+ Bits)" }
-    ],
-    // Explicitly binding the Bit Animation IDs so populateCustomDropdowns maps them safely
-    "bit-text-in-anim": AVAILABLE_IN_ANIMATIONS,
-    "bit-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
-    "bit-img-in-anim": AVAILABLE_IN_ANIMATIONS,
-    "bit-img-out-anim": AVAILABLE_OUT_ANIMATIONS
-};
-// State engine to track actively selected values since we don't have standard .value anymore
-let customSelectValues = {
-    "reward-text-in-anim": "none",
-    "reward-text-out-anim": "none",
-    "reward-img-in-anim": "none",
-    "reward-img-out-anim": "none",
-    "reward-font-weight": "bold",
-    "reward-img-mode": "loop",
-    // Bit Cheer Manager State Fallbacks
-    "bit-tier-selector": "1",
-    "bit-text-in-anim": "none",
-    "bit-text-out-anim": "none",
-    "bit-img-in-anim": "none",
-    "bit-img-out-anim": "none"
-};
-
-// Programmatic getter and setter wrappers to maintain backward compatibility with your save actions
-function getCustomSelectValue(id) {
-    return customSelectValues[id];
-}
-
-function setCustomSelectValue(id, value) {
-    customSelectValues[id] = value;
-    
-    // Support both fallback matching patterns
-    const displayEl = document.getElementById(`display-${id}`) || document.getElementById(`current-${id}`);
-    if (!displayEl) return;
-
-    // Resolve structural label representations if tracking raw object lists
-    const dataset = CUSTOM_SELECT_DATA[id];
-    if (dataset && typeof dataset[0] === 'object') {
-        const matched = dataset.find(item => String(item.value) === String(value));
-        displayEl.innerText = matched ? matched.label : value;
-    } else {
-        displayEl.innerText = value;
-    }
-
-    // Contextual Trigger: Fire custom change updates for the Bit Tier configuration loader
-    if (id === "bit-tier-selector") {
-        if (typeof loadBitTierConfig === "function") {
-            loadBitTierConfig(value);
-        }
-        return;
-    }
-
-    // --- LIVE GRAPH REWRITE ENGINE MATCHES ---
-    // If we are configuring a Bit Alert Dropdown, update registry tracking immediately
-    if (id.startsWith("bit-")) {
-        const activeTier = customSelectValues["bit-tier-selector"] || "1";
-        if (registry.bits && registry.bits[activeTier]) {
-            // Map the internal field layout key (e.g., bit-text-in-anim -> anim_tx_in)
-            let targetKey = null;
-            if (id === "bit-text-in-anim") targetKey = "anim_tx_in";
-            if (id === "bit-text-out-anim") targetKey = "anim_tx_out";
-            if (id === "bit-img-in-anim") targetKey = "anim_im_in";
-            if (id === "bit-img-out-anim") targetKey = "anim_im_out";
-
-            if (targetKey) {
-                registry.bits[activeTier][targetKey] = value;
-                console.log(`Saved bit array transaction [Tier ${activeTier}]: ${targetKey} -> ${value}`);
-            }
-        }
-    }
-}
-function populateCustomDropdowns() {
-    Object.keys(CUSTOM_SELECT_DATA).forEach(id => {
-        const displayEl = document.getElementById(`display-${id}`) || 
-                          document.getElementById(`current-${id}`) || 
-                          document.getElementById(id);
-
-        const optionsEl = document.getElementById(`options-${id}`) || 
-                          document.getElementById(`${id}-options`);
-
-        if (!displayEl || !optionsEl) {
-            // console.warn(`Dropdown elements not found for ID: ${id}`);
-            return;
-        }
-
-        const optionsData = CUSTOM_SELECT_DATA[id];
-        optionsEl.innerHTML = "";
-
-        optionsData.forEach(item => {
-            const val = typeof item === 'object' ? item.value : item;
-            const text = typeof item === 'object' ? item.label : item;
-
-            const row = document.createElement("div");
-            row.className = "option-item";
-            row.innerText = text;
-            row.dataset.value = val;
-
-            row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer;";
-
-            row.addEventListener("mouseenter", () => row.style.background = "var(--accent, #9146ff)");
-            row.addEventListener("mouseleave", () => row.style.background = "transparent");
-
-            row.addEventListener("click", (e) => {
-                e.stopImmediatePropagation();   // Crucial fix
-                setCustomSelectValue(id, val);
-                optionsEl.style.display = "none";
-            });
-
-            optionsEl.appendChild(row);
-        });
-
-        // Attach click handler to display (only once)
-        if (!displayEl.dataset.dropdownInitialized) {
-            displayEl.dataset.dropdownInitialized = "true";
-
-            displayEl.addEventListener("click", (e) => {
-                e.stopImmediatePropagation();
-
-                // Close all other dropdowns
-                document.querySelectorAll(".custom-select-options-box, .select-options").forEach(box => {
-                    if (box !== optionsEl) box.style.display = "none";
-                });
-
-                optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
-            });
-        }
-    });
-}
-
-function toggleBits() {
-    bitsEnabled = !bitsEnabled;
-    saveSettings();
-    // Optional: Update badge text color/label here
-}
 
 
-function updateAllBadgesUI() {
-    // 1. Resolve State Flags
-    // Read variables matching your memory allocation rules
-    const isAlertActive = (String(alertHidden) !== "true"); 
-    const isRewardsActive = (String(rewardsEnabled) === "true");
-    const isBitsActive = (String(bitsEnabled) === "true");
-
-    // 2. Helper Array Mapping to distribute classes evenly
-    const toggleTargets = [
-        { ids: ["mgr-alert-status-badge"], active: isAlertActive },
-        { ids: ["mgr-rewards-status-badge", "stg-rewards-status-badge"], active: isRewardsActive },
-        { ids: ["mgr-bits-status-badge", "stg-bits-status-badge"], active: isBitsActive },
-        { ids: ["stg-master-status-badge"], active: isAlertActive }
-    ];
-
-    // 3. Render Status Updates Loops
-    toggleTargets.forEach(target => {
-        target.ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            
-            if (target.active) {
-                el.innerText = "ACTIVE";
-                el.className = "toggle-status-badge status-enabled";
-            } else {
-                el.innerText = "MUTED";
-                el.className = "toggle-status-badge status-disabled";
-            }
-        });
-    });
-}
-
-//=========================================
-//==========================================
 // ==========================================
-// --- CORE UTILITIES & MAPS CONFIGURATIONS ---
+// --- REWARDS LIST GENERATION SYSTEM ---
 // ==========================================
-
-// Registry mapping overlay window elements to all actions that trigger their close event
-const WINDOW_CLOSE_MAPS = [
-    { win: "rewards-manager", triggers: ["close-rewards-btn", "close-rewards-top-btn"] },
-    { win: "bit-manager",     triggers: ["close-bit-manager-btn", "close-bits-top-btn"] },
-    { win: "settings-window",  triggers: ["close-settings-manager-btn", "close-settings-top-btn"] },
-    { win: "style-editor",     triggers: ["close-editor-btn", "close-editor-top-btn"] },
-	{ win: "widgets-manager",     triggers: [//"close-widgets-manager-btn",
-	"close-widgets-top-btn"] }
-];
-// Configuration layout matrix for the Custom Select dropdown boxes
-const DROPDOWN_CONFIGS = [
-    { display: "display-bit-text-in-anim",   options: "options-bit-text-in-anim",   list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
-    { display: "display-bit-text-out-anim",  options: "options-bit-text-out-anim",  list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] },
-    { display: "display-bit-img-in-anim",    options: "options-bit-img-in-anim",    list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
-    { display: "display-bit-img-out-anim",   options: "options-bit-img-out-anim",   list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] }
-];
-// Structural array mapping state variables to element inputs and persistent targets
-const REWARD_SELECTS_REGISTRY = [
-    { id: "reward-text-in-anim",  def: "none" },
-    { id: "reward-text-out-anim", def: "none" },
-    { id: "reward-img-in-anim",   def: "none" },
-    { id: "reward-img-out-anim",  def: "none" },
-    { id: "reward-font-weight",   def: "bold" },
-    { id: "reward-img-mode",      def: "loop" }
-];
-const REWARD_INPUTS_REGISTRY = [
-    { id: "reward-font-size",      type: "text" },
-    { id: "reward-text-outline",   type: "text" },
-    { id: "reward-img-size",       type: "text" },
-    { id: "reward-text-duration",  type: "text" },
-    { id: "reward-img-duration",   type: "text" }
-];
-
 function renderThemeControls() {
     const container = document.getElementById('variable-controls');
     if (!container) return;
@@ -978,11 +900,6 @@ function renderThemeList() {
         list.appendChild(opt);
     });
 }
-
-// ==========================================
-// --- REWARDS LIST GENERATION SYSTEM ---
-// ==========================================
-
 function renderRewardsList() {
     const container = document.getElementById("rewards-list-container");
     if (!container) return;
@@ -1085,6 +1002,66 @@ function renderRewardsList() {
 
         container.appendChild(item);
     });
+}
+function renderSettingsWindow() {
+    const stackContainer = document.querySelector('#settings-window .settings-stack');
+    if (!stackContainer) return;
+    
+    // Clear the stack before drawing to ensure fresh state on re-renders
+    stackContainer.innerHTML = '';
+
+    // Apply layout constraints to keep the panel tightly bounds-locked and navigable
+    stackContainer.style.cssText = "padding-top: 10px; display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; overflow-x: hidden; padding-right: 4px;";
+
+    // Feed globally defined constant structure directly down into the view assembler
+    SETTINGS_SCHEMA.forEach(group => {
+        const detailsEl = document.createElement('details');
+        detailsEl.className = 'settings-group-wrapper';
+        detailsEl.open = true; // Remains open initially; allows simple collapsing transitions
+        detailsEl.style.cssText = "border: 1px solid #27272a; border-radius: 4px; background: #09090b; margin-bottom: 2px; overflow: hidden;";
+
+        const summaryEl = document.createElement('summary');
+        summaryEl.className = 'settings-group-header';
+        summaryEl.style.cssText = "padding: 6px 8px; font-size: 11px; font-weight: 600; color: var(--accent, #a855f7); background: #18181b; cursor: pointer; user-select: none; list-style: none; display: flex; align-items: center; justify-content: space-between;";
+        summaryEl.innerHTML = `<span>${group.groupName}</span><span class="group-arrow" style="font-size: 9px; opacity: 0.6;">▼</span>`;
+        
+        detailsEl.appendChild(summaryEl);
+
+        const innerPanel = document.createElement('div');
+        innerPanel.className = 'settings-group-content';
+        innerPanel.style.cssText = "padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; background: #09090b;";
+
+        group.items.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'settings-toggle-row';
+            row.style.cssText = "display: flex; justify-content: space-between; align-items: center;";
+
+            row.innerHTML = `
+                <span class="settings-toggle-label" style="font-size: 12px; color: #e4e4e7;">${item.label}:</span>
+                <div class="settings-toggle-controls" style="display: flex; align-items: center; gap: 8px;">
+                    <span id="stg-${item.idKey}-status-badge" class="toggle-status-badge">---</span>
+                    <button type="button" id="stg-toggle-${item.idKey}-btn" class="toggle-action-btn">Toggle</button>
+                </div>
+            `;
+
+            const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    const currentVal = item.get();
+                    item.set(!currentVal);
+                    syncAllToggleUI(); // Push live tracking visual flags across active panes
+                });
+            }
+
+            innerPanel.appendChild(row);
+        });
+
+        detailsEl.appendChild(innerPanel);
+        stackContainer.appendChild(detailsEl);
+    });
+
+    // Run structural component badge sync instantly on panel drawing completion
+    syncAllToggleUI();
 }
 // --- EVENT BINDING ---
 // --- CENTRALIZED ALERT PIPELINE ENGINE ---
@@ -1395,51 +1372,7 @@ function triggerBitAlertPipeline(user, bits, message) {
     }, duration);
 }
 
-
-
-/* 
-function loadPositions() {
-    document.querySelectorAll('.p8-widget').forEach(el => {
-        const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
-        if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
-    });
-
-    // NEW: Apply the persistent visibility states on load
-    document.getElementById("chat-widget").style.display = settings.chatHidden ? "none" : "block";
-    document.getElementById("alert-widget").style.display = settings.alertHidden ? "none" : "block";
-    document.getElementById("status-widget").style.display = settings.statusHidden ? "none" : "block";
-	const chatContainer = document.getElementById('chat-widget'); // Matching your chat layout ID
-    if (chatContainer && chatHeight) {
-        chatContainer.style.height = chatHeight;
-    }
-} */
-function loadPositions() {
-    document.querySelectorAll('.p8-widget').forEach(el => {
-        const pos = JSON.parse(localStorage.getItem(`p8_pos_${el.id}`));
-        if(pos) { el.style.top = pos.top; el.style.left = pos.left; }
-    });
-
-    // 🏎️ Target the inner feed for height restorations
-    if (chatWidget) {
-        const isHidden = !!settings.chatHidden;
-        chatWidget.style.display = isHidden ? "none" : "block";
-        
-        // Apply saved custom height to the feed element instead of the parent container
-        if (!isHidden && chatFeed) { 
-            // 🛑 CRITICAL FALLBACK: If height is missing or less than 32px, reset to a clean default
-            if (!chatHeight || parseInt(chatHeight) < 32) {
-                chatHeight = "175px";
-                if (typeof settings !== 'undefined') settings.chatHeight = "175px";
-            }
-            chatFeed.style.height = chatHeight; 
-        }
-    }
-    if (alertWidget) { alertWidget.style.display = settings.alertHidden ? "none" : "block"; }
-    if (statusWidget) { statusWidget.style.display = settings.statusHidden ? "none" : "block"; }
-}
-/**
- * Global utility to cleanly coordinate Master Alert visibility and states
- */
+/* Global utility to cleanly coordinate Master Alert visibility and states */
 function syncAlertVisibilityState() {
     saveSettings();
     if (typeof updateManagerBadgesUI === "function") updateManagerBadgesUI();
@@ -1451,7 +1384,7 @@ function syncAlertVisibilityState() {
 function syncAllToggleUI() {
     const s = typeof settings !== 'undefined' ? settings : {};
     
-    // Helper to update specific badges (Uses your clean class assignment setup!)
+    // Helper to update specific badges (Preserves your clean class style naming assignments!)
     const updateBadge = (id, isActive) => {
         const el = document.getElementById(id);
         if (el) {
@@ -1460,20 +1393,21 @@ function syncAllToggleUI() {
         }
     };
 
-    // 1. Master Alerts
-    updateBadge("stg-master-status-badge", !alertHidden); 
+    // 🤖 AUTOMATED LOOP: Automatically updates every badge inside your settings window schema!
+    if (typeof SETTINGS_SCHEMA !== 'undefined') {
+        SETTINGS_SCHEMA.forEach(group => {
+            group.items.forEach(item => {
+                updateBadge(`stg-${item.idKey}-status-badge`, item.get());
+            });
+        });
+    }
+
+    // 🎯 INDEPENDENT MANAGEMENT SYNC: Handles your multi-window alerts manager panel badges
     updateBadge("mgr-alert-status-badge", !alertHidden);
-
-    // 2. Rewards
-    updateBadge("stg-rewards-status-badge", s.rewardsEnabled);
     updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
-
-    // 3. Bits
-    updateBadge("stg-bits-status-badge", s.bitsEnabled);
     updateBadge("mgr-bits-status-badge", s.bitsEnabled);
 
-    // 4. Jukebox
-    updateBadge("stg-jukebox-status-badge", s.jukeboxWidgetEnabled);
+    // 🎸 JUKEBOX VISUAL SIDE-EFFECTS: Handles the opacity/interaction changes on your player element
     const jbControls = document.getElementById("jukebox-widget-controls");
     if (jbControls) {
         jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
@@ -1481,19 +1415,173 @@ function syncAllToggleUI() {
         jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
     }
 
-    // 5. 🆕 New Core System Variables Added to Your Sync Pipeline
-    updateBadge("stg-console-status-badge", consoleMessages);
-    updateBadge("stg-prefix-check-status-badge", useCmdPrefix);
-    updateBadge("stg-bot-visibility-status-badge", useBotPrefix);
-    updateBadge("stg-emotes-status-badge", floatingEmotes);
-    updateBadge("stg-chat-widget-status-badge", !chatHidden);
-    updateBadge("stg-status-widget-status-badge", !statusHidden);
-
-    // Sync Engine States
+    // 🏎️ CORE AUDIO ENGINE SYNC
     if (window.streamJukeboxEngine) {
         window.streamJukeboxEngine.setWidgetActiveState(s.jukeboxWidgetEnabled);
     }
 }
+function updateAllBadgesUI() {
+    // 1. Resolve State Flags
+    // Read variables matching your memory allocation rules
+    const isAlertActive = (String(alertHidden) !== "true"); 
+    const isRewardsActive = (String(rewardsEnabled) === "true");
+    const isBitsActive = (String(bitsEnabled) === "true");
+
+    // 2. Helper Array Mapping to distribute classes evenly
+    const toggleTargets = [
+        { ids: ["mgr-alert-status-badge"], active: isAlertActive },
+        { ids: ["mgr-rewards-status-badge", "stg-rewards-status-badge"], active: isRewardsActive },
+        { ids: ["mgr-bits-status-badge", "stg-bits-status-badge"], active: isBitsActive },
+        { ids: ["stg-master-status-badge"], active: isAlertActive }
+    ];
+
+    // 3. Render Status Updates Loops
+    toggleTargets.forEach(target => {
+        target.ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            
+            if (target.active) {
+                el.innerText = "ACTIVE";
+                el.className = "toggle-status-badge status-enabled";
+            } else {
+                el.innerText = "MUTED";
+                el.className = "toggle-status-badge status-disabled";
+            }
+        });
+    });
+}
+
+// Programmatic getter and setter wrappers to maintain backward compatibility with your save actions
+function getCustomSelectValue(id) {
+    return customSelectValues[id];
+}
+function setCustomSelectValue(id, value) {
+    customSelectValues[id] = value;
+    
+    // Support both fallback matching patterns
+    const displayEl = document.getElementById(`display-${id}`) || document.getElementById(`current-${id}`);
+    if (!displayEl) return;
+
+    // Resolve structural label representations if tracking raw object lists
+    const dataset = CUSTOM_SELECT_DATA[id];
+    if (dataset && typeof dataset[0] === 'object') {
+        const matched = dataset.find(item => String(item.value) === String(value));
+        displayEl.innerText = matched ? matched.label : value;
+    } else {
+        displayEl.innerText = value;
+    }
+
+    // Contextual Trigger: Fire custom change updates for the Bit Tier configuration loader
+    if (id === "bit-tier-selector") {
+        if (typeof loadBitTierConfig === "function") {
+            loadBitTierConfig(value);
+        }
+        return;
+    }
+
+    // --- LIVE GRAPH REWRITE ENGINE MATCHES ---
+    // If we are configuring a Bit Alert Dropdown, update registry tracking immediately
+    if (id.startsWith("bit-")) {
+        const activeTier = customSelectValues["bit-tier-selector"] || "1";
+        if (registry.bits && registry.bits[activeTier]) {
+            // Map the internal field layout key (e.g., bit-text-in-anim -> anim_tx_in)
+            let targetKey = null;
+            if (id === "bit-text-in-anim") targetKey = "anim_tx_in";
+            if (id === "bit-text-out-anim") targetKey = "anim_tx_out";
+            if (id === "bit-img-in-anim") targetKey = "anim_im_in";
+            if (id === "bit-img-out-anim") targetKey = "anim_im_out";
+
+            if (targetKey) {
+                registry.bits[activeTier][targetKey] = value;
+                console.log(`Saved bit array transaction [Tier ${activeTier}]: ${targetKey} -> ${value}`);
+            }
+        }
+    }
+}
+function populateCustomDropdowns() {
+    Object.keys(CUSTOM_SELECT_DATA).forEach(id => {
+        const displayEl = document.getElementById(`display-${id}`) || 
+                          document.getElementById(`current-${id}`) || 
+                          document.getElementById(id);
+
+        const optionsEl = document.getElementById(`options-${id}`) || 
+                          document.getElementById(`${id}-options`);
+
+        if (!displayEl || !optionsEl) {
+            // console.warn(`Dropdown elements not found for ID: ${id}`);
+            return;
+        }
+
+        const optionsData = CUSTOM_SELECT_DATA[id];
+        optionsEl.innerHTML = "";
+
+        optionsData.forEach(item => {
+            const val = typeof item === 'object' ? item.value : item;
+            const text = typeof item === 'object' ? item.label : item;
+
+            const row = document.createElement("div");
+            row.className = "option-item";
+            row.innerText = text;
+            row.dataset.value = val;
+
+            row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer;";
+
+            row.addEventListener("mouseenter", () => row.style.background = "var(--accent, #9146ff)");
+            row.addEventListener("mouseleave", () => row.style.background = "transparent");
+
+            row.addEventListener("click", (e) => {
+                e.stopImmediatePropagation();   // Crucial fix
+                setCustomSelectValue(id, val);
+                optionsEl.style.display = "none";
+            });
+
+            optionsEl.appendChild(row);
+        });
+
+        // Attach click handler to display (only once)
+        if (!displayEl.dataset.dropdownInitialized) {
+            displayEl.dataset.dropdownInitialized = "true";
+
+            displayEl.addEventListener("click", (e) => {
+                e.stopImmediatePropagation();
+
+                // Close all other dropdowns
+                document.querySelectorAll(".custom-select-options-box, .select-options").forEach(box => {
+                    if (box !== optionsEl) box.style.display = "none";
+                });
+
+                optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
+            });
+        }
+    });
+}
+
+// --- color helpers ---
+function hexToHSLA(hex) {
+    if(!hex || hex.startsWith('hsla')) return parseHSLA(hex || 'hsla(0,0%,0%,1)');
+    if(hex.startsWith('rgba')) {
+        const vals = hex.match(/\d+(\.\d+)?/g);
+        return rgbToHSLA(vals[0], vals[1], vals[2], vals[3] || 1);
+    }
+    let r=0, g=0, b=0;
+    if (hex.length == 4) { r = "0x" + hex[1] + hex[1]; g = "0x" + hex[2] + hex[2]; b = "0x" + hex[3] + hex[3]; }
+    else { r = "0x" + hex[1] + hex[2]; g = "0x" + hex[3] + hex[4]; b = "0x" + hex[5] + hex[6]; }
+    return rgbToHSLA(r, g, b, 1);
+}
+function rgbToHSLA(r, g, b, a) {
+    r /= 255; g /= 255; b /= 255;
+    let cmin = Math.min(r,g,b), cmax = Math.max(r,g,b), delta = cmax - cmin, h = 0, s = 0, l = 0;
+    if (delta == 0) h = 0; else if (cmax == r) h = ((g - b) / delta) % 6; else if (cmax == g) h = (b - r) / delta + 2; else h = (r - g) / delta + 4;
+    h = Math.round(h * 60); if (h < 0) h += 360;
+    l = (cmax + cmin) / 2; s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    return { h, s: Math.round(s * 100), l: Math.round(l * 100), a: parseFloat(a) };
+}
+function parseHSLA(str) {
+    const vals = str.match(/\d+(\.\d+)?/g);
+    return { h: vals[0], s: vals[1], l: vals[2], a: vals[3] || 1 };
+}
+
 // --- INITIALIZE DRAGGING FOR BOTH WINDOWS ---
 document.addEventListener("DOMContentLoaded", () => {
     // Parameter 1: The Main Window Element ID
@@ -1744,9 +1832,7 @@ function botSay(msg) {
 // =========================================================================
 // --- DOM UTILITY & EVENT ROUTING HELPERS ---
 // =========================================================================
-/**
- * Safely attaches a click listener to an element if it exists in the DOM.
- */
+/* Safely attaches a click listener to an element if it exists in the DOM. */
 function onSafeClick(id, callback, stopPropagation = false) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -1755,25 +1841,13 @@ function onSafeClick(id, callback, stopPropagation = false) {
         callback(e, el);
     });
 }
-/**
- * Safely attaches a change listener to an input element if it exists in the DOM.
- */
+/* Safely attaches a change listener to an input element if it exists in the DOM. */
 function onSafeChange(id, callback) {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener("change", (e) => callback(e, el));
 }
-
-/**
- * Unified context menu closer wrapper
- */
-function closeContextMenu() {
-    const ctxMenu = document.getElementById('p8-ctx-menu');
-    if (ctxMenu) ctxMenu.style.display = 'none';
-}
-/**
- * Inline file streaming parsing utility to cut file handler duplicate code blocks
- */
+/* Inline file streaming parsing utility to cut file handler duplicate code blocks */
 function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
     if (!inputElement) return;
     inputElement.addEventListener("change", function(e) {
@@ -1787,7 +1861,32 @@ function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
         reader.readAsDataURL(file);
     });
 }
+// --- MODAL & HELPERS ---
+async function p8Confirm(message, isAlert = false) {
+    const overlay = document.getElementById('p8-modal-overlay');
+    const msgEl = document.getElementById('modal-msg');
+    const cancelBtn = document.getElementById('modal-cancel');
+    const confirmBtn = document.getElementById('modal-confirm');
+    
+    msgEl.innerText = message;
+    cancelBtn.style.display = isAlert ? 'none' : 'block';
+    overlay.style.display = 'flex';
 
+    return new Promise((resolve) => {
+        const cleanup = (val) => {
+            overlay.style.display = 'none';
+            confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+            cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+            resolve(val);
+        };
+        document.getElementById('modal-confirm').addEventListener('click', () => cleanup(true));
+        document.getElementById('modal-cancel').addEventListener('click', () => cleanup(false));
+    });
+}
+function closeContextMenu() {
+    const ctxMenu = document.getElementById('p8-ctx-menu');
+    if (ctxMenu) ctxMenu.style.display = 'none';
+}
 // --- CORE COMMAND LOGIC & WIDGET VISIBILITY CONTROLS ---
 // --- CENTRALIZED COMMAND REGISTRY ---
 // Helper to parse ID or default to latest
@@ -2077,7 +2176,6 @@ async function checkTwitchAuth() {
         history.replaceState(null, "", window.location.pathname);
     }
 }
-
 function startTwitch(channel, token) {
     const formattedToken = token.startsWith("oauth:") ? token : `oauth:${token}`;
     
@@ -2132,8 +2230,123 @@ function startTwitch(channel, token) {
 }
 
 
+// =====================================================================================================================================================
+// =========================================================================
+// --- SOUND SYSTEM ---
+// =========================================================================
+// Centralized Generic Audio Utility
+function playSound(audioSource, volume = 0.8) {
+    if (!audioSource) return;
+
+    try {
+        const audio = new Audio(audioSource);
+        audio.volume = Math.min(Math.max(volume, 0), 1); // Clamp volume between 0.0 and 1.0
+        
+        // Play the audio asset
+        audio.play().catch(err => {
+            console.error("Audio playback blocked or failed:", err);
+        });
+
+        // Cleanup memory once playback finishes
+        audio.onended = () => {
+            audio.remove();
+        };
+    } catch (e) {
+        console.error("Failed to initialize audio element:", e);
+    }
+}
+
+// Staged storage arrays for the current item actively open in the template form editor
+let stagedSoundsPool = [];
+
+// Helper utility to render active sound chips inside the editor panel
+function renderStagedSoundsUI() {
+    const listContainer = document.getElementById("reward-sounds-list");
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = "";
+    
+    if (stagedSoundsPool.length === 0) {
+        listContainer.innerHTML = `<div style="font-size: 11px; color: #52525b; font-style: italic; padding: 4px;">No custom audio assigned.</div>`;
+        return;
+    }
+    
+    stagedSoundsPool.forEach((soundItem, index) => {
+        const soundRow = document.createElement("div");
+        soundRow.style.cssText = "display: flex; gap: 8px; justify-content: space-between; align-items: center; background: #09090b; border: 1px solid #27272a; padding: 6px 10px; border-radius: 6px; font-size: 11px;";
+        
+        // Fallback properties for safety configuration management
+        let displayName = `🔊 Custom Sound #${index + 1}`;
+        let audioPlayTarget = "";
+        let currentVol = 1.0;
+
+        if (soundItem && typeof soundItem === "object") {
+            displayName = soundItem.name || displayName;
+            audioPlayTarget = soundItem.data || "";
+            currentVol = soundItem.volume !== undefined ? soundItem.volume : 1.0;
+        } else if (typeof soundItem === "string") {
+            // Backward compatibility tracking loop for legacy data variants
+            displayName = soundItem.startsWith("data:") ? `🔊 Custom Sound #${index + 1}` : soundItem.split('/').pop();
+            audioPlayTarget = soundItem;
+        }
+        
+        soundRow.innerHTML = `
+            <div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0;">
+                <span style="color: #e4e4e7; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 160px; margin-bottom: 2px;" title="${displayName}">${displayName}</span>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 9px; color: #71717a; font-family: monospace; width: 24px;">Vol:</span>
+                    <input type="range" class="sound-vol-slider" min="0" max="1" step="0.05" value="${currentVol}" style="width: 70px; height: 3px; accent-color: var(--accent); cursor: pointer; margin: 0; padding: 0;">
+                    <span class="vol-label" style="font-size: 9px; color: #a1a1aa; font-family: monospace; width: 26px; text-align: right;">${Math.round(currentVol * 100)}%</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+                <button type="button" class="play-preview-btn" style="background: none; border: none; color: var(--accent); cursor: pointer; padding: 2px;">▶️</button>
+                <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 2px;" onclick="removeStagedSoundItem(${index})">❌</button>
+            </div>
+        `;
+
+        // Update volume value inside the data object array when the slider is dragged
+        const slider = soundRow.querySelector(".sound-vol-slider");
+        const volLabel = soundRow.querySelector(".vol-label");
+        
+        slider.addEventListener("input", function() {
+            const v = parseFloat(this.value);
+            volLabel.innerText = `${Math.round(v * 100)}%`;
+            
+            if (stagedSoundsPool[index] && typeof stagedSoundsPool[index] === "object") {
+                stagedSoundsPool[index].volume = v;
+            } else if (typeof stagedSoundsPool[index] === "string") {
+                // Upgrade string on-the-fly to prevent syntax runtime bugs if user slides an legacy object item
+                stagedSoundsPool[index] = {
+                    name: displayName,
+                    data: audioPlayTarget,
+                    volume: v
+                };
+            }
+        });
+
+        // Test play layout handler with specific assigned settings configuration
+        soundRow.querySelector(".play-preview-btn").addEventListener("click", () => {
+            const currentObj = stagedSoundsPool[index];
+            const targetVolume = (currentObj && typeof currentObj === "object" && currentObj.volume !== undefined) ? currentObj.volume : 0.7;
+            playSound(audioPlayTarget, targetVolume);
+        });
+
+        listContainer.appendChild(soundRow);
+    });
+}
+
+// Global hook execution to safely pull items out of memory cache via index position
+window.removeStagedSoundItem = function(index) {
+    stagedSoundsPool.splice(index, 1);
+    renderStagedSoundsUI();
+};
+
+// =========== END OF SOUND SYTEM ===================================
+// =====================================================================================================================================================
 
 
+// =====================================================================================================================================================
 // =========================================================================
 // --- TIMERS & RUNTIME CONTEXT ENGINE STATE ---
 // =========================================================================
@@ -2401,235 +2614,9 @@ function getLatestInstanceIdByType(type) {
     }
     return null;
 }
+// ================END OF TIMER SHIT========================================
+// ========================================================================================================================================================
 
-// =========================================================================
-// --- CONFIGURATION MAPS & STRUCTS ---
-// =========================================================================
-// Maps trigger elements to their target interface panels and optional callback lifecycle hooks
-const PANEL_NAVIGATION_MAPS = [
-    { 
-        triggerId: "ctx-open-editor", 
-        targetId: "style-editor", 
-        onOpen: () => { if (typeof renderThemeList === "function") renderThemeList(); } 
-    },
-    { 
-        triggerId: "quick-theme-btn", 
-        targetId: "style-editor", 
-        onOpen: () => { if (typeof renderThemeList === "function") renderThemeList(); } 
-    },
-    { 
-        triggerId: "ctx-open-rewards", 
-        targetId: "rewards-manager", 
-        onOpen: () => { 
-            if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); 
-            if (typeof renderRewardsList === "function") renderRewardsList(); 
-        } 
-    },
-    { 
-        triggerId: "ctx-open-settings", 
-        targetId: "settings-window", 
-        onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); } 
-    },
-    // REFACTORED IN: Bits Manager context trigger
-    { 
-        triggerId: "ctx-open-bits", 
-        targetId: "bit-manager",
-        onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); }
-    },
-    // REFACTORED IN: Widgets Manager context trigger
-    { 
-        triggerId: "ctx-open-widgets", 
-        targetId: "widgets-manager" 
-    }
-];
-// Maps HTML inputs/buttons to reactive parameters, executing automated mutations and context syncs
-
-const BOOLEAN_TOGGLE_MAPS = [
-    // --- MASTER ALERTS ---
-    { 
-        id: "settings-toggle-master-alerts", type: "change", valuePath: "checked", invert: true, 
-        assignTo: (val) => { alertHidden = val; settings.alertHidden = val; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
-    { 
-        id: "stg-toggle-master-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { alertHidden = !alertHidden; settings.alertHidden = alertHidden; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
-    { 
-        id: "mgr-toggle-alert-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { alertHidden = !alertHidden; settings.alertHidden = alertHidden; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
-
-    // --- REWARDS ---
-    { 
-        id: "stg-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { rewardsEnabled = !rewardsEnabled; settings.rewardsEnabled = rewardsEnabled; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
-    { 
-        id: "mgr-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { rewardsEnabled = !rewardsEnabled; settings.rewardsEnabled = rewardsEnabled; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
-
-    // --- BITS ---
-    { 
-        id: "stg-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { bitsEnabled = !bitsEnabled; settings.bitsEnabled = bitsEnabled; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
-    { 
-        id: "mgr-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { bitsEnabled = !bitsEnabled; settings.bitsEnabled = bitsEnabled; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    },
-
-    // --- JUKEBOX ---
-    { 
-        id: "stg-toggle-jukebox-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { settings.jukeboxWidgetEnabled = !settings.jukeboxWidgetEnabled; }, 
-        onSync: () => { saveSettings(); syncAllToggleUI(); } 
-    }
-];
-// Straight utility mapping dictionary for clean event routing execution pipelines
-const SIMPLE_CLICK_MAPS = [
-    { id: "ctx-reset",     handler: () => systemReset() },
-    { id: "logout-btn-ui", handler: () => systemReset() },
-    { id: "ctx-lock",      handler: () => setEditMode(!isEditMode) }
-];
-
-// Configuration layout for elements requiring dynamic dragging parameters
-const DRAGGABLE_WINDOWS_CONFIG = [
-    { winId: "bit-manager",           headerId: "bit-manager-header" },
-    { winId: "settings-window",       headerId: "settings-manager-header" },
-    { winId: "widgets-manager",       headerId: "widgets-manager-header" }
-];
-
-function renderSettingsWindow() {
-    const stackContainer = document.querySelector('#settings-window .settings-stack');
-    if (!stackContainer) return;
-    
-    // Clear the stack before drawing to ensure fresh state on re-renders
-    stackContainer.innerHTML = '';
-
-    // The configuration schema, tailored to match your precise variable lookups and global side effects
-    const settingsSchema = [
-        { 
-            label: "Master Alert Visibility", 
-            idKey: "master", 
-            get: () => !alertHidden, 
-            set: (v) => { 
-                alertHidden = !v; 
-                settings.alertHidden = !v; 
-                // Leverages your existing global coordinator for opacity, display, and manager updates
-                syncAlertVisibilityState(); 
-            }
-        },
-        { 
-            label: "Channel Point Alerts", 
-            idKey: "rewards", 
-            get: () => rewardsEnabled, 
-            set: (v) => { rewardsEnabled = v; settings.rewardsEnabled = v; saveSettings(); } 
-        },
-        { 
-            label: "Bit Cheer Alerts", 
-            idKey: "bits", 
-            get: () => bitsEnabled, 
-            set: (v) => { bitsEnabled = v; settings.bitsEnabled = v; saveSettings(); } 
-        },
-        { 
-            label: "Song Request Jukebox", 
-            idKey: "jukebox", 
-            get: () => !!settings.jukeboxWidgetEnabled, 
-            set: (v) => { settings.jukeboxWidgetEnabled = v; saveSettings(); } 
-        },
-        { 
-            label: "Console Logging", 
-            idKey: "console", 
-            get: () => consoleMessages, 
-            set: (v) => { consoleMessages = v; saveSettings(); } 
-        },
-        { 
-            label: "Command Prefix Check", 
-            idKey: "prefix-check", 
-            get: () => useCmdPrefix, 
-            set: (v) => { useCmdPrefix = v; saveSettings(); } 
-        },
-        { 
-            label: "Show Bot Prefixes", 
-            idKey: "bot-visibility", 
-            get: () => useBotPrefix, 
-            set: (v) => { useBotPrefix = v; saveSettings(); } 
-        },
-        { 
-            label: "Floating Chat Emotes", 
-            idKey: "emotes", 
-            get: () => floatingEmotes, 
-            set: (v) => { floatingEmotes = v; saveSettings(); } 
-        },
-		{ 
-            label: "Show Twitch Chat Widget", 
-            idKey: "chat-widget", 
-            get: () => !chatHidden, 
-            set: (v) => { 
-                chatHidden = !v; 
-                if (chatWidget) {
-                    chatWidget.style.display = chatHidden ? "none" : "block";
-                    
-                    // Direct the stored height layout right into the active resizer target
-                    if (!chatHidden && chatFeed && typeof chatHeight !== 'undefined' && chatHeight) {
-                        chatFeed.style.height = chatHeight;
-                    }
-                }
-                saveSettings();
-            }
-        },
-        { 
-            label: "Show Stream Status Indicator", 
-            idKey: "status-widget", 
-            get: () => !statusHidden, 
-            set: (v) => { 
-                statusHidden = !v; 
-                if (statusWidget) statusWidget.style.display = statusHidden ? "none" : "block";
-                saveSettings();
-            }
-        }
-    ];
-
-    // Build each row dynamically using your design syntax
-    settingsSchema.forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'settings-toggle-row';
-        row.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;";
-
-        row.innerHTML = `
-            <span class="settings-toggle-label" style="font-size: 12px; color: #e4e4e7;">${item.label}:</span>
-            <div class="settings-toggle-controls" style="display: flex; align-items: center; gap: 8px;">
-                <span id="stg-${item.idKey}-status-badge" class="toggle-status-badge">---</span>
-                <button type="button" id="stg-toggle-${item.idKey}-btn" class="toggle-action-btn">Toggle</button>
-            </div>
-        `;
-
-        // Direct event attachment on element creation
-        const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                const currentVal = item.get();
-                // Commit state mutation
-                item.set(!currentVal);
-                // Use your existing global layout UI syncing function to update all panel badges and engine components
-                syncAllToggleUI();
-            });
-        }
-
-        stackContainer.appendChild(row);
-    });
-
-    // Run your existing tracker update logic so the buttons show the true state instantly on window draw
-    syncAllToggleUI();
-}
 // ==========================================
 // --- REWARDS MANAGER CONTROL ENGINE ---
 // ==========================================
@@ -3088,7 +3075,7 @@ function bindEvents() {
     });
 	// 🆕 NEW: Automated Resize Tracking for Native CSS Resize Handlers (Targeting Inner Chat Feed)
 	// 🆕 FIXED: Automated Resize Tracking with Safety Guards for Toggle States
-if (chatFeed) {
+	if (chatFeed) {
         let resizeTimeout;
         const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
@@ -3138,28 +3125,76 @@ init();
 // ==========================================
 // 🛠️ TEMPORARY ONE-TIME COLD RESET SCRIPT
 // ==========================================
-if (!localStorage.getItem('p8_reset_done')) {
-    // 1. Clear out independent legacy cache keys
-    localStorage.removeItem('p8_chat_height');
-    
-    // 2. Safely parse and rewrite your monolithic settings wrapper
+/**
+ * Universally deletes a setting key from both the monolithic settings wrapper 
+ * and independent localStorage entries, then syncs the active UI state.
+ * @param {string} key - The precise settings property name or independent localStorage key to remove.
+ * @param {boolean} [shouldReload=false] - Optional flag to force a hard reload after wiping.
+ */
+function deleteSetting(key, shouldReload = false) {
+    let wasDeleted = false;
+
+    // 1. Target the monolithic grouped settings object if it exists
     if (localStorage.getItem('settings')) {
         try {
             let s = JSON.parse(localStorage.getItem('settings'));
-            s.chatHeight = "175px"; // Safe string fallback value to get your window open!
-            localStorage.setItem('settings', JSON.stringify(s));
-        } catch(e) {
-            console.error("Could not parse settings during emergency reset:", e);
+            
+            // Check if the property actively exists in the schema object
+            if (s && s.hasOwnProperty(key)) {
+                delete s[key];
+                localStorage.setItem('settings', JSON.stringify(s));
+                
+                // Mirror the deletion to your active top-level runtime settings variable
+                if (typeof settings !== 'undefined' && settings.hasOwnProperty(key)) {
+                    delete settings[key];
+                }
+                wasDeleted = true;
+                console.log(`[Storage] Cleaned property "${key}" out of the monolithic settings wrapper.`);
+            }
+        } catch (e) {
+            console.error(`[Storage Error] Failed to parse settings object while deleting key "${key}":`, e);
         }
     }
-    
-    // 3. Mark this reset as completed so it doesn't cause an infinite loop!
-    localStorage.setItem('p8_reset_done', 'true');
-    
-    console.log("Storage cleared! Hard refreshing application layout...");
-    location.reload();
-} else {
-    // Clean up our temporary flag behind us once we've successfully bypassed the loop
-    localStorage.removeItem('p8_reset_done');
+
+    // 2. Fall back to checking independent localStorage cache keys (like legacy elements or positions)
+    if (localStorage.getItem(key) !== null) {
+        localStorage.removeItem(key);
+        wasDeleted = true;
+        console.log(`[Storage] Removed independent key entry "${key}" from localStorage directly.`);
+    }
+
+    // 3. Clear any active matching top-level global runtime variables if they exist
+    if (window.hasOwnProperty(key)) {
+        window[key] = undefined;
+        wasDeleted = true;
+    }
+
+    // 4. Determine post-execution routing flow
+    if (wasDeleted) {
+        if (shouldReload) {
+            console.log(`[Storage] Reload requested. Refreshing page wrapper context...`);
+            location.reload();
+            return;
+        }
+
+        // Live update the application UI context states without requiring a reload
+        if (typeof loadPositions === "function") loadPositions();
+        if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+        
+        console.log(`[Storage] Hot-sync complete. Element attributes updated across active layout components.`);
+    } else {
+        console.warn(`[Storage Wrapper] Specified key "${key}" was not located in active storage contexts.`);
+    }
 }
-// ==========================================
+
+//deleteSetting('chatHeight'); 
+// Instantly deletes it from storage and snaps the feed back to its default 175px CSS floor safely!
+
+//deleteSetting('p8_pos_chat-widget', true); 
+// Erases the manual drag tracking position memory and reloads the window to pop it back to 400px/20px baseline rules.
+async function systemReset() {
+    if(await p8Confirm("This will logout and reset your local settings. Proceed?")) {
+        localStorage.clear();
+        window.location.href = FULL_REDIRECT;
+    }
+}
