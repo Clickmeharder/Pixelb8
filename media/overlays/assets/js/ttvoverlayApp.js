@@ -1547,7 +1547,7 @@ function syncAllToggleUI() {
         const el = document.getElementById(id);
         if (el) {
             el.className = `toggle-status-badge ${isActive ? 'status-enabled' : 'status-disabled'}`;
-            el.innerText = isActive ? "ON" : "OFF";
+            el.innerText = isActive ? "Enabled" : "Disabled";
         }
     };
 
