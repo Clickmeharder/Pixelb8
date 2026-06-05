@@ -1039,11 +1039,14 @@ function renderSettingsWindow() {
                 </div>
             `;
 
-            const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
+		const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', () => {
                     const currentVal = item.get();
                     item.set(!currentVal);
+                    
+                    // 🎯 FIX: Only sync the visual statuses/badges. 
+                    // DO NOT re-call renderSettingsWindow() here or save flags that reconstruct the DOM tree.
                     syncAllToggleUI(); 
                 });
             }
@@ -2770,17 +2773,43 @@ function bindRewardsManagerEvents() {
         });
     }
 
+    // 🎯 FIX: Bind Master Control Buttons inside the Rewards Manager layout
+    const mgrAlertBtn = document.getElementById("mgr-toggle-alert-btn");
+    if (mgrAlertBtn) {
+        mgrAlertBtn.addEventListener("click", () => {
+            alertHidden = !alertHidden;
+            if (typeof settings !== 'undefined') settings.alertHidden = alertHidden;
+            if (typeof syncAlertVisibilityState === "function") syncAlertVisibilityState();
+            if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+        });
+    }
+
+    const mgrRewardsBtn = document.getElementById("mgr-toggle-rewards-btn");
+    if (mgrRewardsBtn) {
+        mgrRewardsBtn.addEventListener("click", () => {
+            // Toggle local scope if it exists, otherwise mutate settings container directly
+            if (typeof rewardsEnabled !== 'undefined') {
+                rewardsEnabled = !rewardsEnabled;
+                if (typeof settings !== 'undefined') settings.rewardsEnabled = rewardsEnabled;
+            } else if (typeof settings !== 'undefined') {
+                settings.rewardsEnabled = !settings.rewardsEnabled;
+            }
+            if (typeof saveSettings === "function") saveSettings();
+            if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+        });
+    }
+
     // Populate dropdowns AFTER the panel is fully loaded
     setTimeout(() => {
         if (typeof populateCustomDropdowns === "function") {
             populateCustomDropdowns();
         }
-        if (typeof updateManagerBadgesUI === "function") {
-            updateManagerBadgesUI();
+        // Force sync state across all panels on initialization
+        if (typeof syncAllToggleUI === "function") {
+            syncAllToggleUI();
         }
     }, 150);
-}
-// ==========================================
+}// ==========================================
 // --- BITS CONFIGURATION ENGINE ---
 // ==========================================
 function bindBitManagerEvents() {
