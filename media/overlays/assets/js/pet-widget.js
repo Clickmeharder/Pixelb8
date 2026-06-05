@@ -288,7 +288,15 @@ export class StreamPet {
             
             const nameIn = document.getElementById("nameInput"); 
             if (nameIn) nameIn.value = this.activePet.name;
+			const tummySlider = document.getElementById("tummyLimitRange");
+			const tummyDisplay = document.getElementById("tummyLimitValue");
 
+			if (tummySlider && this.state.tummylimit !== undefined) {
+				tummySlider.value = this.state.tummylimit;
+				if (tummyDisplay) {
+					tummyDisplay.innerText = this.state.tummylimit;
+				}
+			}
             const displayEl = document.getElementById("speciesSelectDisplay");
             if (displayEl && this.registry.activeSpecies) {
                 const speciesMap = {
