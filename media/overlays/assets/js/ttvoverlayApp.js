@@ -3177,40 +3177,58 @@ function bindEvents() {
     }
 
     // === GLOBAL MOUSEDOWN HANDLER ===
-    window.addEventListener('mousedown', e => {
-        const ctxMenu = document.getElementById('p8-ctx-menu');
-        const themeOpts = document.getElementById('theme-options');
-        
-        if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) {
-            closeContextMenu();
-        }
-        
-        if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) {
-            themeOpts.style.display = 'none';
-        }
+	window.addEventListener('mousedown', e => {
+		const ctxMenu = document.getElementById('p8-ctx-menu');
+		const themeOpts = document.getElementById('theme-options');
+		
+		// ... (keep your existing context menu and select-box cleanup code)
+		if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) {
+			closeContextMenu();
+		}
+		
+		if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) {
+			themeOpts.style.display = 'none';
+		}
 
-        if (!e.target.closest('.custom-select-display') &&
-            !e.target.closest('.select-trigger') &&
-            !e.target.closest('.custom-select-options-box') &&
-            !e.target.closest('.select-options') &&
-            !e.target.closest('.option-item')) {
-            
-            document.querySelectorAll(".custom-select-options-box, .select-options").forEach(b => {
-                b.style.display = "none";
-            });
-        }
-        
-        if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 ||
-            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, .timer-btn-group, .setup-container, .p8-modal')) {
-            return;
-        }
-        
-        dragTarget = e.target.closest('.p8-widget');
-        if (dragTarget) {
-            const r = dragTarget.getBoundingClientRect();
-            offset = { x: e.clientX - r.left, y: e.clientY - r.top };
-        }
-    });
+		if (!e.target.closest('.custom-select-display') &&
+			!e.target.closest('.select-trigger') &&
+			!e.target.closest('.custom-select-options-box') &&
+			!e.target.closest('.select-options') &&
+			!e.target.closest('.option-item')) {
+			
+			document.querySelectorAll(".custom-select-options-box, .select-options").forEach(b => {
+				b.style.display = "none";
+			});
+		}
+		
+		// Check if we should even process this drag
+		if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 ||
+			e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, .timer-btn-group, .setup-container, .p8-modal')) {
+			return;
+		}
+		
+		// Identify potential drag target
+		dragTarget = e.target.closest('.p8-widget');
+		
+		if (dragTarget) {
+			// --- NEW: RESIZER EXCLUSION LOGIC ---
+			const r = dragTarget.getBoundingClientRect();
+			const handleSize = 20; // Matches your CSS resize zone
+			
+			// Calculate if click is within bottom-right 20px
+			const isClickingResizer = (e.clientX > r.right - handleSize && 
+									   e.clientY > r.bottom - handleSize);
+			
+			// If clicking the resizer, abort the drag logic so CSS resize can take over
+			if (isClickingResizer) {
+				dragTarget = null;
+				return;
+			}
+			// ------------------------------------
+			
+			offset = { x: e.clientX - r.left, y: e.clientY - r.top };
+		}
+	});
 
     window.addEventListener('mousemove', e => {
         if (typeof dragTarget !== 'undefined' && dragTarget) {
