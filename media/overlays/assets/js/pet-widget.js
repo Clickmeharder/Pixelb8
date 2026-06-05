@@ -600,6 +600,31 @@ export class StreamPet {
 		if (begging) { this.ctx.beginPath(); this.ctx.arc(x+1, y+8, 4, 0, Math.PI*2); this.ctx.fill(); }
 		else { this.ctx.beginPath(); this.ctx.moveTo(x+1, y+3); this.ctx.lineTo(x-2, y); this.ctx.lineTo(x+4, y); this.ctx.fill(); }
 	}
+	reviveKitty() {
+		if (this.state.isDead) {
+			this.state.isDead = false;
+			this.state.hunger = 50; 
+			this.state.action = "special";
+			this.state.actionTimer = 200;
+			this.state.lastHungerTick = Date.now();
+			this.say("I'M ALIVE! 💖");
+			this.saveData();
+			
+			for(let i=0; i<20; i++) {
+				this.state.particles.push({
+					x: this.state.x, 
+					y: this.state.y, 
+					vx: (Math.random() - 0.5) * 10, 
+					vy: (Math.random() - 0.5) * 10, 
+					s: 4, 
+					c: "#ff77aa", 
+					life: 40
+				});
+			}
+		} else {
+			this.say("Already healthy! ✨");
+		}
+	}
 
 	// --- STATE SIMULATION SYSTEM ---
 	updateAI(t) {
@@ -786,33 +811,6 @@ export class StreamPet {
 			});
 			swatchContainer.appendChild(btn);
 		});
-	}
-
-	// --- SEPARATED CONTROL ACTIONS ---
-	reviveKitty() {
-		if (this.state.isDead) {
-			this.state.isDead = false;
-			this.state.hunger = 50; 
-			this.state.action = "special";
-			this.state.actionTimer = 200;
-			this.state.lastHungerTick = Date.now();
-			this.say("I'M ALIVE! 💖");
-			this.saveData();
-			
-			for(let i=0; i<20; i++) {
-				this.state.particles.push({
-					x: this.state.x, 
-					y: this.state.y, 
-					vx: (Math.random() - 0.5) * 10, 
-					vy: (Math.random() - 0.5) * 10, 
-					s: 4, 
-					c: "#ff77aa", 
-					life: 40
-				});
-			}
-		} else {
-			this.say("Already healthy! ✨");
-		}
 	}
 
 	// --- 3. DISCRETE BOUND UI INTERFACES ---
