@@ -1,4 +1,3 @@
-
 /**
  * 🐾 StreamPet Widget Module
  * Follows the hot-swappable monolithic component structure.
@@ -14,23 +13,41 @@ export class StreamPet {
             return;
         }
 
+        // Pull layout dimensions from storage before building to prevent visual snapping
+        const savedBounds = localStorage.getItem("greta_widget_bounds");
+        this.widgetBounds = savedBounds ? JSON.parse(savedBounds) : {
+            left: "100px",
+            top: "100px",
+            width: "400px",
+            height: "400px"
+        };
+
         // Only inject if it doesn't already exist
         if (!document.getElementById("pet-widget")) {
             const petViewport = document.createElement("div");
             petViewport.id = "pet-widget";
 			petViewport.classList.add("p8-widget");
             petViewport.style.zIndex = "101";
+            petViewport.style.position = "absolute";
+            
+            // Reapply persistent window coordinates
+            petViewport.style.left = this.widgetBounds.left;
+            petViewport.style.top = this.widgetBounds.top;
+            petViewport.style.width = this.widgetBounds.width;
+            petViewport.style.height = this.widgetBounds.height;
+
             petViewport.innerHTML = `
-                <div id="bubble" class="chat-bubble"></div>
-                <div id="nameplate">Loading...</div>
-                <canvas id="companionCanvas"></canvas>
-                <div id="status">❤️ Greta | EXP 0</div>
+                <div id=\"bubble\" class=\"chat-bubble\"></div>
+                <div id=\"nameplate\">Loading...</div>
+                <canvas id=\"companionCanvas\"></canvas>
+                <div id=\"status\">❤️ Greta | EXP 0</div>
             `;
             overlayWrapper.appendChild(petViewport);
             console.log("🐾 [Pet Widget]: Viewport DOM elements injected into overlay-wrapper.");
         }
 
-        // Pull nodes out of our markup safely
+        // Safely extract our nodes
+        this.widgetContainer = document.getElementById("pet-widget");
         this.canvas = document.getElementById("companionCanvas");
         this.ctx = this.canvas.getContext("2d");
 
@@ -108,6 +125,7 @@ export class StreamPet {
         window.addEventListener('resize', () => this.resize());
 
         this.loadData();
+        this.initContainerListeners(); // Persistent drag/resize listener wireup
         
         // Start Loops
         this.saveInterval = setInterval(() => this.saveData(), 5000);
@@ -115,6 +133,64 @@ export class StreamPet {
         this.animate();
 
         this.bindUIEventListeners();
+    }
+
+    // --- TRACK DRAG & RESIZE COORDINATES PERMANENTLY ---
+    initContainerListeners() {
+        if (!this.widgetContainer) return;
+
+        // Mutation Observer watches style adjustments handled via native CSS resizing
+        const styleObserver = new MutationObserver(() => {
+            this.widgetBounds.width = this.widgetContainer.style.width;
+            this.widgetBounds.height = this.widgetContainer.style.height;
+            this.widgetBounds.left = this.widgetContainer.style.left;
+            this.widgetBounds.top = this.widgetContainer.style.top;
+            localStorage.setItem("greta_widget_bounds", JSON.stringify(this.widgetBounds));
+            this.resize(); // Refreshes interior high-density scaling safely
+        });
+
+        styleObserver.observe(this.widgetContainer, { 
+            attributes: true, 
+            attributeFilter: ["style"] 
+        });
+
+        // Draggable Title/Grab Handle behavior logic
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        this.widgetContainer.addEventListener("mousedown", (e) => {
+            // Avoid conflict if clicking forms or UI sliders inside the element
+            if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" || e.target.closest("a, .swatch")) return;
+            
+            // Check if clicking edge resize area (usually bottom-right corner)
+            const rect = this.widgetContainer.getBoundingClientRect();
+            if (e.clientX > rect.right - 15 && e.clientY > rect.bottom - 15) return;
+
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialLeft = parseInt(this.widgetContainer.style.left, 10) || rect.left;
+            initialTop = parseInt(this.widgetContainer.style.top, 10) || rect.top;
+            
+            this.widgetContainer.style.cursor = "grabbing";
+            e.preventDefault();
+        });
+
+        window.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            this.widgetContainer.style.left = `${initialLeft + deltaX}px`;
+            this.widgetContainer.style.top = `${initialTop + deltaY}px`;
+        });
+
+        window.addEventListener("mouseup", () => {
+            if (isDragging) {
+                isDragging = false;
+                if (this.widgetContainer) this.widgetContainer.style.cursor = "auto";
+            }
+        });
     }
 
     // --- CHAT COMMAND ROUTER ---
@@ -380,14 +456,16 @@ export class StreamPet {
 	}
 
 	resize() {
-		this.canvas.width = window.innerWidth + 200;
-		this.canvas.height = window.innerHeight + 200;
+        if (!this.widgetContainer || !this.canvas) return;
+        // Map sizing parameters to context dimensions cleanly
+		this.canvas.width = this.widgetContainer.clientWidth;
+		this.canvas.height = this.widgetContainer.clientHeight;
 		this.ctx.imageSmoothingEnabled = false;
 	}
 
 	getPos(pctX, pctY, offY = 0) {
-		const visibleW = this.canvas.width - 200;
-		const visibleH = this.canvas.height - 200;
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
 
 		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
 		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
@@ -441,13 +519,11 @@ export class StreamPet {
 
 		this.ctx.save();
 		
-		this.ctx.translate(100, 100);
-
 		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
 		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
 
-		const visibleW = this.canvas.width - 200;
-		const visibleH = this.canvas.height - 200;
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
 		const anchorX = visibleW / 2;
 		const anchorY = visibleH - this.BASE_FLOOR_Y;
 
@@ -519,8 +595,8 @@ export class StreamPet {
 
 		if (this.state.action === "nyan") {
 			const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
-			const visibleW = this.canvas.width - 200;
-			const visibleH = this.canvas.height - 200;
+			const visibleW = this.canvas.width;
+			const visibleH = this.canvas.height;
 			this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
 			for (let segment = 0; segment < 8; segment++) {
 				const segOffset = segment * 35;
@@ -683,8 +759,8 @@ export class StreamPet {
 		};
 
 		// Workspace resolution mapping definitions
-		const visibleW = this.canvas.width - 200;
-		const visibleH = this.canvas.height - 200;
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
 		const floorLineY = visibleH - this.BASE_FLOOR_Y;
 		
 		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
@@ -929,6 +1005,7 @@ export class StreamPet {
         bindClick("btnTreat", () => { if(!this.state.isDead) { this.state.hunger = Math.max(0, this.state.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM NOM! 🍗"); } });
         bindClick("btnClear", () => { this.state.poops = []; this.say("Fresh sand! ✨"); });
         bindClick("btnReset", () => { 
+            localStorage.removeItem("greta_widget_bounds");
 			localStorage.removeItem("greta_ultra_v10"); 
 			location.reload(); 
 		});
