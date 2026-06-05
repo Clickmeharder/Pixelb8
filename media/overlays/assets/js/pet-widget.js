@@ -1,3 +1,4 @@
+
 /**
  * 🐾 StreamPet Widget Module
  * Follows the hot-swappable monolithic component structure.
@@ -156,6 +157,32 @@ export class StreamPet {
         this.state.actionTimer = 400;
         this.playSound('nyanSound');
         this.say("NYAN NYAN NYAN! 🌈");
+    }
+
+    // --- MAIN ANIMATION INTERFACE LOOP ---
+    animate() {
+        this.state.animT++;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Update Game Frame Physics & Logic State Machine
+        this.updateAI(this.state.animT);
+
+        // Render Static Environmental Props
+        this.drawEnvironment(this.state.animT);
+
+        // Compute Structural Scaling Values based on Development Stage
+        let petScale = 1.0;
+        if (this.state.stage === "Baby") petScale = 0.6;
+        if (this.state.stage === "Juvenile") petScale = 0.8;
+
+        // Render Character Layer Canvas Layout Pipeline
+        this.drawKitty(this.state.animT, petScale);
+
+        // Push Raw State Metrics to DOM Text Textures
+        this.updateUI();
+
+        // Recursively Request Next Available Frame
+        requestAnimationFrame(this.animate);
     }
 
     // --- DRAWING & RENDERING PROCEDURES ---
@@ -605,8 +632,8 @@ export class StreamPet {
             const fileInput = row.querySelector('.hidden-file-input');
             const testBtn = row.querySelector('.test-btn');
 
-            if (checkbox) checkbox.checked = window.soundSettings[key];
             if (checkbox) {
+                checkbox.checked = window.soundSettings[key];
                 checkbox.addEventListener('change', (e) => {
                     window.soundSettings[key] = e.target.checked;
                     localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
@@ -618,74 +645,21 @@ export class StreamPet {
                 fileInput.addEventListener('change', (e) => {
                     const file = e.target.files[0];
                     if (file) {
-                        const objectURL = URL.createObjectURL(file);
-                        window.soundSettings.customPaths[key] = objectURL;
+                        const url = URL.createObjectURL(file);
+                        window.soundSettings.customPaths[key] = url;
                         localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
                         this.refreshAudioInstance(key);
-                        this.say("Sound loaded! 🎵");
+                        this.say("Audio updated! 🎧");
                     }
                 });
             }
 
             if (testBtn) {
                 testBtn.addEventListener('click', () => {
-                    const sound = this.audioAssets[key];
-                    if (sound) {
-                        sound.currentTime = 0;
-                        sound.play().catch(() => this.say("Pick a sound first!"));
-                    } else {
-                        this.say("Sound error!");
-                    }
+                    this.playSound(key);
                 });
             }
         });
     }
-	getCommands(botSay) {
-        return [
-            { name: "revivekitty",   adminOnly: true,  execute: () => this.handleTwitchCommand("revivekitty") },
-            { name: "nyankitty",     adminOnly: false, execute: () => this.handleTwitchCommand("nyankitty") },
-            { name: "feedkitty",     adminOnly: false, execute: () => this.handleTwitchCommand("feedkitty") },
-            { name: "playwithkitty", adminOnly: false, execute: () => this.handleTwitchCommand("playwithkitty") },
-            { name: "dance",         adminOnly: false, execute: () => this.handleTwitchCommand("dance") },
-            { name: "treatkitty",    adminOnly: false, execute: () => this.handleTwitchCommand("treatkitty") },
-            { name: "cleanlitter",   adminOnly: false, execute: () => this.handleTwitchCommand("cleanlitter") }
-        ];
-    }
-    // --- TWITCH CHAT ROUTER INTEGRATION ---
-    handleTwitchCommand(cmd) {
-        if (this.state.isDead && cmd !== "revivekitty") return;
-
-        switch(cmd) {
-            case "revivekitty":   this.revivekitty(); break;
-            case "nyankitty":     this.triggerNyan(); break;
-            case "feedkitty":     const f = document.getElementById("btnFeed"); if(f) f.click(); else if(!this.state.hasFood) { this.state.hasFood = true; this.say("Food! 🐟"); }; break;
-            case "playwithkitty": const p = document.getElementById("btnPlay"); if(p) p.click(); else { this.state.action = "special"; this.state.actionTimer = 350; this.say("Play! 🧶"); }; break;
-            case "dance":         const d = document.getElementById("btnDance"); if(d) d.click(); else { this.state.action = "dance"; this.state.actionTimer = 300; this.say("Dance! ✨"); }; break;
-            case "treatkitty":    const t = document.getElementById("btnTreat"); if(t) t.click(); else { this.state.hunger = Math.max(0, this.state.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM NOM! 🍗"); }; break;
-            case "cleanlitter":   const c = document.getElementById("btnClear"); if(c) c.click(); else { this.state.poops = []; this.say("Fresh sand! ✨"); }; break;
-        }
-    }
-
-    // --- ENGINE ANIMATION TICK ---
-    animate() {
-        // Break loop instantly if element was detached or widget turned off
-        if (!document.getElementById("companionCanvas")) {
-            clearInterval(this.saveInterval);
-            this.stopSound('nyanSound');
-            console.log("🐾 [Pet Widget]: Loop torn down safely.");
-            return;
-        }
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.state.animT++;
-        
-        this.drawEnvironment(this.state.animT);
-        this.updateAI(this.state.animT);
-        
-        const scale = this.state.stage === "Baby" ? 0.4 : this.state.stage === "Juvenile" ? 0.75 : 1.1;
-        this.drawKitty(this.state.animT, scale);
-        this.updateUI();
-        
-        requestAnimationFrame(this.animate);
-    }
 }
+
