@@ -78,7 +78,21 @@ body {
 	overflow:hidden;
 	resize:both;
 }
-
+.p8-widget #nameplate { 
+	position: absolute; 
+	background: var(--bg);
+	color: #0ec3c3; 
+	padding: 8px 15px; 
+	font-size: 11px; 
+	border: var(--border-width) var(--border-style) var(--border-color);
+	border-radius: var(--border-radius);
+	pointer-events: auto; 
+	white-space: nowrap; 
+	transform: translate(-50%, -50%); 
+	z-index: 1000; 
+	cursor: pointer; 
+	transition: background 0.2s, transform 0.1s;
+}
 body.edit-mode .p8-widget { 
     outline: 2px dashed rgba(145, 70, 255, 0.6); 
     cursor: grab; 
