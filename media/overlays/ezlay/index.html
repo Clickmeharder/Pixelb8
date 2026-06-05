@@ -172,13 +172,13 @@ body.edit-mode .p8-widget#pet-widget {
 
 /* Push the canvas away from the bottom-right corner so it doesn't block the handle */
 body.edit-mode .p8-widget #companionCanvas {
-    margin-right: 20px;
-    margin-bottom: 20px;
+    margin-right: 4px;
+    margin-bottom: 2px;
 }
 
 /* Explicitly target the resizer for browsers that support it */
 body.edit-mode .p8-widget#pet-widget::-webkit-resizer {
-
+    pointer-events: auto !important;
 }
     </style>
 </head>
