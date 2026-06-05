@@ -67,10 +67,10 @@ export class StreamPet {
         };
 
         this.defaultPaths = {
-            meowSound: 'assets/sounds/meowSound.mp3',
-            mewSound: 'assets/sounds/mewSound.mp3',
-            purrSound: 'assets/sounds/purrSound.mp3',
-            nyanSound: 'assets/sounds/nyanSound.mp3'
+            meowSound: '../assets/sounds/meowSound.mp3',
+            mewSound: '../assets/sounds/mewSound.mp3',
+            purrSound: '../assets/sounds/purrSound.mp3',
+            nyanSound: '../assets/sounds/nyanSound.mp3'
         };
 
         const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
