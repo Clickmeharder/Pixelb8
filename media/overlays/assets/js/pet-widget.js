@@ -284,12 +284,12 @@ export class StreamPet {
                         <summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">📐 Layout & Environment</summary>
                         <div style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid #27272a;">
-                                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #a1a1aa;">
-                                    <span>Canvas Zoom Scaling</span>
-                                    <span id="zoomValue" style="color: #0ec3c3; font-weight: bold;">1.0x</span>
-                                </div>
-                                <input type="range" id="canvasZoom" min="0.5" max="3.0" step="0.1" value="1.0" style="width: 100%;">
-                            </div>
+								<div style="display: flex; justify-content: space-between; font-size: 11px; color: #a1a1aa;">
+									<span>Canvas Zoom Scaling</span>
+									<span id="zoomValue" style="color: #0ec3c3; font-weight: bold;">1.0x</span>
+								</div>
+								<input type="range" id="canvasZoom" min="-2" max="2" step="0.1" value="0" style="width: 100%;">
+							</div>
 
                             <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
                                 <span>Show Cat Tower</span>
@@ -434,26 +434,36 @@ export class StreamPet {
 	}
 
 	// --- MAIN ANIMATION INTERFACE LOOP ---
+
 	animate = () => {
 		this.state.animT++;
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
 		this.updateAI(this.state.animT);
 
-		// 🔍 Context Layer Tracking Isolation Group
+		// Isolate matrix layer transform parameters
 		this.ctx.save();
 		
-		// 1. Establish the canvas origin mid-point vectors
-		const midX = this.canvas.width / 2;
-		const midY = this.canvas.height / 2;
-		const scaleVal = this.state.zoom || 1.0;
+		// Map slider value range (-2 to 2) down to true visual multiplier values (0.5x to 2.0x)
+		// Slider value 0 acts as default 1.0x multiplier anchor
+		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
+		let scaleVal = 1.0;
+		if (rawSliderVal >= 0) {
+			scaleVal = 1.0 + (rawSliderVal * 0.5); // Maps 0 to 2 -> 1.0x to 2.0x
+		} else {
+			scaleVal = 1.0 + (rawSliderVal * 0.25); // Maps -2 to 0 -> 0.5x to 1.0x
+		}
 
-		// 2. Perform Centered Matrix Transformation
-		this.ctx.translate(midX, midY); // Shift origin to frame center
-		this.ctx.scale(scaleVal, scaleVal); // Apply the slider magnification scale matrix
-		this.ctx.translate(-midX, -midY); // Restore coordinate mapping coordinates
+		// Anchor the zoom around the center-horizontal floor line
+		const anchorX = this.canvas.width / 2;
+		const anchorY = this.canvas.height - this.BASE_FLOOR_Y;
 
-		// Render the environment elements relative to scaled matrix transformations
+		// Perform scale context adjustments from the custom floor anchor point
+		this.ctx.translate(anchorX, anchorY);
+		this.ctx.scale(scaleVal, scaleVal);
+		this.ctx.translate(-anchorX, -anchorY);
+
+		// Render the assets safely under the modified transformation matrix
 		this.drawEnvironment(this.state.animT);
 
 		let petScale = 1.0;
@@ -462,7 +472,7 @@ export class StreamPet {
 
 		this.drawKitty(this.state.animT, petScale);
 		
-		// Tear down transform layers so text vectors aren't corrupted
+		// Remove transform adjustments so DOM overlay items aren't displaced
 		this.ctx.restore();
 
 		this.updateUI();
@@ -686,30 +696,15 @@ export class StreamPet {
 			return true;
 		};
 
-		// --- 🛠️ FIX: Dynamic Y Boundary Percentage Mapping Matrices ---
-		const floorY = window.innerHeight - this.BASE_FLOOR_Y;
-		const ceilingY = 150; // Keeps objects from vanishing past the top of the canvas
-		const usableHeight = floorY - ceilingY;
-
-		// Convert layout percentages (0-100) to precise viewport pixels
-		const getObjectY = (sliderY) => ceilingY + ((sliderY / 100) * usableHeight);
-
-		const bowlPos = { 
-			x: (this.state.layout.bowlX / 100) * window.innerWidth, 
-			y: getObjectY(this.state.layout.bowlY) 
-		};
-		const bedPos = { 
-			x: (this.state.layout.bedX / 100) * window.innerWidth, 
-			y: getObjectY(this.state.layout.bedY) 
-		};
-		const litPos = { 
-			x: (this.state.layout.litterX / 100) * window.innerWidth, 
-			y: getObjectY(this.state.layout.litterY) 
-		};
-		const towerPos = { 
-			x: (this.state.layout.towerX / 100) * window.innerWidth, 
-			y: getObjectY(this.state.layout.towerY) 
-		};
+		// Fix: Calculate positions using a fixed baseline relative to the canvas resolution
+		const floorLineY = this.canvas.height - this.BASE_FLOOR_Y;
+		
+		// Bowl, bed, litter, and tower are calculated as exact percentages of the standard canvas width
+		// Their baseline Y positions align precisely with the flat line where the cat walks
+		const bowlPos = { x: (this.state.layout.bowlX / 100) * this.canvas.width, y: floorLineY + this.state.layout.bowlY };
+		const bedPos = { x: (this.state.layout.bedX / 100) * this.canvas.width, y: floorLineY + this.state.layout.bedY };
+		const litPos = { x: (this.state.layout.litterX / 100) * this.canvas.width, y: floorLineY + this.state.layout.litterY };
+		const towerPos = { x: (this.state.layout.towerX / 100) * this.canvas.width, y: floorLineY + this.state.layout.towerY };
 
 		if (this.state.actionTimer > 0) this.state.actionTimer--;
 		if (this.state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(this.state.action)) this.state.action = "walk_to_food";
@@ -717,18 +712,18 @@ export class StreamPet {
 		switch(this.state.action) {
 			case "nyan":
 				if (this.state.nyanPhase === "takeoff") {
-					const targetY = window.innerHeight / 2;
+					const targetY = this.canvas.height / 2;
 					this.state.y += (targetY - this.state.y) * 0.05; this.state.x += this.state.facing * 5;
 					if (Math.abs(this.state.y - targetY) < 15) this.state.nyanPhase = "flying";
 				} else if (this.state.nyanPhase === "flying") {
-					this.state.x += this.state.facing * 10; this.state.y = (window.innerHeight / 2) + Math.sin(t * 0.1) * 100;
+					this.state.x += this.state.facing * 10; this.state.y = (this.canvas.height / 2) + Math.sin(t * 0.1) * 100;
 					if (this.state.actionTimer < 80) this.state.nyanPhase = "landing";
 				} else if (this.state.nyanPhase === "landing") {
 					this.state.x += (this.state.originalPos.x - this.state.x) * 0.08; this.state.y += (this.state.originalPos.y - this.state.y) * 0.08;
 				}
 				if (this.state.nyanPhase !== "landing") {
-					if (this.state.x > window.innerWidth + 150) this.state.x = -150;
-					if (this.state.x < -150) this.state.x = window.innerWidth + 150;
+					if (this.state.x > this.canvas.width + 150) this.state.x = -150;
+					if (this.state.x < -150) this.canvas.width + 150;
 				}
 				if (this.state.actionTimer <= 0) {
 					this.stopSound('nyanSound');
@@ -768,7 +763,6 @@ export class StreamPet {
 				if (walkToPoint(towerPos.x - 15, towerPos.y)) { this.state.facing = 1; this.state.action = "scratching"; this.state.actionTimer = 200; this.say("Scritch! 🐾"); }
 				break;
 			case "walk_to_tower_climb":
-				// Keeps relative offset to the tower canvas coordinate tree
 				if (walkToPoint(towerPos.x, towerPos.y - 145)) { this.state.action = "tower_sleep"; this.state.actionTimer = 1500; }
 				break;
 			case "scratching":
@@ -777,14 +771,11 @@ export class StreamPet {
 				 break;
 			case "idle":
 				if (this.state.actionTimer <= 0) {
-					// Ensure cat resets down perfectly flat to floor line when resuming defaults
-					this.state.y = window.innerHeight - this.BASE_FLOOR_Y;
-
 					if (Math.random() < 0.20) {
 						let sound = "Meow!";
 						if (this.state.hunger < 20) sound = "Purrr... ❤️";
 						if (this.state.hunger > 70) sound = "Mew? (Hungry)";
-						this.say(sound);
+						this.say("Meow! 🐾");
 					}
 					if (Math.random() < 0.5) { this.state.actionTimer = 600 + Math.random() * 600; return; }
 					if (this.state.digestive >= 3) { this.state.action = "walk_to_litter"; } 
@@ -798,9 +789,8 @@ export class StreamPet {
 				}
 				break;
 			case "walk":
-				this.state.y = window.innerHeight - this.BASE_FLOOR_Y; // Ground safety fallback
 				this.state.x += this.state.facing * 1.2;
-				if (this.state.x < 100 || this.state.x > window.innerWidth - 100) this.state.facing *= -1;
+				if (this.state.x < 100 || this.state.x > this.canvas.width - 100) this.state.facing *= -1;
 				if (this.state.actionTimer <= 0) { this.state.action = "idle"; this.state.actionTimer = 500; }
 				break;
 			case "sleep":
@@ -808,7 +798,7 @@ export class StreamPet {
 			case "dance":
 			case "special":
 				if (this.state.actionTimer <= 0) { 
-					if(this.state.action === "tower_sleep") this.state.y = window.innerHeight - this.BASE_FLOOR_Y;
+					if(this.state.action === "tower_sleep") this.state.y = this.canvas.height - this.BASE_FLOOR_Y;
 					this.state.action = "idle"; 
 				}
 				break;
@@ -845,10 +835,20 @@ export class StreamPet {
 			const nameIn = document.getElementById("nameInput"); if(nameIn) nameIn.value = this.state.name;
 			const checkT = document.getElementById("showTower"); if(checkT) checkT.checked = this.state.layout.showTower;
 			const zoomSlider = document.getElementById("canvasZoom");
-            const zoomDisplay = document.getElementById("zoomValue");
-            if (zoomSlider) zoomSlider.value = this.state.zoom || 1.0;
-            if (zoomDisplay) zoomDisplay.textContent = `${(this.state.zoom || 1.0).toFixed(1)}x`;
-			
+			const zoomDisplay = document.getElementById("zoomValue");
+			if (zoomSlider) {
+				zoomSlider.addEventListener("input", (e) => {
+					const val = parseFloat(e.target.value);
+					this.state.zoom = val;
+					
+					// Translate the step range (-2 to 2) to visual text label updates
+					let scaleVal = val >= 0 ? 1.0 + (val * 0.5) : 1.0 + (val * 0.25);
+					if (zoomDisplay) zoomDisplay.textContent = `${scaleVal.toFixed(1)}x`;
+				});
+				zoomSlider.addEventListener("change", () => {
+					this.saveData(); // Save configuration when user releases input handle
+				});
+			}
 			Object.keys(this.state.layout).forEach(k => { 
 				const el = document.getElementById(k);
 				if(el && k !== 'showTower') el.value = this.state.layout[k]; 
