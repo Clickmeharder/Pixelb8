@@ -1848,76 +1848,80 @@ export class StreamPet {
     // ==========================================
     // NEW COMPANION ADDITION 1: PUPPY ENGINE
     // ==========================================
-    drawPuppy(t, scale) {
-        this.ctx.save();
-        const bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.25)) * 20 : 0;
-        let rotationAngle = (this.state.action === "trick") ? (t * 0.2) : 0;
+	drawPuppy(t, scale) {
+		this.ctx.save();
+		
+		// 1. DANCE LOGIC: Instead of just jumping, we rotate the whole body 
+		// to simulate a happy wiggle (swaying side-to-side)
+		const isDancing = (this.state.action === "dance");
+		const wiggle = isDancing ? Math.sin(t * 0.4) * 0.2 : 0; 
+		
+		// Apply translation first
+		this.ctx.translate(this.state.x, this.state.y);
+		
+		// Apply the wiggle rotation around the center
+		this.ctx.rotate(wiggle);
+		
+		// Trick rotation (if applicable)
+		let rotationAngle = (this.state.action === "trick") ? (t * 0.2) : 0;
+		this.ctx.rotate(rotationAngle);
+		
+		this.ctx.scale(this.state.facing * scale, scale);
 
-        this.ctx.translate(this.state.x, this.state.y - bounce);
-        this.ctx.rotate(rotationAngle);
-        this.ctx.scale(this.state.facing * scale, scale);
+		// Ground shadow
+		this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+		this.ctx.beginPath(); this.ctx.ellipse(0, 25, 48, 14, 0, 0, Math.PI*2); this.ctx.fill();
 
-        // Ground shadow
-        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-        this.ctx.beginPath(); this.ctx.ellipse(0, 25, 48, 14, 0, 0, Math.PI*2); this.ctx.fill();
+		let baseColor = this.activePet.isDead ? "#dddddd" : (this.activePet.poops.length > 5 ? "#a1d95d" : this.activePet.color);
+		if(this.activePet.isDead) this.ctx.globalAlpha = 0.4;
+		this.ctx.fillStyle = baseColor;
 
-        let baseColor = this.activePet.isDead ? "#dddddd" : (this.activePet.poops.length > 5 ? "#a1d95d" : this.activePet.color);
-        if(this.activePet.isDead) this.ctx.globalAlpha = 0.4;
-        this.ctx.fillStyle = baseColor;
+		if (this.state.action === "sleep" || this.state.action === "tower_sleep") {
+			const breath = Math.sin(t * 0.04) * 2;
+			this.ctx.beginPath(); this.ctx.ellipse(0, 10, 46 + breath, 34 + breath, 0, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = "#5d4037";
+			this.ctx.beginPath(); this.ctx.arc(20, 14, 10, 0, Math.PI*2); this.ctx.fill();
+		} else {
+			this.ctx.beginPath(); this.ctx.ellipse(-5, 2, 45, 28, 0, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.beginPath(); this.ctx.arc(30, -22, 22, 0, Math.PI*2); this.ctx.fill();
+			
+			this.ctx.fillStyle = "rgba(255,255,255,0.2)";
+			this.ctx.beginPath(); this.ctx.ellipse(40, -18, 12, 9, 0, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = "black";
+			this.ctx.beginPath(); this.ctx.arc(48, -20, 3, 0, Math.PI*2); this.ctx.fill();
 
-        if (this.state.action === "sleep" || this.state.action === "tower_sleep") {
-            // Curled up sleeping puppy dog matrix
-            const breath = Math.sin(t * 0.04) * 2;
-            this.ctx.beginPath(); this.ctx.ellipse(0, 10, 46 + breath, 34 + breath, 0, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.fillStyle = "#5d4037"; // Dark snout spot preset
-            this.ctx.beginPath(); this.ctx.arc(20, 14, 10, 0, Math.PI*2); this.ctx.fill();
-        } else {
-            // Standard dynamic standing/walking framework puppy body
-            this.ctx.beginPath(); this.ctx.ellipse(-5, 2, 45, 28, 0, 0, Math.PI*2); this.ctx.fill();
-            
-            // Canine head structure positioning
-            this.ctx.beginPath(); this.ctx.arc(30, -22, 22, 0, Math.PI*2); this.ctx.fill();
-            
-            // Snout / Muzzle asset layer injection
-            this.ctx.fillStyle = "rgba(255,255,255,0.2)";
-            this.ctx.beginPath(); this.ctx.ellipse(40, -18, 12, 9, 0, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.fillStyle = "black";
-            this.ctx.beginPath(); this.ctx.arc(48, -20, 3, 0, Math.PI*2); this.ctx.fill(); // Nose node
+			this.ctx.fillStyle = baseColor;
+			this.ctx.beginPath(); this.ctx.ellipse(22, -24, 8, 18, 0.2, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = "#3e2723";
+			this.ctx.beginPath(); this.ctx.ellipse(22, -22, 5, 12, 0.2, 0, Math.PI*2); this.ctx.fill();
 
-            // Floppy canine ear rendering logic arrays
-            this.ctx.fillStyle = baseColor;
-            this.ctx.beginPath(); this.ctx.ellipse(22, -24, 8, 18, 0.2, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.fillStyle = "#3e2723"; // Inner contrast ear profile
-            this.ctx.beginPath(); this.ctx.ellipse(22, -22, 5, 12, 0.2, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = "white";
+			this.ctx.beginPath(); this.ctx.arc(34, -28, 5, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = "black";
+			this.ctx.beginPath(); this.ctx.arc(36, -28, 2, 0, Math.PI*2); this.ctx.fill();
 
-            // Eyes injection matrix
-            this.ctx.fillStyle = "white";
-            this.ctx.beginPath(); this.ctx.arc(34, -28, 5, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.fillStyle = "black";
-            this.ctx.beginPath(); this.ctx.arc(36, -28, 2, 0, Math.PI*2); this.ctx.fill();
+			// 2. TAIL WAG: Make it wag super fast during the dance!
+			const wagSpeed = isDancing ? 1.5 : (this.state.action === "walk" || this.state.hasFood ? 0.6 : 0.2);
+			const tailWag = Math.sin(t * wagSpeed) * 0.8 - 0.5;
+			this.ctx.save();
+			this.ctx.translate(-42, -5);
+			this.ctx.rotate(tailWag);
+			this.ctx.fillStyle = baseColor;
+			this.ctx.fillRect(-22, -6, 24, 10);
+			this.ctx.restore();
 
-            // Happy tail wag engine logic loop speed mapping
-            const wagSpeed = (this.state.action === "walk" || this.state.hasFood) ? 0.6 : 0.2;
-            const tailWag = Math.sin(t * wagSpeed) * 0.4 - 0.5;
-            this.ctx.save();
-            this.ctx.translate(-42, -5);
-            this.ctx.rotate(tailWag);
-            this.ctx.fillStyle = baseColor;
-            this.ctx.fillRect(-22, -6, 24, 10);
-            this.ctx.restore();
+			// Legs
+			const legSwing = (this.state.action === "walk") ? Math.sin(t * 0.22) * 10 : 0;
+			this.ctx.fillStyle = baseColor;
+			this.ctx.fillRect(-35, 15, 11, 16 + legSwing);
+			this.ctx.fillRect(-15, 15, 11, 16 - legSwing);
+			this.ctx.fillRect(10, 15, 11, 16 + legSwing);
+			this.ctx.fillRect(25, 15, 11, 16 - legSwing);
 
-            // Dynamic walking kinematic legs matrix mapping array strings
-            const legSwing = (this.state.action === "walk") ? Math.sin(t * 0.22) * 10 : 0;
-            this.ctx.fillStyle = baseColor;
-            this.ctx.fillRect(-35, 15, 11, 16 + legSwing);
-            this.ctx.fillRect(-15, 15, 11, 16 - legSwing);
-            this.ctx.fillRect(10, 15, 11, 16 + legSwing);
-            this.ctx.fillRect(25, 15, 11, 16 - legSwing);
-
-            if (this.state.action === "special") this.drawYarn(40, 0, t);
-        }
-        this.ctx.restore();
-    }
+			if (this.state.action === "special") this.drawYarn(40, 0, t);
+		}
+		this.ctx.restore();
+	}
 
     // ==========================================
     // NEW COMPANION ADDITION 2: SPIDER COMPANION
