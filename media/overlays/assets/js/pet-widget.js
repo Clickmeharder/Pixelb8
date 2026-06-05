@@ -410,21 +410,32 @@ export class StreamPet {
 	}
 
 	getPos(pctX, pctY, offY = 0) {
-		// 1. Calculate true dimensions of the actual browser viewport window
-		const viewW = window.innerWidth;
-		const viewH = window.innerHeight;
-		
-		// 2. Find the pixel coordinates mapping directly to screen edges (0% to 100%)
-		const targetX = (pctX / 100) * viewW;
-		const targetY = (pctY / 100) * viewH;
-		
-		// 3. Subtract the 100px translation shift so 0% sits perfectly on the left window boundary
+		// 1. Core visual workspace bounds (ignoring the 200px bleed padding)
+		const visibleW = this.canvas.width - 200;
+		const visibleH = this.canvas.height - 200;
+
+		// 2. Exact scale calculation mirroring your animate loop logic
+		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
+		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
+
+		// 3. Define the exact zoom transformation center anchor points
+		const anchorX = visibleW / 2;
+		const anchorY = visibleH - this.BASE_FLOOR_Y;
+
+		// 4. Determine target pixel coordinates on the active browser window
+		const targetX = (pctX / 100) * window.innerWidth;
+		const targetY = (pctY / 100) * window.innerHeight;
+
+		// 5. Reverse transform the coordinates relative to the zoom anchor
+		// (This ensures that when the context scales out from the center, it hits the exact target)
+		const finalX = anchorX + (targetX - anchorX) / scaleVal;
+		const finalY = anchorY + (targetY - anchorY) / scaleVal;
+
 		return {
-			x: targetX - 100,
-			y: targetY - 100 + offY
+			x: finalX,
+			y: finalY + offY
 		};
 	}
-
 	say(txt) {
 		const b = document.getElementById("bubble");
 		if (!b) return;
@@ -465,14 +476,9 @@ export class StreamPet {
 		// This centers the standard screen coordinates while keeping the 100px bleed padding alive!
 		this.ctx.translate(100, 100);
 
-		// Map slider value range (-2 to 2) down to true visual multiplier values (0.5x to 2.0x)
+		// Calculate true scale multiplier values (mirroring your getPos logic)
 		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
-		let scaleVal = 1.0;
-		if (rawSliderVal >= 0) {
-			scaleVal = 1.0 + (rawSliderVal * 0.5); // Maps 0 to 2 -> 1.0x to 2.0x
-		} else {
-			scaleVal = 1.0 + (rawSliderVal * 0.25); // Maps -2 to 0 -> 0.5x to 1.0x
-		}
+		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
 
 		// Anchor calculations use relative workspace limits (subtracting overflow padding margins)
 		const visibleW = this.canvas.width - 200;
