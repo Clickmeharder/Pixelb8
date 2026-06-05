@@ -302,7 +302,7 @@ export class StreamPet {
                             <div style="display: grid; grid-template-columns: 70px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
                                     ${layoutMetrics.map(([id, label, xVal, yVal, minY, maxY]) => `
                                         <span>${label}</span>
-                                        <div style="display: flex; gap: 4px;">
+                                        <div style="display: flex;flex-direction:column; gap: 4px;">
                                             <input type="range" id="${id}X" min="0" max="100" value="${xVal}" style="flex:1;">
                                             <input type="range" id="${id}Y" min="${minY}" max="${maxY}" value="${yVal}" style="flex:1;">
                                         </div>
@@ -326,7 +326,7 @@ export class StreamPet {
                                             <span style="font-size: 11px; color: #fff;">${label}</span>
                                             <input type="checkbox" checked>
                                         </div>
-                                        <div style="display: flex;flex-direction:column; gap: 4px;">
+                                        <div style="display: flex; gap: 4px;">
                                             <button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
                                             <button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
                                             <input type="file" class="hidden-file-input" accept="audio/*" style="display: none;">
