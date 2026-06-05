@@ -186,8 +186,16 @@ export class StreamPet {
             const nameIn = document.getElementById("nameInput"); 
             if (nameIn) nameIn.value = this.state.name;
 
-            const speciesSel = document.getElementById("speciesSelect");
-            if (speciesSel) speciesSel.value = this.state.species || "kitty";
+            const displayEl = document.getElementById("speciesSelectDisplay");
+			if (displayEl && this.state.species) {
+				const speciesMap = {
+					kitty: "🐈 Kitty (Feline Engine v10)",
+					puppy: "🐕 Puppy (Canine Kinematics Engine)",
+					spider: "🕷️ Spider (Arachnid Procedural Pathing)",
+					goldfish: "🐟 Goldfish (Aquatic Fluid Physics)"
+				};
+				displayEl.innerText = speciesMap[this.state.species] || speciesMap.kitty;
+			}
 
             const hideBorderCheck = document.getElementById("hideBorderToggle");
 			if (hideBorderCheck) hideBorderCheck.checked = this.state.hideBorder || false;
@@ -501,15 +509,18 @@ export class StreamPet {
 			<div class="collapsible-content">
 				<div style="display: flex; flex-direction: column; gap: 12px;">
 					
-                    <div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 6px;">
-                        <label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Select Companion Species</label>
-                        <select id="speciesSelect" class="p8-input" style="background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 32px; padding: 0 8px; font-size: 12px; border-radius: 4px; width: 100%;">
-                            <option value="kitty">🐈 Kitty (Feline Engine v10)</option>
-                            <option value="puppy">🐕 Puppy (Canine Kinematics Engine)</option>
-                            <option value="spider">🕷️ Spider (Arachnid Procedural Pathing)</option>
-                            <option value="goldfish">🐟 Goldfish (Aquatic Fluid Physics)</option>
-                        </select>
-                    </div>
+					<div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 6px;">
+						<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Select Companion Species</label>
+						
+						<div style="position: relative; width: 100%;">
+							<div id="speciesSelectDisplay" class="p8-input" style="background: #1c1c1f; border: 1px solid #3f3f46; color: #fff; height: 32px; line-height: 30px; padding: 0 8px; font-size: 12px; border-radius: 4px; width: 100%; cursor: pointer; box-sizing: border-box;">
+								🐈 Kitty (Feline Engine v10)
+							</div>
+							
+							<div id="speciesSelectOptions" class="custom-select-options-box" style="display: none; position: absolute; top: 34px; left: 0; width: 100%; background: #1c1c1f; border: 1px solid #3f3f46; border-radius: 4px; z-index: 1000; max-height: 200px; overflow-y: auto; box-sizing: border-box;">
+								</div>
+						</div>
+					</div>
 
 					<div style="background: #111114; border: 1px solid #27272a; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 12px;">
 						<div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
@@ -672,7 +683,41 @@ export class StreamPet {
             swatchContainer.appendChild(btn);
         });
     }
+	// Add your function directly inside the class file or as a method, or hook into it globally
+	setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
+		console.log(`Setting up: ${displayId}, Items count: ${optionItems ? optionItems.length : 'NULL'}`);
+		const displayEl = document.getElementById(displayId);
+		const optionsEl = document.getElementById(optionsId);
+		if (!displayEl || !optionsEl) return;
 
+		optionsEl.innerHTML = "";
+		optionItems.forEach(anim => {
+			const opt = document.createElement("div");
+			opt.className = "option-item";
+			opt.style.cssText = "padding: 6px 8px; cursor: pointer; color: #fff; font-size: 12px;";
+			opt.innerText = anim;
+			
+			// Add subtle hover highlights matching your CMS
+			opt.addEventListener("mouseenter", () => opt.style.background = "#27272a");
+			opt.addEventListener("mouseleave", () => opt.style.background = "transparent");
+			
+			opt.addEventListener("click", (e) => {
+				e.stopPropagation();
+				displayEl.innerText = anim;
+				optionsEl.style.display = "none";
+				if (onSelectionCallback) onSelectionCallback(anim);
+			});
+			optionsEl.appendChild(opt);
+		});
+
+		displayEl.addEventListener("click", (e) => {
+			e.stopPropagation();
+			document.querySelectorAll(".custom-select-options-box").forEach(box => {
+				if (box !== optionsEl) box.style.display = "none";
+			});
+			optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
+		});
+	}
     bindUIEventListeners() {
         const bindClick = (id, callback) => {
             const el = document.getElementById(id);
@@ -685,27 +730,46 @@ export class StreamPet {
             if(el) el.addEventListener("input", (e) => this.state.layout[id] = parseInt(e.target.value));
         });
 
-        const speciesSel = document.getElementById("speciesSelect");
-        if (speciesSel) {
-            speciesSel.addEventListener("change", (e) => {
-                this.state.species = e.target.value;
-                if (this.state.species === "kitty") this.state.color = this.KITTY_COLORS[0];
-                if (this.state.species === "puppy") this.state.color = this.PUPPY_COLORS[0];
-                if (this.state.species === "spider") this.state.color = this.SPIDER_COLORS[0];
-                if (this.state.species === "goldfish") this.state.color = this.GOLDFISH_COLORS[0];
-                
-                // Teleport to species-relevant safe anchor line inside bounds instantly
-                const visibleH = this.canvas.height;
-                if (this.state.species === "spider") this.state.y = 80; 
-                else if (this.state.species === "goldfish") this.state.y = visibleH / 2;
-                else this.state.y = visibleH - this.BASE_FLOOR_Y;
+		// Define the clear descriptive display labels matching your exact options array data
+		const speciesOptions = [
+			"🐈 Kitty (Feline Engine v10)",
+			"🐕 Puppy (Canine Kinematics Engine)",
+			"🕷️ Spider (Arachnid Procedural Pathing)",
+			"🐟 Goldfish (Aquatic Fluid Physics)"
+		];
 
-                this.syncSpeciesInterfaceToggle();
-                this.saveData();
-                this.say(`Swapped to ${this.state.species}!`);
-            });
-        }
+		this.setupCustomDropdownEngine("speciesSelectDisplay", "speciesSelectOptions", speciesOptions, (selectedText) => {
+			// Inverse mapping to find matching species string shorthand key
+			let chosenSpecies = "kitty";
+			if (selectedText.includes("Puppy")) chosenSpecies = "puppy";
+			if (selectedText.includes("Spider")) chosenSpecies = "spider";
+			if (selectedText.includes("Goldfish")) chosenSpecies = "goldfish";
 
+			this.state.species = chosenSpecies;
+			
+			// Assign starting default color schemes dynamically based on core selection mappings
+			if (chosenSpecies === "kitty") this.state.color = this.KITTY_COLORS[0];
+			if (chosenSpecies === "puppy") this.state.color = this.PUPPY_COLORS[0];
+			if (chosenSpecies === "spider") this.state.color = this.SPIDER_COLORS[0];
+			if (chosenSpecies === "goldfish") this.state.color = this.GOLDFISH_COLORS[0];
+
+			// Floor anchor adjustment rules
+			const visibleH = this.canvas.height;
+			if (chosenSpecies === "spider") this.state.y = 80;
+			else if (chosenSpecies === "goldfish") this.state.y = visibleH / 2;
+			else this.state.y = visibleH - this.BASE_FLOOR_Y;
+
+			this.syncSpeciesInterfaceToggle();
+			this.saveData();
+			this.say(`Swapped to ${chosenSpecies}!`);
+		});
+
+		// Document click listener fallback so the overlay dropdown automatically drops focus out
+		document.addEventListener("click", () => {
+			document.querySelectorAll(".custom-select-options-box").forEach(box => {
+				box.style.display = "none";
+			});
+		});
         const zoomSlider = document.getElementById("canvasZoom");
         const zoomDisplay = document.getElementById("zoomValue");
         if (zoomSlider) {
