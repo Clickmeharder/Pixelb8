@@ -972,27 +972,34 @@ export class StreamPet {
         if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.playSound('bubbleSound');
     }
 
-    updateUI() {
-        const nameEl = document.getElementById("nameplate");
-        const statsEl = document.getElementById("status");
-        if(!nameEl || !statsEl) return;
-        
-        nameEl.style.left = this.state.layout.nameX + "%"; 
-        nameEl.style.top = this.state.layout.nameY + "%";
-        statsEl.style.left = this.state.layout.statsX + "%"; 
-        statsEl.style.top = this.state.layout.statsY + "%";
-        
-        let sTxt = this.activePet.isDead ? "DECEASED" : (this.activePet.poops.length > 5 ? "SICK" : "HEALTHY");
-        statsEl.innerHTML = `${this.activePet.name} (${this.registry.activeSpecies.toUpperCase()}) | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} | EXP: ${this.activePet.exp}`;
-        nameEl.textContent = this.activePet.isDead ? `${this.activePet.name.toUpperCase()}'S GHOST` : this.activePet.name.toUpperCase();
-        
-        const propLabel = document.querySelector('label[for="showTower"]') || document.getElementById("showTower")?.previousElementSibling;
-        if (propLabel) {
-            if (this.registry.activeSpecies === "puppy") propLabel.textContent = "Show Doghouse";
-            else if (this.registry.activeSpecies === "goldfish") propLabel.textContent = "Show Castle/Coral";
-            else propLabel.textContent = "Show Cat Tower";
-        }
-    }
+	updateUI() {
+		const nameEl = document.getElementById("nameplate");
+		const statsEl = document.getElementById("status");
+		if(!nameEl || !statsEl) return;
+		
+		nameEl.style.left = this.state.layout.nameX + "%"; 
+		nameEl.style.top = this.state.layout.nameY + "%";
+		statsEl.style.left = this.state.layout.statsX + "%"; 
+		statsEl.style.top = this.state.layout.statsY + "%";
+		
+		let sTxt = this.activePet.isDead ? "DECEASED" : (this.activePet.poops.length > 5 ? "SICK" : "HEALTHY");
+		statsEl.innerHTML = `${this.activePet.name} (${this.registry.activeSpecies.toUpperCase()}) | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} | EXP: ${this.activePet.exp}`;
+		nameEl.textContent = this.activePet.isDead ? `${this.activePet.name.toUpperCase()}'S GHOST` : this.activePet.name.toUpperCase();
+		
+		// Dynamic Form Option Label Management
+		const propLabel = document.querySelector('label[for="showTower"]') || document.getElementById("showTower")?.previousElementSibling;
+		if (propLabel) {
+			if (this.registry.activeSpecies === "puppy") propLabel.textContent = "Show Doghouse";
+			else if (this.registry.activeSpecies === "goldfish") propLabel.textContent = "Show Castle/Coral";
+			else propLabel.textContent = "Show Cat Tower";
+		}
+
+		// NEW: Dynamic Multi-Species Potty Label Swap
+		const litterLabel = Array.from(document.querySelectorAll('span')).find(el => el.textContent.includes("Litter Box"));
+		if (litterLabel) {
+			litterLabel.textContent = (this.registry.activeSpecies === "puppy") ? "Grass Patch X/Y" : "Litter Box X/Y";
+		}
+	}
 
     applyEditModeStyles() {
         const el = document.getElementById("pet-widget");
@@ -1489,19 +1496,55 @@ export class StreamPet {
         }
 
         // Environment Sandbox Litter Box Layout Map
+		// ========================================================
+        // POLYMORPHIC POTTY SANITARY MATRIX (Litter Box vs Grass Patch)
+        // ========================================================
         const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
         const boxW = 150;
-        this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
-        this.ctx.fillStyle = "#2c3e50"; this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
-        this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
+
+        if (this.registry.activeSpecies === "puppy") {
+            // 🌿 Fresh Sod Grass Patch Variant for Canines
+            // Base Underlay Dirt Shadow Matrix
+            this.ctx.fillStyle = "#4e342e"; 
+            this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
+            
+            // Vibrant Grass Turf Slabs
+            this.ctx.fillStyle = "#2e7d32"; 
+            this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
+            
+            // Procedural Blade Clusters Accent Details
+            this.ctx.fillStyle = "#4caf50";
+            for (let i = 0; i < 6; i++) {
+                let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
+                this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
+                this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
+            }
+            
+            // Miniature Backyard Decorative Picket Border Trim
+            this.ctx.fillStyle = "#f5f5f5";
+            for(let p = 0; p <= boxW; p += 15) {
+                this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y + 2, 4, 36); // Vertical posts
+            }
+            this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 8, boxW, 4);   // Top rail
+            this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 26, boxW, 4);  // Bottom rail
+            
+        } else {
+            // 🐈 Standard Feline Sand Litter Box Enclosure
+            this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
+            this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
+            this.ctx.fillStyle = "#2c3e50"; 
+            this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
+            this.ctx.fillStyle = "#95a5a6"; 
+            this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
+        }
         
+        // Render associated waste units uniformly relative to localized coordinate indexes
         this.activePet.poops.forEach(p => {
             let poopyY = p.isCeil ? 90 : lPos.y + 24;
             let poopyX = (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40);
             this.ctx.font = "14px Arial";
             this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
         });
-
         // Fluid Goldfish bubble update execution loops
         if (this.registry.activeSpecies === "goldfish") {
             this.state.goldfishBubbles.forEach((bubble, idx) => {
