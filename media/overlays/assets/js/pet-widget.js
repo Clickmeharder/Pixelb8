@@ -64,6 +64,8 @@ export class StreamPet {
         this.state = {
             twitchUser: "",
 			hideBorder: false,
+			hideStatus: false,
+			hideNameplate: false,
             name: "Greta",
             isDead: false,
             birthday: Date.now(),
@@ -211,6 +213,16 @@ export class StreamPet {
 			if (hideBorderCheck) {
 				hideBorderCheck.checked = this.state.hideBorder || false;
 			}
+			// Inside loadData() after your other checkbox checks
+			const hideStatusCheck = document.getElementById("hideStatusToggle");
+			if (hideStatusCheck) {
+				hideStatusCheck.checked = this.state.hideStatus || false;
+			}
+			const hideNameplateCheck = document.getElementById("hideNameplateToggle");
+			if (hideNameplateCheck) {
+				hideNameplateCheck.checked = this.state.hideNameplate || false;
+			}
+
             const checkT = document.getElementById("showTower"); 
             if (checkT) checkT.checked = this.state.layout.showTower;
             
@@ -239,7 +251,7 @@ export class StreamPet {
                 if (el) el.value = this.state.layout[k];
             });
         }
-		this.applyBorderState();
+		this.applyVisibilityStates();
         this.initSwatches(); 
     }
 
@@ -491,6 +503,16 @@ export class StreamPet {
 								<span>Hide Outer Border</span>
 								<input type="checkbox" id="hideBorderToggle">
 							</div>
+							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+								<span>Hide Status Text</span>
+								<input type="checkbox" id="hideStatusToggle">
+							</div>
+							
+							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+								<span>Hide Nameplate Text</span>
+								<input type="checkbox" id="hideNameplateToggle">
+							</div>
+							
                             <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
                                 <span>Show Cat Tower</span>
                                 <input type="checkbox" id="showTower" checked>
@@ -616,6 +638,22 @@ export class StreamPet {
 				this.saveData(); // Commit to localStorage
 			});
 		}
+		const statusToggle = document.getElementById("hideStatusToggle");
+		if (statusToggle) {
+			statusToggle.addEventListener("change", (e) => {
+				this.state.hideStatus = e.target.checked;
+				this.applyVisibilityStates(); // Fire style update instantly
+				this.saveData();
+			});
+		}
+		const NameplateToggle = document.getElementById("hideNameplateToggle");
+		if (NameplateToggle) {
+			NameplateToggle.addEventListener("change", (e) => {
+				this.state.hideNameplate = e.target.checked;
+				this.applyVisibilityStates(); // Fire style update instantly
+				this.saveData();
+			});
+		}
         const st = document.getElementById("showTower");
         if (st) st.addEventListener("change", (e) => {
             this.state.layout.showTower = e.target.checked;
@@ -704,18 +742,28 @@ export class StreamPet {
         nameEl.textContent = (this.state.isDead ? "GHOST " : this.state.stage.toUpperCase() + " ") + this.state.name.toUpperCase();
     }
 
-	applyBorderState() {
-		if (!this.widgetContainer) return;
-		
-		if (this.state.hideBorder) {
-			this.widgetContainer.style.border = "none";
-			this.widgetContainer.style.background = "transparent"; // Optional: removes background if desired
-			this.widgetContainer.style.boxShadow = "none"; // Optional: drops any drop-shadow glow accents
-		} else {
-			// Revert back to your global CSS stylesheet defaults
-			this.widgetContainer.style.border = "";
-			this.widgetContainer.style.background = "";
-			this.widgetContainer.style.boxShadow = "";
+	applyVisibilityStates() {
+		// 1. Handle Widget Border States
+		if (this.widgetContainer) {
+			if (this.state.hideBorder) {
+				this.widgetContainer.style.border = "none";
+				this.widgetContainer.style.background = "transparent";
+				this.widgetContainer.style.boxShadow = "none";
+			} else {
+				this.widgetContainer.style.border = "";
+				this.widgetContainer.style.background = "";
+				this.widgetContainer.style.boxShadow = "";
+			}
+		}
+
+		// 2. Handle Status Element Display State
+		const statusEl = document.getElementById("status");
+		if (statusEl) {
+			statusEl.style.display = this.state.hideStatus ? "none" : "block";
+		}
+		const nameplateEl = document.getElementById("nameplate");
+		if (nameplateEl) {
+			nameplateEl.style.display = this.state.hideNameplate ? "none" : "block";
 		}
 	}
     // ==========================================
