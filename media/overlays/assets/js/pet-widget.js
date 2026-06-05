@@ -238,13 +238,13 @@ export class StreamPet {
     // --- 1. SEPARATED RAW TEMPLATE MATRIX ---
 	static get controlsTemplate() {
         // Define positioning sliders: [idPrefix, label, defaultX, defaultY, minY (optional)]
-        const layoutMetrics = [
-            ["name", "Nameplate X/Y", 50, 70, 0],
-            ["stats", "Stats X/Y", 50, 90, 0],
-            ["bed", "Cat Bed X/Y", 20, 0, -100],
-            ["bowl", "Food Bowl X/Y", 45, 0, -100],
-            ["litter", "Litter Box X/Y", 90, 0, -100],
-            ["tower", "Tower X/Y", 70, 0, -100]
+		const layoutMetrics = [
+            ["name", "Nameplate X/Y", 50, 70, 0, 100],
+            ["stats", "Stats X/Y", 50, 90, 0, 100],
+            ["bed", "Cat Bed X/Y", 20, 0, -100, 100],
+            ["bowl", "Food Bowl X/Y", 45, 0, -100, 100],
+            ["litter", "Litter Box X/Y", 90, 0, -100, 100],
+            ["tower", "Tower X/Y", 70, 0, -100, 100]
         ];
 
         // Define audio track configuration rows
@@ -299,14 +299,12 @@ export class StreamPet {
                                 <span style="font-size: 11px; color: #a1a1aa;">Bed Fabric Accent Color:</span>
                                 <div id="bedColorSwatches" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px;"></div>
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px; border-top: 1px solid #27272a; padding-top: 8px;">
-                                <span style="font-size: 10px; color: #71717a; text-transform: uppercase; font-weight: bold;">Screen Placement Metrics (%)</span>
-                                <div style="display: grid; grid-template-columns: 70px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
-                                    ${layoutMetrics.map(([id, label, xVal, yVal, minY]) => `
+                            <div style="display: grid; grid-template-columns: 70px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
+                                    ${layoutMetrics.map(([id, label, xVal, yVal, minY, maxY]) => `
                                         <span>${label}</span>
-                                        <div style="display: flex;flex-direction:column; gap: 4px;">
+                                        <div style="display: flex; gap: 4px;">
                                             <input type="range" id="${id}X" min="0" max="100" value="${xVal}" style="flex:1;">
-                                            <input type="range" id="${id}Y" min="${minY}" max="100" value="${yVal}" style="flex:1;">
+                                            <input type="range" id="${id}Y" min="${minY}" max="${maxY}" value="${yVal}" style="flex:1;">
                                         </div>
                                     `).join('')}
                                 </div>
@@ -437,41 +435,40 @@ export class StreamPet {
 
 	// --- MAIN ANIMATION INTERFACE LOOP ---
 	animate = () => {
-        this.state.animT++;
-        
-        // Wipe previous frame clean
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		this.state.animT++;
+		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Run non-rendering state calculations
-        this.updateAI(this.state.animT);
+		this.updateAI(this.state.animT);
 
-        // 🔍 Isolate context modifications so they don't multiply infinitely or bleed into other elements
-        this.ctx.save();
-        
-        // Fetch the loaded slider scale value (fallback to 1.0)
-        const scaleVal = this.state.zoom || 1.0;
-        this.ctx.scale(scaleVal, scaleVal);
+		// 🔍 Context Layer Tracking Isolation Group
+		this.ctx.save();
+		
+		// 1. Establish the canvas origin mid-point vectors
+		const midX = this.canvas.width / 2;
+		const midY = this.canvas.height / 2;
+		const scaleVal = this.state.zoom || 1.0;
 
-        // Render environment objects (Bed, Bowl, Tower, Litter Box, Particles, etc.)
-        this.drawEnvironment(this.state.animT);
+		// 2. Perform Centered Matrix Transformation
+		this.ctx.translate(midX, midY); // Shift origin to frame center
+		this.ctx.scale(scaleVal, scaleVal); // Apply the slider magnification scale matrix
+		this.ctx.translate(-midX, -midY); // Restore coordinate mapping coordinates
 
-        // Calculate visual growth scaling based on life stages
-        let petScale = 1.0;
-        if (this.state.stage === "Baby") petScale = 0.6;
-        if (this.state.stage === "Juvenile") petScale = 0.8;
+		// Render the environment elements relative to scaled matrix transformations
+		this.drawEnvironment(this.state.animT);
 
-        // Render the pet inside the zoomed matrix layout
-        this.drawKitty(this.state.animT, petScale);
+		let petScale = 1.0;
+		if (this.state.stage === "Baby") petScale = 0.6;
+		if (this.state.stage === "Juvenile") petScale = 0.8;
 
-        // Reset context transformations back to standard 1:1 pixel grid for the next frame
-        this.ctx.restore();
+		this.drawKitty(this.state.animT, petScale);
+		
+		// Tear down transform layers so text vectors aren't corrupted
+		this.ctx.restore();
 
-        // Refresh UI Text Layers (Nameplate status bar strings, etc.)
-        this.updateUI();
+		this.updateUI();
 
-        // Cycle the main drawing frame thread
-        requestAnimationFrame(this.animate);
-    }
+		requestAnimationFrame(this.animate);
+	}
 	// --- DRAWING & RENDERING PROCEDURES ---
 	drawYarn(x, y, t) {
 		const roll = Math.sin(t * 0.15) * 40;
@@ -490,21 +487,24 @@ export class StreamPet {
 	}
 
 	drawEnvironment(t) {
-		const bPos = this.getPos(this.state.layout.bedX, 100, -this.BASE_FLOOR_Y + this.state.layout.bedY);
+		// 🛏️ 1. Cat Bed (Derived directly via percentage layouts)
+		const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
 		this.ctx.fillStyle = "rgba(0,0,0,0.1)";
 		this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
 		this.ctx.fillStyle = this.state.layout.bedColor;
 		this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
 
+		// 🏰 2. Cat Tower
 		if (this.state.layout.showTower) {
-			const tPos = this.getPos(this.state.layout.towerX, 100, -this.BASE_FLOOR_Y + this.state.layout.towerY);
+			const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
 			this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
 			this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 50, tPos.y - 5, 100, 15); 
 			this.ctx.fillStyle = "#a67c52"; this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
 			this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
 		}
 
-		const fPos = this.getPos(this.state.layout.bowlX, 100, -105 + this.state.layout.bowlY);
+		// 🐟 3. Food Bowl
+		const fPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
 		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); this.ctx.fill();
 		this.ctx.fillStyle = "#ecf0f1"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); this.ctx.fill();
 		this.ctx.fillStyle = "#bdc3c7"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); this.ctx.fill();
@@ -513,13 +513,15 @@ export class StreamPet {
 			this.ctx.font = "18px Arial"; this.ctx.fillText("🐟", fPos.x - 10, fPos.y - 6);
 		}
 
-		const lPos = this.getPos(this.state.layout.litterX, 100, -110 + this.state.layout.litterY);
+		// 💩 4. Litter Box
+		const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
 		const boxW = 150;
 		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 50);
 		this.ctx.fillStyle = "#2c3e50"; this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 50);
 		this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 5, boxW - 16, 38);
 		this.state.poops.forEach(p => this.ctx.fillText("💩", (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40), lPos.y + 30));
 
+		// 🌈 5. Nyan Drive Rainbow Trail Overlay
 		if (this.state.action === "nyan") {
 			const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
 			this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
@@ -528,7 +530,7 @@ export class StreamPet {
 				const timeOffset = segment * 2;
 				colors.forEach((col, i) => {
 					this.ctx.fillStyle = col;
-					const segY = (this.state.nyanPhase === "flying") ? (window.innerHeight / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
+					const segY = (this.state.nyanPhase === "flying") ? (this.canvas.height / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
 					const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
 					this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
 				});
@@ -536,6 +538,7 @@ export class StreamPet {
 			this.ctx.globalAlpha = 1.0;
 		}
 
+		// ✨ 6. Local Scratch/Poop Dig Sand Particles System
 		this.state.particles.forEach((p, i) => {
 			this.ctx.fillStyle = p.c; this.ctx.globalAlpha = p.life / 30;
 			this.ctx.fillRect(p.x, p.y, p.s, p.s); this.ctx.globalAlpha = 1.0;
