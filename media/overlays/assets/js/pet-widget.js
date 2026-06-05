@@ -612,7 +612,7 @@ export class StreamPet {
 
         const petSection = document.createElement("div");
         petSection.id = "pet-widget-controls";
-        petSection.className = "collapsible-section";
+        petSection.className = "collapsible-section collapsed";
         petSection.innerHTML = StreamPet.controlsTemplate;
 
         const entropiaBox = document.getElementById("entropia-widget-controls");
