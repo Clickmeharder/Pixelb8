@@ -97,13 +97,13 @@ export class StreamPet {
 
     // --- DYNAMIC UI INJECTION ENGINE ---
     injectUI() {
-        const manager = document.getElementById("widgets-manager");
-        if (!manager) {
-            console.warn("⚠️ [Pet Widget]: #widgets-manager wrapper not found. Skipping UI injection.");
+        const wrapper = document.getElementById("widget-control-wrapper");
+        if (!wrapper) {
+            console.warn("⚠️ [Pet Widget]: #widget-control-wrapper not found. Skipping UI injection.");
             return;
         }
 
-        // Prevent duplicating if the module initializes multiple times
+        // Prevent duplicate panels on hot-reloading/double instantiation
         if (document.getElementById("pet-widget-controls")) return;
 
         const petSection = document.createElement("div");
@@ -157,23 +157,23 @@ export class StreamPet {
                             <span style="font-size: 10px; color: #71717a; text-transform: uppercase; font-weight: bold;">Screen Placement Metrics (%)</span>
                             
                             <div style="display: grid; grid-template-columns: 70px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #a1a1aa;">
-								<span>Nameplate X/Y</span>
-								<div style="display: flex; gap: 4px;"><input type="range" id="nameX" min="0" max="100" value="50" style="flex:1;"><input type="range" id="nameY" min="0" max="100" value="70" style="flex:1;"></div>
-								
-								<span>Stats X/Y</span>
-								<div style="display: flex; gap: 4px;"><input type="range" id="statsX" min="0" max="100" value="50" style="flex:1;"><input type="range" id="statsY" min="0" max="100" value="90" style="flex:1;"></div>
+                                <span>Nameplate X/Y</span>
+                                <div style="display: flex; gap: 4px;"><input type="range" id="nameX" min="0" max="100" value="50" style="flex:1;"><input type="range" id="nameY" min="0" max="100" value="70" style="flex:1;"></div>
+                                
+                                <span>Stats X/Y</span>
+                                <div style="display: flex; gap: 4px;"><input type="range" id="statsX" min="0" max="100" value="50" style="flex:1;"><input type="range" id="statsY" min="0" max="100" value="90" style="flex:1;"></div>
 
-								<span>Cat Bed X/Y</span>
-								<div style="display: flex; gap: 4px;"><input type="range" id="bedX" min="0" max="100" value="20" style="flex:1;"><input type="range" id="bedY" min="-100" max="100" value="0" style="flex:1;"></div>
+                                <span>Cat Bed X/Y</span>
+                                <div style="display: flex; gap: 4px;"><input type="range" id="bedX" min="0" max="100" value="20" style="flex:1;"><input type="range" id="bedY" min="-100" max="100" value="0" style="flex:1;"></div>
 
-								<span>Food Bowl X/Y</span>
-								<div style="display: flex; gap: 4px;"><input type="range" id="bowlX" min="0" max="100" value="45" style="flex:1;"><input type="range" id="bowlY" min="-100" max="100" value="0" style="flex:1;"></div>
+                                <span>Food Bowl X/Y</span>
+                                <div style="display: flex; gap: 4px;"><input type="range" id="bowlX" min="0" max="100" value="45" style="flex:1;"><input type="range" id="bowlY" min="-100" max="100" value="0" style="flex:1;"></div>
 
-								<span>Litter Box X/Y</span>
-								<div style="display: flex; gap: 4px;"><input type="range" id="litterX" min="0" max="100" value="90" style="flex:1;"><input type="range" id="litterY" min="-100" max="100" value="0" style="flex:1;"></div>
+                                <span>Litter Box X/Y</span>
+                                <div style="display: flex; gap: 4px;"><input type="range" id="litterX" min="0" max="100" value="90" style="flex:1;"><input type="range" id="litterY" min="-100" max="100" value="0" style="flex:1;"></div>
 
-								<span>Tower X/Y</span>
-								<div style="display: flex; gap: 4px;"><input type="range" id="towerX" min="0" max="100" value="70" style="flex:1;"><input type="range" id="towerY" min="-100" max="100" value="0" style="flex:1;"></div>
+                                <span>Tower X/Y</span>
+                                <div style="display: flex; gap: 4px;"><input type="range" id="towerX" min="0" max="100" value="70" style="flex:1;"><input type="range" id="towerY" min="-100" max="100" value="0" style="flex:1;"></div>
                             </div>
                         </div>
                     </div>
@@ -205,7 +205,7 @@ export class StreamPet {
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <span style="font-size: 11px; color: #fff;">😾 Baby Mew</span>
                                     <input type="checkbox" checked>
-                                </div>
+                                00    </div>
                                 <div style="display: flex; gap: 4px;">
                                     <button type="button" class="file-btn p8-btn alt-btn" style="flex: 1; padding: 2px 0; font-size: 10px;">Upload Audio</button>
                                     <button type="button" class="test-btn p8-btn" style="width: 40px; padding: 2px 0; font-size: 10px; background: #27272a;">▶</button>
@@ -244,14 +244,14 @@ export class StreamPet {
             </div>
         `;
 
-        // Safely append before the "Close Panel" button at the bottom of the manager
-        const closeBtn = document.getElementById("close-widgets-manager-btn");
-        if (closeBtn) {
-            manager.insertBefore(petSection, closeBtn);
+        // Places the Pet Module clean right after the Entropia Tracker box
+        const entropiaBox = document.getElementById("entropia-widget-controls");
+        if (entropiaBox && entropiaBox.nextSibling) {
+            wrapper.insertBefore(petSection, entropiaBox.nextSibling);
         } else {
-            manager.appendChild(petSection);
+            wrapper.appendChild(petSection);
         }
-        console.log("🐾 [Pet Widget]: Interface Injected into DOM.");
+        console.log("🐾 [Pet Widget]: Interface Injected inside #widget-control-wrapper.");
     }
 
     // --- SOUND COMPONENT HANDLERS ---
