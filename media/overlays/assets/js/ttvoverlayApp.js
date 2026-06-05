@@ -1006,8 +1006,8 @@ function renderSettingsWindow() {
 
         const summaryEl = document.createElement('summary');
         summaryEl.className = 'settings-group-header';
-        summaryEl.style.cssText = "padding: 6px 8px; font-size: 11px; font-weight: 600; color: var(--accent, #a855f7); background: #18181b; cursor: pointer; user-select: none; list-style: none; display: flex; align-items: center; justify-content: space-between;";
-        summaryEl.innerHTML = `<span>${group.groupName}</span><span class="group-arrow" style="font-size: 9px; opacity: 0.6;">▼</span>`;
+        summaryEl.style.cssText = "padding: 6px 8px; font-size: 14px; font-weight: 600; color: var(--accent, #a855f7); background: #18181b; cursor: pointer; user-select: none; list-style: none; display: flex; align-items: center; justify-content: space-between;";
+        summaryEl.innerHTML = `<span>${group.groupName}</span><span class="group-arrow" style="font-size: 11px; opacity: 0.6;">▼</span>`;
         
         detailsEl.appendChild(summaryEl);
 
