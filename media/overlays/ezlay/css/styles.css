@@ -296,8 +296,8 @@ body.edit-mode .p8-widget:active {
 #widgets-manager {
     display: none;
     position: fixed; 
-    right: 360px; 
-    top: 250px; 
+    right: 185px; 
+    top: 50px; 
     width: 320px;
     background: #09090b; 
     border: 2px solid var(--accent); 
