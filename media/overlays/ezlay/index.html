@@ -108,6 +108,39 @@
 	}
 	.swatch:hover { border-color: #ffcc00; transform: scale(1.1); }
 	.swatch.active { border-color: #ffffff; outline: 1px solid #ffcc00; }
+	
+	
+	
+/*p8-widget pet widget style overrides*/
+
+.p8-widget#pet-widget {
+    background: transparent;
+	border: var(--border-width) var(--border-style) var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size);
+	overflow:hidden;
+	resize:both;
+}
+.p8-widget #nameplate { 
+	position: absolute; 
+	background: var(--bg);
+	color: var(--text-color);
+	border: var(--border-width) var(--border-style) var(--border-color);
+	border-radius: var(--border-radius);
+	padding: 8px 8px; 
+	font-size: 11px; 
+
+	pointer-events: auto; 
+	white-space: nowrap; 
+	transform: translate(-50%, -50%); 
+	z-index: 1000; 
+	cursor: pointer; 
+	transition: background 0.2s, transform 0.1s;
+}
+
+body.edit-mode .p8-widget #companionCanvas { 
+	outline:1px dashed orange;
+}
     </style>
 </head>
 
