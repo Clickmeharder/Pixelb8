@@ -476,6 +476,10 @@ export class StreamPet {
 								<input type="checkbox" id="hideBorderToggle">
 							</div>
 							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+								<span>Hide Background</span>
+								<input type="checkbox" id="hideBackgroundToggle">
+							</div>
+							<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
 								<span>Hide Status Text</span>
 								<input type="checkbox" id="hideStatusToggle">
 							</div>
