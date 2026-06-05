@@ -1,4 +1,3 @@
-//----
 
 /* 
 NOTES:
@@ -307,40 +306,25 @@ const SETTINGS_SCHEMA = [
                 label: "Master Alert Visibility", 
                 idKey: "master", 
                 get: () => !alertHidden, 
-                set: (v) => { 
-                    alertHidden = !v; 
-                    if (typeof settings !== 'undefined') settings.alertHidden = !v; 
-                    if (typeof syncAlertVisibilityState === "function") syncAlertVisibilityState(); 
-                }
+                set: (v) => { alertHidden = !v; settings.alertHidden = !v; syncAlertVisibilityState(); }
             },
             { 
                 label: "Channel Point Alerts", 
                 idKey: "rewards", 
-                get: () => (typeof rewardsEnabled !== 'undefined' ? rewardsEnabled : !!settings.rewardsEnabled), 
-                set: (v) => { 
-                    if (typeof rewardsEnabled !== 'undefined') rewardsEnabled = v; 
-                    if (typeof settings !== 'undefined') settings.rewardsEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                } 
+                get: () => rewardsEnabled, 
+                set: (v) => { rewardsEnabled = v; settings.rewardsEnabled = v; saveSettings(); } 
             },
             { 
                 label: "Bit Cheer Alerts", 
                 idKey: "bits", 
-                get: () => (typeof bitsEnabled !== 'undefined' ? bitsEnabled : !!settings.bitsEnabled), 
-                set: (v) => { 
-                    if (typeof bitsEnabled !== 'undefined') bitsEnabled = v; 
-                    if (typeof settings !== 'undefined') settings.bitsEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                } 
+                get: () => bitsEnabled, 
+                set: (v) => { bitsEnabled = v; settings.bitsEnabled = v; saveSettings(); } 
             },
             { 
-                label: "Enable Jukebox", 
+                label: "Song Request Jukebox", 
                 idKey: "jukebox", 
                 get: () => !!settings.jukeboxWidgetEnabled, 
-                set: (v) => { 
-                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                } 
+                set: (v) => { settings.jukeboxWidgetEnabled = v; saveSettings(); } 
             }
         ]
     },
@@ -348,41 +332,31 @@ const SETTINGS_SCHEMA = [
         groupName: "💬 Chat & UI Displays",
         items: [
             { 
-                label: "Show Twitch Chat", 
+                label: "Show Twitch Chat Widget", 
                 idKey: "chat-widget", 
                 get: () => !chatHidden, 
                 set: (v) => { 
                     chatHidden = !v; 
-                    if (typeof settings !== 'undefined') settings.chatHidden = chatHidden;
                     if (chatWidget) {
                         chatWidget.style.display = chatHidden ? "none" : "block";
                         if (!chatHidden && chatFeed && typeof chatHeight !== 'undefined' && chatHeight) {
                             chatFeed.style.height = chatHeight;
                         }
                     }
-                    if (typeof saveSettings === "function") saveSettings();
+                    saveSettings();
                 }
             },
             { 
-                label: "Show Stream Status", 
+                label: "Show Stream Status Indicator", 
                 idKey: "status-widget", 
                 get: () => !statusHidden, 
-                set: (v) => { 
-                    statusHidden = !v; 
-                    if (typeof settings !== 'undefined') settings.statusHidden = statusHidden;
-                    if (statusWidget) statusWidget.style.display = statusHidden ? "none" : "block"; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                }
+                set: (v) => { statusHidden = !v; if (statusWidget) statusWidget.style.display = statusHidden ? "none" : "block"; saveSettings(); }
             },
             { 
                 label: "Floating Chat Emotes", 
                 idKey: "emotes", 
                 get: () => floatingEmotes, 
-                set: (v) => { 
-                    floatingEmotes = v; 
-                    if (typeof settings !== 'undefined') settings.floatingEmotes = v;
-                    if (typeof saveSettings === "function") saveSettings(); 
-                } 
+                set: (v) => { floatingEmotes = v; saveSettings(); } 
             }
         ]
     },
@@ -393,36 +367,23 @@ const SETTINGS_SCHEMA = [
                 label: "Command Prefix Check", 
                 idKey: "prefix-check", 
                 get: () => useCmdPrefix, 
-                set: (v) => { 
-                    useCmdPrefix = v; 
-                    if (typeof settings !== 'undefined') settings.useCmdPrefix = v;
-                    if (typeof saveSettings === "function") saveSettings(); 
-                } 
+                set: (v) => { useCmdPrefix = v; saveSettings(); } 
             },
             { 
                 label: "Show Bot Prefixes", 
                 idKey: "bot-visibility", 
                 get: () => useBotPrefix, 
-                set: (v) => { 
-                    useBotPrefix = v; 
-                    if (typeof settings !== 'undefined') settings.useBotPrefix = v;
-                    if (typeof saveSettings === "function") saveSettings(); 
-                } 
+                set: (v) => { useBotPrefix = v; saveSettings(); } 
             },
             { 
                 label: "Console Logging", 
                 idKey: "console", 
                 get: () => consoleMessages, 
-                set: (v) => { 
-                    consoleMessages = v; 
-                    if (typeof settings !== 'undefined') settings.consoleMessages = v;
-                    if (typeof saveSettings === "function") saveSettings(); 
-                } 
+                set: (v) => { consoleMessages = v; saveSettings(); } 
             }
         ]
     }
 ];
-
 // Maps trigger elements to their target interface panels and optional callback lifecycle hooks
 const PANEL_NAVIGATION_MAPS = [
     { 
@@ -1032,60 +993,46 @@ function renderSettingsWindow() {
     // Clear the stack before drawing to ensure fresh state on re-renders
     stackContainer.innerHTML = '';
 
-    // Remove any restrictive heights on the main stack container so sections can sit together naturally
-    stackContainer.style.cssText = "padding-top: 10px; display: flex; flex-direction: column; gap: 8px;";
+    // Apply layout constraints to keep the panel tightly bounds-locked and navigable
+    stackContainer.style.cssText = "padding-top: 10px; display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; overflow-x: hidden; padding-right: 4px;";
 
     // Feed globally defined constant structure directly down into the view assembler
     SETTINGS_SCHEMA.forEach(group => {
         const detailsEl = document.createElement('details');
         detailsEl.className = 'settings-group-wrapper';
-        detailsEl.open = true; 
-        detailsEl.style.cssText = "border: 1px solid #27272a; border-radius: 4px; background: #09090b; overflow: hidden;";
+        detailsEl.open = true; // Remains open initially; allows simple collapsing transitions
+        detailsEl.style.cssText = "border: 1px solid #27272a; border-radius: 4px; background: #09090b; margin-bottom: 2px; overflow: hidden;";
 
         const summaryEl = document.createElement('summary');
         summaryEl.className = 'settings-group-header';
-        summaryEl.style.cssText = "padding: 6px 8px; font-size: 14px; font-weight: 600; color: var(--accent, #a855f7); background: #18181b; cursor: pointer; user-select: none; list-style: none; display: flex; align-items: center; justify-content: space-between;";
-        summaryEl.innerHTML = `<span>${group.groupName}</span><span class="group-arrow" style="font-size: 11px; opacity: 0.6;">▼</span>`;
+        summaryEl.style.cssText = "padding: 6px 8px; font-size: 11px; font-weight: 600; color: var(--accent, #a855f7); background: #18181b; cursor: pointer; user-select: none; list-style: none; display: flex; align-items: center; justify-content: space-between;";
+        summaryEl.innerHTML = `<span>${group.groupName}</span><span class="group-arrow" style="font-size: 9px; opacity: 0.6;">▼</span>`;
         
         detailsEl.appendChild(summaryEl);
 
-        // 🎯 FIX: This inner container is where we restrict height and isolate the scroll area
         const innerPanel = document.createElement('div');
         innerPanel.className = 'settings-group-content';
-        innerPanel.style.cssText = `
-            padding: 6px 8px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 6px; 
-            background: #09090b;
-            max-height: 120px;       /* 🛑 Caps the height of just this category dropdown */
-            overflow-y: auto;        /* 🌟 Adds a scrollbar only to this block if items overflow */
-            overflow-x: hidden;
-            padding-right: 4px;      /* Prevents trackbars from clipping your toggle row layout */
-        `;
+        innerPanel.style.cssText = "padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; background: #09090b;";
 
         group.items.forEach(item => {
             const row = document.createElement('div');
             row.className = 'settings-toggle-row';
-            row.style.cssText = "display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;"; // flex-shrink: 0 stops items from compressing
+            row.style.cssText = "display: flex; justify-content: space-between; align-items: center;";
 
             row.innerHTML = `
-                <span class="settings-toggle-label" style="font-size: 11px; color: #e4e4e7;">${item.label}:</span>
+                <span class="settings-toggle-label" style="font-size: 12px; color: #e4e4e7;">${item.label}:</span>
                 <div class="settings-toggle-controls" style="display: flex; align-items: center; gap: 8px;">
                     <span id="stg-${item.idKey}-status-badge" class="toggle-status-badge">---</span>
                     <button type="button" id="stg-toggle-${item.idKey}-btn" class="toggle-action-btn">Toggle</button>
                 </div>
             `;
 
-		const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
+            const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', () => {
                     const currentVal = item.get();
                     item.set(!currentVal);
-                    
-                    // 🎯 FIX: Only sync the visual statuses/badges. 
-                    // DO NOT re-call renderSettingsWindow() here or save flags that reconstruct the DOM tree.
-                    syncAllToggleUI(); 
+                    syncAllToggleUI(); // Push live tracking visual flags across active panes
                 });
             }
 
@@ -1096,6 +1043,7 @@ function renderSettingsWindow() {
         stackContainer.appendChild(detailsEl);
     });
 
+    // Run structural component badge sync instantly on panel drawing completion
     syncAllToggleUI();
 }
 // --- EVENT BINDING ---
