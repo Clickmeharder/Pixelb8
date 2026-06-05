@@ -149,6 +149,26 @@ body.edit-mode .p8-widget#pet-widget {
 body.edit-mode .p8-widget #companionCanvas { 
 	outline:1px dashed orange;
 }
+/* 1. Prevent the container from stealing clicks from internal elements */
+body.edit-mode .p8-widget#pet-widget {
+    pointer-events: none; /* Ignore clicks on the background of the widget */
+    resize: both;
+    overflow: hidden;
+}
+
+/* 2. Re-enable pointer events for the internal UI elements */
+body.edit-mode .p8-widget#pet-widget > * {
+    pointer-events: auto; /* Allow clicks on canvas, text, etc. */
+}
+
+/* 3. Ensure the resize handle is interactable */
+/* Note: The browser's native resize handle is part of the element's layout,
+   so we keep pointer-events: auto on the container ONLY when interacting with the handle. 
+   However, since CSS doesn't have a "pseudo-class" for just the handle, 
+   we can just ensure the container is 'auto' during an active resize action. */
+body.edit-mode .p8-widget#pet-widget:active {
+    pointer-events: auto; 
+}
     </style>
 </head>
 

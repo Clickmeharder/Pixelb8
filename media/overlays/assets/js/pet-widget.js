@@ -251,6 +251,7 @@ export class StreamPet {
                 if (el) el.value = this.state.layout[k];
             });
         }
+		this.applyEditModeStyles();
 		this.applyVisibilityStates();
         this.initSwatches(); 
     }
@@ -742,7 +743,16 @@ export class StreamPet {
         // nameEl.textContent = (this.state.isDead ? "GHOST " : this.state.stage.toUpperCase() + " ") + this.state.name.toUpperCase();
 		nameEl.textContent = this.state.isDead ? `${this.state.name.toUpperCase()}'S GHOST` : this.state.name.toUpperCase();
     }
+	applyEditModeStyles() {
+		const el = document.getElementById("pet-widget");
+		if (!el) return;
 
+		// This ensures that when in edit mode, the canvas inside the widget
+		// remains clickable for your UI events.
+		if (document.body.classList.contains('edit-mode')) {
+			el.style.pointerEvents = "auto"; 
+		}
+	}
 	applyVisibilityStates() {
 		// 1. Handle Widget Border States
 		if (this.widgetContainer) {
