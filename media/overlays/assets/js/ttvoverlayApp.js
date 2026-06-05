@@ -476,7 +476,7 @@ const SETTINGS_SCHEMA = [
 		groupName: "🧩 Widgets Settings",
 		items: [
 			{ 
-				label: "Enable Jukebox", 
+				label: "Jukebox", 
 				idKey: "jukebox", 
 				get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
 				set: (v) => { 
@@ -490,7 +490,7 @@ const SETTINGS_SCHEMA = [
 				} 
 			},
 			{ 
-				label: "Enable Entropia Tracker", 
+				label: "Entropia Widget", 
 				idKey: "entropia-widget", 
 				get: () => (settings ? !!settings.entropiaWidgetEnabled : false), 
 				set: (v) => { 
@@ -503,7 +503,7 @@ const SETTINGS_SCHEMA = [
 				} 
 			},
 			{ 
-				label: "Enable Stream Timer", 
+				label: "Timers", 
 				idKey: "timer-widget", 
 				get: () => (settings ? !!settings.timerWidgetEnabled : false), 
 				set: (v) => { 
