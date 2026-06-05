@@ -266,8 +266,15 @@ export class StreamPet {
             const loadedBundle = JSON.parse(saved);
             
             if (loadedBundle.registry) this.registry = loadedBundle.registry;
-            if (loadedBundle.state) this.state = { ...this.state, ...loadedBundle.state };
-            
+			if (loadedBundle.state) {
+				// Merge loaded state into current state
+				this.state = { ...this.state, ...loadedBundle.state };
+				
+				// Check for the new property, and set default if it's missing
+				if (this.state.tummylimit === undefined) {
+					this.state.tummylimit = 8;
+				}
+			}
             // Loop through all individual isolated profiles to catch offline progression separately
             const now = Date.now();
             Object.keys(this.registry.profiles).forEach(key => {
@@ -291,10 +298,13 @@ export class StreamPet {
 			const tummySlider = document.getElementById("tummyLimitRange");
 			const tummyDisplay = document.getElementById("tummyLimitValue");
 
-			if (tummySlider && this.state.tummylimit !== undefined) {
-				tummySlider.value = this.state.tummylimit;
+			// Ensure we use the loaded state value, default to 8 if not found
+			const currentLimit = this.state.tummylimit !== undefined ? this.state.tummylimit : 8;
+
+			if (tummySlider) {
+				tummySlider.value = currentLimit;
 				if (tummyDisplay) {
-					tummyDisplay.innerText = this.state.tummylimit;
+					tummyDisplay.innerText = currentLimit;
 				}
 			}
             const displayEl = document.getElementById("speciesSelectDisplay");
@@ -675,8 +685,7 @@ export class StreamPet {
 										<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">Explosion Threshold</label>
 										<span id="tummyLimitValue" style="color: #ea580c; font-weight: bold; font-size: 12px;">5</span>
 									</div>
-									<input type="range" id="tummyLimitRange" min="1" max="15" value="5" style="width: 100%;" 
-										   oninput="document.getElementById('tummyLimitValue').innerText = this.value; petManager.setTummyLimit(this.value);">
+									<input type="range" id="tummyLimitRange" min="1" max="15" value="5" style="width: 100%;">
 								</div>
 								<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
 									<span>Hide Outer Border</span>
@@ -856,14 +865,22 @@ export class StreamPet {
                 this.activePet.name = e.target.value || "Companion";
             });
         }
-		
+		const tummySlider = document.getElementById("tummyLimitRange");
+		if (tummySlider) {
+			tummySlider.addEventListener("input", (e) => {
+				const val = parseInt(e.target.value);
+				this.setTummyLimit(val);
+				const display = document.getElementById("tummyLimitValue");
+				if (display) display.innerText = val;
+			});
+		}
 		const speciesOptions = [
             "🐈 Kitty (Feline Engine v10)",
             "🐕 Puppy (Canine Kinematics Engine)",
             "🕷️ Spider (Arachnid Procedural Pathing)",
             "🐟 Goldfish (Aquatic Fluid Physics)"
         ];
-
+		
         this.setupCustomDropdownEngine("speciesSelectDisplay", "speciesSelectOptions", speciesOptions, (selectedText) => {
             let chosenSpecies = "kitty";
             if (selectedText.includes("Puppy")) chosenSpecies = "puppy";
