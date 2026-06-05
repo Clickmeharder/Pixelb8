@@ -682,7 +682,7 @@ export class StreamPet {
 								</div>
 								<div style="background: #141414; padding: 10px; border-radius: 6px; border: 1px solid #27272a; display: flex; flex-direction: column; gap: 8px;">
 									<div style="display: flex; justify-content: space-between; align-items: center;">
-										<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">Explosion Threshold</label>
+										<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px;">Max Tummy Capacity</label>
 										<span id="tummyLimitValue" style="color: #ea580c; font-weight: bold; font-size: 12px;">5</span>
 									</div>
 									<input type="range" id="tummyLimitRange" min="1" max="15" value="5" style="width: 100%;">
