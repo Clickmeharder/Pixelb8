@@ -1,0 +1,691 @@
+/**
+ * 🐾 StreamPet Widget Module
+ * Follows the hot-swappable monolithic component structure.
+ */
+export class StreamPet {
+    constructor() {
+        console.log("🐾 [Pet Widget]: Initializing Core...");
+        
+        // --- 1. CORE CANVAS & STATE ---
+        this.canvas = document.getElementById("companionCanvas");
+        if (!this.canvas) {
+            console.error("❌ [Pet Widget Error]: #companionCanvas element not found in DOM.");
+            return;
+        }
+        this.ctx = this.canvas.getContext("2d");
+
+        this.KITTY_COLORS = ["#E67E22", "#95A5A6", "#2C3E50", "#ECF0F1", "#BDC3C7", "#D35400"];
+        this.BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
+        this.HUNGER_TICK_MS = 144000; 
+        this.BASE_FLOOR_Y = 110;
+
+        this.state = {
+            twitchUser: "",
+            name: "Greta",
+            isDead: false,
+            birthday: Date.now(),
+            ageDays: 0,
+            stage: "Baby",
+            exp: 0,
+            hunger: 0,
+            digestive: 0,
+            lastHungerTick: Date.now(),
+            color: this.KITTY_COLORS[Math.floor(Math.random() * this.KITTY_COLORS.length)],
+            originalPos: { x: 0, y: 0 },
+            nyanTimer: 0,
+            nyanPhase: "takeoff",
+            x: 200,
+            y: window.innerHeight - 150,
+            facing: 1,
+            action: "idle",
+            actionTimer: 300,
+            animT: 0,
+            poops: [],
+            hasFood: false,
+            particles: [],
+            layout: {
+                nameX: 50, nameY: 70,
+                statsX: 50, statsY: 90,
+                bedX: 20, bedY: 0,
+                bowlX: 45, bowlY: 0,
+                litterX: 90, litterY: 0,
+                towerX: 70, towerY: 0,
+                showTower: true,
+                bedColor: "#e74c3c"
+            }
+        };
+
+        // --- 2. SOUND SYSTEM INITIALIZATION ---
+        const defaultSoundSettings = {
+            masterEnabled: true,
+            meowSound: true,
+            purrSound: true,
+            nyanSound: true,
+            mewSound: true,
+            customPaths: {}
+        };
+
+        this.defaultPaths = {
+            meowSound: 'assets/sounds/meowSound.mp3',
+            mewSound: 'assets/sounds/mewSound.mp3',
+            purrSound: 'assets/sounds/purrSound.mp3',
+            nyanSound: 'assets/sounds/nyanSound.mp3'
+        };
+
+        const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
+        window.soundSettings = savedSoundSettings ? JSON.parse(savedSoundSettings) : defaultSoundSettings;
+
+        this.audioAssets = {};
+        Object.keys(this.defaultPaths).forEach(key => this.refreshAudioInstance(key));
+
+        // --- 3. RUN LIFECYCLE INITIALIZATION ---
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+
+        this.loadData();
+        
+        // Start Loops
+        this.saveInterval = setInterval(() => this.saveData(), 5000);
+        this.animate = this.animate.bind(this);
+        this.animate();
+
+        this.bindEvents();
+    }
+
+    // --- SOUND COMPONENT HANDLERS ---
+    refreshAudioInstance(key) {
+        const source = window.soundSettings.customPaths[key] || this.defaultPaths[key];
+        if (source) {
+            this.audioAssets[key] = new Audio(source);
+            if (key === 'nyanSound') this.audioAssets[key].loop = true;
+        }
+    }
+
+    playSound(soundKey) {
+        if (window.soundSettings.masterEnabled && window.soundSettings[soundKey]) {
+            const sound = this.audioAssets[soundKey];
+            if (sound) {
+                sound.currentTime = 0; 
+                sound.play().catch(err => console.warn(`[!] Audio: ${soundKey} blocked.`, err));
+            }
+        }
+    }
+
+    stopSound(soundKey) {
+        if (this.audioAssets[soundKey]) {
+            this.audioAssets[soundKey].pause();
+            this.audioAssets[soundKey].currentTime = 0;
+        }
+    }
+
+    // --- UTILITIES ---
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+
+    getPos(pctX, pctY, offY = 0) {
+        return {
+            x: (pctX / 100) * this.canvas.width,
+            y: ((pctY / 100) * this.canvas.height) + offY
+        };
+    }
+
+    say(txt) {
+        const b = document.getElementById("bubble");
+        if (!b) return;
+        b.textContent = txt; 
+        b.style.left = (this.state.x - 50) + "px"; 
+        b.style.top = (this.state.y - 140) + "px";
+        b.classList.add("show"); 
+        
+        // Clear previous timeouts cleanly if overlapping calls execute fast
+        if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
+        this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
+
+        if (txt.includes("Meow")) this.playSound('meowSound');
+        if (txt.includes("Mew")) this.playSound('mewSound');
+        if (txt.includes("Purrr")) this.playSound('purrSound');
+    }
+
+    triggerNyan() {
+        if (this.state.isDead || this.state.action === "nyan") return;
+        this.state.originalPos = { x: this.state.x, y: this.state.y };
+        this.state.action = "nyan";
+        this.state.nyanPhase = "takeoff";
+        this.state.actionTimer = 400;
+        this.playSound('nyanSound');
+        this.say("NYAN NYAN NYAN! 🌈");
+    }
+
+    // --- DRAWING & RENDERING PROCEDURES ---
+    drawYarn(x, y, t) {
+        const roll = Math.sin(t * 0.15) * 40;
+        this.ctx.save();
+        this.ctx.translate(x + roll, y);
+        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+        this.ctx.beginPath(); this.ctx.ellipse(0, 15, 15, 5, 0, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.fillStyle = "#e74c3c";
+        this.ctx.beginPath(); this.ctx.arc(0, 0, 12, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.strokeStyle = "#c0392b";
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath(); this.ctx.arc(0, 0, 8, 0, Math.PI); this.ctx.stroke();
+        this.ctx.beginPath(); this.ctx.moveTo(-12, 0); this.ctx.lineTo(12, -5); this.ctx.stroke();
+        this.ctx.beginPath(); this.ctx.moveTo(-12, 5); this.ctx.bezierCurveTo(-20, 15, -30, 0, -45, 10); this.ctx.stroke();
+        this.ctx.restore();
+    }
+
+    drawEnvironment(t) {
+        const bPos = this.getPos(this.state.layout.bedX, 100, -this.BASE_FLOOR_Y + this.state.layout.bedY);
+        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+        this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.fillStyle = this.state.layout.bedColor;
+        this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
+
+        if (this.state.layout.showTower) {
+            const tPos = this.getPos(this.state.layout.towerX, 100, -this.BASE_FLOOR_Y + this.state.layout.towerY);
+            this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
+            this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 50, tPos.y - 5, 100, 15); 
+            this.ctx.fillStyle = "#a67c52"; this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
+            this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
+        }
+
+        const fPos = this.getPos(this.state.layout.bowlX, 100, -105 + this.state.layout.bowlY);
+        this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.fillStyle = "#ecf0f1"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.fillStyle = "#bdc3c7"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); this.ctx.fill();
+        if(this.state.hasFood) {
+            this.ctx.fillStyle = "#d35400"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.font = "18px Arial"; this.ctx.fillText("🐟", fPos.x - 10, fPos.y - 6);
+        }
+
+        const lPos = this.getPos(this.state.layout.litterX, 100, -110 + this.state.layout.litterY);
+        const boxW = 150;
+        this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 50);
+        this.ctx.fillStyle = "#2c3e50"; this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 50);
+        this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 5, boxW - 16, 38);
+        this.state.poops.forEach(p => this.ctx.fillText("💩", (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40), lPos.y + 30));
+
+        if (this.state.action === "nyan") {
+            const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
+            this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
+            for (let segment = 0; segment < 8; segment++) {
+                const segOffset = segment * 35;
+                const timeOffset = segment * 2;
+                colors.forEach((col, i) => {
+                    this.ctx.fillStyle = col;
+                    const segY = (this.state.nyanPhase === "flying") ? (window.innerHeight / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
+                    const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
+                    this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
+                });
+            }
+            this.ctx.globalAlpha = 1.0;
+        }
+
+        this.state.particles.forEach((p, i) => {
+            this.ctx.fillStyle = p.c; this.ctx.globalAlpha = p.life / 30;
+            this.ctx.fillRect(p.x, p.y, p.s, p.s); this.ctx.globalAlpha = 1.0;
+            p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life--;
+            if(p.life <= 0) this.state.particles.splice(i, 1);
+        });
+    }
+
+    drawKitty(t, scale) {
+        this.ctx.save();
+        let bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
+        this.ctx.translate(this.state.x, this.state.y - bounce);
+        this.ctx.scale(this.state.facing * scale, scale);
+        
+        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+        this.ctx.beginPath(); this.ctx.ellipse(0, 30 + bounce, 45, 12, 0, 0, Math.PI*2); this.ctx.fill();
+
+        let finalColor = this.state.isDead ? "#ffffff" : (this.state.poops.length > 5 ? "#8edb4b" : this.state.color);
+        if(this.state.isDead) this.ctx.globalAlpha = 0.5;
+        this.ctx.fillStyle = finalColor;
+
+        if (this.state.action === "sleep" || this.state.action === "tower_sleep") {
+            const breathing = Math.sin(t * 0.03) * 2.5;
+            this.ctx.beginPath(); this.ctx.ellipse(0, 12, 42 + breathing, 32 + breathing, 0, 0, Math.PI * 2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.arc(15, 8, 22, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.lineWidth = 11; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
+            this.ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); this.ctx.stroke();
+            this.drawEars(15, 8, finalColor, true); this.drawFace(15, 8, false, true);
+        } 
+        else if (this.state.action === "special" || this.state.action === "scratching") {
+            if (this.state.action === "special") this.drawYarn(30, 20, t);
+            const shake = (this.state.action === "scratching") ? Math.sin(t*0.5)*5 : 0;
+            this.ctx.translate(shake, 0);
+            this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.arc(0, -45, 24, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.fillStyle = finalColor;
+            if (this.state.action === "special") {
+                const reach = Math.sin(t * 0.2) * 15;
+                this.ctx.fillRect(10, -5 + reach, 10, 15); this.ctx.fillRect(-20, -5 - reach, 10, 15);
+            } else {
+                this.ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15); this.ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
+            }
+            this.drawEars(0, -45, finalColor, false); this.drawFace(0, -45, false, false);
+        }
+        else if (["groom", "potty", "kicking", "beg"].includes(this.state.action)) {
+            this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.arc(0, -45, 24, 0, Math.PI*2); this.ctx.fill();
+            if (this.state.action === "kicking") {
+                this.ctx.fillStyle = finalColor; this.ctx.fillRect(10, 10 + Math.sin(t * 0.5) * 15, 10, 15);
+            }
+            this.drawEars(0, -45, finalColor, false); this.drawFace(0, -45, this.state.action === "beg", false);
+        }
+        else {
+            this.ctx.beginPath(); this.ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.arc(35, -15, 24, 0, Math.PI*2); this.ctx.fill();
+            this.drawEars(35, -15, finalColor, false);
+            const walkCycle = (this.state.action.includes("walk")) ? Math.sin(t * 0.18) : 0;
+            [[-35, 12], [-12, 12], [10, 12], [28, 12]].forEach((p, i) => {
+                this.ctx.fillRect(p[0], p[1], 9, 16 + (i % 2 === 0 ? walkCycle : -walkCycle) * 8);
+            });
+            this.ctx.beginPath(); this.ctx.lineWidth = 8; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
+            this.ctx.moveTo(-45, 0); this.ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); this.ctx.stroke();
+            this.drawFace(35, -15, false, false);
+        }
+        this.ctx.restore();
+    }
+
+    drawEars(x, y, color, sleeping) {
+        this.ctx.fillStyle = color;
+        if (sleeping) {
+            this.ctx.beginPath(); this.ctx.moveTo(x - 15, y - 8); this.ctx.lineTo(x - 22, y + 2); this.ctx.lineTo(x - 5, y + 5); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.moveTo(x + 15, y - 8); this.ctx.lineTo(x + 22, y + 2); this.ctx.lineTo(x + 5, y + 5); this.ctx.fill();
+        } else {
+            this.ctx.beginPath(); this.ctx.moveTo(x - 20, y - 10); this.ctx.lineTo(x - 12, y - 40); this.ctx.lineTo(x - 2, y - 15); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.moveTo(x + 20, y - 10); this.ctx.lineTo(x + 12, y - 40); this.ctx.lineTo(x + 2, y - 15); this.ctx.fill();
+        }
+    }
+
+    drawFace(x, y, begging, sleeping) {
+        if (sleeping) {
+            this.ctx.strokeStyle = "rgba(0,0,0,0.5)"; this.ctx.lineWidth = 2;
+            this.ctx.beginPath(); this.ctx.arc(x - 7, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.arc(x + 9, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); this.ctx.stroke();
+        } else {
+            this.ctx.fillStyle = "white"; this.ctx.beginPath(); this.ctx.arc(x - 7, y - 5, 6, 0, Math.PI*2); this.ctx.arc(x + 9, y - 5, 6, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.fillStyle = "black"; this.ctx.beginPath(); this.ctx.arc(x - 6, y - 5, 2.5, 0, Math.PI*2); this.ctx.arc(x + 10, y - 5, 2.5, 0, Math.PI*2); this.ctx.fill();
+        }
+        this.ctx.strokeStyle = "rgba(255,255,255,0.6)"; this.ctx.lineWidth = 1;
+        [0, 1, 2].forEach(i => {
+           this.ctx.beginPath(); this.ctx.moveTo(x+12, y+2*i); this.ctx.lineTo(x+30, y-8+8*i); this.ctx.stroke();
+           this.ctx.beginPath(); this.ctx.moveTo(x-10, y+2*i); this.ctx.lineTo(x-28, y-8+8*i); this.ctx.stroke();
+        });
+        this.ctx.fillStyle = "#ffaaaa";
+        if (begging) { this.ctx.beginPath(); this.ctx.arc(x+1, y+8, 4, 0, Math.PI*2); this.ctx.fill(); }
+        else { this.ctx.beginPath(); this.ctx.moveTo(x+1, y+3); this.ctx.lineTo(x-2, y); this.ctx.lineTo(x+4, y); this.ctx.fill(); }
+    }
+
+    // --- STATE SIMULATION SYSTEM ---
+    updateAI(t) {
+        if (this.state.isDead) return;
+        this.state.ageDays = Math.floor((Date.now() - this.state.birthday) / 86400000);
+        this.state.stage = this.state.ageDays < 2 ? "Baby" : this.state.ageDays < 5 ? "Juvenile" : "Adult";
+
+        const now = Date.now();
+        const msElapsed = now - this.state.lastHungerTick;
+        if (msElapsed >= this.HUNGER_TICK_MS) {
+            this.state.hunger = Math.min(100, this.state.hunger + Math.floor(msElapsed / this.HUNGER_TICK_MS)); 
+            this.state.lastHungerTick = now - (msElapsed % this.HUNGER_TICK_MS);
+        }
+        if (this.state.hunger === 100) this.state.isDead = true;
+
+        const walkToPoint = (targetX, targetY, speed = 2) => {
+            const dx = targetX - this.state.x; const dy = targetY - this.state.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 10) {
+                this.state.facing = dx > 0 ? 1 : -1;
+                this.state.x += (dx / dist) * speed; this.state.y += (dy / dist) * speed;
+                return false;
+            }
+            return true;
+        };
+
+        const bowlPos = this.getPos(this.state.layout.bowlX, 100, -this.BASE_FLOOR_Y + this.state.layout.bowlY);
+        const bedPos = this.getPos(this.state.layout.bedX, 100, -this.BASE_FLOOR_Y + this.state.layout.bedY);
+        const litPos = this.getPos(this.state.layout.litterX, 100, -this.BASE_FLOOR_Y + this.state.layout.litterY);
+        const towerPos = this.getPos(this.state.layout.towerX, 100, -this.BASE_FLOOR_Y + this.state.layout.towerY);
+
+        if (this.state.actionTimer > 0) this.state.actionTimer--;
+        if (this.state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(this.state.action)) this.state.action = "walk_to_food";
+
+        switch(this.state.action) {
+            case "nyan":
+                if (this.state.nyanPhase === "takeoff") {
+                    const targetY = window.innerHeight / 2;
+                    this.state.y += (targetY - this.state.y) * 0.05; this.state.x += this.state.facing * 5;
+                    if (Math.abs(this.state.y - targetY) < 15) this.state.nyanPhase = "flying";
+                } else if (this.state.nyanPhase === "flying") {
+                    this.state.x += this.state.facing * 10; this.state.y = (window.innerHeight / 2) + Math.sin(t * 0.1) * 100;
+                    if (this.state.actionTimer < 80) this.state.nyanPhase = "landing";
+                } else if (this.state.nyanPhase === "landing") {
+                    this.state.x += (this.state.originalPos.x - this.state.x) * 0.08; this.state.y += (this.state.originalPos.y - this.state.y) * 0.08;
+                }
+                if (this.state.nyanPhase !== "landing") {
+                    if (this.state.x > window.innerWidth + 150) this.state.x = -150;
+                    if (this.state.x < -150) this.state.x = window.innerWidth + 150;
+                }
+                if (this.state.actionTimer <= 0) {
+                    this.stopSound('nyanSound');
+                    this.state.x = this.state.originalPos.x; this.state.y = this.state.originalPos.y;
+                    this.state.action = "dance"; this.state.actionTimer = 200;
+                }
+                break;
+            case "walk_to_food":
+                if (walkToPoint(bowlPos.x, bowlPos.y)) { 
+                    if (this.state.hasFood) { this.state.action = "eating"; this.state.actionTimer = 150; }
+                    else { this.state.action = "beg"; this.state.actionTimer = 150; this.say("Hungry! 🐟"); }
+                }
+                break;
+            case "eating":
+                if (this.state.actionTimer <= 0) {
+                    this.state.hasFood = false; this.state.hunger = Math.max(0, this.state.hunger - 10); 
+                    this.state.digestive++; this.state.exp += 15; this.state.action = "idle"; this.state.actionTimer = 400;
+                }
+                break;
+            case "walk_to_litter":
+                if (walkToPoint(litPos.x, litPos.y)) { this.state.action = "potty"; this.state.actionTimer = 150; }
+                break;
+            case "potty":
+                if (this.state.actionTimer <= 0) { this.state.poops.push({ox: Math.random()*100}); this.state.digestive = 0; this.state.action = "walk_to_kick"; }
+                break;
+            case "walk_to_kick":
+                if (walkToPoint(litPos.x - 60, litPos.y)) { this.state.facing = 1; this.state.action = "kicking"; this.state.actionTimer = 100; }
+                break;
+            case "kicking":
+                if (t % 2 === 0) this.state.particles.push({x: this.state.x - 10, y: this.state.y + 25, vx: 6 + Math.random()*8, vy: -5, s: 2, c: "#bdc3c7", life: 30});
+                if (this.state.actionTimer <= 0) { this.state.action = "idle"; this.state.actionTimer = 400; this.say("I made a Poopy!"); }
+                break;
+            case "walk_to_bed":
+                if (walkToPoint(bedPos.x, bedPos.y)) { this.state.action = "sleep"; this.state.actionTimer = 1200; }
+                break;
+            case "walk_to_tower_scratch":
+                if (walkToPoint(towerPos.x - 15, towerPos.y)) { this.state.facing = 1; this.state.action = "scratching"; this.state.actionTimer = 200; this.say("Scritch! 🐾"); }
+                break;
+            case "walk_to_tower_climb":
+                if (walkToPoint(towerPos.x, towerPos.y - 145)) { this.state.action = "tower_sleep"; this.state.actionTimer = 1500; }
+                break;
+            case "scratching":
+                 if (t % 3 === 0) this.state.particles.push({x: this.state.x + 10, y: this.state.y - 10, vx: Math.random()*4, vy: -2, s: 2, c: "#d2b48c", life: 15});
+                 if (this.state.actionTimer <= 0) this.state.action = "idle";
+                 break;
+            case "idle":
+                if (this.state.actionTimer <= 0) {
+                    if (Math.random() < 0.20) {
+                        let sound = "Meow!";
+                        if (this.state.hunger < 20) sound = "Purrr... ❤️";
+                        if (this.state.hunger > 70) sound = "Mew? (Hungry)";
+                        this.say(sound);
+                    }
+                    if (Math.random() < 0.5) { this.state.actionTimer = 600 + Math.random() * 600; return; }
+                    if (this.state.digestive >= 3) { this.state.action = "walk_to_litter"; } 
+                    else {
+                        const r = Math.random();
+                        if (r < 0.15) { this.state.action = "walk"; this.state.facing = Math.random() > 0.5 ? 1 : -1; this.state.actionTimer = 400 + Math.random() * 400; }
+                        else if (r < 0.25) this.state.action = "walk_to_bed";
+                        else if (r < 0.40 && this.state.layout.showTower) this.state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
+                        else this.state.actionTimer = 800 + Math.random() * 1000;
+                    }
+                }
+                break;
+            case "walk":
+                this.state.x += this.state.facing * 1.2;
+                if (this.state.x < 100 || this.state.x > window.innerWidth - 100) this.state.facing *= -1;
+                if (this.state.actionTimer <= 0) { this.state.action = "idle"; this.state.actionTimer = 500; }
+                break;
+            case "sleep":
+            case "tower_sleep":
+            case "dance":
+            case "special":
+                if (this.state.actionTimer <= 0) { 
+                    if(this.state.action === "tower_sleep") this.state.y = window.innerHeight - this.BASE_FLOOR_Y;
+                    this.state.action = "idle"; 
+                }
+                break;
+        }
+    }
+
+    // --- DOM TEXT METADATA UPDATES ---
+    updateUI() {
+        const nameEl = document.getElementById("nameplate");
+        const statsEl = document.getElementById("status");
+        if(!nameEl || !statsEl) return;
+        nameEl.style.left = this.state.layout.nameX + "%"; nameEl.style.top = this.state.layout.nameY + "%";
+        statsEl.style.left = this.state.layout.statsX + "%"; statsEl.style.top = this.state.layout.statsY + "%";
+        let sTxt = this.state.isDead ? "DECEASED" : (this.state.poops.length > 5 ? "SICK" : "HEALTHY");
+        statsEl.innerHTML = `${this.state.name} | Age: ${this.state.ageDays}d | Hunger: ${this.state.hunger}%<br>Status: ${sTxt} | EXP: ${this.state.exp}`;
+        nameEl.textContent = (this.state.isDead ? "GHOST " : this.state.stage.toUpperCase() + " ") + this.state.name.toUpperCase();
+    }
+
+    saveData() { localStorage.setItem("greta_ultra_v10", JSON.stringify(this.state)); }
+
+    loadData() {
+        const saved = localStorage.getItem("greta_ultra_v10");
+        if(saved) {
+            const loaded = JSON.parse(saved);
+            this.state = {...this.state, ...loaded};
+            const now = Date.now();
+            const msOffline = now - this.state.lastHungerTick;
+            if (msOffline >= this.HUNGER_TICK_MS && !this.state.isDead) {
+                const pointsGained = Math.floor(msOffline / this.HUNGER_TICK_MS);
+                let potentialHunger = this.state.hunger + pointsGained;
+                if (potentialHunger >= 100) { this.state.hunger = 70; this.state.lastHungerTick = now; } 
+                else { this.state.hunger = potentialHunger; this.state.lastHungerTick = now - (msOffline % this.HUNGER_TICK_MS); }
+            }
+            
+            // Safe Syncing with form controls (if present in window context)
+            const nameIn = document.getElementById("nameInput"); if(nameIn) nameIn.value = this.state.name;
+            const checkT = document.getElementById("showTower"); if(checkT) checkT.checked = this.state.layout.showTower;
+            
+            if(this.state.twitchUser && document.getElementById("streamerInput")) { 
+                document.getElementById("streamerInput").value = this.state.twitchUser; 
+                if (window.ComfyJS) ComfyJS.Init(this.state.twitchUser);
+            }
+            
+            Object.keys(this.state.layout).forEach(k => { 
+                const el = document.getElementById(k);
+                if(el && k !== 'showTower') el.value = this.state.layout[k]; 
+            });
+        }
+        this.initSwatches(); 
+    }
+
+    initSwatches() {
+        const swatchContainer = document.getElementById("bedColorSwatches");
+        if (!swatchContainer) return;
+        swatchContainer.innerHTML = ""; 
+        this.BED_PRESETS.forEach(color => {
+            const btn = document.createElement("div");
+            btn.className = "swatch" + (this.state.layout.bedColor === color ? " active" : "");
+            btn.style.backgroundColor = color;
+            btn.addEventListener("click", () => {
+                this.state.layout.bedColor = color;
+                document.querySelectorAll(".swatch").forEach(s => s.classList.remove("active"));
+                btn.classList.add("active");
+                this.say("Comfy! ✨");
+            });
+            swatchContainer.appendChild(btn);
+        });
+    }
+
+    // --- SEPARATED CONTROL ACTIONS ---
+    revivekitty() {
+        if (this.state.isDead) {
+            this.state.isDead = false;
+            this.state.hunger = 50; 
+            this.state.action = "special";
+            this.state.actionTimer = 200;
+            this.state.lastHungerTick = Date.now();
+            this.say("I'M ALIVE! 💖");
+            this.saveData();
+            
+            for(let i=0; i<20; i++) {
+                this.state.particles.push({
+                    x: this.state.x, 
+                    y: this.state.y, 
+                    vx: (Math.random() - 0.5) * 10, 
+                    vy: (Math.random() - 0.5) * 10, 
+                    s: 4, 
+                    c: "#ff77aa", 
+                    life: 40
+                });
+            }
+        } else {
+            this.say("Already healthy! ✨");
+        }
+    }
+
+    // --- DISCRETE BOUND INTERFACES ---
+    bindEvents() {
+        // Safe binding layout sliders and action buttons (Dashboard UI context)
+        const bindClick = (id, callback) => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('click', callback);
+        };
+
+        const np = document.getElementById("nameplate");
+        if (np) np.addEventListener("click", () => {
+            const c = document.getElementById("comfycontrolContainer");
+            if (c) c.classList.toggle("active");
+        });
+
+        const ni = document.getElementById("nameInput");
+        if (ni) ni.addEventListener("input", (e) => this.state.name = e.target.value || "Greta");
+
+        bindClick("btnNewKitten", () => {
+            this.state.birthday = Date.now(); this.state.ageDays = 0; this.state.stage = "Baby"; this.state.exp = 0; this.state.hunger = 0;
+            this.state.digestive = 0; this.state.isDead = false; this.state.lastHungerTick = Date.now(); this.state.poops = []; this.state.action = "idle";
+            this.state.color = this.KITTY_COLORS[Math.floor(Math.random() * this.KITTY_COLORS.length)];
+            this.say("New kitten! 🐾"); this.saveData();
+        });
+
+        bindClick("connectBtn", () => {
+            const sInput = document.getElementById("streamerInput");
+            if(sInput) {
+                const u = sInput.value.trim();
+                if(u) { this.state.twitchUser = u; this.saveData(); if(window.ComfyJS) ComfyJS.Init(u); this.say("Meow! Connected"); }
+            }
+        });
+
+        const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY", "towerX", "towerY"];
+        sliders.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener("input", (e) => this.state.layout[id] = parseInt(e.target.value));
+        });
+
+        const st = document.getElementById("showTower");
+        if (st) st.addEventListener("change", (e) => {
+            this.state.layout.showTower = e.target.checked;
+            if(!this.state.layout.showTower && this.state.action.includes("tower")) this.state.action = "idle";
+        });
+
+        bindClick("btnFeed", () => { if(!this.state.isDead && !this.state.hasFood) { this.state.hasFood = true; this.say("Food! 🐟"); } });
+        bindClick("btnPlay", () => { if(!this.state.isDead) { this.state.action = "special"; this.state.actionTimer = 350; this.say("Play! 🧶"); } });
+        bindClick("btnDance", () => { if(!this.state.isDead) { this.state.action = "dance"; this.state.actionTimer = 300; this.say("Dance! ✨"); } });
+        bindClick("btnTreat", () => { if(!this.state.isDead) { this.state.hunger = Math.max(0, this.state.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM NOM! 🍗"); } });
+        bindClick("btnClear", () => { this.state.poops = []; this.say("Fresh sand! ✨"); });
+        bindClick("btnReset", () => { localStorage.clear(); location.reload(); });
+
+        const masterToggle = document.getElementById("masterEnabled");
+        if (masterToggle) {
+            masterToggle.checked = window.soundSettings.masterEnabled;
+            masterToggle.addEventListener("change", (e) => {
+                window.soundSettings.masterEnabled = e.target.checked;
+                localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+            });
+        }
+
+        document.querySelectorAll('.setting-row[data-key]').forEach(row => {
+            const key = row.getAttribute('data-key');
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            const fileBtn = row.querySelector('.file-btn');
+            const fileInput = row.querySelector('.hidden-file-input');
+            const testBtn = row.querySelector('.test-btn');
+
+            if (checkbox) checkbox.checked = window.soundSettings[key];
+            if (checkbox) {
+                checkbox.addEventListener('change', (e) => {
+                    window.soundSettings[key] = e.target.checked;
+                    localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+                });
+            }
+
+            if (fileBtn && fileInput) {
+                fileBtn.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const objectURL = URL.createObjectURL(file);
+                        window.soundSettings.customPaths[key] = objectURL;
+                        localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+                        this.refreshAudioInstance(key);
+                        this.say("Sound loaded! 🎵");
+                    }
+                });
+            }
+
+            if (testBtn) {
+                testBtn.addEventListener('click', () => {
+                    const sound = this.audioAssets[key];
+                    if (sound) {
+                        sound.currentTime = 0;
+                        sound.play().catch(() => this.say("Pick a sound first!"));
+                    } else {
+                        this.say("Sound error!");
+                    }
+                });
+            }
+        });
+    }
+	getCommands(botSay) {
+        return [
+            { name: "revivekitty",   adminOnly: true,  execute: () => this.handleTwitchCommand("revivekitty") },
+            { name: "nyankitty",     adminOnly: false, execute: () => this.handleTwitchCommand("nyankitty") },
+            { name: "feedkitty",     adminOnly: false, execute: () => this.handleTwitchCommand("feedkitty") },
+            { name: "playwithkitty", adminOnly: false, execute: () => this.handleTwitchCommand("playwithkitty") },
+            { name: "dance",         adminOnly: false, execute: () => this.handleTwitchCommand("dance") },
+            { name: "treatkitty",    adminOnly: false, execute: () => this.handleTwitchCommand("treatkitty") },
+            { name: "cleanlitter",   adminOnly: false, execute: () => this.handleTwitchCommand("cleanlitter") }
+        ];
+    }
+    // --- TWITCH CHAT ROUTER INTEGRATION ---
+    handleTwitchCommand(cmd) {
+        if (this.state.isDead && cmd !== "revivekitty") return;
+
+        switch(cmd) {
+            case "revivekitty":   this.revivekitty(); break;
+            case "nyankitty":     this.triggerNyan(); break;
+            case "feedkitty":     const f = document.getElementById("btnFeed"); if(f) f.click(); else if(!this.state.hasFood) { this.state.hasFood = true; this.say("Food! 🐟"); }; break;
+            case "playwithkitty": const p = document.getElementById("btnPlay"); if(p) p.click(); else { this.state.action = "special"; this.state.actionTimer = 350; this.say("Play! 🧶"); }; break;
+            case "dance":         const d = document.getElementById("btnDance"); if(d) d.click(); else { this.state.action = "dance"; this.state.actionTimer = 300; this.say("Dance! ✨"); }; break;
+            case "treatkitty":    const t = document.getElementById("btnTreat"); if(t) t.click(); else { this.state.hunger = Math.max(0, this.state.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM NOM! 🍗"); }; break;
+            case "cleanlitter":   const c = document.getElementById("btnClear"); if(c) c.click(); else { this.state.poops = []; this.say("Fresh sand! ✨"); }; break;
+        }
+    }
+
+    // --- ENGINE ANIMATION TICK ---
+    animate() {
+        // Break loop instantly if element was detached or widget turned off
+        if (!document.getElementById("companionCanvas")) {
+            clearInterval(this.saveInterval);
+            this.stopSound('nyanSound');
+            console.log("🐾 [Pet Widget]: Loop torn down safely.");
+            return;
+        }
+
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.state.animT++;
+        
+        this.drawEnvironment(this.state.animT);
+        this.updateAI(this.state.animT);
+        
+        const scale = this.state.stage === "Baby" ? 0.4 : this.state.stage === "Juvenile" ? 0.75 : 1.1;
+        this.drawKitty(this.state.animT, scale);
+        this.updateUI();
+        
+        requestAnimationFrame(this.animate);
+    }
+}

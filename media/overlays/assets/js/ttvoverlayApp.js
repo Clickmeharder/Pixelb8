@@ -69,53 +69,7 @@ modes:
 // import { EntropiaWidget } from './entropia-widget.js';
 //import { EntropiaWidget } from './entropia-widget-refactored.js';
 //import { StreamJukebox } from './jukebox.js';
-
-
-async function bootstrapWidgets() {
-    const s = typeof settings !== 'undefined' ? settings : {};
-
-    // Array of conditional module loading promises
-    const bootPromises = [];
-
-    // 🎸 Load Jukebox only if explicitly enabled
-    if (s.jukeboxWidgetEnabled) {
-        bootPromises.push(
-            import('./jukebox.js')
-                .then((module) => {
-                    console.log('🎸 Jukebox Module Lazy-Loaded Successfully.');
-                    // If you need to initialize it manually:
-                    // window.streamJukeboxEngine = new module.StreamJukebox();
-                })
-                .catch(err => console.error('Failed to load Jukebox:', err))
-        );
-    }
-
-    // 🎯 Load Entropia Tracker only if explicitly enabled
-    if (s.entropiaWidgetEnabled) {
-        bootPromises.push(
-            import('./entropia-widget-refactored.js')
-                .then((module) => {
-                    console.log('🎯 Entropia Widget Lazy-Loaded Successfully.');
-                    // Initialize if necessary:
-                    // window.entropiaWidget = new module.EntropiaWidget();
-                })
-                .catch(err => console.error('Failed to load Entropia Widget:', err))
-        );
-    }
-
-    // ⏱️ Stream Timer Module (If you ever split it out of core into its own file)
-    if (s.timerWidgetEnabled) {
-        // bootPromises.push(import('./timer-widget.js').then(...));
-    }
-
-    // Wait for all enabled features to finish loading before letting the app run
-    await Promise.all(bootPromises);
-    
-    // Run your normal post-load layouts
-    if (typeof syncAllToggleUI === 'function') {
-        syncAllToggleUI();
-    }
-}
+//import { StreamJukebox } from './pet-widget.js';
 
 // Call this inside your document ready or window load initialization routine
 
@@ -353,7 +307,8 @@ const AVAILABLE_OUT_ANIMATIONS = ["none", "fadeOut", "bounceOut", "zoomOut", "sl
 const DYNAMIC_WIDGET_MAPS = [
     { idKey: "jukebox", settingsKey: "jukeboxWidgetEnabled" },
     { idKey: "entropia-widget", settingsKey: "entropiaWidgetEnabled" },
-    { idKey: "timer-widget", settingsKey: "timerWidgetEnabled" }
+    { idKey: "timer-widget", settingsKey: "timerWidgetEnabled" },
+    { idKey: "pet-widget", settingsKey: "petWidgetEnabled" }
     // 🚀 To add future widgets, just drop a new line here! (e.g., { idKey: "goals-widget", settingsKey: "goalsWidgetEnabled" })
 ];
 const SETTINGS_SCHEMA = [
@@ -475,7 +430,42 @@ const SETTINGS_SCHEMA = [
         groupName: "🧩 Widgets Settings",
         items: [
             { 
-                label: "Enable Jukebox", 
+                label: "Enable Timer Widget", 
+                idKey: "timer-widget", 
+                get: () => (settings ? !!settings.timerWidgetEnabled : false), 
+                set: (v) => { 
+                    if (typeof settings !== 'undefined') settings.timerWidgetEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+                } 
+            },
+			{ 
+                label: "Enable Pet Widget", 
+                idKey: "pet-widget", 
+                get: () => (settings ? !!settings.petWidgetEnabled : false), 
+                set: async (v) => {
+                    if (typeof settings !== 'undefined') settings.petWidgetEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    
+                    // Hot-load your future pet-widget.js file dynamically mid-session
+                    if (v && typeof window.streamPetEngine === 'undefined') {
+                        try {
+                            const module = await import('./pet-widget.js');
+                            window.StreamPet = module.StreamPet;
+                            window.streamPetEngine = new module.StreamPet();
+                            
+                            if (typeof injectAllWidgetCommands === 'function') injectAllWidgetCommands();
+                            console.log("🐾 Pet Widget Hot-Loaded and Instantiated mid-session!");
+                        } catch (err) {
+                            console.error("❌ Failed to hot-load Pet Widget source:", err);
+                        }
+                    }
+                    
+                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+                } 
+            }
+            { 
+                label: "Enable Jukebox Widget", 
                 idKey: "jukebox", 
                 get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
                 set: async (v) => { // 🔄 Marked async for on-the-fly streaming
@@ -502,7 +492,7 @@ const SETTINGS_SCHEMA = [
                 } 
             },
             { 
-                label: "Enable Entropia Tracker", 
+                label: "Enable Entropia Widget", 
                 idKey: "entropia-widget", 
                 get: () => (settings ? !!settings.entropiaWidgetEnabled : false), 
                 set: async (v) => { // 🔄 Marked async for on-the-fly streaming
@@ -525,16 +515,6 @@ const SETTINGS_SCHEMA = [
                     }
                     
                     // Always sync up the visibility across windows instantly
-                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
-                } 
-            },
-            { 
-                label: "Enable Stream Timer", 
-                idKey: "timer-widget", 
-                get: () => (settings ? !!settings.timerWidgetEnabled : false), 
-                set: (v) => { 
-                    if (typeof settings !== 'undefined') settings.timerWidgetEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
                     if (typeof syncAllToggleUI === "function") syncAllToggleUI();
                 } 
             }
@@ -769,6 +749,17 @@ async function init() {
     // =========================================================================
     // ⚙️ INITIAL BOOT LAZY-LOADING (Only runs if enabled on start)
     // =========================================================================
+	// 🐾 Dynamic Pet Widget Fetch on boot
+    if (s.petWidgetEnabled) {
+        try {
+            const module = await import('./pet-widget.js');
+            window.StreamPet = module.StreamPet;
+            window.streamPetEngine = new module.StreamPet();
+            console.log("✅ Pet Widget Loaded on boot.");
+        } catch (err) {
+            console.error("❌ Failed to boot Pet Widget:", err);
+        }
+    }
     if (s.entropiaWidgetEnabled) {
         try {
             const module = await import('./entropia-widget-refactored.js');
@@ -810,6 +801,7 @@ async function init() {
 }
 function injectAllWidgetCommands() {
     const activeWidgets = [
+        { name: "StreamPet", instance: window.streamPetEngine },
         { name: "EntropiaParser", instance: window.entropiaLogParser },
         { name: "StreamJukebox", instance: window.streamJukeboxEngine }
     ];
@@ -829,7 +821,7 @@ function injectAllWidgetCommands() {
 }
 function injectWidgetCommands(widgetInstance) {
     // Pass the local botSay utility directly into the initialization layer
-	console.log("🔍 Attempting to inject commands for:", widgetInstance);
+    console.log("🔍 Attempting to inject commands for:", widgetInstance);
     if (widgetInstance && typeof widgetInstance.getCommands === 'function') {
         const widgetCommands = widgetInstance.getCommands(botSay);
         console.log("📦 Commands received from widget:", widgetCommands);
