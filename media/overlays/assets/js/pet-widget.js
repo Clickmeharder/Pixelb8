@@ -1105,7 +1105,7 @@ export class StreamPet {
         const bedPos = getUnscaledPos(this.state.layout.bedX, this.state.layout.bedY);
         const litPos = getUnscaledPos(this.state.layout.litterX, this.state.layout.litterY);
 
-        // Boundary Coordinates
+        // 🕷️ Strict Boundary Constraints
         const CEIL_Y = 70;
         const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
         const LEFT_X = 60;
@@ -1126,7 +1126,7 @@ export class StreamPet {
 
         if (this.state.actionTimer > 0) this.state.actionTimer--;
         
-        // Intercept food state if bowl is occupied
+        // Intercept food state
         if (this.state.hasFood && !["nyan", "eating", "potty", "walk_to_litter", "rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
             this.state.action = "walk_to_food";
         }
@@ -1163,8 +1163,24 @@ export class StreamPet {
                 break;
 
             case "walk_to_food":
-                // Spiders can traverse down side walls or paths to reach food matrix on ground level
-                if (walkToPoint(bowlPos.x, bowlPos.y, 2.5)) { 
+                // Spiders crawl along the floor to reach the bowl
+                let foodTargetX = bowlPos.x;
+                let foodTargetY = (this.registry.activeSpecies === "spider") ? FLOOR_Y : bowlPos.y;
+                
+                if (this.registry.activeSpecies === "spider") {
+                    // Force pathing through perimeter walls before moving to the center floor bowl
+                    if (this.state.x > LEFT_X && this.state.x < RIGHT_X && this.state.y < FLOOR_Y - 10) {
+                        // If stuck in open air, crawl to closest side wall first
+                        foodTargetX = (this.state.x < visibleW / 2) ? LEFT_X : RIGHT_X;
+                        foodTargetY = this.state.y;
+                    }
+                }
+
+                if (walkToPoint(foodTargetX, foodTargetY, 2.5)) { 
+                    if (this.registry.activeSpecies === "spider" && foodTargetX !== bowlPos.x) {
+                        // Sidewall fallback target met, continue to actual floor target
+                        return;
+                    }
                     if (this.state.hasFood) { 
                         this.state.action = "eating"; 
                         this.state.actionTimer = 140; 
@@ -1199,7 +1215,7 @@ export class StreamPet {
                         this.state.actionTimer = 90;
                     }
                 } else if (this.registry.activeSpecies === "spider") {
-                    // Lock target specifically to perimeter borders
+                    // Force the potty target to lock strictly into a precise edge coordinate
                     if (!this.state.spiderPottyTarget) {
                         const r = Math.random();
                         if (r < 0.25) this.state.spiderPottyTarget = { x: LEFT_X + Math.random() * (RIGHT_X - LEFT_X), y: CEIL_Y };
@@ -1207,6 +1223,7 @@ export class StreamPet {
                         else if (r < 0.75) this.state.spiderPottyTarget = { x: LEFT_X, y: CEIL_Y + Math.random() * (FLOOR_Y - CEIL_Y) };
                         else this.state.spiderPottyTarget = { x: RIGHT_X, y: CEIL_Y + Math.random() * (FLOOR_Y - CEIL_Y) };
                     }
+                    
                     if (walkToPoint(this.state.spiderPottyTarget.x, this.state.spiderPottyTarget.y, 2.2)) {
                         this.state.spiderPottyTarget = null;
                         this.state.action = "potty";
@@ -1231,9 +1248,27 @@ export class StreamPet {
                         this.state.action = "idle"; 
                         this.state.actionTimer = 250;
                     } else if (this.registry.activeSpecies === "spider") {
-                        // Weave structural fast-travel node web exactly where it stands
+                        // Double check and force coordinate boundaries before dropping web asset node
+                        let cleanX = this.state.x;
+                        let cleanY = this.state.y;
+                        
+                        // Snap if within open air margins
+                        if (cleanX > LEFT_X + 15 && cleanX < RIGHT_X - 15 && cleanY > CEIL_Y + 15 && cleanY < FLOOR_Y - 15) {
+                            // Find closest side edge to attach to cleanly
+                            let distToLeft = cleanX - LEFT_X;
+                            let distToRight = RIGHT_X - cleanX;
+                            let distToCeil = cleanY - CEIL_Y;
+                            let distToFloor = FLOOR_Y - cleanY;
+                            let minDist = Math.min(distToLeft, distToRight, distToCeil, distToFloor);
+                            
+                            if (minDist === distToLeft) cleanX = LEFT_X;
+                            else if (minDist === distToRight) cleanX = RIGHT_X;
+                            else if (minDist === distToCeil) cleanY = CEIL_Y;
+                            else cleanY = FLOOR_Y;
+                        }
+
                         this.state.spiderWebs.push({
-                            x: this.state.x, y: this.state.y,
+                            x: cleanX, y: cleanY,
                             size: 20 + Math.random() * 15
                         });
                         this.activePet.digestive = 0;
@@ -1266,18 +1301,16 @@ export class StreamPet {
                 break;
 
             case "walk_to_bed":
-                // Spiders can walk directly onto the mesh hammock bed
-                if (walkToPoint(bedPos.x, bedPos.y)) { 
+                let bedTargetX = bedPos.x;
+                let bedTargetY = (this.registry.activeSpecies === "spider") ? FLOOR_Y : bedPos.y;
+                if (walkToPoint(bedTargetX, bedTargetY)) { 
                     this.state.action = "sleep"; 
                     this.state.actionTimer = 1000; 
                 }
                 break;
 
-            // ========================================================
-            // SPIDER EXTENDED GEOMETRIC SILK RAPPEL STATES
-            // ========================================================
             case "rappel_drop":
-                this.state.y += 3.5; // Slide downward smoothly
+                this.state.y += 3.5; 
                 if (this.state.y >= this.state.rappelDepth) {
                     this.state.action = "rappel_hang";
                     this.state.actionTimer = 180 + Math.random() * 200;
@@ -1285,7 +1318,6 @@ export class StreamPet {
                 break;
 
             case "rappel_hang":
-                // Dynamic subtle air current swaying while suspended in mid-air
                 this.state.x += Math.sin(t * 0.05) * 0.4;
                 if (this.state.actionTimer <= 0) {
                     this.state.action = "rappel_rise";
@@ -1293,7 +1325,7 @@ export class StreamPet {
                 break;
 
             case "rappel_rise":
-                this.state.y -= 2.5; // Ascend backward back up toward ceiling anchor
+                this.state.y -= 2.5; 
                 if (this.state.y <= CEIL_Y) {
                     this.state.y = CEIL_Y;
                     this.state.action = "idle";
@@ -1306,32 +1338,39 @@ export class StreamPet {
                     this.state.y = (visibleH / 2) + Math.sin(t * 0.04) * 40;
                 }
 
-                if (this.state.actionTimer <= 0) {
-                    if (Math.random() < 0.12) {
-                        if (this.registry.activeSpecies === "spider") this.say("Click-click... 🕷️");
-                        if (this.registry.activeSpecies === "goldfish") this.say("Blub... 🫧");
+                if (this.registry.activeSpecies === "spider") {
+                    // Prevent incremental creeping updates from letting spider drift away from perimeter lines
+                    let currentWeb = this.state.spiderWebs.find(w => Math.sqrt((w.x - this.state.x)**2 + (w.y - this.state.y)**2) < w.size);
+                    if (!currentWeb && !["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
+                        // Force structural alignment values back onto the nearest outer axis
+                        if (this.state.x > LEFT_X + 15 && this.state.x < RIGHT_X - 15 && this.state.y > CEIL_Y + 15 && this.state.y < FLOOR_Y - 15) {
+                            if (this.state.y < CEIL_Y + 40) this.state.y = CEIL_Y;
+                            else if (this.state.y > FLOOR_Y - 40) this.state.y = FLOOR_Y;
+                            else if (this.state.x < LEFT_X + 100) this.state.x = LEFT_X;
+                            else this.state.x = RIGHT_X;
+                        }
                     }
-                    
+                }
+
+                if (this.state.actionTimer <= 0) {
                     if (this.activePet.digestive >= 3) { 
                         this.state.action = "walk_to_litter"; 
                         return;
                     }
 
                     const r = Math.random();
-                    if (r < 0.35) { 
+                    if (r < 0.45) { 
                         this.state.action = "walk"; 
-                        // Setup dynamic direction choices for perimeter movement boundaries
                         this.state.spiderDir = Math.random() > 0.5 ? 1 : -1;
                         this.state.actionTimer = 200 + Math.random() * 250; 
                     } 
-                    else if (r < 0.55) {
+                    else if (r < 0.65) {
                         this.state.action = "walk_to_bed";
                     }
-                    // Ceiling Check: Trigger dropping down vertically on a line thread
-                    else if (r < 0.80 && this.registry.activeSpecies === "spider" && Math.abs(this.state.y - CEIL_Y) < 5) {
+                    else if (r < 0.85 && this.registry.activeSpecies === "spider" && Math.abs(this.state.y - CEIL_Y) < 6) {
                         this.state.action = "rappel_drop";
                         this.state.rappelAnchor = { x: this.state.x, y: this.state.y };
-                        this.state.rappelDepth = CEIL_Y + 80 + Math.random() * 140; // Mid-air scope limit
+                        this.state.rappelDepth = CEIL_Y + 80 + Math.random() * 140;
                     }
                     else {
                         this.state.actionTimer = 300 + Math.random() * 400;
@@ -1341,53 +1380,51 @@ export class StreamPet {
 
             case "walk":
                 if (this.registry.activeSpecies === "spider") {
-                    // ========================================================
-                    // SPIDER PERIMETER TRAVERSAL ENGINE
-                    // ========================================================
                     let dir = this.state.spiderDir || 1;
 
-                    // 1. Is the spider currently walking on one of its custom woven internal webs?
-                    let onWebNode = this.state.spiderWebs.find(web => {
+                    // Check if spider is currently intersecting a custom woven web cluster node
+                    let activeWebNode = this.state.spiderWebs.find(web => {
                         let dx = web.x - this.state.x;
                         let dy = web.y - this.state.y;
-                        return Math.sqrt(dx*dx + dy*dy) < web.size;
+                        return Math.sqrt(dx*dx + dy*dy) < web.size + 10;
                     });
 
-                    if (onWebNode) {
-                        // Allow crossing interior whitespace if following a chain of nodes
+                    if (activeWebNode) {
+                        // Allow step path movement across whitespace if balancing on web node structural strands
                         this.state.x += this.state.facing * 1.5;
-                        if (Math.random() < 0.05) this.state.y += (Math.random() - 0.5) * 4;
+                        if (Math.random() < 0.08) {
+                            this.state.y += (Math.random() > 0.5 ? 2 : -2);
+                        }
                     } 
-                    // 2. Otherwise standard tracking constraints pin it directly to the room's hard bounds
-                    else if (Math.abs(this.state.y - CEIL_Y) < 6) { // On Ceiling
-                        this.state.y = CEIL_Y;
+                    // Strict edge-snapping coordinates tracking systems
+                    else if (Math.abs(this.state.y - CEIL_Y) < 10) { 
+                        this.state.y = CEIL_Y; // Hard snap locking coordinate axis
                         this.state.x += dir * 1.8;
                         this.state.facing = dir;
-                        if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.y += 2; }
-                        if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.y += 2; }
-                    } else if (Math.abs(this.state.y - FLOOR_Y) < 6) { // On Floor
-                        this.state.y = FLOOR_Y;
+                        if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.spiderDir = 1; this.state.y += 5; }
+                        if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.spiderDir = 1; this.state.y += 5; }
+                    } else if (Math.abs(this.state.y - FLOOR_Y) < 10) { 
+                        this.state.y = FLOOR_Y; // Hard snap locking coordinate axis
                         this.state.x += dir * 1.8;
                         this.state.facing = dir;
-                        if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.y -= 2; }
-                        if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.y -= 2; }
-                    } else if (Math.abs(this.state.x - LEFT_X) < 6) { // On Left Wall
-                        this.state.x = LEFT_X;
+                        if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.spiderDir = -1; this.state.y -= 5; }
+                        if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.spiderDir = -1; this.state.y -= 5; }
+                    } else if (Math.abs(this.state.x - LEFT_X) < 10) { 
+                        this.state.x = LEFT_X; // Hard snap locking coordinate axis
                         this.state.y += dir * 1.8;
-                        if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.x += 2; }
-                        if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.x += 2; }
-                    } else if (Math.abs(this.state.x - RIGHT_X) < 6) { // On Right Wall
-                        this.state.x = RIGHT_X;
+                        if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.spiderDir = 1; this.state.x += 5; }
+                        if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.spiderDir = 1; this.state.x += 5; }
+                    } else if (Math.abs(this.state.x - RIGHT_X) < 10) { 
+                        this.state.x = RIGHT_X; // Hard snap locking coordinate axis
                         this.state.y += dir * 1.8;
-                        if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.x -= 2; }
-                        if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.x -= 2; }
+                        if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.spiderDir = -1; this.state.x -= 5; }
+                        if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.spiderDir = -1; this.state.x -= 5; }
                     } else {
-                        // Fallback adjustment snap to nearest boundary line
-                        if (this.state.y < visibleH / 2) this.state.y = CEIL_Y;
+                        // Dynamic correction fallback if somehow clipped into deadzone center whitespace
+                        if (this.state.y < (visibleH / 2)) this.state.y = CEIL_Y;
                         else this.state.y = FLOOR_Y;
                     }
                 } else {
-                    // Terrestrial standard linear pathing
                     this.state.x += this.state.facing * 1.5;
                     if (this.registry.activeSpecies === "goldfish") {
                         this.state.y = (visibleH / 2) + Math.sin(t * 0.07) * 50;
@@ -1408,7 +1445,6 @@ export class StreamPet {
                 break;
         }
     }
-
     animate = () => {
         this.state.animT++;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
