@@ -116,59 +116,41 @@
 	
 	
 	
-/* p8-widget pet widget style overrides */
+/*p8-widget pet widget style overrides*/
 
 .p8-widget#pet-widget {
     background: transparent;
-    border: var(--border-width) var(--border-style) var(--border-color);
+	border: var(--border-width) var(--border-style) var(--border-color);
     border-radius: var(--border-radius);
     font-size: var(--font-size);
-    overflow: visible;
+	overflow:visible;
 }
-
 .p8-widget #nameplate { 
-    position: absolute; 
-    background: var(--bg);
-    color: var(--text-color);
-    border: var(--border-width) var(--border-style) var(--border-color);
-    border-radius: var(--border-radius);
-    padding: 4px 8px; 
-    font-size: 11px; 
-    pointer-events: auto; 
-    white-space: nowrap; 
-    transform: translate(-50%, -50%); 
-    z-index: 1000; 
-    cursor: pointer; 
-    transition: background 0.2s, transform 0.1s;
+	position: absolute; 
+	background: var(--bg);
+	color: var(--text-color);
+	border: var(--border-width) var(--border-style) var(--border-color);
+	border-radius: var(--border-radius);
+	padding: 4px 8px; 
+	font-size: 11px; 
+
+	pointer-events: auto; 
+	white-space: nowrap; 
+	transform: translate(-50%, -50%); 
+	z-index: 1000; 
+	cursor: pointer; 
+	transition: background 0.2s, transform 0.1s;
 }
 
-/* Edit Mode Overrides */
-body.edit-mode .p8-widget#pet-widget { 
-    pointer-events: auto;
-    resize: both !important;
-    overflow: auto !important; /* 'auto' ensures the resize handle is not clipped */
-    min-width: 100px;
-    min-height: 100px;
-    padding: 0;
+body.edit-mode .p8-widget #pet-widget { 
+	outline:1px dashed orange;
+	overflow: hidden;
+	resize:both;
+	padding:4px;
+	margin:8px;
 }
-
 body.edit-mode .p8-widget #companionCanvas { 
-    outline: 1px dashed orange;
-    pointer-events: auto;
-    /* Use margin to pull the canvas away from the bottom-right resize handle */
-    margin-right: 20px;
-    margin-bottom: 20px;
-}
-
-body.edit-mode .p8-widget #nameplate,
-body.edit-mode .p8-widget #status {
-    pointer-events: auto; 
-}
-
-/* Make the resize handle explicitly interactable and visible */
-body.edit-mode .p8-widget#pet-widget::-webkit-resizer {
-    pointer-events: auto !important;
-    background-color: rgba(255, 255, 255, 0.5); 
+	outline:1px dashed orange;
 }
     </style>
 </head>
