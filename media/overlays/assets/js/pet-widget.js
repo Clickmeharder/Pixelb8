@@ -410,12 +410,18 @@ export class StreamPet {
 	}
 
 	getPos(pctX, pctY, offY = 0) {
-		// Calculate relative to the true visible workspace width/height boundaries
-		const visibleW = this.canvas.width - 200;
-		const visibleH = this.canvas.height - 200;
+		// 1. Calculate true dimensions of the actual browser viewport window
+		const viewW = window.innerWidth;
+		const viewH = window.innerHeight;
+		
+		// 2. Find the pixel coordinates mapping directly to screen edges (0% to 100%)
+		const targetX = (pctX / 100) * viewW;
+		const targetY = (pctY / 100) * viewH;
+		
+		// 3. Subtract the 100px translation shift so 0% sits perfectly on the left window boundary
 		return {
-			x: (pctX / 100) * visibleW,
-			y: ((pctY / 100) * visibleH) + offY
+			x: targetX - 100,
+			y: targetY - 100 + offY
 		};
 	}
 
