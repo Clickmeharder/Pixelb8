@@ -547,14 +547,31 @@ export class StreamPet {
                     }
                     break;
 
-                case 'species':
-                    if (isAdmin && parts[1] && this.PET_SPECIES.includes(parts[1])) {
-                        this.registry.activeSpecies = parts[1];
-                        this.saveData();
-                        this.loadData();
-                        sendNotice(`🧬 [Pet]: Species hot-swapped to ${parts[1].toUpperCase()}!`);
-                    }
-                    break;
+				case 'species':
+					// Check if the user is providing a valid species name
+					if (isAdmin && parts[1]) {
+						// Map common inputs to your internal keys
+						const speciesMap = {
+							"kitty": "kitty",
+							"kitten": "kitty",
+							"puppy": "puppy",
+							"dog": "puppy",
+							"spider": "spider",
+							"fish": "goldfish",
+							"goldfish": "goldfish"
+						};
+
+						const targetKey = speciesMap[parts[1].toLowerCase()];
+
+						if (targetKey && this.PET_SPECIES.includes(targetKey)) {
+							// Use the centralized method that handles snapping and UI sync
+							this.selectSpecies(targetKey); 
+							sendNotice(`🧬 [Pet]: Species hot-swapped to ${targetKey.toUpperCase()}!`);
+						} else {
+							sendNotice(`❌ [Pet]: Unknown species. Try: kitty, puppy, spider, or fish.`);
+						}
+					}
+					break;
 
                 case 'revive':
                     if (isAdmin || this.activePet.exp > 100) {
