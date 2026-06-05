@@ -69,6 +69,57 @@ modes:
 // import { EntropiaWidget } from './entropia-widget.js';
 import { EntropiaWidget } from './entropia-widget-refactored.js';
 import { StreamJukebox } from './jukebox.js'; // 🟢 Added Jukebox Engine Module
+// import { EntropiaWidget } from './entropia-widget-refactored.js';
+// import { StreamJukebox } from './jukebox.js';
+
+async function bootstrapWidgets() {
+    const s = typeof settings !== 'undefined' ? settings : {};
+
+    // Array of conditional module loading promises
+    const bootPromises = [];
+
+    // 🎸 Load Jukebox only if explicitly enabled
+    if (s.jukeboxWidgetEnabled) {
+        bootPromises.push(
+            import('./jukebox.js')
+                .then((module) => {
+                    console.log('🎸 Jukebox Module Lazy-Loaded Successfully.');
+                    // If you need to initialize it manually:
+                    // window.streamJukeboxEngine = new module.StreamJukebox();
+                })
+                .catch(err => console.error('Failed to load Jukebox:', err))
+        );
+    }
+
+    // 🎯 Load Entropia Tracker only if explicitly enabled
+    if (s.entropiaWidgetEnabled) {
+        bootPromises.push(
+            import('./entropia-widget-refactored.js')
+                .then((module) => {
+                    console.log('🎯 Entropia Widget Lazy-Loaded Successfully.');
+                    // Initialize if necessary:
+                    // window.entropiaWidget = new module.EntropiaWidget();
+                })
+                .catch(err => console.error('Failed to load Entropia Widget:', err))
+        );
+    }
+
+    // ⏱️ Stream Timer Module (If you ever split it out of core into its own file)
+    if (s.timerWidgetEnabled) {
+        // bootPromises.push(import('./timer-widget.js').then(...));
+    }
+
+    // Wait for all enabled features to finish loading before letting the app run
+    await Promise.all(bootPromises);
+    
+    // Run your normal post-load layouts
+    if (typeof syncAllToggleUI === 'function') {
+        syncAllToggleUI();
+    }
+}
+
+// Call this inside your document ready or window load initialization routine
+
 console.log("🚀 [Module Load]: entropia-widget-refactored.js version 0.002 imported successfully without dependencies!");
 console.log("🚀 [Module Load]: jukebox.js version 1.000 imported successfully!");
 
@@ -300,6 +351,12 @@ const AVAILABLE_OUT_ANIMATIONS = ["none", "fadeOut", "bounceOut", "zoomOut", "sl
 // =========================================================================
 
 // 🌐 GLOBAL CORE CONFIGURATION LAYER (Single Source of Truth)
+const DYNAMIC_WIDGET_MAPS = [
+    { idKey: "jukebox", settingsKey: "jukeboxWidgetEnabled" },
+    { idKey: "entropia-widget", settingsKey: "entropiaWidgetEnabled" },
+    { idKey: "timer-widget", settingsKey: "timerWidgetEnabled" }
+    // 🚀 To add future widgets, just drop a new line here! (e.g., { idKey: "goals-widget", settingsKey: "goalsWidgetEnabled" })
+];
 const SETTINGS_SCHEMA = [
     {
         groupName: "🔔 Alert Core Management",
@@ -415,19 +472,23 @@ const SETTINGS_SCHEMA = [
             }
         ]
     },
-    {
-        // 🆕 NEW COMPONENT BLOCK
-        groupName: "🧩 Widgets Settings",
-        items: [
-            { 
-                label: "Enable Jukebox", 
-                idKey: "jukebox", 
-                get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
-                set: (v) => { 
-                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                } 
-            },
+	{
+		groupName: "🧩 Widgets Settings",
+		items: [
+			{ 
+				label: "Enable Jukebox", 
+				idKey: "jukebox", 
+				get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
+				set: (v) => { 
+					if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
+					if (typeof saveSettings === "function") saveSettings(); 
+					
+					// Alert user that a hardware state change requires a reload
+					if (confirm(`Jukebox ${v ? 'Enabled' : 'Disabled'}. A page reload is required to apply changes and optimize performance. Reload now?`)) {
+						window.location.reload();
+					}
+				} 
+			},
 			{ 
 				label: "Enable Entropia Tracker", 
 				idKey: "entropia-widget", 
@@ -435,10 +496,30 @@ const SETTINGS_SCHEMA = [
 				set: (v) => { 
 					if (typeof settings !== 'undefined') settings.entropiaWidgetEnabled = v; 
 					if (typeof saveSettings === "function") saveSettings(); 
+					
+					if (confirm(`Entropia Tracker ${v ? 'Enabled' : 'Disabled'}. A page reload is required to apply changes and optimize performance. Reload now?`)) {
+						window.location.reload();
+					}
+				} 
+			},
+			{ 
+				label: "Enable Stream Timer", 
+				idKey: "timer-widget", 
+				get: () => (settings ? !!settings.timerWidgetEnabled : false), 
+				set: (v) => { 
+					if (typeof settings !== 'undefined') settings.timerWidgetEnabled = v; 
+					if (typeof saveSettings === "function") saveSettings(); 
+					
+					// If your timer is baked into your core file right now, you don't *strictly* need a reload, 
+					// but keeping it consistent prevents confusion!
+					if (confirm(`Stream Timer ${v ? 'Enabled' : 'Disabled'}. Reload page to update layout elements?`)) {
+						window.location.reload();
+					}
 				} 
 			}
-        ]
-    }
+		]
+	}
+	
 ];
 // Maps trigger elements to their target interface panels and optional callback lifecycle hooks
 const PANEL_NAVIGATION_MAPS = [
@@ -639,7 +720,8 @@ console.warn = function(...args) {
 
 
 
-function init() {
+// Add 'async' to your init declaration so we can use 'await' inside it
+async function init() {
     applyTheme(registry.active);
     const params = new URLSearchParams(window.location.search);
     
@@ -658,16 +740,48 @@ function init() {
     
     // Core Layout & Registry Loading
     loadPositions();
-	renderSettingsWindow();
+    renderSettingsWindow();
     renderThemeControls();
     
-    // 1. INSTANTIATE WIDGETS
+    const s = typeof settings !== 'undefined' ? settings : {};
+
+    // =========================================================================
+    // ⚙️ HARDWARE OPTIMIZATION: CONDITIONAL LAZY-LOADING PACKS
+    // =========================================================================
+    
+    // 🎯 Dynamic Entropia Fetch
+    if (s.entropiaWidgetEnabled) {
+        try {
+            // This pulls the module across the network only if it's turned ON
+            const module = await import('./entropia-widget-refactored.js');
+            // Assign the class to window scope so your existing try/catch block below works perfectly
+            window.EntropiaWidget = module.EntropiaWidget;
+            console.log("📦 Entropia Widget file dynamically imported.");
+        } catch (err) {
+            console.error("❌ Failed to stream Entropia script source:", err);
+        }
+    }
+
+    // 🎸 Dynamic Jukebox Fetch
+    if (s.jukeboxWidgetEnabled) {
+        try {
+            const module = await import('./jukebox.js');
+            window.StreamJukebox = module.StreamJukebox;
+            console.log("📦 Jukebox Engine file dynamically imported.");
+        } catch (err) {
+            console.error("❌ Failed to stream Jukebox script source:", err);
+        }
+    }
+    
+    // =========================================================================
+    // 1. INSTANTIATE WIDGETS (Your original architecture runs unchanged!)
+    // =========================================================================
     try {
         if (typeof EntropiaWidget !== 'undefined') {
             window.entropiaLogParser = new EntropiaWidget();
             console.log("✅ Entropia Widget Instance created.");
         } else {
-            console.warn("⚠️ [Init Warning]: EntropiaWidget class is not defined.");
+            console.warn("⚠️ [Init Warning]: EntropiaWidget class is not loaded (Widget is disabled).");
         }
     } catch (entropiaError) {
         console.error("❌ [Init Error]: Failed to initialize Entropia Widget:", entropiaError);
@@ -678,23 +792,27 @@ function init() {
             window.streamJukeboxEngine = new StreamJukebox();
             console.log("✅ Jukebox Instance created.");
         } else {
-            console.warn("⚠️ [Init Warning]: StreamJukebox class is not defined.");
+            console.warn("⚠️ [Init Warning]: StreamJukebox class is not loaded (Widget is disabled).");
         }
     } catch (jukeboxError) {
         console.error("❌ [Init Error]: Failed to initialize Jukebox Module:", jukeboxError);
     }
 
-    // 2. NOW inject commands (only after both instances are guaranteed to exist)
+    // 2. NOW inject commands (only after both instances are guaranteed to exist or safely skip)
     console.log("📡 [Command Registry]: Starting injection scan...");
     injectAllWidgetCommands();
-	
+    
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 
     populateCustomDropdowns();
     initTimerEngine();
     
-    // Bind all event listeners to the DOM
+    // Bind all event listeners to the DOM and sync UI states
     bindEvents();
+    if (typeof syncAllToggleUI === 'function') {
+        syncAllToggleUI();
+    }
+    
     console.log("ttvoverlayapp.js version 0.112 finished loading");
 }
 function injectAllWidgetCommands() {
@@ -1433,7 +1551,7 @@ function syncAllToggleUI() {
         }
     };
 
-    // 🤖 AUTOMATED LOOP: Automatically updates every badge inside your settings window schema!
+    // 🤖 AUTOMATED SETTINGS BADGE LOOP: Updates stg-[idKey]-status-badge
     if (typeof SETTINGS_SCHEMA !== 'undefined') {
         SETTINGS_SCHEMA.forEach(group => {
             group.items.forEach(item => {
@@ -1442,36 +1560,34 @@ function syncAllToggleUI() {
         });
     }
 
-    // 🎯 INDEPENDENT MANAGEMENT SYNC: Handles your multi-window alerts manager panel badges
+    // 🎯 INDEPENDENT MANAGEMENT SYNC: Alerts manager panel badges
     updateBadge("mgr-alert-status-badge", !alertHidden);
     updateBadge("mgr-rewards-status-badge", s.rewardsEnabled);
     updateBadge("mgr-bits-status-badge", s.bitsEnabled);
 
-    // 🎸 JUKEBOX VISUAL SIDE-EFFECTS
-    const jbControls = document.getElementById("jukebox-widget-controls");
-    if (jbControls) {
-        jbControls.style.display = s.jukeboxWidgetEnabled ? "block" : "none";
-        jbControls.style.opacity = s.jukeboxWidgetEnabled ? "1" : "0.5";
-        jbControls.style.pointerEvents = s.jukeboxWidgetEnabled ? "auto" : "none";
-    }
+    // 🧩 AUTOMATED WIDGET DOM VISIBILITY LOOP
+    DYNAMIC_WIDGET_MAPS.forEach(({ idKey, settingsKey }) => {
+        const isActive = !!s[settingsKey];
 
-    // 🎯 ENTROPIA TRACKER VISUAL SIDE-EFFECTS (Matches Jukebox style rules perfectly)
-    const entControls = document.getElementById("entropia-widget-controls");
-    if (entControls) {
-        entControls.style.display = s.entropiaWidgetEnabled ? "block" : "none";
-        entControls.style.opacity = s.entropiaWidgetEnabled ? "1" : "0.5";
-        entControls.style.pointerEvents = s.entropiaWidgetEnabled ? "auto" : "none";
-    }
+        // 1. Automatically syncs any container matching your dashboard controls: "[idKey]-controls"
+        const controls = document.getElementById(`${idKey}-controls`);
+        if (controls) {
+            controls.style.display = isActive ? "block" : "none";
+            controls.style.opacity = isActive ? "1" : "0.5";
+            controls.style.pointerEvents = isActive ? "auto" : "none";
+        }
 
-    // (If you have a main overlay panel wrapper element for the stream layout itself)
-    const entWidget = document.getElementById("entropia-widget");
-    if (entWidget) {
-        entWidget.style.display = s.entropiaWidgetEnabled ? "block" : "none";
-    }
+        // 2. Automatically syncs any stream overlay elements matching the base ID: "[idKey]"
+        const overlay = document.getElementById(idKey);
+        if (overlay) {
+            overlay.style.display = isActive ? "block" : "none";
+        }
+    });
 
-    // 🏎️ CORE AUDIO ENGINE SYNC
+    // 🏎️ EXCEPTION HANDLING / CORE AUDIO ENGINE SYNC
+    // (Keep unique non-UI side-effects right below the loop)
     if (window.streamJukeboxEngine) {
-        window.streamJukeboxEngine.setWidgetActiveState(s.jukeboxWidgetEnabled);
+        window.streamJukeboxEngine.setWidgetActiveState(!!s.jukeboxWidgetEnabled);
     }
 }
 function updateAllBadgesUI() {
