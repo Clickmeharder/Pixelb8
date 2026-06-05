@@ -3213,7 +3213,7 @@ function bindEvents() {
 		if (dragTarget) {
 			// --- NEW: RESIZER EXCLUSION LOGIC ---
 			const r = dragTarget.getBoundingClientRect();
-			const handleSize = 20; // Matches your CSS resize zone
+			const handleSize = 64; // Matches your CSS resize zone
 			
 			// Calculate if click is within bottom-right 20px
 			const isClickingResizer = (e.clientX > r.right - handleSize && 
