@@ -39,7 +39,7 @@ export class StreamPet {
         this.HUNGER_TICK_MS = 144000; 
         this.BASE_FLOOR_Y = 110;
 
-        this.state = {
+		this.state = {
             twitchUser: "",
             name: "Greta",
             isDead: false,
@@ -63,6 +63,13 @@ export class StreamPet {
             poops: [],
             hasFood: false,
             particles: [],
+            // 📐 Add default dimensions tracking here
+            dimensions: {
+                width: "",
+                height: "",
+                left: "",
+                top: ""
+            },
             layout: {
                 nameX: 50, nameY: 70,
                 statsX: 50, statsY: 90,
@@ -792,6 +799,13 @@ export class StreamPet {
 				if(el && k !== 'showTower') el.value = this.state.layout[k]; 
 			});
 		}
+		const el = document.getElementById("pet-widget");
+        if (el && this.state.dimensions) {
+            if (this.state.dimensions.width) el.style.width = this.state.dimensions.width;
+            if (this.state.dimensions.height) el.style.height = this.state.dimensions.height;
+            if (this.state.dimensions.left) el.style.left = this.state.dimensions.left;
+            if (this.state.dimensions.top) el.style.top = this.state.dimensions.top;
+        }
 		this.initSwatches(); 
 	}
 
