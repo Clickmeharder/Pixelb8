@@ -69,7 +69,15 @@ body {
     box-sizing: border-box;
     user-select: none;
 }
-        
+
+.p8-widget#pet-widget {
+    background: transparent;
+	border: var(--border-width) var(--border-style) var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size);
+
+}
+
 body.edit-mode .p8-widget { 
     outline: 2px dashed rgba(145, 70, 255, 0.6); 
     cursor: grab; 

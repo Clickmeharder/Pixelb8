@@ -17,6 +17,7 @@ export class StreamPet {
         if (!document.getElementById("pet-widget")) {
             const petViewport = document.createElement("div");
             petViewport.id = "pet-widget";
+			petViewport.classList.add("p8-widget");
             petViewport.style.zIndex = "101";
             petViewport.innerHTML = `
                 <div id="bubble" class="chat-bubble"></div>
