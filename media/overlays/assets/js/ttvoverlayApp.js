@@ -1425,7 +1425,12 @@ function loadPositions() {
         chatWidget.style.display = isHidden ? "none" : "block";
         
         // Apply saved custom height to the feed element instead of the parent container
-        if (!isHidden && chatFeed && chatHeight) { 
+        if (!isHidden && chatFeed) { 
+            // 🛑 CRITICAL FALLBACK: If height is missing or less than 32px, reset to a clean default
+            if (!chatHeight || parseInt(chatHeight) < 32) {
+                chatHeight = "175px";
+                if (typeof settings !== 'undefined') settings.chatHeight = "175px";
+            }
             chatFeed.style.height = chatHeight; 
         }
     }
@@ -3083,19 +3088,18 @@ function bindEvents() {
     });
 	// 🆕 NEW: Automated Resize Tracking for Native CSS Resize Handlers (Targeting Inner Chat Feed)
 	// 🆕 FIXED: Automated Resize Tracking with Safety Guards for Toggle States
-    if (chatFeed) {
+if (chatFeed) {
         let resizeTimeout;
         const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 const currentHeight = entry.contentRect.height;
 
-                // 🛑 SAFETY FILTER: If the height is 0, the widget was likely hidden.
-                // Do not overwrite the streamer's real saved height setting!
-                if (currentHeight <= 0) continue;
+                // 🛑 SHARPENED GATE: If the height is below 32px, the widget was toggled hidden.
+                // Ignore it entirely so it doesn't overwrite your real settings configuration!
+                if (currentHeight < 32) continue;
 
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
-                    // Capture the real, positive dragged height in pixels
                     chatHeight = `${Math.round(currentHeight)}px`;
                     
                     if (typeof settings !== 'undefined') {
@@ -3131,5 +3135,31 @@ function bindEvents() {
 }
 init();
 
-
-
+// ==========================================
+// 🛠️ TEMPORARY ONE-TIME COLD RESET SCRIPT
+// ==========================================
+if (!localStorage.getItem('p8_reset_done')) {
+    // 1. Clear out independent legacy cache keys
+    localStorage.removeItem('p8_chat_height');
+    
+    // 2. Safely parse and rewrite your monolithic settings wrapper
+    if (localStorage.getItem('settings')) {
+        try {
+            let s = JSON.parse(localStorage.getItem('settings'));
+            s.chatHeight = "175px"; // Safe string fallback value to get your window open!
+            localStorage.setItem('settings', JSON.stringify(s));
+        } catch(e) {
+            console.error("Could not parse settings during emergency reset:", e);
+        }
+    }
+    
+    // 3. Mark this reset as completed so it doesn't cause an infinite loop!
+    localStorage.setItem('p8_reset_done', 'true');
+    
+    console.log("Storage cleared! Hard refreshing application layout...");
+    location.reload();
+} else {
+    // Clean up our temporary flag behind us once we've successfully bypassed the loop
+    localStorage.removeItem('p8_reset_done');
+}
+// ==========================================
