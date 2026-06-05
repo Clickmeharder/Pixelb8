@@ -123,8 +123,7 @@
 	border: var(--border-width) var(--border-style) var(--border-color);
     border-radius: var(--border-radius);
     font-size: var(--font-size);
-	overflow: hidden;
-	resize:both;
+	overflow:visible;
 }
 .p8-widget #nameplate { 
 	position: absolute; 
@@ -143,6 +142,10 @@
 	transition: background 0.2s, transform 0.1s;
 }
 
+body.edit-mode .p8-widget#pet-widget { 
+	overflow: hidden;
+	resize:both;
+}
 body.edit-mode .p8-widget #companionCanvas { 
 	outline:1px dashed orange;
 }
