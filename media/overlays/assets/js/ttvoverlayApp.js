@@ -167,6 +167,15 @@ const statusIndicator = document.getElementById("status-indicator");
 const statusText = document.getElementById("status-text");
 const chatWidget = document.getElementById('chat-widget');
 const chatFeed = document.getElementById('chat-feed');
+    const rewardsPanel = document.getElementById("rewards-manager");
+    const fileInput = document.getElementById("reward-file-input");
+    const urlInput = document.getElementById("reward-img-input");
+    const fontColorPicker = document.getElementById("reward-font-color");
+    const fontColorHex = document.getElementById("reward-font-color-hex");
+    const soundFileInput = document.getElementById("reward-sound-file");
+    const addSoundBtn = document.getElementById("push-sound-btn");
+    const labelSoundBtn = document.getElementById("add-sound-file-btn");
+
 let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 }, fadeTimeout;
 
 // --- DYNAMIC THEMING & ALERTS DATA CORES ---
@@ -1039,11 +1048,14 @@ function renderSettingsWindow() {
                 </div>
             `;
 
-            const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
+		const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', () => {
                     const currentVal = item.get();
                     item.set(!currentVal);
+                    
+                    // 🎯 FIX: Only sync the visual statuses/badges. 
+                    // DO NOT re-call renderSettingsWindow() here or save flags that reconstruct the DOM tree.
                     syncAllToggleUI(); 
                 });
             }
@@ -2617,16 +2629,8 @@ function getLatestInstanceIdByType(type) {
 // Ensure this function exists globally in overlayapp.js
 
 function bindRewardsManagerEvents() {
-    const rewardsPanel = document.getElementById("rewards-manager");
-    if (!rewardsPanel) return;
 
-    const fileInput = document.getElementById("reward-file-input");
-    const urlInput = document.getElementById("reward-img-input");
-    const fontColorPicker = document.getElementById("reward-font-color");
-    const fontColorHex = document.getElementById("reward-font-color-hex");
-    const soundFileInput = document.getElementById("reward-sound-file");
-    const addSoundBtn = document.getElementById("push-sound-btn");
-    const labelSoundBtn = document.getElementById("add-sound-file-btn");
+    if (!rewardsPanel) return;
 
     // Initialize UI state
     if (fontColorPicker && fontColorHex) {
@@ -2770,13 +2774,34 @@ function bindRewardsManagerEvents() {
         });
     }
 
+    // 🎯 MASTER OVERLAY LAYER CONTROLS (Syncs State variables + Badges globally across panels)
+    const mgrAlertBtn = document.getElementById("mgr-toggle-alert-btn");
+    if (mgrAlertBtn) {
+        mgrAlertBtn.addEventListener("click", () => {
+            alertHidden = !alertHidden;
+            if (typeof syncAlertVisibilityState === "function") syncAlertVisibilityState();
+            if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+        });
+    }
+
+    const mgrRewardsBtn = document.getElementById("mgr-toggle-rewards-btn");
+    if (mgrRewardsBtn) {
+        mgrRewardsBtn.addEventListener("click", () => {
+            if (typeof settings !== 'undefined') {
+                settings.rewardsEnabled = !settings.rewardsEnabled;
+                if (typeof saveSettings === "function") saveSettings();
+                if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+            }
+        });
+    }
+
     // Populate dropdowns AFTER the panel is fully loaded
     setTimeout(() => {
         if (typeof populateCustomDropdowns === "function") {
             populateCustomDropdowns();
         }
-        if (typeof updateManagerBadgesUI === "function") {
-            updateManagerBadgesUI();
+        if (typeof syncAllToggleUI === "function") {
+            syncAllToggleUI();
         }
     }, 150);
 }
