@@ -1351,9 +1351,20 @@ export class StreamPet {
                 break;
 
             case "idle":
-                if (this.registry.activeSpecies === "goldfish") {
-                    this.state.y = (visibleH / 2) + Math.sin(t * 0.04) * 40;
-                }
+				if (this.registry.activeSpecies === "goldfish") {
+					this.state.y = (visibleH / 2) + Math.sin(t * 0.04) * 40;
+					
+					// --- ADD THIS TO GENERATE BUBBLES ---
+					if (Math.random() < 0.05) { // 5% chance per frame to spawn a bubble
+						this.state.goldfishBubbles.push({
+							x: this.state.x,
+							y: this.state.y,
+							r: Math.random() * 3 + 2,
+							alpha: 0.8
+						});
+					}
+					// ------------------------------------
+				}
 
                 if (this.registry.activeSpecies === "spider") {
                     let currentWeb = this.state.spiderWebs.find(w => Math.sqrt((w.x - this.state.x)**2 + (w.y - this.state.y)**2) < w.size);
