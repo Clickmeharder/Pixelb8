@@ -1123,6 +1123,7 @@ export class StreamPet {
 
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
+		const groundY = visibleH - this.BASE_FLOOR_Y;
 		
 		const bowlPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
 		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
@@ -1347,12 +1348,12 @@ export class StreamPet {
 			case "idle":
 				if (this.registry.activeSpecies === "goldfish") {
 					this.state.y = (visibleH / 2) + Math.sin(t * 0.04) * 40;
-					if (Math.random() < 0.05) { 
+					if (Math.random() < 0.02) {
 						this.state.goldfishBubbles.push({
-							x: this.state.x,
-							y: this.state.y,
-							r: Math.random() * 3 + 2,
-							alpha: 0.8
+							x: this.state.x + this.state.facing * 20, 
+							y: this.state.y - 10, 
+							r: 2 + Math.random() * 4, 
+							alpha: 1
 						});
 					}
 				}
@@ -1370,36 +1371,32 @@ export class StreamPet {
 				}
 
 				if (this.state.actionTimer <= 0) {
-					if (this.activePet.digestive >= 3) { 
-						this.state.action = "walk_to_litter"; 
-						return;
+					if (Math.random() < 0.15) {
+						if (this.registry.activeSpecies === "kitty") this.say("Meow! 🐾");
+						if (this.registry.activeSpecies === "puppy") this.say("BARK! 🐶");
+						if (this.registry.activeSpecies === "spider") this.say("Click-click... 🕷️");
+						if (this.registry.activeSpecies === "goldfish") this.say("Blub... 🫧");
+					}
+					
+					if (Math.random() < 0.4) { 
+						this.state.actionTimer = 400 + Math.random() * 400; 
+						return; 
 					}
 
-					const r = Math.random();
-					// 1. Walk (70% chance - increased)
-					if (r < 0.70) { 
-						this.state.action = "walk"; 
-						this.state.spiderDir = Math.random() > 0.5 ? 1 : -1;
-						this.state.actionTimer = 250 + Math.random() * 250; 
-					} 
-					// 2. Dance (5% chance)
-					else if (r < 0.75) {
-						this.state.action = "dance";
-						this.state.actionTimer = 150;
-					}
-					// 3. Bed (10% chance)
-					else if (r < 0.85) {
-						this.state.action = "walk_to_bed";
-					}
-					// 4. Rappel (Spider - 5% chance)
-					else if (r < 0.90 && this.registry.activeSpecies === "spider" && Math.abs(this.state.y - CEIL_Y) < 4) {
-						this.state.action = "rappel_drop";
-						this.state.rappelAnchor = { x: this.state.x, y: this.state.y };
-						this.state.rappelDepth = CEIL_Y + 80 + Math.random() * 140;
-					}
-					// 5. Idle/Stay (10% chance)
-					else {
-						this.state.actionTimer = 300 + Math.random() * 400;
+					if (this.activePet.digestive >= 3) { 
+						this.state.action = "walk_to_litter"; 
+					} else {
+						const r = Math.random();
+						if (r < 0.20) { 
+							this.state.action = "walk"; 
+							this.state.facing = Math.random() > 0.5 ? 1 : -1; 
+							this.state.actionTimer = 300 + Math.random() * 300; 
+						}
+						else if (r < 0.40) this.state.action = "walk_to_bed";
+						else if (r < 0.60 && this.state.layout.showTower) {
+							this.state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
+						}
+						else this.state.actionTimer = 500 + Math.random() * 500;
 					}
 				}
 				break;
@@ -1447,8 +1444,11 @@ export class StreamPet {
 					this.state.x += this.state.facing * 1.5;
 					if (this.registry.activeSpecies === "goldfish") {
 						this.state.y = (visibleH / 2) + Math.sin(t * 0.07) * 50;
+						if(t % 5 === 0) this.state.goldfishBubbles.push({x: this.state.x, y: this.state.y, r: 2, alpha: 0.8});
 					}
-					if (this.state.x < LEFT_X || this.state.x > RIGHT_X) this.state.facing *= -1;
+					// Boundary fix: force position to limit to prevent snapping
+					if (this.state.x < 80) { this.state.x = 80; this.state.facing = 1; }
+					if (this.state.x > visibleW - 80) { this.state.x = visibleW - 80; this.state.facing = -1; }
 				}
 
 				if (this.state.actionTimer <= 0) { 
@@ -1458,12 +1458,17 @@ export class StreamPet {
 				break;
 
 			case "sleep":
+			case "tower_sleep":
 			case "dance":
 			case "special":
-				if (this.state.actionTimer <= 0) this.state.action = "idle";
+				if (this.state.actionTimer <= 0) { 
+					if(this.state.action === "tower_sleep") this.state.y = groundY;
+					this.state.action = "idle"; 
+				}
 				break;
 		}
 	}
+
     animate = () => {
         this.state.animT++;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
