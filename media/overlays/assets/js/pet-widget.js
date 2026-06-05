@@ -92,7 +92,7 @@ export class StreamPet {
         this.animate = this.animate.bind(this);
         this.animate();
 
-        this.bindEvents();
+        this.bindUIEventListeners();
     }
 
     // --- CHAT COMMAND ROUTER ---
