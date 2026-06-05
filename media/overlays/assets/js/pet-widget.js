@@ -739,7 +739,8 @@ export class StreamPet {
         statsEl.style.left = this.state.layout.statsX + "%"; statsEl.style.top = this.state.layout.statsY + "%";
         let sTxt = this.state.isDead ? "DECEASED" : (this.state.poops.length > 5 ? "SICK" : "HEALTHY");
         statsEl.innerHTML = `${this.state.name} | Age: ${this.state.ageDays}d | Hunger: ${this.state.hunger}%<br>Status: ${sTxt} | EXP: ${this.state.exp}`;
-        nameEl.textContent = (this.state.isDead ? "GHOST " : this.state.stage.toUpperCase() + " ") + this.state.name.toUpperCase();
+        // nameEl.textContent = (this.state.isDead ? "GHOST " : this.state.stage.toUpperCase() + " ") + this.state.name.toUpperCase();
+		nameEl.textContent = this.state.isDead ? `${this.state.name.toUpperCase()}'S GHOST` : this.state.name.toUpperCase();
     }
 
 	applyVisibilityStates() {
