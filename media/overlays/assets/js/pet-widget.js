@@ -1704,18 +1704,27 @@ export class StreamPet {
         // ========================================================
         // PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
         // ========================================================
-        if (this.registry.activeSpecies === "goldfish") {
-            this.state.goldfishBubbles.forEach((bubble, idx) => {
-                bubble.y -= 1.2;
-                bubble.x += Math.sin(t*0.05 + idx)*0.5;
-                this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
-                this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
-                this.ctx.beginPath(); this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI*2);
-                this.ctx.fill(); this.ctx.stroke();
-                if(bubble.y < 50) this.state.goldfishBubbles.splice(idx,1);
-            });
-        }
-
+		if (this.registry.activeSpecies === "goldfish") {
+			// Loop backwards to safely remove elements
+			for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
+				let bubble = this.state.goldfishBubbles[i];
+				
+				bubble.y -= 1.2;
+				bubble.x += Math.sin(t * 0.05 + i) * 0.5;
+				
+				this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
+				this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
+				this.ctx.beginPath();
+				this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+				this.ctx.fill();
+				this.ctx.stroke();
+				
+				// Cleanup bubbles that float off-screen
+				if (bubble.y < 50) {
+					this.state.goldfishBubbles.splice(i, 1);
+				}
+			}
+		}
         if (this.state.action === "nyan") {
             const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
             this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
