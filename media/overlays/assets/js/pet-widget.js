@@ -66,6 +66,7 @@ export class StreamPet {
 			hideBorder: false,
 			hideStatus: false,
 			hideNameplate: false,
+			hideBackground: false,
             name: "Greta",
             isDead: false,
             birthday: Date.now(),
@@ -178,6 +179,10 @@ export class StreamPet {
             const hideBorderCheck = document.getElementById("hideBorderToggle");
 			if (hideBorderCheck) {
 				hideBorderCheck.checked = this.state.hideBorder || false;
+			}
+			const hideBackgroundCheck = document.getElementById("hideBackgroundToggle");
+			if (hideBackgroundCheck) {
+				hideBackgroundCheck.checked = this.state.hideBackground || false;
 			}
 			// Inside loadData() after your other checkbox checks
 			const hideStatusCheck = document.getElementById("hideStatusToggle");
@@ -605,6 +610,14 @@ export class StreamPet {
 				this.saveData(); // Commit to localStorage
 			});
 		}
+		const hideBGCheck = document.getElementById("hideBackgroundToggle");
+        if (hideBGCheck) {
+            hideBGCheck.addEventListener("change", (e) => {
+                this.state.hideBackground = e.target.checked;
+                this.applyVisibilityStates();
+                this.saveData(); // Persist the changes immediately
+            });
+        }
 		const statusToggle = document.getElementById("hideStatusToggle");
 		if (statusToggle) {
 			statusToggle.addEventListener("change", (e) => {
@@ -730,6 +743,13 @@ export class StreamPet {
 				this.widgetContainer.style.border = "";
 				this.widgetContainer.style.background = "";
 				this.widgetContainer.style.boxShadow = "";
+			}
+
+			// 🔳 Add: Explicit backdrop visibility execution
+			if (this.state.hideBackground) {
+				this.widgetContainer.style.setProperty("background", "transparent", "important");
+			} else if (!this.state.hideBorder) {
+				this.widgetContainer.style.background = ""; // Restore default theme rules
 			}
 		}
 
