@@ -231,7 +231,17 @@ export class StreamJukebox {
                 playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1, 'fs': 0 },
                 events: {
                     'onReady': () => { 
-                        this.ytPlayerReady = true; 
+                        this.ytPlayerReady = true;
+						const savedHeight = localStorage.getItem("jb_wrapper_height");
+						const wrapper = document.getElementById('jukebox-video-wrapper');
+						if (wrapper && savedHeight) {
+							wrapper.style.height = savedHeight;
+						}
+						
+						// Bind the listener to keep tracking changes
+						this.bindResizePersistence();
+
+						const savedVol = localStorage.getItem("jbVolume") || 50;						
 						const savedVol = localStorage.getItem("jbVolume") || 50;
 						this.ytPlayer.setVolume(parseInt(savedVol));
                         this.applyButtonStyles();
@@ -475,9 +485,19 @@ export class StreamJukebox {
 				}
 			};
 		}
-
+		
 	}
+	bindResizePersistence() {
+		const wrapper = document.getElementById('jukebox-video-wrapper');
+		if (!wrapper) return;
 
+		// Listen for when the user stops resizing
+		wrapper.addEventListener('mouseup', () => {
+			const newHeight = wrapper.style.height;
+			localStorage.setItem("jb_wrapper_height", newHeight);
+			console.log("💾 Jukebox height saved:", newHeight);
+		});
+	}
 	toggleAudioOnly(state) {
 		this.isAudioOnly = state;
 		const playerContainer = document.getElementById('player');
