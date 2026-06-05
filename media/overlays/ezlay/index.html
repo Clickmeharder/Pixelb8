@@ -16,100 +16,96 @@
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
 
-/* 📦 Changed from full screen viewport parameters to absolute boundaries */
-        #companion-container { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-			padding:4px;
-            pointer-events: none; 
-            overflow: visible; /* Keeps scaled rendering artifacts clean */
-        }
+	/* 📦 Acts as your secure outer bounding box wrapper */
+	#companion-container { 
+		position: absolute; 
+		top: 4px; 
+		left: 4px; 
+		right: 4px;
+		bottom: 4px;
+		pointer-events: none; 
+		overflow: visible; /* Allows the canvas drawing buffer to spill out into view safely */
+	}
 
-        /* 🎨 Spans perfectly 1:1 inside the container */
-        #companionCanvas { 
-            display: block; /* Removes baseline inline layout spacing gaps */
-            width: 98%; 
-            height: 98%; 
-			outline:none;
-            image-rendering: pixelated;
-			margin:2px;
-            pointer-events: auto; 
-            position: absolute; 
-            top: 0;
-            left: 0;
-            z-index: 100;
-			overflow:visible;
-        }
-        
-        #nameplate { 
-            position: absolute; 
-            background: rgba(0,0,0,0.8); 
-            color: #0ec3c3; 
-            padding: 8px 15px; 
-            font-size: 10px; 
-            border: 2px solid #0ec3c3; 
-            pointer-events: auto; 
-            white-space: nowrap; 
-            transform: translate(-50%, -50%); 
-            z-index: 1000; 
-            cursor: pointer; 
-            transition: background 0.2s, transform 0.1s;
-        }
+	/* 🎨 Spans perfectly 100% inside its container with no artificial restrictions */
+	#companionCanvas { 
+		display: block; 
+		width: 100%; 
+		height: 100%; 
+		outline: none;
+		image-rendering: pixelated; 
+		pointer-events: auto; 
+		position: absolute; 
+		top: 0;
+		left: 0;
+		z-index: 100; 
+	}
 
-        #nameplate:hover {
-            background: rgba(50, 50, 0, 0.9);
-            border-color: teal;
-            color: teal;
-        }
+	#nameplate { 
+		position: absolute; 
+		background: rgba(0,0,0,0.8); 
+		color: #0ec3c3; 
+		padding: 8px 15px; 
+		font-size: 10px; 
+		border: 2px solid #0ec3c3; 
+		pointer-events: auto; 
+		white-space: nowrap; 
+		transform: translate(-50%, -50%); 
+		z-index: 1000; 
+		cursor: pointer; 
+		transition: background 0.2s, transform 0.1s;
+	}
 
-        #nameplate:active {
-            transform: translate(-50%, -50%) scale(0.95);
-        }
+	#nameplate:hover {
+		background: rgba(50, 50, 0, 0.9);
+		border-color: teal;
+		color: teal;
+	}
 
-        #status { 
-            position: absolute; 
-            font-size: 9px; 
-            color: #ffffff; 
-            background: rgba(0,0,0,0.7); 
-            padding: 10px 20px; 
-            border-radius: 4px; 
-            text-align: center; 
-            line-height: 1.6; 
-            min-width: 250px; 
-            transform: translate(-50%, -50%); 
-            z-index: 1000; 
-        }
-        
-        .chat-bubble { 
-            position: absolute; 
-            background: white; 
-            border: 3px solid #333; 
-            padding: 10px; 
-            font-size: 10px; 
-            border-radius: 15px; 
-            opacity: 0; 
-            transition: opacity 0.3s; 
-            color: black; 
-            pointer-events: none; 
-            white-space: nowrap; 
-            z-index: 1100; 
-        }
+	#nameplate:active {
+		transform: translate(-50%, -50%) scale(0.95);
+	}
 
-        .chat-bubble.show { opacity: 1; }
-        
+	#status { 
+		position: absolute; 
+		font-size: 9px; 
+		color: #ffffff; 
+		background: rgba(0,0,0,0.7); 
+		padding: 10px 20px; 
+		border-radius: 4px; 
+		text-align: center; 
+		line-height: 1.6; 
+		min-width: 250px; 
+		transform: translate(-50%, -50%); 
+		z-index: 1000; 
+	}
 
-        .swatch {
-            width: 24px;
-            height: 24px;
-            border: 2px solid #555;
-            cursor: pointer;
-            transition: transform 0.1s, border-color 0.1s;
-        }
-        .swatch:hover { border-color: #ffcc00; transform: scale(1.1); }
-        .swatch.active { border-color: #ffffff; outline: 1px solid #ffcc00; }
+	.chat-bubble { 
+		position: absolute; 
+		background: white; 
+		border: 3px solid #333; 
+		padding: 10px; 
+		font-size: 10px; 
+		border-radius: 15px; 
+		opacity: 0; 
+		transition: opacity 0.3s; 
+		color: black; 
+		pointer-events: none; 
+		white-space: nowrap; 
+		z-index: 1100; 
+	}
+
+	.chat-bubble.show { opacity: 1; }
+
+	.swatch {
+		width: 24px;
+		height: 24px;
+		border: 2px solid #555;
+		cursor: pointer;
+		transition: transform 0.1s, border-color 0.1s;
+	}
+	.swatch:hover { border-color: #ffcc00; transform: scale(1.1); }
+	.swatch.active { border-color: #ffffff; outline: 1px solid #ffcc00; }
     </style>
 </head>
 
