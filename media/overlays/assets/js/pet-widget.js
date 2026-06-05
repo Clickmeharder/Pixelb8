@@ -782,7 +782,7 @@ export class StreamPet {
         }
     }
 
-	updateAI(t) {
+    updateAI(t) {
         if (this.state.isDead) return;
         this.state.ageDays = Math.floor((Date.now() - this.state.birthday) / 86400000);
         this.state.stage = this.state.ageDays < 2 ? "Baby" : this.state.ageDays < 5 ? "Juvenile" : "Adult";
@@ -809,16 +809,6 @@ export class StreamPet {
         const visibleW = this.canvas.width;
         const visibleH = this.canvas.height;
         const floorLineY = visibleH - this.BASE_FLOOR_Y;
-        const towerLineY = floorLineY - 145;
-
-        // --- POSITION CLAMPING ---
-        // Force the cat to the correct level based on current action
-        if (this.state.action === "tower_sleep" || this.state.action === "walk_to_tower_climb") {
-            this.state.y = towerLineY;
-        } else if (this.state.action !== "nyan") { // Nyan cat handles its own Y
-            this.state.y = floorLineY; 
-        }
-        // -------------------------
         
         let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
         let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
@@ -931,12 +921,13 @@ export class StreamPet {
             case "dance":
             case "special":
                 if (this.state.actionTimer <= 0) { 
+                    if(this.state.action === "tower_sleep") this.state.y = floorLineY;
                     this.state.action = "idle"; 
                 }
                 break;
         }
     }
-	
+
 	animate = () => {
 		this.state.animT++;
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
