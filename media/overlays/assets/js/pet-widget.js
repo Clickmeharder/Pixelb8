@@ -132,7 +132,7 @@ export class StreamPet {
             hideNameplate: false,
             hideBackground: false,
             originalPos: { x: 0, y: 0 },
-			tummylimit: 5,
+			tummylimit: 8,
             nyanTimer: 0,
             nyanPhase: "takeoff",
             x: 200,
