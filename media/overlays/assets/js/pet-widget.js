@@ -1451,51 +1451,71 @@ export class StreamPet {
         const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
         const boxW = 150;
 
-        if (this.registry.activeSpecies === "puppy") {
-            // 🌿 Fresh Sod Grass Patch Variant for Canines
-            // Base Underlay Dirt Shadow Matrix
-            this.ctx.fillStyle = "#4e342e"; 
-            this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
-            
-            // Vibrant Grass Turf Slabs
-            this.ctx.fillStyle = "#2e7d32"; 
-            this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
-            
-            // Procedural Blade Clusters Accent Details
-            this.ctx.fillStyle = "#4caf50";
-            for (let i = 0; i < 6; i++) {
-                let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
-                this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
-                this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
+        // Only draw the litter box or grass patch if the pet is NOT a goldfish
+        if (this.registry.activeSpecies !== "goldfish") {
+            if (this.registry.activeSpecies === "puppy") {
+                // 🌿 Fresh Sod Grass Patch Variant for Canines
+                this.ctx.fillStyle = "#4e342e"; 
+                this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
+                
+                this.ctx.fillStyle = "#2e7d32"; 
+                this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
+                
+                this.ctx.fillStyle = "#4caf50";
+                for (let i = 0; i < 6; i++) {
+                    let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
+                    this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
+                    this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
+                }
+                
+                this.ctx.fillStyle = "#f5f5f5";
+                for(let p = 0; p <= boxW; p += 15) {
+                    this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
+                }
+                this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   
+                this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    
+            } else {
+                // 🐈 Standard Feline Sand Litter Box Enclosure
+                this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
+                this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
+                this.ctx.fillStyle = "#2c3e50"; 
+                this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
+                this.ctx.fillStyle = "#95a5a6"; 
+                this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
             }
-            
-            // Miniature Backyard Decorative Picket Border Trim (Shifted perfectly on top of grass)
-            this.ctx.fillStyle = "#f5f5f5";
-            
-            // 1. Vertical posts: Started at lPos.y - 20 with a height of 24 so they terminate exactly at lPos.y + 4
-            for(let p = 0; p <= boxW; p += 15) {
-                this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
-            }
-            
-            // 2. Rails: Shifted upward to fit proportionally within the new picket area height
-            this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   // Top rail
-            this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    // Bottom rail
-        } else {
-            // 🐈 Standard Feline Sand Litter Box Enclosure
-            this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
-            this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
-            this.ctx.fillStyle = "#2c3e50"; 
-            this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
-            this.ctx.fillStyle = "#95a5a6"; 
-            this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
         }
         
-        // Render associated waste units uniformly relative to localized coordinate indexes
+        // ========================================================
+        // DYNAMIC MULTI-SPECIES WASTE FLOATING & RENDERING ENGINE
+        // ========================================================
         this.activePet.poops.forEach(p => {
-            let poopyY = p.isCeil ? 90 : lPos.y + 24;
-            let poopyX = (lPos.x - boxW/2 + 20) + p.ox % (boxW - 40);
-            this.ctx.font = "14px Arial";
-            this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
+            if (this.registry.activeSpecies === "goldfish") {
+                // If x or y properties don't exist yet on legacy poop objects, initialize them right where the fish is
+                if (p.x === undefined) p.x = this.state.x;
+                if (p.y === undefined) p.y = this.state.y;
+                if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
+
+                // 1. Slowly drift the fish poop upward over time
+                // Stops rising when it gets close to the surface line (e.g., y = 80)
+                if (p.y > 80) {
+                    p.y -= 0.2; 
+                }
+
+                // 2. Add a smooth underwater current wave swaying effect (side-to-side)
+                p.swimOffset += 0.03;
+                let finalX = p.x + Math.sin(p.swimOffset) * 5;
+
+                // 3. Render the floating aquatic waste
+                this.ctx.font = "14px Arial";
+                this.ctx.fillText("💩", finalX, p.y);
+
+            } else {
+                // Land Animal Static Render Pass (Anchored to Litterbox / Grass Patch relative layouts)
+                let poopyY = p.isCeil ? 90 : lPos.y + 24;
+                let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
+                this.ctx.font = "14px Arial";
+                this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
+            }
         });
 
         // ========================================================
