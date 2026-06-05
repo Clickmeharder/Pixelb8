@@ -401,7 +401,7 @@ export class StreamPet {
 			this.ctx.beginPath(); this.ctx.arc(15, 8, 22, 0, Math.PI*2); this.ctx.fill();
 			this.ctx.beginPath(); this.ctx.lineWidth = 11; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
 			this.ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); this.ctx.stroke();
-			this.drawEars(15, 8, finalColor, true); this.drawFace(15, 8, false, true);
+			this.drawkittyEars(15, 8, finalColor, true); this.drawkittyFace(15, 8, false, true);
 		} 
 		else if (this.state.action === "special" || this.state.action === "scratching") {
 			if (this.state.action === "special") this.drawYarn(30, 20, t);
@@ -416,7 +416,7 @@ export class StreamPet {
 			} else {
 				this.ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15); this.ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
 			}
-			this.drawEars(0, -45, finalColor, false); this.drawFace(0, -45, false, false);
+			this.drawkittyEars(0, -45, finalColor, false); this.drawkittyFace(0, -45, false, false);
 		}
 		else if (["groom", "potty", "kicking", "beg"].includes(this.state.action)) {
 			this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
@@ -424,24 +424,24 @@ export class StreamPet {
 			if (this.state.action === "kicking") {
 				this.ctx.fillStyle = finalColor; this.ctx.fillRect(10, 10 + Math.sin(t * 0.5) * 15, 10, 15);
 			}
-			this.drawEars(0, -45, finalColor, false); this.drawFace(0, -45, this.state.action === "beg", false);
+			this.drawkittyEars(0, -45, finalColor, false); this.drawkittyFace(0, -45, this.state.action === "beg", false);
 		}
 		else {
 			this.ctx.beginPath(); this.ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); this.ctx.fill();
 			this.ctx.beginPath(); this.ctx.arc(35, -15, 24, 0, Math.PI*2); this.ctx.fill();
-			this.drawEars(35, -15, finalColor, false);
+			this.drawkittyEars(35, -15, finalColor, false);
 			const walkCycle = (this.state.action.includes("walk")) ? Math.sin(t * 0.18) : 0;
 			[[-35, 12], [-12, 12], [10, 12], [28, 12]].forEach((p, i) => {
 				this.ctx.fillRect(p[0], p[1], 9, 16 + (i % 2 === 0 ? walkCycle : -walkCycle) * 8);
 			});
 			this.ctx.beginPath(); this.ctx.lineWidth = 8; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
 			this.ctx.moveTo(-45, 0); this.ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); this.ctx.stroke();
-			this.drawFace(35, -15, false, false);
+			this.drawkittyFace(35, -15, false, false);
 		}
 		this.ctx.restore();
 	}
 
-	drawEars(x, y, color, sleeping) {
+	drawkittyEars(x, y, color, sleeping) {
 		this.ctx.fillStyle = color;
 		if (sleeping) {
 			this.ctx.beginPath(); this.ctx.moveTo(x - 15, y - 8); this.ctx.lineTo(x - 22, y + 2); this.ctx.lineTo(x - 5, y + 5); this.ctx.fill();
@@ -452,7 +452,7 @@ export class StreamPet {
 		}
 	}
 
-	drawFace(x, y, begging, sleeping) {
+	drawkittyFace(x, y, begging, sleeping) {
 		if (sleeping) {
 			this.ctx.strokeStyle = "rgba(0,0,0,0.5)"; this.ctx.lineWidth = 2;
 			this.ctx.beginPath(); this.ctx.arc(x - 7, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); this.ctx.stroke();
