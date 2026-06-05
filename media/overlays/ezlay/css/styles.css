@@ -98,8 +98,8 @@ body.edit-mode .p8-widget {
     cursor: grab; 
 }
 body.edit-mode .p8-widget #companionCanvas { 
-			outline:1px dashed orange;
-        }
+	outline:1px dashed orange;
+}
 body.edit-mode .p8-widget:active { 
     cursor: grabbing; 
 }
