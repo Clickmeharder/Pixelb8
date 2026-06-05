@@ -396,8 +396,17 @@ export class StreamPet {
 
 	// --- UTILITIES ---
 	resize() {
-		this.canvas.width = window.innerWidth;
-		this.canvas.height = window.innerHeight;
+		// Look at the window client sizes
+		const parentW = window.innerWidth;
+		const parentH = window.innerHeight;
+
+		// 🛠️ BUFFER OVERFLOW FIX: Expand the internal resolution matrix out past boundaries
+		// This gives the drawing engine an extra 100px safe padding on all sides.
+		this.canvas.width = parentW + 200;
+		this.canvas.height = parentH + 200;
+
+		// Reset context state changes from previous size contexts
+		this.ctx.imageSmoothingEnabled = false;
 	}
 
 	getPos(pctX, pctY, offY = 0) {
@@ -441,11 +450,13 @@ export class StreamPet {
 
 		this.updateAI(this.state.animT);
 
-		// Isolate matrix layer transform parameters
 		this.ctx.save();
 		
+		// 🛠️ BUFFER OVERFLOW SHIFT: Push drawing coordinate grid 0,0 inward by 100px.
+		// This centers the standard screen coordinates while keeping the 100px bleed padding alive!
+		this.ctx.translate(100, 100);
+
 		// Map slider value range (-2 to 2) down to true visual multiplier values (0.5x to 2.0x)
-		// Slider value 0 acts as default 1.0x multiplier anchor
 		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
 		let scaleVal = 1.0;
 		if (rawSliderVal >= 0) {
@@ -454,9 +465,11 @@ export class StreamPet {
 			scaleVal = 1.0 + (rawSliderVal * 0.25); // Maps -2 to 0 -> 0.5x to 1.0x
 		}
 
-		// Anchor the zoom around the center-horizontal floor line
-		const anchorX = this.canvas.width / 2;
-		const anchorY = this.canvas.height - this.BASE_FLOOR_Y;
+		// Anchor calculations use relative workspace limits (subtracting overflow padding margins)
+		const visibleW = this.canvas.width - 200;
+		const visibleH = this.canvas.height - 200;
+		const anchorX = visibleW / 2;
+		const anchorY = visibleH - this.BASE_FLOOR_Y;
 
 		// Perform scale context adjustments from the custom floor anchor point
 		this.ctx.translate(anchorX, anchorY);
@@ -472,7 +485,7 @@ export class StreamPet {
 
 		this.drawKitty(this.state.animT, petScale);
 		
-		// Remove transform adjustments so DOM overlay items aren't displaced
+		// Remove scale transformations and bleed translations
 		this.ctx.restore();
 
 		this.updateUI();
@@ -534,13 +547,15 @@ export class StreamPet {
 		// 🌈 5. Nyan Drive Rainbow Trail Overlay
 		if (this.state.action === "nyan") {
 			const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
+			const visibleW = this.canvas.width - 200;
+			const visibleH = this.canvas.height - 200;
 			this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
 			for (let segment = 0; segment < 8; segment++) {
 				const segOffset = segment * 35;
 				const timeOffset = segment * 2;
 				colors.forEach((col, i) => {
 					this.ctx.fillStyle = col;
-					const segY = (this.state.nyanPhase === "flying") ? (this.canvas.height / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
+					const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
 					const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
 					this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
 				});
@@ -556,7 +571,6 @@ export class StreamPet {
 			if(p.life <= 0) this.state.particles.splice(i, 1);
 		});
 	}
-
 	drawKitty(t, scale) {
 		this.ctx.save();
 		let bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
@@ -615,7 +629,6 @@ export class StreamPet {
 		}
 		this.ctx.restore();
 	}
-
 	drawkittyEars(x, y, color, sleeping) {
 		this.ctx.fillStyle = color;
 		if (sleeping) {
@@ -696,15 +709,15 @@ export class StreamPet {
 			return true;
 		};
 
-		// Fix: Calculate positions using a fixed baseline relative to the canvas resolution
-		const floorLineY = this.canvas.height - this.BASE_FLOOR_Y;
+		// Workspace resolution math (canvas width bounds minus our padding frame boundaries)
+		const visibleW = this.canvas.width - 200;
+		const visibleH = this.canvas.height - 200;
+		const floorLineY = visibleH - this.BASE_FLOOR_Y;
 		
-		// Bowl, bed, litter, and tower are calculated as exact percentages of the standard canvas width
-		// Their baseline Y positions align precisely with the flat line where the cat walks
-		const bowlPos = { x: (this.state.layout.bowlX / 100) * this.canvas.width, y: floorLineY + this.state.layout.bowlY };
-		const bedPos = { x: (this.state.layout.bedX / 100) * this.canvas.width, y: floorLineY + this.state.layout.bedY };
-		const litPos = { x: (this.state.layout.litterX / 100) * this.canvas.width, y: floorLineY + this.state.layout.litterY };
-		const towerPos = { x: (this.state.layout.towerX / 100) * this.canvas.width, y: floorLineY + this.state.layout.towerY };
+		const bowlPos = { x: (this.state.layout.bowlX / 100) * visibleW, y: floorLineY + this.state.layout.bowlY };
+		const bedPos = { x: (this.state.layout.bedX / 100) * visibleW, y: floorLineY + this.state.layout.bedY };
+		const litPos = { x: (this.state.layout.litterX / 100) * visibleW, y: floorLineY + this.state.layout.litterY };
+		const towerPos = { x: (this.state.layout.towerX / 100) * visibleW, y: floorLineY + this.state.layout.towerY };
 
 		if (this.state.actionTimer > 0) this.state.actionTimer--;
 		if (this.state.hasFood && !["nyan", "eating", "potty", "kicking", "walk_to_kick", "walk_to_litter"].includes(this.state.action)) this.state.action = "walk_to_food";
@@ -712,18 +725,18 @@ export class StreamPet {
 		switch(this.state.action) {
 			case "nyan":
 				if (this.state.nyanPhase === "takeoff") {
-					const targetY = this.canvas.height / 2;
+					const targetY = visibleH / 2;
 					this.state.y += (targetY - this.state.y) * 0.05; this.state.x += this.state.facing * 5;
 					if (Math.abs(this.state.y - targetY) < 15) this.state.nyanPhase = "flying";
 				} else if (this.state.nyanPhase === "flying") {
-					this.state.x += this.state.facing * 10; this.state.y = (this.canvas.height / 2) + Math.sin(t * 0.1) * 100;
+					this.state.x += this.state.facing * 10; this.state.y = (visibleH / 2) + Math.sin(t * 0.1) * 100;
 					if (this.state.actionTimer < 80) this.state.nyanPhase = "landing";
 				} else if (this.state.nyanPhase === "landing") {
 					this.state.x += (this.state.originalPos.x - this.state.x) * 0.08; this.state.y += (this.state.originalPos.y - this.state.y) * 0.08;
 				}
 				if (this.state.nyanPhase !== "landing") {
-					if (this.state.x > this.canvas.width + 150) this.state.x = -150;
-					if (this.state.x < -150) this.canvas.width + 150;
+					if (this.state.x > visibleW + 150) this.state.x = -150;
+					if (this.state.x < -150) this.state.x = visibleW + 150;
 				}
 				if (this.state.actionTimer <= 0) {
 					this.stopSound('nyanSound');
@@ -790,7 +803,7 @@ export class StreamPet {
 				break;
 			case "walk":
 				this.state.x += this.state.facing * 1.2;
-				if (this.state.x < 100 || this.state.x > this.canvas.width - 100) this.state.facing *= -1;
+				if (this.state.x < 100 || this.state.x > visibleW - 100) this.state.facing *= -1;
 				if (this.state.actionTimer <= 0) { this.state.action = "idle"; this.state.actionTimer = 500; }
 				break;
 			case "sleep":
@@ -798,7 +811,7 @@ export class StreamPet {
 			case "dance":
 			case "special":
 				if (this.state.actionTimer <= 0) { 
-					if(this.state.action === "tower_sleep") this.state.y = this.canvas.height - this.BASE_FLOOR_Y;
+					if(this.state.action === "tower_sleep") this.state.y = floorLineY;
 					this.state.action = "idle"; 
 				}
 				break;
@@ -820,40 +833,64 @@ export class StreamPet {
 
 	loadData() {
 		const saved = localStorage.getItem("greta_ultra_v10");
-		if(saved) {
+		if (saved) {
 			const loaded = JSON.parse(saved);
-			this.state = {...this.state, ...loaded};
+			this.state = { ...this.state, ...loaded };
 			const now = Date.now();
 			const msOffline = now - this.state.lastHungerTick;
 			if (msOffline >= this.HUNGER_TICK_MS && !this.state.isDead) {
 				const pointsGained = Math.floor(msOffline / this.HUNGER_TICK_MS);
 				let potentialHunger = this.state.hunger + pointsGained;
-				if (potentialHunger >= 100) { this.state.hunger = 70; this.state.lastHungerTick = now; } 
-				else { this.state.hunger = potentialHunger; this.state.lastHungerTick = now - (msOffline % this.HUNGER_TICK_MS); }
+				if (potentialHunger >= 100) { 
+					this.state.hunger = 70; 
+					this.state.lastHungerTick = now; 
+				} else { 
+					this.state.hunger = potentialHunger; 
+					this.state.lastHungerTick = now - (msOffline % this.HUNGER_TICK_MS); 
+				}
 			}
 			
-			const nameIn = document.getElementById("nameInput"); if(nameIn) nameIn.value = this.state.name;
-			const checkT = document.getElementById("showTower"); if(checkT) checkT.checked = this.state.layout.showTower;
+			const nameIn = document.getElementById("nameInput"); 
+			if (nameIn) nameIn.value = this.state.name;
+			
+			const checkT = document.getElementById("showTower"); 
+			if (checkT) checkT.checked = this.state.layout.showTower;
+			
+			// --- ZOOM SLIDER SETUP ---
 			const zoomSlider = document.getElementById("canvasZoom");
 			const zoomDisplay = document.getElementById("zoomValue");
 			if (zoomSlider) {
-				zoomSlider.addEventListener("input", (e) => {
-					const val = parseFloat(e.target.value);
-					this.state.zoom = val;
-					
-					// Translate the step range (-2 to 2) to visual text label updates
-					let scaleVal = val >= 0 ? 1.0 + (val * 0.5) : 1.0 + (val * 0.25);
-					if (zoomDisplay) zoomDisplay.textContent = `${scaleVal.toFixed(1)}x`;
-				});
-				zoomSlider.addEventListener("change", () => {
-					this.saveData(); // Save configuration when user releases input handle
-				});
+				let savedZoom = this.state.zoom !== undefined ? this.state.zoom : 0;
+				zoomSlider.value = savedZoom;
+				let scaleVal = savedZoom >= 0 ? 1.0 + (savedZoom * 0.5) : 1.0 + (savedZoom * 0.25);
+				if (zoomDisplay) zoomDisplay.textContent = `${scaleVal.toFixed(1)}x`;
+
+				// Wire up listeners safely if not already assigned
+				if (!zoomSlider.dataset.listenerWired) {
+					zoomSlider.addEventListener("input", (e) => {
+						const val = parseFloat(e.target.value);
+						this.state.zoom = val;
+						let dynamicScale = val >= 0 ? 1.0 + (val * 0.5) : 1.0 + (val * 0.25);
+						if (zoomDisplay) zoomDisplay.textContent = `${dynamicScale.toFixed(1)}x`;
+					});
+					zoomSlider.addEventListener("change", () => {
+						this.saveData();
+					});
+					zoomSlider.dataset.listenerWired = "true";
+				}
 			}
+
+			// --- ENVIRONMENT LAYOUT METRICS MATRIX RE-SYNC ---
+			// Dynamically matches state layout properties (e.g. bedX, bedY) back to inputs (#bedX, #bedY)
 			Object.keys(this.state.layout).forEach(k => { 
+				if (k === 'showTower' || k === 'bedColor') return;
 				const el = document.getElementById(k);
-				if(el && k !== 'showTower') el.value = this.state.layout[k]; 
+				if (el) {
+					el.value = this.state.layout[k];
+				}
 			});
 		}
+	}
 		const el = document.getElementById("pet-widget");
         if (el && this.state.dimensions) {
             if (this.state.dimensions.width) el.style.width = this.state.dimensions.width;
