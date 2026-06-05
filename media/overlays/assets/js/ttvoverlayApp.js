@@ -422,6 +422,7 @@ const SETTINGS_SCHEMA = [
         ]
     }
 ];
+
 // Maps trigger elements to their target interface panels and optional callback lifecycle hooks
 const PANEL_NAVIGATION_MAPS = [
     { 
@@ -2810,43 +2811,17 @@ function bindRewardsManagerEvents() {
         });
     }
 
-    // 🎯 FIX: Bind Master Control Buttons inside the Rewards Manager layout
-    const mgrAlertBtn = document.getElementById("mgr-toggle-alert-btn");
-    if (mgrAlertBtn) {
-        mgrAlertBtn.addEventListener("click", () => {
-            alertHidden = !alertHidden;
-            if (typeof settings !== 'undefined') settings.alertHidden = alertHidden;
-            if (typeof syncAlertVisibilityState === "function") syncAlertVisibilityState();
-            if (typeof syncAllToggleUI === "function") syncAllToggleUI();
-        });
-    }
-
-    const mgrRewardsBtn = document.getElementById("mgr-toggle-rewards-btn");
-    if (mgrRewardsBtn) {
-        mgrRewardsBtn.addEventListener("click", () => {
-            // Toggle local scope if it exists, otherwise mutate settings container directly
-            if (typeof rewardsEnabled !== 'undefined') {
-                rewardsEnabled = !rewardsEnabled;
-                if (typeof settings !== 'undefined') settings.rewardsEnabled = rewardsEnabled;
-            } else if (typeof settings !== 'undefined') {
-                settings.rewardsEnabled = !settings.rewardsEnabled;
-            }
-            if (typeof saveSettings === "function") saveSettings();
-            if (typeof syncAllToggleUI === "function") syncAllToggleUI();
-        });
-    }
-
     // Populate dropdowns AFTER the panel is fully loaded
     setTimeout(() => {
         if (typeof populateCustomDropdowns === "function") {
             populateCustomDropdowns();
         }
-        // Force sync state across all panels on initialization
-        if (typeof syncAllToggleUI === "function") {
-            syncAllToggleUI();
+        if (typeof updateManagerBadgesUI === "function") {
+            updateManagerBadgesUI();
         }
     }, 150);
-}// ==========================================
+}
+// ==========================================
 // --- BITS CONFIGURATION ENGINE ---
 // ==========================================
 function bindBitManagerEvents() {
