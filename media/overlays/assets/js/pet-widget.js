@@ -1071,8 +1071,7 @@ export class StreamPet {
             this.say("Already healthy! ✨");
         }
     }
-
-    updateAI(t) {
+	updateAI(t) {
         if (this.activePet.isDead) return;
         this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
         this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
@@ -1194,19 +1193,50 @@ export class StreamPet {
                 break;
 
             case "walk_to_litter":
-                let litterDestY = (this.registry.activeSpecies === "spider") ? 70 : litPos.y;
-                if (walkToPoint(litPos.x, litterDestY)) { 
-                    this.state.action = "potty"; 
-                    this.state.actionTimer = 120; 
+                if (this.registry.activeSpecies === "goldfish") {
+                    // 🐟 Fish routing step: Pick a completely random open coordinate segment inside the tank environment
+                    if (!this.state.aquaticPottyTarget) {
+                        this.state.aquaticPottyTarget = {
+                            x: 100 + Math.random() * (visibleW - 200),
+                            y: 120 + Math.random() * (visibleH - 240)
+                        };
+                    }
+                    if (walkToPoint(this.state.aquaticPottyTarget.x, this.state.aquaticPottyTarget.y, 1.8)) {
+                        this.state.aquaticPottyTarget = null; // Clean target reference out
+                        this.state.action = "potty";
+                        this.state.actionTimer = 90;
+                    }
+                } else {
+                    // Standard floor anchor animal pathing
+                    let litterDestY = (this.registry.activeSpecies === "spider") ? 70 : litPos.y;
+                    if (walkToPoint(litPos.x, litterDestY)) { 
+                        this.state.action = "potty"; 
+                        this.state.actionTimer = 120; 
+                    }
                 }
                 break;
 
             case "potty":
                 if (this.state.actionTimer <= 0) { 
-                    this.activePet.poops.push({ox: Math.random()*100, isCeil: (this.registry.activeSpecies === "spider")}); 
-                    this.activePet.digestive = 0; 
-                    this.state.action = (this.registry.activeSpecies === "spider") ? "idle" : "walk_to_kick"; 
-                    if (this.registry.activeSpecies === "spider") this.say("Dropped silk line! 🕸️");
+                    if (this.registry.activeSpecies === "goldfish") {
+                        // Drop a standalone floating object tracking coordinate bundle
+                        this.activePet.poops.push({
+                            x: this.state.x - (this.state.facing * 10),
+                            y: this.state.y + 5,
+                            isCeil: false,
+                            ox: Math.random() * 100,
+                            swimOffset: Math.random() * Math.PI * 2
+                        });
+                        this.activePet.digestive = 0;
+                        this.state.action = "idle"; // Bypass sand kicking loops completely
+                        this.state.actionTimer = 250;
+                    } else {
+                        // Land animal/spider legacy execution drop arrays
+                        this.activePet.poops.push({ox: Math.random()*100, isCeil: (this.registry.activeSpecies === "spider")}); 
+                        this.activePet.digestive = 0; 
+                        this.state.action = (this.registry.activeSpecies === "spider") ? "idle" : "walk_to_kick"; 
+                        if (this.registry.activeSpecies === "spider") this.say("Dropped silk line! 🕸️");
+                    }
                 }
                 break;
 
@@ -1336,7 +1366,6 @@ export class StreamPet {
                 break;
         }
     }
-
     animate = () => {
         this.state.animT++;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
