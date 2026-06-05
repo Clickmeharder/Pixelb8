@@ -188,30 +188,41 @@ export class StreamPet {
     // ==========================================
 	// ⭐ FIX: Added internal Snap Placement handler inside the class structure
     initPetPlacement() {
-        if (!this.canvas) return;
-        const visibleW = this.canvas.width;
-        const visibleH = this.canvas.height;
-        
-        const CEIL_Y = 30; 
-        const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
+		if (!this.canvas) return;
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
+		
+		// Environment Edge Constraints
+		const CEIL_Y = 30; 
+		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
 
-        this.state.action = "idle";
-        this.state.actionTimer = 200;
+		// 🛏️ Dynamic Bed Tracking Coordinates
+		// Convert layout grid percentage integers (e.g., 20, 100) directly into canvas pixel positions
+		const bedPixelX = (this.state.layout.bedX / 100) * visibleW;
+		const bedPixelY = (this.state.layout.bedY / 100) * visibleH;
 
-        if (this.registry.activeSpecies === "spider") {
-            this.state.x = visibleW / 2;
-            this.state.y = CEIL_Y;
-        } else if (this.registry.activeSpecies === "goldfish") {
-            this.state.x = visibleW / 2;
-            this.state.y = visibleH / 2; // Perfectly centered vertical horizon lane
-        } else {
-            this.state.x = visibleW / 2;
-            this.state.y = FLOOR_Y; // Ground level for kitty/puppy
-        }
+		this.state.action = "idle";
+		this.state.actionTimer = 200;
 
-        this.state.originalPos = { x: this.state.x, y: this.state.y };
-        console.log(`🎯 [Pet Positioner]: Snapped ${this.registry.activeSpecies} cleanly to start position.`);
-    }
+		if (this.registry.activeSpecies === "spider") {
+			// Spiders still drop onto the ceiling directly above the bed anchor
+			this.state.x = bedPixelX;
+			this.state.y = CEIL_Y;
+		} else if (this.registry.activeSpecies === "goldfish") {
+			// Goldfish sit comfortably in their horizon swimming lane directly above the bed
+			this.state.x = bedPixelX;
+			this.state.y = visibleH / 2; 
+		} else {
+			// Terrestrial pets (Puppy, Kitty) spawn directly curled up on the ground floor bed line
+			this.state.x = bedPixelX;
+			// If your custom bed layout slider pushes y to 100%, match the true ground level
+			this.state.y = this.state.layout.bedY >= 100 ? FLOOR_Y : bedPixelY;
+		}
+
+		// Lock position values into the system memory cache
+		this.state.originalPos = { x: this.state.x, y: this.state.y };
+		console.log(`🎯 [Pet Positioner]: Snapped ${this.registry.activeSpecies} cleanly to the Bed matching coordinate axis.`);
+	}
     initContainerListeners() {
         if (!this.widgetContainer) return;
 
