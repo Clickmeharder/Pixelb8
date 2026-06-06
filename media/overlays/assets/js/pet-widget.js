@@ -126,7 +126,6 @@ export class StreamPet {
 
         // Shared Local Viewport Mechanics and Runtime Settings Structure
         this.state = {
-            twitchUser: "",
             hideBorder: false,
             hideStatus: false,
             hideNameplate: false,
