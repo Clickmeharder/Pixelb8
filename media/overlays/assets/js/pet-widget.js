@@ -1613,48 +1613,45 @@ export class StreamPet {
 				break;
 		}
 	}
-    animate = () => {
-        this.state.animT++;
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	animate = () => {
+		this.state.animT++;
+		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.updateAI(this.state.animT);
+		this.updateAI(this.state.animT);
 
-        this.ctx.save();
-        let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
-        let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
+		this.ctx.save();
+		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
+		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
 
-        const anchorX = this.canvas.width / 2;
-        const anchorY = this.canvas.height - this.BASE_FLOOR_Y;
+		const anchorX = this.canvas.width / 2;
+		const anchorY = this.canvas.height - this.BASE_FLOOR_Y;
 
-        this.ctx.translate(anchorX, anchorY);
-        this.ctx.scale(scaleVal, scaleVal);
-        this.ctx.translate(-anchorX, -anchorY);
+		this.ctx.translate(anchorX, anchorY);
+		this.ctx.scale(scaleVal, scaleVal);
+		this.ctx.translate(-anchorX, -anchorY);
 
-        this.drawEnvironment(this.state.animT);
+		this.drawEnvironment(this.state.animT);
 
-        let petScale = (this.activePet.stage === "Baby") ? 0.6 : (this.activePet.stage === "Juvenile") ? 0.8 : 1.0;
-        
-        // Determine tease state for renderer
-        let isTeased = (this.state.action === "teased");
-        
-        // ========================================================
-        // RENDERING SPECIES DELEGATION ROUTER
-        // ========================================================
-        if (this.registry.activeSpecies === "kitty") {
-            this.drawKitty(this.state.animT, petScale, isTeased);
-        } else if (this.registry.activeSpecies === "puppy") {
-            this.drawPuppy(this.state.animT, petScale, isTeased);
-        } else if (this.registry.activeSpecies === "spider") {
-            this.drawSpider(this.state.animT, petScale, isTeased);
-        } else if (this.registry.activeSpecies === "goldfish") {
-            this.drawGoldfish(this.state.animT, petScale, isTeased);
-        }
-        
-        this.ctx.restore();
-        this.updateUI();
-        requestAnimationFrame(this.animate);
-    }
-
+		let petScale = (this.activePet.stage === "Baby") ? 0.6 : (this.activePet.stage === "Juvenile") ? 0.8 : 1.0;
+		
+		// ========================================================
+		// RENDERING SPECIES DELEGATION ROUTER
+		// (No changes needed to existing draw calls!)
+		// ========================================================
+		if (this.registry.activeSpecies === "kitty") {
+			this.drawKitty(this.state.animT, petScale);
+		} else if (this.registry.activeSpecies === "puppy") {
+			this.drawPuppy(this.state.animT, petScale);
+		} else if (this.registry.activeSpecies === "spider") {
+			this.drawSpider(this.state.animT, petScale);
+		} else if (this.registry.activeSpecies === "goldfish") {
+			this.drawGoldfish(this.state.animT, petScale);
+		}
+		
+		this.ctx.restore();
+		this.updateUI();
+		requestAnimationFrame(this.animate);
+	}
     drawYarn(x, y, t) {
         const roll = Math.sin(t * 0.15) * 40;
         this.ctx.save();
@@ -1914,8 +1911,12 @@ export class StreamPet {
     // CORE VISUAL RENDERING ROUTERS PER SPECIES
     // ==========================================
     
-    drawKitty(t, scale) {
+	drawKitty(t, scale) {
         this.ctx.save();
+        
+        // Check for teased state
+        const isTeased = (this.state.action === "teased");
+        
         const stateOffsets = { "sleep": 15, "tower_sleep": 15, "walk": 5, "idle": 0 };
         const baseOffset = stateOffsets[this.state.action] || 0;
         const bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
@@ -1936,7 +1937,8 @@ export class StreamPet {
             this.ctx.beginPath(); this.ctx.arc(15, 8, 22, 0, Math.PI*2); this.ctx.fill();
             this.ctx.beginPath(); this.ctx.lineWidth = 11; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
             this.ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); this.ctx.stroke();
-            this.drawkittyEars(15, 8, finalColor, true); this.drawkittyFace(15, 8, false, true);
+            this.drawkittyEars(15, 8, finalColor, true); 
+            this.drawkittyFace(15, 8, false, true);
         } else if (this.state.action === "special" || this.state.action === "scratching" || this.state.action === "trick") {
             if (this.state.action === "special") this.drawYarn(30, 20, t);
             let rot = (this.state.action === "trick") ? (t * 0.25) : 0;
@@ -1950,7 +1952,9 @@ export class StreamPet {
             } else {
                 this.ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15); this.ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
             }
-            this.drawkittyEars(0, -45, finalColor, false); this.drawkittyFace(0, -45, false, false);
+            this.drawkittyEars(0, -45, finalColor, false); 
+            // Pass isTeased here
+            this.drawkittyFace(0, -45, false, false, isTeased);
         } else {
             this.ctx.beginPath(); this.ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); this.ctx.fill();
             this.ctx.beginPath(); this.ctx.arc(35, -15, 24, 0, Math.PI*2); this.ctx.fill();
@@ -1961,11 +1965,11 @@ export class StreamPet {
             });
             this.ctx.beginPath(); this.ctx.lineWidth = 8; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
             this.ctx.moveTo(-45, 0); this.ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); this.ctx.stroke();
-            this.drawkittyFace(35, -15, this.state.action === "beg", false);
+            // Pass isTeased here
+            this.drawkittyFace(35, -15, this.state.action === "beg", false, isTeased);
         }
         this.ctx.restore();
     }
-    
     drawkittyEars(x, y, color, sleeping) {
         this.ctx.fillStyle = color;
         if (sleeping) {
@@ -2002,16 +2006,19 @@ export class StreamPet {
 	drawPuppy(t, scale) {
 		this.ctx.save();
 		
-		// 1. DANCE LOGIC: Instead of just jumping, we rotate the whole body 
-		// to simulate a happy wiggle (swaying side-to-side)
+		// 1. STATE LOGIC
 		const isDancing = (this.state.action === "dance");
+		const isTeased = (this.state.action === "teased");
+		
+		// If teased, add a rapid shake effect to the whole body
+		const shake = isTeased ? Math.sin(t * 2) * 5 : 0;
 		const wiggle = isDancing ? Math.sin(t * 0.4) * 0.2 : 0; 
 		
 		// Apply translation first
-		this.ctx.translate(this.state.x, this.state.y);
+		this.ctx.translate(this.state.x + shake, this.state.y);
 		
-		// Apply the wiggle rotation around the center
-		this.ctx.rotate(wiggle);
+		// Apply the wiggle/shake rotation
+		this.ctx.rotate(wiggle + (isTeased ? Math.sin(t) * 0.1 : 0));
 		
 		// Trick rotation (if applicable)
 		let rotationAngle = (this.state.action === "trick") ? (t * 0.2) : 0;
@@ -2036,15 +2043,18 @@ export class StreamPet {
 			this.ctx.beginPath(); this.ctx.ellipse(-5, 2, 45, 28, 0, 0, Math.PI*2); this.ctx.fill();
 			this.ctx.beginPath(); this.ctx.arc(30, -22, 22, 0, Math.PI*2); this.ctx.fill();
 			
-			this.ctx.fillStyle = "rgba(255,255,255,0.2)";
+			// Eyes (Change color to red if teased)
+			this.ctx.fillStyle = isTeased ? "#ff0000" : "rgba(255,255,255,0.2)";
 			this.ctx.beginPath(); this.ctx.ellipse(40, -18, 12, 9, 0, 0, Math.PI*2); this.ctx.fill();
 			this.ctx.fillStyle = "black";
 			this.ctx.beginPath(); this.ctx.arc(48, -20, 3, 0, Math.PI*2); this.ctx.fill();
 
+			// Ears (If teased, draw them slightly more upright/alert)
 			this.ctx.fillStyle = baseColor;
-			this.ctx.beginPath(); this.ctx.ellipse(22, -24, 8, 18, 0.2, 0, Math.PI*2); this.ctx.fill();
+			const earAngle = isTeased ? -0.5 : 0.2;
+			this.ctx.beginPath(); this.ctx.ellipse(22 + (isTeased ? 5 : 0), -24, 8, 18, earAngle, 0, Math.PI*2); this.ctx.fill();
 			this.ctx.fillStyle = "#3e2723";
-			this.ctx.beginPath(); this.ctx.ellipse(22, -22, 5, 12, 0.2, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.beginPath(); this.ctx.ellipse(22 + (isTeased ? 5 : 0), -22, 5, 12, earAngle, 0, Math.PI*2); this.ctx.fill();
 
 			this.ctx.fillStyle = "white";
 			this.ctx.beginPath(); this.ctx.arc(34, -28, 5, 0, Math.PI*2); this.ctx.fill();
@@ -2073,19 +2083,23 @@ export class StreamPet {
 		}
 		this.ctx.restore();
 	}
-
     // ==========================================
     // NEW COMPANION ADDITION 2: SPIDER COMPANION
     // ==========================================
 	drawSpider(t, scale) {
 		this.ctx.save();
 		
-		// Translation to position the spider
-		this.ctx.translate(this.state.x, this.state.y);
+		const isTeased = (this.state.action === "teased");
+		
+		// Translation to position the spider (adds shake if teased)
+		const shakeX = isTeased ? Math.sin(t * 0.5) * 8 : 0;
+		this.ctx.translate(this.state.x + shakeX, this.state.y);
 
-		// Apply "Dance" rotation: a slight wiggle back and forth
+		// Apply "Dance" or "Teased" rotation
 		if (this.state.action === "dance") {
 			this.ctx.rotate(Math.sin(t * 0.5) * 0.5);
+		} else if (isTeased) {
+			this.ctx.rotate(Math.sin(t * 0.8) * 0.3);
 		}
 
 		this.ctx.scale(this.state.facing * scale, scale);
@@ -2094,9 +2108,9 @@ export class StreamPet {
 		if (this.activePet.isDead) this.ctx.globalAlpha = 0.3;
 		this.ctx.fillStyle = spiderColor;
 		this.ctx.strokeStyle = spiderColor;
-		this.ctx.lineWidth = 3.5; // Slightly thicker for legs
+		this.ctx.lineWidth = 3.5;
 
-		// Ceil ceiling support hanging web element thread lines
+		// Web thread
 		this.ctx.strokeStyle = "rgba(255,255,255,0.15)";
 		this.ctx.lineWidth = 1;
 		this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0, -this.state.y); this.ctx.stroke();
@@ -2105,12 +2119,9 @@ export class StreamPet {
 		this.ctx.strokeStyle = spiderColor;
 		this.ctx.lineWidth = 3.5;
 
-		// Base structural body spheres
 		this.ctx.beginPath(); this.ctx.arc(-16, 0, 18, 0, Math.PI*2); this.ctx.fill();
 		this.ctx.beginPath(); this.ctx.arc(8, -2, 12, 0, Math.PI*2); this.ctx.fill();
 
-		// Dynamic multi-leg procedural animation
-		// Define leg motion based on action
 		const isWalking = (this.state.action === "walk");
 		const isDancing = (this.state.action === "dance");
 		
@@ -2118,18 +2129,16 @@ export class StreamPet {
 		
 		for(let i = 0; i < 4; i++) {
 			let offsetPhase = i * 0.4;
-			// Legs move much faster and wider during dance
+			// Legs move faster/erratically when teased
 			let dynamicSwing = isWalking ? Math.sin(t * 0.22 + offsetPhase) * 12 : 
-							   (isDancing ? Math.sin(t * 0.6 + offsetPhase) * 25 : 0);
+							   (isDancing ? Math.sin(t * 0.6 + offsetPhase) * 25 : (isTeased ? Math.sin(t * 1.5) * 15 : 0));
 
-			// Left Side Legs
 			this.ctx.beginPath();
 			this.ctx.moveTo(0, -2);
 			this.ctx.lineTo(-10 - (i*8), -24 - (Math.sin(t*0.1 + i)*4) + dynamicSwing);
 			this.ctx.lineTo(-20 - (i*14), 18 + legWave);
 			this.ctx.stroke();
 
-			// Right Side Legs
 			this.ctx.beginPath();
 			this.ctx.moveTo(4, -2);
 			this.ctx.lineTo(15 + (i*8), -22 - (Math.cos(t*0.1 + i)*4) - dynamicSwing);
@@ -2137,10 +2146,9 @@ export class StreamPet {
 			this.ctx.stroke();
 		}
 
-		// Spider Red Arachnid Eye Clusters
-		this.ctx.fillStyle = this.activePet.isDead ? "black" : "#ff1744";
-		// If dancing, make the eyes "pulse" by changing size based on time
-		let eyePulse = isDancing ? Math.abs(Math.sin(t * 0.2)) * 1.5 : 1;
+		// Eyes: Pulse faster when teased
+		this.ctx.fillStyle = this.activePet.isDead ? "black" : (isTeased ? "#ff00ff" : "#ff1744");
+		let eyePulse = (isDancing || isTeased) ? Math.abs(Math.sin(t * (isTeased ? 0.5 : 0.2))) * 1.5 : 1;
 		let eyeOffsets = [[12, -6], [16, -5], [14, -2], [18, -1], [10, -2], [14, 2]];
 		eyeOffsets.forEach(pos => {
 			this.ctx.beginPath(); this.ctx.arc(pos[0], pos[1], 1.5 * eyePulse, 0, Math.PI*2); this.ctx.fill();
@@ -2156,40 +2164,37 @@ export class StreamPet {
 	drawGoldfish(t, scale) {
 		this.ctx.save();
 		
-		// Translation to position the fish
-		this.ctx.translate(this.state.x, this.state.y);
+		const isTeased = (this.state.action === "teased");
+		
+		// Frantic shaking when teased
+		const shakeX = isTeased ? Math.sin(t * 0.8) * 10 : 0;
+		const shakeY = isTeased ? Math.cos(t * 0.9) * 5 : 0;
+		this.ctx.translate(this.state.x + shakeX, this.state.y + shakeY);
 
-		// Apply rotation only if in 'dance' mode (somersault effect)
-		// t * 0.2 makes it spin based on time
 		if (this.state.action === "dance") {
 			this.ctx.rotate(t * 0.2);
 		}
 
-		// Apply scaling/facing
 		this.ctx.scale(this.state.facing * scale, scale);
 
 		let fishColor = this.activePet.isDead ? "#e0e0e0" : this.activePet.color;
 		if (this.activePet.isDead) {
 			this.ctx.globalAlpha = 0.4;
-			this.ctx.rotate(Math.PI); // Float inverted upside down if deceased
+			this.ctx.rotate(Math.PI);
 		}
 		this.ctx.fillStyle = fishColor;
 
-		// Main structural streamlined fluid teardrop body mesh representation
 		this.ctx.beginPath();
 		this.ctx.ellipse(0, 0, 36, 22, 0, 0, Math.PI * 2);
 		this.ctx.fill();
 
-		// Elegant wavy tail fin architecture loops
-		const tailWiggle = Math.sin(t * 0.28) * 12;
+		const tailWiggle = Math.sin(t * (isTeased ? 0.6 : 0.28)) * (isTeased ? 25 : 12);
 		this.ctx.beginPath();
 		this.ctx.moveTo(-32, 0);
 		this.ctx.bezierCurveTo(-55, -25 + tailWiggle, -65, -10 + tailWiggle, -58, tailWiggle);
 		this.ctx.bezierCurveTo(-65, 10 + tailWiggle, -55, 25 + tailWiggle, -32, 0);
-		this.ctx.fillStyle = fishColor;
 		this.ctx.fill();
 
-		// Secondary sheer internal accent layer mapping lines for fins
 		this.ctx.fillStyle = "rgba(255,255,255,0.3)";
 		this.ctx.beginPath();
 		this.ctx.moveTo(-32, 0);
@@ -2197,32 +2202,27 @@ export class StreamPet {
 		this.ctx.lineTo(-50, 15 + tailWiggle);
 		this.ctx.fill();
 
-		// Dorsal Top fin architecture layer
 		this.ctx.fillStyle = fishColor;
 		this.ctx.beginPath();
 		this.ctx.moveTo(-10, -20);
 		this.ctx.bezierCurveTo(-5, -38, -25, -32, -22, -14);
 		this.ctx.fill();
 
-		// Pectoral steering fin animation wave parameters
-		const finWave = Math.sin(t * 0.12) * 8;
+		const finWave = Math.sin(t * (isTeased ? 0.4 : 0.12)) * (isTeased ? 20 : 8);
 		this.ctx.save();
 		this.ctx.translate(10, 8);
 		this.ctx.rotate(finWave * Math.PI / 180);
 		this.ctx.beginPath(); this.ctx.ellipse(0, 0, 14, 8, 0.5, 0, Math.PI * 2); this.ctx.fill();
 		this.ctx.restore();
 
-		// Large glassy aquatic eye sockets arrays logic
-		this.ctx.fillStyle = "white";
+		// Angry eyes when teased
+		this.ctx.fillStyle = isTeased ? "#ff0000" : "white";
 		this.ctx.beginPath(); this.ctx.arc(20, -6, 7, 0, Math.PI * 2); this.ctx.fill();
 		this.ctx.fillStyle = "black";
 		this.ctx.beginPath(); this.ctx.arc(22, -6, 3.5, 0, Math.PI * 2); this.ctx.fill();
-		this.ctx.fillStyle = "white";
-		this.ctx.beginPath(); this.ctx.arc(24, -8, 1, 0, Math.PI * 2); this.ctx.fill(); // Highlight node
 
 		if (this.state.action === "special") this.drawYarn(30, -5, t);
 
 		this.ctx.restore();
 	}
-
 }
