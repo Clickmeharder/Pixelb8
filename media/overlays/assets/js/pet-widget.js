@@ -591,10 +591,8 @@ export class StreamPet {
                     break;
 
                 case 'nyan':
-                    if (isAdmin) {
-                        this.triggerNyan();
-                        sendNotice(`🌈 [Pet]: NYAN OVERDRIVE ACTIVATED BY STAFF!`);
-                    }
+                    this.triggerNyan();
+                    sendNotice(`🌈 [Pet]: NYAN OVERDRIVE ACTIVATED BY STAFF!`);
                     break;
 
                 case 'tease':
