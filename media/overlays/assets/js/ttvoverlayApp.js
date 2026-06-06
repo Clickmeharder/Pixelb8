@@ -2349,9 +2349,29 @@ function startTwitch(channel, token) {
     };
 
     // --- CHANNEL POINT REWARD TRIGGER ---
-    ComfyJS.onReward = (user, reward, cost, message, extra) => {
+	ComfyJS.onReward = (user, reward, cost, message, extra) => {
         if (!rewardsEnabled) return;
-        triggerAlertPipeline(reward, user, cost, message);
+        
+        // 1. Normalize the reward name to look up in our command mapping
+        const lookupKey = reward.toLowerCase().trim();
+
+        // 2. Check if an active module (like StreamPet) registered a matching interaction
+        if (commandsRegistry && commandsRegistry[lookupKey]) {
+            console.log(`🎯 [Pet Sync]: Channel point match found for "${lookupKey}"! Triggering module...`);
+            
+            // Build mock flags matching your standard chat handler layout
+            const mockFlags = { broadcaster: false, mod: false, subscriber: false };
+            
+            try {
+                // Fire the module's execution loop directly
+                commandsRegistry[lookupKey].execute(user, message, mockFlags);
+            } catch (err) {
+                console.error(`❌ [Pet Sync]: Failed to execute custom reward module logic for !${lookupKey}:`, err);
+            }
+        } else {
+            // 3. Fallback to standard graphic/audio overlay engine if no widget code intercepts it
+            triggerAlertPipeline(reward, user, cost, message);
+        }
     };
 	ComfyJS.onCheer = (user, message, bits, flags, extra) => {
 		if (!bitsEnabled) return; 

@@ -452,37 +452,95 @@ export class StreamPet {
     // ==========================================
     // SECTION 4: CHAT COMMAND ROUTER
     // ==========================================
-    getCommands(sendNotice) {
+	getCommands(sendNotice) {
         const petExecution = (user, message, flags) => {
-            const parts = message.trim().toLowerCase().split(/\s+/);
+            // 1. Clean the incoming input text
+            const incomingInput = message.trim().toLowerCase();
+            const parts = incomingInput.split(/\s+/);
             const subCommand = parts[0];
-            const isAdmin = flags.broadcaster || flags.mod;
+            const isAdmin = flags ? (flags.broadcaster || flags.mod) : false;
 
-            let actualSub = subCommand;
-            
-            if (this.activePet.isDead && actualSub !== 'revive' && actualSub !== 'status' && actualSub !== 'stats') {
+            // =========================================================================
+            // 🗺️ THE ALIAS DICTIONARY (Maps all custom variations to core actions)
+            // =========================================================================
+            const aliasMap = {
+                // Help & Info variations
+                'help': 'help', 'h': 'help',
+                'rewards': 'rewards',
+
+                // Tease variations
+                'tease': 'tease', 'tease pet': 'tease', 
+                'pulltail': 'tease', 'pull tail': 'tease', 'pull pets tail': 'tease',
+                'tapglass': 'tease', 'tap glass': 'tease',
+
+                // Feed variations
+                'feed': 'feed', 'feed pet': 'feed', 'food': 'feed', 'fish': 'feed', 
+                'meat': 'feed', 'bugs': 'feed', 'flakes': 'feed',
+
+                // Play variations
+                'play': 'play', 'yarn': 'play', 'ball': 'play', 'web': 'play',
+
+                // Trick variations
+                'trick': 'trick',
+
+                // Dance variations
+                'dance': 'dance',
+
+                // Treat variations
+                'treat': 'treat', 'nom': 'treat',
+
+                // Status variations
+                'status': 'status', 'stats': 'status',
+
+                // Admin variations
+                'nyan': 'nyan', 'rainbow': 'nyan',
+                'revive': 'revive',
+                'clear': 'clear', 'clean': 'clear',
+                'species': 'species'
+            };
+
+            // 2. Resolve the action: check if the FULL message matches a multi-word channel point first,
+            //    otherwise fall back to checking the first word.
+            let actualSub = aliasMap[incomingInput] || aliasMap[subCommand] || null;
+
+            // Death boundary guard check
+            if (this.activePet.isDead && actualSub !== 'revive' && actualSub !== 'status') {
                 sendNotice(`🪦 [Pet]: ${this.activePet.name} is currently deceased. Use !pet revive to save them!`);
                 return;
             }
 
             if (!actualSub) {
-                sendNotice(`🐾 [Pet]: Available options: !pet [feed | play | dance | treat | status | trick]`);
+                sendNotice(`🐾 [Pet]: Option not recognized. Try: !pet [feed | play | dance | treat | status | trick]`);
                 return;
             }
 
+            // =========================================================================
+            // 🎬 STREAMLINED CORE SWITCH
+            // =========================================================================
             switch (actualSub) {
                 case 'help':
-                case 'h':
-                    sendNotice(`🐾 [Pet Help]: !pet feed | !pet play | !pet dance | !pet treat | !pet status | !pet trick`);
-                    if (isAdmin) sendNotice(`🛠️ [Admin]: !pet [nyan | revive | clear | species]`);
+                    const userCommands = ['feed', 'play', 'dance', 'treat', 'status', 'trick'];
+                    sendNotice(`🐾 [Pet Help]: Options: ${userCommands.map(c => `!pet ${c}`).join(' | ')}`);
+                    if (isAdmin) sendNotice(`🛠️ [Admin]: !pet [nyan | revive | clear | species | rewards]`);
+                    break;
+
+                case 'rewards':
+                    if (!isAdmin) return;
+
+                    // Invert the dictionary dynamically to build matching collections
+                    const groups = {};
+                    Object.entries(aliasMap).forEach(([trigger, coreAction]) => {
+                        if (!groups[coreAction]) groups[coreAction] = [];
+                        groups[coreAction].push(trigger);
+                    });
+
+                    sendNotice(`🎁 [Pet Reward Guide]: Create Twitch Channel Point Rewards with these exact names:`);
+                    if (groups['feed']) sendNotice(`  🍏 Feed Pet: ${groups['feed'].map(t => `"${t}"`).join(', ')}`);
+                    if (groups['tease']) sendNotice(`  😠 Tease Pet: ${groups['tease'].map(t => `"${t}"`).join(', ')}`);
+                    if (groups['play']) sendNotice(`  🥎 Play Pet: ${groups['play'].map(t => `"${t}"`).join(', ')}`);
                     break;
 
                 case 'feed':
-                case 'food':
-                case 'fish':
-                case 'meat':
-                case 'bugs':
-                case 'flakes':
                     if (!this.state.hasFood) {
                         this.state.hasFood = true;
                         if (this.registry.activeSpecies === "kitty") this.say("Food! 🐟");
@@ -496,9 +554,6 @@ export class StreamPet {
                     break;
 
                 case 'play':
-                case 'yarn':
-                case 'ball':
-                case 'web':
                     this.state.action = "special";
                     this.state.actionTimer = 350;
                     if (this.registry.activeSpecies === "kitty") this.say("Play! 🧶");
@@ -515,7 +570,6 @@ export class StreamPet {
                     break;
 
                 case 'treat':
-                case 'nom':
                     this.activePet.hunger = Math.max(0, this.activePet.hunger - 5);
                     this.state.action = "special";
                     this.state.actionTimer = 200;
@@ -523,7 +577,6 @@ export class StreamPet {
                     break;
 
                 case 'trick':
-                    if (this.activePet.isDead) return;
                     this.state.action = "trick";
                     this.state.actionTimer = 250;
                     if (this.registry.activeSpecies === "puppy") { this.say("BACKFLIP! 🤸"); this.activePet.exp += 25; }
@@ -533,49 +586,34 @@ export class StreamPet {
                     break;
 
                 case 'status':
-                case 'stats':
                     let healthTxt = this.activePet.poops.length > 5 ? "SICK" : "HEALTHY";
                     sendNotice(`🐾 [${this.activePet.name}]: Species: ${this.registry.activeSpecies.toUpperCase()} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}% | Mood: ${healthTxt} | EXP: ${this.activePet.exp}`);
                     break;
 
                 case 'nyan':
-                case 'rainbow':
                     if (isAdmin) {
                         this.triggerNyan();
                         sendNotice(`🌈 [Pet]: NYAN OVERDRIVE ACTIVATED BY STAFF!`);
                     }
                     break;
-				case 'tease':
-				case 'pulltail':
-				case 'tapglass':
-					this.teasePet();
-					sendNotice(`😠 [Pet]: ${user} teased ${this.activePet.name}!`);
-					break;
-				case 'species':
-					// Check if the user is providing a valid species name
-					if (isAdmin && parts[1]) {
-						// Map common inputs to your internal keys
-						const speciesMap = {
-							"kitty": "kitty",
-							"kitten": "kitty",
-							"puppy": "puppy",
-							"dog": "puppy",
-							"spider": "spider",
-							"fish": "goldfish",
-							"goldfish": "goldfish"
-						};
 
-						const targetKey = speciesMap[parts[1].toLowerCase()];
+                case 'tease':
+                    this.teasePet();
+                    sendNotice(`😠 [Pet]: ${user} teased ${this.activePet.name}!`);
+                    break;
 
-						if (targetKey && this.PET_SPECIES.includes(targetKey)) {
-							// Use the centralized method that handles snapping and UI sync
-							this.selectSpecies(targetKey); 
-							sendNotice(`🧬 [Pet]: Species hot-swapped to ${targetKey.toUpperCase()}!`);
-						} else {
-							sendNotice(`❌ [Pet]: Unknown species. Try: kitty, puppy, spider, or fish.`);
-						}
-					}
-					break;
+                case 'species':
+                    if (isAdmin && parts[1]) {
+                        const speciesMap = { "kitty": "kitty", "kitten": "kitty", "puppy": "puppy", "dog": "puppy", "spider": "spider", "fish": "goldfish", "goldfish": "goldfish" };
+                        const targetKey = speciesMap[parts[1].toLowerCase()];
+                        if (targetKey && this.PET_SPECIES.includes(targetKey)) {
+                            this.selectSpecies(targetKey); 
+                            sendNotice(`🧬 [Pet]: Species hot-swapped to ${targetKey.toUpperCase()}!`);
+                        } else {
+                            sendNotice(`❌ [Pet]: Unknown species. Try: kitty, puppy, spider, or fish.`);
+                        }
+                    }
+                    break;
 
                 case 'revive':
                     if (isAdmin || this.activePet.exp > 100) {
@@ -587,35 +625,41 @@ export class StreamPet {
                     break;
 
                 case 'clear':
-                case 'clean':
                     this.activePet.poops = [];
                     this.state.spiderWebs = [];
                     this.state.goldfishBubbles = [];
                     this.say("Fresh sand! ✨");
                     sendNotice(`🧹 [Pet]: ${user} scooped the environment layout parameters!`);
                     break;
-				
-                default:
-                    sendNotice(`❌ Action !pet ${actualSub} unknown.`);
             }
         };
 
-        return [
+        // =========================================================================
+        // 🚀 DYNAMIC INJECTION EXPORT
+        // =========================================================================
+        const baseCommands = [
             { name: 'pet', adminOnly: false, execute: petExecution },
-            { name: 'kitty', adminOnly: false, execute: petExecution },
-            { name: 'feed', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'feed', flags) },
-            { name: 'play', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'play', flags) },
-            { name: 'dance', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'dance', flags) },
-            { name: 'treat', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'treat', flags) },
-            { name: 'trick', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'trick', flags) },
-            { name: 'clean', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'clean', flags) },
-            { name: 'status', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'status', flags) },
-            { name: 'nyan', adminOnly: true, execute: (user, message, flags) => petExecution(user, 'nyan', flags) },
-            { name: 'revive', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'revive', flags) },
-			{ name: 'tease', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'tease', flags) },
-			{ name: 'pulltail', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'pulltail', flags) },
-			{ name: 'tapglass', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'tapglass', flags) }
+            { name: 'kitty', adminOnly: false, execute: petExecution }
         ];
+
+        const aliasKeys = [
+            'help', 'h', 'rewards',
+            'tease', 'tease pet', 'pulltail', 'pull tail', 'pull pets tail', 'tapglass', 'tap glass',
+            'feed', 'feed pet', 'food', 'fish', 'meat', 'bugs', 'flakes',
+            'play', 'yarn', 'ball', 'web', 'dance', 'treat', 'nom', 'trick', 'status', 'stats',
+            'nyan', 'rainbow', 'clear', 'clean', 'revive'
+        ];
+
+        aliasKeys.forEach(alias => {
+            const isAdminCommand = (alias === 'nyan' || alias === 'rainbow' || alias === 'rewards');
+            baseCommands.push({
+                name: alias,
+                adminOnly: isAdminCommand,
+                execute: (user, message, flags) => petExecution(user, alias, flags)
+            });
+        });
+
+        return baseCommands;
     }
 
     // ==========================================
