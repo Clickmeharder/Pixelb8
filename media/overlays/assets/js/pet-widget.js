@@ -18,10 +18,10 @@ export class StreamPet {
         // Pull layout dimensions from storage before building to prevent visual snapping
         const savedBounds = localStorage.getItem("greta_widget_bounds");
         this.widgetBounds = savedBounds ? JSON.parse(savedBounds) : {
-            left: "100px",
-            top: "100px",
-            width: "400px",
-            height: "400px"
+            left: "20px",
+            top: "302px",
+            width: "274px",
+            height: "197px"
         };
 
         // Only inject viewport if it doesn't already exist
@@ -125,13 +125,13 @@ export class StreamPet {
         };
 
         // Shared Local Viewport Mechanics and Runtime Settings Structure
-        this.state = {
+		this.state = {
             hideBorder: false,
             hideStatus: false,
             hideNameplate: false,
             hideBackground: false,
             originalPos: { x: 0, y: 0 },
-			tummylimit: 8,
+            tummylimit: 11,               // Updated from 8 -> 11
             nyanTimer: 0,
             nyanPhase: "takeoff",
             x: 200,
@@ -142,7 +142,7 @@ export class StreamPet {
             animT: 0,
             hasFood: false,
             particles: [],
-            zoom: 0, 
+            zoom: -2,                     // Updated from 0 -> -2
             
             // Dynamic secondary matrices for specific simulation profiles
             spiderWebs: [],
@@ -150,17 +150,16 @@ export class StreamPet {
             puppyBones: [],
 
             layout: {
-                nameX: 50, nameY: 70,
-                statsX: 50, statsY: 90,
-                bedX: 20, bedY: 100,
-                bowlX: 45, bowlY: 100,
-                litterX: 90, litterY: 100,
-                towerX: 70, towerY: 100,
+                nameX: 10, nameY: 1,      // Your precise custom element layouts
+                statsX: 66, statsY: 5,
+                bedX: 8, bedY: 94,
+                bowlX: 89, bowlY: 97,
+                litterX: 22, litterY: 91,
+                towerX: 10, towerY: 89,
                 showTower: true,
-                bedColor: "#e74c3c"
+                bedColor: "#3498db"       // Your updated light blue bed color option
             }
         };
-
         // Initialize Audio Sub-Engine
         this.initAudioEngine();
 
