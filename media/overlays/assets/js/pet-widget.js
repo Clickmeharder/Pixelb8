@@ -389,6 +389,59 @@ export class StreamPet {
         return { x: finalX, y: finalY + offY };
     }
 
+	exportSettingsToClipboard(sendNotice = null) {
+        try {
+            // 1. Gather all of your custom layout sizes, coordinates, and pet profiles
+            const configBundle = {
+                widgetBounds: this.widgetBounds,
+                registry: this.registry,
+                state: this.state
+            };
+
+            // Convert the bundle into a clean, formatted JSON string
+            const jsonString = JSON.stringify(configBundle, null, 4);
+
+            // 2. Create a hidden textarea to force focus and execution permission
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = jsonString;
+            
+            // Move it completely off-screen so it's invisible to viewers
+            tempTextArea.style.position = "absolute";
+            tempTextArea.style.left = "-9999px";
+            tempTextArea.style.top = "-9999px";
+            document.body.appendChild(tempTextArea);
+
+            // 3. Select the string text inside the element
+            tempTextArea.focus();
+            tempTextArea.select();
+            tempTextArea.setSelectionRange(0, 99999); // Compatibility fix for older webkit builds
+
+            // 4. Fire the copy command execution thread
+            const success = document.execCommand("copy");
+            document.body.removeChild(tempTextArea);
+
+            if (success) {
+                console.log("💾 [Pet Widget]: Your custom configuration settings have been successfully copied to your clipboard!");
+                if (typeof sendNotice === "function") {
+                    sendNotice("📋 [Pet Widget]: Settings bundle copied to clipboard! You can paste this directly into your backup files.");
+                } else if (typeof p8Confirm === "function") {
+                    alert("📋 Settings copied to clipboard! Paste it safely into a text file.");
+                }
+            } else {
+                throw new Error("document.execCommand failed to execute.");
+            }
+        } catch (err) {
+            console.error("❌ [Pet Widget Error]: Failed to copy settings automatically: ", err);
+            
+            // Fallback: If copy execution completely blocked, output the clean object to log stream
+            console.log("👇 COPY THIS RAW DATA TEMPLATE MANUALLY:");
+            console.log(JSON.stringify({
+                widgetBounds: this.widgetBounds,
+                registry: this.registry,
+                state: this.state
+            }));
+        }
+    }
     // ==========================================
     // SECTION 3: SOUND SYSTEM ENGINE
     // ==========================================
@@ -913,6 +966,16 @@ export class StreamPet {
     }
 
     bindUIEventListeners() {
+        // Looks for a button with id="exportPetSettings" anywhere in your HTML/UI engine
+        const exportBtn = document.getElementById("exportPetSettings");
+			if (exportBtn) {
+				exportBtn.addEventListener("click", () => {
+					// Calls the copy routine. If your environment uses a notify alert, pass it here
+					this.exportSettingsToClipboard();
+				});
+				console.log("🔗 [Pet Widget]: Export Settings event listener attached to UI button.");
+			}
+
         const bindClick = (id, callback) => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('click', callback);
