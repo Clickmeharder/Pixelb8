@@ -160,6 +160,17 @@ export class StreamPet {
                 bedColor: "#3498db"       // Your updated light blue bed color option
             }
         };
+
+		// Inside your constructor() -> this.state = { ... }
+        this.state.commandAccess = this.state.commandAccess || {
+            feed:   { chat: true,  cp: true },
+            play:   { chat: true,  cp: true },
+            dance:  { chat: true,  cp: false },
+            treat:  { chat: false, cp: true }, // Default treat to CP only if desired
+            trick:  { chat: true,  cp: false },
+            status: { chat: true,  cp: false },
+            tease:  { chat: true,  cp: true }
+        };
         // Initialize Audio Sub-Engine
         this.initAudioEngine();
 
@@ -174,6 +185,7 @@ export class StreamPet {
         this.loadData();
         this.initContainerListeners(); 
         this.initPetPlacement();
+		this.renderControlPanel();
         // Kick off intervals and processing thread loops
         this.saveInterval = setInterval(() => this.saveData(), 5000);
         this.animate = this.animate.bind(this);
@@ -548,15 +560,37 @@ export class StreamPet {
                 'nyan': 'nyan', 'rainbow': 'nyan',
                 'revive': 'revive',
                 'clear': 'clear', 'clean': 'clear',
-                'species': 'species',
-				'hidepet': 'hidepet', 'hide pet': 'hidepet', 'invisiblepet': 'hidepet',
-				'showpet': 'showpet', 'show pet': 'showpet', 'visiblepet': 'showpet',
-				'togglepet': 'togglepet', 'toggle pet': 'togglepet',
+                'species': 'type',
+                'hidepet': 'hidepet', 'hide pet': 'hidepet', 'hide': 'hidepet',
+                'showpet': 'showpet', 'show pet': 'showpet', 'show': 'showpet',
+                'togglepet': 'togglepet', 'toggle': 'togglepet',
             };
 
             // 2. Resolve the action: check if the FULL message matches a multi-word channel point first,
             //    otherwise fall back to checking the first word.
             let actualSub = aliasMap[incomingInput] || aliasMap[subCommand] || null;
+
+            // =========================================================================
+            // 🛑 COMMAND ACCESS & UI ROUTER MATRIX CONTROL FILTER
+            // =========================================================================
+            if (actualSub && this.state.commandAccess && this.state.commandAccess[actualSub]) {
+                const config = this.state.commandAccess[actualSub];
+                
+                // Identify incoming event transmission pathways
+                const isChannelPoint = !!(flags && (flags.customRewardId || flags.channelPointRedemption || flags.isRewardSimulated));
+                const isChatMessage = !isChannelPoint;
+
+                // Enforce Twitch chat-specific restrictions
+                if (isChatMessage && !config.chat) {
+                    return; // Quieter dropouts prevent chatbot spam loops in public channels
+                }
+
+                // Enforce Channel Point / Event Reward restrictions
+                if (isChannelPoint && !config.cp) {
+                    sendNotice(`❌ [Pet]: The "${incomingInput}" reward matrix is currently toggled off by the broadcaster.`);
+                    return;
+                }
+            }
 
             // Death boundary guard check
             if (this.activePet.isDead && actualSub !== 'revive' && actualSub !== 'status') {
@@ -576,7 +610,7 @@ export class StreamPet {
                 case 'help':
                     const userCommands = ['feed', 'play', 'dance', 'treat', 'status', 'trick'];
                     sendNotice(`🐾 [Pet Help]: Options: ${userCommands.map(c => `!pet ${c}`).join(' | ')}`);
-                    if (isAdmin) sendNotice(`🛠️ [Admin]: !pet [nyan | revive | clear | species | rewards]`);
+                    if (isAdmin) sendNotice(`🛠️ [Admin]: !pet [nyan | revive | clear | species | rewards | hide | show | toggle]`);
                     break;
 
                 case 'rewards':
@@ -590,11 +624,12 @@ export class StreamPet {
                     });
 
                     sendNotice(`🎁 [Pet Reward Guide]: Create Twitch Channel Point Rewards with these exact names:`);
-                    if (groups['feed']) sendNotice(`  🍏 Feed Pet: ${groups['feed'].map(t => `"${t}"`).join(', ')}`);
-                    if (groups['tease']) sendNotice(`  😠 Tease Pet: ${groups['tease'].map(t => `"${t}"`).join(', ')}`);
-                    if (groups['play']) sendNotice(`  🥎 Play Pet: ${groups['play'].map(t => `"${t}"`).join(', ')}`);
+                    if (groups['feed']) sendNotice(`   🍏 Feed Pet: ${groups['feed'].map(t => `"${t}"`).join(', ')}`);
+                    if (groups['tease']) sendNotice(`   😠 Tease Pet: ${groups['tease'].map(t => `"${t}"`).join(', ')}`);
+                    if (groups['play']) sendNotice(`   🥎 Play Pet: ${groups['play'].map(t => `"${t}"`).join(', ')}`);
                     break;
-				case 'hidepet':
+
+                case 'hidepet':
                     if (!isAdmin) return; // Restricts to Broadcaster & Mods only
                     if (this.widgetContainer) {
                         this.widgetContainer.style.display = 'none';
@@ -631,6 +666,7 @@ export class StreamPet {
                         this.saveData();
                     }
                     break;
+
                 case 'feed':
                     if (!this.state.hasFood) {
                         this.state.hasFood = true;
@@ -692,7 +728,7 @@ export class StreamPet {
                     break;
 
                 case 'species':
-				case 'type':
+                case 'type':
                     if (isAdmin && parts[1]) {
                         const speciesMap = { "kitty": "kitty", "kitten": "kitty", "puppy": "puppy", "dog": "puppy", "spider": "spider", "fish": "goldfish", "goldfish": "goldfish" };
                         const targetKey = speciesMap[parts[1].toLowerCase()];
@@ -738,11 +774,21 @@ export class StreamPet {
             'feed', 'feed pet', 'food', 'fish', 'meat', 'bugs', 'flakes',
             'play', 'yarn', 'ball', 'web', 'dance', 'treat', 'nom', 'trick', 'status', 'stats',
             'nyan', 'rainbow', 'clear', 'clean', 'revive',
-			'hidepet', 'hide pet', 'showpet', 'show pet', 'togglepet', 'toggle pet'
+            'hidepet', 'hide pet', 'hide', 
+            'showpet', 'show pet', 'show', 
+            'togglepet', 'toggle pet', 'toggle'
         ];
 
         aliasKeys.forEach(alias => {
-            const isAdminCommand = (alias === 'nyan' || alias === 'rainbow' || alias === 'rewards');
+            const isAdminCommand = (
+                alias === 'nyan' || 
+                alias === 'rainbow' || 
+                alias === 'rewards' ||
+                alias === 'hidepet' || alias === 'hide pet' || alias === 'hide' ||
+                alias === 'showpet' || alias === 'show pet' || alias === 'show' ||
+                alias === 'togglepet' || alias === 'toggle pet' || alias === 'toggle'
+            );
+            
             baseCommands.push({
                 name: alias,
                 adminOnly: isAdminCommand,
@@ -752,7 +798,6 @@ export class StreamPet {
 
         return baseCommands;
     }
-
     // ==========================================
     // SECTION 5: UI ASSEMBLY, TEMPLATES & BINDINGS
     // ==========================================
@@ -907,36 +952,100 @@ export class StreamPet {
 							</div>
 						</div>
 					</details>
-
+					<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b; margin-top: 5px;" open>
+						<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🛠️ Live Command Router Matrix</summary>
+						<div class="pet-matrix-container-target" style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 4px;">
+							</div>
+					</details>
 					<button type="button" id="btnReset" class="p8-btn" style="background: #991b1b; padding: 6px 0; font-size: 11px; margin-top: 5px;">⚠️ FACTORY RESET DATA</button>
 				</div>
 			</div>
         `;
     }
 
-    injectUI() {
+	injectUI() {
         const wrapper = document.getElementById("widget-control-wrapper");
         if (!wrapper) {
             console.warn("⚠️ [Pet Widget]: #widget-control-wrapper not found. Skipping UI injection.");
             return;
         }
 
-        if (document.getElementById("pet-widget-controls")) return;
+        // Check if the outer panel skeleton already exists
+        let petSection = document.getElementById("pet-widget-controls");
+        
+        if (!petSection) {
+            petSection = document.createElement("div");
+            petSection.id = "pet-widget-controls";
+            petSection.className = "collapsible-section collapsed";
+            petSection.innerHTML = StreamPet.controlsTemplate;
 
-        const petSection = document.createElement("div");
-        petSection.id = "pet-widget-controls";
-        petSection.className = "collapsible-section collapsed";
-        petSection.innerHTML = StreamPet.controlsTemplate;
-
-        const entropiaBox = document.getElementById("entropia-widget-controls");
-        if (entropiaBox && entropiaBox.nextSibling) {
-            wrapper.insertBefore(petSection, entropiaBox.nextSibling);
-        } else {
-            wrapper.appendChild(petSection);
+            const entropiaBox = document.getElementById("entropia-widget-controls");
+            if (entropiaBox && entropiaBox.nextSibling) {
+                wrapper.insertBefore(petSection, entropiaBox.nextSibling);
+            } else {
+                wrapper.appendChild(petSection);
+            }
+            console.log("🐾 [Pet Widget]: Global Multi-Pet Interface Injected.");
         }
-        console.log("🐾 [Pet Widget]: Global Multi-Pet Interface Injected.");
-    }
 
+        // 👇 VITAL BRIDGE STEP:
+        // Locate the target element where your matrix table should actually render.
+        // Replace '.pet-matrix-container-target' with whatever class/id is inside your StreamPet.controlsTemplate
+        this.controlsContainer = petSection.querySelector('.pet-matrix-container-target') || petSection;
+    }
+renderControlPanel() {
+        if (!this.controlsContainer) return;
+
+        // Clean, compact dark matrix that matches your #18181b UI exactly
+        let html = `
+            <p style="font-size: 11px; color: #a1a1aa; margin-bottom: 8px; line-height: 1.3;">
+                Toggle interaction methods. Turn off "Chat" to make a command Channel Point exclusive!
+            </p>
+            <div class="matrix-table" style="width: 100%; font-family: sans-serif; font-size: 11px; display: flex; flex-direction: column; gap: 3px;">
+                <div class="matrix-header" style="display: flex; font-weight: bold; padding: 4px 6px; background: #141414; border-radius: 4px; color: #a1a1aa; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;">
+                    <div style="flex: 2;">Command Core</div>
+                    <div style="flex: 1.2; text-align: center;">💬 Chat (!pet)</div>
+                    <div style="flex: 1.2; text-align: center;">🎁 Reward (CP)</div>
+                </div>
+        `;
+
+        Object.keys(this.state.commandAccess).forEach(cmd => {
+            const config = this.state.commandAccess[cmd];
+            html += `
+                <div class="matrix-row" style="display: flex; padding: 6px; background: #141414; border-radius: 4px; align-items: center;">
+                    <div style="flex: 2; font-weight: bold; text-transform: capitalize; color: #fff;">${cmd}</div>
+                    <div style="flex: 1.2; text-align: center; display: flex; justify-content: center;">
+                        <input type="checkbox" data-cmd="${cmd}" data-type="chat" ${config.chat ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
+                    </div>
+                    <div style="flex: 1.2; text-align: center; display: flex; justify-content: center;">
+                        <input type="checkbox" data-cmd="${cmd}" data-type="cp" ${config.cp ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        
+        this.controlsContainer.innerHTML = html;
+        this.bindMatrixListeners();
+    }
+    bindMatrixListeners() {
+        if (!this.controlsContainer) return;
+        
+        this.controlsContainer.querySelectorAll('.matrix-toggle').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const cmd = e.target.getAttribute('data-cmd');
+                const type = e.target.getAttribute('data-type'); 
+                const isChecked = e.target.checked;
+                
+                if (this.state.commandAccess && this.state.commandAccess[cmd]) {
+                    this.state.commandAccess[cmd][type] = isChecked;
+                    this.saveData(); 
+                    console.log(`[Config Router]: Updated "${cmd}" -> Access Mode [${type.toUpperCase()}]: ${isChecked}`);
+                }
+            });
+        });
+    }
     syncSpeciesInterfaceToggle() {
         document.querySelectorAll(".species-note").forEach(el => el.style.display = "none");
         const currentNote = document.getElementById(`${this.registry.activeSpecies}ContextNotes`);
