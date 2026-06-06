@@ -546,7 +546,12 @@ export class StreamPet {
                         sendNotice(`🌈 [Pet]: NYAN OVERDRIVE ACTIVATED BY STAFF!`);
                     }
                     break;
-
+				case 'tease':
+				case 'pulltail':
+				case 'tapglass':
+					this.teasePet();
+					sendNotice(`😠 [Pet]: ${user} teased ${this.activePet.name}!`);
+					break;
 				case 'species':
 					// Check if the user is providing a valid species name
 					if (isAdmin && parts[1]) {
@@ -590,7 +595,7 @@ export class StreamPet {
                     this.say("Fresh sand! ✨");
                     sendNotice(`🧹 [Pet]: ${user} scooped the environment layout parameters!`);
                     break;
-
+				
                 default:
                     sendNotice(`❌ Action !pet ${actualSub} unknown.`);
             }
@@ -607,7 +612,10 @@ export class StreamPet {
             { name: 'clean', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'clean', flags) },
             { name: 'status', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'status', flags) },
             { name: 'nyan', adminOnly: true, execute: (user, message, flags) => petExecution(user, 'nyan', flags) },
-            { name: 'revive', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'revive', flags) }
+            { name: 'revive', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'revive', flags) },
+			{ name: 'tease', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'tease', flags) },
+			{ name: 'pulltail', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'pulltail', flags) },
+			{ name: 'tapglass', adminOnly: false, execute: (user, message, flags) => petExecution(user, 'tapglass', flags) }
         ];
     }
 
@@ -1170,7 +1178,24 @@ export class StreamPet {
 
 		}, 2000); // 2 seconds of bloating
 	}
+	teasePet() {
+		if (this.activePet.isDead) return;
 
+		// Set the action to 'teased' (you might need to add this case in your animate loop)
+		this.state.action = "teased";
+		this.state.actionTimer = 150; // How long they stay "teased"
+
+		switch (this.registry.activeSpecies) {
+			case "kitty":
+			case "puppy":
+				this.say("Hey! That's mean! 😾");
+				break;
+			case "spider":
+			case "goldfish":
+				this.say("Stop tapping the glass! 🫧");
+				break;
+		}
+	}
 	revivePet() {
 		if (this.activePet.isDead) {
 			this.activePet.isDead = false;
@@ -1419,7 +1444,21 @@ export class StreamPet {
 					this.state.actionTimer = 1000; 
 				}
 				break;
-
+			case "teased":
+				// The pet shakes back and forth while teased
+				if (this.state.actionTimer > 0) {
+					// Small jitter effect
+					this.state.x += (Math.random() - 0.5) * 6;
+					this.state.y += (Math.random() - 0.5) * 6;
+					
+					// Face the source of the "tease" (randomly flip for effect)
+					if (this.state.actionTimer % 5 === 0) this.state.facing *= -1;
+				} else {
+					// Return to normal
+					this.state.action = "idle";
+					this.state.actionTimer = 300;
+				}
+				break;
 			case "rappel_drop":
 				this.state.y += 3.5; 
 				if (this.state.y >= this.state.rappelDepth) {
@@ -1596,17 +1635,20 @@ export class StreamPet {
 
         let petScale = (this.activePet.stage === "Baby") ? 0.6 : (this.activePet.stage === "Juvenile") ? 0.8 : 1.0;
         
+        // Determine tease state for renderer
+        let isTeased = (this.state.action === "teased");
+        
         // ========================================================
         // RENDERING SPECIES DELEGATION ROUTER
         // ========================================================
         if (this.registry.activeSpecies === "kitty") {
-            this.drawKitty(this.state.animT, petScale);
+            this.drawKitty(this.state.animT, petScale, isTeased);
         } else if (this.registry.activeSpecies === "puppy") {
-            this.drawPuppy(this.state.animT, petScale);
+            this.drawPuppy(this.state.animT, petScale, isTeased);
         } else if (this.registry.activeSpecies === "spider") {
-            this.drawSpider(this.state.animT, petScale);
+            this.drawSpider(this.state.animT, petScale, isTeased);
         } else if (this.registry.activeSpecies === "goldfish") {
-            this.drawGoldfish(this.state.animT, petScale);
+            this.drawGoldfish(this.state.animT, petScale, isTeased);
         }
         
         this.ctx.restore();
