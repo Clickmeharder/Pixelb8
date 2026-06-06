@@ -548,7 +548,10 @@ export class StreamPet {
                 'nyan': 'nyan', 'rainbow': 'nyan',
                 'revive': 'revive',
                 'clear': 'clear', 'clean': 'clear',
-                'species': 'species'
+                'species': 'species',
+				'hidepet': 'hidepet', 'hide pet': 'hidepet', 'invisiblepet': 'hidepet',
+				'showpet': 'showpet', 'show pet': 'showpet', 'visiblepet': 'showpet',
+				'togglepet': 'togglepet', 'toggle pet': 'togglepet',
             };
 
             // 2. Resolve the action: check if the FULL message matches a multi-word channel point first,
@@ -591,7 +594,43 @@ export class StreamPet {
                     if (groups['tease']) sendNotice(`  😠 Tease Pet: ${groups['tease'].map(t => `"${t}"`).join(', ')}`);
                     if (groups['play']) sendNotice(`  🥎 Play Pet: ${groups['play'].map(t => `"${t}"`).join(', ')}`);
                     break;
+				case 'hidepet':
+                    if (!isAdmin) return; // Restricts to Broadcaster & Mods only
+                    if (this.widgetContainer) {
+                        this.widgetContainer.style.display = 'none';
+                        this.state.hideWidget = true; // Cache state rule
+                        this.saveData();              // Commit to localStorage
+                        sendNotice(`🙈 [Pet]: ${this.activePet.name} has been hidden from the stream overlay.`);
+                    }
+                    break;
 
+                case 'showpet':
+                    if (!isAdmin) return; // Restricts to Broadcaster & Mods only
+                    if (this.widgetContainer) {
+                        this.widgetContainer.style.display = 'block';
+                        this.state.hideWidget = false;
+                        this.saveData();
+                        this.resize(); // Force recalculate dimensions to prevent freeze frames
+                        sendNotice(`👀 [Pet]: ${this.activePet.name} is back and visible!`);
+                    }
+                    break;
+
+                case 'togglepet':
+                    if (!isAdmin) return; // Restricts to Broadcaster & Mods only
+                    if (this.widgetContainer) {
+                        const isHidden = this.widgetContainer.style.display === 'none' || this.state.hideWidget;
+                        if (isHidden) {
+                            this.widgetContainer.style.display = 'block';
+                            this.state.hideWidget = false;
+                            this.resize();
+                            sendNotice(`👀 [Pet]: Showing ${this.activePet.name}!`);
+                        } else {
+                            this.widgetContainer.style.display = 'none';
+                            this.state.hideWidget = true;
+                        }
+                        this.saveData();
+                    }
+                    break;
                 case 'feed':
                     if (!this.state.hasFood) {
                         this.state.hasFood = true;
@@ -653,6 +692,7 @@ export class StreamPet {
                     break;
 
                 case 'species':
+				case 'type':
                     if (isAdmin && parts[1]) {
                         const speciesMap = { "kitty": "kitty", "kitten": "kitty", "puppy": "puppy", "dog": "puppy", "spider": "spider", "fish": "goldfish", "goldfish": "goldfish" };
                         const targetKey = speciesMap[parts[1].toLowerCase()];
@@ -697,7 +737,8 @@ export class StreamPet {
             'tease', 'tease pet', 'pulltail', 'pull tail', 'pull pets tail', 'tapglass', 'tap glass',
             'feed', 'feed pet', 'food', 'fish', 'meat', 'bugs', 'flakes',
             'play', 'yarn', 'ball', 'web', 'dance', 'treat', 'nom', 'trick', 'status', 'stats',
-            'nyan', 'rainbow', 'clear', 'clean', 'revive'
+            'nyan', 'rainbow', 'clear', 'clean', 'revive',
+			'hidepet', 'hide pet', 'showpet', 'show pet', 'togglepet', 'toggle pet'
         ];
 
         aliasKeys.forEach(alias => {
@@ -1214,6 +1255,11 @@ export class StreamPet {
 
     applyVisibilityStates() {
         if (this.widgetContainer) {
+			if (this.state.hideWidget === true) {
+				this.widgetContainer.style.display = 'none';
+			} else {
+				this.widgetContainer.style.display = 'block';
+			}
             if (this.state.hideBorder) {
                 this.widgetContainer.style.border = "none";
                 this.widgetContainer.style.boxShadow = "none";
