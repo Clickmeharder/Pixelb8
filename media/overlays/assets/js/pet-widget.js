@@ -161,15 +161,24 @@ export class StreamPet {
             }
         };
 
-		// Inside your constructor() -> this.state = { ... }
-        this.state.commandAccess = this.state.commandAccess || {
-            feed:   { chat: true,  cp: true },
-            play:   { chat: true,  cp: true },
-            dance:  { chat: true,  cp: false },
-            treat:  { chat: false, cp: true }, // Default treat to CP only if desired
-            trick:  { chat: true,  cp: false },
-            status: { chat: true,  cp: false },
-            tease:  { chat: true,  cp: true }
+
+		this.state.commandAccess = this.state.commandAccess || {
+            feed:      { chat: true,  cp: true },
+            play:      { chat: true,  cp: true },
+            dance:     { chat: true,  cp: false },
+            treat:     { chat: false, cp: true }, 
+            trick:     { chat: true,  cp: false },
+            status:    { chat: true,  cp: false },
+            tease:     { chat: true,  cp: true },
+            revive:    { chat: true,  cp: true },
+            help:      { chat: true,  cp: false }, 
+            rewards:   { chat: true,  cp: false }, 
+            nyan:      { chat: true,  cp: true },  
+            clear:     { chat: true,  cp: true },  
+            species:   { chat: true,  cp: true },  
+            hidepet:   { chat: true,  cp: true },  
+            showpet:   { chat: true,  cp: true },  
+            togglepet: { chat: true,  cp: true }   
         };
         // Initialize Audio Sub-Engine
         this.initAudioEngine();
@@ -559,6 +568,8 @@ export class StreamPet {
                 // Admin variations
                 'nyan': 'nyan', 'rainbow': 'nyan',
                 'revive': 'revive',
+				'revive pet': 'revive', 
+				'revive active pet': 'revive',
                 'clear': 'clear', 'clean': 'clear',
                 'species': 'type',
                 'hidepet': 'hidepet', 'hide pet': 'hidepet', 'hide': 'hidepet',
@@ -742,11 +753,11 @@ export class StreamPet {
                     break;
 
                 case 'revive':
-                    if (isAdmin || this.activePet.exp > 100) {
+                    if (this.activePet.exp > 100) {
                         this.revivePet();
                         sendNotice(`💖 [Pet]: ${this.activePet.name} was successfully revived by ${user}!`);
                     } else {
-                        sendNotice(`❌ [Pet]: Only staff or high EXP users can revive ${this.activePet.name}!`);
+                        sendNotice(`❌ [Pet]: Only pets with greater than 100 can be revived ${this.activePet.name}!`);
                     }
                     break;
 
@@ -773,7 +784,8 @@ export class StreamPet {
             'tease', 'tease pet', 'pulltail', 'pull tail', 'pull pets tail', 'tapglass', 'tap glass',
             'feed', 'feed pet', 'food', 'fish', 'meat', 'bugs', 'flakes',
             'play', 'yarn', 'ball', 'web', 'dance', 'treat', 'nom', 'trick', 'status', 'stats',
-            'nyan', 'rainbow', 'clear', 'clean', 'revive',
+			'revive', 'revive pet', 'revive active pet',
+            'nyan', 'rainbow', 'clear', 'clean',
             'hidepet', 'hide pet', 'hide', 
             'showpet', 'show pet', 'show', 
             'togglepet', 'toggle pet', 'toggle'
@@ -993,7 +1005,7 @@ export class StreamPet {
         // Replace '.pet-matrix-container-target' with whatever class/id is inside your StreamPet.controlsTemplate
         this.controlsContainer = petSection.querySelector('.pet-matrix-container-target') || petSection;
     }
-renderControlPanel() {
+	renderControlPanel() {
         if (!this.controlsContainer) return;
 
         // Clean, compact dark matrix that matches your #18181b UI exactly
