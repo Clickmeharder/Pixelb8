@@ -487,7 +487,7 @@ function createDefaultState() {
 }
 
 export class StreamPet {
-constructor() {
+	constructor() {
         console.log("🐾 [Pet Widget]: Initializing Core Ecosystem...");
         
         // 1. Core DOM Validation & Sizing Injection
@@ -537,12 +537,74 @@ constructor() {
         
         this.saveInterval = setInterval(() => this.saveData(), 5000);
         this.animate = this.animate.bind(this);
-        this.animate();
+        // this.animate();
+
+        this.animationFrameId = requestAnimationFrame(this.animate);
+		
 		
 		this.initContainerListeners(); 
         this.bindUIEventListeners();
     }
 
+	destroyWidget() {
+        console.log("⚠️ [Pet Widget]: Initiating ecosystem tear-down sequence...");
+
+        // ========================================================
+        // 1. ENGINE LOOPS & MECHANICAL TIMERS
+        // ========================================================
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+        if (this.saveInterval) {
+            clearInterval(this.saveInterval);
+            this.saveInterval = null;
+        }
+
+        // ========================================================
+        // 2. DOM INTERFACE DESTRUCTION (Control Panels & Custom Engine Display)
+        // ========================================================
+        const optionsEl = document.getElementById("speciesSelectOptions");
+        if (optionsEl) optionsEl.innerHTML = "";
+
+        const controlPanel = document.getElementById("pet-widget-controls");
+        if (controlPanel && controlPanel.parentNode) {
+            controlPanel.parentNode.removeChild(controlPanel);
+            console.log("   -> [DOM Cleanup]: Control Panel Matrix Interface removed.");
+        }
+
+        // NEW PURGE: Remove the main pet canvas overlay window completely
+        if (this.widgetContainer && this.widgetContainer.parentNode) {
+            this.widgetContainer.parentNode.removeChild(this.widgetContainer);
+            console.log("   -> [DOM Cleanup]: Main pet viewport element removed from overlay-wrapper.");
+        }
+
+        // ========================================================
+        // 3. HARDWARE & CONTEXT LISTENER HANDLES
+        // ========================================================
+        if (this.containerObserver) {
+            this.containerObserver.disconnect();
+            this.containerObserver = null;
+        }
+        if (this._boundResizeHandler) {
+            window.removeEventListener('resizePetWidget', this._boundResizeHandler);
+            this._boundResizeHandler = null;
+        }
+        if (this._boundGlobalClickCloser) {
+            document.removeEventListener('click', this._boundGlobalClickCloser);
+            this._boundGlobalClickCloser = null;
+        }
+
+        // ========================================================
+        // 4. MEMORY RE-REFERENCES FOR GARBAGE COLLECTION
+        // ========================================================
+        this.canvas = null;
+        this.ctx = null;
+        this.widgetContainer = null;
+        this.controlsContainer = null;
+        console.log("✅ [Pet Widget]: Teardown complete. All core nodes destroyed.");
+    }
+	
 	injectWidgetViewport(overlayWrapper) {
         const petViewport = document.createElement("div");
         petViewport.id = "pet-widget";
@@ -566,6 +628,8 @@ constructor() {
         overlayWrapper.appendChild(petViewport);
         console.log("🐾 [Pet Widget]: Viewport DOM elements injected into overlay-wrapper.");
     }
+
+
     static get controlsTemplate() {
         const layoutMetrics = [
             ["name", "Nameplate X/Y", 50, 70, 0, 100],
@@ -776,8 +840,6 @@ constructor() {
 // ===============================================
 // SECTION 3: UI ASSEMBLY synchronization, TEMPLATES & BINDINGS
 // ===============================================
-
-
 	injectUI() {
         const wrapper = document.getElementById("widget-control-wrapper");
         if (!wrapper) {
@@ -1417,6 +1479,7 @@ constructor() {
 		
 		this.ctx.restore();
 		this.updateUI();
+		
 		requestAnimationFrame(this.animate);
 	}
 	
