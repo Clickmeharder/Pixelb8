@@ -1410,63 +1410,100 @@ export class StreamPet {
         this.controlsContainer = petSection.querySelector('.pet-matrix-container-target') || petSection;
     }
 	renderControlPanel() {
-        if (!this.controlsContainer) return;
+		if (!this.controlsContainer) return;
 
-        // Clean, compact dark matrix that matches your #18181b UI exactly
-        let html = `
-            <p style="font-size: 11px; color: #a1a1aa; margin-bottom: 8px; line-height: 1.3;">
-                Toggle interaction methods. Turn off "Chat" to make a command Channel Point exclusive!
-            </p>
-            <div class="matrix-table" style="width: 100%; font-family: sans-serif; font-size: 11px; display: flex; flex-direction: column; gap: 3px;">
-                <div class="matrix-header" style="display: flex; font-weight: bold; padding: 4px 6px; background: #141414; border-radius: 4px; color: #a1a1aa; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;">
-                    <div style="flex: 2;">Command Core</div>
-                    <div style="flex: 1.2; text-align: center;">💬 Chat (!pet)</div>
-                    <div style="flex: 1.2; text-align: center;">🎁 Reward (CP)</div>
-                </div>
-        `;
+		// Clean, compact dark matrix matching #18181b aesthetics
+		let html = `
+			<p style="font-size: 11px; color: #a1a1aa; margin-bottom: 8px; line-height: 1.3;">
+				Toggle interaction methods or fire a manual trigger to test animations and behaviors instantly.
+			</p>
+			<div class="matrix-table" style="width: 100%; font-family: sans-serif; font-size: 11px; display: flex; flex-direction: column; gap: 3px;">
+				<div class="matrix-header" style="display: flex; font-weight: bold; padding: 4px 6px; background: #141414; border-radius: 4px; color: #a1a1aa; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;">
+					<div style="flex: 1.8;">Command Core</div>
+					<div style="flex: 1; text-align: center;">💬 Chat</div>
+					<div style="flex: 1; text-align: center;">🎁 Reward</div>
+					<div style="flex: 0.8; text-align: center;">⚡ Test</div>
+				</div>
+		`;
 
-        // 👇 FILTER OUT ADMINISTRATIVE / METADATA UTILITIES FROM CLUTTERING THE UI
-        const hiddenCommands = ['help', 'rewards', 'clear', 'species', 'hidepet', 'showpet', 'togglepet'];
+		// 👇 FILTER OUT ADMINISTRATIVE / METADATA UTILITIES FROM CLUTTERING THE UI
+		const hiddenCommands = ['help', 'rewards', 'clear', 'species', 'hidepet', 'showpet', 'togglepet'];
 
-        Object.keys(this.state.commandAccess).forEach(cmd => {
-            if (hiddenCommands.includes(cmd)) return; // Skip rendering these rows!
+		Object.keys(this.state.commandAccess).forEach(cmd => {
+			if (hiddenCommands.includes(cmd)) return; // Skip rendering these rows!
 
-            const config = this.state.commandAccess[cmd];
-            html += `
-                <div class="matrix-row" style="display: flex; padding: 6px; background: #141414; border-radius: 4px; align-items: center;">
-                    <div style="flex: 2; font-weight: bold; text-transform: capitalize; color: #fff;">${cmd}</div>
-                    <div style="flex: 1.2; text-align: center; display: flex; justify-content: center;">
-                        <input type="checkbox" data-cmd="${cmd}" data-type="chat" ${config.chat ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
-                    </div>
-                    <div style="flex: 1.2; text-align: center; display: flex; justify-content: center;">
-                        <input type="checkbox" data-cmd="${cmd}" data-type="cp" ${config.cp ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
-                    </div>
-                </div>
-            `;
-        });
+			const config = this.state.commandAccess[cmd];
+			html += `
+				<div class="matrix-row" style="display: flex; padding: 6px; background: #141414; border-radius: 4px; align-items: center;">
+					<div style="flex: 1.8; font-weight: bold; text-transform: capitalize; color: #fff;">${cmd}</div>
+					<div style="flex: 1; text-align: center; display: flex; justify-content: center;">
+						<input type="checkbox" data-cmd="${cmd}" data-type="chat" ${config.chat ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
+					</div>
+					<div style="flex: 1; text-align: center; display: flex; justify-content: center;">
+						<input type="checkbox" data-cmd="${cmd}" data-type="cp" ${config.cp ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
+					</div>
+					<div style="flex: 0.8; text-align: center; display: flex; justify-content: center;">
+						<button data-cmd="${cmd}" class="matrix-test-btn" style="cursor: pointer; background: #27272a; color: #3498db; border: 1px solid #3f3f46; border-radius: 4px; font-size: 10px; padding: 2px 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; height: 20px; min-width: 28px;" onmouseover="this.style.background='#3f3f46'; this.style.color='#fff';" onmouseout="this.style.background='#27272a'; this.style.color='#3498db';">
+							▶
+						</button>
+					</div>
+				</div>
+			`;
+		});
 
-        html += `</div>`;
-        
-        this.controlsContainer.innerHTML = html;
-        this.bindMatrixListeners();
-    }
-    bindMatrixListeners() {
-        if (!this.controlsContainer) return;
-        
-        this.controlsContainer.querySelectorAll('.matrix-toggle').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const cmd = e.target.getAttribute('data-cmd');
-                const type = e.target.getAttribute('data-type'); 
-                const isChecked = e.target.checked;
-                
-                if (this.state.commandAccess && this.state.commandAccess[cmd]) {
-                    this.state.commandAccess[cmd][type] = isChecked;
-                    this.saveData(); 
-                    console.log(`[Config Router]: Updated "${cmd}" -> Access Mode [${type.toUpperCase()}]: ${isChecked}`);
-                }
-            });
-        });
-    }
+		html += `</div>`;
+		
+		this.controlsContainer.innerHTML = html;
+		this.bindMatrixListeners();
+	}
+
+	bindMatrixListeners() {
+		if (!this.controlsContainer) return;
+		
+		// Wire up the configuration access checkboxes
+		this.controlsContainer.querySelectorAll('.matrix-toggle').forEach(checkbox => {
+			checkbox.addEventListener('change', (e) => {
+				const cmd = e.target.getAttribute('data-cmd');
+				const type = e.target.getAttribute('data-type'); 
+				const isChecked = e.target.checked;
+				
+				if (this.state.commandAccess && this.state.commandAccess[cmd]) {
+					this.state.commandAccess[cmd][type] = isChecked;
+					this.saveData(); 
+					console.log(`[Config Router]: Updated "${cmd}" -> Access Mode [${type.toUpperCase()}]: ${isChecked}`);
+				}
+			});
+		});
+
+		// Wire up the "Play" test trigger buttons
+		this.controlsContainer.querySelectorAll('.matrix-test-btn').forEach(button => {
+			button.addEventListener('click', (e) => {
+				// Find target element handling nested icon clicks safely
+				const btn = e.target.closest('.matrix-test-btn');
+				const cmd = btn.getAttribute('data-cmd');
+				
+				console.log(`[Test Simulator]: Locating routing handles for payload trigger: !pet ${cmd}`);
+
+				// Fetch the executable routing layout from the framework
+				if (typeof this.getCommands === 'function') {
+					const commandSuite = this.getCommands((notice) => console.log(`[Simulated Response]: ${notice}`));
+					const petCommand = commandSuite.find(c => c.name === 'pet');
+
+					if (petCommand && typeof petCommand.execute === 'function') {
+						// Simulate execution framework flags bypassing standard chat restrictions
+						const simulatedFlags = {
+							broadcaster: true,
+							mod: false,
+							isRewardSimulated: true // Simulates system-level permission clearance
+						};
+						
+						// Route the core command text straight into the system engine
+						petCommand.execute('BroadcasterUI', cmd, simulatedFlags);
+					}
+				}
+			});
+		});
+	}
     syncSpeciesInterfaceToggle() {
         document.querySelectorAll(".species-note").forEach(el => el.style.display = "none");
         const currentNote = document.getElementById(`${this.registry.activeSpecies}ContextNotes`);
