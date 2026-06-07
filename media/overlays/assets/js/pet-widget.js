@@ -36,7 +36,7 @@ const DEFAULT_AUDIO_PATHS = {
 //
 // state library
 //----------------
-const STATE_LIBRARY = {
+const PET_STATE_LIBRARY = {
 	nyan: (pet, ctx) => {
 		if (pet.state.nyanPhase === "takeoff") {
 			const targetY = ctx.visibleH / 2;
@@ -410,10 +410,10 @@ const STATE_LIBRARY = {
 		}
 	},
 
-	sleep: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
-	tower_sleep: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
-	dance: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
-	special: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
+	sleep: (pet, ctx) => { PET_STATE_LIBRARY._fallbackSleep(pet, ctx); },
+	tower_sleep: (pet, ctx) => { PET_STATE_LIBRARY._fallbackSleep(pet, ctx); },
+	dance: (pet, ctx) => { PET_STATE_LIBRARY._fallbackSleep(pet, ctx); },
+	special: (pet, ctx) => { PET_STATE_LIBRARY._fallbackSleep(pet, ctx); },
 
 	// Common exit handler shared across shared static end states
 	_fallbackSleep: (pet, ctx) => {
@@ -919,7 +919,6 @@ export class StreamPet {
 		this.controlsContainer.innerHTML = html;
 		this.bindMatrixListeners();
 	}
-
     applyEditModeStyles() {
         const el = document.getElementById("pet-widget");
         if (!el) return;
@@ -1427,8 +1426,8 @@ export class StreamPet {
 		}
 
 		// 5. STATE EXECUTION: Run active state logic from the library
-		if (STATE_LIBRARY[this.state.action]) {
-			STATE_LIBRARY[this.state.action](this, ctx);
+		if (PET_STATE_LIBRARY[this.state.action]) {
+			PET_STATE_LIBRARY[this.state.action](this, ctx);
 		}
 	}
 	animate = () => {
