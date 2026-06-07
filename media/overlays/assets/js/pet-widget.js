@@ -2236,6 +2236,80 @@ export class StreamPet {
 			}
 		}
 	}
+	drawGoldfishBubbles(t) {
+		if (this.registry.activeSpecies !== "goldfish") return;
+
+		for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
+			let bubble = this.state.goldfishBubbles[i];
+			
+			bubble.y -= 1.2;
+			bubble.x += Math.sin(t * 0.05 + i) * 0.5;
+			
+			this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
+			this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
+			this.ctx.beginPath();
+			this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+			this.ctx.fill();
+			this.ctx.stroke();
+			
+			if (bubble.y < 50) {
+				this.state.goldfishBubbles.splice(i, 1);
+			}
+		}
+	}
+	drawNyanTrail(t, visibleH) {
+		if (this.state.action !== "nyan") return;
+
+		const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
+		this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
+		
+		for (let segment = 0; segment < 8; segment++) {
+			const segOffset = segment * 35;
+			const timeOffset = segment * 2;
+			colors.forEach((col, i) => {
+				this.ctx.fillStyle = col;
+				const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
+				const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
+				this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
+			});
+		}
+		this.ctx.globalAlpha = 1.0;
+	}
+	updateAndDrawParticles() {
+		for (let i = this.state.particles.length - 1; i >= 0; i--) {
+			const p = this.state.particles[i];
+			this.ctx.save();
+			
+			const isHeavyChunk = p.s > 5;
+			this.ctx.fillStyle = p.c;
+			this.ctx.globalAlpha = p.life < 30 ? p.life / 30 : 1.0;
+			
+			if (isHeavyChunk) {
+				this.ctx.fillRect(p.x, p.y, p.s, p.s);
+				this.ctx.strokeStyle = "#1a0000";
+				this.ctx.lineWidth = 1;
+				this.ctx.strokeRect(p.x, p.y, p.s, p.s);
+			} else {
+				this.ctx.fillRect(p.x, p.y, p.s, p.s);
+			}
+			this.ctx.restore();
+
+			p.x += p.vx;
+			p.y += p.vy;
+			p.vy += isHeavyChunk ? 0.22 : 0.35;
+			
+			if (isHeavyChunk) {
+				p.vx *= 0.985;
+			}
+
+			p.life--;
+			if (p.life <= 0) {
+				this.state.particles.splice(i, 1);
+			}
+		}
+	}
+
+
 /* 	drawEnvironment(t) {
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
@@ -2709,133 +2783,10 @@ export class StreamPet {
 		// ========================================================
 		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
 		// ========================================================
-		if (this.registry.activeSpecies === "goldfish") {
-			for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
-				let bubble = this.state.goldfishBubbles[i];
-				
-				bubble.y -= 1.2;
-				bubble.x += Math.sin(t * 0.05 + i) * 0.5;
-				
-				this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
-				this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
-				this.ctx.beginPath();
-				this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
-				this.ctx.fill();
-				this.ctx.stroke();
-				
-				if (bubble.y < 50) {
-					this.state.goldfishBubbles.splice(i, 1);
-				}
-			}
-		}
-		if (this.state.action === "nyan") {
-			const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
-			this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
-			for (let segment = 0; segment < 8; segment++) {
-				const segOffset = segment * 35;
-				const timeOffset = segment * 2;
-				colors.forEach((col, i) => {
-					this.ctx.fillStyle = col;
-					const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
-					const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
-					this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
-				});
-			}
-			this.ctx.globalAlpha = 1.0;
-		}
-
-/* 		if (this.state.paintBalloons && this.state.paintBalloons.length > 0) {
-			for (let i = this.state.paintBalloons.length - 1; i >= 0; i--) {
-				let balloon = this.state.paintBalloons[i];
-
-				balloon.x += balloon.vx;
-				balloon.y += balloon.vy;
-
-				this.ctx.save();
-				this.ctx.fillStyle = balloon.color;
-				this.ctx.beginPath();
-				this.ctx.arc(balloon.x, balloon.y, balloon.radius, 0, Math.PI * 2);
-				this.ctx.fill();
-				this.ctx.strokeStyle = "#ffffff";
-				this.ctx.lineWidth = 1.5;
-				this.ctx.stroke();
-				this.ctx.restore();
-
-				const curDx = balloon.targetX - balloon.x;
-				const curDy = balloon.targetY - balloon.y;
-				const remainingDist = Math.sqrt(curDx * curDx + curDy * curDy);
-
-				if (remainingDist < 10 || balloon.x < -50 || balloon.x > this.canvas.width + 50) {
-					const reachedTarget = remainingDist < 15;
-
-					if (balloon.isHit && reachedTarget) {
-						this.state.overrideColor = balloon.color;
-						
-						// ⭐ REGISTRY UPDATE: Explicitly mutates active companion profile state color
-						if (this.activePet) {
-							this.activePet.color = balloon.color;
-						}
-						
-						this.say("🎨 SPLATAFY!");
-						this.playSound('bubbleSound'); 
-					} else {
-						if (reachedTarget) {
-							this.say("💨 MISSED!");
-						}
-					}
-
-					if (balloon.x >= -10 && balloon.x <= this.canvas.width + 10) {
-						const particleCount = balloon.isHit ? 30 : 15;
-						for (let p = 0; p < particleCount; p++) {
-							this.state.particles.push({
-								x: balloon.x,
-								y: balloon.y,
-								vx: (Math.random() - 0.5) * 8,
-								vy: (Math.random() - 0.7) * 8,
-								s: Math.random() * 3 + 2,
-								c: balloon.color,
-								life: Math.floor(Math.random() * 20) + 15
-							});
-						}
-					}
-					this.state.paintBalloons.splice(i, 1);
-				}
-			}
-		}
- */
+		this.drawGoldfishBubbles(t);
+		this.drawNyanTrail(t, visibleH);
 		this.drawPaintBalloons();
-		// Dynamic particle physics engine loop
-		for (let i = this.state.particles.length - 1; i >= 0; i--) {
-			const p = this.state.particles[i];
-			this.ctx.save();
-			
-			const isHeavyChunk = p.s > 5;
-			this.ctx.fillStyle = p.c;
-			this.ctx.globalAlpha = p.life < 30 ? p.life / 30 : 1.0;
-			
-			if (isHeavyChunk) {
-				this.ctx.fillRect(p.x, p.y, p.s, p.s);
-				this.ctx.strokeStyle = "#1a0000";
-				this.ctx.lineWidth = 1;
-				this.ctx.strokeRect(p.x, p.y, p.s, p.s);
-			} else {
-				this.ctx.fillRect(p.x, p.y, p.s, p.s);
-			}
-			this.ctx.restore();
-
-			p.x += p.vx;
-			p.y += p.vy;
-			p.vy += isHeavyChunk ? 0.22 : 0.35;
-			
-			if (isHeavyChunk) {
-				p.vx *= 0.985;
-			}
-
-			p.life--;
-			if (p.life <= 0) {
-				this.state.particles.splice(i, 1);
-			}
-		}
+		this.updateAndDrawParticles();
 	}
     // ==========================================
     // CORE VISUAL RENDERING ROUTERS PER SPECIES
