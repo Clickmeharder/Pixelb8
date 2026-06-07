@@ -1853,16 +1853,15 @@ export class StreamPet {
                 break;
 
             case "climbing_tower":
-                // Climb up vertically on the tower structure relative to its scale footprint
-                const perchY = towerPos.y - 90; // Aim for the mid-to-high platform marker
-                this.state.y -= 1.5; // Climb velocity up the column
-                
-                if (this.state.y <= perchY) {
-                    this.state.y = perchY;
-                    this.state.action = "tower_sleep";
-                    this.state.actionTimer = 800; // Take a long nap up on the perch
-                }
-                break;
+				const perchY = towerPos.y - 125; // 🌟 Matches top platform deck precisely!
+				this.state.y -= 1.5;
+				
+				if (this.state.y <= perchY) {
+					this.state.y = perchY;
+					this.state.action = "tower_sleep";
+					this.state.actionTimer = 800;
+				}
+				break;
 			case "potty":
 				if (this.state.actionTimer <= 0) { 
 					if (this.registry.activeSpecies === "goldfish") {
