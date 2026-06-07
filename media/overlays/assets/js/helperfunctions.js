@@ -354,6 +354,37 @@ function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
         reader.readAsDataURL(file);
     });
 }
+
+
+
+
+// --- MODAL & HELPERS ---
+async function p8Confirm(message, isAlert = false) {
+    const overlay = document.getElementById('p8-modal-overlay');
+    const msgEl = document.getElementById('modal-msg');
+    const cancelBtn = document.getElementById('modal-cancel');
+    const confirmBtn = document.getElementById('modal-confirm');
+    
+    msgEl.innerText = message;
+    cancelBtn.style.display = isAlert ? 'none' : 'block';
+    overlay.style.display = 'flex';
+
+    return new Promise((resolve) => {
+        const cleanup = (val) => {
+            overlay.style.display = 'none';
+            confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+            cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+            resolve(val);
+        };
+        document.getElementById('modal-confirm').addEventListener('click', () => cleanup(true));
+        document.getElementById('modal-cancel').addEventListener('click', () => cleanup(false));
+    });
+}
+function closeContextMenu() {
+    const ctxMenu = document.getElementById('p8-ctx-menu');
+    if (ctxMenu) ctxMenu.style.display = 'none';
+}
+
 // =========================================================================
 // GLOBAL VIEWPORT CANVAS INTERACTION CLOSER
 // =========================================================================

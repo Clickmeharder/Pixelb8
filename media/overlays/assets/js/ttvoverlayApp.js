@@ -4,59 +4,7 @@
 /* 
 NOTES:
 
-- find a solution for browser page falling asleep 
-- make entropia widget disabled until enabled by Default 
-
-
-one of these loots or system messsages crashed the loot tracker ( it stopped runnign on loot)
-
-[System]: Mission updated (Cleanup Job (Daily))
-[System]: You received [Credit - H.M.] x (200) Value: 2 PED
-[System]: You received [Space Mining Scrip - H.M.] x (1) Value: 0 PED
-[System]: You received [Scottium Stone] x (2) Value: 0.25 PED
-[System]: You received [Universal Ammo] x (7500) Value: 0.75 PED
-[System]: Mission completed (Cleanup Job (Daily))
-
-
-
-
-
-- entropia-widget shouldnt load unless widget is enabled, once enabled require refresh
--create landing page:
-	-> on first load, prompt user:
-			"OBS Browser Source" or "Web overlay"
--copy theme to clipboard, import theme
--copy settings/profile to clipboard, iimport settings/profile
-
-- import local widget
--twitch commands to pull info from entropianexus
--web tracker for eu 
-
-
--team tracking & commands
--import loadout from entropia nexus and calculate cost / stats
--finish other polling stuff
-
--add more toggle-able stats and info to entropia-widget (overlay) ( off by default )
-
--toggleable seperate euteam-widget with class euwidgets
-   ->   if entropia-widget is disabled, then so it eu-team widget;
-      but, if entropia-widget is enabled eu-team widget is toggleable.
-	  
--add minifest grid mode options(looted item list)
-modes:
- autocycle
-	->cycle all selected every {input desired time between modes}
- itemtotal, ((current generic default mode ) this is the only mode our specific toggles change, all other modes have preset values and info) 
- biggest loots
- skills
- combatstats ( similar to recount addon for wow)
- team (team members and lootlogs
- recent globals:
-		(a top section that shows the most recent global by anyplayer on the streamers current planet abot a section for a list of all streamers hof in history with timestamps)
-			*** sortable with commands or interact window ***
- 
- 
+- 
  - add environment option to channel point manager bit cheer manager
     -> mist/fog   (fog on bottom of screen. when checked get options for set height and color)
 	-> weather (snow, falling autumn leaves)  
@@ -603,7 +551,6 @@ const DRAGGABLE_WINDOWS_CONFIG = [
 ];
 
 // Data registries for the options blocks
-
 // State engine to track actively selected values since we don't have standard .value anymore
 let customSelectValues = {
     "reward-text-in-anim": "none",
@@ -676,9 +623,6 @@ console.warn = function(...args) {
     const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
     displayConsoleMessage("WARN", msg);
 };
-
-
-
 
 
 
@@ -1704,33 +1648,6 @@ function botSay(msg) {
     }
 }
 
-
-// --- MODAL & HELPERS ---
-async function p8Confirm(message, isAlert = false) {
-    const overlay = document.getElementById('p8-modal-overlay');
-    const msgEl = document.getElementById('modal-msg');
-    const cancelBtn = document.getElementById('modal-cancel');
-    const confirmBtn = document.getElementById('modal-confirm');
-    
-    msgEl.innerText = message;
-    cancelBtn.style.display = isAlert ? 'none' : 'block';
-    overlay.style.display = 'flex';
-
-    return new Promise((resolve) => {
-        const cleanup = (val) => {
-            overlay.style.display = 'none';
-            confirmBtn.replaceWith(confirmBtn.cloneNode(true));
-            cancelBtn.replaceWith(cancelBtn.cloneNode(true));
-            resolve(val);
-        };
-        document.getElementById('modal-confirm').addEventListener('click', () => cleanup(true));
-        document.getElementById('modal-cancel').addEventListener('click', () => cleanup(false));
-    });
-}
-function closeContextMenu() {
-    const ctxMenu = document.getElementById('p8-ctx-menu');
-    if (ctxMenu) ctxMenu.style.display = 'none';
-}
 // --- CORE COMMAND LOGIC & WIDGET VISIBILITY CONTROLS ---
 // --- CENTRALIZED COMMAND REGISTRY ---
 // Helper to parse ID or default to latest
@@ -1742,50 +1659,6 @@ const commandsRegistry = {
             botSay(`System active. Current prefix: !${useCmdPrefix ? CMD_PREFIX : '[NONE]'}`);
         }
     },
-/* 	"toggle": {
-        adminOnly: true,
-        execute: (user, message, flags) => {
-            const target = message.toLowerCase().trim();
-            
-            if (target === "consolemessages") {
-                consoleMessages = !consoleMessages;
-                botSay(`Console messages: ${consoleMessages ? "Enabled" : "Disabled"}`);
-            } 
-            else if (target === "cmdprefix") {
-                useCmdPrefix = !useCmdPrefix;
-                botSay(`Prefix Mode: ${useCmdPrefix ? "REQUIRED (!" + CMD_PREFIX + ")" : "Disabled"}`);
-            }
-            else if (target === "botprefix") {
-                useBotPrefix = !useBotPrefix;
-                botSay(`Bot Prefix visibility is now: ${useBotPrefix ? "Enabled" : "Disabled"}`);
-            }
-            else if (target === "floatingemotes") {
-                floatingEmotes = !floatingEmotes;
-                botSay(`Floating Emotes are now: ${floatingEmotes ? "Enabled" : "Disabled"}`);
-            }
-            // --- FIX: Sync with global variables and correct visual elements ---
-			else if (target === "chat") {
-                chatHidden = !chatHidden; 
-                if (chatWidget) { chatWidget.style.display = chatHidden ? "none" : "block"; }
-                botSay(`Chat Widget visibility: ${chatHidden ? "Hidden" : "Visible"}`);
-            }
-            else if (target === "alert" || target === "alerts") {
-                alertHidden = !alertHidden;
-                if (alertWidget) {
-                    alertWidget.style.display = alertHidden ? "none" : "block";
-                    if (alertHidden) alertWidget.style.opacity = "0";
-                }
-                botSay(`Alert Widget visibility: ${alertHidden ? "Hidden" : "Visible"}`);
-            }
-            else if (target === "status") {
-                statusHidden = !statusHidden;
-                if (statusWidget) { statusWidget.style.display = statusHidden ? "none" : "block"; }
-                botSay(`Status Widget visibility: ${statusHidden ? "Hidden" : "Visible"}`);
-            }
-            // This now safely synchronizes our updated global variables to localStorage
-            saveSettings();
-        }
-    }, */
 	"toggle": {
         adminOnly: true,
         execute: (user, message, flags) => {
@@ -2089,7 +1962,7 @@ function startTwitch(channel, token) {
 }
 
 
-// =====================================================================================================================================================
+// ==============================================================================================================
 // =========================================================================
 // --- SOUND SYSTEM ---
 // =========================================================================
@@ -2200,10 +2073,10 @@ window.removeStagedSoundItem = function(index) {
 };
 
 // =========== END OF SOUND SYTEM ===================================
-// =====================================================================================================================================================
+// ==============================================================================================================
 
 
-// =====================================================================================================================================================
+// ===============================================================================================================
 // =========================================================================
 // --- TIMERS & RUNTIME CONTEXT ENGINE STATE ---
 // =========================================================================

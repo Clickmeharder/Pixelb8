@@ -1,5 +1,60 @@
 import { get, set, del } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
+/* 
+NOTES:
 
+- find a solution for browser page falling asleep 
+- make entropia widget disabled until enabled by Default 
+
+
+one of these loots or system messsages crashed the loot tracker ( it stopped runnign on loot)
+
+[System]: Mission updated (Cleanup Job (Daily))
+[System]: You received [Credit - H.M.] x (200) Value: 2 PED
+[System]: You received [Space Mining Scrip - H.M.] x (1) Value: 0 PED
+[System]: You received [Scottium Stone] x (2) Value: 0.25 PED
+[System]: You received [Universal Ammo] x (7500) Value: 0.75 PED
+[System]: Mission completed (Cleanup Job (Daily))
+
+
+
+
+
+- entropia-widget shouldnt load unless widget is enabled, once enabled require refresh
+-create landing page:
+	-> on first load, prompt user:
+			"OBS Browser Source" or "Web overlay"
+-copy theme to clipboard, import theme
+-copy settings/profile to clipboard, iimport settings/profile
+
+- import local widget
+-twitch commands to pull info from entropianexus
+-web tracker for eu 
+
+
+-team tracking & commands
+-import loadout from entropia nexus and calculate cost / stats
+-finish other polling stuff
+
+-add more toggle-able stats and info to entropia-widget (overlay) ( off by default )
+
+-toggleable seperate euteam-widget with class euwidgets
+   ->   if entropia-widget is disabled, then so it eu-team widget;
+      but, if entropia-widget is enabled eu-team widget is toggleable.
+	  
+-add minifest grid mode options(looted item list)
+modes:
+ autocycle
+	->cycle all selected every {input desired time between modes}
+ itemtotal, ((current generic default mode ) this is the only mode our specific toggles change, all other modes have preset values and info) 
+ biggest loots
+ skills
+ combatstats ( similar to recount addon for wow)
+ team (team members and lootlogs
+ recent globals:
+		(a top section that shows the most recent global by anyplayer on the streamers current planet abot a section for a list of all streamers hof in history with timestamps)
+			*** sortable with commands or interact window ***
+ 
+*/
 export class EntropiaWidget {
     constructor() {
         this.FILE_HANDLE_KEY = "entropia_chat_handle";
