@@ -172,6 +172,7 @@ export class StreamPet {
             trick:     { chat: true,  cp: false },
             status:    { chat: true,  cp: false },
             tease:     { chat: true,  cp: true },
+            paint:     { chat: true,  cp: true },
             revive:    { chat: true,  cp: true },
             help:      { chat: true,  cp: false }, 
             rewards:   { chat: true,  cp: false }, 
@@ -2176,7 +2177,7 @@ export class StreamPet {
 			} else if (this.registry.activeSpecies === "spider") {
 				// Spiders leave permanent webs handled above in Phase 1
 			} else {
-				// ⭐ FIX: Instead of static offsets, tie poop elements explicitly to the zoomed lPos tracking matrix
+				// Tie poop elements explicitly to the zoomed lPos tracking matrix
 				let poopyY = p.isCeil ? 90 : lPos.y + 24;
 				let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
 				this.ctx.font = "14px Arial";
@@ -2281,7 +2282,6 @@ export class StreamPet {
 		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
 		// ========================================================
 		if (this.registry.activeSpecies === "goldfish") {
-			// Loop backwards to safely remove elements
 			for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
 				let bubble = this.state.goldfishBubbles[i];
 				
@@ -2295,7 +2295,6 @@ export class StreamPet {
 				this.ctx.fill();
 				this.ctx.stroke();
 				
-				// Cleanup bubbles that float off-screen
 				if (bubble.y < 50) {
 					this.state.goldfishBubbles.splice(i, 1);
 				}
@@ -2320,11 +2319,9 @@ export class StreamPet {
 			for (let i = this.state.paintBalloons.length - 1; i >= 0; i--) {
 				let balloon = this.state.paintBalloons[i];
 
-				// Drive animation layout offsets
 				balloon.x += balloon.vx;
 				balloon.y += balloon.vy;
 
-				// Render balloon graphic contour shapes
 				this.ctx.save();
 				this.ctx.fillStyle = balloon.color;
 				this.ctx.beginPath();
@@ -2335,28 +2332,29 @@ export class StreamPet {
 				this.ctx.stroke();
 				this.ctx.restore();
 
-				// Measure accurate tracking distance remaining to determine impact framework bounds
 				const curDx = balloon.targetX - balloon.x;
 				const curDy = balloon.targetY - balloon.y;
 				const remainingDist = Math.sqrt(curDx * curDx + curDy * curDy);
 
-				// Trigger explosion loop if it hits target threshold OR flies out of screen boundaries
 				if (remainingDist < 10 || balloon.x < -50 || balloon.x > this.canvas.width + 50) {
-					// Check if the explosion happened because it truly reached its intended target coordinates
 					const reachedTarget = remainingDist < 15;
 
 					if (balloon.isHit && reachedTarget) {
 						this.state.overrideColor = balloon.color;
+						
+						// ⭐ REGISTRY UPDATE: Explicitly mutates active companion profile state color
+						if (this.activePet) {
+							this.activePet.color = balloon.color;
+						}
+						
 						this.say("🎨 SPLATAFY!");
 						this.playSound('bubbleSound'); 
 					} else {
-						// Only say missed if the balloon actually exploded near the pet area
 						if (reachedTarget) {
 							this.say("💨 MISSED!");
 						}
 					}
 
-					// Only generate visible splash particles if the detonation happens on-screen
 					if (balloon.x >= -10 && balloon.x <= this.canvas.width + 10) {
 						const particleCount = balloon.isHit ? 30 : 15;
 						for (let p = 0; p < particleCount; p++) {
@@ -2371,44 +2369,35 @@ export class StreamPet {
 							});
 						}
 					}
-
-					// Splice current node out of loop registry processing list heap array
 					this.state.paintBalloons.splice(i, 1);
 				}
 			}
 		}
-		// Dynamic particle physics engine handler loop
+		// Dynamic particle physics engine loop
 		for (let i = this.state.particles.length - 1; i >= 0; i--) {
 			const p = this.state.particles[i];
 			this.ctx.save();
 			
-			// Detect custom chunks injected by explodePet()
 			const isHeavyChunk = p.s > 5;
-			
 			this.ctx.fillStyle = p.c;
 			this.ctx.globalAlpha = p.life < 30 ? p.life / 30 : 1.0;
 			
 			if (isHeavyChunk) {
-				// Render chunky body parts with sharp perimeter borders
 				this.ctx.fillRect(p.x, p.y, p.s, p.s);
 				this.ctx.strokeStyle = "#1a0000";
 				this.ctx.lineWidth = 1;
 				this.ctx.strokeRect(p.x, p.y, p.s, p.s);
 			} else {
-				// Standard particle square drops
 				this.ctx.fillRect(p.x, p.y, p.s, p.s);
 			}
 			this.ctx.restore();
 
-			// Mutation mechanics
 			p.x += p.vx;
 			p.y += p.vy;
-			
-			// Custom gravity weights: standard drops drop instantly; heavy chunks maintain flight velocity curves
 			p.vy += isHeavyChunk ? 0.22 : 0.35;
 			
 			if (isHeavyChunk) {
-				p.vx *= 0.985; // Air-resistance friction damping factor
+				p.vx *= 0.985;
 			}
 
 			p.life--;
@@ -2417,6 +2406,7 @@ export class StreamPet {
 			}
 		}
 	}
+
     // ==========================================
     // CORE VISUAL RENDERING ROUTERS PER SPECIES
     // ==========================================
