@@ -172,8 +172,8 @@ export class StreamPet {
         // Inject Config Menu Interface
         this.injectUI();
         // Fire initial sizing setup and register display observer
-        this.resize();
-        window.addEventListener('resize', () => this.resize());
+        this.resizePetWidget();
+        window.addEventListener('resizePetWidget', () => this.resizePetWidget());
         // Load runtime memory maps
         this.loadData();
         this.initContainerListeners(); 
@@ -186,403 +186,7 @@ export class StreamPet {
         this.bindUIEventListeners();
     }
 
-    // ==========================================
-    // SECTION 2: INPUT, BOUNDS & DATA PERSISTENCE
-    // ==========================================
-	// ⭐ FIX: Added internal Snap Placement handler inside the class structure
 
-    initContainerListeners() {
-        if (!this.widgetContainer) return;
-
-        const observer = new MutationObserver((mutations) => {
-            this.widgetBounds = {
-                left: this.widgetContainer.style.left,
-                top: this.widgetContainer.style.top,
-                width: this.widgetContainer.style.width,
-                height: this.widgetContainer.style.height
-            };
-            localStorage.setItem("greta_widget_bounds", JSON.stringify(this.widgetBounds));
-            this.resize(); // Re-sync the canvas internal resolution
-        });
-
-        observer.observe(this.widgetContainer, { 
-            attributes: true, 
-            attributeFilter: ["style"] 
-        });
-    }
-
-
-
-
-    resize() {
-        if (!this.widgetContainer || !this.canvas) return;
-        this.canvas.width = this.widgetContainer.clientWidth;
-        this.canvas.height = this.widgetContainer.clientHeight;
-        this.ctx.imageSmoothingEnabled = false;
-    }
-    getPos(pctX, pctY, offY = 0) {
-        const visibleW = this.canvas.width;
-        const visibleH = this.canvas.height;
-
-        let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
-        let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
-
-        const anchorX = visibleW / 2;
-        const anchorY = visibleH - this.BASE_FLOOR_Y;
-
-        const targetX = (pctX / 100) * visibleW;
-        const targetY = (pctY / 100) * visibleH;
-
-        const finalX = anchorX + (targetX - anchorX) / scaleVal;
-        const finalY = anchorY + (targetY - anchorY) / scaleVal;
-
-        return { x: finalX, y: finalY + offY };
-    }
-
-
-// ==========================================
-// SECTION 3: CHAT COMMAND ROUTER
-// ==========================================
-	getDefaultCommandMatrix() {
-		return {
-			feed:      { chat: true,  cp: true },
-			play:      { chat: true,  cp: true },
-			dance:     { chat: true,  cp: false },
-			treat:     { chat: false, cp: true }, 
-			trick:     { chat: true,  cp: false },
-			status:    { chat: true,  cp: false },
-			tease:     { chat: true,  cp: true },
-			paintbomb: { chat: true,  cp: true }, // Added once here safely
-			revive:    { chat: true,  cp: true }, 
-			help:      { chat: true,  cp: false }, 
-			rewards:   { chat: true,  cp: false }, 
-			nyan:      { chat: true,  cp: true },  
-			clear:     { chat: true,  cp: true },  
-			species:   { chat: true,  cp: true },  
-			hidepet:   { chat: true,  cp: true },  
-			showpet:   { chat: true,  cp: true },  
-			togglepet: { chat: true,  cp: true }   
-		};
-	}
-
-	getCommands(sendNotice) {
-		// =========================================================================
-		// 🗺️ THE MASTER ALIAS DICTIONARY (Single source of truth for syntax mapping)
-		// =========================================================================
-		const aliasMap = {
-			// User Help & Info
-			'help':      { core: 'help',      admin: false },
-			'h':         { core: 'help',      admin: false },
-			'rewards':   { core: 'rewards',   admin: true },
-
-			// Simulation Triggers
-			'tease':           { core: 'tease',     admin: false },
-			'tease pet':       { core: 'tease',     admin: false }, 
-			'pulltail':        { core: 'tease',     admin: false }, 
-			'pull tail':       { core: 'tease',     admin: false }, 
-			'pull pets tail':  { core: 'tease',     admin: false },
-			'tapglass':        { core: 'tease',     admin: false }, 
-			'tap glass':       { core: 'tease',     admin: false },
-
-			'feed':      { core: 'feed',      admin: false }, 
-			'feed pet':  { core: 'feed',      admin: false }, 
-			'food':      { core: 'feed',      admin: false }, 
-			'fish':      { core: 'feed',      admin: false }, 
-			'meat':      { core: 'feed',      admin: false }, 
-			'bugs':      { core: 'feed',      admin: false }, 
-			'flakes':    { core: 'feed',      admin: false },
-
-			'play':      { core: 'play',      admin: false }, 
-			'yarn':      { core: 'play',      admin: false }, 
-			'ball':      { core: 'play',      admin: false }, 
-			'web':       { core: 'play',      admin: false },
-
-			'trick':     { core: 'trick',     admin: false },
-			'dance':     { core: 'dance',     admin: false },
-			'treat':     { core: 'treat',     admin: false }, 
-			'nom':       { core: 'treat',     admin: false },
-			'status':    { core: 'status',    admin: false }, 
-			'stats':     { core: 'status',    admin: false },
-
-			'paintbomb': { core: 'paintbomb', admin: false }, 
-			'paint':     { core: 'paintbomb', admin: false }, 
-			'bomb':      { core: 'paintbomb', admin: false }, 
-			'splat':     { core: 'paintbomb', admin: false },
-
-			// Administrator Routing Protocols
-			'nyan':               { core: 'nyan',      admin: true }, 
-			'rainbow':            { core: 'nyan',      admin: true },
-			'revive':             { core: 'revive',    admin: false }, // Access matrix filters this instead of hardcoding
-			'revive pet':         { core: 'revive',    admin: false }, 
-			'revive active pet':  { core: 'revive',    admin: false },
-			'clear':              { core: 'clear',     admin: false }, 
-			'clean':              { core: 'clear',     admin: false },
-			'species':            { core: 'species',   admin: true }, 
-			'type':               { core: 'species',   admin: true },
-
-			'hidepet':   { core: 'hidepet',   admin: true }, 
-			'hide pet':  { core: 'hidepet',   admin: true }, 
-			'hide':      { core: 'hidepet',   admin: true },
-			'showpet':   { core: 'showpet',   admin: true }, 
-			'show pet':  { core: 'showpet',   admin: true }, 
-			'show':      { core: 'showpet',   admin: true },
-			'togglepet': { core: 'togglepet', admin: true }, 
-			'toggle pet':{ core: 'togglepet', admin: true }, 
-			'toggle':    { core: 'togglepet', admin: true }
-		};
-
-		const petExecution = (user, message, flags) => {
-			const incomingInput = message.trim().toLowerCase();
-			const parts = incomingInput.split(/\s+/);
-			const subCommand = parts[0];
-			const isAdmin = flags ? (flags.broadcaster || flags.mod) : false;
-
-			// Resolve input mapping configuration dynamically from master alias template
-			const matchedMapping = aliasMap[incomingInput] || aliasMap[subCommand] || null;
-			if (!matchedMapping) {
-				sendNotice(`🐾 [Pet]: Option not recognized. Try: !pet [feed | play | dance | treat | status | trick]`);
-				return;
-			}
-
-			const actualSub = matchedMapping.core;
-
-			// =========================================================================
-			// 🛑 HARDWARE FILTERS & SECURITY MATRIX GUARD ROUTER
-			// =========================================================================
-			if (this.state.commandAccess && this.state.commandAccess[actualSub]) {
-				const config = this.state.commandAccess[actualSub];
-				const isChannelPoint = !!(flags && (flags.customRewardId || flags.channelPointRedemption || flags.isRewardSimulated));
-				const isChatMessage = !isChannelPoint;
-
-				if (isChatMessage && !config.chat) return;
-
-				if (isChannelPoint && !config.cp) {
-					sendNotice(`❌ [Pet]: The "${incomingInput}" reward matrix is currently toggled off by the broadcaster.`);
-					return;
-				}
-			}
-
-			if (this.activePet.isDead && actualSub !== 'revive' && actualSub !== 'status') {
-				sendNotice(`🪦 [Pet]: ${this.activePet.name} is currently deceased. Use !pet revive to save them!`);
-				return;
-			}
-
-			// =========================================================================
-			// 🎬 LOGICAL PROCESSING HUB (CLEAN ROUTING)
-			// =========================================================================
-			switch (actualSub) {
-				case 'help':
-					// Gather list of public user commands automatically using the defaults blueprint keys
-					const availableCmds = Object.keys(this.getDefaultCommandMatrix()).filter(c => {
-						const mapped = Object.values(aliasMap).find(m => m.core === c);
-						return mapped ? !mapped.admin : true;
-					});
-					sendNotice(`🐾 [Pet Help]: Options: ${availableCmds.map(c => `!pet ${c}`).join(' | ')}`);
-					if (isAdmin) sendNotice(`🛠️ [Admin]: !pet [nyan | revive | clear | species | rewards | hide | show | toggle]`);
-					break;
-
-				case 'rewards':
-					if (!isAdmin) return;
-					const groups = {};
-					Object.entries(aliasMap).forEach(([trigger, data]) => {
-						if (!groups[data.core]) groups[data.core] = [];
-						groups[data.core].push(trigger);
-					});
-
-					sendNotice(`🎁 [Pet Reward Guide]: Create Twitch Channel Point Rewards with these exact names:`);
-					if (groups['feed']) sendNotice(`   🍏 Feed Pet: ${groups['feed'].map(t => `"${t}"`).join(', ')}`);
-					if (groups['tease']) sendNotice(`   😠 Tease Pet: ${groups['tease'].map(t => `"${t}"`).join(', ')}`);
-					if (groups['play']) sendNotice(`   🥎 Play Pet: ${groups['play'].map(t => `"${t}"`).join(', ')}`);
-					break;
-
-				case 'hidepet':
-					if (!isAdmin) return;
-					if (this.widgetContainer) {
-						this.widgetContainer.style.display = 'none';
-						this.state.hideWidget = true;
-						this.saveData();
-						sendNotice(`🙈 [Pet]: ${this.activePet.name} has been hidden from the stream overlay.`);
-					}
-					break;
-
-				case 'showpet':
-					if (!isAdmin) return;
-					if (this.widgetContainer) {
-						this.widgetContainer.style.display = 'block';
-						this.state.hideWidget = false;
-						this.saveData();
-						this.resize();
-						sendNotice(`👀 [Pet]: ${this.activePet.name} is back and visible!`);
-					}
-					break;
-
-				case 'togglepet':
-					if (!isAdmin) return;
-					if (this.widgetContainer) {
-						const isHidden = this.widgetContainer.style.display === 'none' || this.state.hideWidget;
-						if (isHidden) {
-							this.widgetContainer.style.display = 'block';
-							this.state.hideWidget = false;
-							this.resize();
-							sendNotice(`👀 [Pet]: Showing ${this.activePet.name}!`);
-						} else {
-							this.widgetContainer.style.display = 'none';
-							this.state.hideWidget = true;
-						}
-						this.saveData();
-					}
-					break;
-
-				case 'feed':
-					if (!this.state.hasFood) {
-						this.state.hasFood = true;
-						if (this.registry.activeSpecies === "kitty") this.say("Food! 🐟");
-						if (this.registry.activeSpecies === "puppy") this.say("BONE! 🍖");
-						if (this.registry.activeSpecies === "spider") this.say("CRICKET! 🪰");
-						if (this.registry.activeSpecies === "goldfish") this.say("FLAKES! 🍤");
-						sendNotice(`🍽️ [Pet]: ${user} dropped food for ${this.activePet.name}!`);
-					} else {
-						sendNotice(`🍽️ [Pet]: There is already food in the bowl!`);
-					}
-					break;
-
-				case 'play':
-					this.state.action = "special";
-					this.state.actionTimer = 350;
-					if (this.registry.activeSpecies === "kitty") this.say("Play! 🧶");
-					if (this.registry.activeSpecies === "puppy") this.say("FETCH! 🥎");
-					if (this.registry.activeSpecies === "spider") this.say("SPIN! 🕸️");
-					if (this.registry.activeSpecies === "goldfish") this.say("LOOP! 🫧");
-					sendNotice(`🥎 [Pet]: ${user} actively engaged with ${this.activePet.name}!`);
-					break;
-
-				case 'dance':
-					this.state.action = "dance";
-					this.state.actionTimer = 300;
-					this.say("Dance! ✨");
-					break;
-
-				case 'treat':
-					this.activePet.hunger = Math.max(0, this.activePet.hunger - 5);
-					this.state.action = "special";
-					this.state.actionTimer = 200;
-					this.say("NOM NOM NOM! 🍗");
-					break;
-
-				case 'trick':
-					this.state.action = "trick";
-					this.state.actionTimer = 250;
-					if (this.registry.activeSpecies === "puppy") { this.say("BACKFLIP! 🤸"); this.activePet.exp += 25; }
-					else if (this.registry.activeSpecies === "kitty") { this.say("PURR SLIDE! 🛷"); this.activePet.exp += 20; }
-					else if (this.registry.activeSpecies === "spider") { this.say("PARACHUTE! 🪂"); this.activePet.exp += 30; }
-					else if (this.registry.activeSpecies === "goldfish") { this.say("SPLASH FLIP! 🌊"); this.activePet.exp += 25; }
-					break;
-
-				case 'status':
-					let healthTxt = this.activePet.poops.length > 5 ? "SICK" : "HEALTHY";
-					sendNotice(`🐾 [${this.activePet.name}]: Species: ${this.registry.activeSpecies.toUpperCase()} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}% | Mood: ${healthTxt} | EXP: ${this.activePet.exp}`);
-					break;
-
-				case 'paintbomb':
-					const rawArgs = message.trim().split(/\s+/).slice(1);
-					let selectedColor = '';
-
-					if (rawArgs.length === 0 || rawArgs[0] === '') {
-						const randH = Math.floor(Math.random() * 360);
-						selectedColor = `hsla(${randH}, 95%, 50%, 1)`;
-					} else if (rawArgs[0].startsWith('#')) {
-						const hslaObj = hexToHSLA(rawArgs[0]);
-						selectedColor = `hsla(${hslaObj.h}, ${hslaObj.s}%, ${hslaObj.l}%, ${hslaObj.a})`;
-					} else if (rawArgs.length >= 3) {
-						const r = parseInt(rawArgs[0], 10) || 0;
-						const g = parseInt(rawArgs[1], 10) || 0;
-						const b = parseInt(rawArgs[2], 10) || 0;
-						const a = rawArgs[3] !== undefined ? parseFloat(rawArgs[3]) : 1.0;
-						const hslaObj = rgbToHSLA(r, g, b, a);
-						selectedColor = `hsla(${hslaObj.h}, ${hslaObj.s}%, ${hslaObj.l}%, ${hslaObj.a})`;
-					} else {
-						const randH = Math.floor(Math.random() * 360);
-						selectedColor = `hsla(${randH}, 95%, 50%, 1)`;
-					}
-
-					const isHit = Math.random() > 0.30; 
-
-					if (typeof this.triggerPaintBomb === 'function') {
-						this.triggerPaintBomb(selectedColor, isHit);
-						if (isHit) {
-							sendNotice(`🎈 [Paintbomb]: ${user} hurled a paint balloon at ${this.activePet.name}!`);
-						} else {
-							sendNotice(`💨 [Paintbomb]: ${user} hurled a paint balloon... but their aim was terrible and it might miss!`);
-						}
-					}
-					break;
-
-				case 'nyan':
-					this.triggerNyan();
-					sendNotice(`🌈 [Pet]: NYAN OVERDRIVE ACTIVATED BY STAFF!`);
-					break;
-
-				case 'tease':
-					this.teasePet();
-					sendNotice(`😠 [Pet]: ${user} teased ${this.activePet.name}!`);
-					break;
-
-				case 'species':
-					if (isAdmin && parts[1]) {
-						const speciesMap = { "kitty": "kitty", "kitten": "kitty", "puppy": "puppy", "dog": "puppy", "spider": "spider", "fish": "goldfish", "goldfish": "goldfish" };
-						const targetKey = speciesMap[parts[1].toLowerCase()];
-						if (targetKey && this.PET_SPECIES.includes(targetKey)) {
-							this.selectSpecies(targetKey); 
-							sendNotice(`🧬 [Pet]: Species hot-swapped to ${targetKey.toUpperCase()}!`);
-						} else {
-							sendNotice(`❌ [Pet]: Unknown species. Try: kitty, puppy, spider, or fish.`);
-						}
-					}
-					break;
-
-				case 'revive':
-					if (this.activePet.exp > 100) {
-						this.revivePet();
-						sendNotice(`💖 [Pet]: ${this.activePet.name} was successfully revived by ${user}!`);
-					} else {
-						sendNotice(`❌ [Pet]: Only pets with greater than 100 can be revived ${this.activePet.name}!`);
-					}
-					break;
-
-				case 'clear':
-					this.activePet.poops = [];
-					this.state.spiderWebs = [];
-					this.state.goldfishBubbles = [];
-					this.state.puppyBones = [];
-					this.say("Fresh sand! ✨");
-					sendNotice(`🧹 [Pet]: ${user} scooped the environment layout parameters!`);
-					break;
-			}
-		};
-
-		// =========================================================================
-		// 🚀 DYNAMIC ROUTER GENERATION (Generates and pipes commands automatically)
-		// =========================================================================
-		const baseCommands = [
-			{ name: 'pet', adminOnly: false, execute: petExecution },
-			{ name: 'kitty', adminOnly: false, execute: petExecution }
-		];
-
-		// Read directly from the alias keys to build and auto-register top-level chat handles
-		Object.keys(aliasMap).forEach(alias => {
-			baseCommands.push({
-				name: alias,
-				adminOnly: aliasMap[alias].admin,
-				execute: (user, message, flags) => petExecution(user, alias, flags)
-			});
-		});
-
-		return baseCommands;
-	}
-
-// ===============================================
-// SECTION 4: UI ASSEMBLY, TEMPLATES & BINDINGS
-// ===============================================
     static get controlsTemplate() {
         const layoutMetrics = [
             ["name", "Nameplate X/Y", 50, 70, 0, 100],
@@ -745,1478 +349,6 @@ export class StreamPet {
 			</div>
         `;
     }
-
-	injectUI() {
-        const wrapper = document.getElementById("widget-control-wrapper");
-        if (!wrapper) {
-            console.warn("⚠️ [Pet Widget]: #widget-control-wrapper not found. Skipping UI injection.");
-            return;
-        }
-
-        // Check if the outer panel skeleton already exists
-        let petSection = document.getElementById("pet-widget-controls");
-        
-        if (!petSection) {
-            petSection = document.createElement("div");
-            petSection.id = "pet-widget-controls";
-            petSection.className = "collapsible-section collapsed";
-            petSection.innerHTML = StreamPet.controlsTemplate;
-
-            const entropiaBox = document.getElementById("entropia-widget-controls");
-            if (entropiaBox && entropiaBox.nextSibling) {
-                wrapper.insertBefore(petSection, entropiaBox.nextSibling);
-            } else {
-                wrapper.appendChild(petSection);
-            }
-            console.log("🐾 [Pet Widget]: Global Multi-Pet Interface Injected.");
-        }
-
-        // 👇 VITAL BRIDGE STEP:
-        // Locate the target element where your matrix table should actually render.
-        // Replace '.pet-matrix-container-target' with whatever class/id is inside your StreamPet.controlsTemplate
-        this.controlsContainer = petSection.querySelector('.pet-matrix-container-target') || petSection;
-    }
-	updateUI() {
-		const nameEl = document.getElementById("nameplate");
-		const statsEl = document.getElementById("status");
-		if(!nameEl || !statsEl) return;
-		
-		nameEl.style.left = this.state.layout.nameX + "%"; 
-		nameEl.style.top = this.state.layout.nameY + "%";
-		statsEl.style.left = this.state.layout.statsX + "%"; 
-		statsEl.style.top = this.state.layout.statsY + "%";
-		
-		let sTxt = this.activePet.isDead ? "DECEASED" : (this.activePet.poops.length > 5 ? "SICK" : "HEALTHY");
-		// statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} | EXP: ${this.activePet.exp}`;
-		statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} [${this.state.action || 'idle'}] | EXP: ${this.activePet.exp}`;
-		nameEl.textContent = this.activePet.isDead ? `${this.activePet.name.toUpperCase()}'S GHOST` : this.activePet.name.toUpperCase();
-		
-		// Dynamic Form Option Label Management
-		const propLabel = document.querySelector('label[for="showTower"]') || document.getElementById("showTower")?.previousElementSibling;
-		if (propLabel) {
-			if (this.registry.activeSpecies === "puppy") propLabel.textContent = "Show Doghouse";
-			else if (this.registry.activeSpecies === "goldfish") propLabel.textContent = "Show Castle/Coral";
-			else propLabel.textContent = "Show Cat Tower";
-		}
-
-		// NEW: Dynamic Multi-Species Potty Label Swap
-		const litterLabel = Array.from(document.querySelectorAll('span')).find(el => el.textContent.includes("Litter Box"));
-		if (litterLabel) {
-			litterLabel.textContent = (this.registry.activeSpecies === "puppy") ? "Grass Patch X/Y" : "Litter Box X/Y";
-		}
-	}
-
-    applyEditModeStyles() {
-        const el = document.getElementById("pet-widget");
-        if (!el) return;
-        if (document.body.classList.contains('edit-mode')) {
-            el.style.pointerEvents = "auto"; 
-        }
-    }
-
-    applyVisibilityStates() {
-        if (this.widgetContainer) {
-			if (this.state.hideWidget === true) {
-				this.widgetContainer.style.display = 'none';
-			} else {
-				this.widgetContainer.style.display = 'block';
-			}
-            if (this.state.hideBorder) {
-                this.widgetContainer.style.border = "none";
-                this.widgetContainer.style.boxShadow = "none";
-            } else {
-                this.widgetContainer.style.border = "";
-                this.widgetContainer.style.boxShadow = "";
-            }
-
-            if (this.state.hideBackground) {
-                this.widgetContainer.style.setProperty("background", "transparent", "important");
-            } else {
-                this.widgetContainer.style.background = ""; 
-            }
-        }
-
-        const statusEl = document.getElementById("status");
-        if (statusEl) statusEl.style.display = this.state.hideStatus ? "none" : "block";
-        
-        const nameplateEl = document.getElementById("nameplate");
-        if (nameplateEl) nameplateEl.style.display = this.state.hideNameplate ? "none" : "block";
-    }
-
-	renderControlPanel() {
-		if (!this.controlsContainer) return;
-
-		// Clean, compact dark matrix matching #18181b aesthetics
-		let html = `
-			<p style="font-size: 11px; color: #a1a1aa; margin-bottom: 8px; line-height: 1.3;">
-				Toggle interaction methods or fire a manual trigger to test animations and behaviors instantly.
-			</p>
-			<div class="matrix-table" style="width: 100%; font-family: sans-serif; font-size: 11px; display: flex; flex-direction: column; gap: 3px;">
-				<div class="matrix-header" style="display: flex; font-weight: bold; padding: 4px 6px; background: #141414; border-radius: 4px; color: #a1a1aa; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;">
-					<div style="flex: 1.8;">Command Core</div>
-					<div style="flex: 1; text-align: center;">💬 Chat</div>
-					<div style="flex: 1; text-align: center;">🎁 Reward</div>
-					<div style="flex: 0.8; text-align: center;">⚡ Test</div>
-				</div>
-		`;
-
-		// 👇 FILTER OUT ADMINISTRATIVE / METADATA UTILITIES FROM CLUTTERING THE UI
-		const hiddenCommands = ['help', 'rewards', 'clear', 'species', 'hidepet', 'showpet', 'togglepet'];
-
-		Object.keys(this.state.commandAccess).forEach(cmd => {
-			if (hiddenCommands.includes(cmd)) return; // Skip rendering these rows!
-
-			const config = this.state.commandAccess[cmd];
-			html += `
-				<div class="matrix-row" style="display: flex; padding: 6px; background: #141414; border-radius: 4px; align-items: center;">
-					<div style="flex: 1.8; font-weight: bold; text-transform: capitalize; color: #fff;">${cmd}</div>
-					<div style="flex: 1; text-align: center; display: flex; justify-content: center;">
-						<input type="checkbox" data-cmd="${cmd}" data-type="chat" ${config.chat ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
-					</div>
-					<div style="flex: 1; text-align: center; display: flex; justify-content: center;">
-						<input type="checkbox" data-cmd="${cmd}" data-type="cp" ${config.cp ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
-					</div>
-					<div style="flex: 0.8; text-align: center; display: flex; justify-content: center;">
-						<button data-cmd="${cmd}" class="matrix-test-btn" style="cursor: pointer; background: #27272a; color: #3498db; border: 1px solid #3f3f46; border-radius: 4px; font-size: 10px; padding: 2px 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; height: 20px; min-width: 28px;" onmouseover="this.style.background='#3f3f46'; this.style.color='#fff';" onmouseout="this.style.background='#27272a'; this.style.color='#3498db';">
-							▶
-						</button>
-					</div>
-				</div>
-			`;
-		});
-
-		html += `</div>`;
-		
-		this.controlsContainer.innerHTML = html;
-		this.bindMatrixListeners();
-	}
-
-	bindMatrixListeners() {
-		if (!this.controlsContainer) return;
-		
-		// Wire up the configuration access checkboxes
-		this.controlsContainer.querySelectorAll('.matrix-toggle').forEach(checkbox => {
-			checkbox.addEventListener('change', (e) => {
-				const cmd = e.target.getAttribute('data-cmd');
-				const type = e.target.getAttribute('data-type'); 
-				const isChecked = e.target.checked;
-				
-				if (this.state.commandAccess && this.state.commandAccess[cmd]) {
-					this.state.commandAccess[cmd][type] = isChecked;
-					this.saveData(); 
-					console.log(`[Config Router]: Updated "${cmd}" -> Access Mode [${type.toUpperCase()}]: ${isChecked}`);
-				}
-			});
-		});
-
-		// Wire up the "Play" test trigger buttons
-		this.controlsContainer.querySelectorAll('.matrix-test-btn').forEach(button => {
-			button.addEventListener('click', (e) => {
-				// Find target element handling nested icon clicks safely
-				const btn = e.target.closest('.matrix-test-btn');
-				const cmd = btn.getAttribute('data-cmd');
-				
-				console.log(`[Test Simulator]: Locating routing handles for payload trigger: !pet ${cmd}`);
-
-				// Fetch the executable routing layout from the framework
-				if (typeof this.getCommands === 'function') {
-					const commandSuite = this.getCommands((notice) => console.log(`[Simulated Response]: ${notice}`));
-					const petCommand = commandSuite.find(c => c.name === 'pet');
-
-					if (petCommand && typeof petCommand.execute === 'function') {
-						// Simulate execution framework flags bypassing standard chat restrictions
-						const simulatedFlags = {
-							broadcaster: true,
-							mod: false,
-							isRewardSimulated: true // Simulates system-level permission clearance
-						};
-						
-						// Route the core command text straight into the system engine
-						petCommand.execute('BroadcasterUI', cmd, simulatedFlags);
-					}
-				}
-			});
-		});
-	}
-
-    initSwatches() {
-        const swatchContainer = document.getElementById("bedColorSwatches");
-        if (!swatchContainer) return;
-        swatchContainer.innerHTML = ""; 
-        this.BED_PRESETS.forEach(color => {
-            const btn = document.createElement("div");
-            btn.className = "swatch" + (this.state.layout.bedColor === color ? " active" : "");
-            btn.style.backgroundColor = color;
-            btn.style.width = "20px";
-            btn.style.height = "20px";
-            btn.style.borderRadius = "4px";
-            btn.style.cursor = "pointer";
-            btn.style.border = this.state.layout.bedColor === color ? "2px solid #fff" : "1px solid #333";
-            
-            btn.addEventListener("click", () => {
-                this.state.layout.bedColor = color;
-                document.querySelectorAll(".swatch").forEach(s => s.style.border = "1px solid #333");
-                btn.style.border = "2px solid #fff";
-                this.say("Comfy! ✨");
-            });
-            swatchContainer.appendChild(btn);
-        });
-    }
-
-    setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
-        console.log(`Setting up: ${displayId}, Items count: ${optionItems ? optionItems.length : 'NULL'}`);
-        const displayEl = document.getElementById(displayId);
-        const optionsEl = document.getElementById(optionsId);
-        if (!displayEl || !optionsEl) return;
-
-        optionsEl.innerHTML = "";
-        optionItems.forEach(anim => {
-            const opt = document.createElement("div");
-            opt.className = "option-item";
-            opt.style.cssText = "padding: 6px 8px; cursor: pointer; color: #fff; font-size: 12px;";
-            opt.innerText = anim;
-            
-            opt.addEventListener("mouseenter", () => opt.style.background = "#27272a");
-            opt.addEventListener("mouseleave", () => opt.style.background = "transparent");
-            
-            opt.addEventListener("click", (e) => {
-                e.stopPropagation();
-                displayEl.innerText = anim;
-                optionsEl.style.display = "none";
-                if (onSelectionCallback) onSelectionCallback(anim);
-            });
-            optionsEl.appendChild(opt);
-        });
-
-        displayEl.addEventListener("click", (e) => {
-            e.stopPropagation();
-            document.querySelectorAll(".custom-select-options-box").forEach(box => {
-                if (box !== optionsEl) box.style.display = "none";
-            });
-            optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
-        });
-    }
-    syncSpeciesInterfaceToggle() {
-        document.querySelectorAll(".species-note").forEach(el => el.style.display = "none");
-        const currentNote = document.getElementById(`${this.registry.activeSpecies}ContextNotes`);
-        if (currentNote) currentNote.style.display = "block";
-    }
-
-    bindUIEventListeners() {
-        // Looks for a button with id="exportPetSettings" anywhere in your HTML/UI engine
-        const exportBtn = document.getElementById("exportPetSettings");
-			if (exportBtn) {
-				exportBtn.addEventListener("click", () => {
-					// Calls the copy routine. If your environment uses a notify alert, pass it here
-					this.exportSettingsToClipboard();
-				});
-				console.log("🔗 [Pet Widget]: Export Settings event listener attached to UI button.");
-			}
-
-        const bindClick = (id, callback) => {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener('click', callback);
-        };
-
-        const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY", "towerX", "towerY"];
-        sliders.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.addEventListener("input", (e) => this.state.layout[id] = parseInt(e.target.value));
-        });
-
-        // Identity rename tracking bound specifically to active isolated memory profile slot
-        const nameIn = document.getElementById("nameInput");
-        if (nameIn) {
-            nameIn.addEventListener("input", (e) => {
-                this.activePet.name = e.target.value || "Companion";
-            });
-        }
-		const tummySlider = document.getElementById("tummyLimitRange");
-		if (tummySlider) {
-			tummySlider.addEventListener("input", (e) => {
-				const val = parseInt(e.target.value);
-				this.setTummyLimit(val);
-				const display = document.getElementById("tummyLimitValue");
-				if (display) display.innerText = val;
-			});
-		}
-		const speciesOptions = [
-            "🐈 Kitty (Feline Engine v10)",
-            "🐕 Puppy (Canine Kinematics Engine)",
-            "🕷️ Spider (Arachnid Procedural Pathing)",
-            "🐟 Goldfish (Aquatic Fluid Physics)"
-        ];
-		
-        this.setupCustomDropdownEngine("speciesSelectDisplay", "speciesSelectOptions", speciesOptions, (selectedText) => {
-            let chosenSpecies = "kitty";
-            if (selectedText.includes("Puppy")) chosenSpecies = "puppy";
-            if (selectedText.includes("Spider")) chosenSpecies = "spider";
-            if (selectedText.includes("Goldfish")) chosenSpecies = "goldfish";
-
-            // Set the new species pointer
-            this.registry.activeSpecies = chosenSpecies;
-            
-            // Re-sync name interface field value dynamically to reflect current animal
-            if (nameIn) nameIn.value = this.activePet.name;
-
-            // ⭐ FIX: Instead of old, floating hardcoded logic, call the snap positioning system 
-            this.initPetPlacement();
-
-            this.syncSpeciesInterfaceToggle();
-            this.saveData();
-            this.say(`Swapped to ${this.activePet.name}!`);
-        });
-
-        document.addEventListener("click", () => {
-            document.querySelectorAll(".custom-select-options-box").forEach(box => {
-                box.style.display = "none";
-            });
-        });
-
-        const zoomSlider = document.getElementById("canvasZoom");
-        const zoomDisplay = document.getElementById("zoomValue");
-        if (zoomSlider) {
-            zoomSlider.addEventListener("input", (e) => {
-                const val = parseFloat(e.target.value);
-                this.state.zoom = val;
-                if (zoomDisplay) zoomDisplay.textContent = `${val.toFixed(1)}x`;
-            });
-            zoomSlider.addEventListener("change", () => this.saveData());
-        }
-
-        const borderToggle = document.getElementById("hideBorderToggle");
-        if (borderToggle) {
-            borderToggle.addEventListener("change", (e) => {
-                this.state.hideBorder = e.target.checked;
-                this.applyVisibilityStates(); 
-                this.saveData();
-            });
-        }
-
-        const hideBGCheck = document.getElementById("hideBackgroundToggle");
-        if (hideBGCheck) {
-            hideBGCheck.addEventListener("change", (e) => {
-                this.state.hideBackground = e.target.checked;
-                this.applyVisibilityStates();
-                this.saveData();
-            });
-        }
-
-        const statusToggle = document.getElementById("hideStatusToggle");
-        if (statusToggle) {
-            statusToggle.addEventListener("change", (e) => {
-                this.state.hideStatus = e.target.checked;
-                this.applyVisibilityStates();
-                this.saveData();
-            });
-        }
-
-        const NameplateToggle = document.getElementById("hideNameplateToggle");
-        if (NameplateToggle) {
-            NameplateToggle.addEventListener("change", (e) => {
-                this.state.hideNameplate = e.target.checked;
-                this.applyVisibilityStates();
-                this.saveData();
-            });
-        }
-
-        const st = document.getElementById("showTower");
-        if (st) st.addEventListener("change", (e) => {
-            this.state.layout.showTower = e.target.checked;
-            if(!this.state.layout.showTower && this.state.action.includes("tower")) this.state.action = "idle";
-        });
-
-        bindClick("btnFeed", () => { 
-            if(!this.activePet.isDead && !this.state.hasFood) { 
-                this.state.hasFood = true; 
-                this.say("Yum! Food dropped!"); 
-            } 
-        });
-        bindClick("btnPlay", () => { if(!this.activePet.isDead) { this.state.action = "special"; this.state.actionTimer = 350; this.say("Playing! ✨"); } });
-        bindClick("btnDance", () => { if(!this.activePet.isDead) { this.state.action = "dance"; this.state.actionTimer = 300; this.say("Dance! ✨"); } });
-        bindClick("btnTreat", () => { if(!this.activePet.isDead) { this.activePet.hunger = Math.max(0, this.activePet.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM! 🍗"); } });
-        bindClick("btnClear", () => { 
-            this.activePet.poops = []; 
-            this.state.spiderWebs = [];
-            this.state.goldfishBubbles = [];
-            this.say("Cleared and Scoured! 🧹"); 
-        });
-        bindClick("btnRevive", () => { this.revivePet(); });
-        bindClick("btnReset", () => { 
-            localStorage.removeItem("greta_widget_bounds");
-            localStorage.removeItem("greta_ultra_v10"); 
-            location.reload(); 
-        });
-
-        const masterToggle = document.getElementById("masterEnabled");
-        if (masterToggle) {
-            masterToggle.checked = window.soundSettings.masterEnabled;
-            masterToggle.addEventListener("change", (e) => {
-                window.soundSettings.masterEnabled = e.target.checked;
-                localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
-            });
-        }
-
-        document.querySelectorAll('.setting-row[data-key]').forEach(row => {
-            const key = row.getAttribute('data-key');
-            const checkbox = row.querySelector('input[type="checkbox"]');
-            const fileBtn = row.querySelector('.file-btn');
-            const fileInput = row.querySelector('.hidden-file-input');
-            const testBtn = row.querySelector('.test-btn');
-
-            if (checkbox) {
-                checkbox.checked = window.soundSettings[key];
-                checkbox.addEventListener('change', (e) => {
-                    window.soundSettings[key] = e.target.checked;
-                    localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
-                });
-            }
-
-            if (fileBtn && fileInput) {
-                fileBtn.addEventListener('click', () => fileInput.click());
-                fileInput.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const url = URL.createObjectURL(file);
-                        window.soundSettings.customPaths[key] = url;
-                        localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
-                        this.refreshAudioInstance(key);
-                        this.say("Audio updated! 🎧");
-                    }
-                });
-            }
-
-            if (testBtn) {
-                testBtn.addEventListener('click', () => this.playSound(key));
-            }
-        });
-    }
-
-    幕(txt) {} // Catch invalid encoding safely
-    say(txt) {
-        const b = document.getElementById("bubble");
-        if (!b) return;
-        b.textContent = txt; 
-        b.style.left = (this.state.x - 50) + "px"; 
-        b.style.top = (this.state.y - 140) + "px";
-        b.classList.add("show"); 
-        
-        if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
-        this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
-
-        if (txt.includes("Meow") || txt.includes("Kitty")) this.playSound('meowSound');
-        if (txt.includes("Mew")) this.playSound('mewSound');
-        if (txt.includes("Purrr") || txt.includes("Comfy")) this.playSound('purrSound');
-        if (txt.includes("BARK") || txt.includes("FETCH")) this.playSound('barkSound');
-        if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.playSound('whineSound');
-        if (txt.includes("SPIN") || this.registry.activeSpecies === "spider" && Math.random() < 0.3) this.playSound('clickSound');
-        if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.playSound('bubbleSound');
-    }
-
-
-
-	initPetPlacement() {
-		if (!this.canvas) return;
-		const visibleW = this.canvas.width;
-		const visibleH = this.canvas.height;
-		
-		// Environment Edge Constraints
-		const CEIL_Y = 30; 
-		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
-
-		// 🛏️ Dynamic Bed Tracking Coordinates via your Zoom Engine
-		// This feeds the percentages into getPos() to properly inherit all zoom transforms
-		const bedCoordinates = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-
-		this.state.action = "idle";
-		this.state.actionTimer = 200;
-
-		if (this.registry.activeSpecies === "spider") {
-			// Spiders drop directly above the bed's scaled X position on the roof
-			this.state.x = bedCoordinates.x;
-			this.state.y = CEIL_Y;
-		} else if (this.registry.activeSpecies === "goldfish") {
-			// Goldfish float in the mid-water horizon lane right over the bed's scaled X position
-			this.state.x = bedCoordinates.x;
-			this.state.y = visibleH / 2; 
-		} else {
-			// Terrestrial pets (Puppy, Kitty) land precisely on the scaled bed positions
-			this.state.x = bedCoordinates.x;
-			
-			// If the bed is pushed all the way down to the floor, lock to true FLOOR_Y
-			// Otherwise, use the dynamically scaled bed Y coordinate
-			this.state.y = this.state.layout.bedY >= 100 ? FLOOR_Y : bedCoordinates.y;
-		}
-
-		// Cache the resolved matrix positions
-		this.state.originalPos = { x: this.state.x, y: this.state.y };
-		console.log(`🎯 [Pet Positioner]: Cleanly snapped ${this.registry.activeSpecies} to Bed with Zoom transformations accounted for.`);
-	}
-    // Sugar shorthand properties to easily get/set values inside the current isolated active pet data profile
-    get activePet() {
-        return this.registry.profiles[this.registry.activeSpecies];
-    }
-	setTummyLimit(newLimit) {
-		this.state.tummylimit = parseInt(newLimit);
-		console.log(`Tummy limit updated to: ${this.state.tummylimit}`);
-		this.saveData(); // Assuming you have a persistence method
-	}
-
-
-// ===================================================
-// SECTION 5: RENDER ENGINE, ANIMATION & AI PIPELINE
-// ===================================================
-
-	drawEnvironment(tick) {
-		const visibleW = this.canvas.width;
-		const visibleH = this.canvas.height;
-		// ========================================================
-		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
-		// ========================================================
-		//if (this.registry.activeSpecies === "spider") {
-			this.drawSpiderWebs();
-			this.drawRappelStrand();
-		//}
-		// ========================================================
-		// PHASE 2: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
-		// ========================================================
-		if (this.state.layout.showTower) {
-			const towerPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
-			this.drawPetHouse(towerPos, tick);
-		}
-		// ========================================================
-		// PHASE 3: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
-		// ========================================================
-		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-		this.drawPetBed(bedPos, tick);
-		// ========================================================
-		// PHASE 4: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
-		// ========================================================
-		const litterPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
-		const boxW = 150;
-		this.drawLitterBox(litterPos, boxW);
-		this.drawWasteLayer(litterPos, boxW);
-		// ========================================================
-		// PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
-		// ========================================================
-		const foodPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
-		this.drawFoodBowl(foodPos, tick);
-		// ========================================================
-		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
-		// ========================================================
-		this.drawGoldfishBubbles(tick);
-		this.drawNyanTrail(tick, visibleH);
-		this.drawPaintBalloons();
-		this.updateAndDrawParticles();
-	}
-	updateAI(t) {
-		// 1. GUARD CLAUSE: Freeze all AI activity immediately if exploding
-		if (this.state.action === "bloating" || this.state.action === "explode") {
-			if (this.state.actionTimer > 0) this.state.actionTimer--;
-			return; 
-		}
-
-		// 2. DATA ALLOCATION: Calculate frame layout coordinates and metrics
-		const visibleW = this.canvas.width;
-		const visibleH = this.canvas.height;
-		const groundY = visibleH - this.BASE_FLOOR_Y;
-		
-		const bowlPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
-		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-		const litPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
-		const towerPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
-		const CEIL_Y = 30; 
-		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
-		const LEFT_X = 40;
-		const RIGHT_X = visibleW - 40;
-		const walkToPoint = (targetX, targetY, speed = 2) => this.walkToPoint(targetX, targetY, speed);
-		
-		const ctx = { t, visibleW, visibleH, groundY, bowlPos, bedPos, litPos, towerPos, CEIL_Y, FLOOR_Y, LEFT_X, RIGHT_X, walkToPoint };
-
-		// 3. INTERNAL ENGINE UPDATES: Tick down clocks and run metabolism
-		if (this.state.actionTimer > 0) this.state.actionTimer--;
-		this.updatePetMetabolism();
-
-		// 4. INTERRUPT MATRIX: Override normal behavior if food is present
-		if (this.state.hasFood && !["nyan", "eating", "potty", "walk_to_litter", "rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
-			this.state.action = "walk_to_food";
-		}
-
-		// 5. STATE EXECUTION: Run active state logic from the library
-		if (STATE_LIBRARY[this.state.action]) {
-			STATE_LIBRARY[this.state.action](this, ctx);
-		}
-	}
-	animate = () => {
-		this.state.animT++;
-		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-		this.updateAI(this.state.animT);
-
-		this.ctx.save();
-		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
-		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
-
-		const anchorX = this.canvas.width / 2;
-		const anchorY = this.canvas.height - this.BASE_FLOOR_Y;
-
-		this.ctx.translate(anchorX, anchorY);
-		this.ctx.scale(scaleVal, scaleVal);
-		this.ctx.translate(-anchorX, -anchorY);
-
-		this.drawEnvironment(this.state.animT);
-
-		let petScale = (this.activePet.stage === "Baby") ? 0.6 : (this.activePet.stage === "Juvenile") ? 0.8 : 1.0;
-		
-		// ========================================================
-		// RENDERING SPECIES DELEGATION ROUTER & EXPLOSION HANDLERS
-		// ========================================================
-		if (!this.state.hideMainSprite) {
-			this.ctx.save();
-
-			// Handle Stage 1: Swell up and violently shake the layout bounds
-			if (this.state.action === "bloating") {
-				petScale *= 1.35; // Expand dimensions dynamically during build-up
-				const jitterX = (Math.random() - 0.5) * 5;
-				const jitterY = (Math.random() - 0.5) * 5;
-				this.ctx.translate(jitterX, jitterY);
-			}
-
-			if (this.registry.activeSpecies === "kitty") {
-				this.drawKitty(this.state.animT, petScale);
-			} else if (this.registry.activeSpecies === "puppy") {
-				this.drawPuppy(this.state.animT, petScale);
-			} else if (this.registry.activeSpecies === "spider") {
-				this.drawSpider(this.state.animT, petScale);
-			} else if (this.registry.activeSpecies === "goldfish") {
-				this.drawGoldfish(this.state.animT, petScale);
-			}
-
-			this.ctx.restore();
-		}
-		
-		this.ctx.restore();
-		this.updateUI();
-		requestAnimationFrame(this.animate);
-	}
-	
-// ==========================================
-// CORE VISUAL RENDERING ROUTERS PER SPECIES
-// ==========================================
-//
-// draw pets 
-
-// KITTY DRAWING
-//--------------------------------------------------
-	drawKitty(t, scale) {
-        this.ctx.save();
-        
-        // Check for teased state
-        const isTeased = (this.state.action === "teased");
-        
-        const stateOffsets = { "sleep": 15, "tower_sleep": 15, "walk": 5, "idle": 0 };
-        const baseOffset = stateOffsets[this.state.action] || 0;
-        const bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
-        
-        this.ctx.translate(this.state.x, this.state.y - bounce + baseOffset);
-        this.ctx.scale(this.state.facing * scale, scale);
-        
-        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-        this.ctx.beginPath(); this.ctx.ellipse(0, 30 + bounce - baseOffset, 45, 12, 0, 0, Math.PI*2); this.ctx.fill();
-
-        let finalColor = this.activePet.isDead ? "#ffffff" : (this.activePet.poops.length > 5 ? "#8edb4b" : this.activePet.color);
-        if(this.activePet.isDead) this.ctx.globalAlpha = 0.5;
-        this.ctx.fillStyle = finalColor;
-
-        if (this.state.action === "sleep" || this.state.action === "tower_sleep") {
-            const breathing = Math.sin(t * 0.03) * 2.5;
-            this.ctx.beginPath(); this.ctx.ellipse(0, 12, 42 + breathing, 32 + breathing, 0, 0, Math.PI * 2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.arc(15, 8, 22, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.lineWidth = 11; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
-            this.ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); this.ctx.stroke();
-            this.drawkittyEars(15, 8, finalColor, true); 
-            this.drawkittyFace(15, 8, false, true);
-        } else if (this.state.action === "special" || this.state.action === "scratching" || this.state.action === "trick") {
-            if (this.state.action === "special") this.drawYarn(30, 20, t);
-            let rot = (this.state.action === "trick") ? (t * 0.25) : 0;
-            this.ctx.rotate(rot);
-
-            this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.arc(0, -45, 24, 0, Math.PI*2); this.ctx.fill();
-            if (this.state.action === "special") {
-                const reach = Math.sin(t * 0.2) * 15;
-                this.ctx.fillRect(10, -5 + reach, 10, 15); this.ctx.fillRect(-20, -5 - reach, 10, 15);
-            } else {
-                this.ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15); this.ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
-            }
-            this.drawkittyEars(0, -45, finalColor, false); 
-            // Pass isTeased here
-            this.drawkittyFace(0, -45, false, false, isTeased);
-        } else {
-            this.ctx.beginPath(); this.ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.arc(35, -15, 24, 0, Math.PI*2); this.ctx.fill();
-            this.drawkittyEars(35, -15, finalColor, false);
-            const walkCycle = (this.state.action.includes("walk")) ? Math.sin(t * 0.18) : 0;
-            [[-35, 12], [-12, 12], [10, 12], [28, 12]].forEach((p, i) => {
-                this.ctx.fillRect(p[0], p[1], 9, 16 + (i % 2 === 0 ? walkCycle : -walkCycle) * 8);
-            });
-            this.ctx.beginPath(); this.ctx.lineWidth = 8; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
-            this.ctx.moveTo(-45, 0); this.ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); this.ctx.stroke();
-            // Pass isTeased here
-            this.drawkittyFace(35, -15, this.state.action === "beg", false, isTeased);
-        }
-        this.ctx.restore();
-    }
-    drawkittyEars(x, y, color, sleeping) {
-        this.ctx.fillStyle = color;
-        if (sleeping) {
-            this.ctx.beginPath(); this.ctx.moveTo(x - 15, y - 8); this.ctx.lineTo(x - 22, y + 2); this.ctx.lineTo(x - 5, y + 5); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.moveTo(x + 15, y - 8); this.ctx.lineTo(x + 22, y + 2); this.ctx.lineTo(x + 5, y + 5); this.ctx.fill();
-        } else {
-            this.ctx.beginPath(); this.ctx.moveTo(x - 20, y - 10); this.ctx.lineTo(x - 12, y - 40); this.ctx.lineTo(x - 2, y - 15); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.moveTo(x + 20, y - 10); this.ctx.lineTo(x + 12, y - 40); this.ctx.lineTo(x + 2, y - 15); this.ctx.fill();
-        }
-    }
-
-    drawkittyFace(x, y, begging, sleeping) {
-        if (sleeping) {
-            this.ctx.strokeStyle = "rgba(0,0,0,0.5)"; this.ctx.lineWidth = 2;
-            this.ctx.beginPath(); this.ctx.arc(x - 7, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); this.ctx.stroke();
-            this.ctx.beginPath(); this.ctx.arc(x + 9, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); this.ctx.stroke();
-        } else {
-            this.ctx.fillStyle = "white"; this.ctx.beginPath(); this.ctx.arc(x - 7, y - 5, 6, 0, Math.PI*2); this.ctx.arc(x + 9, y - 5, 6, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.fillStyle = "black"; this.ctx.beginPath(); this.ctx.arc(x - 6, y - 5, 2.5, 0, Math.PI*2); this.ctx.arc(x + 10, y - 5, 2.5, 0, Math.PI*2); this.ctx.fill();
-        }
-        this.ctx.strokeStyle = "rgba(255,255,255,0.4)"; this.ctx.lineWidth = 1;
-        [0, 1, 2].forEach(i => {
-           this.ctx.beginPath(); this.ctx.moveTo(x+12, y+2*i); this.ctx.lineTo(x+30, y-8+8*i); this.ctx.stroke();
-           this.ctx.beginPath(); this.ctx.moveTo(x-10, y+2*i); this.ctx.lineTo(x-28, y-8+8*i); this.ctx.stroke();
-        });
-        this.ctx.fillStyle = "#ffaaaa";
-        if (begging) { this.ctx.beginPath(); this.ctx.arc(x+1, y+8, 4, 0, Math.PI*2); this.ctx.fill(); }
-        else { this.ctx.beginPath(); this.ctx.moveTo(x+1, y+3); this.ctx.lineTo(x-2, y); this.ctx.lineTo(x+4, y); this.ctx.fill(); }
-    }
-
-// ==========================================
-//  PUPPY DRAWING
-//--------------------------------------------------
-	drawPuppy(t, scale) {
-		this.ctx.save();
-		
-		// 1. STATE LOGIC
-		const isDancing = (this.state.action === "dance");
-		const isTeased = (this.state.action === "teased");
-		
-		// If teased, add a rapid shake effect to the whole body
-		const shake = isTeased ? Math.sin(t * 2) * 5 : 0;
-		const wiggle = isDancing ? Math.sin(t * 0.4) * 0.2 : 0; 
-		
-		// Apply translation first
-		this.ctx.translate(this.state.x + shake, this.state.y);
-		
-		// Apply the wiggle/shake rotation
-		this.ctx.rotate(wiggle + (isTeased ? Math.sin(t) * 0.1 : 0));
-		
-		// Trick rotation (if applicable)
-		let rotationAngle = (this.state.action === "trick") ? (t * 0.2) : 0;
-		this.ctx.rotate(rotationAngle);
-		
-		this.ctx.scale(this.state.facing * scale, scale);
-
-		// Ground shadow
-		this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-		this.ctx.beginPath(); this.ctx.ellipse(0, 25, 48, 14, 0, 0, Math.PI*2); this.ctx.fill();
-
-		let baseColor = this.activePet.isDead ? "#dddddd" : (this.activePet.poops.length > 5 ? "#a1d95d" : this.activePet.color);
-		if(this.activePet.isDead) this.ctx.globalAlpha = 0.4;
-		this.ctx.fillStyle = baseColor;
-
-		if (this.state.action === "sleep" || this.state.action === "tower_sleep") {
-			const breath = Math.sin(t * 0.04) * 2;
-			this.ctx.beginPath(); this.ctx.ellipse(0, 10, 46 + breath, 34 + breath, 0, 0, Math.PI*2); this.ctx.fill();
-			this.ctx.fillStyle = "#5d4037";
-			this.ctx.beginPath(); this.ctx.arc(20, 14, 10, 0, Math.PI*2); this.ctx.fill();
-		} else {
-			this.ctx.beginPath(); this.ctx.ellipse(-5, 2, 45, 28, 0, 0, Math.PI*2); this.ctx.fill();
-			this.ctx.beginPath(); this.ctx.arc(30, -22, 22, 0, Math.PI*2); this.ctx.fill();
-			
-			// Eyes (Change color to red if teased)
-			this.ctx.fillStyle = isTeased ? "#ff0000" : "rgba(255,255,255,0.2)";
-			this.ctx.beginPath(); this.ctx.ellipse(40, -18, 12, 9, 0, 0, Math.PI*2); this.ctx.fill();
-			this.ctx.fillStyle = "black";
-			this.ctx.beginPath(); this.ctx.arc(48, -20, 3, 0, Math.PI*2); this.ctx.fill();
-
-			// Ears (If teased, draw them slightly more upright/alert)
-			this.ctx.fillStyle = baseColor;
-			const earAngle = isTeased ? -0.5 : 0.2;
-			this.ctx.beginPath(); this.ctx.ellipse(22 + (isTeased ? 5 : 0), -24, 8, 18, earAngle, 0, Math.PI*2); this.ctx.fill();
-			this.ctx.fillStyle = "#3e2723";
-			this.ctx.beginPath(); this.ctx.ellipse(22 + (isTeased ? 5 : 0), -22, 5, 12, earAngle, 0, Math.PI*2); this.ctx.fill();
-
-			this.ctx.fillStyle = "white";
-			this.ctx.beginPath(); this.ctx.arc(34, -28, 5, 0, Math.PI*2); this.ctx.fill();
-			this.ctx.fillStyle = "black";
-			this.ctx.beginPath(); this.ctx.arc(36, -28, 2, 0, Math.PI*2); this.ctx.fill();
-
-			// 2. TAIL WAG: Make it wag super fast during the dance!
-			const wagSpeed = isDancing ? 1.5 : (this.state.action === "walk" || this.state.hasFood ? 0.6 : 0.2);
-			const tailWag = Math.sin(t * wagSpeed) * 0.8 - 0.5;
-			this.ctx.save();
-			this.ctx.translate(-42, -5);
-			this.ctx.rotate(tailWag);
-			this.ctx.fillStyle = baseColor;
-			this.ctx.fillRect(-22, -6, 24, 10);
-			this.ctx.restore();
-
-			// Legs
-			const legSwing = (this.state.action === "walk") ? Math.sin(t * 0.22) * 10 : 0;
-			this.ctx.fillStyle = baseColor;
-			this.ctx.fillRect(-35, 15, 11, 16 + legSwing);
-			this.ctx.fillRect(-15, 15, 11, 16 - legSwing);
-			this.ctx.fillRect(10, 15, 11, 16 + legSwing);
-			this.ctx.fillRect(25, 15, 11, 16 - legSwing);
-
-			if (this.state.action === "special") this.drawYarn(40, 0, t);
-		}
-		this.ctx.restore();
-	}
-//  FISH DRAWING
-//--------------------------------------------------
-	drawGoldfish(t, scale) {
-		this.ctx.save();
-		
-		const isTeased = (this.state.action === "teased");
-		
-		// Frantic shaking when teased
-		const shakeX = isTeased ? Math.sin(t * 0.8) * 10 : 0;
-		const shakeY = isTeased ? Math.cos(t * 0.9) * 5 : 0;
-		this.ctx.translate(this.state.x + shakeX, this.state.y + shakeY);
-
-		if (this.state.action === "dance") {
-			this.ctx.rotate(t * 0.2);
-		}
-
-		this.ctx.scale(this.state.facing * scale, scale);
-
-		let fishColor = this.activePet.isDead ? "#e0e0e0" : this.activePet.color;
-		if (this.activePet.isDead) {
-			this.ctx.globalAlpha = 0.4;
-			this.ctx.rotate(Math.PI);
-		}
-		this.ctx.fillStyle = fishColor;
-
-		this.ctx.beginPath();
-		this.ctx.ellipse(0, 0, 36, 22, 0, 0, Math.PI * 2);
-		this.ctx.fill();
-
-		const tailWiggle = Math.sin(t * (isTeased ? 0.6 : 0.28)) * (isTeased ? 25 : 12);
-		this.ctx.beginPath();
-		this.ctx.moveTo(-32, 0);
-		this.ctx.bezierCurveTo(-55, -25 + tailWiggle, -65, -10 + tailWiggle, -58, tailWiggle);
-		this.ctx.bezierCurveTo(-65, 10 + tailWiggle, -55, 25 + tailWiggle, -32, 0);
-		this.ctx.fill();
-
-		this.ctx.fillStyle = "rgba(255,255,255,0.3)";
-		this.ctx.beginPath();
-		this.ctx.moveTo(-32, 0);
-		this.ctx.lineTo(-52, -15 + tailWiggle);
-		this.ctx.lineTo(-50, 15 + tailWiggle);
-		this.ctx.fill();
-
-		this.ctx.fillStyle = fishColor;
-		this.ctx.beginPath();
-		this.ctx.moveTo(-10, -20);
-		this.ctx.bezierCurveTo(-5, -38, -25, -32, -22, -14);
-		this.ctx.fill();
-
-		const finWave = Math.sin(t * (isTeased ? 0.4 : 0.12)) * (isTeased ? 20 : 8);
-		this.ctx.save();
-		this.ctx.translate(10, 8);
-		this.ctx.rotate(finWave * Math.PI / 180);
-		this.ctx.beginPath(); this.ctx.ellipse(0, 0, 14, 8, 0.5, 0, Math.PI * 2); this.ctx.fill();
-		this.ctx.restore();
-
-		// Angry eyes when teased
-		this.ctx.fillStyle = isTeased ? "#ff0000" : "white";
-		this.ctx.beginPath(); this.ctx.arc(20, -6, 7, 0, Math.PI * 2); this.ctx.fill();
-		this.ctx.fillStyle = "black";
-		this.ctx.beginPath(); this.ctx.arc(22, -6, 3.5, 0, Math.PI * 2); this.ctx.fill();
-
-		if (this.state.action === "special") this.drawYarn(30, -5, t);
-
-		this.ctx.restore();
-	}
-
-
-//  SPIDER DRAWING
-//--------------------------------------------------
-	drawSpider(t, scale) {
-		this.ctx.save();
-		
-		const isTeased = (this.state.action === "teased");
-		
-		// Translation to position the spider (adds shake if teased)
-		const shakeX = isTeased ? Math.sin(t * 0.5) * 8 : 0;
-		this.ctx.translate(this.state.x + shakeX, this.state.y);
-
-		// Apply "Dance" or "Teased" rotation
-		if (this.state.action === "dance") {
-			this.ctx.rotate(Math.sin(t * 0.5) * 0.5);
-		} else if (isTeased) {
-			this.ctx.rotate(Math.sin(t * 0.8) * 0.3);
-		}
-
-		this.ctx.scale(this.state.facing * scale, scale);
-
-		let spiderColor = this.activePet.isDead ? "#777777" : this.activePet.color;
-		if (this.activePet.isDead) this.ctx.globalAlpha = 0.3;
-		this.ctx.fillStyle = spiderColor;
-		this.ctx.strokeStyle = spiderColor;
-		this.ctx.lineWidth = 3.5;
-
-		// Web thread
-		this.ctx.strokeStyle = "rgba(255,255,255,0.15)";
-		this.ctx.lineWidth = 1;
-		this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0, -this.state.y); this.ctx.stroke();
-
-		this.ctx.fillStyle = spiderColor;
-		this.ctx.strokeStyle = spiderColor;
-		this.ctx.lineWidth = 3.5;
-
-		this.ctx.beginPath(); this.ctx.arc(-16, 0, 18, 0, Math.PI*2); this.ctx.fill();
-		this.ctx.beginPath(); this.ctx.arc(8, -2, 12, 0, Math.PI*2); this.ctx.fill();
-
-		const isWalking = (this.state.action === "walk");
-		const isDancing = (this.state.action === "dance");
-		
-		const legWave = isWalking ? Math.sin(t * 0.25) * 8 : (isDancing ? Math.sin(t * 0.8) * 20 : 0);
-		
-		for(let i = 0; i < 4; i++) {
-			let offsetPhase = i * 0.4;
-			// Legs move faster/erratically when teased
-			let dynamicSwing = isWalking ? Math.sin(t * 0.22 + offsetPhase) * 12 : 
-							   (isDancing ? Math.sin(t * 0.6 + offsetPhase) * 25 : (isTeased ? Math.sin(t * 1.5) * 15 : 0));
-
-			this.ctx.beginPath();
-			this.ctx.moveTo(0, -2);
-			this.ctx.lineTo(-10 - (i*8), -24 - (Math.sin(t*0.1 + i)*4) + dynamicSwing);
-			this.ctx.lineTo(-20 - (i*14), 18 + legWave);
-			this.ctx.stroke();
-
-			this.ctx.beginPath();
-			this.ctx.moveTo(4, -2);
-			this.ctx.lineTo(15 + (i*8), -22 - (Math.cos(t*0.1 + i)*4) - dynamicSwing);
-			this.ctx.lineTo(24 + (i*14), 18 - legWave);
-			this.ctx.stroke();
-		}
-
-		// Eyes: Pulse faster when teased
-		this.ctx.fillStyle = this.activePet.isDead ? "black" : (isTeased ? "#ff00ff" : "#ff1744");
-		let eyePulse = (isDancing || isTeased) ? Math.abs(Math.sin(t * (isTeased ? 0.5 : 0.2))) * 1.5 : 1;
-		let eyeOffsets = [[12, -6], [16, -5], [14, -2], [18, -1], [10, -2], [14, 2]];
-		eyeOffsets.forEach(pos => {
-			this.ctx.beginPath(); this.ctx.arc(pos[0], pos[1], 1.5 * eyePulse, 0, Math.PI*2); this.ctx.fill();
-		});
-
-		if (this.state.action === "special") this.drawYarn(25, 10, t);
-
-		this.ctx.restore();
-	}
-
-
-
-//===========================================
-// furniture & other static large objects
-//===========================================
-//------------------------------
-// pet house drawing functions
-//------------------------------
-	drawPetHouse(tPos, tick) {
-		switch (this.registry.activeSpecies) {
-			case "spider":
-				this.drawSpiderNest(tPos, tick);
-				break;
-			case "goldfish":
-				this.drawFishCastle(tPos, tick);
-				break;
-			case "puppy":
-				this.drawDogHouse(tPos, tick);
-				break;
-			case "kitty":
-			default:
-				this.drawCatTower(tPos, tick);
-				break;
-		}
-	}
-//------------------------------
-	drawCatTower(tPos, tick) {
-		// 1. Base Shadow
-		this.ctx.fillStyle = "rgba(0,0,0,0.1)"; 
-		this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
-
-		// 2. Tower Base Plinth
-		this.ctx.fillStyle = "#7f8c8d"; 
-		this.ctx.fillRect(tPos.x - 55, tPos.y - 5, 110, 15); 
-
-		// 3. Main Vertical Post (Sisal trunk)
-		this.ctx.fillStyle = "#a67c52"; 
-		this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
-
-		// 4. Lower Mid-Platform
-		this.ctx.fillStyle = "#95a5a6"; 
-		this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); 
-
-		// 5. Top Crowns Perch
-		this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
-	}
-//------------------------------
-	drawDogHouse(tPos, tick) {
-		this.ctx.save();
-		// Base shadow
-		this.ctx.fillStyle = "rgba(0,0,0,0.15)";
-		this.ctx.fillRect(tPos.x - 55, tPos.y + 5, 110, 15);
-		
-		// Main Structure
-		this.ctx.fillStyle = "#d7ccc8"; 
-		this.ctx.fillRect(tPos.x - 45, tPos.y - 65, 90, 70);
-		
-		// Doorway
-		this.ctx.fillStyle = "#3e2723"; 
-		this.ctx.beginPath();
-		this.ctx.arc(tPos.x, tPos.y - 25, 20, Math.PI, 0, false);
-		this.ctx.fillRect(tPos.x - 20, tPos.y - 25, 40, 30);
-		this.ctx.fill();
-		
-		// Roof Facade
-		this.ctx.fillStyle = "#d7ccc8";
-		this.ctx.beginPath();
-		this.ctx.moveTo(tPos.x - 45, tPos.y - 65);
-		this.ctx.lineTo(tPos.x, tPos.y - 95);
-		this.ctx.lineTo(tPos.x + 45, tPos.y - 65);
-		this.ctx.fill();
-		
-		// Roof Trim
-		this.ctx.strokeStyle = "#d32f2f";
-		this.ctx.lineWidth = 8;
-		this.ctx.lineCap = "round";
-		this.ctx.beginPath();
-		this.ctx.moveTo(tPos.x - 55, tPos.y - 60);
-		this.ctx.lineTo(tPos.x, tPos.y - 98);
-		this.ctx.lineTo(tPos.x + 55, tPos.y - 60);
-		this.ctx.stroke();
-		this.ctx.restore();
-	}
-//------------------------------
-	drawFishCastle(tPos, tick) {
-		// Main Keep
-		this.ctx.fillStyle = "#ffb74d"; 
-		this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
-		
-		// Left & Right Spires
-		this.ctx.fillStyle = "#e65100";
-		this.ctx.fillRect(tPos.x - 50, tPos.y - 110, 30, 30);
-		this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
-		
-		// Gate Entrance
-		this.ctx.fillStyle = "#4e342e"; 
-		this.ctx.beginPath(); 
-		this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); 
-		this.ctx.fill();
-	}
-//------------------------------
-	drawSpiderNest(tPos, tick) {
-		this.ctx.save();
-		// Anchor structural cobweb down from ceiling at tower position x
-		const nestX = tPos.x;
-		const nestY = 65; // Suspended high ceiling nest line
-
-		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
-		this.ctx.lineWidth = 1;
-
-		// Draw supporting frame rays spanning outward and up to ceiling limits
-		this.ctx.beginPath();
-		for (let i = 0; i <= 8; i++) {
-			let angle = Math.PI + (i / 8) * Math.PI; // Upward semi-circle grid
-			this.ctx.moveTo(nestX, nestY);
-			this.ctx.lineTo(nestX + Math.cos(angle) * 75, nestY + Math.sin(angle) * 45);
-		}
-		this.ctx.stroke();
-
-		// Intersecting concentric orbit web strings
-		for (let r = 15; r <= 65; r += 15) {
-			this.ctx.beginPath();
-			this.ctx.ellipse(nestX, nestY, r, r * 0.6, 0, Math.PI, Math.PI * 2);
-			this.ctx.stroke();
-		}
-
-		// Draw central egg sac cocoon cocooned in the center
-		this.ctx.fillStyle = "rgba(240, 240, 240, 0.85)";
-		this.ctx.beginPath();
-		this.ctx.ellipse(nestX, nestY + 5, 12, 18, 0, 0, Math.PI * 2);
-		this.ctx.fill();
-		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-		this.ctx.stroke();
-		this.ctx.restore();
-	}
-
-//------------------------------
-// pet beds
-	drawPetBed(bPos, tick) {
-		if (this.registry.activeSpecies === "spider") {
-			// Structural radial support anchors for the web nest
-			this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
-			this.ctx.lineWidth = 1;
-			this.ctx.beginPath();
-			for (let i = 0; i < 8; i++) {
-				let angle = (i / 8) * Math.PI * 2;
-				this.ctx.moveTo(bPos.x, bPos.y + 5);
-				this.ctx.lineTo(bPos.x + Math.cos(angle) * 55, bPos.y + 5 + Math.sin(angle) * 18);
-			}
-			this.ctx.stroke();
-
-			// Concentric horizontal web ring segments
-			for (let r = 10; r <= 50; r += 12) {
-				this.ctx.beginPath();
-				this.ctx.ellipse(bPos.x, bPos.y + 5, r, r * 0.35, 0, 0, Math.PI * 2);
-				this.ctx.stroke();
-			}
-		} else {
-			// Grounding ambient drop shadow cushion
-			this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-			this.ctx.beginPath(); 
-			this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI * 2); 
-			this.ctx.fill();
-			
-			// Main colored fabric bed core
-			this.ctx.fillStyle = this.state.layout.bedColor;
-			this.ctx.beginPath(); 
-			this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI * 2); 
-			this.ctx.fill();
-		}
-	}
-//------------------------------
-// food and bowl drawing
-	drawFoodBowl(fPos, tick) {
-		// Shadow base
-		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
-		this.ctx.beginPath(); 
-		this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); 
-		this.ctx.fill();
-
-		// Outer Bowl rim
-		this.ctx.fillStyle = "#ecf0f1"; 
-		this.ctx.beginPath(); 
-		this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); 
-		this.ctx.fill();
-
-		// Inner Bowl basin
-		this.ctx.fillStyle = "#bdc3c7"; 
-		this.ctx.beginPath(); 
-		this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); 
-		this.ctx.fill();
-
-		// Interactive food payload
-		if (this.state.hasFood) {
-			this.ctx.fillStyle = "#d35400"; 
-			this.ctx.beginPath(); 
-			this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); 
-			this.ctx.fill();
-			
-			this.ctx.font = "16px Arial";
-			let foodIcon = "🐟";
-			if (this.registry.activeSpecies === "puppy") foodIcon = "🍖";
-			if (this.registry.activeSpecies === "spider") foodIcon = "🪰";
-			if (this.registry.activeSpecies === "goldfish") foodIcon = "🍤";
-			
-			this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
-		}
-	}
-//------------------------------
-// litter box and poop drawing
-	drawLitterBox(lPos, boxW) {
-		// Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
-		if (this.registry.activeSpecies === "goldfish" || this.registry.activeSpecies === "spider") return;
-
-		if (this.registry.activeSpecies === "puppy") {
-			// Base Dirt Tray
-			this.ctx.fillStyle = "#4e342e"; 
-			this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
-			
-			// Green Grass Mat
-			this.ctx.fillStyle = "#2e7d32"; 
-			this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
-			
-			// Procedural Grass Blades
-			this.ctx.fillStyle = "#4caf50";
-			for (let i = 0; i < 6; i++) {
-				let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
-				this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
-				this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
-			}
-			
-			// Picket Fence Border Details
-			this.ctx.fillStyle = "#f5f5f5";
-			for(let p = 0; p <= boxW; p += 15) {
-				this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
-			}
-			this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   
-			this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    
-		} else {
-			// Standard Cat/Companion Plastic Litter Pan
-			this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
-			this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
-			this.ctx.fillStyle = "#2c3e50"; 
-			this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
-			this.ctx.fillStyle = "#95a5a6"; 
-			this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
-		}
-	}
-	drawWasteLayer(lPos, boxW) {
-		this.activePet.poops.forEach(p => {
-			if (this.registry.activeSpecies === "goldfish") {
-				if (p.x === undefined) p.x = this.state.x;
-				if (p.y === undefined) p.y = this.state.y;
-				if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
-
-				// Float up naturally in aquarium water space
-				p.y -= 0.2; 
-				p.swimOffset += 0.03;
-				let finalX = p.x + Math.sin(p.swimOffset) * 5;
-
-				this.ctx.font = "14px Arial";
-				this.ctx.fillText("💩", finalX, p.y);
-			} else if (this.registry.activeSpecies === "spider") {
-				// Spiders use architectural webs instead of standard floor assets
-			} else {
-				// Anchors standard waste to the litter pan coordinates layout
-				let poopyY = p.isCeil ? 90 : lPos.y + 24;
-				let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
-				this.ctx.font = "14px Arial";
-				this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
-			}
-		});
-	}
-
-
-//=================================
-// particals and final layer stuff
-//=================================
-    drawSpiderWebs() {
-		// Early exit guard: Only render background webs if the active species is a spider
-		if (this.registry.activeSpecies !== "spider") return;
-		this.state.spiderWebs.forEach(web => {
-			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
-			this.ctx.lineWidth = 1;
-			this.ctx.beginPath();
-			for(let i = 0; i < 8; i++) {
-				let angle = (i / 8) * Math.PI * 2;
-				this.ctx.moveTo(web.x, web.y);
-				this.ctx.lineTo(web.x + Math.cos(angle) * web.size, web.y + Math.sin(angle) * web.size);
-			}
-			this.ctx.stroke();
-		});
-	}
-	drawRappelStrand() {
-		const isRappelling = ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action);
-		if (this.registry.activeSpecies !== "spider" || !isRappelling) return;
-
-		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
-		this.ctx.lineWidth = 1.2;
-		this.ctx.beginPath();
-		
-		// Connect line from ceiling anchor down to spider's live center position
-		const anchorX = this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x;
-		this.ctx.moveTo(anchorX, 30); // Bound tightly to true CEIL_Y
-		this.ctx.lineTo(this.state.x, this.state.y);
-		this.ctx.stroke();
-	}
-
-
-    drawYarn(x, y, tick) {
-        const roll = Math.sin(tick * 0.15) * 40;
-        this.ctx.save();
-        this.ctx.translate(x + roll, y);
-        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-        this.ctx.beginPath(); this.ctx.ellipse(0, 15, 15, 5, 0, 0, Math.PI*2); this.ctx.fill();
-        
-        let ballColor = "#e74c3c";
-        if (this.registry.activeSpecies === "puppy") ballColor = "#ffeb3b"; // Tennis ball variant
-        if (this.registry.activeSpecies === "spider") ballColor = "#9c27b0";
-        
-        this.ctx.fillStyle = ballColor;
-        this.ctx.beginPath(); this.ctx.arc(0, 12, 12, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
-        this.ctx.lineWidth = 1.5;
-        this.ctx.beginPath(); this.ctx.arc(0, 0, 8, 0, Math.PI); this.ctx.stroke();
-        this.ctx.restore();
-    }
-	drawPaintBalloons() {
-		if (!this.state.paintBalloons || this.state.paintBalloons.length === 0) return;
-
-		for (let i = this.state.paintBalloons.length - 1; i >= 0; i--) {
-			let balloon = this.state.paintBalloons[i];
-
-			balloon.x += balloon.vx;
-			balloon.y += balloon.vy;
-
-			this.ctx.save();
-			this.ctx.fillStyle = balloon.color;
-			this.ctx.beginPath();
-			this.ctx.arc(balloon.x, balloon.y, balloon.radius, 0, Math.PI * 2);
-			this.ctx.fill();
-			this.ctx.strokeStyle = "#ffffff";
-			this.ctx.lineWidth = 1.5;
-			this.ctx.stroke();
-			this.ctx.restore();
-
-			const curDx = balloon.targetX - balloon.x;
-			const curDy = balloon.targetY - balloon.y;
-			const remainingDist = Math.sqrt(curDx * curDx + curDy * curDy);
-
-			if (remainingDist < 10 || balloon.x < -50 || balloon.x > this.canvas.width + 50) {
-				const reachedTarget = remainingDist < 15;
-
-				if (balloon.isHit && reachedTarget) {
-					this.state.overrideColor = balloon.color;
-					
-					if (this.activePet) {
-						this.activePet.color = balloon.color;
-					}
-					
-					this.say("🎨 SPLATAFY!");
-					this.playSound('bubbleSound'); 
-				} else if (reachedTarget) {
-					this.say("💨 MISSED!");
-				}
-
-				if (balloon.x >= -10 && balloon.x <= this.canvas.width + 10) {
-					const particleCount = balloon.isHit ? 30 : 15;
-					for (let p = 0; p < particleCount; p++) {
-						this.state.particles.push({
-							x: balloon.x,
-							y: balloon.y,
-							vx: (Math.random() - 0.5) * 8,
-							vy: (Math.random() - 0.7) * 8,
-							s: Math.random() * 3 + 2,
-							c: balloon.color,
-							life: Math.floor(Math.random() * 20) + 15
-						});
-					}
-				}
-				this.state.paintBalloons.splice(i, 1);
-			}
-		}
-	}
-	drawGoldfishBubbles(tick) {
-		if (this.registry.activeSpecies !== "goldfish") return;
-
-		for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
-			let bubble = this.state.goldfishBubbles[i];
-			
-			bubble.y -= 1.2;
-			bubble.x += Math.sin(tick * 0.05 + i) * 0.5;
-			
-			this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
-			this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
-			this.ctx.beginPath();
-			this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
-			this.ctx.fill();
-			this.ctx.stroke();
-			
-			if (bubble.y < 50) {
-				this.state.goldfishBubbles.splice(i, 1);
-			}
-		}
-	}
-	drawNyanTrail(tick, visibleH) {
-		if (this.state.action !== "nyan") return;
-
-		const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
-		this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
-		
-		for (let segment = 0; segment < 8; segment++) {
-			const segOffset = segment * 35;
-			const timeOffset = segment * 2;
-			colors.forEach((col, i) => {
-				this.ctx.fillStyle = col;
-				const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
-				const wiggle = Math.cos((tick - timeOffset) * 0.2 + i) * 5;
-				this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
-			});
-		}
-		this.ctx.globalAlpha = 1.0;
-	}
-
-//=================================
-// individual updates and stuff
-//=================================
-	updateAndDrawParticles() {
-		for (let i = this.state.particles.length - 1; i >= 0; i--) {
-			const p = this.state.particles[i];
-			this.ctx.save();
-			
-			const isHeavyChunk = p.s > 5;
-			this.ctx.fillStyle = p.c;
-			this.ctx.globalAlpha = p.life < 30 ? p.life / 30 : 1.0;
-			
-			if (isHeavyChunk) {
-				this.ctx.fillRect(p.x, p.y, p.s, p.s);
-				this.ctx.strokeStyle = "#1a0000";
-				this.ctx.lineWidth = 1;
-				this.ctx.strokeRect(p.x, p.y, p.s, p.s);
-			} else {
-				this.ctx.fillRect(p.x, p.y, p.s, p.s);
-			}
-			this.ctx.restore();
-
-			p.x += p.vx;
-			p.y += p.vy;
-			p.vy += isHeavyChunk ? 0.22 : 0.35;
-			
-			if (isHeavyChunk) {
-				p.vx *= 0.985;
-			}
-
-			p.life--;
-			if (p.life <= 0) {
-				this.state.particles.splice(i, 1);
-			}
-		}
-	}
-	walkToPoint(targetX, targetY, speed = 2) {
-		const dx = targetX - this.state.x; 
-		const dy = targetY - this.state.y;
-		const dist = Math.sqrt(dx * dx + dy * dy);
-		if (dist > 12) {
-			this.state.facing = dx > 0 ? 1 : -1;
-			this.state.x += (dx / dist) * speed; 
-			this.state.y += (dy / dist) * speed;
-			return false;
-		}
-		return true;
-	}
-	updatePetMetabolism() {
-		if (this.activePet.isDead) return;
-		
-		// 1. Calculate age levels and growth stages
-		this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
-		this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
-
-		// 2. Compute progressive metabolic hunger decay
-		const now = Date.now();
-		const msElapsed = now - this.activePet.lastHungerTick;
-		if (msElapsed >= this.HUNGER_TICK_MS) {
-			this.activePet.hunger = Math.min(100, this.activePet.hunger + Math.floor(msElapsed / this.HUNGER_TICK_MS)); 
-			this.activePet.lastHungerTick = now - (msElapsed % this.HUNGER_TICK_MS);
-		}
-		
-		// 3. Check for absolute starvation state
-		if (this.activePet.hunger === 100) this.activePet.isDead = true;
-	}
-
-	
-
-
 
 //===================================
 // Libraries
@@ -2612,6 +744,1531 @@ export class StreamPet {
 		}
 	};
 
+    // ==========================================
+    // SECTION 2:some setup and bs
+    // ==========================================
+
+    resizePetWidget() {
+        if (!this.widgetContainer || !this.canvas) return;
+        this.canvas.width = this.widgetContainer.clientWidth;
+        this.canvas.height = this.widgetContainer.clientHeight;
+        this.ctx.imageSmoothingEnabled = false;
+    }
+    setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
+        console.log(`Setting up: ${displayId}, Items count: ${optionItems ? optionItems.length : 'NULL'}`);
+        const displayEl = document.getElementById(displayId);
+        const optionsEl = document.getElementById(optionsId);
+        if (!displayEl || !optionsEl) return;
+
+        optionsEl.innerHTML = "";
+        optionItems.forEach(anim => {
+            const opt = document.createElement("div");
+            opt.className = "option-item";
+            opt.style.cssText = "padding: 6px 8px; cursor: pointer; color: #fff; font-size: 12px;";
+            opt.innerText = anim;
+            
+            opt.addEventListener("mouseenter", () => opt.style.background = "#27272a");
+            opt.addEventListener("mouseleave", () => opt.style.background = "transparent");
+            
+            opt.addEventListener("click", (e) => {
+                e.stopPropagation();
+                displayEl.innerText = anim;
+                optionsEl.style.display = "none";
+                if (onSelectionCallback) onSelectionCallback(anim);
+            });
+            optionsEl.appendChild(opt);
+        });
+
+        displayEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            document.querySelectorAll(".custom-select-options-box").forEach(box => {
+                if (box !== optionsEl) box.style.display = "none";
+            });
+            optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
+        });
+    }
+
+// ===============================================
+// SECTION 4: UI ASSEMBLY, TEMPLATES & BINDINGS
+// ===============================================
+
+
+	injectUI() {
+        const wrapper = document.getElementById("widget-control-wrapper");
+        if (!wrapper) {
+            console.warn("⚠️ [Pet Widget]: #widget-control-wrapper not found. Skipping UI injection.");
+            return;
+        }
+
+        // Check if the outer panel skeleton already exists
+        let petSection = document.getElementById("pet-widget-controls");
+        
+        if (!petSection) {
+            petSection = document.createElement("div");
+            petSection.id = "pet-widget-controls";
+            petSection.className = "collapsible-section collapsed";
+            petSection.innerHTML = StreamPet.controlsTemplate;
+
+            const entropiaBox = document.getElementById("entropia-widget-controls");
+            if (entropiaBox && entropiaBox.nextSibling) {
+                wrapper.insertBefore(petSection, entropiaBox.nextSibling);
+            } else {
+                wrapper.appendChild(petSection);
+            }
+            console.log("🐾 [Pet Widget]: Global Multi-Pet Interface Injected.");
+        }
+
+        // 👇 VITAL BRIDGE STEP:
+        // Locate the target element where your matrix table should actually render.
+        // Replace '.pet-matrix-container-target' with whatever class/id is inside your StreamPet.controlsTemplate
+        this.controlsContainer = petSection.querySelector('.pet-matrix-container-target') || petSection;
+    }
+	renderControlPanel() {
+		if (!this.controlsContainer) return;
+
+		// Clean, compact dark matrix matching #18181b aesthetics
+		let html = `
+			<p style="font-size: 11px; color: #a1a1aa; margin-bottom: 8px; line-height: 1.3;">
+				Toggle interaction methods or fire a manual trigger to test animations and behaviors instantly.
+			</p>
+			<div class="matrix-table" style="width: 100%; font-family: sans-serif; font-size: 11px; display: flex; flex-direction: column; gap: 3px;">
+				<div class="matrix-header" style="display: flex; font-weight: bold; padding: 4px 6px; background: #141414; border-radius: 4px; color: #a1a1aa; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;">
+					<div style="flex: 1.8;">Command Core</div>
+					<div style="flex: 1; text-align: center;">💬 Chat</div>
+					<div style="flex: 1; text-align: center;">🎁 Reward</div>
+					<div style="flex: 0.8; text-align: center;">⚡ Test</div>
+				</div>
+		`;
+
+		// 👇 FILTER OUT ADMINISTRATIVE / METADATA UTILITIES FROM CLUTTERING THE UI
+		const hiddenCommands = ['help', 'rewards', 'clear', 'species', 'hidepet', 'showpet', 'togglepet'];
+
+		Object.keys(this.state.commandAccess).forEach(cmd => {
+			if (hiddenCommands.includes(cmd)) return; // Skip rendering these rows!
+
+			const config = this.state.commandAccess[cmd];
+			html += `
+				<div class="matrix-row" style="display: flex; padding: 6px; background: #141414; border-radius: 4px; align-items: center;">
+					<div style="flex: 1.8; font-weight: bold; text-transform: capitalize; color: #fff;">${cmd}</div>
+					<div style="flex: 1; text-align: center; display: flex; justify-content: center;">
+						<input type="checkbox" data-cmd="${cmd}" data-type="chat" ${config.chat ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
+					</div>
+					<div style="flex: 1; text-align: center; display: flex; justify-content: center;">
+						<input type="checkbox" data-cmd="${cmd}" data-type="cp" ${config.cp ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
+					</div>
+					<div style="flex: 0.8; text-align: center; display: flex; justify-content: center;">
+						<button data-cmd="${cmd}" class="matrix-test-btn" style="cursor: pointer; background: #27272a; color: #3498db; border: 1px solid #3f3f46; border-radius: 4px; font-size: 10px; padding: 2px 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; height: 20px; min-width: 28px;" onmouseover="this.style.background='#3f3f46'; this.style.color='#fff';" onmouseout="this.style.background='#27272a'; this.style.color='#3498db';">
+							▶
+						</button>
+					</div>
+				</div>
+			`;
+		});
+
+		html += `</div>`;
+		
+		this.controlsContainer.innerHTML = html;
+		this.bindMatrixListeners();
+	}
+
+    applyEditModeStyles() {
+        const el = document.getElementById("pet-widget");
+        if (!el) return;
+        if (document.body.classList.contains('edit-mode')) {
+            el.style.pointerEvents = "auto"; 
+        }
+    }
+    applyVisibilityStates() {
+        if (this.widgetContainer) {
+			if (this.state.hideWidget === true) {
+				this.widgetContainer.style.display = 'none';
+			} else {
+				this.widgetContainer.style.display = 'block';
+			}
+            if (this.state.hideBorder) {
+                this.widgetContainer.style.border = "none";
+                this.widgetContainer.style.boxShadow = "none";
+            } else {
+                this.widgetContainer.style.border = "";
+                this.widgetContainer.style.boxShadow = "";
+            }
+
+            if (this.state.hideBackground) {
+                this.widgetContainer.style.setProperty("background", "transparent", "important");
+            } else {
+                this.widgetContainer.style.background = ""; 
+            }
+        }
+
+        const statusEl = document.getElementById("status");
+        if (statusEl) statusEl.style.display = this.state.hideStatus ? "none" : "block";
+        
+        const nameplateEl = document.getElementById("nameplate");
+        if (nameplateEl) nameplateEl.style.display = this.state.hideNameplate ? "none" : "block";
+    }
+	updateUI() {
+		const nameEl = document.getElementById("nameplate");
+		const statsEl = document.getElementById("status");
+		if(!nameEl || !statsEl) return;
+		
+		nameEl.style.left = this.state.layout.nameX + "%"; 
+		nameEl.style.top = this.state.layout.nameY + "%";
+		statsEl.style.left = this.state.layout.statsX + "%"; 
+		statsEl.style.top = this.state.layout.statsY + "%";
+		
+		let sTxt = this.activePet.isDead ? "DECEASED" : (this.activePet.poops.length > 5 ? "SICK" : "HEALTHY");
+		// statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} | EXP: ${this.activePet.exp}`;
+		statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} [${this.state.action || 'idle'}] | EXP: ${this.activePet.exp}`;
+		nameEl.textContent = this.activePet.isDead ? `${this.activePet.name.toUpperCase()}'S GHOST` : this.activePet.name.toUpperCase();
+		
+		// Dynamic Form Option Label Management
+		const propLabel = document.querySelector('label[for="showTower"]') || document.getElementById("showTower")?.previousElementSibling;
+		if (propLabel) {
+			if (this.registry.activeSpecies === "puppy") propLabel.textContent = "Show Doghouse";
+			else if (this.registry.activeSpecies === "goldfish") propLabel.textContent = "Show Castle/Coral";
+			else propLabel.textContent = "Show Cat Tower";
+		}
+
+		// NEW: Dynamic Multi-Species Potty Label Swap
+		const litterLabel = Array.from(document.querySelectorAll('span')).find(el => el.textContent.includes("Litter Box"));
+		if (litterLabel) {
+			litterLabel.textContent = (this.registry.activeSpecies === "puppy") ? "Grass Patch X/Y" : "Litter Box X/Y";
+		}
+	}
+
+
+    initSwatches() {
+        const swatchContainer = document.getElementById("bedColorSwatches");
+        if (!swatchContainer) return;
+        swatchContainer.innerHTML = ""; 
+        this.BED_PRESETS.forEach(color => {
+            const btn = document.createElement("div");
+            btn.className = "swatch" + (this.state.layout.bedColor === color ? " active" : "");
+            btn.style.backgroundColor = color;
+            btn.style.width = "20px";
+            btn.style.height = "20px";
+            btn.style.borderRadius = "4px";
+            btn.style.cursor = "pointer";
+            btn.style.border = this.state.layout.bedColor === color ? "2px solid #fff" : "1px solid #333";
+            
+            btn.addEventListener("click", () => {
+                this.state.layout.bedColor = color;
+                document.querySelectorAll(".swatch").forEach(s => s.style.border = "1px solid #333");
+                btn.style.border = "2px solid #fff";
+                this.say("Comfy! ✨");
+            });
+            swatchContainer.appendChild(btn);
+        });
+    }
+
+    initContainerListeners() {
+        if (!this.widgetContainer) return;
+
+        const observer = new MutationObserver((mutations) => {
+            this.widgetBounds = {
+                left: this.widgetContainer.style.left,
+                top: this.widgetContainer.style.top,
+                width: this.widgetContainer.style.width,
+                height: this.widgetContainer.style.height
+            };
+            localStorage.setItem("greta_widget_bounds", JSON.stringify(this.widgetBounds));
+            this.resizePetWidget(); // Re-sync the canvas internal resolution
+        });
+
+        observer.observe(this.widgetContainer, { 
+            attributes: true, 
+            attributeFilter: ["style"] 
+        });
+    }
+
+	bindMatrixListeners() {
+		if (!this.controlsContainer) return;
+		
+		// Wire up the configuration access checkboxes
+		this.controlsContainer.querySelectorAll('.matrix-toggle').forEach(checkbox => {
+			checkbox.addEventListener('change', (e) => {
+				const cmd = e.target.getAttribute('data-cmd');
+				const type = e.target.getAttribute('data-type'); 
+				const isChecked = e.target.checked;
+				
+				if (this.state.commandAccess && this.state.commandAccess[cmd]) {
+					this.state.commandAccess[cmd][type] = isChecked;
+					this.saveData(); 
+					console.log(`[Config Router]: Updated "${cmd}" -> Access Mode [${type.toUpperCase()}]: ${isChecked}`);
+				}
+			});
+		});
+
+		// Wire up the "Play" test trigger buttons
+		this.controlsContainer.querySelectorAll('.matrix-test-btn').forEach(button => {
+			button.addEventListener('click', (e) => {
+				// Find target element handling nested icon clicks safely
+				const btn = e.target.closest('.matrix-test-btn');
+				const cmd = btn.getAttribute('data-cmd');
+				
+				console.log(`[Test Simulator]: Locating routing handles for payload trigger: !pet ${cmd}`);
+
+				// Fetch the executable routing layout from the framework
+				if (typeof this.getCommands === 'function') {
+					const commandSuite = this.getCommands((notice) => console.log(`[Simulated Response]: ${notice}`));
+					const petCommand = commandSuite.find(c => c.name === 'pet');
+
+					if (petCommand && typeof petCommand.execute === 'function') {
+						// Simulate execution framework flags bypassing standard chat restrictions
+						const simulatedFlags = {
+							broadcaster: true,
+							mod: false,
+							isRewardSimulated: true // Simulates system-level permission clearance
+						};
+						
+						// Route the core command text straight into the system engine
+						petCommand.execute('BroadcasterUI', cmd, simulatedFlags);
+					}
+				}
+			});
+		});
+	}
+
+    bindUIEventListeners() {
+        // Looks for a button with id="exportPetSettings" anywhere in your HTML/UI engine
+        const exportBtn = document.getElementById("exportPetSettings");
+			if (exportBtn) {
+				exportBtn.addEventListener("click", () => {
+					// Calls the copy routine. If your environment uses a notify alert, pass it here
+					this.exportSettingsToClipboard();
+				});
+				console.log("🔗 [Pet Widget]: Export Settings event listener attached to UI button.");
+			}
+
+        const bindClick = (id, callback) => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('click', callback);
+        };
+
+        const sliders = ["nameX", "nameY", "statsX", "statsY", "bedX", "bedY", "bowlX", "bowlY", "litterX", "litterY", "towerX", "towerY"];
+        sliders.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener("input", (e) => this.state.layout[id] = parseInt(e.target.value));
+        });
+
+        // Identity rename tracking bound specifically to active isolated memory profile slot
+        const nameIn = document.getElementById("nameInput");
+        if (nameIn) {
+            nameIn.addEventListener("input", (e) => {
+                this.activePet.name = e.target.value || "Companion";
+            });
+        }
+		const tummySlider = document.getElementById("tummyLimitRange");
+		if (tummySlider) {
+			tummySlider.addEventListener("input", (e) => {
+				const val = parseInt(e.target.value);
+				this.setTummyLimit(val);
+				const display = document.getElementById("tummyLimitValue");
+				if (display) display.innerText = val;
+			});
+		}
+		const speciesOptions = [
+            "🐈 Kitty (Feline Engine v10)",
+            "🐕 Puppy (Canine Kinematics Engine)",
+            "🕷️ Spider (Arachnid Procedural Pathing)",
+            "🐟 Goldfish (Aquatic Fluid Physics)"
+        ];
+		
+        this.setupCustomDropdownEngine("speciesSelectDisplay", "speciesSelectOptions", speciesOptions, (selectedText) => {
+            let chosenSpecies = "kitty";
+            if (selectedText.includes("Puppy")) chosenSpecies = "puppy";
+            if (selectedText.includes("Spider")) chosenSpecies = "spider";
+            if (selectedText.includes("Goldfish")) chosenSpecies = "goldfish";
+
+            // Set the new species pointer
+            this.registry.activeSpecies = chosenSpecies;
+            
+            // Re-sync name interface field value dynamically to reflect current animal
+            if (nameIn) nameIn.value = this.activePet.name;
+
+            // ⭐ FIX: Instead of old, floating hardcoded logic, call the snap positioning system 
+            this.initPetPlacement();
+
+            this.syncSpeciesInterfaceToggle();
+            this.saveData();
+            this.say(`Swapped to ${this.activePet.name}!`);
+        });
+
+        document.addEventListener("click", () => {
+            document.querySelectorAll(".custom-select-options-box").forEach(box => {
+                box.style.display = "none";
+            });
+        });
+
+        const zoomSlider = document.getElementById("canvasZoom");
+        const zoomDisplay = document.getElementById("zoomValue");
+        if (zoomSlider) {
+            zoomSlider.addEventListener("input", (e) => {
+                const val = parseFloat(e.target.value);
+                this.state.zoom = val;
+                if (zoomDisplay) zoomDisplay.textContent = `${val.toFixed(1)}x`;
+            });
+            zoomSlider.addEventListener("change", () => this.saveData());
+        }
+
+        const borderToggle = document.getElementById("hideBorderToggle");
+        if (borderToggle) {
+            borderToggle.addEventListener("change", (e) => {
+                this.state.hideBorder = e.target.checked;
+                this.applyVisibilityStates(); 
+                this.saveData();
+            });
+        }
+
+        const hideBGCheck = document.getElementById("hideBackgroundToggle");
+        if (hideBGCheck) {
+            hideBGCheck.addEventListener("change", (e) => {
+                this.state.hideBackground = e.target.checked;
+                this.applyVisibilityStates();
+                this.saveData();
+            });
+        }
+
+        const statusToggle = document.getElementById("hideStatusToggle");
+        if (statusToggle) {
+            statusToggle.addEventListener("change", (e) => {
+                this.state.hideStatus = e.target.checked;
+                this.applyVisibilityStates();
+                this.saveData();
+            });
+        }
+
+        const NameplateToggle = document.getElementById("hideNameplateToggle");
+        if (NameplateToggle) {
+            NameplateToggle.addEventListener("change", (e) => {
+                this.state.hideNameplate = e.target.checked;
+                this.applyVisibilityStates();
+                this.saveData();
+            });
+        }
+
+        const st = document.getElementById("showTower");
+        if (st) st.addEventListener("change", (e) => {
+            this.state.layout.showTower = e.target.checked;
+            if(!this.state.layout.showTower && this.state.action.includes("tower")) this.state.action = "idle";
+        });
+
+        bindClick("btnFeed", () => { 
+            if(!this.activePet.isDead && !this.state.hasFood) { 
+                this.state.hasFood = true; 
+                this.say("Yum! Food dropped!"); 
+            } 
+        });
+        bindClick("btnPlay", () => { if(!this.activePet.isDead) { this.state.action = "special"; this.state.actionTimer = 350; this.say("Playing! ✨"); } });
+        bindClick("btnDance", () => { if(!this.activePet.isDead) { this.state.action = "dance"; this.state.actionTimer = 300; this.say("Dance! ✨"); } });
+        bindClick("btnTreat", () => { if(!this.activePet.isDead) { this.activePet.hunger = Math.max(0, this.activePet.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM! 🍗"); } });
+        bindClick("btnClear", () => { 
+            this.activePet.poops = []; 
+            this.state.spiderWebs = [];
+            this.state.goldfishBubbles = [];
+            this.say("Cleared and Scoured! 🧹"); 
+        });
+        bindClick("btnRevive", () => { this.revivePet(); });
+        bindClick("btnReset", () => { 
+            localStorage.removeItem("greta_widget_bounds");
+            localStorage.removeItem("greta_ultra_v10"); 
+            location.reload(); 
+        });
+
+        const masterToggle = document.getElementById("masterEnabled");
+        if (masterToggle) {
+            masterToggle.checked = window.soundSettings.masterEnabled;
+            masterToggle.addEventListener("change", (e) => {
+                window.soundSettings.masterEnabled = e.target.checked;
+                localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+            });
+        }
+
+        document.querySelectorAll('.setting-row[data-key]').forEach(row => {
+            const key = row.getAttribute('data-key');
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            const fileBtn = row.querySelector('.file-btn');
+            const fileInput = row.querySelector('.hidden-file-input');
+            const testBtn = row.querySelector('.test-btn');
+
+            if (checkbox) {
+                checkbox.checked = window.soundSettings[key];
+                checkbox.addEventListener('change', (e) => {
+                    window.soundSettings[key] = e.target.checked;
+                    localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+                });
+            }
+
+            if (fileBtn && fileInput) {
+                fileBtn.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const url = URL.createObjectURL(file);
+                        window.soundSettings.customPaths[key] = url;
+                        localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
+                        this.refreshAudioInstance(key);
+                        this.say("Audio updated! 🎧");
+                    }
+                });
+            }
+
+            if (testBtn) {
+                testBtn.addEventListener('click', () => this.playSound(key));
+            }
+        });
+    }
+
+    syncSpeciesInterfaceToggle() {
+        document.querySelectorAll(".species-note").forEach(el => el.style.display = "none");
+        const currentNote = document.getElementById(`${this.registry.activeSpecies}ContextNotes`);
+        if (currentNote) currentNote.style.display = "block";
+    }
+
+
+
+
+    幕(txt) {} // Catch invalid encoding safely
+    say(txt) {
+        const b = document.getElementById("bubble");
+        if (!b) return;
+        b.textContent = txt; 
+        b.style.left = (this.state.x - 50) + "px"; 
+        b.style.top = (this.state.y - 140) + "px";
+        b.classList.add("show"); 
+        
+        if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
+        this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
+
+        if (txt.includes("Meow") || txt.includes("Kitty")) this.playSound('meowSound');
+        if (txt.includes("Mew")) this.playSound('mewSound');
+        if (txt.includes("Purrr") || txt.includes("Comfy")) this.playSound('purrSound');
+        if (txt.includes("BARK") || txt.includes("FETCH")) this.playSound('barkSound');
+        if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.playSound('whineSound');
+        if (txt.includes("SPIN") || this.registry.activeSpecies === "spider" && Math.random() < 0.3) this.playSound('clickSound');
+        if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.playSound('bubbleSound');
+    }
+
+
+    getPos(pctX, pctY, offY = 0) {
+        const visibleW = this.canvas.width;
+        const visibleH = this.canvas.height;
+
+        let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
+        let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
+
+        const anchorX = visibleW / 2;
+        const anchorY = visibleH - this.BASE_FLOOR_Y;
+
+        const targetX = (pctX / 100) * visibleW;
+        const targetY = (pctY / 100) * visibleH;
+
+        const finalX = anchorX + (targetX - anchorX) / scaleVal;
+        const finalY = anchorY + (targetY - anchorY) / scaleVal;
+
+        return { x: finalX, y: finalY + offY };
+    }
+	initPetPlacement() {
+		if (!this.canvas) return;
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
+		
+		// Environment Edge Constraints
+		const CEIL_Y = 30; 
+		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
+
+		// 🛏️ Dynamic Bed Tracking Coordinates via your Zoom Engine
+		// This feeds the percentages into getPos() to properly inherit all zoom transforms
+		const bedCoordinates = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
+
+		this.state.action = "idle";
+		this.state.actionTimer = 200;
+
+		if (this.registry.activeSpecies === "spider") {
+			// Spiders drop directly above the bed's scaled X position on the roof
+			this.state.x = bedCoordinates.x;
+			this.state.y = CEIL_Y;
+		} else if (this.registry.activeSpecies === "goldfish") {
+			// Goldfish float in the mid-water horizon lane right over the bed's scaled X position
+			this.state.x = bedCoordinates.x;
+			this.state.y = visibleH / 2; 
+		} else {
+			// Terrestrial pets (Puppy, Kitty) land precisely on the scaled bed positions
+			this.state.x = bedCoordinates.x;
+			
+			// If the bed is pushed all the way down to the floor, lock to true FLOOR_Y
+			// Otherwise, use the dynamically scaled bed Y coordinate
+			this.state.y = this.state.layout.bedY >= 100 ? FLOOR_Y : bedCoordinates.y;
+		}
+
+		// Cache the resolved matrix positions
+		this.state.originalPos = { x: this.state.x, y: this.state.y };
+		console.log(`🎯 [Pet Positioner]: Cleanly snapped ${this.registry.activeSpecies} to Bed with Zoom transformations accounted for.`);
+	}
+    // Sugar shorthand properties to easily get/set values inside the current isolated active pet data profile
+    get activePet() {
+        return this.registry.profiles[this.registry.activeSpecies];
+    }
+	setTummyLimit(newLimit) {
+		this.state.tummylimit = parseInt(newLimit);
+		console.log(`Tummy limit updated to: ${this.state.tummylimit}`);
+		this.saveData(); // Assuming you have a persistence method
+	}
+
+// ===================================================
+// SECTION 5: RENDER ENGINE, ANIMATION & AI PIPELINE
+// ===================================================
+
+	drawEnvironment(tick) {
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
+		// ========================================================
+		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
+		// ========================================================
+		//if (this.registry.activeSpecies === "spider") {
+			this.drawSpiderWebs();
+			this.drawRappelStrand();
+		//}
+		// ========================================================
+		// PHASE 2: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
+		// ========================================================
+		if (this.state.layout.showTower) {
+			const towerPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
+			this.drawPetHouse(towerPos, tick);
+		}
+		// ========================================================
+		// PHASE 3: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
+		// ========================================================
+		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
+		this.drawPetBed(bedPos, tick);
+		// ========================================================
+		// PHASE 4: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
+		// ========================================================
+		const litterPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
+		const boxW = 150;
+		this.drawLitterBox(litterPos, boxW);
+		this.drawWasteLayer(litterPos, boxW);
+		// ========================================================
+		// PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
+		// ========================================================
+		const foodPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
+		this.drawFoodBowl(foodPos, tick);
+		// ========================================================
+		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
+		// ========================================================
+		this.drawFishBubbles(tick);
+		this.drawNyanTrail(tick, visibleH);
+		this.drawPaintBalloons();
+		this.updateAndDrawParticles();
+	}
+	updateAI(t) {
+		// 1. GUARD CLAUSE: Freeze all AI activity immediately if exploding
+		if (this.state.action === "bloating" || this.state.action === "explode") {
+			if (this.state.actionTimer > 0) this.state.actionTimer--;
+			return; 
+		}
+
+		// 2. DATA ALLOCATION: Calculate frame layout coordinates and metrics
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
+		const groundY = visibleH - this.BASE_FLOOR_Y;
+		
+		const bowlPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
+		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
+		const litPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
+		const towerPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
+		const CEIL_Y = 30; 
+		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
+		const LEFT_X = 40;
+		const RIGHT_X = visibleW - 40;
+		const walkToPoint = (targetX, targetY, speed = 2) => this.walkToPoint(targetX, targetY, speed);
+		
+		const ctx = { t, visibleW, visibleH, groundY, bowlPos, bedPos, litPos, towerPos, CEIL_Y, FLOOR_Y, LEFT_X, RIGHT_X, walkToPoint };
+
+		// 3. INTERNAL ENGINE UPDATES: Tick down clocks and run metabolism
+		if (this.state.actionTimer > 0) this.state.actionTimer--;
+		this.updatePetMetabolism();
+
+		// 4. INTERRUPT MATRIX: Override normal behavior if food is present
+		if (this.state.hasFood && !["nyan", "eating", "potty", "walk_to_litter", "rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
+			this.state.action = "walk_to_food";
+		}
+
+		// 5. STATE EXECUTION: Run active state logic from the library
+		if (STATE_LIBRARY[this.state.action]) {
+			STATE_LIBRARY[this.state.action](this, ctx);
+		}
+	}
+	animate = () => {
+		this.state.animT++;
+		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+		this.updateAI(this.state.animT);
+
+		this.ctx.save();
+		let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
+		let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
+
+		const anchorX = this.canvas.width / 2;
+		const anchorY = this.canvas.height - this.BASE_FLOOR_Y;
+
+		this.ctx.translate(anchorX, anchorY);
+		this.ctx.scale(scaleVal, scaleVal);
+		this.ctx.translate(-anchorX, -anchorY);
+
+		this.drawEnvironment(this.state.animT);
+
+		let petScale = (this.activePet.stage === "Baby") ? 0.6 : (this.activePet.stage === "Juvenile") ? 0.8 : 1.0;
+		
+		// ========================================================
+		// RENDERING SPECIES DELEGATION ROUTER & EXPLOSION HANDLERS
+		// ========================================================
+		if (!this.state.hideMainSprite) {
+			this.ctx.save();
+
+			// Handle Stage 1: Swell up and violently shake the layout bounds
+			if (this.state.action === "bloating") {
+				petScale *= 1.35; // Expand dimensions dynamically during build-up
+				const jitterX = (Math.random() - 0.5) * 5;
+				const jitterY = (Math.random() - 0.5) * 5;
+				this.ctx.translate(jitterX, jitterY);
+			}
+
+			if (this.registry.activeSpecies === "kitty") {
+				this.drawKitty(this.state.animT, petScale);
+			} else if (this.registry.activeSpecies === "puppy") {
+				this.drawPuppy(this.state.animT, petScale);
+			} else if (this.registry.activeSpecies === "spider") {
+				this.drawSpider(this.state.animT, petScale);
+			} else if (this.registry.activeSpecies === "goldfish") {
+				this.drawFish(this.state.animT, petScale);
+			}
+
+			this.ctx.restore();
+		}
+		
+		this.ctx.restore();
+		this.updateUI();
+		requestAnimationFrame(this.animate);
+	}
+	
+// ==========================================
+// CORE VISUAL RENDERING ROUTERS PER SPECIES
+// ==========================================
+//
+// draw pets 
+
+// KITTY DRAWING
+//--------------------------------------------------
+    drawkittyEars(x, y, color, sleeping) {
+        this.ctx.fillStyle = color;
+        if (sleeping) {
+            this.ctx.beginPath(); this.ctx.moveTo(x - 15, y - 8); this.ctx.lineTo(x - 22, y + 2); this.ctx.lineTo(x - 5, y + 5); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.moveTo(x + 15, y - 8); this.ctx.lineTo(x + 22, y + 2); this.ctx.lineTo(x + 5, y + 5); this.ctx.fill();
+        } else {
+            this.ctx.beginPath(); this.ctx.moveTo(x - 20, y - 10); this.ctx.lineTo(x - 12, y - 40); this.ctx.lineTo(x - 2, y - 15); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.moveTo(x + 20, y - 10); this.ctx.lineTo(x + 12, y - 40); this.ctx.lineTo(x + 2, y - 15); this.ctx.fill();
+        }
+    }
+		drawkittyFace(x, y, begging, sleeping) {
+			if (sleeping) {
+				this.ctx.strokeStyle = "rgba(0,0,0,0.5)"; this.ctx.lineWidth = 2;
+				this.ctx.beginPath(); this.ctx.arc(x - 7, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); this.ctx.stroke();
+				this.ctx.beginPath(); this.ctx.arc(x + 9, y + 2, 5, 0.1 * Math.PI, 0.9 * Math.PI); this.ctx.stroke();
+			} else {
+				this.ctx.fillStyle = "white"; this.ctx.beginPath(); this.ctx.arc(x - 7, y - 5, 6, 0, Math.PI*2); this.ctx.arc(x + 9, y - 5, 6, 0, Math.PI*2); this.ctx.fill();
+				this.ctx.fillStyle = "black"; this.ctx.beginPath(); this.ctx.arc(x - 6, y - 5, 2.5, 0, Math.PI*2); this.ctx.arc(x + 10, y - 5, 2.5, 0, Math.PI*2); this.ctx.fill();
+			}
+			this.ctx.strokeStyle = "rgba(255,255,255,0.4)"; this.ctx.lineWidth = 1;
+			[0, 1, 2].forEach(i => {
+			   this.ctx.beginPath(); this.ctx.moveTo(x+12, y+2*i); this.ctx.lineTo(x+30, y-8+8*i); this.ctx.stroke();
+			   this.ctx.beginPath(); this.ctx.moveTo(x-10, y+2*i); this.ctx.lineTo(x-28, y-8+8*i); this.ctx.stroke();
+			});
+			this.ctx.fillStyle = "#ffaaaa";
+			if (begging) { this.ctx.beginPath(); this.ctx.arc(x+1, y+8, 4, 0, Math.PI*2); this.ctx.fill(); }
+			else { this.ctx.beginPath(); this.ctx.moveTo(x+1, y+3); this.ctx.lineTo(x-2, y); this.ctx.lineTo(x+4, y); this.ctx.fill(); }
+		}
+		drawKitty(t, scale) {
+			this.ctx.save();
+			
+			// Check for teased state
+			const isTeased = (this.state.action === "teased");
+			
+			const stateOffsets = { "sleep": 15, "tower_sleep": 15, "walk": 5, "idle": 0 };
+			const baseOffset = stateOffsets[this.state.action] || 0;
+			const bounce = (this.state.action === "dance") ? Math.abs(Math.sin(t * 0.2)) * 25 : 0;
+			
+			this.ctx.translate(this.state.x, this.state.y - bounce + baseOffset);
+			this.ctx.scale(this.state.facing * scale, scale);
+			
+			this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+			this.ctx.beginPath(); this.ctx.ellipse(0, 30 + bounce - baseOffset, 45, 12, 0, 0, Math.PI*2); this.ctx.fill();
+
+			let finalColor = this.activePet.isDead ? "#ffffff" : (this.activePet.poops.length > 5 ? "#8edb4b" : this.activePet.color);
+			if(this.activePet.isDead) this.ctx.globalAlpha = 0.5;
+			this.ctx.fillStyle = finalColor;
+
+			if (this.state.action === "sleep" || this.state.action === "tower_sleep") {
+				const breathing = Math.sin(t * 0.03) * 2.5;
+				this.ctx.beginPath(); this.ctx.ellipse(0, 12, 42 + breathing, 32 + breathing, 0, 0, Math.PI * 2); this.ctx.fill();
+				this.ctx.beginPath(); this.ctx.arc(15, 8, 22, 0, Math.PI*2); this.ctx.fill();
+				this.ctx.beginPath(); this.ctx.lineWidth = 11; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
+				this.ctx.arc(0, 18, 36, 0.5 * Math.PI, 1.4 * Math.PI); this.ctx.stroke();
+				this.drawkittyEars(15, 8, finalColor, true); 
+				this.drawkittyFace(15, 8, false, true);
+			} else if (this.state.action === "special" || this.state.action === "scratching" || this.state.action === "trick") {
+				if (this.state.action === "special") this.drawYarn(30, 20, t);
+				let rot = (this.state.action === "trick") ? (t * 0.25) : 0;
+				this.ctx.rotate(rot);
+
+				this.ctx.beginPath(); this.ctx.ellipse(0, 0, 32, 42, 0, 0, Math.PI * 2); this.ctx.fill();
+				this.ctx.beginPath(); this.ctx.arc(0, -45, 24, 0, Math.PI*2); this.ctx.fill();
+				if (this.state.action === "special") {
+					const reach = Math.sin(t * 0.2) * 15;
+					this.ctx.fillRect(10, -5 + reach, 10, 15); this.ctx.fillRect(-20, -5 - reach, 10, 15);
+				} else {
+					this.ctx.fillRect(15, -25 + Math.sin(t*0.5)*5, 8, 15); this.ctx.fillRect(5, -35 + Math.sin(t*0.5)*5, 8, 15);
+				}
+				this.drawkittyEars(0, -45, finalColor, false); 
+				// Pass isTeased here
+				this.drawkittyFace(0, -45, false, false, isTeased);
+			} else {
+				this.ctx.beginPath(); this.ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2); this.ctx.fill();
+				this.ctx.beginPath(); this.ctx.arc(35, -15, 24, 0, Math.PI*2); this.ctx.fill();
+				this.drawkittyEars(35, -15, finalColor, false);
+				const walkCycle = (this.state.action.includes("walk")) ? Math.sin(t * 0.18) : 0;
+				[[-35, 12], [-12, 12], [10, 12], [28, 12]].forEach((p, i) => {
+					this.ctx.fillRect(p[0], p[1], 9, 16 + (i % 2 === 0 ? walkCycle : -walkCycle) * 8);
+				});
+				this.ctx.beginPath(); this.ctx.lineWidth = 8; this.ctx.lineCap = "round"; this.ctx.strokeStyle = finalColor;
+				this.ctx.moveTo(-45, 0); this.ctx.bezierCurveTo(-65, 10, -80 + Math.sin(t * 0.06) * 18, -35, -60, -65); this.ctx.stroke();
+				// Pass isTeased here
+				this.drawkittyFace(35, -15, this.state.action === "beg", false, isTeased);
+			}
+			this.ctx.restore();
+		}
+
+// ==========================================
+
+//  PUPPY DRAWING
+//--------------------------------------------------
+	// (mutt breed)
+	drawPuppy(t, scale) {
+		this.ctx.save();
+		
+		// 1. STATE LOGIC
+		const isDancing = (this.state.action === "dance");
+		const isTeased = (this.state.action === "teased");
+		
+		// If teased, add a rapid shake effect to the whole body
+		const shake = isTeased ? Math.sin(t * 2) * 5 : 0;
+		const wiggle = isDancing ? Math.sin(t * 0.4) * 0.2 : 0; 
+		
+		// Apply translation first
+		this.ctx.translate(this.state.x + shake, this.state.y);
+		
+		// Apply the wiggle/shake rotation
+		this.ctx.rotate(wiggle + (isTeased ? Math.sin(t) * 0.1 : 0));
+		
+		// Trick rotation (if applicable)
+		let rotationAngle = (this.state.action === "trick") ? (t * 0.2) : 0;
+		this.ctx.rotate(rotationAngle);
+		
+		this.ctx.scale(this.state.facing * scale, scale);
+
+		// Ground shadow
+		this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+		this.ctx.beginPath(); this.ctx.ellipse(0, 25, 48, 14, 0, 0, Math.PI*2); this.ctx.fill();
+
+		let baseColor = this.activePet.isDead ? "#dddddd" : (this.activePet.poops.length > 5 ? "#a1d95d" : this.activePet.color);
+		if(this.activePet.isDead) this.ctx.globalAlpha = 0.4;
+		this.ctx.fillStyle = baseColor;
+
+		if (this.state.action === "sleep" || this.state.action === "tower_sleep") {
+			const breath = Math.sin(t * 0.04) * 2;
+			this.ctx.beginPath(); this.ctx.ellipse(0, 10, 46 + breath, 34 + breath, 0, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = "#5d4037";
+			this.ctx.beginPath(); this.ctx.arc(20, 14, 10, 0, Math.PI*2); this.ctx.fill();
+		} else {
+			this.ctx.beginPath(); this.ctx.ellipse(-5, 2, 45, 28, 0, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.beginPath(); this.ctx.arc(30, -22, 22, 0, Math.PI*2); this.ctx.fill();
+			
+			// Eyes (Change color to red if teased)
+			this.ctx.fillStyle = isTeased ? "#ff0000" : "rgba(255,255,255,0.2)";
+			this.ctx.beginPath(); this.ctx.ellipse(40, -18, 12, 9, 0, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = "black";
+			this.ctx.beginPath(); this.ctx.arc(48, -20, 3, 0, Math.PI*2); this.ctx.fill();
+
+			// Ears (If teased, draw them slightly more upright/alert)
+			this.ctx.fillStyle = baseColor;
+			const earAngle = isTeased ? -0.5 : 0.2;
+			this.ctx.beginPath(); this.ctx.ellipse(22 + (isTeased ? 5 : 0), -24, 8, 18, earAngle, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = "#3e2723";
+			this.ctx.beginPath(); this.ctx.ellipse(22 + (isTeased ? 5 : 0), -22, 5, 12, earAngle, 0, Math.PI*2); this.ctx.fill();
+
+			this.ctx.fillStyle = "white";
+			this.ctx.beginPath(); this.ctx.arc(34, -28, 5, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = "black";
+			this.ctx.beginPath(); this.ctx.arc(36, -28, 2, 0, Math.PI*2); this.ctx.fill();
+
+			// 2. TAIL WAG: Make it wag super fast during the dance!
+			const wagSpeed = isDancing ? 1.5 : (this.state.action === "walk" || this.state.hasFood ? 0.6 : 0.2);
+			const tailWag = Math.sin(t * wagSpeed) * 0.8 - 0.5;
+			this.ctx.save();
+			this.ctx.translate(-42, -5);
+			this.ctx.rotate(tailWag);
+			this.ctx.fillStyle = baseColor;
+			this.ctx.fillRect(-22, -6, 24, 10);
+			this.ctx.restore();
+
+			// Legs
+			const legSwing = (this.state.action === "walk") ? Math.sin(t * 0.22) * 10 : 0;
+			this.ctx.fillStyle = baseColor;
+			this.ctx.fillRect(-35, 15, 11, 16 + legSwing);
+			this.ctx.fillRect(-15, 15, 11, 16 - legSwing);
+			this.ctx.fillRect(10, 15, 11, 16 + legSwing);
+			this.ctx.fillRect(25, 15, 11, 16 - legSwing);
+
+			if (this.state.action === "special") this.drawYarn(40, 0, t);
+		}
+		this.ctx.restore();
+	}
+//  FISH DRAWING
+//--------------------------------------------------
+	drawFish(t, scale) {
+		this.ctx.save();
+		
+		const isTeased = (this.state.action === "teased");
+		
+		// Frantic shaking when teased
+		const shakeX = isTeased ? Math.sin(t * 0.8) * 10 : 0;
+		const shakeY = isTeased ? Math.cos(t * 0.9) * 5 : 0;
+		this.ctx.translate(this.state.x + shakeX, this.state.y + shakeY);
+
+		if (this.state.action === "dance") {
+			this.ctx.rotate(t * 0.2);
+		}
+
+		this.ctx.scale(this.state.facing * scale, scale);
+
+		let fishColor = this.activePet.isDead ? "#e0e0e0" : this.activePet.color;
+		if (this.activePet.isDead) {
+			this.ctx.globalAlpha = 0.4;
+			this.ctx.rotate(Math.PI);
+		}
+		this.ctx.fillStyle = fishColor;
+
+		this.ctx.beginPath();
+		this.ctx.ellipse(0, 0, 36, 22, 0, 0, Math.PI * 2);
+		this.ctx.fill();
+
+		const tailWiggle = Math.sin(t * (isTeased ? 0.6 : 0.28)) * (isTeased ? 25 : 12);
+		this.ctx.beginPath();
+		this.ctx.moveTo(-32, 0);
+		this.ctx.bezierCurveTo(-55, -25 + tailWiggle, -65, -10 + tailWiggle, -58, tailWiggle);
+		this.ctx.bezierCurveTo(-65, 10 + tailWiggle, -55, 25 + tailWiggle, -32, 0);
+		this.ctx.fill();
+
+		this.ctx.fillStyle = "rgba(255,255,255,0.3)";
+		this.ctx.beginPath();
+		this.ctx.moveTo(-32, 0);
+		this.ctx.lineTo(-52, -15 + tailWiggle);
+		this.ctx.lineTo(-50, 15 + tailWiggle);
+		this.ctx.fill();
+
+		this.ctx.fillStyle = fishColor;
+		this.ctx.beginPath();
+		this.ctx.moveTo(-10, -20);
+		this.ctx.bezierCurveTo(-5, -38, -25, -32, -22, -14);
+		this.ctx.fill();
+
+		const finWave = Math.sin(t * (isTeased ? 0.4 : 0.12)) * (isTeased ? 20 : 8);
+		this.ctx.save();
+		this.ctx.translate(10, 8);
+		this.ctx.rotate(finWave * Math.PI / 180);
+		this.ctx.beginPath(); this.ctx.ellipse(0, 0, 14, 8, 0.5, 0, Math.PI * 2); this.ctx.fill();
+		this.ctx.restore();
+
+		// Angry eyes when teased
+		this.ctx.fillStyle = isTeased ? "#ff0000" : "white";
+		this.ctx.beginPath(); this.ctx.arc(20, -6, 7, 0, Math.PI * 2); this.ctx.fill();
+		this.ctx.fillStyle = "black";
+		this.ctx.beginPath(); this.ctx.arc(22, -6, 3.5, 0, Math.PI * 2); this.ctx.fill();
+
+		if (this.state.action === "special") this.drawYarn(30, -5, t);
+
+		this.ctx.restore();
+	}
+//  SPIDER DRAWING
+//--------------------------------------------------
+	drawSpider(t, scale) {
+		this.ctx.save();
+		
+		const isTeased = (this.state.action === "teased");
+		
+		// Translation to position the spider (adds shake if teased)
+		const shakeX = isTeased ? Math.sin(t * 0.5) * 8 : 0;
+		this.ctx.translate(this.state.x + shakeX, this.state.y);
+
+		// Apply "Dance" or "Teased" rotation
+		if (this.state.action === "dance") {
+			this.ctx.rotate(Math.sin(t * 0.5) * 0.5);
+		} else if (isTeased) {
+			this.ctx.rotate(Math.sin(t * 0.8) * 0.3);
+		}
+
+		this.ctx.scale(this.state.facing * scale, scale);
+
+		let spiderColor = this.activePet.isDead ? "#777777" : this.activePet.color;
+		if (this.activePet.isDead) this.ctx.globalAlpha = 0.3;
+		this.ctx.fillStyle = spiderColor;
+		this.ctx.strokeStyle = spiderColor;
+		this.ctx.lineWidth = 3.5;
+
+		// Web thread
+		this.ctx.strokeStyle = "rgba(255,255,255,0.15)";
+		this.ctx.lineWidth = 1;
+		this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0, -this.state.y); this.ctx.stroke();
+
+		this.ctx.fillStyle = spiderColor;
+		this.ctx.strokeStyle = spiderColor;
+		this.ctx.lineWidth = 3.5;
+
+		this.ctx.beginPath(); this.ctx.arc(-16, 0, 18, 0, Math.PI*2); this.ctx.fill();
+		this.ctx.beginPath(); this.ctx.arc(8, -2, 12, 0, Math.PI*2); this.ctx.fill();
+
+		const isWalking = (this.state.action === "walk");
+		const isDancing = (this.state.action === "dance");
+		
+		const legWave = isWalking ? Math.sin(t * 0.25) * 8 : (isDancing ? Math.sin(t * 0.8) * 20 : 0);
+		
+		for(let i = 0; i < 4; i++) {
+			let offsetPhase = i * 0.4;
+			// Legs move faster/erratically when teased
+			let dynamicSwing = isWalking ? Math.sin(t * 0.22 + offsetPhase) * 12 : 
+							   (isDancing ? Math.sin(t * 0.6 + offsetPhase) * 25 : (isTeased ? Math.sin(t * 1.5) * 15 : 0));
+
+			this.ctx.beginPath();
+			this.ctx.moveTo(0, -2);
+			this.ctx.lineTo(-10 - (i*8), -24 - (Math.sin(t*0.1 + i)*4) + dynamicSwing);
+			this.ctx.lineTo(-20 - (i*14), 18 + legWave);
+			this.ctx.stroke();
+
+			this.ctx.beginPath();
+			this.ctx.moveTo(4, -2);
+			this.ctx.lineTo(15 + (i*8), -22 - (Math.cos(t*0.1 + i)*4) - dynamicSwing);
+			this.ctx.lineTo(24 + (i*14), 18 - legWave);
+			this.ctx.stroke();
+		}
+
+		// Eyes: Pulse faster when teased
+		this.ctx.fillStyle = this.activePet.isDead ? "black" : (isTeased ? "#ff00ff" : "#ff1744");
+		let eyePulse = (isDancing || isTeased) ? Math.abs(Math.sin(t * (isTeased ? 0.5 : 0.2))) * 1.5 : 1;
+		let eyeOffsets = [[12, -6], [16, -5], [14, -2], [18, -1], [10, -2], [14, 2]];
+		eyeOffsets.forEach(pos => {
+			this.ctx.beginPath(); this.ctx.arc(pos[0], pos[1], 1.5 * eyePulse, 0, Math.PI*2); this.ctx.fill();
+		});
+
+		if (this.state.action === "special") this.drawYarn(25, 10, t);
+
+		this.ctx.restore();
+	}
+
+
+
+//===========================================
+// furniture & other static large objects
+//===========================================
+
+//------------------------------
+// pet house drawing system
+//------------------------------
+	drawPetHouse(tPos, tick) {
+		switch (this.registry.activeSpecies) {
+			case "spider":
+				this.drawSpiderNest(tPos, tick);
+				break;
+			case "goldfish":
+				this.drawFishCastle(tPos, tick);
+				break;
+			case "puppy":
+				this.drawDogHouse(tPos, tick);
+				break;
+			case "kitty":
+			default:
+				this.drawCatTower(tPos, tick);
+				break;
+		}
+	}
+	//------------------------------
+		drawCatTower(tPos, tick) {
+			// 1. Base Shadow
+			this.ctx.fillStyle = "rgba(0,0,0,0.1)"; 
+			this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
+
+			// 2. Tower Base Plinth
+			this.ctx.fillStyle = "#7f8c8d"; 
+			this.ctx.fillRect(tPos.x - 55, tPos.y - 5, 110, 15); 
+
+			// 3. Main Vertical Post (Sisal trunk)
+			this.ctx.fillStyle = "#a67c52"; 
+			this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
+
+			// 4. Lower Mid-Platform
+			this.ctx.fillStyle = "#95a5a6"; 
+			this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); 
+
+			// 5. Top Crowns Perch
+			this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
+		}
+	//------------------------------
+		drawDogHouse(tPos, tick) {
+			this.ctx.save();
+			// Base shadow
+			this.ctx.fillStyle = "rgba(0,0,0,0.15)";
+			this.ctx.fillRect(tPos.x - 55, tPos.y + 5, 110, 15);
+			
+			// Main Structure
+			this.ctx.fillStyle = "#d7ccc8"; 
+			this.ctx.fillRect(tPos.x - 45, tPos.y - 65, 90, 70);
+			
+			// Doorway
+			this.ctx.fillStyle = "#3e2723"; 
+			this.ctx.beginPath();
+			this.ctx.arc(tPos.x, tPos.y - 25, 20, Math.PI, 0, false);
+			this.ctx.fillRect(tPos.x - 20, tPos.y - 25, 40, 30);
+			this.ctx.fill();
+			
+			// Roof Facade
+			this.ctx.fillStyle = "#d7ccc8";
+			this.ctx.beginPath();
+			this.ctx.moveTo(tPos.x - 45, tPos.y - 65);
+			this.ctx.lineTo(tPos.x, tPos.y - 95);
+			this.ctx.lineTo(tPos.x + 45, tPos.y - 65);
+			this.ctx.fill();
+			
+			// Roof Trim
+			this.ctx.strokeStyle = "#d32f2f";
+			this.ctx.lineWidth = 8;
+			this.ctx.lineCap = "round";
+			this.ctx.beginPath();
+			this.ctx.moveTo(tPos.x - 55, tPos.y - 60);
+			this.ctx.lineTo(tPos.x, tPos.y - 98);
+			this.ctx.lineTo(tPos.x + 55, tPos.y - 60);
+			this.ctx.stroke();
+			this.ctx.restore();
+		}
+	//------------------------------
+		drawFishCastle(tPos, tick) {
+			// Main Keep
+			this.ctx.fillStyle = "#ffb74d"; 
+			this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
+			
+			// Left & Right Spires
+			this.ctx.fillStyle = "#e65100";
+			this.ctx.fillRect(tPos.x - 50, tPos.y - 110, 30, 30);
+			this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
+			
+			// Gate Entrance
+			this.ctx.fillStyle = "#4e342e"; 
+			this.ctx.beginPath(); 
+			this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); 
+			this.ctx.fill();
+		}
+	//------------------------------
+		drawSpiderNest(tPos, tick) {
+			this.ctx.save();
+			// Anchor structural cobweb down from ceiling at tower position x
+			const nestX = tPos.x;
+			const nestY = 65; // Suspended high ceiling nest line
+
+			this.ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+			this.ctx.lineWidth = 1;
+
+			// Draw supporting frame rays spanning outward and up to ceiling limits
+			this.ctx.beginPath();
+			for (let i = 0; i <= 8; i++) {
+				let angle = Math.PI + (i / 8) * Math.PI; // Upward semi-circle grid
+				this.ctx.moveTo(nestX, nestY);
+				this.ctx.lineTo(nestX + Math.cos(angle) * 75, nestY + Math.sin(angle) * 45);
+			}
+			this.ctx.stroke();
+
+			// Intersecting concentric orbit web strings
+			for (let r = 15; r <= 65; r += 15) {
+				this.ctx.beginPath();
+				this.ctx.ellipse(nestX, nestY, r, r * 0.6, 0, Math.PI, Math.PI * 2);
+				this.ctx.stroke();
+			}
+
+			// Draw central egg sac cocoon cocooned in the center
+			this.ctx.fillStyle = "rgba(240, 240, 240, 0.85)";
+			this.ctx.beginPath();
+			this.ctx.ellipse(nestX, nestY + 5, 12, 18, 0, 0, Math.PI * 2);
+			this.ctx.fill();
+			this.ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+			this.ctx.stroke();
+			this.ctx.restore();
+		}
+//-------------------------------------
+
+
+//------------------------------
+// pet beds
+	drawPetBed(bPos, tick) {
+		if (this.registry.activeSpecies === "spider") {
+			// Structural radial support anchors for the web nest
+			this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
+			this.ctx.lineWidth = 1;
+			this.ctx.beginPath();
+			for (let i = 0; i < 8; i++) {
+				let angle = (i / 8) * Math.PI * 2;
+				this.ctx.moveTo(bPos.x, bPos.y + 5);
+				this.ctx.lineTo(bPos.x + Math.cos(angle) * 55, bPos.y + 5 + Math.sin(angle) * 18);
+			}
+			this.ctx.stroke();
+
+			// Concentric horizontal web ring segments
+			for (let r = 10; r <= 50; r += 12) {
+				this.ctx.beginPath();
+				this.ctx.ellipse(bPos.x, bPos.y + 5, r, r * 0.35, 0, 0, Math.PI * 2);
+				this.ctx.stroke();
+			}
+		} else {
+			// Grounding ambient drop shadow cushion
+			this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+			this.ctx.beginPath(); 
+			this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI * 2); 
+			this.ctx.fill();
+			
+			// Main colored fabric bed core
+			this.ctx.fillStyle = this.state.layout.bedColor;
+			this.ctx.beginPath(); 
+			this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI * 2); 
+			this.ctx.fill();
+		}
+	}
+//------------------------------
+// food and bowl drawing
+	drawFoodBowl(fPos, tick) {
+		// Shadow base
+		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
+		this.ctx.beginPath(); 
+		this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); 
+		this.ctx.fill();
+
+		// Outer Bowl rim
+		this.ctx.fillStyle = "#ecf0f1"; 
+		this.ctx.beginPath(); 
+		this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); 
+		this.ctx.fill();
+
+		// Inner Bowl basin
+		this.ctx.fillStyle = "#bdc3c7"; 
+		this.ctx.beginPath(); 
+		this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); 
+		this.ctx.fill();
+
+		// Interactive food payload
+		if (this.state.hasFood) {
+			this.ctx.fillStyle = "#d35400"; 
+			this.ctx.beginPath(); 
+			this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); 
+			this.ctx.fill();
+			
+			this.ctx.font = "16px Arial";
+			let foodIcon = "🐟";
+			if (this.registry.activeSpecies === "puppy") foodIcon = "🍖";
+			if (this.registry.activeSpecies === "spider") foodIcon = "🪰";
+			if (this.registry.activeSpecies === "goldfish") foodIcon = "🍤";
+			
+			this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
+		}
+	}
+//------------------------------
+// litter box and poop drawing
+	drawLitterBox(lPos, boxW) {
+		// Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
+		if (this.registry.activeSpecies === "goldfish" || this.registry.activeSpecies === "spider") return;
+
+		if (this.registry.activeSpecies === "puppy") {
+			// Base Dirt Tray
+			this.ctx.fillStyle = "#4e342e"; 
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
+			
+			// Green Grass Mat
+			this.ctx.fillStyle = "#2e7d32"; 
+			this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
+			
+			// Procedural Grass Blades
+			this.ctx.fillStyle = "#4caf50";
+			for (let i = 0; i < 6; i++) {
+				let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
+				this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
+				this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
+			}
+			
+			// Picket Fence Border Details
+			this.ctx.fillStyle = "#f5f5f5";
+			for(let p = 0; p <= boxW; p += 15) {
+				this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
+			}
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    
+		} else {
+			// Standard Cat/Companion Plastic Litter Pan
+			this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
+			this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
+			this.ctx.fillStyle = "#2c3e50"; 
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
+			this.ctx.fillStyle = "#95a5a6"; 
+			this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
+		}
+	}
+	drawWasteLayer(lPos, boxW) {
+		this.activePet.poops.forEach(p => {
+			if (this.registry.activeSpecies === "goldfish") {
+				if (p.x === undefined) p.x = this.state.x;
+				if (p.y === undefined) p.y = this.state.y;
+				if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
+
+				// Float up naturally in aquarium water space
+				p.y -= 0.2; 
+				p.swimOffset += 0.03;
+				let finalX = p.x + Math.sin(p.swimOffset) * 5;
+
+				this.ctx.font = "14px Arial";
+				this.ctx.fillText("💩", finalX, p.y);
+			} else if (this.registry.activeSpecies === "spider") {
+				// Spiders use architectural webs instead of standard floor assets
+			} else {
+				// Anchors standard waste to the litter pan coordinates layout
+				let poopyY = p.isCeil ? 90 : lPos.y + 24;
+				let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
+				this.ctx.font = "14px Arial";
+				this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
+			}
+		});
+	}
+
+
+//=================================
+// particals and final layer stuff
+//=================================
+    drawSpiderWebs() {
+		// Early exit guard: Only render background webs if the active species is a spider
+		if (this.registry.activeSpecies !== "spider") return;
+		this.state.spiderWebs.forEach(web => {
+			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
+			this.ctx.lineWidth = 1;
+			this.ctx.beginPath();
+			for(let i = 0; i < 8; i++) {
+				let angle = (i / 8) * Math.PI * 2;
+				this.ctx.moveTo(web.x, web.y);
+				this.ctx.lineTo(web.x + Math.cos(angle) * web.size, web.y + Math.sin(angle) * web.size);
+			}
+			this.ctx.stroke();
+		});
+	}
+	drawRappelStrand() {
+		const isRappelling = ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action);
+		if (this.registry.activeSpecies !== "spider" || !isRappelling) return;
+
+		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+		this.ctx.lineWidth = 1.2;
+		this.ctx.beginPath();
+		
+		// Connect line from ceiling anchor down to spider's live center position
+		const anchorX = this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x;
+		this.ctx.moveTo(anchorX, 30); // Bound tightly to true CEIL_Y
+		this.ctx.lineTo(this.state.x, this.state.y);
+		this.ctx.stroke();
+	}
+
+
+    drawYarn(x, y, tick) {
+        const roll = Math.sin(tick * 0.15) * 40;
+        this.ctx.save();
+        this.ctx.translate(x + roll, y);
+        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+        this.ctx.beginPath(); this.ctx.ellipse(0, 15, 15, 5, 0, 0, Math.PI*2); this.ctx.fill();
+        
+        let ballColor = "#e74c3c";
+        if (this.registry.activeSpecies === "puppy") ballColor = "#ffeb3b"; // Tennis ball variant
+        if (this.registry.activeSpecies === "spider") ballColor = "#9c27b0";
+        
+        this.ctx.fillStyle = ballColor;
+        this.ctx.beginPath(); this.ctx.arc(0, 12, 12, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        this.ctx.lineWidth = 1.5;
+        this.ctx.beginPath(); this.ctx.arc(0, 0, 8, 0, Math.PI); this.ctx.stroke();
+        this.ctx.restore();
+    }
+	drawPaintBalloons() {
+		if (!this.state.paintBalloons || this.state.paintBalloons.length === 0) return;
+
+		for (let i = this.state.paintBalloons.length - 1; i >= 0; i--) {
+			let balloon = this.state.paintBalloons[i];
+
+			balloon.x += balloon.vx;
+			balloon.y += balloon.vy;
+
+			this.ctx.save();
+			this.ctx.fillStyle = balloon.color;
+			this.ctx.beginPath();
+			this.ctx.arc(balloon.x, balloon.y, balloon.radius, 0, Math.PI * 2);
+			this.ctx.fill();
+			this.ctx.strokeStyle = "#ffffff";
+			this.ctx.lineWidth = 1.5;
+			this.ctx.stroke();
+			this.ctx.restore();
+
+			const curDx = balloon.targetX - balloon.x;
+			const curDy = balloon.targetY - balloon.y;
+			const remainingDist = Math.sqrt(curDx * curDx + curDy * curDy);
+
+			if (remainingDist < 10 || balloon.x < -50 || balloon.x > this.canvas.width + 50) {
+				const reachedTarget = remainingDist < 15;
+
+				if (balloon.isHit && reachedTarget) {
+					this.state.overrideColor = balloon.color;
+					
+					if (this.activePet) {
+						this.activePet.color = balloon.color;
+					}
+					
+					this.say("🎨 SPLATAFY!");
+					this.playSound('bubbleSound'); 
+				} else if (reachedTarget) {
+					this.say("💨 MISSED!");
+				}
+
+				if (balloon.x >= -10 && balloon.x <= this.canvas.width + 10) {
+					const particleCount = balloon.isHit ? 30 : 15;
+					for (let p = 0; p < particleCount; p++) {
+						this.state.particles.push({
+							x: balloon.x,
+							y: balloon.y,
+							vx: (Math.random() - 0.5) * 8,
+							vy: (Math.random() - 0.7) * 8,
+							s: Math.random() * 3 + 2,
+							c: balloon.color,
+							life: Math.floor(Math.random() * 20) + 15
+						});
+					}
+				}
+				this.state.paintBalloons.splice(i, 1);
+			}
+		}
+	}
+	drawFishBubbles(tick) {
+		if (this.registry.activeSpecies !== "goldfish") return;
+
+		for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
+			let bubble = this.state.goldfishBubbles[i];
+			
+			bubble.y -= 1.2;
+			bubble.x += Math.sin(tick * 0.05 + i) * 0.5;
+			
+			this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
+			this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
+			this.ctx.beginPath();
+			this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+			this.ctx.fill();
+			this.ctx.stroke();
+			
+			if (bubble.y < 50) {
+				this.state.goldfishBubbles.splice(i, 1);
+			}
+		}
+	}
+	drawNyanTrail(tick, visibleH) {
+		if (this.state.action !== "nyan") return;
+
+		const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
+		this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
+		
+		for (let segment = 0; segment < 8; segment++) {
+			const segOffset = segment * 35;
+			const timeOffset = segment * 2;
+			colors.forEach((col, i) => {
+				this.ctx.fillStyle = col;
+				const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
+				const wiggle = Math.cos((tick - timeOffset) * 0.2 + i) * 5;
+				this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
+			});
+		}
+		this.ctx.globalAlpha = 1.0;
+	}
+
+//=================================
+// individual updates and stuff
+//=================================
+	updateAndDrawParticles() {
+		for (let i = this.state.particles.length - 1; i >= 0; i--) {
+			const p = this.state.particles[i];
+			this.ctx.save();
+			
+			const isHeavyChunk = p.s > 5;
+			this.ctx.fillStyle = p.c;
+			this.ctx.globalAlpha = p.life < 30 ? p.life / 30 : 1.0;
+			
+			if (isHeavyChunk) {
+				this.ctx.fillRect(p.x, p.y, p.s, p.s);
+				this.ctx.strokeStyle = "#1a0000";
+				this.ctx.lineWidth = 1;
+				this.ctx.strokeRect(p.x, p.y, p.s, p.s);
+			} else {
+				this.ctx.fillRect(p.x, p.y, p.s, p.s);
+			}
+			this.ctx.restore();
+
+			p.x += p.vx;
+			p.y += p.vy;
+			p.vy += isHeavyChunk ? 0.22 : 0.35;
+			
+			if (isHeavyChunk) {
+				p.vx *= 0.985;
+			}
+
+			p.life--;
+			if (p.life <= 0) {
+				this.state.particles.splice(i, 1);
+			}
+		}
+	}
+	walkToPoint(targetX, targetY, speed = 2) {
+		const dx = targetX - this.state.x; 
+		const dy = targetY - this.state.y;
+		const dist = Math.sqrt(dx * dx + dy * dy);
+		if (dist > 12) {
+			this.state.facing = dx > 0 ? 1 : -1;
+			this.state.x += (dx / dist) * speed; 
+			this.state.y += (dy / dist) * speed;
+			return false;
+		}
+		return true;
+	}
+	updatePetMetabolism() {
+		if (this.activePet.isDead) return;
+		
+		// 1. Calculate age levels and growth stages
+		this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
+		this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
+
+		// 2. Compute progressive metabolic hunger decay
+		const now = Date.now();
+		const msElapsed = now - this.activePet.lastHungerTick;
+		if (msElapsed >= this.HUNGER_TICK_MS) {
+			this.activePet.hunger = Math.min(100, this.activePet.hunger + Math.floor(msElapsed / this.HUNGER_TICK_MS)); 
+			this.activePet.lastHungerTick = now - (msElapsed % this.HUNGER_TICK_MS);
+		}
+		
+		// 3. Check for absolute starvation state
+		if (this.activePet.hunger === 100) this.activePet.isDead = true;
+	}
+
+
 
 // ==========================================
 // SECTION 6: pet functions & triggers etc
@@ -2762,8 +2419,350 @@ export class StreamPet {
 		}
 	}
 
+
 // ==========================================
-// SECTION 7: loading and saving/ exporting and importing
+// SECTION 7: CHAT COMMAND ROUTER
+// ==========================================
+	getDefaultCommandMatrix() {
+		return {
+			feed:      { chat: true,  cp: true },
+			play:      { chat: true,  cp: true },
+			dance:     { chat: true,  cp: false },
+			treat:     { chat: false, cp: true }, 
+			trick:     { chat: true,  cp: false },
+			status:    { chat: true,  cp: false },
+			tease:     { chat: true,  cp: true },
+			paintbomb: { chat: true,  cp: true }, // Added once here safely
+			revive:    { chat: true,  cp: true }, 
+			help:      { chat: true,  cp: false }, 
+			rewards:   { chat: true,  cp: false }, 
+			nyan:      { chat: true,  cp: true },  
+			clear:     { chat: true,  cp: true },  
+			species:   { chat: true,  cp: true },  
+			hidepet:   { chat: true,  cp: true },  
+			showpet:   { chat: true,  cp: true },  
+			togglepet: { chat: true,  cp: true }   
+		};
+	}
+
+	getCommands(sendNotice) {
+		// =========================================================================
+		// 🗺️ THE MASTER ALIAS DICTIONARY (Single source of truth for syntax mapping)
+		// =========================================================================
+		const aliasMap = {
+			// User Help & Info
+			'help':      { core: 'help',      admin: false },
+			'h':         { core: 'help',      admin: false },
+			'rewards':   { core: 'rewards',   admin: true },
+
+			// Simulation Triggers
+			'tease':           { core: 'tease',     admin: false },
+			'tease pet':       { core: 'tease',     admin: false }, 
+			'pulltail':        { core: 'tease',     admin: false }, 
+			'pull tail':       { core: 'tease',     admin: false }, 
+			'pull pets tail':  { core: 'tease',     admin: false },
+			'tapglass':        { core: 'tease',     admin: false }, 
+			'tap glass':       { core: 'tease',     admin: false },
+
+			'feed':      { core: 'feed',      admin: false }, 
+			'feed pet':  { core: 'feed',      admin: false }, 
+			'food':      { core: 'feed',      admin: false }, 
+			'fish':      { core: 'feed',      admin: false }, 
+			'meat':      { core: 'feed',      admin: false }, 
+			'bugs':      { core: 'feed',      admin: false }, 
+			'flakes':    { core: 'feed',      admin: false },
+
+			'play':      { core: 'play',      admin: false }, 
+			'yarn':      { core: 'play',      admin: false }, 
+			'ball':      { core: 'play',      admin: false }, 
+			'web':       { core: 'play',      admin: false },
+
+			'trick':     { core: 'trick',     admin: false },
+			'dance':     { core: 'dance',     admin: false },
+			'treat':     { core: 'treat',     admin: false }, 
+			'nom':       { core: 'treat',     admin: false },
+			'status':    { core: 'status',    admin: false }, 
+			'stats':     { core: 'status',    admin: false },
+
+			'paintbomb': { core: 'paintbomb', admin: false }, 
+			'paint':     { core: 'paintbomb', admin: false }, 
+			'bomb':      { core: 'paintbomb', admin: false }, 
+			'splat':     { core: 'paintbomb', admin: false },
+
+			// Administrator Routing Protocols
+			'nyan':               { core: 'nyan',      admin: true }, 
+			'rainbow':            { core: 'nyan',      admin: true },
+			'revive':             { core: 'revive',    admin: false }, // Access matrix filters this instead of hardcoding
+			'revive pet':         { core: 'revive',    admin: false }, 
+			'revive active pet':  { core: 'revive',    admin: false },
+			'clear':              { core: 'clear',     admin: false }, 
+			'clean':              { core: 'clear',     admin: false },
+			'species':            { core: 'species',   admin: true }, 
+			'type':               { core: 'species',   admin: true },
+
+			'hidepet':   { core: 'hidepet',   admin: true }, 
+			'hide pet':  { core: 'hidepet',   admin: true }, 
+			'hide':      { core: 'hidepet',   admin: true },
+			'showpet':   { core: 'showpet',   admin: true }, 
+			'show pet':  { core: 'showpet',   admin: true }, 
+			'show':      { core: 'showpet',   admin: true },
+			'togglepet': { core: 'togglepet', admin: true }, 
+			'toggle pet':{ core: 'togglepet', admin: true }, 
+			'toggle':    { core: 'togglepet', admin: true }
+		};
+
+		const petExecution = (user, message, flags) => {
+			const incomingInput = message.trim().toLowerCase();
+			const parts = incomingInput.split(/\s+/);
+			const subCommand = parts[0];
+			const isAdmin = flags ? (flags.broadcaster || flags.mod) : false;
+
+			// Resolve input mapping configuration dynamically from master alias template
+			const matchedMapping = aliasMap[incomingInput] || aliasMap[subCommand] || null;
+			if (!matchedMapping) {
+				sendNotice(`🐾 [Pet]: Option not recognized. Try: !pet [feed | play | dance | treat | status | trick]`);
+				return;
+			}
+
+			const actualSub = matchedMapping.core;
+
+			// =========================================================================
+			// 🛑 HARDWARE FILTERS & SECURITY MATRIX GUARD ROUTER
+			// =========================================================================
+			if (this.state.commandAccess && this.state.commandAccess[actualSub]) {
+				const config = this.state.commandAccess[actualSub];
+				const isChannelPoint = !!(flags && (flags.customRewardId || flags.channelPointRedemption || flags.isRewardSimulated));
+				const isChatMessage = !isChannelPoint;
+
+				if (isChatMessage && !config.chat) return;
+
+				if (isChannelPoint && !config.cp) {
+					sendNotice(`❌ [Pet]: The "${incomingInput}" reward matrix is currently toggled off by the broadcaster.`);
+					return;
+				}
+			}
+
+			if (this.activePet.isDead && actualSub !== 'revive' && actualSub !== 'status') {
+				sendNotice(`🪦 [Pet]: ${this.activePet.name} is currently deceased. Use !pet revive to save them!`);
+				return;
+			}
+
+			// =========================================================================
+			// 🎬 LOGICAL PROCESSING HUB (CLEAN ROUTING)
+			// =========================================================================
+			switch (actualSub) {
+				case 'help':
+					// Gather list of public user commands automatically using the defaults blueprint keys
+					const availableCmds = Object.keys(this.getDefaultCommandMatrix()).filter(c => {
+						const mapped = Object.values(aliasMap).find(m => m.core === c);
+						return mapped ? !mapped.admin : true;
+					});
+					sendNotice(`🐾 [Pet Help]: Options: ${availableCmds.map(c => `!pet ${c}`).join(' | ')}`);
+					if (isAdmin) sendNotice(`🛠️ [Admin]: !pet [nyan | revive | clear | species | rewards | hide | show | toggle]`);
+					break;
+
+				case 'rewards':
+					if (!isAdmin) return;
+					const groups = {};
+					Object.entries(aliasMap).forEach(([trigger, data]) => {
+						if (!groups[data.core]) groups[data.core] = [];
+						groups[data.core].push(trigger);
+					});
+
+					sendNotice(`🎁 [Pet Reward Guide]: Create Twitch Channel Point Rewards with these exact names:`);
+					if (groups['feed']) sendNotice(`   🍏 Feed Pet: ${groups['feed'].map(t => `"${t}"`).join(', ')}`);
+					if (groups['tease']) sendNotice(`   😠 Tease Pet: ${groups['tease'].map(t => `"${t}"`).join(', ')}`);
+					if (groups['play']) sendNotice(`   🥎 Play Pet: ${groups['play'].map(t => `"${t}"`).join(', ')}`);
+					break;
+
+				case 'hidepet':
+					if (!isAdmin) return;
+					if (this.widgetContainer) {
+						this.widgetContainer.style.display = 'none';
+						this.state.hideWidget = true;
+						this.saveData();
+						sendNotice(`🙈 [Pet]: ${this.activePet.name} has been hidden from the stream overlay.`);
+					}
+					break;
+
+				case 'showpet':
+					if (!isAdmin) return;
+					if (this.widgetContainer) {
+						this.widgetContainer.style.display = 'block';
+						this.state.hideWidget = false;
+						this.saveData();
+						this.resizePetWidget();
+						sendNotice(`👀 [Pet]: ${this.activePet.name} is back and visible!`);
+					}
+					break;
+
+				case 'togglepet':
+					if (!isAdmin) return;
+					if (this.widgetContainer) {
+						const isHidden = this.widgetContainer.style.display === 'none' || this.state.hideWidget;
+						if (isHidden) {
+							this.widgetContainer.style.display = 'block';
+							this.state.hideWidget = false;
+							this.resizePetWidget();
+							sendNotice(`👀 [Pet]: Showing ${this.activePet.name}!`);
+						} else {
+							this.widgetContainer.style.display = 'none';
+							this.state.hideWidget = true;
+						}
+						this.saveData();
+					}
+					break;
+
+				case 'feed':
+					if (!this.state.hasFood) {
+						this.state.hasFood = true;
+						if (this.registry.activeSpecies === "kitty") this.say("Food! 🐟");
+						if (this.registry.activeSpecies === "puppy") this.say("BONE! 🍖");
+						if (this.registry.activeSpecies === "spider") this.say("CRICKET! 🪰");
+						if (this.registry.activeSpecies === "goldfish") this.say("FLAKES! 🍤");
+						sendNotice(`🍽️ [Pet]: ${user} dropped food for ${this.activePet.name}!`);
+					} else {
+						sendNotice(`🍽️ [Pet]: There is already food in the bowl!`);
+					}
+					break;
+
+				case 'play':
+					this.state.action = "special";
+					this.state.actionTimer = 350;
+					if (this.registry.activeSpecies === "kitty") this.say("Play! 🧶");
+					if (this.registry.activeSpecies === "puppy") this.say("FETCH! 🥎");
+					if (this.registry.activeSpecies === "spider") this.say("SPIN! 🕸️");
+					if (this.registry.activeSpecies === "goldfish") this.say("LOOP! 🫧");
+					sendNotice(`🥎 [Pet]: ${user} actively engaged with ${this.activePet.name}!`);
+					break;
+
+				case 'dance':
+					this.state.action = "dance";
+					this.state.actionTimer = 300;
+					this.say("Dance! ✨");
+					break;
+
+				case 'treat':
+					this.activePet.hunger = Math.max(0, this.activePet.hunger - 5);
+					this.state.action = "special";
+					this.state.actionTimer = 200;
+					this.say("NOM NOM NOM! 🍗");
+					break;
+
+				case 'trick':
+					this.state.action = "trick";
+					this.state.actionTimer = 250;
+					if (this.registry.activeSpecies === "puppy") { this.say("BACKFLIP! 🤸"); this.activePet.exp += 25; }
+					else if (this.registry.activeSpecies === "kitty") { this.say("PURR SLIDE! 🛷"); this.activePet.exp += 20; }
+					else if (this.registry.activeSpecies === "spider") { this.say("PARACHUTE! 🪂"); this.activePet.exp += 30; }
+					else if (this.registry.activeSpecies === "goldfish") { this.say("SPLASH FLIP! 🌊"); this.activePet.exp += 25; }
+					break;
+
+				case 'status':
+					let healthTxt = this.activePet.poops.length > 5 ? "SICK" : "HEALTHY";
+					sendNotice(`🐾 [${this.activePet.name}]: Species: ${this.registry.activeSpecies.toUpperCase()} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}% | Mood: ${healthTxt} | EXP: ${this.activePet.exp}`);
+					break;
+
+				case 'paintbomb':
+					const rawArgs = message.trim().split(/\s+/).slice(1);
+					let selectedColor = '';
+
+					if (rawArgs.length === 0 || rawArgs[0] === '') {
+						const randH = Math.floor(Math.random() * 360);
+						selectedColor = `hsla(${randH}, 95%, 50%, 1)`;
+					} else if (rawArgs[0].startsWith('#')) {
+						const hslaObj = hexToHSLA(rawArgs[0]);
+						selectedColor = `hsla(${hslaObj.h}, ${hslaObj.s}%, ${hslaObj.l}%, ${hslaObj.a})`;
+					} else if (rawArgs.length >= 3) {
+						const r = parseInt(rawArgs[0], 10) || 0;
+						const g = parseInt(rawArgs[1], 10) || 0;
+						const b = parseInt(rawArgs[2], 10) || 0;
+						const a = rawArgs[3] !== undefined ? parseFloat(rawArgs[3]) : 1.0;
+						const hslaObj = rgbToHSLA(r, g, b, a);
+						selectedColor = `hsla(${hslaObj.h}, ${hslaObj.s}%, ${hslaObj.l}%, ${hslaObj.a})`;
+					} else {
+						const randH = Math.floor(Math.random() * 360);
+						selectedColor = `hsla(${randH}, 95%, 50%, 1)`;
+					}
+
+					const isHit = Math.random() > 0.30; 
+
+					if (typeof this.triggerPaintBomb === 'function') {
+						this.triggerPaintBomb(selectedColor, isHit);
+						if (isHit) {
+							sendNotice(`🎈 [Paintbomb]: ${user} hurled a paint balloon at ${this.activePet.name}!`);
+						} else {
+							sendNotice(`💨 [Paintbomb]: ${user} hurled a paint balloon... but their aim was terrible and it might miss!`);
+						}
+					}
+					break;
+
+				case 'nyan':
+					this.triggerNyan();
+					sendNotice(`🌈 [Pet]: NYAN OVERDRIVE ACTIVATED BY STAFF!`);
+					break;
+
+				case 'tease':
+					this.teasePet();
+					sendNotice(`😠 [Pet]: ${user} teased ${this.activePet.name}!`);
+					break;
+
+				case 'species':
+					if (isAdmin && parts[1]) {
+						const speciesMap = { "kitty": "kitty", "kitten": "kitty", "puppy": "puppy", "dog": "puppy", "spider": "spider", "fish": "goldfish", "goldfish": "goldfish" };
+						const targetKey = speciesMap[parts[1].toLowerCase()];
+						if (targetKey && this.PET_SPECIES.includes(targetKey)) {
+							this.selectSpecies(targetKey); 
+							sendNotice(`🧬 [Pet]: Species hot-swapped to ${targetKey.toUpperCase()}!`);
+						} else {
+							sendNotice(`❌ [Pet]: Unknown species. Try: kitty, puppy, spider, or fish.`);
+						}
+					}
+					break;
+
+				case 'revive':
+					if (this.activePet.exp > 100) {
+						this.revivePet();
+						sendNotice(`💖 [Pet]: ${this.activePet.name} was successfully revived by ${user}!`);
+					} else {
+						sendNotice(`❌ [Pet]: Only pets with greater than 100 can be revived ${this.activePet.name}!`);
+					}
+					break;
+
+				case 'clear':
+					this.activePet.poops = [];
+					this.state.spiderWebs = [];
+					this.state.goldfishBubbles = [];
+					this.state.puppyBones = [];
+					this.say("Fresh sand! ✨");
+					sendNotice(`🧹 [Pet]: ${user} scooped the environment layout parameters!`);
+					break;
+			}
+		};
+
+		// =========================================================================
+		// 🚀 DYNAMIC ROUTER GENERATION (Generates and pipes commands automatically)
+		// =========================================================================
+		const baseCommands = [
+			{ name: 'pet', adminOnly: false, execute: petExecution },
+			{ name: 'kitty', adminOnly: false, execute: petExecution }
+		];
+
+		// Read directly from the alias keys to build and auto-register top-level chat handles
+		Object.keys(aliasMap).forEach(alias => {
+			baseCommands.push({
+				name: alias,
+				adminOnly: aliasMap[alias].admin,
+				execute: (user, message, flags) => petExecution(user, alias, flags)
+			});
+		});
+
+		return baseCommands;
+	}
+
+
+// ==========================================
+// SECTION 8: loading and saving/ exporting and importing
 // ==========================================
     saveData() { 
         // Save the entire multi-pet registry alongside standard global layout states
@@ -2951,7 +2950,7 @@ export class StreamPet {
     }
 
 // ==========================================
-// SECTION 8: SOUND SYSTEM ENGINE
+// SECTION 9: SOUND SYSTEM ENGINE
 // ==========================================
     initAudioEngine() {
         const defaultSoundSettings = {
