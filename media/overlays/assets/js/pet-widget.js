@@ -1281,14 +1281,23 @@ export class StreamPet {
 // SECTION 5: pet system helpers
 // ===============================================
 	getPos(pctX, pctY, offY = 0) {
-		// 1. Get the container's physical dimensions (the "World")
-		const visibleW = this.canvas.clientWidth;
-		const visibleH = this.canvas.clientHeight;
+		const containerW = this.widgetContainer.clientWidth;
+		const containerH = this.widgetContainer.clientHeight;
+		
+		// Calculate the logical 0-100% position
+		const logicalX = (pctX / 100) * containerW;
+		const logicalY = (pctY / 100) * containerH;
 
-		// 2. Calculate the position based on the percentage (0-100)
-		// This ignores any ctx.scale() transformations
-		const finalX = (pctX / 100) * visibleW;
-		const finalY = (pctY / 100) * visibleH;
+		// Adjust for the current zoom scale so the "visual" position is correct
+		// This allows the slider to feel "locked" to the object's visual center
+		const scaleVal = this.state.zoom >= 0 ? 1.0 + (this.state.zoom * 0.5) : 1.0 + (this.state.zoom * 0.25);
+		
+		const centerX = containerW / 2;
+		const centerY = containerH - this.BASE_FLOOR_Y;
+
+		// Inverse transform: This maps the logical position into the current zoomed view
+		const finalX = centerX + (logicalX - centerX) / scaleVal;
+		const finalY = centerY + (logicalY - centerY) / scaleVal;
 
 		return { x: finalX, y: finalY + offY };
 	}
