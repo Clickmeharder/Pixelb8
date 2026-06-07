@@ -2315,34 +2315,15 @@ export class StreamPet {
 	drawEnvironment(t) {
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
-
+		//if (this.registry.activeSpecies === "spider") {
+			this.drawSpiderWebs();
+			this.drawRappelStrand();
+		//}
 		// ========================================================
 		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
 		// ========================================================
-		// Render structural perimeter webs at their exact dropped locations
-		this.state.spiderWebs.forEach(web => {
-			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
-			this.ctx.lineWidth = 1;
-			this.ctx.beginPath();
-			for(let i=0; i<8; i++) {
-				let angle = (i / 8) * Math.PI * 2;
-				this.ctx.moveTo(web.x, web.y);
-				this.ctx.lineTo(web.x + Math.cos(angle)*web.size, web.y + Math.sin(angle)*web.size);
-			}
-			this.ctx.stroke();
-		});
-
-		// Draw active silk dropping strand if the spider is currently rappelling
-		if (this.registry.activeSpecies === "spider" && ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
-			this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
-			this.ctx.lineWidth = 1.2;
-			this.ctx.beginPath();
-			// Connect line from ceiling anchor down to spider's live center position
-			this.ctx.moveTo(this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x, 30); // Bound tightly to true CEIL_Y
-			this.ctx.lineTo(this.state.x, this.state.y);
-			this.ctx.stroke();
-		}
-
+		this.drawSpiderWebs();
+		this.drawRappelStrand();
 
 		// ========================================================
 		// PHASE 2: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
@@ -2356,30 +2337,7 @@ export class StreamPet {
 		// PHASE 3: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
 		// ========================================================
 		const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-		
-		if (this.registry.activeSpecies === "spider") {
-			this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
-			this.ctx.lineWidth = 1;
-			this.ctx.beginPath();
-			for (let i = 0; i < 8; i++) {
-				let angle = (i / 8) * Math.PI * 2;
-				this.ctx.moveTo(bPos.x, bPos.y + 5);
-				this.ctx.lineTo(bPos.x + Math.cos(angle) * 55, bPos.y + 5 + Math.sin(angle) * 18);
-			}
-			this.ctx.stroke();
-
-			for (let r = 10; r <= 50; r += 12) {
-				this.ctx.beginPath();
-				this.ctx.ellipse(bPos.x, bPos.y + 5, r, r * 0.35, 0, 0, Math.PI * 2);
-				this.ctx.stroke();
-			}
-		} else {
-			this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-			this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
-			this.ctx.fillStyle = this.state.layout.bedColor;
-			this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
-		}
-
+		this.drawPetBed(bPos);
 		// ========================================================
 		// PHASE 4: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
 		// ========================================================
@@ -2391,19 +2349,7 @@ export class StreamPet {
 		// PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
 		// ========================================================
 		const fPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
-		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); this.ctx.fill();
-		this.ctx.fillStyle = "#ecf0f1"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); this.ctx.fill();
-		this.ctx.fillStyle = "#bdc3c7"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); this.ctx.fill();
-		if(this.state.hasFood) {
-			this.ctx.fillStyle = "#d35400"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); this.ctx.fill();
-			this.ctx.font = "16px Arial";
-			let foodIcon = "🐟";
-			if (this.registry.activeSpecies === "puppy") foodIcon = "🍖";
-			if (this.registry.activeSpecies === "spider") foodIcon = "🪰";
-			if (this.registry.activeSpecies === "goldfish") foodIcon = "🍤";
-			this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
-		}
-
+		this.drawFoodBowl(fPos);
 		// ========================================================
 		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
 		// ========================================================
@@ -2416,8 +2362,38 @@ export class StreamPet {
 // ==========================================
 // CORE VISUAL RENDERING ROUTERS PER SPECIES
 // ==========================================
-    
-	// future pethousing placeholders
+    drawSpiderWebs() {
+		// Early exit guard: Only render background webs if the active species is a spider
+		if (this.registry.activeSpecies !== "spider") return;
+		this.state.spiderWebs.forEach(web => {
+			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
+			this.ctx.lineWidth = 1;
+			this.ctx.beginPath();
+			for(let i = 0; i < 8; i++) {
+				let angle = (i / 8) * Math.PI * 2;
+				this.ctx.moveTo(web.x, web.y);
+				this.ctx.lineTo(web.x + Math.cos(angle) * web.size, web.y + Math.sin(angle) * web.size);
+			}
+			this.ctx.stroke();
+		});
+	}
+
+	drawRappelStrand() {
+		const isRappelling = ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action);
+		if (this.registry.activeSpecies !== "spider" || !isRappelling) return;
+
+		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+		this.ctx.lineWidth = 1.2;
+		this.ctx.beginPath();
+		
+		// Connect line from ceiling anchor down to spider's live center position
+		const anchorX = this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x;
+		this.ctx.moveTo(anchorX, 30); // Bound tightly to true CEIL_Y
+		this.ctx.lineTo(this.state.x, this.state.y);
+		this.ctx.stroke();
+	}
+
+	//pet house drawing functions
 
 	drawPetHouse(tPos, t) {
 		switch (this.registry.activeSpecies) {
@@ -2547,6 +2523,80 @@ export class StreamPet {
 		this.ctx.restore();
 	}
 
+
+// beds
+	drawPetBed(bPos) {
+		if (this.registry.activeSpecies === "spider") {
+			// Structural radial support anchors for the web nest
+			this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
+			this.ctx.lineWidth = 1;
+			this.ctx.beginPath();
+			for (let i = 0; i < 8; i++) {
+				let angle = (i / 8) * Math.PI * 2;
+				this.ctx.moveTo(bPos.x, bPos.y + 5);
+				this.ctx.lineTo(bPos.x + Math.cos(angle) * 55, bPos.y + 5 + Math.sin(angle) * 18);
+			}
+			this.ctx.stroke();
+
+			// Concentric horizontal web ring segments
+			for (let r = 10; r <= 50; r += 12) {
+				this.ctx.beginPath();
+				this.ctx.ellipse(bPos.x, bPos.y + 5, r, r * 0.35, 0, 0, Math.PI * 2);
+				this.ctx.stroke();
+			}
+		} else {
+			// Grounding ambient drop shadow cushion
+			this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+			this.ctx.beginPath(); 
+			this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI * 2); 
+			this.ctx.fill();
+			
+			// Main colored fabric bed core
+			this.ctx.fillStyle = this.state.layout.bedColor;
+			this.ctx.beginPath(); 
+			this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI * 2); 
+			this.ctx.fill();
+		}
+	}
+	
+//food bowl
+	drawFoodBowl(fPos) {
+		// Shadow base
+		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
+		this.ctx.beginPath(); 
+		this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); 
+		this.ctx.fill();
+
+		// Outer Bowl rim
+		this.ctx.fillStyle = "#ecf0f1"; 
+		this.ctx.beginPath(); 
+		this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); 
+		this.ctx.fill();
+
+		// Inner Bowl basin
+		this.ctx.fillStyle = "#bdc3c7"; 
+		this.ctx.beginPath(); 
+		this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); 
+		this.ctx.fill();
+
+		// Interactive food payload
+		if (this.state.hasFood) {
+			this.ctx.fillStyle = "#d35400"; 
+			this.ctx.beginPath(); 
+			this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); 
+			this.ctx.fill();
+			
+			this.ctx.font = "16px Arial";
+			let foodIcon = "🐟";
+			if (this.registry.activeSpecies === "puppy") foodIcon = "🍖";
+			if (this.registry.activeSpecies === "spider") foodIcon = "🪰";
+			if (this.registry.activeSpecies === "goldfish") foodIcon = "🍤";
+			
+			this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
+		}
+	}
+
+// litter box
 	drawLitterBox(lPos, boxW) {
 		// Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
 		if (this.registry.activeSpecies === "goldfish" || this.registry.activeSpecies === "spider") return;
@@ -2586,6 +2636,7 @@ export class StreamPet {
 		}
 	}
 
+//poop drawing
 	drawWasteLayer(lPos, boxW) {
 		this.activePet.poops.forEach(p => {
 			if (this.registry.activeSpecies === "goldfish") {
@@ -2613,7 +2664,9 @@ export class StreamPet {
 	}
 
 
-
+// ==========================================
+// draw pets 
+// ==========================================
 	drawKitty(t, scale) {
         this.ctx.save();
         
