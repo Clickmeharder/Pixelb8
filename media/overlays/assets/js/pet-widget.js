@@ -212,137 +212,7 @@ export class StreamPet {
     }
 
 
-    saveData() { 
-        // Save the entire multi-pet registry alongside standard global layout states
-        const bundle = {
-            registry: this.registry,
-            state: this.state
-        };
-        localStorage.setItem("greta_ultra_v10", JSON.stringify(bundle)); 
-    }
 
-	loadData() {
-		const saved = localStorage.getItem("greta_ultra_v10");
-		if (saved) {
-			const loadedBundle = JSON.parse(saved);
-			
-			if (loadedBundle.registry) this.registry = loadedBundle.registry;
-			if (loadedBundle.state) {
-				// Merge loaded state into current state
-				this.state = { ...this.state, ...loadedBundle.state };
-				
-				// Check for the new property, and set default if it's missing
-				if (this.state.tummylimit === undefined) {
-					this.state.tummylimit = 8;
-				}
-
-				// 👇 BIOLOGICAL PATCH: Automatically loops blueprint definitions to repair old user custom settings
-				if (loadedBundle.state.commandAccess) {
-					const defaults = this.getDefaultCommandMatrix();
-					const loadedAccess = loadedBundle.state.commandAccess || {};
-
-					this.state.commandAccess = {};
-					Object.keys(defaults).forEach(cmd => {
-						// Retain specific channel adjustments if present, otherwise safe fallbacks are applied
-						this.state.commandAccess[cmd] = loadedAccess[cmd] !== undefined 
-							? loadedAccess[cmd] 
-							: defaults[cmd];
-					});
-				}
-			}
-			
-			// Loop through all individual isolated profiles to catch offline progression separately
-			const now = Date.now();
-			Object.keys(this.registry.profiles).forEach(key => {
-				const profile = this.registry.profiles[key];
-				const msOffline = now - profile.lastHungerTick;
-				if (msOffline >= this.HUNGER_TICK_MS && !profile.isDead) {
-					const pointsGained = Math.floor(msOffline / this.HUNGER_TICK_MS);
-					let potentialHunger = profile.hunger + pointsGained;
-					if (potentialHunger >= 100) { 
-						profile.hunger = 70; 
-						profile.lastHungerTick = now; 
-					} else { 
-						profile.hunger = potentialHunger; 
-						profile.lastHungerTick = now - (msOffline % this.HUNGER_TICK_MS); 
-					}
-				}
-			});
-			
-			const nameIn = document.getElementById("nameInput"); 
-			if (nameIn && this.activePet) nameIn.value = this.activePet.name;
-			
-			const tummySlider = document.getElementById("tummyLimitRange");
-			const tummyDisplay = document.getElementById("tummyLimitValue");
-
-			// Ensure we use the loaded state value, default to 8 if not found
-			const currentLimit = this.state.tummylimit !== undefined ? this.state.tummylimit : 8;
-
-			if (tummySlider) {
-				tummySlider.value = currentLimit;
-				if (tummyDisplay) {
-					tummyDisplay.innerText = currentLimit;
-				}
-			}
-			
-			const displayEl = document.getElementById("speciesSelectDisplay");
-			if (displayEl && this.registry.activeSpecies) {
-				const speciesMap = {
-					kitty: "🐈 Kitty (Feline Engine v10)",
-					puppy: "🐕 Puppy (Canine Kinematics Engine)",
-					spider: "🕷️ Spider (Arachnid Procedural Pathing)",
-					goldfish: "🐟 Goldfish (Aquatic Fluid Physics)"
-				};
-				displayEl.innerText = speciesMap[this.registry.activeSpecies] || speciesMap.kitty;
-			}
-
-			const hideBorderCheck = document.getElementById("hideBorderToggle");
-			if (hideBorderCheck) hideBorderCheck.checked = this.state.hideBorder || false;
-
-			const hideBackgroundCheck = document.getElementById("hideBackgroundToggle");
-			if (hideBackgroundCheck) hideBackgroundCheck.checked = this.state.hideBackground || false;
-
-			const hideStatusCheck = document.getElementById("hideStatusToggle");
-			if (hideStatusCheck) hideStatusCheck.checked = this.state.hideStatus || false;
-
-			const hideNameplateCheck = document.getElementById("hideNameplateToggle");
-			if (hideNameplateCheck) hideNameplateCheck.checked = this.state.hideNameplate || false;
-
-			const checkT = document.getElementById("showTower"); 
-			if (checkT && this.state.layout) checkT.checked = this.state.layout.showTower;
-			
-			const zoomSlider = document.getElementById("canvasZoom");
-			const zoomDisplay = document.getElementById("zoomValue");
-			if (zoomSlider) {
-				let savedZoom = this.state.zoom !== undefined ? this.state.zoom : 0;
-				zoomSlider.value = savedZoom;
-				let scaleVal = savedZoom >= 0 ? 1.0 + (savedZoom * 0.5) : 1.0 + (savedZoom * 0.25);
-				if (zoomDisplay) zoomDisplay.textContent = `${scaleVal.toFixed(1)}x`;
-
-				if (!zoomSlider.dataset.listenerWired) {
-					zoomSlider.addEventListener("input", (e) => {
-						const val = parseFloat(e.target.value);
-						this.state.zoom = val;
-						let dynamicScale = val >= 0 ? 1.0 + (val * 0.5) : 1.0 + (val * 0.25);
-						if (zoomDisplay) zoomDisplay.textContent = `${dynamicScale.toFixed(1)}x`;
-					});
-					zoomSlider.dataset.listenerWired = "true";
-				}
-			}
-
-			if (this.state.layout) {
-				Object.keys(this.state.layout).forEach(k => { 
-					if (k === 'showTower' || k === 'bedColor') return;
-					const el = document.getElementById(k);
-					if (el) el.value = this.state.layout[k];
-				});
-			}
-		}
-		this.applyEditModeStyles();
-		this.applyVisibilityStates();
-		this.initSwatches(); 
-		this.syncSpeciesInterfaceToggle();
-	}
 
     resize() {
         if (!this.widgetContainer || !this.canvas) return;
@@ -369,59 +239,6 @@ export class StreamPet {
         return { x: finalX, y: finalY + offY };
     }
 
-	exportSettingsToClipboard(sendNotice = null) {
-        try {
-            // 1. Gather all of your custom layout sizes, coordinates, and pet profiles
-            const configBundle = {
-                widgetBounds: this.widgetBounds,
-                registry: this.registry,
-                state: this.state
-            };
-
-            // Convert the bundle into a clean, formatted JSON string
-            const jsonString = JSON.stringify(configBundle, null, 4);
-
-            // 2. Create a hidden textarea to force focus and execution permission
-            const tempTextArea = document.createElement("textarea");
-            tempTextArea.value = jsonString;
-            
-            // Move it completely off-screen so it's invisible to viewers
-            tempTextArea.style.position = "absolute";
-            tempTextArea.style.left = "-9999px";
-            tempTextArea.style.top = "-9999px";
-            document.body.appendChild(tempTextArea);
-
-            // 3. Select the string text inside the element
-            tempTextArea.focus();
-            tempTextArea.select();
-            tempTextArea.setSelectionRange(0, 99999); // Compatibility fix for older webkit builds
-
-            // 4. Fire the copy command execution thread
-            const success = document.execCommand("copy");
-            document.body.removeChild(tempTextArea);
-
-            if (success) {
-                console.log("💾 [Pet Widget]: Your custom configuration settings have been successfully copied to your clipboard!");
-                if (typeof sendNotice === "function") {
-                    sendNotice("📋 [Pet Widget]: Settings bundle copied to clipboard! You can paste this directly into your backup files.");
-                } else if (typeof p8Confirm === "function") {
-                    alert("📋 Settings copied to clipboard! Paste it safely into a text file.");
-                }
-            } else {
-                throw new Error("document.execCommand failed to execute.");
-            }
-        } catch (err) {
-            console.error("❌ [Pet Widget Error]: Failed to copy settings automatically: ", err);
-            
-            // Fallback: If copy execution completely blocked, output the clean object to log stream
-            console.log("👇 COPY THIS RAW DATA TEMPLATE MANUALLY:");
-            console.log(JSON.stringify({
-                widgetBounds: this.widgetBounds,
-                registry: this.registry,
-                state: this.state
-            }));
-        }
-    }
 
 // ==========================================
 // SECTION 3: CHAT COMMAND ROUTER
@@ -763,9 +580,9 @@ export class StreamPet {
 		return baseCommands;
 	}
 
-// ==========================================
+// ===============================================
 // SECTION 4: UI ASSEMBLY, TEMPLATES & BINDINGS
-// ==========================================
+// ===============================================
     static get controlsTemplate() {
         const layoutMetrics = [
             ["name", "Nameplate X/Y", 50, 70, 0, 100],
@@ -1444,43 +1261,12 @@ export class StreamPet {
 		console.log(`Tummy limit updated to: ${this.state.tummylimit}`);
 		this.saveData(); // Assuming you have a persistence method
 	}
-	updatePetMetabolism() {
-		if (this.activePet.isDead) return;
-		
-		// 1. Calculate age levels and growth stages
-		this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
-		this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
 
-		// 2. Compute progressive metabolic hunger decay
-		const now = Date.now();
-		const msElapsed = now - this.activePet.lastHungerTick;
-		if (msElapsed >= this.HUNGER_TICK_MS) {
-			this.activePet.hunger = Math.min(100, this.activePet.hunger + Math.floor(msElapsed / this.HUNGER_TICK_MS)); 
-			this.activePet.lastHungerTick = now - (msElapsed % this.HUNGER_TICK_MS);
-		}
-		
-		// 3. Check for absolute starvation state
-		if (this.activePet.hunger === 100) this.activePet.isDead = true;
-	}
-	walkToPoint(targetX, targetY, speed = 2) {
-		const dx = targetX - this.state.x; 
-		const dy = targetY - this.state.y;
-		const dist = Math.sqrt(dx * dx + dy * dy);
-		if (dist > 12) {
-			this.state.facing = dx > 0 ? 1 : -1;
-			this.state.x += (dx / dist) * speed; 
-			this.state.y += (dy / dist) * speed;
-			return false;
-		}
-		return true;
-	}
-    // ==========================================
-    // SECTION 5: RENDER ENGINE, ANIMATION & AI PIPELINE
-    // ==========================================
 
-// ========================================================
-//  what should we put here to let reader know what this function does? and what should we put into helpers nexT?
-// ========================================================
+// ===================================================
+// SECTION 5: RENDER ENGINE, ANIMATION & AI PIPELINE
+// ===================================================
+
 	drawEnvironment(tick) {
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
@@ -1617,9 +1403,11 @@ export class StreamPet {
 // ==========================================
 // CORE VISUAL RENDERING ROUTERS PER SPECIES
 // ==========================================
-// ==========================================
+//
 // draw pets 
-// ==========================================
+
+// KITTY DRAWING
+//--------------------------------------------------
 	drawKitty(t, scale) {
         this.ctx.save();
         
@@ -1709,9 +1497,9 @@ export class StreamPet {
         else { this.ctx.beginPath(); this.ctx.moveTo(x+1, y+3); this.ctx.lineTo(x-2, y); this.ctx.lineTo(x+4, y); this.ctx.fill(); }
     }
 
-    // ==========================================
-    // NEW COMPANION ADDITION 1: PUPPY ENGINE
-    // ==========================================
+// ==========================================
+//  PUPPY DRAWING
+//--------------------------------------------------
 	drawPuppy(t, scale) {
 		this.ctx.save();
 		
@@ -1792,9 +1580,76 @@ export class StreamPet {
 		}
 		this.ctx.restore();
 	}
-    // ==========================================
-    // NEW COMPANION ADDITION 2: SPIDER COMPANION
-    // ==========================================
+//  FISH DRAWING
+//--------------------------------------------------
+	drawGoldfish(t, scale) {
+		this.ctx.save();
+		
+		const isTeased = (this.state.action === "teased");
+		
+		// Frantic shaking when teased
+		const shakeX = isTeased ? Math.sin(t * 0.8) * 10 : 0;
+		const shakeY = isTeased ? Math.cos(t * 0.9) * 5 : 0;
+		this.ctx.translate(this.state.x + shakeX, this.state.y + shakeY);
+
+		if (this.state.action === "dance") {
+			this.ctx.rotate(t * 0.2);
+		}
+
+		this.ctx.scale(this.state.facing * scale, scale);
+
+		let fishColor = this.activePet.isDead ? "#e0e0e0" : this.activePet.color;
+		if (this.activePet.isDead) {
+			this.ctx.globalAlpha = 0.4;
+			this.ctx.rotate(Math.PI);
+		}
+		this.ctx.fillStyle = fishColor;
+
+		this.ctx.beginPath();
+		this.ctx.ellipse(0, 0, 36, 22, 0, 0, Math.PI * 2);
+		this.ctx.fill();
+
+		const tailWiggle = Math.sin(t * (isTeased ? 0.6 : 0.28)) * (isTeased ? 25 : 12);
+		this.ctx.beginPath();
+		this.ctx.moveTo(-32, 0);
+		this.ctx.bezierCurveTo(-55, -25 + tailWiggle, -65, -10 + tailWiggle, -58, tailWiggle);
+		this.ctx.bezierCurveTo(-65, 10 + tailWiggle, -55, 25 + tailWiggle, -32, 0);
+		this.ctx.fill();
+
+		this.ctx.fillStyle = "rgba(255,255,255,0.3)";
+		this.ctx.beginPath();
+		this.ctx.moveTo(-32, 0);
+		this.ctx.lineTo(-52, -15 + tailWiggle);
+		this.ctx.lineTo(-50, 15 + tailWiggle);
+		this.ctx.fill();
+
+		this.ctx.fillStyle = fishColor;
+		this.ctx.beginPath();
+		this.ctx.moveTo(-10, -20);
+		this.ctx.bezierCurveTo(-5, -38, -25, -32, -22, -14);
+		this.ctx.fill();
+
+		const finWave = Math.sin(t * (isTeased ? 0.4 : 0.12)) * (isTeased ? 20 : 8);
+		this.ctx.save();
+		this.ctx.translate(10, 8);
+		this.ctx.rotate(finWave * Math.PI / 180);
+		this.ctx.beginPath(); this.ctx.ellipse(0, 0, 14, 8, 0.5, 0, Math.PI * 2); this.ctx.fill();
+		this.ctx.restore();
+
+		// Angry eyes when teased
+		this.ctx.fillStyle = isTeased ? "#ff0000" : "white";
+		this.ctx.beginPath(); this.ctx.arc(20, -6, 7, 0, Math.PI * 2); this.ctx.fill();
+		this.ctx.fillStyle = "black";
+		this.ctx.beginPath(); this.ctx.arc(22, -6, 3.5, 0, Math.PI * 2); this.ctx.fill();
+
+		if (this.state.action === "special") this.drawYarn(30, -5, t);
+
+		this.ctx.restore();
+	}
+
+
+//  SPIDER DRAWING
+//--------------------------------------------------
 	drawSpider(t, scale) {
 		this.ctx.save();
 		
@@ -1867,79 +1722,12 @@ export class StreamPet {
 
 		this.ctx.restore();
 	}
-    // ==========================================
-    // NEW COMPANION ADDITION 3: GOLDFISH MODULE
-    // ==========================================
-	drawGoldfish(t, scale) {
-		this.ctx.save();
-		
-		const isTeased = (this.state.action === "teased");
-		
-		// Frantic shaking when teased
-		const shakeX = isTeased ? Math.sin(t * 0.8) * 10 : 0;
-		const shakeY = isTeased ? Math.cos(t * 0.9) * 5 : 0;
-		this.ctx.translate(this.state.x + shakeX, this.state.y + shakeY);
-
-		if (this.state.action === "dance") {
-			this.ctx.rotate(t * 0.2);
-		}
-
-		this.ctx.scale(this.state.facing * scale, scale);
-
-		let fishColor = this.activePet.isDead ? "#e0e0e0" : this.activePet.color;
-		if (this.activePet.isDead) {
-			this.ctx.globalAlpha = 0.4;
-			this.ctx.rotate(Math.PI);
-		}
-		this.ctx.fillStyle = fishColor;
-
-		this.ctx.beginPath();
-		this.ctx.ellipse(0, 0, 36, 22, 0, 0, Math.PI * 2);
-		this.ctx.fill();
-
-		const tailWiggle = Math.sin(t * (isTeased ? 0.6 : 0.28)) * (isTeased ? 25 : 12);
-		this.ctx.beginPath();
-		this.ctx.moveTo(-32, 0);
-		this.ctx.bezierCurveTo(-55, -25 + tailWiggle, -65, -10 + tailWiggle, -58, tailWiggle);
-		this.ctx.bezierCurveTo(-65, 10 + tailWiggle, -55, 25 + tailWiggle, -32, 0);
-		this.ctx.fill();
-
-		this.ctx.fillStyle = "rgba(255,255,255,0.3)";
-		this.ctx.beginPath();
-		this.ctx.moveTo(-32, 0);
-		this.ctx.lineTo(-52, -15 + tailWiggle);
-		this.ctx.lineTo(-50, 15 + tailWiggle);
-		this.ctx.fill();
-
-		this.ctx.fillStyle = fishColor;
-		this.ctx.beginPath();
-		this.ctx.moveTo(-10, -20);
-		this.ctx.bezierCurveTo(-5, -38, -25, -32, -22, -14);
-		this.ctx.fill();
-
-		const finWave = Math.sin(t * (isTeased ? 0.4 : 0.12)) * (isTeased ? 20 : 8);
-		this.ctx.save();
-		this.ctx.translate(10, 8);
-		this.ctx.rotate(finWave * Math.PI / 180);
-		this.ctx.beginPath(); this.ctx.ellipse(0, 0, 14, 8, 0.5, 0, Math.PI * 2); this.ctx.fill();
-		this.ctx.restore();
-
-		// Angry eyes when teased
-		this.ctx.fillStyle = isTeased ? "#ff0000" : "white";
-		this.ctx.beginPath(); this.ctx.arc(20, -6, 7, 0, Math.PI * 2); this.ctx.fill();
-		this.ctx.fillStyle = "black";
-		this.ctx.beginPath(); this.ctx.arc(22, -6, 3.5, 0, Math.PI * 2); this.ctx.fill();
-
-		if (this.state.action === "special") this.drawYarn(30, -5, t);
-
-		this.ctx.restore();
-	}
 
 
 
-//=================================
+//===========================================
 // furniture & other static large objects
-//=================================
+//===========================================
 //------------------------------
 // pet house drawing functions
 //------------------------------
@@ -2209,9 +1997,41 @@ export class StreamPet {
 		});
 	}
 
+
 //=================================
 // particals and final layer stuff
 //=================================
+    drawSpiderWebs() {
+		// Early exit guard: Only render background webs if the active species is a spider
+		if (this.registry.activeSpecies !== "spider") return;
+		this.state.spiderWebs.forEach(web => {
+			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
+			this.ctx.lineWidth = 1;
+			this.ctx.beginPath();
+			for(let i = 0; i < 8; i++) {
+				let angle = (i / 8) * Math.PI * 2;
+				this.ctx.moveTo(web.x, web.y);
+				this.ctx.lineTo(web.x + Math.cos(angle) * web.size, web.y + Math.sin(angle) * web.size);
+			}
+			this.ctx.stroke();
+		});
+	}
+	drawRappelStrand() {
+		const isRappelling = ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action);
+		if (this.registry.activeSpecies !== "spider" || !isRappelling) return;
+
+		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+		this.ctx.lineWidth = 1.2;
+		this.ctx.beginPath();
+		
+		// Connect line from ceiling anchor down to spider's live center position
+		const anchorX = this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x;
+		this.ctx.moveTo(anchorX, 30); // Bound tightly to true CEIL_Y
+		this.ctx.lineTo(this.state.x, this.state.y);
+		this.ctx.stroke();
+	}
+
+
     drawYarn(x, y, tick) {
         const roll = Math.sin(tick * 0.15) * 40;
         this.ctx.save();
@@ -2326,6 +2146,10 @@ export class StreamPet {
 		}
 		this.ctx.globalAlpha = 1.0;
 	}
+
+//=================================
+// individual updates and stuff
+//=================================
 	updateAndDrawParticles() {
 		for (let i = this.state.particles.length - 1; i >= 0; i--) {
 			const p = this.state.particles[i];
@@ -2359,434 +2183,439 @@ export class StreamPet {
 			}
 		}
 	}
-
-    drawSpiderWebs() {
-		// Early exit guard: Only render background webs if the active species is a spider
-		if (this.registry.activeSpecies !== "spider") return;
-		this.state.spiderWebs.forEach(web => {
-			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
-			this.ctx.lineWidth = 1;
-			this.ctx.beginPath();
-			for(let i = 0; i < 8; i++) {
-				let angle = (i / 8) * Math.PI * 2;
-				this.ctx.moveTo(web.x, web.y);
-				this.ctx.lineTo(web.x + Math.cos(angle) * web.size, web.y + Math.sin(angle) * web.size);
-			}
-			this.ctx.stroke();
-		});
+	walkToPoint(targetX, targetY, speed = 2) {
+		const dx = targetX - this.state.x; 
+		const dy = targetY - this.state.y;
+		const dist = Math.sqrt(dx * dx + dy * dy);
+		if (dist > 12) {
+			this.state.facing = dx > 0 ? 1 : -1;
+			this.state.x += (dx / dist) * speed; 
+			this.state.y += (dy / dist) * speed;
+			return false;
+		}
+		return true;
 	}
-	drawRappelStrand() {
-		const isRappelling = ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action);
-		if (this.registry.activeSpecies !== "spider" || !isRappelling) return;
-
-		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
-		this.ctx.lineWidth = 1.2;
-		this.ctx.beginPath();
+	updatePetMetabolism() {
+		if (this.activePet.isDead) return;
 		
-		// Connect line from ceiling anchor down to spider's live center position
-		const anchorX = this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x;
-		this.ctx.moveTo(anchorX, 30); // Bound tightly to true CEIL_Y
-		this.ctx.lineTo(this.state.x, this.state.y);
-		this.ctx.stroke();
+		// 1. Calculate age levels and growth stages
+		this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
+		this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
+
+		// 2. Compute progressive metabolic hunger decay
+		const now = Date.now();
+		const msElapsed = now - this.activePet.lastHungerTick;
+		if (msElapsed >= this.HUNGER_TICK_MS) {
+			this.activePet.hunger = Math.min(100, this.activePet.hunger + Math.floor(msElapsed / this.HUNGER_TICK_MS)); 
+			this.activePet.lastHungerTick = now - (msElapsed % this.HUNGER_TICK_MS);
+		}
+		
+		// 3. Check for absolute starvation state
+		if (this.activePet.hunger === 100) this.activePet.isDead = true;
 	}
+
+	
 
 
 
 //===================================
-//
+// Libraries
 //==================================
 //
 // state library
 //----------------
-const STATE_LIBRARY = {
-	nyan: (pet, ctx) => {
-		if (pet.state.nyanPhase === "takeoff") {
-			const targetY = ctx.visibleH / 2;
-			pet.state.y += (targetY - pet.state.y) * 0.05; 
-			pet.state.x += pet.state.facing * 5;
-			if (Math.abs(pet.state.y - targetY) < 15) pet.state.nyanPhase = "flying";
-		} else if (pet.state.nyanPhase === "flying") {
-			pet.state.x += pet.state.facing * 10; 
-			pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.1) * 100;
-			if (pet.state.actionTimer < 80) pet.state.nyanPhase = "landing";
-		} else if (pet.state.nyanPhase === "landing") {
-			pet.state.x += (pet.state.originalPos.x - pet.state.x) * 0.08; 
-			pet.state.y += (pet.state.originalPos.y - pet.state.y) * 0.08;
-		}
-		if (pet.state.nyanPhase !== "landing") {
-			if (pet.state.x > ctx.visibleW + 150) pet.state.x = -150;
-			if (pet.state.x < -150) pet.state.x = ctx.visibleW + 150;
-		}
-		if (pet.state.actionTimer <= 0) {
-			pet.stopSound('nyanSound');
-			pet.state.x = pet.state.originalPos.x; 
-			pet.state.y = pet.state.originalPos.y;
-			pet.state.action = "idle"; 
-			pet.state.actionTimer = 200;
-		}
-	},
-
-	walk_to_food: (pet, ctx) => {
-		let foodTargetX = ctx.bowlPos.x;
-		let foodTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bowlPos.y;
-		
-		if (pet.registry.activeSpecies === "spider") {
-			if (pet.state.y < ctx.FLOOR_Y - 5) {
-				foodTargetX = (pet.state.x < ctx.visibleW / 2) ? ctx.LEFT_X : ctx.RIGHT_X;
-				foodTargetY = ctx.FLOOR_Y;
+	const STATE_LIBRARY = {
+		nyan: (pet, ctx) => {
+			if (pet.state.nyanPhase === "takeoff") {
+				const targetY = ctx.visibleH / 2;
+				pet.state.y += (targetY - pet.state.y) * 0.05; 
+				pet.state.x += pet.state.facing * 5;
+				if (Math.abs(pet.state.y - targetY) < 15) pet.state.nyanPhase = "flying";
+			} else if (pet.state.nyanPhase === "flying") {
+				pet.state.x += pet.state.facing * 10; 
+				pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.1) * 100;
+				if (pet.state.actionTimer < 80) pet.state.nyanPhase = "landing";
+			} else if (pet.state.nyanPhase === "landing") {
+				pet.state.x += (pet.state.originalPos.x - pet.state.x) * 0.08; 
+				pet.state.y += (pet.state.originalPos.y - pet.state.y) * 0.08;
 			}
-		}
-
-		if (ctx.walkToPoint(foodTargetX, foodTargetY, 2.5)) { 
-			if (pet.registry.activeSpecies === "spider" && Math.abs(pet.state.y - ctx.FLOOR_Y) < 5 && Math.abs(pet.state.x - ctx.bowlPos.x) > 15) {
-				ctx.walkToPoint(ctx.bowlPos.x, ctx.FLOOR_Y, 2.5);
-				return;
+			if (pet.state.nyanPhase !== "landing") {
+				if (pet.state.x > ctx.visibleW + 150) pet.state.x = -150;
+				if (pet.state.x < -150) pet.state.x = ctx.visibleW + 150;
 			}
-			if (pet.state.hasFood) { 
-				pet.state.action = "eating"; 
-				pet.state.actionTimer = 140; 
-			} else { 
-				pet.state.action = "idle";
-			}
-		}
-	},
-
-	eating: (pet, ctx) => {
-		if (pet.state.actionTimer <= 0) {
-			pet.state.hasFood = false; 
-			pet.activePet.hunger = Math.max(0, pet.activePet.hunger - 15); 
-			pet.activePet.digestive += 1; 
-			
-			if (pet.activePet.digestive > pet.state.tummylimit) {
-				pet.explodePet();
-				return;
-			}
-
-			pet.activePet.exp += 20; 
-			pet.state.action = "idle"; 
-			pet.state.actionTimer = 300;
-		}
-	},
-
-	walk_to_litter: (pet, ctx) => {
-		if (pet.registry.activeSpecies === "goldfish") {
-			if (!pet.state.aquaticPottyTarget) {
-				pet.state.aquaticPottyTarget = {
-					x: 100 + Math.random() * (ctx.visibleW - 200),
-					y: 120 + Math.random() * (ctx.visibleH - 240)
-				};
-			}
-			if (ctx.walkToPoint(pet.state.aquaticPottyTarget.x, pet.state.aquaticPottyTarget.y, 1.8)) {
-				pet.state.aquaticPottyTarget = null;
-				pet.state.action = "potty";
-				pet.state.actionTimer = 90;
-			}
-		} else if (pet.registry.activeSpecies === "spider") {
-			if (!pet.state.spiderPottyTarget) {
-				const r = Math.random();
-				if (r < 0.25) pet.state.spiderPottyTarget = { x: ctx.LEFT_X + Math.random() * (ctx.RIGHT_X - ctx.LEFT_X), y: ctx.CEIL_Y };
-				else if (r < 0.50) pet.state.spiderPottyTarget = { x: ctx.LEFT_X + Math.random() * (ctx.RIGHT_X - ctx.LEFT_X), y: ctx.FLOOR_Y };
-				else if (r < 0.75) pet.state.spiderPottyTarget = { x: ctx.LEFT_X, y: ctx.CEIL_Y + Math.random() * (ctx.FLOOR_Y - ctx.CEIL_Y) };
-				else pet.state.spiderPottyTarget = { x: ctx.RIGHT_X, y: ctx.CEIL_Y + Math.random() * (ctx.FLOOR_Y - ctx.CEIL_Y) };
-			}
-			
-			if (ctx.walkToPoint(pet.state.spiderPottyTarget.x, pet.state.spiderPottyTarget.y, 2.2)) {
-				pet.state.spiderPottyTarget = null;
-				pet.state.action = "potty";
-				pet.state.actionTimer = 100;
-			}
-		} else {
-			if (ctx.walkToPoint(ctx.litPos.x, ctx.litPos.y)) { 
-				pet.state.action = "potty"; 
-				pet.state.actionTimer = 120; 
-			}
-		}
-	},
-
-	walk_to_tower_scratch: (pet, ctx) => {
-		if (ctx.walkToPoint(ctx.towerPos.x, ctx.towerPos.y)) {
-			pet.state.action = "scratching";
-			pet.state.actionTimer = 180;
-		}
-	},
-
-	scratching: (pet, ctx) => {
-		if (ctx.t % 3 === 0) {
-			const clawX = pet.state.x + (pet.state.facing * 15);
-			const clawY = pet.state.y + 5; 
-
-			pet.state.particles.push({
-				x: clawX,
-				y: clawY,
-				vx: -pet.state.facing * (0.5 + Math.random() * 3),
-				vy: -1 - Math.random() * 2,
-				s: 2,
-				c: "#d2b48c",
-				life: 15
-			});
-		}
-
-		if (pet.state.actionTimer <= 0) {
-			pet.state.action = "idle";
-			pet.state.actionTimer = Math.floor(Math.random() * 200) + 150;
-		}
-	},
-
-	walk_to_tower_climb: (pet, ctx) => {
-		if (ctx.walkToPoint(ctx.towerPos.x, ctx.towerPos.y)) {
-			pet.state.action = "climbing_tower";
-		}
-	},
-
-	climbing_tower: (pet, ctx) => {
-		const perchY = ctx.towerPos.y - 125;
-		pet.state.y -= 1.5;
-		
-		if (pet.state.y <= perchY) {
-			pet.state.y = perchY;
-			pet.state.action = "tower_sleep";
-			pet.state.actionTimer = 800;
-		}
-	},
-
-	potty: (pet, ctx) => {
-		if (pet.state.actionTimer <= 0) { 
-			if (pet.registry.activeSpecies === "goldfish") {
-				pet.activePet.poops.push({
-					x: pet.state.x - (pet.state.facing * 10), y: pet.state.y + 5,
-					ox: Math.random() * 100, swimOffset: Math.random() * Math.PI * 2
-				});
-				pet.activePet.digestive = 0;
-				pet.state.action = "idle"; 
-				pet.state.actionTimer = 250;
-			} else if (pet.registry.activeSpecies === "spider") {
-				let cleanX = pet.state.x;
-				let cleanY = pet.state.y;
-				
-				if (cleanX > ctx.LEFT_X + 10 && cleanX < ctx.RIGHT_X - 10 && cleanY > ctx.CEIL_Y + 10 && cleanY < ctx.FLOOR_Y - 10) {
-					let distToLeft = cleanX - ctx.LEFT_X;
-					let distToRight = ctx.RIGHT_X - cleanX;
-					let distToCeil = cleanY - ctx.CEIL_Y;
-					let distToFloor = ctx.FLOOR_Y - cleanY;
-					let minDist = Math.min(distToLeft, distToRight, distToCeil, distToFloor);
-					
-					if (minDist === distToLeft) cleanX = ctx.LEFT_X;
-					else if (minDist === ctx.RIGHT_X) cleanX = ctx.RIGHT_X;
-					else if (minDist === ctx.CEIL_Y) cleanY = ctx.CEIL_Y;
-					else cleanY = ctx.FLOOR_Y;
-				}
-
-				pet.state.spiderWebs.push({
-					x: cleanX, y: cleanY,
-					size: 20 + Math.random() * 15
-				});
-				pet.activePet.digestive = 0;
+			if (pet.state.actionTimer <= 0) {
+				pet.stopSound('nyanSound');
+				pet.state.x = pet.state.originalPos.x; 
+				pet.state.y = pet.state.originalPos.y;
 				pet.state.action = "idle"; 
 				pet.state.actionTimer = 200;
-			} else {
-				pet.activePet.poops.push({ox: Math.random()*100, isCeil: false}); 
-				pet.activePet.digestive = 0; 
-				pet.state.action = "walk_to_kick"; 
 			}
-		}
-	},
+		},
 
-	walk_to_kick: (pet, ctx) => {
-		if (ctx.walkToPoint(ctx.litPos.x - 50, ctx.litPos.y)) { 
-			pet.state.facing = 1; 
-			pet.state.action = "kicking"; 
-			pet.state.actionTimer = 80; 
-		}
-	},
+		walk_to_food: (pet, ctx) => {
+			let foodTargetX = ctx.bowlPos.x;
+			let foodTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bowlPos.y;
+			
+			if (pet.registry.activeSpecies === "spider") {
+				if (pet.state.y < ctx.FLOOR_Y - 5) {
+					foodTargetX = (pet.state.x < ctx.visibleW / 2) ? ctx.LEFT_X : ctx.RIGHT_X;
+					foodTargetY = ctx.FLOOR_Y;
+				}
+			}
 
-	kicking: (pet, ctx) => {
-		if (ctx.t % 2 === 0) {
-			pet.state.particles.push({x: pet.state.x - 10, y: pet.state.y + 20, vx: 5 + Math.random()*6, vy: -4, s: 2.5, c: "#bdc3c7", life: 25});
-		}
-		if (pet.state.actionTimer <= 0) { 
-			pet.state.action = "idle"; 
-			pet.state.actionTimer = 300; 
-		}
-	},
+			if (ctx.walkToPoint(foodTargetX, foodTargetY, 2.5)) { 
+				if (pet.registry.activeSpecies === "spider" && Math.abs(pet.state.y - ctx.FLOOR_Y) < 5 && Math.abs(pet.state.x - ctx.bowlPos.x) > 15) {
+					ctx.walkToPoint(ctx.bowlPos.x, ctx.FLOOR_Y, 2.5);
+					return;
+				}
+				if (pet.state.hasFood) { 
+					pet.state.action = "eating"; 
+					pet.state.actionTimer = 140; 
+				} else { 
+					pet.state.action = "idle";
+				}
+			}
+		},
 
-	walk_to_bed: (pet, ctx) => {
-		let bedTargetX = ctx.bedPos.x;
-		let bedTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bedPos.y;
-		if (ctx.walkToPoint(bedTargetX, bedTargetY)) { 
-			pet.state.action = "sleep"; 
-			pet.state.actionTimer = 1000; 
-		}
-	},
+		eating: (pet, ctx) => {
+			if (pet.state.actionTimer <= 0) {
+				pet.state.hasFood = false; 
+				pet.activePet.hunger = Math.max(0, pet.activePet.hunger - 15); 
+				pet.activePet.digestive += 1; 
+				
+				if (pet.activePet.digestive > pet.state.tummylimit) {
+					pet.explodePet();
+					return;
+				}
 
-	teased: (pet, ctx) => {
-		if (pet.state.actionTimer > 0) {
-			pet.state.x += (Math.random() - 0.5) * 6;
-			pet.state.y += (Math.random() - 0.5) * 6;
-			if (pet.state.actionTimer % 5 === 0) pet.state.facing *= -1;
-		} else {
-			pet.state.action = "idle";
-			pet.state.actionTimer = 300;
-		}
-	},
+				pet.activePet.exp += 20; 
+				pet.state.action = "idle"; 
+				pet.state.actionTimer = 300;
+			}
+		},
 
-	rappel_drop: (pet, ctx) => {
-		pet.state.y += 3.5; 
-		if (pet.state.y >= pet.state.rappelDepth) {
-			pet.state.action = "rappel_hang";
-			pet.state.actionTimer = 180 + Math.random() * 200;
-		}
-	},
+		walk_to_litter: (pet, ctx) => {
+			if (pet.registry.activeSpecies === "goldfish") {
+				if (!pet.state.aquaticPottyTarget) {
+					pet.state.aquaticPottyTarget = {
+						x: 100 + Math.random() * (ctx.visibleW - 200),
+						y: 120 + Math.random() * (ctx.visibleH - 240)
+					};
+				}
+				if (ctx.walkToPoint(pet.state.aquaticPottyTarget.x, pet.state.aquaticPottyTarget.y, 1.8)) {
+					pet.state.aquaticPottyTarget = null;
+					pet.state.action = "potty";
+					pet.state.actionTimer = 90;
+				}
+			} else if (pet.registry.activeSpecies === "spider") {
+				if (!pet.state.spiderPottyTarget) {
+					const r = Math.random();
+					if (r < 0.25) pet.state.spiderPottyTarget = { x: ctx.LEFT_X + Math.random() * (ctx.RIGHT_X - ctx.LEFT_X), y: ctx.CEIL_Y };
+					else if (r < 0.50) pet.state.spiderPottyTarget = { x: ctx.LEFT_X + Math.random() * (ctx.RIGHT_X - ctx.LEFT_X), y: ctx.FLOOR_Y };
+					else if (r < 0.75) pet.state.spiderPottyTarget = { x: ctx.LEFT_X, y: ctx.CEIL_Y + Math.random() * (ctx.FLOOR_Y - ctx.CEIL_Y) };
+					else pet.state.spiderPottyTarget = { x: ctx.RIGHT_X, y: ctx.CEIL_Y + Math.random() * (ctx.FLOOR_Y - ctx.CEIL_Y) };
+				}
+				
+				if (ctx.walkToPoint(pet.state.spiderPottyTarget.x, pet.state.spiderPottyTarget.y, 2.2)) {
+					pet.state.spiderPottyTarget = null;
+					pet.state.action = "potty";
+					pet.state.actionTimer = 100;
+				}
+			} else {
+				if (ctx.walkToPoint(ctx.litPos.x, ctx.litPos.y)) { 
+					pet.state.action = "potty"; 
+					pet.state.actionTimer = 120; 
+				}
+			}
+		},
 
-	rappel_hang: (pet, ctx) => {
-		pet.state.x += Math.sin(ctx.t * 0.05) * 0.4;
-		if (pet.state.actionTimer <= 0) {
-			pet.state.action = "rappel_rise";
-		}
-	},
+		walk_to_tower_scratch: (pet, ctx) => {
+			if (ctx.walkToPoint(ctx.towerPos.x, ctx.towerPos.y)) {
+				pet.state.action = "scratching";
+				pet.state.actionTimer = 180;
+			}
+		},
 
-	rappel_rise: (pet, ctx) => {
-		pet.state.y -= 2.5; 
-		if (pet.state.y <= ctx.CEIL_Y) {
-			pet.state.y = ctx.CEIL_Y;
-			pet.state.action = "idle";
-			pet.state.actionTimer = 200;
-		}
-	},
+		scratching: (pet, ctx) => {
+			if (ctx.t % 3 === 0) {
+				const clawX = pet.state.x + (pet.state.facing * 15);
+				const clawY = pet.state.y + 5; 
 
-	idle: (pet, ctx) => {
-		if (pet.registry.activeSpecies === "goldfish") {
-			pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.04) * 40;
-			if (Math.random() < 0.02) {
-				pet.state.goldfishBubbles.push({
-					x: pet.state.x + pet.state.facing * 20, 
-					y: pet.state.y - 10, 
-					r: 2 + Math.random() * 4, 
-					alpha: 1
+				pet.state.particles.push({
+					x: clawX,
+					y: clawY,
+					vx: -pet.state.facing * (0.5 + Math.random() * 3),
+					vy: -1 - Math.random() * 2,
+					s: 2,
+					c: "#d2b48c",
+					life: 15
 				});
 			}
-		}
 
-		if (pet.registry.activeSpecies === "spider") {
-			let currentWeb = pet.state.spiderWebs.find(w => Math.sqrt((w.x - pet.state.x)**2 + (w.y - pet.state.y)**2) < w.size);
-			if (!currentWeb && !["rappel_drop", "rappel_hang", "rappel_rise"].includes(pet.state.action)) {
-				if (pet.state.x > ctx.LEFT_X + 5 && pet.state.x < ctx.RIGHT_X - 5 && pet.state.y > ctx.CEIL_Y + 5 && pet.state.y < ctx.FLOOR_Y - 5) {
-					if (pet.state.y < ctx.CEIL_Y + 40) pet.state.y = ctx.CEIL_Y;
-					else if (pet.state.y > ctx.FLOOR_Y - 40) pet.state.y = ctx.FLOOR_Y;
-					else if (pet.state.x < ctx.visibleW / 2) pet.state.x = ctx.LEFT_X;
-					else pet.state.x = ctx.RIGHT_X;
-				}
+			if (pet.state.actionTimer <= 0) {
+				pet.state.action = "idle";
+				pet.state.actionTimer = Math.floor(Math.random() * 200) + 150;
 			}
-		}
+		},
 
-		if (pet.state.actionTimer <= 0) {
-			if (Math.random() < 0.15) {
-				if (pet.registry.activeSpecies === "kitty") pet.say("Meow! 🐾");
-				if (pet.registry.activeSpecies === "puppy") pet.say("BARK! 🐶");
-				if (pet.registry.activeSpecies === "spider") pet.say("Click-click... 🕷️");
-				if (pet.registry.activeSpecies === "goldfish") pet.say("Blub... 🫧");
+		walk_to_tower_climb: (pet, ctx) => {
+			if (ctx.walkToPoint(ctx.towerPos.x, ctx.towerPos.y)) {
+				pet.state.action = "climbing_tower";
 			}
+		},
+
+		climbing_tower: (pet, ctx) => {
+			const perchY = ctx.towerPos.y - 125;
+			pet.state.y -= 1.5;
 			
-			if (Math.random() < 0.4) { 
-				pet.state.actionTimer = 400 + Math.random() * 400; 
-				return; 
+			if (pet.state.y <= perchY) {
+				pet.state.y = perchY;
+				pet.state.action = "tower_sleep";
+				pet.state.actionTimer = 800;
 			}
+		},
 
-			if (pet.activePet.digestive >= 3) { 
-				pet.state.action = "walk_to_litter"; 
-			} else {
-				const r = Math.random();
-				if (r < 0.20) { 
-					pet.state.action = "walk"; 
-					pet.state.facing = Math.random() > 0.5 ? 1 : -1; 
-					pet.state.actionTimer = 300 + Math.random() * 300; 
+		potty: (pet, ctx) => {
+			if (pet.state.actionTimer <= 0) { 
+				if (pet.registry.activeSpecies === "goldfish") {
+					pet.activePet.poops.push({
+						x: pet.state.x - (pet.state.facing * 10), y: pet.state.y + 5,
+						ox: Math.random() * 100, swimOffset: Math.random() * Math.PI * 2
+					});
+					pet.activePet.digestive = 0;
+					pet.state.action = "idle"; 
+					pet.state.actionTimer = 250;
+				} else if (pet.registry.activeSpecies === "spider") {
+					let cleanX = pet.state.x;
+					let cleanY = pet.state.y;
+					
+					if (cleanX > ctx.LEFT_X + 10 && cleanX < ctx.RIGHT_X - 10 && cleanY > ctx.CEIL_Y + 10 && cleanY < ctx.FLOOR_Y - 10) {
+						let distToLeft = cleanX - ctx.LEFT_X;
+						let distToRight = ctx.RIGHT_X - cleanX;
+						let distToCeil = cleanY - ctx.CEIL_Y;
+						let distToFloor = ctx.FLOOR_Y - cleanY;
+						let minDist = Math.min(distToLeft, distToRight, distToCeil, distToFloor);
+						
+						if (minDist === distToLeft) cleanX = ctx.LEFT_X;
+						else if (minDist === ctx.RIGHT_X) cleanX = ctx.RIGHT_X;
+						else if (minDist === ctx.CEIL_Y) cleanY = ctx.CEIL_Y;
+						else cleanY = ctx.FLOOR_Y;
+					}
+
+					pet.state.spiderWebs.push({
+						x: cleanX, y: cleanY,
+						size: 20 + Math.random() * 15
+					});
+					pet.activePet.digestive = 0;
+					pet.state.action = "idle"; 
+					pet.state.actionTimer = 200;
+				} else {
+					pet.activePet.poops.push({ox: Math.random()*100, isCeil: false}); 
+					pet.activePet.digestive = 0; 
+					pet.state.action = "walk_to_kick"; 
 				}
-				else if (r < 0.40) pet.state.action = "walk_to_bed";
-				else if (r < 0.60 && pet.state.layout.showTower) {
-					pet.state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
-				}
-				else pet.state.actionTimer = 500 + Math.random() * 500;
 			}
-		}
-	},
+		},
 
-	walk: (pet, ctx) => {
-		if (pet.registry.activeSpecies === "spider") {
-			let dir = pet.state.spiderDir || 1;
-			let activeWebNode = pet.state.spiderWebs.find(web => {
-				let dx = web.x - pet.state.x;
-				let dy = web.y - pet.state.y;
-				return Math.sqrt(dx*dx + dy*dy) < web.size + 10;
-			});
+		walk_to_kick: (pet, ctx) => {
+			if (ctx.walkToPoint(ctx.litPos.x - 50, ctx.litPos.y)) { 
+				pet.state.facing = 1; 
+				pet.state.action = "kicking"; 
+				pet.state.actionTimer = 80; 
+			}
+		},
 
-			if (activeWebNode) {
-				pet.state.x += pet.state.facing * 1.5;
-				if (Math.random() < 0.08) pet.state.y += (Math.random() > 0.5 ? 2 : -2);
-			} 
-			else if (Math.abs(pet.state.y - ctx.CEIL_Y) <= 4) { 
-				pet.state.y = ctx.CEIL_Y; 
-				pet.state.x += dir * 1.8;
-				pet.state.facing = dir;
-				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.CEIL_Y + 4; }
-				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.CEIL_Y + 4; }
-			} else if (Math.abs(pet.state.y - ctx.FLOOR_Y) <= 4) { 
-				pet.state.y = ctx.FLOOR_Y; 
-				pet.state.x += dir * 1.8;
-				pet.state.facing = dir;
-				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.FLOOR_Y - 4; }
-				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.FLOOR_Y - 4; }
-			} else if (Math.abs(pet.state.x - ctx.LEFT_X) <= 4) { 
-				pet.state.x = ctx.LEFT_X; 
-				pet.state.y += dir * 1.8;
-				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.LEFT_X + 4; }
-				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.LEFT_X + 4; }
-			} else if (Math.abs(pet.state.x - ctx.RIGHT_X) <= 4) { 
-				pet.state.x = ctx.RIGHT_X; 
-				pet.state.y += dir * 1.8;
-				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.RIGHT_X - 4; }
-				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.RIGHT_X - 4; }
+		kicking: (pet, ctx) => {
+			if (ctx.t % 2 === 0) {
+				pet.state.particles.push({x: pet.state.x - 10, y: pet.state.y + 20, vx: 5 + Math.random()*6, vy: -4, s: 2.5, c: "#bdc3c7", life: 25});
+			}
+			if (pet.state.actionTimer <= 0) { 
+				pet.state.action = "idle"; 
+				pet.state.actionTimer = 300; 
+			}
+		},
+
+		walk_to_bed: (pet, ctx) => {
+			let bedTargetX = ctx.bedPos.x;
+			let bedTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bedPos.y;
+			if (ctx.walkToPoint(bedTargetX, bedTargetY)) { 
+				pet.state.action = "sleep"; 
+				pet.state.actionTimer = 1000; 
+			}
+		},
+
+		teased: (pet, ctx) => {
+			if (pet.state.actionTimer > 0) {
+				pet.state.x += (Math.random() - 0.5) * 6;
+				pet.state.y += (Math.random() - 0.5) * 6;
+				if (pet.state.actionTimer % 5 === 0) pet.state.facing *= -1;
 			} else {
-				if (pet.state.y < (ctx.visibleH / 2)) pet.state.y = ctx.CEIL_Y;
-				else pet.state.y = ctx.FLOOR_Y;
+				pet.state.action = "idle";
+				pet.state.actionTimer = 300;
 			}
-		} else {
-			if (!pet.state.swimTargetX) {
-				pet.state.swimTargetX = ctx.LEFT_X + Math.random() * (ctx.visibleW - (ctx.LEFT_X + ctx.RIGHT_X));
+		},
+
+		rappel_drop: (pet, ctx) => {
+			pet.state.y += 3.5; 
+			if (pet.state.y >= pet.state.rappelDepth) {
+				pet.state.action = "rappel_hang";
+				pet.state.actionTimer = 180 + Math.random() * 200;
 			}
+		},
 
-			pet.state.x += (pet.state.swimTargetX - pet.state.x) * 0.02;
-			pet.state.facing = (pet.state.swimTargetX > pet.state.x) ? 1 : -1;
+		rappel_hang: (pet, ctx) => {
+			pet.state.x += Math.sin(ctx.t * 0.05) * 0.4;
+			if (pet.state.actionTimer <= 0) {
+				pet.state.action = "rappel_rise";
+			}
+		},
 
+		rappel_rise: (pet, ctx) => {
+			pet.state.y -= 2.5; 
+			if (pet.state.y <= ctx.CEIL_Y) {
+				pet.state.y = ctx.CEIL_Y;
+				pet.state.action = "idle";
+				pet.state.actionTimer = 200;
+			}
+		},
+
+		idle: (pet, ctx) => {
 			if (pet.registry.activeSpecies === "goldfish") {
-				pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.03) * 60;
-				if(ctx.t % 20 === 0) pet.state.goldfishBubbles.push({x: pet.state.x, y: pet.state.y, r: 2, alpha: 0.8});
+				pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.04) * 40;
+				if (Math.random() < 0.02) {
+					pet.state.goldfishBubbles.push({
+						x: pet.state.x + pet.state.facing * 20, 
+						y: pet.state.y - 10, 
+						r: 2 + Math.random() * 4, 
+						alpha: 1
+					});
+				}
 			}
-			
-			if (Math.abs(pet.state.x - pet.state.swimTargetX) < 10) {
-				pet.state.swimTargetX = null;
+
+			if (pet.registry.activeSpecies === "spider") {
+				let currentWeb = pet.state.spiderWebs.find(w => Math.sqrt((w.x - pet.state.x)**2 + (w.y - pet.state.y)**2) < w.size);
+				if (!currentWeb && !["rappel_drop", "rappel_hang", "rappel_rise"].includes(pet.state.action)) {
+					if (pet.state.x > ctx.LEFT_X + 5 && pet.state.x < ctx.RIGHT_X - 5 && pet.state.y > ctx.CEIL_Y + 5 && pet.state.y < ctx.FLOOR_Y - 5) {
+						if (pet.state.y < ctx.CEIL_Y + 40) pet.state.y = ctx.CEIL_Y;
+						else if (pet.state.y > ctx.FLOOR_Y - 40) pet.state.y = ctx.FLOOR_Y;
+						else if (pet.state.x < ctx.visibleW / 2) pet.state.x = ctx.LEFT_X;
+						else pet.state.x = ctx.RIGHT_X;
+					}
+				}
+			}
+
+			if (pet.state.actionTimer <= 0) {
+				if (Math.random() < 0.15) {
+					if (pet.registry.activeSpecies === "kitty") pet.say("Meow! 🐾");
+					if (pet.registry.activeSpecies === "puppy") pet.say("BARK! 🐶");
+					if (pet.registry.activeSpecies === "spider") pet.say("Click-click... 🕷️");
+					if (pet.registry.activeSpecies === "goldfish") pet.say("Blub... 🫧");
+				}
+				
+				if (Math.random() < 0.4) { 
+					pet.state.actionTimer = 400 + Math.random() * 400; 
+					return; 
+				}
+
+				if (pet.activePet.digestive >= 3) { 
+					pet.state.action = "walk_to_litter"; 
+				} else {
+					const r = Math.random();
+					if (r < 0.20) { 
+						pet.state.action = "walk"; 
+						pet.state.facing = Math.random() > 0.5 ? 1 : -1; 
+						pet.state.actionTimer = 300 + Math.random() * 300; 
+					}
+					else if (r < 0.40) pet.state.action = "walk_to_bed";
+					else if (r < 0.60 && pet.state.layout.showTower) {
+						pet.state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
+					}
+					else pet.state.actionTimer = 500 + Math.random() * 500;
+				}
+			}
+		},
+
+		walk: (pet, ctx) => {
+			if (pet.registry.activeSpecies === "spider") {
+				let dir = pet.state.spiderDir || 1;
+				let activeWebNode = pet.state.spiderWebs.find(web => {
+					let dx = web.x - pet.state.x;
+					let dy = web.y - pet.state.y;
+					return Math.sqrt(dx*dx + dy*dy) < web.size + 10;
+				});
+
+				if (activeWebNode) {
+					pet.state.x += pet.state.facing * 1.5;
+					if (Math.random() < 0.08) pet.state.y += (Math.random() > 0.5 ? 2 : -2);
+				} 
+				else if (Math.abs(pet.state.y - ctx.CEIL_Y) <= 4) { 
+					pet.state.y = ctx.CEIL_Y; 
+					pet.state.x += dir * 1.8;
+					pet.state.facing = dir;
+					if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.CEIL_Y + 4; }
+					if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.CEIL_Y + 4; }
+				} else if (Math.abs(pet.state.y - ctx.FLOOR_Y) <= 4) { 
+					pet.state.y = ctx.FLOOR_Y; 
+					pet.state.x += dir * 1.8;
+					pet.state.facing = dir;
+					if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.FLOOR_Y - 4; }
+					if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.FLOOR_Y - 4; }
+				} else if (Math.abs(pet.state.x - ctx.LEFT_X) <= 4) { 
+					pet.state.x = ctx.LEFT_X; 
+					pet.state.y += dir * 1.8;
+					if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.LEFT_X + 4; }
+					if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.LEFT_X + 4; }
+				} else if (Math.abs(pet.state.x - ctx.RIGHT_X) <= 4) { 
+					pet.state.x = ctx.RIGHT_X; 
+					pet.state.y += dir * 1.8;
+					if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.RIGHT_X - 4; }
+					if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.RIGHT_X - 4; }
+				} else {
+					if (pet.state.y < (ctx.visibleH / 2)) pet.state.y = ctx.CEIL_Y;
+					else pet.state.y = ctx.FLOOR_Y;
+				}
+			} else {
+				if (!pet.state.swimTargetX) {
+					pet.state.swimTargetX = ctx.LEFT_X + Math.random() * (ctx.visibleW - (ctx.LEFT_X + ctx.RIGHT_X));
+				}
+
+				pet.state.x += (pet.state.swimTargetX - pet.state.x) * 0.02;
+				pet.state.facing = (pet.state.swimTargetX > pet.state.x) ? 1 : -1;
+
+				if (pet.registry.activeSpecies === "goldfish") {
+					pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.03) * 60;
+					if(ctx.t % 20 === 0) pet.state.goldfishBubbles.push({x: pet.state.x, y: pet.state.y, r: 2, alpha: 0.8});
+				}
+				
+				if (Math.abs(pet.state.x - pet.state.swimTargetX) < 10) {
+					pet.state.swimTargetX = null;
+				}
+			}
+
+			if (pet.state.actionTimer <= 0) { 
+				pet.state.action = "idle"; 
+				pet.state.actionTimer = 400; 
+			}
+		},
+
+		sleep: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
+		tower_sleep: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
+		dance: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
+		special: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
+
+		// Common exit handler shared across shared static end states
+		_fallbackSleep: (pet, ctx) => {
+			if (pet.state.actionTimer <= 0) { 
+				if(pet.state.action === "tower_sleep") pet.state.y = ctx.groundY;
+				pet.state.action = "idle"; 
 			}
 		}
+	};
 
-		if (pet.state.actionTimer <= 0) { 
-			pet.state.action = "idle"; 
-			pet.state.actionTimer = 400; 
-		}
-	},
 
-	sleep: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
-	tower_sleep: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
-	dance: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
-	special: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
-
-	// Common exit handler shared across shared static end states
-	_fallbackSleep: (pet, ctx) => {
-		if (pet.state.actionTimer <= 0) { 
-			if(pet.state.action === "tower_sleep") pet.state.y = ctx.groundY;
-			pet.state.action = "idle"; 
-		}
-	}
-};
-
-//pet functions & triggers etc
+// ==========================================
+// SECTION 6: pet functions & triggers etc
+// ==========================================
 
     triggerNyan() {
         if (this.activePet.isDead || this.state.action === "nyan") return;
@@ -2933,10 +2762,196 @@ const STATE_LIBRARY = {
 		}
 	}
 
+// ==========================================
+// SECTION 7: loading and saving/ exporting and importing
+// ==========================================
+    saveData() { 
+        // Save the entire multi-pet registry alongside standard global layout states
+        const bundle = {
+            registry: this.registry,
+            state: this.state
+        };
+        localStorage.setItem("greta_ultra_v10", JSON.stringify(bundle)); 
+    }
+	loadData() {
+		const saved = localStorage.getItem("greta_ultra_v10");
+		if (saved) {
+			const loadedBundle = JSON.parse(saved);
+			
+			if (loadedBundle.registry) this.registry = loadedBundle.registry;
+			if (loadedBundle.state) {
+				// Merge loaded state into current state
+				this.state = { ...this.state, ...loadedBundle.state };
+				
+				// Check for the new property, and set default if it's missing
+				if (this.state.tummylimit === undefined) {
+					this.state.tummylimit = 8;
+				}
 
+				// 👇 BIOLOGICAL PATCH: Automatically loops blueprint definitions to repair old user custom settings
+				if (loadedBundle.state.commandAccess) {
+					const defaults = this.getDefaultCommandMatrix();
+					const loadedAccess = loadedBundle.state.commandAccess || {};
+
+					this.state.commandAccess = {};
+					Object.keys(defaults).forEach(cmd => {
+						// Retain specific channel adjustments if present, otherwise safe fallbacks are applied
+						this.state.commandAccess[cmd] = loadedAccess[cmd] !== undefined 
+							? loadedAccess[cmd] 
+							: defaults[cmd];
+					});
+				}
+			}
+			
+			// Loop through all individual isolated profiles to catch offline progression separately
+			const now = Date.now();
+			Object.keys(this.registry.profiles).forEach(key => {
+				const profile = this.registry.profiles[key];
+				const msOffline = now - profile.lastHungerTick;
+				if (msOffline >= this.HUNGER_TICK_MS && !profile.isDead) {
+					const pointsGained = Math.floor(msOffline / this.HUNGER_TICK_MS);
+					let potentialHunger = profile.hunger + pointsGained;
+					if (potentialHunger >= 100) { 
+						profile.hunger = 70; 
+						profile.lastHungerTick = now; 
+					} else { 
+						profile.hunger = potentialHunger; 
+						profile.lastHungerTick = now - (msOffline % this.HUNGER_TICK_MS); 
+					}
+				}
+			});
+			
+			const nameIn = document.getElementById("nameInput"); 
+			if (nameIn && this.activePet) nameIn.value = this.activePet.name;
+			
+			const tummySlider = document.getElementById("tummyLimitRange");
+			const tummyDisplay = document.getElementById("tummyLimitValue");
+
+			// Ensure we use the loaded state value, default to 8 if not found
+			const currentLimit = this.state.tummylimit !== undefined ? this.state.tummylimit : 8;
+
+			if (tummySlider) {
+				tummySlider.value = currentLimit;
+				if (tummyDisplay) {
+					tummyDisplay.innerText = currentLimit;
+				}
+			}
+			
+			const displayEl = document.getElementById("speciesSelectDisplay");
+			if (displayEl && this.registry.activeSpecies) {
+				const speciesMap = {
+					kitty: "🐈 Kitty (Feline Engine v10)",
+					puppy: "🐕 Puppy (Canine Kinematics Engine)",
+					spider: "🕷️ Spider (Arachnid Procedural Pathing)",
+					goldfish: "🐟 Goldfish (Aquatic Fluid Physics)"
+				};
+				displayEl.innerText = speciesMap[this.registry.activeSpecies] || speciesMap.kitty;
+			}
+
+			const hideBorderCheck = document.getElementById("hideBorderToggle");
+			if (hideBorderCheck) hideBorderCheck.checked = this.state.hideBorder || false;
+
+			const hideBackgroundCheck = document.getElementById("hideBackgroundToggle");
+			if (hideBackgroundCheck) hideBackgroundCheck.checked = this.state.hideBackground || false;
+
+			const hideStatusCheck = document.getElementById("hideStatusToggle");
+			if (hideStatusCheck) hideStatusCheck.checked = this.state.hideStatus || false;
+
+			const hideNameplateCheck = document.getElementById("hideNameplateToggle");
+			if (hideNameplateCheck) hideNameplateCheck.checked = this.state.hideNameplate || false;
+
+			const checkT = document.getElementById("showTower"); 
+			if (checkT && this.state.layout) checkT.checked = this.state.layout.showTower;
+			
+			const zoomSlider = document.getElementById("canvasZoom");
+			const zoomDisplay = document.getElementById("zoomValue");
+			if (zoomSlider) {
+				let savedZoom = this.state.zoom !== undefined ? this.state.zoom : 0;
+				zoomSlider.value = savedZoom;
+				let scaleVal = savedZoom >= 0 ? 1.0 + (savedZoom * 0.5) : 1.0 + (savedZoom * 0.25);
+				if (zoomDisplay) zoomDisplay.textContent = `${scaleVal.toFixed(1)}x`;
+
+				if (!zoomSlider.dataset.listenerWired) {
+					zoomSlider.addEventListener("input", (e) => {
+						const val = parseFloat(e.target.value);
+						this.state.zoom = val;
+						let dynamicScale = val >= 0 ? 1.0 + (val * 0.5) : 1.0 + (val * 0.25);
+						if (zoomDisplay) zoomDisplay.textContent = `${dynamicScale.toFixed(1)}x`;
+					});
+					zoomSlider.dataset.listenerWired = "true";
+				}
+			}
+
+			if (this.state.layout) {
+				Object.keys(this.state.layout).forEach(k => { 
+					if (k === 'showTower' || k === 'bedColor') return;
+					const el = document.getElementById(k);
+					if (el) el.value = this.state.layout[k];
+				});
+			}
+		}
+		this.applyEditModeStyles();
+		this.applyVisibilityStates();
+		this.initSwatches(); 
+		this.syncSpeciesInterfaceToggle();
+	}
+
+	exportSettingsToClipboard(sendNotice = null) {
+        try {
+            // 1. Gather all of your custom layout sizes, coordinates, and pet profiles
+            const configBundle = {
+                widgetBounds: this.widgetBounds,
+                registry: this.registry,
+                state: this.state
+            };
+
+            // Convert the bundle into a clean, formatted JSON string
+            const jsonString = JSON.stringify(configBundle, null, 4);
+
+            // 2. Create a hidden textarea to force focus and execution permission
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = jsonString;
+            
+            // Move it completely off-screen so it's invisible to viewers
+            tempTextArea.style.position = "absolute";
+            tempTextArea.style.left = "-9999px";
+            tempTextArea.style.top = "-9999px";
+            document.body.appendChild(tempTextArea);
+
+            // 3. Select the string text inside the element
+            tempTextArea.focus();
+            tempTextArea.select();
+            tempTextArea.setSelectionRange(0, 99999); // Compatibility fix for older webkit builds
+
+            // 4. Fire the copy command execution thread
+            const success = document.execCommand("copy");
+            document.body.removeChild(tempTextArea);
+
+            if (success) {
+                console.log("💾 [Pet Widget]: Your custom configuration settings have been successfully copied to your clipboard!");
+                if (typeof sendNotice === "function") {
+                    sendNotice("📋 [Pet Widget]: Settings bundle copied to clipboard! You can paste this directly into your backup files.");
+                } else if (typeof p8Confirm === "function") {
+                    alert("📋 Settings copied to clipboard! Paste it safely into a text file.");
+                }
+            } else {
+                throw new Error("document.execCommand failed to execute.");
+            }
+        } catch (err) {
+            console.error("❌ [Pet Widget Error]: Failed to copy settings automatically: ", err);
+            
+            // Fallback: If copy execution completely blocked, output the clean object to log stream
+            console.log("👇 COPY THIS RAW DATA TEMPLATE MANUALLY:");
+            console.log(JSON.stringify({
+                widgetBounds: this.widgetBounds,
+                registry: this.registry,
+                state: this.state
+            }));
+        }
+    }
 
 // ==========================================
-// SECTION 6: SOUND SYSTEM ENGINE
+// SECTION 8: SOUND SYSTEM ENGINE
 // ==========================================
     initAudioEngine() {
         const defaultSoundSettings = {
