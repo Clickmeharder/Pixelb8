@@ -1005,7 +1005,7 @@ export class StreamPet {
         // Replace '.pet-matrix-container-target' with whatever class/id is inside your StreamPet.controlsTemplate
         this.controlsContainer = petSection.querySelector('.pet-matrix-container-target') || petSection;
     }
-	renderControlPanel() {
+renderControlPanel() {
         if (!this.controlsContainer) return;
 
         // Clean, compact dark matrix that matches your #18181b UI exactly
@@ -1021,7 +1021,12 @@ export class StreamPet {
                 </div>
         `;
 
+        // 👇 FILTER OUT ADMINISTRATIVE / METADATA UTILITIES FROM CLUTTERING THE UI
+        const hiddenCommands = ['help', 'rewards', 'clear', 'species', 'hidepet', 'showpet', 'togglepet'];
+
         Object.keys(this.state.commandAccess).forEach(cmd => {
+            if (hiddenCommands.includes(cmd)) return; // Skip rendering these rows!
+
             const config = this.state.commandAccess[cmd];
             html += `
                 <div class="matrix-row" style="display: flex; padding: 6px; background: #141414; border-radius: 4px; align-items: center;">
