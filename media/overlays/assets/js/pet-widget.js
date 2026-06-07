@@ -8,6 +8,31 @@
 //===================================
 // Libraries
 //==================================
+const DEFAULT_SOUND_SETTINGS = {
+    masterEnabled: true,
+    meowSound: true,
+    purrSound: true,
+    nyanSound: true,
+    mewSound: true,
+    barkSound: true,
+    whineSound: true,
+    clickSound: true,
+    bubbleSound: true,
+    petsplatSound: true,
+    customPaths: {}
+};
+
+const DEFAULT_AUDIO_PATHS = {
+    meowSound: '../assets/sounds/meowSound.mp3',
+    mewSound: '../assets/sounds/mewSound.mp3',
+    purrSound: '../assets/sounds/purrSound.mp3',
+    nyanSound: '../assets/sounds/nyanSound.mp3',
+    barkSound: '../assets/sounds/barkSound.mp3',
+    whineSound: '../assets/sounds/whineSound.mp3',
+    clickSound: '../assets/sounds/clickSound.mp3',
+    bubbleSound: '../assets/sounds/bubbleSound.mp3',
+    petsplatSound: '../assets/sounds/petsplatSound.mp3'
+};
 //
 // state library
 //----------------
@@ -399,187 +424,148 @@ const STATE_LIBRARY = {
 	}
 };
 
+
+// ============================================================================
+// SECTION 1B: CORE ENGINE PRESETS & PALETTES (Outside the Class)
+// ============================================================================
+const WIDGET_DEFAULT_BOUNDS = { left: "20px", top: "302px", width: "274px", height: "197px" };
+
+const PET_SPECIES = ["kitty", "puppy", "spider", "goldfish"];
+const KITTY_COLORS = ["#E67E22", "#95A5A6", "#2C3E50", "#ECF0F1", "#BDC3C7", "#D35400"];
+const PUPPY_COLORS = ["#D2B48C", "#8B4513", "#F5DEB3", "#3E2723", "#FFF8DC", "#795548"];
+const SPIDER_COLORS = ["#1A1A1A", "#3A1A1A", "#1A3A1A", "#2E1C47", "#004D40", "#424242"];
+const GOLDFISH_COLORS = ["#FF5722", "#FF9800", "#FFC107", "#E91E63", "#FF3D00", "#FFFFFF"];
+const BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
+
+const HUNGER_TICK_MS = 144000; 
+const BASE_FLOOR_Y = 110;
+
+// Factory function to cleanly generate a fresh, unpolluted profile registry matrix
+function createDefaultPetRegistry() {
+    return {
+        activeSpecies: "kitty",
+        profiles: {
+            kitty: {
+                name: "Greta", isDead: false, birthday: Date.now(), ageDays: 0, stage: "Baby", exp: 0, hunger: 0, digestive: 0,
+                lastHungerTick: Date.now(), poops: [],
+                color: KITTY_COLORS[Math.floor(Math.random() * KITTY_COLORS.length)]
+            },
+            puppy: {
+                name: "Barnaby", isDead: false, birthday: Date.now(), ageDays: 0, stage: "Baby", exp: 0, hunger: 0, digestive: 0,
+                lastHungerTick: Date.now(), poops: [],
+                color: PUPPY_COLORS[Math.floor(Math.random() * PUPPY_COLORS.length)]
+            },
+            spider: {
+                name: "Webster", isDead: false, birthday: Date.now(), ageDays: 0, stage: "Baby", exp: 0, hunger: 0, digestive: 0,
+                lastHungerTick: Date.now(), poops: [],
+                color: SPIDER_COLORS[Math.floor(Math.random() * SPIDER_COLORS.length)]
+            },
+            goldfish: {
+                name: "Bubbles", isDead: false, birthday: Date.now(), ageDays: 0, stage: "Baby", exp: 0, hunger: 0, digestive: 0,
+                lastHungerTick: Date.now(), poops: [],
+                color: GOLDFISH_COLORS[Math.floor(Math.random() * GOLDFISH_COLORS.length)]
+            }
+        }
+    };
+}
+
+// Factory function to isolate the massive default runtime tracking object
+function createDefaultState() {
+    return {
+        hideBorder: false, hideStatus: false, hideNameplate: false, hideBackground: false,
+        originalPos: { x: 0, y: 0 },
+        tummylimit: 11, nyanTimer: 0, nyanPhase: "takeoff",
+        x: 200, y: window.innerHeight - 150, facing: 1,
+        action: "idle", actionTimer: 300, animT: 0,
+        hasFood: false, particles: [], overrideColor: null, paintBalloons: [], zoom: -2,
+        spiderWebs: [], goldfishBubbles: [], puppyBones: [],
+        layout: {
+            nameX: 10, nameY: 1, statsX: 66, statsY: 5, bedX: 8, bedY: 94, bowlX: 89, bowlY: 97,
+            litterX: 22, litterY: 91, towerX: 10, towerY: 89, showTower: true, bedColor: "#3498db"
+        }
+    };
+}
+
 export class StreamPet {
-    constructor() {
+constructor() {
         console.log("🐾 [Pet Widget]: Initializing Core Ecosystem...");
         
-        // ==========================================
-        // SECTION 1: CORE INITIALIZATION & DOM INJECTION
-        // ==========================================
+        // 1. Core DOM Validation & Sizing Injection
         const overlayWrapper = document.getElementById("overlay-wrapper");
         if (!overlayWrapper) {
             console.error("❌ [Pet Widget Error]: #overlay-wrapper element not found in DOM.");
             return;
         }
 
-        // Pull layout dimensions from storage before building to prevent visual snapping
         const savedBounds = localStorage.getItem("greta_widget_bounds");
-        this.widgetBounds = savedBounds ? JSON.parse(savedBounds) : {
-            left: "20px",
-            top: "302px",
-            width: "274px",
-            height: "197px"
-        };
+        this.widgetBounds = savedBounds ? JSON.parse(savedBounds) : WIDGET_DEFAULT_BOUNDS;
 
-        // Only inject viewport if it doesn't already exist
         if (!document.getElementById("pet-widget")) {
-            const petViewport = document.createElement("div");
-            petViewport.id = "pet-widget";
-            petViewport.classList.add("p8-widget");
-            petViewport.style.zIndex = "101";
-            petViewport.style.position = "absolute";
-            
-            // Reapply persistent window coordinates instantly
-            petViewport.style.left = this.widgetBounds.left;
-            petViewport.style.top = this.widgetBounds.top;
-            petViewport.style.width = this.widgetBounds.width;
-            petViewport.style.height = this.widgetBounds.height;
-
-            petViewport.innerHTML = `
-                <div id="bubble" class="chat-bubble"></div>
-                <div id="nameplate">Loading...</div>
-                <canvas id="companionCanvas"></canvas>
-                <div id="status">❤️ Loading... | EXP 0</div>
-            `;
-            overlayWrapper.appendChild(petViewport);
-            console.log("🐾 [Pet Widget]: Viewport DOM elements injected into overlay-wrapper.");
+            this.injectViewport(overlayWrapper);
         }
 
-        // Extract native canvas context references
+        // 2. Extract Native Contexts
         this.widgetContainer = document.getElementById("pet-widget");
         this.canvas = document.getElementById("companionCanvas");
         this.ctx = this.canvas.getContext("2d");
 
-        // Core Static Presets & Palettes
-        this.PET_SPECIES = ["kitty", "puppy", "spider", "goldfish"];
-        this.KITTY_COLORS = ["#E67E22", "#95A5A6", "#2C3E50", "#ECF0F1", "#BDC3C7", "#D35400"];
-        this.PUPPY_COLORS = ["#D2B48C", "#8B4513", "#F5DEB3", "#3E2723", "#FFF8DC", "#795548"];
-        this.SPIDER_COLORS = ["#1A1A1A", "#3A1A1A", "#1A3A1A", "#2E1C47", "#004D40", "#424242"];
-        this.GOLDFISH_COLORS = ["#FF5722", "#FF9800", "#FFC107", "#E91E63", "#FF3D00", "#FFFFFF"];
-        this.BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
-        
-        this.HUNGER_TICK_MS = 144000; 
-        this.BASE_FLOOR_Y = 110;
+        // 3. Map Static Runtime Scalars (Safely referenced throughout your logic)
+        this.PET_SPECIES = PET_SPECIES;
+        this.KITTY_COLORS = KITTY_COLORS;
+        this.PUPPY_COLORS = PUPPY_COLORS;
+        this.SPIDER_COLORS = SPIDER_COLORS;
+        this.GOLDFISH_COLORS = GOLDFISH_COLORS;
+        this.BED_PRESETS = BED_PRESETS;
+        this.HUNGER_TICK_MS = HUNGER_TICK_MS; 
+        this.BASE_FLOOR_Y = BASE_FLOOR_Y;
 
-        // NEW: Decentralized Species-Specific Profiles Database
-        // This ensures every single animal tracks its own independent name, stats, age, and records cleanly.
-        this.registry = {
-            activeSpecies: "kitty", // Current live companion pointer
-            profiles: {
-                kitty: {
-                    name: "Greta",
-                    isDead: false,
-                    birthday: Date.now(),
-                    ageDays: 0,
-                    stage: "Baby",
-                    exp: 0,
-                    hunger: 0,
-                    digestive: 0,
-                    lastHungerTick: Date.now(),
-                    color: this.KITTY_COLORS[Math.floor(Math.random() * this.KITTY_COLORS.length)],
-                    poops: []
-                },
-                puppy: {
-                    name: "Barnaby",
-                    isDead: false,
-                    birthday: Date.now(),
-                    ageDays: 0,
-                    stage: "Baby",
-                    exp: 0,
-                    hunger: 0,
-                    digestive: 0,
-                    lastHungerTick: Date.now(),
-                    color: this.PUPPY_COLORS[Math.floor(Math.random() * this.PUPPY_COLORS.length)],
-                    poops: []
-                },
-                spider: {
-                    name: "Webster",
-                    isDead: false,
-                    birthday: Date.now(),
-                    ageDays: 0,
-                    stage: "Baby",
-                    exp: 0,
-                    hunger: 0,
-                    digestive: 0,
-                    lastHungerTick: Date.now(),
-                    color: this.SPIDER_COLORS[Math.floor(Math.random() * this.SPIDER_COLORS.length)],
-                    poops: []
-                },
-                goldfish: {
-                    name: "Bubbles",
-                    isDead: false,
-                    birthday: Date.now(),
-                    ageDays: 0,
-                    stage: "Baby",
-                    exp: 0,
-                    hunger: 0,
-                    digestive: 0,
-                    lastHungerTick: Date.now(),
-                    color: this.GOLDFISH_COLORS[Math.floor(Math.random() * this.GOLDFISH_COLORS.length)],
-                    poops: []
-                }
-            }
-        };
+        // 4. Generate Initial Data Frameworks (Overwritten seamlessly when loadData() fires)
+        this.registry = createDefaultPetRegistry();
+        this.state = createDefaultState();
+        this.state.commandAccess = this.getDefaultCommandMatrix();
 
-        // Shared Local Viewport Mechanics and Runtime Settings Structure
-		this.state = {
-            hideBorder: false,
-            hideStatus: false,
-            hideNameplate: false,
-            hideBackground: false,
-            originalPos: { x: 0, y: 0 },
-            tummylimit: 11,               // Updated from 8 -> 11
-            nyanTimer: 0,
-            nyanPhase: "takeoff",
-            x: 200,
-            y: window.innerHeight - 150,
-            facing: 1,
-            action: "idle",
-            actionTimer: 300,
-            animT: 0,
-            hasFood: false,
-            particles: [],
-			overrideColor: null, 
-            paintBalloons: [],
-            zoom: -2,                     // Updated from 0 -> -2
-            
-            // Dynamic secondary matrices for specific simulation profiles
-            spiderWebs: [],
-            goldfishBubbles: [],
-            puppyBones: [],
-
-            layout: {
-                nameX: 10, nameY: 1,      // Your precise custom element layouts
-                statsX: 66, statsY: 5,
-                bedX: 8, bedY: 94,
-                bowlX: 89, bowlY: 97,
-                litterX: 22, litterY: 91,
-                towerX: 10, towerY: 89,
-                showTower: true,
-                bedColor: "#3498db"       // Your updated light blue bed color option
-            }
-        };
-		this.state.commandAccess = this.getDefaultCommandMatrix();
-        // Initialize Audio Sub-Engine
+        // 5. Initialize Sub-Engines & Hardware Hooks
         this.initAudioEngine();
-        // Inject Config Menu Interface
         this.injectUI();
-        // Fire initial sizing setup and register display observer
         this.resizePetWidget();
-        window.addEventListener('resizePetWidget', () => this.resizePetWidget());
-        // Load runtime memory maps
-        this.loadData();
+        
+ 
+        
+        // 6. Memory De-serialization & Execution Loops
+        this.loadData(); // This instantly overwrites the default structures above with your active save file
         this.initContainerListeners(); 
         this.initPetPlacement();
-		this.renderControlPanel();
-        // Kick off intervals and processing thread loops
+        this.renderControlPanel();
+        
         this.saveInterval = setInterval(() => this.saveData(), 5000);
         this.animate = this.animate.bind(this);
         this.animate();
         this.bindUIEventListeners();
     }
 
+	injectWidgetViewport(overlayWrapper) {
+        const petViewport = document.createElement("div");
+        petViewport.id = "pet-widget";
+        petViewport.classList.add("p8-widget");
+        petViewport.style.zIndex = "101";
+        petViewport.style.position = "absolute";
+        
+        // Apply persistent window coordinates instantly to avoid snapping frames
+        petViewport.style.left = this.widgetBounds.left;
+        petViewport.style.top = this.widgetBounds.top;
+        petViewport.style.width = this.widgetBounds.width;
+        petViewport.style.height = this.widgetBounds.height;
 
+        petViewport.innerHTML = `
+            <div id="bubble" class="chat-bubble"></div>
+            <div id="nameplate">Loading...</div>
+            <canvas id="companionCanvas"></canvas>
+            <div id="status">❤️ Loading... | EXP 0</div>
+        `;
+        
+        overlayWrapper.appendChild(petViewport);
+        console.log("🐾 [Pet Widget]: Viewport DOM elements injected into overlay-wrapper.");
+    }
     static get controlsTemplate() {
         const layoutMetrics = [
             ["name", "Nameplate X/Y", 50, 70, 0, 100],
@@ -963,25 +949,27 @@ export class StreamPet {
         });
     }
 
-    initContainerListeners() {
-        if (!this.widgetContainer) return;
+	initContainerListeners() {
+		if (!this.widgetContainer) return;
 
-        const observer = new MutationObserver((mutations) => {
-            this.widgetBounds = {
-                left: this.widgetContainer.style.left,
-                top: this.widgetContainer.style.top,
-                width: this.widgetContainer.style.width,
-                height: this.widgetContainer.style.height
-            };
-            localStorage.setItem("greta_widget_bounds", JSON.stringify(this.widgetBounds));
-            this.resizePetWidget(); // Re-sync the canvas internal resolution
-        });
+		// Attach the observer to 'this' so the class retains a handle on it
+		this.containerObserver = new MutationObserver((mutations) => {
+			this.widgetBounds = {
+				left: this.widgetContainer.style.left,
+				top: this.widgetContainer.style.top,
+				width: this.widgetContainer.style.width,
+				height: this.widgetContainer.style.height
+			};
+			localStorage.setItem("greta_widget_bounds", JSON.stringify(this.widgetBounds));
+			this.resizePetWidget(); 
+		});
 
-        observer.observe(this.widgetContainer, { 
-            attributes: true, 
-            attributeFilter: ["style"] 
-        });
-    }
+		this.containerObserver.observe(this.widgetContainer, { 
+			attributes: true, 
+			attributeFilter: ["style"] 
+		});
+		console.log("🐾 [Pet Widget]: Mutation Observer locked onto layout style mutations.");
+	}
 
 	bindMatrixListeners() {
 		if (!this.controlsContainer) return;
@@ -1032,6 +1020,7 @@ export class StreamPet {
 	}
 
     bindUIEventListeners() {
+		 window.addEventListener('resizePetWidget', () => this.resizePetWidget());
         // Looks for a button with id="exportPetSettings" anywhere in your HTML/UI engine
         const exportBtn = document.getElementById("exportPetSettings");
 			if (exportBtn) {
@@ -2951,42 +2940,16 @@ export class StreamPet {
 // ==========================================
 // SECTION 9: SOUND SYSTEM ENGINE
 // ==========================================
-    initAudioEngine() {
-        const defaultSoundSettings = {
-            masterEnabled: true,
-            meowSound: true,
-            purrSound: true,
-            nyanSound: true,
-            mewSound: true,
-            barkSound: true,
-            whineSound: true,
-            clickSound: true,
-            bubbleSound: true,
-			petsplatSound: true,
-            customPaths: {}
-        };
-
-        this.defaultPaths = {
-            meowSound: '../assets/sounds/meowSound.mp3',
-            mewSound: '../assets/sounds/mewSound.mp3',
-            purrSound: '../assets/sounds/purrSound.mp3',
-            nyanSound: '../assets/sounds/nyanSound.mp3',
-            barkSound: '../assets/sounds/barkSound.mp3',
-            whineSound: '../assets/sounds/whineSound.mp3',
-            clickSound: '../assets/sounds/clickSound.mp3',
-            bubbleSound: '../assets/sounds/bubbleSound.mp3',
-			petsplatSound: '../assets/sounds/petsplatSound.mp3'
-        };
-
+	initAudioEngine() {
         const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
-        window.soundSettings = savedSoundSettings ? JSON.parse(savedSoundSettings) : defaultSoundSettings;
+        window.soundSettings = savedSoundSettings ? JSON.parse(savedSoundSettings) : DEFAULT_SOUND_SETTINGS;
 
         this.audioAssets = {};
-        Object.keys(this.defaultPaths).forEach(key => this.refreshAudioInstance(key));
+        Object.keys(DEFAULT_AUDIO_PATHS).forEach(key => this.refreshAudioInstance(key));
     }
 
     refreshAudioInstance(key) {
-        const source = window.soundSettings.customPaths[key] || this.defaultPaths[key];
+        const source = window.soundSettings.customPaths[key] || DEFAULT_AUDIO_PATHS[key];
         if (source) {
             this.audioAssets[key] = new Audio(source);
             if (key === 'nyanSound') this.audioAssets[key].loop = true;
@@ -3009,5 +2972,4 @@ export class StreamPet {
             this.audioAssets[soundKey].currentTime = 0;
         }
     }
-
 }
