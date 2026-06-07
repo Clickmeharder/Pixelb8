@@ -4,7 +4,44 @@
 /* 
 NOTES:
 
-- 
+- begin splitting this file up into:
+1-> ui/dom manipulation
+2-> helper functions
+3-> ttv connection & related logic:
+       -twitch Auth
+       -reward, cheer, message
+	   -emoji handling & floating emojis
+		
+4-> widgetEngine
+    -widget ui/dom connection
+	-widget module lazy loading
+	-built for future cusotm widget creation
+4-> Timer Widget
+5-> alertWidget?
+
+todo:
+step 1: move timers into their own widget, timer-widget.js
+step 2: figure out step 3
+step 3: uknown
+- maybe create main.js
+- main js can hold the theme creation logic, main settings, and core stuff ?
+if i went this route we would have:
+ helperfunctions.js
+ main.js (core logic, and functions)
+ ttvconnection.js (connects app and widgets to twitch)
+ widgetEngine.js (builds and loads widgets using the theme stuff) 
+ 
+ then my widgets (imported in widget engine & pass whatever is needed to ttvconnection.js):
+   pet-widget.js
+   jukebox-widget.js
+   entropiauniverse-widget.js
+   
+   and new timer-widget.js
+
+
+=======
+future ideas:
+
  - add environment option to channel point manager bit cheer manager
     -> mist/fog   (fog on bottom of screen. when checked get options for set height and color)
 	-> weather (snow, falling autumn leaves)  

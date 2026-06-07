@@ -841,7 +841,6 @@ export class StreamPet {
         this.canvas.height = this.widgetContainer.clientHeight;
         this.ctx.imageSmoothingEnabled = false;
     }
-
 // ===============================================
 // SECTION 3: UI ASSEMBLY synchronization, TEMPLATES & BINDINGS
 // ===============================================
@@ -1281,24 +1280,16 @@ export class StreamPet {
 // ===============================================
 // SECTION 5: pet system helpers
 // ===============================================
-    getPos(pctX, pctY, offY = 0) {
-        const visibleW = this.canvas.width;
-        const visibleH = this.canvas.height;
+	getPos(pctX, pctY, offY = 0) {
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
 
-        let rawSliderVal = (this.state.zoom === undefined) ? 0 : this.state.zoom;
-        let scaleVal = rawSliderVal >= 0 ? 1.0 + (rawSliderVal * 0.5) : 1.0 + (rawSliderVal * 0.25);
+		// Just convert percentages to raw pixel coordinates on the base canvas
+		const finalX = (pctX / 100) * visibleW;
+		const finalY = (pctY / 100) * visibleH;
 
-        const anchorX = visibleW / 2;
-        const anchorY = visibleH - this.BASE_FLOOR_Y;
-
-        const targetX = (pctX / 100) * visibleW;
-        const targetY = (pctY / 100) * visibleH;
-
-        const finalX = anchorX + (targetX - anchorX) / scaleVal;
-        const finalY = anchorY + (targetY - anchorY) / scaleVal;
-
-        return { x: finalX, y: finalY + offY };
-    }
+		return { x: finalX, y: finalY + offY };
+	}
 	initPetPlacement() {
 		if (!this.canvas) return;
 		const visibleW = this.canvas.width;
@@ -1308,8 +1299,8 @@ export class StreamPet {
 		const CEIL_Y = 30; 
 		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
 
-		// 🛏️ Dynamic Bed Tracking Coordinates via your Zoom Engine
-		// This feeds the percentages into getPos() to properly inherit all zoom transforms
+		// 🛏️ Resolved coordinates based on canvas dimensions. 
+		// The Zoom Engine (in animate()) will automatically apply scaling to these positions.
 		const bedCoordinates = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
 
 		this.state.action = "idle";
