@@ -1443,38 +1443,62 @@ export class StreamPet {
         this.say("NYAN OVERDRIVE ACTIVATED! 🌈");
     }
 	explodePet() {
-		// 1. Mark as dead 
-		this.activePet.isDead = true;
-		this.activePet.hunger = 100;
-		this.stopSound('nyanSound');
+        // Prevent double-triggering if the explosion sequence is already running
+        if (this.state.action === "bloating" || this.state.action === "dead") return;
 
-		// 2. Bloat Animation: Wait 2 seconds, then explode
-		setTimeout(() => {
-			// Trigger the gore particles
-			const numParticles = 60;
-			for (let i = 0; i < numParticles; i++) {
-				this.state.particles.push({
-					x: this.state.x, y: this.state.y,
-					vx: (Math.random() - 0.5) * 20,
-					vy: (Math.random() - 0.5) * 20,
-					s: 3 + Math.random() * 5, 
-					c: "#8b0000",
-					life: 80 + Math.random() * 40
-				});
-			}
-			
-			this.state.showCarcass = true;
-			this.say("...");
+        // 🛑 STAGE 1: START THE TIMED DEATH SEQUENCE (Bloat for 2 seconds)
+        // Keep activePet.isDead FALSE for now so the normal renderer doesn't draw a ghost yet
+        this.state.action = "bloating"; 
+        this.state.actionTimer = 120; // 2 seconds at ~60fps
+        this.stopSound('nyanSound');
+        this.say("🤢 BLECH...");
 
-			// 3. Ghost Walk: After explosion, show ghost for 3 seconds
-			this.state.isGhost = true; 
-			setTimeout(() => {
-				this.state.isGhost = false; // Finished, stop rendering ghost
-				this.state.action = "dead";
-			}, 3000);
+        // Play a warning bloat or rumbling sound here if you have one!
 
-		}, 2000); // 2 seconds of bloating
-	}
+        setTimeout(() => {
+            // 💥 STAGE 2: THE EXPLOSION (2 Seconds Later)
+            this.state.action = "explode";
+            this.say("💥 SPLAT!");
+            
+            // Trigger high-velocity systemic gore particles & body chunks
+            const numParticles = 80; // Bumped up for maximum impact density
+            for (let i = 0; i < numParticles; i++) {
+                const isChunk = Math.random() > 0.75; // 25% chance to spawn a larger body chunk
+                this.state.particles.push({
+                    // Capture the exact snapshot coordinate where the pet died
+                    x: this.state.x, 
+                    y: this.state.y - 20, 
+                    vx: (Math.random() - 0.5) * 16,
+                    vy: (Math.random() - 0.7) * 18, // Propel chunks slightly upward structurally
+                    s: isChunk ? 6 + Math.random() * 6 : 2 + Math.random() * 4, // Varying chunk dimensions
+                    c: isChunk ? "#5c0000" : "#8b0000", // Darker crimson for chunks, standard gore for spray
+                    life: isChunk ? 120 + Math.random() * 60 : 60 + Math.random() * 40,
+                    isGoreChunk: isChunk // Flag in case your particle renderer checks for rotation/gravity
+                });
+            }
+
+            // Hide the primary physical body completely
+            this.state.showCarcass = false; 
+
+            // 👻 STAGE 3: THE SPIRIT MANIFESTATION (Wait 2 seconds in empty space, then spawn ghost)
+            setTimeout(() => {
+                // Now we officially commit the database record to deceased status
+                this.activePet.isDead = true;
+                this.activePet.hunger = 100;
+                
+                // Trigger Ghost State rules
+                this.state.isGhost = true; 
+                this.state.action = "walk"; // Set back to walk so it cycles its frames
+                this.state.actionTimer = 300;
+                this.say("👻 OoooOoo...");
+                
+                console.log(`🪦 [Pet Engine]: ${this.activePet.name} has crossed the mortal boundary.`);
+                this.saveData(); // Commit death state permanently to localStorage
+
+            }, 2000); // Time spent as an empty blast zone before ghost rises
+
+        }, 2000); // Duration of the swelling/bloating warning animation
+    }
 	teasePet() {
 		if (this.activePet.isDead) return;
 
