@@ -1281,10 +1281,12 @@ export class StreamPet {
 // SECTION 5: pet system helpers
 // ===============================================
 	getPos(pctX, pctY, offY = 0) {
-		const visibleW = this.canvas.width;
-		const visibleH = this.canvas.height;
+		// 1. Get the container's physical dimensions (the "World")
+		const visibleW = this.canvas.clientWidth;
+		const visibleH = this.canvas.clientHeight;
 
-		// Just convert percentages to raw pixel coordinates on the base canvas
+		// 2. Calculate the position based on the percentage (0-100)
+		// This ignores any ctx.scale() transformations
 		const finalX = (pctX / 100) * visibleW;
 		const finalY = (pctY / 100) * visibleH;
 
