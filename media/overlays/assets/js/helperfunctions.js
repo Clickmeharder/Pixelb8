@@ -102,6 +102,38 @@ function setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectio
 }
 
 // =========================================================================
+// --- DOM UTILITY & EVENT ROUTING HELPERS ---
+// =========================================================================
+/* Safely attaches a click listener to an element if it exists in the DOM. */
+function onSafeClick(id, callback, stopPropagation = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("click", (e) => {
+        if (stopPropagation) e.stopPropagation();
+        callback(e, el);
+    });
+}
+/* Safely attaches a change listener to an input element if it exists in the DOM. */
+function onSafeChange(id, callback) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", (e) => callback(e, el));
+}
+/* Inline file streaming parsing utility to cut file handler duplicate code blocks */
+function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
+    if (!inputElement) return;
+    inputElement.addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (!file) {
+            onClearFallback();
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (evt) => onLoadedSuccess(evt.target.result, file.name);
+        reader.readAsDataURL(file);
+    });
+}
+// =========================================================================
 // GLOBAL VIEWPORT CANVAS INTERACTION CLOSER
 // =========================================================================
 // Closes open dropdown menus when clicking on the open layout space in the OBS Interact Window
