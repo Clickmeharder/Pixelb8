@@ -30,7 +30,38 @@ function parseHSLA(str) {
     return { h: vals[0], s: vals[1], l: vals[2], a: vals[3] || 1 };
 }
 
- 
+
+const AVAILABLE_IN_ANIMATIONS = ["none", "fadeIn", "bounceIn", "zoomIn", "slideInDown", "slideInUp"];
+const AVAILABLE_OUT_ANIMATIONS = ["none", "fadeOut", "bounceOut", "zoomOut", "slideOutUp", "slideOutDown"];
+ const CUSTOM_SELECT_DATA = {
+    "reward-text-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "reward-img-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "reward-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
+    "reward-img-out-anim": AVAILABLE_OUT_ANIMATIONS,
+    "reward-font-weight": [
+        { value: "normal", label: "Normal (400)" },
+        { value: "bold", label: "Bold (700)" },
+        { value: "900", label: "Black (900)" },
+        { value: "300", label: "Light (300)" }
+    ],
+    "reward-img-mode": [
+        { value: "loop", label: "Loop Continuously" },
+        { value: "once", label: "Play Once (Reset)" }
+    ],
+    // Bit Cheer Manager Additions
+    "bit-tier-selector": [
+        { value: "1", label: "Tier 1 (1+ Bits)" },
+        { value: "100", label: "Tier 2 (100+ Bits)" },
+        { value: "500", label: "Tier 3 (500+ Bits)" },
+        { value: "1000", label: "Tier 4 (1000+ Bits)" },
+        { value: "5000", label: "Tier 5 (5000+ Bits)" }
+    ],
+    // Explicitly binding the Bit Animation IDs so populateCustomDropdowns maps them safely
+    "bit-text-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "bit-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
+    "bit-img-in-anim": AVAILABLE_IN_ANIMATIONS,
+    "bit-img-out-anim": AVAILABLE_OUT_ANIMATIONS
+};
  // Programmatic getter and setter wrappers to maintain backward compatibility with your save actions
 function getCustomSelectValue(id) {
     return customSelectValues[id];

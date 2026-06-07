@@ -605,35 +605,7 @@ const DRAGGABLE_WINDOWS_CONFIG = [
 ];
 
 // Data registries for the options blocks
-const CUSTOM_SELECT_DATA = {
-    "reward-text-in-anim": AVAILABLE_IN_ANIMATIONS,
-    "reward-img-in-anim": AVAILABLE_IN_ANIMATIONS,
-    "reward-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
-    "reward-img-out-anim": AVAILABLE_OUT_ANIMATIONS,
-    "reward-font-weight": [
-        { value: "normal", label: "Normal (400)" },
-        { value: "bold", label: "Bold (700)" },
-        { value: "900", label: "Black (900)" },
-        { value: "300", label: "Light (300)" }
-    ],
-    "reward-img-mode": [
-        { value: "loop", label: "Loop Continuously" },
-        { value: "once", label: "Play Once (Reset)" }
-    ],
-    // Bit Cheer Manager Additions
-    "bit-tier-selector": [
-        { value: "1", label: "Tier 1 (1+ Bits)" },
-        { value: "100", label: "Tier 2 (100+ Bits)" },
-        { value: "500", label: "Tier 3 (500+ Bits)" },
-        { value: "1000", label: "Tier 4 (1000+ Bits)" },
-        { value: "5000", label: "Tier 5 (5000+ Bits)" }
-    ],
-    // Explicitly binding the Bit Animation IDs so populateCustomDropdowns maps them safely
-    "bit-text-in-anim": AVAILABLE_IN_ANIMATIONS,
-    "bit-text-out-anim": AVAILABLE_OUT_ANIMATIONS,
-    "bit-img-in-anim": AVAILABLE_IN_ANIMATIONS,
-    "bit-img-out-anim": AVAILABLE_OUT_ANIMATIONS
-};
+
 // State engine to track actively selected values since we don't have standard .value anymore
 let customSelectValues = {
     "reward-text-in-anim": "none",
@@ -1764,11 +1736,6 @@ function closeContextMenu() {
 // --- CORE COMMAND LOGIC & WIDGET VISIBILITY CONTROLS ---
 // --- CENTRALIZED COMMAND REGISTRY ---
 // Helper to parse ID or default to latest
-function resolveTargetId(message, type) {
-    const parts = message.trim().split(" ");
-    const id = parts[0]; // Assume first argument is the ID
-    return activeTimers[id] && activeTimers[id].type === type ? id : getLatestInstanceIdByType(type);
-}
 
 const commandsRegistry = {
     "hello": {
@@ -2149,10 +2116,8 @@ function playSound(audioSource, volume = 0.8) {
         console.error("Failed to initialize audio element:", e);
     }
 }
-
 // Staged storage arrays for the current item actively open in the template form editor
 let stagedSoundsPool = [];
-
 // Helper utility to render active sound chips inside the editor panel
 function renderStagedSoundsUI() {
     const listContainer = document.getElementById("reward-sounds-list");
@@ -2508,6 +2473,12 @@ function getLatestInstanceIdByType(type) {
     }
     return null;
 }
+function resolveTargetId(message, type) {
+    const parts = message.trim().split(" ");
+    const id = parts[0]; // Assume first argument is the ID
+    return activeTimers[id] && activeTimers[id].type === type ? id : getLatestInstanceIdByType(type);
+}
+
 // ================END OF TIMER SHIT========================================
 // ========================================================================================================================================================
 
