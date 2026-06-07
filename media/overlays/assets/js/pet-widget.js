@@ -501,7 +501,7 @@ constructor() {
         this.widgetBounds = savedBounds ? JSON.parse(savedBounds) : WIDGET_DEFAULT_BOUNDS;
 
         if (!document.getElementById("pet-widget")) {
-            this.injectViewport(overlayWrapper);
+            this.injectWidgetViewport(overlayWrapper);
         }
 
         // 2. Extract Native Contexts
@@ -775,7 +775,7 @@ constructor() {
     }
 
 // ===============================================
-// SECTION 3: UI ASSEMBLY, TEMPLATES & BINDINGS
+// SECTION 3: UI ASSEMBLY synchronization, TEMPLATES & BINDINGS
 // ===============================================
 
 
