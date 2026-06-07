@@ -753,7 +753,7 @@ async function init() {
     }
     if (s.entropiaWidgetEnabled) {
         try {
-            const module = await import('./entropia-widget-refactored.js');
+            const module = await import('./entropiauniverse.js');
             window.EntropiaWidget = module.EntropiaWidget;
             window.entropiaLogParser = new module.EntropiaWidget();
             console.log("✅ Entropia Widget Loaded on boot.");
