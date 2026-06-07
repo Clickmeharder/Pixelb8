@@ -1804,6 +1804,20 @@ export class StreamPet {
 					}
 				}
 				break;
+				
+		//original tower walk and scratch part:		
+/*         case "walk_to_tower_scratch":
+            if (walkToPoint(towerPos.x - 15, towerPos.y)) { state.facing = 1; state.action = "scratching"; state.actionTimer = 200; say("Scritch! 🐾"); }
+            break;
+        case "walk_to_tower_climb":
+            if (walkToPoint(towerPos.x, towerPos.y - 145)) { state.action = "tower_sleep"; state.actionTimer = 1500; }
+            break;
+        case "scratching":
+             if (t % 3 === 0) state.particles.push({x: state.x + 10, y: state.y - 10, vx: Math.random()*4, vy: -2, s: 2, c: "#d2b48c", life: 15});
+             if (state.actionTimer <= 0) state.action = "idle";
+             break; */
+				
+				
 			case "walk_to_tower_scratch":
                 // Walk to the base of the tower using the zoom-calculated position
                 if (walkToPoint(towerPos.x, towerPos.y)) {
