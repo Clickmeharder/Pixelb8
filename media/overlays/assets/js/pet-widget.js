@@ -177,7 +177,7 @@ const PET_STATE_LIBRARY = {
 	},
 
 	climbing_tower: (pet, ctx) => {
-		const perchY = ctx.towerPos.y;
+		const perchY = ctx.towerPos.y - 150;
 		pet.state.y -= 1.5;
 		
 		if (pet.state.y <= perchY) {
