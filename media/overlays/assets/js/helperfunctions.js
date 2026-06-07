@@ -87,4 +87,23 @@ if (typeof window !== "undefined" && !window._globalDropdownCloserWired) {
     window._globalDropdownCloserWired = true;
     console.log("🚀 [Helper Engine]: Global OBS Dropdown Closer successfully wired to DOM.");
 }
- console.log(" [Helper Functions]: Initialized.");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================================
+// END OF HELPERFUNCTIONS FILE
+// =========================================================================
+console.log(" [Helper Functions]: Initialized.");
