@@ -529,17 +529,17 @@ constructor() {
         this.injectUI();
         this.resizePetWidget();
         
- 
-        
         // 6. Memory De-serialization & Execution Loops
         this.loadData(); // This instantly overwrites the default structures above with your active save file
-        this.initContainerListeners(); 
+        
         this.initPetPlacement();
         this.renderControlPanel();
         
         this.saveInterval = setInterval(() => this.saveData(), 5000);
         this.animate = this.animate.bind(this);
         this.animate();
+		
+		this.initContainerListeners(); 
         this.bindUIEventListeners();
     }
 
@@ -730,10 +730,9 @@ constructor() {
     }
 
 
-    // ==========================================
-    // SECTION 2:some setup and bs
-    // ==========================================
-
+// ==========================================
+// SECTION 2:some setup and bs
+// ==========================================
     resizePetWidget() {
         if (!this.widgetContainer || !this.canvas) return;
         this.canvas.width = this.widgetContainer.clientWidth;
