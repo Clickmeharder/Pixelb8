@@ -65,16 +65,7 @@ modes:
 */
 //__________________________________________________
 //==================================================
-// --- MODULE IMPORTS ---
-// import { EntropiaWidget } from './entropia-widget.js';
-//import { EntropiaWidget } from './entropia-widget-refactored.js';
-//import { StreamJukebox } from './jukebox.js';
-//import { StreamJukebox } from './pet-widget.js';
 
-// Call this inside your document ready or window load initialization routine
-
-console.log("🚀 [Module Load]: entropia-widget-refactored.js version 0.002 imported successfully without dependencies!");
-console.log("🚀 [Module Load]: jukebox.js version 1.000 imported successfully!");
 
 // --- STORAGE & SETTINGS INITIALIZATION ---
 let settings = JSON.parse(localStorage.getItem('p8_settings')) || {
@@ -797,7 +788,7 @@ async function init() {
         syncAllToggleUI();
     }
     
-    console.log("ttvoverlayapp.js version 0.112 finished loading");
+    console.log("🚀ttvoverlayapp.js version 0.112 finished loading");
 }
 function injectAllWidgetCommands() {
     const activeWidgets = [
