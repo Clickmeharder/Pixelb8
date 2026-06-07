@@ -841,39 +841,6 @@ export class StreamPet {
         this.canvas.height = this.widgetContainer.clientHeight;
         this.ctx.imageSmoothingEnabled = false;
     }
-    setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
-        console.log(`Setting up: ${displayId}, Items count: ${optionItems ? optionItems.length : 'NULL'}`);
-        const displayEl = document.getElementById(displayId);
-        const optionsEl = document.getElementById(optionsId);
-        if (!displayEl || !optionsEl) return;
-
-        optionsEl.innerHTML = "";
-        optionItems.forEach(anim => {
-            const opt = document.createElement("div");
-            opt.className = "option-item";
-            opt.style.cssText = "padding: 6px 8px; cursor: pointer; color: #fff; font-size: 12px;";
-            opt.innerText = anim;
-            
-            opt.addEventListener("mouseenter", () => opt.style.background = "#27272a");
-            opt.addEventListener("mouseleave", () => opt.style.background = "transparent");
-            
-            opt.addEventListener("click", (e) => {
-                e.stopPropagation();
-                displayEl.innerText = anim;
-                optionsEl.style.display = "none";
-                if (onSelectionCallback) onSelectionCallback(anim);
-            });
-            optionsEl.appendChild(opt);
-        });
-
-        displayEl.addEventListener("click", (e) => {
-            e.stopPropagation();
-            document.querySelectorAll(".custom-select-options-box").forEach(box => {
-                if (box !== optionsEl) box.style.display = "none";
-            });
-            optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
-        });
-    }
 
 // ===============================================
 // SECTION 3: UI ASSEMBLY synchronization, TEMPLATES & BINDINGS
