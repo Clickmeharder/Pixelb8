@@ -1826,24 +1826,10 @@ export class StreamPet {
                 }
                 break;
 
-            case "scratching":
-                // Spawn a few cardboard shred particles dynamically for effect
-                if (t % 8 === 0) {
-                    this.state.particles.push({
-                        x: this.state.x + (this.state.facing * 12), 
-                        y: this.state.y + 10, 
-                        vx: -this.state.facing * (1 + Math.random() * 2), 
-                        vy: -1 - Math.random() * 2, 
-                        s: 1.5, 
-                        c: "#d7ccc8", 
-                        life: 15
-                    });
-                }
-                if (this.state.actionTimer <= 0) {
-                    this.state.action = "idle";
-                    this.state.actionTimer = 300;
-                }
-                break;
+			case "scratching":
+				 if (t % 3 === 0) state.particles.push({x: state.x + 10, y: state.y - 10, vx: Math.random()*4, vy: -2, s: 2, c: "#d2b48c", life: 15});
+				 if (state.actionTimer <= 0) state.action = "idle";
+				 break; 
 
             case "walk_to_tower_climb":
                 // Walk to the base, then cleanly switch over to the climbing state
