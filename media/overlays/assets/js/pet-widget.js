@@ -870,9 +870,6 @@ export class StreamPet {
             console.log("🐾 [Pet Widget]: Global Multi-Pet Interface Injected.");
         }
 
-        // 👇 VITAL BRIDGE STEP:
-        // Locate the target element where your matrix table should actually render.
-        // Replace '.pet-matrix-container-target' with whatever class/id is inside your StreamPet.controlsTemplate
         this.controlsContainer = petSection.querySelector('.pet-matrix-container-target') || petSection;
     }
 	renderControlPanel() {
