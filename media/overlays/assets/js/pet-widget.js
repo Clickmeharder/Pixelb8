@@ -163,8 +163,8 @@ export class StreamPet {
             }
         };
 
-
-		this.state.commandAccess = this.state.commandAccess || {
+		this.state.commandAccess = this.getDefaultCommandMatrix();
+/* 		this.state.commandAccess = this.state.commandAccess || {
             feed:      { chat: true,  cp: true },
             play:      { chat: true,  cp: true },
             dance:     { chat: true,  cp: false },
@@ -182,7 +182,7 @@ export class StreamPet {
             hidepet:   { chat: true,  cp: true },  
             showpet:   { chat: true,  cp: true },  
             togglepet: { chat: true,  cp: true }   
-        };
+        }; */
         // Initialize Audio Sub-Engine
         this.initAudioEngine();
 
@@ -283,138 +283,134 @@ export class StreamPet {
     }
 
 	loadData() {
-        const saved = localStorage.getItem("greta_ultra_v10");
-        if (saved) {
-            const loadedBundle = JSON.parse(saved);
-            
-            if (loadedBundle.registry) this.registry = loadedBundle.registry;
-            if (loadedBundle.state) {
-                // Merge loaded state into current state
-                this.state = { ...this.state, ...loadedBundle.state };
-                
-                // Check for the new property, and set default if it's missing
-                if (this.state.tummylimit === undefined) {
-                    this.state.tummylimit = 8;
-                }
+		const saved = localStorage.getItem("greta_ultra_v10");
+		if (saved) {
+			const loadedBundle = JSON.parse(saved);
+			
+			if (loadedBundle.registry) this.registry = loadedBundle.registry;
+			if (loadedBundle.state) {
+				// Merge loaded state into current state
+				this.state = { ...this.state, ...loadedBundle.state };
+				
+				// Check for the new property, and set default if it's missing
+				if (this.state.tummylimit === undefined) {
+					this.state.tummylimit = 8;
+				}
 
-                // 👇 BIOLOGICAL PATCH: Prevent old localStorage entries from deleting new commands
-                if (loadedBundle.state.commandAccess) {
-                    this.state.commandAccess = {
-                        feed:      { chat: true,  cp: true },
-                        play:      { chat: true,  cp: true },
-                        dance:     { chat: true,  cp: false },
-                        treat:     { chat: false, cp: true }, 
-                        trick:     { chat: true,  cp: false },
-                        status:    { chat: true,  cp: false },
-                        tease:     { chat: true,  cp: true },
-                        revive:    { chat: true,  cp: true }, // Assured survival route
-                        help:      { chat: true,  cp: false }, 
-                        rewards:   { chat: true,  cp: false }, 
-                        nyan:      { chat: true,  cp: true },  
-                        clear:     { chat: true,  cp: true },  
-                        species:   { chat: true,  cp: true },  
-                        hidepet:   { chat: true,  cp: true },  
-                        showpet:   { chat: true,  cp: true },  
-                        togglepet: { chat: true,  cp: true },
-                        ...loadedBundle.state.commandAccess // Merges old user custom settings on top safely
-                    };
-                }
-            }
-            // Loop through all individual isolated profiles to catch offline progression separately
-            const now = Date.now();
-            Object.keys(this.registry.profiles).forEach(key => {
-                const profile = this.registry.profiles[key];
-                const msOffline = now - profile.lastHungerTick;
-                if (msOffline >= this.HUNGER_TICK_MS && !profile.isDead) {
-                    const pointsGained = Math.floor(msOffline / this.HUNGER_TICK_MS);
-                    let potentialHunger = profile.hunger + pointsGained;
-                    if (potentialHunger >= 100) { 
-                        profile.hunger = 70; 
-                        profile.lastHungerTick = now; 
-                    } else { 
-                        profile.hunger = potentialHunger; 
-                        profile.lastHungerTick = now - (msOffline % this.HUNGER_TICK_MS); 
-                    }
-                }
-            });
-            
-            const nameIn = document.getElementById("nameInput"); 
-            if (nameIn) nameIn.value = this.activePet.name;
-            const tummySlider = document.getElementById("tummyLimitRange");
-            const tummyDisplay = document.getElementById("tummyLimitValue");
+				// 👇 BIOLOGICAL PATCH: Automatically loops blueprint definitions to repair old user custom settings
+				if (loadedBundle.state.commandAccess) {
+					const defaults = this.getDefaultCommandMatrix();
+					const loadedAccess = loadedBundle.state.commandAccess || {};
 
-            // Ensure we use the loaded state value, default to 8 if not found
-            const currentLimit = this.state.tummylimit !== undefined ? this.state.tummylimit : 8;
+					this.state.commandAccess = {};
+					Object.keys(defaults).forEach(cmd => {
+						// Retain specific channel adjustments if present, otherwise safe fallbacks are applied
+						this.state.commandAccess[cmd] = loadedAccess[cmd] !== undefined 
+							? loadedAccess[cmd] 
+							: defaults[cmd];
+					});
+				}
+			}
+			
+			// Loop through all individual isolated profiles to catch offline progression separately
+			const now = Date.now();
+			Object.keys(this.registry.profiles).forEach(key => {
+				const profile = this.registry.profiles[key];
+				const msOffline = now - profile.lastHungerTick;
+				if (msOffline >= this.HUNGER_TICK_MS && !profile.isDead) {
+					const pointsGained = Math.floor(msOffline / this.HUNGER_TICK_MS);
+					let potentialHunger = profile.hunger + pointsGained;
+					if (potentialHunger >= 100) { 
+						profile.hunger = 70; 
+						profile.lastHungerTick = now; 
+					} else { 
+						profile.hunger = potentialHunger; 
+						profile.lastHungerTick = now - (msOffline % this.HUNGER_TICK_MS); 
+					}
+				}
+			});
+			
+			const nameIn = document.getElementById("nameInput"); 
+			if (nameIn && this.activePet) nameIn.value = this.activePet.name;
+			
+			const tummySlider = document.getElementById("tummyLimitRange");
+			const tummyDisplay = document.getElementById("tummyLimitValue");
 
-            if (tummySlider) {
-                tummySlider.value = currentLimit;
-                if (tummyDisplay) {
-                    tummyDisplay.innerText = currentLimit;
-                }
-            }
-            const displayEl = document.getElementById("speciesSelectDisplay");
-            if (displayEl && this.registry.activeSpecies) {
-                const speciesMap = {
-                    kitty: "🐈 Kitty (Feline Engine v10)",
-                    puppy: "🐕 Puppy (Canine Kinematics Engine)",
-                    spider: "🕷️ Spider (Arachnid Procedural Pathing)",
-                    goldfish: "🐟 Goldfish (Aquatic Fluid Physics)"
-                };
-                displayEl.innerText = speciesMap[this.registry.activeSpecies] || speciesMap.kitty;
-            }
+			// Ensure we use the loaded state value, default to 8 if not found
+			const currentLimit = this.state.tummylimit !== undefined ? this.state.tummylimit : 8;
 
-            const hideBorderCheck = document.getElementById("hideBorderToggle");
-            if (hideBorderCheck) hideBorderCheck.checked = this.state.hideBorder || false;
+			if (tummySlider) {
+				tummySlider.value = currentLimit;
+				if (tummyDisplay) {
+					tummyDisplay.innerText = currentLimit;
+				}
+			}
+			
+			const displayEl = document.getElementById("speciesSelectDisplay");
+			if (displayEl && this.registry.activeSpecies) {
+				const speciesMap = {
+					kitty: "🐈 Kitty (Feline Engine v10)",
+					puppy: "🐕 Puppy (Canine Kinematics Engine)",
+					spider: "🕷️ Spider (Arachnid Procedural Pathing)",
+					goldfish: "🐟 Goldfish (Aquatic Fluid Physics)"
+				};
+				displayEl.innerText = speciesMap[this.registry.activeSpecies] || speciesMap.kitty;
+			}
 
-            const hideBackgroundCheck = document.getElementById("hideBackgroundToggle");
-            if (hideBackgroundCheck) hideBackgroundCheck.checked = this.state.hideBackground || false;
+			const hideBorderCheck = document.getElementById("hideBorderToggle");
+			if (hideBorderCheck) hideBorderCheck.checked = this.state.hideBorder || false;
 
-            const hideStatusCheck = document.getElementById("hideStatusToggle");
-            if (hideStatusCheck) hideStatusCheck.checked = this.state.hideStatus || false;
+			const hideBackgroundCheck = document.getElementById("hideBackgroundToggle");
+			if (hideBackgroundCheck) hideBackgroundCheck.checked = this.state.hideBackground || false;
 
-            const hideNameplateCheck = document.getElementById("hideNameplateToggle");
-            if (hideNameplateCheck) hideNameplateCheck.checked = this.state.hideNameplate || false;
+			const hideStatusCheck = document.getElementById("hideStatusToggle");
+			if (hideStatusCheck) hideStatusCheck.checked = this.state.hideStatus || false;
 
-            const checkT = document.getElementById("showTower"); 
-            if (checkT) checkT.checked = this.state.layout.showTower;
-            
-            const zoomSlider = document.getElementById("canvasZoom");
-            const zoomDisplay = document.getElementById("zoomValue");
-            if (zoomSlider) {
-                let savedZoom = this.state.zoom !== undefined ? this.state.zoom : 0;
-                zoomSlider.value = savedZoom;
-                let scaleVal = savedZoom >= 0 ? 1.0 + (savedZoom * 0.5) : 1.0 + (savedZoom * 0.25);
-                if (zoomDisplay) zoomDisplay.textContent = `${scaleVal.toFixed(1)}x`;
+			const hideNameplateCheck = document.getElementById("hideNameplateToggle");
+			if (hideNameplateCheck) hideNameplateCheck.checked = this.state.hideNameplate || false;
 
-                if (!zoomSlider.dataset.listenerWired) {
-                    zoomSlider.addEventListener("input", (e) => {
-                        const val = parseFloat(e.target.value);
-                        this.state.zoom = val;
-                        let dynamicScale = val >= 0 ? 1.0 + (val * 0.5) : 1.0 + (val * 0.25);
-                        if (zoomDisplay) zoomDisplay.textContent = `${dynamicScale.toFixed(1)}x`;
-                    });
-                    zoomSlider.dataset.listenerWired = "true";
-                }
-            }
+			const checkT = document.getElementById("showTower"); 
+			if (checkT && this.state.layout) checkT.checked = this.state.layout.showTower;
+			
+			const zoomSlider = document.getElementById("canvasZoom");
+			const zoomDisplay = document.getElementById("zoomValue");
+			if (zoomSlider) {
+				let savedZoom = this.state.zoom !== undefined ? this.state.zoom : 0;
+				zoomSlider.value = savedZoom;
+				let scaleVal = savedZoom >= 0 ? 1.0 + (savedZoom * 0.5) : 1.0 + (savedZoom * 0.25);
+				if (zoomDisplay) zoomDisplay.textContent = `${scaleVal.toFixed(1)}x`;
 
-            Object.keys(this.state.layout).forEach(k => { 
-                if (k === 'showTower' || k === 'bedColor') return;
-                const el = document.getElementById(k);
-                if (el) el.value = this.state.layout[k];
-            });
-        }
-        this.applyEditModeStyles();
-        this.applyVisibilityStates();
-        this.initSwatches(); 
-        this.syncSpeciesInterfaceToggle();
-    }
+				if (!zoomSlider.dataset.listenerWired) {
+					zoomSlider.addEventListener("input", (e) => {
+						const val = parseFloat(e.target.value);
+						this.state.zoom = val;
+						let dynamicScale = val >= 0 ? 1.0 + (val * 0.5) : 1.0 + (val * 0.25);
+						if (zoomDisplay) zoomDisplay.textContent = `${dynamicScale.toFixed(1)}x`;
+					});
+					zoomSlider.dataset.listenerWired = "true";
+				}
+			}
+
+			if (this.state.layout) {
+				Object.keys(this.state.layout).forEach(k => { 
+					if (k === 'showTower' || k === 'bedColor') return;
+					const el = document.getElementById(k);
+					if (el) el.value = this.state.layout[k];
+				});
+			}
+		}
+		this.applyEditModeStyles();
+		this.applyVisibilityStates();
+		this.initSwatches(); 
+		this.syncSpeciesInterfaceToggle();
+	}
+
     resize() {
         if (!this.widgetContainer || !this.canvas) return;
         this.canvas.width = this.widgetContainer.clientWidth;
         this.canvas.height = this.widgetContainer.clientHeight;
         this.ctx.imageSmoothingEnabled = false;
     }
-
     getPos(pctX, pctY, offY = 0) {
         const visibleW = this.canvas.width;
         const visibleH = this.canvas.height;
@@ -552,6 +548,28 @@ export class StreamPet {
     // ==========================================
     // SECTION 4: CHAT COMMAND ROUTER
     // ==========================================
+	getDefaultCommandMatrix() {
+		return {
+			feed:      { chat: true,  cp: true },
+			play:      { chat: true,  cp: true },
+			dance:     { chat: true,  cp: false },
+			treat:     { chat: false, cp: true }, 
+			trick:     { chat: true,  cp: false },
+			status:    { chat: true,  cp: false },
+			tease:     { chat: true,  cp: true },
+			paintbomb: { chat: true,  cp: true }, // Added once here safely
+			revive:    { chat: true,  cp: true }, 
+			help:      { chat: true,  cp: false }, 
+			rewards:   { chat: true,  cp: false }, 
+			nyan:      { chat: true,  cp: true },  
+			clear:     { chat: true,  cp: true },  
+			species:   { chat: true,  cp: true },  
+			hidepet:   { chat: true,  cp: true },  
+			showpet:   { chat: true,  cp: true },  
+			togglepet: { chat: true,  cp: true }   
+		};
+	}
+
 	getCommands(sendNotice) {
         const petExecution = (user, message, flags) => {
             // 1. Clean the incoming input text
