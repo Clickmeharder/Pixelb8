@@ -551,64 +551,114 @@ export class StreamPet {
     }
 
 	destroyWidget() {
-        console.log("⚠️ [Pet Widget]: Initiating ecosystem tear-down sequence...");
+		console.log("⚠️ [Pet Widget]: Initiating ecosystem tear-down sequence...");
+		// ========================================================
+		// ⏰ BLOCK 1: ENGINE LOOPS & MECHANICAL TIMERS
+		// ========================================================
+		{
+			if (this.animationFrameId) {
+				cancelAnimationFrame(this.animationFrameId);
+				this.animationFrameId = null;
+			}
+			if (this.saveInterval) {
+				clearInterval(this.saveInterval);
+				this.saveInterval = null;
+			}
+			if (this.bubbleTimeout) {
+				clearTimeout(this.bubbleTimeout);
+				this.bubbleTimeout = null;
+			}
+			if (this.explodeStage1Timeout) {
+				clearTimeout(this.explodeStage1Timeout);
+				this.explodeStage1Timeout = null;
+			}
+			if (this.explodeStage2Timeout) {
+				clearTimeout(this.explodeStage2Timeout);
+				this.explodeStage2Timeout = null;
+			}
+			console.log("   -> [Teardown]: Core loop engine and async timers defused.");
+		}
 
-        // ========================================================
-        // 1. ENGINE LOOPS & MECHANICAL TIMERS
-        // ========================================================
-        if (this.animationFrameId) {
-            cancelAnimationFrame(this.animationFrameId);
-            this.animationFrameId = null;
-        }
-        if (this.saveInterval) {
-            clearInterval(this.saveInterval);
-            this.saveInterval = null;
-        }
+		// ========================================================
+		// 🔊 BLOCK 2: HARDWARE AUDIO ENGINE MUTING & BUFFER PURGE
+		// ========================================================
+		{
+			if (this.audioAssets) {
+				Object.keys(this.audioAssets).forEach(key => {
+					const soundInstance = this.audioAssets[key];
+					if (soundInstance) {
+						try {
+							soundInstance.pause();
+							soundInstance.currentTime = 0;
+							soundInstance.src = "";
+							soundInstance.load(); 
+						} catch (audioErr) {
+							console.warn(`[!] Audio Buffer Purge Failed [${key}]:`, audioErr);
+						}
+						this.audioAssets[key] = null;
+					}
+				});
+				this.audioAssets = {};
+			}
+			if (window.soundSettings) {
+				delete window.soundSettings;
+			}
+			console.log("   -> [Teardown]: Hardware audio channels silenced and purged.");
+		}
 
-        // ========================================================
-        // 2. DOM INTERFACE DESTRUCTION (Control Panels & Custom Engine Display)
-        // ========================================================
-        const optionsEl = document.getElementById("speciesSelectOptions");
-        if (optionsEl) optionsEl.innerHTML = "";
+		// ========================================================
+		// 🛠️ BLOCK 3: CONTROL PANEL & WINDOW EVENT LISTENERS
+		// ========================================================
+		{
+			const zoomSlider = document.getElementById("canvasZoom");
+			if (zoomSlider && this._boundZoomHandler) {
+				zoomSlider.removeEventListener("input", this._boundZoomHandler);
+				this._boundZoomHandler = null;
+			}
+			if (this._boundResizeHandler) {
+				window.removeEventListener('resizePetWidget', this._boundResizeHandler);
+				this._boundResizeHandler = null;
+			}
+			if (this._boundGlobalClickCloser) {
+				document.removeEventListener('click', this._boundGlobalClickCloser);
+				this._boundGlobalClickCloser = null;
+			}
+			if (this.containerObserver) {
+				this.containerObserver.disconnect();
+				this.containerObserver = null;
+			}
+			console.log("   -> [Teardown]: Hardware input handlers and DOM observers unhooked.");
+		}
 
-        const controlPanel = document.getElementById("pet-widget-controls");
-        if (controlPanel && controlPanel.parentNode) {
-            controlPanel.parentNode.removeChild(controlPanel);
-            console.log("   -> [DOM Cleanup]: Control Panel Matrix Interface removed.");
-        }
+		// ========================================================
+		// 🧹 BLOCK 4: DOM INTERFACE DESTRUCTION
+		// ========================================================
+		{
+			const optionsEl = document.getElementById("speciesSelectOptions");
+			if (optionsEl) optionsEl.innerHTML = "";
 
-        // NEW PURGE: Remove the main pet canvas overlay window completely
-        if (this.widgetContainer && this.widgetContainer.parentNode) {
-            this.widgetContainer.parentNode.removeChild(this.widgetContainer);
-            console.log("   -> [DOM Cleanup]: Main pet viewport element removed from overlay-wrapper.");
-        }
+			const controlPanel = document.getElementById("pet-widget-controls");
+			if (controlPanel && controlPanel.parentNode) {
+				controlPanel.parentNode.removeChild(controlPanel);
+			}
 
-        // ========================================================
-        // 3. HARDWARE & CONTEXT LISTENER HANDLES
-        // ========================================================
-        if (this.containerObserver) {
-            this.containerObserver.disconnect();
-            this.containerObserver = null;
-        }
-        if (this._boundResizeHandler) {
-            window.removeEventListener('resizePetWidget', this._boundResizeHandler);
-            this._boundResizeHandler = null;
-        }
-        if (this._boundGlobalClickCloser) {
-            document.removeEventListener('click', this._boundGlobalClickCloser);
-            this._boundGlobalClickCloser = null;
-        }
+			if (this.widgetContainer && this.widgetContainer.parentNode) {
+				this.widgetContainer.parentNode.removeChild(this.widgetContainer);
+			}
+			console.log("   -> [Teardown]: UI Viewports and Control Panel elements deleted.");
+		}
 
-        // ========================================================
-        // 4. MEMORY RE-REFERENCES FOR GARBAGE COLLECTION
-        // ========================================================
-        this.canvas = null;
-        this.ctx = null;
-        this.widgetContainer = null;
-        this.controlsContainer = null;
-        console.log("✅ [Pet Widget]: Teardown complete. All core nodes destroyed.");
-    }
-	
+		// ========================================================
+		// 🗑️ BLOCK 5: GC POINTER NULLIFICATION
+		// ========================================================
+		{
+			this.canvas = null;
+			this.ctx = null;
+			this.widgetContainer = null;
+			this.controlsContainer = null;
+			console.log("✅ [Pet Widget]: Teardown complete. All core nodes cleared from memory.");
+		}
+	}
 	injectWidgetViewport(overlayWrapper) {
         const petViewport = document.createElement("div");
         petViewport.id = "pet-widget";
@@ -632,7 +682,6 @@ export class StreamPet {
         overlayWrapper.appendChild(petViewport);
         console.log("🐾 [Pet Widget]: Viewport DOM elements injected into overlay-wrapper.");
     }
-
 
     static get controlsTemplate() {
         const layoutMetrics = [
@@ -796,7 +845,6 @@ export class StreamPet {
 			</div>
         `;
     }
-
 
 // ==========================================
 // SECTION 2:some setup and bs
@@ -1129,8 +1177,7 @@ export class StreamPet {
             "🕷️ Spider (Arachnid Procedural Pathing)",
             "🐟 Goldfish (Aquatic Fluid Physics)"
         ];
-		
-        this.setupCustomDropdownEngine("speciesSelectDisplay", "speciesSelectOptions", speciesOptions, (selectedText) => {
+		setupCustomDropdownEngine("speciesSelectDisplay", "speciesSelectOptions", speciesOptions, (selectedText) => {
             let chosenSpecies = "kitty";
             if (selectedText.includes("Puppy")) chosenSpecies = "puppy";
             if (selectedText.includes("Spider")) chosenSpecies = "spider";
@@ -1491,7 +1538,6 @@ export class StreamPet {
 // Section 7: DRAWING PETS
 // ==========================================
 //
-
 // KITTY DRAWING
 //--------------------------------------------------
     drawkittyEars(x, y, color, sleeping) {
@@ -2325,7 +2371,7 @@ export class StreamPet {
 
 
 // ==========================================
-// SECTION 6: pet functions & triggers etc
+// SECTION 10: pet functions & triggers etc
 // ==========================================
 
     triggerNyan() {
@@ -2475,7 +2521,7 @@ export class StreamPet {
 
 
 // ==========================================
-// SECTION 7: CHAT COMMAND ROUTER
+// SECTION 11: CHAT COMMAND ROUTER
 // ==========================================
 	getDefaultCommandMatrix() {
 		return {
@@ -2816,7 +2862,7 @@ export class StreamPet {
 
 
 // ==========================================
-// SECTION 8: loading and saving/ exporting and importing
+// SECTION 12: loading and saving/ exporting and importing
 // ==========================================
     saveData() { 
         // Save the entire multi-pet registry alongside standard global layout states
@@ -2924,15 +2970,14 @@ export class StreamPet {
 				let scaleVal = savedZoom >= 0 ? 1.0 + (savedZoom * 0.5) : 1.0 + (savedZoom * 0.25);
 				if (zoomDisplay) zoomDisplay.textContent = `${scaleVal.toFixed(1)}x`;
 
-				if (!zoomSlider.dataset.listenerWired) {
-					zoomSlider.addEventListener("input", (e) => {
-						const val = parseFloat(e.target.value);
-						this.state.zoom = val;
-						let dynamicScale = val >= 0 ? 1.0 + (val * 0.5) : 1.0 + (val * 0.25);
-						if (zoomDisplay) zoomDisplay.textContent = `${dynamicScale.toFixed(1)}x`;
-					});
-					zoomSlider.dataset.listenerWired = "true";
+				// Unhook old tracking pointer reference to avoid accumulating active memory listeners
+				if (this._boundZoomHandler) {
+					zoomSlider.removeEventListener("input", this._boundZoomHandler);
 				}
+
+				// Safely bind context target reference to instance method
+				this._boundZoomHandler = this.handleZoomInput.bind(this);
+				zoomSlider.addEventListener("input", this._boundZoomHandler);
 			}
 
 			if (this.state.layout) {
@@ -2948,7 +2993,6 @@ export class StreamPet {
 		this.initSwatches(); 
 		this.syncSpeciesInterfaceToggle();
 	}
-
 	exportSettingsToClipboard(sendNotice = null) {
         try {
             // 1. Gather all of your custom layout sizes, coordinates, and pet profiles
@@ -3004,7 +3048,7 @@ export class StreamPet {
     }
 
 // ==========================================
-// SECTION 9: SOUND SYSTEM ENGINE
+// SECTION 13: SOUND SYSTEM ENGINE
 // ==========================================
 	initAudioEngine() {
         const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
