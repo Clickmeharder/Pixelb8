@@ -1606,6 +1606,7 @@ document.addEventListener("DOMContentLoaded", () => {
     makeElementDraggable("style-editor", "theme-manager-header");
     makeElementDraggable("rewards-manager", "rewards-manager-header");
 });
+
 function displayConsoleMessage(user, message) {
     if (!consoleMessages) return;
     const consoleContainer = document.getElementById("chat-feed");
@@ -1633,7 +1634,6 @@ function displayConsoleMessage(user, message) {
         consoleContainer.removeChild(consoleContainer.firstChild);
     }
 }
-
 function displayChatMessage(user, message, flags = {}, extra = {}, processed = null) {
     const chatContainer = document.getElementById("chat-feed");
     if (!chatContainer) return;
