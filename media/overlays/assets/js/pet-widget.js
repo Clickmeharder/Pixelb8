@@ -498,6 +498,7 @@ export class StreamPet {
             whineSound: true,
             clickSound: true,
             bubbleSound: true,
+			petsplatSound: true,
             customPaths: {}
         };
 
@@ -509,7 +510,8 @@ export class StreamPet {
             barkSound: '../assets/sounds/barkSound.mp3',
             whineSound: '../assets/sounds/whineSound.mp3',
             clickSound: '../assets/sounds/clickSound.mp3',
-            bubbleSound: '../assets/sounds/bubbleSound.mp3'
+            bubbleSound: '../assets/sounds/bubbleSound.mp3',
+			petsplatSound: '../assets/sounds/petsplatSound.mp3'
         };
 
         const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
@@ -1453,8 +1455,10 @@ export class StreamPet {
 
         setTimeout(() => {
             // 💥 STAGE 2: THE DETONATION
+			
             this.state.action = "explode";
             this.state.hideMainSprite = true; // 🌟 POP! Delete the main body instantly here
+			this.playSound('petsplatSound');
             this.say("💥 SPLAT!");
             
             // Spray gore particles and body chunks from the vacant origin point
@@ -1486,7 +1490,7 @@ export class StreamPet {
 
             }, 2000); // Time spent as empty space with flying debris
 
-        }, 2000); // Bloat duration
+        }, 3200); // Bloat duration
     }
 	teasePet() {
 		if (this.activePet.isDead) return;
