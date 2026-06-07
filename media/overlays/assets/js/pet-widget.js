@@ -190,43 +190,6 @@ export class StreamPet {
     // SECTION 2: INPUT, BOUNDS & DATA PERSISTENCE
     // ==========================================
 	// ⭐ FIX: Added internal Snap Placement handler inside the class structure
-	initPetPlacement() {
-		if (!this.canvas) return;
-		const visibleW = this.canvas.width;
-		const visibleH = this.canvas.height;
-		
-		// Environment Edge Constraints
-		const CEIL_Y = 30; 
-		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
-
-		// 🛏️ Dynamic Bed Tracking Coordinates via your Zoom Engine
-		// This feeds the percentages into getPos() to properly inherit all zoom transforms
-		const bedCoordinates = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-
-		this.state.action = "idle";
-		this.state.actionTimer = 200;
-
-		if (this.registry.activeSpecies === "spider") {
-			// Spiders drop directly above the bed's scaled X position on the roof
-			this.state.x = bedCoordinates.x;
-			this.state.y = CEIL_Y;
-		} else if (this.registry.activeSpecies === "goldfish") {
-			// Goldfish float in the mid-water horizon lane right over the bed's scaled X position
-			this.state.x = bedCoordinates.x;
-			this.state.y = visibleH / 2; 
-		} else {
-			// Terrestrial pets (Puppy, Kitty) land precisely on the scaled bed positions
-			this.state.x = bedCoordinates.x;
-			
-			// If the bed is pushed all the way down to the floor, lock to true FLOOR_Y
-			// Otherwise, use the dynamically scaled bed Y coordinate
-			this.state.y = this.state.layout.bedY >= 100 ? FLOOR_Y : bedCoordinates.y;
-		}
-
-		// Cache the resolved matrix positions
-		this.state.originalPos = { x: this.state.x, y: this.state.y };
-		console.log(`🎯 [Pet Positioner]: Cleanly snapped ${this.registry.activeSpecies} to Bed with Zoom transformations accounted for.`);
-	}
 
     initContainerListeners() {
         if (!this.widgetContainer) return;
@@ -248,10 +211,6 @@ export class StreamPet {
         });
     }
 
-    // Sugar shorthand properties to easily get/set values inside the current isolated active pet data profile
-    get activePet() {
-        return this.registry.profiles[this.registry.activeSpecies];
-    }
 
     saveData() { 
         // Save the entire multi-pet registry alongside standard global layout states
@@ -1502,6 +1461,49 @@ export class StreamPet {
         if (nameplateEl) nameplateEl.style.display = this.state.hideNameplate ? "none" : "block";
     }
 
+
+	initPetPlacement() {
+		if (!this.canvas) return;
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
+		
+		// Environment Edge Constraints
+		const CEIL_Y = 30; 
+		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
+
+		// 🛏️ Dynamic Bed Tracking Coordinates via your Zoom Engine
+		// This feeds the percentages into getPos() to properly inherit all zoom transforms
+		const bedCoordinates = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
+
+		this.state.action = "idle";
+		this.state.actionTimer = 200;
+
+		if (this.registry.activeSpecies === "spider") {
+			// Spiders drop directly above the bed's scaled X position on the roof
+			this.state.x = bedCoordinates.x;
+			this.state.y = CEIL_Y;
+		} else if (this.registry.activeSpecies === "goldfish") {
+			// Goldfish float in the mid-water horizon lane right over the bed's scaled X position
+			this.state.x = bedCoordinates.x;
+			this.state.y = visibleH / 2; 
+		} else {
+			// Terrestrial pets (Puppy, Kitty) land precisely on the scaled bed positions
+			this.state.x = bedCoordinates.x;
+			
+			// If the bed is pushed all the way down to the floor, lock to true FLOOR_Y
+			// Otherwise, use the dynamically scaled bed Y coordinate
+			this.state.y = this.state.layout.bedY >= 100 ? FLOOR_Y : bedCoordinates.y;
+		}
+
+		// Cache the resolved matrix positions
+		this.state.originalPos = { x: this.state.x, y: this.state.y };
+		console.log(`🎯 [Pet Positioner]: Cleanly snapped ${this.registry.activeSpecies} to Bed with Zoom transformations accounted for.`);
+	}
+    // Sugar shorthand properties to easily get/set values inside the current isolated active pet data profile
+    get activePet() {
+        return this.registry.profiles[this.registry.activeSpecies];
+    }
+
     // ==========================================
     // SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
     // ==========================================
@@ -2161,8 +2163,58 @@ export class StreamPet {
 		this.updateUI();
 		requestAnimationFrame(this.animate);
 	}
-    drawYarn(x, y, t) {
-        const roll = Math.sin(t * 0.15) * 40;
+
+// ========================================================
+//  what should we put here to let reader know what this function does? and what should we put into helpers nexT?
+// ========================================================
+	drawEnvironment(tick) {
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
+		// ========================================================
+		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
+		// ========================================================
+		//if (this.registry.activeSpecies === "spider") {
+			this.drawSpiderWebs();
+			this.drawRappelStrand();
+		//}
+		// ========================================================
+		// PHASE 2: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
+		// ========================================================
+		if (this.state.layout.showTower) {
+			const towerPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
+			this.drawPetHouse(towerPos, tick);
+		}
+		// ========================================================
+		// PHASE 3: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
+		// ========================================================
+		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
+		this.drawPetBed(bedPos, tick);
+		// ========================================================
+		// PHASE 4: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
+		// ========================================================
+		const litterPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
+		const boxW = 150;
+		this.drawLitterBox(litterPos, boxW);
+		this.drawWasteLayer(litterPos, boxW);
+		// ========================================================
+		// PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
+		// ========================================================
+		const foodPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
+		this.drawFoodBowl(foodPos, tick);
+		// ========================================================
+		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
+		// ========================================================
+		this.drawGoldfishBubbles(tick);
+		this.drawNyanTrail(tick, visibleH);
+		this.drawPaintBalloons();
+		this.updateAndDrawParticles();
+	}
+	
+// ==========================================
+// CORE VISUAL RENDERING ROUTERS PER SPECIES
+// ==========================================
+    drawYarn(x, y, tick) {
+        const roll = Math.sin(tick * 0.15) * 40;
         this.ctx.save();
         this.ctx.translate(x + roll, y);
         this.ctx.fillStyle = "rgba(0,0,0,0.1)";
@@ -2236,14 +2288,14 @@ export class StreamPet {
 			}
 		}
 	}
-	drawGoldfishBubbles(t) {
+	drawGoldfishBubbles(tick) {
 		if (this.registry.activeSpecies !== "goldfish") return;
 
 		for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
 			let bubble = this.state.goldfishBubbles[i];
 			
 			bubble.y -= 1.2;
-			bubble.x += Math.sin(t * 0.05 + i) * 0.5;
+			bubble.x += Math.sin(tick * 0.05 + i) * 0.5;
 			
 			this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
 			this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
@@ -2257,7 +2309,7 @@ export class StreamPet {
 			}
 		}
 	}
-	drawNyanTrail(t, visibleH) {
+	drawNyanTrail(tick, visibleH) {
 		if (this.state.action !== "nyan") return;
 
 		const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
@@ -2269,7 +2321,7 @@ export class StreamPet {
 			colors.forEach((col, i) => {
 				this.ctx.fillStyle = col;
 				const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
-				const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
+				const wiggle = Math.cos((tick - timeOffset) * 0.2 + i) * 5;
 				this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
 			});
 		}
@@ -2309,55 +2361,6 @@ export class StreamPet {
 		}
 	}
 
-// ========================================================
-//  what should we put here to let reader know what this function does? and what should we put into helpers nexT?
-// ========================================================
-	drawEnvironment(tick) {
-		const visibleW = this.canvas.width;
-		const visibleH = this.canvas.height;
-		// ========================================================
-		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
-		// ========================================================
-		//if (this.registry.activeSpecies === "spider") {
-			this.drawSpiderWebs();
-			this.drawRappelStrand();
-		//}
-		// ========================================================
-		// PHASE 2: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
-		// ========================================================
-		if (this.state.layout.showTower) {
-			const towerPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
-			this.drawPetHouse(towerPos, tick);
-		}
-		// ========================================================
-		// PHASE 3: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
-		// ========================================================
-		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-		this.drawPetBed(bedPos);
-		// ========================================================
-		// PHASE 4: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
-		// ========================================================
-		const litterPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
-		const boxW = 150;
-		this.drawLitterBox(litterPos, boxW);
-		this.drawWasteLayer(litterPos, boxW);
-		// ========================================================
-		// PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
-		// ========================================================
-		const foodPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
-		this.drawFoodBowl(foodPos);
-		// ========================================================
-		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
-		// ========================================================
-		this.drawGoldfishBubbles(tick);
-		this.drawNyanTrail(tick, visibleH);
-		this.drawPaintBalloons();
-		this.updateAndDrawParticles();
-	}
-	
-// ==========================================
-// CORE VISUAL RENDERING ROUTERS PER SPECIES
-// ==========================================
     drawSpiderWebs() {
 		// Early exit guard: Only render background webs if the active species is a spider
 		if (this.registry.activeSpecies !== "spider") return;
@@ -2390,26 +2393,25 @@ export class StreamPet {
 	}
 
 	//pet house drawing functions
-
-	drawPetHouse(tPos, t) {
+	drawPetHouse(tPos, tick) {
 		switch (this.registry.activeSpecies) {
 			case "spider":
-				this.drawSpiderNest(tPos);
+				this.drawSpiderNest(tPos, tick);
 				break;
 			case "goldfish":
-				this.drawFishCastle(tPos);
+				this.drawFishCastle(tPos, tick);
 				break;
 			case "puppy":
-				this.drawDogHouse(tPos);
+				this.drawDogHouse(tPos, tick);
 				break;
 			case "kitty":
 			default:
-				this.drawCatTower(tPos);
+				this.drawCatTower(tPos, tick);
 				break;
 		}
 	}
 
-	drawCatTower(tPos) {
+	drawCatTower(tPos, tick) {
 		// 1. Base Shadow
 		this.ctx.fillStyle = "rgba(0,0,0,0.1)"; 
 		this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
@@ -2430,7 +2432,7 @@ export class StreamPet {
 		this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
 	}
 
-	drawDogHouse(tPos) {
+	drawDogHouse(tPos, tick) {
 		this.ctx.save();
 		// Base shadow
 		this.ctx.fillStyle = "rgba(0,0,0,0.15)";
@@ -2467,7 +2469,7 @@ export class StreamPet {
 		this.ctx.restore();
 	}
 
-	drawFishCastle(tPos) {
+	drawFishCastle(tPos, tick) {
 		// Main Keep
 		this.ctx.fillStyle = "#ffb74d"; 
 		this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
@@ -2484,7 +2486,7 @@ export class StreamPet {
 		this.ctx.fill();
 	}
 
-	drawSpiderNest(tPos) {
+	drawSpiderNest(tPos, tick) {
 		this.ctx.save();
 		// Anchor structural cobweb down from ceiling at tower position x
 		const nestX = tPos.x;
@@ -2521,7 +2523,7 @@ export class StreamPet {
 
 
 // beds
-	drawPetBed(bPos) {
+	drawPetBed(bPos, tick) {
 		if (this.registry.activeSpecies === "spider") {
 			// Structural radial support anchors for the web nest
 			this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
@@ -2556,7 +2558,7 @@ export class StreamPet {
 	}
 	
 //food bowl
-	drawFoodBowl(fPos) {
+	drawFoodBowl(fPos, tick) {
 		// Shadow base
 		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
 		this.ctx.beginPath(); 
