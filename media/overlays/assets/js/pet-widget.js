@@ -2343,18 +2343,9 @@ export class StreamPet {
 			this.ctx.stroke();
 		}
 
+
 		// ========================================================
-		// PHASE 2: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
-		// ========================================================
-		const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
-		const boxW = 150;
-		// ========================================================
-		// PHASE 2: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
-		// ========================================================
-		this.drawLitterBox(lPos, boxW);
-		this.drawWasteLayer(lPos, boxW);
-		// ========================================================
-		// PHASE 3: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
+		// PHASE 2: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
 		// ========================================================
 		if (this.state.layout.showTower) {
 			const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
@@ -2362,7 +2353,7 @@ export class StreamPet {
 		}
 
 		// ========================================================
-		// PHASE 4: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
+		// PHASE 3: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
 		// ========================================================
 		const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
 		
@@ -2389,6 +2380,13 @@ export class StreamPet {
 			this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
 		}
 
+		// ========================================================
+		// PHASE 4: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
+		// ========================================================
+		const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
+		const boxW = 150;
+		this.drawLitterBox(lPos, boxW);
+		this.drawWasteLayer(lPos, boxW);
 		// ========================================================
 		// PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
 		// ========================================================
