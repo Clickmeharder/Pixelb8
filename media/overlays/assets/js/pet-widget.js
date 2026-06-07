@@ -166,37 +166,14 @@ export class StreamPet {
                 bedColor: "#3498db"       // Your updated light blue bed color option
             }
         };
-
 		this.state.commandAccess = this.getDefaultCommandMatrix();
-/* 		this.state.commandAccess = this.state.commandAccess || {
-            feed:      { chat: true,  cp: true },
-            play:      { chat: true,  cp: true },
-            dance:     { chat: true,  cp: false },
-            treat:     { chat: false, cp: true }, 
-            trick:     { chat: true,  cp: false },
-            status:    { chat: true,  cp: false },
-            tease:     { chat: true,  cp: true },
-            paintbomb: { chat: true,  cp: true },
-            revive:    { chat: true,  cp: true },
-            help:      { chat: true,  cp: false }, 
-            rewards:   { chat: true,  cp: false }, 
-            nyan:      { chat: true,  cp: true },  
-            clear:     { chat: true,  cp: true },  
-            species:   { chat: true,  cp: true },  
-            hidepet:   { chat: true,  cp: true },  
-            showpet:   { chat: true,  cp: true },  
-            togglepet: { chat: true,  cp: true }   
-        }; */
         // Initialize Audio Sub-Engine
         this.initAudioEngine();
-
         // Inject Config Menu Interface
         this.injectUI();
-
         // Fire initial sizing setup and register display observer
         this.resize();
         window.addEventListener('resize', () => this.resize());
-
         // Load runtime memory maps
         this.loadData();
         this.initContainerListeners(); 
@@ -206,7 +183,6 @@ export class StreamPet {
         this.saveInterval = setInterval(() => this.saveData(), 5000);
         this.animate = this.animate.bind(this);
         this.animate();
-
         this.bindUIEventListeners();
     }
 
@@ -573,334 +549,6 @@ export class StreamPet {
 			togglepet: { chat: true,  cp: true }   
 		};
 	}
-
-/* 	getCommands(sendNotice) {
-        const petExecution = (user, message, flags) => {
-            // 1. Clean the incoming input text
-            const incomingInput = message.trim().toLowerCase();
-            const parts = incomingInput.split(/\s+/);
-            const subCommand = parts[0];
-            const isAdmin = flags ? (flags.broadcaster || flags.mod) : false;
-
-            // =========================================================================
-            // 🗺️ THE ALIAS DICTIONARY (Maps all custom variations to core actions)
-            // =========================================================================
-            const aliasMap = {
-                // Help & Info variations
-                'help': 'help', 'h': 'help',
-                'rewards': 'rewards',
-
-                // Tease variations
-                'tease': 'tease', 'tease pet': 'tease', 
-                'pulltail': 'tease', 'pull tail': 'tease', 'pull pets tail': 'tease',
-                'tapglass': 'tease', 'tap glass': 'tease',
-
-                // Feed variations
-                'feed': 'feed', 'feed pet': 'feed', 'food': 'feed', 'fish': 'feed', 
-                'meat': 'feed', 'bugs': 'feed', 'flakes': 'feed',
-
-                // Play variations
-                'play': 'play', 'yarn': 'play', 'ball': 'play', 'web': 'play',
-
-                // Trick variations
-                'trick': 'trick',
-
-                // Dance variations
-                'dance': 'dance',
-
-                // Treat variations
-                'treat': 'treat', 'nom': 'treat',
-
-                // Status variations
-                'status': 'status', 'stats': 'status',
-				'paintbomb': 'paintbomb', 'paint': 'paintbomb', 'bomb': 'paintbomb', 'splat': 'paintbomb',
-                // Admin variations
-                'nyan': 'nyan', 'rainbow': 'nyan',
-                'revive': 'revive',
-				'revive pet': 'revive', 
-				'revive active pet': 'revive',
-                'clear': 'clear', 'clean': 'clear',
-                'species': 'type',
-                'hidepet': 'hidepet', 'hide pet': 'hidepet', 'hide': 'hidepet',
-                'showpet': 'showpet', 'show pet': 'showpet', 'show': 'showpet',
-                'togglepet': 'togglepet', 'toggle': 'togglepet',
-            };
-
-            // 2. Resolve the action: check if the FULL message matches a multi-word channel point first,
-            //    otherwise fall back to checking the first word.
-            let actualSub = aliasMap[incomingInput] || aliasMap[subCommand] || null;
-
-            // =========================================================================
-            // 🛑 COMMAND ACCESS & UI ROUTER MATRIX CONTROL FILTER
-            // =========================================================================
-            if (actualSub && this.state.commandAccess && this.state.commandAccess[actualSub]) {
-                const config = this.state.commandAccess[actualSub];
-                
-                // Identify incoming event transmission pathways
-                const isChannelPoint = !!(flags && (flags.customRewardId || flags.channelPointRedemption || flags.isRewardSimulated));
-                const isChatMessage = !isChannelPoint;
-
-                // Enforce Twitch chat-specific restrictions
-                if (isChatMessage && !config.chat) {
-                    return; // Quieter dropouts prevent chatbot spam loops in public channels
-                }
-
-                // Enforce Channel Point / Event Reward restrictions
-                if (isChannelPoint && !config.cp) {
-                    sendNotice(`❌ [Pet]: The "${incomingInput}" reward matrix is currently toggled off by the broadcaster.`);
-                    return;
-                }
-            }
-
-            // Death boundary guard check
-            if (this.activePet.isDead && actualSub !== 'revive' && actualSub !== 'status') {
-                sendNotice(`🪦 [Pet]: ${this.activePet.name} is currently deceased. Use !pet revive to save them!`);
-                return;
-            }
-
-            if (!actualSub) {
-                sendNotice(`🐾 [Pet]: Option not recognized. Try: !pet [feed | play | dance | treat | status | trick]`);
-                return;
-            }
-
-            // =========================================================================
-            // 🎬 STREAMLINED CORE SWITCH
-            // =========================================================================
-            switch (actualSub) {
-                case 'help':
-                    const userCommands = ['feed', 'play', 'dance', 'treat', 'status', 'trick'];
-                    sendNotice(`🐾 [Pet Help]: Options: ${userCommands.map(c => `!pet ${c}`).join(' | ')}`);
-                    if (isAdmin) sendNotice(`🛠️ [Admin]: !pet [nyan | revive | clear | species | rewards | hide | show | toggle]`);
-                    break;
-
-                case 'rewards':
-                    if (!isAdmin) return;
-
-                    // Invert the dictionary dynamically to build matching collections
-                    const groups = {};
-                    Object.entries(aliasMap).forEach(([trigger, coreAction]) => {
-                        if (!groups[coreAction]) groups[coreAction] = [];
-                        groups[coreAction].push(trigger);
-                    });
-
-                    sendNotice(`🎁 [Pet Reward Guide]: Create Twitch Channel Point Rewards with these exact names:`);
-                    if (groups['feed']) sendNotice(`   🍏 Feed Pet: ${groups['feed'].map(t => `"${t}"`).join(', ')}`);
-                    if (groups['tease']) sendNotice(`   😠 Tease Pet: ${groups['tease'].map(t => `"${t}"`).join(', ')}`);
-                    if (groups['play']) sendNotice(`   🥎 Play Pet: ${groups['play'].map(t => `"${t}"`).join(', ')}`);
-                    break;
-
-                case 'hidepet':
-                    if (!isAdmin) return; // Restricts to Broadcaster & Mods only
-                    if (this.widgetContainer) {
-                        this.widgetContainer.style.display = 'none';
-                        this.state.hideWidget = true; // Cache state rule
-                        this.saveData();              // Commit to localStorage
-                        sendNotice(`🙈 [Pet]: ${this.activePet.name} has been hidden from the stream overlay.`);
-                    }
-                    break;
-
-                case 'showpet':
-                    if (!isAdmin) return; // Restricts to Broadcaster & Mods only
-                    if (this.widgetContainer) {
-                        this.widgetContainer.style.display = 'block';
-                        this.state.hideWidget = false;
-                        this.saveData();
-                        this.resize(); // Force recalculate dimensions to prevent freeze frames
-                        sendNotice(`👀 [Pet]: ${this.activePet.name} is back and visible!`);
-                    }
-                    break;
-
-                case 'togglepet':
-                    if (!isAdmin) return; // Restricts to Broadcaster & Mods only
-                    if (this.widgetContainer) {
-                        const isHidden = this.widgetContainer.style.display === 'none' || this.state.hideWidget;
-                        if (isHidden) {
-                            this.widgetContainer.style.display = 'block';
-                            this.state.hideWidget = false;
-                            this.resize();
-                            sendNotice(`👀 [Pet]: Showing ${this.activePet.name}!`);
-                        } else {
-                            this.widgetContainer.style.display = 'none';
-                            this.state.hideWidget = true;
-                        }
-                        this.saveData();
-                    }
-                    break;
-
-                case 'feed':
-                    if (!this.state.hasFood) {
-                        this.state.hasFood = true;
-                        if (this.registry.activeSpecies === "kitty") this.say("Food! 🐟");
-                        if (this.registry.activeSpecies === "puppy") this.say("BONE! 🍖");
-                        if (this.registry.activeSpecies === "spider") this.say("CRICKET! 🪰");
-                        if (this.registry.activeSpecies === "goldfish") this.say("FLAKES! 🍤");
-                        sendNotice(`🍽️ [Pet]: ${user} dropped food for ${this.activePet.name}!`);
-                    } else {
-                        sendNotice(`🍽️ [Pet]: There is already food in the bowl!`);
-                    }
-                    break;
-
-                case 'play':
-                    this.state.action = "special";
-                    this.state.actionTimer = 350;
-                    if (this.registry.activeSpecies === "kitty") this.say("Play! 🧶");
-                    if (this.registry.activeSpecies === "puppy") this.say("FETCH! 🥎");
-                    if (this.registry.activeSpecies === "spider") this.say("SPIN! 🕸️");
-                    if (this.registry.activeSpecies === "goldfish") this.say("LOOP! 🫧");
-                    sendNotice(`🥎 [Pet]: ${user} actively engaged with ${this.activePet.name}!`);
-                    break;
-
-                case 'dance':
-                    this.state.action = "dance";
-                    this.state.actionTimer = 300;
-                    this.say("Dance! ✨");
-                    break;
-
-                case 'treat':
-                    this.activePet.hunger = Math.max(0, this.activePet.hunger - 5);
-                    this.state.action = "special";
-                    this.state.actionTimer = 200;
-                    this.say("NOM NOM NOM! 🍗");
-                    break;
-
-                case 'trick':
-                    this.state.action = "trick";
-                    this.state.actionTimer = 250;
-                    if (this.registry.activeSpecies === "puppy") { this.say("BACKFLIP! 🤸"); this.activePet.exp += 25; }
-                    else if (this.registry.activeSpecies === "kitty") { this.say("PURR SLIDE! 🛷"); this.activePet.exp += 20; }
-                    else if (this.registry.activeSpecies === "spider") { this.say("PARACHUTE! 🪂"); this.activePet.exp += 30; }
-                    else if (this.registry.activeSpecies === "goldfish") { this.say("SPLASH FLIP! 🌊"); this.activePet.exp += 25; }
-                    break;
-
-                case 'status':
-                    let healthTxt = this.activePet.poops.length > 5 ? "SICK" : "HEALTHY";
-                    sendNotice(`🐾 [${this.activePet.name}]: Species: ${this.registry.activeSpecies.toUpperCase()} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}% | Mood: ${healthTxt} | EXP: ${this.activePet.exp}`);
-                    break;
-				case 'paintbomb':
-                    // 1. Isolate arguments from original message text to preserve mixed casing of hexes
-                    const rawArgs = message.trim().split(/\s+/).slice(1); // drops 'paintbomb'/'paint' etc.
-                    let selectedColor = '';
-
-                    // 2. Build HSLA mapping variants dynamically via your core helpers
-                    if (rawArgs.length === 0 || rawArgs[0] === '') {
-                        // Default Fallback: Random Hue
-                        const randH = Math.floor(Math.random() * 360);
-                        selectedColor = `hsla(${randH}, 95%, 50%, 1)`;
-                    } else if (rawArgs[0].startsWith('#')) {
-                        // Hex String processing
-                        const hslaObj = hexToHSLA(rawArgs[0]);
-                        selectedColor = `hsla(${hslaObj.h}, ${hslaObj.s}%, ${hslaObj.l}%, ${hslaObj.a})`;
-                    } else if (rawArgs.length >= 3) {
-                        // Space-separated RGBA processing
-                        const r = parseInt(rawArgs[0], 10) || 0;
-                        const g = parseInt(rawArgs[1], 10) || 0;
-                        const b = parseInt(rawArgs[2], 10) || 0;
-                        const a = rawArgs[3] !== undefined ? parseFloat(rawArgs[3]) : 1.0;
-                        const hslaObj = rgbToHSLA(r, g, b, a);
-                        selectedColor = `hsla(${hslaObj.h}, ${hslaObj.s}%, ${hslaObj.l}%, ${hslaObj.a})`;
-                    } else {
-                        // Bad/Incomplete formatting layout default
-                        const randH = Math.floor(Math.random() * 360);
-                        selectedColor = `hsla(${randH}, 95%, 50%, 1)`;
-                    }
-
-                    // 3. Roll target calculations: Give it a 30% chance to miss entirely
-                    const isHit = Math.random() > 0.30; 
-
-                    // 4. Fire into the pet widget execution framework
-                    if (typeof this.triggerPaintBomb === 'function') {
-                        this.triggerPaintBomb(selectedColor, isHit);
-                        if (isHit) {
-                            sendNotice(`🎈 [Paintbomb]: ${user} hurled a paint balloon at ${this.activePet.name}!`);
-                        } else {
-                            sendNotice(`💨 [Paintbomb]: ${user} hurled a paint balloon... but their aim was terrible and it might miss!`);
-                        }
-                    }
-                    break;
-                case 'nyan':
-                    this.triggerNyan();
-                    sendNotice(`🌈 [Pet]: NYAN OVERDRIVE ACTIVATED BY STAFF!`);
-                    break;
-
-                case 'tease':
-                    this.teasePet();
-                    sendNotice(`😠 [Pet]: ${user} teased ${this.activePet.name}!`);
-                    break;
-
-                case 'species':
-                case 'type':
-                    if (isAdmin && parts[1]) {
-                        const speciesMap = { "kitty": "kitty", "kitten": "kitty", "puppy": "puppy", "dog": "puppy", "spider": "spider", "fish": "goldfish", "goldfish": "goldfish" };
-                        const targetKey = speciesMap[parts[1].toLowerCase()];
-                        if (targetKey && this.PET_SPECIES.includes(targetKey)) {
-                            this.selectSpecies(targetKey); 
-                            sendNotice(`🧬 [Pet]: Species hot-swapped to ${targetKey.toUpperCase()}!`);
-                        } else {
-                            sendNotice(`❌ [Pet]: Unknown species. Try: kitty, puppy, spider, or fish.`);
-                        }
-                    }
-                    break;
-
-                case 'revive':
-                    if (this.activePet.exp > 100) {
-                        this.revivePet();
-                        sendNotice(`💖 [Pet]: ${this.activePet.name} was successfully revived by ${user}!`);
-                    } else {
-                        sendNotice(`❌ [Pet]: Only pets with greater than 100 can be revived ${this.activePet.name}!`);
-                    }
-                    break;
-
-                case 'clear':
-                    this.activePet.poops = [];
-                    this.state.spiderWebs = [];
-                    this.state.goldfishBubbles = [];
-                    this.say("Fresh sand! ✨");
-                    sendNotice(`🧹 [Pet]: ${user} scooped the environment layout parameters!`);
-                    break;
-            }
-        };
-
-        // =========================================================================
-        // 🚀 DYNAMIC INJECTION EXPORT
-        // =========================================================================
-        const baseCommands = [
-            { name: 'pet', adminOnly: false, execute: petExecution },
-            { name: 'kitty', adminOnly: false, execute: petExecution }
-        ];
-
-        const aliasKeys = [
-            'help', 'h', 'rewards',
-            'tease', 'tease pet', 'pulltail', 'pull tail', 'pull pets tail', 'tapglass', 'tap glass',
-            'feed', 'feed pet', 'food', 'fish', 'meat', 'bugs', 'flakes',
-            'play', 'yarn', 'ball', 'web', 'dance', 'treat', 'nom', 'trick', 'status', 'stats',
-			'paintbomb', 'paint', 'bomb', 'splat',
-			'revive', 'revive pet', 'revive active pet',
-            'nyan', 'rainbow', 'clear', 'clean',
-            'hidepet', 'hide pet', 'hide', 
-            'showpet', 'show pet', 'show', 
-            'togglepet', 'toggle pet', 'toggle'
-        ];
-
-        aliasKeys.forEach(alias => {
-            const isAdminCommand = (
-                alias === 'nyan' || 
-                alias === 'rainbow' || 
-                alias === 'rewards' ||
-                alias === 'hidepet' || alias === 'hide pet' || alias === 'hide' ||
-                alias === 'showpet' || alias === 'show pet' || alias === 'show' ||
-                alias === 'togglepet' || alias === 'toggle pet' || alias === 'toggle'
-            );
-            
-            baseCommands.push({
-                name: alias,
-                adminOnly: isAdminCommand,
-                execute: (user, message, flags) => petExecution(user, alias, flags)
-            });
-        });
-
-        return baseCommands;
-    }
- */
 
 	getCommands(sendNotice) {
 		// =========================================================================
@@ -2026,7 +1674,7 @@ export class StreamPet {
 		const bowlPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
 		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
 		const litPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
-
+		const towerPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
 		const CEIL_Y = 30; 
 		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
 		const LEFT_X = 40;
@@ -2156,7 +1804,51 @@ export class StreamPet {
 					}
 				}
 				break;
+			case "walk_to_tower_scratch":
+                // Walk to the base of the tower using the zoom-calculated position
+                if (walkToPoint(towerPos.x, towerPos.y)) {
+                    this.state.action = "scratching";
+                    this.state.actionTimer = 180; // Run scratch animation for 180 ticks
+                }
+                break;
 
+            case "scratching":
+                // Spawn a few cardboard shred particles dynamically for effect
+                if (t % 8 === 0) {
+                    this.state.particles.push({
+                        x: this.state.x + (this.state.facing * 12), 
+                        y: this.state.y + 10, 
+                        vx: -this.state.facing * (1 + Math.random() * 2), 
+                        vy: -1 - Math.random() * 2, 
+                        s: 1.5, 
+                        c: "#d7ccc8", 
+                        life: 15
+                    });
+                }
+                if (this.state.actionTimer <= 0) {
+                    this.state.action = "idle";
+                    this.state.actionTimer = 300;
+                }
+                break;
+
+            case "walk_to_tower_climb":
+                // Walk to the base, then cleanly switch over to the climbing state
+                if (walkToPoint(towerPos.x, towerPos.y)) {
+                    this.state.action = "climbing_tower";
+                }
+                break;
+
+            case "climbing_tower":
+                // Climb up vertically on the tower structure relative to its scale footprint
+                const perchY = towerPos.y - 90; // Aim for the mid-to-high platform marker
+                this.state.y -= 1.5; // Climb velocity up the column
+                
+                if (this.state.y <= perchY) {
+                    this.state.y = perchY;
+                    this.state.action = "tower_sleep";
+                    this.state.actionTimer = 800; // Take a long nap up on the perch
+                }
+                break;
 			case "potty":
 				if (this.state.actionTimer <= 0) { 
 					if (this.registry.activeSpecies === "goldfish") {
