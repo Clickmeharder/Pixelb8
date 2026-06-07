@@ -486,6 +486,10 @@ function createDefaultState() {
     };
 }
 
+
+// ============================================================================
+// MAIN EXPORT CLASS
+// ============================================================================
 export class StreamPet {
 	constructor() {
         console.log("🐾 [Pet Widget]: Initializing Core Ecosystem...");
