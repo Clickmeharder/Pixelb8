@@ -1443,61 +1443,50 @@ export class StreamPet {
         this.say("NYAN OVERDRIVE ACTIVATED! 🌈");
     }
 	explodePet() {
-        // Prevent double-triggering if the explosion sequence is already running
         if (this.state.action === "bloating" || this.state.action === "dead") return;
 
-        // 🛑 STAGE 1: START THE TIMED DEATH SEQUENCE (Bloat for 2 seconds)
-        // Keep activePet.isDead FALSE for now so the normal renderer doesn't draw a ghost yet
+        // 🛑 STAGE 1: BLOATING
         this.state.action = "bloating"; 
-        this.state.actionTimer = 120; // 2 seconds at ~60fps
+        this.state.hideMainSprite = false; // Still visible while expanding
         this.stopSound('nyanSound');
         this.say("🤢 BLECH...");
 
-        // Play a warning bloat or rumbling sound here if you have one!
-
         setTimeout(() => {
-            // 💥 STAGE 2: THE EXPLOSION (2 Seconds Later)
+            // 💥 STAGE 2: THE DETONATION
             this.state.action = "explode";
+            this.state.hideMainSprite = true; // 🌟 POP! Delete the main body instantly here
             this.say("💥 SPLAT!");
             
-            // Trigger high-velocity systemic gore particles & body chunks
-            const numParticles = 80; // Bumped up for maximum impact density
+            // Spray gore particles and body chunks from the vacant origin point
+            const numParticles = 80;
             for (let i = 0; i < numParticles; i++) {
-                const isChunk = Math.random() > 0.75; // 25% chance to spawn a larger body chunk
+                const isChunk = Math.random() > 0.75;
                 this.state.particles.push({
-                    // Capture the exact snapshot coordinate where the pet died
                     x: this.state.x, 
                     y: this.state.y - 20, 
                     vx: (Math.random() - 0.5) * 16,
-                    vy: (Math.random() - 0.7) * 18, // Propel chunks slightly upward structurally
-                    s: isChunk ? 6 + Math.random() * 6 : 2 + Math.random() * 4, // Varying chunk dimensions
-                    c: isChunk ? "#5c0000" : "#8b0000", // Darker crimson for chunks, standard gore for spray
-                    life: isChunk ? 120 + Math.random() * 60 : 60 + Math.random() * 40,
-                    isGoreChunk: isChunk // Flag in case your particle renderer checks for rotation/gravity
+                    vy: (Math.random() - 0.7) * 18, 
+                    s: isChunk ? 6 + Math.random() * 6 : 2 + Math.random() * 4, 
+                    c: isChunk ? "#5c0000" : "#8b0000", 
+                    life: isChunk ? 120 + Math.random() * 60 : 60 + Math.random() * 40
                 });
             }
 
-            // Hide the primary physical body completely
-            this.state.showCarcass = false; 
-
-            // 👻 STAGE 3: THE SPIRIT MANIFESTATION (Wait 2 seconds in empty space, then spawn ghost)
+            // 👻 STAGE 3: THE SPIRIT RISES (2 seconds of empty space later)
             setTimeout(() => {
-                // Now we officially commit the database record to deceased status
                 this.activePet.isDead = true;
                 this.activePet.hunger = 100;
                 
-                // Trigger Ghost State rules
                 this.state.isGhost = true; 
-                this.state.action = "walk"; // Set back to walk so it cycles its frames
-                this.state.actionTimer = 300;
+                this.state.hideMainSprite = false; // 🌟 Bring back visibility so the Ghost can be seen!
+                this.state.action = "walk"; 
                 this.say("👻 OoooOoo...");
                 
-                console.log(`🪦 [Pet Engine]: ${this.activePet.name} has crossed the mortal boundary.`);
-                this.saveData(); // Commit death state permanently to localStorage
+                this.saveData();
 
-            }, 2000); // Time spent as an empty blast zone before ghost rises
+            }, 2000); // Time spent as empty space with flying debris
 
-        }, 2000); // Duration of the swelling/bloating warning animation
+        }, 2000); // Bloat duration
     }
 	teasePet() {
 		if (this.activePet.isDead) return;
@@ -1547,6 +1536,11 @@ export class StreamPet {
 		}
 	}
 	updateAI(t) {
+		if (this.state.action === "bloating" || this.state.action === "explode") {
+			if (this.state.actionTimer > 0) this.state.actionTimer--;
+			return; 
+		}
+		
 		if (this.activePet.isDead) return;
 		this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
 		this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
@@ -1957,17 +1951,30 @@ export class StreamPet {
 		let petScale = (this.activePet.stage === "Baby") ? 0.6 : (this.activePet.stage === "Juvenile") ? 0.8 : 1.0;
 		
 		// ========================================================
-		// RENDERING SPECIES DELEGATION ROUTER
-		// (No changes needed to existing draw calls!)
+		// RENDERING SPECIES DELEGATION ROUTER & EXPLOSION HANDLERS
 		// ========================================================
-		if (this.registry.activeSpecies === "kitty") {
-			this.drawKitty(this.state.animT, petScale);
-		} else if (this.registry.activeSpecies === "puppy") {
-			this.drawPuppy(this.state.animT, petScale);
-		} else if (this.registry.activeSpecies === "spider") {
-			this.drawSpider(this.state.animT, petScale);
-		} else if (this.registry.activeSpecies === "goldfish") {
-			this.drawGoldfish(this.state.animT, petScale);
+		if (!this.state.hideMainSprite) {
+			this.ctx.save();
+
+			// Handle Stage 1: Swell up and violently shake the layout bounds
+			if (this.state.action === "bloating") {
+				petScale *= 1.35; // Expand dimensions dynamically during build-up
+				const jitterX = (Math.random() - 0.5) * 5;
+				const jitterY = (Math.random() - 0.5) * 5;
+				this.ctx.translate(jitterX, jitterY);
+			}
+
+			if (this.registry.activeSpecies === "kitty") {
+				this.drawKitty(this.state.animT, petScale);
+			} else if (this.registry.activeSpecies === "puppy") {
+				this.drawPuppy(this.state.animT, petScale);
+			} else if (this.registry.activeSpecies === "spider") {
+				this.drawSpider(this.state.animT, petScale);
+			} else if (this.registry.activeSpecies === "goldfish") {
+				this.drawGoldfish(this.state.animT, petScale);
+			}
+
+			this.ctx.restore();
 		}
 		
 		this.ctx.restore();
@@ -1994,197 +2001,197 @@ export class StreamPet {
     }
 
 	drawEnvironment(t) {
-        const visibleW = this.canvas.width;
-        const visibleH = this.canvas.height;
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
 
-        // ========================================================
-        // PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
-        // ========================================================
+		// ========================================================
+		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
+		// ========================================================
 
-        // Render structural perimeter webs at their exact dropped locations
-        this.state.spiderWebs.forEach(web => {
-            this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
-            this.ctx.lineWidth = 1;
-            this.ctx.beginPath();
-            for(let i=0; i<8; i++) {
-                let angle = (i / 8) * Math.PI * 2;
-                this.ctx.moveTo(web.x, web.y);
-                this.ctx.lineTo(web.x + Math.cos(angle)*web.size, web.y + Math.sin(angle)*web.size);
-            }
-            this.ctx.stroke();
-        });
+		// Render structural perimeter webs at their exact dropped locations
+		this.state.spiderWebs.forEach(web => {
+			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
+			this.ctx.lineWidth = 1;
+			this.ctx.beginPath();
+			for(let i=0; i<8; i++) {
+				let angle = (i / 8) * Math.PI * 2;
+				this.ctx.moveTo(web.x, web.y);
+				this.ctx.lineTo(web.x + Math.cos(angle)*web.size, web.y + Math.sin(angle)*web.size);
+			}
+			this.ctx.stroke();
+		});
 
-        // Draw active silk dropping strand if the spider is currently rappelling
-        if (this.registry.activeSpecies === "spider" && ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
-            this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
-            this.ctx.lineWidth = 1.2;
-            this.ctx.beginPath();
-            // Connect line from ceiling anchor down to spider's live center position
-            this.ctx.moveTo(this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x, 30); // Bound tightly to true CEIL_Y
-            this.ctx.lineTo(this.state.x, this.state.y);
-            this.ctx.stroke();
-        }
+		// Draw active silk dropping strand if the spider is currently rappelling
+		if (this.registry.activeSpecies === "spider" && ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
+			this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+			this.ctx.lineWidth = 1.2;
+			this.ctx.beginPath();
+			// Connect line from ceiling anchor down to spider's live center position
+			this.ctx.moveTo(this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x, 30); // Bound tightly to true CEIL_Y
+			this.ctx.lineTo(this.state.x, this.state.y);
+			this.ctx.stroke();
+		}
 
-        // ========================================================
-        // PHASE 2: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
-        // ========================================================
-        const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
-        const boxW = 150;
+		// ========================================================
+		// PHASE 2: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
+		// ========================================================
+		const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
+		const boxW = 150;
 
-        // Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
-        if (this.registry.activeSpecies !== "goldfish" && this.registry.activeSpecies !== "spider") {
-            if (this.registry.activeSpecies === "puppy") {
-                this.ctx.fillStyle = "#4e342e"; 
-                this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
-                
-                this.ctx.fillStyle = "#2e7d32"; 
-                this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
-                
-                this.ctx.fillStyle = "#4caf50";
-                for (let i = 0; i < 6; i++) {
-                    let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
-                    this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
-                    this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
-                }
-                
-                this.ctx.fillStyle = "#f5f5f5";
-                for(let p = 0; p <= boxW; p += 15) {
-                    this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
-                }
-                this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   
-                this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    
-            } else {
-                this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
-                this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
-                this.ctx.fillStyle = "#2c3e50"; 
-                this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
-                this.ctx.fillStyle = "#95a5a6"; 
-                this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
-            }
-        }
-        
-        // ========================================================
-        // DYNAMIC MULTI-SPECIES WASTE FLOATING & RENDERING ENGINE
-        // ========================================================
-        this.activePet.poops.forEach(p => {
-            if (this.registry.activeSpecies === "goldfish") {
-                if (p.x === undefined) p.x = this.state.x;
-                if (p.y === undefined) p.y = this.state.y;
-                if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
+		// Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
+		if (this.registry.activeSpecies !== "goldfish" && this.registry.activeSpecies !== "spider") {
+			if (this.registry.activeSpecies === "puppy") {
+				this.ctx.fillStyle = "#4e342e"; 
+				this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
+				
+				this.ctx.fillStyle = "#2e7d32"; 
+				this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
+				
+				this.ctx.fillStyle = "#4caf50";
+				for (let i = 0; i < 6; i++) {
+					let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
+					this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
+					this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
+				}
+				
+				this.ctx.fillStyle = "#f5f5f5";
+				for(let p = 0; p <= boxW; p += 15) {
+					this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
+				}
+				this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   
+				this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    
+			} else {
+				this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
+				this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
+				this.ctx.fillStyle = "#2c3e50"; 
+				this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
+				this.ctx.fillStyle = "#95a5a6"; 
+				this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
+			}
+		}
+		
+		// ========================================================
+		// DYNAMIC MULTI-SPECIES WASTE FLOATING & RENDERING ENGINE
+		// ========================================================
+		this.activePet.poops.forEach(p => {
+			if (this.registry.activeSpecies === "goldfish") {
+				if (p.x === undefined) p.x = this.state.x;
+				if (p.y === undefined) p.y = this.state.y;
+				if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
 
-                p.y -= 0.2; // Float up naturally in pixel canvas space
-                p.swimOffset += 0.03;
-                let finalX = p.x + Math.sin(p.swimOffset) * 5;
+				p.y -= 0.2; // Float up naturally in pixel canvas space
+				p.swimOffset += 0.03;
+				let finalX = p.x + Math.sin(p.swimOffset) * 5;
 
-                this.ctx.font = "14px Arial";
-                this.ctx.fillText("💩", finalX, p.y);
-            } else if (this.registry.activeSpecies === "spider") {
-                // Spiders leave permanent webs handled above in Phase 1
-            } else {
-                // ⭐ FIX: Instead of static offsets, tie poop elements explicitly to the zoomed lPos tracking matrix
-                let poopyY = p.isCeil ? 90 : lPos.y + 24;
-                let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
-                this.ctx.font = "14px Arial";
-                this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
-            }
-        });
+				this.ctx.font = "14px Arial";
+				this.ctx.fillText("💩", finalX, p.y);
+			} else if (this.registry.activeSpecies === "spider") {
+				// Spiders leave permanent webs handled above in Phase 1
+			} else {
+				// ⭐ FIX: Instead of static offsets, tie poop elements explicitly to the zoomed lPos tracking matrix
+				let poopyY = p.isCeil ? 90 : lPos.y + 24;
+				let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
+				this.ctx.font = "14px Arial";
+				this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
+			}
+		});
 
-        // ========================================================
-        // PHASE 3: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
-        // ========================================================
-        if (this.state.layout.showTower && this.registry.activeSpecies !== "spider") {
-            const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
-            
-            if (this.registry.activeSpecies === "goldfish") {
-                this.ctx.fillStyle = "#ffb74d"; 
-                this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
-                this.ctx.fillStyle = "#e65100";
-                this.ctx.fillRect(tPos.x - 50, tPos.y - 110, 30, 30);
-                this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
-                this.ctx.fillStyle = "#4e342e"; 
-                this.ctx.beginPath(); this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); this.ctx.fill();
-            } else if (this.registry.activeSpecies === "puppy") {
-                this.ctx.save();
-                this.ctx.fillStyle = "rgba(0,0,0,0.15)";
-                this.ctx.fillRect(tPos.x - 55, tPos.y + 5, 110, 15);
-                this.ctx.fillStyle = "#d7ccc8"; 
-                this.ctx.fillRect(tPos.x - 45, tPos.y - 65, 90, 70);
-                this.ctx.fillStyle = "#3e2723"; 
-                this.ctx.beginPath();
-                this.ctx.arc(tPos.x, tPos.y - 25, 20, Math.PI, 0, false);
-                this.ctx.fillRect(tPos.x - 20, tPos.y - 25, 40, 30);
-                this.ctx.fill();
-                this.ctx.fillStyle = "#d7ccc8";
-                this.ctx.beginPath();
-                this.ctx.moveTo(tPos.x - 45, tPos.y - 65);
-                this.ctx.lineTo(tPos.x, tPos.y - 95);
-                this.ctx.lineTo(tPos.x + 45, tPos.y - 65);
-                this.ctx.fill();
-                this.ctx.strokeStyle = "#d32f2f";
-                this.ctx.lineWidth = 8;
-                this.ctx.lineCap = "round";
-                this.ctx.beginPath();
-                this.ctx.moveTo(tPos.x - 55, tPos.y - 60);
-                this.ctx.lineTo(tPos.x, tPos.y - 98);
-                this.ctx.lineTo(tPos.x + 55, tPos.y - 60);
-                this.ctx.stroke();
-                this.ctx.restore();
-            } else {
-                this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
-                this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 55, tPos.y - 5, 110, 15); 
-                this.ctx.fillStyle = "#a67c52"; this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
-                this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
-            }
-        }
+		// ========================================================
+		// PHASE 3: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
+		// ========================================================
+		if (this.state.layout.showTower && this.registry.activeSpecies !== "spider") {
+			const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
+			
+			if (this.registry.activeSpecies === "goldfish") {
+				this.ctx.fillStyle = "#ffb74d"; 
+				this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
+				this.ctx.fillStyle = "#e65100";
+				this.ctx.fillRect(tPos.x - 50, tPos.y - 110, 30, 30);
+				this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
+				this.ctx.fillStyle = "#4e342e"; 
+				this.ctx.beginPath(); this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); this.ctx.fill();
+			} else if (this.registry.activeSpecies === "puppy") {
+				this.ctx.save();
+				this.ctx.fillStyle = "rgba(0,0,0,0.15)";
+				this.ctx.fillRect(tPos.x - 55, tPos.y + 5, 110, 15);
+				this.ctx.fillStyle = "#d7ccc8"; 
+				this.ctx.fillRect(tPos.x - 45, tPos.y - 65, 90, 70);
+				this.ctx.fillStyle = "#3e2723"; 
+				this.ctx.beginPath();
+				this.ctx.arc(tPos.x, tPos.y - 25, 20, Math.PI, 0, false);
+				this.ctx.fillRect(tPos.x - 20, tPos.y - 25, 40, 30);
+				this.ctx.fill();
+				this.ctx.fillStyle = "#d7ccc8";
+				this.ctx.beginPath();
+				this.ctx.moveTo(tPos.x - 45, tPos.y - 65);
+				this.ctx.lineTo(tPos.x, tPos.y - 95);
+				this.ctx.lineTo(tPos.x + 45, tPos.y - 65);
+				this.ctx.fill();
+				this.ctx.strokeStyle = "#d32f2f";
+				this.ctx.lineWidth = 8;
+				this.ctx.lineCap = "round";
+				this.ctx.beginPath();
+				this.ctx.moveTo(tPos.x - 55, tPos.y - 60);
+				this.ctx.lineTo(tPos.x, tPos.y - 98);
+				this.ctx.lineTo(tPos.x + 55, tPos.y - 60);
+				this.ctx.stroke();
+				this.ctx.restore();
+			} else {
+				this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
+				this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 55, tPos.y - 5, 110, 15); 
+				this.ctx.fillStyle = "#a67c52"; this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
+				this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
+			}
+		}
 
-        // ========================================================
-        // PHASE 4: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
-        // ========================================================
-        const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-        
-        if (this.registry.activeSpecies === "spider") {
-            this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
-            this.ctx.lineWidth = 1;
-            this.ctx.beginPath();
-            for (let i = 0; i < 8; i++) {
-                let angle = (i / 8) * Math.PI * 2;
-                this.ctx.moveTo(bPos.x, bPos.y + 5);
-                this.ctx.lineTo(bPos.x + Math.cos(angle) * 55, bPos.y + 5 + Math.sin(angle) * 18);
-            }
-            this.ctx.stroke();
+		// ========================================================
+		// PHASE 4: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
+		// ========================================================
+		const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
+		
+		if (this.registry.activeSpecies === "spider") {
+			this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
+			this.ctx.lineWidth = 1;
+			this.ctx.beginPath();
+			for (let i = 0; i < 8; i++) {
+				let angle = (i / 8) * Math.PI * 2;
+				this.ctx.moveTo(bPos.x, bPos.y + 5);
+				this.ctx.lineTo(bPos.x + Math.cos(angle) * 55, bPos.y + 5 + Math.sin(angle) * 18);
+			}
+			this.ctx.stroke();
 
-            for (let r = 10; r <= 50; r += 12) {
-                this.ctx.beginPath();
-                this.ctx.ellipse(bPos.x, bPos.y + 5, r, r * 0.35, 0, 0, Math.PI * 2);
-                this.ctx.stroke();
-            }
-        } else {
-            this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-            this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.fillStyle = this.state.layout.bedColor;
-            this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
-        }
+			for (let r = 10; r <= 50; r += 12) {
+				this.ctx.beginPath();
+				this.ctx.ellipse(bPos.x, bPos.y + 5, r, r * 0.35, 0, 0, Math.PI * 2);
+				this.ctx.stroke();
+			}
+		} else {
+			this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+			this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.fillStyle = this.state.layout.bedColor;
+			this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
+		}
 
-        // ========================================================
-        // PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
-        // ========================================================
-        const fPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
-        this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.fillStyle = "#ecf0f1"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.fillStyle = "#bdc3c7"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); this.ctx.fill();
-        if(this.state.hasFood) {
-            this.ctx.fillStyle = "#d35400"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.font = "16px Arial";
-            let foodIcon = "🐟";
-            if (this.registry.activeSpecies === "puppy") foodIcon = "🍖";
-            if (this.registry.activeSpecies === "spider") foodIcon = "🪰";
-            if (this.registry.activeSpecies === "goldfish") foodIcon = "🍤";
-            this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
-        }
+		// ========================================================
+		// PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
+		// ========================================================
+		const fPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
+		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); this.ctx.fill();
+		this.ctx.fillStyle = "#ecf0f1"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); this.ctx.fill();
+		this.ctx.fillStyle = "#bdc3c7"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); this.ctx.fill();
+		if(this.state.hasFood) {
+			this.ctx.fillStyle = "#d35400"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); this.ctx.fill();
+			this.ctx.font = "16px Arial";
+			let foodIcon = "🐟";
+			if (this.registry.activeSpecies === "puppy") foodIcon = "🍖";
+			if (this.registry.activeSpecies === "spider") foodIcon = "🪰";
+			if (this.registry.activeSpecies === "goldfish") foodIcon = "🍤";
+			this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
+		}
 
-        // ========================================================
-        // PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
-        // ========================================================
+		// ========================================================
+		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
+		// ========================================================
 		if (this.registry.activeSpecies === "goldfish") {
 			// Loop backwards to safely remove elements
 			for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
@@ -2206,29 +2213,62 @@ export class StreamPet {
 				}
 			}
 		}
-        if (this.state.action === "nyan") {
-            const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
-            this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
-            for (let segment = 0; segment < 8; segment++) {
-                const segOffset = segment * 35;
-                const timeOffset = segment * 2;
-                colors.forEach((col, i) => {
-                    this.ctx.fillStyle = col;
-                    const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
-                    const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
-                    this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
-                });
-            }
-            this.ctx.globalAlpha = 1.0;
-        }
+		if (this.state.action === "nyan") {
+			const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
+			this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
+			for (let segment = 0; segment < 8; segment++) {
+				const segOffset = segment * 35;
+				const timeOffset = segment * 2;
+				colors.forEach((col, i) => {
+					this.ctx.fillStyle = col;
+					const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
+					const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
+					this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
+				});
+			}
+			this.ctx.globalAlpha = 1.0;
+		}
 
-        this.state.particles.forEach((p, i) => {
-            this.ctx.fillStyle = p.c; this.ctx.globalAlpha = p.life / 30;
-            this.ctx.fillRect(p.x, p.y, p.s, p.s); this.ctx.globalAlpha = 1.0;
-            p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life--;
-            if(p.life <= 0) this.state.particles.splice(i, 1);
-        });
-    }
+		// Dynamic particle physics engine handler loop
+		for (let i = this.state.particles.length - 1; i >= 0; i--) {
+			const p = this.state.particles[i];
+			this.ctx.save();
+			
+			// Detect custom chunks injected by explodePet()
+			const isHeavyChunk = p.s > 5;
+			
+			this.ctx.fillStyle = p.c;
+			this.ctx.globalAlpha = p.life < 30 ? p.life / 30 : 1.0;
+			
+			if (isHeavyChunk) {
+				// Render chunky body parts with sharp perimeter borders
+				this.ctx.fillRect(p.x, p.y, p.s, p.s);
+				this.ctx.strokeStyle = "#1a0000";
+				this.ctx.lineWidth = 1;
+				this.ctx.strokeRect(p.x, p.y, p.s, p.s);
+			} else {
+				// Standard particle square drops
+				this.ctx.fillRect(p.x, p.y, p.s, p.s);
+			}
+			this.ctx.restore();
+
+			// Mutation mechanics
+			p.x += p.vx;
+			p.y += p.vy;
+			
+			// Custom gravity weights: standard drops drop instantly; heavy chunks maintain flight velocity curves
+			p.vy += isHeavyChunk ? 0.22 : 0.35;
+			
+			if (isHeavyChunk) {
+				p.vx *= 0.985; // Air-resistance friction damping factor
+			}
+
+			p.life--;
+			if (p.life <= 0) {
+				this.state.particles.splice(i, 1);
+			}
+		}
+	}
     // ==========================================
     // CORE VISUAL RENDERING ROUTERS PER SPECIES
     // ==========================================
