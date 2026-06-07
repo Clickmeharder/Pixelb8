@@ -855,7 +855,8 @@ export class StreamPet {
             { key: "whineSound", label: "🥺 Puppy Whine" },
             { key: "clickSound", label: "🕷️ Spider Click" },
             { key: "bubbleSound", label: "🐟 Fish Bubble" },
-            { key: "nyanSound", label: "🌈 Space Nyan Theme Loop" }
+            { key: "nyanSound", label: "🌈 Space Nyan Theme Loop" },
+			{ key: "petsplatSound", label: "💥 Pet Explosion Splat" }
         ];
 
         return `
