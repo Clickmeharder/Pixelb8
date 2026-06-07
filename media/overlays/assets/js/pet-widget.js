@@ -422,71 +422,10 @@ export class StreamPet {
             }));
         }
     }
-    // ==========================================
-    // SECTION 3: SOUND SYSTEM ENGINE
-    // ==========================================
-    initAudioEngine() {
-        const defaultSoundSettings = {
-            masterEnabled: true,
-            meowSound: true,
-            purrSound: true,
-            nyanSound: true,
-            mewSound: true,
-            barkSound: true,
-            whineSound: true,
-            clickSound: true,
-            bubbleSound: true,
-			petsplatSound: true,
-            customPaths: {}
-        };
 
-        this.defaultPaths = {
-            meowSound: '../assets/sounds/meowSound.mp3',
-            mewSound: '../assets/sounds/mewSound.mp3',
-            purrSound: '../assets/sounds/purrSound.mp3',
-            nyanSound: '../assets/sounds/nyanSound.mp3',
-            barkSound: '../assets/sounds/barkSound.mp3',
-            whineSound: '../assets/sounds/whineSound.mp3',
-            clickSound: '../assets/sounds/clickSound.mp3',
-            bubbleSound: '../assets/sounds/bubbleSound.mp3',
-			petsplatSound: '../assets/sounds/petsplatSound.mp3'
-        };
-
-        const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
-        window.soundSettings = savedSoundSettings ? JSON.parse(savedSoundSettings) : defaultSoundSettings;
-
-        this.audioAssets = {};
-        Object.keys(this.defaultPaths).forEach(key => this.refreshAudioInstance(key));
-    }
-
-    refreshAudioInstance(key) {
-        const source = window.soundSettings.customPaths[key] || this.defaultPaths[key];
-        if (source) {
-            this.audioAssets[key] = new Audio(source);
-            if (key === 'nyanSound') this.audioAssets[key].loop = true;
-        }
-    }
-
-    playSound(soundKey) {
-        if (window.soundSettings.masterEnabled && window.soundSettings[soundKey]) {
-            const sound = this.audioAssets[soundKey];
-            if (sound) {
-                sound.currentTime = 0; 
-                sound.play().catch(err => console.warn(`[!] Audio: ${soundKey} blocked.`, err));
-            }
-        }
-    }
-
-    stopSound(soundKey) {
-        if (this.audioAssets[soundKey]) {
-            this.audioAssets[soundKey].pause();
-            this.audioAssets[soundKey].currentTime = 0;
-        }
-    }
-
-    // ==========================================
-    // SECTION 4: CHAT COMMAND ROUTER
-    // ==========================================
+// ==========================================
+// SECTION 3: CHAT COMMAND ROUTER
+// ==========================================
 	getDefaultCommandMatrix() {
 		return {
 			feed:      { chat: true,  cp: true },
@@ -824,9 +763,9 @@ export class StreamPet {
 		return baseCommands;
 	}
 
-    // ==========================================
-    // SECTION 5: UI ASSEMBLY, TEMPLATES & BINDINGS
-    // ==========================================
+// ==========================================
+// SECTION 4: UI ASSEMBLY, TEMPLATES & BINDINGS
+// ==========================================
     static get controlsTemplate() {
         const layoutMetrics = [
             ["name", "Nameplate X/Y", 50, 70, 0, 100],
@@ -1020,6 +959,73 @@ export class StreamPet {
         // Replace '.pet-matrix-container-target' with whatever class/id is inside your StreamPet.controlsTemplate
         this.controlsContainer = petSection.querySelector('.pet-matrix-container-target') || petSection;
     }
+	updateUI() {
+		const nameEl = document.getElementById("nameplate");
+		const statsEl = document.getElementById("status");
+		if(!nameEl || !statsEl) return;
+		
+		nameEl.style.left = this.state.layout.nameX + "%"; 
+		nameEl.style.top = this.state.layout.nameY + "%";
+		statsEl.style.left = this.state.layout.statsX + "%"; 
+		statsEl.style.top = this.state.layout.statsY + "%";
+		
+		let sTxt = this.activePet.isDead ? "DECEASED" : (this.activePet.poops.length > 5 ? "SICK" : "HEALTHY");
+		// statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} | EXP: ${this.activePet.exp}`;
+		statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} [${this.state.action || 'idle'}] | EXP: ${this.activePet.exp}`;
+		nameEl.textContent = this.activePet.isDead ? `${this.activePet.name.toUpperCase()}'S GHOST` : this.activePet.name.toUpperCase();
+		
+		// Dynamic Form Option Label Management
+		const propLabel = document.querySelector('label[for="showTower"]') || document.getElementById("showTower")?.previousElementSibling;
+		if (propLabel) {
+			if (this.registry.activeSpecies === "puppy") propLabel.textContent = "Show Doghouse";
+			else if (this.registry.activeSpecies === "goldfish") propLabel.textContent = "Show Castle/Coral";
+			else propLabel.textContent = "Show Cat Tower";
+		}
+
+		// NEW: Dynamic Multi-Species Potty Label Swap
+		const litterLabel = Array.from(document.querySelectorAll('span')).find(el => el.textContent.includes("Litter Box"));
+		if (litterLabel) {
+			litterLabel.textContent = (this.registry.activeSpecies === "puppy") ? "Grass Patch X/Y" : "Litter Box X/Y";
+		}
+	}
+
+    applyEditModeStyles() {
+        const el = document.getElementById("pet-widget");
+        if (!el) return;
+        if (document.body.classList.contains('edit-mode')) {
+            el.style.pointerEvents = "auto"; 
+        }
+    }
+
+    applyVisibilityStates() {
+        if (this.widgetContainer) {
+			if (this.state.hideWidget === true) {
+				this.widgetContainer.style.display = 'none';
+			} else {
+				this.widgetContainer.style.display = 'block';
+			}
+            if (this.state.hideBorder) {
+                this.widgetContainer.style.border = "none";
+                this.widgetContainer.style.boxShadow = "none";
+            } else {
+                this.widgetContainer.style.border = "";
+                this.widgetContainer.style.boxShadow = "";
+            }
+
+            if (this.state.hideBackground) {
+                this.widgetContainer.style.setProperty("background", "transparent", "important");
+            } else {
+                this.widgetContainer.style.background = ""; 
+            }
+        }
+
+        const statusEl = document.getElementById("status");
+        if (statusEl) statusEl.style.display = this.state.hideStatus ? "none" : "block";
+        
+        const nameplateEl = document.getElementById("nameplate");
+        if (nameplateEl) nameplateEl.style.display = this.state.hideNameplate ? "none" : "block";
+    }
+
 	renderControlPanel() {
 		if (!this.controlsContainer) return;
 
@@ -1115,16 +1121,7 @@ export class StreamPet {
 			});
 		});
 	}
-    syncSpeciesInterfaceToggle() {
-        document.querySelectorAll(".species-note").forEach(el => el.style.display = "none");
-        const currentNote = document.getElementById(`${this.registry.activeSpecies}ContextNotes`);
-        if (currentNote) currentNote.style.display = "block";
-    }
-	setTummyLimit(newLimit) {
-		this.state.tummylimit = parseInt(newLimit);
-		console.log(`Tummy limit updated to: ${this.state.tummylimit}`);
-		this.saveData(); // Assuming you have a persistence method
-	}
+
     initSwatches() {
         const swatchContainer = document.getElementById("bedColorSwatches");
         if (!swatchContainer) return;
@@ -1181,6 +1178,11 @@ export class StreamPet {
             });
             optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
         });
+    }
+    syncSpeciesInterfaceToggle() {
+        document.querySelectorAll(".species-note").forEach(el => el.style.display = "none");
+        const currentNote = document.getElementById(`${this.registry.activeSpecies}ContextNotes`);
+        if (currentNote) currentNote.style.display = "block";
     }
 
     bindUIEventListeners() {
@@ -1394,72 +1396,6 @@ export class StreamPet {
         if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.playSound('bubbleSound');
     }
 
-	updateUI() {
-		const nameEl = document.getElementById("nameplate");
-		const statsEl = document.getElementById("status");
-		if(!nameEl || !statsEl) return;
-		
-		nameEl.style.left = this.state.layout.nameX + "%"; 
-		nameEl.style.top = this.state.layout.nameY + "%";
-		statsEl.style.left = this.state.layout.statsX + "%"; 
-		statsEl.style.top = this.state.layout.statsY + "%";
-		
-		let sTxt = this.activePet.isDead ? "DECEASED" : (this.activePet.poops.length > 5 ? "SICK" : "HEALTHY");
-		// statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} | EXP: ${this.activePet.exp}`;
-		statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} [${this.state.action || 'idle'}] | EXP: ${this.activePet.exp}`;
-		nameEl.textContent = this.activePet.isDead ? `${this.activePet.name.toUpperCase()}'S GHOST` : this.activePet.name.toUpperCase();
-		
-		// Dynamic Form Option Label Management
-		const propLabel = document.querySelector('label[for="showTower"]') || document.getElementById("showTower")?.previousElementSibling;
-		if (propLabel) {
-			if (this.registry.activeSpecies === "puppy") propLabel.textContent = "Show Doghouse";
-			else if (this.registry.activeSpecies === "goldfish") propLabel.textContent = "Show Castle/Coral";
-			else propLabel.textContent = "Show Cat Tower";
-		}
-
-		// NEW: Dynamic Multi-Species Potty Label Swap
-		const litterLabel = Array.from(document.querySelectorAll('span')).find(el => el.textContent.includes("Litter Box"));
-		if (litterLabel) {
-			litterLabel.textContent = (this.registry.activeSpecies === "puppy") ? "Grass Patch X/Y" : "Litter Box X/Y";
-		}
-	}
-
-    applyEditModeStyles() {
-        const el = document.getElementById("pet-widget");
-        if (!el) return;
-        if (document.body.classList.contains('edit-mode')) {
-            el.style.pointerEvents = "auto"; 
-        }
-    }
-
-    applyVisibilityStates() {
-        if (this.widgetContainer) {
-			if (this.state.hideWidget === true) {
-				this.widgetContainer.style.display = 'none';
-			} else {
-				this.widgetContainer.style.display = 'block';
-			}
-            if (this.state.hideBorder) {
-                this.widgetContainer.style.border = "none";
-                this.widgetContainer.style.boxShadow = "none";
-            } else {
-                this.widgetContainer.style.border = "";
-                this.widgetContainer.style.boxShadow = "";
-            }
-
-            if (this.state.hideBackground) {
-                this.widgetContainer.style.setProperty("background", "transparent", "important");
-            } else {
-                this.widgetContainer.style.background = ""; 
-            }
-        }
-
-        const statusEl = document.getElementById("status");
-        if (statusEl) statusEl.style.display = this.state.hideStatus ? "none" : "block";
-        
-        const nameplateEl = document.getElementById("nameplate");
-        if (nameplateEl) nameplateEl.style.display = this.state.hideNameplate ? "none" : "block";
-    }
 
 
 	initPetPlacement() {
@@ -1503,155 +1439,44 @@ export class StreamPet {
     get activePet() {
         return this.registry.profiles[this.registry.activeSpecies];
     }
-
-    // ==========================================
-    // SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
-    // ==========================================
-    triggerNyan() {
-        if (this.activePet.isDead || this.state.action === "nyan") return;
-        this.state.originalPos = { x: this.state.x, y: this.state.y };
-        this.state.action = "nyan";
-        this.state.nyanPhase = "takeoff";
-        this.state.actionTimer = 400;
-        this.playSound('nyanSound');
-        this.say("NYAN OVERDRIVE ACTIVATED! 🌈");
-    }
-	triggerPaintBomb(colorString, isHit) {
-        if (this.state.action === "dead" || this.state.action === "explode" || this.state.action === "bloating") return;
-
-        this.say("🎈 INCOMING!!");
-        this.playSound('clickSound'); // Fits the tactical trigger sound
-
-        // 1. Spawning trajectory setups
-        const spawnFromLeft = Math.random() > 0.5;
-        const startX = spawnFromLeft ? -30 : this.canvas.width + 30;
-        const startY = Math.random() * (this.canvas.height - 80) + 40;
-
-        // 2. Visual target placement offsets based on hit check
-        let finalTargetX = this.state.x;
-        let finalTargetY = this.state.y - 15;
-
-        if (!isHit) {
-            // Miss calculation: offset target horizontally and vertically to miss the pet sprite container entirely
-            const missDirectionX = Math.random() > 0.5 ? 1 : -1;
-            finalTargetX = this.state.x + (missDirectionX * (55 + Math.random() * 40));
-            finalTargetY = this.state.y - (40 + Math.random() * 40);
-        }
-
-        const dx = finalTargetX - startX;
-        const dy = finalTargetY - startY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const travelVelocity = 8; // Projectile speed constant
-
-        this.state.paintBalloons.push({
-            x: startX,
-            y: startY,
-            vx: (dx / distance) * travelVelocity,
-            vy: (dy / distance) * travelVelocity,
-            color: colorString,
-            isHit: isHit,
-            targetX: finalTargetX,
-            targetY: finalTargetY,
-            radius: 9,
-            distanceLeft: distance
-        });
-    }
-	explodePet() {
-        if (this.state.action === "bloating" || this.state.action === "dead") return;
-
-        // 🛑 STAGE 1: BLOATING
-        this.state.action = "bloating"; 
-        this.state.hideMainSprite = false; // Still visible while expanding
-        this.stopSound('nyanSound');
-        this.say("🤢 BLECH...");
-
-        setTimeout(() => {
-            // 💥 STAGE 2: THE DETONATION
-			
-            this.state.action = "explode";
-            this.state.hideMainSprite = true; // 🌟 POP! Delete the main body instantly here
-			this.playSound('petsplatSound');
-            this.say("💥 SPLAT!");
-            
-            // Spray gore particles and body chunks from the vacant origin point
-            const numParticles = 80;
-            for (let i = 0; i < numParticles; i++) {
-                const isChunk = Math.random() > 0.75;
-                this.state.particles.push({
-                    x: this.state.x, 
-                    y: this.state.y - 20, 
-                    vx: (Math.random() - 0.5) * 16,
-                    vy: (Math.random() - 0.7) * 18, 
-                    s: isChunk ? 6 + Math.random() * 6 : 2 + Math.random() * 4, 
-                    c: isChunk ? "#5c0000" : "#8b0000", 
-                    life: isChunk ? 120 + Math.random() * 60 : 60 + Math.random() * 40
-                });
-            }
-
-            // 👻 STAGE 3: THE SPIRIT RISES (2 seconds of empty space later)
-            setTimeout(() => {
-                this.activePet.isDead = true;
-                this.activePet.hunger = 100;
-                
-                this.state.isGhost = true; 
-                this.state.hideMainSprite = false; // 🌟 Bring back visibility so the Ghost can be seen!
-                this.state.action = "walk"; 
-                this.say("👻 OoooOoo...");
-                
-                this.saveData();
-
-            }, 2000); // Time spent as empty space with flying debris
-
-        }, 3200); // Bloat duration
-    }
-	teasePet() {
+	setTummyLimit(newLimit) {
+		this.state.tummylimit = parseInt(newLimit);
+		console.log(`Tummy limit updated to: ${this.state.tummylimit}`);
+		this.saveData(); // Assuming you have a persistence method
+	}
+	updatePetMetabolism() {
 		if (this.activePet.isDead) return;
+		
+		// 1. Calculate age levels and growth stages
+		this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
+		this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
 
-		// Set the action to 'teased' (you might need to add this case in your animate loop)
-		this.state.action = "teased";
-		this.state.actionTimer = 150; // How long they stay "teased"
-
-		switch (this.registry.activeSpecies) {
-			case "kitty":
-			case "puppy":
-				this.say("Hey! That's mean! 😾");
-				break;
-			case "spider":
-			case "goldfish":
-				this.say("Stop tapping the glass! 🫧");
-				break;
+		// 2. Compute progressive metabolic hunger decay
+		const now = Date.now();
+		const msElapsed = now - this.activePet.lastHungerTick;
+		if (msElapsed >= this.HUNGER_TICK_MS) {
+			this.activePet.hunger = Math.min(100, this.activePet.hunger + Math.floor(msElapsed / this.HUNGER_TICK_MS)); 
+			this.activePet.lastHungerTick = now - (msElapsed % this.HUNGER_TICK_MS);
 		}
+		
+		// 3. Check for absolute starvation state
+		if (this.activePet.hunger === 100) this.activePet.isDead = true;
 	}
-	revivePet() {
-		if (this.activePet.isDead) {
-			this.activePet.isDead = false;
-			this.activePet.hunger = 50; 
-			this.state.action = "special";
-			this.state.actionTimer = 200;
-			this.activePet.lastHungerTick = Date.now();
-			
-			// --- Carcass Cleanup ---
-			this.state.showCarcass = false;
-			this.state.particles = [];
-			this.say("I'M ALIVE! 💖");
-			this.saveData();
-			
-			for(let i=0; i<20; i++) {
-				this.state.particles.push({
-					x: this.state.x, 
-					y: this.state.y, 
-					vx: (Math.random() - 0.5) * 10, 
-					vy: (Math.random() - 0.5) * 10, 
-					s: 4, 
-					c: "#ff77aa", 
-					life: 40
-				});
-			}
-		} else {
-			this.say("Already healthy! ✨");
+	walkToPoint(targetX, targetY, speed = 2) {
+		const dx = targetX - this.state.x; 
+		const dy = targetY - this.state.y;
+		const dist = Math.sqrt(dx * dx + dy * dy);
+		if (dist > 12) {
+			this.state.facing = dx > 0 ? 1 : -1;
+			this.state.x += (dx / dist) * speed; 
+			this.state.y += (dy / dist) * speed;
+			return false;
 		}
+		return true;
 	}
-
+    // ==========================================
+    // SECTION 5: RENDER ENGINE, ANIMATION & AI PIPELINE
+    // ==========================================
 
 // ========================================================
 //  what should we put here to let reader know what this function does? and what should we put into helpers nexT?
@@ -1699,23 +1524,13 @@ export class StreamPet {
 		this.updateAndDrawParticles();
 	}
 	updateAI(t) {
+		// 1. GUARD CLAUSE: Freeze all AI activity immediately if exploding
 		if (this.state.action === "bloating" || this.state.action === "explode") {
 			if (this.state.actionTimer > 0) this.state.actionTimer--;
 			return; 
 		}
-		
-		if (this.activePet.isDead) return;
-		this.activePet.ageDays = Math.floor((Date.now() - this.activePet.birthday) / 86400000);
-		this.activePet.stage = this.activePet.ageDays < 2 ? "Baby" : this.activePet.ageDays < 5 ? "Juvenile" : "Adult";
 
-		const now = Date.now();
-		const msElapsed = now - this.activePet.lastHungerTick;
-		if (msElapsed >= this.HUNGER_TICK_MS) {
-			this.activePet.hunger = Math.min(100, this.activePet.hunger + Math.floor(msElapsed / this.HUNGER_TICK_MS)); 
-			this.activePet.lastHungerTick = now - (msElapsed % this.HUNGER_TICK_MS);
-		}
-		if (this.activePet.hunger === 100) this.activePet.isDead = true;
-
+		// 2. DATA ALLOCATION: Calculate frame layout coordinates and metrics
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
 		const groundY = visibleH - this.BASE_FLOOR_Y;
@@ -1728,437 +1543,24 @@ export class StreamPet {
 		const FLOOR_Y = visibleH - this.BASE_FLOOR_Y;
 		const LEFT_X = 40;
 		const RIGHT_X = visibleW - 40;
-
-		const walkToPoint = (targetX, targetY, speed = 2) => {
-			const dx = targetX - this.state.x; 
-			const dy = targetY - this.state.y;
-			const dist = Math.sqrt(dx * dx + dy * dy);
-			if (dist > 12) {
-				this.state.facing = dx > 0 ? 1 : -1;
-				this.state.x += (dx / dist) * speed; 
-				this.state.y += (dy / dist) * speed;
-				return false;
-			}
-			return true;
-		};
-
-		if (this.state.actionTimer > 0) this.state.actionTimer--;
+		const walkToPoint = (targetX, targetY, speed = 2) => this.walkToPoint(targetX, targetY, speed);
 		
+		const ctx = { t, visibleW, visibleH, groundY, bowlPos, bedPos, litPos, towerPos, CEIL_Y, FLOOR_Y, LEFT_X, RIGHT_X, walkToPoint };
+
+		// 3. INTERNAL ENGINE UPDATES: Tick down clocks and run metabolism
+		if (this.state.actionTimer > 0) this.state.actionTimer--;
+		this.updatePetMetabolism();
+
+		// 4. INTERRUPT MATRIX: Override normal behavior if food is present
 		if (this.state.hasFood && !["nyan", "eating", "potty", "walk_to_litter", "rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
 			this.state.action = "walk_to_food";
 		}
 
-		switch(this.state.action) {
-			case "nyan":
-				if (this.state.nyanPhase === "takeoff") {
-					const targetY = visibleH / 2;
-					this.state.y += (targetY - this.state.y) * 0.05; 
-					this.state.x += this.state.facing * 5;
-					if (Math.abs(this.state.y - targetY) < 15) this.state.nyanPhase = "flying";
-				} else if (this.state.nyanPhase === "flying") {
-					this.state.x += this.state.facing * 10; 
-					this.state.y = (visibleH / 2) + Math.sin(t * 0.1) * 100;
-					if (this.state.actionTimer < 80) this.state.nyanPhase = "landing";
-				} else if (this.state.nyanPhase === "landing") {
-					this.state.x += (this.state.originalPos.x - this.state.x) * 0.08; 
-					this.state.y += (this.state.originalPos.y - this.state.y) * 0.08;
-				}
-				if (this.state.nyanPhase !== "landing") {
-					if (this.state.x > visibleW + 150) this.state.x = -150;
-					if (this.state.x < -150) this.state.x = visibleW + 150;
-				}
-				if (this.state.actionTimer <= 0) {
-					this.stopSound('nyanSound');
-					this.state.x = this.state.originalPos.x; 
-					this.state.y = this.state.originalPos.y;
-					this.state.action = "idle"; 
-					this.state.actionTimer = 200;
-				}
-				break;
-
-			case "walk_to_food":
-				let foodTargetX = bowlPos.x;
-				let foodTargetY = (this.registry.activeSpecies === "spider") ? FLOOR_Y : bowlPos.y;
-				
-				if (this.registry.activeSpecies === "spider") {
-					if (this.state.y < FLOOR_Y - 5) {
-						foodTargetX = (this.state.x < visibleW / 2) ? LEFT_X : RIGHT_X;
-						foodTargetY = FLOOR_Y;
-					}
-				}
-
-				if (walkToPoint(foodTargetX, foodTargetY, 2.5)) { 
-					if (this.registry.activeSpecies === "spider" && Math.abs(this.state.y - FLOOR_Y) < 5 && Math.abs(this.state.x - bowlPos.x) > 15) {
-						walkToPoint(bowlPos.x, FLOOR_Y, 2.5);
-						return;
-					}
-					if (this.state.hasFood) { 
-						this.state.action = "eating"; 
-						this.state.actionTimer = 140; 
-					} else { 
-						this.state.action = "idle";
-					}
-				}
-				break;
-
-			case "eating":
-				if (this.state.actionTimer <= 0) {
-					this.state.hasFood = false; 
-					this.activePet.hunger = Math.max(0, this.activePet.hunger - 15); 
-					this.activePet.digestive += 1; 
-                    
-					// Explode if digestion count is too high (e.g., 5 is the limit)
-					if (this.activePet.digestive > this.state.tummylimit) {
-						this.explodePet();
-						return;
-					}
-
-					this.activePet.exp += 20; 
-					this.state.action = "idle"; 
-					this.state.actionTimer = 300;
-				}
-				break;
-
-			case "walk_to_litter":
-				if (this.registry.activeSpecies === "goldfish") {
-					if (!this.state.aquaticPottyTarget) {
-						this.state.aquaticPottyTarget = {
-							x: 100 + Math.random() * (visibleW - 200),
-							y: 120 + Math.random() * (visibleH - 240)
-						};
-					}
-					if (walkToPoint(this.state.aquaticPottyTarget.x, this.state.aquaticPottyTarget.y, 1.8)) {
-						this.state.aquaticPottyTarget = null;
-						this.state.action = "potty";
-						this.state.actionTimer = 90;
-					}
-				} else if (this.registry.activeSpecies === "spider") {
-					if (!this.state.spiderPottyTarget) {
-						const r = Math.random();
-						if (r < 0.25) this.state.spiderPottyTarget = { x: LEFT_X + Math.random() * (RIGHT_X - LEFT_X), y: CEIL_Y };
-						else if (r < 0.50) this.state.spiderPottyTarget = { x: LEFT_X + Math.random() * (RIGHT_X - LEFT_X), y: FLOOR_Y };
-						else if (r < 0.75) this.state.spiderPottyTarget = { x: LEFT_X, y: CEIL_Y + Math.random() * (FLOOR_Y - CEIL_Y) };
-						else this.state.spiderPottyTarget = { x: RIGHT_X, y: CEIL_Y + Math.random() * (FLOOR_Y - CEIL_Y) };
-					}
-					
-					if (walkToPoint(this.state.spiderPottyTarget.x, this.state.spiderPottyTarget.y, 2.2)) {
-						this.state.spiderPottyTarget = null;
-						this.state.action = "potty";
-						this.state.actionTimer = 100;
-					}
-				} else {
-					if (walkToPoint(litPos.x, litPos.y)) { 
-						this.state.action = "potty"; 
-						this.state.actionTimer = 120; 
-					}
-				}
-				break;
-				
-		//original tower walk and scratch part:		
-/*         case "walk_to_tower_scratch":
-            if (walkToPoint(towerPos.x - 15, towerPos.y)) { state.facing = 1; state.action = "scratching"; state.actionTimer = 200; say("Scritch! 🐾"); }
-            break;
-        case "walk_to_tower_climb":
-            if (walkToPoint(towerPos.x, towerPos.y - 145)) { state.action = "tower_sleep"; state.actionTimer = 1500; }
-            break;
-        case "scratching":
-             if (t % 3 === 0) state.particles.push({x: state.x + 10, y: state.y - 10, vx: Math.random()*4, vy: -2, s: 2, c: "#d2b48c", life: 15});
-             if (state.actionTimer <= 0) state.action = "idle";
-             break; */
-				
-				
-			case "walk_to_tower_scratch":
-                // Walk to the base of the tower using the zoom-calculated position
-                if (walkToPoint(towerPos.x, towerPos.y)) {
-                    this.state.action = "scratching";
-                    this.state.actionTimer = 180; // Run scratch animation for 180 ticks
-                }
-                break;
-
-			case "scratching":
-				// 1. HIGH DENSITY SHRED TIMING (t % 3): Fixed to prevent crashes using 'this.state'
-				if (t % 3 === 0) {
-					// Anchors x-axis exactly where the front paws hit based on facing direction (-1 or 1)
-					const clawX = this.state.x + (this.state.facing * 15);
-					// Lowers y-axis right to scratch deck height so particles don't spawn in mid-air
-					const clawY = this.state.y + 5; 
-
-					this.state.particles.push({
-						x: clawX,
-						y: clawY,
-						// Shoots shreds backwards away from the object being scratched
-						vx: -this.state.facing * (0.5 + Math.random() * 3),
-						// Gives a light upward burst arc
-						vy: -1 - Math.random() * 2,
-						s: 2, // Your original size
-						c: "#d2b48c", // Your preferred tan color
-						life: 15
-					});
-				}
-
-				// 2. STATE TRANSITION MATRIX
-				if (this.state.actionTimer <= 0) {
-					this.state.action = "idle";
-					this.state.actionTimer = Math.floor(Math.random() * 200) + 150; // Resets AI clock cleanly
-				}
-				break;
-
-            case "walk_to_tower_climb":
-                // Walk to the base, then cleanly switch over to the climbing state
-                if (walkToPoint(towerPos.x, towerPos.y)) {
-                    this.state.action = "climbing_tower";
-                }
-                break;
-
-            case "climbing_tower":
-				const perchY = towerPos.y - 125; // 🌟 Matches top platform deck precisely!
-				this.state.y -= 1.5;
-				
-				if (this.state.y <= perchY) {
-					this.state.y = perchY;
-					this.state.action = "tower_sleep";
-					this.state.actionTimer = 800;
-				}
-				break;
-			case "potty":
-				if (this.state.actionTimer <= 0) { 
-					if (this.registry.activeSpecies === "goldfish") {
-						this.activePet.poops.push({
-							x: this.state.x - (this.state.facing * 10), y: this.state.y + 5,
-							ox: Math.random() * 100, swimOffset: Math.random() * Math.PI * 2
-						});
-						this.activePet.digestive = 0;
-						this.state.action = "idle"; 
-						this.state.actionTimer = 250;
-					} else if (this.registry.activeSpecies === "spider") {
-						let cleanX = this.state.x;
-						let cleanY = this.state.y;
-						
-						if (cleanX > LEFT_X + 10 && cleanX < RIGHT_X - 10 && cleanY > CEIL_Y + 10 && cleanY < FLOOR_Y - 10) {
-							let distToLeft = cleanX - LEFT_X;
-							let distToRight = RIGHT_X - cleanX;
-							let distToCeil = cleanY - CEIL_Y;
-							let distToFloor = FLOOR_Y - cleanY;
-							let minDist = Math.min(distToLeft, distToRight, distToCeil, distToFloor);
-							
-							if (minDist === distToLeft) cleanX = LEFT_X;
-							else if (minDist === distToRight) cleanX = RIGHT_X;
-							else if (minDist === distToCeil) cleanY = CEIL_Y;
-							else cleanY = FLOOR_Y;
-						}
-
-						this.state.spiderWebs.push({
-							x: cleanX, y: cleanY,
-							size: 20 + Math.random() * 15
-						});
-						this.activePet.digestive = 0;
-						this.state.action = "idle"; 
-						this.state.actionTimer = 200;
-					} else {
-						this.activePet.poops.push({ox: Math.random()*100, isCeil: false}); 
-						this.activePet.digestive = 0; 
-						this.state.action = "walk_to_kick"; 
-					}
-				}
-				break;
-
-			case "walk_to_kick":
-				if (walkToPoint(litPos.x - 50, litPos.y)) { 
-					this.state.facing = 1; 
-					this.state.action = "kicking"; 
-					this.state.actionTimer = 80; 
-				}
-				break;
-
-			case "kicking":
-				if (t % 2 === 0) {
-					this.state.particles.push({x: this.state.x - 10, y: this.state.y + 20, vx: 5 + Math.random()*6, vy: -4, s: 2.5, c: "#bdc3c7", life: 25});
-				}
-				if (this.state.actionTimer <= 0) { 
-					this.state.action = "idle"; 
-					this.state.actionTimer = 300; 
-				}
-				break;
-
-			case "walk_to_bed":
-				let bedTargetX = bedPos.x;
-				let bedTargetY = (this.registry.activeSpecies === "spider") ? FLOOR_Y : bedPos.y;
-				if (walkToPoint(bedTargetX, bedTargetY)) { 
-					this.state.action = "sleep"; 
-					this.state.actionTimer = 1000; 
-				}
-				break;
-			case "teased":
-				// The pet shakes back and forth while teased
-				if (this.state.actionTimer > 0) {
-					// Small jitter effect
-					this.state.x += (Math.random() - 0.5) * 6;
-					this.state.y += (Math.random() - 0.5) * 6;
-					
-					// Face the source of the "tease" (randomly flip for effect)
-					if (this.state.actionTimer % 5 === 0) this.state.facing *= -1;
-				} else {
-					// Return to normal
-					this.state.action = "idle";
-					this.state.actionTimer = 300;
-				}
-				break;
-			case "rappel_drop":
-				this.state.y += 3.5; 
-				if (this.state.y >= this.state.rappelDepth) {
-					this.state.action = "rappel_hang";
-					this.state.actionTimer = 180 + Math.random() * 200;
-				}
-				break;
-
-			case "rappel_hang":
-				this.state.x += Math.sin(t * 0.05) * 0.4;
-				if (this.state.actionTimer <= 0) {
-					this.state.action = "rappel_rise";
-				}
-				break;
-
-			case "rappel_rise":
-				this.state.y -= 2.5; 
-				if (this.state.y <= CEIL_Y) {
-					this.state.y = CEIL_Y;
-					this.state.action = "idle";
-					this.state.actionTimer = 200;
-				}
-				break;
-
-			case "idle":
-				if (this.registry.activeSpecies === "goldfish") {
-					this.state.y = (visibleH / 2) + Math.sin(t * 0.04) * 40;
-					if (Math.random() < 0.02) {
-						this.state.goldfishBubbles.push({
-							x: this.state.x + this.state.facing * 20, 
-							y: this.state.y - 10, 
-							r: 2 + Math.random() * 4, 
-							alpha: 1
-						});
-					}
-				}
-
-				if (this.registry.activeSpecies === "spider") {
-					let currentWeb = this.state.spiderWebs.find(w => Math.sqrt((w.x - this.state.x)**2 + (w.y - this.state.y)**2) < w.size);
-					if (!currentWeb && !["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
-						if (this.state.x > LEFT_X + 5 && this.state.x < RIGHT_X - 5 && this.state.y > CEIL_Y + 5 && this.state.y < FLOOR_Y - 5) {
-							if (this.state.y < CEIL_Y + 40) this.state.y = CEIL_Y;
-							else if (this.state.y > FLOOR_Y - 40) this.state.y = FLOOR_Y;
-							else if (this.state.x < visibleW / 2) this.state.x = LEFT_X;
-							else this.state.x = RIGHT_X;
-						}
-					}
-				}
-
-				if (this.state.actionTimer <= 0) {
-					if (Math.random() < 0.15) {
-						if (this.registry.activeSpecies === "kitty") this.say("Meow! 🐾");
-						if (this.registry.activeSpecies === "puppy") this.say("BARK! 🐶");
-						if (this.registry.activeSpecies === "spider") this.say("Click-click... 🕷️");
-						if (this.registry.activeSpecies === "goldfish") this.say("Blub... 🫧");
-					}
-					
-					if (Math.random() < 0.4) { 
-						this.state.actionTimer = 400 + Math.random() * 400; 
-						return; 
-					}
-
-					if (this.activePet.digestive >= 3) { 
-						this.state.action = "walk_to_litter"; 
-					} else {
-						const r = Math.random();
-						if (r < 0.20) { 
-							this.state.action = "walk"; 
-							this.state.facing = Math.random() > 0.5 ? 1 : -1; 
-							this.state.actionTimer = 300 + Math.random() * 300; 
-						}
-						else if (r < 0.40) this.state.action = "walk_to_bed";
-						else if (r < 0.60 && this.state.layout.showTower) {
-							this.state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
-						}
-						else this.state.actionTimer = 500 + Math.random() * 500;
-					}
-				}
-				break;
-
-			case "walk":
-				if (this.registry.activeSpecies === "spider") {
-					let dir = this.state.spiderDir || 1;
-					let activeWebNode = this.state.spiderWebs.find(web => {
-						let dx = web.x - this.state.x;
-						let dy = web.y - this.state.y;
-						return Math.sqrt(dx*dx + dy*dy) < web.size + 10;
-					});
-
-					if (activeWebNode) {
-						this.state.x += this.state.facing * 1.5;
-						if (Math.random() < 0.08) this.state.y += (Math.random() > 0.5 ? 2 : -2);
-					} 
-					else if (Math.abs(this.state.y - CEIL_Y) <= 4) { 
-						this.state.y = CEIL_Y; 
-						this.state.x += dir * 1.8;
-						this.state.facing = dir;
-						if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.y = CEIL_Y + 4; }
-						if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.y = CEIL_Y + 4; }
-					} else if (Math.abs(this.state.y - FLOOR_Y) <= 4) { 
-						this.state.y = FLOOR_Y; 
-						this.state.x += dir * 1.8;
-						this.state.facing = dir;
-						if (this.state.x <= LEFT_X) { this.state.x = LEFT_X; this.state.y = FLOOR_Y - 4; }
-						if (this.state.x >= RIGHT_X) { this.state.x = RIGHT_X; this.state.y = FLOOR_Y - 4; }
-					} else if (Math.abs(this.state.x - LEFT_X) <= 4) { 
-						this.state.x = LEFT_X; 
-						this.state.y += dir * 1.8;
-						if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.x = LEFT_X + 4; }
-						if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.x = LEFT_X + 4; }
-					} else if (Math.abs(this.state.x - RIGHT_X) <= 4) { 
-						this.state.x = RIGHT_X; 
-						this.state.y += dir * 1.8;
-						if (this.state.y <= CEIL_Y) { this.state.y = CEIL_Y; this.state.x = RIGHT_X - 4; }
-						if (this.state.y >= FLOOR_Y) { this.state.y = FLOOR_Y; this.state.x = RIGHT_X - 4; }
-					} else {
-						if (this.state.y < (visibleH / 2)) this.state.y = CEIL_Y;
-						else this.state.y = FLOOR_Y;
-					}
-				} else {
-					// Goldfish Full-Tank Swimming Logic
-					if (!this.state.swimTargetX) {
-						this.state.swimTargetX = LEFT_X + Math.random() * (visibleW - (LEFT_X + RIGHT_X));
-					}
-
-					this.state.x += (this.state.swimTargetX - this.state.x) * 0.02;
-					this.state.facing = (this.state.swimTargetX > this.state.x) ? 1 : -1;
-
-					if (this.registry.activeSpecies === "goldfish") {
-						this.state.y = (visibleH / 2) + Math.sin(t * 0.03) * 60;
-						if(t % 20 === 0) this.state.goldfishBubbles.push({x: this.state.x, y: this.state.y, r: 2, alpha: 0.8});
-					}
-					
-					if (Math.abs(this.state.x - this.state.swimTargetX) < 10) {
-						this.state.swimTargetX = null;
-					}
-				}
-
-				if (this.state.actionTimer <= 0) { 
-					this.state.action = "idle"; 
-					this.state.actionTimer = 400; 
-				}
-				break;
-
-			case "sleep":
-			case "tower_sleep":
-			case "dance":
-			case "special":
-				if (this.state.actionTimer <= 0) { 
-					if(this.state.action === "tower_sleep") this.state.y = groundY;
-					this.state.action = "idle"; 
-				}
-				break;
+		// 5. STATE EXECUTION: Run active state logic from the library
+		if (STATE_LIBRARY[this.state.action]) {
+			STATE_LIBRARY[this.state.action](this, ctx);
 		}
 	}
-
 	animate = () => {
 		this.state.animT++;
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -2215,455 +1617,6 @@ export class StreamPet {
 // ==========================================
 // CORE VISUAL RENDERING ROUTERS PER SPECIES
 // ==========================================
-    drawYarn(x, y, tick) {
-        const roll = Math.sin(tick * 0.15) * 40;
-        this.ctx.save();
-        this.ctx.translate(x + roll, y);
-        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-        this.ctx.beginPath(); this.ctx.ellipse(0, 15, 15, 5, 0, 0, Math.PI*2); this.ctx.fill();
-        
-        let ballColor = "#e74c3c";
-        if (this.registry.activeSpecies === "puppy") ballColor = "#ffeb3b"; // Tennis ball variant
-        if (this.registry.activeSpecies === "spider") ballColor = "#9c27b0";
-        
-        this.ctx.fillStyle = ballColor;
-        this.ctx.beginPath(); this.ctx.arc(0, 12, 12, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
-        this.ctx.lineWidth = 1.5;
-        this.ctx.beginPath(); this.ctx.arc(0, 0, 8, 0, Math.PI); this.ctx.stroke();
-        this.ctx.restore();
-    }
-	drawPaintBalloons() {
-		if (!this.state.paintBalloons || this.state.paintBalloons.length === 0) return;
-
-		for (let i = this.state.paintBalloons.length - 1; i >= 0; i--) {
-			let balloon = this.state.paintBalloons[i];
-
-			balloon.x += balloon.vx;
-			balloon.y += balloon.vy;
-
-			this.ctx.save();
-			this.ctx.fillStyle = balloon.color;
-			this.ctx.beginPath();
-			this.ctx.arc(balloon.x, balloon.y, balloon.radius, 0, Math.PI * 2);
-			this.ctx.fill();
-			this.ctx.strokeStyle = "#ffffff";
-			this.ctx.lineWidth = 1.5;
-			this.ctx.stroke();
-			this.ctx.restore();
-
-			const curDx = balloon.targetX - balloon.x;
-			const curDy = balloon.targetY - balloon.y;
-			const remainingDist = Math.sqrt(curDx * curDx + curDy * curDy);
-
-			if (remainingDist < 10 || balloon.x < -50 || balloon.x > this.canvas.width + 50) {
-				const reachedTarget = remainingDist < 15;
-
-				if (balloon.isHit && reachedTarget) {
-					this.state.overrideColor = balloon.color;
-					
-					if (this.activePet) {
-						this.activePet.color = balloon.color;
-					}
-					
-					this.say("🎨 SPLATAFY!");
-					this.playSound('bubbleSound'); 
-				} else if (reachedTarget) {
-					this.say("💨 MISSED!");
-				}
-
-				if (balloon.x >= -10 && balloon.x <= this.canvas.width + 10) {
-					const particleCount = balloon.isHit ? 30 : 15;
-					for (let p = 0; p < particleCount; p++) {
-						this.state.particles.push({
-							x: balloon.x,
-							y: balloon.y,
-							vx: (Math.random() - 0.5) * 8,
-							vy: (Math.random() - 0.7) * 8,
-							s: Math.random() * 3 + 2,
-							c: balloon.color,
-							life: Math.floor(Math.random() * 20) + 15
-						});
-					}
-				}
-				this.state.paintBalloons.splice(i, 1);
-			}
-		}
-	}
-	drawGoldfishBubbles(tick) {
-		if (this.registry.activeSpecies !== "goldfish") return;
-
-		for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
-			let bubble = this.state.goldfishBubbles[i];
-			
-			bubble.y -= 1.2;
-			bubble.x += Math.sin(tick * 0.05 + i) * 0.5;
-			
-			this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
-			this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
-			this.ctx.beginPath();
-			this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
-			this.ctx.fill();
-			this.ctx.stroke();
-			
-			if (bubble.y < 50) {
-				this.state.goldfishBubbles.splice(i, 1);
-			}
-		}
-	}
-	drawNyanTrail(tick, visibleH) {
-		if (this.state.action !== "nyan") return;
-
-		const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
-		this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
-		
-		for (let segment = 0; segment < 8; segment++) {
-			const segOffset = segment * 35;
-			const timeOffset = segment * 2;
-			colors.forEach((col, i) => {
-				this.ctx.fillStyle = col;
-				const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
-				const wiggle = Math.cos((tick - timeOffset) * 0.2 + i) * 5;
-				this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
-			});
-		}
-		this.ctx.globalAlpha = 1.0;
-	}
-	updateAndDrawParticles() {
-		for (let i = this.state.particles.length - 1; i >= 0; i--) {
-			const p = this.state.particles[i];
-			this.ctx.save();
-			
-			const isHeavyChunk = p.s > 5;
-			this.ctx.fillStyle = p.c;
-			this.ctx.globalAlpha = p.life < 30 ? p.life / 30 : 1.0;
-			
-			if (isHeavyChunk) {
-				this.ctx.fillRect(p.x, p.y, p.s, p.s);
-				this.ctx.strokeStyle = "#1a0000";
-				this.ctx.lineWidth = 1;
-				this.ctx.strokeRect(p.x, p.y, p.s, p.s);
-			} else {
-				this.ctx.fillRect(p.x, p.y, p.s, p.s);
-			}
-			this.ctx.restore();
-
-			p.x += p.vx;
-			p.y += p.vy;
-			p.vy += isHeavyChunk ? 0.22 : 0.35;
-			
-			if (isHeavyChunk) {
-				p.vx *= 0.985;
-			}
-
-			p.life--;
-			if (p.life <= 0) {
-				this.state.particles.splice(i, 1);
-			}
-		}
-	}
-
-    drawSpiderWebs() {
-		// Early exit guard: Only render background webs if the active species is a spider
-		if (this.registry.activeSpecies !== "spider") return;
-		this.state.spiderWebs.forEach(web => {
-			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
-			this.ctx.lineWidth = 1;
-			this.ctx.beginPath();
-			for(let i = 0; i < 8; i++) {
-				let angle = (i / 8) * Math.PI * 2;
-				this.ctx.moveTo(web.x, web.y);
-				this.ctx.lineTo(web.x + Math.cos(angle) * web.size, web.y + Math.sin(angle) * web.size);
-			}
-			this.ctx.stroke();
-		});
-	}
-
-	drawRappelStrand() {
-		const isRappelling = ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action);
-		if (this.registry.activeSpecies !== "spider" || !isRappelling) return;
-
-		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
-		this.ctx.lineWidth = 1.2;
-		this.ctx.beginPath();
-		
-		// Connect line from ceiling anchor down to spider's live center position
-		const anchorX = this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x;
-		this.ctx.moveTo(anchorX, 30); // Bound tightly to true CEIL_Y
-		this.ctx.lineTo(this.state.x, this.state.y);
-		this.ctx.stroke();
-	}
-
-	//pet house drawing functions
-	drawPetHouse(tPos, tick) {
-		switch (this.registry.activeSpecies) {
-			case "spider":
-				this.drawSpiderNest(tPos, tick);
-				break;
-			case "goldfish":
-				this.drawFishCastle(tPos, tick);
-				break;
-			case "puppy":
-				this.drawDogHouse(tPos, tick);
-				break;
-			case "kitty":
-			default:
-				this.drawCatTower(tPos, tick);
-				break;
-		}
-	}
-
-	drawCatTower(tPos, tick) {
-		// 1. Base Shadow
-		this.ctx.fillStyle = "rgba(0,0,0,0.1)"; 
-		this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
-
-		// 2. Tower Base Plinth
-		this.ctx.fillStyle = "#7f8c8d"; 
-		this.ctx.fillRect(tPos.x - 55, tPos.y - 5, 110, 15); 
-
-		// 3. Main Vertical Post (Sisal trunk)
-		this.ctx.fillStyle = "#a67c52"; 
-		this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
-
-		// 4. Lower Mid-Platform
-		this.ctx.fillStyle = "#95a5a6"; 
-		this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); 
-
-		// 5. Top Crowns Perch
-		this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
-	}
-
-	drawDogHouse(tPos, tick) {
-		this.ctx.save();
-		// Base shadow
-		this.ctx.fillStyle = "rgba(0,0,0,0.15)";
-		this.ctx.fillRect(tPos.x - 55, tPos.y + 5, 110, 15);
-		
-		// Main Structure
-		this.ctx.fillStyle = "#d7ccc8"; 
-		this.ctx.fillRect(tPos.x - 45, tPos.y - 65, 90, 70);
-		
-		// Doorway
-		this.ctx.fillStyle = "#3e2723"; 
-		this.ctx.beginPath();
-		this.ctx.arc(tPos.x, tPos.y - 25, 20, Math.PI, 0, false);
-		this.ctx.fillRect(tPos.x - 20, tPos.y - 25, 40, 30);
-		this.ctx.fill();
-		
-		// Roof Facade
-		this.ctx.fillStyle = "#d7ccc8";
-		this.ctx.beginPath();
-		this.ctx.moveTo(tPos.x - 45, tPos.y - 65);
-		this.ctx.lineTo(tPos.x, tPos.y - 95);
-		this.ctx.lineTo(tPos.x + 45, tPos.y - 65);
-		this.ctx.fill();
-		
-		// Roof Trim
-		this.ctx.strokeStyle = "#d32f2f";
-		this.ctx.lineWidth = 8;
-		this.ctx.lineCap = "round";
-		this.ctx.beginPath();
-		this.ctx.moveTo(tPos.x - 55, tPos.y - 60);
-		this.ctx.lineTo(tPos.x, tPos.y - 98);
-		this.ctx.lineTo(tPos.x + 55, tPos.y - 60);
-		this.ctx.stroke();
-		this.ctx.restore();
-	}
-
-	drawFishCastle(tPos, tick) {
-		// Main Keep
-		this.ctx.fillStyle = "#ffb74d"; 
-		this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
-		
-		// Left & Right Spires
-		this.ctx.fillStyle = "#e65100";
-		this.ctx.fillRect(tPos.x - 50, tPos.y - 110, 30, 30);
-		this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
-		
-		// Gate Entrance
-		this.ctx.fillStyle = "#4e342e"; 
-		this.ctx.beginPath(); 
-		this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); 
-		this.ctx.fill();
-	}
-
-	drawSpiderNest(tPos, tick) {
-		this.ctx.save();
-		// Anchor structural cobweb down from ceiling at tower position x
-		const nestX = tPos.x;
-		const nestY = 65; // Suspended high ceiling nest line
-
-		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
-		this.ctx.lineWidth = 1;
-
-		// Draw supporting frame rays spanning outward and up to ceiling limits
-		this.ctx.beginPath();
-		for (let i = 0; i <= 8; i++) {
-			let angle = Math.PI + (i / 8) * Math.PI; // Upward semi-circle grid
-			this.ctx.moveTo(nestX, nestY);
-			this.ctx.lineTo(nestX + Math.cos(angle) * 75, nestY + Math.sin(angle) * 45);
-		}
-		this.ctx.stroke();
-
-		// Intersecting concentric orbit web strings
-		for (let r = 15; r <= 65; r += 15) {
-			this.ctx.beginPath();
-			this.ctx.ellipse(nestX, nestY, r, r * 0.6, 0, Math.PI, Math.PI * 2);
-			this.ctx.stroke();
-		}
-
-		// Draw central egg sac cocoon cocooned in the center
-		this.ctx.fillStyle = "rgba(240, 240, 240, 0.85)";
-		this.ctx.beginPath();
-		this.ctx.ellipse(nestX, nestY + 5, 12, 18, 0, 0, Math.PI * 2);
-		this.ctx.fill();
-		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-		this.ctx.stroke();
-		this.ctx.restore();
-	}
-
-
-// beds
-	drawPetBed(bPos, tick) {
-		if (this.registry.activeSpecies === "spider") {
-			// Structural radial support anchors for the web nest
-			this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
-			this.ctx.lineWidth = 1;
-			this.ctx.beginPath();
-			for (let i = 0; i < 8; i++) {
-				let angle = (i / 8) * Math.PI * 2;
-				this.ctx.moveTo(bPos.x, bPos.y + 5);
-				this.ctx.lineTo(bPos.x + Math.cos(angle) * 55, bPos.y + 5 + Math.sin(angle) * 18);
-			}
-			this.ctx.stroke();
-
-			// Concentric horizontal web ring segments
-			for (let r = 10; r <= 50; r += 12) {
-				this.ctx.beginPath();
-				this.ctx.ellipse(bPos.x, bPos.y + 5, r, r * 0.35, 0, 0, Math.PI * 2);
-				this.ctx.stroke();
-			}
-		} else {
-			// Grounding ambient drop shadow cushion
-			this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-			this.ctx.beginPath(); 
-			this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI * 2); 
-			this.ctx.fill();
-			
-			// Main colored fabric bed core
-			this.ctx.fillStyle = this.state.layout.bedColor;
-			this.ctx.beginPath(); 
-			this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI * 2); 
-			this.ctx.fill();
-		}
-	}
-	
-//food bowl
-	drawFoodBowl(fPos, tick) {
-		// Shadow base
-		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
-		this.ctx.beginPath(); 
-		this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); 
-		this.ctx.fill();
-
-		// Outer Bowl rim
-		this.ctx.fillStyle = "#ecf0f1"; 
-		this.ctx.beginPath(); 
-		this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); 
-		this.ctx.fill();
-
-		// Inner Bowl basin
-		this.ctx.fillStyle = "#bdc3c7"; 
-		this.ctx.beginPath(); 
-		this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); 
-		this.ctx.fill();
-
-		// Interactive food payload
-		if (this.state.hasFood) {
-			this.ctx.fillStyle = "#d35400"; 
-			this.ctx.beginPath(); 
-			this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); 
-			this.ctx.fill();
-			
-			this.ctx.font = "16px Arial";
-			let foodIcon = "🐟";
-			if (this.registry.activeSpecies === "puppy") foodIcon = "🍖";
-			if (this.registry.activeSpecies === "spider") foodIcon = "🪰";
-			if (this.registry.activeSpecies === "goldfish") foodIcon = "🍤";
-			
-			this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
-		}
-	}
-
-// litter box
-	drawLitterBox(lPos, boxW) {
-		// Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
-		if (this.registry.activeSpecies === "goldfish" || this.registry.activeSpecies === "spider") return;
-
-		if (this.registry.activeSpecies === "puppy") {
-			// Base Dirt Tray
-			this.ctx.fillStyle = "#4e342e"; 
-			this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
-			
-			// Green Grass Mat
-			this.ctx.fillStyle = "#2e7d32"; 
-			this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
-			
-			// Procedural Grass Blades
-			this.ctx.fillStyle = "#4caf50";
-			for (let i = 0; i < 6; i++) {
-				let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
-				this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
-				this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
-			}
-			
-			// Picket Fence Border Details
-			this.ctx.fillStyle = "#f5f5f5";
-			for(let p = 0; p <= boxW; p += 15) {
-				this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
-			}
-			this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   
-			this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    
-		} else {
-			// Standard Cat/Companion Plastic Litter Pan
-			this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
-			this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
-			this.ctx.fillStyle = "#2c3e50"; 
-			this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
-			this.ctx.fillStyle = "#95a5a6"; 
-			this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
-		}
-	}
-
-//poop drawing
-	drawWasteLayer(lPos, boxW) {
-		this.activePet.poops.forEach(p => {
-			if (this.registry.activeSpecies === "goldfish") {
-				if (p.x === undefined) p.x = this.state.x;
-				if (p.y === undefined) p.y = this.state.y;
-				if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
-
-				// Float up naturally in aquarium water space
-				p.y -= 0.2; 
-				p.swimOffset += 0.03;
-				let finalX = p.x + Math.sin(p.swimOffset) * 5;
-
-				this.ctx.font = "14px Arial";
-				this.ctx.fillText("💩", finalX, p.y);
-			} else if (this.registry.activeSpecies === "spider") {
-				// Spiders use architectural webs instead of standard floor assets
-			} else {
-				// Anchors standard waste to the litter pan coordinates layout
-				let poopyY = p.isCeil ? 90 : lPos.y + 24;
-				let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
-				this.ctx.font = "14px Arial";
-				this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
-			}
-		});
-	}
-
-
 // ==========================================
 // draw pets 
 // ==========================================
@@ -2981,4 +1934,1067 @@ export class StreamPet {
 
 		this.ctx.restore();
 	}
+
+
+
+//=================================
+// furniture & other static large objects
+//=================================
+//------------------------------
+// pet house drawing functions
+//------------------------------
+	drawPetHouse(tPos, tick) {
+		switch (this.registry.activeSpecies) {
+			case "spider":
+				this.drawSpiderNest(tPos, tick);
+				break;
+			case "goldfish":
+				this.drawFishCastle(tPos, tick);
+				break;
+			case "puppy":
+				this.drawDogHouse(tPos, tick);
+				break;
+			case "kitty":
+			default:
+				this.drawCatTower(tPos, tick);
+				break;
+		}
+	}
+//------------------------------
+	drawCatTower(tPos, tick) {
+		// 1. Base Shadow
+		this.ctx.fillStyle = "rgba(0,0,0,0.1)"; 
+		this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
+
+		// 2. Tower Base Plinth
+		this.ctx.fillStyle = "#7f8c8d"; 
+		this.ctx.fillRect(tPos.x - 55, tPos.y - 5, 110, 15); 
+
+		// 3. Main Vertical Post (Sisal trunk)
+		this.ctx.fillStyle = "#a67c52"; 
+		this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
+
+		// 4. Lower Mid-Platform
+		this.ctx.fillStyle = "#95a5a6"; 
+		this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); 
+
+		// 5. Top Crowns Perch
+		this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
+	}
+//------------------------------
+	drawDogHouse(tPos, tick) {
+		this.ctx.save();
+		// Base shadow
+		this.ctx.fillStyle = "rgba(0,0,0,0.15)";
+		this.ctx.fillRect(tPos.x - 55, tPos.y + 5, 110, 15);
+		
+		// Main Structure
+		this.ctx.fillStyle = "#d7ccc8"; 
+		this.ctx.fillRect(tPos.x - 45, tPos.y - 65, 90, 70);
+		
+		// Doorway
+		this.ctx.fillStyle = "#3e2723"; 
+		this.ctx.beginPath();
+		this.ctx.arc(tPos.x, tPos.y - 25, 20, Math.PI, 0, false);
+		this.ctx.fillRect(tPos.x - 20, tPos.y - 25, 40, 30);
+		this.ctx.fill();
+		
+		// Roof Facade
+		this.ctx.fillStyle = "#d7ccc8";
+		this.ctx.beginPath();
+		this.ctx.moveTo(tPos.x - 45, tPos.y - 65);
+		this.ctx.lineTo(tPos.x, tPos.y - 95);
+		this.ctx.lineTo(tPos.x + 45, tPos.y - 65);
+		this.ctx.fill();
+		
+		// Roof Trim
+		this.ctx.strokeStyle = "#d32f2f";
+		this.ctx.lineWidth = 8;
+		this.ctx.lineCap = "round";
+		this.ctx.beginPath();
+		this.ctx.moveTo(tPos.x - 55, tPos.y - 60);
+		this.ctx.lineTo(tPos.x, tPos.y - 98);
+		this.ctx.lineTo(tPos.x + 55, tPos.y - 60);
+		this.ctx.stroke();
+		this.ctx.restore();
+	}
+//------------------------------
+	drawFishCastle(tPos, tick) {
+		// Main Keep
+		this.ctx.fillStyle = "#ffb74d"; 
+		this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
+		
+		// Left & Right Spires
+		this.ctx.fillStyle = "#e65100";
+		this.ctx.fillRect(tPos.x - 50, tPos.y - 110, 30, 30);
+		this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
+		
+		// Gate Entrance
+		this.ctx.fillStyle = "#4e342e"; 
+		this.ctx.beginPath(); 
+		this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); 
+		this.ctx.fill();
+	}
+//------------------------------
+	drawSpiderNest(tPos, tick) {
+		this.ctx.save();
+		// Anchor structural cobweb down from ceiling at tower position x
+		const nestX = tPos.x;
+		const nestY = 65; // Suspended high ceiling nest line
+
+		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+		this.ctx.lineWidth = 1;
+
+		// Draw supporting frame rays spanning outward and up to ceiling limits
+		this.ctx.beginPath();
+		for (let i = 0; i <= 8; i++) {
+			let angle = Math.PI + (i / 8) * Math.PI; // Upward semi-circle grid
+			this.ctx.moveTo(nestX, nestY);
+			this.ctx.lineTo(nestX + Math.cos(angle) * 75, nestY + Math.sin(angle) * 45);
+		}
+		this.ctx.stroke();
+
+		// Intersecting concentric orbit web strings
+		for (let r = 15; r <= 65; r += 15) {
+			this.ctx.beginPath();
+			this.ctx.ellipse(nestX, nestY, r, r * 0.6, 0, Math.PI, Math.PI * 2);
+			this.ctx.stroke();
+		}
+
+		// Draw central egg sac cocoon cocooned in the center
+		this.ctx.fillStyle = "rgba(240, 240, 240, 0.85)";
+		this.ctx.beginPath();
+		this.ctx.ellipse(nestX, nestY + 5, 12, 18, 0, 0, Math.PI * 2);
+		this.ctx.fill();
+		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+		this.ctx.stroke();
+		this.ctx.restore();
+	}
+
+//------------------------------
+// pet beds
+	drawPetBed(bPos, tick) {
+		if (this.registry.activeSpecies === "spider") {
+			// Structural radial support anchors for the web nest
+			this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
+			this.ctx.lineWidth = 1;
+			this.ctx.beginPath();
+			for (let i = 0; i < 8; i++) {
+				let angle = (i / 8) * Math.PI * 2;
+				this.ctx.moveTo(bPos.x, bPos.y + 5);
+				this.ctx.lineTo(bPos.x + Math.cos(angle) * 55, bPos.y + 5 + Math.sin(angle) * 18);
+			}
+			this.ctx.stroke();
+
+			// Concentric horizontal web ring segments
+			for (let r = 10; r <= 50; r += 12) {
+				this.ctx.beginPath();
+				this.ctx.ellipse(bPos.x, bPos.y + 5, r, r * 0.35, 0, 0, Math.PI * 2);
+				this.ctx.stroke();
+			}
+		} else {
+			// Grounding ambient drop shadow cushion
+			this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+			this.ctx.beginPath(); 
+			this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI * 2); 
+			this.ctx.fill();
+			
+			// Main colored fabric bed core
+			this.ctx.fillStyle = this.state.layout.bedColor;
+			this.ctx.beginPath(); 
+			this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI * 2); 
+			this.ctx.fill();
+		}
+	}
+//------------------------------
+// food and bowl drawing
+	drawFoodBowl(fPos, tick) {
+		// Shadow base
+		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
+		this.ctx.beginPath(); 
+		this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); 
+		this.ctx.fill();
+
+		// Outer Bowl rim
+		this.ctx.fillStyle = "#ecf0f1"; 
+		this.ctx.beginPath(); 
+		this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); 
+		this.ctx.fill();
+
+		// Inner Bowl basin
+		this.ctx.fillStyle = "#bdc3c7"; 
+		this.ctx.beginPath(); 
+		this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); 
+		this.ctx.fill();
+
+		// Interactive food payload
+		if (this.state.hasFood) {
+			this.ctx.fillStyle = "#d35400"; 
+			this.ctx.beginPath(); 
+			this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); 
+			this.ctx.fill();
+			
+			this.ctx.font = "16px Arial";
+			let foodIcon = "🐟";
+			if (this.registry.activeSpecies === "puppy") foodIcon = "🍖";
+			if (this.registry.activeSpecies === "spider") foodIcon = "🪰";
+			if (this.registry.activeSpecies === "goldfish") foodIcon = "🍤";
+			
+			this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
+		}
+	}
+//------------------------------
+// litter box and poop drawing
+	drawLitterBox(lPos, boxW) {
+		// Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
+		if (this.registry.activeSpecies === "goldfish" || this.registry.activeSpecies === "spider") return;
+
+		if (this.registry.activeSpecies === "puppy") {
+			// Base Dirt Tray
+			this.ctx.fillStyle = "#4e342e"; 
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
+			
+			// Green Grass Mat
+			this.ctx.fillStyle = "#2e7d32"; 
+			this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
+			
+			// Procedural Grass Blades
+			this.ctx.fillStyle = "#4caf50";
+			for (let i = 0; i < 6; i++) {
+				let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
+				this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
+				this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
+			}
+			
+			// Picket Fence Border Details
+			this.ctx.fillStyle = "#f5f5f5";
+			for(let p = 0; p <= boxW; p += 15) {
+				this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
+			}
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    
+		} else {
+			// Standard Cat/Companion Plastic Litter Pan
+			this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
+			this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
+			this.ctx.fillStyle = "#2c3e50"; 
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
+			this.ctx.fillStyle = "#95a5a6"; 
+			this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
+		}
+	}
+	drawWasteLayer(lPos, boxW) {
+		this.activePet.poops.forEach(p => {
+			if (this.registry.activeSpecies === "goldfish") {
+				if (p.x === undefined) p.x = this.state.x;
+				if (p.y === undefined) p.y = this.state.y;
+				if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
+
+				// Float up naturally in aquarium water space
+				p.y -= 0.2; 
+				p.swimOffset += 0.03;
+				let finalX = p.x + Math.sin(p.swimOffset) * 5;
+
+				this.ctx.font = "14px Arial";
+				this.ctx.fillText("💩", finalX, p.y);
+			} else if (this.registry.activeSpecies === "spider") {
+				// Spiders use architectural webs instead of standard floor assets
+			} else {
+				// Anchors standard waste to the litter pan coordinates layout
+				let poopyY = p.isCeil ? 90 : lPos.y + 24;
+				let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
+				this.ctx.font = "14px Arial";
+				this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
+			}
+		});
+	}
+
+//=================================
+// particals and final layer stuff
+//=================================
+    drawYarn(x, y, tick) {
+        const roll = Math.sin(tick * 0.15) * 40;
+        this.ctx.save();
+        this.ctx.translate(x + roll, y);
+        this.ctx.fillStyle = "rgba(0,0,0,0.1)";
+        this.ctx.beginPath(); this.ctx.ellipse(0, 15, 15, 5, 0, 0, Math.PI*2); this.ctx.fill();
+        
+        let ballColor = "#e74c3c";
+        if (this.registry.activeSpecies === "puppy") ballColor = "#ffeb3b"; // Tennis ball variant
+        if (this.registry.activeSpecies === "spider") ballColor = "#9c27b0";
+        
+        this.ctx.fillStyle = ballColor;
+        this.ctx.beginPath(); this.ctx.arc(0, 12, 12, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        this.ctx.lineWidth = 1.5;
+        this.ctx.beginPath(); this.ctx.arc(0, 0, 8, 0, Math.PI); this.ctx.stroke();
+        this.ctx.restore();
+    }
+	drawPaintBalloons() {
+		if (!this.state.paintBalloons || this.state.paintBalloons.length === 0) return;
+
+		for (let i = this.state.paintBalloons.length - 1; i >= 0; i--) {
+			let balloon = this.state.paintBalloons[i];
+
+			balloon.x += balloon.vx;
+			balloon.y += balloon.vy;
+
+			this.ctx.save();
+			this.ctx.fillStyle = balloon.color;
+			this.ctx.beginPath();
+			this.ctx.arc(balloon.x, balloon.y, balloon.radius, 0, Math.PI * 2);
+			this.ctx.fill();
+			this.ctx.strokeStyle = "#ffffff";
+			this.ctx.lineWidth = 1.5;
+			this.ctx.stroke();
+			this.ctx.restore();
+
+			const curDx = balloon.targetX - balloon.x;
+			const curDy = balloon.targetY - balloon.y;
+			const remainingDist = Math.sqrt(curDx * curDx + curDy * curDy);
+
+			if (remainingDist < 10 || balloon.x < -50 || balloon.x > this.canvas.width + 50) {
+				const reachedTarget = remainingDist < 15;
+
+				if (balloon.isHit && reachedTarget) {
+					this.state.overrideColor = balloon.color;
+					
+					if (this.activePet) {
+						this.activePet.color = balloon.color;
+					}
+					
+					this.say("🎨 SPLATAFY!");
+					this.playSound('bubbleSound'); 
+				} else if (reachedTarget) {
+					this.say("💨 MISSED!");
+				}
+
+				if (balloon.x >= -10 && balloon.x <= this.canvas.width + 10) {
+					const particleCount = balloon.isHit ? 30 : 15;
+					for (let p = 0; p < particleCount; p++) {
+						this.state.particles.push({
+							x: balloon.x,
+							y: balloon.y,
+							vx: (Math.random() - 0.5) * 8,
+							vy: (Math.random() - 0.7) * 8,
+							s: Math.random() * 3 + 2,
+							c: balloon.color,
+							life: Math.floor(Math.random() * 20) + 15
+						});
+					}
+				}
+				this.state.paintBalloons.splice(i, 1);
+			}
+		}
+	}
+	drawGoldfishBubbles(tick) {
+		if (this.registry.activeSpecies !== "goldfish") return;
+
+		for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
+			let bubble = this.state.goldfishBubbles[i];
+			
+			bubble.y -= 1.2;
+			bubble.x += Math.sin(tick * 0.05 + i) * 0.5;
+			
+			this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
+			this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
+			this.ctx.beginPath();
+			this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+			this.ctx.fill();
+			this.ctx.stroke();
+			
+			if (bubble.y < 50) {
+				this.state.goldfishBubbles.splice(i, 1);
+			}
+		}
+	}
+	drawNyanTrail(tick, visibleH) {
+		if (this.state.action !== "nyan") return;
+
+		const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
+		this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
+		
+		for (let segment = 0; segment < 8; segment++) {
+			const segOffset = segment * 35;
+			const timeOffset = segment * 2;
+			colors.forEach((col, i) => {
+				this.ctx.fillStyle = col;
+				const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
+				const wiggle = Math.cos((tick - timeOffset) * 0.2 + i) * 5;
+				this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
+			});
+		}
+		this.ctx.globalAlpha = 1.0;
+	}
+	updateAndDrawParticles() {
+		for (let i = this.state.particles.length - 1; i >= 0; i--) {
+			const p = this.state.particles[i];
+			this.ctx.save();
+			
+			const isHeavyChunk = p.s > 5;
+			this.ctx.fillStyle = p.c;
+			this.ctx.globalAlpha = p.life < 30 ? p.life / 30 : 1.0;
+			
+			if (isHeavyChunk) {
+				this.ctx.fillRect(p.x, p.y, p.s, p.s);
+				this.ctx.strokeStyle = "#1a0000";
+				this.ctx.lineWidth = 1;
+				this.ctx.strokeRect(p.x, p.y, p.s, p.s);
+			} else {
+				this.ctx.fillRect(p.x, p.y, p.s, p.s);
+			}
+			this.ctx.restore();
+
+			p.x += p.vx;
+			p.y += p.vy;
+			p.vy += isHeavyChunk ? 0.22 : 0.35;
+			
+			if (isHeavyChunk) {
+				p.vx *= 0.985;
+			}
+
+			p.life--;
+			if (p.life <= 0) {
+				this.state.particles.splice(i, 1);
+			}
+		}
+	}
+
+    drawSpiderWebs() {
+		// Early exit guard: Only render background webs if the active species is a spider
+		if (this.registry.activeSpecies !== "spider") return;
+		this.state.spiderWebs.forEach(web => {
+			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
+			this.ctx.lineWidth = 1;
+			this.ctx.beginPath();
+			for(let i = 0; i < 8; i++) {
+				let angle = (i / 8) * Math.PI * 2;
+				this.ctx.moveTo(web.x, web.y);
+				this.ctx.lineTo(web.x + Math.cos(angle) * web.size, web.y + Math.sin(angle) * web.size);
+			}
+			this.ctx.stroke();
+		});
+	}
+	drawRappelStrand() {
+		const isRappelling = ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action);
+		if (this.registry.activeSpecies !== "spider" || !isRappelling) return;
+
+		this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+		this.ctx.lineWidth = 1.2;
+		this.ctx.beginPath();
+		
+		// Connect line from ceiling anchor down to spider's live center position
+		const anchorX = this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x;
+		this.ctx.moveTo(anchorX, 30); // Bound tightly to true CEIL_Y
+		this.ctx.lineTo(this.state.x, this.state.y);
+		this.ctx.stroke();
+	}
+
+
+
+//===================================
+//
+//==================================
+//
+// state library
+//----------------
+const STATE_LIBRARY = {
+	nyan: (pet, ctx) => {
+		if (pet.state.nyanPhase === "takeoff") {
+			const targetY = ctx.visibleH / 2;
+			pet.state.y += (targetY - pet.state.y) * 0.05; 
+			pet.state.x += pet.state.facing * 5;
+			if (Math.abs(pet.state.y - targetY) < 15) pet.state.nyanPhase = "flying";
+		} else if (pet.state.nyanPhase === "flying") {
+			pet.state.x += pet.state.facing * 10; 
+			pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.1) * 100;
+			if (pet.state.actionTimer < 80) pet.state.nyanPhase = "landing";
+		} else if (pet.state.nyanPhase === "landing") {
+			pet.state.x += (pet.state.originalPos.x - pet.state.x) * 0.08; 
+			pet.state.y += (pet.state.originalPos.y - pet.state.y) * 0.08;
+		}
+		if (pet.state.nyanPhase !== "landing") {
+			if (pet.state.x > ctx.visibleW + 150) pet.state.x = -150;
+			if (pet.state.x < -150) pet.state.x = ctx.visibleW + 150;
+		}
+		if (pet.state.actionTimer <= 0) {
+			pet.stopSound('nyanSound');
+			pet.state.x = pet.state.originalPos.x; 
+			pet.state.y = pet.state.originalPos.y;
+			pet.state.action = "idle"; 
+			pet.state.actionTimer = 200;
+		}
+	},
+
+	walk_to_food: (pet, ctx) => {
+		let foodTargetX = ctx.bowlPos.x;
+		let foodTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bowlPos.y;
+		
+		if (pet.registry.activeSpecies === "spider") {
+			if (pet.state.y < ctx.FLOOR_Y - 5) {
+				foodTargetX = (pet.state.x < ctx.visibleW / 2) ? ctx.LEFT_X : ctx.RIGHT_X;
+				foodTargetY = ctx.FLOOR_Y;
+			}
+		}
+
+		if (ctx.walkToPoint(foodTargetX, foodTargetY, 2.5)) { 
+			if (pet.registry.activeSpecies === "spider" && Math.abs(pet.state.y - ctx.FLOOR_Y) < 5 && Math.abs(pet.state.x - ctx.bowlPos.x) > 15) {
+				ctx.walkToPoint(ctx.bowlPos.x, ctx.FLOOR_Y, 2.5);
+				return;
+			}
+			if (pet.state.hasFood) { 
+				pet.state.action = "eating"; 
+				pet.state.actionTimer = 140; 
+			} else { 
+				pet.state.action = "idle";
+			}
+		}
+	},
+
+	eating: (pet, ctx) => {
+		if (pet.state.actionTimer <= 0) {
+			pet.state.hasFood = false; 
+			pet.activePet.hunger = Math.max(0, pet.activePet.hunger - 15); 
+			pet.activePet.digestive += 1; 
+			
+			if (pet.activePet.digestive > pet.state.tummylimit) {
+				pet.explodePet();
+				return;
+			}
+
+			pet.activePet.exp += 20; 
+			pet.state.action = "idle"; 
+			pet.state.actionTimer = 300;
+		}
+	},
+
+	walk_to_litter: (pet, ctx) => {
+		if (pet.registry.activeSpecies === "goldfish") {
+			if (!pet.state.aquaticPottyTarget) {
+				pet.state.aquaticPottyTarget = {
+					x: 100 + Math.random() * (ctx.visibleW - 200),
+					y: 120 + Math.random() * (ctx.visibleH - 240)
+				};
+			}
+			if (ctx.walkToPoint(pet.state.aquaticPottyTarget.x, pet.state.aquaticPottyTarget.y, 1.8)) {
+				pet.state.aquaticPottyTarget = null;
+				pet.state.action = "potty";
+				pet.state.actionTimer = 90;
+			}
+		} else if (pet.registry.activeSpecies === "spider") {
+			if (!pet.state.spiderPottyTarget) {
+				const r = Math.random();
+				if (r < 0.25) pet.state.spiderPottyTarget = { x: ctx.LEFT_X + Math.random() * (ctx.RIGHT_X - ctx.LEFT_X), y: ctx.CEIL_Y };
+				else if (r < 0.50) pet.state.spiderPottyTarget = { x: ctx.LEFT_X + Math.random() * (ctx.RIGHT_X - ctx.LEFT_X), y: ctx.FLOOR_Y };
+				else if (r < 0.75) pet.state.spiderPottyTarget = { x: ctx.LEFT_X, y: ctx.CEIL_Y + Math.random() * (ctx.FLOOR_Y - ctx.CEIL_Y) };
+				else pet.state.spiderPottyTarget = { x: ctx.RIGHT_X, y: ctx.CEIL_Y + Math.random() * (ctx.FLOOR_Y - ctx.CEIL_Y) };
+			}
+			
+			if (ctx.walkToPoint(pet.state.spiderPottyTarget.x, pet.state.spiderPottyTarget.y, 2.2)) {
+				pet.state.spiderPottyTarget = null;
+				pet.state.action = "potty";
+				pet.state.actionTimer = 100;
+			}
+		} else {
+			if (ctx.walkToPoint(ctx.litPos.x, ctx.litPos.y)) { 
+				pet.state.action = "potty"; 
+				pet.state.actionTimer = 120; 
+			}
+		}
+	},
+
+	walk_to_tower_scratch: (pet, ctx) => {
+		if (ctx.walkToPoint(ctx.towerPos.x, ctx.towerPos.y)) {
+			pet.state.action = "scratching";
+			pet.state.actionTimer = 180;
+		}
+	},
+
+	scratching: (pet, ctx) => {
+		if (ctx.t % 3 === 0) {
+			const clawX = pet.state.x + (pet.state.facing * 15);
+			const clawY = pet.state.y + 5; 
+
+			pet.state.particles.push({
+				x: clawX,
+				y: clawY,
+				vx: -pet.state.facing * (0.5 + Math.random() * 3),
+				vy: -1 - Math.random() * 2,
+				s: 2,
+				c: "#d2b48c",
+				life: 15
+			});
+		}
+
+		if (pet.state.actionTimer <= 0) {
+			pet.state.action = "idle";
+			pet.state.actionTimer = Math.floor(Math.random() * 200) + 150;
+		}
+	},
+
+	walk_to_tower_climb: (pet, ctx) => {
+		if (ctx.walkToPoint(ctx.towerPos.x, ctx.towerPos.y)) {
+			pet.state.action = "climbing_tower";
+		}
+	},
+
+	climbing_tower: (pet, ctx) => {
+		const perchY = ctx.towerPos.y - 125;
+		pet.state.y -= 1.5;
+		
+		if (pet.state.y <= perchY) {
+			pet.state.y = perchY;
+			pet.state.action = "tower_sleep";
+			pet.state.actionTimer = 800;
+		}
+	},
+
+	potty: (pet, ctx) => {
+		if (pet.state.actionTimer <= 0) { 
+			if (pet.registry.activeSpecies === "goldfish") {
+				pet.activePet.poops.push({
+					x: pet.state.x - (pet.state.facing * 10), y: pet.state.y + 5,
+					ox: Math.random() * 100, swimOffset: Math.random() * Math.PI * 2
+				});
+				pet.activePet.digestive = 0;
+				pet.state.action = "idle"; 
+				pet.state.actionTimer = 250;
+			} else if (pet.registry.activeSpecies === "spider") {
+				let cleanX = pet.state.x;
+				let cleanY = pet.state.y;
+				
+				if (cleanX > ctx.LEFT_X + 10 && cleanX < ctx.RIGHT_X - 10 && cleanY > ctx.CEIL_Y + 10 && cleanY < ctx.FLOOR_Y - 10) {
+					let distToLeft = cleanX - ctx.LEFT_X;
+					let distToRight = ctx.RIGHT_X - cleanX;
+					let distToCeil = cleanY - ctx.CEIL_Y;
+					let distToFloor = ctx.FLOOR_Y - cleanY;
+					let minDist = Math.min(distToLeft, distToRight, distToCeil, distToFloor);
+					
+					if (minDist === distToLeft) cleanX = ctx.LEFT_X;
+					else if (minDist === ctx.RIGHT_X) cleanX = ctx.RIGHT_X;
+					else if (minDist === ctx.CEIL_Y) cleanY = ctx.CEIL_Y;
+					else cleanY = ctx.FLOOR_Y;
+				}
+
+				pet.state.spiderWebs.push({
+					x: cleanX, y: cleanY,
+					size: 20 + Math.random() * 15
+				});
+				pet.activePet.digestive = 0;
+				pet.state.action = "idle"; 
+				pet.state.actionTimer = 200;
+			} else {
+				pet.activePet.poops.push({ox: Math.random()*100, isCeil: false}); 
+				pet.activePet.digestive = 0; 
+				pet.state.action = "walk_to_kick"; 
+			}
+		}
+	},
+
+	walk_to_kick: (pet, ctx) => {
+		if (ctx.walkToPoint(ctx.litPos.x - 50, ctx.litPos.y)) { 
+			pet.state.facing = 1; 
+			pet.state.action = "kicking"; 
+			pet.state.actionTimer = 80; 
+		}
+	},
+
+	kicking: (pet, ctx) => {
+		if (ctx.t % 2 === 0) {
+			pet.state.particles.push({x: pet.state.x - 10, y: pet.state.y + 20, vx: 5 + Math.random()*6, vy: -4, s: 2.5, c: "#bdc3c7", life: 25});
+		}
+		if (pet.state.actionTimer <= 0) { 
+			pet.state.action = "idle"; 
+			pet.state.actionTimer = 300; 
+		}
+	},
+
+	walk_to_bed: (pet, ctx) => {
+		let bedTargetX = ctx.bedPos.x;
+		let bedTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bedPos.y;
+		if (ctx.walkToPoint(bedTargetX, bedTargetY)) { 
+			pet.state.action = "sleep"; 
+			pet.state.actionTimer = 1000; 
+		}
+	},
+
+	teased: (pet, ctx) => {
+		if (pet.state.actionTimer > 0) {
+			pet.state.x += (Math.random() - 0.5) * 6;
+			pet.state.y += (Math.random() - 0.5) * 6;
+			if (pet.state.actionTimer % 5 === 0) pet.state.facing *= -1;
+		} else {
+			pet.state.action = "idle";
+			pet.state.actionTimer = 300;
+		}
+	},
+
+	rappel_drop: (pet, ctx) => {
+		pet.state.y += 3.5; 
+		if (pet.state.y >= pet.state.rappelDepth) {
+			pet.state.action = "rappel_hang";
+			pet.state.actionTimer = 180 + Math.random() * 200;
+		}
+	},
+
+	rappel_hang: (pet, ctx) => {
+		pet.state.x += Math.sin(ctx.t * 0.05) * 0.4;
+		if (pet.state.actionTimer <= 0) {
+			pet.state.action = "rappel_rise";
+		}
+	},
+
+	rappel_rise: (pet, ctx) => {
+		pet.state.y -= 2.5; 
+		if (pet.state.y <= ctx.CEIL_Y) {
+			pet.state.y = ctx.CEIL_Y;
+			pet.state.action = "idle";
+			pet.state.actionTimer = 200;
+		}
+	},
+
+	idle: (pet, ctx) => {
+		if (pet.registry.activeSpecies === "goldfish") {
+			pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.04) * 40;
+			if (Math.random() < 0.02) {
+				pet.state.goldfishBubbles.push({
+					x: pet.state.x + pet.state.facing * 20, 
+					y: pet.state.y - 10, 
+					r: 2 + Math.random() * 4, 
+					alpha: 1
+				});
+			}
+		}
+
+		if (pet.registry.activeSpecies === "spider") {
+			let currentWeb = pet.state.spiderWebs.find(w => Math.sqrt((w.x - pet.state.x)**2 + (w.y - pet.state.y)**2) < w.size);
+			if (!currentWeb && !["rappel_drop", "rappel_hang", "rappel_rise"].includes(pet.state.action)) {
+				if (pet.state.x > ctx.LEFT_X + 5 && pet.state.x < ctx.RIGHT_X - 5 && pet.state.y > ctx.CEIL_Y + 5 && pet.state.y < ctx.FLOOR_Y - 5) {
+					if (pet.state.y < ctx.CEIL_Y + 40) pet.state.y = ctx.CEIL_Y;
+					else if (pet.state.y > ctx.FLOOR_Y - 40) pet.state.y = ctx.FLOOR_Y;
+					else if (pet.state.x < ctx.visibleW / 2) pet.state.x = ctx.LEFT_X;
+					else pet.state.x = ctx.RIGHT_X;
+				}
+			}
+		}
+
+		if (pet.state.actionTimer <= 0) {
+			if (Math.random() < 0.15) {
+				if (pet.registry.activeSpecies === "kitty") pet.say("Meow! 🐾");
+				if (pet.registry.activeSpecies === "puppy") pet.say("BARK! 🐶");
+				if (pet.registry.activeSpecies === "spider") pet.say("Click-click... 🕷️");
+				if (pet.registry.activeSpecies === "goldfish") pet.say("Blub... 🫧");
+			}
+			
+			if (Math.random() < 0.4) { 
+				pet.state.actionTimer = 400 + Math.random() * 400; 
+				return; 
+			}
+
+			if (pet.activePet.digestive >= 3) { 
+				pet.state.action = "walk_to_litter"; 
+			} else {
+				const r = Math.random();
+				if (r < 0.20) { 
+					pet.state.action = "walk"; 
+					pet.state.facing = Math.random() > 0.5 ? 1 : -1; 
+					pet.state.actionTimer = 300 + Math.random() * 300; 
+				}
+				else if (r < 0.40) pet.state.action = "walk_to_bed";
+				else if (r < 0.60 && pet.state.layout.showTower) {
+					pet.state.action = Math.random() > 0.5 ? "walk_to_tower_scratch" : "walk_to_tower_climb";
+				}
+				else pet.state.actionTimer = 500 + Math.random() * 500;
+			}
+		}
+	},
+
+	walk: (pet, ctx) => {
+		if (pet.registry.activeSpecies === "spider") {
+			let dir = pet.state.spiderDir || 1;
+			let activeWebNode = pet.state.spiderWebs.find(web => {
+				let dx = web.x - pet.state.x;
+				let dy = web.y - pet.state.y;
+				return Math.sqrt(dx*dx + dy*dy) < web.size + 10;
+			});
+
+			if (activeWebNode) {
+				pet.state.x += pet.state.facing * 1.5;
+				if (Math.random() < 0.08) pet.state.y += (Math.random() > 0.5 ? 2 : -2);
+			} 
+			else if (Math.abs(pet.state.y - ctx.CEIL_Y) <= 4) { 
+				pet.state.y = ctx.CEIL_Y; 
+				pet.state.x += dir * 1.8;
+				pet.state.facing = dir;
+				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.CEIL_Y + 4; }
+				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.CEIL_Y + 4; }
+			} else if (Math.abs(pet.state.y - ctx.FLOOR_Y) <= 4) { 
+				pet.state.y = ctx.FLOOR_Y; 
+				pet.state.x += dir * 1.8;
+				pet.state.facing = dir;
+				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.FLOOR_Y - 4; }
+				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.FLOOR_Y - 4; }
+			} else if (Math.abs(pet.state.x - ctx.LEFT_X) <= 4) { 
+				pet.state.x = ctx.LEFT_X; 
+				pet.state.y += dir * 1.8;
+				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.LEFT_X + 4; }
+				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.LEFT_X + 4; }
+			} else if (Math.abs(pet.state.x - ctx.RIGHT_X) <= 4) { 
+				pet.state.x = ctx.RIGHT_X; 
+				pet.state.y += dir * 1.8;
+				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.RIGHT_X - 4; }
+				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.RIGHT_X - 4; }
+			} else {
+				if (pet.state.y < (ctx.visibleH / 2)) pet.state.y = ctx.CEIL_Y;
+				else pet.state.y = ctx.FLOOR_Y;
+			}
+		} else {
+			if (!pet.state.swimTargetX) {
+				pet.state.swimTargetX = ctx.LEFT_X + Math.random() * (ctx.visibleW - (ctx.LEFT_X + ctx.RIGHT_X));
+			}
+
+			pet.state.x += (pet.state.swimTargetX - pet.state.x) * 0.02;
+			pet.state.facing = (pet.state.swimTargetX > pet.state.x) ? 1 : -1;
+
+			if (pet.registry.activeSpecies === "goldfish") {
+				pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.03) * 60;
+				if(ctx.t % 20 === 0) pet.state.goldfishBubbles.push({x: pet.state.x, y: pet.state.y, r: 2, alpha: 0.8});
+			}
+			
+			if (Math.abs(pet.state.x - pet.state.swimTargetX) < 10) {
+				pet.state.swimTargetX = null;
+			}
+		}
+
+		if (pet.state.actionTimer <= 0) { 
+			pet.state.action = "idle"; 
+			pet.state.actionTimer = 400; 
+		}
+	},
+
+	sleep: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
+	tower_sleep: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
+	dance: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
+	special: (pet, ctx) => { STATE_LIBRARY._fallbackSleep(pet, ctx); },
+
+	// Common exit handler shared across shared static end states
+	_fallbackSleep: (pet, ctx) => {
+		if (pet.state.actionTimer <= 0) { 
+			if(pet.state.action === "tower_sleep") pet.state.y = ctx.groundY;
+			pet.state.action = "idle"; 
+		}
+	}
+};
+
+//pet functions & triggers etc
+
+    triggerNyan() {
+        if (this.activePet.isDead || this.state.action === "nyan") return;
+        this.state.originalPos = { x: this.state.x, y: this.state.y };
+        this.state.action = "nyan";
+        this.state.nyanPhase = "takeoff";
+        this.state.actionTimer = 400;
+        this.playSound('nyanSound');
+        this.say("NYAN OVERDRIVE ACTIVATED! 🌈");
+    }
+	triggerPaintBomb(colorString, isHit) {
+        if (this.state.action === "dead" || this.state.action === "explode" || this.state.action === "bloating") return;
+
+        this.say("🎈 INCOMING!!");
+        this.playSound('clickSound'); // Fits the tactical trigger sound
+
+        // 1. Spawning trajectory setups
+        const spawnFromLeft = Math.random() > 0.5;
+        const startX = spawnFromLeft ? -30 : this.canvas.width + 30;
+        const startY = Math.random() * (this.canvas.height - 80) + 40;
+
+        // 2. Visual target placement offsets based on hit check
+        let finalTargetX = this.state.x;
+        let finalTargetY = this.state.y - 15;
+
+        if (!isHit) {
+            // Miss calculation: offset target horizontally and vertically to miss the pet sprite container entirely
+            const missDirectionX = Math.random() > 0.5 ? 1 : -1;
+            finalTargetX = this.state.x + (missDirectionX * (55 + Math.random() * 40));
+            finalTargetY = this.state.y - (40 + Math.random() * 40);
+        }
+
+        const dx = finalTargetX - startX;
+        const dy = finalTargetY - startY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const travelVelocity = 8; // Projectile speed constant
+
+        this.state.paintBalloons.push({
+            x: startX,
+            y: startY,
+            vx: (dx / distance) * travelVelocity,
+            vy: (dy / distance) * travelVelocity,
+            color: colorString,
+            isHit: isHit,
+            targetX: finalTargetX,
+            targetY: finalTargetY,
+            radius: 9,
+            distanceLeft: distance
+        });
+    }
+	explodePet() {
+        if (this.state.action === "bloating" || this.state.action === "dead") return;
+
+        // 🛑 STAGE 1: BLOATING
+        this.state.action = "bloating"; 
+        this.state.hideMainSprite = false; // Still visible while expanding
+        this.stopSound('nyanSound');
+        this.say("🤢 BLECH...");
+
+        setTimeout(() => {
+            // 💥 STAGE 2: THE DETONATION
+			
+            this.state.action = "explode";
+            this.state.hideMainSprite = true; // 🌟 POP! Delete the main body instantly here
+			this.playSound('petsplatSound');
+            this.say("💥 SPLAT!");
+            
+            // Spray gore particles and body chunks from the vacant origin point
+            const numParticles = 80;
+            for (let i = 0; i < numParticles; i++) {
+                const isChunk = Math.random() > 0.75;
+                this.state.particles.push({
+                    x: this.state.x, 
+                    y: this.state.y - 20, 
+                    vx: (Math.random() - 0.5) * 16,
+                    vy: (Math.random() - 0.7) * 18, 
+                    s: isChunk ? 6 + Math.random() * 6 : 2 + Math.random() * 4, 
+                    c: isChunk ? "#5c0000" : "#8b0000", 
+                    life: isChunk ? 120 + Math.random() * 60 : 60 + Math.random() * 40
+                });
+            }
+
+            // 👻 STAGE 3: THE SPIRIT RISES (2 seconds of empty space later)
+            setTimeout(() => {
+                this.activePet.isDead = true;
+                this.activePet.hunger = 100;
+                
+                this.state.isGhost = true; 
+                this.state.hideMainSprite = false; // 🌟 Bring back visibility so the Ghost can be seen!
+                this.state.action = "walk"; 
+                this.say("👻 OoooOoo...");
+                
+                this.saveData();
+
+            }, 2000); // Time spent as empty space with flying debris
+
+        }, 3200); // Bloat duration
+    }
+	teasePet() {
+		if (this.activePet.isDead) return;
+
+		// Set the action to 'teased' (you might need to add this case in your animate loop)
+		this.state.action = "teased";
+		this.state.actionTimer = 150; // How long they stay "teased"
+
+		switch (this.registry.activeSpecies) {
+			case "kitty":
+			case "puppy":
+				this.say("Hey! That's mean! 😾");
+				break;
+			case "spider":
+			case "goldfish":
+				this.say("Stop tapping the glass! 🫧");
+				break;
+		}
+	}
+	revivePet() {
+		if (this.activePet.isDead) {
+			this.activePet.isDead = false;
+			this.activePet.hunger = 50; 
+			this.state.action = "special";
+			this.state.actionTimer = 200;
+			this.activePet.lastHungerTick = Date.now();
+			
+			// --- Carcass Cleanup ---
+			this.state.showCarcass = false;
+			this.state.particles = [];
+			this.say("I'M ALIVE! 💖");
+			this.saveData();
+			
+			for(let i=0; i<20; i++) {
+				this.state.particles.push({
+					x: this.state.x, 
+					y: this.state.y, 
+					vx: (Math.random() - 0.5) * 10, 
+					vy: (Math.random() - 0.5) * 10, 
+					s: 4, 
+					c: "#ff77aa", 
+					life: 40
+				});
+			}
+		} else {
+			this.say("Already healthy! ✨");
+		}
+	}
+
+
+
+// ==========================================
+// SECTION 6: SOUND SYSTEM ENGINE
+// ==========================================
+    initAudioEngine() {
+        const defaultSoundSettings = {
+            masterEnabled: true,
+            meowSound: true,
+            purrSound: true,
+            nyanSound: true,
+            mewSound: true,
+            barkSound: true,
+            whineSound: true,
+            clickSound: true,
+            bubbleSound: true,
+			petsplatSound: true,
+            customPaths: {}
+        };
+
+        this.defaultPaths = {
+            meowSound: '../assets/sounds/meowSound.mp3',
+            mewSound: '../assets/sounds/mewSound.mp3',
+            purrSound: '../assets/sounds/purrSound.mp3',
+            nyanSound: '../assets/sounds/nyanSound.mp3',
+            barkSound: '../assets/sounds/barkSound.mp3',
+            whineSound: '../assets/sounds/whineSound.mp3',
+            clickSound: '../assets/sounds/clickSound.mp3',
+            bubbleSound: '../assets/sounds/bubbleSound.mp3',
+			petsplatSound: '../assets/sounds/petsplatSound.mp3'
+        };
+
+        const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
+        window.soundSettings = savedSoundSettings ? JSON.parse(savedSoundSettings) : defaultSoundSettings;
+
+        this.audioAssets = {};
+        Object.keys(this.defaultPaths).forEach(key => this.refreshAudioInstance(key));
+    }
+
+    refreshAudioInstance(key) {
+        const source = window.soundSettings.customPaths[key] || this.defaultPaths[key];
+        if (source) {
+            this.audioAssets[key] = new Audio(source);
+            if (key === 'nyanSound') this.audioAssets[key].loop = true;
+        }
+    }
+
+    playSound(soundKey) {
+        if (window.soundSettings.masterEnabled && window.soundSettings[soundKey]) {
+            const sound = this.audioAssets[soundKey];
+            if (sound) {
+                sound.currentTime = 0; 
+                sound.play().catch(err => console.warn(`[!] Audio: ${soundKey} blocked.`, err));
+            }
+        }
+    }
+
+    stopSound(soundKey) {
+        if (this.audioAssets[soundKey]) {
+            this.audioAssets[soundKey].pause();
+            this.audioAssets[soundKey].currentTime = 0;
+        }
+    }
+
 }
