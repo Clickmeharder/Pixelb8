@@ -2309,329 +2309,9 @@ export class StreamPet {
 		}
 	}
 
-
-/* 	drawEnvironment(t) {
-		const visibleW = this.canvas.width;
-		const visibleH = this.canvas.height;
-
-		// ========================================================
-		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
-		// ========================================================
-
-		// Render structural perimeter webs at their exact dropped locations
-		this.state.spiderWebs.forEach(web => {
-			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
-			this.ctx.lineWidth = 1;
-			this.ctx.beginPath();
-			for(let i=0; i<8; i++) {
-				let angle = (i / 8) * Math.PI * 2;
-				this.ctx.moveTo(web.x, web.y);
-				this.ctx.lineTo(web.x + Math.cos(angle)*web.size, web.y + Math.sin(angle)*web.size);
-			}
-			this.ctx.stroke();
-		});
-
-		// Draw active silk dropping strand if the spider is currently rappelling
-		if (this.registry.activeSpecies === "spider" && ["rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
-			this.ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
-			this.ctx.lineWidth = 1.2;
-			this.ctx.beginPath();
-			// Connect line from ceiling anchor down to spider's live center position
-			this.ctx.moveTo(this.state.rappelAnchor ? this.state.rappelAnchor.x : this.state.x, 30); // Bound tightly to true CEIL_Y
-			this.ctx.lineTo(this.state.x, this.state.y);
-			this.ctx.stroke();
-		}
-
-		// ========================================================
-		// PHASE 2: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
-		// ========================================================
-		const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
-		const boxW = 150;
-
-		// Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
-		if (this.registry.activeSpecies !== "goldfish" && this.registry.activeSpecies !== "spider") {
-			if (this.registry.activeSpecies === "puppy") {
-				this.ctx.fillStyle = "#4e342e"; 
-				this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
-				
-				this.ctx.fillStyle = "#2e7d32"; 
-				this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
-				
-				this.ctx.fillStyle = "#4caf50";
-				for (let i = 0; i < 6; i++) {
-					let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
-					this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
-					this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
-				}
-				
-				this.ctx.fillStyle = "#f5f5f5";
-				for(let p = 0; p <= boxW; p += 15) {
-					this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
-				}
-				this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   
-				this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    
-			} else {
-				this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
-				this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
-				this.ctx.fillStyle = "#2c3e50"; 
-				this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
-				this.ctx.fillStyle = "#95a5a6"; 
-				this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
-			}
-		}
-		
-		// ========================================================
-		// DYNAMIC MULTI-SPECIES WASTE FLOATING & RENDERING ENGINE
-		// ========================================================
-		this.activePet.poops.forEach(p => {
-			if (this.registry.activeSpecies === "goldfish") {
-				if (p.x === undefined) p.x = this.state.x;
-				if (p.y === undefined) p.y = this.state.y;
-				if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
-
-				p.y -= 0.2; // Float up naturally in pixel canvas space
-				p.swimOffset += 0.03;
-				let finalX = p.x + Math.sin(p.swimOffset) * 5;
-
-				this.ctx.font = "14px Arial";
-				this.ctx.fillText("💩", finalX, p.y);
-			} else if (this.registry.activeSpecies === "spider") {
-				// Spiders leave permanent webs handled above in Phase 1
-			} else {
-				// Tie poop elements explicitly to the zoomed lPos tracking matrix
-				let poopyY = p.isCeil ? 90 : lPos.y + 24;
-				let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
-				this.ctx.font = "14px Arial";
-				this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
-			}
-		});
-
-		// ========================================================
-		// PHASE 3: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
-		// ========================================================
-		if (this.state.layout.showTower && this.registry.activeSpecies !== "spider") {
-			const tPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
-			
-			if (this.registry.activeSpecies === "goldfish") {
-				//draw fish house or castle
-				this.ctx.fillStyle = "#ffb74d"; 
-				this.ctx.fillRect(tPos.x - 40, tPos.y - 80, 80, 80);
-				this.ctx.fillStyle = "#e65100";
-				this.ctx.fillRect(tPos.x - 50, tPos.y - 110, 30, 30);
-				this.ctx.fillRect(tPos.x + 20, tPos.y - 110, 30, 30);
-				this.ctx.fillStyle = "#4e342e"; 
-				this.ctx.beginPath(); this.ctx.arc(tPos.x, tPos.y, 20, Math.PI, 0, false); this.ctx.fill();
-			} else if (this.registry.activeSpecies === "puppy") {
-				//draw doghouse
-				this.ctx.save();
-				this.ctx.fillStyle = "rgba(0,0,0,0.15)";
-				this.ctx.fillRect(tPos.x - 55, tPos.y + 5, 110, 15);
-				this.ctx.fillStyle = "#d7ccc8"; 
-				this.ctx.fillRect(tPos.x - 45, tPos.y - 65, 90, 70);
-				this.ctx.fillStyle = "#3e2723"; 
-				this.ctx.beginPath();
-				this.ctx.arc(tPos.x, tPos.y - 25, 20, Math.PI, 0, false);
-				this.ctx.fillRect(tPos.x - 20, tPos.y - 25, 40, 30);
-				this.ctx.fill();
-				this.ctx.fillStyle = "#d7ccc8";
-				this.ctx.beginPath();
-				this.ctx.moveTo(tPos.x - 45, tPos.y - 65);
-				this.ctx.lineTo(tPos.x, tPos.y - 95);
-				this.ctx.lineTo(tPos.x + 45, tPos.y - 65);
-				this.ctx.fill();
-				this.ctx.strokeStyle = "#d32f2f";
-				this.ctx.lineWidth = 8;
-				this.ctx.lineCap = "round";
-				this.ctx.beginPath();
-				this.ctx.moveTo(tPos.x - 55, tPos.y - 60);
-				this.ctx.lineTo(tPos.x, tPos.y - 98);
-				this.ctx.lineTo(tPos.x + 55, tPos.y - 60);
-				this.ctx.stroke();
-				this.ctx.restore();
-			} else {
-				//draw tower?
-				this.ctx.fillStyle = "rgba(0,0,0,0.1)"; this.ctx.fillRect(tPos.x - 60, tPos.y + 5, 120, 20); 
-				this.ctx.fillStyle = "#7f8c8d"; this.ctx.fillRect(tPos.x - 55, tPos.y - 5, 110, 15); 
-				this.ctx.fillStyle = "#a67c52"; this.ctx.fillRect(tPos.x - 10, tPos.y - 120, 20, 120); 
-				this.ctx.fillStyle = "#95a5a6"; this.ctx.fillRect(tPos.x - 40, tPos.y - 60, 80, 10); this.ctx.fillRect(tPos.x - 30, tPos.y - 125, 60, 10); 
-			}
-		}
-
-		// ========================================================
-		// PHASE 4: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
-		// ========================================================
-		const bPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-		
-		if (this.registry.activeSpecies === "spider") {
-			this.ctx.strokeStyle = "rgba(255,255,255,0.35)";
-			this.ctx.lineWidth = 1;
-			this.ctx.beginPath();
-			for (let i = 0; i < 8; i++) {
-				let angle = (i / 8) * Math.PI * 2;
-				this.ctx.moveTo(bPos.x, bPos.y + 5);
-				this.ctx.lineTo(bPos.x + Math.cos(angle) * 55, bPos.y + 5 + Math.sin(angle) * 18);
-			}
-			this.ctx.stroke();
-
-			for (let r = 10; r <= 50; r += 12) {
-				this.ctx.beginPath();
-				this.ctx.ellipse(bPos.x, bPos.y + 5, r, r * 0.35, 0, 0, Math.PI * 2);
-				this.ctx.stroke();
-			}
-		} else {
-			this.ctx.fillStyle = "rgba(0,0,0,0.1)";
-			this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 10, 70, 25, 0, 0, Math.PI*2); this.ctx.fill();
-			this.ctx.fillStyle = this.state.layout.bedColor;
-			this.ctx.beginPath(); this.ctx.ellipse(bPos.x, bPos.y + 5, 60, 20, 0, 0, Math.PI*2); this.ctx.fill();
-		}
-
-		// ========================================================
-		// PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
-		// ========================================================
-		const fPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
-		this.ctx.fillStyle = "rgba(0,0,0,0.2)"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y + 5, 35, 10, 0, 0, Math.PI*2); this.ctx.fill();
-		this.ctx.fillStyle = "#ecf0f1"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y, 32, 12, 0, 0, Math.PI*2); this.ctx.fill();
-		this.ctx.fillStyle = "#bdc3c7"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 3, 30, 9, 0, 0, Math.PI*2); this.ctx.fill();
-		if(this.state.hasFood) {
-			this.ctx.fillStyle = "#d35400"; this.ctx.beginPath(); this.ctx.ellipse(fPos.x, fPos.y - 4, 18, 5, 0, 0, Math.PI*2); this.ctx.fill();
-			this.ctx.font = "16px Arial";
-			let foodIcon = "🐟";
-			if (this.registry.activeSpecies === "puppy") foodIcon = "🍖";
-			if (this.registry.activeSpecies === "spider") foodIcon = "🪰";
-			if (this.registry.activeSpecies === "goldfish") foodIcon = "🍤";
-			this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
-		}
-
-		// ========================================================
-		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
-		// ========================================================
-		if (this.registry.activeSpecies === "goldfish") {
-			for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
-				let bubble = this.state.goldfishBubbles[i];
-				
-				bubble.y -= 1.2;
-				bubble.x += Math.sin(t * 0.05 + i) * 0.5;
-				
-				this.ctx.strokeStyle = `rgba(135, 206, 250, ${bubble.alpha})`;
-				this.ctx.fillStyle = `rgba(173, 216, 230, ${bubble.alpha * 0.3})`;
-				this.ctx.beginPath();
-				this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
-				this.ctx.fill();
-				this.ctx.stroke();
-				
-				if (bubble.y < 50) {
-					this.state.goldfishBubbles.splice(i, 1);
-				}
-			}
-		}
-		if (this.state.action === "nyan") {
-			const colors = ["#ff0000", "#ff9900", "#ffff00", "#33ff00", "#0099ff", "#6633ff"];
-			this.ctx.globalAlpha = this.state.nyanPhase === "flying" ? 1.0 : 0.4;
-			for (let segment = 0; segment < 8; segment++) {
-				const segOffset = segment * 35;
-				const timeOffset = segment * 2;
-				colors.forEach((col, i) => {
-					this.ctx.fillStyle = col;
-					const segY = (this.state.nyanPhase === "flying") ? (visibleH / 2) + Math.sin((t - timeOffset) * 0.1) * 100 : this.state.y; 
-					const wiggle = Math.cos((t - timeOffset) * 0.2 + i) * 5;
-					this.ctx.fillRect(this.state.x - (this.state.facing * (60 + segOffset)), segY - 15 + (i * 6) + wiggle, 40, 6);
-				});
-			}
-			this.ctx.globalAlpha = 1.0;
-		}
-		if (this.state.paintBalloons && this.state.paintBalloons.length > 0) {
-			for (let i = this.state.paintBalloons.length - 1; i >= 0; i--) {
-				let balloon = this.state.paintBalloons[i];
-
-				balloon.x += balloon.vx;
-				balloon.y += balloon.vy;
-
-				this.ctx.save();
-				this.ctx.fillStyle = balloon.color;
-				this.ctx.beginPath();
-				this.ctx.arc(balloon.x, balloon.y, balloon.radius, 0, Math.PI * 2);
-				this.ctx.fill();
-				this.ctx.strokeStyle = "#ffffff";
-				this.ctx.lineWidth = 1.5;
-				this.ctx.stroke();
-				this.ctx.restore();
-
-				const curDx = balloon.targetX - balloon.x;
-				const curDy = balloon.targetY - balloon.y;
-				const remainingDist = Math.sqrt(curDx * curDx + curDy * curDy);
-
-				if (remainingDist < 10 || balloon.x < -50 || balloon.x > this.canvas.width + 50) {
-					const reachedTarget = remainingDist < 15;
-
-					if (balloon.isHit && reachedTarget) {
-						this.state.overrideColor = balloon.color;
-						
-						// ⭐ REGISTRY UPDATE: Explicitly mutates active companion profile state color
-						if (this.activePet) {
-							this.activePet.color = balloon.color;
-						}
-						
-						this.say("🎨 SPLATAFY!");
-						this.playSound('bubbleSound'); 
-					} else {
-						if (reachedTarget) {
-							this.say("💨 MISSED!");
-						}
-					}
-
-					if (balloon.x >= -10 && balloon.x <= this.canvas.width + 10) {
-						const particleCount = balloon.isHit ? 30 : 15;
-						for (let p = 0; p < particleCount; p++) {
-							this.state.particles.push({
-								x: balloon.x,
-								y: balloon.y,
-								vx: (Math.random() - 0.5) * 8,
-								vy: (Math.random() - 0.7) * 8,
-								s: Math.random() * 3 + 2,
-								c: balloon.color,
-								life: Math.floor(Math.random() * 20) + 15
-							});
-						}
-					}
-					this.state.paintBalloons.splice(i, 1);
-				}
-			}
-		}
-		// Dynamic particle physics engine loop
-		for (let i = this.state.particles.length - 1; i >= 0; i--) {
-			const p = this.state.particles[i];
-			this.ctx.save();
-			
-			const isHeavyChunk = p.s > 5;
-			this.ctx.fillStyle = p.c;
-			this.ctx.globalAlpha = p.life < 30 ? p.life / 30 : 1.0;
-			
-			if (isHeavyChunk) {
-				this.ctx.fillRect(p.x, p.y, p.s, p.s);
-				this.ctx.strokeStyle = "#1a0000";
-				this.ctx.lineWidth = 1;
-				this.ctx.strokeRect(p.x, p.y, p.s, p.s);
-			} else {
-				this.ctx.fillRect(p.x, p.y, p.s, p.s);
-			}
-			this.ctx.restore();
-
-			p.x += p.vx;
-			p.y += p.vy;
-			p.vy += isHeavyChunk ? 0.22 : 0.35;
-			
-			if (isHeavyChunk) {
-				p.vx *= 0.985;
-			}
-
-			p.life--;
-			if (p.life <= 0) {
-				this.state.particles.splice(i, 1);
-			}
-		}
-	}
- */
-
+// ========================================================
+//  what should we put here to let reader know what this function does? and what should we put into helpers nexT?
+// ========================================================
 	drawEnvironment(t) {
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
@@ -2666,67 +2346,8 @@ export class StreamPet {
 		// ========================================================
 		// PHASE 2: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
 		// ========================================================
-		const lPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
-		const boxW = 150;
-
-		// Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
-		if (this.registry.activeSpecies !== "goldfish" && this.registry.activeSpecies !== "spider") {
-			if (this.registry.activeSpecies === "puppy") {
-				this.ctx.fillStyle = "#4e342e"; 
-				this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
-				
-				this.ctx.fillStyle = "#2e7d32"; 
-				this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
-				
-				this.ctx.fillStyle = "#4caf50";
-				for (let i = 0; i < 6; i++) {
-					let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
-					this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
-					this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
-				}
-				
-				this.ctx.fillStyle = "#f5f5f5";
-				for(let p = 0; p <= boxW; p += 15) {
-					this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
-				}
-				this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   
-				this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    
-			} else {
-				this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
-				this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
-				this.ctx.fillStyle = "#2c3e50"; 
-				this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
-				this.ctx.fillStyle = "#95a5a6"; 
-				this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
-			}
-		}
-		
-		// ========================================================
-		// DYNAMIC MULTI-SPECIES WASTE FLOATING & RENDERING ENGINE
-		// ========================================================
-		this.activePet.poops.forEach(p => {
-			if (this.registry.activeSpecies === "goldfish") {
-				if (p.x === undefined) p.x = this.state.x;
-				if (p.y === undefined) p.y = this.state.y;
-				if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
-
-				p.y -= 0.2; // Float up naturally in pixel canvas space
-				p.swimOffset += 0.03;
-				let finalX = p.x + Math.sin(p.swimOffset) * 5;
-
-				this.ctx.font = "14px Arial";
-				this.ctx.fillText("💩", finalX, p.y);
-			} else if (this.registry.activeSpecies === "spider") {
-				// Spiders leave permanent webs handled above in Phase 1
-			} else {
-				// Tie poop elements explicitly to the zoomed lPos tracking matrix
-				let poopyY = p.isCeil ? 90 : lPos.y + 24;
-				let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
-				this.ctx.font = "14px Arial";
-				this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
-			}
-		});
-
+		this.drawLitterBox(lPos, boxW);
+		this.drawWasteLayer(lPos, boxW);
 		// ========================================================
 		// PHASE 3: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
 		// ========================================================
@@ -2788,9 +2409,10 @@ export class StreamPet {
 		this.drawPaintBalloons();
 		this.updateAndDrawParticles();
 	}
-    // ==========================================
-    // CORE VISUAL RENDERING ROUTERS PER SPECIES
-    // ==========================================
+	
+// ==========================================
+// CORE VISUAL RENDERING ROUTERS PER SPECIES
+// ==========================================
     
 	// future pethousing placeholders
 
@@ -2922,7 +2544,73 @@ export class StreamPet {
 		this.ctx.restore();
 	}
 
-	
+	drawLitterBox(lPos, boxW) {
+		// Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
+		if (this.registry.activeSpecies === "goldfish" || this.registry.activeSpecies === "spider") return;
+
+		if (this.registry.activeSpecies === "puppy") {
+			// Base Dirt Tray
+			this.ctx.fillStyle = "#4e342e"; 
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y + 2, boxW, 38);
+			
+			// Green Grass Mat
+			this.ctx.fillStyle = "#2e7d32"; 
+			this.ctx.fillRect(lPos.x - boxW/2 + 4, lPos.y + 4, boxW - 8, 32);
+			
+			// Procedural Grass Blades
+			this.ctx.fillStyle = "#4caf50";
+			for (let i = 0; i < 6; i++) {
+				let bladeX = lPos.x - boxW/2 + 15 + (i * 22);
+				this.ctx.fillRect(bladeX, lPos.y + 12 + (i % 3 * 4), 3, 10);
+				this.ctx.fillRect(bladeX + 4, lPos.y + 16, 2, 6);
+			}
+			
+			// Picket Fence Border Details
+			this.ctx.fillStyle = "#f5f5f5";
+			for(let p = 0; p <= boxW; p += 15) {
+				this.ctx.fillRect(lPos.x - boxW/2 + p, lPos.y - 20, 4, 24); 
+			}
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 14, boxW, 4);   
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y - 4, boxW, 4);    
+		} else {
+			// Standard Cat/Companion Plastic Litter Pan
+			this.ctx.fillStyle = "rgba(0,0,0,0.2)"; 
+			this.ctx.fillRect(lPos.x - boxW/2 + 5, lPos.y + 5, boxW, 40);
+			this.ctx.fillStyle = "#2c3e50"; 
+			this.ctx.fillRect(lPos.x - boxW/2, lPos.y, boxW, 40);
+			this.ctx.fillStyle = "#95a5a6"; 
+			this.ctx.fillRect(lPos.x - boxW/2 + 8, lPos.y + 4, boxW - 16, 30);
+		}
+	}
+
+	drawWasteLayer(lPos, boxW) {
+		this.activePet.poops.forEach(p => {
+			if (this.registry.activeSpecies === "goldfish") {
+				if (p.x === undefined) p.x = this.state.x;
+				if (p.y === undefined) p.y = this.state.y;
+				if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
+
+				// Float up naturally in aquarium water space
+				p.y -= 0.2; 
+				p.swimOffset += 0.03;
+				let finalX = p.x + Math.sin(p.swimOffset) * 5;
+
+				this.ctx.font = "14px Arial";
+				this.ctx.fillText("💩", finalX, p.y);
+			} else if (this.registry.activeSpecies === "spider") {
+				// Spiders use architectural webs instead of standard floor assets
+			} else {
+				// Anchors standard waste to the litter pan coordinates layout
+				let poopyY = p.isCeil ? 90 : lPos.y + 24;
+				let poopyX = (lPos.x - boxW/2 + 20) + (p.ox || 0) % (boxW - 40);
+				this.ctx.font = "14px Arial";
+				this.ctx.fillText(p.isCeil ? "🕸️" : "💩", poopyX, poopyY);
+			}
+		});
+	}
+
+
+
 	drawKitty(t, scale) {
         this.ctx.save();
         
