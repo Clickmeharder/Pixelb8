@@ -489,7 +489,6 @@ function createDefaultState() {
 
 // ============================================================================
 // MAIN EXPORT CLASS
-// ============================================================================
 export class StreamPet {
 	constructor() {
         console.log("🐾 [Pet Widget]: Initializing Core Ecosystem...");
@@ -2950,6 +2949,9 @@ export class StreamPet {
 			const checkT = document.getElementById("showTower"); 
 			if (checkT && this.state.layout) checkT.checked = this.state.layout.showTower;
 			
+			// =========================================================================
+			// 🎯 CANVASES ZOOM TRACKING & MEMORY LEAK SAFETY LAYER
+			// =========================================================================
 			const zoomSlider = document.getElementById("canvasZoom");
 			const zoomDisplay = document.getElementById("zoomValue");
 			if (zoomSlider) {
@@ -2958,14 +2960,25 @@ export class StreamPet {
 				let scaleVal = savedZoom >= 0 ? 1.0 + (savedZoom * 0.5) : 1.0 + (savedZoom * 0.25);
 				if (zoomDisplay) zoomDisplay.textContent = `${scaleVal.toFixed(1)}x`;
 
-				// Unhook old tracking pointer reference to avoid accumulating active memory listeners
+				// 1. Unhook old tracking pointer reference to avoid accumulating active memory listeners
 				if (this._boundZoomHandler) {
 					zoomSlider.removeEventListener("input", this._boundZoomHandler);
 				}
+				if (this._boundZoomSaveHandler) {
+					zoomSlider.removeEventListener("change", this._boundZoomSaveHandler);
+				}
 
-				// Safely bind context target reference to instance method
-				this._boundZoomHandler = this.handleZoomInput.bind(this);
-				zoomSlider.addEventListener("input", this._boundZoomHandler);
+				// 2. Verify that handleZoomInput exists before tying the context pointer
+				if (typeof this.handleZoomInput === 'function') {
+					this._boundZoomHandler = this.handleZoomInput.bind(this);
+					zoomSlider.addEventListener("input", this._boundZoomHandler);
+				} else {
+					console.warn("⚠️ [Pet Widget Boot]: handleZoomInput method not found in class body during loadData.");
+				}
+
+				// 3. Attach standard runtime mouse-release data persistence trigger
+				this._boundZoomSaveHandler = () => this.saveData();
+				zoomSlider.addEventListener("change", this._boundZoomSaveHandler);
 			}
 
 			if (this.state.layout) {
@@ -2981,6 +2994,21 @@ export class StreamPet {
 		this.initSwatches(); 
 		this.syncSpeciesInterfaceToggle();
 	}
+	handleZoomInput = (e) => {
+		if (!e || !e.target) return;
+		
+		const val = parseFloat(e.target.value);
+		this.state.zoom = val; // Store the raw slider value (-2 to 2)
+
+		// Calculate dynamic visual scale using your dual-curve rendering algorithm
+		let dynamicScale = val >= 0 ? 1.0 + (val * 0.5) : 1.0 + (val * 0.25);
+		
+		// Instantly update the UI indicator text
+		const zoomDisplay = document.getElementById("zoomValue");
+		if (zoomDisplay) {
+			zoomDisplay.textContent = `${dynamicScale.toFixed(1)}x`;
+		}
+	};
 	exportSettingsToClipboard(sendNotice = null) {
         try {
             // 1. Gather all of your custom layout sizes, coordinates, and pet profiles
