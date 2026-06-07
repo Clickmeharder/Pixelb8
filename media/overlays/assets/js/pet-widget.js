@@ -279,21 +279,44 @@ export class StreamPet {
         localStorage.setItem("greta_ultra_v10", JSON.stringify(bundle)); 
     }
 
-    loadData() {
+	loadData() {
         const saved = localStorage.getItem("greta_ultra_v10");
         if (saved) {
             const loadedBundle = JSON.parse(saved);
             
             if (loadedBundle.registry) this.registry = loadedBundle.registry;
-			if (loadedBundle.state) {
-				// Merge loaded state into current state
-				this.state = { ...this.state, ...loadedBundle.state };
-				
-				// Check for the new property, and set default if it's missing
-				if (this.state.tummylimit === undefined) {
-					this.state.tummylimit = 8;
-				}
-			}
+            if (loadedBundle.state) {
+                // Merge loaded state into current state
+                this.state = { ...this.state, ...loadedBundle.state };
+                
+                // Check for the new property, and set default if it's missing
+                if (this.state.tummylimit === undefined) {
+                    this.state.tummylimit = 8;
+                }
+
+                // 👇 BIOLOGICAL PATCH: Prevent old localStorage entries from deleting new commands
+                if (loadedBundle.state.commandAccess) {
+                    this.state.commandAccess = {
+                        feed:      { chat: true,  cp: true },
+                        play:      { chat: true,  cp: true },
+                        dance:     { chat: true,  cp: false },
+                        treat:     { chat: false, cp: true }, 
+                        trick:     { chat: true,  cp: false },
+                        status:    { chat: true,  cp: false },
+                        tease:     { chat: true,  cp: true },
+                        revive:    { chat: true,  cp: true }, // Assured survival route
+                        help:      { chat: true,  cp: false }, 
+                        rewards:   { chat: true,  cp: false }, 
+                        nyan:      { chat: true,  cp: true },  
+                        clear:     { chat: true,  cp: true },  
+                        species:   { chat: true,  cp: true },  
+                        hidepet:   { chat: true,  cp: true },  
+                        showpet:   { chat: true,  cp: true },  
+                        togglepet: { chat: true,  cp: true },
+                        ...loadedBundle.state.commandAccess // Merges old user custom settings on top safely
+                    };
+                }
+            }
             // Loop through all individual isolated profiles to catch offline progression separately
             const now = Date.now();
             Object.keys(this.registry.profiles).forEach(key => {
@@ -314,18 +337,18 @@ export class StreamPet {
             
             const nameIn = document.getElementById("nameInput"); 
             if (nameIn) nameIn.value = this.activePet.name;
-			const tummySlider = document.getElementById("tummyLimitRange");
-			const tummyDisplay = document.getElementById("tummyLimitValue");
+            const tummySlider = document.getElementById("tummyLimitRange");
+            const tummyDisplay = document.getElementById("tummyLimitValue");
 
-			// Ensure we use the loaded state value, default to 8 if not found
-			const currentLimit = this.state.tummylimit !== undefined ? this.state.tummylimit : 8;
+            // Ensure we use the loaded state value, default to 8 if not found
+            const currentLimit = this.state.tummylimit !== undefined ? this.state.tummylimit : 8;
 
-			if (tummySlider) {
-				tummySlider.value = currentLimit;
-				if (tummyDisplay) {
-					tummyDisplay.innerText = currentLimit;
-				}
-			}
+            if (tummySlider) {
+                tummySlider.value = currentLimit;
+                if (tummyDisplay) {
+                    tummyDisplay.innerText = currentLimit;
+                }
+            }
             const displayEl = document.getElementById("speciesSelectDisplay");
             if (displayEl && this.registry.activeSpecies) {
                 const speciesMap = {
@@ -382,7 +405,6 @@ export class StreamPet {
         this.initSwatches(); 
         this.syncSpeciesInterfaceToggle();
     }
-
     resize() {
         if (!this.widgetContainer || !this.canvas) return;
         this.canvas.width = this.widgetContainer.clientWidth;
@@ -1005,7 +1027,7 @@ export class StreamPet {
         // Replace '.pet-matrix-container-target' with whatever class/id is inside your StreamPet.controlsTemplate
         this.controlsContainer = petSection.querySelector('.pet-matrix-container-target') || petSection;
     }
-renderControlPanel() {
+	renderControlPanel() {
         if (!this.controlsContainer) return;
 
         // Clean, compact dark matrix that matches your #18181b UI exactly
