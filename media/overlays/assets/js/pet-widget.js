@@ -1281,8 +1281,10 @@ export class StreamPet {
 // SECTION 5: pet system helpers
 // ===============================================
 	getPos(pctX, pctY, offY = 0) {
-		const containerW = this.widgetContainer.clientWidth;
-		const containerH = this.widgetContainer.clientHeight;
+		// const containerW = this.widgetContainer.clientWidth;
+		// const containerH = this.widgetContainer.clientHeight;
+		const containerW = this.canvas.width;
+		const containerH = this.canvas.height;
 		
 		// Calculate the logical 0-100% position
 		const logicalX = (pctX / 100) * containerW;
