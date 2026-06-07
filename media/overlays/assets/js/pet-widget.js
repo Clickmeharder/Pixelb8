@@ -1651,6 +1651,53 @@ export class StreamPet {
 			this.say("Already healthy! ✨");
 		}
 	}
+
+
+// ========================================================
+//  what should we put here to let reader know what this function does? and what should we put into helpers nexT?
+// ========================================================
+	drawEnvironment(tick) {
+		const visibleW = this.canvas.width;
+		const visibleH = this.canvas.height;
+		// ========================================================
+		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
+		// ========================================================
+		//if (this.registry.activeSpecies === "spider") {
+			this.drawSpiderWebs();
+			this.drawRappelStrand();
+		//}
+		// ========================================================
+		// PHASE 2: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
+		// ========================================================
+		if (this.state.layout.showTower) {
+			const towerPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
+			this.drawPetHouse(towerPos, tick);
+		}
+		// ========================================================
+		// PHASE 3: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
+		// ========================================================
+		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
+		this.drawPetBed(bedPos, tick);
+		// ========================================================
+		// PHASE 4: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
+		// ========================================================
+		const litterPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
+		const boxW = 150;
+		this.drawLitterBox(litterPos, boxW);
+		this.drawWasteLayer(litterPos, boxW);
+		// ========================================================
+		// PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
+		// ========================================================
+		const foodPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
+		this.drawFoodBowl(foodPos, tick);
+		// ========================================================
+		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
+		// ========================================================
+		this.drawGoldfishBubbles(tick);
+		this.drawNyanTrail(tick, visibleH);
+		this.drawPaintBalloons();
+		this.updateAndDrawParticles();
+	}
 	updateAI(t) {
 		if (this.state.action === "bloating" || this.state.action === "explode") {
 			if (this.state.actionTimer > 0) this.state.actionTimer--;
@@ -2111,6 +2158,7 @@ export class StreamPet {
 				break;
 		}
 	}
+
 	animate = () => {
 		this.state.animT++;
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -2162,52 +2210,6 @@ export class StreamPet {
 		this.ctx.restore();
 		this.updateUI();
 		requestAnimationFrame(this.animate);
-	}
-
-// ========================================================
-//  what should we put here to let reader know what this function does? and what should we put into helpers nexT?
-// ========================================================
-	drawEnvironment(tick) {
-		const visibleW = this.canvas.width;
-		const visibleH = this.canvas.height;
-		// ========================================================
-		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
-		// ========================================================
-		//if (this.registry.activeSpecies === "spider") {
-			this.drawSpiderWebs();
-			this.drawRappelStrand();
-		//}
-		// ========================================================
-		// PHASE 2: LARGE STRUCTURE INTERIOR ENVIRONMENT (MIDGROUND)
-		// ========================================================
-		if (this.state.layout.showTower) {
-			const towerPos = this.getPos(this.state.layout.towerX, this.state.layout.towerY);
-			this.drawPetHouse(towerPos, tick);
-		}
-		// ========================================================
-		// PHASE 3: PET BED INTERIOR FURNITURE (MIDGROUND FRONT)
-		// ========================================================
-		const bedPos = this.getPos(this.state.layout.bedX, this.state.layout.bedY);
-		this.drawPetBed(bedPos, tick);
-		// ========================================================
-		// PHASE 4: POTTY BASE SANITARY MATRIX (MID BACK BACKGROUND)
-		// ========================================================
-		const litterPos = this.getPos(this.state.layout.litterX, this.state.layout.litterY);
-		const boxW = 150;
-		this.drawLitterBox(litterPos, boxW);
-		this.drawWasteLayer(litterPos, boxW);
-		// ========================================================
-		// PHASE 5: INTERACTIVE CONSUMABLES LAYER (FOREGROUND EXTREME)
-		// ========================================================
-		const foodPos = this.getPos(this.state.layout.bowlX, this.state.layout.bowlY);
-		this.drawFoodBowl(foodPos, tick);
-		// ========================================================
-		// PHASE 6: SCREEN ENGINE POST-PROCESSING & FX PASSES (FRONT)
-		// ========================================================
-		this.drawGoldfishBubbles(tick);
-		this.drawNyanTrail(tick, visibleH);
-		this.drawPaintBalloons();
-		this.updateAndDrawParticles();
 	}
 	
 // ==========================================
