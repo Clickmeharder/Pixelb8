@@ -1827,23 +1827,32 @@ export class StreamPet {
                 break;
 
 			case "scratching":
-                // Spawn a few cardboard shred particles dynamically for effect
-                if (t % 8 === 0) {
-                    this.state.particles.push({
-                        x: this.state.x + (this.state.facing * 12), 
-                        y: this.state.y + 10, 
-                        vx: -this.state.facing * (1 + Math.random() * 2), 
-                        vy: -1 - Math.random() * 2, 
-                        s: 1.5, 
-                        c: "#d7ccc8", 
-                        life: 15
-                    });
-                }
-                if (this.state.actionTimer <= 0) {
-                    this.state.action = "idle";
-                    this.state.actionTimer = 300;
-                }
-                break;
+				// 1. HIGH DENSITY SHRED TIMING (t % 3): Fixed to prevent crashes using 'this.state'
+				if (t % 3 === 0) {
+					// Anchors x-axis exactly where the front paws hit based on facing direction (-1 or 1)
+					const clawX = this.state.x + (this.state.facing * 15);
+					// Lowers y-axis right to scratch deck height so particles don't spawn in mid-air
+					const clawY = this.state.y + 5; 
+
+					this.state.particles.push({
+						x: clawX,
+						y: clawY,
+						// Shoots shreds backwards away from the object being scratched
+						vx: -this.state.facing * (0.5 + Math.random() * 3),
+						// Gives a light upward burst arc
+						vy: -1 - Math.random() * 2,
+						s: 2, // Your original size
+						c: "#d2b48c", // Your preferred tan color
+						life: 15
+					});
+				}
+
+				// 2. STATE TRANSITION MATRIX
+				if (this.state.actionTimer <= 0) {
+					this.state.action = "idle";
+					this.state.actionTimer = Math.floor(Math.random() * 200) + 150; // Resets AI clock cleanly
+				}
+				break;
 
             case "walk_to_tower_climb":
                 // Walk to the base, then cleanly switch over to the climbing state
