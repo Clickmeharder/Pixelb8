@@ -31,7 +31,197 @@ function parseHSLA(str) {
 }
 
  
- 
+ // Programmatic getter and setter wrappers to maintain backward compatibility with your save actions
+function getCustomSelectValue(id) {
+    return customSelectValues[id];
+}
+function setCustomSelectValue(id, value) {
+    customSelectValues[id] = value;
+    
+    // Support both fallback matching patterns
+    const displayEl = document.getElementById(`display-${id}`) || document.getElementById(`current-${id}`);
+    if (!displayEl) return;
+
+    // Resolve structural label representations if tracking raw object lists
+    const dataset = CUSTOM_SELECT_DATA[id];
+    if (dataset && typeof dataset[0] === 'object') {
+        const matched = dataset.find(item => String(item.value) === String(value));
+        displayEl.innerText = matched ? matched.label : value;
+    } else {
+        displayEl.innerText = value;
+    }
+
+    // Contextual Trigger: Fire custom change updates for the Bit Tier configuration loader
+    if (id === "bit-tier-selector") {
+        if (typeof loadBitTierConfig === "function") {
+            loadBitTierConfig(value);
+        }
+        return;
+    }
+
+    // --- LIVE GRAPH REWRITE ENGINE MATCHES ---
+    // If we are configuring a Bit Alert Dropdown, update registry tracking immediately
+    if (id.startsWith("bit-")) {
+        const activeTier = customSelectValues["bit-tier-selector"] || "1";
+        if (registry.bits && registry.bits[activeTier]) {
+            // Map the internal field layout key (e.g., bit-text-in-anim -> anim_tx_in)
+            let targetKey = null;
+            if (id === "bit-text-in-anim") targetKey = "anim_tx_in";
+            if (id === "bit-text-out-anim") targetKey = "anim_tx_out";
+            if (id === "bit-img-in-anim") targetKey = "anim_im_in";
+            if (id === "bit-img-out-anim") targetKey = "anim_im_out";
+
+            if (targetKey) {
+                registry.bits[activeTier][targetKey] = value;
+                console.log(`Saved bit array transaction [Tier ${activeTier}]: ${targetKey} -> ${value}`);
+            }
+        }
+    }
+}
+function populateCustomDropdowns() {
+    Object.keys(CUSTOM_SELECT_DATA).forEach(id => {
+        const displayEl = document.getElementById(`display-${id}`) || 
+                          document.getElementById(`current-${id}`) || 
+                          document.getElementById(id);
+
+        const optionsEl = document.getElementById(`options-${id}`) || 
+                          document.getElementById(`${id}-options`);
+
+        if (!displayEl || !optionsEl) {
+            // console.warn(`Dropdown elements not found for ID: ${id}`);
+            return;
+        }
+
+        const optionsData = CUSTOM_SELECT_DATA[id];
+        optionsEl.innerHTML = "";
+
+        optionsData.forEach(item => {
+            const val = typeof item === 'object' ? item.value : item;
+            const text = typeof item === 'object' ? item.label : item;
+
+            const row = document.createElement("div");
+            row.className = "option-item";
+            row.innerText = text;
+            row.dataset.value = val;
+
+            row.style.cssText = "padding: 6px 10px; font-size: 11px; color: #e4e4e7; cursor: pointer;";
+
+            row.addEventListener("mouseenter", () => row.style.background = "var(--accent, #9146ff)");
+            row.addEventListener("mouseleave", () => row.style.background = "transparent");
+
+            row.addEventListener("click", (e) => {
+                e.stopImmediatePropagation();   // Crucial fix
+                setCustomSelectValue(id, val);
+                optionsEl.style.display = "none";
+            });
+
+            optionsEl.appendChild(row);
+        });
+
+        // Attach click handler to display (only once)
+        if (!displayEl.dataset.dropdownInitialized) {
+            displayEl.dataset.dropdownInitialized = "true";
+
+            displayEl.addEventListener("click", (e) => {
+                e.stopImmediatePropagation();
+
+                // Close all other dropdowns
+                document.querySelectorAll(".custom-select-options-box, .select-options").forEach(box => {
+                    if (box !== optionsEl) box.style.display = "none";
+                });
+
+                optionsEl.style.display = optionsEl.style.display === "block" ? "none" : "block";
+            });
+        }
+    });
+}
+
+
+
+function makeElementDraggable(targetId, handleId) {
+    const target = document.getElementById(targetId);
+    const handle = document.getElementById(handleId);
+
+    if (!target || !handle) return;
+
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    handle.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        // Only drag on left click
+        if (e.button !== 0) return;
+        
+        e.preventDefault();
+        
+        // Get the initial mouse cursor position
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        
+        // If the element uses a centering transform (like the Theme Manager),
+        // capture its current bounding coordinates and strip the transform immediately
+        // BEFORE dragging starts to avoid jumping.
+        const computedStyle = window.getComputedStyle(target);
+        if (computedStyle.transform !== 'none' && !target.style.left) {
+            const rect = target.getBoundingClientRect();
+            target.style.transform = 'none';
+            target.style.left = rect.left + 'px';
+            target.style.top = rect.top + 'px';
+        }
+        
+        // Attach event listeners for moving and releasing the mouse
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        
+        // Calculate the new cursor position
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+
+        // Set the element's new absolute position coordinates
+        let newTop = target.offsetTop - pos2;
+        let newLeft = target.offsetLeft - pos1;
+
+        // --- UPDATED BOUNDARY GUARDS ---
+        // Prevent window from getting lost off the top or left edge
+        if (newTop < 0) newTop = 0;
+        if (newLeft < 0) newLeft = 0;
+
+        // Prevent window from escaping past the right side of the screen
+        if (newLeft + target.offsetWidth > window.innerWidth) {
+            newLeft = window.innerWidth - target.offsetWidth;
+        }
+
+        // FIX: Allow the window to slide all the way to the bottom frame.
+        // It locks it right before the header handle (approx 40px) vanishes off-screen.
+        const minVisibleHeader = 40; 
+        if (newTop > window.innerHeight - minVisibleHeader) {
+            newTop = window.innerHeight - minVisibleHeader;
+        }
+
+        // Apply new styles
+        target.style.top = newTop + "px";
+        target.style.left = newLeft + "px";
+        
+        // Clear right/bottom anchors so they don't fight the explicit top/left styling
+        target.style.right = 'auto';
+        target.style.bottom = 'auto';
+    }
+
+    function closeDragElement() {
+        // Stop moving when mouse button is released
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+}
+
 function setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
     console.log(`[Global UI]: Mounting dropdown -> Display: ${displayId}, Items: ${optionItems ? optionItems.length : '0'}`);
     
@@ -99,6 +289,33 @@ function setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectio
     displayEl.addEventListener("click", displayEl._boundDropdownToggle);
     
     return { displayEl, optionsEl };
+}
+function displayConsoleMessage(user, message) {
+    if (!consoleMessages) return;
+    const consoleContainer = document.getElementById("chat-feed");
+    if (!consoleContainer) return;
+
+    const consoleMessage = document.createElement("div");
+    consoleMessage.classList.add("consoleMessage");
+
+    const usernameSpan = document.createElement("span");
+    usernameSpan.classList.add("consoleUser");
+    usernameSpan.innerHTML = `${user}: `;
+
+    const messageSpan = document.createElement("span");
+    messageSpan.classList.add("consoleMessageText");
+    messageSpan.innerHTML = message;
+
+    consoleMessage.appendChild(usernameSpan);
+    consoleMessage.appendChild(messageSpan);
+    consoleContainer.appendChild(consoleMessage);
+
+    setTimeout(() => { consoleMessage.style.opacity = '0'; }, 15000);
+    setTimeout(() => { consoleMessage.remove(); }, 15500);
+
+    if (consoleContainer.children.length > 5) {
+        consoleContainer.removeChild(consoleContainer.firstChild);
+    }
 }
 
 // =========================================================================
