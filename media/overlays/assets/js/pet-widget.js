@@ -172,7 +172,7 @@ export class StreamPet {
             trick:     { chat: true,  cp: false },
             status:    { chat: true,  cp: false },
             tease:     { chat: true,  cp: true },
-            paint:     { chat: true,  cp: true },
+            paintbomb: { chat: true,  cp: true },
             revive:    { chat: true,  cp: true },
             help:      { chat: true,  cp: false }, 
             rewards:   { chat: true,  cp: false }, 
