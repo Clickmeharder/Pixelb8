@@ -3,6 +3,7 @@
  * Pure functional layout utility. Resolves native select clipping bugs in OBS Studio.
  * Safe for multiple widgets on a single monolithic canvas.
  */
+ console.log(" [Helper Functions]: Initializing initializing...");
 function setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
     console.log(`[Global UI]: Mounting dropdown -> Display: ${displayId}, Items: ${optionItems ? optionItems.length : '0'}`);
     
@@ -86,3 +87,4 @@ if (typeof window !== "undefined" && !window._globalDropdownCloserWired) {
     window._globalDropdownCloserWired = true;
     console.log("🚀 [Helper Engine]: Global OBS Dropdown Closer successfully wired to DOM.");
 }
+ console.log(" [Helper Functions]: Initialized.");
