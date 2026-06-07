@@ -1606,6 +1606,33 @@ document.addEventListener("DOMContentLoaded", () => {
     makeElementDraggable("style-editor", "theme-manager-header");
     makeElementDraggable("rewards-manager", "rewards-manager-header");
 });
+function displayConsoleMessage(user, message) {
+    if (!consoleMessages) return;
+    const consoleContainer = document.getElementById("chat-feed");
+    if (!consoleContainer) return;
+
+    const consoleMessage = document.createElement("div");
+    consoleMessage.classList.add("consoleMessage");
+
+    const usernameSpan = document.createElement("span");
+    usernameSpan.classList.add("consoleUser");
+    usernameSpan.innerHTML = `${user}: `;
+
+    const messageSpan = document.createElement("span");
+    messageSpan.classList.add("consoleMessageText");
+    messageSpan.innerHTML = message;
+
+    consoleMessage.appendChild(usernameSpan);
+    consoleMessage.appendChild(messageSpan);
+    consoleContainer.appendChild(consoleMessage);
+
+    setTimeout(() => { consoleMessage.style.opacity = '0'; }, 15000);
+    setTimeout(() => { consoleMessage.remove(); }, 15500);
+
+    if (consoleContainer.children.length > 5) {
+        consoleContainer.removeChild(consoleContainer.firstChild);
+    }
+}
 
 function displayChatMessage(user, message, flags = {}, extra = {}, processed = null) {
     const chatContainer = document.getElementById("chat-feed");
