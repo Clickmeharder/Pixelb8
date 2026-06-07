@@ -177,7 +177,7 @@ const PET_STATE_LIBRARY = {
 	},
 
 	climbing_tower: (pet, ctx) => {
-		const perchY = ctx.towerPos.y - 125;
+		const perchY = ctx.towerPos.y;
 		pet.state.y -= 1.5;
 		
 		if (pet.state.y <= perchY) {
@@ -290,7 +290,16 @@ const PET_STATE_LIBRARY = {
 			pet.state.actionTimer = 200;
 		}
 	},
+	idle_return: (pet, ctx) => {
+		// Smoothly glide back to the starting point
+		pet.state.x += (pet.state.originalPos.x - pet.state.x) * 0.1;
+		pet.state.y += (pet.state.originalPos.y - pet.state.y) * 0.1;
 
+		if (pet.state.actionTimer <= 0) {
+			pet.state.action = "idle";
+			pet.state.actionTimer = 200;
+		}
+	},
 	idle: (pet, ctx) => {
 		if (pet.registry.activeSpecies === "goldfish") {
 			pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.04) * 40;
@@ -417,9 +426,10 @@ const PET_STATE_LIBRARY = {
 
 	// Common exit handler shared across shared static end states
 	_fallbackSleep: (pet, ctx) => {
-		if (pet.state.actionTimer <= 0) { 
-			if(pet.state.action === "tower_sleep") pet.state.y = ctx.groundY;
-			pet.state.action = "idle"; 
+		if (pet.state.actionTimer <= 0) {
+			// Instead of snapping, start a transition back to original position
+			pet.state.action = "idle_return";
+			pet.state.actionTimer = 50; // Give it 50 frames to glide back
 		}
 	}
 };
