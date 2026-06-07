@@ -142,6 +142,8 @@ export class StreamPet {
             animT: 0,
             hasFood: false,
             particles: [],
+			overrideColor: null, 
+            paintBalloons: [],
             zoom: -2,                     // Updated from 0 -> -2
             
             // Dynamic secondary matrices for specific simulation profiles
@@ -588,7 +590,7 @@ export class StreamPet {
 
                 // Status variations
                 'status': 'status', 'stats': 'status',
-
+				'paintbomb': 'paintbomb', 'paint': 'paintbomb', 'bomb': 'paintbomb', 'splat': 'paintbomb',
                 // Admin variations
                 'nyan': 'nyan', 'rainbow': 'nyan',
                 'revive': 'revive',
@@ -751,7 +753,47 @@ export class StreamPet {
                     let healthTxt = this.activePet.poops.length > 5 ? "SICK" : "HEALTHY";
                     sendNotice(`🐾 [${this.activePet.name}]: Species: ${this.registry.activeSpecies.toUpperCase()} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}% | Mood: ${healthTxt} | EXP: ${this.activePet.exp}`);
                     break;
+				case 'paintbomb':
+                    // 1. Isolate arguments from original message text to preserve mixed casing of hexes
+                    const rawArgs = message.trim().split(/\s+/).slice(1); // drops 'paintbomb'/'paint' etc.
+                    let selectedColor = '';
 
+                    // 2. Build HSLA mapping variants dynamically via your core helpers
+                    if (rawArgs.length === 0 || rawArgs[0] === '') {
+                        // Default Fallback: Random Hue
+                        const randH = Math.floor(Math.random() * 360);
+                        selectedColor = `hsla(${randH}, 95%, 50%, 1)`;
+                    } else if (rawArgs[0].startsWith('#')) {
+                        // Hex String processing
+                        const hslaObj = hexToHSLA(rawArgs[0]);
+                        selectedColor = `hsla(${hslaObj.h}, ${hslaObj.s}%, ${hslaObj.l}%, ${hslaObj.a})`;
+                    } else if (rawArgs.length >= 3) {
+                        // Space-separated RGBA processing
+                        const r = parseInt(rawArgs[0], 10) || 0;
+                        const g = parseInt(rawArgs[1], 10) || 0;
+                        const b = parseInt(rawArgs[2], 10) || 0;
+                        const a = rawArgs[3] !== undefined ? parseFloat(rawArgs[3]) : 1.0;
+                        const hslaObj = rgbToHSLA(r, g, b, a);
+                        selectedColor = `hsla(${hslaObj.h}, ${hslaObj.s}%, ${hslaObj.l}%, ${hslaObj.a})`;
+                    } else {
+                        // Bad/Incomplete formatting layout default
+                        const randH = Math.floor(Math.random() * 360);
+                        selectedColor = `hsla(${randH}, 95%, 50%, 1)`;
+                    }
+
+                    // 3. Roll target calculations: Give it a 30% chance to miss entirely
+                    const isHit = Math.random() > 0.30; 
+
+                    // 4. Fire into the pet widget execution framework
+                    if (typeof this.triggerPaintBomb === 'function') {
+                        this.triggerPaintBomb(selectedColor, isHit);
+                        if (isHit) {
+                            sendNotice(`🎈 [Paintbomb]: ${user} hurled a paint balloon at ${this.activePet.name}!`);
+                        } else {
+                            sendNotice(`💨 [Paintbomb]: ${user} hurled a paint balloon... but their aim was terrible and it might miss!`);
+                        }
+                    }
+                    break;
                 case 'nyan':
                     this.triggerNyan();
                     sendNotice(`🌈 [Pet]: NYAN OVERDRIVE ACTIVATED BY STAFF!`);
@@ -808,6 +850,7 @@ export class StreamPet {
             'tease', 'tease pet', 'pulltail', 'pull tail', 'pull pets tail', 'tapglass', 'tap glass',
             'feed', 'feed pet', 'food', 'fish', 'meat', 'bugs', 'flakes',
             'play', 'yarn', 'ball', 'web', 'dance', 'treat', 'nom', 'trick', 'status', 'stats',
+			'paintbomb', 'paint', 'bomb', 'splat',
 			'revive', 'revive pet', 'revive active pet',
             'nyan', 'rainbow', 'clear', 'clean',
             'hidepet', 'hide pet', 'hide', 
@@ -1444,6 +1487,46 @@ export class StreamPet {
         this.state.actionTimer = 400;
         this.playSound('nyanSound');
         this.say("NYAN OVERDRIVE ACTIVATED! 🌈");
+    }
+	triggerPaintBomb(colorString, isHit) {
+        if (this.state.action === "dead" || this.state.action === "explode" || this.state.action === "bloating") return;
+
+        this.say("🎈 INCOMING!!");
+        this.playSound('clickSound'); // Fits the tactical trigger sound
+
+        // 1. Spawning trajectory setups
+        const spawnFromLeft = Math.random() > 0.5;
+        const startX = spawnFromLeft ? -30 : this.canvas.width + 30;
+        const startY = Math.random() * (this.canvas.height - 80) + 40;
+
+        // 2. Visual target placement offsets based on hit check
+        let finalTargetX = this.state.x;
+        let finalTargetY = this.state.y - 15;
+
+        if (!isHit) {
+            // Miss calculation: offset target horizontally and vertically to miss the pet sprite container entirely
+            const missDirectionX = Math.random() > 0.5 ? 1 : -1;
+            finalTargetX = this.state.x + (missDirectionX * (55 + Math.random() * 40));
+            finalTargetY = this.state.y - (40 + Math.random() * 40);
+        }
+
+        const dx = finalTargetX - startX;
+        const dy = finalTargetY - startY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const travelVelocity = 8; // Projectile speed constant
+
+        this.state.paintBalloons.push({
+            x: startX,
+            y: startY,
+            vx: (dx / distance) * travelVelocity,
+            vy: (dy / distance) * travelVelocity,
+            color: colorString,
+            isHit: isHit,
+            targetX: finalTargetX,
+            targetY: finalTargetY,
+            radius: 9,
+            distanceLeft: distance
+        });
     }
 	explodePet() {
         if (this.state.action === "bloating" || this.state.action === "dead") return;
@@ -2233,7 +2316,67 @@ export class StreamPet {
 			}
 			this.ctx.globalAlpha = 1.0;
 		}
+		if (this.state.paintBalloons && this.state.paintBalloons.length > 0) {
+			for (let i = this.state.paintBalloons.length - 1; i >= 0; i--) {
+				let balloon = this.state.paintBalloons[i];
 
+				// Drive animation layout offsets
+				balloon.x += balloon.vx;
+				balloon.y += balloon.vy;
+
+				// Render balloon graphic contour shapes
+				this.ctx.save();
+				this.ctx.fillStyle = balloon.color;
+				this.ctx.beginPath();
+				this.ctx.arc(balloon.x, balloon.y, balloon.radius, 0, Math.PI * 2);
+				this.ctx.fill();
+				this.ctx.strokeStyle = "#ffffff";
+				this.ctx.lineWidth = 1.5;
+				this.ctx.stroke();
+				this.ctx.restore();
+
+				// Measure accurate tracking distance remaining to determine impact framework bounds
+				const curDx = balloon.targetX - balloon.x;
+				const curDy = balloon.targetY - balloon.y;
+				const remainingDist = Math.sqrt(curDx * curDx + curDy * curDy);
+
+				// Trigger explosion loop if it hits target threshold OR flies out of screen boundaries
+				if (remainingDist < 10 || balloon.x < -50 || balloon.x > this.canvas.width + 50) {
+					// Check if the explosion happened because it truly reached its intended target coordinates
+					const reachedTarget = remainingDist < 15;
+
+					if (balloon.isHit && reachedTarget) {
+						this.state.overrideColor = balloon.color;
+						this.say("🎨 SPLATAFY!");
+						this.playSound('bubbleSound'); 
+					} else {
+						// Only say missed if the balloon actually exploded near the pet area
+						if (reachedTarget) {
+							this.say("💨 MISSED!");
+						}
+					}
+
+					// Only generate visible splash particles if the detonation happens on-screen
+					if (balloon.x >= -10 && balloon.x <= this.canvas.width + 10) {
+						const particleCount = balloon.isHit ? 30 : 15;
+						for (let p = 0; p < particleCount; p++) {
+							this.state.particles.push({
+								x: balloon.x,
+								y: balloon.y,
+								vx: (Math.random() - 0.5) * 8,
+								vy: (Math.random() - 0.7) * 8,
+								s: Math.random() * 3 + 2,
+								c: balloon.color,
+								life: Math.floor(Math.random() * 20) + 15
+							});
+						}
+					}
+
+					// Splice current node out of loop registry processing list heap array
+					this.state.paintBalloons.splice(i, 1);
+				}
+			}
+		}
 		// Dynamic particle physics engine handler loop
 		for (let i = this.state.particles.length - 1; i >= 0; i--) {
 			const p = this.state.particles[i];
