@@ -638,10 +638,10 @@ export class StreamPet {
 
 			if (pet.state.actionTimer <= 0) {
 				if (Math.random() < 0.15) {
-					if (pet.registry.activeSpecies === "kitty") pet.say("Meow! 🐾");
-					if (pet.registry.activeSpecies === "puppy") pet.say("BARK! 🐶");
-					if (pet.registry.activeSpecies === "spider") pet.say("Click-click... 🕷️");
-					if (pet.registry.activeSpecies === "goldfish") pet.say("Blub... 🫧");
+					if (pet.registry.activeSpecies === "kitty") pet.petSpeechBubble("Meow! 🐾");
+					if (pet.registry.activeSpecies === "puppy") pet.petSpeechBubble("BARK! 🐶");
+					if (pet.registry.activeSpecies === "spider") pet.petSpeechBubble("Click-click... 🕷️");
+					if (pet.registry.activeSpecies === "goldfish") pet.petSpeechBubble("Blub... 🫧");
 				}
 				
 				if (Math.random() < 0.4) { 
@@ -789,7 +789,7 @@ export class StreamPet {
     }
 
 // ===============================================
-// SECTION 4: UI ASSEMBLY, TEMPLATES & BINDINGS
+// SECTION 3: UI ASSEMBLY, TEMPLATES & BINDINGS
 // ===============================================
 
 
@@ -936,7 +936,9 @@ export class StreamPet {
 		}
 	}
 
-
+// ===============================================
+// SECTION 4: listeners and BINDINGS
+// ===============================================
     initSwatches() {
         const swatchContainer = document.getElementById("bedColorSwatches");
         if (!swatchContainer) return;
@@ -955,7 +957,7 @@ export class StreamPet {
                 this.state.layout.bedColor = color;
                 document.querySelectorAll(".swatch").forEach(s => s.style.border = "1px solid #333");
                 btn.style.border = "2px solid #fff";
-                this.say("Comfy! ✨");
+                this.petSpeechBubble("Comfy! ✨");
             });
             swatchContainer.appendChild(btn);
         });
@@ -1091,7 +1093,7 @@ export class StreamPet {
 
             this.syncSpeciesInterfaceToggle();
             this.saveData();
-            this.say(`Swapped to ${this.activePet.name}!`);
+            this.petSpeechBubble(`Swapped to ${this.activePet.name}!`);
         });
 
         document.addEventListener("click", () => {
@@ -1156,17 +1158,17 @@ export class StreamPet {
         bindClick("btnFeed", () => { 
             if(!this.activePet.isDead && !this.state.hasFood) { 
                 this.state.hasFood = true; 
-                this.say("Yum! Food dropped!"); 
+                this.petSpeechBubble("Yum! Food dropped!"); 
             } 
         });
-        bindClick("btnPlay", () => { if(!this.activePet.isDead) { this.state.action = "special"; this.state.actionTimer = 350; this.say("Playing! ✨"); } });
-        bindClick("btnDance", () => { if(!this.activePet.isDead) { this.state.action = "dance"; this.state.actionTimer = 300; this.say("Dance! ✨"); } });
-        bindClick("btnTreat", () => { if(!this.activePet.isDead) { this.activePet.hunger = Math.max(0, this.activePet.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.say("NOM NOM! 🍗"); } });
+        bindClick("btnPlay", () => { if(!this.activePet.isDead) { this.state.action = "special"; this.state.actionTimer = 350; this.petSpeechBubble("Playing! ✨"); } });
+        bindClick("btnDance", () => { if(!this.activePet.isDead) { this.state.action = "dance"; this.state.actionTimer = 300; this.petSpeechBubble("Dance! ✨"); } });
+        bindClick("btnTreat", () => { if(!this.activePet.isDead) { this.activePet.hunger = Math.max(0, this.activePet.hunger - 5); this.state.action = "special"; this.state.actionTimer = 200; this.petSpeechBubble("NOM NOM! 🍗"); } });
         bindClick("btnClear", () => { 
             this.activePet.poops = []; 
             this.state.spiderWebs = [];
             this.state.goldfishBubbles = [];
-            this.say("Cleared and Scoured! 🧹"); 
+            this.petSpeechBubble("Cleared and Scoured! 🧹"); 
         });
         bindClick("btnRevive", () => { this.revivePet(); });
         bindClick("btnReset", () => { 
@@ -1208,7 +1210,7 @@ export class StreamPet {
                         window.soundSettings.customPaths[key] = url;
                         localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
                         this.refreshAudioInstance(key);
-                        this.say("Audio updated! 🎧");
+                        this.petSpeechBubble("Audio updated! 🎧");
                     }
                 });
             }
@@ -1225,29 +1227,10 @@ export class StreamPet {
         if (currentNote) currentNote.style.display = "block";
     }
 
+// ===============================================
+// SECTION 5: pet system helpers
+// ===============================================
 
-
-
-    幕(txt) {} // Catch invalid encoding safely
-    say(txt) {
-        const b = document.getElementById("bubble");
-        if (!b) return;
-        b.textContent = txt; 
-        b.style.left = (this.state.x - 50) + "px"; 
-        b.style.top = (this.state.y - 140) + "px";
-        b.classList.add("show"); 
-        
-        if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
-        this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
-
-        if (txt.includes("Meow") || txt.includes("Kitty")) this.playSound('meowSound');
-        if (txt.includes("Mew")) this.playSound('mewSound');
-        if (txt.includes("Purrr") || txt.includes("Comfy")) this.playSound('purrSound');
-        if (txt.includes("BARK") || txt.includes("FETCH")) this.playSound('barkSound');
-        if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.playSound('whineSound');
-        if (txt.includes("SPIN") || this.registry.activeSpecies === "spider" && Math.random() < 0.3) this.playSound('clickSound');
-        if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.playSound('bubbleSound');
-    }
 
 
     getPos(pctX, pctY, offY = 0) {
@@ -1316,7 +1299,7 @@ export class StreamPet {
 	}
 
 // ===================================================
-// SECTION 5: RENDER ENGINE, ANIMATION & AI PIPELINE
+// SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
 // ===================================================
 
 	drawEnvironment(tick) {
@@ -1453,7 +1436,7 @@ export class StreamPet {
 	}
 	
 // ==========================================
-// CORE VISUAL RENDERING ROUTERS PER SPECIES
+// Section 7: DRAWING PETS
 // ==========================================
 //
 // draw pets 
@@ -1777,7 +1760,7 @@ export class StreamPet {
 
 
 //===========================================
-// furniture & other static large objects
+// Section 8: furniture & other static large objects
 //===========================================
 
 //------------------------------
@@ -2053,7 +2036,7 @@ export class StreamPet {
 
 
 //=================================
-// particals and final layer stuff
+// Section 9: PARTICALS AND TOP LAYER STUFF
 //=================================
     drawSpiderWebs() {
 		// Early exit guard: Only render background webs if the active species is a spider
@@ -2137,10 +2120,10 @@ export class StreamPet {
 						this.activePet.color = balloon.color;
 					}
 					
-					this.say("🎨 SPLATAFY!");
+					this.petSpeechBubble("🎨 SPLATAFY!");
 					this.playSound('bubbleSound'); 
 				} else if (reachedTarget) {
-					this.say("💨 MISSED!");
+					this.petSpeechBubble("💨 MISSED!");
 				}
 
 				if (balloon.x >= -10 && balloon.x <= this.canvas.width + 10) {
@@ -2200,6 +2183,27 @@ export class StreamPet {
 		}
 		this.ctx.globalAlpha = 1.0;
 	}
+
+    幕(txt) {} // Catch invalid encoding safely
+    petSpeechBubble(txt) {
+        const b = document.getElementById("bubble");
+        if (!b) return;
+        b.textContent = txt; 
+        b.style.left = (this.state.x - 50) + "px"; 
+        b.style.top = (this.state.y - 140) + "px";
+        b.classList.add("show"); 
+        
+        if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
+        this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
+
+        if (txt.includes("Meow") || txt.includes("Kitty")) this.playSound('meowSound');
+        if (txt.includes("Mew")) this.playSound('mewSound');
+        if (txt.includes("Purrr") || txt.includes("Comfy")) this.playSound('purrSound');
+        if (txt.includes("BARK") || txt.includes("FETCH")) this.playSound('barkSound');
+        if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.playSound('whineSound');
+        if (txt.includes("SPIN") || this.registry.activeSpecies === "spider" && Math.random() < 0.3) this.playSound('clickSound');
+        if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.playSound('bubbleSound');
+    }
 
 //=================================
 // individual updates and stuff
@@ -2281,12 +2285,12 @@ export class StreamPet {
         this.state.nyanPhase = "takeoff";
         this.state.actionTimer = 400;
         this.playSound('nyanSound');
-        this.say("NYAN OVERDRIVE ACTIVATED! 🌈");
+        this.petSpeechBubble("NYAN OVERDRIVE ACTIVATED! 🌈");
     }
 	triggerPaintBomb(colorString, isHit) {
         if (this.state.action === "dead" || this.state.action === "explode" || this.state.action === "bloating") return;
 
-        this.say("🎈 INCOMING!!");
+        this.petSpeechBubble("🎈 INCOMING!!");
         this.playSound('clickSound'); // Fits the tactical trigger sound
 
         // 1. Spawning trajectory setups
@@ -2330,7 +2334,7 @@ export class StreamPet {
         this.state.action = "bloating"; 
         this.state.hideMainSprite = false; // Still visible while expanding
         this.stopSound('nyanSound');
-        this.say("🤢 BLECH...");
+        this.petSpeechBubble("🤢 BLECH...");
 
         setTimeout(() => {
             // 💥 STAGE 2: THE DETONATION
@@ -2338,7 +2342,7 @@ export class StreamPet {
             this.state.action = "explode";
             this.state.hideMainSprite = true; // 🌟 POP! Delete the main body instantly here
 			this.playSound('petsplatSound');
-            this.say("💥 SPLAT!");
+            this.petSpeechBubble("💥 SPLAT!");
             
             // Spray gore particles and body chunks from the vacant origin point
             const numParticles = 80;
@@ -2363,7 +2367,7 @@ export class StreamPet {
                 this.state.isGhost = true; 
                 this.state.hideMainSprite = false; // 🌟 Bring back visibility so the Ghost can be seen!
                 this.state.action = "walk"; 
-                this.say("👻 OoooOoo...");
+                this.petSpeechBubble("👻 OoooOoo...");
                 
                 this.saveData();
 
@@ -2381,11 +2385,11 @@ export class StreamPet {
 		switch (this.registry.activeSpecies) {
 			case "kitty":
 			case "puppy":
-				this.say("Hey! That's mean! 😾");
+				this.petSpeechBubble("Hey! That's mean! 😾");
 				break;
 			case "spider":
 			case "goldfish":
-				this.say("Stop tapping the glass! 🫧");
+				this.petSpeechBubble("Stop tapping the glass! 🫧");
 				break;
 		}
 	}
@@ -2400,7 +2404,7 @@ export class StreamPet {
 			// --- Carcass Cleanup ---
 			this.state.showCarcass = false;
 			this.state.particles = [];
-			this.say("I'M ALIVE! 💖");
+			this.petSpeechBubble("I'M ALIVE! 💖");
 			this.saveData();
 			
 			for(let i=0; i<20; i++) {
@@ -2415,7 +2419,7 @@ export class StreamPet {
 				});
 			}
 		} else {
-			this.say("Already healthy! ✨");
+			this.petSpeechBubble("Already healthy! ✨");
 		}
 	}
 
@@ -2616,10 +2620,10 @@ export class StreamPet {
 				case 'feed':
 					if (!this.state.hasFood) {
 						this.state.hasFood = true;
-						if (this.registry.activeSpecies === "kitty") this.say("Food! 🐟");
-						if (this.registry.activeSpecies === "puppy") this.say("BONE! 🍖");
-						if (this.registry.activeSpecies === "spider") this.say("CRICKET! 🪰");
-						if (this.registry.activeSpecies === "goldfish") this.say("FLAKES! 🍤");
+						if (this.registry.activeSpecies === "kitty") this.petSpeechBubble("Food! 🐟");
+						if (this.registry.activeSpecies === "puppy") this.petSpeechBubble("BONE! 🍖");
+						if (this.registry.activeSpecies === "spider") this.petSpeechBubble("CRICKET! 🪰");
+						if (this.registry.activeSpecies === "goldfish") this.petSpeechBubble("FLAKES! 🍤");
 						sendNotice(`🍽️ [Pet]: ${user} dropped food for ${this.activePet.name}!`);
 					} else {
 						sendNotice(`🍽️ [Pet]: There is already food in the bowl!`);
@@ -2629,33 +2633,33 @@ export class StreamPet {
 				case 'play':
 					this.state.action = "special";
 					this.state.actionTimer = 350;
-					if (this.registry.activeSpecies === "kitty") this.say("Play! 🧶");
-					if (this.registry.activeSpecies === "puppy") this.say("FETCH! 🥎");
-					if (this.registry.activeSpecies === "spider") this.say("SPIN! 🕸️");
-					if (this.registry.activeSpecies === "goldfish") this.say("LOOP! 🫧");
+					if (this.registry.activeSpecies === "kitty") this.petSpeechBubble("Play! 🧶");
+					if (this.registry.activeSpecies === "puppy") this.petSpeechBubble("FETCH! 🥎");
+					if (this.registry.activeSpecies === "spider") this.petSpeechBubble("SPIN! 🕸️");
+					if (this.registry.activeSpecies === "goldfish") this.petSpeechBubble("LOOP! 🫧");
 					sendNotice(`🥎 [Pet]: ${user} actively engaged with ${this.activePet.name}!`);
 					break;
 
 				case 'dance':
 					this.state.action = "dance";
 					this.state.actionTimer = 300;
-					this.say("Dance! ✨");
+					this.petSpeechBubble("Dance! ✨");
 					break;
 
 				case 'treat':
 					this.activePet.hunger = Math.max(0, this.activePet.hunger - 5);
 					this.state.action = "special";
 					this.state.actionTimer = 200;
-					this.say("NOM NOM NOM! 🍗");
+					this.petSpeechBubble("NOM NOM NOM! 🍗");
 					break;
 
 				case 'trick':
 					this.state.action = "trick";
 					this.state.actionTimer = 250;
-					if (this.registry.activeSpecies === "puppy") { this.say("BACKFLIP! 🤸"); this.activePet.exp += 25; }
-					else if (this.registry.activeSpecies === "kitty") { this.say("PURR SLIDE! 🛷"); this.activePet.exp += 20; }
-					else if (this.registry.activeSpecies === "spider") { this.say("PARACHUTE! 🪂"); this.activePet.exp += 30; }
-					else if (this.registry.activeSpecies === "goldfish") { this.say("SPLASH FLIP! 🌊"); this.activePet.exp += 25; }
+					if (this.registry.activeSpecies === "puppy") { this.petSpeechBubble("BACKFLIP! 🤸"); this.activePet.exp += 25; }
+					else if (this.registry.activeSpecies === "kitty") { this.petSpeechBubble("PURR SLIDE! 🛷"); this.activePet.exp += 20; }
+					else if (this.registry.activeSpecies === "spider") { this.petSpeechBubble("PARACHUTE! 🪂"); this.activePet.exp += 30; }
+					else if (this.registry.activeSpecies === "goldfish") { this.petSpeechBubble("SPLASH FLIP! 🌊"); this.activePet.exp += 25; }
 					break;
 
 				case 'status':
@@ -2734,7 +2738,7 @@ export class StreamPet {
 					this.state.spiderWebs = [];
 					this.state.goldfishBubbles = [];
 					this.state.puppyBones = [];
-					this.say("Fresh sand! ✨");
+					this.petSpeechBubble("Fresh sand! ✨");
 					sendNotice(`🧹 [Pet]: ${user} scooped the environment layout parameters!`);
 					break;
 			}
