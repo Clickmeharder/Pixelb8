@@ -288,8 +288,6 @@ const styleConfig = [
 
 let pendingImageBase64 = "";
 
-const AVAILABLE_IN_ANIMATIONS = ["none", "fadeIn", "bounceIn", "zoomIn", "slideInDown", "slideInUp"];
-const AVAILABLE_OUT_ANIMATIONS = ["none", "fadeOut", "bounceOut", "zoomOut", "slideOutUp", "slideOutDown"];
 // =========================================================================
 // --- CONFIGURATION MAPS & STRUCTS ---
 // =========================================================================
