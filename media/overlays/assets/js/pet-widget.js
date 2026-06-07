@@ -1,6 +1,10 @@
 /**
  * 🐾 StreamPet Widget Module
  * Follows the hot-swappable monolithic component structure.
+ 
+ todo/notes:
+ ADD  pet actionstatus  element or something in stats to show the current state ex: if idle, walking, walkingto food, walking to litter etc 
+  either a stand alone actionstatus element or add current action to stats 
  */
 export class StreamPet {
     constructor() {
