@@ -1798,7 +1798,8 @@ export class StreamPet {
 		statsEl.style.top = this.state.layout.statsY + "%";
 		
 		let sTxt = this.activePet.isDead ? "DECEASED" : (this.activePet.poops.length > 5 ? "SICK" : "HEALTHY");
-		statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} | EXP: ${this.activePet.exp}`;
+		// statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} | EXP: ${this.activePet.exp}`;
+		statsEl.innerHTML = `${this.registry.activeSpecies.charAt(0).toUpperCase() + this.registry.activeSpecies.slice(1)} | Age: ${this.activePet.ageDays}d | Hunger: ${this.activePet.hunger}%<br>Status: ${sTxt} [${this.state.action || 'idle'}] | EXP: ${this.activePet.exp}`;
 		nameEl.textContent = this.activePet.isDead ? `${this.activePet.name.toUpperCase()}'S GHOST` : this.activePet.name.toUpperCase();
 		
 		// Dynamic Form Option Label Management
