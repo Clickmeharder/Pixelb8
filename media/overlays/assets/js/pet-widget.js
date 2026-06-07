@@ -2179,7 +2179,63 @@ export class StreamPet {
         this.ctx.beginPath(); this.ctx.arc(0, 0, 8, 0, Math.PI); this.ctx.stroke();
         this.ctx.restore();
     }
+	drawPaintBalloons() {
+		if (!this.state.paintBalloons || this.state.paintBalloons.length === 0) return;
 
+		for (let i = this.state.paintBalloons.length - 1; i >= 0; i--) {
+			let balloon = this.state.paintBalloons[i];
+
+			balloon.x += balloon.vx;
+			balloon.y += balloon.vy;
+
+			this.ctx.save();
+			this.ctx.fillStyle = balloon.color;
+			this.ctx.beginPath();
+			this.ctx.arc(balloon.x, balloon.y, balloon.radius, 0, Math.PI * 2);
+			this.ctx.fill();
+			this.ctx.strokeStyle = "#ffffff";
+			this.ctx.lineWidth = 1.5;
+			this.ctx.stroke();
+			this.ctx.restore();
+
+			const curDx = balloon.targetX - balloon.x;
+			const curDy = balloon.targetY - balloon.y;
+			const remainingDist = Math.sqrt(curDx * curDx + curDy * curDy);
+
+			if (remainingDist < 10 || balloon.x < -50 || balloon.x > this.canvas.width + 50) {
+				const reachedTarget = remainingDist < 15;
+
+				if (balloon.isHit && reachedTarget) {
+					this.state.overrideColor = balloon.color;
+					
+					if (this.activePet) {
+						this.activePet.color = balloon.color;
+					}
+					
+					this.say("🎨 SPLATAFY!");
+					this.playSound('bubbleSound'); 
+				} else if (reachedTarget) {
+					this.say("💨 MISSED!");
+				}
+
+				if (balloon.x >= -10 && balloon.x <= this.canvas.width + 10) {
+					const particleCount = balloon.isHit ? 30 : 15;
+					for (let p = 0; p < particleCount; p++) {
+						this.state.particles.push({
+							x: balloon.x,
+							y: balloon.y,
+							vx: (Math.random() - 0.5) * 8,
+							vy: (Math.random() - 0.7) * 8,
+							s: Math.random() * 3 + 2,
+							c: balloon.color,
+							life: Math.floor(Math.random() * 20) + 15
+						});
+					}
+				}
+				this.state.paintBalloons.splice(i, 1);
+			}
+		}
+	}
 /* 	drawEnvironment(t) {
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
@@ -2509,7 +2565,6 @@ export class StreamPet {
 		// ========================================================
 		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
 		// ========================================================
-
 		// Render structural perimeter webs at their exact dropped locations
 		this.state.spiderWebs.forEach(web => {
 			this.ctx.strokeStyle = "rgba(255,255,255,0.28)";
@@ -2688,7 +2743,8 @@ export class StreamPet {
 			}
 			this.ctx.globalAlpha = 1.0;
 		}
-		if (this.state.paintBalloons && this.state.paintBalloons.length > 0) {
+
+/* 		if (this.state.paintBalloons && this.state.paintBalloons.length > 0) {
 			for (let i = this.state.paintBalloons.length - 1; i >= 0; i--) {
 				let balloon = this.state.paintBalloons[i];
 
@@ -2746,6 +2802,8 @@ export class StreamPet {
 				}
 			}
 		}
+ */
+		this.drawPaintBalloons();
 		// Dynamic particle physics engine loop
 		for (let i = this.state.particles.length - 1; i >= 0; i--) {
 			const p = this.state.particles[i];
