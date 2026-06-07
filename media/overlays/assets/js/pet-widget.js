@@ -56,7 +56,7 @@ const STATE_LIBRARY = {
 			if (pet.state.x < -150) pet.state.x = ctx.visibleW + 150;
 		}
 		if (pet.state.actionTimer <= 0) {
-			pet.stopSound('nyanSound');
+			pet.petAudio('stop', 'nyanSound');
 			pet.state.x = pet.state.originalPos.x; 
 			pet.state.y = pet.state.originalPos.y;
 			pet.state.action = "idle"; 
@@ -529,7 +529,8 @@ export class StreamPet {
         this.state.commandAccess = this.getDefaultCommandMatrix();
 
         // 5. Initialize Sub-Engines & Hardware Hooks
-        this.initAudioEngine();
+        // this.initAudioEngine();
+		this.petAudio('init');
         this.injectUI();
         this.resizePetWidget();
         
@@ -583,27 +584,13 @@ export class StreamPet {
 		// 🔊 BLOCK 2: HARDWARE AUDIO ENGINE MUTING & BUFFER PURGE
 		// ========================================================
 		{
-			if (this.audioAssets) {
-				Object.keys(this.audioAssets).forEach(key => {
-					const soundInstance = this.audioAssets[key];
-					if (soundInstance) {
-						try {
-							soundInstance.pause();
-							soundInstance.currentTime = 0;
-							soundInstance.src = "";
-							soundInstance.load(); 
-						} catch (audioErr) {
-							console.warn(`[!] Audio Buffer Purge Failed [${key}]:`, audioErr);
-						}
-						this.audioAssets[key] = null;
-					}
-				});
-				this.audioAssets = {};
-			}
+			// Fire the command router's internal teardown logic
+			this.petAudio('destroy');
+
 			if (window.soundSettings) {
 				delete window.soundSettings;
 			}
-			console.log("   -> [Teardown]: Hardware audio channels silenced and purged.");
+			console.log("   -> [Teardown]: Hardware audio channels silenced and purged via router.");
 		}
 
 		// ========================================================
@@ -1310,14 +1297,15 @@ export class StreamPet {
                         const url = URL.createObjectURL(file);
                         window.soundSettings.customPaths[key] = url;
                         localStorage.setItem('pixelkitty_sound_settings', JSON.stringify(window.soundSettings));
-                        this.refreshAudioInstance(key);
+                        // this.refreshAudioInstance(key);
+						this.petAudio('refresh', key);
                         this.petSpeechBubble("Audio updated! 🎧");
                     }
                 });
             }
 
             if (testBtn) {
-                testBtn.addEventListener('click', () => this.playSound(key));
+                testBtn.addEventListener('click', () => this.petAudio('play', key));
             }
         });
     }
@@ -2217,7 +2205,7 @@ export class StreamPet {
 					}
 					
 					this.petSpeechBubble("🎨 SPLATAFY!");
-					this.playSound('bubbleSound'); 
+					this.petAudio('play', 'bubbleSound');
 				} else if (reachedTarget) {
 					this.petSpeechBubble("💨 MISSED!");
 				}
@@ -2292,13 +2280,13 @@ export class StreamPet {
         if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
         this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
 
-        if (txt.includes("Meow") || txt.includes("Kitty")) this.playSound('meowSound');
-        if (txt.includes("Mew")) this.playSound('mewSound');
-        if (txt.includes("Purrr") || txt.includes("Comfy")) this.playSound('purrSound');
-        if (txt.includes("BARK") || txt.includes("FETCH")) this.playSound('barkSound');
-        if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.playSound('whineSound');
-        if (txt.includes("SPIN") || this.registry.activeSpecies === "spider" && Math.random() < 0.3) this.playSound('clickSound');
-        if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.playSound('bubbleSound');
+        if (txt.includes("Meow") || txt.includes("Kitty")) this.petAudio('play', 'meowSound');
+        if (txt.includes("Mew")) this.petAudio('play', 'mewSound');
+        if (txt.includes("Purrr") || txt.includes("Comfy")) this.petAudio('play', 'purrSound');
+        if (txt.includes("BARK") || txt.includes("FETCH")) this.petAudio('play', 'barkSound');
+        if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.petAudio('play', 'whineSound');
+        if (txt.includes("SPIN") || this.registry.activeSpecies === "spider" && Math.random() < 0.3) this.petAudio('play', 'clickSound');
+        if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.petAudio('play', 'bubbleSound');
     }
 
 //=================================
@@ -2380,14 +2368,14 @@ export class StreamPet {
         this.state.action = "nyan";
         this.state.nyanPhase = "takeoff";
         this.state.actionTimer = 400;
-        this.playSound('nyanSound');
+        this.petAudio('play', 'nyanSound');
         this.petSpeechBubble("NYAN OVERDRIVE ACTIVATED! 🌈");
     }
 	triggerPaintBomb(colorString, isHit) {
         if (this.state.action === "dead" || this.state.action === "explode" || this.state.action === "bloating") return;
 
         this.petSpeechBubble("🎈 INCOMING!!");
-        this.playSound('clickSound'); // Fits the tactical trigger sound
+        this.petAudio('play', 'clickSound'); // Fits the tactical trigger sound
 
         // 1. Spawning trajectory setups
         const spawnFromLeft = Math.random() > 0.5;
@@ -2437,7 +2425,7 @@ export class StreamPet {
 			
             this.state.action = "explode";
             this.state.hideMainSprite = true; // 🌟 POP! Delete the main body instantly here
-			this.playSound('petsplatSound');
+			this.petAudio('play', 'petsplatSound');
             this.petSpeechBubble("💥 SPLAT!");
             
             // Spray gore particles and body chunks from the vacant origin point
@@ -3050,36 +3038,58 @@ export class StreamPet {
 // ==========================================
 // SECTION 13: SOUND SYSTEM ENGINE
 // ==========================================
-	initAudioEngine() {
-        const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
-        window.soundSettings = savedSoundSettings ? JSON.parse(savedSoundSettings) : DEFAULT_SOUND_SETTINGS;
 
-        this.audioAssets = {};
-        Object.keys(DEFAULT_AUDIO_PATHS).forEach(key => this.refreshAudioInstance(key));
-    }
+	petAudio(action, key = null) {
+        switch (action) {
+            case 'init': {
+                const savedSoundSettings = localStorage.getItem('pixelkitty_sound_settings');
+                window.soundSettings = savedSoundSettings ? JSON.parse(savedSoundSettings) : DEFAULT_SOUND_SETTINGS;
 
-    refreshAudioInstance(key) {
-        const source = window.soundSettings.customPaths[key] || DEFAULT_AUDIO_PATHS[key];
-        if (source) {
-            this.audioAssets[key] = new Audio(source);
-            if (key === 'nyanSound') this.audioAssets[key].loop = true;
-        }
-    }
+                this.audioAssets = {};
+                Object.keys(DEFAULT_AUDIO_PATHS).forEach(k => this.petAudio('refresh', k));
+                break;
+            }
 
-    playSound(soundKey) {
-        if (window.soundSettings.masterEnabled && window.soundSettings[soundKey]) {
-            const sound = this.audioAssets[soundKey];
-            if (sound) {
-                sound.currentTime = 0; 
-                sound.play().catch(err => console.warn(`[!] Audio: ${soundKey} blocked.`, err));
+            case 'refresh': {
+                if (!key) return;
+                const source = window.soundSettings.customPaths[key] || DEFAULT_AUDIO_PATHS[key];
+                if (source) {
+                    this.audioAssets[key] = new Audio(source);
+                    if (key === 'nyanSound') this.audioAssets[key].loop = true;
+                }
+                break;
+            }
+
+            case 'play': {
+                if (!key) return;
+                if (window.soundSettings.masterEnabled && window.soundSettings[key]) {
+                    const sound = this.audioAssets[key];
+                    if (sound) {
+                        sound.currentTime = 0; 
+                        sound.play().catch(err => console.warn(`[!] Audio: ${key} blocked.`, err));
+                    }
+                }
+                break;
+            }
+
+            case 'stop': {
+                if (!key) return;
+                if (this.audioAssets && this.audioAssets[key]) {
+                    this.audioAssets[key].pause();
+                    this.audioAssets[key].currentTime = 0;
+                }
+                break;
+            }
+            
+            case 'destroy': {
+                // Perfect hook for your destroyWidget loop!
+                if (this.audioAssets) {
+                    Object.keys(this.audioAssets).forEach(k => this.petAudio('stop', k));
+                    this.audioAssets = {};
+                }
+                break;
             }
         }
     }
 
-    stopSound(soundKey) {
-        if (this.audioAssets[soundKey]) {
-            this.audioAssets[soundKey].pause();
-            this.audioAssets[soundKey].currentTime = 0;
-        }
-    }
 }
