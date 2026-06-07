@@ -1150,7 +1150,7 @@ function renderSettingsWindow() {
     SETTINGS_SCHEMA.forEach(group => {
         const detailsEl = document.createElement('details');
         detailsEl.className = 'settings-group-wrapper';
-        detailsEl.open = true; 
+        detailsEl.open = false; 
         detailsEl.style.cssText = "border: 1px solid #27272a; border-radius: 4px; background: #09090b; overflow: hidden;";
 
         const summaryEl = document.createElement('summary');
