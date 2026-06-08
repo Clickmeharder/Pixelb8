@@ -1379,7 +1379,7 @@ export class StreamPet {
 
 		// The calibration offset:
 		// Change this number until the pet is perfectly aligned with your visual floor
-		const GROUND_CALIBRATION_OFFSET = -12; 
+		const GROUND_CALIBRATION_OFFSET = -25; 
 
 		// Get the zoom-aware floor position and apply the offset
 		const floorPos = this.getPos(0, 100).y + GROUND_CALIBRATION_OFFSET;
