@@ -1375,7 +1375,7 @@ export class StreamPet {
 // SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
 // ===================================================
 	applyGravity(pet, ctx) {
-		if (pet.registry.activeSpecies === "spider" || pet.registry.activeSpecies === "goldfish") return;
+		if ( pet.registry.activeSpecies === "goldfish") return;
 
 		// The calibration offset:
 		// Change this number until the pet is perfectly aligned with your visual floor
