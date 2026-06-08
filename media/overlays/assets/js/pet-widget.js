@@ -1374,7 +1374,20 @@ export class StreamPet {
 // ===================================================
 // SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
 // ===================================================
+	applyGravity(pet, ctx) {
+		// 1. Immunity for species that don't follow gravity
+		if (pet.registry.activeSpecies === "goldfish") return;
 
+		// 2. If the pet is above the floor, pull them down
+		if (pet.state.y < ctx.FLOOR_Y) {
+			pet.state.y += 2.0; 
+		}
+		
+		// 3. Prevent overshooting the floor (snapping)
+		if (pet.state.y > ctx.FLOOR_Y) {
+			pet.state.y = ctx.FLOOR_Y;
+		}
+	}
 	drawEnvironment(tick) {
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
@@ -1423,6 +1436,7 @@ export class StreamPet {
 			if (this.state.actionTimer > 0) this.state.actionTimer--;
 			return; 
 		}
+// ADD THIS: Define which actions are "grounded" vs "furniture/airborne"
 
 		// 2. DATA ALLOCATION: Calculate frame layout coordinates and metrics
 		const visibleW = this.canvas.width;
@@ -1449,7 +1463,11 @@ export class StreamPet {
 		if (this.state.hasFood && !["nyan", "eating", "potty", "walk_to_litter", "rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
 			this.state.action = "walk_to_food";
 		}
-
+		const isAirborneAction = ["climbing_tower", "tower_sleep", "sleep", "rappel_drop", "rappel_hang", "rappel_rise", "nyan", "eating"];
+		
+		if (!isAirborneAction.includes(this.state.action)) {
+			this.applyGravity(this, ctx);
+		}
 		// 5. STATE EXECUTION: Run active state logic from the library
 		if (PET_STATE_LIBRARY[this.state.action]) {
 			PET_STATE_LIBRARY[this.state.action](this, ctx);
