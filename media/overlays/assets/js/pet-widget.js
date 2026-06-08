@@ -1945,15 +1945,22 @@ export class StreamPet {
 
 
 	drawPetFloor(floorTopY, visibleW, visibleH) {
-		const thickness = visibleH - floorTopY;
+		// Ensure thickness never breaks into negative space
+		const thickness = Math.max(0, visibleH - floorTopY);
 		if (thickness <= 0) return;
 
 		const species = this.registry.activeSpecies;
 
-		// Route rendering to the targeted species layer handler
 		if (PET_FLOOR_LIBRARY[species]) {
 			this.ctx.save();
+			
+			// CRITICAL: Reset the transformation matrix temporarily 
+			// so 0,0 is ALWAYS the top-left of the actual screen canvas.
+			this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+			
+			// Run the library draw call
 			PET_FLOOR_LIBRARY[species](this.ctx, floorTopY, visibleW, visibleH, thickness);
+			
 			this.ctx.restore();
 		}
 	}
