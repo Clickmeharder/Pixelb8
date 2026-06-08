@@ -1622,9 +1622,7 @@ export class StreamPet {
 			}
 
 			this.ctx.restore();
-			const b = document.getElementById("bubble");
-			if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
-			this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
+
 		}
 		
 		this.ctx.restore();
@@ -2393,27 +2391,45 @@ export class StreamPet {
 	}
 
     幕(txt) {} // Catch invalid encoding safely
-    petSpeechBubble(txt) {
-        const b = document.getElementById("bubble");
-        if (!b) return;
-        b.textContent = txt; 
-        b.style.left = (this.state.x - 50) + "px"; 
-        b.style.top = (this.state.y - 140) + "px";
-        b.classList.add("show"); 
-        
+	petSpeechBubble(txt) {
+		const b = document.getElementById("bubble");
+		if (!b) return;
+		
+		// 1. CLEAR PREVIOUS TIMEOUTS (Instance property AND element state memory)
+		if (this.bubbleTimeout) {
+			clearTimeout(this.bubbleTimeout);
+			this.bubbleTimeout = null;
+		}
+		if (b.dataset.timeoutId) {
+			clearTimeout(parseInt(b.dataset.timeoutId, 10));
+		}
 
-        if (txt.includes("Meow") || txt.includes("Kitty")) this.petAudio('play', 'meowSound');
-        if (txt.includes("Mew")) this.petAudio('play', 'mewSound');
-        if (txt.includes("Purrr") || txt.includes("Comfy")) this.petAudio('play', 'purrSound');
-        if (txt.includes("BARK") || txt.includes("FETCH")) this.petAudio('play', 'barkSound');
-        if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.petAudio('play', 'whineSound');
-        if (txt.includes("SPIN") || this.registry.activeSpecies === "spider" && Math.random() < 0.3) this.petAudio('play', 'clickSound');
-        if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.petAudio('play', 'bubbleSound');
-		if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
-        this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
+		// 2. INJECT CONTENT & POSITION METRICS
+		b.textContent = txt; 
+		b.style.left = (this.state.x - 50) + "px"; 
+		b.style.top = (this.state.y - 140) + "px";
+		b.classList.add("show"); 
 
-    }
+		// 3. SPECIES-SPECIFIC ROUTING AUDIO ENGINES
+		if (txt.includes("Meow") || txt.includes("Kitty")) this.petAudio('play', 'meowSound');
+		if (txt.includes("Mew")) this.petAudio('play', 'mewSound');
+		if (txt.includes("Purrr") || txt.includes("Comfy")) this.petAudio('play', 'purrSound');
+		if (txt.includes("BARK") || txt.includes("FETCH")) this.petAudio('play', 'barkSound');
+		if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.petAudio('play', 'whineSound');
+		if (txt.includes("SPIN") || (this.registry.activeSpecies === "spider" && Math.random() < 0.3)) this.petAudio('play', 'clickSound');
+		if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.petAudio('play', 'bubbleSound');
 
+		// 4. PERSIST TIMEOUT ID BOTH ON CLASS AND DOM ELEMENT DATASET
+		const clearBubbleId = setTimeout(() => {
+			b.classList.remove("show");
+			// Clear out references cleanly once expired
+			if (this.bubbleTimeout === clearBubbleId) this.bubbleTimeout = null;
+			b.removeAttribute('data-timeout-id');
+		}, 3000);
+
+		this.bubbleTimeout = clearBubbleId;
+		b.dataset.timeoutId = clearBubbleId;
+	}
 //=================================
 // individual updates and stuff
 //=================================
