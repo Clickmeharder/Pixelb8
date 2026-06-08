@@ -37,75 +37,70 @@ const DEFAULT_AUDIO_PATHS = {
 // state library
 //----------------
 const PET_STATE_LIBRARY = {
-	nyan: (pet, ctx) => {
-		if (pet.state.nyanPhase === "takeoff") {
-			const targetY = ctx.visibleH / 2;
-			pet.state.y += (targetY - pet.state.y) * 0.05; 
-			pet.state.x += pet.state.facing * 5;
-			if (Math.abs(pet.state.y - targetY) < 15) pet.state.nyanPhase = "flying";
-		} else if (pet.state.nyanPhase === "flying") {
-			pet.state.x += pet.state.facing * 10; 
-			pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.1) * 100;
-			if (pet.state.actionTimer < 80) pet.state.nyanPhase = "landing";
-		} else if (pet.state.nyanPhase === "landing") {
-			pet.state.x += (pet.state.originalPos.x - pet.state.x) * 0.08; 
-			pet.state.y += (pet.state.originalPos.y - pet.state.y) * 0.08;
-		}
-		if (pet.state.nyanPhase !== "landing") {
-			if (pet.state.x > ctx.visibleW + 150) pet.state.x = -150;
-			if (pet.state.x < -150) pet.state.x = ctx.visibleW + 150;
-		}
-		if (pet.state.actionTimer <= 0) {
-			pet.petAudio('stop', 'nyanSound');
-			pet.state.x = pet.state.originalPos.x; 
-			pet.state.y = pet.state.originalPos.y;
-			pet.state.action = "idle"; 
-			pet.state.actionTimer = 200;
-		}
-	},
 
-	walk_to_food: (pet, ctx) => {
-		let foodTargetX = ctx.bowlPos.x;
-		let foodTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bowlPos.y;
-		
+
+	walk: (pet, ctx) => {
 		if (pet.registry.activeSpecies === "spider") {
-			if (pet.state.y < ctx.FLOOR_Y - 5) {
-				foodTargetX = (pet.state.x < ctx.visibleW / 2) ? ctx.LEFT_X : ctx.RIGHT_X;
-				foodTargetY = ctx.FLOOR_Y;
-			}
-		}
+			let dir = pet.state.spiderDir || 1;
+			let activeWebNode = pet.state.spiderWebs.find(web => {
+				let dx = web.x - pet.state.x;
+				let dy = web.y - pet.state.y;
+				return Math.sqrt(dx*dx + dy*dy) < web.size + 10;
+			});
 
-		if (ctx.walkToPoint(foodTargetX, foodTargetY, 2.5)) { 
-			if (pet.registry.activeSpecies === "spider" && Math.abs(pet.state.y - ctx.FLOOR_Y) < 5 && Math.abs(pet.state.x - ctx.bowlPos.x) > 15) {
-				ctx.walkToPoint(ctx.bowlPos.x, ctx.FLOOR_Y, 2.5);
-				return;
+			if (activeWebNode) {
+				pet.state.x += pet.state.facing * 1.5;
+				if (Math.random() < 0.08) pet.state.y += (Math.random() > 0.5 ? 2 : -2);
+			} 
+			else if (Math.abs(pet.state.y - ctx.CEIL_Y) <= 4) { 
+				pet.state.y = ctx.CEIL_Y; 
+				pet.state.x += dir * 1.8;
+				pet.state.facing = dir;
+				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.CEIL_Y + 4; }
+				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.CEIL_Y + 4; }
+			} else if (Math.abs(pet.state.y - ctx.FLOOR_Y) <= 4) { 
+				pet.state.y = ctx.FLOOR_Y; 
+				pet.state.x += dir * 1.8;
+				pet.state.facing = dir;
+				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.FLOOR_Y - 4; }
+				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.FLOOR_Y - 4; }
+			} else if (Math.abs(pet.state.x - ctx.LEFT_X) <= 4) { 
+				pet.state.x = ctx.LEFT_X; 
+				pet.state.y += dir * 1.8;
+				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.LEFT_X + 4; }
+				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.LEFT_X + 4; }
+			} else if (Math.abs(pet.state.x - ctx.RIGHT_X) <= 4) { 
+				pet.state.x = ctx.RIGHT_X; 
+				pet.state.y += dir * 1.8;
+				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.RIGHT_X - 4; }
+				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.RIGHT_X - 4; }
+			} else {
+				if (pet.state.y < (ctx.visibleH / 2)) pet.state.y = ctx.CEIL_Y;
+				else pet.state.y = ctx.FLOOR_Y;
 			}
-			if (pet.state.hasFood) { 
-				pet.state.action = "eating"; 
-				pet.state.actionTimer = 140; 
-			} else { 
-				pet.state.action = "idle";
+		} else {
+			if (!pet.state.swimTargetX) {
+				pet.state.swimTargetX = ctx.LEFT_X + Math.random() * (ctx.visibleW - (ctx.LEFT_X + ctx.RIGHT_X));
 			}
-		}
-	},
 
-	eating: (pet, ctx) => {
-		if (pet.state.actionTimer <= 0) {
-			pet.state.hasFood = false; 
-			pet.activePet.hunger = Math.max(0, pet.activePet.hunger - 15); 
-			pet.activePet.digestive += 1; 
+			pet.state.x += (pet.state.swimTargetX - pet.state.x) * 0.02;
+			pet.state.facing = (pet.state.swimTargetX > pet.state.x) ? 1 : -1;
+
+			if (pet.registry.activeSpecies === "goldfish") {
+				pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.03) * 60;
+				if(ctx.t % 20 === 0) pet.state.goldfishBubbles.push({x: pet.state.x, y: pet.state.y, r: 2, alpha: 0.8});
+			}
 			
-			if (pet.activePet.digestive > pet.state.tummylimit) {
-				pet.explodePet();
-				return;
+			if (Math.abs(pet.state.x - pet.state.swimTargetX) < 10) {
+				pet.state.swimTargetX = null;
 			}
+		}
 
-			pet.activePet.exp += 20; 
+		if (pet.state.actionTimer <= 0) { 
 			pet.state.action = "idle"; 
-			pet.state.actionTimer = 300;
+			pet.state.actionTimer = 400; 
 		}
 	},
-
 	walk_to_litter: (pet, ctx) => {
 		if (pet.registry.activeSpecies === "goldfish") {
 			if (!pet.state.aquaticPottyTarget) {
@@ -140,54 +135,58 @@ const PET_STATE_LIBRARY = {
 			}
 		}
 	},
-
+	walk_to_tower_climb: (pet, ctx) => {
+		if (ctx.walkToPoint(ctx.towerPos.x, ctx.towerPos.y)) {
+			pet.state.action = "climbing_tower";
+		}
+	},
 	walk_to_tower_scratch: (pet, ctx) => {
 		if (ctx.walkToPoint(ctx.towerPos.x, ctx.towerPos.y)) {
 			pet.state.action = "scratching";
 			pet.state.actionTimer = 180;
 		}
 	},
-
-	scratching: (pet, ctx) => {
-		if (ctx.t % 3 === 0) {
-			const clawX = pet.state.x + (pet.state.facing * 15);
-			const clawY = pet.state.y + 5; 
-
-			pet.state.particles.push({
-				x: clawX,
-				y: clawY,
-				vx: -pet.state.facing * (0.5 + Math.random() * 3),
-				vy: -1 - Math.random() * 2,
-				s: 2,
-				c: "#d2b48c",
-				life: 15
-			});
-		}
-
-		if (pet.state.actionTimer <= 0) {
-			pet.state.action = "idle";
-			pet.state.actionTimer = Math.floor(Math.random() * 200) + 150;
+	walk_to_bed: (pet, ctx) => {
+		let bedTargetX = ctx.bedPos.x;
+		let bedTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bedPos.y;
+		if (ctx.walkToPoint(bedTargetX, bedTargetY)) { 
+			pet.state.action = "sleep"; 
+			pet.state.actionTimer = 1000; 
 		}
 	},
-
-	walk_to_tower_climb: (pet, ctx) => {
-		if (ctx.walkToPoint(ctx.towerPos.x, ctx.towerPos.y)) {
-			pet.state.action = "climbing_tower";
-		}
-	},
-
-	climbing_tower: (pet, ctx) => {
-		const perchY = ctx.towerPos.y - 150;
-		pet.state.y -= 1.5;
+	walk_to_food: (pet, ctx) => {
+		let foodTargetX = ctx.bowlPos.x;
+		let foodTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bowlPos.y;
 		
-		if (pet.state.y <= perchY) {
-			pet.state.y = perchY;
-			pet.state.perchPos = { x: pet.state.x, y: pet.state.y }
-			pet.state.action = "tower_sleep";
-			pet.state.actionTimer = 800;
+		if (pet.registry.activeSpecies === "spider") {
+			if (pet.state.y < ctx.FLOOR_Y - 5) {
+				foodTargetX = (pet.state.x < ctx.visibleW / 2) ? ctx.LEFT_X : ctx.RIGHT_X;
+				foodTargetY = ctx.FLOOR_Y;
+			}
+		}
+
+		if (ctx.walkToPoint(foodTargetX, foodTargetY, 2.5)) { 
+			if (pet.registry.activeSpecies === "spider" && Math.abs(pet.state.y - ctx.FLOOR_Y) < 5 && Math.abs(pet.state.x - ctx.bowlPos.x) > 15) {
+				ctx.walkToPoint(ctx.bowlPos.x, ctx.FLOOR_Y, 2.5);
+				return;
+			}
+			if (pet.state.hasFood) { 
+				pet.state.action = "eating"; 
+				pet.state.actionTimer = 140; 
+			} else { 
+				pet.state.action = "idle";
+			}
 		}
 	},
-
+	// walk to kick dirt after poop
+	walk_to_kick: (pet, ctx) => {
+		if (ctx.walkToPoint(ctx.litPos.x - 50, ctx.litPos.y)) { 
+			pet.state.facing = 1; 
+			pet.state.action = "kicking"; 
+			pet.state.actionTimer = 80; 
+		}
+	},
+	// go poop
 	potty: (pet, ctx) => {
 		if (pet.state.actionTimer <= 0) { 
 			if (pet.registry.activeSpecies === "goldfish") {
@@ -229,14 +228,26 @@ const PET_STATE_LIBRARY = {
 			}
 		}
 	},
+	eating: (pet, ctx) => {
+		if (pet.state.actionTimer <= 0) {
+			pet.state.hasFood = false; 
+			pet.activePet.hunger = Math.max(0, pet.activePet.hunger - 15); 
+			pet.activePet.digestive += 1; 
+			
+			if (pet.activePet.digestive > pet.state.tummylimit) {
+				pet.explodePet();
+				return;
+			}
 
-	walk_to_kick: (pet, ctx) => {
-		if (ctx.walkToPoint(ctx.litPos.x - 50, ctx.litPos.y)) { 
-			pet.state.facing = 1; 
-			pet.state.action = "kicking"; 
-			pet.state.actionTimer = 80; 
+			pet.activePet.exp += 20; 
+			pet.state.action = "idle"; 
+			pet.state.actionTimer = 300;
 		}
 	},
+
+
+
+	//kick dirt to cover poop
 
 	kicking: (pet, ctx) => {
 		if (ctx.t % 2 === 0) {
@@ -247,13 +258,36 @@ const PET_STATE_LIBRARY = {
 			pet.state.actionTimer = 300; 
 		}
 	},
+	climbing_tower: (pet, ctx) => {
+		const perchY = ctx.towerPos.y - 150;
+		pet.state.y -= 1.5;
+		
+		if (pet.state.y <= perchY) {
+			pet.state.y = perchY;
+			pet.state.perchPos = { x: pet.state.x, y: pet.state.y }
+			pet.state.action = "tower_sleep";
+			pet.state.actionTimer = 800;
+		}
+	},
+	scratching: (pet, ctx) => {
+		if (ctx.t % 3 === 0) {
+			const clawX = pet.state.x + (pet.state.facing * 15);
+			const clawY = pet.state.y + 5; 
 
-	walk_to_bed: (pet, ctx) => {
-		let bedTargetX = ctx.bedPos.x;
-		let bedTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bedPos.y;
-		if (ctx.walkToPoint(bedTargetX, bedTargetY)) { 
-			pet.state.action = "sleep"; 
-			pet.state.actionTimer = 1000; 
+			pet.state.particles.push({
+				x: clawX,
+				y: clawY,
+				vx: -pet.state.facing * (0.5 + Math.random() * 3),
+				vy: -1 - Math.random() * 2,
+				s: 2,
+				c: "#d2b48c",
+				life: 15
+			});
+		}
+
+		if (pet.state.actionTimer <= 0) {
+			pet.state.action = "idle";
+			pet.state.actionTimer = Math.floor(Math.random() * 200) + 150;
 		}
 	},
 
@@ -265,30 +299,6 @@ const PET_STATE_LIBRARY = {
 		} else {
 			pet.state.action = "idle";
 			pet.state.actionTimer = 300;
-		}
-	},
-
-	rappel_drop: (pet, ctx) => {
-		pet.state.y += 3.5; 
-		if (pet.state.y >= pet.state.rappelDepth) {
-			pet.state.action = "rappel_hang";
-			pet.state.actionTimer = 180 + Math.random() * 200;
-		}
-	},
-
-	rappel_hang: (pet, ctx) => {
-		pet.state.x += Math.sin(ctx.t * 0.05) * 0.4;
-		if (pet.state.actionTimer <= 0) {
-			pet.state.action = "rappel_rise";
-		}
-	},
-
-	rappel_rise: (pet, ctx) => {
-		pet.state.y -= 2.5; 
-		if (pet.state.y <= ctx.CEIL_Y) {
-			pet.state.y = ctx.CEIL_Y;
-			pet.state.action = "idle";
-			pet.state.actionTimer = 200;
 		}
 	},
 	idle_return: (pet, ctx) => {
@@ -357,69 +367,59 @@ const PET_STATE_LIBRARY = {
 		}
 	},
 
-	walk: (pet, ctx) => {
-		if (pet.registry.activeSpecies === "spider") {
-			let dir = pet.state.spiderDir || 1;
-			let activeWebNode = pet.state.spiderWebs.find(web => {
-				let dx = web.x - pet.state.x;
-				let dy = web.y - pet.state.y;
-				return Math.sqrt(dx*dx + dy*dy) < web.size + 10;
-			});
+// spider STUFF
 
-			if (activeWebNode) {
-				pet.state.x += pet.state.facing * 1.5;
-				if (Math.random() < 0.08) pet.state.y += (Math.random() > 0.5 ? 2 : -2);
-			} 
-			else if (Math.abs(pet.state.y - ctx.CEIL_Y) <= 4) { 
-				pet.state.y = ctx.CEIL_Y; 
-				pet.state.x += dir * 1.8;
-				pet.state.facing = dir;
-				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.CEIL_Y + 4; }
-				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.CEIL_Y + 4; }
-			} else if (Math.abs(pet.state.y - ctx.FLOOR_Y) <= 4) { 
-				pet.state.y = ctx.FLOOR_Y; 
-				pet.state.x += dir * 1.8;
-				pet.state.facing = dir;
-				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.FLOOR_Y - 4; }
-				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.FLOOR_Y - 4; }
-			} else if (Math.abs(pet.state.x - ctx.LEFT_X) <= 4) { 
-				pet.state.x = ctx.LEFT_X; 
-				pet.state.y += dir * 1.8;
-				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.LEFT_X + 4; }
-				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.LEFT_X + 4; }
-			} else if (Math.abs(pet.state.x - ctx.RIGHT_X) <= 4) { 
-				pet.state.x = ctx.RIGHT_X; 
-				pet.state.y += dir * 1.8;
-				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.RIGHT_X - 4; }
-				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.RIGHT_X - 4; }
-			} else {
-				if (pet.state.y < (ctx.visibleH / 2)) pet.state.y = ctx.CEIL_Y;
-				else pet.state.y = ctx.FLOOR_Y;
-			}
-		} else {
-			if (!pet.state.swimTargetX) {
-				pet.state.swimTargetX = ctx.LEFT_X + Math.random() * (ctx.visibleW - (ctx.LEFT_X + ctx.RIGHT_X));
-			}
-
-			pet.state.x += (pet.state.swimTargetX - pet.state.x) * 0.02;
-			pet.state.facing = (pet.state.swimTargetX > pet.state.x) ? 1 : -1;
-
-			if (pet.registry.activeSpecies === "goldfish") {
-				pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.03) * 60;
-				if(ctx.t % 20 === 0) pet.state.goldfishBubbles.push({x: pet.state.x, y: pet.state.y, r: 2, alpha: 0.8});
-			}
-			
-			if (Math.abs(pet.state.x - pet.state.swimTargetX) < 10) {
-				pet.state.swimTargetX = null;
-			}
+	rappel_drop: (pet, ctx) => {
+		pet.state.y += 3.5; 
+		if (pet.state.y >= pet.state.rappelDepth) {
+			pet.state.action = "rappel_hang";
+			pet.state.actionTimer = 180 + Math.random() * 200;
 		}
-
-		if (pet.state.actionTimer <= 0) { 
-			pet.state.action = "idle"; 
-			pet.state.actionTimer = 400; 
+	},
+	rappel_hang: (pet, ctx) => {
+		pet.state.x += Math.sin(ctx.t * 0.05) * 0.4;
+		if (pet.state.actionTimer <= 0) {
+			pet.state.action = "rappel_rise";
+		}
+	},
+	rappel_rise: (pet, ctx) => {
+		pet.state.y -= 2.5; 
+		if (pet.state.y <= ctx.CEIL_Y) {
+			pet.state.y = ctx.CEIL_Y;
+			pet.state.action = "idle";
+			pet.state.actionTimer = 200;
 		}
 	},
 
+	// nyanpet
+	nyan: (pet, ctx) => {
+		if (pet.state.nyanPhase === "takeoff") {
+			const targetY = ctx.visibleH / 2;
+			pet.state.y += (targetY - pet.state.y) * 0.05; 
+			pet.state.x += pet.state.facing * 5;
+			if (Math.abs(pet.state.y - targetY) < 15) pet.state.nyanPhase = "flying";
+		} else if (pet.state.nyanPhase === "flying") {
+			pet.state.x += pet.state.facing * 10; 
+			pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.1) * 100;
+			if (pet.state.actionTimer < 80) pet.state.nyanPhase = "landing";
+		} else if (pet.state.nyanPhase === "landing") {
+			pet.state.x += (pet.state.originalPos.x - pet.state.x) * 0.08; 
+			pet.state.y += (pet.state.originalPos.y - pet.state.y) * 0.08;
+		}
+		if (pet.state.nyanPhase !== "landing") {
+			if (pet.state.x > ctx.visibleW + 150) pet.state.x = -150;
+			if (pet.state.x < -150) pet.state.x = ctx.visibleW + 150;
+		}
+		if (pet.state.actionTimer <= 0) {
+			pet.petAudio('stop', 'nyanSound');
+			pet.state.x = pet.state.originalPos.x; 
+			pet.state.y = pet.state.originalPos.y;
+			pet.state.action = "idle"; 
+			pet.state.actionTimer = 200;
+		}
+	},
+
+//these, idk why they use pet state library fallback sleep
 	sleep: (pet, ctx) => { PET_STATE_LIBRARY._fallbackSleep(pet, ctx); },
 	tower_sleep: (pet, ctx) => { PET_STATE_LIBRARY._fallbackSleep(pet, ctx); },
 	dance: (pet, ctx) => { PET_STATE_LIBRARY._fallbackSleep(pet, ctx); },
