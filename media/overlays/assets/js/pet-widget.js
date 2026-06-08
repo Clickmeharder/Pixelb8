@@ -1377,13 +1377,15 @@ export class StreamPet {
 	applyGravity(pet, ctx) {
 		if (pet.registry.activeSpecies === "spider" || pet.registry.activeSpecies === "goldfish") return;
 
-		// Get the dynamic, zoom-aware floor position
-		// We use getPos(0, 100) to find the logical floor Y 
-		// (Assuming 0-100% scale where 100% Y is the floor)
-		const floorPos = this.getPos(0, 100).y;
+		// The calibration offset:
+		// Change this number until the pet is perfectly aligned with your visual floor
+		const GROUND_CALIBRATION_OFFSET = -12; 
 
-		if (pet.state.y < floorPos - 5) {
-			pet.state.y += 2.0; 
+		// Get the zoom-aware floor position and apply the offset
+		const floorPos = this.getPos(0, 100).y + GROUND_CALIBRATION_OFFSET;
+
+		if (pet.state.y < floorPos - 2) {
+			pet.state.y += 2.5; 
 		} else {
 			pet.state.y = floorPos;
 		}
