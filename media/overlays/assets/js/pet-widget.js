@@ -291,7 +291,7 @@ const PET_STATE_LIBRARY = {
 			pet.state.actionTimer = 800;
 		}
 	},
-	scratching: (pet, ctx) => {
+scratching: (pet, ctx) => {
 		if (ctx.t % 3 === 0) {
 			const isFish = pet.registry.activeSpecies === "fish";
 			const clawX = pet.state.x + (pet.state.facing * 15);
@@ -308,7 +308,7 @@ const PET_STATE_LIBRARY = {
 					// Underwater sand silt should rise more slowly and drift (lower negative vy)
 					vy: isFish ? (-0.2 - Math.random() * 1) : (-1 - Math.random() * 2),
 					s: isFish ? (1.5 + Math.random() * 2) : 2, // Varied sand grain sizes
-					// Use ocean sand color for goldfish, fallback to pet dander/wood tan
+					// Use ocean sand color for fish, fallback to pet dander/wood tan
 					c: isFish ? "#dfc26d" : "#d2b48c", 
 					life: isFish ? 30 : 15 // Sand clouds hang in the water longer (30 frames instead of 15)
 				});
