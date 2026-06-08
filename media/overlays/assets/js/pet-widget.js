@@ -42,6 +42,8 @@ const PET_STATE_LIBRARY = {
 	walk: (pet, ctx) => {
 		if (pet.registry.activeSpecies === "spider") {
 			let dir = pet.state.spiderDir || 1;
+			
+			// 1. Check Web Interaction
 			let activeWebNode = pet.state.spiderWebs.find(web => {
 				let dx = web.x - pet.state.x;
 				let dy = web.y - pet.state.y;
@@ -51,32 +53,49 @@ const PET_STATE_LIBRARY = {
 			if (activeWebNode) {
 				pet.state.x += pet.state.facing * 1.5;
 				if (Math.random() < 0.08) pet.state.y += (Math.random() > 0.5 ? 2 : -2);
+				return;
 			} 
-			else if (Math.abs(pet.state.y - ctx.CEIL_Y) <= 4) { 
+
+			// 2. Wall / Ceiling / Floor Crawling Boundaries
+			// Only crawl up walls if the spider is already near them!
+			const nearCeiling = Math.abs(pet.state.y - ctx.CEIL_Y) <= 6;
+			const nearFloor = Math.abs(pet.state.y - ctx.FLOOR_Y) <= 6;
+			const nearLeftWall = Math.abs(pet.state.x - ctx.LEFT_X) <= 6;
+			const nearRightWall = Math.abs(pet.state.x - ctx.RIGHT_X) <= 6;
+
+			if (nearCeiling) { 
 				pet.state.y = ctx.CEIL_Y; 
 				pet.state.x += dir * 1.8;
 				pet.state.facing = dir;
 				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.CEIL_Y + 4; }
 				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.CEIL_Y + 4; }
-			} else if (Math.abs(pet.state.y - ctx.FLOOR_Y) <= 4) { 
+			} 
+			else if (nearFloor) { 
 				pet.state.y = ctx.FLOOR_Y; 
 				pet.state.x += dir * 1.8;
 				pet.state.facing = dir;
-				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.y = ctx.FLOOR_Y - 4; }
-				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.y = ctx.FLOOR_Y - 4; }
-			} else if (Math.abs(pet.state.x - ctx.LEFT_X) <= 4) { 
+				if (pet.state.x <= ctx.LEFT_X) { pet.state.x = ctx.LEFT_X; pet.state.spiderDir = 1; }
+				if (pet.state.x >= ctx.RIGHT_X) { pet.state.x = ctx.RIGHT_X; pet.state.spiderDir = -1; }
+			} 
+			else if (nearLeftWall) { 
 				pet.state.x = ctx.LEFT_X; 
 				pet.state.y += dir * 1.8;
-				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.LEFT_X + 4; }
-				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.LEFT_X + 4; }
-			} else if (Math.abs(pet.state.x - ctx.RIGHT_X) <= 4) { 
+				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.spiderDir = 1; }
+				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.spiderDir = -1; }
+			} 
+			else if (nearRightWall) { 
 				pet.state.x = ctx.RIGHT_X; 
 				pet.state.y += dir * 1.8;
-				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.x = ctx.RIGHT_X - 4; }
-				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.x = ctx.RIGHT_X - 4; }
-			} else {
-				if (pet.state.y < (ctx.visibleH / 2)) pet.state.y = ctx.CEIL_Y;
-				else pet.state.y = ctx.FLOOR_Y;
+				if (pet.state.y <= ctx.CEIL_Y) { pet.state.y = ctx.CEIL_Y; pet.state.spiderDir = -1; }
+				if (pet.state.y >= ctx.FLOOR_Y) { pet.state.y = ctx.FLOOR_Y; pet.state.spiderDir = 1; }
+			} 
+			else {
+				// 3. Fallback: If trapped in mid-air (e.g. dropped off web), walk left/right on ground
+				pet.state.x += dir * 1.8;
+				pet.state.facing = dir;
+				if (pet.state.x <= ctx.LEFT_X || pet.state.x >= ctx.RIGHT_X) {
+					pet.state.spiderDir *= -1;
+				}
 			}
 		} else {
 			if (!pet.state.swimTargetX) {
@@ -1375,13 +1394,28 @@ export class StreamPet {
 // SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
 // ===================================================
 	applyGravity(pet, ctx) {
-		if ( pet.registry.activeSpecies === "goldfish") return;
+		if (pet.registry.activeSpecies === "goldfish") return;
 
-		// The calibration offset:
-		// Change this number until the pet is perfectly aligned with your visual floor
+		// Check if the spider is currently using an airborne state
+		const spiderIsClimbing = ["rappel_drop", "rappel_hang", "rappel_rise", "climbing_tower", "tower_sleep", "sleep"].includes(pet.state.action);
+		
+		// Check if the spider is safely sitting on a web node
+		let isOnWeb = false;
+		if (pet.registry.activeSpecies === "spider" && pet.state.spiderWebs) {
+			isOnWeb = pet.state.spiderWebs.some(web => {
+				let dx = web.x - pet.state.x;
+				let dy = web.y - pet.state.y;
+				return Math.sqrt(dx*dx + dy*dy) < web.size + 10;
+			});
+		}
+
+		// If spider is climbing or on a web, freeze gravity!
+		if (pet.registry.activeSpecies === "spider" && (spiderIsClimbing || isOnWeb)) {
+			return; 
+		}
+
+		// Standard Gravity Engine (for Kitty, Puppy, and Free Spiders)
 		const GROUND_CALIBRATION_OFFSET = -25; 
-
-		// Get the zoom-aware floor position and apply the offset
 		const floorPos = this.getPos(0, 100).y + GROUND_CALIBRATION_OFFSET;
 
 		if (pet.state.y < floorPos - 2) {
