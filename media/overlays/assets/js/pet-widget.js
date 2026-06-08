@@ -2394,9 +2394,9 @@ export class StreamPet {
         const b = document.getElementById("bubble");
         if (!b) return;
         b.textContent = txt; 
-        b.style.left = (this.state.x - 10) + "px"; 
-        b.style.top = (this.state.y - 175) + "px";
-		b.style.opacity = 0.8;
+        b.style.left = (this.state.x - 0) + "px"; 
+        b.style.top = (this.state.y - 200) + "px";
+		b.style.opacity = 0.7;
         b.classList.add("show"); 
         
         if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
