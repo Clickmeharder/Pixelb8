@@ -278,12 +278,15 @@ const PET_STATE_LIBRARY = {
 		}
 	},
 	climbing_tower: (pet, ctx) => {
-		const perchY = ctx.towerPos.y - 150;
+		// If it's a puppy, make the perch position lower (e.g., -110 instead of -150)
+		const heightOffset = (pet.registry.activeSpecies === "puppy") ? 110 : 150;
+		const perchY = ctx.towerPos.y - heightOffset;
+		
 		pet.state.y -= 1.5;
 		
 		if (pet.state.y <= perchY) {
 			pet.state.y = perchY;
-			pet.state.perchPos = { x: pet.state.x, y: pet.state.y }
+			pet.state.perchPos = { x: pet.state.x, y: pet.state.y };
 			pet.state.action = "tower_sleep";
 			pet.state.actionTimer = 800;
 		}
@@ -1489,7 +1492,7 @@ export class StreamPet {
 		// ========================================================
 		// PHASE 0: SPECIES-SPECIFIC FLOOR LAYER (BACKGROUND BASE)
 		// ========================================================
-		if (!this.state.hideFloor) { // 👈 ENGINE GUARD CHECK
+		if (!this.state.hideFloor) { 
 			this.drawPetFloor(floorTopY, visibleW, visibleH);
 		}
 		// ========================================================
