@@ -467,28 +467,28 @@ const PET_FLOOR_LIBRARY = {
 	kitty: (ctx, floorTopY, visibleW, visibleH, thickness) => {
 		// House Floor: Warm hardwood floor panels
 		ctx.fillStyle = "#d2b48c"; 
-		ctx.fillRect(0, floorTopY, visibleW, thickness);
+		ctx.fillRect(-2000, floorTopY, 6000, thickness);
 		
-		// Draw plank lines
+		// Draw plank lines across the massive field
 		ctx.strokeStyle = "#b59975";
 		ctx.lineWidth = 1.5;
-		for (let x = 0; x < visibleW; x += 60) {
+		for (let x = -2000; x < 4000; x += 60) {
 			ctx.beginPath();
 			ctx.moveTo(x, floorTopY);
-			ctx.lineTo(x, visibleH);
+			ctx.lineTo(x, floorTopY + thickness);
 			ctx.stroke();
 		}
 	},
 	puppy: (ctx, floorTopY, visibleW, visibleH, thickness) => {
 		// Backyard Floor: Rich green grass patch
 		ctx.fillStyle = "#4caf50"; 
-		ctx.fillRect(0, floorTopY, visibleW, thickness);
+		ctx.fillRect(-2000, floorTopY, 6000, thickness);
 
 		// Sprinkle textured grass blades
 		ctx.strokeStyle = "#388e3c";
 		ctx.lineWidth = 2;
-		for (let x = 10; x < visibleW; x += 40) {
-			const bladeH = 6 + (x % 5);
+		for (let x = -2000; x < 4000; x += 40) {
+			const bladeH = 6 + (Math.abs(x) % 5);
 			ctx.beginPath();
 			ctx.moveTo(x, floorTopY);
 			ctx.lineTo(x - 2, floorTopY - bladeH);
@@ -498,26 +498,25 @@ const PET_FLOOR_LIBRARY = {
 	spider: (ctx, floorTopY, visibleW, visibleH, thickness) => {
 		// Dirt Floor: Rough textured dark brown ground
 		ctx.fillStyle = "#5c4033"; 
-		ctx.fillRect(0, floorTopY, visibleW, thickness);
+		ctx.fillRect(-2000, floorTopY, 6000, thickness);
 
 		// Add tiny pebbles/specks for detail
 		ctx.fillStyle = "#4a3228";
-		for (let i = 0; i < visibleW; i += 35) {
-			let speckY = floorTopY + 5 + ((i * 7) % (thickness - 10));
+		for (let i = -2000; i < 4000; i += 35) {
+			let speckY = floorTopY + 5 + (Math.abs(i * 7) % (thickness - 40));
 			ctx.fillRect(i, speckY, 3, 3);
 		}
 	},
 	goldfish: (ctx, floorTopY, visibleW, visibleH, thickness) => {
 		// Sand Floor: Soft underwater ocean sand with a subtle top gradient
-		let sandGrad = ctx.createLinearGradient(0, floorTopY, 0, visibleH);
+		let sandGrad = ctx.createLinearGradient(0, floorTopY, 0, floorTopY + thickness);
 		sandGrad.addColorStop(0, "#f2da91"); 
 		sandGrad.addColorStop(1, "#dfc26d"); 
 		
 		ctx.fillStyle = sandGrad;
-		ctx.fillRect(0, floorTopY, visibleW, thickness);
+		ctx.fillRect(-2000, floorTopY, 6000, thickness);
 	}
 };
-
 // ============================================================================
 // SECTION 1B: CORE ENGINE PRESETS & PALETTES (Outside the Class)
 // ============================================================================
@@ -1480,7 +1479,7 @@ export class StreamPet {
 	drawEnvironment(tick) {
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
-		const floorTopY = this.getPos(0, 100).y - 25;
+		const floorTopY = this.getPos(0, 100).y - 35;
 
 		// ========================================================
 		// PHASE 0: SPECIES-SPECIFIC FLOOR LAYER (BACKGROUND BASE)
@@ -1945,22 +1944,16 @@ export class StreamPet {
 
 
 	drawPetFloor(floorTopY, visibleW, visibleH) {
-		// Ensure thickness never breaks into negative space
-		const thickness = Math.max(0, visibleH - floorTopY);
-		if (thickness <= 0) return;
+		// A floor thickness of 300 gives it a deep 3D shelf dimension 
+		// extending far below the canvas frame bounding limits
+		const thickness = 400; 
 
 		const species = this.registry.activeSpecies;
 
 		if (PET_FLOOR_LIBRARY[species]) {
 			this.ctx.save();
-			
-			// CRITICAL: Reset the transformation matrix temporarily 
-			// so 0,0 is ALWAYS the top-left of the actual screen canvas.
-			this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-			
-			// Run the library draw call
+			// We do NOT call setTransform here. Stay inside the camera space!
 			PET_FLOOR_LIBRARY[species](this.ctx, floorTopY, visibleW, visibleH, thickness);
-			
 			this.ctx.restore();
 		}
 	}
