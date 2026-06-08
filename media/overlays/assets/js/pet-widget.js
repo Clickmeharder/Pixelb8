@@ -148,7 +148,7 @@ const PET_STATE_LIBRARY = {
 	},
 	walk_to_bed: (pet, ctx) => {
 		let bedTargetX = ctx.bedPos.x;
-		let bedTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bedPos.y;
+		let bedTargetY = (pet.registry.activeSpecies === "spider") ? ctx.FLOOR_Y : ctx.bedPos.y - 25;
 		if (ctx.walkToPoint(bedTargetX, bedTargetY)) { 
 			pet.state.action = "sleep"; 
 			pet.state.actionTimer = 1000; 
