@@ -565,6 +565,7 @@ function createDefaultPetRegistry() {
 function createDefaultState() {
     return {
         hideBorder: false, hideStatus: false, hideNameplate: false, hideBackground: false,
+		hideFloor: false,
         originalPos: { x: 0, y: 0 },
         tummylimit: 11, nyanTimer: 0, nyanPhase: "takeoff",
         x: 200, y: window.innerHeight - 150, facing: 1,
@@ -859,6 +860,10 @@ export class StreamPet {
 								<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
 									<span>Hide Background</span>
 									<input type="checkbox" id="hideBackgroundToggle">
+								</div>
+								<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
+									<span>Hide Environment Floor</span>
+									<input type="checkbox" id="hideFloorToggle">
 								</div>
 								<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #27272a;">
 									<span>Hide Status Text</span>
@@ -1484,7 +1489,9 @@ export class StreamPet {
 		// ========================================================
 		// PHASE 0: SPECIES-SPECIFIC FLOOR LAYER (BACKGROUND BASE)
 		// ========================================================
-		this.drawPetFloor(floorTopY, visibleW, visibleH);
+		if (!this.state.hideFloor) { // 👈 ENGINE GUARD CHECK
+			this.drawPetFloor(floorTopY, visibleW, visibleH);
+		}
 		// ========================================================
 		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
 		// ========================================================
@@ -3055,6 +3062,9 @@ export class StreamPet {
 			const hideBackgroundCheck = document.getElementById("hideBackgroundToggle");
 			if (hideBackgroundCheck) hideBackgroundCheck.checked = this.state.hideBackground || false;
 
+			const hideFloorCheck = document.getElementById("hideFloorToggle");
+			if (hideFloorCheck) hideFloorCheck.checked = this.state.hideFloor || false;
+
 			const hideStatusCheck = document.getElementById("hideStatusToggle");
 			if (hideStatusCheck) hideStatusCheck.checked = this.state.hideStatus || false;
 
@@ -3095,7 +3105,23 @@ export class StreamPet {
 				this._boundZoomSaveHandler = () => this.saveData();
 				zoomSlider.addEventListener("change", this._boundZoomSaveHandler);
 			}
-
+			// =========================================================================
+			// 🎯 hidefloor
+			// =========================================================================
+			const hideFloorToggleInput = document.getElementById("hideFloorToggle");
+			if (hideFloorToggleInput) {
+				// Remove old listeners to prevent memory leaking on multiple load invocations
+				if (this._boundFloorToggleHandler) {
+					hideFloorToggleInput.removeEventListener("change", this._boundFloorToggleHandler);
+				}
+				
+				// Bind the engine assignment router directly
+				this._boundFloorToggleHandler = (e) => {
+					this.state.hideFloor = e.target.checked;
+					this.saveData(); // Auto-persists structural updates instantly
+				};
+				hideFloorToggleInput.addEventListener("change", this._boundFloorToggleHandler);
+			}
 			if (this.state.layout) {
 				Object.keys(this.state.layout).forEach(k => { 
 					if (k === 'showTower' || k === 'bedColor') return;
