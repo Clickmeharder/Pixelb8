@@ -463,7 +463,60 @@ const PET_STATE_LIBRARY = {
 		}
 	}
 };
+const PET_FLOOR_LIBRARY = {
+	kitty: (ctx, floorTopY, visibleW, visibleH, thickness) => {
+		// House Floor: Warm hardwood floor panels
+		ctx.fillStyle = "#d2b48c"; 
+		ctx.fillRect(0, floorTopY, visibleW, thickness);
+		
+		// Draw plank lines
+		ctx.strokeStyle = "#b59975";
+		ctx.lineWidth = 1.5;
+		for (let x = 0; x < visibleW; x += 60) {
+			ctx.beginPath();
+			ctx.moveTo(x, floorTopY);
+			ctx.lineTo(x, visibleH);
+			ctx.stroke();
+		}
+	},
+	puppy: (ctx, floorTopY, visibleW, visibleH, thickness) => {
+		// Backyard Floor: Rich green grass patch
+		ctx.fillStyle = "#4caf50"; 
+		ctx.fillRect(0, floorTopY, visibleW, thickness);
 
+		// Sprinkle textured grass blades
+		ctx.strokeStyle = "#388e3c";
+		ctx.lineWidth = 2;
+		for (let x = 10; x < visibleW; x += 40) {
+			const bladeH = 6 + (x % 5);
+			ctx.beginPath();
+			ctx.moveTo(x, floorTopY);
+			ctx.lineTo(x - 2, floorTopY - bladeH);
+			ctx.stroke();
+		}
+	},
+	spider: (ctx, floorTopY, visibleW, visibleH, thickness) => {
+		// Dirt Floor: Rough textured dark brown ground
+		ctx.fillStyle = "#5c4033"; 
+		ctx.fillRect(0, floorTopY, visibleW, thickness);
+
+		// Add tiny pebbles/specks for detail
+		ctx.fillStyle = "#4a3228";
+		for (let i = 0; i < visibleW; i += 35) {
+			let speckY = floorTopY + 5 + ((i * 7) % (thickness - 10));
+			ctx.fillRect(i, speckY, 3, 3);
+		}
+	},
+	goldfish: (ctx, floorTopY, visibleW, visibleH, thickness) => {
+		// Sand Floor: Soft underwater ocean sand with a subtle top gradient
+		let sandGrad = ctx.createLinearGradient(0, floorTopY, 0, visibleH);
+		sandGrad.addColorStop(0, "#f2da91"); 
+		sandGrad.addColorStop(1, "#dfc26d"); 
+		
+		ctx.fillStyle = sandGrad;
+		ctx.fillRect(0, floorTopY, visibleW, thickness);
+	}
+};
 
 // ============================================================================
 // SECTION 1B: CORE ENGINE PRESETS & PALETTES (Outside the Class)
@@ -1427,6 +1480,12 @@ export class StreamPet {
 	drawEnvironment(tick) {
 		const visibleW = this.canvas.width;
 		const visibleH = this.canvas.height;
+		const floorTopY = this.getPos(0, 100).y - 25;
+
+		// ========================================================
+		// PHASE 0: SPECIES-SPECIFIC FLOOR LAYER (BACKGROUND BASE)
+		// ========================================================
+		this.drawPetFloor(floorTopY, visibleW, visibleH);
 		// ========================================================
 		// PHASE 1: BACKGROUND / DECORATIVE OVERLAYS (FAR BACK)
 		// ========================================================
@@ -1885,7 +1944,19 @@ export class StreamPet {
 	}
 
 
+	drawPetFloor(floorTopY, visibleW, visibleH) {
+		const thickness = visibleH - floorTopY;
+		if (thickness <= 0) return;
 
+		const species = this.registry.activeSpecies;
+
+		// Route rendering to the targeted species layer handler
+		if (PET_FLOOR_LIBRARY[species]) {
+			this.ctx.save();
+			PET_FLOOR_LIBRARY[species](this.ctx, floorTopY, visibleW, visibleH, thickness);
+			this.ctx.restore();
+		}
+	}
 //===========================================
 // Section 8: furniture & other static large objects
 //===========================================
