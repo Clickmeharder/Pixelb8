@@ -1622,6 +1622,9 @@ export class StreamPet {
 			}
 
 			this.ctx.restore();
+			const b = document.getElementById("bubble");
+			if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
+			b.classList.remove("show");
 		}
 		
 		this.ctx.restore();
@@ -2394,13 +2397,10 @@ export class StreamPet {
         const b = document.getElementById("bubble");
         if (!b) return;
         b.textContent = txt; 
-        b.style.left = (this.state.x - 10) + "px"; 
-        b.style.top = (this.state.y - 175) + "px";
-		b.style.opacity = 0.8;
+        b.style.left = (this.state.x - 50) + "px"; 
+        b.style.top = (this.state.y - 140) + "px";
         b.classList.add("show"); 
         
-        if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
-        this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 2000);
 
         if (txt.includes("Meow") || txt.includes("Kitty")) this.petAudio('play', 'meowSound');
         if (txt.includes("Mew")) this.petAudio('play', 'mewSound');
@@ -2409,6 +2409,9 @@ export class StreamPet {
         if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.petAudio('play', 'whineSound');
         if (txt.includes("SPIN") || this.registry.activeSpecies === "spider" && Math.random() < 0.3) this.petAudio('play', 'clickSound');
         if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.petAudio('play', 'bubbleSound');
+		if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
+        this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
+
     }
 
 //=================================
