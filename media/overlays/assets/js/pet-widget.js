@@ -360,7 +360,7 @@ const PET_STATE_LIBRARY = {
 				if (pet.registry.activeSpecies === "kitty") pet.petSpeechBubble("Meow! 🐾");
 				if (pet.registry.activeSpecies === "puppy") pet.petSpeechBubble("BARK! 🐶");
 				if (pet.registry.activeSpecies === "spider") pet.petSpeechBubble("Click-click... 🕷️");
-				if (pet.registry.activeSpecies === "fish") pet.petSpeechBubble("Blub... 🫧");
+				if (pet.registry.activeSpecies === "fish") pet.petSpeechBubble("Blub...");
 			}
 			
 			if (Math.random() < 0.4) { 
@@ -2391,7 +2391,7 @@ export class StreamPet {
 	}
 
     幕(txt) {} // Catch invalid encoding safely
-	petSpeechBubble(txt) {
+petSpeechBubble(txt) {
 		const b = document.getElementById("bubble");
 		if (!b) return;
 		
@@ -2407,8 +2407,8 @@ export class StreamPet {
 		// 2. INJECT CONTENT & POSITION METRICS
 		b.textContent = txt; 
 		b.style.left = (this.state.x - 50) + "px"; 
-		b.style.top = (this.state.y - 200) + "px";
-		b.style.opacity = "0.8";
+		b.style.top = (this.state.y - 140) + "px";
+		b.style.opacity = 0.8;
 		b.classList.add("show"); 
 
 		// 3. SPECIES-SPECIFIC ROUTING AUDIO ENGINES
@@ -2418,7 +2418,7 @@ export class StreamPet {
 		if (txt.includes("BARK") || txt.includes("FETCH")) this.petAudio('play', 'barkSound');
 		if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.petAudio('play', 'whineSound');
 		if (txt.includes("SPIN") || (this.registry.activeSpecies === "spider" && Math.random() < 0.3)) this.petAudio('play', 'clickSound');
-		if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "fish") this.petAudio('play', 'bubbleSound');
+		if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.petAudio('play', 'bubbleSound');
 
 		// 4. PERSIST TIMEOUT ID BOTH ON CLASS AND DOM ELEMENT DATASET
 		const clearBubbleId = setTimeout(() => {
@@ -2426,6 +2426,7 @@ export class StreamPet {
 			// Clear out references cleanly once expired
 			if (this.bubbleTimeout === clearBubbleId) this.bubbleTimeout = null;
 			b.removeAttribute('data-timeout-id');
+			b.style.opacity = 0.0;
 		}, 3000);
 
 		this.bubbleTimeout = clearBubbleId;
