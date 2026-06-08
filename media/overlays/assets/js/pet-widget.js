@@ -1,3 +1,4 @@
+
 /**
  * 🐾 StreamPet Widget Module
  * Follows the hot-swappable monolithic component structure.
@@ -105,9 +106,9 @@ const PET_STATE_LIBRARY = {
 			pet.state.x += (pet.state.swimTargetX - pet.state.x) * 0.02;
 			pet.state.facing = (pet.state.swimTargetX > pet.state.x) ? 1 : -1;
 
-			if (pet.registry.activeSpecies === "fish") {
+			if (pet.registry.activeSpecies === "goldfish") {
 				pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.03) * 60;
-				if(ctx.t % 20 === 0) pet.state.fishBubbles.push({x: pet.state.x, y: pet.state.y, r: 2, alpha: 0.8});
+				if(ctx.t % 20 === 0) pet.state.goldfishBubbles.push({x: pet.state.x, y: pet.state.y, r: 2, alpha: 0.8});
 			}
 			
 			if (Math.abs(pet.state.x - pet.state.swimTargetX) < 10) {
@@ -121,7 +122,7 @@ const PET_STATE_LIBRARY = {
 		}
 	},
 	walk_to_litter: (pet, ctx) => {
-		if (pet.registry.activeSpecies === "fish") {
+		if (pet.registry.activeSpecies === "goldfish") {
 			if (!pet.state.aquaticPottyTarget) {
 				pet.state.aquaticPottyTarget = {
 					x: 100 + Math.random() * (ctx.visibleW - 200),
@@ -208,7 +209,7 @@ const PET_STATE_LIBRARY = {
 	// go poop
 	potty: (pet, ctx) => {
 		if (pet.state.actionTimer <= 0) { 
-			if (pet.registry.activeSpecies === "fish") {
+			if (pet.registry.activeSpecies === "goldfish") {
 				pet.activePet.poops.push({
 					x: pet.state.x - (pet.state.facing * 10), y: pet.state.y + 5,
 					ox: Math.random() * 100, swimOffset: Math.random() * Math.PI * 2
@@ -291,9 +292,9 @@ const PET_STATE_LIBRARY = {
 			pet.state.actionTimer = 800;
 		}
 	},
-scratching: (pet, ctx) => {
+	scratching: (pet, ctx) => {
 		if (ctx.t % 3 === 0) {
-			const isFish = pet.registry.activeSpecies === "fish";
+			const isFish = pet.registry.activeSpecies === "goldfish";
 			const clawX = pet.state.x + (pet.state.facing * 15);
 			const clawY = pet.state.y + 5; 
 
@@ -308,16 +309,11 @@ scratching: (pet, ctx) => {
 					// Underwater sand silt should rise more slowly and drift (lower negative vy)
 					vy: isFish ? (-0.2 - Math.random() * 1) : (-1 - Math.random() * 2),
 					s: isFish ? (1.5 + Math.random() * 2) : 2, // Varied sand grain sizes
-					// Use ocean sand color for fish, fallback to pet dander/wood tan
+					// Use ocean sand color for goldfish, fallback to pet dander/wood tan
 					c: isFish ? "#dfc26d" : "#d2b48c", 
 					life: isFish ? 30 : 15 // Sand clouds hang in the water longer (30 frames instead of 15)
 				});
 			}
-		}
-
-		if (pet.state.actionTimer <= 0) {
-			pet.state.action = "idle";
-			pet.state.actionTimer = Math.floor(Math.random() * 200) + 150;
 		}
 	},
 
@@ -342,10 +338,10 @@ scratching: (pet, ctx) => {
 		}
 	},
 	idle: (pet, ctx) => {
-		if (pet.registry.activeSpecies === "fish") {
+		if (pet.registry.activeSpecies === "goldfish") {
 			pet.state.y = (ctx.visibleH / 2) + Math.sin(ctx.t * 0.04) * 40;
 			if (Math.random() < 0.02) {
-				pet.state.fishBubbles.push({
+				pet.state.goldfishBubbles.push({
 					x: pet.state.x + pet.state.facing * 20, 
 					y: pet.state.y - 10, 
 					r: 2 + Math.random() * 4, 
@@ -371,7 +367,7 @@ scratching: (pet, ctx) => {
 				if (pet.registry.activeSpecies === "kitty") pet.petSpeechBubble("Meow! 🐾");
 				if (pet.registry.activeSpecies === "puppy") pet.petSpeechBubble("BARK! 🐶");
 				if (pet.registry.activeSpecies === "spider") pet.petSpeechBubble("Click-click... 🕷️");
-				if (pet.registry.activeSpecies === "fish") pet.petSpeechBubble("Blub... 🫧");
+				if (pet.registry.activeSpecies === "goldfish") pet.petSpeechBubble("Blub... 🫧");
 			}
 			
 			if (Math.random() < 0.4) { 
@@ -518,7 +514,7 @@ const PET_FLOOR_LIBRARY = {
 			ctx.fillRect(i, speckY, 3, 3);
 		}
 	},
-	fish: (ctx, floorTopY, visibleW, visibleH, thickness) => {
+	goldfish: (ctx, floorTopY, visibleW, visibleH, thickness) => {
 		// Sand Floor: Soft underwater ocean sand with a subtle top gradient
 		let sandGrad = ctx.createLinearGradient(0, floorTopY, 0, floorTopY + thickness);
 		sandGrad.addColorStop(0, "#f2da91"); 
@@ -533,11 +529,11 @@ const PET_FLOOR_LIBRARY = {
 // ============================================================================
 const WIDGET_DEFAULT_BOUNDS = { left: "20px", top: "302px", width: "274px", height: "197px" };
 
-const PET_SPECIES = ["kitty", "puppy", "spider", "fish"];
+const PET_SPECIES = ["kitty", "puppy", "spider", "goldfish"];
 const KITTY_COLORS = ["#E67E22", "#95A5A6", "#2C3E50", "#ECF0F1", "#BDC3C7", "#D35400"];
 const PUPPY_COLORS = ["#D2B48C", "#8B4513", "#F5DEB3", "#3E2723", "#FFF8DC", "#795548"];
 const SPIDER_COLORS = ["#1A1A1A", "#3A1A1A", "#1A3A1A", "#2E1C47", "#004D40", "#424242"];
-const fish_COLORS = ["#FF5722", "#FF9800", "#FFC107", "#E91E63", "#FF3D00", "#FFFFFF"];
+const GOLDFISH_COLORS = ["#FF5722", "#FF9800", "#FFC107", "#E91E63", "#FF3D00", "#FFFFFF"];
 const BED_PRESETS = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#ffffff", "#333333"];
 
 const HUNGER_TICK_MS = 144000; 
@@ -563,10 +559,10 @@ function createDefaultPetRegistry() {
                 lastHungerTick: Date.now(), poops: [],
                 color: SPIDER_COLORS[Math.floor(Math.random() * SPIDER_COLORS.length)]
             },
-            fish: {
+            goldfish: {
                 name: "Bubbles", isDead: false, birthday: Date.now(), ageDays: 0, stage: "Baby", exp: 0, hunger: 0, digestive: 0,
                 lastHungerTick: Date.now(), poops: [],
-                color: fish_COLORS[Math.floor(Math.random() * fish_COLORS.length)]
+                color: GOLDFISH_COLORS[Math.floor(Math.random() * GOLDFISH_COLORS.length)]
             }
         }
     };
@@ -582,7 +578,7 @@ function createDefaultState() {
         x: 200, y: window.innerHeight - 150, facing: 1,
         action: "idle", actionTimer: 300, animT: 0,
         hasFood: false, particles: [], overrideColor: null, paintBalloons: [], zoom: -2,
-        spiderWebs: [], fishBubbles: [], puppyBones: [],
+        spiderWebs: [], goldfishBubbles: [], puppyBones: [],
         layout: {
             nameX: 10, nameY: 1, statsX: 66, statsY: 5, bedX: 8, bedY: 94, bowlX: 89, bowlY: 97,
             litterX: 22, litterY: 91, towerX: 10, towerY: 89, showTower: true, bedColor: "#3498db"
@@ -621,7 +617,7 @@ export class StreamPet {
         this.KITTY_COLORS = KITTY_COLORS;
         this.PUPPY_COLORS = PUPPY_COLORS;
         this.SPIDER_COLORS = SPIDER_COLORS;
-        this.fish_COLORS = fish_COLORS;
+        this.GOLDFISH_COLORS = GOLDFISH_COLORS;
         this.BED_PRESETS = BED_PRESETS;
         this.HUNGER_TICK_MS = HUNGER_TICK_MS; 
         this.BASE_FLOOR_Y = BASE_FLOOR_Y;
@@ -843,8 +839,8 @@ export class StreamPet {
                         <div id="spiderContextNotes" class="species-note" style="font-size:11px; color:#a1a1aa; background:#18181b; padding:8px; border-radius:4px; border-left:3px solid #9c27b0; display:none;">
                             <strong>Spider Active:</strong> Inverting standard gravity matrix. Spider paths directly along roof layers and injects geometric web nets.
                         </div>
-                        <div id="fishContextNotes" class="species-note" style="font-size:11px; color:#a1a1aa; background:#18181b; padding:8px; border-radius:4px; border-left:3px solid #2196f3; display:none;">
-                            <strong>fish Active:</strong> Floats viewport container parameters inside hydrodynamic swimming bounds. Disables standard walking algorithms.
+                        <div id="goldfishContextNotes" class="species-note" style="font-size:11px; color:#a1a1aa; background:#18181b; padding:8px; border-radius:4px; border-left:3px solid #2196f3; display:none;">
+                            <strong>Goldfish Active:</strong> Floats viewport container parameters inside hydrodynamic swimming bounds. Disables standard walking algorithms.
                         </div>
 
 						<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b;">
@@ -1080,7 +1076,7 @@ export class StreamPet {
 		const propLabel = document.querySelector('label[for="showTower"]') || document.getElementById("showTower")?.previousElementSibling;
 		if (propLabel) {
 			if (this.registry.activeSpecies === "puppy") propLabel.textContent = "Show Doghouse";
-			else if (this.registry.activeSpecies === "fish") propLabel.textContent = "Show Castle/Coral";
+			else if (this.registry.activeSpecies === "goldfish") propLabel.textContent = "Show Castle/Coral";
 			else propLabel.textContent = "Show Cat Tower";
 		}
 
@@ -1231,13 +1227,13 @@ export class StreamPet {
             "🐈 Kitty (Feline Engine v10)",
             "🐕 Puppy (Canine Kinematics Engine)",
             "🕷️ Spider (Arachnid Procedural Pathing)",
-            "🐟 fish (Aquatic Fluid Physics)"
+            "🐟 Goldfish (Aquatic Fluid Physics)"
         ];
 		setupCustomDropdownEngine("speciesSelectDisplay", "speciesSelectOptions", speciesOptions, (selectedText) => {
             let chosenSpecies = "kitty";
             if (selectedText.includes("Puppy")) chosenSpecies = "puppy";
             if (selectedText.includes("Spider")) chosenSpecies = "spider";
-            if (selectedText.includes("fish")) chosenSpecies = "fish";
+            if (selectedText.includes("Goldfish")) chosenSpecies = "goldfish";
 
             // Set the new species pointer
             this.registry.activeSpecies = chosenSpecies;
@@ -1324,7 +1320,7 @@ export class StreamPet {
         bindClick("btnClear", () => { 
             this.activePet.poops = []; 
             this.state.spiderWebs = [];
-            this.state.fishBubbles = [];
+            this.state.goldfishBubbles = [];
             this.petSpeechBubble("Cleared and Scoured! 🧹"); 
         });
         bindClick("btnRevive", () => { this.revivePet(); });
@@ -1431,8 +1427,8 @@ export class StreamPet {
 			// Spiders drop directly above the bed's scaled X position on the roof
 			this.state.x = bedCoordinates.x;
 			this.state.y = CEIL_Y;
-		} else if (this.registry.activeSpecies === "fish") {
-			// fish float in the mid-water horizon lane right over the bed's scaled X position
+		} else if (this.registry.activeSpecies === "goldfish") {
+			// Goldfish float in the mid-water horizon lane right over the bed's scaled X position
 			this.state.x = bedCoordinates.x;
 			this.state.y = visibleH / 2; 
 		} else {
@@ -1462,7 +1458,7 @@ export class StreamPet {
 // SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
 // ===================================================
 	applyGravity(pet, ctx) {
-		if (pet.registry.activeSpecies === "fish") return;
+		if (pet.registry.activeSpecies === "goldfish") return;
 
 		// Check if the spider is currently using an airborne state
 		const spiderIsClimbing = ["rappel_drop", "rappel_hang", "rappel_rise", "climbing_tower", "tower_sleep", "sleep"].includes(pet.state.action);
@@ -1628,7 +1624,7 @@ export class StreamPet {
 				this.drawPuppy(this.state.animT, petScale);
 			} else if (this.registry.activeSpecies === "spider") {
 				this.drawSpider(this.state.animT, petScale);
-			} else if (this.registry.activeSpecies === "fish") {
+			} else if (this.registry.activeSpecies === "goldfish") {
 				this.drawFish(this.state.animT, petScale);
 			}
 
@@ -1988,7 +1984,7 @@ export class StreamPet {
 			case "spider":
 				this.drawSpiderNest(tPos, tick);
 				break;
-			case "fish":
+			case "goldfish":
 				this.drawFishCastle(tPos, tick);
 				break;
 			case "puppy":
@@ -2180,7 +2176,7 @@ export class StreamPet {
 			let foodIcon = "🐟";
 			if (this.registry.activeSpecies === "puppy") foodIcon = "🍖";
 			if (this.registry.activeSpecies === "spider") foodIcon = "🪰";
-			if (this.registry.activeSpecies === "fish") foodIcon = "🍤";
+			if (this.registry.activeSpecies === "goldfish") foodIcon = "🍤";
 			
 			this.ctx.fillText(foodIcon, fPos.x - 8, fPos.y - 5);
 		}
@@ -2188,8 +2184,8 @@ export class StreamPet {
 //------------------------------
 // litter box and poop drawing
 	drawLitterBox(lPos, boxW) {
-		// Only draw the litter box or grass patch if the pet is NOT a fish or spider
-		if (this.registry.activeSpecies === "fish" || this.registry.activeSpecies === "spider") return;
+		// Only draw the litter box or grass patch if the pet is NOT a goldfish or spider
+		if (this.registry.activeSpecies === "goldfish" || this.registry.activeSpecies === "spider") return;
 
 		if (this.registry.activeSpecies === "puppy") {
 			// Base Dirt Tray
@@ -2227,7 +2223,7 @@ export class StreamPet {
 	}
 	drawWasteLayer(lPos, boxW) {
 		this.activePet.poops.forEach(p => {
-			if (this.registry.activeSpecies === "fish") {
+			if (this.registry.activeSpecies === "goldfish") {
 				if (p.x === undefined) p.x = this.state.x;
 				if (p.y === undefined) p.y = this.state.y;
 				if (p.swimOffset === undefined) p.swimOffset = Math.random() * Math.PI * 2;
@@ -2362,10 +2358,10 @@ export class StreamPet {
 		}
 	}
 	drawFishBubbles(tick) {
-		if (this.registry.activeSpecies !== "fish") return;
+		if (this.registry.activeSpecies !== "goldfish") return;
 
-		for (let i = this.state.fishBubbles.length - 1; i >= 0; i--) {
-			let bubble = this.state.fishBubbles[i];
+		for (let i = this.state.goldfishBubbles.length - 1; i >= 0; i--) {
+			let bubble = this.state.goldfishBubbles[i];
 			
 			bubble.y -= 1.2;
 			bubble.x += Math.sin(tick * 0.05 + i) * 0.5;
@@ -2378,7 +2374,7 @@ export class StreamPet {
 			this.ctx.stroke();
 			
 			if (bubble.y < 50) {
-				this.state.fishBubbles.splice(i, 1);
+				this.state.goldfishBubbles.splice(i, 1);
 			}
 		}
 	}
@@ -2429,7 +2425,7 @@ export class StreamPet {
 		if (txt.includes("BARK") || txt.includes("FETCH")) this.petAudio('play', 'barkSound');
 		if (txt.includes("Hungry") && this.registry.activeSpecies === "puppy") this.petAudio('play', 'whineSound');
 		if (txt.includes("SPIN") || (this.registry.activeSpecies === "spider" && Math.random() < 0.3)) this.petAudio('play', 'clickSound');
-		if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "fish") this.petAudio('play', 'bubbleSound');
+		if (txt.includes("LOOP") || txt.includes("FLAKES") || this.registry.activeSpecies === "goldfish") this.petAudio('play', 'bubbleSound');
 
 		// 4. PERSIST TIMEOUT ID BOTH ON CLASS AND DOM ELEMENT DATASET
 		const clearBubbleId = setTimeout(() => {
@@ -2625,7 +2621,7 @@ export class StreamPet {
 				this.petSpeechBubble("Hey! That's mean! 😾");
 				break;
 			case "spider":
-			case "fish":
+			case "goldfish":
 				this.petSpeechBubble("Stop tapping the glass! 🫧");
 				break;
 		}
@@ -2860,7 +2856,7 @@ export class StreamPet {
 						if (this.registry.activeSpecies === "kitty") this.petSpeechBubble("Food! 🐟");
 						if (this.registry.activeSpecies === "puppy") this.petSpeechBubble("BONE! 🍖");
 						if (this.registry.activeSpecies === "spider") this.petSpeechBubble("CRICKET! 🪰");
-						if (this.registry.activeSpecies === "fish") this.petSpeechBubble("FLAKES! 🍤");
+						if (this.registry.activeSpecies === "goldfish") this.petSpeechBubble("FLAKES! 🍤");
 						sendNotice(`🍽️ [Pet]: ${user} dropped food for ${this.activePet.name}!`);
 					} else {
 						sendNotice(`🍽️ [Pet]: There is already food in the bowl!`);
@@ -2873,7 +2869,7 @@ export class StreamPet {
 					if (this.registry.activeSpecies === "kitty") this.petSpeechBubble("Play! 🧶");
 					if (this.registry.activeSpecies === "puppy") this.petSpeechBubble("FETCH! 🥎");
 					if (this.registry.activeSpecies === "spider") this.petSpeechBubble("SPIN! 🕸️");
-					if (this.registry.activeSpecies === "fish") this.petSpeechBubble("LOOP! 🫧");
+					if (this.registry.activeSpecies === "goldfish") this.petSpeechBubble("LOOP! 🫧");
 					sendNotice(`🥎 [Pet]: ${user} actively engaged with ${this.activePet.name}!`);
 					break;
 
@@ -2896,7 +2892,7 @@ export class StreamPet {
 					if (this.registry.activeSpecies === "puppy") { this.petSpeechBubble("BACKFLIP! 🤸"); this.activePet.exp += 25; }
 					else if (this.registry.activeSpecies === "kitty") { this.petSpeechBubble("PURR SLIDE! 🛷"); this.activePet.exp += 20; }
 					else if (this.registry.activeSpecies === "spider") { this.petSpeechBubble("PARACHUTE! 🪂"); this.activePet.exp += 30; }
-					else if (this.registry.activeSpecies === "fish") { this.petSpeechBubble("SPLASH FLIP! 🌊"); this.activePet.exp += 25; }
+					else if (this.registry.activeSpecies === "goldfish") { this.petSpeechBubble("SPLASH FLIP! 🌊"); this.activePet.exp += 25; }
 					break;
 
 				case 'status':
@@ -2950,7 +2946,7 @@ export class StreamPet {
 
 				case 'species':
 					if (isAdmin && parts[1]) {
-						const speciesMap = { "kitty": "kitty", "kitten": "kitty", "puppy": "puppy", "dog": "puppy", "spider": "spider", "fish": "fish", "fish": "fish" };
+						const speciesMap = { "kitty": "kitty", "kitten": "kitty", "puppy": "puppy", "dog": "puppy", "spider": "spider", "fish": "goldfish", "goldfish": "goldfish" };
 						const targetKey = speciesMap[parts[1].toLowerCase()];
 						if (targetKey && this.PET_SPECIES.includes(targetKey)) {
 							this.selectSpecies(targetKey); 
@@ -2973,7 +2969,7 @@ export class StreamPet {
 				case 'clear':
 					this.activePet.poops = [];
 					this.state.spiderWebs = [];
-					this.state.fishBubbles = [];
+					this.state.goldfishBubbles = [];
 					this.state.puppyBones = [];
 					this.petSpeechBubble("Fresh sand! ✨");
 					sendNotice(`🧹 [Pet]: ${user} scooped the environment layout parameters!`);
@@ -3083,7 +3079,7 @@ export class StreamPet {
 					kitty: "🐈 Kitty (Feline Engine v10)",
 					puppy: "🐕 Puppy (Canine Kinematics Engine)",
 					spider: "🕷️ Spider (Arachnid Procedural Pathing)",
-					fish: "🐟 fish (Aquatic Fluid Physics)"
+					goldfish: "🐟 Goldfish (Aquatic Fluid Physics)"
 				};
 				displayEl.innerText = speciesMap[this.registry.activeSpecies] || speciesMap.kitty;
 			}
