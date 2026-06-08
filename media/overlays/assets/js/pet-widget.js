@@ -2407,7 +2407,8 @@ export class StreamPet {
 		// 2. INJECT CONTENT & POSITION METRICS
 		b.textContent = txt; 
 		b.style.left = (this.state.x - 50) + "px"; 
-		b.style.top = (this.state.y - 140) + "px";
+		b.style.top = (this.state.y - 200) + "px";
+		b.style.opacity = "0.8";
 		b.classList.add("show"); 
 
 		// 3. SPECIES-SPECIFIC ROUTING AUDIO ENGINES
