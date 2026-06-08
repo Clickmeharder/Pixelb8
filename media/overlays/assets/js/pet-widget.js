@@ -1375,15 +1375,17 @@ export class StreamPet {
 // SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
 // ===================================================
 	applyGravity(pet, ctx) {
-		// Only apply to terrestrial pets
 		if (pet.registry.activeSpecies === "spider" || pet.registry.activeSpecies === "goldfish") return;
 
-		// Only apply if the pet is clearly not on the floor (tolerance of 5px)
-		if (pet.state.y < ctx.FLOOR_Y - 5) {
+		// Get the dynamic, zoom-aware floor position
+		// We use getPos(0, 100) to find the logical floor Y 
+		// (Assuming 0-100% scale where 100% Y is the floor)
+		const floorPos = this.getPos(0, 100).y;
+
+		if (pet.state.y < floorPos - 5) {
 			pet.state.y += 2.0; 
 		} else {
-			// Snap to floor to prevent micro-floating
-			pet.state.y = ctx.FLOOR_Y;
+			pet.state.y = floorPos;
 		}
 	}
 	drawEnvironment(tick) {
