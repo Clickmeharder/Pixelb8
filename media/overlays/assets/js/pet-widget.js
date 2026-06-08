@@ -2394,13 +2394,13 @@ export class StreamPet {
         const b = document.getElementById("bubble");
         if (!b) return;
         b.textContent = txt; 
-        b.style.left = (this.state.x - 0) + "px"; 
-        b.style.top = (this.state.y - 200) + "px";
-		b.style.opacity = 0.7;
+        b.style.left = (this.state.x - 10) + "px"; 
+        b.style.top = (this.state.y - 175) + "px";
+		b.style.opacity = 0.8;
         b.classList.add("show"); 
         
         if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
-        this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
+        this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 2000);
 
         if (txt.includes("Meow") || txt.includes("Kitty")) this.petAudio('play', 'meowSound');
         if (txt.includes("Mew")) this.petAudio('play', 'mewSound');
