@@ -182,6 +182,7 @@ const PET_STATE_LIBRARY = {
 		
 		if (pet.state.y <= perchY) {
 			pet.state.y = perchY;
+			pet.state.perchPos = { x: pet.state.x, y: pet.state.y }
 			pet.state.action = "tower_sleep";
 			pet.state.actionTimer = 800;
 		}
@@ -427,9 +428,19 @@ const PET_STATE_LIBRARY = {
 	// Common exit handler shared across shared static end states
 	_fallbackSleep: (pet, ctx) => {
 		if (pet.state.actionTimer <= 0) {
-			// Instead of snapping, start a transition back to original position
-			pet.state.action = "idle_return";
-			pet.state.actionTimer = 50; // Give it 50 frames to glide back
+			// If he was on the tower, snap back to the exact perch
+			if (pet.state.action === "tower_sleep" && pet.state.perchPos) {
+				pet.state.x = pet.state.perchPos.x;
+				pet.state.y = pet.state.perchPos.y;
+				// Clear the anchor once he returns
+				pet.state.perchPos = null;
+			} else {
+				// Otherwise, snap to his default ground floor original position
+				pet.state.x = pet.state.originalPos.x;
+				pet.state.y = pet.state.originalPos.y;
+			}
+			pet.state.action = "idle";
+			pet.state.actionTimer = 200;
 		}
 	}
 };
