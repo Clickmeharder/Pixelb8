@@ -1624,7 +1624,7 @@ export class StreamPet {
 			this.ctx.restore();
 			const b = document.getElementById("bubble");
 			if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
-			b.classList.remove("show");
+			this.bubbleTimeout = setTimeout(() => b.classList.remove("show"), 3000);
 		}
 		
 		this.ctx.restore();
