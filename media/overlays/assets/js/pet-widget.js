@@ -1375,16 +1375,14 @@ export class StreamPet {
 // SECTION 6: RENDER ENGINE, ANIMATION & AI PIPELINE
 // ===================================================
 	applyGravity(pet, ctx) {
-		// 1. Immunity for species that don't follow gravity
-		if (pet.registry.activeSpecies === "goldfish") return;
+		// Only apply to terrestrial pets
+		if (pet.registry.activeSpecies === "spider" || pet.registry.activeSpecies === "goldfish") return;
 
-		// 2. If the pet is above the floor, pull them down
-		if (pet.state.y < ctx.FLOOR_Y) {
+		// Only apply if the pet is clearly not on the floor (tolerance of 5px)
+		if (pet.state.y < ctx.FLOOR_Y - 5) {
 			pet.state.y += 2.0; 
-		}
-		
-		// 3. Prevent overshooting the floor (snapping)
-		if (pet.state.y > ctx.FLOOR_Y) {
+		} else {
+			// Snap to floor to prevent micro-floating
 			pet.state.y = ctx.FLOOR_Y;
 		}
 	}
@@ -1463,9 +1461,11 @@ export class StreamPet {
 		if (this.state.hasFood && !["nyan", "eating", "potty", "walk_to_litter", "rappel_drop", "rappel_hang", "rappel_rise"].includes(this.state.action)) {
 			this.state.action = "walk_to_food";
 		}
-		const isAirborneAction = ["climbing_tower", "tower_sleep", "sleep", "rappel_drop", "rappel_hang", "rappel_rise", "nyan", "eating"];
+		// Define states that override gravity
+		const isGrounded = ["idle", "walk", "walk_to_food", "walk_to_kick", "kicking", "scratching"];
 		
-		if (!isAirborneAction.includes(this.state.action)) {
+		// Only run gravity if the action is one that should be grounded
+		if (isGrounded.includes(this.state.action)) {
 			this.applyGravity(this, ctx);
 		}
 		// 5. STATE EXECUTION: Run active state logic from the library
