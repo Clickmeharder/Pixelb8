@@ -293,7 +293,7 @@ const PET_STATE_LIBRARY = {
 	},
 	scratching: (pet, ctx) => {
 		if (ctx.t % 3 === 0) {
-			const isFish = pet.registry.activeSpecies === "goldfish";
+			const isFish = pet.registry.activeSpecies === "fish";
 			const clawX = pet.state.x + (pet.state.facing * 15);
 			const clawY = pet.state.y + 5; 
 
