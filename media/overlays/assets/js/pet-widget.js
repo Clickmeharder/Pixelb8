@@ -565,7 +565,7 @@ function createDefaultPetRegistry() {
 function createDefaultState() {
     return {
         hideBorder: false, hideStatus: false, hideNameplate: false, hideBackground: false,
-		hideFloor: false,
+		hideFloor: true,
         originalPos: { x: 0, y: 0 },
         tummylimit: 11, nyanTimer: 0, nyanPhase: "takeoff",
         x: 200, y: window.innerHeight - 150, facing: 1,
@@ -2394,8 +2394,9 @@ export class StreamPet {
         const b = document.getElementById("bubble");
         if (!b) return;
         b.textContent = txt; 
-        b.style.left = (this.state.x - 50) + "px"; 
-        b.style.top = (this.state.y - 140) + "px";
+        b.style.left = (this.state.x - 10) + "px"; 
+        b.style.top = (this.state.y - 175) + "px";
+		b.style.opacity = 0.8;
         b.classList.add("show"); 
         
         if (this.bubbleTimeout) clearTimeout(this.bubbleTimeout);
