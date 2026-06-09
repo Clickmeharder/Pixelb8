@@ -290,18 +290,26 @@ const PET_STATE_LIBRARY = {
 	},
 	scratching: (pet, ctx) => {
 		if (ctx.t % 3 === 0) {
+			const isFish = pet.registry.activeSpecies === "goldfish";
 			const clawX = pet.state.x + (pet.state.facing * 15);
 			const clawY = pet.state.y + 5; 
 
-			pet.state.particles.push({
-				x: clawX,
-				y: clawY,
-				vx: -pet.state.facing * (0.5 + Math.random() * 3),
-				vy: -1 - Math.random() * 2,
-				s: 2,
-				c: "#d2b48c",
-				life: 15
-			});
+			// If it's a fish, spawn a burst of 3 silt particles at once for a "bunch of dust" effect
+			const burstCount = isFish ? 3 : 1;
+
+			for (let i = 0; i < burstCount; i++) {
+				pet.state.particles.push({
+					x: clawX + (isFish ? (Math.random() - 0.5) * 10 : 0), // Spread the sand horizontally
+					y: clawY,
+					vx: -pet.state.facing * (0.5 + Math.random() * 3),
+					// Underwater sand silt should rise more slowly and drift (lower negative vy)
+					vy: isFish ? (-0.2 - Math.random() * 1) : (-1 - Math.random() * 2),
+					s: isFish ? (1.5 + Math.random() * 2) : 2, // Varied sand grain sizes
+					// Use ocean sand color for goldfish, fallback to pet dander/wood tan
+					c: isFish ? "#dfc26d" : "#d2b48c", 
+					life: isFish ? 30 : 15 // Sand clouds hang in the water longer (30 frames instead of 15)
+				});
+			}
 		}
 
 		if (pet.state.actionTimer <= 0) {
@@ -2391,7 +2399,7 @@ export class StreamPet {
 	}
 
     幕(txt) {} // Catch invalid encoding safely
-petSpeechBubble(txt) {
+	petSpeechBubble(txt) {
 		const b = document.getElementById("bubble");
 		if (!b) return;
 		
