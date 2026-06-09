@@ -2569,6 +2569,7 @@ export class StreamPet {
         this.state.action = "bloating"; 
         this.state.hideMainSprite = false; // Still visible while expanding
         this.stopSound('nyanSound');
+		this.petAudio('stop', 'nyanSound');
         this.petSpeechBubble("🤢 BLECH...");
 
         setTimeout(() => {
