@@ -1,686 +1,129 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jaedraze Twitch Risk - Production</title>
+    <title>Jaedraze Twitch Risk - Full Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
-        #game-container { width: 100%; max-width: 1200px; height: 60vh; background: #000; border: 2px solid #555; position: relative; }
+        #game-container { width: 100%; max-width: 1000px; height: 50vh; background: #000; border: 2px solid #555; position: relative; margin-top: 10px; }
         #map { width: 100%; height: 100%; }
-        .country { fill: #2d3436; stroke: #fff; stroke-width: 0.3; cursor: pointer; transition: 0.5s; }
-        @keyframes flash { 0% { fill: #c0392b; } 100% { fill: #27ae60; } }
-        .attack-anim { animation: flash 0.5s ease-in-out; }
-        #log { width: 100%; max-width: 1200px; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 13px; margin-top: 10px; border: 1px solid #333; }
+        .country { fill: #2d3436; stroke: #fff; stroke-width: 0.5; cursor: pointer; transition: 0.3s; }
+        #log { width: 100%; max-width: 1000px; height: 200px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 14px; margin-top: 10px; border: 1px solid #333; color: #ccc; }
     </style>
 </head>
 <body>
 
-    <h3>Jaedrazeshityy Strategy Engine</h3>
-    <div id="ui">!startrisk | !claim [CODE] | !build [mine/base] [CODE] | !attack [FROM] [TO] | !stats</div>
-    <div id="game-container"><svg id="map" viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet"></svg></div>
-    <div id="log">Waiting for !startrisk...</div>
+    <h3>Jaedraze Strategy Engine: v1.0000</h3>
+    <div id="ui">!join | !claim [CODE] | !build [mine/base] [CODE] | !train [CODE] [amt] | !attack [FROM] [TO] | !stats</div>
+    <div id="game-container"><svg id="map" viewBox="0 0 360 180"></svg></div>
+    <div id="log">System Initializing...</div>
 
 <script>
-const SAVE_KEY = "jaedrazeRiskV2";
+const SAVE_KEY = "jaedrazeRiskV4";
+let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || { active: false, players: {}, data: {} };
+const COSTS = { mine: 50, base: 100, troop: 10 }; // 10 gold per troop
 
-let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || {
-    active:false,
-    startTime:null,
-    players:{},
-    data:{},
-    lastEvent:Date.now(),
-    lastTick:Date.now()
-};
+function saveGame() { localStorage.setItem(SAVE_KEY, JSON.stringify(gameState)); }
+function log(msg) { const l = document.getElementById("log"); l.innerHTML += `<div>> ${msg}</div>`; l.scrollTop = l.scrollHeight; }
 
-const BUILDINGS = {
-    mine:{
-        cost:100,
-        income:20
-    },
-    base:{
-        cost:150,
-        troopCap:50
-    },
-    factory:{
-        cost:300,
-        troopIncome:5
-    },
-    fort:{
-        cost:500,
-        defenseBonus:0.25
-    }
-};
-
-function saveGame(){
-    localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
-}
-
-function log(msg){
-    const l=document.getElementById("log");
-    l.innerHTML += `<div>> ${msg}</div>`;
-    l.scrollTop=l.scrollHeight;
-}
-
-function getUserColor(name){
-    let hash=0;
-
-    for(let i=0;i<name.length;i++){
-        hash=name.charCodeAt(i)+((hash<<5)-hash);
-    }
-
-    let color="#";
-
-    for(let i=0;i<3;i++){
-        color+=("00"+((hash>>(i*8))&255).toString(16)).slice(-2);
-    }
-
+function getUserColor(name) {
+    let hash = 0; for(let i=0; i<name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    let color = '#'; for(let i=0; i<3; i++) color += ('00'+((hash>>(i*8))&255).toString(16)).slice(-2);
     return color;
 }
 
-function ensurePlayer(user){
-
-    if(!gameState.players[user]){
-
-        gameState.players[user]={
-            gold:500,
-            joined:true,
-            attacks:0,
-            wins:0,
-            losses:0,
-            recruited:0
-        };
-
-        log(`${user} joined the war.`);
-    }
-}
-
-async function initMap(){
-
-    const res = await fetch(
-        "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson"
-    );
-
+async function initMap() {
+    const res = await fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson");
     const geo = await res.json();
+    const svg = document.getElementById("map");
 
-    const svg=document.getElementById("map");
-
-    geo.features.forEach(f=>{
-
-        const code=f.properties.ISO_A3;
-
-        let path=document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "path"
-        );
-
-        path.setAttribute("class","country");
-        path.setAttribute("id",code);
-
-        let title=document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "title"
-        );
-
-        path.appendChild(title);
-
-        const project=(c)=>[
-            c[0]+180,
-            90-c[1]
-        ];
-
-        let d="";
-
-        (
-            f.geometry.type==="Polygon"
-            ? [f.geometry.coordinates]
-            : f.geometry.coordinates
-        ).forEach(poly=>{
-
-            poly[0].forEach((c,i)=>{
-
-                const [x,y]=project(c);
-
-                d +=
-                    (i===0 ? "M":"L")
-                    + `${x},${y} `;
-            });
-
-            d+="Z ";
+    geo.features.forEach(f => {
+        const code = f.properties.ISO_A3;
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("class", "country");
+        path.setAttribute("id", code);
+        path.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
+        
+        let d = "";
+        const coords = (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates);
+        coords.forEach(poly => {
+            poly[0].forEach((c, i) => { d += (i === 0 ? "M" : "L") + `${c[0]+180},${90-c[1]} `; });
+            d += "Z ";
         });
-
-        path.setAttribute("d",d);
-
+        path.setAttribute("d", d);
         svg.appendChild(path);
 
-        if(!gameState.data[code]){
-
-            gameState.data[code]={
-                owner:null,
-                troops:20,
-                gold:100,
-                cooldown:0,
-
-                buildings:{
-                    mine:0,
-                    base:0,
-                    factory:0,
-                    fort:0
-                }
-            };
-        }
+        if(!gameState.data[code]) gameState.data[code] = { owner: null, troops: 5, gold: 0, buildings: {mine:0, base:0} };
     });
-
     updateMap();
-
-    log("Map Loaded.");
 }
 
-function updateMap(){
-
-    Object.keys(gameState.data).forEach(code=>{
-
-        const territory=gameState.data[code];
-
-        const path=document.getElementById(code);
-
+function updateMap() {
+    Object.keys(gameState.data).forEach(code => {
+        const t = gameState.data[code];
+        const path = document.getElementById(code);
         if(!path) return;
-
-        path.style.fill=
-            territory.owner
-            ? getUserColor(territory.owner)
-            : "#2d3436";
-
-        let title=path.querySelector("title");
-
-        title.textContent=
-`
-${code}
-Owner: ${territory.owner||"None"}
-Troops: ${territory.troops}
-Gold: ${territory.gold}
-Mine: ${territory.buildings.mine}
-Base: ${territory.buildings.base}
-Factory: ${territory.buildings.factory}
-Fort: ${territory.buildings.fort}
-`;
+        path.style.fill = t.owner ? getUserColor(t.owner) : "#2d3436";
+        path.querySelector("title").textContent = `${code} | Owner: ${t.owner || 'None'} | Troops: ${t.troops} | Mines: ${t.buildings.mine}`;
     });
 }
 
-function territoryCount(user){
-
-    return Object.values(gameState.data)
-        .filter(t=>t.owner===user)
-        .length;
-}
-
-function totalTroops(user){
-
-    let total=0;
-
-    Object.values(gameState.data)
-        .forEach(t=>{
-
-            if(t.owner===user)
-                total+=t.troops;
-        });
-
-    return total;
-}
-
-function playerIncome(user){
-
-    let income=0;
-
-    Object.values(gameState.data)
-        .forEach(t=>{
-
-            if(t.owner===user){
-
-                income +=
-                    t.buildings.mine *
-                    BUILDINGS.mine.income;
-            }
-        });
-
-    return income;
-}
-
-function gameTick(){
-
-    if(!gameState.active)
+function processCommand(user, cmd, args) {
+    if (cmd === "startrisk") { gameState.active = true; log("🌍 War Started!"); saveGame(); return; }
+    if (cmd === "join") { 
+        if(!gameState.players[user]) { gameState.players[user] = { gold: 200 }; log(`${user} joined the war.`); saveGame(); }
         return;
-
-    Object.values(gameState.data)
-        .forEach(t=>{
-
-            if(!t.owner)
-                return;
-
-            const player=
-                gameState.players[t.owner];
-
-            if(!player)
-                return;
-
-            const mineIncome=
-                t.buildings.mine * 20;
-
-            player.gold += mineIncome;
-
-            t.troops +=
-                t.buildings.factory * 5;
-
-            if(t.cooldown>0)
-                t.cooldown--;
-        });
-
+    }
+    
+    if(!gameState.players[user]) return; // Must join first
+    const p = gameState.players[user];
+    
+    if (cmd === "claim") {
+        const code = args[0]?.toUpperCase();
+        if (gameState.data[code] && !gameState.data[code].owner) {
+            gameState.data[code].owner = user;
+            log(`${user} claimed ${code}`);
+        }
+    } 
+    else if (cmd === "build") {
+        const type = args[0]; // mine or base
+        const code = args[1]?.toUpperCase();
+        if (gameState.data[code]?.owner === user && p.gold >= COSTS[type]) {
+            p.gold -= COSTS[type];
+            gameState.data[code].buildings[type]++;
+            log(`${user} built ${type} in ${code}. Remaining gold: ${p.gold}`);
+        }
+    }
+    else if (cmd === "train") {
+        const code = args[0]?.toUpperCase();
+        const amt = parseInt(args[1]) || 1;
+        const totalCost = amt * COSTS.troop;
+        if (gameState.data[code]?.owner === user && p.gold >= totalCost) {
+            p.gold -= totalCost;
+            gameState.data[code].troops += amt;
+            log(`${user} trained ${amt} troops in ${code}.`);
+        }
+    }
+    else if (cmd === "attack") {
+        const [from, to] = [args[0]?.toUpperCase(), args[1]?.toUpperCase()];
+        if (gameState.data[from]?.owner === user && gameState.data[to] && gameState.data[from].troops > 5) {
+            gameState.data[from].troops -= 5;
+            if (Math.random() > 0.4) {
+                gameState.data[to].owner = user;
+                log(`⚔️ ${user} captured ${to}!`);
+            } else { log(`❌ Attack on ${to} failed.`); }
+        }
+    }
+    else if (cmd === "stats") {
+        log(`${user} | Gold: ${p.gold}`);
+    }
+    
+    updateMap();
     saveGame();
 }
 
-function randomEvent(){
-
-    const events=[
-        "goldrush",
-        "meteor",
-        "rebellion",
-        "supplydrop"
-    ];
-
-    const event=
-        events[Math.floor(
-            Math.random()*events.length
-        )];
-
-    const codes=
-        Object.keys(gameState.data);
-
-    const code=
-        codes[Math.floor(
-            Math.random()*codes.length
-        )];
-
-    const t=
-        gameState.data[code];
-
-    if(event==="goldrush"){
-
-        if(t.owner){
-
-            gameState.players[
-                t.owner
-            ].gold += 500;
-
-            log(
-                `💰 Gold Rush in ${code}!`
-            );
-        }
-    }
-
-    if(event==="meteor"){
-
-        t.troops=
-            Math.floor(
-                t.troops*0.75
-            );
-
-        log(
-            `☄️ Meteor hit ${code}!`
-        );
-    }
-
-    if(event==="rebellion"){
-
-        if(t.owner){
-
-            t.owner=null;
-
-            log(
-                `⚔️ Rebellion in ${code}!`
-            );
-        }
-    }
-
-    if(event==="supplydrop"){
-
-        t.troops+=100;
-
-        log(
-            `📦 Supply Drop in ${code}!`
-        );
-    }
-
-    updateMap();
-}
-
-function leaderboard(){
-
-    let board=
-        Object.keys(gameState.players)
-        .map(name=>({
-
-            name,
-
-            territories:
-                territoryCount(name),
-
-            troops:
-                totalTroops(name),
-
-            gold:
-                gameState.players[name].gold
-        }))
-        .sort((a,b)=>
-            b.territories-
-            a.territories
-        );
-
-    log("===== LEADERBOARD =====");
-
-    board.slice(0,10)
-        .forEach((p,i)=>{
-
-            log(
-                `${i+1}. ${p.name} | ` +
-                `${p.territories} territories | ` +
-                `${p.troops} troops | ` +
-                `${p.gold} gold`
-            );
-        });
-}
-
-function checkVictory(){
-
-    const total=
-        Object.keys(gameState.data)
-        .length;
-
-    Object.keys(gameState.players)
-        .forEach(player=>{
-
-            const owned=
-                territoryCount(player);
-
-            if(owned >= total*0.5){
-
-                log(
-                    `🏆 ${player} has conquered the world!`
-                );
-
-                gameState.active=false;
-            }
-        });
-}
-
-function processCommand(user,cmd,args){
-
-    cmd=cmd.toLowerCase();
-
-    if(cmd==="startrisk"){
-
-        gameState.active=true;
-        gameState.startTime=Date.now();
-
-        log("🌍 World War Started.");
-
-        saveGame();
-
-        return;
-    }
-
-    if(cmd==="join"){
-
-        ensurePlayer(user);
-
-        saveGame();
-
-        return;
-    }
-
-    if(!gameState.active)
-        return;
-
-    ensurePlayer(user);
-
-    const player=
-        gameState.players[user];
-
-    if(cmd==="help"){
-
-        log(
-            "!join !claim !build !attack !recruit !stats !leaderboard"
-        );
-
-        return;
-    }
-
-    if(cmd==="claim"){
-
-        const code=
-            args[0]?.toUpperCase();
-
-        const t=
-            gameState.data[code];
-
-        if(
-            t &&
-            !t.owner
-        ){
-
-            t.owner=user;
-
-            log(
-                `${user} claimed ${code}`
-            );
-        }
-    }
-
-    if(cmd==="recruit"){
-
-        const code=
-            args[0]?.toUpperCase();
-
-        const amount=
-            parseInt(args[1])||0;
-
-        const t=
-            gameState.data[code];
-
-        if(
-            t &&
-            t.owner===user
-        ){
-
-            const cost=
-                amount*5;
-
-            if(
-                player.gold>=cost
-            ){
-
-                player.gold-=cost;
-
-                t.troops+=amount;
-
-                player.recruited+=amount;
-
-                log(
-                    `${user} recruited ${amount}`
-                );
-            }
-        }
-    }
-
-    if(cmd==="build"){
-
-        const type=
-            args[0];
-
-        const code=
-            args[1]?.toUpperCase();
-
-        const t=
-            gameState.data[code];
-
-        if(
-            !BUILDINGS[type] ||
-            !t ||
-            t.owner!==user
-        ) return;
-
-        const cost=
-            BUILDINGS[type].cost;
-
-        if(
-            player.gold>=cost
-        ){
-
-            player.gold-=cost;
-
-            t.buildings[type]++;
-
-            log(
-                `${user} built ${type} in ${code}`
-            );
-        }
-    }
-
-    if(cmd==="attack"){
-
-        const from=
-            args[0]?.toUpperCase();
-
-        const to=
-            args[1]?.toUpperCase();
-
-        const a=
-            gameState.data[from];
-
-        const d=
-            gameState.data[to];
-
-        if(
-            !a ||
-            !d
-        ) return;
-
-        if(
-            a.owner!==user
-        ) return;
-
-        if(
-            a.troops<10
-        ) return;
-
-        if(
-            a.cooldown>0
-        ){
-
-            log(
-                `${from} is recovering.`
-            );
-
-            return;
-        }
-
-        a.cooldown=3;
-
-        const attackPower=
-            a.troops *
-            (0.8+Math.random()*0.4);
-
-        const defensePower=
-            d.troops *
-            (
-                1+
-                (
-                    d.buildings.fort*
-                    0.25
-                )
-            ) *
-            (
-                0.8+
-                Math.random()*0.4
-            );
-
-        player.attacks++;
-
-        if(
-            attackPower >
-            defensePower
-        ){
-
-            const survivors=
-                Math.max(
-                    5,
-                    Math.floor(
-                        attackPower-
-                        defensePower
-                    )
-                );
-
-            d.owner=user;
-            d.troops=survivors;
-
-            a.troops=
-                Math.floor(
-                    a.troops*0.5
-                );
-
-            player.wins++;
-
-            log(
-                `⚔️ ${user} captured ${to}!`
-            );
-        }
-        else{
-
-            a.troops=
-                Math.floor(
-                    a.troops*0.7
-                );
-
-            player.losses++;
-
-            log(
-                `❌ ${user} failed attacking ${to}`
-            );
-        }
-
-        checkVictory();
-    }
-
-    if(cmd==="stats"){
-
-        log(
-            `${user} | Gold:${player.gold} | Territories:${territoryCount(user)} | Troops:${totalTroops(user)}`
-        );
-    }
-
-    if(cmd==="leaderboard"){
-
-        leaderboard();
-    }
-
-    saveGame();
-    updateMap();
-}
-
-ComfyJS.onCommand=
-(u,c,m)=>
-processCommand(
-    u,
-    c,
-    m.split(" ")
-);
-
+ComfyJS.onCommand = (u, c, m) => processCommand(u, c.toLowerCase(), m.split(" "));
 ComfyJS.Init("Jaedraze");
-
-setInterval(gameTick,60000);
-
-setInterval(randomEvent,300000);
-
-setInterval(saveGame,30000);
-
 initMap();
 </script>
 </body>
