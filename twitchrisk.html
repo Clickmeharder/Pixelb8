@@ -1,129 +1,314 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Jaedraze Twitch Risk - Full Engine</title>
+    <meta charset="UTF-8">
+    <title>Jaedraze Twitch Risk - Full Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
-        body { background: #0c0f12; color: #d1d5db; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; }
-        #game-container { width: 100%; max-width: 1000px; height: 60vh; background: #000; border: 2px solid #555; position: relative; }
+        body {
+            background: #0c0f12; color: #d1d5db; font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center;
+        }
+        h1 { margin: 8px 0; color: #e74c3c; }
+        #game-container {
+            width: 100%; max-width: 1100px; height: 65vh; background: #000; 
+            border: 3px solid #444; position: relative; overflow: hidden;
+        }
         #map { width: 100%; height: 100%; }
-        .country { stroke: #fff; stroke-width: 0.2; cursor: pointer; transition: 0.3s; }
-        .owner-label { pointer-events: none; font-size: 3px; fill: white; text-anchor: middle; font-weight: bold; text-shadow: 1px 1px 1px black; }
-        #log { width: 100%; max-width: 1000px; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 13px; margin-top: 10px; border: 1px solid #333; }
-        button { background: #e74c3c; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-bottom: 5px; }
+        .country { stroke: #222; stroke-width: 0.8; cursor: pointer; transition: fill 0.2s; }
+        .country:hover { stroke: #fff; stroke-width: 1.5; }
+        .owner-label { pointer-events: none; font-size: 3.5px; fill: white; text-anchor: middle; 
+                       font-weight: bold; text-shadow: 1px 1px 2px black; }
+        #sidebar {
+            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.85);
+            padding: 12px; border-radius: 8px; width: 220px; font-size: 13px; border: 1px solid #555;
+        }
+        #log {
+            width: 100%; max-width: 1100px; height: 160px; background: #1a1f26; 
+            overflow-y: auto; padding: 10px; font-size: 13px; margin-top: 10px;
+            border: 1px solid #333; border-radius: 4px;
+        }
+        button { background: #e74c3c; color: white; border: none; padding: 8px 14px; margin: 5px; cursor: pointer; font-weight: bold; border-radius: 4px; }
     </style>
 </head>
 <body>
-
-    <h3>Jaedraze Strategy Engine</h3>
+    <h1>🌍 JAEDRAZE RISK - TWITCH EDITION</h1>
     <button onclick="resetGame()">RESET GAME</button>
-    <div id="game-container"><svg id="map" viewBox="0 0 360 180"></svg></div>
-    <div id="log">System Initializing...</div>
+
+    <div id="game-container">
+        <svg id="map" viewBox="0 0 360 180"></svg>
+        <div id="sidebar">
+            <strong>Players Online:</strong> <span id="player-count">0</span><br><br>
+            <div id="player-list"></div>
+        </div>
+    </div>
+
+    <div id="log">Game initialized. Type !join to play.</div>
 
 <script>
-const SAVE_KEY = "jaedrazeRiskV5";
-let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || { active: false, players: {}, data: {} };
-const COSTS = { mine: 50, base: 100, troop: 10 };
+// ====================== CONFIG ======================
+const SAVE_KEY = "jaedrazeRiskV2";
+const COSTS = { mine: 60, base: 120, troop: 12 };
+const INCOME_INTERVAL = 30000; // 30 seconds
 
-// --- CRITICAL FUNCTIONS ---
+let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || {
+    active: false,
+    players: {},
+    data: {},
+    lastIncome: Date.now()
+};
+
+// ====================== HELPERS ======================
 function saveGame() { localStorage.setItem(SAVE_KEY, JSON.stringify(gameState)); }
 function resetGame() { localStorage.removeItem(SAVE_KEY); location.reload(); }
-function log(msg) { const l = document.getElementById("log"); l.innerHTML += `<div>> ${msg}</div>`; l.scrollTop = l.scrollHeight; }
+
+function log(msg, color = "#d1d5db") {
+    const l = document.getElementById("log");
+    l.innerHTML += `<div style="color:${color}">> ${msg}</div>`;
+    l.scrollTop = l.scrollHeight;
+}
 
 function getUserColor(name) {
-    let hash = 0; for(let i=0; i<name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    let color = '#'; for(let i=0; i<3; i++) color += ('00'+((hash>>(i*8))&255).toString(16)).slice(-2);
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    let color = '#';
+    for (let i = 0; i < 3; i++) color += ('00' + ((hash >> (i*8)) & 255).toString(16)).slice(-2);
     return color;
 }
 
+// ====================== MAP ======================
 async function initMap() {
     const res = await fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson");
     const geo = await res.json();
     const svg = document.getElementById("map");
 
-    geo.features.forEach(f => {
-        const code = f.properties.ISO_A3;
+    gameState.data = gameState.data || {};
+
+    geo.features.forEach(feature => {
+        const code = feature.properties.ISO_A3;
+        if (!code) return;
+
         const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("class", "country");
-        path.setAttribute("id", code);
-        path.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
-        
+        path.classList.add("country");
+        path.id = code;
+
         let d = "";
-        const coords = (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates);
-        coords.forEach(poly => {
-            poly[0].forEach((c, i) => { d += (i === 0 ? "M" : "L") + `${c[0]+180},${90-c[1]} `; });
+        const coords = feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates;
+        coords.forEach(ring => {
+            ring[0].forEach((c, i) => {
+                d += (i === 0 ? "M" : "L") + `${c[0] + 180},${90 - c[1]} `;
+            });
             d += "Z ";
         });
         path.setAttribute("d", d);
-        
-        // Label Element
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("class", "owner-label");
-        text.setAttribute("id", `label-${code}`);
-        text.style.display = "none";
-        
+
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.classList.add("owner-label");
+        label.id = `label-${code}`;
+
         group.appendChild(path);
-        group.appendChild(text);
+        group.appendChild(label);
         svg.appendChild(group);
 
-        // Position label
-        setTimeout(() => {
-            const box = path.getBBox();
-            text.setAttribute("x", box.x + box.width/2);
-            text.setAttribute("y", box.y + box.height/2);
-        }, 500);
-
-        if(!gameState.data[code]) gameState.data[code] = { owner: null, troops: 5, buildings: {mine:0, base:0} };
+        // Initialize country if missing
+        if (!gameState.data[code]) {
+            gameState.data[code] = { owner: null, troops: 3, buildings: {mine:0, base:0} };
+        }
     });
+
     updateMap();
-    log("Map Loaded.");
+    log("🗺️ World map loaded. !join to enter the war.", "#4ade80");
 }
 
+// Update visual map
 function updateMap() {
     Object.keys(gameState.data).forEach(code => {
         const t = gameState.data[code];
         const path = document.getElementById(code);
         const label = document.getElementById(`label-${code}`);
-        if(!path) return;
-        
+        if (!path) return;
+
         path.style.fill = t.owner ? getUserColor(t.owner) : "#2d3436";
-        path.querySelector("title").textContent = `${code} | Owner: ${t.owner || 'None'} | Troops: ${t.troops}`;
-        
-        if(t.owner) {
-            label.textContent = t.owner;
+
+        const title = `${code} | ${t.owner || 'Neutral'} | ${t.troops} troops`;
+        path.querySelector("title") ? path.querySelector("title").textContent = title : null;
+
+        if (t.owner && label) {
+            label.textContent = t.owner.substring(0,4);
             label.style.display = "block";
-        } else {
+            const bbox = path.getBBox();
+            label.setAttribute("x", bbox.x + bbox.width/2);
+            label.setAttribute("y", bbox.y + bbox.height/2 + 1);
+        } else if (label) {
             label.style.display = "none";
         }
     });
+    updateSidebar();
 }
 
+// ====================== SIDEBAR ======================
+function updateSidebar() {
+    const countEl = document.getElementById("player-count");
+    const listEl = document.getElementById("player-list");
+    countEl.textContent = Object.keys(gameState.players).length;
+
+    let html = "";
+    Object.entries(gameState.players).forEach(([user, data]) => {
+        html += `<div style="color:${getUserColor(user)}">• ${user} <small>(${data.gold}g)</small></div>`;
+    });
+    listEl.innerHTML = html || "<small>No players yet</small>";
+}
+
+// ====================== INCOME ======================
+function processIncome() {
+    if (!gameState.active) return;
+    const now = Date.now();
+    if (now - gameState.lastIncome < INCOME_INTERVAL) return;
+
+    let totalIncome = 0;
+    Object.keys(gameState.data).forEach(code => {
+        const c = gameState.data[code];
+        if (c.owner && gameState.players[c.owner]) {
+            const income = (c.buildings.mine * 8) + (c.buildings.base * 3);
+            gameState.players[c.owner].gold += income;
+            totalIncome += income;
+        }
+    });
+
+    if (totalIncome > 0) log(`💰 Income distributed (+${totalIncome} total)`, "#facc15");
+    gameState.lastIncome = now;
+    saveGame();
+}
+
+// ====================== COMMANDS ======================
 function processCommand(user, cmd, args) {
-    if (cmd === "startrisk") { gameState.active = true; log("🌍 War Started!"); saveGame(); }
-    if (cmd === "join" && !gameState.players[user]) { 
-        gameState.players[user] = { gold: 500 }; 
-        log(`${user} joined!`); saveGame(); 
+    if (!gameState.players[user] && cmd !== "join") return;
+
+    const p = gameState.players[user] || { gold: 0 };
+
+    switch (cmd) {
+        case "join":
+            if (!gameState.players[user]) {
+                gameState.players[user] = { gold: 600 };
+                log(`🎮 ${user} joined the war!`, "#4ade80");
+            }
+            break;
+
+        case "claim":
+            const code = args[0]?.toUpperCase();
+            if (gameState.data[code] && !gameState.data[code].owner) {
+                gameState.data[code].owner = user;
+                gameState.data[code].troops = 6;
+                log(`🏴‍☠️ ${user} claimed ${code}!`, "#60a5fa");
+            } else {
+                log(`❌ ${code} is already owned or invalid.`, "#f87171");
+            }
+            break;
+
+        case "train":
+            const trainCode = args[0]?.toUpperCase();
+            const amt = parseInt(args[1]) || 1;
+            if (gameState.data[trainCode]?.owner === user) {
+                const cost = amt * COSTS.troop;
+                if (p.gold >= cost) {
+                    p.gold -= cost;
+                    gameState.data[trainCode].troops += amt;
+                    log(`⚔️ ${user} trained ${amt} troops in ${trainCode}`, "#f472b6");
+                } else log("❌ Not enough gold.", "#f87171");
+            }
+            break;
+
+        case "build":
+            const buildType = args[0]?.toLowerCase();
+            const buildCode = args[1]?.toUpperCase();
+            if (!["mine","base"].includes(buildType)) {
+                log("❌ Use !build mine/base <country>", "#f87171");
+                return;
+            }
+            const cost = COSTS[buildType];
+            if (gameState.data[buildCode]?.owner === user && p.gold >= cost) {
+                p.gold -= cost;
+                gameState.data[buildCode].buildings[buildType]++;
+                log(`🏗️ ${user} built a ${buildType} in ${buildCode}`, "#34d399");
+            } else log("❌ Cannot build there.", "#f87171");
+            break;
+
+        case "attack":
+            const from = args[0]?.toUpperCase();
+            const to = args[1]?.toUpperCase();
+            if (!gameState.data[from] || !gameState.data[to]) return log("❌ Invalid countries");
+
+            if (gameState.data[from].owner !== user) {
+                log("❌ You don't own that territory.", "#f87171");
+                return;
+            }
+            if (gameState.data[from].troops < 6) {
+                log("❌ Need at least 6 troops to attack.", "#f87171");
+                return;
+            }
+
+            const atkTroops = Math.floor(gameState.data[from].troops * 0.7); // leave some behind
+            const defTroops = gameState.data[to].troops || 3;
+
+            // Simple combat
+            const atkRoll = atkTroops + Math.random() * 15;
+            const defRoll = defTroops + Math.random() * 12;
+
+            gameState.data[from].troops -= Math.floor(atkTroops * 0.6); // losses
+
+            if (atkRoll > defRoll) {
+                gameState.data[to].owner = user;
+                gameState.data[to].troops = Math.max(2, Math.floor(atkTroops * 0.4));
+                log(`🔥 ${user} conquered ${to} from ${gameState.data[to].owner || "neutral"}!`, "#ef4444");
+            } else {
+                gameState.data[to].troops = Math.max(1, Math.floor(defTroops * 0.7));
+                log(`🛡️ Attack on ${to} failed.`, "#f59e0b");
+            }
+            break;
+
+        case "move":
+            const mFrom = args[0]?.toUpperCase();
+            const mTo = args[1]?.toUpperCase();
+            const mAmt = parseInt(args[2]) || 5;
+            if (gameState.data[mFrom]?.owner === user && gameState.data[mTo]?.owner === user) {
+                if (gameState.data[mFrom].troops > mAmt + 3) {
+                    gameState.data[mFrom].troops -= mAmt;
+                    gameState.data[mTo].troops += mAmt;
+                    log(`🚚 ${user} moved ${mAmt} troops from ${mFrom} → ${mTo}`);
+                }
+            }
+            break;
+
+        case "startrisk":
+            if (!gameState.active) {
+                gameState.active = true;
+                log("🌍 THE GREAT WAR HAS BEGUN!", "#ef4444");
+            }
+            break;
     }
-    
-    if(!gameState.players[user]) return; 
-    
-    if (cmd === "claim") {
-        const code = args[0]?.toUpperCase();
-        if (gameState.data[code] && !gameState.data[code].owner) {
-            gameState.data[code].owner = user;
-            log(`${user} claimed ${code}`);
-        } else { log("Invalid or already owned."); }
-    } 
-    
+
     updateMap();
     saveGame();
 }
 
-ComfyJS.onCommand = (u, c, m) => processCommand(u, c.toLowerCase(), m.split(" "));
-ComfyJS.Init("Jaedraze");
+// ====================== GAME LOOP ======================
+setInterval(() => {
+    processIncome();
+    updateMap();
+}, 5000);
+
+// ====================== TWITCH INTEGRATION ======================
+ComfyJS.onCommand = (user, command, message, flags, extra) => {
+    const args = message.trim().split(/\s+/);
+    processCommand(user.toLowerCase(), command.toLowerCase(), args);
+};
+
+ComfyJS.Init("Jaedraze");   // ← Change to your Twitch username
+
+// ====================== START ======================
 initMap();
+log("✅ Jaedraze Risk Engine v2 Ready. Use !join", "#4ade80");
 </script>
 </body>
 </html>
