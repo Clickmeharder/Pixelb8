@@ -6,22 +6,23 @@
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
         
-        /* Container holds the SVG and lets it expand */
         #game-container { 
             width: 100%; 
-            max-width: 1000px; /* Limits max width for better readability */
-            height: 70vh;      /* Gives it a substantial portion of the screen */
+            max-width: 1200px; 
+            height: 70vh;      
             background: #000; 
             border: 2px solid #555; 
             margin-top: 10px;
             display: flex;
         }
 
-        /* Forces the SVG to fill the container perfectly */
         #map { width: 100%; height: 100%; }
 
-        .country { fill: #2d3436; stroke: #fff; stroke-width: 0.3; cursor: pointer; }
-        #log { width: 100%; max-width: 1000px; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 14px; margin-top: 10px; border: 1px solid #333; }
+        .country { fill: #2d3436; stroke: #fff; stroke-width: 0.3; cursor: pointer; transition: 0.3s; }
+        .country:hover { fill: #555; }
+        
+        #log { width: 100%; max-width: 1200px; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 14px; margin-top: 10px; border: 1px solid #333; }
+        #ui { font-size: 16px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -29,7 +30,6 @@
     <h3>Jaedraze Strategy Engine</h3>
     <div id="ui">!startrisk | !claim [CODE] | !build [mine/base] [CODE] | !attack [FROM] [TO]</div>
     <div id="game-container">
-        <!-- Removed fixed width/height attributes from SVG -->
         <svg id="map" viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
     <div id="log">Waiting for !startrisk...</div>
@@ -62,12 +62,49 @@ async function initMap() {
         path.setAttribute("d", d);
         svg.appendChild(path);
         
-        if(gameState.data[f.properties.ISO_A3]?.owner) 
+        if(!gameState.data[f.properties.ISO_A3]) 
+            gameState.data[f.properties.ISO_A3] = { owner: null, buildings: { mine: 0, base: 0 } };
+        
+        if(gameState.data[f.properties.ISO_A3].owner) 
             path.style.fill = "#27ae60";
     });
 }
 
-// Command logic remains the same...
+function processCommand(user, cmd, arg1, arg2) {
+    if (!gameState.active) return;
+    
+    let code = arg1?.toUpperCase();
+    let target = arg2?.toUpperCase();
+
+    if (cmd === "claim") {
+        if (gameState.data[code] && !gameState.data[code].owner) {
+            gameState.data[code].owner = user;
+            document.getElementById(code).style.fill = "#27ae60";
+            log(user + " claimed " + code);
+        } else {
+            log("Invalid or already claimed: " + code);
+        }
+    } 
+    else if (cmd === "build") {
+        if (gameState.data[target]?.owner === user) {
+            gameState.data[target].buildings[arg1.toLowerCase()]++;
+            log(user + " built " + arg1 + " in " + target);
+        }
+    }
+    else if (cmd === "attack") {
+        if (gameState.data[code]?.owner === user && gameState.data[target]) {
+            if (Math.random() > 0.5) {
+                gameState.data[target].owner = user;
+                document.getElementById(target).style.fill = "#27ae60";
+                log(user + " captured " + target);
+            } else {
+                log(user + " failed to capture " + target);
+            }
+        }
+    }
+    localStorage.setItem('riskState', JSON.stringify(gameState));
+}
+
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
     const args = message.split(' ');
@@ -77,13 +114,16 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         localStorage.removeItem('riskState');
         location.reload();
     }
-    if (cmd === "startrisk") { gameState.active = true; log("Game Started!"); }
-    if (!gameState.active) return;
+    if (cmd === "startrisk") { 
+        gameState.active = true; 
+        log("Game Started! Type !claim [CODE] to begin."); 
+    }
     
-    // ... (rest of your logic)
+    processCommand(user, cmd, args[0], args[1]);
 };
 
 ComfyJS.Init("Jaedraze");
+
 function log(msg) { 
     const logBox = document.getElementById("log");
     logBox.innerHTML += `<div>> ${msg}</div>`; 
