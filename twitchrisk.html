@@ -5,30 +5,20 @@
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
-        
-        #game-container { 
-            width: 100%; 
-            max-width: 1200px; 
-            height: 70vh;      
-            background: #000; 
-            border: 2px solid #555; 
-            margin-top: 10px;
-            display: flex;
-        }
-
+        #game-container { width: 100%; max-width: 1200px; height: 60vh; background: #000; border: 2px solid #555; position: relative; }
         #map { width: 100%; height: 100%; }
-
         .country { fill: #2d3436; stroke: #fff; stroke-width: 0.3; cursor: pointer; transition: 0.3s; }
-        .country:hover { fill: #555; }
-        
-        #log { width: 100%; max-width: 1200px; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 14px; margin-top: 10px; border: 1px solid #333; }
-        #ui { font-size: 16px; margin-bottom: 5px; }
+        /* Combat Flash Animation */
+        @keyframes flash { 0% { fill: #c0392b; } 100% { fill: #27ae60; } }
+        .attack-anim { animation: flash 0.5s ease-in-out; }
+        #log { width: 100%; max-width: 1200px; height: 120px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 13px; margin-top: 10px; }
+        .stats { font-size: 14px; margin-top: 5px; color: #f1c40f; }
     </style>
 </head>
 <body>
 
     <h3>Jaedraze Strategy Engine</h3>
-    <div id="ui">!startrisk | !claim [CODE] | !build [mine/base] [CODE] | !attack [FROM] [TO]</div>
+    <div id="ui">!claim [CODE] | !build [mine/base] [CODE] | !train [CODE] | !attack [FROM] [TO]</div>
     <div id="game-container">
         <svg id="map" viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
@@ -47,8 +37,12 @@ async function initMap() {
         path.setAttribute("class", "country");
         path.setAttribute("id", f.properties.ISO_A3);
         
-        const project = (c) => [c[0] + 180, 90 - c[1]];
+        // Add Title for Hover Ownership
+        let title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+        title.textContent = f.properties.ISO_A3;
+        path.appendChild(title);
         
+        const project = (c) => [c[0] + 180, 90 - c[1]];
         let d = "";
         let coords = f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates;
         coords.forEach(poly => {
@@ -63,73 +57,70 @@ async function initMap() {
         svg.appendChild(path);
         
         if(!gameState.data[f.properties.ISO_A3]) 
-            gameState.data[f.properties.ISO_A3] = { owner: null, buildings: { mine: 0, base: 0 } };
+            gameState.data[f.properties.ISO_A3] = { owner: null, gold: 100, troops: 5, buildings: { mine: 0, base: 0 } };
         
-        if(gameState.data[f.properties.ISO_A3].owner) 
+        if(gameState.data[f.properties.ISO_A3].owner) {
             path.style.fill = "#27ae60";
+            title.textContent = f.properties.ISO_A3 + " | Owner: " + gameState.data[f.properties.ISO_A3].owner;
+        }
     });
 }
 
+// Economic Tick: Runs every 30 seconds
+setInterval(() => {
+    if(!gameState.active) return;
+    for(let code in gameState.data) {
+        let c = gameState.data[code];
+        if(c.owner) {
+            c.gold += (c.buildings.mine * 10) + 5; // Base income + mines
+            c.troops += (c.buildings.base * 2);
+        }
+    }
+    localStorage.setItem('riskState', JSON.stringify(gameState));
+}, 30000);
+
 function processCommand(user, cmd, arg1, arg2) {
     if (!gameState.active) return;
-    
     let code = arg1?.toUpperCase();
     let target = arg2?.toUpperCase();
 
-    if (cmd === "claim") {
-        if (gameState.data[code] && !gameState.data[code].owner) {
-            gameState.data[code].owner = user;
-            document.getElementById(code).style.fill = "#27ae60";
-            log(user + " claimed " + code);
-        } else {
-            log("Invalid or already claimed: " + code);
-        }
+    if (cmd === "claim" && gameState.data[code] && !gameState.data[code].owner) {
+        gameState.data[code].owner = user;
+        document.getElementById(code).style.fill = "#27ae60";
+        document.getElementById(code).querySelector('title').textContent = code + " | Owner: " + user;
+        log(user + " claimed " + code);
     } 
     else if (cmd === "build") {
-        if (gameState.data[target]?.owner === user) {
+        if (gameState.data[target]?.owner === user && gameState.data[target].gold >= 50) {
+            gameState.data[target].gold -= 50;
             gameState.data[target].buildings[arg1.toLowerCase()]++;
             log(user + " built " + arg1 + " in " + target);
         }
     }
     else if (cmd === "attack") {
-        if (gameState.data[code]?.owner === user && gameState.data[target]) {
-            if (Math.random() > 0.5) {
+        let path = document.getElementById(target);
+        path.classList.add('attack-anim');
+        setTimeout(() => path.classList.remove('attack-anim'), 500);
+        
+        if (gameState.data[code]?.owner === user && gameState.data[target] && gameState.data[code].troops > 5) {
+            gameState.data[code].troops -= 5;
+            if (Math.random() > 0.4) {
                 gameState.data[target].owner = user;
-                document.getElementById(target).style.fill = "#27ae60";
-                log(user + " captured " + target);
-            } else {
-                log(user + " failed to capture " + target);
+                path.style.fill = "#27ae60";
+                log(user + " captured " + target + "!");
             }
         }
     }
     localStorage.setItem('riskState', JSON.stringify(gameState));
 }
 
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    const cmd = command.toLowerCase();
-    const args = message.split(' ');
-    log(`<strong>${user}:</strong> !${cmd} ${message}`);
-
-    if (cmd === "resetrisk" && flags.broadcaster) {
-        localStorage.removeItem('riskState');
-        location.reload();
-    }
-    if (cmd === "startrisk") { 
-        gameState.active = true; 
-        log("Game Started! Type !claim [CODE] to begin."); 
-    }
-    
-    processCommand(user, cmd, args[0], args[1]);
+ComfyJS.onCommand = (u, c, m, f, e) => {
+    if (c === "startrisk") { gameState.active = true; log("Game Started!"); }
+    processCommand(u, c.toLowerCase(), m.split(' ')[0], m.split(' ')[1]);
 };
 
 ComfyJS.Init("Jaedraze");
-
-function log(msg) { 
-    const logBox = document.getElementById("log");
-    logBox.innerHTML += `<div>> ${msg}</div>`; 
-    logBox.scrollTop = logBox.scrollHeight;
-}
-
+function log(m) { const l = document.getElementById("log"); l.innerHTML += `<div>> ${m}</div>`; l.scrollTop = l.scrollHeight; }
 initMap();
 </script>
 </body>
