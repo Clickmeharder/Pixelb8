@@ -2,25 +2,24 @@
 <html>
 <head>
     <title>Jaedraze Twitch Risk</title>
-    <!-- 1. Include Comfy.js for live Twitch interaction -->
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: monospace; display: flex; flex-direction: column; align-items: center; margin: 0; }
         #game-container { width: 90vw; height: 60vh; background: #000; border: 2px solid #555; margin-top: 10px; }
-        .country { fill: #2d3436; stroke: #fff; stroke-width: 0.2; cursor: pointer; }
-        #log { width: 90vw; height: 100px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 14px; }
+        .country { fill: #2d3436; stroke: #fff; stroke-width: 0.2; cursor: pointer; transition: 0.3s; }
+        #log { width: 90vw; height: 100px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 14px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <h3>Jaedraze Strategy Engine</h3>
-    <div id="ui">!claim [CODE] | !build mine [CODE] | !attack [FROM] [TO]</div>
+    <div id="ui">Commands: !claim [CODE] | !build mine [CODE] | !attack [FROM] [TO]</div>
     <div id="game-container"><svg id="map" viewBox="-180 -90 360 180"></svg></div>
-    <div id="log">Waiting for commands...</div>
+    <div id="log">Waiting for Twitch...</div>
 
 <script>
-// Load saved game state if it exists
-let gameState = JSON.parse(localStorage.getItem('riskState')) || { status: "ACTIVE", data: {} };
+// Load state
+let gameState = JSON.parse(localStorage.getItem('riskState')) || { data: {} };
 
 async function initMap() {
     const res = await fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson');
@@ -33,35 +32,60 @@ async function initMap() {
         let d = f.geometry.coordinates[0].map((c, i) => (i === 0 ? "M" : "L") + c.join(",")).join(" ") + "Z";
         path.setAttribute("d", d);
         svg.appendChild(path);
+        
+        // Initialize if not in save
         if(!gameState.data[f.properties.ISO_A3]) 
             gameState.data[f.properties.ISO_A3] = { owner: null, gold: 0, units: 0, buildings: { mine: 0, base: 0 } };
+        
+        // Restore colors
         if(gameState.data[f.properties.ISO_A3].owner) 
             path.style.fill = "#27ae60";
     });
+    log("Map loaded.");
 }
 
-// 2. Command Processing
+// Improved logic
 function processCommand(user, cmd, arg1, arg2) {
-    if (cmd === "claim" && gameState.data[arg1] && !gameState.data[arg1].owner) {
-        gameState.data[arg1].owner = user;
-        document.getElementById(arg1).style.fill = "#27ae60";
-        log(user + " claimed " + arg1);
+    if (!arg1) return;
+    let countryId = arg1.toUpperCase();
+    let targetId = arg2 ? arg2.toUpperCase() : null;
+
+    if (cmd === "claim" && gameState.data[countryId] && !gameState.data[countryId].owner) {
+        gameState.data[countryId].owner = user;
+        document.getElementById(countryId).style.fill = "#27ae60";
+        log(user + " claimed " + countryId);
+    } 
+    else if (cmd === "build" && gameState.data[targetId] && gameState.data[targetId].owner === user) {
+        // arg1 is building type, arg2 is country
+        gameState.data[targetId].buildings[arg1]++;
+        log(user + " built " + arg1 + " in " + targetId);
     }
-    if (cmd === "build" && gameState.data[arg2] && gameState.data[arg2].owner === user) {
-        gameState.data[arg2].buildings[arg1]++;
-        log(user + " built " + arg1 + " in " + arg2);
+    else if (cmd === "attack" && gameState.data[countryId]?.owner === user && gameState.data[targetId]) {
+        if (Math.random() > 0.5) {
+            gameState.data[targetId].owner = user;
+            document.getElementById(targetId).style.fill = "#27ae60";
+            log(user + " captured " + targetId);
+        } else {
+            log(user + " failed to capture " + targetId);
+        }
     }
     localStorage.setItem('riskState', JSON.stringify(gameState));
 }
 
-// 3. Connect to Jaedraze Twitch
+// Twitch Listener
 ComfyJS.onCommand = (user, cmd, message, flags, extra) => {
     let args = message.split(' ');
     processCommand(user, cmd, args[0], args[1]);
 };
+
+ComfyJS.onConnected = () => log("Connected to Jaedraze chat!");
 ComfyJS.Init("Jaedraze");
 
-function log(msg) { document.getElementById("log").innerHTML += `<div>> ${msg}</div>`; }
+function log(msg) { 
+    document.getElementById("log").innerHTML += `<div>> ${msg}</div>`; 
+    document.getElementById("log").scrollTop = document.getElementById("log").scrollHeight;
+}
+
 initMap();
 </script>
 </body>
