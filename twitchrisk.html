@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jaedraze Twitch Risk - Full Engine</title>
+    <title>Jaedraze Twitch Risk - Stable</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
@@ -13,18 +13,26 @@
 </head>
 <body>
 
-    <h3>Jaedraze Strategy Engine: v1.0000</h3>
+    <h3>Jaedraze Strategy Engine (Stable)</h3>
     <div id="ui">!join | !claim [CODE] | !build [mine/base] [CODE] | !train [CODE] [amt] | !attack [FROM] [TO] | !stats</div>
     <div id="game-container"><svg id="map" viewBox="0 0 360 180"></svg></div>
     <div id="log">System Initializing...</div>
 
 <script>
+// Global Error Handler: Shows errors on-screen
+window.onerror = function(msg, url, line) { log(`CRITICAL ERROR: ${msg} on line ${line}`); };
+
 const SAVE_KEY = "jaedrazeRiskV4";
 let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || { active: false, players: {}, data: {} };
-const COSTS = { mine: 50, base: 100, troop: 10 }; // 10 gold per troop
+const COSTS = { mine: 50, base: 100, troop: 10 };
 
 function saveGame() { localStorage.setItem(SAVE_KEY, JSON.stringify(gameState)); }
-function log(msg) { const l = document.getElementById("log"); l.innerHTML += `<div>> ${msg}</div>`; l.scrollTop = l.scrollHeight; }
+function log(msg) { 
+    const l = document.getElementById("log"); 
+    l.innerHTML += `<div>> ${msg}</div>`; 
+    l.scrollTop = l.scrollHeight; 
+    console.log(msg);
+}
 
 function getUserColor(name) {
     let hash = 0; for(let i=0; i<name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -33,29 +41,36 @@ function getUserColor(name) {
 }
 
 async function initMap() {
-    const res = await fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson");
-    const geo = await res.json();
-    const svg = document.getElementById("map");
+    try {
+        log("Fetching map data...");
+        const res = await fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson");
+        if (!res.ok) throw new Error("Could not fetch map data");
+        const geo = await res.json();
+        const svg = document.getElementById("map");
 
-    geo.features.forEach(f => {
-        const code = f.properties.ISO_A3;
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("class", "country");
-        path.setAttribute("id", code);
-        path.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
-        
-        let d = "";
-        const coords = (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates);
-        coords.forEach(poly => {
-            poly[0].forEach((c, i) => { d += (i === 0 ? "M" : "L") + `${c[0]+180},${90-c[1]} `; });
-            d += "Z ";
+        geo.features.forEach(f => {
+            const code = f.properties.ISO_A3;
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("class", "country");
+            path.setAttribute("id", code);
+            path.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
+            
+            let d = "";
+            const coords = (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates);
+            coords.forEach(poly => {
+                poly[0].forEach((c, i) => { d += (i === 0 ? "M" : "L") + `${c[0]+180},${90-c[1]} `; });
+                d += "Z ";
+            });
+            path.setAttribute("d", d);
+            svg.appendChild(path);
+
+            if(!gameState.data[code]) gameState.data[code] = { owner: null, troops: 5, gold: 0, buildings: {mine:0, base:0} };
         });
-        path.setAttribute("d", d);
-        svg.appendChild(path);
-
-        if(!gameState.data[code]) gameState.data[code] = { owner: null, troops: 5, gold: 0, buildings: {mine:0, base:0} };
-    });
-    updateMap();
+        updateMap();
+        log("Map Loaded Successfully.");
+    } catch(e) {
+        log("ERROR LOADING MAP: " + e.message);
+    }
 }
 
 function updateMap() {
@@ -69,13 +84,20 @@ function updateMap() {
 }
 
 function processCommand(user, cmd, args) {
+    // Admin Commands
     if (cmd === "startrisk") { gameState.active = true; log("🌍 War Started!"); saveGame(); return; }
+    if (cmd === "reset") { localStorage.removeItem(SAVE_KEY); location.reload(); return; }
+    
     if (cmd === "join") { 
         if(!gameState.players[user]) { gameState.players[user] = { gold: 200 }; log(`${user} joined the war.`); saveGame(); }
+        else { log(`${user} has already joined.`); }
         return;
     }
     
-    if(!gameState.players[user]) return; // Must join first
+    // Game Logic
+    if(!gameState.players[user]) { log(`${user} must !join first.`); return; }
+    if(!gameState.active) { log("Game has not started yet. Broadcaster: use !startrisk"); return; }
+
     const p = gameState.players[user];
     
     if (cmd === "claim") {
@@ -83,16 +105,16 @@ function processCommand(user, cmd, args) {
         if (gameState.data[code] && !gameState.data[code].owner) {
             gameState.data[code].owner = user;
             log(`${user} claimed ${code}`);
-        }
+        } else { log("Invalid country or already claimed."); }
     } 
     else if (cmd === "build") {
-        const type = args[0]; // mine or base
+        const type = args[0]; 
         const code = args[1]?.toUpperCase();
-        if (gameState.data[code]?.owner === user && p.gold >= COSTS[type]) {
+        if (gameState.data[code]?.owner === user && p.gold >= (COSTS[type] || 9999)) {
             p.gold -= COSTS[type];
             gameState.data[code].buildings[type]++;
-            log(`${user} built ${type} in ${code}. Remaining gold: ${p.gold}`);
-        }
+            log(`${user} built ${type} in ${code}. Gold left: ${p.gold}`);
+        } else { log("Insufficient gold or invalid building/country."); }
     }
     else if (cmd === "train") {
         const code = args[0]?.toUpperCase();
@@ -102,7 +124,7 @@ function processCommand(user, cmd, args) {
             p.gold -= totalCost;
             gameState.data[code].troops += amt;
             log(`${user} trained ${amt} troops in ${code}.`);
-        }
+        } else { log("Insufficient gold."); }
     }
     else if (cmd === "attack") {
         const [from, to] = [args[0]?.toUpperCase(), args[1]?.toUpperCase()];
@@ -112,7 +134,7 @@ function processCommand(user, cmd, args) {
                 gameState.data[to].owner = user;
                 log(`⚔️ ${user} captured ${to}!`);
             } else { log(`❌ Attack on ${to} failed.`); }
-        }
+        } else { log("Invalid attack. Check ownership or troop count (>5)."); }
     }
     else if (cmd === "stats") {
         log(`${user} | Gold: ${p.gold}`);
