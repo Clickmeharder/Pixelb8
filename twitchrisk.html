@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jaedraze broken Twitch Risk</title>
+    <title>Jaedraze Twitch Risk - Production</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
         #game-container { width: 100%; max-width: 1200px; height: 60vh; background: #000; border: 2px solid #555; position: relative; }
         #map { width: 100%; height: 100%; }
-        .country { fill: #2d3436; stroke: #fff; stroke-width: 0.3; cursor: pointer; transition: 0.3s; }
+        .country { fill: #2d3436; stroke: #fff; stroke-width: 0.3; cursor: pointer; transition: 0.5s; }
         @keyframes flash { 0% { fill: #c0392b; } 100% { fill: #27ae60; } }
         .attack-anim { animation: flash 0.5s ease-in-out; }
         #log { width: 100%; max-width: 1200px; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 13px; margin-top: 10px; border: 1px solid #333; }
@@ -16,12 +16,19 @@
 <body>
 
     <h3>Jaedraze Strategy Engine</h3>
-    <div id="ui">!startrisk | !claim [CODE] | !build [mine/base] [CODE] | !attack [FROM] [TO]</div>
+    <div id="ui">!startrisk | !claim [CODE] | !build [mine/base] [CODE] | !attack [FROM] [TO] | !stats</div>
     <div id="game-container"><svg id="map" viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet"></svg></div>
     <div id="log">Waiting for !startrisk...</div>
 
 <script>
 let gameState = JSON.parse(localStorage.getItem('riskState')) || { active: false, data: {} };
+
+// Generate unique color for user
+function getUserColor(name) {
+    let hash = 0; for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    let color = '#'; for (let i = 0; i < 3; i++) color += ('00' + ((hash >> (i * 8)) & 0xFF).toString(16)).slice(-2);
+    return color;
+}
 
 async function initMap() {
     const res = await fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson');
@@ -32,18 +39,12 @@ async function initMap() {
         let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("class", "country");
         path.setAttribute("id", f.properties.ISO_A3);
-        let title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-        title.textContent = f.properties.ISO_A3;
-        path.appendChild(title);
+        path.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
         
         const project = (c) => [c[0] + 180, 90 - c[1]];
         let d = "";
-        let coords = f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates;
-        coords.forEach(poly => {
-            poly[0].forEach((c, i) => {
-                const [x, y] = project(c);
-                d += (i === 0 ? "M" : "L") + `${x},${y} `;
-            });
+        (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates).forEach(poly => {
+            poly[0].forEach((c, i) => { const [x, y] = project(c); d += (i === 0 ? "M" : "L") + `${x},${y} `; });
             d += "Z ";
         });
         path.setAttribute("d", d);
@@ -51,64 +52,57 @@ async function initMap() {
         
         if(!gameState.data[f.properties.ISO_A3]) 
             gameState.data[f.properties.ISO_A3] = { owner: null, gold: 100, troops: 5, buildings: { mine: 0, base: 0 } };
-        if(gameState.data[f.properties.ISO_A3].owner) {
-            path.style.fill = "#27ae60";
-            title.textContent = f.properties.ISO_A3 + " | Owner: " + gameState.data[f.properties.ISO_A3].owner;
-        }
     });
+    updateMap();
+}
+
+function updateMap() {
+    for (let code in gameState.data) {
+        let path = document.getElementById(code);
+        if (!path) continue;
+        let owner = gameState.data[code].owner;
+        path.style.fill = owner ? getUserColor(owner) : "#2d3436";
+        path.querySelector('title').textContent = code + (owner ? " | Owner: " + owner : " (Unclaimed)");
+    }
 }
 
 function processCommand(user, cmd, args) {
-    if (!gameState.active && cmd !== "startrisk") return;
+    if (cmd === "startrisk") { gameState.active = true; log("Game Started!"); }
+    if (!gameState.active) return;
     
-    if (cmd === "startrisk") { 
-        gameState.active = true; 
-        log("Game Started!"); 
-    }
-    else if (cmd === "claim") {
+    if (cmd === "claim") {
         let code = args[0]?.toUpperCase();
         if (gameState.data[code] && !gameState.data[code].owner) {
             gameState.data[code].owner = user;
-            document.getElementById(code).style.fill = "#27ae60";
             log(user + " claimed " + code);
         }
-    } 
-    else if (cmd === "build") {
-        let type = args[0]?.toLowerCase();
+    } else if (cmd === "build") {
         let code = args[1]?.toUpperCase();
         if (gameState.data[code]?.owner === user && gameState.data[code].gold >= 50) {
             gameState.data[code].gold -= 50;
-            gameState.data[code].buildings[type]++;
-            log(user + " built " + type + " in " + code);
+            gameState.data[code].buildings[args[0]]++;
+            log(user + " built " + args[0] + " in " + code);
         }
-    }
-    else if (cmd === "attack") {
-        let from = args[0]?.toUpperCase();
-        let to = args[1]?.toUpperCase();
-        let path = document.getElementById(to);
-        if (path) path.classList.add('attack-anim');
-        setTimeout(() => path?.classList.remove('attack-anim'), 500);
-        
+    } else if (cmd === "attack") {
+        let from = args[0]?.toUpperCase(), to = args[1]?.toUpperCase();
         if (gameState.data[from]?.owner === user && gameState.data[to] && gameState.data[from].troops > 5) {
             gameState.data[from].troops -= 5;
             if (Math.random() > 0.4) {
                 gameState.data[to].owner = user;
-                if(path) path.style.fill = "#27ae60";
                 log(user + " captured " + to + "!");
-            }
+            } else { log("Attack failed!"); }
         }
+    } else if (cmd === "stats") {
+        let owned = Object.keys(gameState.data).filter(k => gameState.data[k].owner === user);
+        log(user + " stats: Territory " + owned.length);
     }
+    
     localStorage.setItem('riskState', JSON.stringify(gameState));
+    updateMap();
 }
 
-ComfyJS.onCommand = (u, c, m, f, e) => {
-    log(`<strong>${u}:</strong> !${c} ${m}`);
-    processCommand(u, c.toLowerCase(), m.split(' '));
-};
-
-ComfyJS.onConnected = () => log("Successfully connected to Jaedraze chat!");
+ComfyJS.onCommand = (u, c, m, f, e) => processCommand(u, c.toLowerCase(), m.split(' '));
 ComfyJS.Init("Jaedraze");
-
 function log(m) { const l = document.getElementById("log"); l.innerHTML += `<div>> ${m}</div>`; l.scrollTop = l.scrollHeight; }
 initMap();
 </script>
