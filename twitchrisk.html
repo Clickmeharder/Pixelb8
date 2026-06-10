@@ -6,10 +6,10 @@
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; }
         #game-container { width: 100%; max-width: 1000px; height: 60vh; background: #000; border: 2px solid #555; position: relative; }
-        .country { stroke: #fff; stroke-width: 0.2; cursor: pointer; }
-        .owner-label { pointer-events: none; font-size: 2px; fill: white; text-anchor: middle; font-weight: bold; }
-        #log { width: 100%; max-width: 1000px; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; margin-top: 10px; border: 1px solid #333; }
-        button { background: #e74c3c; color: white; border: none; padding: 10px; cursor: pointer; }
+        .country { stroke: #fff; stroke-width: 0.2; cursor: pointer; transition: 0.3s; }
+        .owner-label { pointer-events: none; font-size: 3px; fill: white; text-anchor: middle; font-weight: bold; }
+        #log { width: 100%; max-width: 1000px; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; margin-top: 10px; border: 1px solid #333; font-family: monospace; }
+        button { background: #e74c3c; color: white; border: none; padding: 10px; cursor: pointer; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -32,17 +32,33 @@ function log(msg) {
 // Income Tick: Every 60 seconds
 setInterval(() => {
     Object.keys(gameState.players).forEach(p => {
-        let income = 10; // Base income
+        let income = 10;
         Object.values(gameState.data).forEach(c => {
             if(c.owner === p) income += (c.buildings.mine * 5);
         });
         gameState.players[p].gold += income;
     });
     saveGame();
+    updateMapColors();
 }, 60000);
 
 function saveGame() { localStorage.setItem(SAVE_KEY, JSON.stringify(gameState)); }
 function resetGame() { localStorage.removeItem(SAVE_KEY); location.reload(); }
+
+function getUserColor(name) {
+    let hash = 0; for(let i=0; i<name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    let color = '#'; for(let i=0; i<3; i++) color += ('00'+((hash>>(i*8))&255).toString(16)).slice(-2);
+    return color;
+}
+
+function updateMapColors() {
+    Object.keys(gameState.data).forEach(code => {
+        const country = document.getElementById(code);
+        if(country) {
+            country.style.fill = gameState.data[code].owner ? getUserColor(gameState.data[code].owner) : "#2d3436";
+        }
+    });
+}
 
 function processCommand(user, cmd, args) {
     if (cmd === "join" && !gameState.players[user]) {
@@ -62,7 +78,7 @@ function processCommand(user, cmd, args) {
     } else if (cmd === "build") {
         const type = args[0];
         const country = args[1]?.toUpperCase();
-        if (gameState.data[country]?.owner === user && p.gold >= COSTS[type]) {
+        if (gameState.data[country]?.owner === user && p.gold >= (COSTS[type] || 999)) {
             p.gold -= COSTS[type];
             gameState.data[country].buildings[type]++;
             log(`${user} built ${type} in ${country}.`);
@@ -72,7 +88,6 @@ function processCommand(user, cmd, args) {
         const amt = parseInt(args[1]) || 1;
         const c = gameState.data[country];
         if (c?.owner === user && p.gold >= (amt * 10)) {
-            // Capacity limit: cities allow more troops
             const cap = 10 + (c.buildings.city * 20);
             if (c.troops + amt <= cap) {
                 p.gold -= (amt * 10);
@@ -96,6 +111,7 @@ function processCommand(user, cmd, args) {
             }
         }
     }
+    updateMapColors();
     saveGame();
 }
 
@@ -103,6 +119,7 @@ async function initMap() {
     const res = await fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson");
     const geo = await res.json();
     const svg = document.getElementById("map");
+
     geo.features.forEach(f => {
         const code = f.properties.ISO_A3;
         if(!gameState.data[code]) gameState.data[code] = { owner: null, troops: 5, buildings: {mine:0, school:0, city:0, base:0} };
@@ -110,11 +127,18 @@ async function initMap() {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("id", code);
         path.setAttribute("class", "country");
-        // Simple map rendering logic
-        let d = ""; 
-        // ... (Path rendering logic remains same as your original snippet)
+        
+        let d = "";
+        const coords = (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates);
+        coords.forEach(poly => {
+            poly[0].forEach((c, i) => { d += (i === 0 ? "M" : "L") + `${c[0]+180},${90-c[1]} `; });
+            d += "Z ";
+        });
+        path.setAttribute("d", d);
         svg.appendChild(path);
     });
+    updateMapColors();
+    log("Engine Loaded. Waiting for commands...");
 }
 
 ComfyJS.onCommand = (u, c, m) => processCommand(u, c.toLowerCase(), m.split(" "));
