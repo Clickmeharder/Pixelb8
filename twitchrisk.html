@@ -4,17 +4,17 @@
     <title>Jaedraze Twitch Risk</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
-        body { background: #0c0f12; color: #d1d5db; font-family: monospace; display: flex; flex-direction: column; align-items: center; margin: 0; }
+        body { background: #0c0f12; color: #d1d5db; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; }
         #game-container { width: 90vw; height: 50vh; background: #000; border: 2px solid #555; margin-top: 10px; }
-        .country { fill: #2d3436; stroke: #fff; stroke-width: 0.2; cursor: pointer; transition: 0.3s; }
-        #log { width: 90vw; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 14px; margin-top: 10px; }
+        .country { fill: #2d3436; stroke: #fff; stroke-width: 0.3; cursor: pointer; }
+        #log { width: 90vw; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 14px; margin-top: 10px; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
     <h3>Jaedraze Strategy Engine</h3>
     <div id="ui">!startrisk | !claim [CODE] | !build [mine/base] [CODE] | !attack [FROM] [TO]</div>
-    <div id="game-container"><svg id="map" viewBox="-180 -90 360 180"></svg></div>
+    <div id="game-container"><svg id="map" viewBox="0 0 360 180"></svg></div>
     <div id="log">Waiting for !startrisk...</div>
 
 <script>
@@ -24,52 +24,67 @@ async function initMap() {
     const res = await fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson');
     const geo = await res.json();
     const svg = document.getElementById('map');
+    
     geo.features.forEach(f => {
         let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("class", "country");
         path.setAttribute("id", f.properties.ISO_A3);
-        let d = f.geometry.coordinates[0].map((c, i) => (i === 0 ? "M" : "L") + c.join(",")).join(" ") + "Z";
+        
+        // Fix: Invert Y and Shift X to fit ViewBox 0,0 360,180
+        const project = (c) => [c[0] + 180, 90 - c[1]];
+        
+        let d = "";
+        let coords = f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates;
+        coords.forEach(poly => {
+            poly[0].forEach((c, i) => {
+                const [x, y] = project(c);
+                d += (i === 0 ? "M" : "L") + `${x},${y} `;
+            });
+            d += "Z ";
+        });
+        
         path.setAttribute("d", d);
         svg.appendChild(path);
+        
         if(!gameState.data[f.properties.ISO_A3]) 
             gameState.data[f.properties.ISO_A3] = { owner: null, buildings: { mine: 0, base: 0 } };
+        
         if(gameState.data[f.properties.ISO_A3].owner) 
             path.style.fill = "#27ae60";
     });
 }
 
-// --- COMMAND LOGIC ---
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     const cmd = command.toLowerCase();
     const args = message.split(' ');
-    
-    // Log all activity
     log(`<strong>${user}:</strong> !${cmd} ${message}`);
+
+    if (cmd === "resetrisk" && flags.broadcaster) {
+        localStorage.removeItem('riskState');
+        location.reload();
+        return;
+    }
 
     if (cmd === "startrisk") {
         gameState.active = true;
-        log("Risk Game Started! Type !claim [CODE] to join.");
+        log("Game Started! Type !claim [CODE] (e.g., !claim USA).");
     }
 
     if (!gameState.active) return;
 
     if (cmd === "claim") {
-        if (!args[0]) {
-            log("Usage: !claim [CODE]. (e.g. !claim USA, !claim CAN, !claim FRA)");
+        let code = args[0]?.toUpperCase();
+        if (gameState.data[code] && !gameState.data[code].owner) {
+            gameState.data[code].owner = user;
+            document.getElementById(code).style.fill = "#27ae60";
+            log(user + " claimed " + code);
         } else {
-            let code = args[0].toUpperCase();
-            if (gameState.data[code] && !gameState.data[code].owner) {
-                gameState.data[code].owner = user;
-                document.getElementById(code).style.fill = "#27ae60";
-                log(user + " claimed " + code);
-            } else {
-                log("Invalid code or already claimed: " + code);
-            }
+            log("Invalid or already claimed: " + code);
         }
     }
 
     if (cmd === "build") {
-        let type = args[0]; // mine or base
+        let type = args[0]; 
         let code = args[1]?.toUpperCase();
         if (gameState.data[code]?.owner === user) {
             gameState.data[code].buildings[type]++;
@@ -93,11 +108,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     localStorage.setItem('riskState', JSON.stringify(gameState));
 };
 
-ComfyJS.onChat = (user, message, flags, self, extra) => {
-    console.log(`${user}: ${message}`);
-};
-
-ComfyJS.onConnected = () => log("Connected to Jaedraze chat!");
 ComfyJS.Init("Jaedraze");
 
 function log(msg) { 
