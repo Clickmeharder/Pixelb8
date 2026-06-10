@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jaedraze Twitch Risk - Labels & Tooltips</title>
+    <title>Jaedraze Twitch Risk - Full Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; }
@@ -16,7 +16,7 @@
 <body>
 
     <h3>Jaedraze Strategy Engine</h3>
-    <button onclick="resetGame()">RESET GAME (Click if claims are stuck)</button>
+    <button onclick="resetGame()">RESET GAME</button>
     <div id="game-container"><svg id="map" viewBox="0 0 360 180"></svg></div>
     <div id="log">System Initializing...</div>
 
@@ -25,6 +25,8 @@ const SAVE_KEY = "jaedrazeRiskV5";
 let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || { active: false, players: {}, data: {} };
 const COSTS = { mine: 50, base: 100, troop: 10 };
 
+// --- CRITICAL FUNCTIONS ---
+function saveGame() { localStorage.setItem(SAVE_KEY, JSON.stringify(gameState)); }
 function resetGame() { localStorage.removeItem(SAVE_KEY); location.reload(); }
 function log(msg) { const l = document.getElementById("log"); l.innerHTML += `<div>> ${msg}</div>`; l.scrollTop = l.scrollHeight; }
 
@@ -66,7 +68,7 @@ async function initMap() {
         group.appendChild(text);
         svg.appendChild(group);
 
-        // Position label at center of bounding box
+        // Position label
         setTimeout(() => {
             const box = path.getBBox();
             text.setAttribute("x", box.x + box.width/2);
@@ -76,7 +78,7 @@ async function initMap() {
         if(!gameState.data[code]) gameState.data[code] = { owner: null, troops: 5, buildings: {mine:0, base:0} };
     });
     updateMap();
-    log("Map Loaded. Click Reset if you can't claim countries.");
+    log("Map Loaded.");
 }
 
 function updateMap() {
