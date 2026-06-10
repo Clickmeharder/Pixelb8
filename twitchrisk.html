@@ -5,21 +5,20 @@
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: monospace; display: flex; flex-direction: column; align-items: center; margin: 0; }
-        #game-container { width: 90vw; height: 60vh; background: #000; border: 2px solid #555; margin-top: 10px; }
+        #game-container { width: 90vw; height: 50vh; background: #000; border: 2px solid #555; margin-top: 10px; }
         .country { fill: #2d3436; stroke: #fff; stroke-width: 0.2; cursor: pointer; transition: 0.3s; }
-        #log { width: 90vw; height: 100px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 14px; margin-top: 10px; }
+        #log { width: 90vw; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; font-size: 14px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <h3>Jaedraze Strategy Engine</h3>
-    <div id="ui">Commands: !claim [CODE] | !build mine [CODE] | !attack [FROM] [TO]</div>
+    <div id="ui">!startrisk | !claim [CODE] | !build [mine/base] [CODE] | !attack [FROM] [TO]</div>
     <div id="game-container"><svg id="map" viewBox="-180 -90 360 180"></svg></div>
-    <div id="log">Waiting for Twitch...</div>
+    <div id="log">Waiting for !startrisk...</div>
 
 <script>
-// Load state
-let gameState = JSON.parse(localStorage.getItem('riskState')) || { data: {} };
+let gameState = JSON.parse(localStorage.getItem('riskState')) || { active: false, data: {} };
 
 async function initMap() {
     const res = await fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson');
@@ -32,50 +31,70 @@ async function initMap() {
         let d = f.geometry.coordinates[0].map((c, i) => (i === 0 ? "M" : "L") + c.join(",")).join(" ") + "Z";
         path.setAttribute("d", d);
         svg.appendChild(path);
-        
-        // Initialize if not in save
         if(!gameState.data[f.properties.ISO_A3]) 
-            gameState.data[f.properties.ISO_A3] = { owner: null, gold: 0, units: 0, buildings: { mine: 0, base: 0 } };
-        
-        // Restore colors
+            gameState.data[f.properties.ISO_A3] = { owner: null, buildings: { mine: 0, base: 0 } };
         if(gameState.data[f.properties.ISO_A3].owner) 
             path.style.fill = "#27ae60";
     });
-    log("Map loaded.");
 }
 
-// Improved logic
-function processCommand(user, cmd, arg1, arg2) {
-    if (!arg1) return;
-    let countryId = arg1.toUpperCase();
-    let targetId = arg2 ? arg2.toUpperCase() : null;
+// --- COMMAND LOGIC ---
+ComfyJS.onCommand = (user, command, message, flags, extra) => {
+    const cmd = command.toLowerCase();
+    const args = message.split(' ');
+    
+    // Log all activity
+    log(`<strong>${user}:</strong> !${cmd} ${message}`);
 
-    if (cmd === "claim" && gameState.data[countryId] && !gameState.data[countryId].owner) {
-        gameState.data[countryId].owner = user;
-        document.getElementById(countryId).style.fill = "#27ae60";
-        log(user + " claimed " + countryId);
-    } 
-    else if (cmd === "build" && gameState.data[targetId] && gameState.data[targetId].owner === user) {
-        // arg1 is building type, arg2 is country
-        gameState.data[targetId].buildings[arg1]++;
-        log(user + " built " + arg1 + " in " + targetId);
+    if (cmd === "startrisk") {
+        gameState.active = true;
+        log("Risk Game Started! Type !claim [CODE] to join.");
     }
-    else if (cmd === "attack" && gameState.data[countryId]?.owner === user && gameState.data[targetId]) {
-        if (Math.random() > 0.5) {
-            gameState.data[targetId].owner = user;
-            document.getElementById(targetId).style.fill = "#27ae60";
-            log(user + " captured " + targetId);
+
+    if (!gameState.active) return;
+
+    if (cmd === "claim") {
+        if (!args[0]) {
+            log("Usage: !claim [CODE]. (e.g. !claim USA, !claim CAN, !claim FRA)");
         } else {
-            log(user + " failed to capture " + targetId);
+            let code = args[0].toUpperCase();
+            if (gameState.data[code] && !gameState.data[code].owner) {
+                gameState.data[code].owner = user;
+                document.getElementById(code).style.fill = "#27ae60";
+                log(user + " claimed " + code);
+            } else {
+                log("Invalid code or already claimed: " + code);
+            }
+        }
+    }
+
+    if (cmd === "build") {
+        let type = args[0]; // mine or base
+        let code = args[1]?.toUpperCase();
+        if (gameState.data[code]?.owner === user) {
+            gameState.data[code].buildings[type]++;
+            log(user + " built " + type + " in " + code);
+        }
+    }
+
+    if (cmd === "attack") {
+        let from = args[0]?.toUpperCase();
+        let to = args[1]?.toUpperCase();
+        if (gameState.data[from]?.owner === user && gameState.data[to]) {
+            if (Math.random() > 0.5) {
+                gameState.data[to].owner = user;
+                document.getElementById(to).style.fill = "#27ae60";
+                log(user + " captured " + to);
+            } else {
+                log(user + " failed to capture " + to);
+            }
         }
     }
     localStorage.setItem('riskState', JSON.stringify(gameState));
-}
+};
 
-// Twitch Listener
-ComfyJS.onCommand = (user, cmd, message, flags, extra) => {
-    let args = message.split(' ');
-    processCommand(user, cmd, args[0], args[1]);
+ComfyJS.onChat = (user, message, flags, self, extra) => {
+    console.log(`${user}: ${message}`);
 };
 
 ComfyJS.onConnected = () => log("Connected to Jaedraze chat!");
