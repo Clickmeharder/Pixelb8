@@ -661,6 +661,9 @@ function executeDeployCommand(user, amountInput, fromCode, toCode) {
 }
 
 // --- PERFORMANCE GRAPHICS RENDERING PIPELINE ---
+
+
+// --- PERFORMANCE GRAPHICS RENDERING PIPELINE (REVISED RESOLUTION ORDER) ---
 function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const boxA = countryBoundsCache[fromCode];
     const boxB = countryBoundsCache[toCode];
@@ -713,7 +716,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         
         troopElementsArray.push({
             node: soldierTextNode,
-            trailOffsetOffset: i * 0.045, // Distance behind the leader
+            trailOffsetOffset: i * 0.045, 
             hasArrived: false
         });
     }
@@ -726,7 +729,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         const elapsed = timestamp - startTime;
         const baseProgress = Math.min(elapsed / duration, 1);
 
-        // Map out the lead line coordinates
         const leadX = x1 + (x2 - x1) * baseProgress;
         const leadY = y1 + (y2 - y1) * baseProgress;
         trajectoryLine.setAttribute("x2", leadX);
@@ -736,7 +738,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         let activeTrackY = leadY;
         let totalArrivedCount = 0;
 
-        // Process positions and find our dynamic camera target
         troopElementsArray.forEach((soldier, index) => {
             let elementProgress = baseProgress - soldier.trailOffsetOffset;
             if (elementProgress < 0) elementProgress = 0;
@@ -744,7 +745,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                 elementProgress = 1;
                 if (!soldier.hasArrived) {
                     soldier.hasArrived = true;
-                    soldier.node.setAttribute("opacity", "0"); // Hide clean on impact
+                    soldier.node.setAttribute("opacity", "0");
                 }
                 totalArrivedCount++;
             }
@@ -758,23 +759,19 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
             const curScale = startTextSize + (endTextSize - startTextSize) * elementProgress;
             soldier.node.setAttribute("font-size", `${curScale}px`);
 
-            // CAMERA RESOLUTION TRACKING
             if (index === Math.floor(troopElementsArray.length / 2) && elementProgress < 1) {
                 activeTrackX = curX;
                 activeTrackY = curY;
             }
         });
 
-        // Frame update tick to smooth out tracking jumps
         if (typeof interpolateMapFocus === "function") {
             interpolateMapFocus(activeTrackX, activeTrackY);
         }
 
-        // Break transit loop ONLY when trailing edge lands safely
         if (totalArrivedCount < troopElementsArray.length) {
             requestAnimationFrame(animateTravel);
         } else {
-            // EXPLICIT PASSING: Send destination down safely to break closure isolation
             handleTargetImpact(toCode); 
         }
     }
@@ -783,12 +780,17 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         requestAnimationFrame(animateTravel);
     }, 1000);
 
-    // Context variable explicitly captured via execution pass
     function handleTargetImpact(destinationSectorCode) {
-        streamContainer.remove();
+        // Clean transit artifacts completely out of memory layout
+        if (streamContainer && streamContainer.parentNode) {
+            streamContainer.remove();
+        }
         
-        // Final absolute center lock on target coordinates via confirmed parameter pass
         changeMapProjection(destinationSectorCode);
+
+        // 🔥 STATE PROTECTION STEP: Execute data alterations instantly when vectors make land.
+        // This stops UI/CSS issues from locking up database/state operations.
+        combatDetails.commitStateResolution();
 
         const battleGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         battleGroup.style.transformOrigin = `${x2}px ${y2}px`;
@@ -797,6 +799,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         const spacingX = endTextSize * 1.6; 
 
         const displayContainer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        // Safe fallbacks applied in case keyframe arrays are missing
         displayContainer.style.animation = "popInStatic 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards";
 
         const attDisplay = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -869,19 +872,26 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                 displayContainer.appendChild(lossTextB);
             }
 
-            // Runs database update operations cleanly after graphic strike animations land
-            combatDetails.commitStateResolution();
-
             setTimeout(() => {
                 battleGroup.style.transition = "opacity 0.6s ease";
                 battleGroup.style.opacity = "0";
-                trajectoryLine.remove();
-                setTimeout(() => battleGroup.remove(), 600);
+                if (trajectoryLine && trajectoryLine.parentNode) {
+                    trajectoryLine.remove();
+                }
+                setTimeout(() => {
+                    if (battleGroup && battleGroup.parentNode) {
+                        battleGroup.remove();
+                    }
+                }, 600);
             }, 3500);
 
         }, 1200);
     }
 }
+
+
+
+
 function executeClaim(user, targetCode) {
     if (!gameState.data[targetCode]) { log(`Country ISO code ${targetCode || 'Empty'} does not exist.`, "err"); return; }
     
