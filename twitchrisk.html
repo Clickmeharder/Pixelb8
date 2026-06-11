@@ -20,15 +20,27 @@
         .asset-label { pointer-events: none; fill: #51e1ed; text-anchor: middle; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; line-height: 1.2; overflow: visible !important; }
         
         /* Collapsible Sidebar Mechanics */
-        #leaderboard-wrapper { position: relative; display: flex; transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-left 0.4s; width: 300px; z-index: 10; }
+        #leaderboard-wrapper { position: relative; display: flex; transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-left 0.4s; width: 172px; z-index: 10; }
         #leaderboard-wrapper.collapsed { width: 0px; margin-left: -15px; }
         
         #leaderboard { width: 100%; background: #11161d; border: 2px solid #2c3e50; padding: 12px; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-y: auto; box-sizing: border-box; }
         #leaderboard-wrapper.collapsed #leaderboard { display: none; }
         
         #leaderboard h4 { margin: 0 0 12px 0; color: #fff; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #e74c3c; padding-bottom: 6px; letter-spacing: 1px; }
-        .lb-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; padding: 5px 8px; background: rgba(255,255,255,0.02); border-radius: 3px; border-left: 3px solid #3498db; }
         
+        /* Structured Leaderboard Row styling */
+        .lb-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-bottom: 5px; padding: 6px 8px; background: rgba(255,255,255,0.02); border-radius: 3px; border-left: 3px solid #3498db; }
+        .lb-player-meta { display: flex; flex-direction: column; gap: 2px; }
+        .lb-player-name { font-weight: bold; color: #fff; }
+        .lb-player-count { font-size: 10px; color: #7f8c8d; }
+        .lb-player-stats { font-family: monospace; text-align: right; white-space: nowrap; }
+
+        /* Tactical Floating Stats Box - Bottom Left */
+        #country-stats-box { position: absolute; bottom: 10px; left: 10px; background: rgba(17,22,29,0.92); width: 220px; padding: 10px; border-radius: 4px; border: 1px solid #e74c3c; font-family: monospace; font-size: 11px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); pointer-events: none; display: flex; flex-direction: column; gap: 4px; z-index: 15; }
+        .stats-title { color: #e74c3c; font-weight: bold; border-bottom: 1px dashed #2c3e50; padding-bottom: 3px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stats-row { display: flex; justify-content: space-between; color: #d1d5db; }
+        .stats-highlight { color: #51e1ed; font-weight: bold; }
+
         /* Collapse Tab Trigger Button */
         #collapse-btn { position: absolute; left: -26px; top: 12px; width: 24px; height: 35px; background: #11161d; border: 2px solid #2c3e50; border-right: none; color: #3498db; font-family: monospace; font-weight: bold; font-size: 12px; text-align: center; line-height: 31px; cursor: pointer; border-radius: 4px 0 0 4px; user-select: none; transition: color 0.2s; z-index: 11; }
         #collapse-btn:hover { color: #e74c3c; background: #161c24; }
@@ -42,7 +54,7 @@
         
         button.admin-btn { background: #e74c3c; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.2s; margin-bottom: 5px; }
         button.admin-btn:hover { background: #c0392b; box-shadow: 0 0 10px rgba(231,76,60,0.5); }
-        #view-indicator { position: absolute; top: 10px; left: 10px; background: rgba(17,22,29,0.85); padding: 6px 12px; border-radius: 4px; border: 1px solid #3498db; font-family: monospace; font-size: 11px; color: #3498db; font-weight: bold; pointer-events: none; text-transform: uppercase; }
+        #view-indicator { position: absolute; top: 10px; left: 10px; background: rgba(17,22,29,0.85); padding: 6px 12px; border-radius: 4px; border: 1px solid #3498db; font-family: monospace; font-size: 11px; color: #3498db; font-weight: bold; pointer-events: none; text-transform: uppercase; z-index: 12; }
         
         /* Scrollbar aesthetics */
         ::-webkit-scrollbar { width: 6px; }
@@ -62,6 +74,15 @@
         <div id="game-container">
             <div id="view-indicator">Theater View: World</div>
             <svg id="map" viewBox="0 0 360 180"></svg>
+            
+            <div id="country-stats-box">
+                <div class="stats-title" id="box-country-title">Sector: UNKNOWN</div>
+                <div class="stats-row"><span>Ruler:</span><span id="box-ruler" class="stats-highlight">Neutral</span></div>
+                <div class="stats-row"><span>Garrison:</span><span id="box-troops">0</span></div>
+                <div class="stats-row"><span>Mines / Schools:</span><span id="box-infra-basic">🏭x0 🏫x0</span></div>
+                <div class="stats-row"><span>Cities / Bases:</span><span id="box-infra-adv">🌆x0 🛡️x0</span></div>
+                <div class="stats-row"><span>Troop Limit:</span><span id="box-cap" style="color: #2ecc71;">15</span></div>
+            </div>
         </div>
 
         <div id="leaderboard-wrapper">
@@ -203,35 +224,28 @@ function updateMapColors() {
                 
                 calculatedSize = Math.max(0.12, Math.min(2.5, calculatedSize));
                 label.setAttribute("font-size", `${calculatedSize}px`);
-                label.textContent = `${code} | Owner: ${cData.owner || 'Neutral'} | Garrison: ${cData.troops}`;
+                label.textContent = `${code} | Garrison: ${cData.troops}`;
             }
         }
 
-        if(assets && cData) {
-            if(currentViewMode === "country" && currentZoomTarget === code) {
-                assets.style.display = "block";
-                
-                let calculatedSize = currentViewBoxDims.w * 0.032;
-                if(pathWidth < 12) {
-                    calculatedSize = currentViewBoxDims.w * 0.026;
-                }
-                
-                calculatedSize = Math.max(0.1, Math.min(1.8, calculatedSize));
-                assets.setAttribute("font-size", `${calculatedSize}px`);
-                
-                let dy1 = calculatedSize * 1.3;
-                let dy2 = calculatedSize * 1.1;
-                
-                assets.innerHTML = `
-                    <tspan x="${assets.getAttribute('x')}" dy="${dy1}">🏫x${cData.buildings.school} 🏭x${cData.buildings.mine}</tspan>
-                    <tspan x="${assets.getAttribute('x')}" dy="${dy2}">🌆x${cData.buildings.city} 🛡️x${cData.buildings.base}</tspan>
-                    <tspan x="${assets.getAttribute('x')}" dy="${dy2}" fill="#2ecc71">Cap: ${15 + (cData.buildings.city * 35)}</tspan>
-                `;
-            } else {
-                assets.style.display = "none";
-            }
+        // Contextually push properties to HTML Panel if focused inside target state view
+        if (currentViewMode === "country" && currentZoomTarget === code && cData) {
+            updateFloatingStatsPanel(code, cData);
         }
+        
+        // Retain original inner-SVG node masking properties
+        if(assets) assets.style.display = "none";
     });
+}
+
+function updateFloatingStatsPanel(code, cData) {
+    document.getElementById("box-country-title").textContent = `Sector: ${code}`;
+    document.getElementById("box-ruler").textContent = cData.owner || "Neutral";
+    document.getElementById("box-ruler").style.color = cData.owner ? getUserColor(cData.owner) : "#51e1ed";
+    document.getElementById("box-troops").textContent = cData.troops;
+    document.getElementById("box-infra-basic").textContent = `🏭x${cData.buildings.mine} 🏫x${cData.buildings.school}`;
+    document.getElementById("box-infra-adv").textContent = `🌆x${cData.buildings.city} 🛡️x${cData.buildings.base}`;
+    document.getElementById("box-cap").textContent = 15 + (cData.buildings.city * 35);
 }
 
 function changeMapProjection(target) {
@@ -249,6 +263,11 @@ function changeMapProjection(target) {
         map.setAttribute("viewBox", CONTINENT_VIEWBOXES[target.toLowerCase()]);
         indicator.textContent = `Theater View: ${target}`;
         log(`🔭 Camera adjustment: Tracking target region [${target.toUpperCase()}].`);
+        
+        // Reset floating panels back to generic unselected state on broader maps
+        document.getElementById("box-country-title").textContent = "Sector: Global View";
+        document.getElementById("box-ruler").textContent = "N/A";
+        document.getElementById("box-ruler").style.color = "#51e1ed";
     } else {
         const path = document.getElementById(target.toUpperCase());
         if (path) {
@@ -298,7 +317,15 @@ function updateLeaderboard() {
     }).sort((a,b) => (b.lands * 10 + b.troops) - (a.lands * 10 + a.troops));
 
     lbc.innerHTML = sorted.map(p => `
-        <div class="lb-row"><span><strong>${p.name}</strong> (${p.lands} Countries)</span><span>💰${p.gold} ⚔️${p.troops}</span></div>
+        <div class="lb-row">
+            <div class="lb-player-meta">
+                <span class="lb-player-name">${p.name}</span>
+                <span class="lb-player-count">(${p.lands} Territories Owned)</span>
+            </div>
+            <div class="lb-player-stats">
+                💰${p.gold} &nbsp;⚔️${p.troops}
+            </div>
+        </div>
     `).join('');
 }
 
@@ -466,6 +493,13 @@ async function initMap() {
             path.setAttribute("id", code);
             path.setAttribute("class", "country");
             
+            // Mouse listener hooks to make the UI interactive when hovering regions
+            path.addEventListener("mouseenter", () => {
+                if(gameState.data[code]) {
+                    updateFloatingStatsPanel(code, gameState.data[code]);
+                }
+            });
+            
             const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
             path.appendChild(title);
             
@@ -481,21 +515,12 @@ async function initMap() {
             text.style.display = "none";
             uiLayer.appendChild(text);
 
-            const assetGroup = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            assetGroup.setAttribute("class", "asset-label");
-            assetGroup.setAttribute("id", `assets-${code}`);
-            assetGroup.style.display = "none";
-            uiLayer.appendChild(assetGroup);
-
             setTimeout(() => {
                 try {
                     const box = path.getBBox();
                     if(box.width > 0.05 && box.height > 0.05) {
                         text.setAttribute("x", box.x + box.width / 2);
                         text.setAttribute("y", box.y + box.height / 2);
-                        
-                        assetGroup.setAttribute("x", box.x + box.width / 2);
-                        assetGroup.setAttribute("y", box.y + box.height / 2);
                     }
                 } catch(e) {}
             }, 600);
