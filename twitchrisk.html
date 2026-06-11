@@ -1,17 +1,17 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Twitch World domination Strategy Game</title>
+    <title>Jaedraze Twitch Strategy - Grand Tactical Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 15px; overflow-x: hidden; }
         h3 { margin: 5px 0 15px 0; color: #e74c3c; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(231,76,60,0.3); }
-        #game-container { width: 100%; max-width: 1100px; height: 62vh; background: #090d13; border: 2px solid #2c3e50; position: relative; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        #map { width: 100%; height: 100%; display: block; }
+        #game-container { width: 100%; max-width: 1100px; height: 62vh; background: #090d13; border: 2px solid #2c3e50; position: relative; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; }
+        #map { width: 100%; height: 100%; display: block; transition: viewBox 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
         .country { fill: #1f242c; stroke: #0d1117; stroke-width: 0.4; cursor: pointer; transition: fill 0.2s ease, stroke 0.2s ease; }
         .country:hover { stroke: #ffffff; stroke-width: 0.8; fill: #2c3541; }
-        .owner-label { pointer-events: none; font-size: 6px; fill: #ffffff; text-anchor: middle; font-weight: 800; font-family: sans-serif; text-shadow: 1px 1px 1px #000, -1px -1px 1px #000; }
+        .owner-label { pointer-events: none; fill: #ffffff; text-anchor: middle; font-weight: 800; font-family: sans-serif; text-shadow: 1px 1px 1px #000, -1px -1px 1px #000; transition: font-size 0.3s; }
+        .asset-label { pointer-events: none; fill: #51e1ed; text-anchor: middle; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; }
         #control-panel { width: 100%; max-width: 1100px; display: flex; gap: 10px; margin-top: 10px; }
         #log { flex: 2; height: 180px; background: #11161d; overflow-y: auto; padding: 12px; border: 1px solid #2c3e50; font-family: 'Courier New', Courier, monospace; font-size: 12px; border-radius: 4px; color: #3498db; }
         #log div.err { color: #e74c3c; }
@@ -22,14 +22,16 @@
         .lb-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; padding: 2px 4px; background: rgba(255,255,255,0.02); }
         button { background: #e74c3c; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.2s; margin-bottom: 5px; }
         button:hover { background: #c0392b; box-shadow: 0 0 10px rgba(231,76,60,0.5); }
+        #view-indicator { position: absolute; top: 10px; left: 10px; background: rgba(17,22,29,0.85); padding: 6px 12px; border-radius: 4px; border: 1px solid #3498db; font-family: monospace; font-size: 11px; color: #3498db; font-weight: bold; pointer-events: none; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <h3>Twitch world sim</h3>
+    <h3>Jaedraze Strategy Engine (Grand Conquest)</h3>
     <button onclick="resetGame()">RESET GAME WORLD</button>
     
     <div id="game-container">
+        <div id="view-indicator">Theater View: World</div>
         <svg id="map" viewBox="0 0 360 180"></svg>
     </div>
 
@@ -42,7 +44,7 @@
     </div>
 
 <script>
-const SAVE_KEY = "jaedraze_grand_strategy_geojson_v6";
+const SAVE_KEY = "jaedraze_grand_strategy_geojson_v7";
 let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || { 
     players: {}, 
     data: {},
@@ -50,6 +52,20 @@ let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || {
 };
 
 const COSTS = { mine: 150, school: 250, city: 400, base: 500 };
+
+// Geographic Theater Projections
+const CONTINENT_VIEWBOXES = {
+    world: "0 0 360 180",
+    na: "10 10 110 80",
+    sa: "70 80 70 90",
+    eu: "160 15 65 50",
+    af: "160 60 70 85",
+    as: "200 10 130 90",
+    oc: "290 95 65 65"
+};
+
+let currentViewMode = "world"; // world, continent, country
+let currentZoomTarget = "world"; 
 
 function log(msg, type = '') { 
     const l = document.getElementById("log"); 
@@ -61,42 +77,25 @@ function log(msg, type = '') {
     l.scrollTop = l.scrollHeight; 
 }
 
-// Unified Game State Core Loop (Triggers every 45 seconds)
+// Global Core Loop (Income & Auto-Recruitment every 45 seconds)
 setInterval(() => {
     let globalRecruitCount = 0;
 
-    // Phase 1: Financial Accounting
     Object.keys(gameState.players).forEach(p => {
-        let income = 15; 
-        let controlledCountries = 0;
-
+        let income = 15; let controlledCountries = 0;
         Object.values(gameState.data).forEach(c => {
-            if(c.owner === p) {
-                controlledCountries++;
-                income += (c.buildings.mine * 12);
-            }
+            if(c.owner === p) { controlledCountries++; income += (c.buildings.mine * 12); }
         });
-
-        if(controlledCountries > 0) {
-            gameState.players[p].gold += income;
-        }
+        if(controlledCountries > 0) gameState.players[p].gold += income;
     });
 
-    // Phase 2: Automated Macro Troop Recruitment
     Object.keys(gameState.data).forEach(code => {
         const c = gameState.data[code];
         if (c.owner && c.buildings.school > 0) {
             const unitCap = 15 + (c.buildings.city * 35);
-            
             if (c.troops < unitCap) {
-                // Generates 2 troops per school built
                 let prospectiveGeneration = c.buildings.school * 2;
-                
-                // Hard clamp to prevent passing population thresholds
-                if (c.troops + prospectiveGeneration > unitCap) {
-                    prospectiveGeneration = unitCap - c.troops;
-                }
-                
+                if (c.troops + prospectiveGeneration > unitCap) prospectiveGeneration = unitCap - c.troops;
                 c.troops += prospectiveGeneration;
                 globalRecruitCount += prospectiveGeneration;
             }
@@ -107,10 +106,8 @@ setInterval(() => {
     updateMapColors();
     updateLeaderboard();
     
-    log("💰 Economic Tick: Passive taxes and mine revenues collected.", "succ");
-    if (globalRecruitCount > 0) {
-        log(`🎖️ Mobilization: ${globalRecruitCount} total reserves deployed globally via local Schools.`, "succ");
-    }
+    log("💰 Economic Tick: Revenues distributed and accounting balances finalized.", "succ");
+    if (globalRecruitCount > 0) log(`🎖️ Mobilization: ${globalRecruitCount} automated reserves generated via Schools.`, "succ");
 }, 45000);
 
 function saveGame() { localStorage.setItem(SAVE_KEY, JSON.stringify(gameState)); }
@@ -126,29 +123,91 @@ function updateMapColors() {
     Object.keys(gameState.data).forEach(code => {
         const country = document.getElementById(code);
         const label = document.getElementById(`lbl-${code}`);
+        const assets = document.getElementById(`assets-${code}`);
         const cData = gameState.data[code];
         
         if(country && cData) {
             country.style.fill = cData.owner ? getUserColor(cData.owner) : "#1f242c";
-            
             const title = country.querySelector("title");
             if(title) {
                 title.textContent = `${code} | Ruler: ${cData.owner || 'Neutral'}\nTroops: ${cData.troops}\nMines: ${cData.buildings.mine} | Schools: ${cData.buildings.school}\nCities: ${cData.buildings.city} | Bases: ${cData.buildings.base}`;
             }
         }
-        if(label && cData && cData.owner) {
-            label.textContent = `${code}:${cData.troops}`;
-            label.style.display = "block";
-        } else if (label) {
-            label.style.display = "none";
+
+        // --- Level Of Detail Visibility Rules ---
+        if(label && cData) {
+            if(currentViewMode === "world") {
+                label.style.display = "none";
+            } else if(currentViewMode === "continent") {
+                label.style.display = cData.owner ? "block" : "none";
+                label.setAttribute("font-size", "4px");
+                label.textContent = `${code}:${cData.troops}`;
+            } else if(currentViewMode === "country") {
+                label.style.display = "block";
+                label.setAttribute("font-size", "2.2px");
+                label.textContent = `${code} | Ruler: ${cData.owner || 'Neutral'} | Garrison: ${cData.troops}`;
+            }
+        }
+
+        if(assets && cData) {
+            if(currentViewMode === "country" && currentZoomTarget === code) {
+                assets.style.display = "block";
+                assets.innerHTML = `
+                    <tspan x="${assets.getAttribute('x')}" dy="3">🏫x${cData.buildings.school} 🏭x${cData.buildings.mine}</tspan>
+                    <tspan x="${assets.getAttribute('x')}" dy="2.5">🌆x${cData.buildings.city} 🛡️x${cData.buildings.base}</tspan>
+                    <tspan x="${assets.getAttribute('x')}" dy="2.5" fill="#2ecc71">Cap: ${15 + (cData.buildings.city * 35)}</tspan>
+                `;
+            } else {
+                assets.style.display = "none";
+            }
         }
     });
+}
+
+function changeMapProjection(target) {
+    const map = document.getElementById("map");
+    const indicator = document.getElementById("view-indicator");
+    
+    if (CONTINENT_VIEWBOXES[target.toLowerCase()]) {
+        // Continent or World Zoom
+        currentViewMode = target.toLowerCase() === "world" ? "world" : "continent";
+        currentZoomTarget = target.toLowerCase();
+        map.setAttribute("viewBox", CONTINENT_VIEWBOXES[target.toLowerCase()]);
+        indicator.textContent = `Theater View: ${target}`;
+        log(`🔭 Camera adjustment: Tracking target region [${target.toUpperCase()}].`);
+    } else {
+        // Direct country bounding box lookup lookup
+        const path = document.getElementById(target.toUpperCase());
+        if (path) {
+            try {
+                const box = path.getBBox();
+                // Safe padding buffer calculation surrounding selected asset node boundaries
+                const pad = Math.max(box.width, box.height) * 0.2;
+                const vx = box.x - pad/2;
+                const vy = box.y - pad/2;
+                const vw = box.width + pad;
+                const vh = box.height + pad;
+                
+                currentViewMode = "country";
+                currentZoomTarget = target.toUpperCase();
+                
+                map.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
+                indicator.textContent = `Country Zoom: ${target.toUpperCase()}`;
+                log(`🔍 Tactical Overlay Focused on [${target.toUpperCase()}]. Scanning asset clusters...`);
+            } catch(e) {
+                log("Target profile found but hardware rendering layout rejected bounding canvas calculation.", "err");
+            }
+        } else {
+            log(`Invalid show vector target context: "${target}". Use: world, na, sa, eu, as, af, oc or valid ISO Code.`, "err");
+            return;
+        }
+    }
+    updateMapColors();
 }
 
 function updateLeaderboard() {
     const lbc = document.getElementById("lb-content");
     if(!lbc) return;
-    
     let sorted = Object.keys(gameState.players).map(name => {
         let lands = 0; let troops = 0;
         Object.values(gameState.data).forEach(c => { if(c.owner === name) { lands++; troops += c.troops; } });
@@ -156,28 +215,27 @@ function updateLeaderboard() {
     }).sort((a,b) => (b.lands * 10 + b.troops) - (a.lands * 10 + a.troops));
 
     lbc.innerHTML = sorted.map(p => `
-        <div class="lb-row">
-            <span><strong>${p.name}</strong> (${p.lands} Countries)</span>
-            <span>💰${p.gold} ⚔️${p.troops}</span>
-        </div>
+        <div class="lb-row"><span><strong>${p.name}</strong> (${p.lands} Countries)</span><span>💰${p.gold} ⚔️${p.troops}</span></div>
     `).join('');
 }
 
-function checkTruce(p1, p2) {
-    return gameState.truces[`${p1}:${p2}`] || gameState.truces[`${p2}:${p1}`] || false;
-}
+function checkTruce(p1, p2) { return gameState.truces[`${p1}:${p2}`] || gameState.truces[`${p2}:${p1}`] || false; }
 
 function processCommand(user, cmd, args) {
     cmd = cmd.toLowerCase();
     
+    if (cmd === "show") {
+        if (!args[0]) { log("Provide visibility arguments. E.g., !show world, !show na, !show USA", "err"); return; }
+        changeMapProjection(args[0]);
+        return;
+    }
+
     if (cmd === "join") {
         if (!gameState.players[user]) {
             gameState.players[user] = { gold: 600, pendingTruce: null };
             log(`👑 Player ${user} has raised their flag and entered the theater of war!`, "succ");
             updateLeaderboard();
-        } else {
-            log(`${user}, you are already inside the war servers.`, "err");
-        }
+        } else { log(`${user}, you are already inside the war servers.`, "err"); }
         return;
     }
 
@@ -186,24 +244,19 @@ function processCommand(user, cmd, args) {
 
     if (cmd === "claim") {
         const targetCode = args[0]?.toUpperCase();
-        if (!gameState.data[targetCode]) { log(`Country ISO code ${targetCode || 'Empty'} does not exist. (Examples: USA, CAN, FRA, DEU, RUS, CHN)`, "err"); return; }
-        
+        if (!gameState.data[targetCode]) { log(`Country ISO code ${targetCode || 'Empty'} does not exist.`, "err"); return; }
         if (!gameState.data[targetCode].owner) {
             gameState.data[targetCode].owner = user;
             gameState.data[targetCode].troops = 10; 
             log(`🗺️ ${user} successfully established sovereign rule over ${targetCode}.`, "succ");
-        } else {
-            log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err");
-        }
+        } else { log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err"); }
     }
 
     else if (cmd === "build") {
         const type = args[0]?.toLowerCase();
         const targetCode = args[1]?.toUpperCase();
-
         if (!COSTS[type]) { log(`Invalid building! Use: mine, school, city, base.`, "err"); return; }
         if (!gameState.data[targetCode] || gameState.data[targetCode].owner !== user) { log(`You do not govern ${targetCode || 'this territory'}.`, "err"); return; }
-
         if (p.gold < COSTS[type]) { log(`Insufficient gold! ${type.toUpperCase()} costs 💰${COSTS[type]} gold.`, "err"); return; }
 
         p.gold -= COSTS[type];
@@ -211,24 +264,18 @@ function processCommand(user, cmd, args) {
         log(`🏗️ ${user} built a ${type.toUpperCase()} in ${targetCode}.`, "succ");
     }
 
-    // Replaced manual training with real-time sector status readouts
     else if (cmd === "status") {
         const targetCode = args[0]?.toUpperCase();
         const c = gameState.data[targetCode];
-
         if (!c || c.owner !== user) { log(`You do not own or have visibility over ${targetCode || 'this territory'}.`, "err"); return; }
-        
         const unitCap = 15 + (c.buildings.city * 35);
-        const autoGenRate = c.buildings.school * 2;
-        
-        log(`📊 Sector Profile [${targetCode}]: Troops: ${c.troops}/${unitCap} | Active Autogen: +${autoGenRate} per tick.`, "succ");
+        log(`📊 Sector Profile [${targetCode}]: Troops: ${c.troops}/${unitCap} | Active Autogen: +${c.buildings.school * 2} per tick.`, "succ");
     }
 
     else if (cmd === "truce") {
         const targetPlayer = args[0];
         if (!targetPlayer || !gameState.players[targetPlayer]) { log(`Target streamer/player context not found.`, "err"); return; }
         if (targetPlayer === user) return;
-
         if (gameState.players[targetPlayer].pendingTruce === user) {
             gameState.truces[`${user}:${targetPlayer}`] = true;
             gameState.players[targetPlayer].pendingTruce = null;
@@ -242,32 +289,26 @@ function processCommand(user, cmd, args) {
     else if (cmd === "breaktruce") {
         const targetPlayer = args[0];
         if(gameState.truces[`${user}:${targetPlayer}`] || gameState.truces[`${targetPlayer}:${user}`]) {
-            delete gameState.truces[`${user}:${targetPlayer}`];
-            delete gameState.truces[`${targetPlayer}:${user}`];
+            delete gameState.truces[`${user}:${targetPlayer}`]; delete gameState.truces[`${targetPlayer}:${user}`];
             log(`💔 WAR DECLARATION: ${user} shattered the peace treaty with ${targetPlayer}!`, "war");
         }
     }
 
     else if (cmd === "attack") {
         const [fromCode, toCode] = [args[0]?.toUpperCase(), args[1]?.toUpperCase()];
-        const attTerritory = gameState.data[fromCode];
-        const defTerritory = gameState.data[toCode];
+        const attTerritory = gameState.data[fromCode]; const defTerritory = gameState.data[toCode];
 
         if (!attTerritory || attTerritory.owner !== user) { log(`Attack source country owned incorrectly or missing.`, "err"); return; }
         if (!defTerritory) { log(`Destination target country code invalid.`, "err"); return; }
         if (defTerritory.owner === user) { log(`Cannot strike your own territories!`, "err"); return; }
-
         if (attTerritory.troops <= 2) { log(`Armies in ${fromCode} are too low (Must leave 2 garrison troops behind).`, "err"); return; }
-
         if (defTerritory.owner && checkTruce(user, defTerritory.owner)) {
             log(`⛔ Order Blocked: You maintain a Truce alliance with ${defTerritory.owner}! Use '!breaktruce ${defTerritory.owner}' first.`, "err");
             return;
         }
 
         const attackingArmies = attTerritory.troops - 2; 
-        const defenseBuff = 1.0 + (defTerritory.buildings.base * 0.4); 
-        const defensiveArmies = defTerritory.troops;
-
+        const defenseBuff = 1.0 + (defTerritory.buildings.base * 0.4); const defensiveArmies = defTerritory.troops;
         log(`⚔️ OFFENSIVE CAMPAIGN: ${user} deploys ${attackingArmies} troops from ${fromCode} to invade ${toCode}!`, "war");
 
         let attPower = 0; let defPower = 0;
@@ -278,20 +319,13 @@ function processCommand(user, cmd, args) {
         if (attPower > defPower) {
             const survivors = Math.max(1, Math.floor(attackingArmies * ((attPower - defPower) / attPower)));
             const formerOwner = defTerritory.owner;
-            
-            defTerritory.owner = user;
-            defTerritory.troops = survivors;
-            attTerritory.troops = 2; 
-            
+            defTerritory.owner = user; defTerritory.troops = survivors; attTerritory.troops = 2; 
             log(`💥 CRITICAL VICTORY! ${user} conquered ${toCode}! (${survivors} units remaining).`, "succ");
             if(formerOwner) log(`📉 Player ${formerOwner} lost operational domain over ${toCode}.`, "war");
         } else {
             const lostRatio = attPower / defPower;
             const remainingDefenders = Math.max(1, Math.floor(defensiveArmies * (1 - (lostRatio * 0.5))));
-            
-            defTerritory.troops = remainingDefenders;
-            attTerritory.troops = 2; 
-            
+            defTerritory.troops = remainingDefenders; attTerritory.troops = 2; 
             log(`❌ DEFENSE HELD: Assault on ${toCode} was entirely repelled. Survivors guarding: ${remainingDefenders}.`);
         }
     }
@@ -306,22 +340,15 @@ function parseGeoJSONCoords(geometry) {
     const convertRing = (ring) => {
         let d = "";
         ring.forEach((c, i) => {
-            const x = (c[0] + 180);
-            const y = (90 - c[1]);
-            if (!isNaN(x) && !isNaN(y)) {
-                d += (i === 0 ? "M " : "L ") + `${x.toFixed(2)},${y.toFixed(2)} `;
-            }
+            const x = (c[0] + 180); const y = (90 - c[1]);
+            if (!isNaN(x) && !isNaN(y)) d += (i === 0 ? "M " : "L ") + `${x.toFixed(2)},${y.toFixed(2)} `;
         });
-        d += "Z";
-        return d;
+        d += "Z"; return d;
     };
-
     if (geometry.type === "Polygon") {
         geometry.coordinates.forEach(ring => { paths.push(convertRing(ring)); });
     } else if (geometry.type === "MultiPolygon") {
-        geometry.coordinates.forEach(polygon => {
-            polygon.forEach(ring => { paths.push(convertRing(ring)); });
-        });
+        geometry.coordinates.forEach(polygon => { polygon.forEach(ring => { paths.push(convertRing(ring)); }); });
     }
     return paths.join(" ");
 }
@@ -339,8 +366,7 @@ async function initMap() {
 
             if(!gameState.data[code]) {
                 gameState.data[code] = { 
-                    owner: null, 
-                    troops: 0, 
+                    owner: null, troops: 0, 
                     buildings: { mine: 0, school: 0, city: 0, base: 0 } 
                 };
             }
@@ -365,14 +391,26 @@ async function initMap() {
             text.setAttribute("id", `lbl-${code}`);
             text.style.display = "none";
             group.appendChild(text);
+
+            // Structural placeholder for country asset micro-readouts
+            const assetGroup = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            assetGroup.setAttribute("class", "asset-label");
+            assetGroup.setAttribute("id", `assets-${code}`);
+            assetGroup.setAttribute("font-size", "1.6px");
+            assetGroup.style.display = "none";
+            group.appendChild(assetGroup);
+            
             svg.appendChild(group);
 
             setTimeout(() => {
                 try {
                     const box = path.getBBox();
-                    if(box.width > 3 && box.height > 3) {
+                    if(box.width > 2 && box.height > 2) {
                         text.setAttribute("x", box.x + box.width / 2);
-                        text.setAttribute("y", box.y + box.height / 2 + 1.5);
+                        text.setAttribute("y", box.y + box.height / 2);
+                        
+                        assetGroup.setAttribute("x", box.x + box.width / 2);
+                        assetGroup.setAttribute("y", box.y + box.height / 2 + 1);
                     }
                 } catch(e) {}
             }, 600);
@@ -380,10 +418,8 @@ async function initMap() {
 
         updateMapColors();
         updateLeaderboard();
-        log("🗺️ Real Earth GeoJSON Map Mesh fully rendered. Waiting for commands...");
-    } catch(err) {
-        log("Critical Map Initialization Failure: " + err.message, "err");
-    }
+        log("🗺️ Dynamic GeoJSON Map Mesh Engine fully online. Stream ready!");
+    } catch(err) { log("Critical Map Initialization Failure: " + err.message, "err"); }
 }
 
 ComfyJS.onCommand = (user, command, message) => {
