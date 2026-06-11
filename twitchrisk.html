@@ -661,13 +661,26 @@ function executeDeployCommand(user, amountInput, fromCode, toCode) {
 }
 
 // --- PERFORMANCE GRAPHICS RENDERING PIPELINE ---
-
-
-// --- PERFORMANCE GRAPHICS RENDERING PIPELINE (REVISED RESOLUTION ORDER) ---
+// --- PERFORMANCE GRAPHICS RENDERING PIPELINE (STABILIZED) ---
 function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const boxA = countryBoundsCache[fromCode];
     const boxB = countryBoundsCache[toCode];
-    if (!boxA || !boxB) { combatDetails.commitStateResolution(); return; }
+    
+    // Safety fallback: if coordinates are missing, resolve state instantly and exit
+    if (!boxA || !boxB) { 
+        if (combatDetails && typeof combatDetails.commitStateResolution === "function") {
+            combatDetails.commitStateResolution(); 
+        }
+        return; 
+    }
+
+    // IMMUTABLE SCOPE CAPTURE: Pull properties out immediately into localized variables 
+    // to insulate them from garbage collection or asynchronous stack losses.
+    const attDeployingVal = combatDetails.attDeploying || 0;
+    const defInitialVal   = combatDetails.defInitial || 0;
+    const attLossesVal    = combatDetails.attLosses || 0;
+    const defLossesVal    = combatDetails.defLosses || 0;
+    const stateResolver   = combatDetails.commitStateResolution;
 
     const uiLayer = document.getElementById("ui-layer");
     
@@ -698,14 +711,12 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     uiLayer.appendChild(streamContainer);
 
     const maxVisibleIcons = 8;
-    const activeTroopCount = combatDetails.attDeploying;
-    const linesToSpawnCount = Math.min(maxVisibleIcons, activeTroopCount);
-    
+    const linesToSpawnCount = Math.min(maxVisibleIcons, attDeployingVal);
     const troopElementsArray = [];
 
     for (let i = 0; i < linesToSpawnCount; i++) {
         const soldierTextNode = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        soldierTextNode.textContent = (i === 0) ? `💂x${activeTroopCount}` : `💂`;
+        soldierTextNode.textContent = (i === 0) ? `💂x${attDeployingVal}` : `💂`;
         soldierTextNode.setAttribute("class", "combat-vfx-text");
         soldierTextNode.setAttribute("fill", "#fff");
         soldierTextNode.setAttribute("font-size", `${startTextSize}px`);
@@ -716,7 +727,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         
         troopElementsArray.push({
             node: soldierTextNode,
-            trailOffsetOffset: i * 0.045, 
+            trailOffsetOffset: i * 0.045,
             hasArrived: false
         });
     }
@@ -776,21 +787,22 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         }
     }
 
+    // Kick off animation cycle
     setTimeout(() => {
         requestAnimationFrame(animateTravel);
     }, 1000);
 
     function handleTargetImpact(destinationSectorCode) {
-        // Clean transit artifacts completely out of memory layout
         if (streamContainer && streamContainer.parentNode) {
             streamContainer.remove();
         }
         
         changeMapProjection(destinationSectorCode);
 
-        // 🔥 STATE PROTECTION STEP: Execute data alterations instantly when vectors make land.
-        // This stops UI/CSS issues from locking up database/state operations.
-        combatDetails.commitStateResolution();
+        // Safe State Execution right at point of impact
+        if (typeof stateResolver === "function") {
+            stateResolver();
+        }
 
         const battleGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         battleGroup.style.transformOrigin = `${x2}px ${y2}px`;
@@ -799,7 +811,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         const spacingX = endTextSize * 1.6; 
 
         const displayContainer = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        // Safe fallbacks applied in case keyframe arrays are missing
         displayContainer.style.animation = "popInStatic 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards";
 
         const attDisplay = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -809,7 +820,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         attDisplay.setAttribute("fill", "#ffeb3b");
         attDisplay.setAttribute("font-size", `${endTextSize}px`);
         attDisplay.setAttribute("text-anchor", "middle");
-        attDisplay.textContent = `⚔️${combatDetails.attDeploying}`;
+        attDisplay.textContent = `⚔️${attDeployingVal}`; // Using locally tracked scope value
         displayContainer.appendChild(attDisplay);
 
         const defDisplay = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -819,7 +830,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         defDisplay.setAttribute("fill", "#00b0ff");
         defDisplay.setAttribute("font-size", `${endTextSize}px`);
         defDisplay.setAttribute("text-anchor", "middle");
-        defDisplay.textContent = `🛡️${combatDetails.defInitial}`;
+        defDisplay.textContent = `🛡️${defInitialVal}`; // Using locally tracked scope value
         displayContainer.appendChild(defDisplay);
 
         battleGroup.appendChild(displayContainer);
@@ -828,7 +839,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         setTimeout(() => {
             const slashWidthOffset = endTextSize * 0.8;
 
-            if (combatDetails.attLosses > 0) {
+            if (attLossesVal > 0) {
                 const slashA = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 slashA.setAttribute("x1", x2 - spacingX - slashWidthOffset);
                 slashA.setAttribute("y1", panelY + (endTextSize * 0.3));
@@ -846,11 +857,11 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                 lossTextA.setAttribute("fill", "#ff1744");
                 lossTextA.setAttribute("font-size", `${endTextSize * 0.75}px`);
                 lossTextA.setAttribute("text-anchor", "middle");
-                lossTextA.textContent = `-${combatDetails.attLosses}`;
+                lossTextA.textContent = `-${attLossesVal}`;
                 displayContainer.appendChild(lossTextA);
             }
 
-            if (combatDetails.defLosses > 0) {
+            if (defLossesVal > 0) {
                 const slashB = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 slashB.setAttribute("x1", x2 + spacingX - slashWidthOffset);
                 slashB.setAttribute("y1", panelY + (endTextSize * 0.3));
@@ -868,7 +879,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                 lossTextB.setAttribute("fill", "#ff1744");
                 lossTextB.setAttribute("font-size", `${endTextSize * 0.75}px`);
                 lossTextB.setAttribute("text-anchor", "middle");
-                lossTextB.textContent = `-${combatDetails.defLosses}`;
+                lossTextB.textContent = `-${defLossesVal}`;
                 displayContainer.appendChild(lossTextB);
             }
 
@@ -888,7 +899,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         }, 1200);
     }
 }
-
 
 
 
@@ -1043,12 +1053,10 @@ function executeAttack(user, fromCode, toCode) {
         commitStateResolution: commitStateResolution
     });
 }
+
 function executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode) {
     const attTerritory = gameState.data[fromCode]; 
     const defTerritory = gameState.data[toCode];
-
-    // Note: Basic ownership, truce validation, and troop-pool validation are already 
-    // handled inside your twitch command listener right before parsing amountInput.
 
     const defenseBuff = 1.0 + (defTerritory.buildings.base * 0.4); 
     const defensiveArmies = defTerritory.troops;
@@ -1070,20 +1078,23 @@ function executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode)
     let calculatedDefenderLosses = 0;
 
     if (isSuccess) {
+        // Calculate how many invading units actually lived to claim the land
         defFinalSurviving = Math.max(1, Math.floor(attackingArmies * ((attPower - defPower) / attPower)));
-        calculatedAttackerLosses = attackingArmies; // The entire invading force leaves home; survivors stay in the captured zone
-        calculatedDefenderLosses = defensiveArmies; // All defenders eliminated
+        
+        // Attacker losses are what sent MINUS what survived to occupy the zone
+        calculatedAttackerLosses = attackingArmies - defFinalSurviving; 
+        calculatedDefenderLosses = defensiveArmies; // All defenders wiped out
     } else {
         const lostRatio = attPower / defPower;
         defFinalSurviving = Math.max(1, Math.floor(defensiveArmies * (1 - (lostRatio * 0.5))));
-        calculatedAttackerLosses = attackingArmies; // The entire explicit deployment force was lost at the gates
+        
+        calculatedAttackerLosses = attackingArmies; // Entire invading force died at the gates
         calculatedDefenderLosses = defensiveArmies - defFinalSurviving;
     }
 
-    // --- LAZY STATE COMMITMENT (CALLED POST-ANIMATION LANDING) ---
+    // --- STATE COMMITMENT (FIRES SAFELY ON ANIMATION IMPACT) ---
     const commitStateResolution = () => {
         if (isSuccess) {
-            // Attacker conquers territory. Their home base loses what was sent.
             defTerritory.owner = user; 
             defTerritory.troops = defFinalSurviving; 
             attTerritory.troops -= attackingArmies; 
@@ -1091,7 +1102,6 @@ function executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode)
             log(`💥 CRITICAL CONQUEST! ${user} took ${toCode}! (${defFinalSurviving} troops garrisoned).`, "succ");
             if(formerOwner) log(`📉 ${formerOwner} lost control of ${toCode}.`, "war");
         } else {
-            // Defense holds. Target updates survivors, Attacker base only loses the specific force sent.
             defTerritory.troops = defFinalSurviving; 
             attTerritory.troops -= attackingArmies; 
             
@@ -1103,7 +1113,7 @@ function executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode)
         saveGame();
     };
 
-    // Pass the calculated results off to your 💂 visual stream renderer
+    // Pass the perfectly matched metrics to the fixed triggerCinematicCombat
     triggerCinematicCombat(fromCode, toCode, {
         attDeploying: attackingArmies,
         defInitial: defensiveArmies,
@@ -1206,38 +1216,62 @@ function processCommand(user, cmd, args) {
     }
 
 	else if (cmd === "deploy" || cmd === "attack") {
-        const amountInput = args[0];
-        const fromCode = args[1]?.toUpperCase();
-        const toCode = args[2]?.toUpperCase();
+		const amountInput = args[0];
+		const fromCode = args[1]?.toUpperCase();
+		const toCode = args[2]?.toUpperCase();
 
-        if (!amountInput || !fromCode || !toCode) {
-            log("Invalid Syntax. Use: !deploy [amount/percent/max] [from] [to] (E.g. !deploy 50% CA RU)", "err");
-            return;
-        }
+		// 1. Syntax Guard
+		if (!amountInput || !fromCode || !toCode) {
+			log(`Invalid Syntax. Use: !${cmd} [amount/percent/max] [from] [to] (E.g. !${cmd} 50% CA RU)`, "err");
+			return;
+		}
 
-        const attTerritory = gameState.data[fromCode];
-        if (!attTerritory || attTerritory.owner !== user) {
-            log(`Deployment origin territory [${fromCode}] owned incorrectly or missing.`, "err");
-            return;
-        }
+		const attTerritory = gameState.data[fromCode];
+		const defTerritory = gameState.data[toCode];
 
-        // Check if player even has an offensive pool to work with before calculating anything
-        const totalAvailablePool = attTerritory.troops - 2;
-        if (totalAvailablePool <= 0) {
-            log(`Armies in ${fromCode} are too low to deploy (Must leave a minimum of 2 troops behind).`, "err");
-            return;
-        }
+		// 2. Comprehensive Domain Guards
+		if (!attTerritory || attTerritory.owner !== user) {
+			log(`Action origin territory [${fromCode}] owned incorrectly or missing.`, "err");
+			return;
+		}
+		if (!defTerritory) {
+			log(`Destination target country code [${toCode}] is invalid.`, "err");
+			return;
+		}
+		if (defTerritory.owner === user) {
+			log(`Operation aborted: You cannot launch military campaigns against your own sovereignty!`, "err");
+			return;
+		}
 
-        // Run the custom input converter to fetch actual deployment count
-        const attackingArmies = parseDeploymentTroops(amountInput, totalAvailablePool);
-        if (attackingArmies <= 0) {
-            log(`Deployment size error. Check your troop values or pool context.`, "err");
-            return;
-        }
+		// 3. Diplomatic Alliance Guards
+		if (defTerritory.owner && typeof checkTruce === "function" && checkTruce(user, defTerritory.owner)) {
+			log(`⛔ Order Blocked: You maintain a Truce alliance with ${defTerritory.owner}! Use '!breaktruce ${defTerritory.owner}' first.`, "err");
+			return;
+		}
 
-        // Validation passed! Hand off safely to the visual combat engine
-        executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode);
-    }
+		// 4. Base Garrison Troop Validation
+		const totalAvailablePool = attTerritory.troops - 2;
+		if (totalAvailablePool <= 0) {
+			log(`Armies in ${fromCode} are too low (Must leave a minimum of 2 troops behind to anchor the garrison).`, "err");
+			return;
+		}
+
+		// 5. Run Custom Input Engine Parser
+		const attackingArmies = parseDeploymentTroops(amountInput, totalAvailablePool);
+		if (attackingArmies <= 0) {
+			log(`Invalid force allocation size specified. Check your pool constraints.`, "err");
+			return;
+		}
+
+		// 6. Context-Aware Engine Bridging
+		if (cmd === "deploy") {
+			executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode);
+		} else {
+			// Safe hand-off back to your specific original core attack logic context
+			// If you consolidated both functions entirely, you can point this to your combat block.
+			executeAttack(user, fromCode, toCode); 
+		}
+	}
 }
 
 function parseGeoJSONCoords(geometry) {
