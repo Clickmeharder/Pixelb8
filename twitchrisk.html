@@ -45,12 +45,21 @@
         #collapse-btn { position: absolute; left: -26px; top: 12px; width: 24px; height: 35px; background: #11161d; border: 2px solid #2c3e50; border-right: none; color: #3498db; font-family: monospace; font-weight: bold; font-size: 12px; text-align: center; line-height: 31px; cursor: pointer; border-radius: 4px 0 0 4px; user-select: none; transition: color 0.2s; z-index: 11; }
         #collapse-btn:hover { color: #e74c3c; background: #161c24; }
         
-        /* Bottom Control Deck */
-        #control-panel { width: 100%; max-width: 1100px; display: flex; gap: 10px; margin-top: 15px; }
-        #log { flex: 1; height: 150px; background: #11161d; overflow-y: auto; padding: 12px; border: 1px solid #2c3e50; font-family: 'Courier New', Courier, monospace; font-size: 12px; border-radius: 4px; color: #3498db; }
+        /* Bottom Control Deck with Collapse Mechanics */
+        #control-panel { width: 100%; max-width: 1100px; display: flex; flex-direction: column; margin-top: 15px; position: relative; }
+        #log-wrapper { width: 100%; height: 150px; transition: height 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-top 0.4s; position: relative; }
+        #log-wrapper.collapsed { height: 0px; }
+        
+        #log { width: 100%; height: 100%; background: #11161d; overflow-y: auto; padding: 12px; border: 1px solid #2c3e50; font-family: 'Courier New', Courier, monospace; font-size: 12px; border-radius: 4px; color: #3498db; box-sizing: border-box; }
+        #log-wrapper.collapsed #log { display: none; }
+        
         #log div.err { color: #e74c3c; }
         #log div.succ { color: #2ecc71; }
         #log div.war { color: #f1c40f; font-weight: bold; }
+        
+        /* Log Collapse Tab Trigger Button */
+        #log-collapse-btn { position: absolute; right: 12px; top: -24px; width: 35px; height: 24px; background: #11161d; border: 1px solid #2c3e50; border-bottom: none; color: #3498db; font-family: monospace; font-weight: bold; font-size: 12px; text-align: center; line-height: 22px; cursor: pointer; border-radius: 4px 4px 0 0; user-select: none; transition: color 0.2s; z-index: 11; }
+        #log-collapse-btn:hover { color: #e74c3c; background: #161c24; }
         
         button.admin-btn { background: #e74c3c; color: white; border: none; padding: 4px 4px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.2s; margin-bottom: 5px; }
         button.admin-btn:hover { background: #c0392b; box-shadow: 0 0 10px rgba(231,76,60,0.5); }
@@ -94,7 +103,10 @@
     </div>
 
     <div id="control-panel">
-        <div id="log">🤖 System Initializing Master Engine...</div>
+        <div id="log-collapse-btn" onclick="toggleLog()">[-]</div>
+        <div id="log-wrapper">
+            <div id="log">🤖 System Initializing Master Engine...</div>
+        </div>
     </div>
 
 <script>
@@ -133,8 +145,21 @@ function toggleLeaderboard() {
     }
 }
 
+function toggleLog() {
+    const wrapper = document.getElementById("log-wrapper");
+    const btn = document.getElementById("log-collapse-btn");
+    if (wrapper.classList.contains("collapsed")) {
+        wrapper.classList.remove("collapsed");
+        btn.textContent = "[-]";
+    } else {
+        wrapper.classList.add("collapsed");
+        btn.textContent = "[+]";
+    }
+}
+
 function log(msg, type = '') { 
     const l = document.getElementById("log"); 
+    if (!l) return;
     let cls = '';
     if (type === 'err') cls = ' class="err"';
     if (type === 'succ') cls = ' class="succ"';
