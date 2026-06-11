@@ -20,7 +20,7 @@
         .asset-label { pointer-events: none; fill: #51e1ed; text-anchor: middle; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; line-height: 1.2; overflow: visible !important; }
         
         /* Collapsible Sidebar Mechanics */
-        #leaderboard-wrapper { position: relative; display: flex; transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-left 0.4s; width: 172px; z-index: 10; }
+        #leaderboard-wrapper { position: fixed; display: flex; bottom:0;right:8px;transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-left 0.4s; width: 172px; z-index: 10; }
         #leaderboard-wrapper.collapsed { width: 0px; margin-left: -15px; }
         
         #leaderboard { width: 100%; background: #11161d; border: 2px solid #2c3e50; padding: 12px; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-y: auto; box-sizing: border-box; }
