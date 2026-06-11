@@ -577,18 +577,18 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const countryGeoSizeA = Math.max(boxA.width, boxA.height);
     const countryGeoSizeB = Math.max(boxB.width, boxB.height);
     
-    // Calculate distinct base sizes for both origin and destination points
     const startTextSize = Math.max(3.5, Math.min(8, countryGeoSizeA * 0.18));
     const endTextSize = Math.max(3.5, Math.min(8, countryGeoSizeB * 0.18)); 
     
     const strokeWidth = Math.max(0.3, Math.min(0.8, countryGeoSizeB * 0.02));
 
-    // --- PHASE 1: FOCUS ATTACKER & INITIALIZE TROOPS ---
+    // --- PHASE 1: FOCUS ATTACKER & INITIALIZE OVERLAY ---
     changeMapProjection(fromCode);
 
+    // REMOVED CSS TRANSITIONS: The line length is now updated strictly frame-by-frame by JS
     const trajectoryLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
     trajectoryLine.setAttribute("x1", x1); trajectoryLine.setAttribute("y1", y1);
-    trajectoryLine.setAttribute("x2", x1); trajectoryLine.setAttribute("y2", y1);
+    trajectoryLine.setAttribute("x2", x1); trajectoryLine.setAttribute("y2", y1); 
     trajectoryLine.setAttribute("stroke", "#ff3d00");
     trajectoryLine.setAttribute("stroke-width", strokeWidth);
     trajectoryLine.setAttribute("stroke-dasharray", `${strokeWidth * 2}, ${strokeWidth * 2}`);
@@ -597,7 +597,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const troopTransport = document.createElementNS("http://www.w3.org/2000/svg", "g");
     
     const troopText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    // Displays structured troop counts in front of the advancing trajectory line
     troopText.textContent = `🪖x${combatDetails.attDeploying}`;
     troopText.setAttribute("class", "combat-vfx-text");
     troopText.setAttribute("fill", "#fff");
@@ -608,52 +607,56 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     troopTransport.appendChild(troopText);
     uiLayer.appendChild(troopTransport);
 
-    // --- PHASE 2: TRAVEL LOOP WITH DYNAMIC LERP & CAMERA FOLLOW ---
-    const duration = 3400; // Slowed down from 2500ms to allow viewers to follow easily
+    // --- PHASE 2: HAND-CRANKED TRAVEL LOOP & REAL-TIME PAN ---
+    const duration = 4500; // Slowed down to 4.5s so chat can track long distances
     let startTime = null;
 
     function animateTravel(timestamp) {
         if (!startTime) startTime = timestamp;
-        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / duration, 1);
 
-        // Smooth cubic easing so launch and landing feel natural on screen
-        const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        // Linear interpolation for predictable, constant-speed flight tracking
+        const currentX = x1 + (x2 - x1) * progress;
+        const currentY = y1 + (y2 - y1) * progress;
 
-        const currentX = x1 + (x2 - x1) * easeProgress;
-        const currentY = y1 + (y2 - y1) * easeProgress;
-
-        // Dotted line draws directly up to the trailing edge of the troops
+        // Force vector attributes to follow progress frame-by-frame
         trajectoryLine.setAttribute("x2", currentX);
         trajectoryLine.setAttribute("y2", currentY);
 
-        // Keep troops positioned right at the advancing tip of the trajectory line
         troopText.setAttribute("x", currentX);
         troopText.setAttribute("y", currentY);
 
-        // DYNAMIC FONT SCALE LERP: Smoothly morph font size based on current map position
-        const currentTextSize = startTextSize + (endTextSize - startTextSize) * easeProgress;
+        const currentTextSize = startTextSize + (endTextSize - startTextSize) * progress;
         troopText.setAttribute("font-size", `${currentTextSize}px`);
 
+        // CAMERA TRACKING ENFORCEMENT:
+        // Pass the live calculation directly to your projection handler every animation frame
         if (typeof interpolateMapFocus === "function") {
             interpolateMapFocus(currentX, currentY);
+        } else if (typeof changeMapProjection === "function") {
+            // If your engine lacks a smooth lerp tool, force the main projection matrix to track the vector center
+            // We pass a custom temporary flag or coordinates if your engine supports manual viewport updates
+            // changeMapProjection(null, currentX, currentY); 
         }
 
         if (progress < 1) {
             requestAnimationFrame(animateTravel);
         } else {
-            // Troops make impact! Transition immediately to target calculations phase
             handleTargetImpact();
         }
     }
 
-    // Give stream layout frame a moment to pan and lock onto attacker before departure
+    // Hold visibility on origin point briefly so stream sees the launch sequence setup
     setTimeout(() => {
         requestAnimationFrame(animateTravel);
-    }, 800);
+    }, 1000);
 
     // --- PHASE 3: ARRIVAL, DETONATION & STATISTICS REPORTING ---
     function handleTargetImpact() {
         troopTransport.remove();
+        
+        // Final absolute lock on destination country geometry coordinates
         changeMapProjection(toCode);
 
         const battleGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -665,7 +668,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         const displayContainer = document.createElementNS("http://www.w3.org/2000/svg", "g");
         displayContainer.style.animation = "popInStatic 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards";
 
-        // 1. Attacker Splash Node
         const attDisplay = document.createElementNS("http://www.w3.org/2000/svg", "text");
         attDisplay.setAttribute("class", "combat-vfx-text");
         attDisplay.setAttribute("x", x2 - spacingX);
@@ -676,7 +678,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         attDisplay.textContent = `⚔️${combatDetails.attDeploying}`;
         displayContainer.appendChild(attDisplay);
 
-        // 2. Defender Splash Node
         const defDisplay = document.createElementNS("http://www.w3.org/2000/svg", "text");
         defDisplay.setAttribute("class", "combat-vfx-text");
         defDisplay.setAttribute("x", x2 + spacingX);
@@ -694,7 +695,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         setTimeout(() => {
             const slashWidthOffset = endTextSize * 0.8;
 
-            // Draw Attacker Deficit Slash Element
             if (combatDetails.attLosses > 0) {
                 const slashA = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 slashA.setAttribute("x1", x2 - spacingX - slashWidthOffset);
@@ -717,7 +717,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                 displayContainer.appendChild(lossTextA);
             }
 
-            // Draw Defender Deficit Slash Element
             if (combatDetails.defLosses > 0) {
                 const slashB = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 slashB.setAttribute("x1", x2 + spacingX - slashWidthOffset);
