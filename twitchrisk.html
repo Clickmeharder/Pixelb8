@@ -11,7 +11,7 @@
         .country { fill: #1f242c; stroke: #0d1117; stroke-width: 0.4; cursor: pointer; transition: fill 0.2s ease, stroke 0.2s ease; }
         .country:hover { stroke: #ffffff; stroke-width: 0.8; fill: #2c3541; }
         
-        /* Force explicit layer isolation to ignore geometric canvas parent masking */
+        /* Clear visual layering configuration */
         .owner-label { pointer-events: none; fill: #ffffff; text-anchor: middle; font-weight: 800; font-family: sans-serif; text-shadow: 1px 1px 1px #000, -1px -1px 1px #000; overflow: visible !important; }
         .asset-label { pointer-events: none; fill: #51e1ed; text-anchor: middle; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; line-height: 1.2; overflow: visible !important; }
         
@@ -80,7 +80,7 @@ function log(msg, type = '') {
     l.scrollTop = l.scrollHeight; 
 }
 
-// Global Core Cycle System
+// Global Core Cycle Loop
 setInterval(() => {
     let globalRecruitCount = 0;
 
@@ -153,10 +153,7 @@ function updateMapColors() {
             } else if(currentViewMode === "country") {
                 label.style.display = "block";
                 
-                // Pure viewport scaling baseline prevents large fonts on tiny viewboxes
                 let calculatedSize = currentViewBoxDims.w * 0.042;
-                
-                // Micro-state protection limiter overrides
                 if(pathWidth < 12) {
                     calculatedSize = currentViewBoxDims.w * 0.035;
                 }
@@ -215,16 +212,12 @@ function changeMapProjection(target) {
             try {
                 const box = path.getBBox();
                 
-                // UPGRADE: Dynamic proportional scaling margins specifically targeting small land masses
                 let pad;
                 if(box.width < 3 || box.height < 3) {
-                    // Micro-nations like SWZ get a massive static coordinate buffer to prevent clipping
                     pad = 16; 
                 } else if(box.width < 10 || box.height < 10) {
-                    // Small nations like GBR get medium breathing room
                     pad = Math.max(box.width, box.height) * 2.5;
                 } else {
-                    // Standard spacious padding for massive zones (USA, RUS)
                     pad = Math.max(box.width, box.height) * 0.6;
                 }
                 
@@ -408,6 +401,16 @@ async function initMap() {
         const svg = document.getElementById("map");
         svg.innerHTML = ""; 
 
+        // UPGRADE: Explicit layer isolation nodes
+        // This forces the browser to render all map paths completely before drawing text layers
+        const countriesLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        countriesLayer.setAttribute("id", "countries-layer");
+        svg.appendChild(countriesLayer);
+
+        const uiLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        uiLayer.setAttribute("id", "ui-layer");
+        svg.appendChild(uiLayer);
+
         geo.features.forEach(f => {
             const code = f.id || f.properties.ISO_A3;
             if(!code) return;
@@ -419,9 +422,7 @@ async function initMap() {
                 };
             }
             
-            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            
             path.setAttribute("id", code);
             path.setAttribute("class", "country");
             
@@ -432,21 +433,20 @@ async function initMap() {
             if(!pathData || pathData.trim() === "") return;
 
             path.setAttribute("d", pathData);
-            group.appendChild(path);
+            countriesLayer.appendChild(path); // Appended safely to background layer
 
+            // Text elements are now placed exclusively in the foreground layer
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.setAttribute("class", "owner-label");
             text.setAttribute("id", `lbl-${code}`);
             text.style.display = "none";
-            group.appendChild(text);
+            uiLayer.appendChild(text);
 
             const assetGroup = document.createElementNS("http://www.w3.org/2000/svg", "text");
             assetGroup.setAttribute("class", "asset-label");
             assetGroup.setAttribute("id", `assets-${code}`);
             assetGroup.style.display = "none";
-            group.appendChild(assetGroup);
-            
-            svg.appendChild(group);
+            uiLayer.appendChild(assetGroup);
 
             setTimeout(() => {
                 try {
@@ -464,7 +464,7 @@ async function initMap() {
 
         updateMapColors();
         updateLeaderboard();
-        log("🗺️ Adaptive Scale GeoJSON Map Mesh Online. Dynamic Viewports calibrated!");
+        log("🗺️ Adaptive Scale GeoJSON Map Mesh Online. Explicit Stacking order calibrated!");
     } catch(err) { log("Critical Map Initialization Failure: " + err.message, "err"); }
 }
 
