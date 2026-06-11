@@ -1,46 +1,88 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jaedraze Twitch Strategy</title>
+    <title>Jaedraze Twitch Strategy - Grand Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
-        body { background: #0c0f12; color: #d1d5db; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; }
-        #game-container { width: 100%; max-width: 1000px; height: 60vh; background: #000; border: 2px solid #555; position: relative; }
-        .country { stroke: #fff; stroke-width: 0.2; cursor: pointer; transition: 0.3s; }
-        .owner-label { pointer-events: none; font-size: 3px; fill: white; text-anchor: middle; font-weight: bold; }
-        #log { width: 100%; max-width: 1000px; height: 150px; background: #1a1f26; overflow-y: auto; padding: 10px; margin-top: 10px; border: 1px solid #333; font-family: monospace; }
-        button { background: #e74c3c; color: white; border: none; padding: 10px; cursor: pointer; margin-bottom: 10px; }
+        body { background: #0c0f12; color: #d1d5db; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 15px; overflow-x: hidden; }
+        h3 { margin: 5px 0 15px 0; color: #e74c3c; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(231,76,60,0.3); }
+        #game-container { width: 100%; max-width: 1100px; height: 65vh; background: #07090c; border: 2px solid #2c3e50; position: relative; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #map { width: 100%; height: 100%; }
+        .country { stroke: #161a21; stroke-width: 0.3; cursor: pointer; transition: fill 0.3s ease, stroke 0.3s ease; }
+        .country:hover { stroke: #fff; stroke-width: 0.6; }
+        .owner-label { pointer-events: none; font-size: 4px; fill: #ffffff; text-anchor: middle; font-weight: 800; font-family: sans-serif; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000; }
+        #control-panel { width: 100%; max-width: 1100px; display: flex; gap: 10px; margin-top: 10px; }
+        #log { flex: 2; height: 180px; background: #11161d; overflow-y: auto; padding: 12px; border: 1px solid #2c3e50; font-family: 'Courier New', Courier, monospace; font-size: 12px; border-radius: 4px; color: #3498db; }
+        #log div.err { color: #e74c3c; }
+        #log div.succ { color: #2ecc71; }
+        #log div.war { color: #f1c40f; font-weight: bold; }
+        #leaderboard { flex: 1; height: 180px; background: #11161d; border: 1px solid #2c3e50; padding: 12px; border-radius: 4px; overflow-y: auto; }
+        #leaderboard h4 { margin: 0 0 8px 0; color: #fff; font-size: 14px; text-transform: uppercase; border-bottom: 1px solid #2c3e50; padding-bottom: 4px; }
+        .lb-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; padding: 2px 4px; background: rgba(255,255,255,0.02); }
+        button { background: #e74c3c; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.2s; }
+        button:hover { background: #c0392b; box-shadow: 0 0 10px rgba(231,76,60,0.5); }
     </style>
 </head>
 <body>
-    <h3>Jaedraze Global Conquest</h3>
-    <button onclick="resetGame()">RESET WORLD</button>
-    <div id="game-container"><svg id="map" viewBox="0 0 360 180"></svg></div>
-    <div id="log">System Initializing...</div>
+
+    <h3>Jaedraze Strategy Engine (Grand Conquest)</h3>
+    <button onclick="resetGame()">RESET GAME WORLD</button>
+    
+    <div id="game-container">
+        <svg id="map" viewBox="0 0 360 180"></svg>
+    </div>
+
+    <div id="control-panel">
+        <div id="log">🤖 System Initializing Master Engine...</div>
+        <div id="leaderboard">
+            <h4>Global Standings</h4>
+            <div id="lb-content"></div>
+        </div>
+    </div>
 
 <script>
-const SAVE_KEY = "jaedraze_v2_data";
-let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || { players: {}, data: {} };
-const COSTS = { mine: 100, school: 200, city: 300, base: 500 };
+const SAVE_KEY = "jaedraze_grand_strategy_v3";
+let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || { 
+    players: {}, 
+    data: {},
+    truces: {} // Format: "player1:player2": true
+};
 
-function log(msg) { 
+const COSTS = { mine: 150, school: 250, city: 400, base: 500 };
+
+function log(msg, type = '') { 
     const l = document.getElementById("log"); 
-    l.innerHTML += `<div>> ${msg}</div>`; 
+    let cls = '';
+    if (type === 'err') cls = ' class="err"';
+    if (type === 'succ') cls = ' class="succ"';
+    if (type === 'war') cls = ' class="war"';
+    l.innerHTML += `<div${cls}>> ${msg}</div>`; 
     l.scrollTop = l.scrollHeight; 
 }
 
-// Income Tick: Every 60 seconds
+// Global Income loop (Every 45 seconds)
 setInterval(() => {
     Object.keys(gameState.players).forEach(p => {
-        let income = 10;
+        let income = 15; // Base passive gold
+        let totalMines = 0;
+        let controlledCountries = 0;
+
         Object.values(gameState.data).forEach(c => {
-            if(c.owner === p) income += (c.buildings.mine * 5);
+            if(c.owner === p) {
+                controlledCountries++;
+                income += (c.buildings.mine * 12);
+            }
         });
-        gameState.players[p].gold += income;
+
+        if(controlledCountries > 0) {
+            gameState.players[p].gold += income;
+        }
     });
     saveGame();
-    updateMapColors();
-}, 60000);
+    updateLeaderboard();
+    log("💰 Economic Tick: Taxes collected and distributions processed.", "succ");
+}, 45000);
 
 function saveGame() { localStorage.setItem(SAVE_KEY, JSON.stringify(gameState)); }
 function resetGame() { localStorage.removeItem(SAVE_KEY); location.reload(); }
@@ -54,94 +96,288 @@ function getUserColor(name) {
 function updateMapColors() {
     Object.keys(gameState.data).forEach(code => {
         const country = document.getElementById(code);
+        const label = document.getElementById(`lbl-${code}`);
+        const cData = gameState.data[code];
+        
         if(country) {
-            country.style.fill = gameState.data[code].owner ? getUserColor(gameState.data[code].owner) : "#2d3436";
+            country.style.fill = cData.owner ? getUserColor(cData.owner) : "#23272a";
+            
+            // Interactive tooltip metadata
+            const title = country.querySelector("title");
+            if(title) {
+                title.textContent = `${code} | Ruler: ${cData.owner || 'Neutral'}\nTroops: ${cData.troops}\nMines: ${cData.buildings.mine} | Schools: ${cData.buildings.school}\nCities: ${cData.buildings.city} | Bases: ${cData.buildings.base}`;
+            }
+        }
+        if(label && cData.owner) {
+            label.textContent = `${code}:${cData.troops}`;
+            label.style.display = "block";
+        } else if (label) {
+            label.style.display = "none";
         }
     });
 }
 
+function updateLeaderboard() {
+    const lbc = document.getElementById("lb-content");
+    if(!lbc) return;
+    
+    let sorted = Object.keys(gameState.players).map(name => {
+        let lands = 0; let troops = 0;
+        Object.values(gameState.data).forEach(c => { if(c.owner === name) { lands++; troops += c.troops; } });
+        return { name, gold: gameState.players[name].gold, lands, troops };
+    }).sort((a,b) => (b.lands * 10 + b.troops) - (a.lands * 10 + a.troops));
+
+    lbc.innerHTML = sorted.map(p => `
+        <div class="lb-row">
+            <span><strong>${p.name}</strong> (${p.lands} Regions)</span>
+            <span>💰${p.gold} ⚔️${p.troops}</span>
+        </div>
+    `).join('');
+}
+
+function checkTruce(p1, p2) {
+    return gameState.truces[`${p1}:${p2}`] || gameState.truces[`${p2}:${p1}`] || false;
+}
+
 function processCommand(user, cmd, args) {
-    if (cmd === "join" && !gameState.players[user]) {
-        gameState.players[user] = { gold: 500 };
-        log(`${user} joined the world.`);
+    cmd = cmd.toLowerCase();
+    
+    // Joint logic commands
+    if (cmd === "join") {
+        if (!gameState.players[user]) {
+            gameState.players[user] = { gold: 600, pendingTruce: null };
+            log(`👑 Player ${user} has raised their flag and entered the theater of war!`, "succ");
+            updateLeaderboard();
+        } else {
+            log(`${user}, you are already inside the matrix. Check your funds.`, "err");
+        }
+        return;
     }
+
     if (!gameState.players[user]) return;
-
     const p = gameState.players[user];
-    const code = args[0]?.toUpperCase();
 
+    // CLAIM LOGIC
     if (cmd === "claim") {
-        if (gameState.data[code] && !gameState.data[code].owner) {
-            gameState.data[code].owner = user;
-            log(`${user} claimed ${code}!`);
-        }
-    } else if (cmd === "build") {
-        const type = args[0];
-        const country = args[1]?.toUpperCase();
-        if (gameState.data[country]?.owner === user && p.gold >= (COSTS[type] || 999)) {
-            p.gold -= COSTS[type];
-            gameState.data[country].buildings[type]++;
-            log(`${user} built ${type} in ${country}.`);
-        }
-    } else if (cmd === "train") {
-        const country = args[0]?.toUpperCase();
-        const amt = parseInt(args[1]) || 1;
-        const c = gameState.data[country];
-        if (c?.owner === user && p.gold >= (amt * 10)) {
-            const cap = 10 + (c.buildings.city * 20);
-            if (c.troops + amt <= cap) {
-                p.gold -= (amt * 10);
-                c.troops += amt;
-                log(`${user} trained ${amt} troops in ${country}.`);
-            } else log("Capacity full! Build cities.");
-        }
-    } else if (cmd === "attack") {
-        const [from, to] = [args[0]?.toUpperCase(), args[1]?.toUpperCase()];
-        if (gameState.data[from]?.owner === user && gameState.data[to]) {
-            const att = gameState.data[from].troops;
-            const def = gameState.data[to].troops + (gameState.data[to].buildings.base * 10);
-            if (att > def) {
-                gameState.data[to].owner = user;
-                gameState.data[to].troops = Math.floor(att / 2);
-                gameState.data[from].troops = Math.floor(att / 2);
-                log(`⚔️ ${user} conquered ${to}!`);
-            } else {
-                gameState.data[from].troops = Math.floor(att * 0.5);
-                log(`❌ Attack on ${to} failed.`);
-            }
+        const targetCode = args[0]?.toUpperCase();
+        if (!gameState.data[targetCode]) { log(`Territory ${targetCode || 'Empty'} does not exist.`, "err"); return; }
+        
+        if (!gameState.data[targetCode].owner) {
+            // Count total territories to verify cap if wanted, or just grant.
+            gameState.data[targetCode].owner = user;
+            gameState.data[targetCode].troops = 10; // Start units
+            log(`🗺️ ${user} successfully established operational control over ${targetCode}.`, "succ");
+        } else {
+            log(`Territory ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err");
         }
     }
+
+    // BUILD LOGIC (mine, school, city, base)
+    else if (cmd === "build") {
+        const type = args[0]?.toLowerCase();
+        const targetCode = args[1]?.toUpperCase();
+
+        if (!COSTS[type]) { log(`Invalid construction type! Use: mine, school, city, base.`, "err"); return; }
+        if (!gameState.data[targetCode] || gameState.data[targetCode].owner !== user) { log(`You do not govern ${targetCode || 'this territory'}.`, "err"); return; }
+
+        if (p.gold < COSTS[type]) { log(`Insufficient funds! ${type.toUpperCase()} costs 💰${COSTS[type]} gold.`, "err"); return; }
+
+        p.gold -= COSTS[type];
+        gameState.data[targetCode].buildings[type]++;
+        log(`🏗️ ${user} constructed a ${type.toUpperCase()} in ${targetCode}.`, "succ");
+    }
+
+    // TRAINING LOGIC (Requires schools & housing limits check)
+    else if (cmd === "train") {
+        const targetCode = args[0]?.toUpperCase();
+        const amount = parseInt(args[1]) || 5;
+
+        if (amount <= 0) return;
+        const c = gameState.data[targetCode];
+
+        if (!c || c.owner !== user) { log(`You do not own ${targetCode || 'this territory'} to train armies.`, "err"); return; }
+        
+        // Rules validation: Must have at least 1 school to perform deployment training adjustments
+        if (c.buildings.school < 1) { log(`Operation cancelled: Training requires at least 1 SCHOOL in ${targetCode}.`, "err"); return; }
+        
+        const goldCost = amount * 8; // 8 gold per unit
+        if (p.gold < goldCost) { log(`Not enough gold! Training ${amount} units costs 💰${goldCost}.`, "err"); return; }
+
+        // Max cap depends on Cities built (Housing capability limit)
+        const unitCap = 15 + (c.buildings.city * 35);
+        if (c.troops + amount > unitCap) { log(`Housing Alert! ${targetCode} cap is ${unitCap}. Build more CITIES!`, "err"); return; }
+
+        p.gold -= goldCost;
+        c.troops += amount;
+        log(`🎖️ ${user} trained ${amount} standard infantries inside ${targetCode}.`);
+    }
+
+    // DIPLOMACY / TRUCE LOGIC
+    else if (cmd === "truce") {
+        const targetPlayer = args[0];
+        if (!targetPlayer || !gameState.players[targetPlayer]) { log(`Target player context not found in database.`, "err"); return; }
+        if (targetPlayer === user) return;
+
+        if (gameState.players[targetPlayer].pendingTruce === user) {
+            // Accept the truce request
+            gameState.truces[`${user}:${targetPlayer}`] = true;
+            gameState.players[targetPlayer].pendingTruce = null;
+            log(`🕊️ PEACE ACCORD: ${user} and ${targetPlayer} have formed an official Truce alliance!`, "succ");
+        } else {
+            p.pendingTruce = targetPlayer;
+            log(`📜 ${user} sent a diplomatic treaty request to ${targetPlayer}. (!truce ${user} to accept)`);
+        }
+    }
+
+    // BREAK TRUCE LOGIC
+    else if (cmd === "breaktruce") {
+        const targetPlayer = args[0];
+        if(gameState.truces[`${user}:${targetPlayer}`] || gameState.truces[`${targetPlayer}:${user}`]) {
+            delete gameState.truces[`${user}:${targetPlayer}`];
+            delete gameState.truces[`${targetPlayer}:${user}`];
+            log(`💔 WAR DECLARATION: ${user} shattered the peace pact with ${targetPlayer}!`, "war");
+        }
+    }
+
+    // ADVANCED COMBAT LOGIC
+    else if (cmd === "attack") {
+        const [fromCode, toCode] = [args[0]?.toUpperCase(), args[1]?.toUpperCase()];
+        const attTerritory = gameState.data[fromCode];
+        const defTerritory = gameState.data[toCode];
+
+        if (!attTerritory || attTerritory.owner !== user) { log(`Attack vector source invalid.`, "err"); return; }
+        if (!defTerritory) { log(`Destination target not existing.`, "err"); return; }
+        if (defTerritory.owner === user) { log(`Cannot commit treason against yourself!`, "err"); return; }
+
+        if (attTerritory.troops <= 2) { log(`Force sizes in ${fromCode} are too low to launch campaigns (Must leave at least 2 behind).`, "err"); return; }
+
+        // Check if truce active
+        if (defTerritory.owner && checkTruce(user, defTerritory.owner)) {
+            log(`⛔ Illegal Order: You maintain a Non-Aggression pact with ${defTerritory.owner}! Type '!breaktruce ${defTerritory.owner}' first.`, "err");
+            return;
+        }
+
+        const attackingArmies = attTerritory.troops - 2; // leave 2 defense minimum
+        
+        // Defensive capabilities calculations bolstered heavily by Military Bases structures
+        const defenseBuff = 1.0 + (defTerritory.buildings.base * 0.4); 
+        const defensiveArmies = defTerritory.troops;
+
+        log(`⚔️ ATTACK LANCING: ${user} marches ${attackingArmies} troops from ${fromCode} to strike ${toCode}!`, "war");
+
+        // Compute simulated combat weights
+        let attPower = 0; let defPower = 0;
+        for(let i=0; i<attackingArmies; i++) { attPower += Math.floor(Math.random() * 6) + 1; }
+        for(let i=0; i<defensiveArmies; i++) { defPower += Math.floor(Math.random() * 6) + 1; }
+        defPower = Math.floor(defPower * defenseBuff);
+
+        if (attPower > defPower) {
+            // Attack Victory
+            const survivors = Math.max(1, Math.floor(attackingArmies * ((attPower - defPower) / attPower)));
+            const formerOwner = defTerritory.owner;
+            
+            defTerritory.owner = user;
+            defTerritory.troops = survivors;
+            attTerritory.troops = 2; // Armies moved out
+            
+            log(`💥 VICTORY! ${user} conquered ${toCode}! (${survivors} troops surviving).`, "succ");
+            if(formerOwner) log(`📉 Player ${formerOwner} lost sovereign dominion over ${toCode}.`, "war");
+        } else {
+            // Defense Holds
+            const lostRatio = attPower / defPower;
+            const remainingDefenders = Math.max(1, Math.floor(defensiveArmies * (1 - (lostRatio * 0.5))));
+            
+            defTerritory.troops = remainingDefenders;
+            attTerritory.troops = 2; // Attacking detachment decimated
+            
+            log(`❌ DEFEAT: Attackers routing out of ${toCode} failed completely. Defenders left: ${remainingDefenders}.`);
+        }
+    }
+
     updateMapColors();
+    updateLeaderboard();
     saveGame();
 }
 
 async function initMap() {
-    const res = await fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson");
-    const geo = await res.json();
-    const svg = document.getElementById("map");
+    try {
+        const res = await fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson");
+        const geo = await res.json();
+        const svg = document.getElementById("map");
 
-    geo.features.forEach(f => {
-        const code = f.properties.ISO_A3;
-        if(!gameState.data[code]) gameState.data[code] = { owner: null, troops: 5, buildings: {mine:0, school:0, city:0, base:0} };
-        
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("id", code);
-        path.setAttribute("class", "country");
-        
-        let d = "";
-        const coords = (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates);
-        coords.forEach(poly => {
-            poly[0].forEach((c, i) => { d += (i === 0 ? "M" : "L") + `${c[0]+180},${90-c[1]} `; });
-            d += "Z ";
+        geo.features.forEach(f => {
+            const code = f.properties.ISO_A3;
+            if(!code) return;
+
+            // Seed initialization profiles
+            if(!gameState.data[code]) {
+                gameState.data[code] = { 
+                    owner: null, 
+                    troops: 0, 
+                    buildings: { mine: 0, school: 0, city: 0, base: 0 } 
+                };
+            }
+            
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            
+            path.setAttribute("id", code);
+            path.setAttribute("class", "country");
+            
+            const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+            path.appendChild(title);
+            
+            let d = "";
+            const coords = (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates);
+            coords.forEach(poly => {
+                // GeoJSON processing handling multi-dimensional coordinate loops
+                let rings = (f.geometry.type === "Polygon") ? [poly] : poly;
+                rings.forEach(ring => {
+                    if(!ring || !ring.forEach) return;
+                    ring.forEach((c, i) => { 
+                        if(typeof c[0] === 'number' && typeof c[1] === 'number') {
+                            d += (i === 0 ? "M" : "L") + `${c[0] + 180},${90 - c[1]} `; 
+                        }
+                    });
+                    d += "Z ";
+                });
+            });
+            
+            path.setAttribute("d", d);
+            group.appendChild(path);
+
+            // Generate Map Overlays text anchors
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("class", "owner-label");
+            text.setAttribute("id", `lbl-${code}`);
+            text.style.display = "none";
+            group.appendChild(text);
+            svg.appendChild(group);
+
+            // Centering algorithm wrapper calculated on execution delays safely
+            setTimeout(() => {
+                try {
+                    const box = path.getBBox();
+                    text.setAttribute("x", box.x + box.width / 2);
+                    text.setAttribute("y", box.y + box.height / 2);
+                } catch(e) {}
+            }, 500);
         });
-        path.setAttribute("d", d);
-        svg.appendChild(path);
-    });
-    updateMapColors();
-    log("Engine Loaded. Waiting for commands...");
+
+        updateMapColors();
+        updateLeaderboard();
+        log("🛸 Strategic Operations Core Engine online. Awaiting chat interface input...");
+    } catch(err) {
+        log("Error configuration initialization map: " + err.message, "err");
+    }
 }
 
-ComfyJS.onCommand = (u, c, m) => processCommand(u, c.toLowerCase(), m.split(" "));
+// ComfyJS Configuration Hookups
+ComfyJS.onCommand = (user, command, message) => {
+    processCommand(user, command, message.split(" ").filter(x => x.trim() !== ""));
+};
+
+// Change "Jaedraze" down below to target your unique channel parameters if testing locally
 ComfyJS.Init("Jaedraze");
 initMap();
 </script>
