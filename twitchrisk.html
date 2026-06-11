@@ -515,24 +515,21 @@ function triggerSovereigntyRipple(countryCode, colorHex) {
     setTimeout(() => ring.remove(), 1200);
 }
 
-function triggerBuildingStampAnimation(countryCode, type) {
+function triggerMultiBuildingStampAnimation(countryCode, type, amount) {
     const box = countryBoundsCache[countryCode];
     if (!box) return;
     const uiLayer = document.getElementById("ui-layer");
     
-    // Calculate center coordinates of the targeted territory
     const cx = box.x + box.width / 2;
     const cy = box.y + box.height / 2;
 
-    // Map building types to their matching broadcast icons
     const iconMap = { mine: "🏭", school: "🏫", city: "🌆", base: "🛡️" };
     const emoji = iconMap[type] || "🏗️";
 
-    // Create a group to anchor the transform-origin directly on the country center
     const animGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     animGroup.style.transformOrigin = `${cx}px ${cy}px`;
     
-    // 1. The Large Stamping Asset
+    // 1. The Large Structural Stamp
     const stampText = document.createElementNS("http://www.w3.org/2000/svg", "text");
     stampText.textContent = emoji;
     stampText.setAttribute("x", cx);
@@ -540,36 +537,30 @@ function triggerBuildingStampAnimation(countryCode, type) {
     stampText.setAttribute("text-anchor", "middle");
     stampText.setAttribute("dominant-baseline", "central");
     
-    // Dynamic sizing based on country scale so it looks balanced when fully zoomed
     const finalSize = Math.max(1.5, Math.min(8, Math.max(box.width, box.height) * 0.8));
     stampText.setAttribute("font-size", `${finalSize}px`);
     stampText.style.animation = "buildingStamp 0.7s cubic-bezier(0.15, 0.85, 0.35, 1.2) forwards";
 
-    // 2. The "+1" Floating Splash Text
+    // 2. The Dynamic Bulk Quantity Splash Text
     const splashText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    splashText.textContent = "+1";
-    splashText.setAttribute("x", cx + (finalSize * 0.6)); // Offset slightly to the right
+    splashText.textContent = `+${amount}`;
+    splashText.setAttribute("x", cx + (finalSize * 0.6));
     splashText.setAttribute("y", cy - (finalSize * 0.4));
-    splashText.setAttribute("fill", "#00e676"); // Vibrant green splash
-    stampText.setAttribute("text-anchor", "middle");
+    splashText.setAttribute("fill", "#00e676"); // Neon upgrade green
     splashText.setAttribute("font-weight", "bold");
     splashText.setAttribute("font-size", `${finalSize * 0.7}px`);
     splashText.style.animation = "splashFloat 1.2s ease-out forwards";
 
-    // Append to UI layer stacking hierarchy
     animGroup.appendChild(stampText);
     animGroup.appendChild(splashText);
     uiLayer.appendChild(animGroup);
 
-    // Clean up elements from DOM after execution cycles finish
     setTimeout(() => {
-        // Smoothly fade out the stamp icon after sitting on the country for a bit
         stampText.style.transition = "opacity 0.5s ease";
         stampText.style.opacity = "0";
         setTimeout(() => animGroup.remove(), 500);
     }, 2500);
 }
-
 function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const boxA = countryBoundsCache[fromCode];
     const boxB = countryBoundsCache[toCode];
@@ -797,27 +788,50 @@ function executeClaim(user, targetCode) {
 
 
 
-function executeBuild(user, p, type, targetCode) {
-    if (!COSTS[type]) { log(`Invalid building! Use: mine, school, city, base.`, "err"); return; }
-    if (!gameState.data[targetCode] || gameState.data[targetCode].owner !== user) { log(`You do not govern ${targetCode || 'this territory'}.`, "err"); return; }
-    if (p.gold < COSTS[type]) { log(`Insufficient gold! ${type.toUpperCase()} costs 💰${COSTS[type]} gold.`, "err"); return; }
+function executeBuild(user, p, type, targetCode, quantity = 1) {
+    if (!COSTS[type]) { 
+        log(`Invalid building! Use: mine, school, city, base.`, "err"); 
+        return; 
+    }
+    if (!gameState.data[targetCode] || gameState.data[targetCode].owner !== user) { 
+        log(`You do not govern ${targetCode || 'this territory'}.`, "err"); 
+        return; 
+    }
 
-    // Phase 1: Dynamic Camera Tracking Lock
+    const unitCost = COSTS[type];
+
+    // Determine absolute build capacity based on available player treasury funds
+    if (quantity === "max") {
+        quantity = Math.floor(p.gold / unitCost);
+        if (quantity <= 0) {
+            log(`❌ Treasury depleted! You cannot afford a single ${type.toUpperCase()} (Costs 💰${unitCost} gold).`, "err");
+            return;
+        }
+    } else {
+        quantity = parseInt(quantity, 10);
+        if (isNaN(quantity) || quantity <= 0) quantity = 1;
+    }
+
+    const totalCost = unitCost * quantity;
+    if (p.gold < totalCost) { 
+        log(`Insufficient gold! Building ${quantity}x ${type.toUpperCase()} costs 💰${totalCost} gold.`, "err"); 
+        return; 
+    }
+
+    // Phase 1: Camera Lock tracking focus
     changeMapProjection(targetCode);
 
-    // Phase 2: Stagger logic execution until camera panning settles
+    // Phase 2: Fire Visual Animation Sequence instantly
     setTimeout(() => {
-        p.gold -= COSTS[type];
+        p.gold -= totalCost;
         
-        // Trigger visual animations instantly
-        triggerBuildingStampAnimation(targetCode, type);
-        log(`🏗️ ${user} initiated infrastructure construction of ${type.toUpperCase()} in ${targetCode}.`, "succ");
+        // Custom multi-build splash engine runner
+        triggerMultiBuildingStampAnimation(targetCode, type, quantity);
+        log(`🏗️ ${user} commissioned ${quantity}x ${type.toUpperCase()} in ${targetCode} for 💰${totalCost} gold.`, "succ");
 
-        // Phase 3: PRECISE TIMER ROLLUP
-        // Exactly 500ms into the animation, the stamp hits the map layout layer.
-        // We update state tracking and refresh rendering here so indicators flip right on impact!
+        // Phase 3: Synchronized UI panel state integration
         setTimeout(() => {
-            gameState.data[targetCode].buildings[type]++;
+            gameState.data[targetCode].buildings[type] += quantity;
             
             updateMapColors();
             updateLeaderboard();
@@ -826,7 +840,6 @@ function executeBuild(user, p, type, targetCode) {
 
     }, 600);
 }
-
 
 function executeAttack(user, fromCode, toCode) {
     const attTerritory = gameState.data[fromCode]; 
@@ -942,9 +955,23 @@ function processCommand(user, cmd, args) {
         log(`⚙️ CONFIG UPDATE: Global expansion limit adjusted. Players can now claim up to ${claimLimit} territories.`, "war");
     }
 
-    else if (cmd === "build") {
-        executeBuild(user, p, args[0]?.toLowerCase(), args[1]?.toUpperCase());
-    }
+	else if (cmd === "build") {
+		let type = args[0]?.toLowerCase();
+		let targetCode = args[1]?.toUpperCase();
+		let quantity = 1;
+
+		// Check if the user typed '!build max mine CA' or '!build mine max CA'
+		if (type === "max") {
+			type = args[1]?.toLowerCase();
+			targetCode = args[2]?.toUpperCase();
+			quantity = "max";
+		} else if (targetCode === "MAX") {
+			targetCode = args[2]?.toUpperCase();
+			quantity = "max";
+		}
+
+		executeBuild(user, p, type, targetCode, quantity);
+	}
 
     else if (cmd === "status") {
         const targetCode = args[0]?.toUpperCase();
