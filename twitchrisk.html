@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jaedraze Twitch Strategy - Real Earth Edition</title>
+    <title>Twitch World domination Strategy Game</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 15px; overflow-x: hidden; }
@@ -26,7 +26,7 @@
 </head>
 <body>
 
-    <h3>Jaedraze Strategy Engine (Grand Conquest)</h3>
+    <h3>Twitch world sim</h3>
     <button onclick="resetGame()">RESET GAME WORLD</button>
     
     <div id="game-container">
@@ -61,8 +61,11 @@ function log(msg, type = '') {
     l.scrollTop = l.scrollHeight; 
 }
 
-// Global Income ticker loop (Every 45 seconds)
+// Unified Game State Core Loop (Triggers every 45 seconds)
 setInterval(() => {
+    let globalRecruitCount = 0;
+
+    // Phase 1: Financial Accounting
     Object.keys(gameState.players).forEach(p => {
         let income = 15; 
         let controlledCountries = 0;
@@ -78,9 +81,36 @@ setInterval(() => {
             gameState.players[p].gold += income;
         }
     });
+
+    // Phase 2: Automated Macro Troop Recruitment
+    Object.keys(gameState.data).forEach(code => {
+        const c = gameState.data[code];
+        if (c.owner && c.buildings.school > 0) {
+            const unitCap = 15 + (c.buildings.city * 35);
+            
+            if (c.troops < unitCap) {
+                // Generates 2 troops per school built
+                let prospectiveGeneration = c.buildings.school * 2;
+                
+                // Hard clamp to prevent passing population thresholds
+                if (c.troops + prospectiveGeneration > unitCap) {
+                    prospectiveGeneration = unitCap - c.troops;
+                }
+                
+                c.troops += prospectiveGeneration;
+                globalRecruitCount += prospectiveGeneration;
+            }
+        }
+    });
+
     saveGame();
+    updateMapColors();
     updateLeaderboard();
+    
     log("💰 Economic Tick: Passive taxes and mine revenues collected.", "succ");
+    if (globalRecruitCount > 0) {
+        log(`🎖️ Mobilization: ${globalRecruitCount} total reserves deployed globally via local Schools.`, "succ");
+    }
 }, 45000);
 
 function saveGame() { localStorage.setItem(SAVE_KEY, JSON.stringify(gameState)); }
@@ -181,25 +211,17 @@ function processCommand(user, cmd, args) {
         log(`🏗️ ${user} built a ${type.toUpperCase()} in ${targetCode}.`, "succ");
     }
 
-    else if (cmd === "train") {
+    // Replaced manual training with real-time sector status readouts
+    else if (cmd === "status") {
         const targetCode = args[0]?.toUpperCase();
-        const amount = parseInt(args[1]) || 5;
-
-        if (amount <= 0) return;
         const c = gameState.data[targetCode];
 
-        if (!c || c.owner !== user) { log(`You do not own ${targetCode || 'this territory'} to deploy armies.`, "err"); return; }
-        if (c.buildings.school < 1) { log(`Operation cancelled: Training requires at least 1 SCHOOL in ${targetCode}.`, "err"); return; }
+        if (!c || c.owner !== user) { log(`You do not own or have visibility over ${targetCode || 'this territory'}.`, "err"); return; }
         
-        const goldCost = amount * 8; 
-        if (p.gold < goldCost) { log(`Not enough gold! Training ${amount} units costs 💰${goldCost}.`, "err"); return; }
-
         const unitCap = 15 + (c.buildings.city * 35);
-        if (c.troops + amount > unitCap) { log(`Housing Limit! ${targetCode} cap is ${unitCap}. Build more CITIES!`, "err"); return; }
-
-        p.gold -= goldCost;
-        c.troops += amount;
-        log(`🎖️ ${user} trained ${amount} infantries inside ${targetCode}.`);
+        const autoGenRate = c.buildings.school * 2;
+        
+        log(`📊 Sector Profile [${targetCode}]: Troops: ${c.troops}/${unitCap} | Active Autogen: +${autoGenRate} per tick.`, "succ");
     }
 
     else if (cmd === "truce") {
@@ -279,13 +301,11 @@ function processCommand(user, cmd, args) {
     saveGame();
 }
 
-// Fixed GeoJSON multidimensional projection transformer 
 function parseGeoJSONCoords(geometry) {
     let paths = [];
     const convertRing = (ring) => {
         let d = "";
         ring.forEach((c, i) => {
-            // Precise mathematical transformation mapping Long/Lat array bounds into SVG projection space
             const x = (c[0] + 180);
             const y = (90 - c[1]);
             if (!isNaN(x) && !isNaN(y)) {
@@ -308,7 +328,6 @@ function parseGeoJSONCoords(geometry) {
 
 async function initMap() {
     try {
-        // High stability public fallback repository URL housing validated country geometry strings
         const res = await fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json");
         const geo = await res.json();
         const svg = document.getElementById("map");
@@ -341,7 +360,6 @@ async function initMap() {
             path.setAttribute("d", pathData);
             group.appendChild(path);
 
-            // Floating layout label creation hooks
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.setAttribute("class", "owner-label");
             text.setAttribute("id", `lbl-${code}`);
@@ -349,7 +367,6 @@ async function initMap() {
             group.appendChild(text);
             svg.appendChild(group);
 
-            // Asynchronous rendering layout positioning bounds calculations
             setTimeout(() => {
                 try {
                     const box = path.getBBox();
@@ -373,7 +390,6 @@ ComfyJS.onCommand = (user, command, message) => {
     processCommand(user, command, message.split(" ").filter(x => x.trim() !== ""));
 };
 
-// Target channel alignment values
 ComfyJS.Init("Jaedraze");
 initMap();
 </script>
