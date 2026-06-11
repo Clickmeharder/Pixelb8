@@ -758,9 +758,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
             const curScale = startTextSize + (endTextSize - startTextSize) * elementProgress;
             soldier.node.setAttribute("font-size", `${curScale}px`);
 
-            // CAMERA RESOLUTION TRACKING:
-            // We lock the camera focus point to the center element of the living battalion stream.
-            // If the lead unit hits the planet, the camera smoothly continues framing the back ranks.
+            // CAMERA RESOLUTION TRACKING
             if (index === Math.floor(troopElementsArray.length / 2) && elementProgress < 1) {
                 activeTrackX = curX;
                 activeTrackY = curY;
@@ -772,11 +770,12 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
             interpolateMapFocus(activeTrackX, activeTrackY);
         }
 
-        // Only break out of transit loop when the final trailing soldier lands safely
+        // Break transit loop ONLY when trailing edge lands safely
         if (totalArrivedCount < troopElementsArray.length) {
             requestAnimationFrame(animateTravel);
         } else {
-            handleTargetImpact();
+            // EXPLICIT PASSING: Send destination down safely to break closure isolation
+            handleTargetImpact(toCode); 
         }
     }
 
@@ -784,11 +783,12 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         requestAnimationFrame(animateTravel);
     }, 1000);
 
-    function handleTargetImpact() {
+    // Context variable explicitly captured via execution pass
+    function handleTargetImpact(destinationSectorCode) {
         streamContainer.remove();
         
-        // Final absolute center lock on target coordinates now that the line is fully cleared
-        changeMapProjection(toCode);
+        // Final absolute center lock on target coordinates via confirmed parameter pass
+        changeMapProjection(destinationSectorCode);
 
         const battleGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         battleGroup.style.transformOrigin = `${x2}px ${y2}px`;
@@ -869,6 +869,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                 displayContainer.appendChild(lossTextB);
             }
 
+            // Runs database update operations cleanly after graphic strike animations land
             combatDetails.commitStateResolution();
 
             setTimeout(() => {
@@ -880,9 +881,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
 
         }, 1200);
     }
-}/* ========================================================================
-   MODULAR CORE GAME LOGIC ACTIONS
-   ======================================================================== */
+}
 function executeClaim(user, targetCode) {
     if (!gameState.data[targetCode]) { log(`Country ISO code ${targetCode || 'Empty'} does not exist.`, "err"); return; }
     
