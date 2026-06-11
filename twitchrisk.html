@@ -133,6 +133,9 @@ let currentViewMode = "world";
 let currentZoomTarget = "world"; 
 let currentViewBoxDims = { w: 360, h: 180 }; 
 
+// Pre-cached bounding boxes for proximity calculations to clean up country view clutter
+let countryBoundsCache = {};
+
 function toggleLeaderboard() {
     const wrapper = document.getElementById("leaderboard-wrapper");
     const btn = document.getElementById("collapse-btn");
@@ -210,6 +213,21 @@ function getUserColor(name) {
     return color;
 }
 
+// Determines if country B is a spatial neighbor of country A by seeing if their bounding boxes overlap/intersect
+function isImmediateNeighbor(targetCode, fallbackCode) {
+    if (!targetCode || !fallbackCode || targetCode === fallbackCode) return false;
+    const boxA = countryBoundsCache[targetCode];
+    const boxB = countryBoundsCache[fallbackCode];
+    if (!boxA || !boxB) return false;
+
+    // Expand bounding box slightly to capture adjacent borders
+    const tolerance = 6.0; 
+    return (boxA.x - tolerance <= boxB.x + boxB.width &&
+            boxA.x + boxA.width + tolerance >= boxB.x &&
+            boxA.y - tolerance <= boxB.y + boxB.height &&
+            boxA.y + boxA.height + tolerance >= boxB.y);
+}
+
 function updateMapColors() {
     Object.keys(gameState.data).forEach(code => {
         const country = document.getElementById(code);
@@ -239,16 +257,21 @@ function updateMapColors() {
                 label.setAttribute("font-size", `${calculatedSize}px`);
                 label.textContent = `${code}:${cData.troops}`;
             } else if(currentViewMode === "country") {
-                label.style.display = "block";
-                
-                let calculatedSize = currentViewBoxDims.w * 0.042;
-                if(pathWidth < 12) {
-                    calculatedSize = currentViewBoxDims.w * 0.035;
+                // CLUTTER FIX: Only show text if it's the target country OR an immediate visual neighbor
+                if (code === currentZoomTarget || isImmediateNeighbor(currentZoomTarget, code)) {
+                    label.style.display = "block";
+                    
+                    let calculatedSize = currentViewBoxDims.w * 0.045;
+                    if(pathWidth < 12) {
+                        calculatedSize = currentViewBoxDims.w * 0.035;
+                    }
+                    
+                    calculatedSize = Math.max(0.10, Math.min(2.0, calculatedSize));
+                    label.setAttribute("font-size", `${calculatedSize}px`);
+                    label.textContent = `${code} | ${cData.troops}`;
+                } else {
+                    label.style.display = "none";
                 }
-                
-                calculatedSize = Math.max(0.12, Math.min(2.5, calculatedSize));
-                label.setAttribute("font-size", `${calculatedSize}px`);
-                label.textContent = `${code} | ${cData.troops}`;
             }
         }
 
@@ -257,7 +280,6 @@ function updateMapColors() {
             updateFloatingStatsPanel(code, cData);
         }
         
-        // Retain original inner-SVG node masking properties
         if(assets) assets.style.display = "none";
     });
 }
@@ -288,7 +310,6 @@ function changeMapProjection(target) {
         indicator.textContent = `Theater View: ${target}`;
         log(`🔭 Camera adjustment: Tracking target region [${target.toUpperCase()}].`);
         
-        // Reset floating panels back to generic unselected state on broader maps
         document.getElementById("box-country-title").textContent = "Sector: Global View";
         document.getElementById("box-ruler").textContent = "N/A";
         document.getElementById("box-ruler").style.color = "#51e1ed";
@@ -298,12 +319,14 @@ function changeMapProjection(target) {
             try {
                 const box = path.getBBox();
                 let pad;
+                
+                // ZOOM FIX: Drastically lowered the layout margins so it zooms in much closer on country views
                 if(box.width < 3 || box.height < 3) {
-                    pad = 16; 
+                    pad = 3.5; 
                 } else if(box.width < 10 || box.height < 10) {
-                    pad = Math.max(box.width, box.height) * 2.5;
+                    pad = Math.max(box.width, box.height) * 0.8;
                 } else {
-                    pad = Math.max(box.width, box.height) * 0.6;
+                    pad = Math.max(box.width, box.height) * 0.35;
                 }
                 
                 const vx = box.x - pad/2;
@@ -517,7 +540,6 @@ async function initMap() {
             path.setAttribute("id", code);
             path.setAttribute("class", "country");
             
-            // Mouse listener hooks to make the UI interactive when hovering regions
             path.addEventListener("mouseenter", () => {
                 if(gameState.data[code]) {
                     updateFloatingStatsPanel(code, gameState.data[code]);
@@ -545,13 +567,16 @@ async function initMap() {
                     if(box.width > 0.05 && box.height > 0.05) {
                         text.setAttribute("x", box.x + box.width / 2);
                         text.setAttribute("y", box.y + box.height / 2);
+                        
+                        // Cache the bounding calculations safely once map sets up
+                        countryBoundsCache[code] = { x: box.x, y: box.y, width: box.width, height: box.height };
                     }
                 } catch(e) {}
             }, 600);
         });
 
-        updateMapColors();
-        updateLeaderboard();
+        // Secondary brief delay loop to guarantee late calculations get properly evaluated and drawn
+        setTimeout(() => { updateMapColors(); updateLeaderboard(); }, 800);
         log("🗺️ Adaptive Scale GeoJSON Map Mesh Online. Absolute Stacking Order Fixed!");
     } catch(err) { log("Critical Map Initialization Failure: " + err.message, "err"); }
 }
