@@ -118,6 +118,7 @@ let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || {
 };
 
 const COSTS = { mine: 150, school: 250, city: 400, base: 500 };
+let claimLimit = 1;
 
 const CONTINENT_VIEWBOXES = {
     world: "0 0 360 180",
@@ -404,14 +405,42 @@ function processCommand(user, cmd, args) {
     if (!gameState.players[user]) return;
     const p = gameState.players[user];
 
-    if (cmd === "claim") {
+	if (cmd === "claim") {
         const targetCode = args[0]?.toUpperCase();
         if (!gameState.data[targetCode]) { log(`Country ISO code ${targetCode || 'Empty'} does not exist.`, "err"); return; }
+        
+        // Count how many territories this user currently owns
+        let ownedCount = Object.values(gameState.data).filter(c => c.owner === user).length;
+        
+        if (ownedCount >= claimLimit) {
+            log(`🚫 Access Denied: You have reached the maximum territory claim limit of ${claimLimit}.`, "err");
+            return;
+        }
+
         if (!gameState.data[targetCode].owner) {
             gameState.data[targetCode].owner = user;
             gameState.data[targetCode].troops = 10; 
             log(`🗺️ ${user} successfully established sovereign rule over ${targetCode}.`, "succ");
-        } else { log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err"); }
+        } else { 
+            log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err"); 
+        }
+    }
+
+    else if (cmd === "setclaimlimit") {
+        // Optional security: if you want only you (the streamer) to change it
+        if (user.toLowerCase() !== "jaedraze") { 
+            log(`⛔ Unauthorized: Only the supreme commander can modify global deployment limits.`, "err"); 
+            return; 
+        }
+
+        const newLimit = parseInt(args[0], 10);
+        if (isNaN(newLimit) || newLimit < 1) {
+            log(`Provide a valid numeric limit of 1 or greater. (E.g., !setclaimlimit 3)`, "err");
+            return;
+        }
+
+        claimLimit = newLimit;
+        log(`⚙️ CONFIG UPDATE: Global expansion limit adjusted. Players can now claim up to ${claimLimit} territories.`, "war");
     }
 
     else if (cmd === "build") {
