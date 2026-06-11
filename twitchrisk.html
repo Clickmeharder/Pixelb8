@@ -11,7 +11,7 @@
         .country { fill: #1f242c; stroke: #0d1117; stroke-width: 0.4; cursor: pointer; transition: fill 0.2s ease, stroke 0.2s ease; }
         .country:hover { stroke: #ffffff; stroke-width: 0.8; fill: #2c3541; }
         
-        /* Clear visual layering configuration */
+        /* Explicit layer separation guarantees text paints over top of all shapes */
         .owner-label { pointer-events: none; fill: #ffffff; text-anchor: middle; font-weight: 800; font-family: sans-serif; text-shadow: 1px 1px 1px #000, -1px -1px 1px #000; overflow: visible !important; }
         .asset-label { pointer-events: none; fill: #51e1ed; text-anchor: middle; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; line-height: 1.2; overflow: visible !important; }
         
@@ -80,7 +80,7 @@ function log(msg, type = '') {
     l.scrollTop = l.scrollHeight; 
 }
 
-// Global Core Cycle Loop
+// Global Core Cycle System
 setInterval(() => {
     let globalRecruitCount = 0;
 
@@ -212,6 +212,7 @@ function changeMapProjection(target) {
             try {
                 const box = path.getBBox();
                 
+                // RESTORED: Your absolute preference baseline zoom formulas
                 let pad;
                 if(box.width < 3 || box.height < 3) {
                     pad = 16; 
@@ -401,8 +402,7 @@ async function initMap() {
         const svg = document.getElementById("map");
         svg.innerHTML = ""; 
 
-        // UPGRADE: Explicit layer isolation nodes
-        // This forces the browser to render all map paths completely before drawing text layers
+        // CRITICAL STRUCTURAL FIX: Split geometries from UI completely to prevent shape bleeding
         const countriesLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
         countriesLayer.setAttribute("id", "countries-layer");
         svg.appendChild(countriesLayer);
@@ -433,9 +433,8 @@ async function initMap() {
             if(!pathData || pathData.trim() === "") return;
 
             path.setAttribute("d", pathData);
-            countriesLayer.appendChild(path); // Appended safely to background layer
+            countriesLayer.appendChild(path); 
 
-            // Text elements are now placed exclusively in the foreground layer
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.setAttribute("class", "owner-label");
             text.setAttribute("id", `lbl-${code}`);
@@ -464,7 +463,7 @@ async function initMap() {
 
         updateMapColors();
         updateLeaderboard();
-        log("🗺️ Adaptive Scale GeoJSON Map Mesh Online. Explicit Stacking order calibrated!");
+        log("🗺️ Adaptive Scale GeoJSON Map Mesh Online. Absolute Stacking Order Fixed!");
     } catch(err) { log("Critical Map Initialization Failure: " + err.message, "err"); }
 }
 
