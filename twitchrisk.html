@@ -159,6 +159,25 @@
 			80% { opacity: 1; }
 			100% { opacity: 0; transform: translateY(-4px); }
 		}
+		
+		/* Clean, highly visible military style overlay text */
+		.combat-vfx-text {
+			font-family: 'Courier New', Courier, monospace;
+			font-weight: 900;
+			text-shadow: 0 0 4px #000, 0 0 8px #000;
+			pointer-events: none;
+		}
+
+		@keyframes slashStrike {
+			0% { width: 0; opacity: 0; }
+			100% { width: 100%; opacity: 1; }
+		}
+
+		@keyframes popInStatic {
+			0% { transform: scale(0); opacity: 0; }
+			70% { transform: scale(1.2); opacity: 1; }
+			100% { transform: scale(1); opacity: 1; }
+		}
     </style>
 </head>
 <body>
@@ -554,140 +573,199 @@ function triggerBuildingStampAnimation(countryCode, type) {
 function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const boxA = countryBoundsCache[fromCode];
     const boxB = countryBoundsCache[toCode];
-    if (!boxA || !boxB) return;
+    if (!boxA || !boxB) { combatDetails.commitStateResolution(); return; }
 
     const uiLayer = document.getElementById("ui-layer");
+    
+    // Core Geographic Source & Destination Nodes
     const x1 = boxA.x + boxA.width / 2;
     const y1 = boxA.y + boxA.height / 2;
     const x2 = boxB.x + boxB.width / 2;
     const y2 = boxB.y + boxB.height / 2;
 
-    const sizeA = Math.max(boxA.width, boxA.height);
-    const sizeB = Math.max(boxB.width, boxB.height);
+    // Standardized, highly-readable text sizing relative to map bounds
+    const baseTextSize = Math.max(12, Math.min(24, Math.max(boxB.width, boxB.height) * 0.25));
 
-    // --- STAGE 1: SPARK ATTACKER MOBILIZATION DISPATCH ---
-    const attGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    attGroup.style.transformOrigin = `${x1}px ${y1}px`;
-    
-    const attForceText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    attForceText.textContent = `⚔️ ${combatDetails.attDeploying}`;
-    attForceText.setAttribute("x", x1); attForceText.setAttribute("y", y1 - (sizeA * 0.3));
-    attForceText.setAttribute("text-anchor", "middle");
-    attForceText.setAttribute("fill", "#fff");
-    attForceText.setAttribute("font-weight", "bold");
-    attForceText.setAttribute("font-size", `${Math.max(1.2, sizeA * 0.4)}px`);
-    attForceText.style.animation = "troopPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards";
-    
-    attGroup.appendChild(attForceText);
-    uiLayer.appendChild(attGroup);
+    // --- PHASE 1: FOCUS ATTACKER & INITIALIZE TROOPS ---
+    changeMapProjection(fromCode);
 
-    // Build Trajectory Vector Path
+    // Dynamic Tracking Dotted Vector Path Line Setup
     const trajectoryLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
     trajectoryLine.setAttribute("x1", x1); trajectoryLine.setAttribute("y1", y1);
-    trajectoryLine.setAttribute("x2", x1); trajectoryLine.setAttribute("y2", y1);
-    trajectoryLine.setAttribute("stroke", "rgba(244, 67, 54, 0.6)");
-    trajectoryLine.setAttribute("stroke-width", "0.5");
-    trajectoryLine.setAttribute("stroke-dasharray", "1, 3");
-    trajectoryLine.style.transition = "all 1.0s cubic-bezier(0.4, 0, 0.2, 1)";
+    trajectoryLine.setAttribute("x2", x1); trajectoryLine.setAttribute("y2", y1); // Starts at length 0
+    trajectoryLine.setAttribute("stroke", "#ff3d00");
+    trajectoryLine.setAttribute("stroke-width", "1.5");
+    trajectoryLine.setAttribute("stroke-dasharray", "4, 4");
     uiLayer.appendChild(trajectoryLine);
 
-    // Animate tracking trajectory line extending across borders
-    requestAnimationFrame(() => {
-        trajectoryLine.setAttribute("x2", x2);
-        trajectoryLine.setAttribute("y2", y2);
-    });
+    // Create the Moving Troop Battalion Node
+    const troopTransport = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    troopTransport.style.transformOrigin = "center";
+    
+    const troopText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    troopText.textContent = `🪖x${combatDetails.attDeploying}`;
+    troopText.setAttribute("class", "combat-vfx-text");
+    troopText.setAttribute("fill", "#fff");
+    troopText.setAttribute("font-size", `${baseTextSize}px`);
+    troopText.setAttribute("text-anchor", "middle");
+    troopText.setAttribute("dominant-baseline", "central");
+    
+    troopTransport.appendChild(troopText);
+    uiLayer.appendChild(troopTransport);
 
-    // --- STAGE 2: CAMERA FOLLOW & SLIDE OPERATION (1000ms Marker) ---
+    // --- PHASE 2: TRAVEL LOOP WITH REAL-TIME CAMERA PAN ---
+    const duration = 2500; // 2.5 seconds transit window across continents
+    let startTime = null;
+
+    function animateTravel(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+
+        // Linear interpolation calculations for vector path fields
+        const currentX = x1 + (x2 - x1) * progress;
+        const currentY = y1 + (y2 - y1) * progress;
+
+        // Draw the red dotted line precisely behind the moving units
+        trajectoryLine.setAttribute("x2", currentX);
+        trajectoryLine.setAttribute("y2", currentY);
+
+        // Anchor troop transform layout to current positions
+        troopText.setAttribute("x", currentX);
+        troopText.setAttribute("y", currentY);
+
+        // INTERPOLATED CAMERA FOLLOW: Smoothly update map viewport variables to follow units mid-flight
+        // Assuming your standard projection coordinates or custom pan method allows bounding center positioning
+        if (typeof interpolateMapFocus === "function") {
+            interpolateMapFocus(currentX, currentY);
+        } else {
+            // Fallback: If your engine uses code strings to update maps, dynamically step center weight
+            if (progress > 0.2 && progress < 0.8 && progress % 0.1 === 0) {
+                 // Incremental steps to keep performance heavy streaming stable
+            }
+        }
+
+        if (progress < 1) {
+            requestAnimationFrame(animateTravel);
+        } else {
+            // Arrived safely at destination! Move to calculations panel phase
+            handleTargetImpact();
+        }
+    }
+
+    // Stagger flight initiation until camera lock on source country completes settling frames
     setTimeout(() => {
+        requestAnimationFrame(animateTravel);
+    }, 800);
+
+    // --- PHASE 3: ARRIVAL, DETONATION & STATISTICS REPORTING ---
+    function handleTargetImpact() {
+        // Clear tactical travel models
+        troopTransport.remove();
+
+        // Lock camera directly on defender target country context
         changeMapProjection(toCode);
-    }, 1000);
 
-    // --- STAGE 3: TARGET ENGAGEMENT & RECON COUNTS (1600ms Marker) ---
-    setTimeout(() => {
-        attGroup.remove();
+        // Spawn Core Combat Metrics Interface Panel Group
+        const battleGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        battleGroup.style.transformOrigin = `${x2}px ${y2}px`;
 
-        const engagementGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        engagementGroup.style.transformOrigin = `${x2}px ${y2}px`;
+        const panelY = y2 - (baseTextSize * 1.5);
 
-        // Target Lock Reticle Ring Animation
-        const reticle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        reticle.setAttribute("cx", x2); reticle.setAttribute("cy", y2);
-        reticle.setAttribute("r", sizeB * 1.3);
-        reticle.setAttribute("fill", "none");
-        reticle.setAttribute("stroke", "#ff3d00");
-        reticle.setAttribute("stroke-width", "0.5");
-        reticle.style.animation = "targetLock 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards";
-        engagementGroup.appendChild(reticle);
+        // Container structure layout
+        const displayContainer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        displayContainer.style.animation = "popInStatic 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards";
 
-        // Engagement Verses Metrics Box Layout
-        const fontSize = Math.max(1.0, sizeB * 0.3);
-        const metricsContainer = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        metricsContainer.style.animation = "troopPop 0.3s ease-out forwards";
+        // 1. Attacker Casualties Layout Node
+        const attDisplay = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        attDisplay.setAttribute("class", "combat-vfx-text");
+        attDisplay.setAttribute("x", x2 - (baseTextSize * 2));
+        attDisplay.setAttribute("y", panelY);
+        attDisplay.setAttribute("fill", "#ffeb3b"); // Attacker team amber coloration
+        attDisplay.setAttribute("font-size", `${baseTextSize}px`);
+        attDisplay.setAttribute("text-anchor", "middle");
+        attDisplay.textContent = `⚔️ ATK: ${combatDetails.attDeploying}`;
+        displayContainer.appendChild(attDisplay);
 
-        // Draw Attacking Power Metrics Line
-        const attLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        attLabel.textContent = `A: ${combatDetails.attDeploying}`;
-        attLabel.setAttribute("x", x2 - (sizeB * 0.5)); attLabel.setAttribute("y", y2 - (sizeB * 0.4));
-        attLabel.setAttribute("fill", "#ffeb3b"); attLabel.setAttribute("font-size", `${fontSize}px`);
-        metricsContainer.appendChild(attLabel);
+        // 2. Defender Casualties Layout Node
+        const defDisplay = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        defDisplay.setAttribute("class", "combat-vfx-text");
+        defDisplay.setAttribute("x", x2 + (baseTextSize * 2));
+        defDisplay.setAttribute("y", panelY);
+        defDisplay.setAttribute("fill", "#00b0ff"); // Defender team blue coloration
+        defDisplay.setAttribute("font-size", `${baseTextSize}px`);
+        defDisplay.setAttribute("text-anchor", "middle");
+        defDisplay.textContent = `🛡️ DEF: ${combatDetails.defInitial}`;
+        displayContainer.appendChild(defDisplay);
 
-        // Draw Defending Hardened Unit Pool Line
-        const defLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        defLabel.textContent = `D: ${combatDetails.defInitial}`;
-        defLabel.setAttribute("x", x2 + (sizeB * 0.5)); defLabel.setAttribute("y", y2 - (sizeB * 0.4));
-        defLabel.setAttribute("fill", "#51e1ed"); defLabel.setAttribute("font-size", `${fontSize}px`);
-        metricsContainer.appendChild(defLabel);
+        battleGroup.appendChild(displayContainer);
+        uiLayer.appendChild(battleGroup);
 
-        engagementGroup.appendChild(metricsContainer);
-        uiLayer.appendChild(engagementGroup);
-
-        // --- STAGE 4: CASUALTY SLASH IMPACT EXECUTION (2400ms Marker) ---
+        // --- PHASE 4: EXECUTE CASUALTY SLING SHOT RED SLASHES (1200ms after arrival) ---
         setTimeout(() => {
-            reticle.remove();
+            const lineOffsetWidth = baseTextSize * 1.8;
 
-            // Draw Attacker Loss Strikeout Line
+            // Draw Attacker Deficit Slash Element
             if (combatDetails.attLosses > 0) {
                 const slashA = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                slashA.setAttribute("x1", x2 - (sizeB * 0.55)); slashA.setAttribute("y1", y2 - (sizeB * 0.45));
-                slashA.setAttribute("x2", x2 - (sizeB * 0.15)); slashA.setAttribute("y2", y2 - (sizeB * 0.35));
-                slashA.setAttribute("stroke", "#ff1744"); slashA.setAttribute("stroke-width", "0.4");
-                slashA.style.animation = "casualtySlash 0.3s ease-in-out forwards";
-                engagementGroup.appendChild(slashA);
+                slashA.setAttribute("x1", x2 - (baseTextSize * 2.9));
+                slashA.setAttribute("y1", panelY + 4);
+                slashA.setAttribute("x2", x2 - (baseTextSize * 1.1));
+                slashA.setAttribute("y2", panelY - baseTextSize + 4);
+                slashA.setAttribute("stroke", "#ff1744");
+                slashA.setAttribute("stroke-width", "3");
+                slashA.style.animation = "slashStrike 0.3s ease-out forwards";
+                displayContainer.appendChild(slashA);
+
+                // Quick delay pop showing casualty modification adjustments
+                const lossTextA = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                lossTextA.setAttribute("class", "combat-vfx-text");
+                lossTextA.setAttribute("x", x2 - (baseTextSize * 2));
+                lossTextA.setAttribute("y", panelY + baseTextSize);
+                lossTextA.setAttribute("fill", "#ff1744");
+                lossTextA.setAttribute("font-size", `${baseTextSize * 0.8}px`);
+                lossTextA.setAttribute("text-anchor", "middle");
+                lossTextA.textContent = `-${combatDetails.attLosses}`;
+                displayContainer.appendChild(lossTextA);
             }
 
-            // Draw Defender Loss Strikeout Line
+            // Draw Defender Deficit Slash Element
             if (combatDetails.defLosses > 0) {
                 const slashB = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                slashB.setAttribute("x1", x2 + (sizeB * 0.45)); slashB.setAttribute("y1", y2 - (sizeB * 0.45));
-                slashB.setAttribute("x2", x2 + (sizeB * 0.85)); slashB.setAttribute("y2", y2 - (sizeB * 0.35));
-                slashB.setAttribute("stroke", "#ff1744"); slashB.setAttribute("stroke-width", "0.4");
-                slashB.style.animation = "casualtySlash 0.3s ease-in-out forwards";
-                engagementGroup.appendChild(slashB);
+                slashB.setAttribute("x1", x2 + (baseTextSize * 1.1));
+                slashB.setAttribute("y1", panelY + 4);
+                slashB.setAttribute("x2", x2 + (baseTextSize * 2.9));
+                slashB.setAttribute("y2", panelY - baseTextSize + 4);
+                slashB.setAttribute("stroke", "#ff1744");
+                slashB.setAttribute("stroke-width", "3");
+                slashB.style.animation = "slashStrike 0.3s ease-out forwards";
+                displayContainer.appendChild(slashB);
+
+                const lossTextB = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                lossTextB.setAttribute("class", "combat-vfx-text");
+                lossTextB.setAttribute("x", x2 + (baseTextSize * 2));
+                lossTextB.setAttribute("y", panelY + baseTextSize);
+                lossTextB.setAttribute("fill", "#ff1744");
+                lossTextB.setAttribute("font-size", `${baseTextSize * 0.8}px`);
+                lossTextB.setAttribute("text-anchor", "middle");
+                lossTextB.textContent = `-${combatDetails.defLosses}`;
+                displayContainer.appendChild(lossTextB);
             }
 
-            // High-Impact Detonation Shockwave ring setup
-            const shockwave = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            shockwave.setAttribute("cx", x2); shockwave.setAttribute("cy", y2);
-            shockwave.setAttribute("r", sizeB * 1.2);
-            shockwave.setAttribute("fill", combatDetails.isSuccess ? "rgba(0, 230, 118, 0.35)" : "rgba(255, 61, 0, 0.35)");
-            shockwave.style.animation = "explosionShockwave 0.5s ease-out forwards";
-            engagementGroup.appendChild(shockwave);
-
-            // Trigger synchronous database value update right on impact line slash!
+            // Commit state variables directly to matching map engine nodes on impact slash
             combatDetails.commitStateResolution();
 
-            // Clear visual clutter remnants
+            // --- CLEANUP SEQUENCE ---
             setTimeout(() => {
-                engagementGroup.style.transition = "opacity 0.4s ease";
-                engagementGroup.style.opacity = "0";
+                battleGroup.style.transition = "opacity 0.6s ease";
+                battleGroup.style.opacity = "0";
                 trajectoryLine.remove();
-                setTimeout(() => engagementGroup.remove(), 400);
-            }, 1800);
+                setTimeout(() => battleGroup.remove(), 600);
+            }, 3000); // Leave metrics overlay open on stream long enough for chat to read perfectly
 
-        }, 800);
-
-    }, 2000);
+        }, 1200);
+    }
 }
+
 /* ========================================================================
    MODULAR CORE GAME LOGIC ACTIONS
    ======================================================================== */
@@ -763,62 +841,62 @@ function executeAttack(user, fromCode, toCode) {
         return;
     }
 
-    // Step 1: Camera centers on the ATTACKING country to kick off the sequence
-    changeMapProjection(fromCode);
+    const attackingArmies = attTerritory.troops - 2; 
+    const defenseBuff = 1.0 + (defTerritory.buildings.base * 0.4); 
+    const defensiveArmies = defTerritory.troops;
+    log(`⚔️ OFFENSIVE CAMPAIGN: ${user} deploys ${attackingArmies} troops from ${fromCode} to invade ${toCode}!`, "war");
 
-    setTimeout(() => {
-        const attackingArmies = attTerritory.troops - 2; 
-        const defenseBuff = 1.0 + (defTerritory.buildings.base * 0.4); 
-        const defensiveArmies = defTerritory.troops;
-        log(`⚔️ OFFENSIVE CAMPAIGN: ${user} deploys ${attackingArmies} troops from ${fromCode} to invade ${toCode}!`, "war");
+    let attPower = 0; let defPower = 0;
+    for(let i=0; i<attackingArmies; i++) { attPower += Math.floor(Math.random() * 6) + 1; }
+    for(let i=0; i<defensiveArmies; i++) { defPower += Math.floor(Math.random() * 6) + 1; }
+    defPower = Math.floor(defPower * defenseBuff);
 
-        let attPower = 0; let defPower = 0;
-        for(let i=0; i<attackingArmies; i++) { attPower += Math.floor(Math.random() * 6) + 1; }
-        for(let i=0; i<defensiveArmies; i++) { defPower += Math.floor(Math.random() * 6) + 1; }
-        defPower = Math.floor(defPower * defenseBuff);
+    const isSuccess = attPower > defPower;
+    
+    let attFinalSurviving = 2;
+    let defFinalSurviving = defensiveArmies;
+    let formerOwner = defTerritory.owner;
 
-        const isSuccess = attPower > defPower;
-        
-        let attFinalSurviving = 2;
-        let defFinalSurviving = defensiveArmies;
-        let formerOwner = defTerritory.owner;
+    let calculatedAttackerLosses = 0;
+    let calculatedDefenderLosses = 0;
 
+    if (isSuccess) {
+        defFinalSurviving = Math.max(1, Math.floor(attackingArmies * ((attPower - defPower) / attPower)));
+        calculatedAttackerLosses = attackingArmies; // Entire invading corps gets updated out of origin country bounds
+        calculatedDefenderLosses = defensiveArmies; // All defenders died
+    } else {
+        const lostRatio = attPower / defPower;
+        defFinalSurviving = Math.max(1, Math.floor(defensiveArmies * (1 - (lostRatio * 0.5))));
+        calculatedAttackerLosses = attackingArmies; // Assault group completely lost battle actions
+        calculatedDefenderLosses = defensiveArmies - defFinalSurviving;
+    }
+
+    const commitStateResolution = () => {
         if (isSuccess) {
-            defFinalSurviving = Math.max(1, Math.floor(attackingArmies * ((attPower - defPower) / attPower)));
+            defTerritory.owner = user; 
+            defTerritory.troops = defFinalSurviving; 
+            attTerritory.troops = 2; 
+            log(`💥 CRITICAL VICTORY! ${user} conquered ${toCode}! (${defFinalSurviving} units remaining).`, "succ");
+            if(formerOwner) log(`📉 Player ${formerOwner} lost operational domain over ${toCode}.`, "war");
         } else {
-            const lostRatio = attPower / defPower;
-            defFinalSurviving = Math.max(1, Math.floor(defensiveArmies * (1 - (lostRatio * 0.5))));
+            defTerritory.troops = defFinalSurviving; 
+            attTerritory.troops = 2; 
+            log(`❌ DEFENSE HELD: Assault on ${toCode} was entirely repelled. Survivors guarding: ${defFinalSurviving}.`);
         }
+        updateMapColors();
+        updateLeaderboard();
+        saveGame();
+    };
 
-        // Packages the logic mutations so they evaluate exactly when the slash overlay runs
-        const commitStateResolution = () => {
-            if (isSuccess) {
-                defTerritory.owner = user; 
-                defTerritory.troops = defFinalSurviving; 
-                attTerritory.troops = 2; 
-                log(`💥 CRITICAL VICTORY! ${user} conquered ${toCode}! (${defFinalSurviving} units remaining).`, "succ");
-                if(formerOwner) log(`📉 Player ${formerOwner} lost operational domain over ${toCode}.`, "war");
-            } else {
-                defTerritory.troops = defFinalSurviving; 
-                attTerritory.troops = 2; 
-                log(`❌ DEFENSE HELD: Assault on ${toCode} was entirely repelled. Survivors guarding: ${defFinalSurviving}.`);
-            }
-            updateMapColors();
-            updateLeaderboard();
-            saveGame();
-        };
-
-        // Fire the cinematic pipeline package
-        triggerCinematicCombat(fromCode, toCode, {
-            attDeploying: attackingArmies,
-            defInitial: defensiveArmies,
-            attLosses: attackingArmies, // Attacking armies are completely spent or moved on victory
-            defLosses: isSuccess ? defensiveArmies : (defisiveArmies - defFinalSurviving),
-            isSuccess: isSuccess,
-            commitStateResolution: commitStateResolution
-        });
-
-    }, 600);
+    // Initialize the tracking engine pipeline
+    triggerCinematicCombat(fromCode, toCode, {
+        attDeploying: attackingArmies,
+        defInitial: defensiveArmies,
+        attLosses: calculatedAttackerLosses,
+        defLosses: calculatedDefenderLosses,
+        isSuccess: isSuccess,
+        commitStateResolution: commitStateResolution
+    });
 }
 function processCommand(user, cmd, args) {
     cmd = cmd.toLowerCase();
