@@ -20,7 +20,7 @@
         .asset-label { pointer-events: none; fill: #51e1ed; text-anchor: middle; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; line-height: 1.2; overflow: visible !important; }
         
         /* Collapsible Sidebar Mechanics */
-        #leaderboard-wrapper { position: fixed; display: flex; bottom:0;right:8px;transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-left 0.4s; width: 172px; z-index: 10; }
+        #leaderboard-wrapper { position: relative; display: flex; transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-left 0.4s; width: 172px; z-index: 10; }
         #leaderboard-wrapper.collapsed { width: 0px; margin-left: -15px; }
         
         #leaderboard { width: 100%; background: #11161d; border: 2px solid #2c3e50; padding: 12px; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-y: auto; box-sizing: border-box; }
@@ -36,7 +36,7 @@
         .lb-player-stats { font-family: monospace; text-align: right; white-space: nowrap; }
 
         /* Tactical Floating Stats Box */
-        #country-stats-box { position: absolute; bottom: 10px; right: 10px; background: rgba(17,22,29,0.92); width: 220px; padding: 10px; border-radius: 4px; border: 1px solid #e74c3c; font-family: monospace; font-size: 11px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); pointer-events: none; display: flex; flex-direction: column; gap: 4px; z-index: 15; }
+        #country-stats-box { position: absolute; bottom: 2px; right: 2px; background: rgba(17,22,29,0.92); width: 220px; padding: 10px; border-radius: 4px; border: 1px solid #e74c3c; font-family: monospace; font-size: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); pointer-events: none; display: flex; flex-direction: column; gap: 4px; z-index: 15; }
         .stats-title { color: #e74c3c; font-weight: bold; border-bottom: 1px dashed #2c3e50; padding-bottom: 3px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .stats-row { display: flex; justify-content: space-between; color: #d1d5db; }
         .stats-highlight { color: #51e1ed; font-weight: bold; }
