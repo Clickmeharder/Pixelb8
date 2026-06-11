@@ -443,7 +443,21 @@ function changeMapProjection(target) {
     }
     updateMapColors();
 }
+function interpolateMapFocus(targetX, targetY) {
+    const map = document.getElementById("map");
+    if (!map) return;
 
+    // Use the width and height of the current view mode/zoom target
+    const vw = currentViewBoxDims.w;
+    const vh = currentViewBoxDims.h;
+
+    // Recalculate top-left coordinates so targetX/targetY stays perfectly centered
+    const vx = targetX - (vw / 2);
+    const vy = targetY - (vh / 2);
+
+    // Apply the real-time frame viewbox directly onto the core SVG mesh layer
+    map.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
+}
 function updateLeaderboard() {
     const lbc = document.getElementById("lb-content");
     if(!lbc) return;
