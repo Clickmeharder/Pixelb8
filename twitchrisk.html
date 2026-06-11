@@ -112,6 +112,35 @@
 				opacity: 0;
 			}
 		}
+		
+		@keyframes targetLock {
+			0% {
+				transform: scale(4) rotate(0deg);
+				opacity: 0;
+			}
+			50% {
+				opacity: 1;
+				stroke-dasharray: 4, 2;
+			}
+			100% {
+				transform: scale(1) rotate(180deg);
+				opacity: 0.8;
+			}
+		}
+
+		@keyframes explosionShockwave {
+			0% {
+				transform: scale(0.2);
+				opacity: 1;
+			}
+			50% {
+				opacity: 0.8;
+			}
+			100% {
+				transform: scale(2.2);
+				opacity: 0;
+			}
+		}
     </style>
 </head>
 <body>
@@ -515,42 +544,78 @@ function triggerOrbitalAssaultBeam(fromCode, toCode, isSuccess) {
     const x2 = boxB.x + boxB.width / 2;
     const y2 = boxB.y + boxB.height / 2;
 
-    const laser = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    laser.setAttribute("x1", x1); laser.setAttribute("y1", y1);
-    laser.setAttribute("x2", x1); laser.setAttribute("y2", y1);
-    laser.setAttribute("stroke", "#ff3d00");
-    laser.setAttribute("stroke-width", "0.8");
-    laser.setAttribute("stroke-dasharray", "2,1");
-    laser.style.transition = "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
-    uiLayer.appendChild(laser);
+    const targetMaxRadius = Math.max(boxB.width, boxB.height) * 1.5;
 
+    // 1. Static Tactical Dotted Trajectory Path
+    const trajectoryLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    trajectoryLine.setAttribute("x1", x1); trajectoryLine.setAttribute("y1", y1);
+    trajectoryLine.setAttribute("x2", x2); trajectoryLine.setAttribute("y2", y2);
+    trajectoryLine.setAttribute("stroke", "rgba(255, 61, 0, 0.35)"); // Faded orange danger line
+    trajectoryLine.setAttribute("stroke-width", "0.4");
+    trajectoryLine.setAttribute("stroke-dasharray", "1, 15"); // Clean dotted layout
+    uiLayer.appendChild(trajectoryLine);
+
+    // 2. Animated Target Acquisition Reticle on Defending Country
+    const targetGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    targetGroup.style.transformOrigin = `${x2}px ${y2}px`;
+    
+    const reticle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    reticle.setAttribute("cx", x2); reticle.setAttribute("cy", y2);
+    reticle.setAttribute("r", targetMaxRadius);
+    reticle.setAttribute("fill", "none");
+    reticle.setAttribute("stroke", "#ff3d00");
+    reticle.setAttribute("stroke-width", "0.6");
+    reticle.style.animation = "targetLock 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards";
+    
+    targetGroup.appendChild(reticle);
+    uiLayer.appendChild(targetGroup);
+
+    // 3. High-Velocity Plasma Projectile
+    const projectile = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    projectile.setAttribute("cx", x1);
+    projectile.setAttribute("cy", y1);
+    projectile.setAttribute("r", "1.2");
+    projectile.setAttribute("fill", "#ffeb3b"); // Bright energy yellow cores
+    projectile.setAttribute("filter", "drop-shadow(0px 0px 2px #ff3d00)");
+    // 600ms matching transition path down the dotted line
+    projectile.style.transition = "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)"; 
+    uiLayer.appendChild(projectile);
+
+    // Ignite projectile launch along track line sequence
     requestAnimationFrame(() => {
-        laser.setAttribute("x2", x2);
-        laser.setAttribute("y2", y2);
+        projectile.setAttribute("cx", x2);
+        projectile.setAttribute("cy", y2);
     });
 
+    // 4. Collision Impact & Detonation Sequence
     setTimeout(() => {
-        laser.style.transition = "opacity 0.3s ease";
-        laser.setAttribute("opacity", "0");
-        
-        // Impact Detonation Flash
-        const flash = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        flash.setAttribute("cx", x2); flash.setAttribute("cy", y2);
-        flash.setAttribute("r", isSuccess ? Math.max(boxB.width, boxB.height) * 1.2 : "2");
-        flash.setAttribute("fill", isSuccess ? "#00e676" : "#ff3d00");
-        flash.setAttribute("opacity", "0.7");
-        flash.style.transition = "all 0.4s ease-out";
-        uiLayer.appendChild(flash);
+        projectile.remove();
+        targetGroup.remove();
 
-        requestAnimationFrame(() => {
-            flash.setAttribute("r", isSuccess ? "0" : Math.max(boxB.width, boxB.height) * 1.8);
-            flash.setAttribute("opacity", "0");
-        });
+        // Spawn Expanding Impact Group Layer
+        const explosionGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        explosionGroup.style.transformOrigin = `${x2}px ${y2}px`;
 
-        setTimeout(() => { laser.remove(); flash.remove(); }, 400);
-    }, 500);
+        const shockwave = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        shockwave.setAttribute("cx", x2);
+        shockwave.setAttribute("cy", y2);
+        shockwave.setAttribute("r", targetMaxRadius);
+        shockwave.setAttribute("fill", isSuccess ? "rgba(0, 230, 118, 0.4)" : "rgba(255, 61, 0, 0.4)");
+        shockwave.setAttribute("stroke", isSuccess ? "#00e676" : "#ff3d00");
+        shockwave.setAttribute("stroke-width", "0.5");
+        shockwave.style.animation = "explosionShockwave 0.5s ease-out forwards";
+
+        explosionGroup.appendChild(shockwave);
+        uiLayer.appendChild(explosionGroup);
+
+        // Remove trace visuals and cleaning cache fields
+        setTimeout(() => {
+            trajectoryLine.remove();
+            explosionGroup.remove();
+        }, 500);
+
+    }, 600); // Trigger detonation exactly when shell payload meets coordinate points
 }
-
 /* ========================================================================
    MODULAR CORE GAME LOGIC ACTIONS
    ======================================================================== */
@@ -611,6 +676,8 @@ function executeBuild(user, p, type, targetCode) {
 
     }, 600);
 }
+
+
 function executeAttack(user, fromCode, toCode) {
     const attTerritory = gameState.data[fromCode]; 
     const defTerritory = gameState.data[toCode];
@@ -624,9 +691,10 @@ function executeAttack(user, fromCode, toCode) {
         return;
     }
 
-    // Camera locks on destination target domain
+    // Dynamic Camera instantly centers focus windows onto the DEFENDING targeted nation
     changeMapProjection(toCode);
 
+    // Stagger calculations to allow viewport frame panning to settle cleanly
     setTimeout(() => {
         const attackingArmies = attTerritory.troops - 2; 
         const defenseBuff = 1.0 + (defTerritory.buildings.base * 0.4); 
@@ -639,27 +707,32 @@ function executeAttack(user, fromCode, toCode) {
         defPower = Math.floor(defPower * defenseBuff);
 
         const isSuccess = attPower > defPower;
+        
+        // Fires vector tracks down coordinate targets seamlessly
         triggerOrbitalAssaultBeam(fromCode, toCode, isSuccess);
 
-        if (isSuccess) {
-            const survivors = Math.max(1, Math.floor(attackingArmies * ((attPower - defPower) / attPower)));
-            const formerOwner = defTerritory.owner;
-            defTerritory.owner = user; defTerritory.troops = survivors; attTerritory.troops = 2; 
-            log(`💥 CRITICAL VICTORY! ${user} conquered ${toCode}! (${survivors} units remaining).`, "succ");
-            if(formerOwner) log(`📉 Player ${formerOwner} lost operational domain over ${toCode}.`, "war");
-        } else {
-            const lostRatio = attPower / defPower;
-            const remainingDefenders = Math.max(1, Math.floor(defensiveArmies * (1 - (lostRatio * 0.5))));
-            defTerritory.troops = remainingDefenders; attTerritory.troops = 2; 
-            log(`❌ DEFENSE HELD: Assault on ${toCode} was entirely repelled. Survivors guarding: ${remainingDefenders}.`);
-        }
-        
-        updateMapColors();
-        updateLeaderboard();
-        saveGame();
+        // DELAY DATA SYNC UNTIL IMPACT EXPLOSION LOGIC HITS THE GROUND (600ms)
+        setTimeout(() => {
+            if (isSuccess) {
+                const survivors = Math.max(1, Math.floor(attackingArmies * ((attPower - defPower) / attPower)));
+                const formerOwner = defTerritory.owner;
+                defTerritory.owner = user; defTerritory.troops = survivors; attTerritory.troops = 2; 
+                log(`💥 CRITICAL VICTORY! ${user} conquered ${toCode}! (${survivors} units remaining).`, "succ");
+                if(formerOwner) log(`📉 Player ${formerOwner} lost operational domain over ${toCode}.`, "war");
+            } else {
+                const lostRatio = attPower / defPower;
+                const remainingDefenders = Math.max(1, Math.floor(defensiveArmies * (1 - (lostRatio * 0.5))));
+                defTerritory.troops = remainingDefenders; attTerritory.troops = 2; 
+                log(`❌ DEFENSE HELD: Assault on ${toCode} was entirely repelled. Survivors guarding: ${remainingDefenders}.`);
+            }
+            
+            updateMapColors();
+            updateLeaderboard();
+            saveGame();
+        }, 600);
+
     }, 600);
 }
-
 function processCommand(user, cmd, args) {
     cmd = cmd.toLowerCase();
     
