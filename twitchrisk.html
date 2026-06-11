@@ -379,6 +379,207 @@ function updateLeaderboard() {
 
 function checkTruce(p1, p2) { return gameState.truces[`${p1}:${p2}`] || gameState.truces[`${p2}:${p1}`] || false; }
 
+/* ========================================================================
+   VFX & ANIMATION ENGINE COMPONENT
+   ======================================================================== */
+function triggerSovereigntyRipple(countryCode, colorHex) {
+    const box = countryBoundsCache[countryCode];
+    if (!box) return;
+    const uiLayer = document.getElementById("ui-layer");
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height / 2;
+
+    const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    ring.setAttribute("cx", cx);
+    ring.setAttribute("cy", cy);
+    ring.setAttribute("r", "1");
+    ring.setAttribute("fill", "none");
+    ring.setAttribute("stroke", colorHex);
+    ring.setAttribute("stroke-width", "1.5");
+    ring.setAttribute("opacity", "1");
+    ring.style.transition = "all 1.2s cubic-bezier(0.1, 0.8, 0.3, 1)";
+    uiLayer.appendChild(ring);
+
+    requestAnimationFrame(() => {
+        ring.setAttribute("r", Math.max(box.width, box.height) * 2.5);
+        ring.setAttribute("opacity", "0");
+    });
+    setTimeout(() => ring.remove(), 1200);
+}
+
+function triggerConstructionSparks(countryCode) {
+    const box = countryBoundsCache[countryCode];
+    if (!box) return;
+    const uiLayer = document.getElementById("ui-layer");
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height / 2;
+
+    for (let i = 0; i < 6; i++) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        const angle = (i / 6) * Math.PI * 2;
+        const length = Math.max(box.width, box.height) * 0.6;
+        
+        line.setAttribute("x1", cx);
+        line.setAttribute("y1", cy);
+        line.setAttribute("x2", cx);
+        line.setAttribute("y2", cy);
+        line.setAttribute("stroke", "#ffca28");
+        line.setAttribute("stroke-width", "0.5");
+        line.style.transition = "all 0.6s ease-out";
+        uiLayer.appendChild(line);
+
+        requestAnimationFrame(() => {
+            line.setAttribute("x2", cx + Math.cos(angle) * length);
+            line.setAttribute("y2", cy + Math.sin(angle) * length);
+            line.setAttribute("opacity", "0");
+        });
+        setTimeout(() => line.remove(), 600);
+    }
+}
+
+function triggerOrbitalAssaultBeam(fromCode, toCode, isSuccess) {
+    const boxA = countryBoundsCache[fromCode];
+    const boxB = countryBoundsCache[toCode];
+    if (!boxA || !boxB) return;
+    const uiLayer = document.getElementById("ui-layer");
+
+    const x1 = boxA.x + boxA.width / 2;
+    const y1 = boxA.y + boxA.height / 2;
+    const x2 = boxB.x + boxB.width / 2;
+    const y2 = boxB.y + boxB.height / 2;
+
+    const laser = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    laser.setAttribute("x1", x1); laser.setAttribute("y1", y1);
+    laser.setAttribute("x2", x1); laser.setAttribute("y2", y1);
+    laser.setAttribute("stroke", "#ff3d00");
+    laser.setAttribute("stroke-width", "0.8");
+    laser.setAttribute("stroke-dasharray", "2,1");
+    laser.style.transition = "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
+    uiLayer.appendChild(laser);
+
+    requestAnimationFrame(() => {
+        laser.setAttribute("x2", x2);
+        laser.setAttribute("y2", y2);
+    });
+
+    setTimeout(() => {
+        laser.style.transition = "opacity 0.3s ease";
+        laser.setAttribute("opacity", "0");
+        
+        // Impact Detonation Flash
+        const flash = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        flash.setAttribute("cx", x2); flash.setAttribute("cy", y2);
+        flash.setAttribute("r", isSuccess ? Math.max(boxB.width, boxB.height) * 1.2 : "2");
+        flash.setAttribute("fill", isSuccess ? "#00e676" : "#ff3d00");
+        flash.setAttribute("opacity", "0.7");
+        flash.style.transition = "all 0.4s ease-out";
+        uiLayer.appendChild(flash);
+
+        requestAnimationFrame(() => {
+            flash.setAttribute("r", isSuccess ? "0" : Math.max(boxB.width, boxB.height) * 1.8);
+            flash.setAttribute("opacity", "0");
+        });
+
+        setTimeout(() => { laser.remove(); flash.remove(); }, 400);
+    }, 500);
+}
+
+/* ========================================================================
+   MODULAR CORE GAME LOGIC ACTIONS
+   ======================================================================== */
+function executeClaim(user, targetCode) {
+    if (!gameState.data[targetCode]) { log(`Country ISO code ${targetCode || 'Empty'} does not exist.`, "err"); return; }
+    
+    let ownedCount = Object.values(gameState.data).filter(c => c.owner === user).length;
+    if (ownedCount >= claimLimit) {
+        log(`🚫 Access Denied: You have reached the maximum territory claim limit of ${claimLimit}.`, "err");
+        return;
+    }
+
+    if (!gameState.data[targetCode].owner) {
+        changeMapProjection(targetCode);
+        
+        setTimeout(() => {
+            gameState.data[targetCode].owner = user;
+            gameState.data[targetCode].troops = 10; 
+            log(`🗺️ ${user} successfully established sovereign rule over ${targetCode}.`, "succ");
+            triggerSovereigntyRipple(targetCode, getUserColor(user));
+            updateMapColors();
+            updateLeaderboard();
+            saveGame();
+        }, 600);
+    } else { 
+        log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err"); 
+    }
+}
+
+function executeBuild(user, p, type, targetCode) {
+    if (!COSTS[type]) { log(`Invalid building! Use: mine, school, city, base.`, "err"); return; }
+    if (!gameState.data[targetCode] || gameState.data[targetCode].owner !== user) { log(`You do not govern ${targetCode || 'this territory'}.`, "err"); return; }
+    if (p.gold < COSTS[type]) { log(`Insufficient gold! ${type.toUpperCase()} costs 💰${COSTS[type]} gold.`, "err"); return; }
+
+    changeMapProjection(targetCode);
+
+    setTimeout(() => {
+        p.gold -= COSTS[type];
+        gameState.data[targetCode].buildings[type]++;
+        log(`🏗️ ${user} built a ${type.toUpperCase()} in ${targetCode}.`, "succ");
+        triggerConstructionSparks(targetCode);
+        updateMapColors();
+        updateLeaderboard();
+        saveGame();
+    }, 600);
+}
+
+function executeAttack(user, fromCode, toCode) {
+    const attTerritory = gameState.data[fromCode]; 
+    const defTerritory = gameState.data[toCode];
+
+    if (!attTerritory || attTerritory.owner !== user) { log(`Attack source country owned incorrectly or missing.`, "err"); return; }
+    if (!defTerritory) { log(`Destination target country code invalid.`, "err"); return; }
+    if (defTerritory.owner === user) { log(`Cannot strike your own territories!`, "err"); return; }
+    if (attTerritory.troops <= 2) { log(`Armies in ${fromCode} are too low (Must leave 2 troops behind).`, "err"); return; }
+    if (defTerritory.owner && checkTruce(user, defTerritory.owner)) {
+        log(`⛔ Order Blocked: You maintain a Truce alliance with ${defTerritory.owner}! Use '!breaktruce ${defTerritory.owner}' first.`, "err");
+        return;
+    }
+
+    // Camera locks on destination target domain
+    changeMapProjection(toCode);
+
+    setTimeout(() => {
+        const attackingArmies = attTerritory.troops - 2; 
+        const defenseBuff = 1.0 + (defTerritory.buildings.base * 0.4); 
+        const defensiveArmies = defTerritory.troops;
+        log(`⚔️ OFFENSIVE CAMPAIGN: ${user} deploys ${attackingArmies} troops from ${fromCode} to invade ${toCode}!`, "war");
+
+        let attPower = 0; let defPower = 0;
+        for(let i=0; i<attackingArmies; i++) { attPower += Math.floor(Math.random() * 6) + 1; }
+        for(let i=0; i<defensiveArmies; i++) { defPower += Math.floor(Math.random() * 6) + 1; }
+        defPower = Math.floor(defPower * defenseBuff);
+
+        const isSuccess = attPower > defPower;
+        triggerOrbitalAssaultBeam(fromCode, toCode, isSuccess);
+
+        if (isSuccess) {
+            const survivors = Math.max(1, Math.floor(attackingArmies * ((attPower - defPower) / attPower)));
+            const formerOwner = defTerritory.owner;
+            defTerritory.owner = user; defTerritory.troops = survivors; attTerritory.troops = 2; 
+            log(`💥 CRITICAL VICTORY! ${user} conquered ${toCode}! (${survivors} units remaining).`, "succ");
+            if(formerOwner) log(`📉 Player ${formerOwner} lost operational domain over ${toCode}.`, "war");
+        } else {
+            const lostRatio = attPower / defPower;
+            const remainingDefenders = Math.max(1, Math.floor(defensiveArmies * (1 - (lostRatio * 0.5))));
+            defTerritory.troops = remainingDefenders; attTerritory.troops = 2; 
+            log(`❌ DEFENSE HELD: Assault on ${toCode} was entirely repelled. Survivors guarding: ${remainingDefenders}.`);
+        }
+        
+        updateMapColors();
+        updateLeaderboard();
+        saveGame();
+    }, 600);
+}
+
 function processCommand(user, cmd, args) {
     cmd = cmd.toLowerCase();
     
@@ -389,7 +590,7 @@ function processCommand(user, cmd, args) {
     }
     if (cmd === "leaderboard") {
         toggleLeaderboard();
-		log(`👑 Player ${user} toggled leaderboard!`, "succ");
+        log(`👑 Player ${user} toggled leaderboard!`, "succ");
         return;
     }
 
@@ -405,54 +606,26 @@ function processCommand(user, cmd, args) {
     if (!gameState.players[user]) return;
     const p = gameState.players[user];
 
-	if (cmd === "claim") {
-        const targetCode = args[0]?.toUpperCase();
-        if (!gameState.data[targetCode]) { log(`Country ISO code ${targetCode || 'Empty'} does not exist.`, "err"); return; }
-        
-        // Count how many territories this user currently owns
-        let ownedCount = Object.values(gameState.data).filter(c => c.owner === user).length;
-        
-        if (ownedCount >= claimLimit) {
-            log(`🚫 Access Denied: You have reached the maximum territory claim limit of ${claimLimit}.`, "err");
-            return;
-        }
-
-        if (!gameState.data[targetCode].owner) {
-            gameState.data[targetCode].owner = user;
-            gameState.data[targetCode].troops = 10; 
-            log(`🗺️ ${user} successfully established sovereign rule over ${targetCode}.`, "succ");
-        } else { 
-            log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err"); 
-        }
+    if (cmd === "claim") {
+        executeClaim(user, args[0]?.toUpperCase());
     }
 
     else if (cmd === "setclaimlimit") {
-        // Optional security: if you want only you (the streamer) to change it
         if (user.toLowerCase() !== "jaedraze") { 
             log(`⛔ Unauthorized: Only the supreme commander can modify global deployment limits.`, "err"); 
             return; 
         }
-
         const newLimit = parseInt(args[0], 10);
         if (isNaN(newLimit) || newLimit < 1) {
             log(`Provide a valid numeric limit of 1 or greater. (E.g., !setclaimlimit 3)`, "err");
             return;
         }
-
         claimLimit = newLimit;
         log(`⚙️ CONFIG UPDATE: Global expansion limit adjusted. Players can now claim up to ${claimLimit} territories.`, "war");
     }
 
     else if (cmd === "build") {
-        const type = args[0]?.toLowerCase();
-        const targetCode = args[1]?.toUpperCase();
-        if (!COSTS[type]) { log(`Invalid building! Use: mine, school, city, base.`, "err"); return; }
-        if (!gameState.data[targetCode] || gameState.data[targetCode].owner !== user) { log(`You do not govern ${targetCode || 'this territory'}.`, "err"); return; }
-        if (p.gold < COSTS[type]) { log(`Insufficient gold! ${type.toUpperCase()} costs 💰${COSTS[type]} gold.`, "err"); return; }
-
-        p.gold -= COSTS[type];
-        gameState.data[targetCode].buildings[type]++;
-        log(`🏗️ ${user} built a ${type.toUpperCase()} in ${targetCode}.`, "succ");
+        executeBuild(user, p, args[0]?.toLowerCase(), args[1]?.toUpperCase());
     }
 
     else if (cmd === "status") {
@@ -486,44 +659,8 @@ function processCommand(user, cmd, args) {
     }
 
     else if (cmd === "attack") {
-        const [fromCode, toCode] = [args[0]?.toUpperCase(), args[1]?.toUpperCase()];
-        const attTerritory = gameState.data[fromCode]; const defTerritory = gameState.data[toCode];
-
-        if (!attTerritory || attTerritory.owner !== user) { log(`Attack source country owned incorrectly or missing.`, "err"); return; }
-        if (!defTerritory) { log(`Destination target country code invalid.`, "err"); return; }
-        if (defTerritory.owner === user) { log(`Cannot strike your own territories!`, "err"); return; }
-        if (attTerritory.troops <= 2) { log(`Armies in ${fromCode} are too low (Must leave 2 troops behind).`, "err"); return; }
-        if (defTerritory.owner && checkTruce(user, defTerritory.owner)) {
-            log(`⛔ Order Blocked: You maintain a Truce alliance with ${defTerritory.owner}! Use '!breaktruce ${defTerritory.owner}' first.`, "err");
-            return;
-        }
-
-        const attackingArmies = attTerritory.troops - 2; 
-        const defenseBuff = 1.0 + (defTerritory.buildings.base * 0.4); const defensiveArmies = defTerritory.troops;
-        log(`⚔️ OFFENSIVE CAMPAIGN: ${user} deploys ${attackingArmies} troops from ${fromCode} to invade ${toCode}!`, "war");
-
-        let attPower = 0; let defPower = 0;
-        for(let i=0; i<attackingArmies; i++) { attPower += Math.floor(Math.random() * 6) + 1; }
-        for(let i=0; i<defensiveArmies; i++) { defPower += Math.floor(Math.random() * 6) + 1; }
-        defPower = Math.floor(defPower * defenseBuff);
-
-        if (attPower > defPower) {
-            const survivors = Math.max(1, Math.floor(attackingArmies * ((attPower - defPower) / attPower)));
-            const formerOwner = defTerritory.owner;
-            defTerritory.owner = user; defTerritory.troops = survivors; attTerritory.troops = 2; 
-            log(`💥 CRITICAL VICTORY! ${user} conquered ${toCode}! (${survivors} units remaining).`, "succ");
-            if(formerOwner) log(`📉 Player ${formerOwner} lost operational domain over ${toCode}.`, "war");
-        } else {
-            const lostRatio = attPower / defPower;
-            const remainingDefenders = Math.max(1, Math.floor(defensiveArmies * (1 - (lostRatio * 0.5))));
-            defTerritory.troops = remainingDefenders; attTerritory.troops = 2; 
-            log(`❌ DEFENSE HELD: Assault on ${toCode} was entirely repelled. Survivors guarding: ${remainingDefenders}.`);
-        }
+        executeAttack(user, args[0]?.toUpperCase(), args[1]?.toUpperCase());
     }
-
-    updateMapColors();
-    updateLeaderboard();
-    saveGame();
 }
 
 function parseGeoJSONCoords(geometry) {
