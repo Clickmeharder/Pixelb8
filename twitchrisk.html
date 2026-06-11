@@ -70,6 +70,48 @@
         ::-webkit-scrollbar-track { background: #0c0f12; }
         ::-webkit-scrollbar-thumb { background: #2c3e50; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #3498db; }
+		
+		
+		
+		@keyframes buildingStamp {
+			0% {
+				transform: scale(8);
+				opacity: 0;
+			}
+			15% {
+				opacity: 1;
+			}
+			70% {
+				transform: scale(1);
+				filter: drop-shadow(0px 0px 0px rgba(0,0,0,0));
+			}
+			75% {
+				transform: scale(1.2); /* Slight impact bounce */
+				filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+			}
+			100% {
+				transform: scale(1);
+				opacity: 1;
+			}
+		}
+
+		@keyframes splashFloat {
+			0% {
+				transform: translateY(0) scale(0.5);
+				opacity: 0;
+			}
+			20% {
+				transform: translateY(-2px) scale(1.3);
+				opacity: 1;
+			}
+			80% {
+				opacity: 1;
+			}
+			100% {
+				transform: translateY(-8px) scale(1);
+				opacity: 0;
+			}
+		}
     </style>
 </head>
 <body>
@@ -407,34 +449,59 @@ function triggerSovereigntyRipple(countryCode, colorHex) {
     setTimeout(() => ring.remove(), 1200);
 }
 
-function triggerConstructionSparks(countryCode) {
+function triggerBuildingStampAnimation(countryCode, type) {
     const box = countryBoundsCache[countryCode];
     if (!box) return;
     const uiLayer = document.getElementById("ui-layer");
+    
+    // Calculate center coordinates of the targeted territory
     const cx = box.x + box.width / 2;
     const cy = box.y + box.height / 2;
 
-    for (let i = 0; i < 6; i++) {
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        const angle = (i / 6) * Math.PI * 2;
-        const length = Math.max(box.width, box.height) * 0.6;
-        
-        line.setAttribute("x1", cx);
-        line.setAttribute("y1", cy);
-        line.setAttribute("x2", cx);
-        line.setAttribute("y2", cy);
-        line.setAttribute("stroke", "#ffca28");
-        line.setAttribute("stroke-width", "0.5");
-        line.style.transition = "all 0.6s ease-out";
-        uiLayer.appendChild(line);
+    // Map building types to their matching broadcast icons
+    const iconMap = { mine: "🏭", school: "🏫", city: "🌆", base: "🛡️" };
+    const emoji = iconMap[type] || "🏗️";
 
-        requestAnimationFrame(() => {
-            line.setAttribute("x2", cx + Math.cos(angle) * length);
-            line.setAttribute("y2", cy + Math.sin(angle) * length);
-            line.setAttribute("opacity", "0");
-        });
-        setTimeout(() => line.remove(), 600);
-    }
+    // Create a group to anchor the transform-origin directly on the country center
+    const animGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    animGroup.style.transformOrigin = `${cx}px ${cy}px`;
+    
+    // 1. The Large Stamping Asset
+    const stampText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    stampText.textContent = emoji;
+    stampText.setAttribute("x", cx);
+    stampText.setAttribute("y", cy);
+    stampText.setAttribute("text-anchor", "middle");
+    stampText.setAttribute("dominant-baseline", "central");
+    
+    // Dynamic sizing based on country scale so it looks balanced when fully zoomed
+    const finalSize = Math.max(1.5, Math.min(8, Math.max(box.width, box.height) * 0.8));
+    stampText.setAttribute("font-size", `${finalSize}px`);
+    stampText.style.animation = "buildingStamp 0.7s cubic-bezier(0.15, 0.85, 0.35, 1.2) forwards";
+
+    // 2. The "+1" Floating Splash Text
+    const splashText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    splashText.textContent = "+1";
+    splashText.setAttribute("x", cx + (finalSize * 0.6)); // Offset slightly to the right
+    splashText.setAttribute("y", cy - (finalSize * 0.4));
+    splashText.setAttribute("fill", "#00e676"); // Vibrant green splash
+    stampText.setAttribute("text-anchor", "middle");
+    splashText.setAttribute("font-weight", "bold");
+    splashText.setAttribute("font-size", `${finalSize * 0.7}px`);
+    splashText.style.animation = "splashFloat 1.2s ease-out forwards";
+
+    // Append to UI layer stacking hierarchy
+    animGroup.appendChild(stampText);
+    animGroup.appendChild(splashText);
+    uiLayer.appendChild(animGroup);
+
+    // Clean up elements from DOM after execution cycles finish
+    setTimeout(() => {
+        // Smoothly fade out the stamp icon after sitting on the country for a bit
+        stampText.style.transition = "opacity 0.5s ease";
+        stampText.style.opacity = "0";
+        setTimeout(() => animGroup.remove(), 500);
+    }, 2500);
 }
 
 function triggerOrbitalAssaultBeam(fromCode, toCode, isSuccess) {
@@ -513,24 +580,37 @@ function executeClaim(user, targetCode) {
     }
 }
 
+
+
 function executeBuild(user, p, type, targetCode) {
     if (!COSTS[type]) { log(`Invalid building! Use: mine, school, city, base.`, "err"); return; }
     if (!gameState.data[targetCode] || gameState.data[targetCode].owner !== user) { log(`You do not govern ${targetCode || 'this territory'}.`, "err"); return; }
     if (p.gold < COSTS[type]) { log(`Insufficient gold! ${type.toUpperCase()} costs 💰${COSTS[type]} gold.`, "err"); return; }
 
+    // Phase 1: Dynamic Camera Tracking Lock
     changeMapProjection(targetCode);
 
+    // Phase 2: Stagger logic execution until camera panning settles
     setTimeout(() => {
         p.gold -= COSTS[type];
-        gameState.data[targetCode].buildings[type]++;
-        log(`🏗️ ${user} built a ${type.toUpperCase()} in ${targetCode}.`, "succ");
-        triggerConstructionSparks(targetCode);
-        updateMapColors();
-        updateLeaderboard();
-        saveGame();
+        
+        // Trigger visual animations instantly
+        triggerBuildingStampAnimation(targetCode, type);
+        log(`🏗️ ${user} initiated infrastructure construction of ${type.toUpperCase()} in ${targetCode}.`, "succ");
+
+        // Phase 3: PRECISE TIMER ROLLUP
+        // Exactly 500ms into the animation, the stamp hits the map layout layer.
+        // We update state tracking and refresh rendering here so indicators flip right on impact!
+        setTimeout(() => {
+            gameState.data[targetCode].buildings[type]++;
+            
+            updateMapColors();
+            updateLeaderboard();
+            saveGame();
+        }, 500);
+
     }, 600);
 }
-
 function executeAttack(user, fromCode, toCode) {
     const attTerritory = gameState.data[fromCode]; 
     const defTerritory = gameState.data[toCode];
