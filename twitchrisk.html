@@ -395,6 +395,12 @@ function processCommand(user, cmd, args) {
         } else { log(`${user}, you are already inside the war servers.`, "err"); }
         return;
     }
+    if (cmd === "riskleaderboard") {
+			toggleLeaderboard();
+            log(`👑 Player ${user} toggled the risk leaderboard!`, "succ");
+        } else { log(`${user}, the toggle leaderboard function gave this err:`, "err"); }
+        return;
+    }
 
     if (!gameState.players[user]) return;
     const p = gameState.players[user];
