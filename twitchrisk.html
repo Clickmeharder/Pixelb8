@@ -141,30 +141,11 @@
 				opacity: 0;
 			}
 		}
-		
-		@keyframes troopPop {
-			0% { transform: scale(0) translateY(0); opacity: 0; }
-			50% { transform: scale(1.3) translateY(-2px); opacity: 1; }
-			100% { transform: scale(1) translateY(0); opacity: 1; }
-		}
-
-		@keyframes casualtySlash {
-			0% { width: 0; opacity: 0; }
-			30% { opacity: 1; }
-			100% { width: 100%; opacity: 1; stroke-dashoffset: 0; }
-		}
-
-		@keyframes textFadeOut {
-			0% { opacity: 1; transform: translateY(0); }
-			80% { opacity: 1; }
-			100% { opacity: 0; transform: translateY(-4px); }
-		}
-		
 		/* Clean, highly visible military style overlay text */
 		.combat-vfx-text {
 			font-family: 'Courier New', Courier, monospace;
 			font-weight: 900;
-			text-shadow: 0 0 4px #000, 0 0 8px #000;
+			text-shadow: 0 0 3px #000, 0 0 6px #000;
 			pointer-events: none;
 		}
 
@@ -175,7 +156,7 @@
 
 		@keyframes popInStatic {
 			0% { transform: scale(0); opacity: 0; }
-			70% { transform: scale(1.2); opacity: 1; }
+			70% { transform: scale(1.15); opacity: 1; }
 			100% { transform: scale(1); opacity: 1; }
 		}
     </style>
@@ -577,6 +558,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const countryGeoSizeA = Math.max(boxA.width, boxA.height);
     const countryGeoSizeB = Math.max(boxB.width, boxB.height);
     
+    // Auto-calculates distinct font layers clamped safely between 3.5px and 8px
     const startTextSize = Math.max(3.5, Math.min(8, countryGeoSizeA * 0.18));
     const endTextSize = Math.max(3.5, Math.min(8, countryGeoSizeB * 0.18)); 
     
@@ -585,7 +567,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     // --- PHASE 1: FOCUS ATTACKER & INITIALIZE OVERLAY ---
     changeMapProjection(fromCode);
 
-    // REMOVED CSS TRANSITIONS: The line length is now updated strictly frame-by-frame by JS
+    // Dotted flight trajectory line
     const trajectoryLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
     trajectoryLine.setAttribute("x1", x1); trajectoryLine.setAttribute("y1", y1);
     trajectoryLine.setAttribute("x2", x1); trajectoryLine.setAttribute("y2", y1); 
@@ -594,6 +576,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     trajectoryLine.setAttribute("stroke-dasharray", `${strokeWidth * 2}, ${strokeWidth * 2}`);
     uiLayer.appendChild(trajectoryLine);
 
+    // Wrapped inside a structural container group to protect cross-browser transforms
     const troopTransport = document.createElementNS("http://www.w3.org/2000/svg", "g");
     
     const troopText = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -608,7 +591,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     uiLayer.appendChild(troopTransport);
 
     // --- PHASE 2: HAND-CRANKED TRAVEL LOOP & REAL-TIME PAN ---
-    const duration = 4500; // Slowed down to 4.5s so chat can track long distances
+    const duration = 4500; 
     let startTime = null;
 
     function animateTravel(timestamp) {
@@ -616,28 +599,23 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         const elapsed = timestamp - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
-        // Linear interpolation for predictable, constant-speed flight tracking
+        // Linear positions across frames
         const currentX = x1 + (x2 - x1) * progress;
         const currentY = y1 + (y2 - y1) * progress;
 
-        // Force vector attributes to follow progress frame-by-frame
+        // Force positions to sync precisely with progress ticks
         trajectoryLine.setAttribute("x2", currentX);
         trajectoryLine.setAttribute("y2", currentY);
 
         troopText.setAttribute("x", currentX);
         troopText.setAttribute("y", currentY);
 
+        // Linear interpolation of text scale over the flight path
         const currentTextSize = startTextSize + (endTextSize - startTextSize) * progress;
         troopText.setAttribute("font-size", `${currentTextSize}px`);
 
-        // CAMERA TRACKING ENFORCEMENT:
-        // Pass the live calculation directly to your projection handler every animation frame
         if (typeof interpolateMapFocus === "function") {
             interpolateMapFocus(currentX, currentY);
-        } else if (typeof changeMapProjection === "function") {
-            // If your engine lacks a smooth lerp tool, force the main projection matrix to track the vector center
-            // We pass a custom temporary flag or coordinates if your engine supports manual viewport updates
-            // changeMapProjection(null, currentX, currentY); 
         }
 
         if (progress < 1) {
@@ -647,7 +625,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         }
     }
 
-    // Hold visibility on origin point briefly so stream sees the launch sequence setup
+    // Keep camera locked on source territory for 1 second before releasing the deployment line
     setTimeout(() => {
         requestAnimationFrame(animateTravel);
     }, 1000);
@@ -655,8 +633,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     // --- PHASE 3: ARRIVAL, DETONATION & STATISTICS REPORTING ---
     function handleTargetImpact() {
         troopTransport.remove();
-        
-        // Final absolute lock on destination country geometry coordinates
         changeMapProjection(toCode);
 
         const battleGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
