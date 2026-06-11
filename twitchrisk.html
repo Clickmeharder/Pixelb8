@@ -543,6 +543,91 @@ function triggerMultiBuildingStampAnimation(countryCode, type, amount) {
     }, 2500);
 }
 
+/* ========================================================================
+   MODULAR CORE GAME LOGIC ACTIONS
+   ======================================================================== */
+function executeClaim(user, targetCode) {
+    if (!gameState.data[targetCode]) { log(`Country ISO code ${targetCode || 'Empty'} does not exist.`, "err"); return; }
+    
+    let ownedCount = Object.values(gameState.data).filter(c => c.owner === user).length;
+    if (ownedCount >= claimLimit) {
+        log(`🚫 Access Denied: You have reached the maximum territory claim limit of ${claimLimit}.`, "err");
+        return;
+    }
+
+    if (!gameState.data[targetCode].owner) {
+        changeMapProjection(targetCode);
+        
+        setTimeout(() => {
+            gameState.data[targetCode].owner = user;
+            gameState.data[targetCode].troops = 10; 
+            log(`🗺️ ${user} successfully established sovereign rule over ${targetCode}.`, "succ");
+            triggerSovereigntyRipple(targetCode, getUserColor(user));
+            updateMapColors();
+            updateLeaderboard();
+            saveGame();
+        }, 600);
+    } else { 
+        log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err"); 
+    }
+}
+
+
+
+function executeBuild(user, p, type, targetCode, quantity = 1) {
+    if (!COSTS[type]) { 
+        log(`Invalid building! Use: mine, school, city, base.`, "err"); 
+        return; 
+    }
+    if (!gameState.data[targetCode] || gameState.data[targetCode].owner !== user) { 
+        log(`You do not govern ${targetCode || 'this territory'}.`, "err"); 
+        return; 
+    }
+
+    const unitCost = COSTS[type];
+
+    // Determine absolute build capacity based on available player treasury funds
+    if (quantity === "max") {
+        quantity = Math.floor(p.gold / unitCost);
+        if (quantity <= 0) {
+            log(`❌ Treasury depleted! You cannot afford a single ${type.toUpperCase()} (Costs 💰${unitCost} gold).`, "err");
+            return;
+        }
+    } else {
+        quantity = parseInt(quantity, 10);
+        if (isNaN(quantity) || quantity <= 0) quantity = 1;
+    }
+
+    const totalCost = unitCost * quantity;
+    if (p.gold < totalCost) { 
+        log(`Insufficient gold! Building ${quantity}x ${type.toUpperCase()} costs 💰${totalCost} gold.`, "err"); 
+        return; 
+    }
+
+    // Phase 1: Camera Lock tracking focus
+    changeMapProjection(targetCode);
+
+    // Phase 2: Fire Visual Animation Sequence instantly
+    setTimeout(() => {
+        p.gold -= totalCost;
+        
+        // Custom multi-build splash engine runner
+        triggerMultiBuildingStampAnimation(targetCode, type, quantity);
+        log(`🏗️ ${user} commissioned ${quantity}x ${type.toUpperCase()} in ${targetCode} for 💰${totalCost} gold.`, "succ");
+
+        // Phase 3: Synchronized UI panel state integration
+        setTimeout(() => {
+            gameState.data[targetCode].buildings[type] += quantity;
+            
+            updateMapColors();
+            updateLeaderboard();
+            saveGame();
+        }, 500);
+
+    }, 600);
+}
+
+
 
 function parseDeploymentTroops(amountInput, totalAvailable) {
     const input = String(amountInput).trim().toLowerCase();
@@ -847,89 +932,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         }, 1200);
     }
 }
-/* ========================================================================
-   MODULAR CORE GAME LOGIC ACTIONS
-   ======================================================================== */
-function executeClaim(user, targetCode) {
-    if (!gameState.data[targetCode]) { log(`Country ISO code ${targetCode || 'Empty'} does not exist.`, "err"); return; }
-    
-    let ownedCount = Object.values(gameState.data).filter(c => c.owner === user).length;
-    if (ownedCount >= claimLimit) {
-        log(`🚫 Access Denied: You have reached the maximum territory claim limit of ${claimLimit}.`, "err");
-        return;
-    }
-
-    if (!gameState.data[targetCode].owner) {
-        changeMapProjection(targetCode);
-        
-        setTimeout(() => {
-            gameState.data[targetCode].owner = user;
-            gameState.data[targetCode].troops = 10; 
-            log(`🗺️ ${user} successfully established sovereign rule over ${targetCode}.`, "succ");
-            triggerSovereigntyRipple(targetCode, getUserColor(user));
-            updateMapColors();
-            updateLeaderboard();
-            saveGame();
-        }, 600);
-    } else { 
-        log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err"); 
-    }
-}
-
-
-
-function executeBuild(user, p, type, targetCode, quantity = 1) {
-    if (!COSTS[type]) { 
-        log(`Invalid building! Use: mine, school, city, base.`, "err"); 
-        return; 
-    }
-    if (!gameState.data[targetCode] || gameState.data[targetCode].owner !== user) { 
-        log(`You do not govern ${targetCode || 'this territory'}.`, "err"); 
-        return; 
-    }
-
-    const unitCost = COSTS[type];
-
-    // Determine absolute build capacity based on available player treasury funds
-    if (quantity === "max") {
-        quantity = Math.floor(p.gold / unitCost);
-        if (quantity <= 0) {
-            log(`❌ Treasury depleted! You cannot afford a single ${type.toUpperCase()} (Costs 💰${unitCost} gold).`, "err");
-            return;
-        }
-    } else {
-        quantity = parseInt(quantity, 10);
-        if (isNaN(quantity) || quantity <= 0) quantity = 1;
-    }
-
-    const totalCost = unitCost * quantity;
-    if (p.gold < totalCost) { 
-        log(`Insufficient gold! Building ${quantity}x ${type.toUpperCase()} costs 💰${totalCost} gold.`, "err"); 
-        return; 
-    }
-
-    // Phase 1: Camera Lock tracking focus
-    changeMapProjection(targetCode);
-
-    // Phase 2: Fire Visual Animation Sequence instantly
-    setTimeout(() => {
-        p.gold -= totalCost;
-        
-        // Custom multi-build splash engine runner
-        triggerMultiBuildingStampAnimation(targetCode, type, quantity);
-        log(`🏗️ ${user} commissioned ${quantity}x ${type.toUpperCase()} in ${targetCode} for 💰${totalCost} gold.`, "succ");
-
-        // Phase 3: Synchronized UI panel state integration
-        setTimeout(() => {
-            gameState.data[targetCode].buildings[type] += quantity;
-            
-            updateMapColors();
-            updateLeaderboard();
-            saveGame();
-        }, 500);
-
-    }, 600);
-}
 
 function executeAttack(user, fromCode, toCode) {
     const attTerritory = gameState.data[fromCode]; 
@@ -1166,6 +1168,57 @@ function processCommand(user, cmd, args) {
     else if (cmd === "attack") {
         executeAttack(user, args[0]?.toUpperCase(), args[1]?.toUpperCase());
     }
+	else if (cmd === "deploy") {
+		const amountInput = args[0];
+		const fromCode = args[1]?.toUpperCase();
+		const toCode = args[2]?.toUpperCase();
+
+		// 1. Syntax Guard
+		if (!amountInput || !fromCode || !toCode) {
+			log(`Invalid Syntax. Use: !${cmd} [amount/percent/max] [from] [to] (E.g. !${cmd} 50% CA RU)`, "err");
+			return;
+		}
+
+		const attTerritory = gameState.data[fromCode];
+		const defTerritory = gameState.data[toCode];
+
+		// 2. Comprehensive Domain Guards
+		if (!attTerritory || attTerritory.owner !== user) {
+			log(`Action origin territory [${fromCode}] owned incorrectly or missing.`, "err");
+			return;
+		}
+		if (!defTerritory) {
+			log(`Destination target country code [${toCode}] is invalid.`, "err");
+			return;
+		}
+		if (defTerritory.owner === user) {
+			log(`Operation aborted: You cannot launch military campaigns against your own sovereignty!`, "err");
+			return;
+		}
+
+		// 3. Diplomatic Alliance Guards
+		if (defTerritory.owner && typeof checkTruce === "function" && checkTruce(user, defTerritory.owner)) {
+			log(`⛔ Order Blocked: You maintain a Truce alliance with ${defTerritory.owner}! Use '!breaktruce ${defTerritory.owner}' first.`, "err");
+			return;
+		}
+
+		// 4. Base Garrison Troop Validation
+		const totalAvailablePool = attTerritory.troops - 2;
+		if (totalAvailablePool <= 0) {
+			log(`Armies in ${fromCode} are too low (Must leave a minimum of 2 troops behind to anchor the garrison).`, "err");
+			return;
+		}
+
+		// 5. Run Custom Input Engine Parser
+		const attackingArmies = parseDeploymentTroops(amountInput, totalAvailablePool);
+		if (attackingArmies <= 0) {
+			log(`Invalid force allocation size specified. Check your pool constraints.`, "err");
+			return;
+		}
+
+
+		executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode);
+	}
 }
 
 function parseGeoJSONCoords(geometry) {
