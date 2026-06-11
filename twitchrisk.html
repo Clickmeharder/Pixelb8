@@ -666,9 +666,9 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const endTextSize = Math.max(3.5, Math.min(8, countryGeoSizeB * 0.18)); 
     const strokeWidth = Math.max(0.3, Math.min(0.8, countryGeoSizeB * 0.02));
 
+    // Focus camera on origin point to begin sequence
     changeMapProjection(fromCode);
 
-    // Dotted flight vector setup
     const trajectoryLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
     trajectoryLine.setAttribute("x1", x1); trajectoryLine.setAttribute("y1", y1);
     trajectoryLine.setAttribute("x2", x1); trajectoryLine.setAttribute("y2", y1); 
@@ -677,11 +677,9 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     trajectoryLine.setAttribute("stroke-dasharray", `${strokeWidth * 2}, ${strokeWidth * 2}`);
     uiLayer.appendChild(trajectoryLine);
 
-    // Battalion stream container management
     const streamContainer = document.createElementNS("http://www.w3.org/2000/svg", "g");
     uiLayer.appendChild(streamContainer);
 
-    // Render configuration limits
     const maxVisibleIcons = 8;
     const activeTroopCount = combatDetails.attDeploying;
     const linesToSpawnCount = Math.min(maxVisibleIcons, activeTroopCount);
@@ -690,7 +688,6 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
 
     for (let i = 0; i < linesToSpawnCount; i++) {
         const soldierTextNode = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        // Lead element contains explicit battalion payload numbers
         soldierTextNode.textContent = (i === 0) ? `💂x${activeTroopCount}` : `💂`;
         soldierTextNode.setAttribute("class", "combat-vfx-text");
         soldierTextNode.setAttribute("fill", "#fff");
@@ -702,11 +699,12 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         
         troopElementsArray.push({
             node: soldierTextNode,
-            trailOffsetOffset: i * 0.045 // Staggers spacing sequentially along path variables
+            trailOffsetOffset: i * 0.045, // Distance behind the leader
+            hasArrived: false
         });
     }
 
-    const duration = 5000; // Stabilized travel duration window
+    const duration = 5000; 
     let startTime = null;
 
     function animateTravel(timestamp) {
@@ -714,18 +712,28 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         const elapsed = timestamp - startTime;
         const baseProgress = Math.min(elapsed / duration, 1);
 
-        // Track the leader node line expansion mechanics
+        // Map out the lead line coordinates
         const leadX = x1 + (x2 - x1) * baseProgress;
         const leadY = y1 + (y2 - y1) * baseProgress;
         trajectoryLine.setAttribute("x2", leadX);
         trajectoryLine.setAttribute("y2", leadY);
 
-        // Sequentially space out individual soldiers behind the leader
-        troopElementsArray.forEach((soldier) => {
-            // Subtract offset to position troops neatly behind the main tip
+        let activeTrackX = leadX;
+        let activeTrackY = leadY;
+        let totalArrivedCount = 0;
+
+        // Process positions and find our dynamic camera target
+        troopElementsArray.forEach((soldier, index) => {
             let elementProgress = baseProgress - soldier.trailOffsetOffset;
-            if (elementProgress < 0) elementProgress = 0; // Hold at assembly point until ready
-            if (elementProgress > 1) elementProgress = 1;
+            if (elementProgress < 0) elementProgress = 0;
+            if (elementProgress >= 1) {
+                elementProgress = 1;
+                if (!soldier.hasArrived) {
+                    soldier.hasArrived = true;
+                    soldier.node.setAttribute("opacity", "0"); // Hide clean on impact
+                }
+                totalArrivedCount++;
+            }
 
             const curX = x1 + (x2 - x1) * elementProgress;
             const curY = y1 + (y2 - y1) * elementProgress;
@@ -735,13 +743,23 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
 
             const curScale = startTextSize + (endTextSize - startTextSize) * elementProgress;
             soldier.node.setAttribute("font-size", `${curScale}px`);
+
+            // CAMERA RESOLUTION TRACKING:
+            // We lock the camera focus point to the center element of the living battalion stream.
+            // If the lead unit hits the planet, the camera smoothly continues framing the back ranks.
+            if (index === Math.floor(troopElementsArray.length / 2) && elementProgress < 1) {
+                activeTrackX = curX;
+                activeTrackY = curY;
+            }
         });
 
+        // Frame update tick to smooth out tracking jumps
         if (typeof interpolateMapFocus === "function") {
-            interpolateMapFocus(leadX, leadY);
+            interpolateMapFocus(activeTrackX, activeTrackY);
         }
 
-        if (baseProgress < 1) {
+        // Only break out of transit loop when the final trailing soldier lands safely
+        if (totalArrivedCount < troopElementsArray.length) {
             requestAnimationFrame(animateTravel);
         } else {
             handleTargetImpact();
@@ -754,6 +772,8 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
 
     function handleTargetImpact() {
         streamContainer.remove();
+        
+        // Final absolute center lock on target coordinates now that the line is fully cleared
         changeMapProjection(toCode);
 
         const battleGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -846,8 +866,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
 
         }, 1200);
     }
-}
-/* ========================================================================
+}/* ========================================================================
    MODULAR CORE GAME LOGIC ACTIONS
    ======================================================================== */
 function executeClaim(user, targetCode) {
