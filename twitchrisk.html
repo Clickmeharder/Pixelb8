@@ -53,7 +53,6 @@ let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || {
 
 const COSTS = { mine: 150, school: 250, city: 400, base: 500 };
 
-// Geographic Theater Projections (Adjusted Africa to capture the northern edge cleanly)
 const CONTINENT_VIEWBOXES = {
     world: "0 0 360 180",
     na: "10 10 110 80",
@@ -66,6 +65,7 @@ const CONTINENT_VIEWBOXES = {
 
 let currentViewMode = "world"; 
 let currentZoomTarget = "world"; 
+let currentViewBoxDims = { w: 360, h: 180 }; // Tracking camera scale tracking dynamically
 
 function log(msg, type = '') { 
     const l = document.getElementById("log"); 
@@ -77,7 +77,7 @@ function log(msg, type = '') {
     l.scrollTop = l.scrollHeight; 
 }
 
-// Global Income & Autogen Loop (Runs every 45s)
+// Global Economy and Logistics Interval Core (45s Ticks)
 setInterval(() => {
     let globalRecruitCount = 0;
 
@@ -126,13 +126,10 @@ function updateMapColors() {
         const assets = document.getElementById(`assets-${code}`);
         const cData = gameState.data[code];
         
-        let pathWidth = 20; // Default fallback size factor
+        let pathWidth = 20; 
         if (country) {
             cData.owner ? country.style.fill = getUserColor(cData.owner) : country.style.fill = "#1f242c";
-            try {
-                // Read the actual geometry width to dynamically adjust text scaling metrics
-                pathWidth = country.getBBox().width;
-            } catch(e) {}
+            try { pathWidth = country.getBBox().width; } catch(e) {}
             
             const title = country.querySelector("title");
             if(title) {
@@ -140,23 +137,31 @@ function updateMapColors() {
             }
         }
 
-        // --- Adaptive Level of Detail Text Optimization ---
+        // --- Contextual Dynamic Font Calculation ---
+        // Uses the current width of the viewport tracking matrix so small countries scale down cleanly
         if(label && cData) {
             if(currentViewMode === "world") {
                 label.style.display = "none";
             } else if(currentViewMode === "continent") {
                 label.style.display = cData.owner ? "block" : "none";
                 
-                // Dynamic formula: prevents text from swallowing small nations (like GBR or JPN)
-                let calculatedSize = Math.max(1.2, Math.min(4.5, pathWidth * 0.25));
+                // Scale text down strictly for low territory footprints
+                let baseSize = currentViewBoxDims.w * 0.03; 
+                let calculatedSize = Math.max(1.0, Math.min(baseSize, pathWidth * 0.25));
                 label.setAttribute("font-size", `${calculatedSize}px`);
                 label.textContent = `${code}:${cData.troops}`;
             } else if(currentViewMode === "country") {
                 label.style.display = "block";
                 
-                let calculatedSize = Math.max(0.6, Math.min(2.5, pathWidth * 0.08));
+                // Camera-adjusted scaling logic to keep text fitting within tiny territories like SWZ
+                let calculatedSize = currentViewBoxDims.w * 0.05;
+                if(pathWidth < currentViewBoxDims.w * 0.3) {
+                    calculatedSize = pathWidth * 0.15; 
+                }
+                calculatedSize = Math.max(0.4, Math.min(2.5, calculatedSize));
+                
                 label.setAttribute("font-size", `${calculatedSize}px`);
-                label.textContent = `${code} | Ruler: ${cData.owner || 'Neutral'} | Garrison: ${cData.troops}`;
+                label.textContent = `${code} | Owner: ${cData.owner || 'Neutral'} | Garrison: ${cData.troops}`;
             }
         }
 
@@ -164,10 +169,13 @@ function updateMapColors() {
             if(currentViewMode === "country" && currentZoomTarget === code) {
                 assets.style.display = "block";
                 
-                let calculatedSize = Math.max(0.5, Math.min(1.8, pathWidth * 0.06));
+                let calculatedSize = currentViewBoxDims.w * 0.038;
+                if(pathWidth < currentViewBoxDims.w * 0.3) {
+                    calculatedSize = pathWidth * 0.12; 
+                }
+                calculatedSize = Math.max(0.35, Math.min(1.8, calculatedSize));
                 assets.setAttribute("font-size", `${calculatedSize}px`);
                 
-                // Using proportional vertical tracking multipliers based on current layout text sizing
                 let dy1 = calculatedSize * 1.3;
                 let dy2 = calculatedSize * 1.1;
                 
@@ -190,6 +198,12 @@ function changeMapProjection(target) {
     if (CONTINENT_VIEWBOXES[target.toLowerCase()]) {
         currentViewMode = target.toLowerCase() === "world" ? "world" : "continent";
         currentZoomTarget = target.toLowerCase();
+        
+        // Cache camera viewport metrics
+        const tokens = CONTINENT_VIEWBOXES[target.toLowerCase()].split(" ");
+        currentViewBoxDims.w = parseFloat(tokens[2]);
+        currentViewBoxDims.h = parseFloat(tokens[3]);
+        
         map.setAttribute("viewBox", CONTINENT_VIEWBOXES[target.toLowerCase()]);
         indicator.textContent = `Theater View: ${target}`;
         log(`🔭 Camera adjustment: Tracking target region [${target.toUpperCase()}].`);
@@ -198,7 +212,14 @@ function changeMapProjection(target) {
         if (path) {
             try {
                 const box = path.getBBox();
-                const pad = Math.max(box.width, box.height) * 0.3; // Added extra step breathing room buffer
+                
+                // Intelligent padding allocation matrix based on targeted geometry footprints
+                let padFactor = 0.3;
+                if(box.width < 5 || box.height < 5) {
+                    padFactor = 1.2; // Extra physical breathing room for micro-states like SWZ
+                }
+                
+                const pad = Math.max(box.width, box.height) * padFactor;
                 const vx = box.x - pad/2;
                 const vy = box.y - pad/2;
                 const vw = box.width + pad;
@@ -206,6 +227,10 @@ function changeMapProjection(target) {
                 
                 currentViewMode = "country";
                 currentZoomTarget = target.toUpperCase();
+                
+                // Cache dynamic zoom values
+                currentViewBoxDims.w = vw;
+                currentViewBoxDims.h = vh;
                 
                 map.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
                 indicator.textContent = `Country Zoom: ${target.toUpperCase()}`;
@@ -419,7 +444,7 @@ async function initMap() {
             setTimeout(() => {
                 try {
                     const box = path.getBBox();
-                    if(box.width > 1 && box.height > 1) {
+                    if(box.width > 0.5 && box.height > 0.5) {
                         text.setAttribute("x", box.x + box.width / 2);
                         text.setAttribute("y", box.y + box.height / 2);
                         
