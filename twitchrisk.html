@@ -6,47 +6,75 @@
     <style>
         body { background: #0c0f12; color: #d1d5db; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 15px; overflow-x: hidden; }
         h3 { margin: 5px 0 15px 0; color: #e74c3c; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(231,76,60,0.3); }
-        #game-container { width: 100%; max-width: 1100px; height: 62vh; background: #090d13; border: 2px solid #2c3e50; position: relative; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; }
+        
+        /* Layout Structure: Map & Leaderboard Side-by-Side */
+        #stage-wrapper { width: 100%; max-width: 1100px; display: flex; gap: 15px; height: 62vh; align-items: stretch; position: relative; }
+        
+        #game-container { flex: 1; background: #090d13; border: 2px solid #2c3e50; position: relative; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; }
         #map { width: 100%; height: 100%; display: block; transition: viewBox 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
         .country { fill: #1f242c; stroke: #0d1117; stroke-width: 0.4; cursor: pointer; transition: fill 0.2s ease, stroke 0.2s ease; }
         .country:hover { stroke: #ffffff; stroke-width: 0.8; fill: #2c3541; }
         
-        /* Explicit layer separation guarantees text paints over top of all shapes */
+        /* Layer separation guarantees text paints over top of all shapes */
         .owner-label { pointer-events: none; fill: #ffffff; text-anchor: middle; font-weight: 800; font-family: sans-serif; text-shadow: 1px 1px 1px #000, -1px -1px 1px #000; overflow: visible !important; }
         .asset-label { pointer-events: none; fill: #51e1ed; text-anchor: middle; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; line-height: 1.2; overflow: visible !important; }
         
-        #control-panel { width: 100%; max-width: 1100px; display: flex; gap: 10px; margin-top: 10px; }
-        #log { flex: 2; height: 180px; background: #11161d; overflow-y: auto; padding: 12px; border: 1px solid #2c3e50; font-family: 'Courier New', Courier, monospace; font-size: 12px; border-radius: 4px; color: #3498db; }
+        /* Collapsible Sidebar Mechanics */
+        #leaderboard-wrapper { position: relative; display: flex; transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-left 0.4s; width: 300px; z-index: 10; }
+        #leaderboard-wrapper.collapsed { width: 0px; margin-left: -15px; }
+        
+        #leaderboard { width: 100%; background: #11161d; border: 2px solid #2c3e50; padding: 12px; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-y: auto; box-sizing: border-box; }
+        #leaderboard-wrapper.collapsed #leaderboard { display: none; }
+        
+        #leaderboard h4 { margin: 0 0 12px 0; color: #fff; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #e74c3c; padding-bottom: 6px; letter-spacing: 1px; }
+        .lb-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; padding: 5px 8px; background: rgba(255,255,255,0.02); border-radius: 3px; border-left: 3px solid #3498db; }
+        
+        /* Collapse Tab Trigger Button */
+        #collapse-btn { position: absolute; left: -26px; top: 12px; width: 24px; height: 35px; background: #11161d; border: 2px solid #2c3e50; border-right: none; color: #3498db; font-family: monospace; font-weight: bold; font-size: 12px; text-align: center; line-height: 31px; cursor: pointer; border-radius: 4px 0 0 4px; user-select: none; transition: color 0.2s; z-index: 11; }
+        #collapse-btn:hover { color: #e74c3c; background: #161c24; }
+        
+        /* Bottom Control Deck */
+        #control-panel { width: 100%; max-width: 1100px; display: flex; gap: 10px; margin-top: 15px; }
+        #log { flex: 1; height: 150px; background: #11161d; overflow-y: auto; padding: 12px; border: 1px solid #2c3e50; font-family: 'Courier New', Courier, monospace; font-size: 12px; border-radius: 4px; color: #3498db; }
         #log div.err { color: #e74c3c; }
         #log div.succ { color: #2ecc71; }
         #log div.war { color: #f1c40f; font-weight: bold; }
-        #leaderboard { flex: 1; height: 180px; background: #11161d; border: 1px solid #2c3e50; padding: 12px; border-radius: 4px; overflow-y: auto; }
-        #leaderboard h4 { margin: 0 0 8px 0; color: #fff; font-size: 14px; text-transform: uppercase; border-bottom: 1px solid #2c3e50; padding-bottom: 4px; }
-        .lb-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; padding: 2px 4px; background: rgba(255,255,255,0.02); }
-        button { background: #e74c3c; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.2s; margin-bottom: 5px; }
-        button:hover { background: #c0392b; box-shadow: 0 0 10px rgba(231,76,60,0.5); }
+        
+        button.admin-btn { background: #e74c3c; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.2s; margin-bottom: 5px; }
+        button.admin-btn:hover { background: #c0392b; box-shadow: 0 0 10px rgba(231,76,60,0.5); }
         #view-indicator { position: absolute; top: 10px; left: 10px; background: rgba(17,22,29,0.85); padding: 6px 12px; border-radius: 4px; border: 1px solid #3498db; font-family: monospace; font-size: 11px; color: #3498db; font-weight: bold; pointer-events: none; text-transform: uppercase; }
+        
+        /* Scrollbar aesthetics */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0c0f12; }
+        ::-webkit-scrollbar-thumb { background: #2c3e50; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3498db; }
     </style>
 </head>
 <body>
 
-	<div id="" style="position: fixed;top:8px;left:45%;">
-    <h3>Jaedraze Strategy Engine (Grand Conquest)</h3>
-    <button onclick="resetGame()">RESET GAME WORLD</button>
+    <div style="position: fixed; top: 8px; left: 45%; z-index: 100; text-align: center;">
+        <h3>Jaedraze Strategy Engine (Grand Conquest)</h3>
+        <button class="admin-btn" onclick="resetGame()">RESET GAME WORLD</button>
     </div>
-	
-	
-    <div id="game-container">
-        <div id="view-indicator">Theater View: World</div>
-        <svg id="map" viewBox="0 0 360 180"></svg>
+    
+    <div id="stage-wrapper">
+        <div id="game-container">
+            <div id="view-indicator">Theater View: World</div>
+            <svg id="map" viewBox="0 0 360 180"></svg>
+        </div>
+
+        <div id="leaderboard-wrapper">
+            <div id="collapse-btn" onclick="toggleLeaderboard()">[-]</div>
+            <div id="leaderboard">
+                <h4>Global Standings</h4>
+                <div id="lb-content"></div>
+            </div>
+        </div>
     </div>
 
     <div id="control-panel">
         <div id="log">🤖 System Initializing Master Engine...</div>
-        <div id="leaderboard">
-            <h4>Global Standings</h4>
-            <div id="lb-content"></div>
-        </div>
     </div>
 
 <script>
@@ -72,6 +100,18 @@ const CONTINENT_VIEWBOXES = {
 let currentViewMode = "world"; 
 let currentZoomTarget = "world"; 
 let currentViewBoxDims = { w: 360, h: 180 }; 
+
+function toggleLeaderboard() {
+    const wrapper = document.getElementById("leaderboard-wrapper");
+    const btn = document.getElementById("collapse-btn");
+    if (wrapper.classList.contains("collapsed")) {
+        wrapper.classList.remove("collapsed");
+        btn.textContent = "[-]";
+    } else {
+        wrapper.classList.add("collapsed");
+        btn.textContent = "[+]";
+    }
+}
 
 function log(msg, type = '') { 
     const l = document.getElementById("log"); 
@@ -214,8 +254,6 @@ function changeMapProjection(target) {
         if (path) {
             try {
                 const box = path.getBBox();
-                
-                // RESTORED: Your absolute preference baseline zoom formulas
                 let pad;
                 if(box.width < 3 || box.height < 3) {
                     pad = 16; 
@@ -405,7 +443,6 @@ async function initMap() {
         const svg = document.getElementById("map");
         svg.innerHTML = ""; 
 
-        // CRITICAL STRUCTURAL FIX: Split geometries from UI completely to prevent shape bleeding
         const countriesLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
         countriesLayer.setAttribute("id", "countries-layer");
         svg.appendChild(countriesLayer);
