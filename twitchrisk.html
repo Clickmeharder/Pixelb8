@@ -86,7 +86,7 @@
             <div id="country-stats-box">
                 <div class="stats-title" id="box-country-title">Sector: UNKNOWN</div>
                 <div class="stats-row"><span>Ruler:</span><span id="box-ruler" class="stats-highlight">Neutral</span></div>
-                <div class="stats-row"><span>Garrison:</span><span id="box-troops">0</span></div>
+                <div class="stats-row"><span>Pop:</span><span id="box-troops">0</span></div>
                 <div class="stats-row"><span>Mines / Schools:</span><span id="box-infra-basic">🏭x0 🏫x0</span></div>
                 <div class="stats-row"><span>Cities / Bases:</span><span id="box-infra-adv">🌆x0 🛡️x0</span></div>
                 <div class="stats-row"><span>Troop Limit:</span><span id="box-cap" style="color: #2ecc71;">15</span></div>
@@ -248,7 +248,7 @@ function updateMapColors() {
                 
                 calculatedSize = Math.max(0.12, Math.min(2.5, calculatedSize));
                 label.setAttribute("font-size", `${calculatedSize}px`);
-                label.textContent = `${code} | Garrison: ${cData.troops}`;
+                label.textContent = `${code} | ${cData.troops}`;
             }
         }
 
@@ -435,7 +435,7 @@ function processCommand(user, cmd, args) {
         if (!attTerritory || attTerritory.owner !== user) { log(`Attack source country owned incorrectly or missing.`, "err"); return; }
         if (!defTerritory) { log(`Destination target country code invalid.`, "err"); return; }
         if (defTerritory.owner === user) { log(`Cannot strike your own territories!`, "err"); return; }
-        if (attTerritory.troops <= 2) { log(`Armies in ${fromCode} are too low (Must leave 2 garrison troops behind).`, "err"); return; }
+        if (attTerritory.troops <= 2) { log(`Armies in ${fromCode} are too low (Must leave 2 troops behind).`, "err"); return; }
         if (defTerritory.owner && checkTruce(user, defTerritory.owner)) {
             log(`⛔ Order Blocked: You maintain a Truce alliance with ${defTerritory.owner}! Use '!breaktruce ${defTerritory.owner}' first.`, "err");
             return;
