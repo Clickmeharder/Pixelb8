@@ -10,8 +10,11 @@
         #map { width: 100%; height: 100%; display: block; transition: viewBox 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
         .country { fill: #1f242c; stroke: #0d1117; stroke-width: 0.4; cursor: pointer; transition: fill 0.2s ease, stroke 0.2s ease; }
         .country:hover { stroke: #ffffff; stroke-width: 0.8; fill: #2c3541; }
-        .owner-label { pointer-events: none; fill: #ffffff; text-anchor: middle; font-weight: 800; font-family: sans-serif; text-shadow: 1px 1px 1px #000, -1px -1px 1px #000; }
-        .asset-label { pointer-events: none; fill: #51e1ed; text-anchor: middle; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; line-height: 1.2; }
+        
+        /* FIX: Force text layers to ignore structural clipping and boundaries */
+        .owner-label { pointer-events: none; fill: #ffffff; text-anchor: middle; font-weight: 800; font-family: sans-serif; text-shadow: 1px 1px 1px #000, -1px -1px 1px #000; overflow: visible !important; }
+        .asset-label { pointer-events: none; fill: #51e1ed; text-anchor: middle; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; line-height: 1.2; overflow: visible !important; }
+        
         #control-panel { width: 100%; max-width: 1100px; display: flex; gap: 10px; margin-top: 10px; }
         #log { flex: 2; height: 180px; background: #11161d; overflow-y: auto; padding: 12px; border: 1px solid #2c3e50; font-family: 'Courier New', Courier, monospace; font-size: 12px; border-radius: 4px; color: #3498db; }
         #log div.err { color: #e74c3c; }
@@ -65,7 +68,7 @@ const CONTINENT_VIEWBOXES = {
 
 let currentViewMode = "world"; 
 let currentZoomTarget = "world"; 
-let currentViewBoxDims = { w: 360, h: 180 }; // Tracking camera scale tracking dynamically
+let currentViewBoxDims = { w: 360, h: 180 }; 
 
 function log(msg, type = '') { 
     const l = document.getElementById("log"); 
@@ -77,7 +80,7 @@ function log(msg, type = '') {
     l.scrollTop = l.scrollHeight; 
 }
 
-// Global Economy and Logistics Interval Core (45s Ticks)
+// Global Tick Management Loop
 setInterval(() => {
     let globalRecruitCount = 0;
 
@@ -137,15 +140,13 @@ function updateMapColors() {
             }
         }
 
-        // --- Contextual Dynamic Font Calculation ---
-        // Uses the current width of the viewport tracking matrix so small countries scale down cleanly
+        // --- Viewport-Driven Realtime Text Normalization Engine ---
         if(label && cData) {
             if(currentViewMode === "world") {
                 label.style.display = "none";
             } else if(currentViewMode === "continent") {
                 label.style.display = cData.owner ? "block" : "none";
                 
-                // Scale text down strictly for low territory footprints
                 let baseSize = currentViewBoxDims.w * 0.03; 
                 let calculatedSize = Math.max(1.0, Math.min(baseSize, pathWidth * 0.25));
                 label.setAttribute("font-size", `${calculatedSize}px`);
@@ -153,13 +154,15 @@ function updateMapColors() {
             } else if(currentViewMode === "country") {
                 label.style.display = "block";
                 
-                // Camera-adjusted scaling logic to keep text fitting within tiny territories like SWZ
-                let calculatedSize = currentViewBoxDims.w * 0.05;
-                if(pathWidth < currentViewBoxDims.w * 0.3) {
-                    calculatedSize = pathWidth * 0.15; 
-                }
-                calculatedSize = Math.max(0.4, Math.min(2.5, calculatedSize));
+                // Base calculation entirely driven by the viewport zoom factor
+                let calculatedSize = currentViewBoxDims.w * 0.045;
                 
+                // If it's a micro-state, pinch the font limits significantly lower so it runs cleanly
+                if(pathWidth < 12) {
+                    calculatedSize = currentViewBoxDims.w * 0.032;
+                }
+                
+                calculatedSize = Math.max(0.08, Math.min(2.5, calculatedSize));
                 label.setAttribute("font-size", `${calculatedSize}px`);
                 label.textContent = `${code} | Owner: ${cData.owner || 'Neutral'} | Garrison: ${cData.troops}`;
             }
@@ -169,11 +172,12 @@ function updateMapColors() {
             if(currentViewMode === "country" && currentZoomTarget === code) {
                 assets.style.display = "block";
                 
-                let calculatedSize = currentViewBoxDims.w * 0.038;
-                if(pathWidth < currentViewBoxDims.w * 0.3) {
-                    calculatedSize = pathWidth * 0.12; 
+                let calculatedSize = currentViewBoxDims.w * 0.035;
+                if(pathWidth < 12) {
+                    calculatedSize = currentViewBoxDims.w * 0.024;
                 }
-                calculatedSize = Math.max(0.35, Math.min(1.8, calculatedSize));
+                
+                calculatedSize = Math.max(0.07, Math.min(1.8, calculatedSize));
                 assets.setAttribute("font-size", `${calculatedSize}px`);
                 
                 let dy1 = calculatedSize * 1.3;
@@ -199,7 +203,6 @@ function changeMapProjection(target) {
         currentViewMode = target.toLowerCase() === "world" ? "world" : "continent";
         currentZoomTarget = target.toLowerCase();
         
-        // Cache camera viewport metrics
         const tokens = CONTINENT_VIEWBOXES[target.toLowerCase()].split(" ");
         currentViewBoxDims.w = parseFloat(tokens[2]);
         currentViewBoxDims.h = parseFloat(tokens[3]);
@@ -213,10 +216,10 @@ function changeMapProjection(target) {
             try {
                 const box = path.getBBox();
                 
-                // Intelligent padding allocation matrix based on targeted geometry footprints
-                let padFactor = 0.3;
+                // Micro-states need higher dynamic framing padding so their metadata doesn't clip off the window
+                let padFactor = 0.35;
                 if(box.width < 5 || box.height < 5) {
-                    padFactor = 1.2; // Extra physical breathing room for micro-states like SWZ
+                    padFactor = 2.2; 
                 }
                 
                 const pad = Math.max(box.width, box.height) * padFactor;
@@ -228,7 +231,6 @@ function changeMapProjection(target) {
                 currentViewMode = "country";
                 currentZoomTarget = target.toUpperCase();
                 
-                // Cache dynamic zoom values
                 currentViewBoxDims.w = vw;
                 currentViewBoxDims.h = vh;
                 
@@ -444,7 +446,7 @@ async function initMap() {
             setTimeout(() => {
                 try {
                     const box = path.getBBox();
-                    if(box.width > 0.5 && box.height > 0.5) {
+                    if(box.width > 0.1 && box.height > 0.1) {
                         text.setAttribute("x", box.x + box.width / 2);
                         text.setAttribute("y", box.y + box.height / 2);
                         
