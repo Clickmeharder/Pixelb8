@@ -386,6 +386,11 @@ function processCommand(user, cmd, args) {
         changeMapProjection(args[0]);
         return;
     }
+    if (cmd === "leaderboard") {
+        toggleLeaderboard();
+		log(`👑 Player ${user} toggled leaderboard!`, "succ");
+        return;
+    }
 
     if (cmd === "join") {
         if (!gameState.players[user]) {
@@ -393,12 +398,6 @@ function processCommand(user, cmd, args) {
             log(`👑 Player ${user} has raised their flag and entered the theater of war!`, "succ");
             updateLeaderboard();
         } else { log(`${user}, you are already inside the war servers.`, "err"); }
-        return;
-    }
-    if (cmd === "riskleaderboard") {
-			toggleLeaderboard();
-            log(`👑 Player ${user} toggled the risk leaderboard!`, "succ");
-        } else { log(`${user}, the toggle leaderboard function gave this err:`, "err"); }
         return;
     }
 
