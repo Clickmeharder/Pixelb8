@@ -11,7 +11,7 @@
         .country { fill: #1f242c; stroke: #0d1117; stroke-width: 0.4; cursor: pointer; transition: fill 0.2s ease, stroke 0.2s ease; }
         .country:hover { stroke: #ffffff; stroke-width: 0.8; fill: #2c3541; }
         
-        /* FIX: Force text layers to ignore structural clipping and boundaries */
+        /* Force explicit layer isolation to ignore geometric canvas parent masking */
         .owner-label { pointer-events: none; fill: #ffffff; text-anchor: middle; font-weight: 800; font-family: sans-serif; text-shadow: 1px 1px 1px #000, -1px -1px 1px #000; overflow: visible !important; }
         .asset-label { pointer-events: none; fill: #51e1ed; text-anchor: middle; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; line-height: 1.2; overflow: visible !important; }
         
@@ -80,7 +80,7 @@ function log(msg, type = '') {
     l.scrollTop = l.scrollHeight; 
 }
 
-// Global Tick Management Loop
+// Global Core Cycle System
 setInterval(() => {
     let globalRecruitCount = 0;
 
@@ -140,7 +140,6 @@ function updateMapColors() {
             }
         }
 
-        // --- Viewport-Driven Realtime Text Normalization Engine ---
         if(label && cData) {
             if(currentViewMode === "world") {
                 label.style.display = "none";
@@ -154,15 +153,15 @@ function updateMapColors() {
             } else if(currentViewMode === "country") {
                 label.style.display = "block";
                 
-                // Base calculation entirely driven by the viewport zoom factor
-                let calculatedSize = currentViewBoxDims.w * 0.045;
+                // Pure viewport scaling baseline prevents large fonts on tiny viewboxes
+                let calculatedSize = currentViewBoxDims.w * 0.042;
                 
-                // If it's a micro-state, pinch the font limits significantly lower so it runs cleanly
+                // Micro-state protection limiter overrides
                 if(pathWidth < 12) {
-                    calculatedSize = currentViewBoxDims.w * 0.032;
+                    calculatedSize = currentViewBoxDims.w * 0.035;
                 }
                 
-                calculatedSize = Math.max(0.08, Math.min(2.5, calculatedSize));
+                calculatedSize = Math.max(0.12, Math.min(2.5, calculatedSize));
                 label.setAttribute("font-size", `${calculatedSize}px`);
                 label.textContent = `${code} | Owner: ${cData.owner || 'Neutral'} | Garrison: ${cData.troops}`;
             }
@@ -172,12 +171,12 @@ function updateMapColors() {
             if(currentViewMode === "country" && currentZoomTarget === code) {
                 assets.style.display = "block";
                 
-                let calculatedSize = currentViewBoxDims.w * 0.035;
+                let calculatedSize = currentViewBoxDims.w * 0.032;
                 if(pathWidth < 12) {
-                    calculatedSize = currentViewBoxDims.w * 0.024;
+                    calculatedSize = currentViewBoxDims.w * 0.026;
                 }
                 
-                calculatedSize = Math.max(0.07, Math.min(1.8, calculatedSize));
+                calculatedSize = Math.max(0.1, Math.min(1.8, calculatedSize));
                 assets.setAttribute("font-size", `${calculatedSize}px`);
                 
                 let dy1 = calculatedSize * 1.3;
@@ -216,13 +215,19 @@ function changeMapProjection(target) {
             try {
                 const box = path.getBBox();
                 
-                // Micro-states need higher dynamic framing padding so their metadata doesn't clip off the window
-                let padFactor = 0.35;
-                if(box.width < 5 || box.height < 5) {
-                    padFactor = 2.2; 
+                // UPGRADE: Dynamic proportional scaling margins specifically targeting small land masses
+                let pad;
+                if(box.width < 3 || box.height < 3) {
+                    // Micro-nations like SWZ get a massive static coordinate buffer to prevent clipping
+                    pad = 16; 
+                } else if(box.width < 10 || box.height < 10) {
+                    // Small nations like GBR get medium breathing room
+                    pad = Math.max(box.width, box.height) * 2.5;
+                } else {
+                    // Standard spacious padding for massive zones (USA, RUS)
+                    pad = Math.max(box.width, box.height) * 0.6;
                 }
                 
-                const pad = Math.max(box.width, box.height) * padFactor;
                 const vx = box.x - pad/2;
                 const vy = box.y - pad/2;
                 const vw = box.width + pad;
@@ -236,7 +241,7 @@ function changeMapProjection(target) {
                 
                 map.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
                 indicator.textContent = `Country Zoom: ${target.toUpperCase()}`;
-                log(`🔍 Tactical Overlay Focused on [${target.toUpperCase()}]. Scanning asset clusters...`);
+                log(`🔍 Tactical Overlay Focused on [${target.toUpperCase()}]. Space margins adjusted.`);
             } catch(e) {
                 log("Target profile found but hardware rendering layout rejected bounding canvas calculation.", "err");
             }
@@ -446,7 +451,7 @@ async function initMap() {
             setTimeout(() => {
                 try {
                     const box = path.getBBox();
-                    if(box.width > 0.1 && box.height > 0.1) {
+                    if(box.width > 0.05 && box.height > 0.05) {
                         text.setAttribute("x", box.x + box.width / 2);
                         text.setAttribute("y", box.y + box.height / 2);
                         
