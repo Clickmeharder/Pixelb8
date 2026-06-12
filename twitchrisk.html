@@ -230,9 +230,20 @@ let currentViewMode = "world";
 let currentZoomTarget = "world"; 
 let currentViewBoxDims = { w: 360, h: 180 }; 
 const gameStartTime = Date.now();
-// Pre-cached bounding boxes for proximity calculations to clean up country view clutter
 let countryBoundsCache = {};
+let projectionTimeoutId = null;
 
+// --- CENTRALIZED THREE.JS GLOBE STATE ---
+let globeContext = {
+    renderer: null,
+    scene: null,
+    camera: null,
+    mesh: null,
+    texture: null,
+    animationId: null,
+    isActive: false,
+    isTextureDirty: false // 🌟 Flags when an animation or state change needs to force a 3D redraw
+};
 function toggleLeaderboard() {
     const wrapper = document.getElementById("leaderboard-wrapper");
     const btn = document.getElementById("collapse-btn");
@@ -392,128 +403,7 @@ function updateFloatingStatsPanel(code, cData) {
 }
 
 
-let projectionTimeoutId = null;
-function changeMapProjection(target) {
-    const map = document.getElementById("map");
-    const indicator = document.getElementById("view-indicator");
-    
-    // 🛑 CRITICAL DEBOUNCE: Clear any pending 30-second world resets 
-    // to prevent overlapping camera snaps if someone types a new command.
-    if (projectionTimeoutId) {
-        clearTimeout(projectionTimeoutId);
-        projectionTimeoutId = null;
-    }
-    
-    if (CONTINENT_VIEWBOXES[target.toLowerCase()]) {
-        currentViewMode = target.toLowerCase() === "world" ? "world" : "continent";
-        currentZoomTarget = target.toLowerCase();
-        
-        const tokens = CONTINENT_VIEWBOXES[target.toLowerCase()].split(" ");
-        currentViewBoxDims.w = parseFloat(tokens[2]);
-        currentViewBoxDims.h = parseFloat(tokens[3]);
-        
-        map.setAttribute("viewBox", CONTINENT_VIEWBOXES[target.toLowerCase()]);
-        indicator.textContent = `Theater View: ${target}`;
-        log(`🔭 Camera adjustment: Tracking target region [${target.toUpperCase()}].`);
-        
-        document.getElementById("box-country-title").textContent = "Sector: Global View";
-        document.getElementById("box-ruler").textContent = "N/A";
-        document.getElementById("box-ruler").style.color = "#51e1ed";
-    } else {
-        const path = document.getElementById(target.toUpperCase());
-        if (path) {
-            try {
-                const box = path.getBBox();
-                let pad;
-                
-                // ZOOM FIX: Drastically lowered the layout margins so it zooms in much closer on country views
-                if(box.width < 3 || box.height < 3) {
-                    pad = 3.5; 
-                } else if(box.width < 10 || box.height < 10) {
-                    pad = Math.max(box.width, box.height) * 0.8;
-                } else {
-                    pad = Math.max(box.width, box.height) * 0.35;
-                }
-                
-                const vx = box.x - pad/2;
-                const vy = box.y - pad/2;
-                const vw = box.width + pad;
-                const vh = box.height + pad;
-                
-                currentViewMode = "country";
-                currentZoomTarget = target.toUpperCase();
-                
-                currentViewBoxDims.w = vw;
-                currentViewBoxDims.h = vh;
-                
-                map.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
-                indicator.textContent = `Country Zoom: ${target.toUpperCase()}`;
-                log(`🔍 Tactical Overlay Focused on [${target.toUpperCase()}]. Space margins adjusted.`);
-            } catch(e) {
-                log("Target profile found but hardware rendering layout rejected bounding canvas calculation.", "err");
-            }
-        } else {
-            log(`Invalid show vector target context: "${target}". Use: world, na, sa, eu, as, af, oc or valid ISO Code.`, "err");
-            return;
-        }
-    }
-    
-    updateMapColors();
 
-    // ⏳ AUTOMATED FALLBACK PROTOCOL
-    // If we just zoomed into anything OTHER than the global world view, 
-    // set a countdown to pull the tactical camera back out after 30 seconds.
-    if (target.toLowerCase() !== "world") {
-        projectionTimeoutId = setTimeout(() => {
-            log("⏳ Idle Cooldown: Returning tactical tracking camera to global world view.");
-            changeMapProjection("world");
-        }, 30000); // 30,000 milliseconds = 30 seconds
-    }
-}
-/**
- * Smoothly interpolates the SVG map viewbox toward a shifting visual center point.
- * Integrates directly with your global 360x180 scale properties and tracking flags.
- * @param {number} targetX - Dynamic center X coordinate of the traveling unit
- * @param {number} targetY - Dynamic center Y coordinate of the traveling unit
- */
-function interpolateMapFocus(targetX, targetY) {
-    const map = document.getElementById("map");
-    if (!map) return;
-
-    // 1. Establish the current bounding context frame dimensions
-    // Uses your existing width/height variables or falls back to a tight cinematic tracking scale.
-    const currentW = currentViewBoxDims.w || 45;
-    const currentH = currentViewBoxDims.h || 30;
-
-    // 2. Parse the map's current active viewbox string to extract where the camera is *right now*
-    const currentViewBoxStr = map.getAttribute("viewBox");
-    let currentX = targetX;
-    let currentY = targetY;
-
-    if (currentViewBoxStr) {
-        const tokens = currentViewBoxStr.split(" ");
-        if (tokens.length === 4) {
-            // Find the current top-left min coordinates, then calculate the active center
-            const curMinX = parseFloat(tokens[0]);
-            const curMinY = parseFloat(tokens[1]);
-            currentX = curMinX + currentW / 2;
-            currentY = curMinY + currentH / 2;
-        }
-    }
-
-    // 3. Apply Linear Interpolation (LERP) for an ultra-smooth cinematic slide
-    // 0.12 means the camera covers 12% of the distance to the target icon per animation frame
-    const easing = 0.12;
-    const nextCenterX = currentX + (targetX - currentX) * easing;
-    const nextCenterY = currentY + (targetY - currentY) * easing;
-
-    // 4. Transform back to top-left SVG ViewBox min-coordinates
-    const nextMinX = nextCenterX - currentW / 2;
-    const nextMinY = nextCenterY - currentH / 2;
-
-    // 5. Update the DOM explicitly without re-triggering full projection cycles
-    map.setAttribute("viewBox", `${nextMinX} ${nextMinY} ${currentW} ${currentH}`);
-}
 function updateLeaderboard() {
     const lbc = document.getElementById("lb-content");
     if(!lbc) return;
@@ -616,6 +506,7 @@ function triggerMultiBuildingStampAnimation(countryCode, type, amount) {
 /* ========================================================================
    MODULAR CORE GAME LOGIC ACTIONS
    ======================================================================== */
+// Ensure game mechanics process and push changes down to the dirty texture monitor loop
 function executeClaim(user, targetCode) {
     if (!gameState.data[targetCode]) { log(`Country ISO code ${targetCode || 'Empty'} does not exist.`, "err"); return; }
     
@@ -626,34 +517,30 @@ function executeClaim(user, targetCode) {
     }
 
     if (!gameState.data[targetCode].owner) {
-        // 1. Zooms into the target country to show the claim action
         changeMapProjection(targetCode);
         
         setTimeout(() => {
-            // 2. Process all game data updates after 600ms zoom transition completes
             gameState.data[targetCode].owner = user;
             gameState.data[targetCode].troops = 10; 
             log(`🗺️ ${user} successfully established sovereign rule over ${targetCode}.`, "succ");
             
-            // Fire the visual ripple effect
             triggerSovereigntyRipple(targetCode, getUserColor(user));
             
             updateMapColors();
             updateLeaderboard();
             saveGame();
+            flagGlobeTextureUpdate(); // Push ripple frame to globe
 
-            // 3. 🎯 NESTED TIMEOUT: Hold the camera here for 1.5 seconds 
-            // so the stream can actually see the full sovereignty ripple expand!
             setTimeout(() => {
-                // Only pull out if they haven't switched views or typed another camera command
                 changeMapProjection("world");
             }, 3500); 
 
-        }, 600); // Matches your initial visual zoom-in presentation timer perfectly
+        }, 600);
     } else { 
         log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err"); 
     }
 }
+
 function executeBuild(user, p, type, targetCode, quantity = 1) {
     if (!COSTS[type]) { 
         log(`Invalid building! Use: mine, school, city, base.`, "err"); 
@@ -683,19 +570,15 @@ function executeBuild(user, p, type, targetCode, quantity = 1) {
         return; 
     }
 
-    // 1. Zoom into the designated territory grid context
     changeMapProjection(targetCode);
 
-    // Wait for the camera zoom transition to complete before stamping
     setTimeout(() => {
         p.gold -= totalCost;
         
-        // 2. Fire the custom canvas/SVG stamp animation sequence
         triggerMultiBuildingStampAnimation(targetCode, type, quantity);
         log(`🏗️ ${user} commissioned ${quantity}x ${type.toUpperCase()} in ${targetCode} for 💰${totalCost} gold.`, "succ");
+        flagGlobeTextureUpdate(); // Capture structural stamp spawn
 
-        // 3. Dynamic cooldown: Give the stamps baseline time (2000ms) 
-        // plus an extra 150ms per building if they are mass-building.
         const animationLeeway = 4000 + (Math.min(quantity, 10) * 150);
 
         setTimeout(() => {
@@ -704,8 +587,8 @@ function executeBuild(user, p, type, targetCode, quantity = 1) {
             updateMapColors();
             updateLeaderboard();
             saveGame();
+            flagGlobeTextureUpdate();
 
-            // 📷 Reset camera back out to the global view after animations have fully finished
             changeMapProjection("world");
         }, animationLeeway);
 
@@ -1425,56 +1308,217 @@ function executeActiveBotTurn(activeBots, allTerritories) {
 /**
  * GLOBE SYSTEM
  */
+/**
+ * Tells the WebGL loop to capture a fresh snapshot of the SVG map layers
+ */
+function flagGlobeTextureUpdate() {
+    if (globeContext.isActive) {
+        globeContext.isTextureDirty = true;
+    }
+}
 
-// --- CENTRALIZED THREE.JS GLOBE STATE ---
-let globeContext = {
-    renderer: null,
-    scene: null,
-    camera: null,
-    mesh: null,
-    texture: null,
-    animationId: null,
-    isActive: false
-};
+function changeMapProjection(target) {
+    const map = document.getElementById("map");
+    const indicator = document.getElementById("view-indicator");
+    
+    if (projectionTimeoutId) {
+        clearTimeout(projectionTimeoutId);
+        projectionTimeoutId = null;
+    }
+    
+    // 🌟 GLOBE BRIDGE: If someone targets a specific zone or country while on 3D globe,
+    // spin the globe to that location instead of forcing a 2D camera pop.
+    if (globeContext.isActive && target.toLowerCase() !== "world") {
+        rotateGlobeToTarget(target);
+    }
+    
+    if (CONTINENT_VIEWBOXES[target.toLowerCase()]) {
+        currentViewMode = target.toLowerCase() === "world" ? "world" : "continent";
+        currentZoomTarget = target.toLowerCase();
+        
+        const tokens = CONTINENT_VIEWBOXES[target.toLowerCase()].split(" ");
+        currentViewBoxDims.w = parseFloat(tokens[2]);
+        currentViewBoxDims.h = parseFloat(tokens[3]);
+        
+        map.setAttribute("viewBox", CONTINENT_VIEWBOXES[target.toLowerCase()]);
+        indicator.textContent = `Theater View: ${target}`;
+        log(`🔭 Camera adjustment: Tracking target region [${target.toUpperCase()}].`);
+        
+        document.getElementById("box-country-title").textContent = "Sector: Global View";
+        document.getElementById("box-ruler").textContent = "N/A";
+        document.getElementById("box-ruler").style.color = "#51e1ed";
+    } else {
+        const path = document.getElementById(target.toUpperCase());
+        if (path) {
+            try {
+                const box = path.getBBox();
+                let pad;
+                
+                if(box.width < 3 || box.height < 3) {
+                    pad = 3.5; 
+                } else if(box.width < 10 || box.height < 10) {
+                    pad = Math.max(box.width, box.height) * 0.8;
+                } else {
+                    pad = Math.max(box.width, box.height) * 0.35;
+                }
+                
+                const vx = box.x - pad/2;
+                const vy = box.y - pad/2;
+                const vw = box.width + pad;
+                const vh = box.height + pad;
+                
+                currentViewMode = "country";
+                currentZoomTarget = target.toUpperCase();
+                
+                currentViewBoxDims.w = vw;
+                currentViewBoxDims.h = vh;
+                
+                map.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
+                indicator.textContent = `Country Zoom: ${target.toUpperCase()}`;
+                log(`🔍 Tactical Overlay Focused on [${target.toUpperCase()}]. Space margins adjusted.`);
+            } catch(e) {
+                log("Target profile found but hardware rendering layout rejected bounding canvas calculation.", "err");
+            }
+        } else {
+            log(`Invalid show vector target context: "${target}". Use: world, na, sa, eu, as, af, oc or valid ISO Code.`, "err");
+            return;
+        }
+    }
+    
+    updateMapColors();
+    flagGlobeTextureUpdate(); // 🌟 Sync changes out to WebGL context
+
+    if (target.toLowerCase() !== "world") {
+        projectionTimeoutId = setTimeout(() => {
+            log("⏳ Idle Cooldown: Returning tactical tracking camera to global world view.");
+            changeMapProjection("world");
+        }, 30000);
+    }
+}
+
+function interpolateMapFocus(targetX, targetY) {
+    const map = document.getElementById("map");
+    if (!map) return;
+
+    const currentW = currentViewBoxDims.w || 45;
+    const currentH = currentViewBoxDims.h || 30;
+    const currentViewBoxStr = map.getAttribute("viewBox");
+    let currentX = targetX;
+    let currentY = targetY;
+
+    if (currentViewBoxStr) {
+        const tokens = currentViewBoxStr.split(" ");
+        if (tokens.length === 4) {
+            const curMinX = parseFloat(tokens[0]);
+            const curMinY = parseFloat(tokens[1]);
+            currentX = curMinX + currentW / 2;
+            currentY = curMinY + currentH / 2;
+        }
+    }
+
+    const easing = 0.12;
+    const nextCenterX = currentX + (targetX - currentX) * easing;
+    const nextCenterY = currentY + (targetY - currentY) * easing;
+    const nextMinX = nextCenterX - currentW / 2;
+    const nextMinY = nextCenterY - currentH / 2;
+
+    map.setAttribute("viewBox", `${nextMinX} ${nextMinY} ${currentW} ${currentH}`);
+    
+    // 🌟 If a projectile or troop is traveling across the 2D plane, 
+    // force the 3D globe texture to dynamically update mid-flight!
+    flagGlobeTextureUpdate();
+}
+
+// 🌟 DYNAMIC CARTOGRAPHY TRANSLATOR FOR GLOBE MODE SPINNING
+function rotateGlobeToTarget(targetCode) {
+    let targetX = 180;
+    const lookup = targetCode.toLowerCase();
+    
+    if (CONTINENT_VIEWBOXES[lookup]) {
+        const tokens = CONTINENT_VIEWBOXES[lookup].split(" ");
+        targetX = parseFloat(tokens[0]) + (parseFloat(tokens[2]) / 2);
+    } else if (countryBoundsCache[targetCode.toUpperCase()]) {
+        const box = countryBoundsCache[targetCode.toUpperCase()];
+        targetX = box.x + (box.width / 2);
+    } else {
+        const path = document.getElementById(targetCode.toUpperCase());
+        if (path) {
+            const box = path.getBBox();
+            targetX = box.x + (box.width / 2);
+        }
+    }
+    
+    // Translate 2D SVG X (0 to 360) directly into 3D Radial Rotation Y bounds
+    const lonPercent = targetX / 360;
+    const targetRadY = Math.PI * 1.5 + (lonPercent * Math.PI * 2);
+    
+    // Smoothly ease the globe mesh rotation to look directly at the battle/claim sector
+    if (globeContext.mesh) {
+        gsap.to(globeContext.mesh.rotation, { y: targetRadY, duration: 1.2, ease: "power2.out" });
+    }
+}
 
 /**
- * Boots up the 3D Three.js scene overlay and projects the map mesh onto a sphere.
+ * Re-rasterizes the live, running SVG map layer on request and maps it into the WebGL runtime
  */
+function updateGlobeTextureFromLiveSVG() {
+    const flatMap = document.getElementById("map");
+    if (!flatMap || !globeContext.isActive || !globeContext.texture) return;
+
+    // Temporarily ensure visibility to make serialization pristine
+    const oldVisibility = flatMap.style.visibility;
+    flatMap.style.visibility = "visible";
+
+    const svgString = new XMLSerializer().serializeToString(flatMap);
+    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const URL = window.URL || window.webkitURL || window;
+    const blobURL = URL.createObjectURL(svgBlob);
+
+    flatMap.style.visibility = oldVisibility;
+
+    const img = new Image();
+    img.src = blobURL;
+    img.onload = function() {
+        if (globeContext.texture) {
+            globeContext.texture.image = img;
+            globeContext.texture.needsUpdate = true;
+        }
+        URL.revokeObjectURL(blobURL);
+    };
+}
+
 function displayTacticalGlobeMode() {
     if (globeContext.isActive) return;
     globeContext.isActive = true;
 
     log("🔭 3D ENGINE IGNITION: Projecting theater coordinates onto planetary sphere...", "succ");
 
-    // 1. Create a full-screen blocking layout container for Three.js canvas
     const globeContainer = document.createElement("div");
     globeContainer.id = "three-globe-viewport";
     globeContainer.style.cssText = `
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: ; z-index: 9999; display: flex;
+        z-index: 9999; display: flex;
         justify-content: center; align-items: center;
-        animation: fadeIn 0.5s ease-out forwards;
+        pointer-events: none; /* Keeps click mechanics working for streaming overlay layers */
     `;
     document.body.appendChild(globeContainer);
 
-    // 2. Locate baseline 2D UI layers so we can safely sample them
     const flatMap = document.getElementById("map");
     if (!flatMap) { log("Error: Base SVG map layer not found.", "err"); return; }
 
-    // 3. Rasterize your live SVG map structure into a high-res image texture
     const svgString = new XMLSerializer().serializeToString(flatMap);
     const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
     const URL = window.URL || window.webkitURL || window;
     const blobURL = URL.createObjectURL(svgBlob);
 
-    // Hide the baseline map *after* taking the operational serializer snapshot
-    flatMap.style.visibility = "hidden";
+    // 🌟 SYSTEM REFACTOR: Keep the SVG map DOM fully active, rendering, and processing loops,
+    // but opacity-shunted so it processes layout calculations while invisible to viewers.
+    flatMap.style.opacity = "0.001";
 
     const textureImage = new Image();
     textureImage.src = blobURL;
 
     textureImage.onload = function() {
-        // Initialize Three.js Core Components
         const width = window.innerWidth;
         const height = window.innerHeight;
 
@@ -1487,44 +1531,40 @@ function displayTacticalGlobeMode() {
         globeContext.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         globeContainer.appendChild(globeContext.renderer.domElement);
 
-        // Map raster image to an official ThreeJS texture wrapper
         const globeTexture = new THREE.Texture(textureImage);
         globeContext.texture = globeTexture;
-        
-        // Force critical GPU compilation sync step to prevent immediate black screens
         globeTexture.needsUpdate = true;
 
-        // Build the physical sphere geometry and map the texture material onto it
-        // (Radius: 90, Segments: 64 to keep render loops fast on human stream hardware)
         const geometry = new THREE.SphereGeometry(90, 64, 64);
         const material = new THREE.MeshBasicMaterial({
             map: globeTexture,
             transparent: true,
-            side: THREE.DoubleSide // Fixes surface culling and coordinate mirroring issues
+            side: THREE.DoubleSide
         });
 
         globeContext.mesh = new THREE.Mesh(geometry, material);
-        
-        // Tilt the globe axis slightly (like earth's 23.5 degree axial tilt) for stream composition
         globeContext.mesh.rotation.z = 0.41; 
-        // Spin the sphere around to face central focal points initially
         globeContext.mesh.rotation.y = Math.PI * 1.5; 
 
         globeContext.scene.add(globeContext.mesh);
 
-        // 4. Run the Core Frame Render Animation Loop
         function animateGlobe() {
             if (!globeContext.isActive) return;
             globeContext.animationId = requestAnimationFrame(animateGlobe);
 
-            // Continuously drift the globe horizontally to simulate satellite surveillance tracking
-            globeContext.mesh.rotation.y += 0.0025;
+            // Dynamically ingest running 2D animation streams into the WebGL engine
+            if (globeContext.isTextureDirty) {
+                updateGlobeTextureFromLiveSVG();
+                globeContext.isTextureDirty = false;
+            }
+
+            // Continuous background orbit simulation
+            globeContext.mesh.rotation.y += 0.0015;
 
             globeContext.renderer.render(globeContext.scene, globeContext.camera);
         }
         animateGlobe();
 
-        // Gracefully clean up binary stream context allocation thresholds
         setTimeout(() => {
             URL.revokeObjectURL(blobURL);
         }, 1000);
@@ -1535,26 +1575,20 @@ function displayTacticalGlobeMode() {
     };
 }
 
-/**
- * Terminates the WebGL rendering context and returns gracefully to standard 2D map views.
- */
 function terminateGlobeMode() {
     if (!globeContext.isActive) return;
     globeContext.isActive = false;
 
     log("🔭 3D ENGINE SHUTDOWN: Restoring 2D flat tactical coordinates.");
 
-    // Clean up animation loops to prevent memory leaks
     if (globeContext.animationId) cancelAnimationFrame(globeContext.animationId);
 
     const globeContainer = document.getElementById("three-globe-viewport");
     if (globeContainer) globeContainer.remove();
 
-    // Bring back 2D operational graphics
     const flatMap = document.getElementById("map");
-    if (flatMap) flatMap.style.visibility = "visible";
+    if (flatMap) flatMap.style.opacity = "1"; // Restore visible flat viewport cleanly
 
-    // Garbage collect properties
     if (globeContext.renderer) globeContext.renderer.dispose();
     globeContext.renderer = null;
     globeContext.scene = null;
@@ -1562,10 +1596,8 @@ function terminateGlobeMode() {
     globeContext.mesh = null;
     globeContext.texture = null;
 
-    // Force re-draw execution metrics to make sure colors are pristine
     updateMapColors();
 }
-
 
 function processCommand(user, cmd, args) {
     cmd = cmd.toLowerCase();
