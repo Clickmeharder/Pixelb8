@@ -21,7 +21,7 @@
             display: flex; flex-direction: column;
         }
 
-        /* Startup Interactive Screen Overlay */
+        /* Enhanced Boot Screen Overlay */
         #boot-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(12, 12, 20, 0.98); z-index: 5000;
@@ -34,6 +34,22 @@
             max-width: 450px; width: 100%; text-align: center;
             background: #000; padding: 25px; border: 1px solid var(--neon-blue);
             box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+        }
+
+        .search-container {
+            margin: 15px 0 5px 0;
+            display: flex;
+            gap: 4px;
+        }
+
+        #search-input {
+            flex: 1;
+            background: #111; color: #fff; border: 1px solid #444;
+            padding: 10px; font-family: inherit; font-size: 0.85rem;
+        }
+
+        #search-input:focus {
+            border-color: var(--neon-blue); outline: none;
         }
 
         #hud {
@@ -76,21 +92,13 @@
         }
         .btn:disabled { color: #444; border-color: #444; background: none; cursor: not-allowed; }
 
-        #build-btn {
-            border-color: var(--neon-magenta); color: var(--neon-magenta);
-            background: rgba(255, 0, 255, 0.05);
-        }
+        #build-btn { border-color: var(--neon-magenta); color: var(--neon-magenta); background: rgba(255, 0, 255, 0.05); }
         #build-btn:active:not(:disabled) { background: var(--neon-magenta); color: var(--dark-bg); }
 
-        #claim-btn {
-            border-color: var(--neon-green); color: var(--neon-green);
-            background: rgba(0, 255, 102, 0.05);
-        }
+        #claim-btn { border-color: var(--neon-green); color: var(--neon-green); background: rgba(0, 255, 102, 0.05); }
         #claim-btn:active:not(:disabled) { background: var(--neon-green); color: var(--dark-bg); }
 
-        .action-container {
-            display: flex; gap: 6px;
-        }
+        .action-container { display: flex; gap: 6px; }
 
         .sim-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
@@ -111,13 +119,22 @@
         <div class="boot-modal">
             <h2 style="color: var(--neon-blue); margin-top: 0; letter-spacing: 2px;">AETHER NETWORK BOOT</h2>
             <p style="font-size: 0.85rem; color: #aaa; text-align: left; line-height: 1.4;">
-                Select node initialization coordinates to mount network assets. Real hardware GPS or custom sandbox coords accepted.
+                Initialize network coordinates. Search for any global city/country location, or target your device's live hardware antenna.
             </p>
+            
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Enter City, Country, or Address...">
+                <button class="btn" style="margin-top:0; width:auto; padding: 0 15px;" id="search-go-btn" onclick="searchGlobalLocation()">Search</button>
+            </div>
+            <div id="search-status" style="font-size:0.75rem; color:var(--neon-magenta); min-height:15px; margin-bottom:10px; text-align:left;"></div>
+
             <button class="btn" onclick="initPositionMode('gps')">📡 USE LIVE GPS LOCATION</button>
-            <div style="margin: 15px 0; color: #555; font-size: 0.75rem;">— OR ENTER CUSTOM COORDS —</div>
-            <input type="text" id="boot-lat" value="53.5461" style="background:#111; color:#fff; border:1px solid #444; padding:8px; width:43%; font-family:inherit; text-align:center;">
-            <input type="text" id="boot-lon" value="-113.4938" style="background:#111; color:#fff; border:1px solid #444; padding:8px; width:43%; font-family:inherit; text-align:center; margin-left:4px;">
-            <button class="btn" style="border-color: var(--neon-magenta); color: var(--neon-magenta);" onclick="initPositionMode('custom')">🛠️ BOOT AT CUSTOM COORDINATES</button>
+            <div style="margin: 12px 0 8px 0; color: #555; font-size: 0.75rem;">— OR USE FALLBACK COORDINATES —</div>
+            <div style="display:flex; gap:4px; justify-content:center;">
+                <input type="text" id="boot-lat" value="53.5461" style="background:#111; color:#fff; border:1px solid #444; padding:8px; width:45%; font-family:inherit; text-align:center; font-size:0.8rem;">
+                <input type="text" id="boot-lon" value="-113.4938" style="background:#111; color:#fff; border:1px solid #444; padding:8px; width:45%; font-family:inherit; text-align:center; font-size:0.8rem;">
+            </div>
+            <button class="btn" style="border-color: #666; color: #aaa;" onclick="initPositionMode('custom')">BOOT AT MANUAL COORDS</button>
         </div>
     </div>
 
@@ -158,9 +175,9 @@
             interactionRadiusMeters: 35,
             generationTriggerDistanceMeters: 150,
             minBuildProximityMeters: 500, 
-            centerBuildCostFrags: 1000,    // Updated center deployment cost
-            gridPurchaseCostFrags: 300,   // Cost to buy an extra datagrid matrix layer at a center
-            chunkSquareRadiusDegrees: 0.0005 // Dimensions of home sector squares on map
+            centerBuildCostFrags: 1000,    
+            gridPurchaseCostFrags: 300,   
+            chunkSquareRadiusDegrees: 0.0005 
         };
 
         let state = {
@@ -169,10 +186,10 @@
             lastGenLat: 0,
             lastGenLon: 0,
             score: 0,
-            dataGridsCount: 1, // Start with exactly 1 usable data grid asset
+            dataGridsCount: 1, 
             isSimulating: true,
             entities: [], 
-            claimedChunks: [], // Holds geometry bounds data for owned quadrants
+            claimedChunks: [], 
             nearestActiveTarget: null
         };
 
@@ -211,6 +228,50 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
+        // --- NEW CHUNKING SEARCH RESOLVER (GEOCODER) ---
+        function searchGlobalLocation() {
+            const query = document.getElementById('search-input').value.trim();
+            const statusBox = document.getElementById('search-status');
+            const searchBtn = document.getElementById('search-go-btn');
+            
+            if (!query) {
+                statusBox.textContent = "Error: Input required.";
+                return;
+            }
+
+            statusBox.style.color = "var(--neon-blue)";
+            statusBox.textContent = "Resolving satellite matrix vectors...";
+            searchBtn.disabled = true;
+
+            // Fetch open-source location coordinate lookups from OpenStreetMap
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        state.playerLat = parseFloat(data[0].lat);
+                        state.playerLon = parseFloat(data[0].lon);
+                        state.isSimulating = true; // Use sandbox movement at targeted address
+                        
+                        statusBox.style.color = "var(--neon-green)";
+                        statusBox.textContent = "Target locked! Initializing engine...";
+                        
+                        setTimeout(() => {
+                            completeBootPipeline();
+                        }, 800);
+                    } else {
+                        statusBox.style.color = "var(--neon-magenta)";
+                        statusBox.textContent = "Coordinates not found. Try variations.";
+                        searchBtn.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    statusBox.style.color = "var(--neon-magenta)";
+                    statusBox.textContent = "Network relay failure. Try fallback methods.";
+                    searchBtn.disabled = false;
+                    console.error(err);
+                });
+        }
+
         // --- POSITION SYSTEM SELECTION ENTRY ---
         function initPositionMode(mode) {
             if (mode === 'custom') {
@@ -240,6 +301,11 @@
         function completeBootPipeline() {
             document.getElementById('boot-overlay').style.display = 'none';
             map.setView([state.playerLat, state.playerLon], 17);
+            
+            // Wipe out old data records if initializing dynamically a second time
+            state.entities.forEach(e => map.removeLayer(e.markerObj));
+            state.entities = [];
+            
             appendProceduralNodes(state.playerLat, state.playerLon);
             syncGameplayState();
             
@@ -258,7 +324,6 @@
                 const targetLat = originLat + latOffset;
                 const targetLon = originLon + lonOffset;
 
-                // Ensure nodes don't spawn inside already claimed home chunks
                 if (isLocationClaimed(targetLat, targetLon)) continue;
 
                 const marker = L.circleMarker([targetLat, targetLon], {
@@ -294,7 +359,6 @@
             document.getElementById('grids-display').textContent = state.dataGridsCount;
             document.getElementById('score-display').textContent = state.score;
 
-            // Handle map updates
             const distanceFromLastGen = map.distance(currentPosition, [state.lastGenLat, state.lastGenLon]);
             if (distanceFromLastGen > CONFIG.generationTriggerDistanceMeters) {
                 appendProceduralNodes(state.playerLat, state.playerLon);
@@ -317,7 +381,6 @@
                 }
             });
 
-            // Target Interaction Handler Button Contexts
             const actionBtn = document.getElementById('action-btn');
             state.nearestActiveTarget = targetRef;
 
@@ -341,7 +404,6 @@
                 document.getElementById('status-display').textContent = targetRef ? `Tracking Target (${Math.round(closestDist)}m)` : "Scanning relays...";
             }
 
-            // --- DEPLOY CENTER CONTROLS ---
             const buildBtn = document.getElementById('build-btn');
             if (nearestCentreDist < CONFIG.minBuildProximityMeters) {
                 buildBtn.disabled = true;
@@ -354,7 +416,6 @@
                 buildBtn.textContent = "Deploy Hub";
             }
 
-            // --- CLAIM MATRIX REGION CONTROLS ---
             const claimBtn = document.getElementById('claim-btn');
             const currentPositionIsAlreadyClaimed = isLocationClaimed(state.playerLat, state.playerLon);
 
@@ -381,7 +442,6 @@
                 state.score += 100;
                 sysLog("Harvested Data Cache. +100 Fragments.");
             } else if (target.type === 'centre') {
-                // Inside an Aether Centre: Use fragments to purchase more Land Data Grids
                 if (state.score >= CONFIG.gridPurchaseCostFrags) {
                     state.score -= CONFIG.gridPurchaseCostFrags;
                     state.dataGridsCount += 1;
@@ -394,7 +454,6 @@
             syncGameplayState();
         });
 
-        // Claim Territory Pipeline
         document.getElementById('claim-btn').addEventListener('click', () => {
             if (state.dataGridsCount < 1 || isLocationClaimed(state.playerLat, state.playerLon)) return;
 
@@ -406,29 +465,19 @@
             const bLonMax = state.playerLon + CONFIG.chunkSquareRadiusDegrees;
             const bounds = [[bLatMin, bLonMin], [bLatMax, bLonMax]];
 
-            // Draw a permanent boundary line sector on map grid layout
             const gridSquareOverlay = L.rectangle(bounds, {
-                color: varStyle('--neon-green'),
-                weight: 2,
-                fillColor: varStyle('--neon-green'),
-                fillOpacity: 0.15
+                color: varStyle('--neon-green'), weight: 2, fillColor: varStyle('--neon-green'), fillOpacity: 0.15
             }).addTo(map).bindPopup("<b>Secure Home Chunk Territory</b>");
 
-            state.claimedChunks.push({
-                bounds: bounds,
-                overlayObj: gridSquareOverlay
-            });
-
+            state.claimedChunks.push({ bounds: bounds, overlayObj: gridSquareOverlay });
             sysLog("Flashed hardware sectors. Home Chunk claimed!");
             syncGameplayState();
         });
 
-        // Deploy Hub Pipeline
         document.getElementById('build-btn').addEventListener('click', () => {
             if (state.score < CONFIG.centerBuildCostFrags) return;
 
             state.score -= CONFIG.centerBuildCostFrags;
-
             const targetLat = state.playerLat;
             const targetLon = state.playerLon;
 
@@ -437,9 +486,7 @@
             }).addTo(map).bindPopup(`<b>Aether Centre Outpost</b><br>Trade core available.`);
 
             state.entities.push({
-                id: 'custom_centre_' + Date.now(),
-                type: 'centre',
-                name: `Aether Centre: Player Hub`,
+                id: 'custom_centre_' + Date.now(), type: 'centre', name: `Aether Centre: Player Hub`,
                 lat: targetLat, lon: targetLon, active: true, markerObj: marker
             });
 
