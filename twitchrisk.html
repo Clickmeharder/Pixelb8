@@ -443,7 +443,58 @@ function changeMapProjection(target) {
     }
     updateMapColors();
 }
+This maps out the exact tracking infrastructure you are working with. Your existing setup operates on a baseline scale coordinate grid of 360 × 180 (standard equirectangular map projection bounds).
 
+Because your layout reads straight from an element with id="map", we can synchronize the interpolation engine perfectly without breaking your continent views or hardcoded aspect ratio metrics.
+
+Here is the customized interpolateMapFocus function tailored directly to use your existing global state objects and layout variables (currentViewBoxDims):
+
+🛠️ The Tailored Tracking Engine
+JavaScript
+/**
+ * Smoothly interpolates the SVG map viewbox toward a shifting visual center point.
+ * Integrates directly with your global 360x180 scale properties and tracking flags.
+ * @param {number} targetX - Dynamic center X coordinate of the traveling unit
+ * @param {number} targetY - Dynamic center Y coordinate of the traveling unit
+ */
+function interpolateMapFocus(targetX, targetY) {
+    const map = document.getElementById("map");
+    if (!map) return;
+
+    // 1. Establish the current bounding context frame dimensions
+    // Uses your existing width/height variables or falls back to a tight cinematic tracking scale.
+    const currentW = currentViewBoxDims.w || 45;
+    const currentH = currentViewBoxDims.h || 30;
+
+    // 2. Parse the map's current active viewbox string to extract where the camera is *right now*
+    const currentViewBoxStr = map.getAttribute("viewBox");
+    let currentX = targetX;
+    let currentY = targetY;
+
+    if (currentViewBoxStr) {
+        const tokens = currentViewBoxStr.split(" ");
+        if (tokens.length === 4) {
+            // Find the current top-left min coordinates, then calculate the active center
+            const curMinX = parseFloat(tokens[0]);
+            const curMinY = parseFloat(tokens[1]);
+            currentX = curMinX + currentW / 2;
+            currentY = curMinY + currentH / 2;
+        }
+    }
+
+    // 3. Apply Linear Interpolation (LERP) for an ultra-smooth cinematic slide
+    // 0.12 means the camera covers 12% of the distance to the target icon per animation frame
+    const easing = 0.12;
+    const nextCenterX = currentX + (targetX - currentX) * easing;
+    const nextCenterY = currentY + (targetY - currentY) * easing;
+
+    // 4. Transform back to top-left SVG ViewBox min-coordinates
+    const nextMinX = nextCenterX - currentW / 2;
+    const nextMinY = nextCenterY - currentH / 2;
+
+    // 5. Update the DOM explicitly without re-triggering full projection cycles
+    map.setAttribute("viewBox", `${nextMinX} ${nextMinY} ${currentW} ${currentH}`);
+}
 function updateLeaderboard() {
     const lbc = document.getElementById("lb-content");
     if(!lbc) return;
