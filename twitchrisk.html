@@ -1,7 +1,7 @@
 <!-- to do: 
 
 The_Hairy_Hobo: wish it would default back to world view 5 secs after your move is over 
-
+Stock_GPT: oooh, a protection phase would probably work also... so say we couldn't attack claimed land or be attacked for the first so many server ticks from joining... ?
 
 -->
 
@@ -216,16 +216,31 @@ let doomsdayTriggered = false;
 const COSTS = { mine: 150, school: 250, city: 400, base: 500 };
 let claimLimit = 1;
 
-const CONTINENT_VIEWBOXES = {
-    world: "0 0 360 180",
-    na: "10 10 110 80",
-    sa: "70 80 70 90",
-    eu: "160 15 65 50",
-    af: "155 35 80 105", 
-    as: "200 10 130 90",
-    oc: "290 95 65 65"
+const MAP_THEATERS = {
+    earth: {
+        viewBoxes: {
+            world: "0 0 360 180",
+            na: "10 10 110 80",
+            sa: "70 80 70 90",
+            eu: "160 15 65 50",
+            af: "155 35 80 105", 
+            as: "200 10 130 90",
+            oc: "290 95 65 65"
+        },
+        defaultWidth: 360,
+        defaultHeight: 180
+    },
+    moon: {
+        viewBoxes: {
+            world: "0 0 360 180",
+            mare: "40 30 100 80",      // Example Moon region: Mare Imbrium / Serenitatis
+            highlands: "180 60 120 90" // Example Moon region: Lunar Highlands
+        },
+        defaultWidth: 360,
+        defaultHeight: 180
+    }
 };
-
+let currentTheater = "earth";
 let currentViewMode = "world"; 
 let currentZoomTarget = "world"; 
 let currentViewBoxDims = { w: 360, h: 180 }; 
@@ -1316,37 +1331,67 @@ function flagGlobeTextureUpdate() {
         globeContext.isTextureDirty = true;
     }
 }
+function switchTheaterMode(theater) {
+    const targetTheater = theater.toLowerCase();
+    if (!MAP_THEATERS[targetTheater]) {
+        log(`Theater system failure: Unknown sector "${theater}".`, "err");
+        return;
+    }
+
+    // Shut down 3D globe before mutating raw DOM nodes
+    if (globeContext.isActive) {
+        terminateGlobeMode();
+    }
+
+    currentTheater = targetTheater;
+    
+    // Toggle DOM Element visibilities
+    const earthDOM = document.getElementById("map-earth");
+    const moonDOM = document.getElementById("map-moon");
+    
+    if (currentTheater === "earth") {
+        if (earthDOM) earthDOM.style.display = "block";
+        if (moonDOM) moonDOM.style.display = "none";
+    } else {
+        if (earthDOM) earthDOM.style.display = "none";
+        if (moonDOM) moonDOM.style.display = "block";
+    }
+
+    log(`🚀 THEATER SWITCH: Tactical overhead transitioned to ${currentTheater.toUpperCase()} operations.`, "succ");
+    
+    // Force reset camera projection back to the new world view bounds
+    changeMapProjection("world");
+}
 
 function changeMapProjection(target) {
-    const map = document.getElementById("map");
+    // Dynamically query the DOM element based on the running theater context
+    const map = document.getElementById(`map-${currentTheater}`);
     const indicator = document.getElementById("view-indicator");
     
+    if (!map) return;
+
     if (projectionTimeoutId) {
         clearTimeout(projectionTimeoutId);
         projectionTimeoutId = null;
     }
     
-    // 🌟 GLOBE BRIDGE: If someone targets a specific zone or country while on 3D globe,
-    // spin the globe to that location instead of forcing a 2D camera pop.
     if (globeContext.isActive && target.toLowerCase() !== "world") {
         rotateGlobeToTarget(target);
     }
     
-    if (CONTINENT_VIEWBOXES[target.toLowerCase()]) {
+    const theaterConfig = MAP_THEATERS[currentTheater];
+
+    if (theaterConfig.viewBoxes[target.toLowerCase()]) {
         currentViewMode = target.toLowerCase() === "world" ? "world" : "continent";
         currentZoomTarget = target.toLowerCase();
         
-        const tokens = CONTINENT_VIEWBOXES[target.toLowerCase()].split(" ");
+        const tokens = theaterConfig.viewBoxes[target.toLowerCase()].split(" ");
         currentViewBoxDims.w = parseFloat(tokens[2]);
         currentViewBoxDims.h = parseFloat(tokens[3]);
         
-        map.setAttribute("viewBox", CONTINENT_VIEWBOXES[target.toLowerCase()]);
-        indicator.textContent = `Theater View: ${target}`;
+        map.setAttribute("viewBox", theaterConfig.viewBoxes[target.toLowerCase()]);
+        indicator.textContent = `${currentTheater.toUpperCase()} View: ${target.toUpperCase()}`;
         log(`🔭 Camera adjustment: Tracking target region [${target.toUpperCase()}].`);
-        
-        document.getElementById("box-country-title").textContent = "Sector: Global View";
-        document.getElementById("box-ruler").textContent = "N/A";
-        document.getElementById("box-ruler").style.color = "#51e1ed";
     } else {
         const path = document.getElementById(target.toUpperCase());
         if (path) {
@@ -1374,28 +1419,26 @@ function changeMapProjection(target) {
                 currentViewBoxDims.h = vh;
                 
                 map.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
-                indicator.textContent = `Country Zoom: ${target.toUpperCase()}`;
-                log(`🔍 Tactical Overlay Focused on [${target.toUpperCase()}]. Space margins adjusted.`);
+                indicator.textContent = `Sector Zoom: ${target.toUpperCase()}`;
+                log(`🔍 Tactical Overlay Focused on [${target.toUpperCase()}].`);
             } catch(e) {
-                log("Target profile found but hardware rendering layout rejected bounding canvas calculation.", "err");
+                log("Target profile found but hardware layout rejected bounding canvas calculation.", "err");
             }
         } else {
-            log(`Invalid show vector target context: "${target}". Use: world, na, sa, eu, as, af, oc or valid ISO Code.`, "err");
+            log(`Invalid vector target context: "${target}".`, "err");
             return;
         }
     }
     
     updateMapColors();
-    flagGlobeTextureUpdate(); // 🌟 Sync changes out to WebGL context
+    flagGlobeTextureUpdate();
 
     if (target.toLowerCase() !== "world") {
         projectionTimeoutId = setTimeout(() => {
-            log("⏳ Idle Cooldown: Returning tactical tracking camera to global world view.");
             changeMapProjection("world");
         }, 30000);
     }
 }
-
 function interpolateMapFocus(targetX, targetY) {
     const map = document.getElementById("map");
     if (!map) return;
@@ -1491,19 +1534,19 @@ function displayTacticalGlobeMode() {
     if (globeContext.isActive) return;
     globeContext.isActive = true;
 
-    log("🔭 3D ENGINE IGNITION: Projecting theater coordinates onto planetary sphere...", "succ");
+    log(`🔭 3D ENGINE IGNITION: Projecting ${currentTheater.toUpperCase()} coordinates onto sphere...`, "succ");
 
     const globeContainer = document.createElement("div");
     globeContainer.id = "three-globe-viewport";
     globeContainer.style.cssText = `
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 9999; display: flex;
-        justify-content: center; align-items: center;
-        pointer-events: none; /* Keeps click mechanics working for streaming overlay layers */
+        z-index: 9999; display: flex; justify-content: center; align-items: center;
+        pointer-events: none;
     `;
     document.body.appendChild(globeContainer);
 
-    const flatMap = document.getElementById("map");
+    // 🌟 Grab the contextually active map element
+    const flatMap = document.getElementById(`map-${currentTheater}`);
     if (!flatMap) { log("Error: Base SVG map layer not found.", "err"); return; }
 
     const svgString = new XMLSerializer().serializeToString(flatMap);
@@ -1511,8 +1554,6 @@ function displayTacticalGlobeMode() {
     const URL = window.URL || window.webkitURL || window;
     const blobURL = URL.createObjectURL(svgBlob);
 
-    // 🌟 SYSTEM REFACTOR: Keep the SVG map DOM fully active, rendering, and processing loops,
-    // but opacity-shunted so it processes layout calculations while invisible to viewers.
     flatMap.style.opacity = "0.001";
 
     const textureImage = new Image();
@@ -1543,7 +1584,7 @@ function displayTacticalGlobeMode() {
         });
 
         globeContext.mesh = new THREE.Mesh(geometry, material);
-        globeContext.mesh.rotation.z = 0.41; 
+        globeContext.mesh.rotation.z = (currentTheater === "earth") ? 0.41 : 0.02; // Moon axis is nearly straight up down (1.5 deg tilt)
         globeContext.mesh.rotation.y = Math.PI * 1.5; 
 
         globeContext.scene.add(globeContext.mesh);
@@ -1552,29 +1593,68 @@ function displayTacticalGlobeMode() {
             if (!globeContext.isActive) return;
             globeContext.animationId = requestAnimationFrame(animateGlobe);
 
-            // Dynamically ingest running 2D animation streams into the WebGL engine
             if (globeContext.isTextureDirty) {
                 updateGlobeTextureFromLiveSVG();
                 globeContext.isTextureDirty = false;
             }
 
-            // Continuous background orbit simulation
             globeContext.mesh.rotation.y += 0.0015;
-
             globeContext.renderer.render(globeContext.scene, globeContext.camera);
         }
         animateGlobe();
 
-        setTimeout(() => {
-            URL.revokeObjectURL(blobURL);
-        }, 1000);
-    };
-
-    textureImage.onerror = function() {
-        log("Critical 3D Canvas Error: Image texture mapping failed to compile.", "err");
+        setTimeout(() => { URL.revokeObjectURL(blobURL); }, 1000);
     };
 }
 
+function updateGlobeTextureFromLiveSVG() {
+    const flatMap = document.getElementById(`map-${currentTheater}`);
+    if (!flatMap || !globeContext.isActive || !globeContext.texture) return;
+
+    const oldVisibility = flatMap.style.visibility;
+    flatMap.style.visibility = "visible";
+
+    const svgString = new XMLSerializer().serializeToString(flatMap);
+    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const URL = window.URL || window.webkitURL || window;
+    const blobURL = URL.createObjectURL(svgBlob);
+
+    flatMap.style.visibility = oldVisibility;
+
+    const img = new Image();
+    img.src = blobURL;
+    img.onload = function() {
+        if (globeContext.texture) {
+            globeContext.texture.image = img;
+            globeContext.texture.needsUpdate = true;
+        }
+        URL.revokeObjectURL(blobURL);
+    };
+}
+function updateGlobeTextureFromLiveSVG() {
+    const flatMap = document.getElementById(`map-${currentTheater}`);
+    if (!flatMap || !globeContext.isActive || !globeContext.texture) return;
+
+    const oldVisibility = flatMap.style.visibility;
+    flatMap.style.visibility = "visible";
+
+    const svgString = new XMLSerializer().serializeToString(flatMap);
+    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const URL = window.URL || window.webkitURL || window;
+    const blobURL = URL.createObjectURL(svgBlob);
+
+    flatMap.style.visibility = oldVisibility;
+
+    const img = new Image();
+    img.src = blobURL;
+    img.onload = function() {
+        if (globeContext.texture) {
+            globeContext.texture.image = img;
+            globeContext.texture.needsUpdate = true;
+        }
+        URL.revokeObjectURL(blobURL);
+    };
+}
 function terminateGlobeMode() {
     if (!globeContext.isActive) return;
     globeContext.isActive = false;
@@ -1601,7 +1681,15 @@ function terminateGlobeMode() {
 
 function processCommand(user, cmd, args) {
     cmd = cmd.toLowerCase();
-    
+    if (command === "earth") {
+        switchTheaterMode("earth");
+        return;
+    }
+
+    if ( command === "moon") {
+        switchTheaterMode("moon");
+        return;
+    }
     if (cmd === "show") {
         if (!args[0]) { log("Provide visibility arguments. E.g., !show world, !show na, !show USA", "err"); return; }
         changeMapProjection(args[0]);
