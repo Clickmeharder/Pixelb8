@@ -82,7 +82,7 @@
 
         .action-container { display: flex; gap: 6px; }
 
-        /* Dynamic Blueprint Selection Sub-Panel */
+        /* Restructuring Blueprint Selection Terminal */
         #blueprint-terminal {
             display: none;
             background: #000;
@@ -118,8 +118,9 @@
             background: rgba(255, 0, 255, 0.1);
         }
         .blueprint-card.disabled {
-            opacity: 0.4;
+            opacity: 0.3;
             cursor: not-allowed;
+            border-color: #222;
         }
         .blueprint-name {
             font-weight: bold;
@@ -129,6 +130,8 @@
         .blueprint-desc {
             color: #aaa;
             margin-bottom: 6px;
+            font-size: 0.55rem;
+            line-height: 1.2;
         }
         .blueprint-cost {
             color: var(--neon-green);
@@ -171,11 +174,14 @@
     <div id="hud">
         <div class="hud-row">
             <span>COORDS: <span id="gps-display" class="accent">Scanning...</span></span>
-            <span>DATA FRAGMENTS: <span id="score-display" class="score">450</span></span>
+            <span>DATA FRAGMENTS: <span id="score-display" class="score">2500</span></span>
         </div>
         <div class="hud-row">
             <span>PROPERTIES OWNED: <span id="grids-display" class="magenta">0</span></span>
-            <span>STRUCTURE MATRIX: <span id="status-display">Syncing...</span></span>
+            <span>PASSIVE ENGINE: <span id="yield-display" style="color:var(--neon-green); font-weight:bold;">+0 F/s</span></span>
+        </div>
+        <div class="hud-row" style="margin-top: 2px; font-size: 0.7rem; border-top: 1px dashed #222; padding-top: 2px;">
+            <span id="status-display">Syncing Engine Core...</span>
         </div>
     </div>
 
@@ -199,7 +205,9 @@
         <div class="sim-grid">
             <div></div><button class="btn" onclick="moveSim(0.00015, 0)">▲ N</button><div></div>
             <button class="btn" onclick="moveSim(0, -0.00018)">◀ W</button>
-            <span style="font-size:0.6rem; text-align:center; align-self:center; color:#555;">SCAN</span>
+            
+            <button class="btn" id="harvest-btn" onclick="manualDataHarvest()" style="font-size:0.55rem; padding:2px; border-color:var(--neon-green); color:var(--neon-green);">HARVEST</button>
+            
             <button class="btn" onclick="moveSim(0, 0.00018)">E ▶</button>
             <div></div><button class="btn" onclick="moveSim(-0.00015, 0)">▼ S</button><div></div>
         </div>
@@ -215,16 +223,16 @@
         let state = {
             playerLat: 53.5444, 
             playerLon: -113.4909,
-            score: 2500, // Boosted starter chips to test out complex building purchases
+            score: 2500, 
             isSimulating: true,
             realProperties: {}, 
             activePropertyId: null,
             isFetchingData: false,
-            // Core Upgrades Taxonomy
+            passiveGenerationRate: 0, // Computed Fragments aggregated per second
             blueprints: {
-                forge: { name: "Quantum Data Forge", costMult: 1.5, desc: "Yields dynamic Fragment production algorithms" },
-                vault: { name: "Secure Grid-Vault", costMult: 2.0, desc: "Expands local memory wallet constraints" },
-                uplink: { name: "Aether Uplink Beacon", costMult: 2.5, desc: "Projects structural interface buffer range" }
+                forge: { name: "Quantum Data Forge", costMult: 1.5, desc: "Yields dynamic background processing loops (+15 F/s + size bonus)" },
+                vault: { name: "Secure Grid-Vault", costMult: 2.0, desc: "Reinforces structural encryption layers (+40% base asset worth)" },
+                uplink: { name: "Aether Uplink Beacon", costMult: 2.5, desc: "Broadcasts continuous localized telemetry streams" }
             }
         };
 
@@ -359,7 +367,7 @@
             syncGameplayState();
         }
 
-        // --- LIVE OPENSTREETMAP OVERPASS API DATA EXTRACTION ---
+        // --- LIVE OPENSTREETMAP DATA EXTRACTION (WEB3-COMPATIBLE LAYOUT) ---
         function fetchRealWorldBuildings(lat, lon) {
             if (state.isFetchingData) return;
             state.isFetchingData = true;
@@ -410,11 +418,23 @@
                             color: varStyle('--neon-blue'), weight: 1.5, fillColor: '#00f0ff', fillOpacity: 0.1
                         }).addTo(map);
 
+                        // FUTURE-PROOF: Produce a 1:1 deterministic Unique Token ID payload representation
+                        const dynamicTokenHash = btoa(`aether-osm-${el.type}-${id}`).replace(/=/g, "");
+
                         state.realProperties[id] = {
-                            id: id, name: name, type: displayType, address: streetAddress, layer: polygonLayer,
-                            center: polygonLayer.getBounds().getCenter(), mintCost: finalMintCost,
-                            area: Math.round(structuralAreaMeters), levels: structuralBuildingLevels,
-                            owned: false, owner: "System Corp", upgradedStructure: null
+                            id: id,
+                            blockchainTokenId: dynamicTokenHash, // Validated immutable string reference key
+                            name: name,
+                            type: displayType,
+                            address: streetAddress,
+                            layer: polygonLayer,
+                            center: polygonLayer.getBounds().getCenter(),
+                            mintCost: finalMintCost,
+                            area: Math.round(structuralAreaMeters),
+                            levels: structuralBuildingLevels,
+                            owned: false,
+                            owner: "System Corp",
+                            upgradedStructure: null
                         };
 
                         updatePropertyMetadataMarkup(state.realProperties[id]);
@@ -422,6 +442,7 @@
                     });
 
                     sysLog(`Mapped ${parsedCount} real structural plots from satellite database.`);
+                    calculatePassiveYieldTotals();
                     syncGameplayState();
                 })
                 .catch(() => {
@@ -440,15 +461,64 @@
             }
 
             prop.layer.bindPopup(`
-                <div style="color:#fff; font-family:monospace; background:#000; padding:6px; min-width:180px;">
-                    <b style="color:var(--neon-blue); font-size:0.9rem;">${prop.name}</b><br>
-                    <span style="color:#aaa; font-size:0.75rem;">Type: ${prop.type} (${prop.levels} Flr)</span><br>
-                    <span style="color:#777; font-size:0.7rem;">Footprint Size: ${prop.area} m²</span><br>
-                    <span style="color:#777; font-size:0.7rem;">Loc: ${prop.address}</span><hr style="border-color:#222;">
+                <div style="color:#fff; font-family:monospace; background:#000; padding:6px; min-width:180px; font-size: 0.75rem;">
+                    <b style="color:var(--neon-blue); font-size:0.85rem;">${prop.name}</b><br>
+                    <span style="color:#aaa;">Type: ${prop.type} (${prop.levels} Flr)</span><br>
+                    <span style="color:#777;">Footprint Size: ${prop.area} m²</span><br>
+                    <span style="color:#555; font-size:0.6rem; display:block; word-break:break-all;">HASH: ${prop.blockchainTokenId}</span><hr style="border-color:#222;">
                     <div style="margin-bottom: 6px; font-weight: bold; color: var(--neon-green)">VALUE: ${prop.mintCost} FRAGS</div>
                     ${statusText}
                 </div>
             `);
+        }
+
+        // --- REVENUE CALCULATION LOGIC LOOP ---
+        function calculatePassiveYieldTotals() {
+            let dynamicSum = 0;
+            Object.values(state.realProperties).forEach(prop => {
+                if (prop.owned && prop.upgradedStructure === state.blueprints.forge.name) {
+                    // Baseline production rate + adaptive footprint volume modifier bonus
+                    dynamicSum += 15 + Math.floor(prop.area / 100);
+                }
+            });
+            state.passiveGenerationRate = dynamicSum;
+            document.getElementById('yield-display').textContent = `+${state.passiveGenerationRate} F/s`;
+        }
+
+        // Native Native Browser Interval Pulse Engine
+        setInterval(() => {
+            if (state.passiveGenerationRate > 0) {
+                state.score += state.passiveGenerationRate;
+                document.getElementById('score-display').textContent = state.score;
+                
+                // Update UI triggers reactively if buttons depend on affordable variables
+                const currentActiveProp = state.realProperties[state.activePropertyId];
+                if (currentActiveProp) {
+                    const claimBtn = document.getElementById('claim-btn');
+                    if (!currentActiveProp.owned) {
+                        claimBtn.disabled = state.score < currentActiveProp.mintCost;
+                    }
+                }
+            }
+        }, 1000);
+
+        // Manual Data Uplink Siphon Event Method
+        function manualDataHarvest() {
+            const harvestYield = Math.floor(Math.random() * 11) + 5; // 5 - 15 fragments packet
+            state.score += harvestYield;
+            document.getElementById('score-display').textContent = state.score;
+
+            const btn = document.getElementById('harvest-btn');
+            const cachedText = btn.textContent;
+            btn.textContent = `+${harvestYield}F`;
+            btn.disabled = true;
+
+            sysLog(`MANUAL HARVEST: Collected ${harvestYield} ambient data packets from current array cluster.`);
+
+            setTimeout(() => {
+                btn.textContent = cachedText;
+                btn.disabled = false;
+            }, 400);
         }
 
         // --- CORE APPLICATION ENGINE LOOPS ---
@@ -504,7 +574,6 @@
                     } else {
                         buildBtn.disabled = false;
                         buildBtn.textContent = "SELECT UPGRADE MOD";
-                        // Keep terminal visibility state managed by the explicit toggle click
                     }
                 } else {
                     claimBtn.disabled = true;
@@ -526,7 +595,6 @@
             }
         }
 
-        // --- INTERACTIVE BLUEPRINT COMPONENT MATRIX GENERATOR ---
         function renderBlueprintSelectionMatrix(prop) {
             const container = document.getElementById('blueprint-options-container');
             container.innerHTML = '';
@@ -562,6 +630,12 @@
             if (state.score >= cost) {
                 state.score -= cost;
                 prop.upgradedStructure = blueprint.name;
+                
+                // If the user upgrades a building, update its baseline valuation calculation to mimic Web3 traits
+                if (blueprintKey === 'vault') {
+                    prop.mintCost = Math.round(prop.mintCost * 1.4);
+                }
+
                 prop.layer.setStyle({
                     color: varStyle('--neon-magenta'),
                     fillColor: varStyle('--neon-magenta'),
@@ -569,8 +643,10 @@
                 });
                 
                 updatePropertyMetadataMarkup(prop);
-                sysLog(`SUCCESS: Installed [${blueprint.name}] on asset registry ID: ${propertyId}.`);
+                sysLog(`SUCCESS: Installed [${blueprint.name}] on asset token registry.`);
                 document.getElementById('blueprint-terminal').style.display = "none";
+                
+                calculatePassiveYieldTotals();
                 syncGameplayState();
             } else {
                 sysLog(`ERROR: Insufficient data fragments.`);
@@ -595,7 +671,7 @@
                 prop.owner = "Player";
                 prop.layer.setStyle({ color: varStyle('--neon-green'), fillColor: varStyle('--neon-green'), fillOpacity: 0.35 });
                 updatePropertyMetadataMarkup(prop);
-                sysLog(`ACQUIRED ASSET: Successfully secured registry for: ${prop.name}!`);
+                sysLog(`ACQUIRED ASSET: Token registry secured for hash: ${prop.blockchainTokenId.substring(0,12)}...`);
                 syncGameplayState();
             }
         });
@@ -611,7 +687,7 @@
                 } else {
                     renderBlueprintSelectionMatrix(prop);
                     terminal.style.display = "block";
-                    sysLog("Restructuring operational systems... Select terminal Core module.");
+                    sysLog("Opening blueprint interface terminal...");
                 }
             }
         });
