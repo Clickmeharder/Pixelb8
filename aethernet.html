@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aether Net: Open World</title>
+    <title>Aether Net: Infinite World</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -33,7 +33,6 @@
         .accent { color: var(--neon-blue); font-weight: bold; }
         .score { color: var(--neon-green); font-weight: bold; }
 
-        /* Map Container filling viewport */
         #map { 
             flex: 1; 
             width: 100%; 
@@ -82,7 +81,7 @@
         </div>
         <div class="hud-row">
             <span>STATUS: <span id="status-display">Scanning Sector...</span></span>
-            <span>ZONE: <span id="zone-display" class="accent">Street Scan Active</span></span>
+            <span>ZONE: <span id="zone-display" class="accent">Infinite Grid Engaged</span></span>
         </div>
     </div>
 
@@ -90,36 +89,29 @@
 
     <div id="controls">
         <button id="action-btn" class="btn" disabled>Target Out Of Range</button>
-        <div id="terminal-log">System boot complete. Connecting to satellites...</div>
+        <div id="terminal-log">System boot complete. Deploying infinite sensory map...</div>
         
         <div class="sim-grid">
-            <div></div><button class="btn" onclick="moveSim(0.00010, 0)">▲ N</button><div></div>
-            <button class="btn" onclick="moveSim(0, -0.00012)">◀ W</button>
+            <div></div><button class="btn" onclick="moveSim(0.00020, 0)">▲ N</button><div></div>
+            <button class="btn" onclick="moveSim(0, -0.00025)">◀ W</button>
             <span style="font-size:0.6rem; text-align:center; align-self:center; color:#555;">D-PAD</span>
-            <button class="btn" onclick="moveSim(0, 0.00012)">E ▶</button>
-            <div></div><button class="btn" onclick="moveSim(-0.00010, 0)">▼ S</button><div></div>
+            <button class="btn" onclick="moveSim(0, 0.00025)">E ▶</button>
+            <div></div><button class="btn" onclick="moveSim(-0.00020, 0)">▼ S</button><div></div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- CONFIGURATION & STATE ---
         const CONFIG = {
-            interactionRadiusMeters: 35, // Expanded radius slightly for easier hitboxes
-            centerSpawns: [
-                { latOffset: 0.0005, lonOffset: 0.0003, name: "Aether Centre: Prime Core" },
-                { latOffset: -0.0006, lonOffset: -0.0005, name: "Aether Centre: Nexus Grid" }
-            ],
-            nodeOffsets: [
-                { latOffset: 0.0002, lonOffset: -0.0002, name: "Data Cache Alpha" },
-                { latOffset: -0.0002, lonOffset: 0.0003, name: "Data Cache Beta" },
-                { latOffset: 0.0003, lonOffset: 0.0004, name: "Data Cache Gamma" }
-            ]
+            interactionRadiusMeters: 35,
+            generationTriggerDistanceMeters: 150 // Distance you can walk before a fresh wave spawns
         };
 
         let state = {
-            playerLat: 53.5461, // Default fallback coordinates
+            playerLat: 53.5461, 
             playerLon: -113.4938,
+            lastGenLat: 0,
+            lastGenLon: 0,
             score: 0,
             isSimulating: true,
             entities: [], 
@@ -127,21 +119,18 @@
         };
 
         // --- INITIALIZE MAP CONTAINER ---
-        // Instantiated at zoom level 18 (closer to ground level, mirroring Pokemon GO scale)
+        // FIX: Lowered minZoom to 12 so you can pinch/scroll to zoom out significantly further
         const map = L.map('map', {
             zoomControl: false,
             attributionControl: false,
-            minZoom: 16,
+            minZoom: 12, 
             maxZoom: 19
-        }).setView([state.playerLat, state.playerLon], 18);
+        }).setView([state.playerLat, state.playerLon], 17);
 
-        // FIX: Using high-contrast CartoDB Dark Matter with all labels included.
-        // Stripped the CSS filter class so that roads, text, and alleyways render sharply.
         const baseTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             maxZoom: 19
         }).addTo(map);
 
-        // Draw interaction radar perimeter circle around player position
         const safetyProximityRing = L.circle([state.playerLat, state.playerLon], {
             radius: CONFIG.interactionRadiusMeters,
             color: varStyle('--neon-green'),
@@ -151,16 +140,10 @@
             fillOpacity: 0.05
         }).addTo(map);
 
-        // Custom Player Position Pin
         const playerMarker = L.circleMarker([state.playerLat, state.playerLon], {
-            radius: 9, 
-            color: '#ffffff', 
-            fillColor: varStyle('--neon-blue'), 
-            fillOpacity: 1, 
-            weight: 3
+            radius: 9, color: '#ffffff', fillColor: varStyle('--neon-blue'), fillOpacity: 1, weight: 3
         }).addTo(map);
 
-        // CSS Variable Helper function for Leaflet configurations
         function varStyle(name) {
             return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
         }
@@ -171,52 +154,42 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        // --- ENTITY GRID GENERATION ---
-        function seedWorldSector(originLat, originLon) {
-            state.entities.forEach(e => map.removeLayer(e.markerObj));
-            state.entities = [];
+        // --- DYNAMIC INFRASTRUCTURE GENERATION ---
+        // Generates nodes procedurally spread out right in front of your path trajectory
+        function appendProceduralNodes(originLat, originLon) {
+            sysLog("Instantiating nearby network nodes...");
+            
+            // Random distribution offsets around your new localized location coordinates
+            for (let i = 0; i < 5; i++) {
+                const latOffset = (Math.random() - 0.5) * 0.0015;
+                const lonOffset = (Math.random() - 0.5) * 0.0015;
+                const isCentre = Math.random() > 0.75; // 25% chance to create an Aether Centre hub
 
-            // 1. Static Mega Centres
-            CONFIG.centerSpawns.forEach((c, idx) => {
-                const targetLat = originLat + c.latOffset;
-                const targetLon = originLon + c.lonOffset;
-                
-                const marker = L.circleMarker([targetLat, targetLon], {
-                    radius: 15, 
-                    color: varStyle('--neon-magenta'), 
-                    fillColor: varStyle('--neon-magenta'), 
-                    fillOpacity: 0.3, 
-                    weight: 3
-                }).addTo(map);
-                
-                marker.bindPopup(`<b>${c.name}</b><br>Secure Base Center.`);
+                const targetLat = originLat + latOffset;
+                const targetLon = originLon + lonOffset;
 
-                state.entities.push({
-                    id: 'centre_' + idx, type: 'centre', name: c.name,
-                    lat: targetLat, lon: targetLon, active: true, markerObj: marker
-                });
-            });
-
-            // 2. Minor Cache Nodes
-            CONFIG.nodeOffsets.forEach((n, idx) => {
-                const targetLat = originLat + n.latOffset;
-                const targetLon = originLon + n.lonOffset;
-
-                const marker = L.circleMarker([targetLat, targetLon], {
-                    radius: 7, 
-                    color: varStyle('--neon-blue'), 
-                    fillColor: '#ffffff', 
-                    fillOpacity: 0.6, 
-                    weight: 2
-                }).addTo(map);
+                let marker;
+                if (isCentre) {
+                    marker = L.circleMarker([targetLat, targetLon], {
+                        radius: 14, color: varStyle('--neon-magenta'), fillColor: varStyle('--neon-magenta'), fillOpacity: 0.3, weight: 3
+                    }).addTo(map).bindPopup(`<b>Aether Centre [Sector Hub]</b>`);
+                } else {
+                    marker = L.circleMarker([targetLat, targetLon], {
+                        radius: 6, color: varStyle('--neon-blue'), fillColor: '#ffffff', fillOpacity: 0.6, weight: 2
+                    }).addTo(map);
+                }
 
                 state.entities.push({
-                    id: 'node_' + idx, type: 'node', name: n.name,
+                    id: 'ent_' + Date.now() + '_' + i,
+                    type: isCentre ? 'centre' : 'node',
+                    name: isCentre ? `Aether Centre Substation` : `Data Cache [Secure Point]`,
                     lat: targetLat, lon: targetLon, active: true, markerObj: marker
                 });
-            });
+            }
 
-            sysLog("Map objects loaded at current sector scale.");
+            // Save our current baseline location 
+            state.lastGenLat = originLat;
+            state.lastGenLon = originLon;
         }
 
         // --- ENGINE TICK ---
@@ -224,9 +197,18 @@
             const currentPosition = [state.playerLat, state.playerLon];
             playerMarker.setLatLng(currentPosition);
             safetyProximityRing.setLatLng(currentPosition);
+            
+            // Keep view anchored tracking user position
             map.panTo(currentPosition);
 
             document.getElementById('gps-display').textContent = `${state.playerLat.toFixed(5)}, ${state.playerLon.toFixed(5)}`;
+
+            // CRITICAL CHECK: Did the player walk past the active grid boundary threshold?
+            const distanceFromLastGen = map.distance(currentPosition, [state.lastGenLat, state.lastGenLon]);
+            if (distanceFromLastGen > CONFIG.generationTriggerDistanceMeters) {
+                sysLog("Entering unexplored airspace. Syncing database map overlays...");
+                appendProceduralNodes(state.playerLat, state.playerLon);
+            }
 
             let closestDist = Infinity;
             let targetRef = null;
@@ -297,8 +279,8 @@
                         state.playerLat = pos.coords.latitude;
                         state.playerLon = pos.coords.longitude;
                         
-                        if(state.entities.length === 0) {
-                            seedWorldSector(state.playerLat, state.playerLon);
+                        if(state.lastGenLat === 0) {
+                            appendProceduralNodes(state.playerLat, state.playerLon);
                         }
                         syncGameplayState();
                     }
@@ -309,7 +291,7 @@
         }
 
         // Boot Pipeline
-        seedWorldSector(state.playerLat, state.playerLon);
+        appendProceduralNodes(state.playerLat, state.playerLon);
         syncGameplayState();
         runLiveHardwareTracking();
     </script>
