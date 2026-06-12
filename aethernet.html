@@ -66,11 +66,12 @@
 
         #map { width: 100%; height: 100%; z-index: 1; background-color: #111; }
 
-        /* FIRST PERSON PROJECTION SCENERY MATRIX */
+        /* FIRST PERSON EYE-LEVEL PROJECTION MATRIX */
         #fpv-viewport {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 5; display: none; background: radial-gradient(circle at center, #141424 0%, #05050a 100%);
-            perspective: 400px; perspective-origin: 50% 60%;
+            perspective: 500px; 
+            perspective-origin: 50% calc(50% - 120px); /* Lifts horizon line up to fix ground-level look */
         }
 
         #fpv-world {
@@ -105,20 +106,36 @@
             box-shadow: inset 0 0 20px rgba(255, 0, 255, 0.15);
         }
 
+        /* VECTOR ROAD NETWORK EXTRUSIONS */
+        .road-3d {
+            position: absolute; transform-style: preserve-3d;
+            width: 1px; height: 1px; top: 50%; left: 50%;
+            pointer-events: none;
+        }
+
+        .road-segment {
+            position: absolute;
+            background: rgba(0, 240, 255, 0.01);
+            border-left: 14px double rgba(0, 240, 255, 0.25);
+            border-right: 14px double rgba(0, 240, 255, 0.25);
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.05);
+            transform-origin: top center;
+        }
+
         .fpv-ground {
             position: absolute; width: 4000px; height: 4000px;
             top: 50%; left: 50%; margin-left: -2000px; margin-top: -2000px;
             background-image: 
-                linear-gradient(rgba(0, 240, 255, 0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.08) 1px, transparent 1px);
-            background-size: 50px 50px; background-position: center;
-            transform: rotateX(90deg) translateZ(100px);
+                linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+            background-size: 60px 60px; background-position: center;
+            transform: rotateX(90deg) translateZ(0px);
         }
 
         .fpv-crosshair {
-            position: absolute; top: 60%; left: 50%;
-            width: 10px; height: 10px; transform: translate(-50%, -50%);
-            border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; z-index: 10;
+            position: absolute; top: calc(50% - 120px); left: 50%;
+            width: 12px; height: 12px; transform: translate(-50%, -50%);
+            border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; z-index: 10;
             pointer-events: none;
         }
 
@@ -220,6 +237,7 @@
         </div>
     </div>
 
+    <!-- ENCOUNTER INTERFACE MATRIX OVERLAY -->
     <div id="encounter-overlay">
         <div class="encounter-modal">
             <div class="encounter-header" id="enc-title">CRITICAL ENCOUNTER DETECTED</div>
@@ -253,11 +271,13 @@
     <div id="view-wrapper">
         <div id="map"></div>
         
+        <!-- FIRST PERSON PERSPECTIVE VIEW CANVAS -->
         <div id="fpv-viewport">
             <div class="fpv-crosshair"></div>
             <div id="fpv-world">
                 <div class="fpv-ground"></div>
-                </div>
+                <!-- Dynamic 3D plots and roads inject here -->
+            </div>
         </div>
     </div>
 
@@ -275,6 +295,7 @@
         
         <div id="terminal-log">System initialized. Awaiting satellite array connection...</div>
         
+        <!-- DYNAMIC CONTROL MATRIX FOR FPV ORIENTATION AND NAVIGATION -->
         <div class="sim-grid">
             <button class="btn" onclick="rotateCameraHeading(-15)">↺ L</button>
             <button class="btn" onclick="navigateStepRelative(1)">▲ FWD</button>
@@ -297,13 +318,13 @@
             queryRadiusMeters: 250,
             cooldownRadiusMeters: 150,
             sectorCooldownDurationMS: 60 * 60 * 1000,
-            spawnSectorRadiusThreshold: 150, // Minimum meter radius before spawning another batch of nodes
-            metersRequiredPerEncounterRoll: 25, // Distance paced gating to fix constant triggers
-            encounterTriggerChance: 0.04, // Lowered base chance per check block
+            spawnSectorRadiusThreshold: 150, 
+            metersRequiredPerEncounterRoll: 25, 
+            encounterTriggerChance: 0.04, 
             skipCostFragments: 150
         };
 
-        const HOME_ANCHOR = { lat: 40.7128, lon: -74.0060 }; // Boot vector inside NYC density core
+        const HOME_ANCHOR = { lat: 40.7128, lon: -74.0060 }; 
 
         const ENCOUNTER_TYPES = [
             { id: "rogue_subroutine", title: "⚠️ MALICIOUS DAEMON DETECTED", desc: "A fragmented firewall sub-routine is siphoning localized node telemetry. Eradicate its core signature immediately.", reward: 250 },
@@ -319,14 +340,15 @@
             score: 2500, 
             isSimulating: true,
             realProperties: {}, 
+            realRoads: {}, // Linear database storing vector highway strings
             activePropertyId: null,
             isFetchingData: false,
             passiveGenerationRate: 0, 
             mapDataNodes: {},
             activeNodeIdInRange: null,
             depletedSectors: [], 
-            spawnedSectors: [], // Tracks coordinate grids where loot nodes have populated
-            metersWalkedSinceLastRoll: 0, // Background odometer logic container
+            spawnedSectors: [], 
+            metersWalkedSinceLastRoll: 0, 
             blueprints: {
                 forge: { name: "Quantum Data Forge", costMult: 1.5, desc: "Yields dynamic background processing loops (+15 F/s + size bonus)" },
                 vault: { name: "Secure Grid-Vault", costMult: 2.0, desc: "Reinforces structural encryption layers (+40% base asset worth)" },
@@ -369,7 +391,7 @@
                 mapEl.style.display = 'none';
                 fpvEl.style.display = 'block';
                 toggleBtn.textContent = "MODE: 3D FIRST-PERSON";
-                sysLog("PERSPECTIVE LINK: Shifted matrix viewport to local 3D Extrusion Layer.");
+                sysLog("PERSPECTIVE LINK: Viewport adjusted to human eye-level matrix landscape.");
             } else {
                 state.viewMode = "2D";
                 mapEl.style.display = 'block';
@@ -386,7 +408,7 @@
             state.metersWalkedSinceLastRoll += distanceMeters;
             
             if (state.metersWalkedSinceLastRoll >= CONFIG.metersRequiredPerEncounterRoll) {
-                state.metersWalkedSinceLastRoll = 0; // Clear metric accumulator
+                state.metersWalkedSinceLastRoll = 0; 
                 
                 if (Math.random() < CONFIG.encounterTriggerChance) {
                     const randomSelection = ENCOUNTER_TYPES[Math.floor(Math.random() * ENCOUNTER_TYPES.length)];
@@ -458,12 +480,12 @@
 
         function navigateStepRelative(forwardDir, strafeDir = 0) {
             if (!state.isSimulating) {
-                sysLog("CONTROL BLOCK: Switch to Home Core or Manual simulation coordinates to unlock simulation movement.");
+                sysLog("CONTROL BLOCK: Handheld Satellite mode active. Telemetry driven directly by physical movement.");
                 return;
             }
 
             const stepFactor = 0.00015; 
-            const approxMetersMoved = 16.5; // Direct geographic equivalent mapping to coordinate scaling increments
+            const approxMetersMoved = 16.5; 
             const headingRad = (state.playerHeading * Math.PI) / 180;
             
             let deltaLat = 0;
@@ -529,16 +551,13 @@
             return Math.max(75, Math.min(12500, Math.round(finalCalculation)));
         }
 
-        // --- AMBIENT COLLECTIBLE SPAWN THROTTLING MATRIX ---
         function spawnAmbientGridLootNodes(centerLat, centerLon) {
-            // Measure if player's current position is too close to a previous spawn sector center
             const insideExistingSpawnZone = state.spawnedSectors.some(sector => {
                 return map.distance([centerLat, centerLon], [sector.lat, sector.lon]) < CONFIG.spawnSectorRadiusThreshold;
             });
 
-            if (insideExistingSpawnZone) return; // Silent abort to prevent fragment cluttering
+            if (insideExistingSpawnZone) return; 
 
-            // Core database entry logging current sector deployment coordinates
             state.spawnedSectors.push({ lat: centerLat, lon: centerLon });
 
             for (let i = 0; i < 3; i++) {
@@ -573,16 +592,59 @@
             if (state.viewMode !== "3D") return;
 
             const worldContainer = document.getElementById('fpv-world');
-            const structuralElements = worldContainer.querySelectorAll('.building-3d');
-            structuralElements.forEach(el => el.remove());
+            
+            // Clear current structures and pathways cleanly
+            worldContainer.querySelectorAll('.building-3d, .road-3d').forEach(el => el.remove());
 
-            worldContainer.style.transform = `rotateY(${-state.playerHeading}deg)`;
+            // Apply camera heading rotation combined with a permanent eye-level dropshift translation matrix
+            worldContainer.style.transform = `translateY(120px) rotateY(${-state.playerHeading}deg)`;
 
             const originLat = state.playerLat;
             const originLon = state.playerLon;
             const latToPixels = 111320 * 8; 
             const lonToPixels = 111320 * Math.cos(originLat * Math.PI / 180) * 8;
 
+            // 1. RENDER PERSPECTIVE HIGHWAY LANES
+            Object.values(state.realRoads).forEach(road => {
+                for(let i = 0; i < road.geometry.length - 1; i++) {
+                    const ptA = road.geometry[i];
+                    const ptB = road.geometry[i+1];
+
+                    // Project relative canvas points from baseline coordinates
+                    const az = (ptA.lat - originLat) * latToPixels;
+                    const ax = (ptA.lon - originLon) * lonToPixels;
+                    const bz = (ptB.lat - originLat) * latToPixels;
+                    const bx = (ptB.lon - originLon) * lonToPixels;
+
+                    if (Math.abs(ax) > 1200 || Math.abs(az) > 1200) continue;
+
+                    // Calculate straight lane lengths and absolute planar vector angle
+                    const dx = bx - ax;
+                    const dz = bz - az;
+                    const length = Math.sqrt(dx * dx + dz * dz);
+                    if (length < 2) continue;
+
+                    const angleRad = Math.atan2(dx, dz);
+                    const angleDeg = angleRad * (180 / Math.PI);
+
+                    const roadWrapper = document.createElement('div');
+                    roadWrapper.className = 'road-3d';
+                    roadWrapper.style.transform = `translate3d(${ax}px, 0px, ${-az}px)`;
+
+                    const segment = document.createElement('div');
+                    segment.className = 'road-segment';
+                    segment.style.width = `45px`; // General structural width allowance for pathways
+                    segment.style.marginLeft = `-22.5px`;
+                    segment.style.height = `${length}px`;
+                    // Rotate and map flat across the X/Z floor grid matrix
+                    segment.style.transform = `rotateX(90deg) rotateZ(${angleDeg}deg)`;
+
+                    roadWrapper.appendChild(segment);
+                    worldContainer.appendChild(roadWrapper);
+                }
+            });
+
+            // 2. RENDER EXTRUDED 3D STRUCTURES
             Object.values(state.realProperties).forEach(prop => {
                 const dz = (prop.center.lat - originLat) * latToPixels;
                 const dx = (prop.center.lng - originLon) * lonToPixels;
@@ -661,7 +723,6 @@
                     state.isSimulating = false;
                     sysLog("GPS LINK ACQUIRED: System locked to active spatial vector.");
                     
-                    // Request device orientation permissions if using hardware sensors (iOS requirement)
                     if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === 'function') {
                         window.DeviceOrientationEvent.requestPermission().catch(() => {});
                     }
@@ -680,15 +741,18 @@
             
             Object.values(state.realProperties).forEach(p => map.removeLayer(p.layer));
             Object.values(state.mapDataNodes).forEach(n => map.removeLayer(n.layer));
+            Object.values(state.realRoads).forEach(r => map.removeLayer(r.layer));
+            
             state.realProperties = {};
             state.mapDataNodes = {};
+            state.realRoads = {};
             state.spawnedSectors = [];
 
             fetchRealWorldBuildings(state.playerLat, state.playerLon);
             syncGameplayState();
         }
 
-        // --- LIVE EXTRACTION PIPELINES ---
+        // --- LIVE OSM DATA PIPELINES WITH HIGHWAY MATCHING ---
         function fetchRealWorldBuildings(lat, lon) {
             if (state.isFetchingData) return;
             state.isFetchingData = true;
@@ -698,6 +762,7 @@
                 (
                   way["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
                   relation["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
+                  way["highway"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
                 );
                 out geom;
             `;
@@ -708,17 +773,35 @@
                 .then(data => {
                     state.isFetchingData = false;
                     
-                    // Throttled ambient drop node evaluator loop placement
                     spawnAmbientGridLootNodes(lat, lon);
 
-                    if (!data.elements || data.elements.length === 0) {
-                        return;
-                    }
+                    if (!data.elements || data.elements.length === 0) return;
 
                     const contextMatrix = analyzeRegionalDensityMatrix(data.elements);
 
                     data.elements.forEach(el => {
                         const id = el.id;
+
+                        // PROCESS HIGHWAY ROADS
+                        if (el.tags && el.tags.highway) {
+                            if (state.realRoads[id] || !el.geometry) return;
+
+                            const lineCoords = el.geometry.map(pt => [pt.lat, pt.lon]);
+                            
+                            // Map 2D representation onto the tactical display
+                            const roadPolyline = L.polyline(lineCoords, {
+                                color: 'rgba(0, 240, 255, 0.2)', weight: 4, dashArray: '4, 8', interactive: false
+                            }).addTo(map);
+
+                            state.realRoads[id] = {
+                                id: id,
+                                geometry: el.geometry, // Retain raw items for direct translation mapping loops
+                                layer: roadPolyline
+                            };
+                            return;
+                        }
+
+                        // PROCESS BUILDINGS
                         if (state.realProperties[id]) return; 
 
                         let latLngs = [];
@@ -794,7 +877,6 @@
                 document.getElementById('score-display').textContent = state.score;
             }
 
-            // Continuous background position synchronizer matrix for hardware gps coordinates
             if (!state.isSimulating && navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
                     const prevLat = state.playerLat;
@@ -804,7 +886,6 @@
                         state.playerLat = pos.coords.latitude;
                         state.playerLon = pos.coords.longitude;
                         
-                        // Approximate horizontal displacement tracking over background updates
                         const metersTraveled = map.distance([prevLat, prevLon], [state.playerLat, state.playerLon]);
                         if (metersTraveled > 1) {
                             trackOdometerAndRoll(metersTraveled);
@@ -816,10 +897,8 @@
             }
         }, 1000);
 
-        // Hardware orientation handler for tracking physical compass heading direction adjustments 
         window.addEventListener('deviceorientationabsolute', (event) => {
             if (!state.isSimulating && event.alpha !== null) {
-                // Adjust for standard coordinate inversion matrix mapping rules
                 state.playerHeading = Math.round(360 - event.alpha);
                 renderFirstPersonGraphicsLoop();
             }
