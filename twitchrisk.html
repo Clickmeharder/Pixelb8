@@ -222,7 +222,7 @@ const CONTINENT_VIEWBOXES = {
 let currentViewMode = "world"; 
 let currentZoomTarget = "world"; 
 let currentViewBoxDims = { w: 360, h: 180 }; 
-
+const gameStartTime = Date.now();
 // Pre-cached bounding boxes for proximity calculations to clean up country view clutter
 let countryBoundsCache = {};
 
@@ -1140,37 +1140,46 @@ const botNamesPool = ["Bot_Alpha", "Warlord_Xero", "General_Zod", "Garrison_AI",
  * Initializes the background thread checking loop for AI simulation.
  */
 function launchAISimulatorLoop() {
-    // Check for a potential action every 45 to 90 seconds to keep things very rare and realistic
+    // Check for a potential action every 45 to 90 seconds
     const randomInterval = Math.floor(Math.random() * (90000 - 45000)) + 45000;
     
     setTimeout(() => {
         triggerAIBackgroundAction();
-        launchAISimulatorLoop(); // Keep loop humming along
+        launchAISimulatorLoop(); 
     }, randomInterval);
 }
 
 /**
- * Orchestrates a localized bot choice, evaluating whether to manifest a new country or act with an old one.
+ * Orchestrates localized bot choices with exponential spawn decay for new entries.
  */
 function triggerAIBackgroundAction() {
-    // 1. Compile arrays of map targets based on ownership statuses
     const allTerritories = Object.keys(gameState.data);
     const unclaimed = allTerritories.filter(code => !gameState.data[code].owner);
     
-    // Find all active bot profiles currently holding properties
     const activeBots = [...new Set(allTerritories
         .map(code => gameState.data[code].owner)
         .filter(owner => owner && owner.startsWith("[BOT] ")))];
 
-    // 2. Decide Action Track: If unclaimed lands remain, very rarely claim one (30% chance)
-    if (unclaimed.length > 0 && (activeBots.length === 0 || Math.random() < 0.3)) {
+    // --- EXPONENTIAL DECAY CALCULATION ---
+    // Calculate elapsed time in minutes
+    const elapsedMinutes = (Date.now() - gameStartTime) / 60000; 
+    
+    // Half-life tuning: 18 minutes means spawn rates drop by half every 18 mins.
+    // At 0 mins: ~35% baseline spawn chance.
+    // At 30 mins: drops to ~11% chance.
+    // At 60 mins: drops to ~3% chance (once in a blue moon).
+    const baseSpawnChance = 0.35;
+    const dynamicSpawnChance = baseSpawnChance * Math.pow(0.5, elapsedMinutes / 18);
+
+    // 2. Decision Logic Tree
+    if (unclaimed.length > 0 && Math.random() < dynamicSpawnChance) {
+        // A brand new bot claims a spot on the map
         spawnNewBotCountry(unclaimed);
     } else if (activeBots.length > 0) {
-        // Otherwise, make an existing bot execute a dynamic action command (70% chance)
+        // Existing bots run their turns (attacks, upgrades) at a steady pace
         executeActiveBotTurn(activeBots, allTerritories);
     }
 }
-
 /**
  * Manifests a bot into an empty unclaimed slice of land
  */
