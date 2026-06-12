@@ -443,14 +443,7 @@ function changeMapProjection(target) {
     }
     updateMapColors();
 }
-This maps out the exact tracking infrastructure you are working with. Your existing setup operates on a baseline scale coordinate grid of 360 × 180 (standard equirectangular map projection bounds).
 
-Because your layout reads straight from an element with id="map", we can synchronize the interpolation engine perfectly without breaking your continent views or hardcoded aspect ratio metrics.
-
-Here is the customized interpolateMapFocus function tailored directly to use your existing global state objects and layout variables (currentViewBoxDims):
-
-🛠️ The Tailored Tracking Engine
-JavaScript
 /**
  * Smoothly interpolates the SVG map viewbox toward a shifting visual center point.
  * Integrates directly with your global 360x180 scale properties and tracking flags.
