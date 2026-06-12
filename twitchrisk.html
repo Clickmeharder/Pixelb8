@@ -1,3 +1,10 @@
+<!-- to do: 
+
+The_Hairy_Hobo: wish it would default back to world view 5 secs after your move is over 
+
+
+-->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -197,7 +204,7 @@
             <div id="log">🤖 System Initializing Master Engine...</div>
         </div>
     </div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const SAVE_KEY = "jaedraze_grand_strategy_geojson_v7";
 let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || { 
@@ -1383,6 +1390,139 @@ function executeActiveBotTurn(activeBots, allTerritories) {
     }
 }
 
+
+/**
+ * GLOBE SYSTEM
+ */
+
+// --- CENTRALIZED THREE.JS GLOBE STATE ---
+let globeContext = {
+    renderer: null,
+    scene: null,
+    camera: null,
+    mesh: null,
+    texture: null,
+    animationId: null,
+    isActive: false
+};
+
+/**
+ * Boots up the 3D Three.js scene overlay and projects the map mesh onto a sphere.
+ */
+function displayTacticalGlobeMode() {
+    if (globeContext.isActive) return;
+    globeContext.isActive = true;
+
+    log("🔭 3D ENGINE IGNITION: Projecting theater coordinates onto planetary sphere...", "succ");
+
+    // 1. Create a full-screen blocking layout container for Three.js canvas
+    const globeContainer = document.createElement("div");
+    globeContainer.id = "three-globe-viewport";
+    globeContainer.style.cssText = `
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: #060911; z-index: 9999; display: flex;
+        justify-content: center; align-items: center;
+        animation: fadeIn 0.5s ease-out forwards;
+    `;
+    document.body.appendChild(globeContainer);
+
+    // 2. Hide the baseline 2D UI layers so they don't clip through
+    const flatMap = document.getElementById("map");
+    if (flatMap) flatMap.style.visibility = "hidden";
+
+    // 3. Rasterize your live SVG map structure into a high-res image texture
+    const svgString = new XMLSerializer().serializeToString(flatMap);
+    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const URL = window.URL || window.webkitURL || window;
+    const blobURL = URL.createObjectURL(svgBlob);
+
+    const textureImage = new Image();
+    textureImage.src = blobURL;
+
+    textureImage.onload = function() {
+        // Initialize Three.js Core Components
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        globeContext.scene = new THREE.Scene();
+        globeContext.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        globeContext.camera.position.z = 280;
+
+        globeContext.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        globeContext.renderer.setSize(width, height);
+        globeContext.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        globeContainer.appendChild(globeContext.renderer.domElement);
+
+        // Map raster image to an official ThreeJS texture wrapper
+        globeContext.texture = new THREE.Texture(textureImage);
+        globeContext.texture.needsUpdate = true;
+
+        // Build the physical sphere geometry and map the texture material onto it
+        // (Radius: 90, Segments: 64 to keep render loops fast on human stream hardware)
+        const geometry = new THREE.SphereGeometry(90, 64, 64);
+        const material = new THREE.MeshBasicMaterial({
+            map: globeContext.texture,
+            transparent: true
+        });
+
+        globeContext.mesh = new THREE.Mesh(geometry, material);
+        
+        // Tilt the globe axis slightly (like earth's 23.5 degree axial tilt) for stream composition
+        globeContext.mesh.rotation.z = 0.41; 
+        // Spin the sphere around to face central focal points initially
+        globeContext.mesh.rotation.y = Math.PI * 1.5; 
+
+        globeContext.scene.add(globeContext.mesh);
+
+        // 4. Run the Core Frame Render Animation Loop
+        function animateGlobe() {
+            if (!globeContext.isActive) return;
+            globeContext.animationId = requestAnimationFrame(animateGlobe);
+
+            // Continuously drift the globe horizontally to simulate satellite surveillance tracking
+            globeContext.mesh.rotation.y += 0.0025;
+
+            globeContext.renderer.render(globeContext.scene, globeContext.camera);
+        }
+        animateGlobe();
+    };
+}
+
+/**
+ * Terminates the WebGL rendering context and returns gracefully to standard 2D map views.
+ */
+function terminateGlobeMode() {
+    if (!globeContext.isActive) return;
+    globeContext.isActive = false;
+
+    log("🔭 3D ENGINE SHUTDOWN: Restoring 2D flat tactical coordinates.");
+
+    // Clean up animation loops to prevent memory leaks
+    if (globeContext.animationId) cancelAnimationFrame(globeContext.animationId);
+
+    const globeContainer = document.getElementById("three-globe-viewport");
+    if (globeContainer) globeContainer.remove();
+
+    // Bring back 2D operational graphics
+    const flatMap = document.getElementById("map");
+    if (flatMap) flatMap.style.visibility = "visible";
+
+    // Garbage collect properties
+    if (globeContext.renderer) globeContext.renderer.dispose();
+    globeContext.renderer = null;
+    globeContext.scene = null;
+    globeContext.camera = null;
+    globeContext.mesh = null;
+    globeContext.texture = null;
+
+    // Force re-draw execution metrics to make sure colors are pristine
+    updateMapColors();
+}
+
+
+
+
+
 function processCommand(user, cmd, args) {
     cmd = cmd.toLowerCase();
     
@@ -1406,6 +1546,15 @@ function processCommand(user, cmd, args) {
         // Set lock state flag to secure system parameters
         doomsdayTriggered = true; 
         executeDoomsdayProtocol();
+    }
+	if (cmd === "globe" || cmd === "3d") {
+        displayTacticalGlobeMode();
+        return;
+    }
+
+    if (cmd === "flat" || cmd === "2d") {
+        terminateGlobeMode();
+        return;
     }
 	if (cmd === "join") {
         if (!gameState.players[user]) {
