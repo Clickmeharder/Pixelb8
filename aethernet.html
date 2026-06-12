@@ -191,7 +191,6 @@
         #encounter-arena { width: 100%; height: 180px; border: 1px dashed var(--neon-magenta); margin-top: 15px; position: relative; display: none; background: #05050a; overflow: hidden; }
         .target-anomaly { position: absolute; width: 30px; height: 30px; background: var(--neon-magenta); border: 2px solid #fff; cursor: pointer; box-shadow: 0 0 15px var(--neon-magenta); animation: pulse 0.8s infinite alternate; }
         @keyframes pulse { from { transform: scale(0.9); box-shadow: 0 0 10px var(--neon-magenta); } to { transform: scale(1.1); box-shadow: 0 0 20px var(--neon-magenta); } }
-        .stored-counter { background: rgba(255, 0, 255, 0.1); border: 1px solid var(--neon-magenta); padding: 2px 6px; font-size: 0.7rem; color: var(--neon-magenta); }
         
         .toggle-view-btn {
             background: rgba(255, 0, 255, 0.15); border: 1px solid var(--neon-magenta);
@@ -298,7 +297,9 @@
             queryRadiusMeters: 250,
             cooldownRadiusMeters: 150,
             sectorCooldownDurationMS: 60 * 60 * 1000,
-            encounterTriggerChance: 0.15,
+            spawnSectorRadiusThreshold: 150, // Minimum meter radius before spawning another batch of nodes
+            metersRequiredPerEncounterRoll: 25, // Distance paced gating to fix constant triggers
+            encounterTriggerChance: 0.04, // Lowered base chance per check block
             skipCostFragments: 150
         };
 
@@ -313,8 +314,8 @@
         let state = {
             playerLat: HOME_ANCHOR.lat, 
             playerLon: HOME_ANCHOR.lon,
-            playerHeading: 0, // Facing direction angle degrees (0 = North, 90 = East, etc.)
-            viewMode: "2D", // "2D" or "3D" FPV mode
+            playerHeading: 0, 
+            viewMode: "2D", 
             score: 2500, 
             isSimulating: true,
             realProperties: {}, 
@@ -324,6 +325,8 @@
             mapDataNodes: {},
             activeNodeIdInRange: null,
             depletedSectors: [], 
+            spawnedSectors: [], // Tracks coordinate grids where loot nodes have populated
+            metersWalkedSinceLastRoll: 0, // Background odometer logic container
             blueprints: {
                 forge: { name: "Quantum Data Forge", costMult: 1.5, desc: "Yields dynamic background processing loops (+15 F/s + size bonus)" },
                 vault: { name: "Secure Grid-Vault", costMult: 2.0, desc: "Reinforces structural encryption layers (+40% base asset worth)" },
@@ -378,11 +381,17 @@
             renderFirstPersonGraphicsLoop();
         }
 
-        // --- ENCOUNTER EVALUATION HANDLERS ---
-        function evaluateEncounterRoll() {
-            if (Math.random() < CONFIG.encounterTriggerChance) {
-                const randomSelection = ENCOUNTER_TYPES[Math.floor(Math.random() * ENCOUNTER_TYPES.length)];
-                triggerEncounterOverlay(randomSelection);
+        // --- DETAILED STEP-GAITED ENCOUNTER EVALUATION ---
+        function trackOdometerAndRoll(distanceMeters) {
+            state.metersWalkedSinceLastRoll += distanceMeters;
+            
+            if (state.metersWalkedSinceLastRoll >= CONFIG.metersRequiredPerEncounterRoll) {
+                state.metersWalkedSinceLastRoll = 0; // Clear metric accumulator
+                
+                if (Math.random() < CONFIG.encounterTriggerChance) {
+                    const randomSelection = ENCOUNTER_TYPES[Math.floor(Math.random() * ENCOUNTER_TYPES.length)];
+                    triggerEncounterOverlay(randomSelection);
+                }
             }
         }
 
@@ -444,7 +453,6 @@
         // --- RELATIVE FIRST-PERSON VECTOR NAVIGATION ---
         function rotateCameraHeading(degrees) {
             state.playerHeading = (state.playerHeading + degrees + 360) % 360;
-            sysLog(`HEADING ADJUSTED: Pivot completed. Direction: ${state.playerHeading}°`);
             renderFirstPersonGraphicsLoop();
         }
 
@@ -454,8 +462,8 @@
                 return;
             }
 
-            // Standard step factor scaling units
             const stepFactor = 0.00015; 
+            const approxMetersMoved = 16.5; // Direct geographic equivalent mapping to coordinate scaling increments
             const headingRad = (state.playerHeading * Math.PI) / 180;
             
             let deltaLat = 0;
@@ -466,7 +474,6 @@
                 deltaLon += Math.sin(headingRad) * forwardDir * stepFactor * 1.3;
             }
             if (strafeDir !== 0) {
-                // Strafe calculation adjusts heading by 90 degrees
                 const strafeRad = headingRad + (Math.PI / 2);
                 deltaLat += Math.cos(strafeRad) * strafeDir * stepFactor;
                 deltaLon += Math.sin(strafeRad) * strafeDir * stepFactor * 1.3;
@@ -475,7 +482,7 @@
             state.playerLat += deltaLat;
             state.playerLon += deltaLon;
 
-            evaluateEncounterRoll();
+            trackOdometerAndRoll(approxMetersMoved);
             fetchRealWorldBuildings(state.playerLat, state.playerLon);
             syncGameplayState();
         }
@@ -522,65 +529,84 @@
             return Math.max(75, Math.min(12500, Math.round(finalCalculation)));
         }
 
+        // --- AMBIENT COLLECTIBLE SPAWN THROTTLING MATRIX ---
+        function spawnAmbientGridLootNodes(centerLat, centerLon) {
+            // Measure if player's current position is too close to a previous spawn sector center
+            const insideExistingSpawnZone = state.spawnedSectors.some(sector => {
+                return map.distance([centerLat, centerLon], [sector.lat, sector.lon]) < CONFIG.spawnSectorRadiusThreshold;
+            });
+
+            if (insideExistingSpawnZone) return; // Silent abort to prevent fragment cluttering
+
+            // Core database entry logging current sector deployment coordinates
+            state.spawnedSectors.push({ lat: centerLat, lon: centerLon });
+
+            for (let i = 0; i < 3; i++) {
+                const randomOffsetId = `node-${Math.floor(Math.random() * 1000000)}`;
+                const angle = Math.random() * Math.PI * 2;
+                const radiusScalar = (Math.random() * 90 + 40) / 111320; 
+                
+                const nodeLat = centerLat + (radiusScalar * Math.sin(angle));
+                const nodeLon = centerLon + (radiusScalar * Math.cos(angle) * Math.cos(centerLat * Math.PI / 180));
+                const computedPayload = Math.floor(Math.random() * 31) + 20;
+
+                const nodeMarker = L.circleMarker([nodeLat, nodeLon], {
+                    radius: 6, color: varStyle('--neon-green'), fillColor: '#000', fillOpacity: 0.8, weight: 2
+                }).addTo(map);
+
+                nodeMarker.bindPopup(`
+                    <div style="color:#fff; font-family:monospace; background:#000; padding:4px; font-size:0.7rem;">
+                        <b style="color:var(--neon-green)">AMBIENT DATA STORAGE</b><br>
+                        <span>Scannable Yield: ${computedPayload} Fragments</span><br>
+                        <span style="color:#555;">Range Required: 40m</span>
+                    </div>
+                `);
+
+                state.mapDataNodes[randomOffsetId] = {
+                    id: randomOffsetId, lat: nodeLat, lon: nodeLon, payload: computedPayload, layer: nodeMarker
+                };
+            }
+        }
+
         // --- COMPREHENSIVE 3D CSS TRANSFORMS ENGINE ---
         function renderFirstPersonGraphicsLoop() {
             if (state.viewMode !== "3D") return;
 
             const worldContainer = document.getElementById('fpv-world');
-            
-            // Clean out older 3D structural boxes safely without removing the background ground plane grid
             const structuralElements = worldContainer.querySelectorAll('.building-3d');
             structuralElements.forEach(el => el.remove());
 
-            // Rotation transformation matches the negative camera vector to handle camera tracking orientation updates
             worldContainer.style.transform = `rotateY(${-state.playerHeading}deg)`;
 
             const originLat = state.playerLat;
             const originLon = state.playerLon;
-
-            // Approximate conversion from absolute lat/lon coordinate deltas into local scene CSS pixels
             const latToPixels = 111320 * 8; 
             const lonToPixels = 111320 * Math.cos(originLat * Math.PI / 180) * 8;
 
             Object.values(state.realProperties).forEach(prop => {
-                // Compute target relative center offset parameters from player anchor vector
                 const dz = (prop.center.lat - originLat) * latToPixels;
                 const dx = (prop.center.lng - originLon) * lonToPixels;
 
-                // Max rendering cutoff distance layer to ensure viewport performance limits
                 if (Math.abs(dx) > 1500 || Math.abs(dz) > 1500) return;
 
-                // Dimensions calculated from footprint square area
                 const sideLength = Math.max(30, Math.min(300, Math.sqrt(prop.area) * 4));
-                
-                // Height calculation: Logarithmic area baseline factored with structure's floor levels
                 const buildingHeight = Math.max(25, Math.log(prop.area) * prop.levels * 10);
 
-                // Create master parent container wrapper element for the target 3D bounding box
                 const b3d = document.createElement('div');
                 b3d.className = 'building-3d';
-                
-                // Position plot center into space coordinates (Z value inversion required inside perspective CSS projection)
                 b3d.style.transform = `translate3d(${dx}px, 0px, ${-dz}px)`;
 
-                // Assign accurate style visual tokens based on current plot ownership indices
                 let customFaceStyle = "";
                 if (prop.owned && prop.owner === "Player") {
                     customFaceStyle = prop.upgradedStructure ? "owned-upgraded" : "owned-player";
                 }
 
-                // Append multi-face procedural box structures
                 const half = sideLength / 2;
                 
-                // Front Wall
                 b3d.appendChild(createFaceElement(sideLength, buildingHeight, -half, -buildingHeight, -half, 0, 0, 0, customFaceStyle));
-                // Back Wall
                 b3d.appendChild(createFaceElement(sideLength, buildingHeight, -half, -buildingHeight, half, 0, 180, 0, customFaceStyle));
-                // Left Wall
                 b3d.appendChild(createFaceElement(sideLength, buildingHeight, -half, -buildingHeight, half, 0, -90, 0, customFaceStyle));
-                // Right Wall
                 b3d.appendChild(createFaceElement(sideLength, buildingHeight, half, -buildingHeight, -half, 0, 90, 0, customFaceStyle));
-                // Roof Cap
                 b3d.appendChild(createFaceElement(sideLength, sideLength, -half, -buildingHeight, half, 90, 0, 0, customFaceStyle));
 
                 worldContainer.appendChild(b3d);
@@ -650,6 +676,7 @@
             Object.values(state.mapDataNodes).forEach(n => map.removeLayer(n.layer));
             state.realProperties = {};
             state.mapDataNodes = {};
+            state.spawnedSectors = [];
 
             fetchRealWorldBuildings(state.playerLat, state.playerLon);
             syncGameplayState();
@@ -674,16 +701,16 @@
                 .then(res => res.json())
                 .then(data => {
                     state.isFetchingData = false;
+                    
+                    // Throttled ambient drop node evaluator loop placement
+                    spawnAmbientGridLootNodes(lat, lon);
 
                     if (!data.elements || data.elements.length === 0) {
-                        sysLog("No building models mapped in this coordinate zone.");
                         return;
                     }
 
                     const contextMatrix = analyzeRegionalDensityMatrix(data.elements);
-                    sysLog(`Sector Vector ID: [${contextMatrix.label}] (Scalar: x${contextMatrix.scalar})`);
 
-                    let parsedCount = 0;
                     data.elements.forEach(el => {
                         const id = el.id;
                         if (state.realProperties[id]) return; 
@@ -716,16 +743,13 @@
                         };
 
                         updatePropertyMetadataMarkup(state.realProperties[id]);
-                        parsedCount++;
                     });
 
-                    sysLog(`Mapped ${parsedCount} real structural plots from satellite database.`);
                     calculatePassiveYieldTotals();
                     syncGameplayState();
                 })
                 .catch(() => {
                     state.isFetchingData = false;
-                    sysLog("Datastream connection interrupted. Recalibrating...");
                 });
         }
 
@@ -767,8 +791,17 @@
 
         function manualDataHarvest() {
             if (!state.activeNodeIdInRange) return;
-            state.score += 50;
-            sysLog("HARVEST PROCESS: Successfully drew localized fragment data payload into system ledger (+50 F).");
+            
+            const selectedNode = state.mapDataNodes[state.activeNodeIdInRange];
+            const yieldValue = selectedNode.payload;
+            
+            state.score += yieldValue;
+            sysLog(`HARVEST PROCESS: Successfully drew +${yieldValue} fragment data into system ledger.`);
+            
+            map.removeLayer(selectedNode.layer);
+            delete state.mapDataNodes[state.activeNodeIdInRange];
+            state.activeNodeIdInRange = null;
+            
             syncGameplayState();
         }
 
@@ -787,6 +820,32 @@
             
             const totalOwned = Object.values(state.realProperties).filter(p => p.owner === "Player").length;
             document.getElementById('grids-display').textContent = totalOwned;
+
+            let closestNodeId = null;
+            let closestNodeDistance = Infinity;
+
+            Object.values(state.mapDataNodes).forEach(node => {
+                const dist = map.distance(currentPosition, [node.lat, node.lon]);
+                if (dist < closestNodeDistance) {
+                    closestNodeDistance = dist;
+                    closestNodeId = node.id;
+                }
+            });
+
+            const harvestBtn = document.getElementById('harvest-btn');
+            if (closestNodeId && closestNodeDistance <= CONFIG.interactionRadiusMeters) {
+                state.activeNodeIdInRange = closestNodeId;
+                harvestBtn.textContent = `SIPHON (${state.mapDataNodes[closestNodeId].payload}F)`;
+                harvestBtn.disabled = false;
+                harvestBtn.style.borderColor = "var(--neon-green)";
+                harvestBtn.style.color = "var(--neon-green)";
+            } else {
+                state.activeNodeIdInRange = null;
+                harvestBtn.textContent = "SCANNING";
+                harvestBtn.disabled = true;
+                harvestBtn.style.borderColor = "#444";
+                harvestBtn.style.color = "#444";
+            }
 
             let currentActiveProp = null;
             let closestDistance = Infinity;
@@ -829,7 +888,6 @@
                 blueprintTerminal.style.display = "none";
             }
 
-            // Fire 3D renderer step changes smoothly alongside player state updates
             renderFirstPersonGraphicsLoop();
         }
 
