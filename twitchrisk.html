@@ -607,9 +607,11 @@ function executeClaim(user, targetCode) {
     }
 
     if (!gameState.data[targetCode].owner) {
+        // 1. Zooms into the target country to show the claim action
         changeMapProjection(targetCode);
         
         setTimeout(() => {
+            // 2. Process all game data updates after 600ms
             gameState.data[targetCode].owner = user;
             gameState.data[targetCode].troops = 10; 
             log(`🗺️ ${user} successfully established sovereign rule over ${targetCode}.`, "succ");
@@ -617,12 +619,15 @@ function executeClaim(user, targetCode) {
             updateMapColors();
             updateLeaderboard();
             saveGame();
-        }, 600);
+
+            // 3. 🎯 RIGHT HERE: The claim is done, now safely reset the camera back to world view
+            changeMapProjection("world");
+
+        }, 600); // This matches your visual presentation timer perfectly
     } else { 
         log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err"); 
     }
 }
-
 
 
 function executeBuild(user, p, type, targetCode, quantity = 1) {
@@ -637,7 +642,6 @@ function executeBuild(user, p, type, targetCode, quantity = 1) {
 
     const unitCost = COSTS[type];
 
-    // Determine absolute build capacity based on available player treasury funds
     if (quantity === "max") {
         quantity = Math.floor(p.gold / unitCost);
         if (quantity <= 0) {
@@ -655,30 +659,27 @@ function executeBuild(user, p, type, targetCode, quantity = 1) {
         return; 
     }
 
-    // Phase 1: Camera Lock tracking focus
     changeMapProjection(targetCode);
 
-    // Phase 2: Fire Visual Animation Sequence instantly
     setTimeout(() => {
         p.gold -= totalCost;
         
-        // Custom multi-build splash engine runner
         triggerMultiBuildingStampAnimation(targetCode, type, quantity);
         log(`🏗️ ${user} commissioned ${quantity}x ${type.toUpperCase()} in ${targetCode} for 💰${totalCost} gold.`, "succ");
 
-        // Phase 3: Synchronized UI panel state integration
         setTimeout(() => {
             gameState.data[targetCode].buildings[type] += quantity;
             
             updateMapColors();
             updateLeaderboard();
             saveGame();
+
+            // 📷 Reset camera back out to the global view after buildings clear up
+            changeMapProjection("world");
         }, 500);
 
     }, 600);
 }
-
-
 
 function parseDeploymentTroops(amountInput, totalAvailable) {
     const input = String(amountInput).trim().toLowerCase();
@@ -982,6 +983,54 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                 displayContainer.appendChild(lossTextB);
             }
 
+			setTimeout(() => {
+				const slashWidthOffset = endTextSize * 0.8;
+
+            if (attLossesVal > 0) {
+                const slashA = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                slashA.setAttribute("x1", x2 - spacingX - slashWidthOffset);
+                slashA.setAttribute("y1", panelY + (endTextSize * 0.3));
+                slashA.setAttribute("x2", x2 - spacingX + slashWidthOffset);
+                slashA.setAttribute("y2", panelY - (endTextSize * 0.5));
+                slashA.setAttribute("stroke", "#ff1744");
+                slashA.setAttribute("stroke-width", `${strokeWidth * 1.5}`);
+                slashA.style.animation = "slashStrike 0.25s ease-out forwards";
+                displayContainer.appendChild(slashA);
+
+                const lossTextA = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                lossTextA.setAttribute("class", "combat-vfx-text");
+                lossTextA.setAttribute("x", x2 - spacingX);
+                lossTextA.setAttribute("y", panelY + endTextSize);
+                lossTextA.setAttribute("fill", "#ff1744");
+                lossTextA.setAttribute("font-size", `${endTextSize * 0.75}px`);
+                lossTextA.setAttribute("text-anchor", "middle");
+                lossTextA.textContent = `-${attLossesVal}`;
+                displayContainer.appendChild(lossTextA);
+            }
+
+            if (defLossesVal > 0) {
+                const slashB = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                slashB.setAttribute("x1", x2 + spacingX - slashWidthOffset);
+                slashB.setAttribute("y1", panelY + (endTextSize * 0.3));
+                slashB.setAttribute("x2", x2 + spacingX + slashWidthOffset);
+                slashB.setAttribute("y2", panelY - (endTextSize * 0.5));
+                slashB.setAttribute("stroke", "#ff1744");
+                slashB.setAttribute("stroke-width", `${strokeWidth * 1.5}`);
+                slashB.style.animation = "slashStrike 0.25s ease-out forwards";
+                displayContainer.appendChild(slashB);
+
+                const lossTextB = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                lossTextB.setAttribute("class", "combat-vfx-text");
+                lossTextB.setAttribute("x", x2 + spacingX);
+                lossTextB.setAttribute("y", panelY + endTextSize);
+                lossTextB.setAttribute("fill", "#ff1744");
+                lossTextB.setAttribute("font-size", `${endTextSize * 0.75}px`);
+                lossTextB.setAttribute("text-anchor", "middle");
+                lossTextB.textContent = `-${defLossesVal}`;
+                displayContainer.appendChild(lossTextB);
+            }
+
+            // This timer manages the post-combat stats showcase window
             setTimeout(() => {
                 battleGroup.style.transition = "opacity 0.6s ease";
                 battleGroup.style.opacity = "0";
@@ -992,6 +1041,9 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                     if (battleGroup && battleGroup.parentNode) {
                         battleGroup.remove();
                     }
+                    
+                    // 📷 The dust has settled, data is committed. Safely restore full world overview!
+                    changeMapProjection("world");
                 }, 600);
             }, 3500);
 
