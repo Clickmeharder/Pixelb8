@@ -1249,7 +1249,7 @@ const botNamesPool = ["Bot_Alpha", "Warlord_Xero", "General_Zod", "Garrison_AI",
  */
 function launchAISimulatorLoop() {
     // Check for a potential action every 45 to 90 seconds
-    const randomInterval = Math.floor(Math.random() * (90000 - 45000)) + 45000;
+    const randomInterval = Math.floor(Math.random() * (180000 - 90000)) + 90000;
     
     setTimeout(() => {
         triggerAIBackgroundAction();
@@ -1327,7 +1327,7 @@ function executeActiveBotTurn(activeBots, allTerritories) {
             const randomTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
             
             // Randomly use a percentage-based approach or absolute count deployment string
-            const choices = ["50%", "75%", "max"];
+            const choices = ["5%", "10%", "25%", "50%", "75%", "max"];
             const selectedPayload = choices[Math.floor(Math.random() * choices.length)];
 
             log(`🤖 AI Decision Context: ${chosenBot} targeting ${randomTarget} from ${sourceCountry}...`, "war");
