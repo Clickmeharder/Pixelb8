@@ -240,6 +240,26 @@ const MAP_THEATERS = {
         defaultHeight: 180
     }
 };
+// Add directly under your MAP_THEATERS configuration block
+const LUNAR_TERRITORIES = [
+    // --- THE MARIA (Lowland Plains) ---
+    { id: "IMBRIUM", name: "Mare Imbrium", type: "Polygon", coords: [[30,40], [90,30], [110,60], [70,95], [30,70]] },
+    { id: "SERENITATIS", name: "Mare Serenitatis", type: "Polygon", coords: [[110,60], [160,50], [175,85], [130,105], [105,85]] },
+    { id: "TRANQUILLITATIS", name: "Mare Tranquillitatis", type: "Polygon", coords: [[140,105], [195,95], [220,135], [165,145]] },
+    { id: "CRISIUM", name: "Mare Crisium", type: "Polygon", coords: [[210,70], [250,65], [265,95], [225,100]] },
+    { id: "FECUNDITATIS", name: "Mare Fecunditatis", type: "Polygon", coords: [[210,115], [265,110], [280,150], [225,160]] },
+    { id: "PROCELLARUM", name: "Oceanus Procellarum", type: "Polygon", coords: [[10,80], [60,95], [75,155], [15,160]] },
+    { id: "NUBIUM", name: "Mare Nubium", type: "Polygon", coords: [[65,115], [115,110], [125,145], [75,155]] },
+    
+    // --- THE HIGHLANDS & CRATERS (Sectors) ---
+    { id: "TYCHO", name: "Tycho Crater Sector", type: "Polygon", coords: [[110,145], [150,140], [160,175], [100,170]] },
+    { id: "COPERNICUS", name: "Copernicus Impact Zone", type: "Polygon", coords: [[70,85], [105,80], [115,110], [65,115]] },
+    { id: "KEPLER", name: "Kepler Ridge", type: "Polygon", coords: [[35,80], [70,85], [65,115], [30,110]] },
+    { id: "LANGRENUS", name: "Langrenus Borderlands", type: "Polygon", coords: [[255,95], [295,90], [310,125], [265,125]] },
+    { id: "PLATO", name: "Plato Highland Outpost", type: "Polygon", coords: [[70,15], [120,15], [110,40], [65,35]] },
+    { id: "ARISTARCHUS", name: "Aristarchus Plateau", type: "Polygon", coords: [[15,45], [55,40], [60,75], [10,75]] },
+    { id: "FRIGORIS", name: "Mare Frigoris North", type: "Polygon", coords: [[120,15], [260,20], [240,45], [110,40]] }
+];
 let currentTheater = "earth";
 let currentViewMode = "world"; 
 let currentZoomTarget = "world"; 
@@ -1338,45 +1358,32 @@ function switchTheaterMode(theater) {
         return;
     }
 
-    // Shut down 3D globe before mutating raw DOM nodes
     if (globeContext.isActive) {
         terminateGlobeMode();
     }
 
     currentTheater = targetTheater;
     
-    // Toggle DOM Element visibilities
-    const earthDOM = document.getElementById("map-earth");
-    const moonDOM = document.getElementById("map-moon");
+    log(`🚀 THEATER SWITCH: Rebuilding tactical projection grid for ${currentTheater.toUpperCase()} operations...`, "succ");
     
-    if (currentTheater === "earth") {
-        if (earthDOM) earthDOM.style.display = "block";
-        if (moonDOM) moonDOM.style.display = "none";
-    } else {
-        if (earthDOM) earthDOM.style.display = "none";
-        if (moonDOM) moonDOM.style.display = "block";
-    }
-
-    log(`🚀 THEATER SWITCH: Tactical overhead transitioned to ${currentTheater.toUpperCase()} operations.`, "succ");
+    // Hard reset view modes back to regional defaults
+    currentViewMode = "world";
+    currentZoomTarget = "world";
     
-    // Force reset camera projection back to the new world view bounds
-    changeMapProjection("world");
-}
-
-function changeMapProjection(target) {
-    // Dynamically query the DOM element based on the running theater context
-    const map = document.getElementById(`map-${currentTheater}`);
     const indicator = document.getElementById("view-indicator");
-    
+    if(indicator) indicator.textContent = `Theater View: ${currentTheater.toUpperCase() === 'EARTH' ? 'World' : 'Lunar Surface'}`;
+
+    // Fire the asset rendering loop
+    initMap();
+}
+function changeMapProjection(target) {
+    const map = document.getElementById("map"); // Target the single standard SVG frame
+    const indicator = document.getElementById("view-indicator");
     if (!map) return;
 
     if (projectionTimeoutId) {
         clearTimeout(projectionTimeoutId);
         projectionTimeoutId = null;
-    }
-    
-    if (globeContext.isActive && target.toLowerCase() !== "world") {
-        rotateGlobeToTarget(target);
     }
     
     const theaterConfig = MAP_THEATERS[currentTheater];
@@ -1390,22 +1397,13 @@ function changeMapProjection(target) {
         currentViewBoxDims.h = parseFloat(tokens[3]);
         
         map.setAttribute("viewBox", theaterConfig.viewBoxes[target.toLowerCase()]);
-        indicator.textContent = `${currentTheater.toUpperCase()} View: ${target.toUpperCase()}`;
-        log(`🔭 Camera adjustment: Tracking target region [${target.toUpperCase()}].`);
+        if(indicator) indicator.textContent = `Theater View: ${target.toUpperCase()}`;
     } else {
         const path = document.getElementById(target.toUpperCase());
         if (path) {
             try {
                 const box = path.getBBox();
-                let pad;
-                
-                if(box.width < 3 || box.height < 3) {
-                    pad = 3.5; 
-                } else if(box.width < 10 || box.height < 10) {
-                    pad = Math.max(box.width, box.height) * 0.8;
-                } else {
-                    pad = Math.max(box.width, box.height) * 0.35;
-                }
+                let pad = Math.max(box.width, box.height) * 0.35;
                 
                 const vx = box.x - pad/2;
                 const vy = box.y - pad/2;
@@ -1414,30 +1412,15 @@ function changeMapProjection(target) {
                 
                 currentViewMode = "country";
                 currentZoomTarget = target.toUpperCase();
-                
                 currentViewBoxDims.w = vw;
                 currentViewBoxDims.h = vh;
                 
                 map.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
-                indicator.textContent = `Sector Zoom: ${target.toUpperCase()}`;
-                log(`🔍 Tactical Overlay Focused on [${target.toUpperCase()}].`);
-            } catch(e) {
-                log("Target profile found but hardware layout rejected bounding canvas calculation.", "err");
-            }
-        } else {
-            log(`Invalid vector target context: "${target}".`, "err");
-            return;
+                if(indicator) indicator.textContent = `Sector Zoom: ${target.toUpperCase()}`;
+            } catch(e) {}
         }
     }
-    
     updateMapColors();
-    flagGlobeTextureUpdate();
-
-    if (target.toLowerCase() !== "world") {
-        projectionTimeoutId = setTimeout(() => {
-            changeMapProjection("world");
-        }, 30000);
-    }
 }
 function interpolateMapFocus(targetX, targetY) {
     const map = document.getElementById("map");
@@ -1881,9 +1864,8 @@ function parseGeoJSONCoords(geometry) {
 
 async function initMap() {
     try {
-        const res = await fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json");
-        const geo = await res.json();
         const svg = document.getElementById("map");
+        if (!svg) return;
         svg.innerHTML = ""; 
 
         const countriesLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -1894,62 +1876,90 @@ async function initMap() {
         uiLayer.setAttribute("id", "ui-layer");
         svg.appendChild(uiLayer);
 
-        geo.features.forEach(f => {
-            const code = f.id || f.properties.ISO_A3;
-            if(!code) return;
+        // Clear local bounding cache before loading paths
+        countryBoundsCache = {};
 
-            if(!gameState.data[code]) {
-                gameState.data[code] = { 
-                    owner: null, troops: 0, 
-                    buildings: { mine: 0, school: 0, city: 0, base: 0 } 
-                };
-            }
-            
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("id", code);
-            path.setAttribute("class", "country");
-            
-            path.addEventListener("mouseenter", () => {
-                if(gameState.data[code]) {
-                    updateFloatingStatsPanel(code, gameState.data[code]);
-                }
+        if (currentTheater === "earth") {
+            // --- EARTH SPHERE GENERATION ENGINE ---
+            const res = await fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json");
+            const geo = await res.json();
+
+            geo.features.forEach(f => {
+                const code = f.id || f.properties.ISO_A3;
+                if(!code) return;
+                buildMapTerritoryPath(code, parseGeoJSONCoords(f.geometry), countriesLayer, uiLayer);
             });
-            
-            const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-            path.appendChild(title);
-            
-            let pathData = parseGeoJSONCoords(f.geometry);
-            if(!pathData || pathData.trim() === "") return;
+        } else {
+            // --- MOON SPHERE GENERATION ENGINE ---
+            LUNAR_TERRITORIES.forEach(t => {
+                const code = t.id;
+                
+                // Helper mapping logic to format the flat array into coordinates matching the Earth projection style
+                let dString = "";
+                t.coords.forEach((pair, idx) => {
+                    dString += (idx === 0 ? "M " : "L ") + `${pair[0].toFixed(2)},${pair[1].toFixed(2)} `;
+                });
+                dString += "Z";
 
-            path.setAttribute("d", pathData);
-            countriesLayer.appendChild(path); 
-
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute("class", "owner-label");
-            text.setAttribute("id", `lbl-${code}`);
-            text.style.display = "none";
-            uiLayer.appendChild(text);
-
-            setTimeout(() => {
-                try {
-                    const box = path.getBBox();
-                    if(box.width > 0.05 && box.height > 0.05) {
-                        text.setAttribute("x", box.x + box.width / 2);
-                        text.setAttribute("y", box.y + box.height / 2);
-                        
-                        // Cache the bounding calculations safely once map sets up
-                        countryBoundsCache[code] = { x: box.x, y: box.y, width: box.width, height: box.height };
-                    }
-                } catch(e) {}
-            }, 600);
-        });
+                buildMapTerritoryPath(code, dString, countriesLayer, uiLayer);
+            });
+        }
         
-        // Secondary brief delay loop to guarantee late calculations get properly evaluated and drawn
-        setTimeout(() => { updateMapColors(); updateLeaderboard(); launchAISimulatorLoop();}, 800);
-        log("🗺️ Adaptive Scale GeoJSON Map Mesh Online. Absolute Stacking Order Fixed!");
-    } catch(err) { log("Critical Map Initialization Failure: " + err.message, "err"); }
+        // Secondary safety execution loops to refresh visualization states
+        setTimeout(() => { 
+            updateMapColors(); 
+            updateLeaderboard(); 
+            if(typeof launchAISimulatorLoop === "function") launchAISimulatorLoop();
+        }, 400);
+
+        log(`🗺️ Tactical Map Reset: ${currentTheater.toUpperCase()} grid completely operational.`);
+    } catch(err) { 
+        log("Critical Map Initialization Failure: " + err.message, "err"); 
+    }
 }
 
+/**
+ * Shared Builder Engine to map individual path assets onto the primary interactive SVG layer
+ */
+function buildMapTerritoryPath(code, pathData, parentLayer, uiLayerRef) {
+    if(!gameState.data[code]) {
+        gameState.data[code] = { 
+            owner: null, troops: 0, 
+            buildings: { mine: 0, school: 0, city: 0, base: 0 } 
+        };
+    }
+    
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("id", code);
+    path.setAttribute("class", "country");
+    path.setAttribute("d", pathData);
+    
+    path.addEventListener("mouseenter", () => {
+        if(gameState.data[code]) {
+            updateFloatingStatsPanel(code, gameState.data[code]);
+        }
+    });
+    
+    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+    path.appendChild(title);
+    parentLayer.appendChild(path); 
+
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("class", "owner-label");
+    text.setAttribute("id", `lbl-${code}`);
+    text.style.display = "none";
+    uiLayerRef.appendChild(text);
+
+    // Read vector layout calculations and cache dimensions
+    try {
+        const box = path.getBBox();
+        if(box.width > 0.01 && box.height > 0.01) {
+            text.setAttribute("x", box.x + box.width / 2);
+            text.setAttribute("y", box.y + box.height / 2);
+            countryBoundsCache[code] = { x: box.x, y: box.y, width: box.width, height: box.height };
+        }
+    } catch(e) {}
+}
 ComfyJS.onCommand = (user, command, message) => {
     processCommand(user, command, message.split(" ").filter(x => x.trim() !== ""));
 };
