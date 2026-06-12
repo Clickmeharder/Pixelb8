@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIXELB8 - Autonomous Spider Engine</title>
+    <style>
+        :root {
+            --neon-blue: #00f0ff;
+            --neon-green: #00ff66;
+            --neon-purple: #bf00ff;
+            --dark-bg: #030305;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            position: relative;
+            width: 960px;
+            height: 540px;
+            border: 3px solid #111116;
+            background: #000;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #boot-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            color: var(--neon-green);
+            font-size: 14px;
+        }
+
+        .boot-log {
+            width: 600px;
+            height: 220px;
+            border: 1px solid #222;
+            background: #050505;
+            padding: 15px;
+            overflow-y: auto;
+            margin-top: 15px;
+            color: #888;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .hud {
+            position: absolute;
+            pointer-events: none;
+            font-size: 12px;
+            text-shadow: 1px 1px 2px #000;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 10px 14px;
+            border: 1px solid #222;
+        }
+
+        #location-hud { top: 20px; left: 20px; border-left: 3px solid var(--neon-blue); }
+        #directory-hud { top: 20px; right: 20px; text-align: right; border-right: 3px solid var(--neon-purple); }
+        #controls-hud { bottom: 20px; left: 20px; color: #aaa; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="boot-screen">
+            <div style="letter-spacing: 2px; font-weight: bold;">PIXELB8 SPIDER ENGINE: INJECTING CRAWLER...</div>
+            <div class="boot-log" id="log-target"></div>
+        </div>
+
+        <canvas id="renderCanvas"></canvas>
+        
+        <div id="location-hud" class="hud">
+            DISTRICT NODE:<br>
+            <strong id="zone-txt" style="font-size: 14px; color: var(--neon-blue); text-transform: uppercase;">SCANNING...</strong>
+            <div id="coords-txt" style="color: #888; font-size: 10px; margin-top: 2px;">X: 0.0, Y: 0.0</div>
+        </div>
+
+        <div id="directory-hud" class="hud">
+            RESOLVED VIRTUAL PATH:<br>
+            <span id="url-txt" style="color: var(--neon-purple); font-weight: bold;">/</span>
+        </div>
+
+        <div id="controls-hud" class="hud">
+            W,A,S,D / Arrows : Walk & Turn | Drag Mouse to look around the map
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("renderCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const R_WIDTH = 480;
+        const R_HEIGHT = 270;
+        canvas.width = R_WIDTH;
+        canvas.height = R_HEIGHT;
+
+        function logConsole(msg, color = "#888") {
+            const tgt = document.getElementById("log-target");
+            tgt.innerHTML += `<span style="color: ${color}">${msg}</span><br>`;
+            tgt.scrollTop = tgt.scrollHeight;
+        }
+
+        // --- WORLD MAP STATE MATRIX ---
+        const MAP_SIZE = 32;
+        let map = new Array(MAP_SIZE * MAP_SIZE).fill(1); // Default everything to open green plots (1)
+        let routeDirectoryMap = {}; // Maps string coordinate grid tags straight to internal directory paths
+
+        const player = { x: 16.5, y: 28.5, angle: -Math.PI / 2, fov: Math.PI / 3, speed: 0.08, rotSpeed: 0.045 };
+        const keys = { w:false, a:false, s:false, d:false, arrowleft:false, arrowright:false };
+
+        // --- BLIND WEB CRAWLER SPIDER CORE ENGINE ---
+        async function runAutonomousCrawl() {
+            logConsole("Target URL targeted: " + window.location.origin, "var(--neon-blue)");
+            logConsole("Requesting root payload data via DOM fetch thread...");
+            
+            let discoveredRoutes = [];
+
+            try {
+                // Fetch the literal HTML source of your homepage dynamically from wherever this file is hosted
+                let response = await fetch(window.location.origin + window.location.pathname);
+                let htmlText = await response.text();
+                
+                logConsole(`Payload received (${htmlText.length} bytes). Parsing structural document node links...`);
+                
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(htmlText, "text/html");
+                let anchors = doc.querySelectorAll("a");
+                
+                logConsole(`Found ${anchors.length} total anchor tags inside DOM frame. Executing link isolation routines...`);
+
+                anchors.forEach(a => {
+                    let href = a.getAttribute("href");
+                    
+                    if (href) {
+                        // Clean up paths, strip domains if they point to local files, and isolate relative directories
+                        let cleanPath = href.trim();
+                        
+                        // Ignore external domains, same-page hashes, and redundant home root tags
+                        if (!cleanPath.startsWith("http") && !cleanPath.startsWith("mailto:") && !cleanPath.startsWith("#") && cleanPath !== "/" && cleanPath !== "") {
+                            // Ensure clean prefixing structure
+                            if (!cleanPath.startsWith("/")) {
+                                cleanPath = "/" + cleanPath;
+                            }
+                            
+                            // Remove trailing slashes for directory matching uniformity
+                            if (cleanPath.endsWith("/") && cleanPath.length > 1) {
+                                cleanPath = cleanPath.slice(0, -1);
+                            }
+
+                            if (!discoveredRoutes.includes(cleanPath)) {
+                                discoveredRoutes.push(cleanPath);
+                                logConsole(`[SPIDER MATCH DISCOVERED]: Isolate path -> ${cleanPath}`, "var(--neon-green)");
+                            }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                logConsole("Error accessing absolute DOM nodes: " + err.message, "#ff3333");
+            }
+
+            // Fallback generation pattern if site contains zero links or is run on a blank local file setup
+            if (discoveredRoutes.length === 0) {
+                logConsole("Zero internal path networks crawled from index text. Initializing procedurally synthesized backup node cluster...", "var(--neon-purple)");
+                discoveredRoutes = ["/shop", "/games", "/tools", "/stream", "/about"];
+            }
+
+            // --- CITY PLOT COMPILER GRID ALGORITHM ---
+            logConsole(`Compiling structural plots layout matrix for ${discoveredRoutes.length} city sectors...`);
+
+            // Carve the open asphalt roadway boulevard down the middle lane (Y = 14 to 17)
+            for (let x = 0; x < MAP_SIZE; x++) {
+                for (let y = 14; y <= 17; y++) {
+                    map[y * MAP_SIZE + x] = 0; // 0 = Concrete Roadway Asphalt Strip
+                }
+            }
+
+            // Map each dynamically crawled page path to its own separate structural building frontage block along Main Street
+            let plotX = 1;
+            discoveredRoutes.forEach((path, index) => {
+                if (plotX + 4 >= MAP_SIZE) return; // Prevent map grid dimension array bounds blowouts
+
+                let buildingUID = 2 + index; // Custom wall structural layer integer tag logic assignment
+
+                // Build out a hollow 4x4 sector structure layout facing the thoroughfare
+                for (let bx = 0; bx < 4; bx++) {
+                    for (let by = 0; by < 4; by++) {
+                        let currentGridX = plotX + bx;
+                        let currentGridY = 10 + by; // Facing north boundary curb alignment lane
+
+                        if (bx === 0 || bx === 3 || by === 0) {
+                            map[currentGridY * MAP_SIZE + currentGridX] = buildingUID; // Border structure walls
+                        } else {
+                            map[currentGridY * MAP_SIZE + currentGridX] = 0; // Walkable interior shop room floor footprint
+                        }
+
+                        // Attach the metadata string file locator coordinate pair directly into our network tracker
+                        routeDirectoryMap[`${currentGridX},${currentGridY}`] = path;
+                    }
+                }
+
+                logConsole(`[SECTOR ${index}] Assigned Route [${path}] to structural plot grid column array index spacing.`, "#aaa");
+                plotX += 6; // Space blocks evenly along Main Street
+            });
+
+            logConsole("Procedural city configuration cycle complete. Opening portal rendering frame matrix...", "var(--neon-blue)");
+            
+            setTimeout(() => {
+                document.getElementById("boot-screen").style.display = "none";
+            }, 1500);
+        }
+
+        // --- CONTROLS INPUT RUNTIME BIND HOOKS ---
+        window.addEventListener('keydown', e => {
+            let k = e.key.toLowerCase(); if(k in keys) keys[k] = true;
+            if(k === 'arrowleft' || k === 'arrowright') keys[k] = true;
+        });
+        window.addEventListener('keyup', e => {
+            let k = e.key.toLowerCase(); if(k in keys) keys[k] = false;
+            if(k === 'arrowleft' || k === 'arrowright') keys[k] = false;
+        });
+
+        let dragMouseActive = false;
+        window.addEventListener('mousedown', () => dragMouseActive = true);
+        window.addEventListener('mouseup', () => dragMouseActive = false);
+        window.addEventListener('mousemove', e => { if (dragMouseActive) player.angle += e.movementX * 0.0045; });
+
+        function moveHandling(dx, dy) {
+            let nextProjX = player.x + dx; let nextProjY = player.y + dy;
+            if (nextProjX >= 0 && nextProjX < MAP_SIZE && nextProjY >= 0 && nextProjY < MAP_SIZE) {
+                let collisionCheckBlock = map[Math.floor(nextProjY) * MAP_SIZE + Math.floor(nextProjX)];
+                if (collisionCheckBlock === 0 || collisionCheckBlock === 1) { // Ground level open elements
+                    player.x = nextProjX; player.y = nextProjY;
+                }
+            }
+        }
+
+        function updateSimulation() {
+            if (keys.w || keys.arrowup) moveHandling(Math.cos(player.angle) * player.speed, Math.sin(player.angle) * player.speed);
+            if (keys.s || keys.arrowdown) moveHandling(-Math.cos(player.angle) * player.speed, -Math.sin(player.angle) * player.speed);
+            if (keys.a) moveHandling(Math.cos(player.angle - Math.PI/2) * player.speed, Math.sin(player.angle - Math.PI/2) * player.speed);
+            if (keys.d) moveHandling(Math.cos(player.angle + Math.PI/2) * player.speed, Math.sin(player.angle + Math.PI/2) * player.speed);
+
+            if (keys.arrowleft) player.angle -= player.rotSpeed;
+            if (keys.arrowright) player.angle += player.rotSpeed;
+
+            // Direct Coordinate Sector Position Tracker 
+            const px = Math.floor(player.x); const py = Math.floor(player.y);
+            const zoneTxt = document.getElementById("zone-txt");
+            const urlTxt = document.getElementById("url-txt");
+
+            let mappedPathTag = routeDirectoryMap[`${px},${py}`] || routeDirectoryMap[`${px},${py-1}`] || routeDirectoryMap[`${px},${py+1}`];
+
+            if (mappedPathTag) {
+                zoneTxt.innerText = `DISTRICT ${mappedPathTag.toUpperCase().replace(/\//g, '')}`;
+                zoneTxt.style.color = "var(--neon-green)";
+                urlTxt.innerText = `${window.location.host || 'pixelb8.lol'}${mappedPathTag}`;
+            } else {
+                let baseTile = map[py * MAP_SIZE + px];
+                if (baseTile === 1) {
+                    zoneTxt.innerText = "OUTLYING GRASS RESERVES"; zoneTxt.style.color = "#55ff55";
+                } else {
+                    zoneTxt.innerText = "CENTRAL TRANSIT STREET"; zoneTxt.style.color = "var(--neon-blue)";
+                }
+                urlTxt.innerText = `${window.location.host || 'pixelb8.lol'}/`;
+            }
+
+            document.getElementById("coords-txt").innerText = `X: ${player.x.toFixed(1)}, Y: ${player.y.toFixed(1)}`;
+        }
+
+        // --- 3D RAYCAST PERSPECTIVE GENERATOR GRAPHICS FILTER ---
+        function renderScene() {
+            ctx.fillStyle = "#040407"; ctx.fillRect(0, 0, R_WIDTH, R_HEIGHT / 2); // Horizon sky
+            ctx.fillStyle = "#0f150f"; ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, R_HEIGHT / 2); // Grass base plane
+
+            for (let x = 0; x < R_WIDTH; x++) {
+                let rayAngle = (player.angle - player.fov / 2) + (x / R_WIDTH) * player.fov;
+                let distance = 0; let hitSolidWall = false; let wallTypeTag = 0;
+                let vectorX = Math.cos(rayAngle); let vectorY = Math.sin(rayAngle);
+
+                while (!hitSolidWall && distance < 24) {
+                    distance += 0.05;
+                    let checkGridX = Math.floor(player.x + vectorX * distance);
+                    let checkGridY = Math.floor(player.y + vectorY * distance);
+
+                    if (checkGridX < 0 || checkGridX >= MAP_SIZE || checkGridY < 0 || checkGridY >= MAP_SIZE) {
+                        hitSolidWall = true; distance = 24;
+                    } else {
+                        let foundBlockValue = map[checkGridY * MAP_SIZE + checkGridX];
+                        if (foundBlockValue > 1) {
+                            hitSolidWall = true; wallTypeTag = foundBlockValue;
+                        }
+                    }
+                }
+
+                let correctedDistance = distance * Math.cos(rayAngle - player.angle);
+                let structureHeight = Math.min(R_HEIGHT, Math.floor(R_HEIGHT / correctedDistance));
+                let drawLineStart = (R_HEIGHT / 2) - (structureHeight / 2);
+                let drawLineEnd = (R_HEIGHT / 2) + (structureHeight / 2);
+
+                let lightShadingFactor = Math.min(1, 1 - (correctedDistance / 20));
+
+                if (wallTypeTag > 1) {
+                    // Seed structural pixel color arrays pseudo-randomly dynamically using the block IDs
+                    let rValue = Math.floor((45 * wallTypeTag) % 170);
+                    let gValue = Math.floor((75 * wallTypeTag) % 140 + 40);
+                    let bValue = Math.floor((55 * wallTypeTag) % 210 + 40);
+
+                    // Core Vertical Wall Structural Column Line
+                    ctx.strokeStyle = `rgb(${Math.floor(rValue*lightShadingFactor)},${Math.floor(gValue*lightShadingFactor)},${Math.floor(bValue*lightShadingFactor)})`;
+                    ctx.beginPath(); ctx.moveTo(x, drawLineStart); ctx.lineTo(x, drawLineEnd); ctx.stroke();
+
+                    // Architectural Upper Sloped High Roof Cap Layer Rendering Addition
+                    ctx.strokeStyle = `rgb(${Math.floor(rValue*0.4*lightShadingFactor)},${Math.floor(gValue*0.4*lightShadingFactor)},${Math.floor(bValue*0.4*lightShadingFactor)})`;
+                    ctx.beginPath(); ctx.moveTo(x, drawLineStart); ctx.lineTo(x, drawLineStart - (structureHeight * 0.45)); ctx.stroke();
+                }
+            }
+        }
+
+        function mainAnimationLoopThread() {
+            updateSimulation();
+            renderScene();
+            requestAnimationFrame(mainAnimationLoopThread);
+        }
+
+        // Run spider logic thread directly before triggering application clock mechanics loop
+        runAutonomousCrawl().then(() => {
+            mainAnimationLoopThread();
+        });
+    </script>
+</body>
+</html>
