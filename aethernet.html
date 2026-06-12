@@ -59,6 +59,21 @@
         }
         .btn:disabled { color: #444; border-color: #444; background: none; }
 
+        /* Distinct styling for construction architecture actions */
+        #build-btn {
+            border-color: var(--neon-magenta);
+            color: var(--neon-magenta);
+            background: rgba(255, 0, 255, 0.05);
+        }
+        #build-btn:active:not(:disabled) {
+            background: var(--neon-magenta); color: var(--dark-bg);
+        }
+
+        .action-container {
+            display: flex;
+            gap: 6px;
+        }
+
         .sim-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
             gap: 4px; width: 180px; margin: 0 auto;
@@ -88,7 +103,11 @@
     <div id="map"></div>
 
     <div id="controls">
-        <button id="action-btn" class="btn" disabled>Target Out Of Range</button>
+        <div class="action-container">
+            <button id="action-btn" class="btn" disabled style="flex: 2;">Target Out Of Range</button>
+            <button id="build-btn" class="btn" disabled style="flex: 1;">Deploy Centre</button>
+        </div>
+        
         <div id="terminal-log">System boot complete. Deploying infinite sensory map...</div>
         
         <div class="sim-grid">
@@ -104,7 +123,9 @@
     <script>
         const CONFIG = {
             interactionRadiusMeters: 35,
-            generationTriggerDistanceMeters: 150 // Distance you can walk before a fresh wave spawns
+            generationTriggerDistanceMeters: 150,
+            minBuildProximityMeters: 500, // Safe buffer radius to prevent overlap spam
+            centerBuildCost: 500          // Cost in fragments to build a center
         };
 
         let state = {
@@ -119,7 +140,6 @@
         };
 
         // --- INITIALIZE MAP CONTAINER ---
-        // FIX: Lowered minZoom to 12 so you can pinch/scroll to zoom out significantly further
         const map = L.map('map', {
             zoomControl: false,
             attributionControl: false,
@@ -155,39 +175,29 @@
         }
 
         // --- DYNAMIC INFRASTRUCTURE GENERATION ---
-        // Generates nodes procedurally spread out right in front of your path trajectory
         function appendProceduralNodes(originLat, originLon) {
             sysLog("Instantiating nearby network nodes...");
             
-            // Random distribution offsets around your new localized location coordinates
-            for (let i = 0; i < 5; i++) {
-                const latOffset = (Math.random() - 0.5) * 0.0015;
-                const lonOffset = (Math.random() - 0.5) * 0.0015;
-                const isCentre = Math.random() > 0.75; // 25% chance to create an Aether Centre hub
+            // Generate standard localized data fragments caches
+            for (let i = 0; i < 6; i++) {
+                const latOffset = (Math.random() - 0.5) * 0.0018;
+                const lonOffset = (Math.random() - 0.5) * 0.0018;
 
                 const targetLat = originLat + latOffset;
                 const targetLon = originLon + lonOffset;
 
-                let marker;
-                if (isCentre) {
-                    marker = L.circleMarker([targetLat, targetLon], {
-                        radius: 14, color: varStyle('--neon-magenta'), fillColor: varStyle('--neon-magenta'), fillOpacity: 0.3, weight: 3
-                    }).addTo(map).bindPopup(`<b>Aether Centre [Sector Hub]</b>`);
-                } else {
-                    marker = L.circleMarker([targetLat, targetLon], {
-                        radius: 6, color: varStyle('--neon-blue'), fillColor: '#ffffff', fillOpacity: 0.6, weight: 2
-                    }).addTo(map);
-                }
+                const marker = L.circleMarker([targetLat, targetLon], {
+                    radius: 6, color: varStyle('--neon-blue'), fillColor: '#ffffff', fillOpacity: 0.6, weight: 2
+                }).addTo(map);
 
                 state.entities.push({
                     id: 'ent_' + Date.now() + '_' + i,
-                    type: isCentre ? 'centre' : 'node',
-                    name: isCentre ? `Aether Centre Substation` : `Data Cache [Secure Point]`,
+                    type: 'node',
+                    name: `Data Cache [Secure Point]`,
                     lat: targetLat, lon: targetLon, active: true, markerObj: marker
                 });
             }
 
-            // Save our current baseline location 
             state.lastGenLat = originLat;
             state.lastGenLon = originLon;
         }
@@ -197,31 +207,37 @@
             const currentPosition = [state.playerLat, state.playerLon];
             playerMarker.setLatLng(currentPosition);
             safetyProximityRing.setLatLng(currentPosition);
-            
-            // Keep view anchored tracking user position
             map.panTo(currentPosition);
 
             document.getElementById('gps-display').textContent = `${state.playerLat.toFixed(5)}, ${state.playerLon.toFixed(5)}`;
 
-            // CRITICAL CHECK: Did the player walk past the active grid boundary threshold?
+            // Check if player crossed procedural chunk threshold
             const distanceFromLastGen = map.distance(currentPosition, [state.lastGenLat, state.lastGenLon]);
             if (distanceFromLastGen > CONFIG.generationTriggerDistanceMeters) {
-                sysLog("Entering unexplored airspace. Syncing database map overlays...");
+                sysLog("Moving through grid boundaries. Syncing area nodes...");
                 appendProceduralNodes(state.playerLat, state.playerLon);
             }
 
             let closestDist = Infinity;
             let targetRef = null;
+            let nearestCentreDist = Infinity;
 
+            // Track closest entities while calculating spatial proximity safety boundaries
             state.entities.forEach(ent => {
                 if (!ent.active) return;
                 const distance = map.distance(currentPosition, [ent.lat, ent.lon]);
+                
                 if (distance < closestDist) {
                     closestDist = distance;
                     targetRef = ent;
                 }
+
+                if (ent.type === 'centre' && distance < nearestCentreDist) {
+                    nearestCentreDist = distance;
+                }
             });
 
+            // Action UI controls
             const actionBtn = document.getElementById('action-btn');
             state.nearestActiveTarget = targetRef;
 
@@ -240,8 +256,23 @@
                 actionBtn.style.color = "var(--neon-blue)";
                 actionBtn.style.background = "rgba(0, 240, 255, 0.05)";
             }
+
+            // --- BUILD MODE VALIDATION ---
+            const buildBtn = document.getElementById('build-btn');
+            
+            if (nearestCentreDist < CONFIG.minBuildProximityMeters) {
+                buildBtn.disabled = true;
+                buildBtn.textContent = `${Math.round(nearestCentreDist)}m to Hub`;
+            } else if (state.score < CONFIG.centerBuildCost) {
+                buildBtn.disabled = true;
+                buildBtn.textContent = `Need ${CONFIG.centerBuildCost} Frags`;
+            } else {
+                buildBtn.disabled = false;
+                buildBtn.textContent = "Deploy Centre";
+            }
         }
 
+        // --- ACTION HANDLERS ---
         document.getElementById('action-btn').addEventListener('click', () => {
             const target = state.nearestActiveTarget;
             if (!target) return;
@@ -251,13 +282,47 @@
                 map.removeLayer(target.markerObj);
                 state.score += 100;
                 document.getElementById('score-display').textContent = state.score;
-                sysLog(`Harvested ${target.name}.`);
+                sysLog(`Harvested ${target.name}. +100 Fragments.`);
             } else if (target.type === 'centre') {
                 state.score += 500;
                 document.getElementById('score-display').textContent = state.score;
-                sysLog(`Synced with database at ${target.name}.`);
-                alert(`Welcome to ${target.name}\nMatrix terminal access granted!`);
+                sysLog(`Synced with data server core at ${target.name}.`);
+                alert(`Welcome to ${target.name}\nMatrix terminal links established!`);
             }
+            syncGameplayState();
+        });
+
+        // Construction deploy execution pipeline
+        document.getElementById('build-btn').addEventListener('click', () => {
+            if (state.score < CONFIG.centerBuildCost) return;
+
+            state.score -= CONFIG.centerBuildCost;
+            document.getElementById('score-display').textContent = state.score;
+
+            const targetLat = state.playerLat;
+            const targetLon = state.playerLon;
+
+            // Generate Leaflet structural element overlay asset
+            const marker = L.circleMarker([targetLat, targetLon], {
+                radius: 14, 
+                color: varStyle('--neon-magenta'), 
+                fillColor: varStyle('--neon-magenta'), 
+                fillOpacity: 0.3, 
+                weight: 3
+            }).addTo(map).bindPopup(`<b>Custom Local Aether Centre</b><br>Constructed Player Base.`);
+
+            // Push into engine structural arrays
+            state.entities.push({
+                id: 'custom_centre_' + Date.now(),
+                type: 'centre',
+                name: `Aether Centre: Player Outpost`,
+                lat: targetLat,
+                lon: targetLon,
+                active: true,
+                markerObj: marker
+            });
+
+            sysLog("Structural array deployment complete. Local hub online!");
             syncGameplayState();
         });
 
@@ -285,7 +350,7 @@
                         syncGameplayState();
                     }
                 }, (err) => {
-                    sysLog(`GPS initialization delay: ${err.message}. Using Sandbox simulation.`);
+                    sysLog(`GPS sync delay: ${err.message}. Running Simulator sandbox.`);
                 }, { enableHighAccuracy: true });
             }
         }
