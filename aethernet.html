@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aether Net: Infinite World</title>
+    <title>Aether Net: Real World Mapping</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -37,23 +37,18 @@
 
         .search-container {
             margin: 15px 0 5px 0;
-            display: flex;
-            gap: 4px;
+            display: flex; gap: 4px;
         }
 
         #search-input {
-            flex: 1;
-            background: #111; color: #fff; border: 1px solid #444;
+            flex: 1; background: #111; color: #fff; border: 1px solid #444;
             padding: 10px; font-family: inherit; font-size: 0.85rem;
         }
 
-        #search-input:focus {
-            border-color: var(--neon-blue); outline: none;
-        }
+        #search-input:focus { border-color: var(--neon-blue); outline: none; }
 
         #hud {
-            background: rgba(12, 12, 20, 0.95);
-            border-bottom: 2px solid var(--neon-blue);
+            background: rgba(12, 12, 20, 0.95); border-bottom: 2px solid var(--neon-blue);
             padding: 12px; font-size: 0.8rem; z-index: 2000;
             display: flex; flex-direction: column; gap: 4px;
             box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
@@ -64,31 +59,19 @@
         .score { color: var(--neon-green); font-weight: bold; }
         .magenta { color: var(--neon-magenta); font-weight: bold; }
 
-        #map { 
-            flex: 1; 
-            width: 100%; 
-            z-index: 1; 
-            background-color: #111;
-        }
+        #map { flex: 1; width: 100%; z-index: 1; background-color: #111; }
 
         #controls {
-            background: rgba(12, 12, 20, 0.95);
-            border-top: 2px solid var(--neon-blue);
-            padding: 12px; z-index: 2000;
-            display: flex; flex-direction: column; gap: 8px;
+            background: rgba(12, 12, 20, 0.95); border-top: 2px solid var(--neon-blue);
+            padding: 12px; z-index: 2000; display: flex; flex-direction: column; gap: 8px;
         }
 
         .btn {
-            background: rgba(0, 240, 255, 0.1);
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-            padding: 10px; font-family: inherit; font-weight: bold;
-            cursor: pointer; text-transform: uppercase; width: 100%;
-            margin-top: 5px;
+            background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-blue);
+            color: var(--neon-blue); padding: 10px; font-family: inherit; font-weight: bold;
+            cursor: pointer; text-transform: uppercase; width: 100%; margin-top: 5px;
         }
-        .btn:active:not(:disabled) {
-            background: var(--neon-blue); color: var(--dark-bg);
-        }
+        .btn:active:not(:disabled) { background: var(--neon-blue); color: var(--dark-bg); }
         .btn:disabled { color: #444; border-color: #444; background: none; cursor: not-allowed; }
 
         #build-btn { border-color: var(--neon-magenta); color: var(--neon-magenta); background: rgba(255, 0, 255, 0.05); }
@@ -107,8 +90,7 @@
 
         #terminal-log {
             font-size: 0.7rem; color: #888; background: #000;
-            padding: 6px; height: 40px; overflow-y: auto;
-            border: 1px solid #222;
+            padding: 6px; height: 40px; overflow-y: auto; border: 1px solid #222;
         }
     </style>
 </head>
@@ -116,35 +98,31 @@
 
     <div id="boot-overlay">
         <div class="boot-modal">
-            <h2 style="color: var(--neon-blue); margin-top: 0; letter-spacing: 2px;">AETHER NETWORK BOOT</h2>
+            <h2 style="color: var(--neon-blue); margin-top: 0; letter-spacing: 2px;">AETHER MAP MATRIX</h2>
             <p style="font-size: 0.85rem; color: #aaa; text-align: left; line-height: 1.4;">
-                Initialize network coordinates. Search for any global city/country location, or target your device's live hardware antenna.
+                Connect to structural databases. Search for a dense urban space (e.g., Downtown city areas work best for property density).
             </p>
             
             <div class="search-container">
-                <input type="text" id="search-input" placeholder="Enter City, Country, or Address...">
-                <button class="btn" style="margin-top:0; width:auto; padding: 0 15px;" id="search-go-btn" onclick="searchGlobalLocation()">Search</button>
+                <input type="text" id="search-input" value="Downtown Edmonton" placeholder="Enter City or Area...">
+                <button class="btn" style="margin-top:0; width:auto; padding: 0 15px;" id="search-go-btn" onclick="searchGlobalLocation()">Sync</button>
             </div>
             <div id="search-status" style="font-size:0.75rem; color:var(--neon-magenta); min-height:15px; margin-bottom:10px; text-align:left;"></div>
 
-            <button class="btn" onclick="initPositionMode('gps')">📡 USE LIVE GPS LOCATION</button>
-            <div style="margin: 12px 0 8px 0; color: #555; font-size: 0.75rem;">— OR USE FALLBACK COORDINATES —</div>
-            <div style="display:flex; gap:4px; justify-content:center;">
-                <input type="text" id="boot-lat" value="53.5461" style="background:#111; color:#fff; border:1px solid #444; padding:8px; width:45%; font-family:inherit; text-align:center; font-size:0.8rem;">
-                <input type="text" id="boot-lon" value="-113.4938" style="background:#111; color:#fff; border:1px solid #444; padding:8px; width:45%; font-family:inherit; text-align:center; font-size:0.8rem;">
-            </div>
-            <button class="btn" style="border-color: #666; color: #aaa;" onclick="initPositionMode('custom')">BOOT AT MANUAL COORDS</button>
+            <button class="btn" onclick="initPositionMode('gps')">📡 SCAN SATELLITE GPS</button>
+            <div style="margin: 12px 0 8px 0; color: #555; font-size: 0.75rem;">— OR START AT FALLBACK COORDS —</div>
+            <button class="btn" style="border-color: #666; color: #aaa;" onclick="initPositionMode('custom')">BOOT MANUAL DATASTREAM</button>
         </div>
     </div>
 
     <div id="hud">
         <div class="hud-row">
-            <span>POS: <span id="gps-display" class="accent">Initializing...</span></span>
-            <span>DATA FRAGMENTS: <span id="score-display" class="score">0</span></span>
+            <span>COORDS: <span id="gps-display" class="accent">Scanning...</span></span>
+            <span>DATA FRAGMENTS: <span id="score-display" class="score">450</span></span>
         </div>
         <div class="hud-row">
-            <span>DATA GRIDS: <span id="grids-display" class="magenta">1</span></span>
-            <span>STATUS: <span id="status-display">Scanning Sector...</span></span>
+            <span>PROPERTIES OWNED: <span id="grids-display" class="magenta">0</span></span>
+            <span>STRUCTURE MATRIX: <span id="status-display">Syncing...</span></span>
         </div>
     </div>
 
@@ -152,54 +130,49 @@
 
     <div id="controls">
         <div class="action-container">
-            <button id="action-btn" class="btn" disabled style="flex: 2;">Target Out Range</button>
-            <button id="claim-btn" class="btn" disabled style="flex: 1.2;">MINT LA LAND</button>
-            <button id="build-btn" class="btn" disabled style="flex: 1.2;">BUILD PLOT</button>
+            <button id="action-btn" class="btn" disabled style="flex: 1.5;">Out of Interaction Range</button>
+            <button id="claim-btn" class="btn" disabled style="flex: 1.2;">MINT PROPERTY</button>
+            <button id="build-btn" class="btn" disabled style="flex: 1.2;">UPGRADE CORE</button>
         </div>
         
-        <div id="terminal-log">System boot complete. Select vector parameters above...</div>
+        <div id="terminal-log">System initialized. Awaiting satellite array connection...</div>
         
         <div class="sim-grid">
-            <div></div><button class="btn" onclick="moveSim(0.00010, 0)">▲ N</button><div></div>
-            <button class="btn" onclick="moveSim(0, -0.00012)">◀ W</button>
-            <span style="font-size:0.6rem; text-align:center; align-self:center; color:#555;">D-PAD</span>
-            <button class="btn" onclick="moveSim(0, 0.00012)">E ▶</button>
-            <div></div><button class="btn" onclick="moveSim(-0.00010, 0)">▼ S</button><div></div>
+            <div></div><button class="btn" onclick="moveSim(0.00015, 0)">▲ N</button><div></div>
+            <button class="btn" onclick="moveSim(0, -0.00018)">◀ W</button>
+            <span style="font-size:0.6rem; text-align:center; align-self:center; color:#555;">SCAN</span>
+            <button class="btn" onclick="moveSim(0, 0.00018)">E ▶</button>
+            <div></div><button class="btn" onclick="moveSim(-0.00015, 0)">▼ S</button><div></div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const CONFIG = {
-            interactionRadiusMeters: 25,
-            generationTriggerDistanceMeters: 80,
-            parcelSizeDegrees: 0.00025, // Micro-parcels matching realistic street properties
-            landMintCostFrags: 150,
-            structureBuildCostFrags: 400
+            interactionRadiusMeters: 40,
+            queryRadiusMeters: 250, // Proximity scan limit for pulling real-world structures
+            landMintCostFrags: 200,
+            structureUpgradeCostFrags: 500
         };
 
         let state = {
-            playerLat: 53.5461, 
-            playerLon: -113.4938,
-            lastGenLat: 0,
-            lastGenLon: 0,
-            score: 500, // Starter fragments to test asset collection
-            dataGridsCount: 1, 
+            playerLat: 53.5444, // Initialized center values
+            playerLon: -113.4909,
+            score: 800,
             isSimulating: true,
-            entities: [], 
-            parcels: {}, // Map database cache keeping track of plot records
-            activeParcelKey: null,
-            nearestActiveTarget: null
+            realProperties: {}, // Dynamic storage lookup index for live parsed structures
+            activePropertyId: null,
+            isFetchingData: false
         };
 
         const map = L.map('map', {
-            zoomControl: false, attributionControl: false, minZoom: 15, maxZoom: 19
+            zoomControl: false, attributionControl: false, minZoom: 16, maxZoom: 19
         }).setView([state.playerLat, state.playerLon], 18);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
-        const safetyProximityRing = L.circle([state.playerLat, state.playerLon], {
-            radius: CONFIG.interactionRadiusMeters, color: varStyle('--neon-green'), weight: 1.5, dashArray: '3, 5', fillColor: 'transparent'
+        const interactionBoundary = L.circle([state.playerLat, state.playerLon], {
+            radius: CONFIG.interactionRadiusMeters, color: varStyle('--neon-blue'), weight: 1.5, dashArray: '5, 5', fillColor: 'transparent'
         }).addTo(map);
 
         const playerMarker = L.circleMarker([state.playerLat, state.playerLon], {
@@ -207,22 +180,20 @@
         }).addTo(map);
 
         function varStyle(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+        
         function sysLog(txt) {
             const logBox = document.getElementById('terminal-log');
             logBox.innerHTML += `<div>&gt; ${txt}</div>`;
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        // --- GLOBAL GEOLOCATION GEOMETRY RESOLVER ---
         function searchGlobalLocation() {
             const query = document.getElementById('search-input').value.trim();
             const statusBox = document.getElementById('search-status');
-            const searchBtn = document.getElementById('search-go-btn');
             if (!query) return;
 
             statusBox.style.color = "var(--neon-blue)";
-            statusBox.textContent = "Querying localized municipal matrices...";
-            searchBtn.disabled = true;
+            statusBox.textContent = "Querying regional spatial nodes...";
 
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
                 .then(res => res.json())
@@ -232,242 +203,244 @@
                         state.playerLon = parseFloat(data[0].lon);
                         state.isSimulating = true;
                         statusBox.style.color = "var(--neon-green)";
-                        statusBox.textContent = "Grid locked! Spawning marketplace sector...";
-                        setTimeout(() => { completeBootPipeline(); }, 800);
+                        statusBox.textContent = "Data lock complete. Building system pipeline...";
+                        setTimeout(() => { completeBootPipeline(); }, 600);
                     } else {
                         statusBox.style.color = "var(--neon-magenta)";
-                        statusBox.textContent = "Sectors unrecognized.";
-                        searchBtn.disabled = false;
+                        statusBox.textContent = "Target coordinate lookup failed.";
                     }
-                }).catch(() => { searchBtn.disabled = false; });
+                });
         }
 
         function initPositionMode(mode) {
-            if (mode === 'custom') {
-                state.playerLat = parseFloat(document.getElementById('boot-lat').value);
-                state.playerLon = parseFloat(document.getElementById('boot-lon').value);
-                state.isSimulating = true;
-                completeBootPipeline();
-            } else {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((pos) => {
-                        state.playerLat = pos.coords.latitude;
-                        state.playerLon = pos.coords.longitude;
-                        state.isSimulating = false;
-                        completeBootPipeline();
-                    }, () => { completeBootPipeline(); }, { enableHighAccuracy: true });
-                } else { completeBootPipeline(); }
-            }
+            if (mode === 'gps' && navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    state.playerLat = pos.coords.latitude;
+                    state.playerLon = pos.coords.longitude;
+                    state.isSimulating = false;
+                    completeBootPipeline();
+                }, () => { completeBootPipeline(); });
+            } else { completeBootPipeline(); }
         }
 
         function completeBootPipeline() {
             document.getElementById('boot-overlay').style.display = 'none';
             map.setView([state.playerLat, state.playerLon], 18);
-            state.entities.forEach(e => map.removeLayer(e.markerObj));
-            Object.values(state.parcels).forEach(p => map.removeLayer(p.layer));
-            state.entities = [];
-            state.parcels = {};
             
-            generateSurroundingGrid(state.playerLat, state.playerLon);
+            // Flush old properties state cache layers
+            Object.values(state.realProperties).forEach(p => map.removeLayer(p.layer));
+            state.realProperties = {};
+
+            fetchRealWorldBuildings(state.playerLat, state.playerLon);
             syncGameplayState();
-            if (!state.isSimulating) runLiveHardwareTracking();
         }
 
-        // --- REAL ESTATE UPLAND PARCEL ENGINE ---
-        function generateSurroundingGrid(centerLat, centerLon) {
-            const range = 3; 
-            // Derive absolute normalized matrix index assignments for infinite execution
-            const baseCol = Math.floor(centerLon / CONFIG.parcelSizeDegrees);
-            const baseRow = Math.floor(centerLat / CONFIG.parcelSizeDegrees);
+        // --- LIVE OPENSTREETMAP OVERPASS API DATA EXTRACTION ---
+        function fetchRealWorldBuildings(lat, lon) {
+            if (state.isFetchingData) return;
+            state.isFetchingData = true;
+            sysLog("Querying Overpass DB for local storefronts & structures...");
 
-            for (let r = -range; r <= range; r++) {
-                for (let c = -range; c <= range; c++) {
-                    const currRow = baseRow + r;
-                    const currCol = baseCol + c;
-                    const pKey = `${currRow}_${currCol}`;
+            // OpenStreetMap QL Query - Pulls structural geometries + meta fields around coordinate radius
+            const query = `
+                [out:json][timeout:25];
+                (
+                  way["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
+                  relation["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
+                );
+                out geom;
+            `;
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
-                    if (state.parcels[pKey]) continue; // Already initialized
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    state.isFetchingData = false;
+                    if (!data.elements || data.elements.length === 0) {
+                        sysLog("No building models mapped in this coordinate zone.");
+                        return;
+                    }
 
-                    const latMin = currRow * CONFIG.parcelSizeDegrees;
-                    const latMax = (currRow + 1) * CONFIG.parcelSizeDegrees;
-                    const lonMin = currCol * CONFIG.parcelSizeDegrees;
-                    const lonMax = (currCol + 1) * CONFIG.parcelSizeDegrees;
-                    const bounds = [[latMin, lonMin], [[latMax, lonMax]]];
+                    let parsedCount = 0;
+                    data.elements.forEach(el => {
+                        const id = el.id;
+                        if (state.realProperties[id]) return; // Skip duplicate entities
 
-                    // Seed procedural asset properties matching street behaviors
-                    const pseudoRandom = Math.sin(currRow * 12.9898 + currCol * 78.233) * 43758.5453;
-                    const isSystemOwned = (pseudoRandom - Math.floor(pseudoRandom)) > 0.75;
-                    const streetNum = Math.abs(currRow % 999);
-                    const addressStr = `${streetNum} Netrunner Blvd`;
+                        // Parse coordinates layout depending on the spatial model type returned
+                        let latLngs = [];
+                        if (el.type === 'way' && el.geometry) {
+                            latLngs = el.geometry.map(pt => [pt.lat, pt.lon]);
+                        } else return; // Keep rendering mechanics robust for standalone single ways
 
-                    const rect = L.rectangle(bounds, {
-                        color: isSystemOwned ? '#333344' : varStyle('--neon-blue'),
-                        weight: 1,
-                        fillColor: isSystemOwned ? '#ff0055' : 'transparent',
-                        fillOpacity: isSystemOwned ? 0.08 : 0
-                    }).addTo(map);
+                        // Extract structural identity vectors using standard OSM classification parameters
+                        const name = el.tags.name || el.tags["addr:housename"] || "Commercial Sector Space";
+                        const type = el.tags.amenity || el.tags.shop || el.tags.office || el.tags.building || "Structure";
+                        const displayType = type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
+                        const streetAddress = el.tags["addr:street"] ? `${el.tags["addr:housenumber"] || ''} ${el.tags["addr:street"]}` : "Unregistered Sector Road";
 
-                    state.parcels[pKey] = {
-                        key: pKey, bounds: bounds, address: addressStr,
-                        owned: isSystemOwned, owner: isSystemOwned ? "System Corporate" : null,
-                        structure: null, layer: rect
-                    };
-                    
-                    updateParcelPopup(state.parcels[pKey]);
-                }
-            }
+                        // Create actual visual polygon matching structural footprint profile lines
+                        const polygonLayer = L.polygon(latLngs, {
+                            color: varStyle('--neon-blue'),
+                            weight: 1.5,
+                            fillColor: '#00f0ff',
+                            fillOpacity: 0.1
+                        }).addTo(map);
 
-            // Scatter simple collectible data fragments over map areas
-            if (Math.abs(centerLat - state.lastGenLat) > CONFIG.parcelSizeDegrees) {
-                for (let i = 0; i < 4; i++) {
-                    const nodeLat = centerLat + (Math.random() - 0.5) * 0.001;
-                    const nodeLon = centerLon + (Math.random() - 0.5) * 0.001;
-                    const m = L.circleMarker([nodeLat, nodeLon], {
-                        radius: 5, color: varStyle('--neon-green'), fillColor: '#fff', fillOpacity: 0.8, weight: 1.5
-                    }).addTo(map);
-                    state.entities.push({ id: 'n_'+Date.now()+'_'+i, type:'node', lat: nodeLat, lon: nodeLon, active: true, markerObj: m });
-                }
-                state.lastGenLat = centerLat;
-                state.lastGenLon = centerLon;
-            }
+                        state.realProperties[id] = {
+                            id: id,
+                            name: name,
+                            type: displayType,
+                            address: streetAddress,
+                            layer: polygonLayer,
+                            center: polygonLayer.getBounds().getCenter(),
+                            owned: false,
+                            owner: "System Corp",
+                            upgradedStructure: null
+                        };
+
+                        updatePropertyMetadataMarkup(state.realProperties[id]);
+                        parsedCount++;
+                    });
+
+                    sysLog(`Mapped ${parsedCount} real structural plots from satellite database.`);
+                    syncGameplayState();
+                })
+                .catch(() => {
+                    state.isFetchingData = false;
+                    sysLog("Datastream connection interrupted. Recalibrating...");
+                });
         }
 
-        function updateParcelPopup(parcel) {
-            let statusMarkup = parcel.owned 
-                ? `<span style="color:var(--neon-magenta)">OWNED BY: ${parcel.owner}</span>`
-                : `<span style="color:var(--neon-green)">AVAILABLE FOR MINT</span>`;
-            if (parcel.structure) {
-                statusMarkup += `<br><span style="color:#fff; font-weight:bold;">BUILDING: ${parcel.structure}</span>`;
+        function updatePropertyMetadataMarkup(prop) {
+            let statusText = prop.owned 
+                ? `<span style="color:var(--neon-magenta); font-weight:bold;">SECURED BY: ${prop.owner}</span>`
+                : `<span style="color:var(--neon-green)">STATUS: FOR SALE [MINTABLE]</span>`;
+            
+            if (prop.upgradedStructure) {
+                statusText += `<br><span style="color:var(--neon-blue); font-weight:bold;">CORE MOD: ${prop.upgradedStructure}</span>`;
             }
-            parcel.layer.bindPopup(`
-                <div style="color:#fff; font-family:monospace; background:#000; padding:5px;">
-                    <b style="color:var(--neon-blue)">${parcel.address}</b><br>
-                    ${statusMarkup}<br>
-                    <span style="font-size:0.65rem; color:#777;">ID: ${parcel.key}</span>
+
+            prop.layer.bindPopup(`
+                <div style="color:#fff; font-family:monospace; background:#000; padding:6px; min-width:160px;">
+                    <b style="color:var(--neon-blue); font-size:0.9rem;">${prop.name}</b><br>
+                    <span style="color:#aaa; font-size:0.75rem;">Type: ${prop.type}</span><br>
+                    <span style="color:#777; font-size:0.7rem;">Loc: ${prop.address}</span><hr style="border-color:#222;">
+                    ${statusText}
                 </div>
             `);
         }
 
-        // --- TRANSACTION AND GAME STATS CONTROLLER ---
+        // --- CORE APPLICATION ENGINE LOOPS ---
         function syncGameplayState() {
-            const currentPos = [state.playerLat, state.playerLon];
-            playerMarker.setLatLng(currentPos);
-            safetyProximityRing.setLatLng(currentPos);
-            map.panTo(currentPos);
+            const currentPosition = [state.playerLat, state.playerLon];
+            playerMarker.setLatLng(currentPosition);
+            interactionBoundary.setLatLng(currentPosition);
+            map.panTo(currentPosition);
 
             document.getElementById('gps-display').textContent = `${state.playerLat.toFixed(5)}, ${state.playerLon.toFixed(5)}`;
             document.getElementById('score-display').textContent = state.score;
-            document.getElementById('grids-display').textContent = Object.values(state.parcels).filter(p=>p.owner==="Player").length;
+            
+            const totalOwned = Object.values(state.realProperties).filter(p => p.owner === "Player").length;
+            document.getElementById('grids-display').textContent = totalOwned;
 
-            // Figure out which land grid coordinates the user is physically stepping over
-            const pRow = Math.floor(state.playerLat / CONFIG.parcelSizeDegrees);
-            const pCol = Math.floor(state.playerLon / CONFIG.parcelSizeDegrees);
-            const activeKey = `${pRow}_${pCol}`;
-            state.activeParcelKey = activeKey;
+            // Track if user is within the bounds or immediate footprint of a real structure
+            let currentActiveProp = null;
+            let closestDistance = Infinity;
 
-            const currentParcel = state.parcels[activeKey];
-            const claimBtn = document.getElementById('claim-btn');
-            const buildBtn = document.getElementById('build-btn');
-
-            if (currentParcel) {
-                document.getElementById('status-display').innerHTML = `ON PLOT: <span style="color:var(--neon-blue)">${currentParcel.address}</span>`;
+            Object.values(state.realProperties).forEach(prop => {
+                const distanceToCenter = map.distance(currentPosition, prop.center);
                 
-                // Real Estate Buy / Mint validation rules
-                if (currentParcel.owned) {
-                    claimBtn.disabled = true;
-                    claimBtn.textContent = "Plot Secured";
-                    if (currentParcel.owner === "Player" && !currentParcel.structure) {
-                        buildBtn.disabled = state.score < CONFIG.structureBuildCostFrags;
-                        buildBtn.textContent = `BUILD (-${CONFIG.structureBuildCostFrags}F)`;
-                    } else {
-                        buildBtn.disabled = true;
-                        buildBtn.textContent = currentParcel.structure ? "MAX UPGRADES" : "PLOT RESTRICTED";
-                    }
-                } else {
-                    claimBtn.disabled = state.score < CONFIG.landMintCostFrags;
-                    claimBtn.textContent = `MINT LAND (-${CONFIG.landMintCostFrags}F)`;
-                    buildBtn.disabled = true;
-                    buildBtn.textContent = "OWNERSHIP REQ.";
+                // If coordinate sits inside polygon path bounds or closest in area radius
+                if (distanceToCenter < closestDistance) {
+                    closestDistance = distanceToCenter;
+                    currentActiveProp = prop;
                 }
-            }
-
-            // Node Harvesting tracking rules logic
-            let closestNodeDist = Infinity; let targetNode = null;
-            state.entities.forEach(ent => {
-                if (!ent.active) return;
-                const d = map.distance(currentPos, [ent.lat, ent.lon]);
-                if (d < closestNodeDist) { closestNodeDist = d; targetNode = ent; }
             });
 
+            const claimBtn = document.getElementById('claim-btn');
+            const buildBtn = document.getElementById('build-btn');
             const actionBtn = document.getElementById('action-btn');
-            state.nearestActiveTarget = targetNode;
-            if (targetNode && closestNodeDist <= CONFIG.interactionRadiusMeters) {
+
+            // Evaluate transaction operations if a structure sits within proximity target range
+            if (currentActiveProp && closestDistance <= CONFIG.interactionRadiusMeters) {
+                state.activePropertyId = currentActiveProp.id;
+                document.getElementById('status-display').innerHTML = `TARGET: <span style="color:var(--neon-blue)">${currentActiveProp.name}</span>`;
+                
                 actionBtn.disabled = false;
-                actionBtn.textContent = "EXTRACT FRAGMENT DATA SPLICER";
-                actionBtn.style.borderColor = "var(--neon-green)";
+                actionBtn.textContent = `INSPECT PROPERTY DATA [${Math.round(closestDistance)}m]`;
+
+                if (!currentActiveProp.owned) {
+                    claimBtn.disabled = state.score < CONFIG.landMintCostFrags;
+                    claimBtn.textContent = `MINT PLOT (-${CONFIG.landMintCostFrags}F)`;
+                    buildBtn.disabled = true;
+                    buildBtn.textContent = "UPGRADE LOCKED";
+                } else if (currentActiveProp.owner === "Player") {
+                    claimBtn.disabled = true;
+                    claimBtn.textContent = "PLOT ACQUIRED";
+                    buildBtn.disabled = state.score < CONFIG.structureUpgradeCostFrags || currentActiveProp.upgradedStructure !== null;
+                    buildBtn.textContent = currentActiveProp.upgradedStructure ? "MAX CORE LEVEL" : `UPGRADE MODULE (-${CONFIG.structureUpgradeCostFrags}F)`;
+                } else {
+                    claimBtn.disabled = true;
+                    claimBtn.textContent = "LOCKED ASSURED";
+                    buildBtn.disabled = true;
+                    buildBtn.textContent = "RESTRICTED ACCESS";
+                }
             } else {
+                state.activePropertyId = null;
+                document.getElementById('status-display').textContent = "SCANNING URBAN VECTOR PLOTS...";
                 actionBtn.disabled = true;
-                actionBtn.textContent = targetNode ? `TRACKING NODE [${Math.round(closestNodeDist)}m]` : "SCANNING EMPTY SPACE...";
-                actionBtn.style.borderColor = "var(--neon-blue)";
+                actionBtn.textContent = "OUT OF OBJECT RANGE";
+                claimBtn.disabled = true;
+                claimBtn.textContent = "MINT PROPERTY";
+                buildBtn.disabled = true;
+                buildBtn.textContent = "UPGRADE CORE";
             }
         }
 
-        // --- INTERACTIVE ACTION BUTTON TRIGGERS ---
+        // --- BUTTON HANDLING REGISTRATION EVENTS ---
         document.getElementById('action-btn').addEventListener('click', () => {
-            if (state.nearestActiveTarget) {
-                state.nearestActiveTarget.active = false;
-                map.removeLayer(state.nearestActiveTarget.markerObj);
-                state.score += 85;
-                sysLog("Harvested network cache matrix. +85 Fragments.");
-                syncGameplayState();
+            if (state.activePropertyId) {
+                const prop = state.realProperties[state.activePropertyId];
+                prop.layer.openPopup(prop.center);
             }
         });
 
         document.getElementById('claim-btn').addEventListener('click', () => {
-            const parcel = state.parcels[state.activeParcelKey];
-            if (parcel && !parcel.owned && state.score >= CONFIG.landMintCostFrags) {
+            if (!state.activePropertyId) return;
+            const prop = state.realProperties[state.activePropertyId];
+
+            if (prop && !prop.owned && state.score >= CONFIG.landMintCostFrags) {
                 state.score -= CONFIG.landMintCostFrags;
-                parcel.owned = true;
-                parcel.owner = "Player";
-                parcel.layer.setStyle({ color: varStyle('--neon-green'), fillColor: varStyle('--neon-green'), fillOpacity: 0.25 });
-                updateParcelPopup(parcel);
-                sysLog(`MINTED LAND: Bought ${parcel.address} registry entry!`);
+                prop.owned = true;
+                prop.owner = "Player";
+                prop.layer.setStyle({ color: varStyle('--neon-green'), fillColor: varStyle('--neon-green'), fillOpacity: 0.35 });
+                updatePropertyMetadataMarkup(prop);
+                sysLog(`ACQUIRED ASSET: Successfully secured registry for: ${prop.name}!`);
                 syncGameplayState();
             }
         });
 
         document.getElementById('build-btn').addEventListener('click', () => {
-            const parcel = state.parcels[state.activeParcelKey];
-            if (parcel && parcel.owner === "Player" && !parcel.structure && state.score >= CONFIG.structureBuildCostFrags) {
-                state.score -= CONFIG.structureBuildCostFrags;
-                const blueprints = ["Cyber Penthouse", "Data Node Core", "Aether Terminal Vault", "Holonet Hub"];
-                parcel.structure = blueprints[Math.floor(Math.random() * blueprints.length)];
-                parcel.layer.setStyle({ color: varStyle('--neon-magenta'), fillColor: varStyle('--neon-magenta'), fillOpacity: 0.45 });
-                updateParcelPopup(parcel);
-                sysLog(`UPGRADED PROPERTY: Constructed a ${parcel.structure}!`);
+            if (!state.activePropertyId) return;
+            const prop = state.realProperties[state.activePropertyId];
+
+            if (prop && prop.owner === "Player" && !prop.upgradedStructure && state.score >= CONFIG.structureUpgradeCostFrags) {
+                state.score -= CONFIG.structureUpgradeCostFrags;
+                prop.upgradedStructure = "Cyber Grid-Vault Array";
+                prop.layer.setStyle({ color: varStyle('--neon-magenta'), fillColor: varStyle('--neon-magenta'), fillOpacity: 0.5 });
+                updatePropertyMetadataMarkup(prop);
+                sysLog(`SYSTEM OVERRIDE: Installed ${prop.upgradedStructure} on real infrastructure platform.`);
                 syncGameplayState();
             }
         });
 
         function moveSim(dLat, dLon) {
-            state.isSimulating = true;
             state.playerLat += dLat;
             state.playerLon += dLon;
-            generateSurroundingGrid(state.playerLat, state.playerLon);
+            
+            // Check if user is testing uncharted territory out of range
+            fetchRealWorldBuildings(state.playerLat, state.playerLon);
             syncGameplayState();
-        }
-
-        function runLiveHardwareTracking() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition((pos) => {
-                    if (!state.isSimulating) {
-                        state.playerLat = pos.coords.latitude;
-                        state.playerLon = pos.coords.longitude;
-                        generateSurroundingGrid(state.playerLat, state.playerLon);
-                        syncGameplayState();
-                    }
-                }, null, { enableHighAccuracy: true });
-            }
         }
     </script>
 </body>
