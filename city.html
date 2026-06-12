@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXELB8 - Terminal City Core v3.1</title>
+    <title>PIXELB8 - Terminal City Core v3.2</title>
     <style>
         :root {
             --neon-blue: #00f0ff;
@@ -93,7 +93,7 @@
 
     <div id="game-container">
         <div id="boot-screen">
-            <div style="letter-spacing: 3px; font-weight: bold; color: var(--neon-blue);">PIXELB8 V3.1: INJECTING HARDENED ARCHITECTURE...</div>
+            <div style="letter-spacing: 3px; font-weight: bold; color: var(--neon-blue);">PIXELB8 V3.2: ROUTING RELATIVE NAVIGATION FIX...</div>
             <div class="boot-log" id="log-target"></div>
         </div>
 
@@ -145,23 +145,10 @@
         const T_COMMONS = 1;
         const T_DOOR = 99;
 
-        // Player starting completely safe on the main highway
-        const player = { x: 32.5, y: 33.5, angle: -Math.PI / 2, fov: Math.PI / 3, speed: 0.12, rotSpeed: 0.045 };
+        // Vector calibration: Spawn facing east directly down the neon avenue line
+        const player = { x: 4.5, y: 33.5, angle: 0, fov: Math.PI / 3, speed: 0.12, rotSpeed: 0.045 };
         const keys = { w:false, a:false, s:false, d:false, arrowleft:false, arrowright:false, arrowup:false, arrowdown:false };
         let globalPulse = 0;
-
-        // --- SAFE URL GENERATION ---
-        function getCleanBaseUrl() {
-            let loc = window.location;
-            let path = loc.pathname;
-            if (path.endsWith('.html')) {
-                path = path.substring(0, path.lastIndexOf('/'));
-            }
-            if (!path.endsWith('/')) {
-                path += '/';
-            }
-            return loc.origin + path;
-        }
 
         // --- WORLD LAYOUT GENERATOR ---
         async function buildAdvancedCircuitCity() {
@@ -175,7 +162,11 @@
                 
                 if(Array.isArray(data)) {
                     data.forEach(item => {
-                        if (item.type === "dir" && !item.name.startsWith(".")) {
+                        // Ignore current engine configurations, components, and hidden source control files
+                        if (item.name === "city.html" || item.name === "city" || item.name.startsWith(".")) {
+                            return;
+                        }
+                        if (item.type === "dir") {
                             discoveredRoutes.push("/" + item.name);
                         } else if (item.type === "file" && item.name.endsWith(".html") && item.name !== "index.html") {
                             discoveredRoutes.push("/" + item.name.replace(".html", ""));
@@ -195,7 +186,7 @@
                 }
             }
 
-            let plotX = 4;
+            let plotX = 8; // Offset slightly so player doesn't instantly collide with the first plot
             let onNorthSide = true;
 
             discoveredRoutes.forEach((path, index) => {
@@ -271,9 +262,9 @@
                 if (cell === T_DOOR) {
                     let targetRedirectPath = routeDirectoryMap[`${Math.floor(nx)},${Math.floor(ny)}`];
                     if (targetRedirectPath) {
-                        let cleanBase = getCleanBaseUrl();
-                        let destination = cleanBase + targetRedirectPath.substring(1);
-                        window.location.href = destination;
+                        // CRITICAL NAVIGATION BUG FIX: Using standard root-relative absolute routing
+                        let cleanSubPath = targetRedirectPath.startsWith('/') ? targetRedirectPath : '/' + targetRedirectPath;
+                        window.location.href = cleanSubPath;
                     }
                     return;
                 }
@@ -407,7 +398,7 @@
 
                     // --- INTEGRATED STRUCTURAL SIGNPOSTS ---
                     if (x % 40 === 0 && wallHeight > 30) {
-                        ctx.fillStyle = `rgba(0, 240, 255, ${finalLighting * 0.9})`;
+                        ctx.fillStyle = `rgba(0, 240, 255, ${finalLighting * 0.95})`;
                         ctx.fillRect(x - 35, lineStart - (wallHeight * 0.6), 70, 13);
                         
                         ctx.fillStyle = `#000`;
