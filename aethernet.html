@@ -10,7 +10,7 @@
             --neon-green: #00ff66;
             --neon-blue: #00f0ff;
             --neon-magenta: #ff00ff;
-            --dark-bg: #09090e;
+            --dark-bg: #0c0c14;
         }
 
         body, html {
@@ -22,10 +22,11 @@
         }
 
         #hud {
-            background: rgba(9, 9, 14, 0.9);
+            background: rgba(12, 12, 20, 0.95);
             border-bottom: 2px solid var(--neon-blue);
             padding: 12px; font-size: 0.8rem; z-index: 2000;
             display: flex; flex-direction: column; gap: 4px;
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
         }
 
         .hud-row { display: flex; justify-content: space-between; }
@@ -33,15 +34,15 @@
         .score { color: var(--neon-green); font-weight: bold; }
 
         /* Map Container filling viewport */
-        #map { flex: 1; width: 100%; z-index: 1; }
-
-        /* Modified Cyberpunk shader filter optimized for CartoDB Dark Matter */
-        .cyberpunk-tiles {
-            filter: hue-rotate(140deg) saturate(180%) brightness(120%) contrast(120%);
+        #map { 
+            flex: 1; 
+            width: 100%; 
+            z-index: 1; 
+            background-color: #111;
         }
 
         #controls {
-            background: rgba(9, 9, 14, 0.9);
+            background: rgba(12, 12, 20, 0.95);
             border-top: 2px solid var(--neon-blue);
             padding: 12px; z-index: 2000;
             display: flex; flex-direction: column; gap: 8px;
@@ -92,11 +93,11 @@
         <div id="terminal-log">System boot complete. Connecting to satellites...</div>
         
         <div class="sim-grid">
-            <div></div><button class="btn" onclick="moveSim(0.00015, 0)">▲ N</button><div></div>
-            <button class="btn" onclick="moveSim(0, -0.00015)">◀ W</button>
+            <div></div><button class="btn" onclick="moveSim(0.00010, 0)">▲ N</button><div></div>
+            <button class="btn" onclick="moveSim(0, -0.00012)">◀ W</button>
             <span style="font-size:0.6rem; text-align:center; align-self:center; color:#555;">D-PAD</span>
-            <button class="btn" onclick="moveSim(0, 0.00015)">E ▶</button>
-            <div></div><button class="btn" onclick="moveSim(-0.00015, 0)">▼ S</button><div></div>
+            <button class="btn" onclick="moveSim(0, 0.00012)">E ▶</button>
+            <div></div><button class="btn" onclick="moveSim(-0.00010, 0)">▼ S</button><div></div>
         </div>
     </div>
 
@@ -104,15 +105,15 @@
     <script>
         // --- CONFIGURATION & STATE ---
         const CONFIG = {
-            interactionRadiusMeters: 30, // Proximity threshold for hacking/interacting
+            interactionRadiusMeters: 35, // Expanded radius slightly for easier hitboxes
             centerSpawns: [
-                { latOffset: 0.0008, lonOffset: 0.0005, name: "Aether Centre: Prime Core" },
-                { latOffset: -0.0009, lonOffset: -0.0007, name: "Aether Centre: Nexus Grid" }
+                { latOffset: 0.0005, lonOffset: 0.0003, name: "Aether Centre: Prime Core" },
+                { latOffset: -0.0006, lonOffset: -0.0005, name: "Aether Centre: Nexus Grid" }
             ],
             nodeOffsets: [
-                { latOffset: 0.0003, lonOffset: -0.0004, name: "Data Cache Alpha" },
-                { latOffset: -0.0004, lonOffset: 0.0005, name: "Data Cache Beta" },
-                { latOffset: 0.0005, lonOffset: 0.0006, name: "Data Cache Gamma" }
+                { latOffset: 0.0002, lonOffset: -0.0002, name: "Data Cache Alpha" },
+                { latOffset: -0.0002, lonOffset: 0.0003, name: "Data Cache Beta" },
+                { latOffset: 0.0003, lonOffset: 0.0004, name: "Data Cache Gamma" }
             ]
         };
 
@@ -121,40 +122,49 @@
             playerLon: -113.4938,
             score: 0,
             isSimulating: true,
-            entities: [], // Holds nodes and processing data
+            entities: [], 
             nearestActiveTarget: null
         };
 
         // --- INITIALIZE MAP CONTAINER ---
+        // Instantiated at zoom level 18 (closer to ground level, mirroring Pokemon GO scale)
         const map = L.map('map', {
             zoomControl: false,
-            attributionControl: false
-        }).setView([state.playerLat, state.playerLon], 17);
+            attributionControl: false,
+            minZoom: 16,
+            maxZoom: 19
+        }).setView([state.playerLat, state.playerLon], 18);
 
-        // CHANGED: Swapped out base tiles to CartoDB Dark Matter.
-        // This ensures paths, buildings, and streets are beautifully visible on dark UI grids.
+        // FIX: Using high-contrast CartoDB Dark Matter with all labels included.
+        // Stripped the CSS filter class so that roads, text, and alleyways render sharply.
         const baseTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             maxZoom: 19
         }).addTo(map);
 
-        // Turn standard map colors into high-contrast cyberpunk neon roads
-        baseTiles.getContainer().classList.add('cyberpunk-tiles');
-
-        // Draw an interaction boundary around the player marker
+        // Draw interaction radar perimeter circle around player position
         const safetyProximityRing = L.circle([state.playerLat, state.playerLon], {
             radius: CONFIG.interactionRadiusMeters,
-            color: '#00ff66',
-            weight: 1,
-            fillColor: '#00ff66',
-            fillOpacity: 0.08
+            color: varStyle('--neon-green'),
+            weight: 2,
+            dashArray: '4, 4',
+            fillColor: varStyle('--neon-green'),
+            fillOpacity: 0.05
         }).addTo(map);
 
-        // Custom Player Avatar Marker element
+        // Custom Player Position Pin
         const playerMarker = L.circleMarker([state.playerLat, state.playerLon], {
-            radius: 8, color: '#ffffff', fillColor: '#00f0ff', fillOpacity: 1, weight: 3
+            radius: 9, 
+            color: '#ffffff', 
+            fillColor: varStyle('--neon-blue'), 
+            fillOpacity: 1, 
+            weight: 3
         }).addTo(map);
 
-        // --- MATH / LOGS ---
+        // CSS Variable Helper function for Leaflet configurations
+        function varStyle(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
         function sysLog(txt) {
             const logBox = document.getElementById('terminal-log');
             logBox.innerHTML += `<div>&gt; ${txt}</div>`;
@@ -166,16 +176,20 @@
             state.entities.forEach(e => map.removeLayer(e.markerObj));
             state.entities = [];
 
-            // 1. Build Static Mega Centres (Gyms)
+            // 1. Static Mega Centres
             CONFIG.centerSpawns.forEach((c, idx) => {
                 const targetLat = originLat + c.latOffset;
                 const targetLon = originLon + c.lonOffset;
                 
                 const marker = L.circleMarker([targetLat, targetLon], {
-                    radius: 14, color: '#ff00ff', fillColor: 'rgba(255,0,255,0.2)', fillOpacity: 0.5, weight: 2
+                    radius: 15, 
+                    color: varStyle('--neon-magenta'), 
+                    fillColor: varStyle('--neon-magenta'), 
+                    fillOpacity: 0.3, 
+                    weight: 3
                 }).addTo(map);
                 
-                marker.bindPopup(`<b>${c.name}</b><br>Secure sector hub.`);
+                marker.bindPopup(`<b>${c.name}</b><br>Secure Base Center.`);
 
                 state.entities.push({
                     id: 'centre_' + idx, type: 'centre', name: c.name,
@@ -183,13 +197,17 @@
                 });
             });
 
-            // 2. Build Minor Cache Nodes (Items)
+            // 2. Minor Cache Nodes
             CONFIG.nodeOffsets.forEach((n, idx) => {
                 const targetLat = originLat + n.latOffset;
                 const targetLon = originLon + n.lonOffset;
 
                 const marker = L.circleMarker([targetLat, targetLon], {
-                    radius: 6, color: '#00f0ff', fillColor: '#00f0ff', fillOpacity: 0.3, weight: 2
+                    radius: 7, 
+                    color: varStyle('--neon-blue'), 
+                    fillColor: '#ffffff', 
+                    fillOpacity: 0.6, 
+                    weight: 2
                 }).addTo(map);
 
                 state.entities.push({
@@ -198,7 +216,7 @@
                 });
             });
 
-            sysLog("World map populating complete.");
+            sysLog("Map objects loaded at current sector scale.");
         }
 
         // --- ENGINE TICK ---
@@ -231,12 +249,14 @@
                 actionBtn.textContent = targetRef.type === 'centre' ? "ENTER AETHER CENTRE" : "HARVEST DATA SPLICE";
                 actionBtn.style.borderColor = "var(--neon-green)";
                 actionBtn.style.color = "var(--neon-green)";
+                actionBtn.style.background = "rgba(0, 255, 102, 0.15)";
             } else {
-                document.getElementById('status-display').textContent = targetRef ? `Tracking: ${targetRef.name} (${Math.round(closestDist)}m out)` : "Scanning deep framework...";
+                document.getElementById('status-display').textContent = targetRef ? `Tracking: ${targetRef.name} (${Math.round(closestDist)}m)` : "Scanning local relays...";
                 actionBtn.disabled = true;
                 actionBtn.textContent = "Target Out Of Range";
                 actionBtn.style.borderColor = "var(--neon-blue)";
                 actionBtn.style.color = "var(--neon-blue)";
+                actionBtn.style.background = "rgba(0, 240, 255, 0.05)";
             }
         }
 
@@ -249,20 +269,20 @@
                 map.removeLayer(target.markerObj);
                 state.score += 100;
                 document.getElementById('score-display').textContent = state.score;
-                sysLog(`Downloaded data packets from ${target.name}.`);
+                sysLog(`Harvested ${target.name}.`);
             } else if (target.type === 'centre') {
                 state.score += 500;
                 document.getElementById('score-display').textContent = state.score;
-                sysLog(`Synchronized terminal nodes at ${target.name}. Core secure!`);
-                alert(`--- Welcome to ${target.name} ---\nYou have accessed the central base server matrix. +500 network credits established.`);
+                sysLog(`Synced with database at ${target.name}.`);
+                alert(`Welcome to ${target.name}\nMatrix terminal access granted!`);
             }
             syncGameplayState();
         });
 
-        // --- CONTROL TOGGLES (MANUAL MOVEMENT SANBOX & HARDWARE GEO) ---
+        // --- NAVIGATION HANDLERS ---
         function moveSim(dLat, dLon) {
             state.isSimulating = true;
-            document.getElementById('zone-display').textContent = "SIMULATION CONTROL";
+            document.getElementById('zone-display').textContent = "SANDBOX DEVIATION";
             state.playerLat += dLat;
             state.playerLon += dLon;
             syncGameplayState();
@@ -271,10 +291,9 @@
         function runLiveHardwareTracking() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition((pos) => {
-                    // Only override position dynamically if player isn't actively utilizing sandbox overrides
                     if (!state.isSimulating || state.playerLat === 53.5461) {
                         state.isSimulating = false;
-                        document.getElementById('zone-display').textContent = "LIVE GPS SYNCED";
+                        document.getElementById('zone-display').textContent = "LIVE GPS ONLINE";
                         state.playerLat = pos.coords.latitude;
                         state.playerLon = pos.coords.longitude;
                         
@@ -284,12 +303,12 @@
                         syncGameplayState();
                     }
                 }, (err) => {
-                    sysLog(`Hardware tracking offline: ${err.message}. Sandbox running.`);
+                    sysLog(`GPS initialization delay: ${err.message}. Using Sandbox simulation.`);
                 }, { enableHighAccuracy: true });
             }
         }
 
-        // Boot Executions
+        // Boot Pipeline
         seedWorldSector(state.playerLat, state.playerLon);
         syncGameplayState();
         runLiveHardwareTracking();
