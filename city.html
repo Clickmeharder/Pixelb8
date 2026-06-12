@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXELB8 - Terminal City Core v3</title>
+    <title>PIXELB8 - Terminal City Core v3.1</title>
     <style>
         :root {
             --neon-blue: #00f0ff;
@@ -67,7 +67,7 @@
             padding: 15px;
             overflow-y: auto;
             margin-top: 15px;
-            color: #555;
+            color: #666;
             font-family: monospace;
             font-size: 11px;
             line-height: 1.4;
@@ -85,7 +85,7 @@
         }
 
         #location-hud { top: 20px; left: 20px; border-left: 4px solid var(--neon-blue); }
-        #directory-hud { top: 20px; right: 20px; text-align: right; border-right: 4px solid var(--neon-purple); }
+        #directory-hud { top: 20px; right: 20px; text-align: right; border-right: 3px solid var(--neon-purple); }
         #controls-hud { bottom: 20px; left: 20px; color: #888; border-bottom: 2px solid #222; }
     </style>
 </head>
@@ -93,7 +93,7 @@
 
     <div id="game-container">
         <div id="boot-screen">
-            <div style="letter-spacing: 3px; font-weight: bold; color: var(--neon-blue);">PIXELB8 V3: GENERATING HIGH-FI CYBER GRID...</div>
+            <div style="letter-spacing: 3px; font-weight: bold; color: var(--neon-blue);">PIXELB8 V3.1: INJECTING HARDENED ARCHITECTURE...</div>
             <div class="boot-log" id="log-target"></div>
         </div>
 
@@ -111,14 +111,11 @@
         </div>
 
         <div id="controls-hud" class="hud">
-            W, A, S, D / Arrows: Drive Platform | Drag Mouse: Look Around | Cross Neon Doors to Launch Sub-Pages
+            W, A, S, D / Arrows: Move | Drag Mouse: Look around | Walk completely through neon doors to load pages
         </div>
     </div>
 
     <script>
-        // =========================================================================
-        // CASE-CORRECTED GITHUB REPOSITORY CONFIGURATION
-        // =========================================================================
         const repoOwner = "Clickmeharder"; 
         const repoName = "Pixelb8";       
 
@@ -130,128 +127,160 @@
         canvas.width = R_WIDTH;
         canvas.height = R_HEIGHT;
 
-        function logConsole(msg, color = "#555") {
+        function logConsole(msg, color = "#666") {
             const tgt = document.getElementById("log-target");
-            tgt.innerHTML += `<span style="color: ${color}">${msg}</span><br>`;
-            tgt.scrollTop = tgt.scrollHeight;
+            if(tgt) {
+                tgt.innerHTML += `<span style="color: ${color}">${msg}</span><br>`;
+                tgt.scrollTop = tgt.scrollHeight;
+            }
         }
 
-        // --- CORE MATRICES ARCHITECTURE ---
+        // --- CORE GRID MAP ---
         const MAP_SIZE = 64; 
         let map = new Array(MAP_SIZE * MAP_SIZE).fill(1); // 1 = Tech Commons Grid
         let routeDirectoryMap = {};
         let sectorNames = {}; 
 
-        // Block IDs Configuration
         const T_ROAD = 0;
         const T_COMMONS = 1;
         const T_DOOR = 99;
 
-        const player = { x: 32.5, y: 38.5, angle: -Math.PI / 2, fov: Math.PI / 3, speed: 0.11, rotSpeed: 0.045 };
-        const keys = { w:false, a:false, s:false, d:false, arrowleft:false, arrowright:false };
+        // Player starting completely safe on the main highway
+        const player = { x: 32.5, y: 33.5, angle: -Math.PI / 2, fov: Math.PI / 3, speed: 0.12, rotSpeed: 0.045 };
+        const keys = { w:false, a:false, s:false, d:false, arrowleft:false, arrowright:false, arrowup:false, arrowdown:false };
         let globalPulse = 0;
 
-        // --- GITHUB REPOSITORY STRUCTURE GRAPH MATCH CRAWLER ---
+        // --- SAFE URL GENERATION ---
+        function getCleanBaseUrl() {
+            let loc = window.location;
+            let path = loc.pathname;
+            if (path.endsWith('.html')) {
+                path = path.substring(0, path.lastIndexOf('/'));
+            }
+            if (!path.endsWith('/')) {
+                path += '/';
+            }
+            return loc.origin + path;
+        }
+
+        // --- WORLD LAYOUT GENERATOR ---
         async function buildAdvancedCircuitCity() {
-            logConsole(`Connecting to API tree: api.github.com/repos/${repoOwner}/${repoName}/contents`, "var(--neon-blue)");
+            logConsole(`Querying repository tree structure...`, "var(--neon-blue)");
             let discoveredRoutes = [];
 
             try {
                 let response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/`);
-                if (!response.ok) throw new Error(`HTTP Matrix status ${response.status}`);
+                if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
                 let data = await response.json();
                 
-                logConsole("Root data stream decrypted. Isolating active sub-folders...", "var(--neon-green)");
-
-                data.forEach(item => {
-                    if (item.type === "dir" && !item.name.startsWith(".")) {
-                        discoveredRoutes.push("/" + item.name);
-                        logConsole(`[NODE VERIFIED]: Added directory /${item.name}`, "#aaa");
-                    } else if (item.type === "file" && item.name.endsWith(".html") && item.name !== "index.html") {
-                        let routeName = "/" + item.name.replace(".html", "");
-                        discoveredRoutes.push(routeName);
-                        logConsole(`[NODE VERIFIED]: Added page file /${item.name}`, "#aaa");
-                    }
-                });
+                if(Array.isArray(data)) {
+                    data.forEach(item => {
+                        if (item.type === "dir" && !item.name.startsWith(".")) {
+                            discoveredRoutes.push("/" + item.name);
+                        } else if (item.type === "file" && item.name.endsWith(".html") && item.name !== "index.html") {
+                            discoveredRoutes.push("/" + item.name.replace(".html", ""));
+                        }
+                    });
+                }
+                logConsole(`Decrypted ${discoveredRoutes.length} repo nodes successfully!`, "var(--neon-green)");
             } catch (err) {
-                logConsole(`Fallback array activated due to: ${err.message}`, "var(--neon-purple)");
+                logConsole(`API Restricted or Offline. Deploying fail-safe sector structures.`, "var(--neon-purple)");
                 discoveredRoutes = ["/shop", "/games", "/tools", "/stream", "/about"];
             }
 
-            // --- CARVE GRIDDED ASYMMETRIC THOROUGHFARES ---
+            // Always clear a massive, guaranteed highway down the middle row matrix
             for (let x = 0; x < MAP_SIZE; x++) {
-                for (let y = 32; y <= 35; y++) {
+                for (let y = 31; y <= 35; y++) {
                     map[y * MAP_SIZE + x] = T_ROAD; 
                 }
             }
 
-            // --- ALLOCATE EXPANSIVE ARCHITECTURAL PLOTS ---
-            let plotX = 3;
+            let plotX = 4;
             let onNorthSide = true;
 
             discoveredRoutes.forEach((path, index) => {
                 if (plotX + 7 >= MAP_SIZE) return;
 
                 let buildingUID = 2 + index; 
-                let startY = onNorthSide ? 25 : 38; 
+                let startY = onNorthSide ? 25 : 36; 
                 sectorNames[buildingUID] = path.replace("/", "").toUpperCase();
 
-                // Structural blocks are mapped as large 6x5 blocks
+                // Clear structural spaces
                 for (let bx = 0; bx < 6; bx++) {
                     for (let by = 0; by < 5; by++) {
                         let cx = plotX + bx;
                         let cy = startY + by;
-
-                        if (bx === 0 || bx === 5 || by === 0 || by === 4) {
-                            map[cy * MAP_SIZE + cx] = buildingUID;
-                        } else {
-                            map[cy * MAP_SIZE + cx] = T_ROAD; 
+                        if (cx >= 0 && cx < MAP_SIZE && cy >= 0 && cy < MAP_SIZE) {
+                            if (bx === 0 || bx === 5 || by === 0 || by === 4) {
+                                map[cy * MAP_SIZE + cx] = buildingUID; // Perimeter wall
+                            } else {
+                                map[cy * MAP_SIZE + cx] = T_ROAD; // Interior floor space
+                            }
+                            routeDirectoryMap[`${cx},${cy}`] = path;
                         }
-                        routeDirectoryMap[`${cx},${cy}`] = path;
                     }
                 }
 
-                // --- INJECT REDIRECT-ENABLED INTEGRATION PORTALS ---
+                // Inject doors precisely aligned with the highway borders
                 if (onNorthSide) {
-                    map[(startY + 4) * MAP_SIZE + (plotX + 3)] = T_DOOR; 
-                    routeDirectoryMap[`${plotX + 3},${startY + 4}`] = path;
+                    let doorY = startY + 4;
+                    let doorX = plotX + 3;
+                    map[doorY * MAP_SIZE + doorX] = T_DOOR; 
+                    routeDirectoryMap[`${doorX},${doorY}`] = path;
                 } else {
-                    map[startY * MAP_SIZE + (plotX + 3)] = T_DOOR; 
-                    routeDirectoryMap[`${plotX + 3},${startY}`] = path;
+                    let doorY = startY;
+                    let doorX = plotX + 3;
+                    map[doorY * MAP_SIZE + doorX] = T_DOOR; 
+                    routeDirectoryMap[`${doorX},${doorY}`] = path;
                 }
 
                 if (!onNorthSide) plotX += 9;
                 onNorthSide = !onNorthSide;
             });
 
-            setTimeout(() => { document.getElementById("boot-screen").style.display = "none"; }, 1200);
+            setTimeout(() => { 
+                let boot = document.getElementById("boot-screen");
+                if(boot) boot.style.display = "none"; 
+            }, 800);
         }
 
-        // --- RUNTIME MOTION CAPTURES ---
-        window.addEventListener('keydown', e => { let k = e.key.toLowerCase(); if(k in keys) keys[k] = true; if(k === 'arrowleft' || k === 'arrowright') keys[k] = true; });
-        window.addEventListener('keyup', e => { let k = e.key.toLowerCase(); if(k in keys) keys[k] = false; if(k === 'arrowleft' || k === 'arrowright') keys[k] = false; });
+        // --- SYSTEM INPUT CAPTURES ---
+        window.addEventListener('keydown', e => { 
+            let k = e.key.toLowerCase(); 
+            if(k in keys) keys[k] = true; 
+        });
+        window.addEventListener('keyup', e => { 
+            let k = e.key.toLowerCase(); 
+            if(k in keys) keys[k] = false; 
+        });
         
         let dragActive = false;
         window.addEventListener('mousedown', () => dragActive = true);
         window.addEventListener('mouseup', () => dragActive = false);
-        window.addEventListener('mousemove', e => { if (dragActive) player.angle += e.movementX * 0.005; });
+        window.addEventListener('mousemove', e => { 
+            if (dragActive) player.angle += e.movementX * 0.005; 
+        });
 
         function attemptGridStep(dx, dy) {
-            let nx = player.x + dx; let ny = player.y + dy;
+            let nx = player.x + dx; 
+            let ny = player.y + dy;
+            
             if (nx >= 0 && nx < MAP_SIZE && ny >= 0 && ny < MAP_SIZE) {
                 let cell = map[Math.floor(ny) * MAP_SIZE + Math.floor(nx)];
                 
                 if (cell === T_DOOR) {
                     let targetRedirectPath = routeDirectoryMap[`${Math.floor(nx)},${Math.floor(ny)}`];
                     if (targetRedirectPath) {
-                        // Direct, zero-dependency browser path relocation payload
-                        window.location.href = window.location.origin + window.location.pathname.replace("index.html", "") + targetRedirectPath.substring(1);
+                        let cleanBase = getCleanBaseUrl();
+                        let destination = cleanBase + targetRedirectPath.substring(1);
+                        window.location.href = destination;
                     }
                     return;
                 }
 
                 if (cell === T_ROAD || cell === T_COMMONS) {
-                    player.x = nx; player.y = ny;
+                    player.x = nx; 
+                    player.y = ny;
                 }
             }
         }
@@ -267,123 +296,131 @@
             if (keys.arrowleft) player.angle -= player.rotSpeed;
             if (keys.arrowright) player.angle += player.rotSpeed;
 
-            const px = Math.floor(player.x); const py = Math.floor(player.y);
+            // Update Head-up Displays
+            const px = Math.floor(player.x); 
+            const py = Math.floor(player.y);
             const zoneTxt = document.getElementById("zone-txt");
             const urlTxt = document.getElementById("url-txt");
 
-            let currentPath = routeDirectoryMap[`${px},${py}`] || routeDirectoryMap[`${px},${py-1}`] || routeDirectoryMap[`${px},${py+1}`] || routeDirectoryMap[`${px-1},${py}`] || routeDirectoryMap[`${px+1},${py}`];
-
-            if (currentPath) {
-                zoneTxt.innerText = `DISTRICT: ${currentPath.toUpperCase().replace(/\//g, '')}`;
-                zoneTxt.style.color = "var(--neon-green)";
-                urlTxt.innerText = `pixelb8.lol${currentPath}`;
-            } else {
-                let tile = map[py * MAP_SIZE + px];
-                zoneTxt.innerText = tile === T_COMMONS ? "DATA COMMONS CORES" : "MAIN SYSTEMS BOULEVARD";
-                zoneTxt.style.color = tile === T_COMMONS ? "#33aa55" : "var(--neon-blue)";
-                urlTxt.innerText = "pixelb8.lol/";
+            if(zoneTxt && urlTxt) {
+                let currentPath = routeDirectoryMap[`${px},${py}`] || routeDirectoryMap[`${px},${py-1}`] || routeDirectoryMap[`${px},${py+1}`];
+                if (currentPath) {
+                    zoneTxt.innerText = `DISTRICT: ${currentPath.toUpperCase().replace(/\//g, '')}`;
+                    zoneTxt.style.color = "var(--neon-green)";
+                    urlTxt.innerText = window.location.host + currentPath;
+                } else {
+                    let tile = map[py * MAP_SIZE + px];
+                    zoneTxt.innerText = tile === T_COMMONS ? "DATA COMMONS CORES" : "MAIN SYSTEMS BOULEVARD";
+                    zoneTxt.style.color = tile === T_COMMONS ? "#33aa55" : "var(--neon-blue)";
+                    urlTxt.innerText = window.location.host + "/";
+                }
             }
 
-            document.getElementById("coords-txt").innerText = `X: ${player.x.toFixed(1)}, Y: ${player.y.toFixed(1)}`;
+            let coords = document.getElementById("coords-txt");
+            if(coords) coords.innerText = `X: ${player.x.toFixed(1)}, Y: ${player.y.toFixed(1)}`;
         }
 
-        // --- HIGH-FI 3D RAYCAST PERSPECTIVE MATRIX PIPELINE ---
+        // --- RENDER ENGINE ---
         function renderPerspectiveMatrix() {
-            // Gradient Sky Generation
+            // High-Fi Sky Gradient
             let skyGrad = ctx.createLinearGradient(0, 0, 0, R_HEIGHT / 2);
-            skyGrad.addColorStop(0, "#010103");
-            skyGrad.addColorStop(0.7, "#050512");
-            skyGrad.addColorStop(1, "#12081c");
-            ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, R_WIDTH, R_HEIGHT / 2); 
+            skyGrad.addColorStop(0, "#020205");
+            skyGrad.addColorStop(0.6, "#0a0a1f");
+            skyGrad.addColorStop(1, "#1a0f2b");
+            ctx.fillStyle = skyGrad; 
+            ctx.fillRect(0, 0, R_WIDTH, R_HEIGHT / 2); 
 
-            // High-Contrast Textured Floor Grid Plane Layout
-            ctx.fillStyle = "#06060a"; ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, R_HEIGHT / 2);
+            // Deep textured floor space
+            ctx.fillStyle = "#09090f"; 
+            ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, R_HEIGHT / 2);
 
-            // Floor Grid-line projection math routines
-            ctx.strokeStyle = "rgba(0, 240, 255, 0.05)";
+            // Ground grid lanes rendering loop
+            ctx.strokeStyle = "rgba(0, 240, 255, 0.07)";
             ctx.lineWidth = 1;
-            for (let i = 0; i < 8; i++) {
-                let lineY = R_HEIGHT / 2 + (i * i * 2);
+            for (let i = 0; i < 10; i++) {
+                let lineY = R_HEIGHT / 2 + (i * i * 1.6);
                 ctx.beginPath(); ctx.moveTo(0, lineY); ctx.lineTo(R_WIDTH, lineY); ctx.stroke();
             }
 
+            // Raycasting Loop across horizontal scanlines
             for (let x = 0; x < R_WIDTH; x++) {
                 let rayAngle = (player.angle - player.fov / 2) + (x / R_WIDTH) * player.fov;
-                let distance = 0; let hit = false; let wallType = 0;
-                let vx = Math.cos(rayAngle); let vy = Math.sin(rayAngle);
+                let distance = 0; 
+                let hit = false; 
+                let wallType = 0;
+                let vx = Math.cos(rayAngle); 
+                let vy = Math.sin(rayAngle);
 
-                while (!hit && distance < 32) {
-                    distance += 0.04;
+                while (!hit && distance < 24) {
+                    distance += 0.05;
                     let tx = Math.floor(player.x + vx * distance);
                     let ty = Math.floor(player.y + vy * distance);
 
                     if (tx < 0 || tx >= MAP_SIZE || ty < 0 || ty >= MAP_SIZE) {
-                        hit = true; distance = 32;
+                        hit = true; 
+                        distance = 24;
                     } else {
                         let tile = map[ty * MAP_SIZE + tx];
                         if (tile > 1 || tile === T_DOOR) {
-                            hit = true; wallType = tile;
+                            hit = true; 
+                            wallType = tile;
                         }
                     }
                 }
 
                 let correctedD = distance * Math.cos(rayAngle - player.angle);
-                let wallHeight = Math.min(R_HEIGHT, Math.floor(R_HEIGHT / correctedD));
+                let wallHeight = Math.min(R_HEIGHT, Math.floor(R_HEIGHT / (correctedD || 0.1)));
                 let lineStart = (R_HEIGHT / 2) - (wallHeight / 2);
                 let lineEnd = (R_HEIGHT / 2) + (wallHeight / 2);
 
-                // Lighting Calculations: High ambient + directional headlight throw multipliers
-                let baseLight = Math.min(1, 1 - (correctedD / 24));
+                // Lighting mixes: Global ambient + precise headlights drop-offs
+                let baseLight = Math.min(1, 1 - (correctedD / 20));
                 let angleDiff = Math.abs(rayAngle - player.angle);
-                let headlight = angleDiff < 0.28 ? Math.max(0, 1 - (correctedD / 14)) * 0.6 : 0;
-                let finalLighting = Math.min(1, baseLight + headlight + 0.25); // Amplified global light channels
+                let headlight = angleDiff < 0.25 ? Math.max(0, 1 - (correctedD / 12)) * 0.7 : 0;
+                let finalLighting = Math.min(1, baseLight + headlight + 0.3); // Bright visibility channels
 
                 if (wallType === T_DOOR) {
-                    // Pulsing door color parameters
-                    let pulse = Math.floor(140 + Math.sin(globalPulse * 2.5) * 115);
+                    // Interactive Neon Gateways
+                    let pulse = Math.floor(130 + Math.sin(globalPulse * 3) * 125);
                     ctx.strokeStyle = `rgba(0, ${pulse}, 255, ${finalLighting})`;
-                    ctx.beginPath(); ctx.moveTo(x, lineStart + (wallHeight * 0.2)); ctx.lineTo(x, lineEnd); ctx.stroke();
-                    
-                    // Neon Header arch accents across door boundaries
-                    ctx.strokeStyle = `rgba(191, 0, 255, ${finalLighting})`;
-                    ctx.beginPath(); ctx.moveTo(x, lineStart + (wallHeight * 0.2)); ctx.lineTo(x, lineStart + (wallHeight * 0.15)); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(x, lineStart + (wallHeight * 0.15)); ctx.lineTo(x, lineEnd); ctx.stroke();
                 } 
                 else if (wallType > 1) {
-                    // Unique procedural color seeds mapped from core asset tags strings calculations
-                    let r = Math.floor((75 * wallType) % 130 + 30);
-                    let g = Math.floor((55 * wallType) % 110 + 20);
-                    let b = Math.floor((95 * wallType) % 150 + 60);
+                    // Structural colors
+                    let r = Math.floor((75 * wallType) % 120 + 40);
+                    let g = Math.floor((55 * wallType) % 90 + 30);
+                    let b = Math.floor((95 * wallType) % 140 + 70);
 
-                    // Add high-visibility horizontal glowing accent stripes across the facades
-                    let blockYPosition = Math.floor(correctedD * 10) % 20;
-                    if (blockYPosition > 16) {
-                        r = Math.min(255, r + 100); g = Math.min(255, g + 100); b = Math.min(255, b + 140);
+                    // Cyber-grid horizontal stripe textures
+                    let stripeCheck = Math.floor(correctedD * 12) % 18;
+                    if (stripeCheck > 15) {
+                        r = Math.min(255, r + 90); g = Math.min(255, g + 90); b = Math.min(255, b + 150);
                     }
 
-                    // Render Building Facade columns pipelines
+                    // Render wall slice
                     ctx.strokeStyle = `rgb(${Math.floor(r * finalLighting)},${Math.floor(g * finalLighting)},${Math.floor(b * finalLighting)})`;
                     ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineEnd); ctx.stroke();
 
-                    // Structural angled framing caps (sloped upper trims)
-                    ctx.strokeStyle = `rgb(${Math.floor(r * 0.5 * finalLighting)},${Math.floor(g * 0.5 * finalLighting)},${Math.floor(b * 0.5 * finalLighting)})`;
-                    ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineStart - (wallHeight * 0.35)); ctx.stroke();
+                    // Geometric Sloped Roof Caps
+                    ctx.strokeStyle = `rgb(${Math.floor(r * 0.4 * finalLighting)},${Math.floor(g * 0.4 * finalLighting)},${Math.floor(b * 0.4 * finalLighting)})`;
+                    ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineStart - (wallHeight * 0.3)); ctx.stroke();
 
-                    // --- HIGH-FI STREET SIGN MECHANICS ---
-                    if (x % 36 === 0 && wallHeight > 25) {
-                        ctx.fillStyle = `rgba(0, 240, 255, ${finalLighting * 0.95})`;
-                        ctx.fillRect(x - 30, lineStart - (wallHeight * 0.65), 60, 14);
+                    // --- INTEGRATED STRUCTURAL SIGNPOSTS ---
+                    if (x % 40 === 0 && wallHeight > 30) {
+                        ctx.fillStyle = `rgba(0, 240, 255, ${finalLighting * 0.9})`;
+                        ctx.fillRect(x - 35, lineStart - (wallHeight * 0.6), 70, 13);
                         
                         ctx.fillStyle = `#000`;
-                        ctx.font = "bold 7px monospace";
+                        ctx.font = "bold 8px monospace";
                         let tag = sectorNames[wallType] || "NODE";
-                        ctx.fillText(tag, x - 25, lineStart - (wallHeight * 0.65) + 10);
+                        ctx.fillText(tag, x - 30, lineStart - (wallHeight * 0.6) + 10);
                     }
                 }
             }
 
-            // Draw crisp horizontal transit lane lines and perspective horizon guidelines
-            ctx.fillStyle = "rgba(0, 240, 255, 0.2)";
-            ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, 2); // Main neon grid separator horizon
+            // High-intensity horizon separator guideline
+            ctx.fillStyle = "rgba(0, 240, 255, 0.25)";
+            ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, 2); 
         }
 
         function engineTickLoop() {
@@ -392,6 +429,7 @@
             requestAnimationFrame(engineTickLoop);
         }
 
+        // Initialize Runtime Boot Sequence Hook
         buildAdvancedCircuitCity().then(() => {
             engineTickLoop();
         });
