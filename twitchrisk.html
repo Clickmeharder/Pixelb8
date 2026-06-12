@@ -391,9 +391,18 @@ function updateFloatingStatsPanel(code, cData) {
     document.getElementById("box-cap").textContent = 15 + (cData.buildings.city * 35);
 }
 
+
+let projectionTimeoutId = null;
 function changeMapProjection(target) {
     const map = document.getElementById("map");
     const indicator = document.getElementById("view-indicator");
+    
+    // 🛑 CRITICAL DEBOUNCE: Clear any pending 30-second world resets 
+    // to prevent overlapping camera snaps if someone types a new command.
+    if (projectionTimeoutId) {
+        clearTimeout(projectionTimeoutId);
+        projectionTimeoutId = null;
+    }
     
     if (CONTINENT_VIEWBOXES[target.toLowerCase()]) {
         currentViewMode = target.toLowerCase() === "world" ? "world" : "continent";
@@ -448,9 +457,19 @@ function changeMapProjection(target) {
             return;
         }
     }
+    
     updateMapColors();
-}
 
+    // ⏳ AUTOMATED FALLBACK PROTOCOL
+    // If we just zoomed into anything OTHER than the global world view, 
+    // set a countdown to pull the tactical camera back out after 30 seconds.
+    if (target.toLowerCase() !== "world") {
+        projectionTimeoutId = setTimeout(() => {
+            log("⏳ Idle Cooldown: Returning tactical tracking camera to global world view.");
+            changeMapProjection("world");
+        }, 30000); // 30,000 milliseconds = 30 seconds
+    }
+}
 /**
  * Smoothly interpolates the SVG map viewbox toward a shifting visual center point.
  * Integrates directly with your global 360x180 scale properties and tracking flags.
