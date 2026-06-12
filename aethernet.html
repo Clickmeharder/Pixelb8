@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aether Net: AR Location Game</title>
+    <style>
+        :root {
+            --neon-green: #00ff66;
+            --neon-blue: #00f0ff;
+            --neon-red: #ff0055;
+            --dark-bg: #0a0a12;
+            --panel-bg: rgba(16, 16, 28, 0.85);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #hud {
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--neon-blue);
+            padding: 15px;
+            font-size: 0.85rem;
+            z-index: 10;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        .hud-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .label { color: #888cf0; }
+        .val { font-weight: bold; }
+        .accent-blue { color: var(--neon-blue); }
+        .accent-green { color: var(--neon-green); }
+
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #controls {
+            background: var(--panel-bg);
+            border-top: 2px solid var(--neon-blue);
+            padding: 15px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 12px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .btn:active:not(:disabled) {
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        .btn:disabled {
+            border-color: #444;
+            color: #444;
+            cursor: not-allowed;
+            background: none;
+        }
+
+        #action-btn {
+            font-size: 1.1rem;
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+        #action-btn:active:not(:disabled) {
+            background: var(--neon-green);
+            color: var(--dark-bg);
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+
+        .sim-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+
+        .sim-pad .btn {
+            padding: 8px;
+            font-size: 0.8rem;
+        }
+
+        #log {
+            font-size: 0.75rem;
+            color: #aaa;
+            max-height: 50px;
+            overflow-y: auto;
+            border: 1px solid #222;
+            padding: 5px;
+            background: rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hud">
+        <div class="hud-line">
+            <span><span class="label">LAT:</span> <span id="lat" class="val">-</span></span>
+            <span><span class="label">LON:</span> <span id="lon" class="val">-</span></span>
+        </div>
+        <div class="hud-line">
+            <span><span class="label">MODE:</span> <span id="mode" class="val accent-blue">GPS INITIALIZING</span></span>
+            <span><span class="label">FRAGMENTS:</span> <span id="score" class="val accent-green">0</span></span>
+        </div>
+        <div class="hud-line">
+            <span><span class="label">NEAREST NODE:</span> <span id="nearest-distance" class="val">-</span></span>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="radarCanvas"></canvas>
+    </div>
+
+    <div id="controls">
+        <button id="action-btn" class="btn" disabled>INTERCEPT NODE</button>
+        <div id="log">System initialized. Awaiting GPS fix...</div>
+        
+        <div class="sim-pad">
+            <td></td>
+            <button class="btn sim-btn" onclick="simulateMove(0, 0.0001)">▲ N</button>
+            <td></td>
+            <button class="btn sim-btn" onclick="simulateMove(-0.0001, 0)">◀ W</button>
+            <span style="display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:#666;">SIM</span>
+            <button class="btn sim-btn" onclick="simulateMove(0.0001, 0)">E ▶</button>
+            <td></td>
+            <button class="btn sim-btn" onclick="simulateMove(0, -0.0001)">▼ S</button>
+            <td></td>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME STATE ---
+        const state = {
+            player: { lat: 0, lon: 0 },
+            nodes: [],
+            score: 0,
+            isSimulation: false,
+            radarRadiusMeters: 100, // Maximum visible distance on radar ring
+            interactionRadius: 25   // Meters required to hack a node
+        };
+
+        // --- DOM ELEMENTS ---
+        const el = {
+            lat: document.getElementById('lat'),
+            lon: document.getElementById('lon'),
+            mode: document.getElementById('mode'),
+            score: document.getElementById('score'),
+            distance: document.getElementById('nearest-distance'),
+            actionBtn: document.getElementById('action-btn'),
+            log: document.getElementById('log'),
+            canvas: document.getElementById('radarCanvas')
+        };
+
+        const ctx = el.canvas.getContext('2d');
+
+        // --- MATH UTILITIES (Haversine Formula) ---
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Radius of Earth in meters
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; 
+        }
+
+        // Bearing calculation to map nodes around a 360-degree radar layout
+        function calculateBearing(lat1, lon1, lat2, lon2) {
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const lat1Rad = lat1 * Math.PI / 180;
+            const lat2Rad = lat2 * Math.PI / 180;
+            const y = Math.sin(dLon) * Math.cos(lat2Rad);
+            const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
+            return Math.atan2(y, x); // Radians relative to true North
+        }
+
+        function logMessage(msg) {
+            el.log.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+            el.log.scrollTop = el.log.scrollHeight;
+        }
+
+        // --- GENERATE REGIONAL NODES ---
+        // Generates consistent deterministic objects around the user's starting point
+        function generateLocalNodes(baseLat, baseLon) {
+            state.nodes = [];
+            logMessage("Generating local local grid anomalies...");
+            
+            // Seed a handful of local anomalies within roughly 40-90 meters
+            const spawnOffsets = [
+                { dLat: 0.0004, dLon: 0.0003, name: "Node_Alpha" },
+                { dLat: -0.0003, dLon: 0.0005, name: "Node_Beta" },
+                { dLat: -0.0005, dLon: -0.0004, name: "Node_Gamma" },
+                { dLat: 0.0002, dLon: -0.0006, name: "Node_Delta" }
+            ];
+
+            state.nodes = spawnOffsets.map((offset, index) => ({
+                id: index,
+                name: offset.name,
+                lat: baseLat + offset.dLat,
+                lon: baseLon + offset.dLon,
+                active: true
+            }));
+        }
+
+        // --- GEOLOCATION MANAGER ---
+        function initGeolocation() {
+            if (!navigator.geolocation) {
+                logMessage("GPS not supported. Switching to Simulation Mode.");
+                enableSimulationMode(53.5461, -113.4938); // Default coordinates (Edmonton)
+                return;
+            }
+
+            logMessage("Requesting precision coordinates...");
+            
+            const geoOptions = {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 10000
+            };
+
+            // Watch position updates continuously
+            navigator.geolocation.watchPosition(
+                (position) => {
+                    if (!state.isSimulation) {
+                        const firstFix = (state.player.lat === 0);
+                        state.player.lat = position.coords.latitude;
+                        state.player.lon = position.coords.longitude;
+                        el.mode.textContent = "LIVE GPS CONNECTED";
+                        el.mode.className = "val accent-green";
+
+                        if (firstFix) {
+                            generateLocalNodes(state.player.lat, state.player.lon);
+                        }
+                        updateGameLoop();
+                    }
+                },
+                (error) => {
+                    logMessage(`GPS Error: ${error.message}. Enabling Simulation.`);
+                    enableSimulationMode(53.5461, -113.4938);
+                },
+                geoOptions
+            );
+        }
+
+        function enableSimulationMode(lat, lon) {
+            state.isSimulation = true;
+            state.player.lat = lat;
+            state.player.lon = lon;
+            el.mode.textContent = "SIMULATION MATRIX";
+            el.mode.className = "val accent-blue";
+            generateLocalNodes(lat, lon);
+            updateGameLoop();
+        }
+
+        function simulateMove(dLon, dLat) {
+            if (!state.isSimulation) {
+                logMessage("Switching execution to standalone simulation mode.");
+                state.isSimulation = true;
+                el.mode.textContent = "SIMULATION MATRIX";
+                el.mode.className = "val accent-blue";
+            }
+            state.player.lat += dLat;
+            state.player.lon += dLon;
+            updateGameLoop();
+        }
+
+        // --- ENGINE LOOP ---
+        function updateGameLoop() {
+            el.lat.textContent = state.player.lat.toFixed(6);
+            el.lon.textContent = state.player.lon.toFixed(6);
+
+            let closestNode = null;
+            let minDistance = Infinity;
+
+            // Compute distance metrics across all nodes
+            state.nodes.forEach(node => {
+                if (!node.active) return;
+                const dist = calculateDistance(state.player.lat, state.player.lon, node.lat, node.lon);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestNode = node;
+                }
+            });
+
+            // Action UI updates based on dynamic range rules
+            if (closestNode && minDistance <= state.interactionRadius) {
+                el.distance.textContent = `${minDistance.toFixed(1)}m [WITHIN INTERCEPT RANGE]`;
+                el.distance.className = "val accent-green";
+                el.actionBtn.disabled = false;
+                el.actionBtn.onclick = () => interceptNode(closestNode.id);
+            } else {
+                el.distance.textContent = closestNode ? `${minDistance.toFixed(1)}m` : "No nodes detected.";
+                el.distance.className = "val";
+                el.actionBtn.disabled = true;
+            }
+
+            renderRadar();
+        }
+
+        function interceptNode(id) {
+            const target = state.nodes.find(n => n.id === id);
+            if (target && target.active) {
+                target.active = false;
+                state.score += 250;
+                el.score.textContent = state.score;
+                logMessage(`Successfully breached ${target.name}! +250 Fragments.`);
+                updateGameLoop();
+            }
+        }
+
+        // --- CANVAS RENDER PIPELINE ---
+        function resizeCanvas() {
+            el.canvas.width = el.canvas.parentElement.clientWidth;
+            el.canvas.height = el.canvas.parentElement.clientHeight;
+            renderRadar();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 100);
+
+        function renderRadar() {
+            const cx = el.canvas.width / 2;
+            const cy = el.canvas.height / 2;
+            const maxRadius = Math.min(cx, cy) * 0.85;
+
+            // Clear frame
+            ctx.fillStyle = '#0a0a12';
+            ctx.fillRect(0, 0, el.canvas.width, el.canvas.height);
+
+            // Draw radial grid sweeps
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.15)';
+            ctx.lineWidth = 1;
+            for (let r = 0.25; r <= 1; r += 0.25) {
+                ctx.beginPath();
+                ctx.arc(cx, cy, maxRadius * r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Crosshairs
+            ctx.beginPath();
+            ctx.moveTo(cx - maxRadius, cy); ctx.lineTo(cx + maxRadius, cy);
+            ctx.moveTo(cx, cy - maxRadius); ctx.lineTo(cx, cy + maxRadius);
+            ctx.stroke();
+
+            // Interaction ring helper boundary (25 meters scaled visual)
+            const interactionVisualRadius = (state.interactionRadius / state.radarRadiusMeters) * maxRadius;
+            ctx.strokeStyle = 'rgba(0, 255, 102, 0.25)';
+            ctx.beginPath();
+            ctx.arc(cx, cy, interactionVisualRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Draw Entities
+            state.nodes.forEach(node => {
+                if (!node.active) return;
+
+                const distance = calculateDistance(state.player.lat, state.player.lon, node.lat, node.lon);
+                
+                // Don't render things out beyond our maximum viewport scan depth
+                if (distance > state.radarRadiusMeters) return;
+
+                const bearing = calculateBearing(state.player.lat, state.player.lon, node.lat, node.lon);
+                
+                // Map polar coordinates onto screen-space coordinates
+                const visualDist = (distance / state.radarRadiusMeters) * maxRadius;
+                
+                // Canvas angles treat 0 as East, so subtract Half-PI to realign true North straight up
+                const x = cx + visualDist * Math.sin(bearing);
+                const y = cy - visualDist * Math.cos(bearing);
+
+                // Draw Anomaly Mark
+                ctx.fillStyle = distance <= state.interactionRadius ? '#00ff66' : '#00f0ff';
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Node tag text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '10px monospace';
+                ctx.fillText(`${node.name} (${Math.round(distance)}m)`, x + 10, y + 4);
+            });
+
+            // Draw Central Player Marker
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0; // reset
+        }
+
+        // Start initialization sequence
+        initGeolocation();
+    </script>
+</body>
+</html>
