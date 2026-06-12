@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aether Net: Autonomous Grid Driver</title>
+    <title>Aether Net: Clean Grid Matrix</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -30,12 +30,12 @@
         }
 
         .boot-modal {
-            max-width: 450px; width: 100%; text-align: center;
+            max-width: 400px; width: 100%; text-align: center;
             background: #000; padding: 25px; border: 1px solid var(--neon-blue);
             box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
         }
 
-        .search-container { margin: 15px 0 5px 0; display: flex; gap: 4px; }
+        .search-container { margin: 15px 0 10px 0; display: flex; gap: 4px; }
 
         #search-input {
             flex: 1; background: #111; color: #fff; border: 1px solid #444;
@@ -62,8 +62,7 @@
         #fpv-viewport {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 5; display: none; background: radial-gradient(circle at center, #0c0c16 0%, #020204 100%);
-            perspective: 500px; 
-            perspective-origin: 50% 50%;
+            perspective: 600px; perspective-origin: 50% 50%;
         }
 
         #fpv-world {
@@ -71,76 +70,38 @@
             transform-style: preserve-3d;
         }
 
-        /* 3D SOLID COMPLEX EXTENDED POLYHEDRONS */
+        /* 3D SOLID CUBED EXTRUSIONS */
         .building-3d { position: absolute; transform-style: preserve-3d; width: 0; height: 0; }
         
         .face {
             position: absolute; 
-            background: rgba(11, 16, 33, 0.96); 
+            background: rgba(12, 18, 38, 0.96); 
             border: 1px solid var(--neon-blue);
-            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.25);
+            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.2);
             transform-origin: top left;
             backface-visibility: hidden;
         }
 
-        /* TRUE POLYGON ROOF FLATS */
-        .roof-polygon-canvas {
-            position: absolute; transform-style: preserve-3d;
-            width: 0; height: 0;
+        .roof-flat-cap {
+            position: absolute;
+            background: #19223e;
+            border: 1px solid rgba(0, 240, 255, 0.6);
+            transform-origin: center center;
+            backface-visibility: hidden;
+        }
+
+        /* HIGH-FIDELITY CONNECTED HIGHWAY PLATFORM */
+        #road-matrix-canvas {
+            position: absolute; width: 4000px; height: 4000px;
+            top: 50%; left: 50%; margin-left: -2000px; margin-top: -2000px;
+            transform: rotateX(90deg) translateZ(0px);
             pointer-events: none;
         }
 
-        .roof-triangle-mesh {
-            position: absolute;
-            width: 0; height: 0;
-            border-style: solid;
-            transform-origin: top left;
-            backface-visibility: hidden;
-        }
-
-        /* CONTIGUOUS CLEAN DRIVE LANES */
-        .road-3d { position: absolute; transform-style: preserve-3d; width: 0; height: 0; pointer-events: none; }
-        
-        .road-clean-segment {
-            position: absolute;
-            background: #111320;
-            border-left: 2px solid rgba(0, 240, 255, 0.5);
-            border-right: 2px solid rgba(0, 240, 255, 0.5);
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
-            transform-origin: top center;
-        }
-
-        .road-center-stripe {
-            position: absolute; top: 0; left: 50%; width: 2px; height: 100%;
-            background-image: linear-gradient(to bottom, var(--neon-blue) 50%, transparent 50%);
-            background-size: 10px 25px; transform: translateX(-50%);
-        }
-
-        .fpv-ground {
-            position: absolute; width: 6000px; height: 6000px;
-            top: 50%; left: 50%; margin-left: -3000px; margin-top: -3000px;
-            background-image: linear-gradient(rgba(0, 240, 255, 0.015) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 240, 255, 0.015) 1px, transparent 1px);
-            background-size: 60px 60px;
-            transform: rotateX(90deg) translateZ(0px);
-        }
-
-        /* GRID PROP VEHICLE PROXY SYSTEM */
-        .car-object-3d {
-            position: absolute; transform-style: preserve-3d;
-            width: 0; height: 0;
-        }
-        .car-body-shell {
-            position: absolute; width: 20px; height: 12px; depth: 36px;
-            background: var(--neon-magenta); border: 2px solid #fff;
-            box-shadow: 0 0 20px var(--neon-magenta);
-            transform: translate3d(-10px, -6px, -18px);
-        }
-
-        /* VEHICLE COCKPIT GRAPHICS CHASSIS */
+        /* DRIVABLE HUD AND OVERLAYS */
         #vehicle-chassis {
             position: absolute; bottom: 0; left: 50%;
-            width: 340px; height: 130px; transform: translateX(-50%);
+            width: 340px; height: 110px; transform: translateX(-50%);
             z-index: 20; pointer-events: none;
             display: none; flex-direction: column; justify-content: flex-end;
         }
@@ -170,7 +131,6 @@
             cursor: pointer; text-transform: uppercase; width: 100%; margin-top: 5px;
         }
         .btn:active:not(:disabled) { background: var(--neon-blue); color: var(--dark-bg); }
-        .btn:disabled { color: #333; border-color: #333; background: none; cursor: not-allowed; }
 
         .sim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 220px; margin: 0 auto; }
         .sim-grid .btn { padding: 8px; font-size: 0.7rem; }
@@ -191,34 +151,33 @@
 
     <div id="boot-overlay">
         <div class="boot-modal">
-            <h2 style="color: var(--neon-blue); margin-top: 0; letter-spacing: 2px;">GRID DRIVER MK-IV</h2>
+            <h2 style="color: var(--neon-blue); margin-top: 0; letter-spacing: 2px;">CLEAN DRIVE MATRIX</h2>
             <p style="font-size: 0.85rem; color: #aaa; text-align: left; line-height: 1.4;">
-                Walk the grid infrastructure on foot, approach the nearest road coordinate array, and board the waiting vehicle core.
+                Extruding raw shapes into 3D boxes and mapping beautifully joined canvas lanes for driving.
             </p>
             
             <div class="search-container">
-                <input type="text" id="search-input" value="manhattan, new york" placeholder="Enter City Location...">
+                <input type="text" id="search-input" value="chicago, illinois" placeholder="Enter City Location...">
                 <button class="btn" style="margin-top:0; width:auto; padding: 0 15px;" onclick="searchGlobalLocation()">Sync</button>
             </div>
-            <div id="search-status" style="font-size:0.75rem; color:var(--neon-magenta); min-height:15px; margin-bottom:10px; text-align:left;"></div>
+            <div id="search-status" style="font-size:0.75rem; color:var(--neon-magenta); min-height:15px; text-align:left;"></div>
 
             <button class="btn" onclick="initPositionMode('gps')">📡 SCAN SATELLITE GPS</button>
-            <div style="margin: 12px 0 8px 0; color: #555; font-size: 0.75rem;">— OR START AT FALLBACK COORDS —</div>
-            <button class="btn" style="border-color: #666; color: #aaa;" onclick="initPositionMode('custom')">BOOT NODE GRAPH</button>
+            <button class="btn" style="border-color: #666; color: #aaa;" onclick="initPositionMode('custom')">BOOT CORE SYSTEM</button>
         </div>
     </div>
 
     <div id="hud">
         <div class="hud-row">
             <span>COORDS: <span id="gps-display" class="accent">Scanning...</span></span>
-            <span>SYSTEM STATE: <span id="hud-mode-state" class="magenta" style="color:var(--neon-green);">WALKING ON FOOT</span></span>
+            <span>GRID MODE: <span id="hud-mode-state" class="magenta" style="color:var(--neon-green)">PEDESTRIAN WALK</span></span>
         </div>
         <div class="hud-row">
-            <span>NEAREST CAR: <span id="hud-car-distance" class="accent">Searching...</span></span>
+            <span>VEHICLE STATUS: <span id="hud-car-distance" class="accent">Awaiting Near Road</span></span>
             <span>VELOCITY: <span id="hud-speedometer-text" style="color:var(--neon-blue); font-weight:bold;">0.0 KM/H</span></span>
         </div>
         <div class="hud-row" style="margin-top: 2px; font-size: 0.7rem; border-top: 1px dashed #222; padding-top: 2px;">
-            <span id="status-display">Initializing environmental buffers...</span>
+            <span id="status-display">Syncing layout components...</span>
             <button class="toggle-view-btn" id="view-toggle" onclick="togglePerspectiveView()">MODE: 2D TACTICAL</button>
         </div>
     </div>
@@ -228,31 +187,27 @@
         
         <div id="fpv-viewport">
             <div id="fpv-world">
-                <div class="fpv-ground"></div>
+                <canvas id="road-matrix-canvas" width="4000" height="4000"></canvas>
             </div>
 
             <div id="vehicle-chassis">
                 <div class="canopy-hood">
-                    <div class="hud-digital-gauge" id="chassis-gear">GEAR: DRIVE</div>
+                    <div class="hud-digital-gauge">SYSTEM ACTIVE</div>
                     <div class="hud-digital-gauge" id="chassis-kmh" style="color:var(--neon-blue);">0 KM/H</div>
-                    <div class="hud-digital-gauge" id="chassis-altitude">ALT: 12.5m</div>
+                    <div class="hud-digital-gauge">CAMERA LOCKED</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="controls">
-        <div class="action-container">
-            <button id="action-btn" class="btn" onclick="triggerVehicleInteraction()" style="flex: 1; border-color: var(--neon-magenta); color: var(--neon-magenta);">WALKING ENGINE ACTIVE</button>
-        </div>
-        
-        <div id="terminal-log">System mapping active. Ready...</div>
+        <button id="action-btn" class="btn" onclick="triggerVehicleInteraction()" style="border-color: var(--neon-magenta); color: var(--neon-magenta); margin-bottom: 4px;">WALK SYSTEM ACTIVE</button>
+        <div id="terminal-log">System maps locked. Approach any marked road node to drop a car...</div>
         
         <div class="sim-grid">
             <button class="btn" onmousedown="startInput('steerLeft')" onmouseup="stopInput('steerLeft')" onmouseleave="stopInput('steerLeft')" ontouchstart="startInput('steerLeft')" ontouchend="stopInput('steerLeft')">◀ TURN</button>
-            <button class="btn" style="background:rgba(0,255,102,0.06);" onmousedown="startInput('gas')" onmouseup="stopInput('gas')" onmouseleave="stopInput('gas')" ontouchstart="startInput('gas')" ontouchend="stopInput('gas')">▲ FORWARD</button>
+            <button class="btn" style="background:rgba(0,255,102,0.06);" onmousedown="startInput('gas')" onmouseup="stopInput('gas')" onmouseleave="stopInput('gas')" ontouchstart="startInput('gas')" ontouchend="stopInput('gas')">▲ DRIVE</button>
             <button class="btn" onmousedown="startInput('steerRight')" onmouseup="stopInput('steerRight')" onmouseleave="stopInput('steerRight')" ontouchstart="startInput('steerRight')" ontouchend="stopInput('steerRight')">TURN ▶</button>
-            
             <div></div>
             <button class="btn" style="background:rgba(255,0,0,0.06);" onmousedown="startInput('brake')" onmouseup="stopInput('brake')" onmouseleave="stopInput('brake')" ontouchstart="startInput('brake')" ontouchend="stopInput('brake')">▼ REVERSE</button>
             <div></div>
@@ -262,21 +217,19 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const CONFIG = {
-            queryRadiusMeters: 350,
-            renderHorizonDistancePx: 1400,
-            roadLaneWidthPx: 52,
-            // Physics / Suspension Core Architecture
-            maxCarSpeed: 18.0,
-            carAcceleration: 0.22,
-            carBraking: 0.40,
-            carFriction: 0.05,
-            carSteeringSpeed: 3.2,
-            humanWalkSpeed: 2.2,
-            gravityForce: 1.8,
-            targetEyeHeight: 32.0 // Ensures car camera spawns completely clear of asphalt
+            queryRadiusMeters: 300,
+            renderHorizonPx: 1200,
+            roadDrawWidth: 44,
+            maxCarSpeed: 16.0,
+            carAcceleration: 0.25,
+            carBraking: 0.45,
+            carFriction: 0.06,
+            carSteeringSpeed: 3.5,
+            humanWalkSpeed: 2.0,
+            eyeHeight: 28.0
         };
 
-        const HOME_ANCHOR = { lat: 40.7580, lon: -73.9855 }; // Times Square, NY
+        const HOME_ANCHOR = { lat: 41.8781, lon: -87.6298 }; // Chicago Core
 
         let state = {
             playerLat: HOME_ANCHOR.lat, 
@@ -287,16 +240,12 @@
             realRoads: {}, 
             isFetchingData: false,
             
-            // Interaction / State variables
             currentControlState: "FOOT", // FOOT or VEHICLE
             carLat: null,
             carLon: null,
-            carSpawnedOnGrid: false,
+            carSpawned: false,
             
-            // Kinematics and Suspension Engine Vectors
             velocity: 0,
-            altitudeY: 180.0, // Spawns way high up in sky to drop down smoothly
-            vertVelocityY: 0,
             inputs: { gas: false, brake: false, steerLeft: false, steerRight: false }
         };
 
@@ -307,8 +256,8 @@
             radius: 7, color: '#ffffff', fillColor: varStyle('--neon-blue'), fillOpacity: 1, weight: 2.5
         }).addTo(map);
 
-        const vehicleMarkerProxy = L.circleMarker([0, 0], {
-            radius: 6, color: varStyle('--neon-magenta'), fillColor: '#000', fillOpacity: 0.8, weight: 2
+        const carMarkerProxy = L.circleMarker([0, 0], {
+            radius: 6, color: varStyle('--neon-magenta'), fillColor: '#000', fillOpacity: 0.9, weight: 2
         });
 
         function varStyle(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
@@ -345,8 +294,7 @@
                 state.viewMode = "3D";
                 mapEl.style.display = 'none';
                 fpvEl.style.display = 'block';
-                toggleBtn.textContent = "MODE: 3D FIRST-PERSON";
-                sysLog("ENVIRONMENT ENGINE LINKED. Simulation running.");
+                toggleBtn.textContent = "MODE: 3D DRIVE GRID";
             } else {
                 state.viewMode = "2D";
                 mapEl.style.display = 'block';
@@ -357,23 +305,11 @@
             renderEnvironmentGraphicsEngine();
         }
 
-        // --- TICK PROCESSOR LOGIC LOOP (40Hz Core Engine Architecture) ---
+        // --- TICK CALCULATION LOOP (40Hz Core) ---
         setInterval(() => {
-            let positionChanged = false;
-
-            // Handle Gravity/Suspension calculations
-            if (state.altitudeY > CONFIG.targetEyeHeight) {
-                state.vertVelocityY -= CONFIG.gravityForce;
-                state.altitudeY += state.vertVelocityY;
-                if (state.altitudeY <= CONFIG.targetEyeHeight) {
-                    state.altitudeY = CONFIG.targetEyeHeight;
-                    state.vertVelocityY = 0;
-                    sysLog("🏀 KINEMATIC DISPATCH: Vehicle chassis safely compressed onto road surface geometry.");
-                }
-            }
+            let moved = false;
 
             if (state.currentControlState === "VEHICLE") {
-                // Driving mechanics
                 if (Math.abs(state.velocity) > 0.05) {
                     const steerDir = state.velocity > 0 ? 1 : -1;
                     if (state.inputs.steerLeft) state.playerHeading = (state.playerHeading - CONFIG.carSteeringSpeed * steerDir + 360) % 360;
@@ -391,298 +327,201 @@
                     const headingRad = (state.playerHeading * Math.PI) / 180;
                     state.playerLat += Math.cos(headingRad) * (0.00001 * (state.velocity / 10));
                     state.playerLon += Math.sin(headingRad) * (0.00001 * (state.velocity / 10)) * 1.3;
-                    
-                    // Vehicle moves car object along with it
                     state.carLat = state.playerLat;
                     state.carLon = state.playerLon;
-                    positionChanged = true;
+                    moved = true;
                 }
             } else {
-                // Walking mechanics
                 state.velocity = 0;
-                let walkMoveX = 0;
-                let walkMoveZ = 0;
+                let mz = 0, mx = 0;
+                if (state.inputs.gas) mz = 1;
+                if (state.inputs.brake) mz = -1;
+                if (state.inputs.steerLeft) mx = -1;
+                if (state.inputs.steerRight) mx = 1;
 
-                if (state.inputs.gas) walkMoveZ = 1;
-                if (state.inputs.brake) walkMoveZ = -1;
-                if (state.inputs.steerLeft) walkMoveX = -1;
-                if (state.inputs.steerRight) walkMoveX = 1;
-
-                if (walkMoveX !== 0 || walkMoveZ !== 0) {
+                if (mz !== 0 || mx !== 0) {
                     const headingRad = (state.playerHeading * Math.PI) / 180;
-                    let speedFactor = 0.000012 * CONFIG.humanWalkSpeed;
-                    
-                    // Basic step projection mapping
-                    let stepLat = (Math.cos(headingRad) * walkMoveZ - Math.sin(headingRad) * walkMoveX) * speedFactor;
-                    let stepLon = (Math.sin(headingRad) * walkMoveZ + Math.cos(headingRad) * walkMoveX) * speedFactor * 1.3;
-
-                    state.playerLat += stepLat;
-                    state.playerLon += stepLon;
-                    positionChanged = true;
+                    let f = 0.000012 * CONFIG.humanWalkSpeed;
+                    state.playerLat += (Math.cos(headingRad) * mz - Math.sin(headingRad) * mx) * f;
+                    state.playerLon += (Math.sin(headingRad) * mz + Math.cos(headingRad) * mx) * f * 1.3;
+                    moved = true;
                 }
             }
 
-            if (positionChanged) {
+            if (moved) {
                 fetchRealWorldBuildings(state.playerLat, state.playerLon);
                 syncGameplayState();
             }
 
-            // Continuous HUD and Dashboard tracking updates
             if (state.viewMode === "3D") {
-                const currentKmh = state.currentControlState === "VEHICLE" ? Math.abs(Math.round(state.velocity * 6.8)) : 0;
+                const currentKmh = Math.abs(Math.round(state.velocity * 6.5));
                 document.getElementById('hud-speedometer-text').textContent = `${currentKmh} KM/H`;
                 document.getElementById('chassis-kmh').textContent = `${currentKmh} KM/H`;
-                document.getElementById('chassis-altitude').textContent = `ALT: ${state.altitudeY.toFixed(1)}m`;
-                
-                if (state.currentControlState === "VEHICLE") {
-                    document.getElementById('chassis-gear').textContent = state.velocity >= 0 ? "GEAR: DRIVE" : "GEAR: REVERSE";
-                } else {
-                    document.getElementById('chassis-gear').textContent = "GEAR: N/A (FOOT)";
-                }
             }
         }, 1000 / 40);
 
-        function calculatePolygonCentroid(points) {
-            let latSum = 0, lonSum = 0, len = points.length;
-            points.forEach(p => { latSum += p.lat; lonSum += p.lon; });
-            return { lat: latSum / len, lon: lonSum / len };
-        }
-
-        // --- MOUNT/DISMOUNT INTERACTION DISPATCHER ---
         function triggerVehicleInteraction() {
-            if (!state.carSpawnedOnGrid) return;
-
-            const distanceToCar = map.distance([state.playerLat, state.playerLon], [state.carLat, state.carLon]);
-            const actionBtn = document.getElementById('action-btn');
+            if (!state.carSpawned) return;
+            const distance = map.distance([state.playerLat, state.playerLon], [state.carLat, state.carLon]);
+            const btn = document.getElementById('action-btn');
 
             if (state.currentControlState === "FOOT") {
-                if (distanceToCar <= 12.0) {
+                if (distance <= 15.0) {
                     state.currentControlState = "VEHICLE";
-                    // Drop car down from ceiling loop onto track position
-                    state.altitudeY = 160.0; 
-                    state.vertVelocityY = 0;
-                    
-                    document.getElementById('hud-mode-state').textContent = "DRIVING VEHICLE MATRIX";
+                    document.getElementById('hud-mode-state').textContent = "DRIVING MODE";
                     document.getElementById('hud-mode-state').style.color = "var(--neon-blue)";
                     document.getElementById('vehicle-chassis').style.display = 'flex';
-                    actionBtn.textContent = "DISMOUNT VEHICLE CORE [E]";
-                    sysLog("CORE CONNECTION EXECUTED: Neural interface linked to steering engine.");
-                } else {
-                    sysLog("INTERACTION WARNING: Out of spatial tracking zone. Approach waiting car icon.");
+                    btn.textContent = "LEAVE VEHICLE UNIT [E]";
+                    sysLog("Car boarded successfully. Drive controls initialized.");
                 }
             } else {
                 state.currentControlState = "FOOT";
-                document.getElementById('hud-mode-state').textContent = "WALKING ON FOOT";
+                document.getElementById('hud-mode-state').textContent = "PEDESTRIAN WALK";
                 document.getElementById('hud-mode-state').style.color = "var(--neon-green)";
                 document.getElementById('vehicle-chassis').style.display = 'none';
-                actionBtn.textContent = "BOARD CAR CONTROLS [E]";
-                
-                // Shift player structural coordinates slightly away from frame to allow clean dismount paths
-                state.playerLat += 0.00004;
-                sysLog("CORE DE-COUPLED: Restored localized manual locomotion.");
+                btn.textContent = "ENTER VEHICLE CORE [E]";
+                state.playerLat += 0.00003; // shift out slightly to not get stuck inside the proxy
             }
             syncGameplayState();
         }
 
-        // --- POLYGON EXTRUSION & SMOOTHED ROAD RENDER PIPELINE ---
+        // --- CLEAN INTEGRATED RENDER MATRIX ---
         function renderEnvironmentGraphicsEngine() {
             if (state.viewMode !== "3D") return;
 
             const worldContainer = document.getElementById('fpv-world');
-            worldContainer.querySelectorAll('.building-3d, .road-3d, .car-object-3d').forEach(el => el.remove());
+            worldContainer.querySelectorAll('.building-3d, .car-object-3d').forEach(el => el.remove());
 
-            // Bind eye view tracking to player coordinates and vehicle altitude parameters
-            worldContainer.style.transform = `translateY(${state.altitudeY}px) rotateY(${-state.playerHeading}deg)`;
+            // Center eye tracking cleanly right over pavement bounds
+            worldContainer.style.transform = `translateY(${CONFIG.eyeHeight}px) rotateY(${-state.playerHeading}deg)`;
 
             const originLat = state.playerLat;
             const originLon = state.playerLon;
-            const headingRad = (state.playerHeading * Math.PI) / 180;
 
             const latToPixels = 111320 * 12.0; 
             const lonToPixels = 111320 * Math.cos(originLat * Math.PI / 180) * 12.0;
 
-            let renderingQueue = [];
+            // --- REDRAW INJECTED ASFAHLT SURFACE (CANVAS BLITTING) ---
+            const canvas = document.getElementById('road-matrix-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Process High-Fidelity Clean Road Layers
+            const cxOff = canvas.width / 2;
+            const cyOff = canvas.height / 2;
+
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+
             Object.values(state.realRoads).forEach(road => {
-                for (let i = 0; i < road.geometry.length - 1; i++) {
-                    const ptA = road.geometry[i];
-                    const ptB = road.geometry[i+1];
-                    
-                    const ax = (ptA.lon - originLon) * lonToPixels;
-                    const az = (ptA.lat - originLat) * latToPixels;
-                    const bx = (ptB.lon - originLon) * lonToPixels;
-                    const bz = (ptB.lat - originLat) * latToPixels;
+                ctx.beginPath();
+                road.geometry.forEach((pt, idx) => {
+                    const rx = cxOff + ((pt.lon - originLon) * lonToPixels);
+                    const ry = cyOff - ((pt.lat - originLat) * latToPixels);
+                    if (idx === 0) ctx.moveTo(rx, ry);
+                    else ctx.lineTo(rx, ry);
+                });
+                // Outer clean roadbed lane mapping
+                ctx.strokeStyle = "#121422";
+                ctx.lineWidth = CONFIG.roadDrawWidth;
+                ctx.stroke();
 
-                    const midX = (ax + bx) / 2;
-                    const midZ = (az + bz) / 2;
-                    const distFromPlayer = Math.sqrt(midX * midX + midZ * midZ);
-
-                    if (distFromPlayer > CONFIG.renderHorizonDistancePx) continue;
-
-                    renderingQueue.push({ type: 'road', distanceSq: distFromPlayer, data: { ax, az, bx, bz } });
-                }
+                // High-fidelity target striping lines
+                ctx.strokeStyle = "rgba(0, 240, 255, 0.4)";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([12, 18]);
+                ctx.stroke();
+                ctx.setLineDash([]);
             });
 
-            // 2. Process Solid Complex Building Geometries
+            // --- RENDER EXACT EXTRUDED BOX BLOCKS ---
             Object.values(state.realProperties).forEach(prop => {
                 const cx = (prop.center.lon - originLon) * lonToPixels;
                 const cz = (prop.center.lat - originLat) * latToPixels;
-                const distFromPlayer = Math.sqrt(cx * cx + cz * cz);
+                const distance = Math.sqrt(cx*cx + cz*cz);
 
-                if (distFromPlayer > CONFIG.renderHorizonDistancePx) return;
+                if (distance > CONFIG.renderHorizonPx) return;
 
-                renderingQueue.push({ type: 'building', distanceSq: distFromPlayer, centerOffset: { cx, cz }, data: prop });
-            });
+                const height = prop.levels * 24;
 
-            // 3. Process Autonomous Car Object Frame if on foot
-            if (state.carSpawnedOnGrid && state.currentControlState === "FOOT") {
-                const carX = (state.carLon - originLon) * lonToPixels;
-                const carZ = (state.carLat - originLat) * latToPixels;
-                const distFromPlayer = Math.sqrt(carX * carX + carZ * carZ);
-                
-                renderingQueue.push({ type: 'car_proxy', distanceSq: distFromPlayer, coords: { carX, carZ } });
-            }
+                const b3d = document.createElement('div');
+                b3d.className = 'building-3d';
+                b3d.style.transform = `translate3d(${cx}px, 0px, ${-cz}px)`;
 
-            // Sort calculations from back to front to render transparency overlays correctly
-            renderingQueue.sort((a, b) => b.distanceSq - a.distanceSq);
+                const nodes = prop.rawGeometryPoints;
+                let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
 
-            renderingQueue.forEach(item => {
-                if (item.type === 'road') {
-                    const { ax, az, bx, bz } = item.data;
+                // Build explicit exterior wall loops matching 2D tactical blueprints
+                for (let i = 0; i < nodes.length - 1; i++) {
+                    const ax = (nodes[i].lon - prop.center.lng) * lonToPixels;
+                    const az = (nodes[i].lat - prop.center.lat) * latToPixels;
+                    const bx = (nodes[i+1].lon - prop.center.lng) * lonToPixels;
+                    const bz = (nodes[i+1].lat - prop.center.lat) * latToPixels;
+
+                    minX = Math.min(minX, ax); maxX = Math.max(maxX, ax);
+                    minZ = Math.min(minZ, az); maxZ = Math.max(maxZ, az);
+
                     const dx = bx - ax;
                     const dz = bz - az;
-                    const length = Math.sqrt(dx * dx + dz * dz);
-                    if (length < 1) return;
+                    const len = Math.sqrt(dx*dx + dz*dz);
+                    if (len < 1) continue;
 
-                    const angleDeg = Math.atan2(dx, dz) * (180 / Math.PI);
+                    const ang = Math.atan2(dx, dz) * (180 / Math.PI);
 
-                    const roadWrapper = document.createElement('div');
-                    roadWrapper.className = 'road-3d';
-                    roadWrapper.style.transform = `translate3d(${ax}px, 0px, ${-az}px)`;
-
-                    const segment = document.createElement('div');
-                    segment.className = 'road-clean-segment';
-                    segment.style.width = `${CONFIG.roadLaneWidthPx}px`;
-                    segment.style.marginLeft = `${-CONFIG.roadLaneWidthPx / 2}px`;
-                    segment.style.height = `${length}px`;
-                    segment.style.transform = `rotateX(90deg) rotateZ(${angleDeg}deg)`;
-
-                    const stripe = document.createElement('div');
-                    stripe.className = 'road-center-stripe';
-                    segment.appendChild(stripe);
-
-                    roadWrapper.appendChild(segment);
-                    worldContainer.appendChild(roadWrapper);
-
-                } else if (item.type === 'car_proxy') {
-                    const { carX, carZ } = item.coords;
-                    const carContainer = document.createElement('div');
-                    carContainer.className = 'car-object-3d';
-                    carContainer.style.transform = `translate3d(${carX}px, 0px, ${-carZ}px)`;
-
-                    const shell = document.createElement('div');
-                    shell.className = 'car-body-shell';
-                    carContainer.appendChild(shell);
-                    worldContainer.appendChild(carContainer);
-
-                } else if (item.type === 'building') {
-                    const prop = item.data;
-                    const { cx, cz } = item.centerOffset;
-                    const height = Math.max(35, Math.min(300, (prop.levels * 22)));
-
-                    const b3d = document.createElement('div');
-                    b3d.className = 'building-3d';
-                    b3d.style.transform = `translate3d(${cx}px, 0px, ${-cz}px)`;
-
-                    const nodes = prop.rawGeometryPoints;
-                    
-                    // Draw outer perimeter walls matching exact 2D vector layouts
-                    for (let i = 0; i < nodes.length - 1; i++) {
-                        const ptA = nodes[i];
-                        const ptB = nodes[i+1];
-
-                        const ax = (ptA.lon - prop.centroid.lon) * lonToPixels;
-                        const az = (ptA.lat - prop.centroid.lat) * latToPixels;
-                        const bx = (ptB.lon - prop.centroid.lon) * lonToPixels;
-                        const bz = (ptB.lat - prop.centroid.lat) * latToPixels;
-
-                        const dx = bx - ax;
-                        const dz = bz - az;
-                        const wallLength = Math.sqrt(dx * dx + dz * dz);
-                        if (wallLength < 1) continue;
-
-                        const angleDeg = Math.atan2(dx, dz) * (180 / Math.PI);
-
-                        const wallFace = document.createElement('div');
-                        wallFace.className = 'face';
-                        wallFace.style.width = `${wallLength}px`;
-                        wallFace.style.height = `${height}px`;
-                        wallFace.style.transform = `translate3d(${ax}px, ${-height}px, ${-az}px) rotateY(${angleDeg}deg)`;
-                        
-                        b3d.appendChild(wallFace);
-                    }
-
-                    // Build roof polygon geometry cap
-                    const roofCanvas = document.createElement('div');
-                    roofCanvas.className = 'roof-polygon-canvas';
-                    roofCanvas.style.transform = `translate3d(0px, ${-height}px, 0px) rotateX(90deg)`;
-
-                    // Render matching closed polygon shapes using CSS triangle layout maps
-                    for (let i = 1; i < nodes.length - 1; i++) {
-                        const originNode = nodes[0];
-                        const node1 = nodes[i];
-                        const node2 = nodes[i+1];
-
-                        const x0 = 0, z0 = 0;
-                        const x1 = (node1.lon - originNode.lon) * lonToPixels;
-                        const z1 = (node1.lat - originNode.lat) * latToPixels;
-                        const x2 = (node2.lon - originNode.lon) * lonToPixels;
-                        const z2 = (node2.lat - originNode.lat) * latToPixels;
-
-                        const cx_tri = (x0 + x1 + x2) / 3;
-                        const cz_tri = (z0 + z1 + z2) / 3;
-
-                        const triMesh = document.createElement('div');
-                        triMesh.className = 'roof-triangle-mesh';
-                        triMesh.style.left = `${cx_tri}px`;
-                        triMesh.style.top = `${-cz_tri}px`;
-                        
-                        // Render standard solid roof texture configuration panels
-                        triMesh.style.borderWidth = '0 15px 25px 15px';
-                        triMesh.style.borderColor = `transparent transparent #161c32 transparent`;
-
-                        roofCanvas.appendChild(triMesh);
-                    }
-
-                    b3d.appendChild(roofCanvas);
-                    worldContainer.appendChild(b3d);
+                    const wall = document.createElement('div');
+                    wall.className = 'face';
+                    wall.style.width = `${len}px`;
+                    wall.style.height = `${height}px`;
+                    wall.style.transform = `translate3d(${ax}px, ${-height}px, ${-az}px) rotateY(${ang}deg)`;
+                    b3d.appendChild(wall);
                 }
+
+                // Append matching flat roof overlay matching bounding dimensions perfectly
+                const rW = maxX - minX;
+                const rD = maxZ - minZ;
+                if (rW > 5 && rD > 5) {
+                    const roof = document.createElement('div');
+                    roof.className = 'roof-flat-cap';
+                    roof.style.width = `${rW}px`;
+                    roof.style.height = `${rD}px`;
+                    roof.style.transform = `translate3d(${minX}px, ${-height}px, ${-maxZ}px) rotateX(90deg)`;
+                    b3d.appendChild(roof);
+                }
+
+                worldContainer.appendChild(b3d);
             });
+
+            // Draw standalone interactive car icon placeholder when on foot
+            if (state.carSpawned && state.currentControlState === "FOOT") {
+                const carX = (state.carLon - originLon) * lonToPixels;
+                const carZ = (state.carLat - originLat) * latToPixels;
+
+                const cBox = document.createElement('div');
+                cBox.className = 'car-object-3d';
+                cBox.style.transform = `translate3d(${carX}px, -4px, ${-carZ}px)`;
+                cBox.style.width = "18px"; cBox.style.height = "10px";
+                cBox.style.background = varStyle('--neon-magenta');
+                cBox.style.border = "1px solid #fff";
+                cBox.style.boxShadow = "0 0 15px var(--neon-magenta)";
+                worldContainer.appendChild(cBox);
+            }
         }
 
-        // --- SYSTEM GEOMETRY SOURCE DATA ACQUISITION ---
+        // --- INFRASTRUCTURE SOURCE RETRIEVAL ---
         function searchGlobalLocation() {
             const query = document.getElementById('search-input').value.trim();
             const statusBox = document.getElementById('search-status');
             if (!query) return;
 
-            statusBox.style.color = "var(--neon-blue)";
-            statusBox.textContent = "Querying OpenStreetMap global node clusters...";
-
+            statusBox.textContent = "Scanning regional data points...";
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.length > 0) {
                         state.playerLat = parseFloat(data[0].lat);
                         state.playerLon = parseFloat(data[0].lon);
-                        statusBox.style.color = "var(--neon-green)";
-                        statusBox.textContent = "Target lock synchronized. Booting layout matrix...";
-                        setTimeout(() => { completeBootPipeline(); }, 600);
-                    } else {
-                        statusBox.style.color = "var(--neon-magenta)";
-                        statusBox.textContent = "Lookup array failed.";
-                    }
+                        statusBox.textContent = "";
+                        completeBootPipeline();
+                    } else { statusBox.textContent = "Location not detected."; }
                 });
         }
 
@@ -705,31 +544,21 @@
             
             state.realProperties = {};
             state.realRoads = {};
-            state.carSpawnedOnGrid = false;
+            state.carSpawned = false;
 
             fetchRealWorldBuildings(state.playerLat, state.playerLon);
-            syncGameplayState();
         }
 
         function fetchRealWorldBuildings(lat, lon) {
             if (state.isFetchingData) return;
             state.isFetchingData = true;
 
-            const query = `
-                [out:json][timeout:25];
-                (
-                  way["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
-                  way["highway"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
-                );
-                out geom;
-            `;
-            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-
-            fetch(url)
+            const q = `[out:json][timeout:25];(way["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});way["highway"](around:${CONFIG.queryRadiusMeters},${lat},${lon}););out geom;`;
+            fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(q)}`)
                 .then(res => res.json())
                 .then(data => {
                     state.isFetchingData = false;
-                    if (!data.elements || data.elements.length === 0) return;
+                    if (!data.elements) return;
 
                     data.elements.forEach(el => {
                         const id = el.id;
@@ -738,90 +567,65 @@
                             if (state.realRoads[id] || !el.geometry || el.geometry.length < 2) return;
                             
                             const lineCoords = el.geometry.map(pt => [pt.lat, pt.lon]);
-                            const roadPolyline = L.polyline(lineCoords, {
-                                color: 'rgba(0, 240, 255, 0.5)', weight: 6, interactive: false
-                            }).addTo(map);
+                            const poly = L.polyline(lineCoords, { color: 'rgba(0, 240, 255, 0.4)', weight: 5 }).addTo(map);
+                            state.realRoads[id] = { id: id, geometry: el.geometry, layer: poly };
 
-                            state.realRoads[id] = { id: id, geometry: el.geometry, layer: roadPolyline };
-
-                            // If vehicle hasn't spawned yet, snap it immediately onto this lane array
-                            if (!state.carSpawnedOnGrid) {
-                                const spawnPoint = el.geometry[Math.floor(el.geometry.length / 2)];
-                                state.carLat = spawnPoint.lat;
-                                state.carLon = spawnPoint.lon;
-                                state.carSpawnedOnGrid = true;
-                                vehicleMarkerProxy.setLatLng([state.carLat, state.carLon]).addTo(map);
-                                sysLog("🚗 MATRIX DISPATCH: Autonomous car spawned onto closest highway node.");
+                            if (!state.carSpawned) {
+                                const targetNode = el.geometry[Math.floor(el.geometry.length / 2)];
+                                state.carLat = targetNode.lat;
+                                state.carLon = targetNode.lon;
+                                state.carSpawned = true;
+                                carMarkerProxy.setLatLng([state.carLat, state.carLon]).addTo(map);
+                                sysLog("Autonomous vehicle deployed onto nearest lane vector.");
                             }
                             return;
                         }
 
                         if (state.realProperties[id] || !el.geometry || el.geometry.length < 3) return; 
 
-                        const latLngs = el.geometry.map(pt => [pt.lat, pt.lon]);
-                        const polygonLayer = L.polygon(latLngs, {
-                            color: varStyle('--neon-blue'), weight: 1.5, fillColor: '#00f0ff', fillOpacity: 0.12
-                        }).addTo(map);
-
-                        const centroid = calculatePolygonCentroid(el.geometry);
+                        const lls = el.geometry.map(pt => [pt.lat, pt.lon]);
+                        const poly = L.polygon(lls, { color: varStyle('--neon-blue'), weight: 1.5, fillOpacity: 0.15 }).addTo(map);
 
                         state.realProperties[id] = {
                             id: id,
-                            name: el.tags.name || "Structural Block",
-                            layer: polygonLayer,
-                            center: polygonLayer.getBounds().getCenter(),
-                            centroid: centroid,
-                            levels: parseInt(el.tags["building:levels"]) || Math.floor(Math.random() * 4) + 1,
+                            layer: poly,
+                            center: poly.getBounds().getCenter(),
+                            levels: parseInt(el.tags["building:levels"]) || Math.floor(Math.random() * 3) + 1,
                             rawGeometryPoints: el.geometry
                         };
                     });
-
                     syncGameplayState();
-                })
-                .catch(() => { state.isFetchingData = false; });
+                }).catch(() => { state.isFetchingData = false; });
         }
 
         function syncGameplayState() {
-            const currentPosition = [state.playerLat, state.playerLon];
-            playerMarker.setLatLng(currentPosition);
-            
-            if (state.viewMode === "2D") {
-                map.panTo(currentPosition);
-            }
+            const pos = [state.playerLat, state.playerLon];
+            playerMarker.setLatLng(pos);
+            if (state.viewMode === "2D") map.panTo(pos);
 
             document.getElementById('gps-display').textContent = `${state.playerLat.toFixed(5)}, ${state.playerLon.toFixed(5)}`;
-            
-            const actionBtn = document.getElementById('action-btn');
+            const btn = document.getElementById('action-btn');
 
-            if (state.carSpawnedOnGrid) {
-                const distanceToCar = map.distance(currentPosition, [state.carLat, state.carLon]);
-                document.getElementById('hud-car-distance').textContent = `${Math.round(distanceToCar)} METERS`;
+            if (state.carSpawned) {
+                const distance = map.distance(pos, [state.carLat, state.carLon]);
+                document.getElementById('hud-car-distance').textContent = `${Math.round(distance)}m Away`;
                 
                 if (state.currentControlState === "FOOT") {
-                    vehicleMarkerProxy.setLatLng([state.carLat, state.carLon]);
-                    if (distanceToCar <= 12.0) {
-                        actionBtn.disabled = false;
-                        actionBtn.style.borderColor = "var(--neon-green)";
-                        actionBtn.style.color = "var(--neon-green)";
-                        actionBtn.textContent = "BOARD CAR STORAGE CORE [E]";
-                        document.getElementById('status-display').innerHTML = `<span style="color:var(--neon-green)">VEHICLE WITHIN RANGE. READY FOR SYSTEM BOARDING.</span>`;
+                    carMarkerProxy.setLatLng([state.carLat, state.carLon]);
+                    if (distance <= 15.0) {
+                        btn.style.borderColor = "var(--neon-green)"; btn.style.color = "var(--neon-green)";
+                        btn.textContent = "BOARD WAITING VEHICLE [E]";
+                        document.getElementById('status-display').innerHTML = `VEHICLE SPOTTED. PRESS E TO MOUNT DRIVER CORE.`;
                     } else {
-                        actionBtn.disabled = true;
-                        actionBtn.style.borderColor = "#333";
-                        actionBtn.style.color = "#333";
-                        actionBtn.textContent = "WALKING INTERFACE ACTIVE";
-                        document.getElementById('status-display').textContent = "APPROACH VEHICLE GLYPH ON HIGHWAY GRID...";
+                        btn.style.borderColor = "#333"; btn.style.color = "#333";
+                        btn.textContent = "PEDESTRIAN LOCOMOTION";
+                        document.getElementById('status-display').textContent = "NAVIGATING TO NEAREST STREET TO FIND DEPLOYED CAR...";
                     }
                 } else {
-                    // Hide vehicle marker icon during interactive operation
-                    vehicleMarkerProxy.setLatLng([0, 0]);
-                    document.getElementById('status-display').innerHTML = `<span style="color:var(--neon-blue)">CRUISING AUTOMATIC LANE ENVIRONMENT...</span>`;
+                    carMarkerProxy.setLatLng([0, 0]);
+                    document.getElementById('status-display').innerHTML = `STREET CRUISING CORE OPERATIONAL...`;
                 }
-            } else {
-                document.getElementById('hud-car-distance').textContent = "SCANNING RADAR...";
-                actionBtn.disabled = true;
             }
-
             renderEnvironmentGraphicsEngine();
         }
     </script>
