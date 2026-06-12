@@ -218,6 +218,9 @@ let claimLimit = 1;
 
 const MAP_THEATERS = {
     earth: {
+        url: "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json",
+        // Helper function to extract a clean, recognizable code string for Earth
+        getCode: (f) => f.id || f.properties.ISO_A3,
         viewBoxes: {
             world: "0 0 360 180",
             na: "10 10 110 80",
@@ -231,35 +234,23 @@ const MAP_THEATERS = {
         defaultHeight: 180
     },
     moon: {
+        // 🌕 Authentic, low-poly USGS Lunar nomenclature boundaries mapped globally
+        url: "https://raw.githubusercontent.com/bptripp/moon-geojson/master/geojson/moon_features.geojson",
+        // Clean up the official crater/sea names so they work perfectly as uppercase chat codes
+        // Example: "Mare Imbrium" -> "MARE_IMBRIUM"
+        getCode: (f) => {
+            const name = f.properties.name || f.properties.NAME;
+            return name ? name.toUpperCase().replace(/[\s-]/g, "_") : null;
+        },
         viewBoxes: {
             world: "0 0 360 180",
-            mare: "40 30 100 80",      // Example Moon region: Mare Imbrium / Serenitatis
-            highlands: "180 60 120 90" // Example Moon region: Lunar Highlands
+            mare: "40 30 100 80",      
+            highlands: "180 60 120 90" 
         },
         defaultWidth: 360,
         defaultHeight: 180
     }
 };
-// Add directly under your MAP_THEATERS configuration block
-const LUNAR_TERRITORIES = [
-    // --- THE MARIA (Lowland Plains) ---
-    { id: "IMBRIUM", name: "Mare Imbrium", type: "Polygon", coords: [[30,40], [90,30], [110,60], [70,95], [30,70]] },
-    { id: "SERENITATIS", name: "Mare Serenitatis", type: "Polygon", coords: [[110,60], [160,50], [175,85], [130,105], [105,85]] },
-    { id: "TRANQUILLITATIS", name: "Mare Tranquillitatis", type: "Polygon", coords: [[140,105], [195,95], [220,135], [165,145]] },
-    { id: "CRISIUM", name: "Mare Crisium", type: "Polygon", coords: [[210,70], [250,65], [265,95], [225,100]] },
-    { id: "FECUNDITATIS", name: "Mare Fecunditatis", type: "Polygon", coords: [[210,115], [265,110], [280,150], [225,160]] },
-    { id: "PROCELLARUM", name: "Oceanus Procellarum", type: "Polygon", coords: [[10,80], [60,95], [75,155], [15,160]] },
-    { id: "NUBIUM", name: "Mare Nubium", type: "Polygon", coords: [[65,115], [115,110], [125,145], [75,155]] },
-    
-    // --- THE HIGHLANDS & CRATERS (Sectors) ---
-    { id: "TYCHO", name: "Tycho Crater Sector", type: "Polygon", coords: [[110,145], [150,140], [160,175], [100,170]] },
-    { id: "COPERNICUS", name: "Copernicus Impact Zone", type: "Polygon", coords: [[70,85], [105,80], [115,110], [65,115]] },
-    { id: "KEPLER", name: "Kepler Ridge", type: "Polygon", coords: [[35,80], [70,85], [65,115], [30,110]] },
-    { id: "LANGRENUS", name: "Langrenus Borderlands", type: "Polygon", coords: [[255,95], [295,90], [310,125], [265,125]] },
-    { id: "PLATO", name: "Plato Highland Outpost", type: "Polygon", coords: [[70,15], [120,15], [110,40], [65,35]] },
-    { id: "ARISTARCHUS", name: "Aristarchus Plateau", type: "Polygon", coords: [[15,45], [55,40], [60,75], [10,75]] },
-    { id: "FRIGORIS", name: "Mare Frigoris North", type: "Polygon", coords: [[120,15], [260,20], [240,45], [110,40]] }
-];
 let currentTheater = "earth";
 let currentViewMode = "world"; 
 let currentZoomTarget = "world"; 
@@ -1876,48 +1867,44 @@ async function initMap() {
         uiLayer.setAttribute("id", "ui-layer");
         svg.appendChild(uiLayer);
 
-        // Clear local bounding cache before loading paths
+        // Reset local boundary metrics for smooth target zooming
         countryBoundsCache = {};
 
-        if (currentTheater === "earth") {
-            // --- EARTH SPHERE GENERATION ENGINE ---
-            const res = await fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json");
-            const geo = await res.json();
+        const activeTheater = MAP_THEATERS[currentTheater];
+        log(`📡 Fetching real topological data from ${currentTheater.toUpperCase()} server...`);
 
-            geo.features.forEach(f => {
-                const code = f.id || f.properties.ISO_A3;
-                if(!code) return;
-                buildMapTerritoryPath(code, parseGeoJSONCoords(f.geometry), countriesLayer, uiLayer);
-            });
-        } else {
-            // --- MOON SPHERE GENERATION ENGINE ---
-            LUNAR_TERRITORIES.forEach(t => {
-                const code = t.id;
-                
-                // Helper mapping logic to format the flat array into coordinates matching the Earth projection style
-                let dString = "";
-                t.coords.forEach((pair, idx) => {
-                    dString += (idx === 0 ? "M " : "L ") + `${pair[0].toFixed(2)},${pair[1].toFixed(2)} `;
-                });
-                dString += "Z";
+        // Fetch the active planet file
+        const res = await fetch(activeTheater.url);
+        const geo = await res.json();
 
-                buildMapTerritoryPath(code, dString, countriesLayer, uiLayer);
-            });
-        }
+        geo.features.forEach(f => {
+            // Skip points/lines (like landing spots or rilles); we only want claimable areas (Polygons)
+            if (f.geometry.type !== "Polygon" && f.geometry.type !== "MultiPolygon") return;
+
+            // Generate the code using our configuration resolver
+            const code = activeTheater.getCode(f);
+            if (!code) return;
+
+            // Extract coordinates using your math converter equation
+            const pathData = parseGeoJSONCoords(f.geometry);
+            if (!pathData || pathData.trim() === "") return;
+
+            // Render into the shared SVG pipeline
+            buildMapTerritoryPath(code, pathData, countriesLayer, uiLayer);
+        });
         
-        // Secondary safety execution loops to refresh visualization states
+        // Refresh structural views and start tracking elements
         setTimeout(() => { 
             updateMapColors(); 
             updateLeaderboard(); 
             if(typeof launchAISimulatorLoop === "function") launchAISimulatorLoop();
         }, 400);
 
-        log(`🗺️ Tactical Map Reset: ${currentTheater.toUpperCase()} grid completely operational.`);
+        log(`🗺️ Tactical Map Reset: ${currentTheater.toUpperCase()} grid completely operational.`, "succ");
     } catch(err) { 
         log("Critical Map Initialization Failure: " + err.message, "err"); 
     }
 }
-
 /**
  * Shared Builder Engine to map individual path assets onto the primary interactive SVG layer
  */
