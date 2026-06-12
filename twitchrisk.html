@@ -611,25 +611,30 @@ function executeClaim(user, targetCode) {
         changeMapProjection(targetCode);
         
         setTimeout(() => {
-            // 2. Process all game data updates after 600ms
+            // 2. Process all game data updates after 600ms zoom transition completes
             gameState.data[targetCode].owner = user;
             gameState.data[targetCode].troops = 10; 
             log(`🗺️ ${user} successfully established sovereign rule over ${targetCode}.`, "succ");
+            
+            // Fire the visual ripple effect
             triggerSovereigntyRipple(targetCode, getUserColor(user));
+            
             updateMapColors();
             updateLeaderboard();
             saveGame();
 
-            // 3. 🎯 RIGHT HERE: The claim is done, now safely reset the camera back to world view
-            changeMapProjection("world");
+            // 3. 🎯 NESTED TIMEOUT: Hold the camera here for 1.5 seconds 
+            // so the stream can actually see the full sovereignty ripple expand!
+            setTimeout(() => {
+                // Only pull out if they haven't switched views or typed another camera command
+                changeMapProjection("world");
+            }, 1500); 
 
-        }, 600); // This matches your visual presentation timer perfectly
+        }, 600); // Matches your initial visual zoom-in presentation timer perfectly
     } else { 
         log(`Country ${targetCode} is already ruled by ${gameState.data[targetCode].owner}!`, "err"); 
     }
 }
-
-
 function executeBuild(user, p, type, targetCode, quantity = 1) {
     if (!COSTS[type]) { 
         log(`Invalid building! Use: mine, school, city, base.`, "err"); 
@@ -659,13 +664,20 @@ function executeBuild(user, p, type, targetCode, quantity = 1) {
         return; 
     }
 
+    // 1. Zoom into the designated territory grid context
     changeMapProjection(targetCode);
 
+    // Wait for the camera zoom transition to complete before stamping
     setTimeout(() => {
         p.gold -= totalCost;
         
+        // 2. Fire the custom canvas/SVG stamp animation sequence
         triggerMultiBuildingStampAnimation(targetCode, type, quantity);
         log(`🏗️ ${user} commissioned ${quantity}x ${type.toUpperCase()} in ${targetCode} for 💰${totalCost} gold.`, "succ");
+
+        // 3. Dynamic cooldown: Give the stamps baseline time (2000ms) 
+        // plus an extra 150ms per building if they are mass-building.
+        const animationLeeway = 2000 + (Math.min(quantity, 10) * 150);
 
         setTimeout(() => {
             gameState.data[targetCode].buildings[type] += quantity;
@@ -674,13 +686,12 @@ function executeBuild(user, p, type, targetCode, quantity = 1) {
             updateLeaderboard();
             saveGame();
 
-            // 📷 Reset camera back out to the global view after buildings clear up
+            // 📷 Reset camera back out to the global view after animations have fully finished
             changeMapProjection("world");
-        }, 500);
+        }, animationLeeway);
 
     }, 600);
 }
-
 function parseDeploymentTroops(amountInput, totalAvailable) {
     const input = String(amountInput).trim().toLowerCase();
     
