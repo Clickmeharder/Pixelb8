@@ -194,6 +194,10 @@
             <button id="action-btn" class="btn" disabled style="flex: 1.5;">Out of Interaction Range</button>
             <button id="claim-btn" class="btn" disabled style="flex: 1.2;">MINT PROPERTY</button>
             <button id="build-btn" class="btn" disabled style="flex: 1.2;">UPGRADE CORE</button>
+			<div class="hud-row" style="margin-top: 10px; display: flex; gap: 10px;">
+				<button class="btn" onclick="triggerReturnToHomeAnchor()" style="font-size: 0.6rem; padding: 5px;">🏠 HOME HUB</button>
+				<button class="btn" onclick="triggerLiveLocationSync()" style="font-size: 0.6rem; padding: 5px;">📡 LIVE WALK</button>
+			</div>
         </div>
 
         <div id="blueprint-terminal">
@@ -252,7 +256,11 @@
                 uplink: { name: "Aether Uplink Beacon", costMult: 2.5, desc: "Broadcasts continuous localized telemetry streams" }
             }
         };
-
+		function updateUIState() {
+			const simGrid = document.querySelector('.sim-grid');
+			// Hide simulation buttons if we are using live GPS
+			simGrid.style.display = state.isSimulating ? 'grid' : 'none';
+		}
         // Upgraded zoom metrics (minZoom lowered to 13 to allow wide area scanning)
         const map = L.map('map', {
             zoomControl: false, attributionControl: false, minZoom: 13, maxZoom: 19
@@ -432,6 +440,7 @@
 
             fetchRealWorldBuildings(state.playerLat, state.playerLon);
             syncGameplayState();
+			updateUIState()
         }
 
         // --- ADAPTIVE DATA INGEST SPAWN MATRIX ENGINE ---
@@ -775,6 +784,7 @@
             if (currentActiveProp && !currentActiveProp.owned) {
                 claimBtn.disabled = state.score < currentActiveProp.mintCost;
             }
+			updateUIState();
         }
 
         function renderBlueprintSelectionMatrix(prop) {
