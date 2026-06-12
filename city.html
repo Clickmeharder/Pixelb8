@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXELB8 - Industrial City Core v3.3</title>
+    <title>PIXELB8 - Asphalt Core v3.4</title>
     <style>
         :root {
             --neon-blue: #00f0ff;
-            --neon-green: #00ff66;
-            --neon-purple: #bf00ff;
             --dark-bg: #010103;
         }
 
@@ -58,20 +56,6 @@
             font-size: 14px;
         }
 
-        .boot-log {
-            width: 600px;
-            height: 220px;
-            border: 1px solid #111;
-            background: #030305;
-            padding: 15px;
-            overflow-y: auto;
-            margin-top: 15px;
-            color: #444;
-            font-family: monospace;
-            font-size: 11px;
-            line-height: 1.4;
-        }
-
         .hud {
             position: absolute;
             pointer-events: none;
@@ -82,20 +66,38 @@
             border: 1px solid #15151f;
         }
 
-        #location-hud { top: 20px; left: 20px; border-left: 3px solid #444; }
-        #directory-hud { top: 20px; right: 20px; text-align: right; border-right: 3px solid #444; }
+        #location-hud { top: 20px; left: 20px; border-left: 3px solid #666; }
+        #directory-hud { top: 20px; right: 20px; text-align: right; border-right: 3px solid #666; }
         #controls-hud { bottom: 20px; left: 20px; color: #666; }
+        
+        #map-toggle-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #111;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 11px;
+            z-index: 5;
+        }
+        #map-toggle-btn:hover {
+            background: #222;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
 
     <div id="game-container">
         <div id="boot-screen">
-            <div style="letter-spacing: 2px; font-weight: bold; color: #888;">PIXELB8 ENGINE: MATTE ARCHITECTURE REBUILD...</div>
-            <div class="boot-log" id="log-target"></div>
+            <div style="letter-spacing: 2px; font-weight: bold; color: #888;">PIXELB8 ENGINE: ROADS, LAMPS & RADAR CONFIG...</div>
         </div>
 
         <canvas id="renderCanvas"></canvas>
+        <button id="map-toggle-btn" onclick="toggleMinimap()">TOGGLE TOP-DOWN VIEW (M)</button>
         
         <div id="location-hud" class="hud">
             LOCATION NODE:<br>
@@ -109,7 +111,7 @@
         </div>
 
         <div id="controls-hud" class="hud">
-            W,A,S,D / Arrows: Navigate | Mouse Drag: Look | Cross doorways to enter pages
+            W,A,S,D / Arrows: Drive | Mouse Drag: Look | Cross doors to enter pages | Press M for Map
         </div>
     </div>
 
@@ -125,19 +127,12 @@
         canvas.width = R_WIDTH;
         canvas.height = R_HEIGHT;
 
-        function logConsole(msg, color = "#444") {
-            const tgt = document.getElementById("log-target");
-            if(tgt) {
-                tgt.innerHTML += `<span style="color: ${color}">${msg}</span><br>`;
-                tgt.scrollTop = tgt.scrollHeight;
-            }
-        }
-
         // --- WORLD MATRIX ---
         const MAP_SIZE = 64; 
-        let map = new Array(MAP_SIZE * MAP_SIZE).fill(1); // 1 = Dark Ground Outside
+        let map = new Array(MAP_SIZE * MAP_SIZE).fill(1); // 1 = Ground Outside
         let routeDirectoryMap = {};
         let sectorNames = {}; 
+        let buildingCenters = {}; // Tracks exact center rays for mounting single signs per block
 
         const T_ROAD = 0;
         const T_GROUND = 1;
@@ -145,10 +140,13 @@
 
         const player = { x: 4.5, y: 33.5, angle: 0, fov: Math.PI / 3, speed: 0.12, rotSpeed: 0.045 };
         const keys = { w:false, a:false, s:false, d:false, arrowleft:false, arrowright:false, arrowup:false, arrowdown:false };
+        let showMinimap = false;
+
+        function toggleMinimap() { showMinimap = !showMinimap; }
+        window.addEventListener('keydown', e => { if(e.key.toLowerCase() === 'm') toggleMinimap(); });
 
         // --- COMPILER PIPELINE ---
         async function buildAsphaltIndustrialCity() {
-            logConsole(`Fetching repository nodes from GitHub REST tree...`, "#666");
             let discoveredRoutes = [];
 
             try {
@@ -167,17 +165,14 @@
                     });
                 }
             } catch (err) {
-                logConsole(`Fallback architecture safely routing.`, "#884488");
                 discoveredRoutes = ["/shop", "/games", "/tools", "/stream", "/about"];
             }
 
-            // --- INJECT CUSTOM ENTROPIA JUNKSHOP BLOCK ---
-            // Force this layout route even if it doesn't exist on server file structures yet
             if (!discoveredRoutes.includes("/entropia-junkshop")) {
                 discoveredRoutes.push("/entropia-junkshop");
             }
 
-            // Carve straight industrial thoroughfare highway down middle rows
+            // Highway Carve Configuration
             for (let x = 0; x < MAP_SIZE; x++) {
                 for (let y = 31; y <= 35; y++) {
                     map[y * MAP_SIZE + x] = T_ROAD; 
@@ -193,14 +188,15 @@
                 let buildingUID = 2 + index; 
                 let startY = onNorthSide ? 25 : 36; 
 
-                // Custom override label text formatting for our injected route block
                 if (path === "/entropia-junkshop") {
                     sectorNames[buildingUID] = "ENTROPIA JUNKSHOP";
                 } else {
                     sectorNames[buildingUID] = path.replace("/", "").toUpperCase();
                 }
 
-                // Carve building block matrices
+                // Register exact X coordinate center ray for single street signboard mounts
+                buildingCenters[buildingUID] = plotX + 3;
+
                 for (let bx = 0; bx < 6; bx++) {
                     for (let by = 0; by < 5; by++) {
                         let cx = plotX + bx;
@@ -216,17 +212,12 @@
                     }
                 }
 
-                // Carve dedicated physical threshold entries (Doors) facing the main street lines
                 if (onNorthSide) {
-                    let doorY = startY + 4;
-                    let doorX = plotX + 3;
-                    map[doorY * MAP_SIZE + doorX] = T_DOOR; 
-                    routeDirectoryMap[`${doorX},${doorY}`] = path;
+                    map[(startY + 4) * MAP_SIZE + (plotX + 3)] = T_DOOR; 
+                    routeDirectoryMap[`${plotX + 3},${startY + 4}`] = path;
                 } else {
-                    let doorY = startY;
-                    let doorX = plotX + 3;
-                    map[doorY * MAP_SIZE + doorX] = T_DOOR; 
-                    routeDirectoryMap[`${doorX},${doorY}`] = path;
+                    map[startY * MAP_SIZE + (plotX + 3)] = T_DOOR; 
+                    routeDirectoryMap[`${plotX + 3},${startY}`] = path;
                 }
 
                 if (!onNorthSide) plotX += 9;
@@ -236,10 +227,10 @@
             setTimeout(() => { 
                 let boot = document.getElementById("boot-screen");
                 if(boot) boot.style.display = "none"; 
-            }, 600);
+            }, 400);
         }
 
-        // --- CONTROL ENGINE CAPTURES ---
+        // --- INPUT CAPTURES ---
         window.addEventListener('keydown', e => { let k = e.key.toLowerCase(); if(k in keys) keys[k] = true; });
         window.addEventListener('keyup', e => { let k = e.key.toLowerCase(); if(k in keys) keys[k] = false; });
         
@@ -256,8 +247,7 @@
                 if (cell === T_DOOR) {
                     let targetRedirectPath = routeDirectoryMap[`${Math.floor(nx)},${Math.floor(ny)}`];
                     if (targetRedirectPath) {
-                        let cleanSubPath = targetRedirectPath.startsWith('/') ? targetRedirectPath : '/' + targetRedirectPath;
-                        window.location.href = cleanSubPath;
+                        window.location.href = targetRedirectPath.startsWith('/') ? targetRedirectPath : '/' + targetRedirectPath;
                     }
                     return;
                 }
@@ -293,39 +283,80 @@
                     urlTxt.innerText = window.location.host + "/";
                 }
             }
-
-            let coords = document.getElementById("coords-txt");
-            if(coords) coords.innerText = `X: ${player.x.toFixed(1)}, Y: ${player.y.toFixed(1)}`;
+            if(document.getElementById("coords-txt")) document.getElementById("coords-txt").innerText = `X: ${player.x.toFixed(1)}, Y: ${player.y.toFixed(1)}`;
         }
 
-        // --- RENDER TIMELINE PERSPECTIVE PIPELINE ---
+        // --- MAP ENGINE RENDERING CORE ---
         function renderPerspectiveMatrix() {
-            // Smooth Sky Gradient
+            // Sky Element
             let skyGrad = ctx.createLinearGradient(0, 0, 0, R_HEIGHT / 2);
-            skyGrad.addColorStop(0, "#020204");
-            skyGrad.addColorStop(1, "#0d0d14");
+            skyGrad.addColorStop(0, "#010103");
+            skyGrad.addColorStop(1, "#0a0a0f");
             ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, R_WIDTH, R_HEIGHT / 2); 
 
-            // Dark Concrete Floor Surface (No flashy gridlines)
-            ctx.fillStyle = "#060608"; ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, R_HEIGHT / 2);
+            // Dark Concrete Foundation Ground Matrix
+            ctx.fillStyle = "#050507"; ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, R_HEIGHT / 2);
 
+            // 3D HIGHWAY PROJECTION TEXTURING
+            let cosA = Math.cos(player.angle), sinA = Math.sin(player.angle);
+            for (let screenY = R_HEIGHT / 2 + 1; screenY < R_HEIGHT; screenY++) {
+                let ratio = (R_HEIGHT / 2) / (screenY - R_HEIGHT / 2);
+                let straightDist = ratio * 0.45; 
+                
+                // Track row markers along camera view vectors
+                let worldX = player.x + cosA * straightDist;
+                let worldY = player.y + sinA * straightDist;
+
+                let tx = Math.floor(worldX);
+                let ty = Math.floor(worldY);
+
+                if (tx >= 0 && tx < MAP_SIZE && ty >= 31 && ty <= 35) {
+                    // Base road asphalt
+                    ctx.fillStyle = "#0d0d12";
+                    ctx.fillRect(0, screenY, R_WIDTH, 1);
+
+                    // Map screen columns projections for road elements
+                    for (let screenX = 0; screenX < R_WIDTH; screenX++) {
+                        let raySkew = (screenX - R_WIDTH / 2) / (R_WIDTH / 2) * (player.fov / 2);
+                        let actualDist = straightDist / Math.cos(raySkew);
+                        let wx = player.x + Math.cos(player.angle + raySkew) * actualDist;
+                        let wy = player.y + Math.sin(player.angle + raySkew) * actualDist;
+
+                        // Yellow side shoulder safety curbs
+                        if ((wy >= 31.0 && wy <= 31.15) || (wy >= 35.85 && wy <= 36.0)) {
+                            ctx.fillStyle = "#cca300";
+                            ctx.fillRect(screenX, screenY, 1, 1);
+                        }
+                        // Dashed white center line lane markers
+                        else if (wy >= 33.45 && wy <= 33.55) {
+                            if (Math.floor(wx * 1.5) % 2 === 0) {
+                                ctx.fillStyle = "#aaaaac";
+                                ctx.fillRect(screenX, screenY, 1, 1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // WALLS AND SIGNPOST CARVING LOOPS
             for (let x = 0; x < R_WIDTH; x++) {
                 let rayAngle = (player.angle - player.fov / 2) + (x / R_WIDTH) * player.fov;
                 let distance = 0; let hit = false; let wallType = 0;
-                let vx = Math.cos(rayAngle); let vy = Math.sin(rayAngle);
+                let vx = Math.cos(rayAngle), vy = Math.sin(rayAngle);
+                let exactWallX = 0, exactWallY = 0;
 
                 while (!hit && distance < 24) {
                     distance += 0.05;
-                    let tx = Math.floor(player.x + vx * distance);
-                    let ty = Math.floor(player.y + vy * distance);
+                    exactWallX = player.x + vx * distance;
+                    exactWallY = player.y + vy * distance;
+                    let tx = Math.floor(exactWallX);
+                    let ty = Math.floor(exactWallY);
 
                     if (tx < 0 || tx >= MAP_SIZE || ty < 0 || ty >= MAP_SIZE) {
                         hit = true; distance = 24;
                     } else {
                         let tile = map[ty * MAP_SIZE + tx];
-                        if (tile > 1 || tile === T_DOOR) {
-                            hit = true; wallType = tile;
-                        }
+                        if (tile > 1 || tile === T_DOOR) { hit = true; wallType = tile; }
                     }
                 }
 
@@ -334,52 +365,104 @@
                 let lineStart = (R_HEIGHT / 2) - (wallHeight / 2);
                 let lineEnd = (R_HEIGHT / 2) + (wallHeight / 2);
 
-                let lightShadingFactor = Math.min(1, 1 - (correctedD / 18)) + 0.15;
+                let lightShadingFactor = Math.min(1, 1 - (correctedD / 18)) + 0.2;
 
                 if (wallType === T_DOOR) {
-                    // Physical Recessed Doorway Rendering Layer
-                    // Draws a dark threshold slit into the wall geometry instead of a glowing energy panel
-                    ctx.strokeStyle = `rgb(${Math.floor(12 * lightShadingFactor)}, ${Math.floor(12 * lightShadingFactor)}, ${Math.floor(16 * lightShadingFactor)})`;
-                    ctx.beginPath(); ctx.moveTo(x, lineStart + (wallHeight * 0.25)); ctx.lineTo(x, lineEnd); ctx.stroke();
+                    // Clean Matte physical door opening threshold
+                    ctx.strokeStyle = `rgb(${Math.floor(10 * lightShadingFactor)}, ${Math.floor(10 * lightShadingFactor)}, ${Math.floor(14 * lightShadingFactor)})`;
+                    ctx.beginPath(); ctx.moveTo(x, lineStart + (wallHeight * 0.3)); ctx.lineTo(x, lineEnd); ctx.stroke();
                     
-                    // Solid dark matte threshold door header beams
-                    ctx.strokeStyle = `rgb(${Math.floor(40 * lightShadingFactor)}, ${Math.floor(40 * lightShadingFactor)}, ${Math.floor(45 * lightShadingFactor)})`;
-                    ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineStart + (wallHeight * 0.25)); ctx.stroke();
+                    ctx.strokeStyle = `rgb(${Math.floor(35 * lightShadingFactor)}, ${Math.floor(35 * lightShadingFactor)}, ${Math.floor(40 * lightShadingFactor)})`;
+                    ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineStart + (wallHeight * 0.3)); ctx.stroke();
                 } 
                 else if (wallType > 1) {
-                    // Muted Industrial Building Bricks Colors
-                    let r = 50, g = 52, b = 60;
-                    
-                    // Give the forced Entropia Junkshop a unique rusted iron hull color signature
-                    if (sectorNames[wallType] === "ENTROPIA JUNKSHOP") {
-                        r = 75; g = 50; b = 40;
-                    }
+                    let r = 45, g = 47, b = 55;
+                    if (sectorNames[wallType] === "ENTROPIA JUNKSHOP") { r = 70; g = 48; b = 38; }
 
-                    // Render main structural wall panels split columns
                     ctx.strokeStyle = `rgb(${Math.floor(r * lightShadingFactor)},${Math.floor(g * lightShadingFactor)},${Math.floor(b * lightShadingFactor)})`;
                     ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineEnd); ctx.stroke();
 
-                    // Flat horizontal structural window trim indicators
-                    let blockYPosition = Math.floor(correctedD * 10) % 24;
-                    if (blockYPosition > 21) {
-                        ctx.strokeStyle = `rgb(${Math.floor(r * 0.5 * lightShadingFactor)},${Math.floor(g * 0.5 * lightShadingFactor)},${Math.floor(b * 0.5 * lightShadingFactor)})`;
-                        ctx.beginPath(); ctx.moveTo(x, lineStart + (wallHeight * 0.4)); ctx.lineTo(x, lineStart + (wallHeight * 0.43)); ctx.stroke();
+                    // --- ONE SINGLE STREET SIGN SYSTEM OVERRIDE ---
+                    // Only mount the signboard on the column column index closest to the center block x coordinate
+                    let targetX = buildingCenters[wallType];
+                    if (Math.floor(exactWallX) === targetX && Math.abs((exactWallX % 1) - 0.5) < 0.08) {
+                        if (wallHeight > 40 && x > 20 && x < R_WIDTH - 20) {
+                            ctx.fillStyle = "rgba(12, 12, 15, 0.95)";
+                            ctx.fillRect(x - 35, lineStart - 16, 70, 12);
+                            ctx.strokeStyle = "#3a3a45";
+                            ctx.strokeRect(x - 35, lineStart - 16, 70, 12);
+                            
+                            ctx.fillStyle = "#999";
+                            ctx.font = "7px monospace";
+                            let tag = sectorNames[wallType] || "NODE";
+                            ctx.fillText(tag, x - 30, lineStart - 8);
+                        }
                     }
+                }
 
-                    // --- COMPACT TEXT STREET SIGNS ---
-                    if (x % 45 === 0 && wallHeight > 35) {
-                        ctx.fillStyle = "rgba(10, 10, 12, 0.85)";
-                        ctx.fillRect(x - 40, lineStart - 18, 80, 13);
-                        ctx.strokeStyle = "#444";
-                        ctx.strokeRect(x - 40, lineStart - 18, 80, 13);
-                        
-                        ctx.fillStyle = "#aaa";
-                        ctx.font = "8px monospace";
-                        let tag = sectorNames[wallType] || "NODE";
-                        ctx.fillText(tag, x - 35, lineStart - 9);
+                // --- PROCEDURAL HIGHWAY STREET LIGHT LAMPS ---
+                // Render sharp lamppost poles on set grid intervals down the street line edge
+                let lightGridCheck = Math.floor(exactWallX);
+                if (lightGridCheck % 14 === 0 && Math.abs((exactWallX % 1) - 0.1) < 0.05) {
+                    if (Math.floor(exactWallY) === 31 || Math.floor(exactWallY) === 36) {
+                        if (correctedD > 1 && correctedD < 16) {
+                            // Draw thin vertical post pole
+                            ctx.strokeStyle = `rgba(80, 80, 90, ${lightShadingFactor})`;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath(); ctx.moveTo(x, lineStart - 10); ctx.lineTo(x, lineEnd); ctx.stroke();
+
+                            // Small luminous single filament lamp head glow cap
+                            ctx.fillStyle = `rgba(255, 230, 150, ${lightShadingFactor})`;
+                            ctx.fillRect(x - 1, lineStart - 12, 3, 3);
+                        }
                     }
                 }
             }
+
+            // --- RADAR 2D TOP-DOWN VIEW OVERLAY GENERATOR ---
+            if (showMinimap) {
+                renderTopDownRadar();
+            }
+        }
+
+        function renderTopDownRadar() {
+            let mSize = 140;
+            let pad = 20;
+            ctx.fillStyle = "rgba(4, 4, 6, 0.95)";
+            ctx.fillRect(pad, pad, mSize, mSize);
+            ctx.strokeStyle = "#222";
+            ctx.strokeRect(pad, pad, mSize, mSize);
+
+            let sFactor = mSize / MAP_SIZE;
+
+            // Render world blocks indicators map onto the miniature display panel
+            for (let y = 0; y < MAP_SIZE; y++) {
+                for (let x = 0; x < MAP_SIZE; x++) {
+                    let tile = map[y * MAP_SIZE + x];
+                    if (tile > 1) {
+                        ctx.fillStyle = sectorNames[tile] === "ENTROPIA JUNKSHOP" ? "#5e3929" : "#333";
+                        ctx.fillRect(pad + x * sFactor, pad + y * sFactor, sFactor + 0.5, sFactor + 0.5);
+                    } else if (tile === T_DOOR) {
+                        ctx.fillStyle = "#888";
+                        ctx.fillRect(pad + x * sFactor, pad + y * sFactor, sFactor, sFactor);
+                    } else if (y >= 31 && y <= 35) {
+                        ctx.fillStyle = "#16161c";
+                        ctx.fillRect(pad + x * sFactor, pad + y * sFactor, sFactor, sFactor);
+                    }
+                }
+            }
+
+            // Draw player position blip dot indicator vector onto target coordinate map
+            let pX = pad + player.x * sFactor;
+            let pY = pad + player.y * sFactor;
+            ctx.fillStyle = "var(--neon-blue)";
+            ctx.beginPath(); ctx.arc(pX, pY, 2.5, 0, Math.PI * 2); ctx.fill();
+
+            // Draw clean simple camera view indicator direction ray
+            ctx.strokeStyle = "rgba(0, 240, 255, 0.6)";
+            ctx.beginPath(); ctx.moveTo(pX, pY);
+            ctx.lineTo(pX + Math.cos(player.angle) * 8, pY + Math.sin(player.angle) * 8);
+            ctx.stroke();
         }
 
         function engineTickLoop() {
