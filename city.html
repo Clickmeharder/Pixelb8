@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXELB8 - GitHub Matrix City</title>
+    <title>PIXELB8 - Matrix City Core v2</title>
     <style>
         :root {
             --neon-blue: #00f0ff;
             --neon-green: #00ff66;
             --neon-purple: #bf00ff;
-            --dark-bg: #030305;
+            --dark-bg: #020204;
         }
 
         * {
@@ -35,8 +35,9 @@
             position: relative;
             width: 960px;
             height: 540px;
-            border: 3px solid #111116;
+            border: 3px solid #1a1a24;
             background: #000;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
         }
 
         canvas {
@@ -77,9 +78,10 @@
             pointer-events: none;
             font-size: 12px;
             text-shadow: 1px 1px 2px #000;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(4, 4, 6, 0.9);
             padding: 10px 14px;
             border: 1px solid #222;
+            backdrop-filter: blur(4px);
         }
 
         #location-hud { top: 20px; left: 20px; border-left: 3px solid var(--neon-blue); }
@@ -91,34 +93,34 @@
 
     <div id="game-container">
         <div id="boot-screen">
-            <div style="letter-spacing: 2px; font-weight: bold;">PIXELB8 ENGINE: QUERYING GITHUB API TREE...</div>
+            <div style="letter-spacing: 2px; font-weight: bold;">PIXELB8 V2: COMPILING DOORS, SIGNS & HIGHWAYS...</div>
             <div class="boot-log" id="log-target"></div>
         </div>
 
         <canvas id="renderCanvas"></canvas>
         
         <div id="location-hud" class="hud">
-            DISTRICT NODE:<br>
-            <strong id="zone-txt" style="font-size: 14px; color: var(--neon-blue); text-transform: uppercase;">CONNECTING...</strong>
+            DISTRICT MATRIX NODE:<br>
+            <strong id="zone-txt" style="font-size: 14px; color: var(--neon-blue); text-transform: uppercase;">INITIALIZING INTERFACES...</strong>
             <div id="coords-txt" style="color: #888; font-size: 10px; margin-top: 2px;">X: 0.0, Y: 0.0</div>
         </div>
 
         <div id="directory-hud" class="hud">
-            RESOLVED REPO PATH:<br>
+            RESOLVED INTERIOR INSTANCE:<br>
             <span id="url-txt" style="color: var(--neon-purple); font-weight: bold;">/</span>
         </div>
 
         <div id="controls-hud" class="hud">
-            W,A,S,D / Arrows : Navigate Grid | Drag Mouse to look around
+            W,A,S,D / Arrows : Walk | Drag Mouse : Turn | Approach neon doorways to enter internal sub-pages
         </div>
     </div>
 
     <script>
         // =========================================================================
-        // GITHUB CONFIGURATION - UPDATE THESE FOR YOUR REPO!
+        // REPOSITORY LOCATOR TARGET BLOCK
         // =========================================================================
-        const repoOwner = "clickmeharder"; // e.g., "pixelb8"
-        const repoName = "pixelb8";       // e.g., "pixelb8.github.io"
+        const repoOwner = "clickmeharder"; 
+        const repoName = "pixelb8";       
 
         const canvas = document.getElementById("renderCanvas");
         const ctx = canvas.getContext("2d");
@@ -134,215 +136,242 @@
             tgt.scrollTop = tgt.scrollHeight;
         }
 
-        // --- WORLD MATRIX STATES ---
+        // --- MAP STATE VECTORS ---
         const MAP_SIZE = 64; 
-        let map = new Array(MAP_SIZE * MAP_SIZE).fill(1); // 1 = Grass Matrix Plot
+        let map = new Array(MAP_SIZE * MAP_SIZE).fill(1); // 1 = High-visibility matrix ground
         let routeDirectoryMap = {};
+        let sectorNames = {}; // Store raw text tags keyed to building IDs for signboards
 
-        const player = { x: 32.5, y: 38.5, angle: -Math.PI / 2, fov: Math.PI / 3, speed: 0.12, rotSpeed: 0.045 };
+        // Render Layer ID Assignments
+        const T_ROAD = 0;
+        const T_GRASS = 1;
+        const T_DOOR = 99; // Universal target value for portal doorways
+
+        const player = { x: 32.5, y: 38.5, angle: -Math.PI / 2, fov: Math.PI / 3, speed: 0.10, rotSpeed: 0.045 };
         const keys = { w:false, a:false, s:false, d:false, arrowleft:false, arrowright:false };
+        let globalPulse = 0;
 
-        // --- GITHUB REPOSITORY DIRECTORY CRAWLER ---
-        async function fetchGithubDirectoryTree() {
-            logConsole(`Targeting API: api.github.com/repos/${repoOwner}/${repoName}/contents`, "var(--neon-blue)");
-            
+        // --- DYNAMIC GITHUB ENDPOINT DISCOVERY CRAWLER ---
+        async function buildAdvancedCircuitCity() {
+            logConsole("Scanning GitHub repositories for absolute asset directories...", "var(--neon-blue)");
             let discoveredRoutes = [];
 
             try {
-                // Fetch the root contents directly from GitHub's Public REST API
                 let response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/`);
-                
                 if (!response.ok) throw new Error(`HTTP status ${response.status}`);
-                
                 let data = await response.json();
-                logConsole("Tree payload decrypted. Parsing architectural items...");
 
                 data.forEach(item => {
-                    // We only want folders, or standalone HTML files that aren't the main index
                     if (item.type === "dir") {
-                        let route = "/" + item.name;
-                        discoveredRoutes.push(route);
-                        logConsole(`[DIR MATCHED]: Found folder node -> ${route}`, "var(--neon-green)");
+                        discoveredRoutes.push("/" + item.name);
                     } else if (item.type === "file" && item.name.endsWith(".html") && item.name !== "index.html") {
-                        let route = "/" + item.name.replace(".html", "");
-                        discoveredRoutes.push(route);
-                        logConsole(`[FILE MATCHED]: Found HTML page node -> ${route}`, "var(--neon-green)");
+                        discoveredRoutes.push("/" + item.name.replace(".html", ""));
                     }
                 });
-
             } catch (err) {
-                logConsole("GitHub API Error or missing config: " + err.message, "#ff3333");
-                logConsole("Deploying offline backup sector grid uniform channels.", "var(--neon-purple)");
-                // Fallback architecture array if API is throttled or settings aren't filled out yet
+                logConsole("Fallback architecture deployed safely.", "var(--neon-purple)");
                 discoveredRoutes = ["/shop", "/games", "/tools", "/stream", "/about"];
             }
 
-            // --- CARVE ASPHALT TRANSIT BOULEVARDS ---
+            // --- CARVE INFRASTRUCTURE ROADS ---
             for (let x = 0; x < MAP_SIZE; x++) {
                 for (let y = 32; y <= 35; y++) {
-                    map[y * MAP_SIZE + x] = 0; // 0 = Walkable Main Street Highway
+                    map[y * MAP_SIZE + x] = T_ROAD; 
                 }
             }
 
-            // --- BUILD THE CIRCUIT MATRIX CITY ---
-            logConsole(`Synthesizing layout blocks for ${discoveredRoutes.length} active zones...`);
-
+            // --- ALLOCATE SECTORS, DOORS, AND SIGNPOST CARRIERS ---
             let plotX = 2;
             let onNorthSide = true;
 
             discoveredRoutes.forEach((path, index) => {
-                if (plotX + 6 >= MAP_SIZE) return; // Boundary wall safeguard
+                if (plotX + 6 >= MAP_SIZE) return;
 
                 let buildingUID = 2 + index; 
-                let startY = onNorthSide ? 26 : 38; // Grid switching logic alternating sides of Main St
+                let startY = onNorthSide ? 26 : 38; 
+                sectorNames[buildingUID] = path.replace("/", "").toUpperCase();
 
-                // Generate a hollow 5x5 structural room block facing the avenue
                 for (let bx = 0; bx < 5; bx++) {
                     for (let by = 0; by < 5; by++) {
-                        let currentGridX = plotX + bx;
-                        let currentGridY = startY + by;
+                        let cx = plotX + bx;
+                        let cy = startY + by;
 
+                        // Default Hollow Box Core Walls Configuration
                         if (bx === 0 || bx === 4 || by === 0 || by === 4) {
-                            map[currentGridY * MAP_SIZE + currentGridX] = buildingUID; // Perimeter Solid Wall
+                            map[cy * MAP_SIZE + cx] = buildingUID;
                         } else {
-                            map[currentGridY * MAP_SIZE + currentGridX] = 0; // Walkable Interior Data Room Floor
+                            map[cy * MAP_SIZE + cx] = T_ROAD; // Interior floor is clean walkable path
                         }
 
-                        // Attach the directory path tag directly to this physical coordinate string key
-                        routeDirectoryMap[`${currentGridX},${currentGridY}`] = path;
+                        routeDirectoryMap[`${cx},${cy}`] = path;
                     }
                 }
 
-                logConsole(`Sector [${index}] -> Path mapped to coordinates frontage plot row.`, "#aaa");
-                
-                if (!onNorthSide) {
-                    plotX += 8; 
+                // --- INJECT PHYSICAL ENTRANCE GATEWAYS (DOORS) ---
+                // Open holes in front-facing wall groups and flag them with our universal portal identifier
+                if (onNorthSide) {
+                    map[(startY + 4) * MAP_SIZE + (plotX + 2)] = T_DOOR; // Center of south-facing wall
+                    routeDirectoryMap[`${plotX + 2},${startY + 4}`] = path;
+                } else {
+                    map[startY * MAP_SIZE + (plotX + 2)] = T_DOOR; // Center of north-facing wall
+                    routeDirectoryMap[`${plotX + 2},${startY}`] = path;
                 }
+
+                logConsole(`[STRUCT SYNCED]: Compiled Sector ${buildingUID} for path alignment [${path}]`, "#aaa");
+
+                if (!onNorthSide) plotX += 8;
                 onNorthSide = !onNorthSide;
             });
 
-            logConsole("City engine matrix initialization cycle complete.", "var(--neon-blue)");
-            
-            setTimeout(() => {
-                document.getElementById("boot-screen").style.display = "none";
-            }, 1200);
+            setTimeout(() => { document.getElementById("boot-screen").style.display = "none"; }, 1000);
         }
 
-        // --- LOGIC ENGINE RUNTIME INPUTS ---
-        window.addEventListener('keydown', e => {
-            let k = e.key.toLowerCase(); if(k in keys) keys[k] = true;
-            if(k === 'arrowleft' || k === 'arrowright') keys[k] = true;
-        });
-        window.addEventListener('keyup', e => {
-            let k = e.key.toLowerCase(); if(k in keys) keys[k] = false;
-            if(k === 'arrowleft' || k === 'arrowright') keys[k] = false;
-        });
+        // --- MOVEMENT ENGINE INTERFACES ---
+        window.addEventListener('keydown', e => { let k = e.key.toLowerCase(); if(k in keys) keys[k] = true; if(k === 'arrowleft' || k === 'arrowright') keys[k] = true; });
+        window.addEventListener('keyup', e => { let k = e.key.toLowerCase(); if(k in keys) keys[k] = false; if(k === 'arrowleft' || k === 'arrowright') keys[k] = false; });
+        
+        let dragActive = false;
+        window.addEventListener('mousedown', () => dragActive = true);
+        window.addEventListener('mouseup', () => dragActive = false);
+        window.addEventListener('mousemove', e => { if (dragActive) player.angle += e.movementX * 0.0045; });
 
-        let dragMouseActive = false;
-        window.addEventListener('mousedown', () => dragMouseActive = true);
-        window.addEventListener('mouseup', () => dragMouseActive = false);
-        window.addEventListener('mousemove', e => { if (dragMouseActive) player.angle += e.movementX * 0.0045; });
-
-        function moveHandling(dx, dy) {
-            let nextProjX = player.x + dx; let nextProjY = player.y + dy;
-            if (nextProjX >= 0 && nextProjX < MAP_SIZE && nextProjY >= 0 && nextProjY < MAP_SIZE) {
-                let checkBlock = map[Math.floor(nextProjY) * MAP_SIZE + Math.floor(nextProjX)];
-                if (checkBlock === 0 || checkBlock === 1) {
-                    player.x = nextProjX; player.y = nextProjY;
+        function attemptGridStep(dx, dy) {
+            let nx = player.x + dx; let ny = player.y + dy;
+            if (nx >= 0 && nx < MAP_SIZE && ny >= 0 && ny < MAP_SIZE) {
+                let cell = map[Math.floor(ny) * MAP_SIZE + Math.floor(nx)];
+                // Walkable parameters: Roadways, Grass open plots, and Active Neon Portals
+                if (cell === T_ROAD || cell === T_GRASS || cell === T_DOOR) {
+                    player.x = nx; player.y = ny;
                 }
             }
         }
 
-        function updateSimulation() {
-            if (keys.w || keys.arrowup) moveHandling(Math.cos(player.angle) * player.speed, Math.sin(player.angle) * player.speed);
-            if (keys.s || keys.arrowdown) moveHandling(-Math.cos(player.angle) * player.speed, -Math.sin(player.angle) * player.speed);
-            if (keys.a) moveHandling(Math.cos(player.angle - Math.PI/2) * player.speed, Math.sin(player.angle - Math.PI/2) * player.speed);
-            if (keys.d) moveHandling(Math.cos(player.angle + Math.PI/2) * player.speed, Math.sin(player.angle + Math.PI/2) * player.speed);
+        function updateSimulationLoop() {
+            globalPulse += 0.08;
+
+            if (keys.w || keys.arrowup) attemptGridStep(Math.cos(player.angle) * player.speed, Math.sin(player.angle) * player.speed);
+            if (keys.s || keys.arrowdown) attemptGridStep(-Math.cos(player.angle) * player.speed, -Math.sin(player.angle) * player.speed);
+            if (keys.a) attemptGridStep(Math.cos(player.angle - Math.PI/2) * player.speed, Math.sin(player.angle - Math.PI/2) * player.speed);
+            if (keys.d) attemptGridStep(Math.cos(player.angle + Math.PI/2) * player.speed, Math.sin(player.angle + Math.PI/2) * player.speed);
 
             if (keys.arrowleft) player.angle -= player.rotSpeed;
             if (keys.arrowright) player.angle += player.rotSpeed;
 
-            // Direct Coordinate UI Sector Position Lookup
             const px = Math.floor(player.x); const py = Math.floor(player.y);
             const zoneTxt = document.getElementById("zone-txt");
             const urlTxt = document.getElementById("url-txt");
 
-            let mappedPathTag = routeDirectoryMap[`${px},${py}`] || routeDirectoryMap[`${px},${py-1}`] || routeDirectoryMap[`${px},${py+1}`] || routeDirectoryMap[`${px-1},${py}`] || routeDirectoryMap[`${px+1},${py}`];
+            let currentPath = routeDirectoryMap[`${px},${py}`] || routeDirectoryMap[`${px},${py-1}`] || routeDirectoryMap[`${px},${py+1}`] || routeDirectoryMap[`${px-1},${py}`] || routeDirectoryMap[`${px+1},${py}`];
 
-            if (mappedPathTag) {
-                zoneTxt.innerText = `DISTRICT ${mappedPathTag.toUpperCase().replace(/\//g, '')}`;
-                zoneTxt.style.color = "var(--neon-green)";
-                urlTxt.innerText = `${repoOwner}.github.io${repoName !== (repoOwner + '.github.io') ? '/' + repoName : ''}${mappedPathTag}`;
-            } else {
-                let baseTile = map[py * MAP_SIZE + px];
-                if (baseTile === 1) {
-                    zoneTxt.innerText = "OUTLYING GRASS MATRICES"; zoneTxt.style.color = "#55ff55";
+            if (currentPath) {
+                let cell = map[py * MAP_SIZE + px];
+                if (cell === T_DOOR) {
+                    zoneTxt.innerText = `PORTAL INTERFACE: ENTERING...`;
+                    zoneTxt.style.color = "var(--neon-green)";
                 } else {
-                    zoneTxt.innerText = "MAIN SYSTEM ROUTE"; zoneTxt.style.color = "var(--neon-blue)";
+                    zoneTxt.innerText = `INTERNAL NODE: ${currentPath.toUpperCase().replace(/\//g, '')}`;
+                    zoneTxt.style.color = "var(--neon-purple)";
                 }
-                urlTxt.innerText = `${repoOwner}.github.io/`;
+                urlTxt.innerText = `${repoOwner}.github.io/${repoName}${currentPath}`;
+            } else {
+                let tile = map[py * MAP_SIZE + px];
+                zoneTxt.innerText = tile === T_GRASS ? "EXTERNAL COMMONS MATRIX" : "MAIN INDUSTRIAL SYSTEM BOULEVARD";
+                zoneTxt.style.color = tile === T_GRASS ? "#55ff55" : "var(--neon-blue)";
+                urlTxt.innerText = `${repoOwner}.github.io/${repoName}/`;
             }
 
             document.getElementById("coords-txt").innerText = `X: ${player.x.toFixed(1)}, Y: ${player.y.toFixed(1)}`;
         }
 
-        // --- 3D RAYCAST VIEWER ---
-        function renderScene() {
-            ctx.fillStyle = "#030306"; ctx.fillRect(0, 0, R_WIDTH, R_HEIGHT / 2); // Horizon Sky 
-            ctx.fillStyle = "#0b100b"; ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, R_HEIGHT / 2); // Ground
+        // --- ADVANCED DOUBLE-PASS RENDER FILTER ---
+        function renderPerspectiveMatrix() {
+            // High-luminance backdrop sky and bright terrain maps
+            ctx.fillStyle = "#06060c"; ctx.fillRect(0, 0, R_WIDTH, R_HEIGHT / 2); 
+            ctx.fillStyle = "#121b12"; ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, R_HEIGHT / 2); 
 
+            // Render high-visibility lane arrays directly onto the ground plane projection
+            let cosP = Math.cos(player.angle); let sinP = Math.sin(player.angle);
+            
             for (let x = 0; x < R_WIDTH; x++) {
                 let rayAngle = (player.angle - player.fov / 2) + (x / R_WIDTH) * player.fov;
-                let distance = 0; let hitSolidWall = false; let wallTypeTag = 0;
-                let vectorX = Math.cos(rayAngle); let vectorY = Math.sin(rayAngle);
+                let distance = 0; let hit = false; let wallType = 0;
+                let vx = Math.cos(rayAngle); let vy = Math.sin(rayAngle);
 
-                while (!hitSolidWall && distance < 32) {
-                    distance += 0.06;
-                    let checkGridX = Math.floor(player.x + vectorX * distance);
-                    let checkGridY = Math.floor(player.y + vectorY * distance);
+                // Extended view distance tracking loop
+                while (!hit && distance < 32) {
+                    distance += 0.05;
+                    let tx = Math.floor(player.x + vx * distance);
+                    let ty = Math.floor(player.y + vy * distance);
 
-                    if (checkGridX < 0 || checkGridX >= MAP_SIZE || checkGridY < 0 || checkGridY >= MAP_SIZE) {
-                        hitSolidWall = true; distance = 32;
+                    if (tx < 0 || tx >= MAP_SIZE || ty < 0 || ty >= MAP_SIZE) {
+                        hit = true; distance = 32;
                     } else {
-                        let foundBlockValue = map[checkGridY * MAP_SIZE + checkGridX];
-                        if (foundBlockValue > 1) {
-                            hitSolidWall = true; wallTypeTag = foundBlockValue;
+                        let tile = map[ty * MAP_SIZE + tx];
+                        if (tile > 1 || tile === T_DOOR) {
+                            hit = true; wallType = tile;
                         }
                     }
                 }
 
-                let correctedDistance = distance * Math.cos(rayAngle - player.angle);
-                let structureHeight = Math.min(R_HEIGHT, Math.floor(R_HEIGHT / correctedDistance));
-                let drawLineStart = (R_HEIGHT / 2) - (structureHeight / 2);
-                let drawLineEnd = (R_HEIGHT / 2) + (structureHeight / 2);
+                // Apply fish-eye projection corrective multipliers
+                let correctedD = distance * Math.cos(rayAngle - player.angle);
+                let wallHeight = Math.min(R_HEIGHT, Math.floor(R_HEIGHT / correctedD));
+                let lineStart = (R_HEIGHT / 2) - (wallHeight / 2);
+                let lineEnd = (R_HEIGHT / 2) + (wallHeight / 2);
 
-                let lightShadingFactor = Math.min(1, 1 - (correctedDistance / 28));
+                // Upgraded Light Engine: Base illumination + high-intensity headlight cone calculation
+                let baseLight = Math.min(1, 1 - (correctedD / 26));
+                let angleDiff = Math.abs(rayAngle - player.angle);
+                let headlightCone = angleDiff < 0.25 ? Math.max(0, 1 - (correctedD / 16)) * 0.45 : 0;
+                let lightingFactor = Math.min(1, baseLight + headlightCone + 0.15); // Added baseline global ambient glow
 
-                if (wallTypeTag > 1) {
-                    let rValue = Math.floor((55 * wallTypeTag) % 160);
-                    let gValue = Math.floor((85 * wallTypeTag) % 130 + 40);
-                    let bValue = Math.floor((65 * wallTypeTag) % 200 + 45);
+                if (wallType === T_DOOR) {
+                    // Pulse portal doorways dynamically using standard sine functions
+                    let pulseGlow = Math.floor(130 + Math.sin(globalPulse * 2) * 125);
+                    ctx.strokeStyle = `rgba(0, ${pulseGlow}, 255, ${lightingFactor})`;
+                    ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineEnd); ctx.stroke();
+                } 
+                else if (wallType > 1) {
+                    // Isolate building color signatures using integer indexing vectors
+                    let r = Math.floor((65 * wallType) % 150 + 20);
+                    let g = Math.floor((45 * wallType) % 120 + 20);
+                    let b = Math.floor((85 * wallType) % 160 + 50);
 
-                    // Wall Column Vertical Segment
-                    ctx.strokeStyle = `rgb(${Math.floor(rValue*lightShadingFactor)},${Math.floor(gValue*lightShadingFactor)},${Math.floor(bValue*lightShadingFactor)})`;
-                    ctx.beginPath(); ctx.moveTo(x, drawLineStart); ctx.lineTo(x, drawLineEnd); ctx.stroke();
+                    // Vertical Column Segment
+                    ctx.strokeStyle = `rgb(${Math.floor(r * lightingFactor)},${Math.floor(g * lightingFactor)},${Math.floor(b * lightingFactor)})`;
+                    ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineEnd); ctx.stroke();
 
-                    // Roof Cap Upper Angle Line Overlay
-                    ctx.strokeStyle = `rgb(${Math.floor(rValue*0.45*lightShadingFactor)},${Math.floor(gValue*0.45*lightShadingFactor)},${Math.floor(bValue*0.45*lightShadingFactor)})`;
-                    ctx.beginPath(); ctx.moveTo(x, drawLineStart); ctx.lineTo(x, drawLineStart - (structureHeight * 0.45)); ctx.stroke();
+                    // High-Pitch Roof Structural Caps
+                    ctx.strokeStyle = `rgb(${Math.floor(r * 0.4 * lightingFactor)},${Math.floor(g * 0.4 * lightingFactor)},${Math.floor(b * 0.4 * lightingFactor)})`;
+                    ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineStart - (wallHeight * 0.4)); ctx.stroke();
+
+                    // --- STREET SIGN SYSTEM INJECTION ---
+                    // Render interactive, floating signage panels above columns on center indexes
+                    if (x % 30 === 0 && wallHeight > 35) {
+                        ctx.fillStyle = `rgba(191, 0, 255, ${lightingFactor})`;
+                        ctx.fillRect(x - 25, lineStart - (wallHeight * 0.7), 50, 12);
+                        
+                        ctx.fillStyle = `rgba(255, 255, 255, ${lightingFactor})`;
+                        ctx.font = "6px monospace";
+                        let txt = sectorNames[wallType] || "NODE";
+                        ctx.fillText(txt, x - 20, lineStart - (wallHeight * 0.7) + 8);
+                    }
                 }
             }
+
+            // Draw clean highway textures down the center split path overlay
+            ctx.fillStyle = "rgba(0, 240, 255, 0.08)";
+            ctx.fillRect(0, R_HEIGHT / 2 + 10, R_WIDTH, 4); // Distant neon horizon guidelines
         }
 
-        function mainAnimationLoopThread() {
-            updateSimulation();
-            renderScene();
-            requestAnimationFrame(mainAnimationLoopThread);
+        function engineTickLoop() {
+            updateSimulationLoop();
+            renderPerspectiveMatrix();
+            requestAnimationFrame(engineTickLoop);
         }
 
-        // Trigger dynamic repository discovery hook before starting engine tick rates
-        fetchGithubDirectoryTree().then(() => {
-            mainAnimationLoopThread();
+        buildAdvancedCircuitCity().then(() => {
+            engineTickLoop();
         });
     </script>
 </body>
