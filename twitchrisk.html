@@ -1392,11 +1392,6 @@ function executeActiveBotTurn(activeBots, allTerritories) {
 }
 
 
-Here is your complete, updated code block for the globe system.
-
-The fix has been cleanly integrated into displayTacticalGlobeMode: the 2D #map element visibility switch is moved outside the asynchronous image loading process, the texture assignment forces a GPU synchronization check (needsUpdate = true), and THREE.DoubleSide geometry wrapping is applied to handle complex element vectors.
-
-JavaScript
 /**
  * GLOBE SYSTEM
  */
