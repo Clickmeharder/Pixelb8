@@ -150,17 +150,16 @@
     <script>
         const CONFIG = {
             interactionRadiusMeters: 40,
-            queryRadiusMeters: 250, // Proximity scan limit for pulling real-world structures
-            landMintCostFrags: 200,
+            queryRadiusMeters: 250, 
             structureUpgradeCostFrags: 500
         };
 
         let state = {
-            playerLat: 53.5444, // Initialized center values
+            playerLat: 53.5444, 
             playerLon: -113.4909,
-            score: 800,
+            score: 2500, // Boosted starter chips to test out complex building purchases
             isSimulating: true,
-            realProperties: {}, // Dynamic storage lookup index for live parsed structures
+            realProperties: {}, 
             activePropertyId: null,
             isFetchingData: false
         };
@@ -186,6 +185,89 @@
             logBox.innerHTML += `<div>&gt; ${txt}</div>`;
             logBox.scrollTop = logBox.scrollHeight;
         }
+
+        // --- MATH CALCULATIONS ENGINE ---
+        
+        // Shoelace algorithm to calculate relative sizing area of structural polygons without adding dependency plugins
+        function calculatePolygonArea(latLngs) {
+            let totalArea = 0;
+            const len = latLngs.length;
+            if (len < 3) return 50; // Fallback size constant if node parsing breaks down
+            
+            for (let i = 0; i < len; i++) {
+                let p1 = latLngs[i];
+                let p2 = latLngs[(i + 1) % len];
+                // Convert lat/lons to scaled meter values relative to coordinates center
+                let x1 = p1[1] * 111320 * Math.cos(p1[0] * Math.PI / 180);
+                let y1 = p1[0] * 110574;
+                let x2 = p2[1] * 111320 * Math.cos(p2[0] * Math.PI / 180);
+                let y2 = p2[0] * 110574;
+                totalArea += (x1 * y2) - (x2 * y1);
+            }
+            return Math.abs(totalArea / 2);
+        }
+
+        // Evaluates architectural density vectors using data parsed from raw elements arrays
+        function analyzeRegionalDensityMatrix(elements) {
+            let commercialNodes = 0;
+            let totalElements = elements.length || 1;
+
+            elements.forEach(el => {
+                if (!el.tags) return;
+                const t = el.tags.amenity || el.tags.shop || el.tags.office || el.tags.building || "";
+                if (["commercial", "office", "retail", "supermarket", "bank", "work"].includes(t) || el.tags.shop || el.tags.office) {
+                    commercialNodes++;
+                }
+            });
+
+            const densityRatio = commercialNodes / totalElements;
+            
+            if (densityRatio > 0.4) return { label: "High Density Commercial Core", scalar: 2.2 };
+            if (densityRatio > 0.15) return { label: "Urban Mixed-Use Sector", scalar: 1.5 };
+            return { label: "Low Density Residential Zone", scalar: 0.9 };
+        }
+
+        // Processing loop logic defining structural pricing profiles
+        function evaluatePseudoPrice(area, levels, tags, neighborhoodScalar) {
+            let baseRate = 0.5; // Base fragment multiplier per square meter
+            let effectiveFloorArea = area * levels;
+            
+            // Structural asset tag premium weights configuration table
+            let assetPremium = 1.0;
+            const structuralType = tags.amenity || tags.shop || tags.office || tags.building || "residential";
+
+            const tagWeights = {
+                "bank": 4.5,
+                "office": 3.0,
+                "supermarket": 2.5,
+                "hospital": 2.5,
+                "university": 2.0,
+                "cafe": 1.8,
+                "restaurant": 1.8,
+                "commercial": 2.2,
+                "apartments": 1.4,
+                "house": 1.1,
+                "detached": 0.9,
+                "garage": 0.4,
+                "shed": 0.2
+            };
+
+            if (tagWeights[structuralType]) {
+                assetPremium = tagWeights[structuralType];
+            } else if (tags.shop || tags.office) {
+                assetPremium = 2.0; 
+            } else if (tags.building === "yes" && area > 400) {
+                assetPremium = 1.5; // Scale unclassified large structures upward automatically
+            }
+
+            // Combine footprint math parameters, structural taxonomy modifiers, and macro neighborhood values
+            let finalCalculation = effectiveFloorArea * baseRate * assetPremium * neighborhoodScalar;
+            
+            // Bound pricing calculations inside clear UI minimums and maximum limits
+            return Math.max(75, Math.min(12500, Math.round(finalCalculation)));
+        }
+
+        // --- GLOBAL LOCATION RESOLUTION PIPELINES ---
 
         function searchGlobalLocation() {
             const query = document.getElementById('search-input').value.trim();
@@ -227,7 +309,6 @@
             document.getElementById('boot-overlay').style.display = 'none';
             map.setView([state.playerLat, state.playerLon], 18);
             
-            // Flush old properties state cache layers
             Object.values(state.realProperties).forEach(p => map.removeLayer(p.layer));
             state.realProperties = {};
 
@@ -241,7 +322,6 @@
             state.isFetchingData = true;
             sysLog("Querying Overpass DB for local storefronts & structures...");
 
-            // OpenStreetMap QL Query - Pulls structural geometries + meta fields around coordinate radius
             const query = `
                 [out:json][timeout:25];
                 (
@@ -261,24 +341,32 @@
                         return;
                     }
 
+                    // 1. Process neighborhood context vector variables
+                    const contextMatrix = analyzeRegionalDensityMatrix(data.elements);
+                    sysLog(`Sector Vector ID: [${contextMatrix.label}] (Scalar: x${contextMatrix.scalar})`);
+
                     let parsedCount = 0;
                     data.elements.forEach(el => {
                         const id = el.id;
-                        if (state.realProperties[id]) return; // Skip duplicate entities
+                        if (state.realProperties[id]) return; 
 
-                        // Parse coordinates layout depending on the spatial model type returned
                         let latLngs = [];
                         if (el.type === 'way' && el.geometry) {
                             latLngs = el.geometry.map(pt => [pt.lat, pt.lon]);
-                        } else return; // Keep rendering mechanics robust for standalone single ways
+                        } else return; 
 
-                        // Extract structural identity vectors using standard OSM classification parameters
+                        // 2. Perform geometric size calculations
+                        const structuralAreaMeters = calculatePolygonArea(latLngs);
+                        const structuralBuildingLevels = parseInt(el.tags["building:levels"]) || 1;
+
+                        // 3. Process the property pseudo valuation score
+                        const finalMintCost = evaluatePseudoPrice(structuralAreaMeters, structuralBuildingLevels, el.tags, contextMatrix.scalar);
+
                         const name = el.tags.name || el.tags["addr:housename"] || "Commercial Sector Space";
                         const type = el.tags.amenity || el.tags.shop || el.tags.office || el.tags.building || "Structure";
                         const displayType = type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
                         const streetAddress = el.tags["addr:street"] ? `${el.tags["addr:housenumber"] || ''} ${el.tags["addr:street"]}` : "Unregistered Sector Road";
 
-                        // Create actual visual polygon matching structural footprint profile lines
                         const polygonLayer = L.polygon(latLngs, {
                             color: varStyle('--neon-blue'),
                             weight: 1.5,
@@ -293,6 +381,9 @@
                             address: streetAddress,
                             layer: polygonLayer,
                             center: polygonLayer.getBounds().getCenter(),
+                            mintCost: finalMintCost, // Stored unique dynamic calculation
+                            area: Math.round(structuralAreaMeters),
+                            levels: structuralBuildingLevels,
                             owned: false,
                             owner: "System Corp",
                             upgradedStructure: null
@@ -321,10 +412,12 @@
             }
 
             prop.layer.bindPopup(`
-                <div style="color:#fff; font-family:monospace; background:#000; padding:6px; min-width:160px;">
+                <div style="color:#fff; font-family:monospace; background:#000; padding:6px; min-width:180px;">
                     <b style="color:var(--neon-blue); font-size:0.9rem;">${prop.name}</b><br>
-                    <span style="color:#aaa; font-size:0.75rem;">Type: ${prop.type}</span><br>
+                    <span style="color:#aaa; font-size:0.75rem;">Type: ${prop.type} (${prop.levels} Flr)</span><br>
+                    <span style="color:#777; font-size:0.7rem;">Footprint Size: ${prop.area} m²</span><br>
                     <span style="color:#777; font-size:0.7rem;">Loc: ${prop.address}</span><hr style="border-color:#222;">
+                    <div style="margin-bottom: 6px; font-weight: bold; color: var(--neon-green)">VALUE: ${prop.mintCost} FRAGS</div>
                     ${statusText}
                 </div>
             `);
@@ -343,14 +436,11 @@
             const totalOwned = Object.values(state.realProperties).filter(p => p.owner === "Player").length;
             document.getElementById('grids-display').textContent = totalOwned;
 
-            // Track if user is within the bounds or immediate footprint of a real structure
             let currentActiveProp = null;
             let closestDistance = Infinity;
 
             Object.values(state.realProperties).forEach(prop => {
                 const distanceToCenter = map.distance(currentPosition, prop.center);
-                
-                // If coordinate sits inside polygon path bounds or closest in area radius
                 if (distanceToCenter < closestDistance) {
                     closestDistance = distanceToCenter;
                     currentActiveProp = prop;
@@ -361,7 +451,6 @@
             const buildBtn = document.getElementById('build-btn');
             const actionBtn = document.getElementById('action-btn');
 
-            // Evaluate transaction operations if a structure sits within proximity target range
             if (currentActiveProp && closestDistance <= CONFIG.interactionRadiusMeters) {
                 state.activePropertyId = currentActiveProp.id;
                 document.getElementById('status-display').innerHTML = `TARGET: <span style="color:var(--neon-blue)">${currentActiveProp.name}</span>`;
@@ -370,8 +459,8 @@
                 actionBtn.textContent = `INSPECT PROPERTY DATA [${Math.round(closestDistance)}m]`;
 
                 if (!currentActiveProp.owned) {
-                    claimBtn.disabled = state.score < CONFIG.landMintCostFrags;
-                    claimBtn.textContent = `MINT PLOT (-${CONFIG.landMintCostFrags}F)`;
+                    claimBtn.disabled = state.score < currentActiveProp.mintCost;
+                    claimBtn.textContent = `MINT PLOT (-${currentActiveProp.mintCost}F)`;
                     buildBtn.disabled = true;
                     buildBtn.textContent = "UPGRADE LOCKED";
                 } else if (currentActiveProp.owner === "Player") {
@@ -409,8 +498,8 @@
             if (!state.activePropertyId) return;
             const prop = state.realProperties[state.activePropertyId];
 
-            if (prop && !prop.owned && state.score >= CONFIG.landMintCostFrags) {
-                state.score -= CONFIG.landMintCostFrags;
+            if (prop && !prop.owned && state.score >= prop.mintCost) {
+                state.score -= prop.mintCost;
                 prop.owned = true;
                 prop.owner = "Player";
                 prop.layer.setStyle({ color: varStyle('--neon-green'), fillColor: varStyle('--neon-green'), fillOpacity: 0.35 });
@@ -437,8 +526,6 @@
         function moveSim(dLat, dLon) {
             state.playerLat += dLat;
             state.playerLon += dLon;
-            
-            // Check if user is testing uncharted territory out of range
             fetchRealWorldBuildings(state.playerLat, state.playerLon);
             syncGameplayState();
         }
