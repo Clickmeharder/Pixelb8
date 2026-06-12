@@ -1131,6 +1131,100 @@ function executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode)
         commitStateResolution: commitStateResolution
     });
 }
+
+
+// --- AUTONOMOUS AI ENGINE VARIABLES ---
+const botNamesPool = ["Bot_Alpha", "Warlord_Xero", "General_Zod", "Garrison_AI", "Pixel_Commander", "Omega_Zero"];
+
+/**
+ * Initializes the background thread checking loop for AI simulation.
+ */
+function launchAISimulatorLoop() {
+    // Check for a potential action every 45 to 90 seconds to keep things very rare and realistic
+    const randomInterval = Math.floor(Math.random() * (90000 - 45000)) + 45000;
+    
+    setTimeout(() => {
+        triggerAIBackgroundAction();
+        launchAISimulatorLoop(); // Keep loop humming along
+    }, randomInterval);
+}
+
+/**
+ * Orchestrates a localized bot choice, evaluating whether to manifest a new country or act with an old one.
+ */
+function triggerAIBackgroundAction() {
+    // 1. Compile arrays of map targets based on ownership statuses
+    const allTerritories = Object.keys(gameState.data);
+    const unclaimed = allTerritories.filter(code => !gameState.data[code].owner);
+    
+    // Find all active bot profiles currently holding properties
+    const activeBots = [...new Set(allTerritories
+        .map(code => gameState.data[code].owner)
+        .filter(owner => owner && owner.startsWith("[BOT] ")))];
+
+    // 2. Decide Action Track: If unclaimed lands remain, very rarely claim one (30% chance)
+    if (unclaimed.length > 0 && (activeBots.length === 0 || Math.random() < 0.3)) {
+        spawnNewBotCountry(unclaimed);
+    } else if (activeBots.length > 0) {
+        // Otherwise, make an existing bot execute a dynamic action command (70% chance)
+        executeActiveBotTurn(activeBots, allTerritories);
+    }
+}
+
+/**
+ * Manifests a bot into an empty unclaimed slice of land
+ */
+function spawnNewBotCountry(unclaimedList) {
+    const randomTarget = unclaimedList[Math.floor(Math.random() * unclaimedList.length)];
+    const randomName = botNamesPool[Math.floor(Math.random() * botNamesPool.length)];
+    const stylizedBotName = `[BOT] ${randomName}`;
+
+    // Ensure bot exists in your core user structural database index
+    if (!gameState.players[stylizedBotName]) {
+        gameState.players[stylizedBotName] = { gold: 1000, pendingTruce: null };
+        log(`🤖 ${stylizedBotName} has booted online and setup a strategic war room!`, "war");
+    }
+
+    // Pass right into your core interaction block exactly like a chat message
+    processCommand(stylizedBotName, "claim", [randomTarget]);
+}
+
+/**
+ * Forces an active bot to evaluate the board state and execute commands
+ */
+function executeActiveBotTurn(activeBots, allTerritories) {
+    const chosenBot = activeBots[Math.floor(Math.random() * activeBots.length)];
+    
+    // Gather lands owned by this exact bot profile
+    const botLands = allTerritories.filter(code => gameState.data[code].owner === chosenBot);
+    if (botLands.length === 0) return;
+
+    const sourceCountry = botLands[Math.floor(Math.random() * botLands.length)];
+    const sourceData = gameState.data[sourceCountry];
+
+    // Decision Logic Tree based on internal resource calculations
+    if (sourceData.troops > 15) {
+        // Aggressive Action: Find neighbors or valid global targets to raid
+        const possibleTargets = allTerritories.filter(code => gameState.data[code].owner !== chosenBot);
+        if (possibleTargets.length > 0) {
+            const randomTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+            
+            // Randomly use a percentage-based approach or absolute count deployment string
+            const choices = ["50%", "75%", "max"];
+            const selectedPayload = choices[Math.floor(Math.random() * choices.length)];
+
+            log(`🤖 AI Decision Context: ${chosenBot} targeting ${randomTarget} from ${sourceCountry}...`, "war");
+            processCommand(chosenBot, "deploy", [selectedPayload, sourceCountry, randomTarget]);
+        }
+    } else {
+        // Defensive Action: Spend local resources to upgrade territory structures
+        const buildOptions = ["base", "city", "school"];
+        const chosenBuild = buildOptions[Math.floor(Math.random() * buildOptions.length)];
+        
+        processCommand(chosenBot, "build", [chosenBuild, sourceCountry]);
+    }
+}
+
 function processCommand(user, cmd, args) {
     cmd = cmd.toLowerCase();
     
@@ -1145,7 +1239,7 @@ function processCommand(user, cmd, args) {
         return;
     }
 
-    if (cmd === "join") {
+	if (cmd === "join") {
         if (!gameState.players[user]) {
             gameState.players[user] = { gold: 600, pendingTruce: null };
             log(`👑 Player ${user} has raised their flag and entered the theater of war!`, "succ");
@@ -1154,7 +1248,15 @@ function processCommand(user, cmd, args) {
         return;
     }
 
-    if (!gameState.players[user]) return;
+    // --- AUTOMATED BOT INITIALIZATION GATES ---
+    if (!gameState.players[user]) {
+        if (user.startsWith("[BOT] ")) {
+            gameState.players[user] = { gold: 800, pendingTruce: null };
+        } else {
+            // Safe exit guard if regular non-joined streamer accounts try running things
+            return; 
+        }
+    }
     const p = gameState.players[user];
 
     if (cmd === "claim") {
@@ -1361,9 +1463,9 @@ async function initMap() {
                 } catch(e) {}
             }, 600);
         });
-
+		
         // Secondary brief delay loop to guarantee late calculations get properly evaluated and drawn
-        setTimeout(() => { updateMapColors(); updateLeaderboard(); }, 800);
+        setTimeout(() => { updateMapColors(); updateLeaderboard(); launchAISimulatorLoop();}, 800);
         log("🗺️ Adaptive Scale GeoJSON Map Mesh Online. Absolute Stacking Order Fixed!");
     } catch(err) { log("Critical Map Initialization Failure: " + err.message, "err"); }
 }
