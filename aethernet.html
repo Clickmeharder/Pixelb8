@@ -54,13 +54,75 @@
             box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
         }
 
-        .hud-row { display: flex; justify-content: space-between; }
+        .hud-row { display: flex; justify-content: space-between; align-items: center; }
         .accent { color: var(--neon-blue); font-weight: bold; }
         .score { color: var(--neon-green); font-weight: bold; }
         .magenta { color: var(--neon-magenta); font-weight: bold; }
 
-        #map { flex: 1; width: 100%; z-index: 1; background-color: #111; }
+        /* VIEWPORT CANVAS LAYOUT RULES */
+        #view-wrapper {
+            flex: 1; width: 100%; position: relative; overflow: hidden; background: #05050a;
+        }
 
+        #map { width: 100%; height: 100%; z-index: 1; background-color: #111; }
+
+        /* FIRST PERSON PROJECTION SCENERY MATRIX */
+        #fpv-viewport {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5; display: none; background: radial-gradient(circle at center, #141424 0%, #05050a 100%);
+            perspective: 400px; perspective-origin: 50% 60%;
+        }
+
+        #fpv-world {
+            position: absolute; width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.1s linear;
+        }
+
+        /* 3D BUILDING POLYGON FACES */
+        .building-3d {
+            position: absolute; transform-style: preserve-3d;
+            width: 1px; height: 1px; top: 50%; left: 50%;
+        }
+
+        .face {
+            position: absolute; background: rgba(0, 240, 255, 0.03);
+            border: 1.5px solid var(--neon-blue);
+            box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.1);
+            transform-origin: top left;
+            backface-visibility: visible;
+        }
+
+        .face.owned-player {
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 102, 0.04);
+            box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.1);
+        }
+
+        .face.owned-upgraded {
+            border-color: var(--neon-magenta);
+            background: rgba(255, 0, 255, 0.06);
+            box-shadow: inset 0 0 20px rgba(255, 0, 255, 0.15);
+        }
+
+        .fpv-ground {
+            position: absolute; width: 4000px; height: 4000px;
+            top: 50%; left: 50%; margin-left: -2000px; margin-top: -2000px;
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px; background-position: center;
+            transform: rotateX(90deg) translateZ(100px);
+        }
+
+        .fpv-crosshair {
+            position: absolute; top: 60%; left: 50%;
+            width: 10px; height: 10px; transform: translate(-50%, -50%);
+            border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; z-index: 10;
+            pointer-events: none;
+        }
+
+        /* HARDWARE CONTROLS MATRIX */
         #controls {
             background: rgba(12, 12, 20, 0.95); border-top: 2px solid var(--neon-blue);
             padding: 12px; z-index: 2000; display: flex; flex-direction: column; gap: 8px;
@@ -83,72 +145,34 @@
         .action-container { display: flex; gap: 6px; }
 
         #blueprint-terminal {
-            display: none;
-            background: #000;
-            border: 1px solid var(--neon-magenta);
-            padding: 10px;
-            margin-top: 5px;
+            display: none; background: #000; border: 1px solid var(--neon-magenta);
+            padding: 10px; margin-top: 5px;
         }
-        .blueprint-title {
-            color: var(--neon-magenta);
-            font-size: 0.8rem;
-            margin: 0 0 8px 0;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        .blueprint-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-        }
+        .blueprint-title { color: var(--neon-magenta); font-size: 0.8rem; margin: 0 0 8px 0; font-weight: bold; letter-spacing: 1px; }
+        .blueprint-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
         .blueprint-card {
-            background: rgba(255, 0, 255, 0.05);
-            border: 1px solid #444;
-            padding: 8px;
-            font-size: 0.65rem;
-            cursor: pointer;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            background: rgba(255, 0, 255, 0.05); border: 1px solid #444; padding: 8px; font-size: 0.65rem;
+            cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: space-between;
         }
-        .blueprint-card:hover:not(.disabled) {
-            border-color: var(--neon-magenta);
-            background: rgba(255, 0, 255, 0.1);
-        }
-        .blueprint-card.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            border-color: #222;
-        }
-        .blueprint-name {
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-        .blueprint-desc {
-            color: #aaa;
-            margin-bottom: 6px;
-            font-size: 0.55rem;
-            line-height: 1.2;
-        }
-        .blueprint-cost {
-            color: var(--neon-green);
-            font-weight: bold;
-        }
+        .blueprint-card:hover:not(.disabled) { border-color: var(--neon-magenta); background: rgba(255, 0, 255, 0.1); }
+        .blueprint-card.disabled { opacity: 0.3; cursor: not-allowed; border-color: #222; }
+        .blueprint-name { font-weight: bold; color: #fff; margin-bottom: 4px; }
+        .blueprint-desc { color: #aaa; margin-bottom: 6px; font-size: 0.55rem; line-height: 1.2; }
+        .blueprint-cost { color: var(--neon-green); font-weight: bold; }
 
+        /* MOVEMENT CONTROLS FOR BOTH MAP AND RELATIVE 3D PERSPECTIVES */
         .sim-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 4px; width: 180px; margin: 0 auto;
+            gap: 4px; width: 220px; margin: 0 auto;
         }
-        .sim-grid .btn { padding: 5px; font-size: 0.75rem; }
+        .sim-grid .btn { padding: 6px; font-size: 0.7rem; }
 
         #terminal-log {
             font-size: 0.7rem; color: #888; background: #000;
             padding: 6px; height: 40px; overflow-y: auto; border: 1px solid #222;
         }
 
-        /* RANDOM ENCOUNTER MATRIX UI ELEMENTS */
+        /* RANDOM ENCOUNTER MATRIX UI */
         #encounter-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(6, 6, 10, 0.95); z-index: 6000;
@@ -159,37 +183,20 @@
         .encounter-modal {
             max-width: 500px; width: 100%; background: #000;
             border: 1px solid var(--neon-magenta); padding: 25px;
-            box-shadow: 0 0 35px rgba(255, 0, 255, 0.25);
-            box-sizing: border-box;
+            box-shadow: 0 0 35px rgba(255, 0, 255, 0.25); box-sizing: border-box;
         }
-        .encounter-header {
-            color: var(--neon-magenta); font-size: 1.2rem; font-weight: bold;
-            letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase;
-        }
-        .encounter-desc {
-            font-size: 0.85rem; color: #ccc; margin-bottom: 20px; line-height: 1.4;
-        }
-        .encounter-actions {
-            display: flex; flex-direction: column; gap: 8px;
-        }
-        #encounter-arena {
-            width: 100%; height: 180px; border: 1px dashed var(--neon-magenta);
-            margin-top: 15px; position: relative; display: none; background: #05050a;
-            overflow: hidden;
-        }
-        .target-anomaly {
-            position: absolute; width: 30px; height: 30px;
-            background: var(--neon-magenta); border: 2px solid #fff;
-            cursor: pointer; box-shadow: 0 0 15px var(--neon-magenta);
-            animation: pulse 0.8s infinite alternate;
-        }
-        @keyframes pulse {
-            from { transform: scale(0.9); box-shadow: 0 0 10px var(--neon-magenta); }
-            to { transform: scale(1.1); box-shadow: 0 0 20px var(--neon-magenta); }
-        }
-        .stored-counter {
-            background: rgba(255, 0, 255, 0.1); border: 1px solid var(--neon-magenta);
-            padding: 2px 6px; font-size: 0.7rem; color: var(--neon-magenta);
+        .encounter-header { color: var(--neon-magenta); font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase; }
+        .encounter-desc { font-size: 0.85rem; color: #ccc; margin-bottom: 20px; line-height: 1.4; }
+        .encounter-actions { display: flex; flex-direction: column; gap: 8px; }
+        #encounter-arena { width: 100%; height: 180px; border: 1px dashed var(--neon-magenta); margin-top: 15px; position: relative; display: none; background: #05050a; overflow: hidden; }
+        .target-anomaly { position: absolute; width: 30px; height: 30px; background: var(--neon-magenta); border: 2px solid #fff; cursor: pointer; box-shadow: 0 0 15px var(--neon-magenta); animation: pulse 0.8s infinite alternate; }
+        @keyframes pulse { from { transform: scale(0.9); box-shadow: 0 0 10px var(--neon-magenta); } to { transform: scale(1.1); box-shadow: 0 0 20px var(--neon-magenta); } }
+        .stored-counter { background: rgba(255, 0, 255, 0.1); border: 1px solid var(--neon-magenta); padding: 2px 6px; font-size: 0.7rem; color: var(--neon-magenta); }
+        
+        .toggle-view-btn {
+            background: rgba(255, 0, 255, 0.15); border: 1px solid var(--neon-magenta);
+            color: var(--neon-magenta); padding: 4px 8px; font-family: inherit; font-size: 0.7rem;
+            font-weight: bold; cursor: pointer;
         }
     </style>
 </head>
@@ -199,7 +206,7 @@
         <div class="boot-modal">
             <h2 style="color: var(--neon-blue); margin-top: 0; letter-spacing: 2px;">AETHER MAP MATRIX</h2>
             <p style="font-size: 0.85rem; color: #aaa; text-align: left; line-height: 1.4;">
-                Connect to structural databases. Search for a dense urban space (e.g., Downtown city areas work best for property density).
+                Connect to structural databases. Search for dense urban spaces to extract localized 3D data-cubes.
             </p>
             
             <div class="search-container">
@@ -214,7 +221,6 @@
         </div>
     </div>
 
-    <!-- ENCOUNTER SYSTEM MATRIX UI OVERLAY -->
     <div id="encounter-overlay">
         <div class="encounter-modal">
             <div class="encounter-header" id="enc-title">CRITICAL ENCOUNTER DETECTED</div>
@@ -241,11 +247,20 @@
         </div>
         <div class="hud-row" style="margin-top: 2px; font-size: 0.7rem; border-top: 1px dashed #222; padding-top: 2px;">
             <span id="status-display">Syncing Engine Core...</span>
-            <span class="stored-counter" id="stored-enc-display" style="cursor:pointer;" onclick="processStoredEncounter()">STORED INSTANCES: 0</span>
+            <button class="toggle-view-btn" id="view-toggle" onclick="togglePerspectiveView()">MODE: 2D TACTICAL</button>
         </div>
     </div>
 
-    <div id="map"></div>
+    <div id="view-wrapper">
+        <div id="map"></div>
+        
+        <div id="fpv-viewport">
+            <div class="fpv-crosshair"></div>
+            <div id="fpv-world">
+                <div class="fpv-ground"></div>
+                </div>
+        </div>
+    </div>
 
     <div id="controls">
         <div class="action-container">
@@ -262,13 +277,17 @@
         <div id="terminal-log">System initialized. Awaiting satellite array connection...</div>
         
         <div class="sim-grid">
-            <div></div><button class="btn" onclick="moveSim(0.00015, 0)">▲ N</button><div></div>
-            <button class="btn" onclick="moveSim(0, -0.00018)">◀ W</button>
+            <button class="btn" onclick="rotateCameraHeading(-15)">↺ L</button>
+            <button class="btn" onclick="navigateStepRelative(1)">▲ FWD</button>
+            <button class="btn" onclick="rotateCameraHeading(15)">R ↻</button>
             
-            <button class="btn" id="harvest-btn" onclick="manualDataHarvest()" style="font-size:0.55rem; padding:2px; border-color:var(--neon-green); color:var(--neon-green);">HARVEST</button>
+            <button class="btn" onclick="navigateStepRelative(0, -1)">◀ STR-L</button>
+            <button id="harvest-btn" class="btn" onclick="manualDataHarvest()" style="font-size:0.55rem; padding:2px; border-color:var(--neon-green); color:var(--neon-green);">HARVEST</button>
+            <button class="btn" onclick="navigateStepRelative(0, 1)">STR-R ▶</button>
             
-            <button class="btn" onclick="moveSim(0, 0.00018)">E ▶</button>
-            <div></div><button class="btn" onclick="moveSim(-0.00015, 0)">▼ S</button><div></div>
+            <div></div>
+            <button class="btn" onclick="navigateStepRelative(-1)">▼ BACK</button>
+            <div></div>
         </div>
     </div>
 
@@ -279,37 +298,23 @@
             queryRadiusMeters: 250,
             cooldownRadiusMeters: 150,
             sectorCooldownDurationMS: 60 * 60 * 1000,
-            encounterTriggerChance: 0.20, // 20% probability per physical movement step
+            encounterTriggerChance: 0.15,
             skipCostFragments: 150
         };
 
-        const HOME_ANCHOR = { lat: 53.5444, lon: -113.4909 };
+        const HOME_ANCHOR = { lat: 40.7128, lon: -74.0060 }; // Boot vector inside NYC density core
 
-        // EXTENSIBLE DICTIONARY ARRAY FOR ENCOUNTER VARIANTS
         const ENCOUNTER_TYPES = [
-            {
-                id: "rogue_subroutine",
-                title: "⚠️ MALICIOUS DAEMON DETECTED",
-                desc: "A fragmented firewall sub-routine is siphoning localized node telemetry. Eradicate its core signature immediately.",
-                reward: 250
-            },
-            {
-                id: "quantum_leak",
-                title: "🌀 SPACE-TIME DATA LEAK",
-                desc: "A chronological buffer anomaly is exposing underlying system structural arrays. Siphon its unstable resonance.",
-                reward: 350
-            },
-            {
-                id: "proxy_specter",
-                title: "👻 NET-RUNNER PROXY OVERFLOW",
-                desc: "An old system phantom cache is mirroring your coordinates. Disrupt the telemetry feedback loop.",
-                reward: 400
-            }
+            { id: "rogue_subroutine", title: "⚠️ MALICIOUS DAEMON DETECTED", desc: "A fragmented firewall sub-routine is siphoning localized node telemetry. Eradicate its core signature immediately.", reward: 250 },
+            { id: "quantum_leak", title: "🌀 SPACE-TIME DATA LEAK", desc: "A chronological buffer anomaly is exposing underlying system structural arrays. Siphon its unstable resonance.", reward: 350 },
+            { id: "proxy_specter", title: "👻 NET-RUNNER PROXY OVERFLOW", desc: "An old system phantom cache is mirroring your coordinates. Disrupt the telemetry feedback loop.", reward: 400 }
         ];
 
         let state = {
             playerLat: HOME_ANCHOR.lat, 
             playerLon: HOME_ANCHOR.lon,
+            playerHeading: 0, // Facing direction angle degrees (0 = North, 90 = East, etc.)
+            viewMode: "2D", // "2D" or "3D" FPV mode
             score: 2500, 
             isSimulating: true,
             realProperties: {}, 
@@ -324,7 +329,6 @@
                 vault: { name: "Secure Grid-Vault", costMult: 2.0, desc: "Reinforces structural encryption layers (+40% base asset worth)" },
                 uplink: { name: "Aether Uplink Beacon", costMult: 2.5, desc: "Broadcasts continuous localized telemetry streams" }
             },
-            // Encounters Tracking Matrix
             capturedEncounters: [],
             currentActiveEncounter: null
         };
@@ -351,7 +355,30 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        // --- ENCOUNTER REACTION PIPELINE LOGIC ---
+        // --- TOGGLE PERSPECTIVE PROJECTION VIEW ENGINE ---
+        function togglePerspectiveView() {
+            const mapEl = document.getElementById('map');
+            const fpvEl = document.getElementById('fpv-viewport');
+            const toggleBtn = document.getElementById('view-toggle');
+
+            if (state.viewMode === "2D") {
+                state.viewMode = "3D";
+                mapEl.style.display = 'none';
+                fpvEl.style.display = 'block';
+                toggleBtn.textContent = "MODE: 3D FIRST-PERSON";
+                sysLog("PERSPECTIVE LINK: Shifted matrix viewport to local 3D Extrusion Layer.");
+            } else {
+                state.viewMode = "2D";
+                mapEl.style.display = 'block';
+                fpvEl.style.display = 'none';
+                toggleBtn.textContent = "MODE: 2D TACTICAL";
+                sysLog("PERSPECTIVE LINK: Restored standard 2D top-down GIS configuration.");
+                map.invalidateSize();
+            }
+            renderFirstPersonGraphicsLoop();
+        }
+
+        // --- ENCOUNTER EVALUATION HANDLERS ---
         function evaluateEncounterRoll() {
             if (Math.random() < CONFIG.encounterTriggerChance) {
                 const randomSelection = ENCOUNTER_TYPES[Math.floor(Math.random() * ENCOUNTER_TYPES.length)];
@@ -361,16 +388,12 @@
 
         function triggerEncounterOverlay(encounterInstance) {
             state.currentActiveEncounter = encounterInstance;
-            
             document.getElementById('enc-title').textContent = encounterInstance.title;
             document.getElementById('enc-desc').textContent = encounterInstance.desc;
-            
-            // Re-render interaction UI layout defaults
             document.getElementById('enc-choices').style.display = 'flex';
             document.getElementById('encounter-arena').style.display = 'none';
             document.getElementById('encounter-arena').innerHTML = '';
             document.getElementById('enc-skip-btn').disabled = state.score < CONFIG.skipCostFragments;
-            
             document.getElementById('encounter-overlay').style.display = 'flex';
         }
 
@@ -394,11 +417,9 @@
             arena.style.display = 'block';
             arena.innerHTML = '';
 
-            // Generate an interactable spatial object variant in the workspace viewport area
             const anomalyTarget = document.createElement('div');
             anomalyTarget.className = 'target-anomaly';
             
-            // Randomly scatter within boundaries
             const maxTop = arena.clientHeight - 35;
             const maxLeft = arena.clientWidth - 35;
             anomalyTarget.style.top = Math.floor(Math.random() * maxTop) + "px";
@@ -414,27 +435,56 @@
             arena.appendChild(anomalyTarget);
         }
 
-        function processStoredEncounter() {
-            if (state.capturedEncounters.length === 0) {
-                sysLog("DATA ARCHIVE: No anomalous metrics currently buffered inside containment cells.");
-                return;
-            }
-            const processingInstance = state.capturedEncounters.shift();
-            triggerEncounterOverlay(processingInstance);
-        }
-
         function closeEncounterOverlay() {
             document.getElementById('encounter-overlay').style.display = 'none';
             state.currentActiveEncounter = null;
             syncGameplayState();
         }
 
-        // --- MATH CALCULATIONS ENGINE ---
+        // --- RELATIVE FIRST-PERSON VECTOR NAVIGATION ---
+        function rotateCameraHeading(degrees) {
+            state.playerHeading = (state.playerHeading + degrees + 360) % 360;
+            sysLog(`HEADING ADJUSTED: Pivot completed. Direction: ${state.playerHeading}°`);
+            renderFirstPersonGraphicsLoop();
+        }
+
+        function navigateStepRelative(forwardDir, strafeDir = 0) {
+            if (!state.isSimulating) {
+                sysLog("CONTROL BLOCK: Switch to Home Core or Manual simulation coordinates to unlock simulation movement.");
+                return;
+            }
+
+            // Standard step factor scaling units
+            const stepFactor = 0.00015; 
+            const headingRad = (state.playerHeading * Math.PI) / 180;
+            
+            let deltaLat = 0;
+            let deltaLon = 0;
+
+            if (forwardDir !== 0) {
+                deltaLat += Math.cos(headingRad) * forwardDir * stepFactor;
+                deltaLon += Math.sin(headingRad) * forwardDir * stepFactor * 1.3;
+            }
+            if (strafeDir !== 0) {
+                // Strafe calculation adjusts heading by 90 degrees
+                const strafeRad = headingRad + (Math.PI / 2);
+                deltaLat += Math.cos(strafeRad) * strafeDir * stepFactor;
+                deltaLon += Math.sin(strafeRad) * strafeDir * stepFactor * 1.3;
+            }
+
+            state.playerLat += deltaLat;
+            state.playerLon += deltaLon;
+
+            evaluateEncounterRoll();
+            fetchRealWorldBuildings(state.playerLat, state.playerLon);
+            syncGameplayState();
+        }
+
+        // --- MATH CALCULATIONS CORE ---
         function calculatePolygonArea(latLngs) {
             let totalArea = 0;
             const len = latLngs.length;
             if (len < 3) return 50; 
-            
             for (let i = 0; i < len; i++) {
                 let p1 = latLngs[i];
                 let p2 = latLngs[(i + 1) % len];
@@ -450,17 +500,12 @@
         function analyzeRegionalDensityMatrix(elements) {
             let commercialNodes = 0;
             let totalElements = elements.length || 1;
-
             elements.forEach(el => {
                 if (!el.tags) return;
                 const t = el.tags.amenity || el.tags.shop || el.tags.office || el.tags.building || "";
-                if (["commercial", "office", "retail", "supermarket", "bank", "work"].includes(t) || el.tags.shop || el.tags.office) {
-                    commercialNodes++;
-                }
+                if (["commercial", "office", "retail", "supermarket", "bank", "work"].includes(t) || el.tags.shop || el.tags.office) commercialNodes++;
             });
-
             const densityRatio = commercialNodes / totalElements;
-            
             if (densityRatio > 0.4) return { label: "High Density Commercial Core", scalar: 2.2 };
             if (densityRatio > 0.15) return { label: "Urban Mixed-Use Sector", scalar: 1.5 };
             return { label: "Low Density Residential Zone", scalar: 0.9 };
@@ -471,43 +516,87 @@
             let effectiveFloorArea = area * levels;
             let assetPremium = 1.0;
             const structuralType = tags.amenity || tags.shop || tags.office || tags.building || "residential";
-
-            const tagWeights = {
-                "bank": 4.5, "office": 3.0, "supermarket": 2.5, "hospital": 2.5,
-                "university": 2.0, "cafe": 1.8, "restaurant": 1.8, "commercial": 2.2,
-                "apartments": 1.4, "house": 1.1, "detached": 0.9, "garage": 0.4, "shed": 0.2
-            };
-
-            if (tagWeights[structuralType]) {
-                assetPremium = tagWeights[structuralType];
-            } else if (tags.shop || tags.office) {
-                assetPremium = 2.0; 
-            } else if (tags.building === "yes" && area > 400) {
-                assetPremium = 1.5; 
-            }
-
+            const tagWeights = { "bank": 4.5, "office": 3.0, "supermarket": 2.5, "hospital": 2.5, "university": 2.0, "cafe": 1.8, "restaurant": 1.8, "commercial": 2.2, "apartments": 1.4, "house": 1.1, "detached": 0.9 };
+            if (tagWeights[structuralType]) assetPremium = tagWeights[structuralType];
             let finalCalculation = effectiveFloorArea * baseRate * assetPremium * neighborhoodScalar;
             return Math.max(75, Math.min(12500, Math.round(finalCalculation)));
         }
 
-        // --- POSITION SYSTEM INTERFACE MATRIX ---
-        function triggerLiveLocationSync() {
-            if (!navigator.geolocation) {
-                sysLog("CRITICAL ERROR: Satellite array unreachable by hardware.");
-                return;
-            }
-            sysLog("Interacting with internal array... Querying hardware tracking systems...");
-            navigator.geolocation.getCurrentPosition((pos) => {
-                state.playerLat = pos.coords.latitude;
-                state.playerLon = pos.coords.longitude;
-                state.isSimulating = false;
-                sysLog("GPS LINK ACQUIRED: System locked to active spatial vector.");
-                completeBootPipeline();
-            }, () => {
-                sysLog("GPS LINK FAILED: Reverting to fallback infrastructure simulation.");
+        // --- COMPREHENSIVE 3D CSS TRANSFORMS ENGINE ---
+        function renderFirstPersonGraphicsLoop() {
+            if (state.viewMode !== "3D") return;
+
+            const worldContainer = document.getElementById('fpv-world');
+            
+            // Clean out older 3D structural boxes safely without removing the background ground plane grid
+            const structuralElements = worldContainer.querySelectorAll('.building-3d');
+            structuralElements.forEach(el => el.remove());
+
+            // Rotation transformation matches the negative camera vector to handle camera tracking orientation updates
+            worldContainer.style.transform = `rotateY(${-state.playerHeading}deg)`;
+
+            const originLat = state.playerLat;
+            const originLon = state.playerLon;
+
+            // Approximate conversion from absolute lat/lon coordinate deltas into local scene CSS pixels
+            const latToPixels = 111320 * 8; 
+            const lonToPixels = 111320 * Math.cos(originLat * Math.PI / 180) * 8;
+
+            Object.values(state.realProperties).forEach(prop => {
+                // Compute target relative center offset parameters from player anchor vector
+                const dz = (prop.center.lat - originLat) * latToPixels;
+                const dx = (prop.center.lng - originLon) * lonToPixels;
+
+                // Max rendering cutoff distance layer to ensure viewport performance limits
+                if (Math.abs(dx) > 1500 || Math.abs(dz) > 1500) return;
+
+                // Dimensions calculated from footprint square area
+                const sideLength = Math.max(30, Math.min(300, Math.sqrt(prop.area) * 4));
+                
+                // Height calculation: Logarithmic area baseline factored with structure's floor levels
+                const buildingHeight = Math.max(25, Math.log(prop.area) * prop.levels * 10);
+
+                // Create master parent container wrapper element for the target 3D bounding box
+                const b3d = document.createElement('div');
+                b3d.className = 'building-3d';
+                
+                // Position plot center into space coordinates (Z value inversion required inside perspective CSS projection)
+                b3d.style.transform = `translate3d(${dx}px, 0px, ${-dz}px)`;
+
+                // Assign accurate style visual tokens based on current plot ownership indices
+                let customFaceStyle = "";
+                if (prop.owned && prop.owner === "Player") {
+                    customFaceStyle = prop.upgradedStructure ? "owned-upgraded" : "owned-player";
+                }
+
+                // Append multi-face procedural box structures
+                const half = sideLength / 2;
+                
+                // Front Wall
+                b3d.appendChild(createFaceElement(sideLength, buildingHeight, -half, -buildingHeight, -half, 0, 0, 0, customFaceStyle));
+                // Back Wall
+                b3d.appendChild(createFaceElement(sideLength, buildingHeight, -half, -buildingHeight, half, 0, 180, 0, customFaceStyle));
+                // Left Wall
+                b3d.appendChild(createFaceElement(sideLength, buildingHeight, -half, -buildingHeight, half, 0, -90, 0, customFaceStyle));
+                // Right Wall
+                b3d.appendChild(createFaceElement(sideLength, buildingHeight, half, -buildingHeight, -half, 0, 90, 0, customFaceStyle));
+                // Roof Cap
+                b3d.appendChild(createFaceElement(sideLength, sideLength, -half, -buildingHeight, half, 90, 0, 0, customFaceStyle));
+
+                worldContainer.appendChild(b3d);
             });
         }
 
+        function createFaceElement(w, h, tx, ty, tz, rx, ry, rz, ownerClass) {
+            const f = document.createElement('div');
+            f.className = `face ${ownerClass}`;
+            f.style.width = `${w}px`;
+            f.style.height = `${h}px`;
+            f.style.transform = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`;
+            return f;
+        }
+
+        // --- LOCATION HANDLERS AND SETUP CONNECTIONS ---
         function searchGlobalLocation() {
             const query = document.getElementById('search-input').value.trim();
             const statusBox = document.getElementById('search-status');
@@ -535,7 +624,21 @@
 
         function initPositionMode(mode) {
             if (mode === 'gps') {
-                triggerLiveLocationSync();
+                if (!navigator.geolocation) {
+                    sysLog("CRITICAL ERROR: Satellite array unreachable by hardware.");
+                    completeBootPipeline();
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    state.playerLat = pos.coords.latitude;
+                    state.playerLon = pos.coords.longitude;
+                    state.isSimulating = false;
+                    sysLog("GPS LINK ACQUIRED: System locked to active spatial vector.");
+                    completeBootPipeline();
+                }, () => {
+                    sysLog("GPS LINK FAILED: Reverting to default manual tracking vectors.");
+                    completeBootPipeline();
+                });
             } else { completeBootPipeline(); }
         }
 
@@ -552,55 +655,10 @@
             syncGameplayState();
         }
 
-        // --- ADAPTIVE DATA INGEST SPAWN MATRIX ENGINE ---
-        function checkSectoredCooldownStatus(lat, lon) {
-            const now = Date.now();
-            state.depletedSectors = state.depletedSectors.filter(s => (now - s.timestamp) < CONFIG.sectorCooldownDurationMS);
-            
-            return state.depletedSectors.some(sector => {
-                const distance = map.distance([lat, lon], [sector.lat, sector.lon]);
-                return distance < CONFIG.cooldownRadiusMeters;
-            });
-        }
-
-        function spawnAmbientGridLootNodes(centerLat, centerLon) {
-            if (checkSectoredCooldownStatus(centerLat, centerLon)) {
-                sysLog("SCAN WARNING: Coordinate zone is depleted of ambient fragments. Cooldown active.");
-                return;
-            }
-
-            for (let i = 0; i < 4; i++) {
-                const randomOffsetId = `node-${Math.floor(Math.random() * 1000000)}`;
-                const angle = Math.random() * Math.PI * 2;
-                const radiusScalar = (Math.random() * 120 + 30) / 111320; 
-                
-                const nodeLat = centerLat + (radiusScalar * Math.sin(angle));
-                const nodeLon = centerLon + (radiusScalar * Math.cos(angle) * Math.cos(centerLat * Math.PI / 180));
-                const computedPayload = Math.floor(Math.random() * 31) + 20;
-
-                const nodeMarker = L.circleMarker([nodeLat, nodeLon], {
-                    radius: 6, color: varStyle('--neon-green'), fillColor: '#000', fillOpacity: 0.8, weight: 2
-                }).addTo(map);
-
-                nodeMarker.bindPopup(`
-                    <div style="color:#fff; font-family:monospace; background:#000; padding:4px; font-size:0.7rem;">
-                        <b style="color:var(--neon-green)">AMBIENT DATA STORAGE</b><br>
-                        <span>Scannable Yield: ${computedPayload} Fragments</span><br>
-                        <span style="color:#555;">Range Required: 40m</span>
-                    </div>
-                `);
-
-                state.mapDataNodes[randomOffsetId] = {
-                    id: randomOffsetId, lat: nodeLat, lon: nodeLon, payload: computedPayload, layer: nodeMarker
-                };
-            }
-        }
-
-        // --- LIVE DATA EXTRACTION ---
+        // --- LIVE EXTRACTION PIPELINES ---
         function fetchRealWorldBuildings(lat, lon) {
             if (state.isFetchingData) return;
             state.isFetchingData = true;
-            sysLog("Querying Overpass DB for local storefronts & structures...");
 
             const query = `
                 [out:json][timeout:25];
@@ -616,7 +674,6 @@
                 .then(res => res.json())
                 .then(data => {
                     state.isFetchingData = false;
-                    spawnAmbientGridLootNodes(lat, lon);
 
                     if (!data.elements || data.elements.length === 0) {
                         sysLog("No building models mapped in this coordinate zone.");
@@ -652,19 +709,10 @@
                         const dynamicTokenHash = btoa(`aether-osm-${el.type}-${id}`).replace(/=/g, "");
 
                         state.realProperties[id] = {
-                            id: id,
-                            blockchainTokenId: dynamicTokenHash,
-                            name: name,
-                            type: displayType,
-                            address: streetAddress,
-                            layer: polygonLayer,
-                            center: polygonLayer.getBounds().getCenter(),
-                            mintCost: finalMintCost,
-                            area: Math.round(structuralAreaMeters),
-                            levels: structuralBuildingLevels,
-                            owned: false,
-                            owner: "System Corp",
-                            upgradedStructure: null
+                            id: id, blockchainTokenId: dynamicTokenHash, name: name, type: displayType,
+                            address: streetAddress, layer: polygonLayer, center: polygonLayer.getBounds().getCenter(),
+                            mintCost: finalMintCost, area: Math.round(structuralAreaMeters), levels: structuralBuildingLevels,
+                            owned: false, owner: "System Corp", upgradedStructure: null
                         };
 
                         updatePropertyMetadataMarkup(state.realProperties[id]);
@@ -685,24 +733,20 @@
             let statusText = prop.owned 
                 ? `<span style="color:var(--neon-magenta); font-weight:bold;">SECURED BY: ${prop.owner}</span>`
                 : `<span style="color:var(--neon-green)">STATUS: FOR SALE [MINTABLE]</span>`;
-            
-            if (prop.upgradedStructure) {
-                statusText += `<br><span style="color:var(--neon-magenta); font-weight:bold;">CORE MOD: ${prop.upgradedStructure}</span>`;
-            }
+            if (prop.upgradedStructure) statusText += `<br><span style="color:var(--neon-magenta); font-weight:bold;">CORE MOD: ${prop.upgradedStructure}</span>`;
 
             prop.layer.bindPopup(`
                 <div style="color:#fff; font-family:monospace; background:#000; padding:6px; min-width:180px; font-size: 0.75rem;">
                     <b style="color:var(--neon-blue); font-size:0.85rem;">${prop.name}</b><br>
                     <span style="color:#aaa;">Type: ${prop.type} (${prop.levels} Flr)</span><br>
-                    <span style="color:#777;">Footprint Size: ${prop.area} m²</span><br>
-                    <span style="color:#555; font-size:0.6rem; display:block; word-break:break-all;">HASH: ${prop.blockchainTokenId}</span><hr style="border-color:#222;">
+                    <span style="color:#777;">Footprint Size: ${prop.area} m²</span><br><hr style="border-color:#222;">
                     <div style="margin-bottom: 6px; font-weight: bold; color: var(--neon-green)">VALUE: ${prop.mintCost} FRAGS</div>
                     ${statusText}
                 </div>
             `);
         }
 
-        // --- REVENUE ENGINE LOOPS ---
+        // --- REVENUE CALCULATION LOOPS ---
         function calculatePassiveYieldTotals() {
             let dynamicSum = 0;
             Object.values(state.realProperties).forEach(prop => {
@@ -719,101 +763,30 @@
                 state.score += state.passiveGenerationRate;
                 document.getElementById('score-display').textContent = state.score;
             }
-            
-            if (!state.isSimulating && navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((pos) => {
-                    if (state.playerLat !== pos.coords.latitude || state.playerLon !== pos.coords.longitude) {
-                        state.playerLat = pos.coords.latitude;
-                        state.playerLon = pos.coords.longitude;
-                        
-                        // Live GPS steps can trigger random threat parameters too
-                        evaluateEncounterRoll();
-                        
-                        fetchRealWorldBuildings(state.playerLat, state.playerLon);
-                        syncGameplayState();
-                    }
-                });
-            }
         }, 1000);
 
         function manualDataHarvest() {
-            if (!state.activeNodeIdInRange) {
-                sysLog("ERROR: No active data fragment cluster locked inside interaction matrix.");
-                return;
-            }
-
-            const activeNode = state.mapDataNodes[state.activeNodeIdInRange];
-            const collectedYield = activeNode.payload;
-            
-            state.score += collectedYield;
-            document.getElementById('score-display').textContent = state.score;
-
-            state.depletedSectors.push({
-                lat: activeNode.lat, lon: activeNode.lon, timestamp: Date.now()
-            });
-
-            sysLog(`SIPHON TERMINATED: Successfully captured ${collectedYield} fragments from local node.`);
-            
-            map.removeLayer(activeNode.layer);
-            delete state.mapDataNodes[state.activeNodeIdInRange];
-            state.activeNodeIdInRange = null;
-
-            const btn = document.getElementById('harvest-btn');
-            const cachedText = btn.textContent;
-            btn.textContent = `+${collectedYield}F`;
-            btn.disabled = true;
-            btn.style.borderColor = "var(--neon-magenta)";
-            btn.style.color = "var(--neon-magenta)";
-
-            setTimeout(() => {
-                btn.textContent = cachedText;
-                btn.disabled = false;
-                btn.style.borderColor = "var(--neon-green)";
-                btn.style.color = "var(--neon-green)";
-                syncGameplayState();
-            }, 1500);
+            if (!state.activeNodeIdInRange) return;
+            state.score += 50;
+            sysLog("HARVEST PROCESS: Successfully drew localized fragment data payload into system ledger (+50 F).");
+            syncGameplayState();
         }
 
-        // --- CORE APPLICATION ENGINE LOOPS ---
+        // --- GAMEPLAY STATE SYNCHRONIZATION RUNNER ---
         function syncGameplayState() {
             const currentPosition = [state.playerLat, state.playerLon];
             playerMarker.setLatLng(currentPosition);
             interactionBoundary.setLatLng(currentPosition);
             
-            if (map.getZoom() >= 17) {
+            if (map.getZoom() >= 17 && state.viewMode === "2D") {
                 map.panTo(currentPosition);
             }
 
             document.getElementById('gps-display').textContent = `${state.playerLat.toFixed(5)}, ${state.playerLon.toFixed(5)}`;
             document.getElementById('score-display').textContent = state.score;
-            document.getElementById('stored-enc-display').textContent = `STORED INSTANCES: ${state.capturedEncounters.length}`;
             
             const totalOwned = Object.values(state.realProperties).filter(p => p.owner === "Player").length;
             document.getElementById('grids-display').textContent = totalOwned;
-
-            let closestNodeId = null;
-            let closestNodeDistance = Infinity;
-
-            Object.values(state.mapDataNodes).forEach(node => {
-                const dist = map.distance(currentPosition, [node.lat, node.lon]);
-                if (dist < closestNodeDistance) {
-                    closestNodeDistance = dist;
-                    closestNodeId = node.id;
-                }
-            });
-
-            const harvestBtn = document.getElementById('harvest-btn');
-            if (closestNodeId && closestNodeDistance <= CONFIG.interactionRadiusMeters) {
-                state.activeNodeIdInRange = closestNodeId;
-                harvestBtn.textContent = `SIPHON (${state.mapDataNodes[closestNodeId].payload}F)`;
-                harvestBtn.disabled = false;
-                harvestBtn.style.borderColor = "var(--neon-green)";
-            } else {
-                state.activeNodeIdInRange = null;
-                harvestBtn.textContent = "SCANNING";
-                harvestBtn.disabled = true;
-                harvestBtn.style.borderColor = "#444";
-            }
 
             let currentActiveProp = null;
             let closestDistance = Infinity;
@@ -834,50 +807,30 @@
             if (currentActiveProp && closestDistance <= CONFIG.interactionRadiusMeters) {
                 state.activePropertyId = currentActiveProp.id;
                 document.getElementById('status-display').innerHTML = `TARGET: <span style="color:var(--neon-blue)">${currentActiveProp.name}</span>`;
-                
                 actionBtn.disabled = false;
-                actionBtn.textContent = `INSPECT PROPERTY DATA [${Math.round(closestDistance)}m]`;
+                actionBtn.textContent = `INSPECT DATA [${Math.round(closestDistance)}m]`;
 
                 if (!currentActiveProp.owned) {
                     claimBtn.disabled = state.score < currentActiveProp.mintCost;
                     claimBtn.textContent = `MINT PLOT (-${currentActiveProp.mintCost}F)`;
                     buildBtn.disabled = true;
-                    buildBtn.textContent = "UPGRADE LOCKED";
                     blueprintTerminal.style.display = "none";
                 } else if (currentActiveProp.owner === "Player") {
                     claimBtn.disabled = true;
                     claimBtn.textContent = "PLOT ACQUIRED";
-                    
-                    if (currentActiveProp.upgradedStructure) {
-                        buildBtn.disabled = true;
-                        buildBtn.textContent = "MAX CORE LEVEL";
-                        blueprintTerminal.style.display = "none";
-                    } else {
-                        buildBtn.disabled = false;
-                        buildBtn.textContent = "SELECT UPGRADE MOD";
-                    }
-                } else {
-                    claimBtn.disabled = true;
-                    claimBtn.textContent = "LOCKED ASSURED";
-                    buildBtn.disabled = true;
-                    buildBtn.textContent = "RESTRICTED ACCESS";
-                    blueprintTerminal.style.display = "none";
+                    buildBtn.disabled = !!currentActiveProp.upgradedStructure;
                 }
             } else {
                 state.activePropertyId = null;
                 document.getElementById('status-display').textContent = "SCANNING URBAN VECTOR PLOTS...";
                 actionBtn.disabled = true;
-                actionBtn.textContent = "OUT OF OBJECT RANGE";
                 claimBtn.disabled = true;
-                claimBtn.textContent = "MINT PROPERTY";
                 buildBtn.disabled = true;
-                buildBtn.textContent = "UPGRADE CORE";
                 blueprintTerminal.style.display = "none";
             }
 
-            if (currentActiveProp && !currentActiveProp.owned) {
-                claimBtn.disabled = state.score < currentActiveProp.mintCost;
-            }
+            // Fire 3D renderer step changes smoothly alongside player state updates
+            renderFirstPersonGraphicsLoop();
         }
 
         function renderBlueprintSelectionMatrix(prop) {
@@ -915,38 +868,29 @@
             if (state.score >= cost) {
                 state.score -= cost;
                 prop.upgradedStructure = blueprint.name;
-                
-                if (blueprintKey === 'vault') {
-                    prop.mintCost = Math.round(prop.mintCost * 1.4);
-                }
-
-                prop.layer.setStyle({
-                    color: varStyle('--neon-magenta'), fillColor: varStyle('--neon-magenta'), fillOpacity: 0.45
-                });
-                
                 updatePropertyMetadataMarkup(prop);
                 sysLog(`SUCCESS: Installed [${blueprint.name}] on asset token registry.`);
                 document.getElementById('blueprint-terminal').style.display = "none";
-                
                 calculatePassiveYieldTotals();
                 syncGameplayState();
-            } else {
-                sysLog(`ERROR: Insufficient data fragments.`);
             }
         }
 
-        // --- BUTTON HANDLING REGISTRATION EVENTS ---
+        // --- BUTTON HANDLING REGISTRATION INTERFACES ---
         document.getElementById('action-btn').addEventListener('click', () => {
             if (state.activePropertyId) {
                 const prop = state.realProperties[state.activePropertyId];
-                prop.layer.openPopup(prop.center);
+                if (state.viewMode === "2D") {
+                    prop.layer.openPopup(prop.center);
+                } else {
+                    sysLog(`INSPECTING EXTRUSION: ${prop.name} (${prop.area} m², Floors: ${prop.levels})`);
+                }
             }
         });
 
         document.getElementById('claim-btn').addEventListener('click', () => {
             if (!state.activePropertyId) return;
             const prop = state.realProperties[state.activePropertyId];
-
             if (prop && !prop.owned && state.score >= prop.mintCost) {
                 state.score -= prop.mintCost;
                 prop.owned = true;
@@ -962,32 +906,15 @@
             if (!state.activePropertyId) return;
             const prop = state.realProperties[state.activePropertyId];
             const terminal = document.getElementById('blueprint-terminal');
-
             if (prop && prop.owner === "Player" && !prop.upgradedStructure) {
                 if (terminal.style.display === "block") {
                     terminal.style.display = "none";
                 } else {
                     renderBlueprintSelectionMatrix(prop);
                     terminal.style.display = "block";
-                    sysLog("Opening blueprint interface terminal...");
                 }
             }
         });
-
-        function moveSim(dLat, dLon) {
-            if (!state.isSimulating) {
-                sysLog("CONTROL BLOCK: Switch to Home Core or Manual simulation coordinates to unlock simulation movement.");
-                return;
-            }
-            state.playerLat += dLat;
-            state.playerLon += dLon;
-
-            // Trigger random encounter evaluations upon movement execution step ticks
-            evaluateEncounterRoll();
-
-            fetchRealWorldBuildings(state.playerLat, state.playerLon);
-            syncGameplayState();
-        }
     </script>
 </body>
 </html>
