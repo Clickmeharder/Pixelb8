@@ -1392,6 +1392,11 @@ function executeActiveBotTurn(activeBots, allTerritories) {
 }
 
 
+Here is your complete, updated code block for the globe system.
+
+The fix has been cleanly integrated into displayTacticalGlobeMode: the 2D #map element visibility switch is moved outside the asynchronous image loading process, the texture assignment forces a GPU synchronization check (needsUpdate = true), and THREE.DoubleSide geometry wrapping is applied to handle complex element vectors.
+
+JavaScript
 /**
  * GLOBE SYSTEM
  */
@@ -1427,15 +1432,18 @@ function displayTacticalGlobeMode() {
     `;
     document.body.appendChild(globeContainer);
 
-    // 2. Hide the baseline 2D UI layers so they don't clip through
+    // 2. Locate baseline 2D UI layers so we can safely sample them
     const flatMap = document.getElementById("map");
-    if (flatMap) flatMap.style.visibility = "hidden";
+    if (!flatMap) { log("Error: Base SVG map layer not found.", "err"); return; }
 
     // 3. Rasterize your live SVG map structure into a high-res image texture
     const svgString = new XMLSerializer().serializeToString(flatMap);
     const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
     const URL = window.URL || window.webkitURL || window;
     const blobURL = URL.createObjectURL(svgBlob);
+
+    // Hide the baseline map *after* taking the operational serializer snapshot
+    flatMap.style.visibility = "hidden";
 
     const textureImage = new Image();
     textureImage.src = blobURL;
@@ -1455,15 +1463,19 @@ function displayTacticalGlobeMode() {
         globeContainer.appendChild(globeContext.renderer.domElement);
 
         // Map raster image to an official ThreeJS texture wrapper
-        globeContext.texture = new THREE.Texture(textureImage);
-        globeContext.texture.needsUpdate = true;
+        const globeTexture = new THREE.Texture(textureImage);
+        globeContext.texture = globeTexture;
+        
+        // Force critical GPU compilation sync step to prevent immediate black screens
+        globeTexture.needsUpdate = true;
 
         // Build the physical sphere geometry and map the texture material onto it
         // (Radius: 90, Segments: 64 to keep render loops fast on human stream hardware)
         const geometry = new THREE.SphereGeometry(90, 64, 64);
         const material = new THREE.MeshBasicMaterial({
-            map: globeContext.texture,
-            transparent: true
+            map: globeTexture,
+            transparent: true,
+            side: THREE.DoubleSide // Fixes surface culling and coordinate mirroring issues
         });
 
         globeContext.mesh = new THREE.Mesh(geometry, material);
@@ -1486,6 +1498,15 @@ function displayTacticalGlobeMode() {
             globeContext.renderer.render(globeContext.scene, globeContext.camera);
         }
         animateGlobe();
+
+        // Gracefully clean up binary stream context allocation thresholds
+        setTimeout(() => {
+            URL.revokeObjectURL(blobURL);
+        }, 1000);
+    };
+
+    textureImage.onerror = function() {
+        log("Critical 3D Canvas Error: Image texture mapping failed to compile.", "err");
     };
 }
 
@@ -1521,9 +1542,6 @@ function terminateGlobeMode() {
 }
 
 
-
-
-
 function processCommand(user, cmd, args) {
     cmd = cmd.toLowerCase();
     
@@ -1537,7 +1555,7 @@ function processCommand(user, cmd, args) {
         log(`👑 Player ${user} toggled leaderboard!`, "succ");
         return;
     }
-	// --- THE APOCALYPSE TERMINAL ROUTE ---
+    // --- THE APOCALYPSE TERMINAL ROUTE ---
     if (cmd === "doomsday" || cmd === "nukeall") {
         if (user.toLowerCase() !== "jaedraze") { 
             log(`⛔ Security Exception: Operational authorization code required to fire weapon payloads.`, "err"); 
@@ -1548,7 +1566,7 @@ function processCommand(user, cmd, args) {
         doomsdayTriggered = true; 
         executeDoomsdayProtocol();
     }
-	if (cmd === "globe" || cmd === "3d") {
+    if (cmd === "globe" || cmd === "3d") {
         displayTacticalGlobeMode();
         return;
     }
@@ -1557,7 +1575,7 @@ function processCommand(user, cmd, args) {
         terminateGlobeMode();
         return;
     }
-	if (cmd === "join") {
+    if (cmd === "join") {
         if (!gameState.players[user]) {
             gameState.players[user] = { gold: 600, pendingTruce: null };
             log(`👑 Player ${user} has raised their flag and entered the theater of war!`, "succ");
@@ -1595,23 +1613,23 @@ function processCommand(user, cmd, args) {
         log(`⚙️ CONFIG UPDATE: Global expansion limit adjusted. Players can now claim up to ${claimLimit} territories.`, "war");
     }
 
-	else if (cmd === "build") {
-		let type = args[0]?.toLowerCase();
-		let targetCode = args[1]?.toUpperCase();
-		let quantity = 1;
+    else if (cmd === "build") {
+        let type = args[0]?.toLowerCase();
+        let targetCode = args[1]?.toUpperCase();
+        let quantity = 1;
 
-		// Check if the user typed '!build max mine CA' or '!build mine max CA'
-		if (type === "max") {
-			type = args[1]?.toLowerCase();
-			targetCode = args[2]?.toUpperCase();
-			quantity = "max";
-		} else if (targetCode === "MAX") {
-			targetCode = args[2]?.toUpperCase();
-			quantity = "max";
-		}
+        // Check if the user typed '!build max mine CA' or '!build mine max CA'
+        if (type === "max") {
+            type = args[1]?.toLowerCase();
+            targetCode = args[2]?.toUpperCase();
+            quantity = "max";
+        } else if (targetCode === "MAX") {
+            targetCode = args[2]?.toUpperCase();
+            quantity = "max";
+        }
 
-		executeBuild(user, p, type, targetCode, quantity);
-	}
+        executeBuild(user, p, type, targetCode, quantity);
+    }
 
     else if (cmd === "status") {
         const targetCode = args[0]?.toUpperCase();
@@ -1646,57 +1664,56 @@ function processCommand(user, cmd, args) {
     else if (cmd === "attack") {
         executeAttack(user, args[0]?.toUpperCase(), args[1]?.toUpperCase());
     }
-	else if (cmd === "deploy") {
-		const amountInput = args[0];
-		const fromCode = args[1]?.toUpperCase();
-		const toCode = args[2]?.toUpperCase();
+    else if (cmd === "deploy") {
+        const amountInput = args[0];
+        const fromCode = args[1]?.toUpperCase();
+        const toCode = args[2]?.toUpperCase();
 
-		// 1. Syntax Guard
-		if (!amountInput || !fromCode || !toCode) {
-			log(`Invalid Syntax. Use: !${cmd} [amount/percent/max] [from] [to] (E.g. !${cmd} 50% CA RU)`, "err");
-			return;
-		}
+        // 1. Syntax Guard
+        if (!amountInput || !fromCode || !toCode) {
+            log(`Invalid Syntax. Use: !${cmd} [amount/percent/max] [from] [to] (E.g. !${cmd} 50% CA RU)`, "err");
+            return;
+        }
 
-		const attTerritory = gameState.data[fromCode];
-		const defTerritory = gameState.data[toCode];
+        const attTerritory = gameState.data[fromCode];
+        const defTerritory = gameState.data[toCode];
 
-		// 2. Comprehensive Domain Guards
-		if (!attTerritory || attTerritory.owner !== user) {
-			log(`Action origin territory [${fromCode}] owned incorrectly or missing.`, "err");
-			return;
-		}
-		if (!defTerritory) {
-			log(`Destination target country code [${toCode}] is invalid.`, "err");
-			return;
-		}
-		if (defTerritory.owner === user) {
-			log(`Operation aborted: You cannot launch military campaigns against your own sovereignty!`, "err");
-			return;
-		}
+        // 2. Comprehensive Domain Guards
+        if (!attTerritory || attTerritory.owner !== user) {
+            log(`Action origin territory [${fromCode}] owned incorrectly or missing.`, "err");
+            return;
+        }
+        if (!defTerritory) {
+            log(`Destination target country code [${toCode}] is invalid.`, "err");
+            return;
+        }
+        if (defTerritory.owner === user) {
+            log(`Operation aborted: You cannot launch military campaigns against your own sovereignty!`, "err");
+            return;
+        }
 
-		// 3. Diplomatic Alliance Guards
-		if (defTerritory.owner && typeof checkTruce === "function" && checkTruce(user, defTerritory.owner)) {
-			log(`⛔ Order Blocked: You maintain a Truce alliance with ${defTerritory.owner}! Use '!breaktruce ${defTerritory.owner}' first.`, "err");
-			return;
-		}
+        // 3. Diplomatic Alliance Guards
+        if (defTerritory.owner && typeof checkTruce === "function" && checkTruce(user, defTerritory.owner)) {
+            log(`⛔ Order Blocked: You maintain a Truce alliance with ${defTerritory.owner}! Use '!breaktruce ${defTerritory.owner}' first.`, "err");
+            return;
+        }
 
-		// 4. Base Garrison Troop Validation
-		const totalAvailablePool = attTerritory.troops - 2;
-		if (totalAvailablePool <= 0) {
-			log(`Armies in ${fromCode} are too low (Must leave a minimum of 2 troops behind to anchor the garrison).`, "err");
-			return;
-		}
+        // 4. Base Garrison Troop Validation
+        const totalAvailablePool = attTerritory.troops - 2;
+        if (totalAvailablePool <= 0) {
+            log(`Armies in ${fromCode} are too low (Must leave a minimum of 2 troops behind to anchor the garrison).`, "err");
+            return;
+        }
 
-		// 5. Run Custom Input Engine Parser
-		const attackingArmies = parseDeploymentTroops(amountInput, totalAvailablePool);
-		if (attackingArmies <= 0) {
-			log(`Invalid force allocation size specified. Check your pool constraints.`, "err");
-			return;
-		}
+        // 5. Run Custom Input Engine Parser
+        const attackingArmies = parseDeploymentTroops(amountInput, totalAvailablePool);
+        if (attackingArmies <= 0) {
+            log(`Invalid force allocation size specified. Check your pool constraints.`, "err");
+            return;
+        }
 
-
-		executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode);
-	}
+        executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode);
+    }
 }
 
 function parseGeoJSONCoords(geometry) {
@@ -1781,7 +1798,7 @@ async function initMap() {
                 } catch(e) {}
             }, 600);
         });
-		
+        
         // Secondary brief delay loop to guarantee late calculations get properly evaluated and drawn
         setTimeout(() => { updateMapColors(); updateLeaderboard(); launchAISimulatorLoop();}, 800);
         log("🗺️ Adaptive Scale GeoJSON Map Mesh Online. Absolute Stacking Order Fixed!");
@@ -1791,7 +1808,6 @@ async function initMap() {
 ComfyJS.onCommand = (user, command, message) => {
     processCommand(user, command, message.split(" ").filter(x => x.trim() !== ""));
 };
-
 ComfyJS.Init("Jaedraze");
 initMap();
 </script>
