@@ -205,7 +205,7 @@ let gameState = JSON.parse(localStorage.getItem(SAVE_KEY)) || {
     data: {},
     truces: {}
 };
-
+let doomsdayTriggered = false;
 const COSTS = { mine: 150, school: 250, city: 400, base: 500 };
 let claimLimit = 1;
 
@@ -1133,6 +1133,155 @@ function executeDeployBattleCalculation(user, attackingArmies, fromCode, toCode)
 }
 
 
+function renderVictoryPodiumOverlay() {
+    // 1. Calculate territory ownership metrics across all registered accounts
+    const scoreboard = {};
+    Object.values(gameState.data).forEach(c => {
+        if (c.owner) {
+            scoreboard[c.owner] = (scoreboard[c.owner] || 0) + 1;
+        }
+    });
+
+    // Sort descending to find the true rulers of the season
+    const topPerformers = Object.entries(scoreboard)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([name, lands]) => ({ player: name, score: lands }));
+
+    // 2. RETAIN ARCHIVE RECORDS: Pull old logs, push the new champion entry, and save back to disk
+    const historyLog = JSON.parse(localStorage.getItem("PIXELB8_WAR_WINNERS")) || [];
+    historyLog.push({
+        seasonTimestamp: new Date().toLocaleDateString(),
+        champion: topPerformers[0]?.player || "No Survivor",
+        championshipPodium: topPerformers
+    });
+    localStorage.setItem("PIXELB8_WAR_WINNERS", JSON.stringify(historyLog));
+
+    // 3. GENERATE THE FLOATING OVERLAY VIEWPORT HTML
+    const overlay = document.createElement("div");
+    overlay.id = "doomsday-victory-screen";
+    overlay.style.cssText = `
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 540px; background: rgba(10, 14, 23, 0.95); border: 2px solid #ff1744;
+        box-shadow: 0 0 30px rgba(255, 23, 68, 0.4), inset 0 0 15px rgba(255, 23, 68, 0.2);
+        font-family: monospace; color: #fff; padding: 30px; text-align: center;
+        border-radius: 8px; z-index: 99999; box-sizing: border-box;
+    `;
+
+    // Construct player metric rows safely
+    let rowsHTML = "";
+    if (topPerformers.length === 0) {
+        rowsHTML = `<div style="color: #888; margin: 20px 0;">No territories were secured. Absolute annihilation.</div>`;
+    } else {
+        topPerformers.forEach((entry, idx) => {
+            const isChamp = idx === 0;
+            const rankColor = isChamp ? "#ffea3b" : (idx === 1 ? "#e0e0e0" : (idx === 2 ? "#cd7f32" : "#51e1ed"));
+            rowsHTML += `
+                <div style="display: flex; justify-content: space-between; align-items: center; 
+                            padding: 10px 15px; margin: 8px 0; background: rgba(255,255,255,0.03); 
+                            border-left: 4px solid ${rankColor}; font-size: ${isChamp ? '18px' : '14px'};
+                            font-weight: ${isChamp ? 'bold' : 'normal'}">
+                    <span>${idx + 1}. <span style="color: ${rankColor}">${entry.player}</span></span>
+                    <span style="color: #ff3d00">${entry.score} Sectors Held</span>
+                </div>`;
+        });
+    }
+
+    overlay.innerHTML = `
+        <h1 style="margin: 0 0 5px 0; color: #ff1744; letter-spacing: 2px; font-size: 28px;">NUCLEAR FALLOUT</h1>
+        <h3 style="margin: 0 0 25px 0; color: #888; font-weight: normal; font-size: 13px;">SEASON FINALE LEADERBOARD ACCORD</h3>
+        
+        <div style="margin-bottom: 25px;">${rowsHTML}</div>
+        
+        <div style="border-top: 1px solid rgba(255,23,68,0.3); padding-top: 15px;">
+            <div style="font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Reinitializing Simulation Core In</div>
+            <div id="doomsday-countdown-ticker" style="font-size: 32px; font-weight: bold; color: #ffea3b; text-shadow: 0 0 10px rgba(255,234,59,0.3)">30</div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // 4. THE 30-SECOND COUNTDOWN CLOCK INTERCEPTOR
+    let secondsRemaining = 30;
+    const tickerElement = document.getElementById("doomsday-countdown-ticker");
+    
+    const countdownInterval = setInterval(() => {
+        secondsRemaining--;
+        if (tickerElement) tickerElement.textContent = secondsRemaining;
+
+        if (secondsRemaining <= 0) {
+            clearInterval(countdownInterval);
+            resetGameAndPreserveWinners();
+        }
+    }, 1000);
+}
+
+/**
+ * Destroys current season states while cleanly ensuring historical logs survive the vacuum wipe.
+ */
+function resetGameAndPreserveWinners() {
+    // Read the logs we just created to rescue them before localStorage clearance
+    const savedWinnersHistory = localStorage.getItem("PIXELB8_WAR_WINNERS");
+    
+    // Clear out active season save configurations completely
+    localStorage.removeItem(SAVE_KEY); 
+    
+    // Re-inject the historical win record safely back into the clean matrix
+    if (savedWinnersHistory) {
+        localStorage.setItem("PIXELB8_WAR_WINNERS", savedWinnersHistory);
+    }
+    
+    // Hard refresh page layer
+    location.reload();
+}
+/**
+ * Initiates the absolute server wipe sequence with cascading visual effects
+ */
+function executeDoomsdayProtocol() {
+    log("🚨 SYSTEM CRITICAL: DOOMSDAY PROTOCOL ACTIVATED. LOCKING COMMAND FILTERS.", "err");
+
+    // 1. Instant full global view snap
+    changeMapProjection("world");
+
+    // 2. Fetch map target configurations
+    const targets = Object.keys(countryBoundsCache);
+    if (targets.length === 0) {
+        resetGameAndPreserveWinners();
+        return;
+    }
+
+    // 3. Stagger carpet-bombing detonation sequences across a 4-second cluster window
+    targets.forEach((code) => {
+        const bounds = countryBoundsCache[code];
+        const cx = bounds.x + bounds.width / 2;
+        const cy = bounds.y + bounds.height / 2;
+        const maxBlastRadius = Math.max(8, Math.max(bounds.width, bounds.height) * 1.5);
+        const triggerDelay = Math.random() * 4000;
+
+        setTimeout(() => {
+            const countryPath = document.getElementById(code);
+            if (countryPath) {
+                countryPath.setAttribute("fill", "#ff1744");
+                countryPath.style.filter = "brightness(2) drop-shadow(0 0 4px #ff1744)";
+            }
+            triggerDoomsdayBlast(cx, cy, maxBlastRadius);
+            log(`☢️ DETONATION: Sector [${code}] completely neutralized.`, "err");
+        }, triggerDelay);
+    });
+
+    // 4. Once the dust settles (5 seconds post-launch), trigger the cinematic end-screen
+    setTimeout(() => {
+        log("☣️ ALL SURFACE HARVESTERS WIPED. COMPILING HISTORICAL WINNERS LEDGER...", "war");
+        
+        // Darken the battlefield layer slightly to bring the overlay forward
+        const map = document.getElementById("map");
+        if (map) map.style.opacity = "0.15";
+
+        // Render the top 5 champions podium panel onto the stream interface
+        renderVictoryPodiumOverlay();
+
+    }, 5200);
+}
 // --- AUTONOMOUS AI ENGINE VARIABLES ---
 const botNamesPool = ["Bot_Alpha", "Warlord_Xero", "General_Zod", "Garrison_AI", "Pixel_Commander", "Omega_Zero"];
 
@@ -1247,7 +1396,17 @@ function processCommand(user, cmd, args) {
         log(`👑 Player ${user} toggled leaderboard!`, "succ");
         return;
     }
-
+	// --- THE APOCALYPSE TERMINAL ROUTE ---
+    if (cmd === "doomsday" || cmd === "nukeall") {
+        if (user.toLowerCase() !== "jaedraze") { 
+            log(`⛔ Security Exception: Operational authorization code required to fire weapon payloads.`, "err"); 
+            return; 
+        }
+        
+        // Set lock state flag to secure system parameters
+        doomsdayTriggered = true; 
+        executeDoomsdayProtocol();
+    }
 	if (cmd === "join") {
         if (!gameState.players[user]) {
             gameState.players[user] = { gold: 600, pendingTruce: null };
