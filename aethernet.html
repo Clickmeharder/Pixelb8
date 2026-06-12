@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aether Net: Real World Mapping</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
-	<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
     <style>
         :root {
             --neon-green: #00ff66;
@@ -214,13 +213,10 @@
             <div></div><button class="btn" onclick="moveSim(-0.00015, 0)">▼ S</button><div></div>
         </div>
     </div>
-	<div id="street-view-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #000;">
-		<div id="street-view-container" style="width: 100%; height: 100%;"></div>
-		<button onclick="closeStreetView()" style="position: absolute; top: 20px; right: 20px; z-index: 10000; background: var(--neon-magenta); border: none; padding: 10px 20px; color: #fff; font-weight: bold;">CLOSE VIEW</button>
-	</div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-	<script>
-	const CONFIG = {
+<script>
+        const CONFIG = {
             interactionRadiusMeters: 40,
             queryRadiusMeters: 250,
             cooldownRadiusMeters: 150,
@@ -274,32 +270,6 @@
             const logBox = document.getElementById('terminal-log');
             logBox.innerHTML += `<div>&gt; ${txt}</div>`;
             logBox.scrollTop = logBox.scrollHeight;
-        }
-
-        // Function to launch the First Person View
-        function openStreetView(lat, lon) {
-            const overlay = document.getElementById('street-view-overlay');
-            overlay.style.display = 'block';
-
-            // Initialize Pannellum
-            pannellum.viewer('street-view-container', {
-                "type": "equirectangular",
-                // Replace this URL with your own local .jpg or a public 360 image
-                "panorama": "https://pannellum.org/images/alma.jpg", 
-                "autoLoad": true,
-                "showControls": true,
-                "title": "Sector Analysis: First Person View"
-            });
-            
-            sysLog("OPTIC LINK: Local 360° environment loaded.");
-        }
-
-        // Function to close the panel
-        function closeStreetView() {
-            const overlay = document.getElementById('street-view-overlay');
-            overlay.style.display = 'none';
-            document.getElementById('street-view-container').innerHTML = ''; // Clean up to save memory
-            sysLog("TERMINATED: Optical link disconnected.");
         }
 
         // --- MATH CALCULATIONS ENGINE ---
@@ -834,12 +804,11 @@
             }
         }
 
+        // --- BUTTON HANDLING REGISTRATION EVENTS ---
         document.getElementById('action-btn').addEventListener('click', () => {
             if (state.activePropertyId) {
                 const prop = state.realProperties[state.activePropertyId];
-                
-                // Instead of just opening the popup, we launch the Street View panel
-                openStreetView(prop.center.lat, prop.center.lng);
+                prop.layer.openPopup(prop.center);
             }
         });
 
@@ -883,7 +852,7 @@
             state.playerLon += dLon;
             fetchRealWorldBuildings(state.playerLat, state.playerLon);
             syncGameplayState();
-         }
+        }
     </script>
 </body>
 </html>
