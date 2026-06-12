@@ -1681,12 +1681,12 @@ function terminateGlobeMode() {
 
 function processCommand(user, cmd, args) {
     cmd = cmd.toLowerCase();
-    if (command === "earth") {
+    if (cmd === "earth") {
         switchTheaterMode("earth");
         return;
     }
 
-    if ( command === "moon") {
+    if (cmd === "moon") {
         switchTheaterMode("moon");
         return;
     }
