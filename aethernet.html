@@ -223,679 +223,649 @@
 		<button onclick="closeStreetView()" style="position: absolute; top: 20px; right: 20px; z-index: 10000; background: var(--neon-magenta); border: none; padding: 10px 20px; color: #fff; font-weight: bold;">CLOSE VIEW</button>
 	</div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    const CONFIG = {
-        interactionRadiusMeters: 40,
-        queryRadiusMeters: 250,
-        cooldownRadiusMeters: 150,
-        sectorCooldownDurationMS: 60 * 60 * 1000 // 1 hour sector blackout threshold
-    };
-
-    // Track your permanent anchor coordinates for swift home network alignment
-    const HOME_ANCHOR = {
-        lat: 53.5444,
-        lon: -113.4909
-    };
-
-    let state = {
-        playerLat: HOME_ANCHOR.lat, 
-        playerLon: HOME_ANCHOR.lon,
-        score: 2500, 
-        isSimulating: true,
-        realProperties: {}, 
-        activePropertyId: null,
-        isFetchingData: false,
-        passiveGenerationRate: 0, 
-        // Persistent matrix registries for the new mechanics
-        mapDataNodes: {},
-        activeNodeIdInRange: null,
-        depletedSectors: [], 
-        blueprints: {
-            forge: { name: "Quantum Data Forge", costMult: 1.5, desc: "Yields dynamic background processing loops (+15 F/s + size bonus)" },
-            vault: { name: "Secure Grid-Vault", costMult: 2.0, desc: "Reinforces structural encryption layers (+40% base asset worth)" },
-            uplink: { name: "Aether Uplink Beacon", costMult: 2.5, desc: "Broadcasts continuous localized telemetry streams" }
-        }
-    };
-    
-    function updateUIState() {
-        const simGrid = document.querySelector('.sim-grid');
-        // Hide simulation buttons if we are using live GPS
-        simGrid.style.display = state.isSimulating ? 'grid' : 'none';
-    }
-
-    // Upgraded zoom metrics (minZoom lowered to 13 to allow wide area scanning)
-    const map = L.map('map', {
-        zoomControl: false, attributionControl: false, minZoom: 13, maxZoom: 19
-    }).setView([state.playerLat, state.playerLon], 18);
-
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-
-    const interactionBoundary = L.circle([state.playerLat, state.playerLon], {
-        radius: CONFIG.interactionRadiusMeters, color: varStyle('--neon-blue'), weight: 1.5, dashArray: '5, 5', fillColor: 'transparent'
-    }).addTo(map);
-
-    const playerMarker = L.circleMarker([state.playerLat, state.playerLon], {
-        radius: 8, color: '#ffffff', fillColor: varStyle('--neon-blue'), fillOpacity: 1, weight: 3
-    }).addTo(map);
-
-    function varStyle(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-    
-    function sysLog(txt) {
-        const logBox = document.getElementById('terminal-log');
-        logBox.innerHTML += `<div>&gt; ${txt}</div>`;
-        logBox.scrollTop = logBox.scrollHeight;
-    }
-
-    // Function to launch the First Person View
-    function openStreetView(lat, lon) {
-        const overlay = document.getElementById('street-view-overlay');
-        overlay.style.display = 'block';
-
-        // Initialize Pannellum
-        pannellum.viewer('street-view-container', {
-            "type": "equirectangular",
-            // Replace this URL with your own local .jpg or a public 360 image
-            "panorama": "https://pannellum.org/images/alma.jpg", 
-            "autoLoad": true,
-            "showControls": true,
-            "title": "Sector Analysis: First Person View"
-        });
-        
-        sysLog("OPTIC LINK: Local 360° environment loaded.");
-    }
-
-    // Function to close the panel
-    function closeStreetView() {
-        const overlay = document.getElementById('street-view-overlay');
-        overlay.style.display = 'none';
-        document.getElementById('street-view-container').innerHTML = ''; // Clean up to save memory
-        sysLog("TERMINATED: Optical link disconnected.");
-    }
-
-    // --- MATH CALCULATIONS ENGINE ---
-    function calculatePolygonArea(latLngs) {
-        let totalArea = 0;
-        const len = latLngs.length;
-        if (len < 3) return 50; 
-        
-        for (let i = 0; i < len; i++) {
-            let p1 = latLngs[i];
-            let p2 = latLngs[(i + 1) % len];
-            let x1 = p1[1] * 111320 * Math.cos(p1[0] * Math.PI / 180);
-            let y1 = p1[0] * 110574;
-            let x2 = p2[1] * 111320 * Math.cos(p2[0] * Math.PI / 180);
-            let y2 = p2[0] * 110574;
-            totalArea += (x1 * y2) - (x2 * y1);
-        }
-        return Math.abs(totalArea / 2);
-    }
-
-    function analyzeRegionalDensityMatrix(elements) {
-        let commercialNodes = 0;
-        let totalElements = elements.length || 1;
-
-        elements.forEach(el => {
-            if (!el.tags) return;
-            const t = el.tags.amenity || el.tags.shop || el.tags.office || el.tags.building || "";
-            if (["commercial", "office", "retail", "supermarket", "bank", "work"].includes(t) || el.tags.shop || el.tags.office) {
-                commercialNodes++;
-            }
-        });
-
-        const densityRatio = commercialNodes / totalElements;
-        
-        if (densityRatio > 0.4) return { label: "High Density Commercial Core", scalar: 2.2 };
-        if (densityRatio > 0.15) return { label: "Urban Mixed-Use Sector", scalar: 1.5 };
-        return { label: "Low Density Residential Zone", scalar: 0.9 };
-    }
-
-    function evaluatePseudoPrice(area, levels, tags, neighborhoodScalar) {
-        let baseRate = 0.5; 
-        let effectiveFloorArea = area * levels;
-        let assetPremium = 1.0;
-        const structuralType = tags.amenity || tags.shop || tags.office || tags.building || "residential";
-
-        const tagWeights = {
-            "bank": 4.5, "office": 3.0, "supermarket": 2.5, "hospital": 2.5,
-            "university": 2.0, "cafe": 1.8, "restaurant": 1.8, "commercial": 2.2,
-            "apartments": 1.4, "house": 1.1, "detached": 0.9, "garage": 0.4, "shed": 0.2
+	<script>
+	const CONFIG = {
+            interactionRadiusMeters: 40,
+            queryRadiusMeters: 250,
+            cooldownRadiusMeters: 150,
+            sectorCooldownDurationMS: 60 * 60 * 1000 // 1 hour sector blackout threshold
         };
 
-        if (tagWeights[structuralType]) {
-            assetPremium = tagWeights[structuralType];
-        } else if (tags.shop || tags.office) {
-            assetPremium = 2.0; 
-        } else if (tags.building === "yes" && area > 400) {
-            assetPremium = 1.5; 
+        const HOME_ANCHOR = {
+            lat: 53.5444,
+            lon: -113.4909
+        };
+
+        let state = {
+            playerLat: HOME_ANCHOR.lat, 
+            playerLon: HOME_ANCHOR.lon,
+            score: 2500, 
+            isSimulating: true,
+            realProperties: {}, 
+            activePropertyId: null,
+            isFetchingData: false,
+            passiveGenerationRate: 0, 
+            mapDataNodes: {},
+            activeNodeIdInRange: null,
+            depletedSectors: [], 
+            blueprints: {
+                forge: { name: "Quantum Data Forge", costMult: 1.5, desc: "Yields dynamic background processing loops (+15 F/s + size bonus)" },
+                vault: { name: "Secure Grid-Vault", costMult: 2.0, desc: "Reinforces structural encryption layers (+40% base asset worth)" },
+                uplink: { name: "Aether Uplink Beacon", costMult: 2.5, desc: "Broadcasts continuous localized telemetry streams" }
+            }
+        };
+
+		function updateUIState() {
+			const simGrid = document.querySelector('.sim-grid');
+			simGrid.style.display = state.isSimulating ? 'grid' : 'none';
+		}
+
+        const map = L.map('map', {
+            zoomControl: false, attributionControl: false, minZoom: 13, maxZoom: 19
+        }).setView([state.playerLat, state.playerLon], 18);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+
+        const interactionBoundary = L.circle([state.playerLat, state.playerLon], {
+            radius: CONFIG.interactionRadiusMeters, color: varStyle('--neon-blue'), weight: 1.5, dashArray: '5, 5', fillColor: 'transparent'
+        }).addTo(map);
+
+        const playerMarker = L.circleMarker([state.playerLat, state.playerLon], {
+            radius: 8, color: '#ffffff', fillColor: varStyle('--neon-blue'), fillOpacity: 1, weight: 3
+        }).addTo(map);
+
+        function varStyle(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+        
+        function sysLog(txt) {
+            const logBox = document.getElementById('terminal-log');
+            logBox.innerHTML += `<div>&gt; ${txt}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
         }
 
-        let finalCalculation = effectiveFloorArea * baseRate * assetPremium * neighborhoodScalar;
-        return Math.max(75, Math.min(12500, Math.round(finalCalculation)));
-    }
+        function openStreetView(lat, lon) {
+            const overlay = document.getElementById('street-view-overlay');
+            overlay.style.display = 'block';
 
-    // --- POSITION SYSTEM INTERFACE MATRIX ---
-    function triggerLiveLocationSync() {
-        if (!navigator.geolocation) {
-            sysLog("CRITICAL ERROR: Satellite array unreachable by hardware.");
-            return;
+            pannellum.viewer('street-view-container', {
+                "type": "equirectangular",
+                "panorama": "https://pannellum.org/images/alma.jpg", 
+                "autoLoad": true,
+                "showControls": true,
+                "title": "Sector Analysis: First Person View"
+            });
+            
+            sysLog("OPTIC LINK: Local 360° environment loaded.");
         }
-        sysLog("Interacting with internal array... Querying hardware tracking systems...");
-        navigator.geolocation.getCurrentPosition((pos) => {
-            state.playerLat = pos.coords.latitude;
-            state.playerLon = pos.coords.longitude;
-            state.isSimulating = false; // Disable directional button override
-            sysLog("GPS LINK ACQUIRED: System locked to active spatial vector.");
-            completeBootPipeline();
-        }, () => {
-            sysLog("GPS LINK FAILED: Reverting to fallback infrastructure simulation.");
-        });
-    }
 
-    function triggerReturnToHomeAnchor() {
-        state.playerLat = HOME_ANCHOR.lat;
-        state.playerLon = HOME_ANCHOR.lon;
-        state.isSimulating = true;
-        sysLog("RECALIBRATING CORE: Reverted network routing to base tracking coordinates.");
-        completeBootPipeline();
-    }
+        function closeStreetView() {
+            const overlay = document.getElementById('street-view-overlay');
+            overlay.style.display = 'none';
+            document.getElementById('street-view-container').innerHTML = ''; 
+            sysLog("TERMINATED: Optical link disconnected.");
+        }
 
-    function searchGlobalLocation() {
-        const query = document.getElementById('search-input').value.trim();
-        const statusBox = document.getElementById('search-status');
-        if (!query) return;
+        function calculatePolygonArea(latLngs) {
+            let totalArea = 0;
+            const len = latLngs.length;
+            if (len < 3) return 50; 
+            
+            for (let i = 0; i < len; i++) {
+                let p1 = latLngs[i];
+                let p2 = latLngs[(i + 1) % len];
+                let x1 = p1[1] * 111320 * Math.cos(p1[0] * Math.PI / 180);
+                let y1 = p1[0] * 110574;
+                let x2 = p2[1] * 111320 * Math.cos(p2[0] * Math.PI / 180);
+                let y2 = p2[0] * 110574;
+                totalArea += (x1 * y2) - (x2 * y1);
+            }
+            return Math.abs(totalArea / 2);
+        }
 
-        statusBox.style.color = "var(--neon-blue)";
-        statusBox.textContent = "Querying regional spatial nodes...";
+        function analyzeRegionalDensityMatrix(elements) {
+            let commercialNodes = 0;
+            let totalElements = elements.length || 1;
 
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.length > 0) {
-                    state.playerLat = parseFloat(data[0].lat);
-                    state.playerLon = parseFloat(data[0].lon);
-                    state.isSimulating = true;
-                    statusBox.style.color = "var(--neon-green)";
-                    statusBox.textContent = "Data lock complete. Building system pipeline...";
-                    setTimeout(() => { completeBootPipeline(); }, 600);
-                } else {
-                    statusBox.style.color = "var(--neon-magenta)";
-                    statusBox.textContent = "Target coordinate lookup failed.";
+            elements.forEach(el => {
+                if (!el.tags) return;
+                const t = el.tags.amenity || el.tags.shop || el.tags.office || el.tags.building || "";
+                if (["commercial", "office", "retail", "supermarket", "bank", "work"].includes(t) || el.tags.shop || el.tags.office) {
+                    commercialNodes++;
                 }
             });
-    }
 
-    function initPositionMode(mode) {
-        if (mode === 'gps') {
-            triggerLiveLocationSync();
-        } else { completeBootPipeline(); }
-    }
-
-    function completeBootPipeline() {
-        document.getElementById('boot-overlay').style.display = 'none';
-        map.setView([state.playerLat, state.playerLon], 18);
-        
-        // Wipe running active rendering components safely
-        Object.values(state.realProperties).forEach(p => map.removeLayer(p.layer));
-        Object.values(state.mapDataNodes).forEach(n => map.removeLayer(n.layer));
-        state.realProperties = {};
-        state.mapDataNodes = {};
-
-        fetchRealWorldBuildings(state.playerLat, state.playerLon);
-        syncGameplayState();
-        updateUIState()
-    }
-
-    // --- ADAPTIVE DATA INGEST SPAWN MATRIX ENGINE ---
-    function checkSectoredCooldownStatus(lat, lon) {
-        const now = Date.now();
-        // Prune expired blackout tokens reactively
-        state.depletedSectors = state.depletedSectors.filter(s => (now - s.timestamp) < CONFIG.sectorCooldownDurationMS);
-        
-        // Measure if your target spawn position collides with a dead vector area
-        return state.depletedSectors.some(sector => {
-            const distance = map.distance([lat, lon], [sector.lat, sector.lon]);
-            return distance < CONFIG.cooldownRadiusMeters;
-        });
-    }
-
-    function spawnAmbientGridLootNodes(centerLat, centerLon) {
-        // Check if the current sector footprint is trapped inside a harvest block
-        if (checkSectoredCooldownStatus(centerLat, centerLon)) {
-            sysLog("SCAN WARNING: Coordinate zone is depleted of ambient fragments. Cooldown active.");
-            return;
+            const densityRatio = commercialNodes / totalElements;
+            
+            if (densityRatio > 0.4) return { label: "High Density Commercial Core", scalar: 2.2 };
+            if (densityRatio > 0.15) return { label: "Urban Mixed-Use Sector", scalar: 1.5 };
+            return { label: "Low Density Residential Zone", scalar: 0.9 };
         }
 
-        // Scatter clean, visible collectible nodes around local roads
-        for (let i = 0; i < 4; i++) {
-            const randomOffsetId = `node-${Math.floor(Math.random() * 1000000)}`;
-            const angle = Math.random() * Math.PI * 2;
-            const radiusScalar = (Math.random() * 120 + 30) / 111320; // Bound safely away from pure center
+        function evaluatePseudoPrice(area, levels, tags, neighborhoodScalar) {
+            let baseRate = 0.5; 
+            let effectiveFloorArea = area * levels;
+            let assetPremium = 1.0;
+            const structuralType = tags.amenity || tags.shop || tags.office || tags.building || "residential";
+
+            const tagWeights = {
+                "bank": 4.5, "office": 3.0, "supermarket": 2.5, "hospital": 2.5,
+                "university": 2.0, "cafe": 1.8, "restaurant": 1.8, "commercial": 2.2,
+                "apartments": 1.4, "house": 1.1, "detached": 0.9, "garage": 0.4, "shed": 0.2
+            };
+
+            if (tagWeights[structuralType]) {
+                assetPremium = tagWeights[structuralType];
+            } else if (tags.shop || tags.office) {
+                assetPremium = 2.0; 
+            } else if (tags.building === "yes" && area > 400) {
+                assetPremium = 1.5; 
+            }
+
+            let finalCalculation = effectiveFloorArea * baseRate * assetPremium * neighborhoodScalar;
+            return Math.max(75, Math.min(12500, Math.round(finalCalculation)));
+        }
+
+        function triggerLiveLocationSync() {
+            if (!navigator.geolocation) {
+                sysLog("CRITICAL ERROR: Satellite array unreachable by hardware.");
+                return;
+            }
+            sysLog("Interacting with internal array... Querying hardware tracking systems...");
+            navigator.geolocation.getCurrentPosition((pos) => {
+                state.playerLat = pos.coords.latitude;
+                state.playerLon = pos.coords.longitude;
+                state.isSimulating = false; 
+                sysLog("GPS LINK ACQUIRED: System locked to active spatial vector.");
+                completeBootPipeline();
+            }, () => {
+                sysLog("GPS LINK FAILED: Reverting to fallback infrastructure simulation.");
+            });
+        }
+
+        function triggerReturnToHomeAnchor() {
+            state.playerLat = HOME_ANCHOR.lat;
+            state.playerLon = HOME_ANCHOR.lon;
+            state.isSimulating = true;
+            sysLog("RECALIBRATING CORE: Reverted network routing to base tracking coordinates.");
+            completeBootPipeline();
+        }
+
+        function searchGlobalLocation() {
+            const query = document.getElementById('search-input').value.trim();
+            const statusBox = document.getElementById('search-status');
+            if (!query) return;
+
+            statusBox.style.color = "var(--neon-blue)";
+            statusBox.textContent = "Querying regional spatial nodes...";
+
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        state.playerLat = parseFloat(data[0].lat);
+                        state.playerLon = parseFloat(data[0].lon);
+                        state.isSimulating = true;
+                        statusBox.style.color = "var(--neon-green)";
+                        statusBox.textContent = "Data lock complete. Building system pipeline...";
+                        setTimeout(() => { completeBootPipeline(); }, 600);
+                    } else {
+                        statusBox.style.color = "var(--neon-magenta)";
+                        statusBox.textContent = "Target coordinate lookup failed.";
+                    }
+                });
+        }
+
+        function initPositionMode(mode) {
+            if (mode === 'gps') {
+                triggerLiveLocationSync();
+            } else { completeBootPipeline(); }
+        }
+
+        function completeBootPipeline() {
+            document.getElementById('boot-overlay').style.display = 'none';
+            map.setView([state.playerLat, state.playerLon], 18);
             
-            const nodeLat = centerLat + (radiusScalar * Math.sin(angle));
-            const nodeLon = centerLon + (radiusScalar * Math.cos(angle) * Math.cos(centerLat * Math.PI / 180));
-            const computedPayload = Math.floor(Math.random() * 31) + 20; // 20 - 50 visibility values
+            Object.values(state.realProperties).forEach(p => map.removeLayer(p.layer));
+            Object.values(state.mapDataNodes).forEach(n => map.removeLayer(n.layer));
+            state.realProperties = {};
+            state.mapDataNodes = {};
 
-            const nodeMarker = L.circleMarker([nodeLat, nodeLon], {
-                radius: 6, color: varStyle('--neon-green'), fillColor: '#000', fillOpacity: 0.8, weight: 2
-            }).addTo(map);
+            fetchRealWorldBuildings(state.playerLat, state.playerLon);
+            syncGameplayState();
+			updateUIState()
+        }
 
-            nodeMarker.bindPopup(`
-                <div style="color:#fff; font-family:monospace; background:#000; padding:4px; font-size:0.7rem;">
-                    <b style="color:var(--neon-green)">AMBIENT DATA STORAGE</b><br>
-                    <span>Scannable Yield: ${computedPayload} Fragments</span><br>
-                    <span style="color:#555;">Range Required: 40m</span>
+        function checkSectoredCooldownStatus(lat, lon) {
+            const now = Date.now();
+            state.depletedSectors = state.depletedSectors.filter(s => (now - s.timestamp) < CONFIG.sectorCooldownDurationMS);
+            
+            return state.depletedSectors.some(sector => {
+                const distance = map.distance([lat, lon], [sector.lat, sector.lon]);
+                return distance < CONFIG.cooldownRadiusMeters;
+            });
+        }
+
+        function spawnAmbientGridLootNodes(centerLat, centerLon) {
+            if (checkSectoredCooldownStatus(centerLat, centerLon)) {
+                sysLog("SCAN WARNING: Coordinate zone is depleted of ambient fragments. Cooldown active.");
+                return;
+            }
+
+            for (let i = 0; i < 4; i++) {
+                const randomOffsetId = `node-${Math.floor(Math.random() * 1000000)}`;
+                const angle = Math.random() * Math.PI * 2;
+                const radiusScalar = (Math.random() * 120 + 30) / 111320; 
+                
+                const nodeLat = centerLat + (radiusScalar * Math.sin(angle));
+                const nodeLon = centerLon + (radiusScalar * Math.cos(angle) * Math.cos(centerLat * Math.PI / 180));
+                const computedPayload = Math.floor(Math.random() * 31) + 20; 
+
+                const nodeMarker = L.circleMarker([nodeLat, nodeLon], {
+                    radius: 6, color: varStyle('--neon-green'), fillColor: '#000', fillOpacity: 0.8, weight: 2
+                }).addTo(map);
+
+                nodeMarker.bindPopup(`
+                    <div style="color:#fff; font-family:monospace; background:#000; padding:4px; font-size:0.7rem;">
+                        <b style="color:var(--neon-green)">AMBIENT DATA STORAGE</b><br>
+                        <span>Scannable Yield: ${computedPayload} Fragments</span><br>
+                        <span style="color:#555;">Range Required: 40m</span>
+                    </div>
+                `);
+
+                state.mapDataNodes[randomOffsetId] = {
+                    id: randomOffsetId,
+                    lat: nodeLat,
+                    lon: nodeLon,
+                    payload: computedPayload,
+                    layer: nodeMarker
+                };
+            }
+        }
+
+        function fetchRealWorldBuildings(lat, lon) {
+            if (state.isFetchingData) return;
+            state.isFetchingData = true;
+            sysLog("Querying Overpass DB for local storefronts & structures...");
+
+            const query = `
+                [out:json][timeout:25];
+                (
+                  way["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
+                  relation["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
+                );
+                out geom;
+            `;
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    state.isFetchingData = false;
+                    
+                    spawnAmbientGridLootNodes(lat, lon);
+
+                    if (!data.elements || data.elements.length === 0) {
+                        sysLog("No building models mapped in this coordinate zone.");
+                        return;
+                    }
+
+                    const contextMatrix = analyzeRegionalDensityMatrix(data.elements);
+                    sysLog(`Sector Vector ID: [${contextMatrix.label}] (Scalar: x${contextMatrix.scalar})`);
+
+                    let parsedCount = 0;
+                    data.elements.forEach(el => {
+                        const id = el.id;
+                        if (state.realProperties[id]) return; 
+
+                        let latLngs = [];
+                        if (el.type === 'way' && el.geometry) {
+                            latLngs = el.geometry.map(pt => [pt.lat, pt.lon]);
+                        } else return; 
+
+                        const structuralAreaMeters = calculatePolygonArea(latLngs);
+                        const structuralBuildingLevels = parseInt(el.tags["building:levels"]) || 1;
+                        const finalMintCost = evaluatePseudoPrice(structuralAreaMeters, structuralBuildingLevels, el.tags, contextMatrix.scalar);
+
+                        const name = el.tags.name || el.tags["addr:housename"] || "Commercial Sector Space";
+                        const type = el.tags.amenity || el.tags.shop || el.tags.office || el.tags.building || "Structure";
+                        const displayType = type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
+                        const streetAddress = el.tags["addr:street"] ? `${el.tags["addr:housenumber"] || ''} ${el.tags["addr:street"]}` : "Unregistered Sector Road";
+
+                        const polygonLayer = L.polygon(latLngs, {
+                            color: varStyle('--neon-blue'), weight: 1.5, fillColor: '#00f0ff', fillOpacity: 0.1
+                        }).addTo(map);
+
+                        const dynamicTokenHash = btoa(`aether-osm-${el.type}-${id}`).replace(/=/g, "");
+
+                        state.realProperties[id] = {
+                            id: id,
+                            blockchainTokenId: dynamicTokenHash,
+                            name: name,
+                            type: displayType,
+                            address: streetAddress,
+                            layer: polygonLayer,
+                            center: polygonLayer.getBounds().getCenter(),
+                            mintCost: finalMintCost,
+                            area: Math.round(structuralAreaMeters),
+                            levels: structuralBuildingLevels,
+                            owned: false,
+                            owner: "System Corp",
+                            upgradedStructure: null
+                        };
+
+                        updatePropertyMetadataMarkup(state.realProperties[id]);
+                        parsedCount++;
+                    });
+
+                    sysLog(`Mapped ${parsedCount} real structural plots from satellite database.`);
+                    calculatePassiveYieldTotals();
+                    syncGameplayState();
+                })
+                .catch(() => {
+                    state.isFetchingData = false;
+                    sysLog("Datastream connection interrupted. Recalibrating...");
+                });
+        }
+
+        function updatePropertyMetadataMarkup(prop) {
+            let statusText = prop.owned 
+                ? `<span style="color:var(--neon-magenta); font-weight:bold;">SECURED BY: ${prop.owner}</span>`
+                : `<span style="color:var(--neon-green)">STATUS: FOR SALE [MINTABLE]</span>`;
+            
+            if (prop.upgradedStructure) {
+                statusText += `<br><span style="color:var(--neon-magenta); font-weight:bold;">CORE MOD: ${prop.upgradedStructure}</span>`;
+            }
+
+            prop.layer.bindPopup(`
+                <div style="color:#fff; font-family:monospace; background:#000; padding:6px; min-width:180px; font-size: 0.75rem;">
+                    <b style="color:var(--neon-blue); font-size:0.85rem;">${prop.name}</b><br>
+                    <span style="color:#aaa;">Type: ${prop.type} (${prop.levels} Flr)</span><br>
+                    <span style="color:#777;">Footprint Size: ${prop.area} m²</span><br>
+                    <span style="color:#555; font-size:0.6rem; display:block; word-break:break-all;">HASH: ${prop.blockchainTokenId}</span><hr style="border-color:#222;">
+                    <div style="margin-bottom: 6px; font-weight: bold; color: var(--neon-green)">VALUE: ${prop.mintCost} FRAGS</div>
+                    ${statusText}
                 </div>
             `);
-
-            state.mapDataNodes[randomOffsetId] = {
-                id: randomOffsetId,
-                lat: nodeLat,
-                lon: nodeLon,
-                payload: computedPayload,
-                layer: nodeMarker
-            };
         }
-    }
 
-    // --- LIVE DATA EXTRACTION ---
-    function fetchRealWorldBuildings(lat, lon) {
-        if (state.isFetchingData) return;
-        state.isFetchingData = true;
-        sysLog("Querying Overpass DB for local storefronts & structures...");
+        function calculatePassiveYieldTotals() {
+            let dynamicSum = 0;
+            Object.values(state.realProperties).forEach(prop => {
+                if (prop.owned && prop.upgradedStructure === state.blueprints.forge.name) {
+                    dynamicSum += 15 + Math.floor(prop.area / 100);
+                }
+            });
+            state.passiveGenerationRate = dynamicSum;
+            document.getElementById('yield-display').textContent = `+${state.passiveGenerationRate} F/s`;
+        }
 
-        const query = `
-            [out:json][timeout:25];
-            (
-              way["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
-              relation["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
-            );
-            out geom;
-        `;
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+        setInterval(() => {
+            if (state.passiveGenerationRate > 0) {
+                state.score += state.passiveGenerationRate;
+                document.getElementById('score-display').textContent = state.score;
+            }
+            
+            if (!state.isSimulating && navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    if (state.playerLat !== pos.coords.latitude || state.playerLon !== pos.coords.longitude) {
+                        state.playerLat = pos.coords.latitude;
+                        state.playerLon = pos.coords.longitude;
+                        fetchRealWorldBuildings(state.playerLat, state.playerLon);
+                        syncGameplayState();
+                    }
+                });
+            }
+        }, 1000);
 
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                state.isFetchingData = false;
+        function manualDataHarvest() {
+            if (!state.activeNodeIdInRange) {
+                sysLog("ERROR: No active data fragment cluster locked inside interaction matrix.");
+                return;
+            }
+
+            const activeNode = state.mapDataNodes[state.activeNodeIdInRange];
+            const collectedYield = activeNode.payload;
+            
+            state.score += collectedYield;
+            document.getElementById('score-display').textContent = state.score;
+
+            state.depletedSectors.push({
+                lat: activeNode.lat,
+                lon: activeNode.lon,
+                timestamp: Date.now()
+            });
+
+            sysLog(`SIPHON TERMINATED: Successfully captured ${collectedYield} fragments from local node.`);
+            
+            map.removeLayer(activeNode.layer);
+            delete state.mapDataNodes[state.activeNodeIdInRange];
+            state.activeNodeIdInRange = null;
+
+            const btn = document.getElementById('harvest-btn');
+            const cachedText = btn.textContent;
+            btn.textContent = `+${collectedYield}F`;
+            btn.disabled = true;
+            btn.style.borderColor = "var(--neon-magenta)";
+            btn.style.color = "var(--neon-magenta)";
+
+            setTimeout(() => {
+                btn.textContent = cachedText;
+                btn.disabled = false;
+                btn.style.borderColor = "var(--neon-green)";
+                btn.style.color = "var(--neon-green)";
+                syncGameplayState();
+            }, 1500);
+        }
+
+        function syncGameplayState() {
+            const currentPosition = [state.playerLat, state.playerLon];
+            playerMarker.setLatLng(currentPosition);
+            interactionBoundary.setLatLng(currentPosition);
+            
+            if (map.getZoom() >= 17) {
+                map.panTo(currentPosition);
+            }
+
+            document.getElementById('gps-display').textContent = `${state.playerLat.toFixed(5)}, ${state.playerLon.toFixed(5)}`;
+            document.getElementById('score-display').textContent = state.score;
+            
+            const totalOwned = Object.values(state.realProperties).filter(p => p.owner === "Player").length;
+            document.getElementById('grids-display').textContent = totalOwned;
+
+            let closestNodeId = null;
+            let closestNodeDistance = Infinity;
+
+            Object.values(state.mapDataNodes).forEach(node => {
+                const dist = map.distance(currentPosition, [node.lat, node.lon]);
+                if (dist < closestNodeDistance) {
+                    closestNodeDistance = dist;
+                    closestNodeId = node.id;
+                }
+            });
+
+            const harvestBtn = document.getElementById('harvest-btn');
+            if (closestNodeId && closestNodeDistance <= CONFIG.interactionRadiusMeters) {
+                state.activeNodeIdInRange = closestNodeId;
+                harvestBtn.textContent = `SIPHON (${state.mapDataNodes[closestNodeId].payload}F)`;
+                harvestBtn.disabled = false;
+                harvestBtn.style.borderColor = "var(--neon-green)";
+            } else {
+                state.activeNodeIdInRange = null;
+                harvestBtn.textContent = "SCANNING";
+                harvestBtn.disabled = true;
+                harvestBtn.style.borderColor = "#444";
+            }
+
+            let currentActiveProp = null;
+            let closestDistance = Infinity;
+
+            Object.values(state.realProperties).forEach(prop => {
+                const distanceToCenter = map.distance(currentPosition, prop.center);
+                if (distanceToCenter < closestDistance) {
+                    closestDistance = distanceToCenter;
+                    currentActiveProp = prop;
+                }
+            });
+
+            const claimBtn = document.getElementById('claim-btn');
+            const buildBtn = document.getElementById('build-btn');
+            const actionBtn = document.getElementById('action-btn');
+            const blueprintTerminal = document.getElementById('blueprint-terminal');
+
+            if (currentActiveProp && closestDistance <= CONFIG.interactionRadiusMeters) {
+                state.activePropertyId = currentActiveProp.id;
+                document.getElementById('status-display').innerHTML = `TARGET: <span style="color:var(--neon-blue)">${currentActiveProp.name}</span>`;
                 
-                // Generate map collectables alongside structural building geometry layouts
-                spawnAmbientGridLootNodes(lat, lon);
+                actionBtn.disabled = false;
+                actionBtn.textContent = `INSPECT PROPERTY DATA [${Math.round(closestDistance)}m]`;
 
-                if (!data.elements || data.elements.length === 0) {
-                    sysLog("No building models mapped in this coordinate zone.");
-                    return;
+                if (!currentActiveProp.owned) {
+                    claimBtn.disabled = state.score < currentActiveProp.mintCost;
+                    claimBtn.textContent = `MINT PLOT (-${currentActiveProp.mintCost}F)`;
+                    buildBtn.disabled = true;
+                    buildBtn.textContent = "UPGRADE LOCKED";
+                    blueprintTerminal.style.display = "none";
+                } else if (currentActiveProp.owner === "Player") {
+                    claimBtn.disabled = true;
+                    claimBtn.textContent = "PLOT ACQUIRED";
+                    
+                    if (currentActiveProp.upgradedStructure) {
+                        buildBtn.disabled = true;
+                        buildBtn.textContent = "MAX CORE LEVEL";
+                        blueprintTerminal.style.display = "none";
+                    } else {
+                        buildBtn.disabled = false;
+                        buildBtn.textContent = "SELECT UPGRADE MOD";
+                    }
+                } else {
+                    claimBtn.disabled = true;
+                    claimBtn.textContent = "LOCKED ASSURED";
+                    buildBtn.disabled = true;
+                    buildBtn.textContent = "RESTRICTED ACCESS";
+                    blueprintTerminal.style.display = "none";
+                }
+            } else {
+                state.activePropertyId = null;
+                document.getElementById('status-display').textContent = "SCANNING URBAN VECTOR PLOTS...";
+                actionBtn.disabled = true;
+                actionBtn.textContent = "OUT OF OBJECT RANGE";
+                claimBtn.disabled = true;
+                claimBtn.textContent = "MINT PROPERTY";
+                buildBtn.disabled = true;
+                buildBtn.textContent = "UPGRADE CORE";
+                blueprintTerminal.style.display = "none";
+            }
+
+            if (currentActiveProp && !currentActiveProp.owned) {
+                claimBtn.disabled = state.score < currentActiveProp.mintCost;
+            }
+			updateUIState();
+        }
+
+        function renderBlueprintSelectionMatrix(prop) {
+            const container = document.getElementById('blueprint-options-container');
+            container.innerHTML = '';
+
+            Object.keys(state.blueprints).forEach(key => {
+                const blueprint = state.blueprints[key];
+                const finalCost = Math.round(prop.mintCost * blueprint.costMult);
+                const isAffordable = state.score >= finalCost;
+
+                const card = document.createElement('div');
+                card.className = `blueprint-card ${!isAffordable ? 'disabled' : ''}`;
+                card.innerHTML = `
+                    <div>
+                        <div class="blueprint-name">${blueprint.name}</div>
+                        <div class="blueprint-desc">${blueprint.desc}</div>
+                    </div>
+                    <div class="blueprint-cost">${finalCost} F</div>
+                `;
+
+                if (isAffordable) {
+                    card.addEventListener('click', () => {
+                        installCoreModule(prop.id, key, finalCost);
+                    });
+                }
+                container.appendChild(card);
+            });
+        }
+
+        function installCoreModule(propertyId, blueprintKey, cost) {
+            const prop = state.realProperties[propertyId];
+            const blueprint = state.blueprints[blueprintKey];
+
+            if (state.score >= cost) {
+                state.score -= cost;
+                prop.upgradedStructure = blueprint.name;
+                
+                if (blueprintKey === 'vault') {
+                    prop.mintCost = Math.round(prop.mintCost * 1.4);
                 }
 
-                const contextMatrix = analyzeRegionalDensityMatrix(data.elements);
-                sysLog(`Sector Vector ID: [${contextMatrix.label}] (Scalar: x${contextMatrix.scalar})`);
-
-                let parsedCount = 0;
-                data.elements.forEach(el => {
-                    const id = el.id;
-                    if (state.realProperties[id]) return; 
-
-                    let latLngs = [];
-                    if (el.type === 'way' && el.geometry) {
-                        latLngs = el.geometry.map(pt => [pt.lat, pt.lon]);
-                    } else return; 
-
-                    const structuralAreaMeters = calculatePolygonArea(latLngs);
-                    const structuralBuildingLevels = parseInt(el.tags["building:levels"]) || 1;
-                    const finalMintCost = evaluatePseudoPrice(structuralAreaMeters, structuralBuildingLevels, el.tags, contextMatrix.scalar);
-
-                    const name = el.tags.name || el.tags["addr:housename"] || "Commercial Sector Space";
-                    const type = el.tags.amenity || el.tags.shop || el.tags.office || el.tags.building || "Structure";
-                    const displayType = type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
-                    const streetAddress = el.tags["addr:street"] ? `${el.tags["addr:housenumber"] || ''} ${el.tags["addr:street"]}` : "Unregistered Sector Road";
-
-                    const polygonLayer = L.polygon(latLngs, {
-                        color: varStyle('--neon-blue'), weight: 1.5, fillColor: '#00f0ff', fillOpacity: 0.1
-                    }).addTo(map);
-
-                    const dynamicTokenHash = btoa(`aether-osm-${el.type}-${id}`).replace(/=/g, "");
-
-                    state.realProperties[id] = {
-                        id: id,
-                        blockchainTokenId: dynamicTokenHash,
-                        name: name,
-                        type: displayType,
-                        address: streetAddress,
-                        layer: polygonLayer,
-                        center: polygonLayer.getBounds().getCenter(),
-                        mintCost: finalMintCost,
-                        area: Math.round(structuralAreaMeters),
-                        levels: structuralBuildingLevels,
-                        owned: false,
-                        owner: "System Corp",
-                        upgradedStructure: null
-                    };
-
-                    updatePropertyMetadataMarkup(state.realProperties[id]);
-                    parsedCount++;
+                prop.layer.setStyle({
+                    color: varStyle('--neon-magenta'),
+                    fillColor: varStyle('--neon-magenta'),
+                    fillOpacity: 0.45
                 });
-
-                sysLog(`Mapped ${parsedCount} real structural plots from satellite database.`);
+                
+                updatePropertyMetadataMarkup(prop);
+                sysLog(`SUCCESS: Installed [${blueprint.name}] on asset token registry.`);
+                document.getElementById('blueprint-terminal').style.display = "none";
+                
                 calculatePassiveYieldTotals();
                 syncGameplayState();
-            })
-            .catch(() => {
-                state.isFetchingData = false;
-                sysLog("Datastream connection interrupted. Recalibrating...");
-            });
-    }
-
-    function updatePropertyMetadataMarkup(prop) {
-        let statusText = prop.owned 
-            ? `<span style="color:var(--neon-magenta); font-weight:bold;">SECURED BY: ${prop.owner}</span>`
-            : `<span style="color:var(--neon-green)">STATUS: FOR SALE [MINTABLE]</span>`;
-        
-        if (prop.upgradedStructure) {
-            statusText += `<br><span style="color:var(--neon-magenta); font-weight:bold;">CORE MOD: ${prop.upgradedStructure}</span>`;
-        }
-
-        prop.layer.bindPopup(`
-            <div style="color:#fff; font-family:monospace; background:#000; padding:6px; min-width:180px; font-size: 0.75rem;">
-                <b style="color:var(--neon-blue); font-size:0.85rem;">${prop.name}</b><br>
-                <span style="color:#aaa;">Type: ${prop.type} (${prop.levels} Flr)</span><br>
-                <span style="color:#777;">Footprint Size: ${prop.area} m²</span><br>
-                <span style="color:#555; font-size:0.6rem; display:block; word-break:break-all;">HASH: ${prop.blockchainTokenId}</span><hr style="border-color:#222;">
-                <div style="margin-bottom: 6px; font-weight: bold; color: var(--neon-green)">VALUE: ${prop.mintCost} FRAGS</div>
-                ${statusText}
-            </div>
-        `);
-    }
-
-    // --- REVENUE ENGINE LOOPS ---
-    function calculatePassiveYieldTotals() {
-        let dynamicSum = 0;
-        Object.values(state.realProperties).forEach(prop => {
-            if (prop.owned && prop.upgradedStructure === state.blueprints.forge.name) {
-                dynamicSum += 15 + Math.floor(prop.area / 100);
-            }
-        });
-        state.passiveGenerationRate = dynamicSum;
-        document.getElementById('yield-display').textContent = `+${state.passiveGenerationRate} F/s`;
-    }
-
-    setInterval(() => {
-        if (state.passiveGenerationRate > 0) {
-            state.score += state.passiveGenerationRate;
-            document.getElementById('score-display').textContent = state.score;
-        }
-        
-        // Continuous internal live tracking loop integration
-        if (!state.isSimulating && navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((pos) => {
-                if (state.playerLat !== pos.coords.latitude || state.playerLon !== pos.coords.longitude) {
-                    state.playerLat = pos.coords.latitude;
-                    state.playerLon = pos.coords.longitude;
-                    fetchRealWorldBuildings(state.playerLat, state.playerLon);
-                    syncGameplayState();
-                }
-            });
-        }
-    }, 1000);
-
-    // Targeted Map Node Siphon Processing Method
-    function manualDataHarvest() {
-        if (!state.activeNodeIdInRange) {
-            sysLog("ERROR: No active data fragment cluster locked inside interaction matrix.");
-            return;
-        }
-
-        const activeNode = state.mapDataNodes[state.activeNodeIdInRange];
-        const collectedYield = activeNode.payload;
-        
-        state.score += collectedYield;
-        document.getElementById('score-display').textContent = state.score;
-
-        // Anchor a dead zone center on the harvested coordinates to lock generation loops
-        state.depletedSectors.push({
-            lat: activeNode.lat,
-            lon: activeNode.lon,
-            timestamp: Date.now()
-        });
-
-        sysLog(`SIPHON TERMINATED: Successfully captured ${collectedYield} fragments from local node.`);
-        
-        // Clean up node rendering structures cleanly
-        map.removeLayer(activeNode.layer);
-        delete state.mapDataNodes[state.activeNodeIdInRange];
-        state.activeNodeIdInRange = null;
-
-        const btn = document.getElementById('harvest-btn');
-        const cachedText = btn.textContent;
-        btn.textContent = `+${collectedYield}F`;
-        btn.disabled = true;
-        btn.style.borderColor = "var(--neon-magenta)";
-        btn.style.color = "var(--neon-magenta)";
-
-        setTimeout(() => {
-            btn.textContent = cachedText;
-            btn.disabled = false;
-            btn.style.borderColor = "var(--neon-green)";
-            btn.style.color = "var(--neon-green)";
-            syncGameplayState();
-        }, 1500);
-    }
-
-    // --- CORE APPLICATION ENGINE LOOPS ---
-    function syncGameplayState() {
-        const currentPosition = [state.playerLat, state.playerLon];
-        playerMarker.setLatLng(currentPosition);
-        interactionBoundary.setLatLng(currentPosition);
-        
-        // Avoid shifting screen frames unexpectedly if the player is deep in analysis view
-        if (map.getZoom() >= 17) {
-            map.panTo(currentPosition);
-        }
-
-        document.getElementById('gps-display').textContent = `${state.playerLat.toFixed(5)}, ${state.playerLon.toFixed(5)}`;
-        document.getElementById('score-display').textContent = state.score;
-        
-        const totalOwned = Object.values(state.realProperties).filter(p => p.owner === "Player").length;
-        document.getElementById('grids-display').textContent = totalOwned;
-
-        // Evaluate nearest ambient visible nodes for harvest accessibility
-        let closestNodeId = null;
-        let closestNodeDistance = Infinity;
-
-        Object.values(state.mapDataNodes).forEach(node => {
-            const dist = map.distance(currentPosition, [node.lat, node.lon]);
-            if (dist < closestNodeDistance) {
-                closestNodeDistance = dist;
-                closestNodeId = node.id;
-            }
-        });
-
-        const harvestBtn = document.getElementById('harvest-btn');
-        if (closestNodeId && closestNodeDistance <= CONFIG.interactionRadiusMeters) {
-            state.activeNodeIdInRange = closestNodeId;
-            harvestBtn.textContent = `SIPHON (${state.mapDataNodes[closestNodeId].payload}F)`;
-            harvestBtn.disabled = false;
-            harvestBtn.style.borderColor = "var(--neon-green)";
-        } else {
-            state.activeNodeIdInRange = null;
-            harvestBtn.textContent = "SCANNING";
-            harvestBtn.disabled = true;
-            harvestBtn.style.borderColor = "#444";
-        }
-
-        // Real estate property distance evaluation logic block
-        let currentActiveProp = null;
-        let closestDistance = Infinity;
-
-        Object.values(state.realProperties).forEach(prop => {
-            const distanceToCenter = map.distance(currentPosition, prop.center);
-            if (distanceToCenter < closestDistance) {
-                closestDistance = distanceToCenter;
-                currentActiveProp = prop;
-            }
-        });
-
-        const claimBtn = document.getElementById('claim-btn');
-        const buildBtn = document.getElementById('build-btn');
-        const actionBtn = document.getElementById('action-btn');
-        const blueprintTerminal = document.getElementById('blueprint-terminal');
-
-        if (currentActiveProp && closestDistance <= CONFIG.interactionRadiusMeters) {
-            state.activePropertyId = currentActiveProp.id;
-            document.getElementById('status-display').innerHTML = `TARGET: <span style="color:var(--neon-blue)">${currentActiveProp.name}</span>`;
-            
-            actionBtn.disabled = false;
-            actionBtn.textContent = `INSPECT PROPERTY DATA [${Math.round(closestDistance)}m]`;
-
-            if (!currentActiveProp.owned) {
-                claimBtn.disabled = state.score < currentActiveProp.mintCost;
-                claimBtn.textContent = `MINT PLOT (-${currentActiveProp.mintCost}F)`;
-                buildBtn.disabled = true;
-                buildBtn.textContent = "UPGRADE LOCKED";
-                blueprintTerminal.style.display = "none";
-            } else if (currentActiveProp.owner === "Player") {
-                claimBtn.disabled = true;
-                claimBtn.textContent = "PLOT ACQUIRED";
-                
-                if (currentActiveProp.upgradedStructure) {
-                    buildBtn.disabled = true;
-                    buildBtn.textContent = "MAX CORE LEVEL";
-                    blueprintTerminal.style.display = "none";
-                } else {
-                    buildBtn.disabled = false;
-                    buildBtn.textContent = "SELECT UPGRADE MOD";
-                }
             } else {
-                claimBtn.disabled = true;
-                claimBtn.textContent = "LOCKED ASSURED";
-                buildBtn.disabled = true;
-                buildBtn.textContent = "RESTRICTED ACCESS";
-                blueprintTerminal.style.display = "none";
+                sysLog(`ERROR: Insufficient data fragments.`);
             }
-        } else {
-            state.activePropertyId = null;
-            document.getElementById('status-display').textContent = "SCANNING URBAN VECTOR PLOTS...";
-            actionBtn.disabled = true;
-            actionBtn.textContent = "OUT OF OBJECT RANGE";
-            claimBtn.disabled = true;
-            claimBtn.textContent = "MINT PROPERTY";
-            buildBtn.disabled = true;
-            buildBtn.textContent = "UPGRADE CORE";
-            blueprintTerminal.style.display = "none";
         }
 
-        // Real-time sanity check updates for token balances
-        if (currentActiveProp && !currentActiveProp.owned) {
-            claimBtn.disabled = state.score < currentActiveProp.mintCost;
-        }
-        updateUIState();
-    }
-
-    function renderBlueprintSelectionMatrix(prop) {
-        const container = document.getElementById('blueprint-options-container');
-        container.innerHTML = '';
-
-        Object.keys(state.blueprints).forEach(key => {
-            const blueprint = state.blueprints[key];
-            const finalCost = Math.round(prop.mintCost * blueprint.costMult);
-            const isAffordable = state.score >= finalCost;
-
-            const card = document.createElement('div');
-            card.className = `blueprint-card ${!isAffordable ? 'disabled' : ''}`;
-            card.innerHTML = `
-                <div>
-                    <div class="blueprint-name">${blueprint.name}</div>
-                    <div class="blueprint-desc">${blueprint.desc}</div>
-                </div>
-                <div class="blueprint-cost">${finalCost} F</div>
-            `;
-
-            if (isAffordable) {
-                card.addEventListener('click', () => {
-                    installCoreModule(prop.id, key, finalCost);
-                });
+        document.getElementById('action-btn').addEventListener('click', () => {
+            if (state.activePropertyId) {
+                const prop = state.realProperties[state.activePropertyId];
+                openStreetView(prop.center.lat, prop.center.lng);
             }
-            container.appendChild(card);
         });
-    }
 
-    function installCoreModule(propertyId, blueprintKey, cost) {
-        const prop = state.realProperties[propertyId];
-        const blueprint = state.blueprints[blueprintKey];
-
-        if (state.score >= cost) {
-            state.score -= cost;
-            prop.upgradedStructure = blueprint.name;
-            
-            if (blueprintKey === 'vault') {
-                prop.mintCost = Math.round(prop.mintCost * 1.4);
-            }
-
-            prop.layer.setStyle({
-                color: varStyle('--neon-magenta'),
-                fillColor: varStyle('--neon-magenta'),
-                fillOpacity: 0.45
-            });
-            
-            updatePropertyMetadataMarkup(prop);
-            sysLog(`SUCCESS: Installed [${blueprint.name}] on asset token registry.`);
-            document.getElementById('blueprint-terminal').style.display = "none";
-            
-            calculatePassiveYieldTotals();
-            syncGameplayState();
-        } else {
-            sysLog(`ERROR: Insufficient data fragments.`);
-        }
-    }
-
-    document.getElementById('action-btn').addEventListener('click', () => {
-        if (state.activePropertyId) {
+        document.getElementById('claim-btn').addEventListener('click', () => {
+            if (!state.activePropertyId) return;
             const prop = state.realProperties[state.activePropertyId];
-            
-            // Instead of just opening the popup, we launch the Street View panel
-            openStreetView(prop.center.lat, prop.center.lng);
-        }
-    });
 
-    document.getElementById('claim-btn').addEventListener('click', () => {
-        if (!state.activePropertyId) return;
-        const prop = state.realProperties[state.activePropertyId];
-
-        if (prop && !prop.owned && state.score >= prop.mintCost) {
-            state.score -= prop.mintCost;
-            prop.owned = true;
-            prop.owner = "Player";
-            prop.layer.setStyle({ color: varStyle('--neon-green'), fillColor: varStyle('--neon-green'), fillOpacity: 0.35 });
-            updatePropertyMetadataMarkup(prop);
-            sysLog(`ACQUIRED ASSET: Token registry secured for hash: ${prop.blockchainTokenId.substring(0,12)}...`);
-            syncGameplayState();
-        }
-    });
-
-    document.getElementById('build-btn').addEventListener('click', () => {
-        if (!state.activePropertyId) return;
-        const prop = state.realProperties[state.activePropertyId];
-        const terminal = document.getElementById('blueprint-terminal');
-
-        if (prop && prop.owner === "Player" && !prop.upgradedStructure) {
-            if (terminal.style.display === "block") {
-                terminal.style.display = "none";
-            } else {
-                renderBlueprintSelectionMatrix(prop);
-                terminal.style.display = "block";
-                sysLog("Opening blueprint interface terminal...");
+            if (prop && !prop.owned && state.score >= prop.mintCost) {
+                state.score -= prop.mintCost;
+                prop.owned = true;
+                prop.owner = "Player";
+                prop.layer.setStyle({ color: varStyle('--neon-green'), fillColor: varStyle('--neon-green'), fillOpacity: 0.35 });
+                updatePropertyMetadataMarkup(prop);
+                sysLog(`ACQUIRED ASSET: Token registry secured for hash: ${prop.blockchainTokenId.substring(0,12)}...`);
+                syncGameplayState();
             }
-        }
-    });
+        });
 
-    function moveSim(dLat, dLon) {
-        if (!state.isSimulating) {
-            sysLog("CONTROL BLOCK: Switch to Home Core or Manual simulation coordinates to unlock simulation movement.");
-            return;
-        }
-        state.playerLat += dLat;
-        state.playerLon += dLon;
-        fetchRealWorldBuildings(state.playerLat, state.playerLon);
-        syncGameplayState();
-    }
-</script>
+        document.getElementById('build-btn').addEventListener('click', () => {
+            if (!state.activePropertyId) return;
+            const prop = state.realProperties[state.activePropertyId];
+            const terminal = document.getElementById('blueprint-terminal');
+
+            if (prop && prop.owner === "Player" && !prop.upgradedStructure) {
+                if (terminal.style.display === "block") {
+                    terminal.style.display = "none";
+                } else {
+                    renderBlueprintSelectionMatrix(prop);
+                    terminal.style.display = "block";
+                    sysLog("Opening blueprint interface terminal...");
+                }
+            }
+        });
+
+        function moveSim(dLat, dLon) {
+            if (!state.isSimulating) {
+                sysLog("CONTROL BLOCK: Switch to Home Core or Manual simulation coordinates to unlock simulation movement.");
+                return;
+            }
+            state.playerLat += dLat;
+            state.playerLon += dLon;
+            fetchRealWorldBuildings(state.playerLat, state.playerLon);
+            syncGameplayState();
+         }
+    </script>
 </body>
 </html>
