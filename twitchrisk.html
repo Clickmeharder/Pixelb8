@@ -804,12 +804,8 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const y2 = boxB.y + boxB.height / 2;
 
     // --- DYNAMIC VIEWPORT SCALING REFACTOR ---
-    // Instead of raw country dimensions, scale using the actual active view size
     const currentViewWidth = currentViewBoxDims.w || 360;
     
-    // Scale texts proportionally against the active window size
-    // For a close zoom (width ~30), text settles beautifully around 2px to 3.5px. 
-    // For global view (width ~360), text grows safely to remain legible.
     const startTextSize = Math.max(1.8, Math.min(8, currentViewWidth * 0.05));
     const endTextSize   = Math.max(1.8, Math.min(8, currentViewWidth * 0.05)); 
     const strokeWidth   = Math.max(0.15, Math.min(0.8, currentViewWidth * 0.005));
@@ -983,54 +979,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                 displayContainer.appendChild(lossTextB);
             }
 
-			setTimeout(() => {
-				const slashWidthOffset = endTextSize * 0.8;
-
-            if (attLossesVal > 0) {
-                const slashA = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                slashA.setAttribute("x1", x2 - spacingX - slashWidthOffset);
-                slashA.setAttribute("y1", panelY + (endTextSize * 0.3));
-                slashA.setAttribute("x2", x2 - spacingX + slashWidthOffset);
-                slashA.setAttribute("y2", panelY - (endTextSize * 0.5));
-                slashA.setAttribute("stroke", "#ff1744");
-                slashA.setAttribute("stroke-width", `${strokeWidth * 1.5}`);
-                slashA.style.animation = "slashStrike 0.25s ease-out forwards";
-                displayContainer.appendChild(slashA);
-
-                const lossTextA = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                lossTextA.setAttribute("class", "combat-vfx-text");
-                lossTextA.setAttribute("x", x2 - spacingX);
-                lossTextA.setAttribute("y", panelY + endTextSize);
-                lossTextA.setAttribute("fill", "#ff1744");
-                lossTextA.setAttribute("font-size", `${endTextSize * 0.75}px`);
-                lossTextA.setAttribute("text-anchor", "middle");
-                lossTextA.textContent = `-${attLossesVal}`;
-                displayContainer.appendChild(lossTextA);
-            }
-
-            if (defLossesVal > 0) {
-                const slashB = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                slashB.setAttribute("x1", x2 + spacingX - slashWidthOffset);
-                slashB.setAttribute("y1", panelY + (endTextSize * 0.3));
-                slashB.setAttribute("x2", x2 + spacingX + slashWidthOffset);
-                slashB.setAttribute("y2", panelY - (endTextSize * 0.5));
-                slashB.setAttribute("stroke", "#ff1744");
-                slashB.setAttribute("stroke-width", `${strokeWidth * 1.5}`);
-                slashB.style.animation = "slashStrike 0.25s ease-out forwards";
-                displayContainer.appendChild(slashB);
-
-                const lossTextB = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                lossTextB.setAttribute("class", "combat-vfx-text");
-                lossTextB.setAttribute("x", x2 + spacingX);
-                lossTextB.setAttribute("y", panelY + endTextSize);
-                lossTextB.setAttribute("fill", "#ff1744");
-                lossTextB.setAttribute("font-size", `${endTextSize * 0.75}px`);
-                lossTextB.setAttribute("text-anchor", "middle");
-                lossTextB.textContent = `-${defLossesVal}`;
-                displayContainer.appendChild(lossTextB);
-            }
-
-            // This timer manages the post-combat stats showcase window
+            // This timer manages the post-combat stats showcase window before cleaning up
             setTimeout(() => {
                 battleGroup.style.transition = "opacity 0.6s ease";
                 battleGroup.style.opacity = "0";
