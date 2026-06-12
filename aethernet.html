@@ -160,7 +160,7 @@
         .blueprint-desc { color: #aaa; margin-bottom: 6px; font-size: 0.55rem; line-height: 1.2; }
         .blueprint-cost { color: var(--neon-green); font-weight: bold; }
 
-        /* MOVEMENT CONTROLS FOR BOTH MAP AND RELATIVE 3D PERSPECTIVES */
+        /* UNIFIED ORIENTATION & NAVIGATION INTERFACE MATRIX */
         .sim-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
             gap: 4px; width: 220px; margin: 0 auto;
@@ -660,6 +660,12 @@
                     state.playerLon = pos.coords.longitude;
                     state.isSimulating = false;
                     sysLog("GPS LINK ACQUIRED: System locked to active spatial vector.");
+                    
+                    // Request device orientation permissions if using hardware sensors (iOS requirement)
+                    if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+                        window.DeviceOrientationEvent.requestPermission().catch(() => {});
+                    }
+                    
                     completeBootPipeline();
                 }, () => {
                     sysLog("GPS LINK FAILED: Reverting to default manual tracking vectors.");
@@ -787,7 +793,37 @@
                 state.score += state.passiveGenerationRate;
                 document.getElementById('score-display').textContent = state.score;
             }
+
+            // Continuous background position synchronizer matrix for hardware gps coordinates
+            if (!state.isSimulating && navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const prevLat = state.playerLat;
+                    const prevLon = state.playerLon;
+                    
+                    if (prevLat !== pos.coords.latitude || prevLon !== pos.coords.longitude) {
+                        state.playerLat = pos.coords.latitude;
+                        state.playerLon = pos.coords.longitude;
+                        
+                        // Approximate horizontal displacement tracking over background updates
+                        const metersTraveled = map.distance([prevLat, prevLon], [state.playerLat, state.playerLon]);
+                        if (metersTraveled > 1) {
+                            trackOdometerAndRoll(metersTraveled);
+                            fetchRealWorldBuildings(state.playerLat, state.playerLon);
+                            syncGameplayState();
+                        }
+                    }
+                });
+            }
         }, 1000);
+
+        // Hardware orientation handler for tracking physical compass heading direction adjustments 
+        window.addEventListener('deviceorientationabsolute', (event) => {
+            if (!state.isSimulating && event.alpha !== null) {
+                // Adjust for standard coordinate inversion matrix mapping rules
+                state.playerHeading = Math.round(360 - event.alpha);
+                renderFirstPersonGraphicsLoop();
+            }
+        }, true);
 
         function manualDataHarvest() {
             if (!state.activeNodeIdInRange) return;
