@@ -82,6 +82,59 @@
 
         .action-container { display: flex; gap: 6px; }
 
+        /* Dynamic Blueprint Selection Sub-Panel */
+        #blueprint-terminal {
+            display: none;
+            background: #000;
+            border: 1px solid var(--neon-magenta);
+            padding: 10px;
+            margin-top: 5px;
+        }
+        .blueprint-title {
+            color: var(--neon-magenta);
+            font-size: 0.8rem;
+            margin: 0 0 8px 0;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .blueprint-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .blueprint-card {
+            background: rgba(255, 0, 255, 0.05);
+            border: 1px solid #444;
+            padding: 8px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .blueprint-card:hover:not(.disabled) {
+            border-color: var(--neon-magenta);
+            background: rgba(255, 0, 255, 0.1);
+        }
+        .blueprint-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .blueprint-name {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .blueprint-desc {
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+        .blueprint-cost {
+            color: var(--neon-green);
+            font-weight: bold;
+        }
+
         .sim-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
             gap: 4px; width: 180px; margin: 0 auto;
@@ -134,6 +187,12 @@
             <button id="claim-btn" class="btn" disabled style="flex: 1.2;">MINT PROPERTY</button>
             <button id="build-btn" class="btn" disabled style="flex: 1.2;">UPGRADE CORE</button>
         </div>
+
+        <div id="blueprint-terminal">
+            <div class="blueprint-title">⚙️ SELECT RESTRUCTURING COMPONENT:</div>
+            <div class="blueprint-grid" id="blueprint-options-container">
+                </div>
+        </div>
         
         <div id="terminal-log">System initialized. Awaiting satellite array connection...</div>
         
@@ -150,8 +209,7 @@
     <script>
         const CONFIG = {
             interactionRadiusMeters: 40,
-            queryRadiusMeters: 250, 
-            structureUpgradeCostFrags: 500
+            queryRadiusMeters: 250
         };
 
         let state = {
@@ -161,7 +219,13 @@
             isSimulating: true,
             realProperties: {}, 
             activePropertyId: null,
-            isFetchingData: false
+            isFetchingData: false,
+            // Core Upgrades Taxonomy
+            blueprints: {
+                forge: { name: "Quantum Data Forge", costMult: 1.5, desc: "Yields dynamic Fragment production algorithms" },
+                vault: { name: "Secure Grid-Vault", costMult: 2.0, desc: "Expands local memory wallet constraints" },
+                uplink: { name: "Aether Uplink Beacon", costMult: 2.5, desc: "Projects structural interface buffer range" }
+            }
         };
 
         const map = L.map('map', {
@@ -187,17 +251,14 @@
         }
 
         // --- MATH CALCULATIONS ENGINE ---
-        
-        // Shoelace algorithm to calculate relative sizing area of structural polygons without adding dependency plugins
         function calculatePolygonArea(latLngs) {
             let totalArea = 0;
             const len = latLngs.length;
-            if (len < 3) return 50; // Fallback size constant if node parsing breaks down
+            if (len < 3) return 50; 
             
             for (let i = 0; i < len; i++) {
                 let p1 = latLngs[i];
                 let p2 = latLngs[(i + 1) % len];
-                // Convert lat/lons to scaled meter values relative to coordinates center
                 let x1 = p1[1] * 111320 * Math.cos(p1[0] * Math.PI / 180);
                 let y1 = p1[0] * 110574;
                 let x2 = p2[1] * 111320 * Math.cos(p2[0] * Math.PI / 180);
@@ -207,7 +268,6 @@
             return Math.abs(totalArea / 2);
         }
 
-        // Evaluates architectural density vectors using data parsed from raw elements arrays
         function analyzeRegionalDensityMatrix(elements) {
             let commercialNodes = 0;
             let totalElements = elements.length || 1;
@@ -227,29 +287,16 @@
             return { label: "Low Density Residential Zone", scalar: 0.9 };
         }
 
-        // Processing loop logic defining structural pricing profiles
         function evaluatePseudoPrice(area, levels, tags, neighborhoodScalar) {
-            let baseRate = 0.5; // Base fragment multiplier per square meter
+            let baseRate = 0.5; 
             let effectiveFloorArea = area * levels;
-            
-            // Structural asset tag premium weights configuration table
             let assetPremium = 1.0;
             const structuralType = tags.amenity || tags.shop || tags.office || tags.building || "residential";
 
             const tagWeights = {
-                "bank": 4.5,
-                "office": 3.0,
-                "supermarket": 2.5,
-                "hospital": 2.5,
-                "university": 2.0,
-                "cafe": 1.8,
-                "restaurant": 1.8,
-                "commercial": 2.2,
-                "apartments": 1.4,
-                "house": 1.1,
-                "detached": 0.9,
-                "garage": 0.4,
-                "shed": 0.2
+                "bank": 4.5, "office": 3.0, "supermarket": 2.5, "hospital": 2.5,
+                "university": 2.0, "cafe": 1.8, "restaurant": 1.8, "commercial": 2.2,
+                "apartments": 1.4, "house": 1.1, "detached": 0.9, "garage": 0.4, "shed": 0.2
             };
 
             if (tagWeights[structuralType]) {
@@ -257,18 +304,14 @@
             } else if (tags.shop || tags.office) {
                 assetPremium = 2.0; 
             } else if (tags.building === "yes" && area > 400) {
-                assetPremium = 1.5; // Scale unclassified large structures upward automatically
+                assetPremium = 1.5; 
             }
 
-            // Combine footprint math parameters, structural taxonomy modifiers, and macro neighborhood values
             let finalCalculation = effectiveFloorArea * baseRate * assetPremium * neighborhoodScalar;
-            
-            // Bound pricing calculations inside clear UI minimums and maximum limits
             return Math.max(75, Math.min(12500, Math.round(finalCalculation)));
         }
 
         // --- GLOBAL LOCATION RESOLUTION PIPELINES ---
-
         function searchGlobalLocation() {
             const query = document.getElementById('search-input').value.trim();
             const statusBox = document.getElementById('search-status');
@@ -341,7 +384,6 @@
                         return;
                     }
 
-                    // 1. Process neighborhood context vector variables
                     const contextMatrix = analyzeRegionalDensityMatrix(data.elements);
                     sysLog(`Sector Vector ID: [${contextMatrix.label}] (Scalar: x${contextMatrix.scalar})`);
 
@@ -355,11 +397,8 @@
                             latLngs = el.geometry.map(pt => [pt.lat, pt.lon]);
                         } else return; 
 
-                        // 2. Perform geometric size calculations
                         const structuralAreaMeters = calculatePolygonArea(latLngs);
                         const structuralBuildingLevels = parseInt(el.tags["building:levels"]) || 1;
-
-                        // 3. Process the property pseudo valuation score
                         const finalMintCost = evaluatePseudoPrice(structuralAreaMeters, structuralBuildingLevels, el.tags, contextMatrix.scalar);
 
                         const name = el.tags.name || el.tags["addr:housename"] || "Commercial Sector Space";
@@ -368,25 +407,14 @@
                         const streetAddress = el.tags["addr:street"] ? `${el.tags["addr:housenumber"] || ''} ${el.tags["addr:street"]}` : "Unregistered Sector Road";
 
                         const polygonLayer = L.polygon(latLngs, {
-                            color: varStyle('--neon-blue'),
-                            weight: 1.5,
-                            fillColor: '#00f0ff',
-                            fillOpacity: 0.1
+                            color: varStyle('--neon-blue'), weight: 1.5, fillColor: '#00f0ff', fillOpacity: 0.1
                         }).addTo(map);
 
                         state.realProperties[id] = {
-                            id: id,
-                            name: name,
-                            type: displayType,
-                            address: streetAddress,
-                            layer: polygonLayer,
-                            center: polygonLayer.getBounds().getCenter(),
-                            mintCost: finalMintCost, // Stored unique dynamic calculation
-                            area: Math.round(structuralAreaMeters),
-                            levels: structuralBuildingLevels,
-                            owned: false,
-                            owner: "System Corp",
-                            upgradedStructure: null
+                            id: id, name: name, type: displayType, address: streetAddress, layer: polygonLayer,
+                            center: polygonLayer.getBounds().getCenter(), mintCost: finalMintCost,
+                            area: Math.round(structuralAreaMeters), levels: structuralBuildingLevels,
+                            owned: false, owner: "System Corp", upgradedStructure: null
                         };
 
                         updatePropertyMetadataMarkup(state.realProperties[id]);
@@ -408,7 +436,7 @@
                 : `<span style="color:var(--neon-green)">STATUS: FOR SALE [MINTABLE]</span>`;
             
             if (prop.upgradedStructure) {
-                statusText += `<br><span style="color:var(--neon-blue); font-weight:bold;">CORE MOD: ${prop.upgradedStructure}</span>`;
+                statusText += `<br><span style="color:var(--neon-magenta); font-weight:bold;">CORE MOD: ${prop.upgradedStructure}</span>`;
             }
 
             prop.layer.bindPopup(`
@@ -450,6 +478,7 @@
             const claimBtn = document.getElementById('claim-btn');
             const buildBtn = document.getElementById('build-btn');
             const actionBtn = document.getElementById('action-btn');
+            const blueprintTerminal = document.getElementById('blueprint-terminal');
 
             if (currentActiveProp && closestDistance <= CONFIG.interactionRadiusMeters) {
                 state.activePropertyId = currentActiveProp.id;
@@ -463,16 +492,26 @@
                     claimBtn.textContent = `MINT PLOT (-${currentActiveProp.mintCost}F)`;
                     buildBtn.disabled = true;
                     buildBtn.textContent = "UPGRADE LOCKED";
+                    blueprintTerminal.style.display = "none";
                 } else if (currentActiveProp.owner === "Player") {
                     claimBtn.disabled = true;
                     claimBtn.textContent = "PLOT ACQUIRED";
-                    buildBtn.disabled = state.score < CONFIG.structureUpgradeCostFrags || currentActiveProp.upgradedStructure !== null;
-                    buildBtn.textContent = currentActiveProp.upgradedStructure ? "MAX CORE LEVEL" : `UPGRADE MODULE (-${CONFIG.structureUpgradeCostFrags}F)`;
+                    
+                    if (currentActiveProp.upgradedStructure) {
+                        buildBtn.disabled = true;
+                        buildBtn.textContent = "MAX CORE LEVEL";
+                        blueprintTerminal.style.display = "none";
+                    } else {
+                        buildBtn.disabled = false;
+                        buildBtn.textContent = "SELECT UPGRADE MOD";
+                        // Keep terminal visibility state managed by the explicit toggle click
+                    }
                 } else {
                     claimBtn.disabled = true;
                     claimBtn.textContent = "LOCKED ASSURED";
                     buildBtn.disabled = true;
                     buildBtn.textContent = "RESTRICTED ACCESS";
+                    blueprintTerminal.style.display = "none";
                 }
             } else {
                 state.activePropertyId = null;
@@ -483,6 +522,58 @@
                 claimBtn.textContent = "MINT PROPERTY";
                 buildBtn.disabled = true;
                 buildBtn.textContent = "UPGRADE CORE";
+                blueprintTerminal.style.display = "none";
+            }
+        }
+
+        // --- INTERACTIVE BLUEPRINT COMPONENT MATRIX GENERATOR ---
+        function renderBlueprintSelectionMatrix(prop) {
+            const container = document.getElementById('blueprint-options-container');
+            container.innerHTML = '';
+
+            Object.keys(state.blueprints).forEach(key => {
+                const blueprint = state.blueprints[key];
+                const finalCost = Math.round(prop.mintCost * blueprint.costMult);
+                const isAffordable = state.score >= finalCost;
+
+                const card = document.createElement('div');
+                card.className = `blueprint-card ${!isAffordable ? 'disabled' : ''}`;
+                card.innerHTML = `
+                    <div>
+                        <div class="blueprint-name">${blueprint.name}</div>
+                        <div class="blueprint-desc">${blueprint.desc}</div>
+                    </div>
+                    <div class="blueprint-cost">${finalCost} F</div>
+                `;
+
+                if (isAffordable) {
+                    card.addEventListener('click', () => {
+                        installCoreModule(prop.id, key, finalCost);
+                    });
+                }
+                container.appendChild(card);
+            });
+        }
+
+        function installCoreModule(propertyId, blueprintKey, cost) {
+            const prop = state.realProperties[propertyId];
+            const blueprint = state.blueprints[blueprintKey];
+
+            if (state.score >= cost) {
+                state.score -= cost;
+                prop.upgradedStructure = blueprint.name;
+                prop.layer.setStyle({
+                    color: varStyle('--neon-magenta'),
+                    fillColor: varStyle('--neon-magenta'),
+                    fillOpacity: 0.45
+                });
+                
+                updatePropertyMetadataMarkup(prop);
+                sysLog(`SUCCESS: Installed [${blueprint.name}] on asset registry ID: ${propertyId}.`);
+                document.getElementById('blueprint-terminal').style.display = "none";
+                syncGameplayState();
+            } else {
+                sysLog(`ERROR: Insufficient data fragments.`);
             }
         }
 
@@ -512,14 +603,16 @@
         document.getElementById('build-btn').addEventListener('click', () => {
             if (!state.activePropertyId) return;
             const prop = state.realProperties[state.activePropertyId];
+            const terminal = document.getElementById('blueprint-terminal');
 
-            if (prop && prop.owner === "Player" && !prop.upgradedStructure && state.score >= CONFIG.structureUpgradeCostFrags) {
-                state.score -= CONFIG.structureUpgradeCostFrags;
-                prop.upgradedStructure = "Cyber Grid-Vault Array";
-                prop.layer.setStyle({ color: varStyle('--neon-magenta'), fillColor: varStyle('--neon-magenta'), fillOpacity: 0.5 });
-                updatePropertyMetadataMarkup(prop);
-                sysLog(`SYSTEM OVERRIDE: Installed ${prop.upgradedStructure} on real infrastructure platform.`);
-                syncGameplayState();
+            if (prop && prop.owner === "Player" && !prop.upgradedStructure) {
+                if (terminal.style.display === "block") {
+                    terminal.style.display = "none";
+                } else {
+                    renderBlueprintSelectionMatrix(prop);
+                    terminal.style.display = "block";
+                    sysLog("Restructuring operational systems... Select terminal Core module.");
+                }
             }
         });
 
