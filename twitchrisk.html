@@ -781,6 +781,13 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const boxB = countryBoundsCache[toCode];
     if (!boxA || !boxB) { combatDetails.commitStateResolution(); return; }
 
+    // IMMUTABLE SCOPE CAPTURE
+    const attDeployingVal = combatDetails.attDeploying || 0;
+    const defInitialVal   = combatDetails.defInitial || 0;
+    const attLossesVal    = combatDetails.attLosses || 0;
+    const defLossesVal    = combatDetails.defLosses || 0;
+    const stateResolver   = combatDetails.commitStateResolution;
+
     const uiLayer = document.getElementById("ui-layer");
     
     const x1 = boxA.x + boxA.width / 2;
@@ -788,12 +795,16 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const x2 = boxB.x + boxB.width / 2;
     const y2 = boxB.y + boxB.height / 2;
 
-    const countryGeoSizeA = Math.max(boxA.width, boxA.height);
-    const countryGeoSizeB = Math.max(boxB.width, boxB.height);
+    // --- DYNAMIC VIEWPORT SCALING REFACTOR ---
+    // Instead of raw country dimensions, scale using the actual active view size
+    const currentViewWidth = currentViewBoxDims.w || 360;
     
-    const startTextSize = Math.max(3.5, Math.min(8, countryGeoSizeA * 0.18));
-    const endTextSize = Math.max(3.5, Math.min(8, countryGeoSizeB * 0.18)); 
-    const strokeWidth = Math.max(0.3, Math.min(0.8, countryGeoSizeB * 0.02));
+    // Scale texts proportionally against the active window size
+    // For a close zoom (width ~30), text settles beautifully around 2px to 3.5px. 
+    // For global view (width ~360), text grows safely to remain legible.
+    const startTextSize = Math.max(1.8, Math.min(8, currentViewWidth * 0.05));
+    const endTextSize   = Math.max(1.8, Math.min(8, currentViewWidth * 0.05)); 
+    const strokeWidth   = Math.max(0.15, Math.min(0.8, currentViewWidth * 0.005));
 
     changeMapProjection(fromCode);
 
@@ -810,17 +821,13 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     const streamContainer = document.createElementNS("http://www.w3.org/2000/svg", "g");
     uiLayer.appendChild(streamContainer);
 
-    // Render configuration limits
     const maxVisibleIcons = 8;
-    const activeTroopCount = combatDetails.attDeploying;
-    const linesToSpawnCount = Math.min(maxVisibleIcons, activeTroopCount);
-    
+    const linesToSpawnCount = Math.min(maxVisibleIcons, attDeployingVal);
     const troopElementsArray = [];
 
     for (let i = 0; i < linesToSpawnCount; i++) {
         const soldierTextNode = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        // Lead element contains explicit battalion payload numbers
-        soldierTextNode.textContent = (i === 0) ? `💂x${activeTroopCount}` : `💂`;
+        soldierTextNode.textContent = (i === 0) ? `💂x${attDeployingVal}` : `💂`;
         soldierTextNode.setAttribute("class", "combat-vfx-text");
         soldierTextNode.setAttribute("fill", "#fff");
         soldierTextNode.setAttribute("font-size", `${startTextSize}px`);
@@ -831,11 +838,11 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         
         troopElementsArray.push({
             node: soldierTextNode,
-            trailOffsetOffset: i * 0.045 // Staggers spacing sequentially along path variables
+            trailOffsetOffset: i * 0.045
         });
     }
 
-    const duration = 5000; // Stabilized travel duration window
+    const duration = 5000; 
     let startTime = null;
 
     function animateTravel(timestamp) {
@@ -843,17 +850,14 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         const elapsed = timestamp - startTime;
         const baseProgress = Math.min(elapsed / duration, 1);
 
-        // Track the leader node line expansion mechanics
         const leadX = x1 + (x2 - x1) * baseProgress;
         const leadY = y1 + (y2 - y1) * baseProgress;
         trajectoryLine.setAttribute("x2", leadX);
         trajectoryLine.setAttribute("y2", leadY);
 
-        // Sequentially space out individual soldiers behind the leader
         troopElementsArray.forEach((soldier) => {
-            // Subtract offset to position troops neatly behind the main tip
             let elementProgress = baseProgress - soldier.trailOffsetOffset;
-            if (elementProgress < 0) elementProgress = 0; // Hold at assembly point until ready
+            if (elementProgress < 0) elementProgress = 0;
             if (elementProgress > 1) elementProgress = 1;
 
             const curX = x1 + (x2 - x1) * elementProgress;
@@ -882,8 +886,15 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
     }, 1000);
 
     function handleTargetImpact() {
-        streamContainer.remove();
+        if (streamContainer && streamContainer.parentNode) {
+            streamContainer.remove();
+        }
         changeMapProjection(toCode);
+
+        // Safe State Execution right at point of impact
+        if (typeof stateResolver === "function") {
+            stateResolver();
+        }
 
         const battleGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         battleGroup.style.transformOrigin = `${x2}px ${y2}px`;
@@ -901,7 +912,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         attDisplay.setAttribute("fill", "#ffeb3b");
         attDisplay.setAttribute("font-size", `${endTextSize}px`);
         attDisplay.setAttribute("text-anchor", "middle");
-        attDisplay.textContent = `⚔️${combatDetails.attDeploying}`;
+        attDisplay.textContent = `⚔️${attDeployingVal}`;
         displayContainer.appendChild(attDisplay);
 
         const defDisplay = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -911,7 +922,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         defDisplay.setAttribute("fill", "#00b0ff");
         defDisplay.setAttribute("font-size", `${endTextSize}px`);
         defDisplay.setAttribute("text-anchor", "middle");
-        defDisplay.textContent = `🛡️${combatDetails.defInitial}`;
+        defDisplay.textContent = `🛡️${defInitialVal}`;
         displayContainer.appendChild(defDisplay);
 
         battleGroup.appendChild(displayContainer);
@@ -920,7 +931,7 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
         setTimeout(() => {
             const slashWidthOffset = endTextSize * 0.8;
 
-            if (combatDetails.attLosses > 0) {
+            if (attLossesVal > 0) {
                 const slashA = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 slashA.setAttribute("x1", x2 - spacingX - slashWidthOffset);
                 slashA.setAttribute("y1", panelY + (endTextSize * 0.3));
@@ -938,11 +949,11 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                 lossTextA.setAttribute("fill", "#ff1744");
                 lossTextA.setAttribute("font-size", `${endTextSize * 0.75}px`);
                 lossTextA.setAttribute("text-anchor", "middle");
-                lossTextA.textContent = `-${combatDetails.attLosses}`;
+                lossTextA.textContent = `-${attLossesVal}`;
                 displayContainer.appendChild(lossTextA);
             }
 
-            if (combatDetails.defLosses > 0) {
+            if (defLossesVal > 0) {
                 const slashB = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 slashB.setAttribute("x1", x2 + spacingX - slashWidthOffset);
                 slashB.setAttribute("y1", panelY + (endTextSize * 0.3));
@@ -960,23 +971,26 @@ function triggerCinematicCombat(fromCode, toCode, combatDetails) {
                 lossTextB.setAttribute("fill", "#ff1744");
                 lossTextB.setAttribute("font-size", `${endTextSize * 0.75}px`);
                 lossTextB.setAttribute("text-anchor", "middle");
-                lossTextB.textContent = `-${combatDetails.defLosses}`;
+                lossTextB.textContent = `-${defLossesVal}`;
                 displayContainer.appendChild(lossTextB);
             }
-
-            combatDetails.commitStateResolution();
 
             setTimeout(() => {
                 battleGroup.style.transition = "opacity 0.6s ease";
                 battleGroup.style.opacity = "0";
-                trajectoryLine.remove();
-                setTimeout(() => battleGroup.remove(), 600);
+                if (trajectoryLine && trajectoryLine.parentNode) {
+                    trajectoryLine.remove();
+                }
+                setTimeout(() => {
+                    if (battleGroup && battleGroup.parentNode) {
+                        battleGroup.remove();
+                    }
+                }, 600);
             }, 3500);
 
         }, 1200);
     }
 }
-
 function executeAttack(user, fromCode, toCode) {
     const attTerritory = gameState.data[fromCode]; 
     const defTerritory = gameState.data[toCode];
