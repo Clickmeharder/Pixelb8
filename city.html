@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXELB8 - Terminal City Core v3.2</title>
+    <title>PIXELB8 - Industrial City Core v3.3</title>
     <style>
         :root {
             --neon-blue: #00f0ff;
             --neon-green: #00ff66;
             --neon-purple: #bf00ff;
-            --dark-bg: #020204;
+            --dark-bg: #010103;
         }
 
         * {
@@ -35,9 +35,8 @@
             position: relative;
             width: 960px;
             height: 540px;
-            border: 4px solid #0d0d14;
+            border: 4px solid #0a0a0f;
             background: #000;
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
         }
 
         canvas {
@@ -55,7 +54,7 @@
             justify-content: center;
             align-items: center;
             z-index: 10;
-            color: var(--neon-blue);
+            color: #666;
             font-size: 14px;
         }
 
@@ -67,7 +66,7 @@
             padding: 15px;
             overflow-y: auto;
             margin-top: 15px;
-            color: #666;
+            color: #444;
             font-family: monospace;
             font-size: 11px;
             line-height: 1.4;
@@ -77,41 +76,40 @@
             position: absolute;
             pointer-events: none;
             font-size: 12px;
-            text-shadow: 2px 2px 2px #000;
-            background: rgba(2, 2, 3, 0.93);
+            text-shadow: 1px 1px 1px #000;
+            background: rgba(2, 2, 4, 0.95);
             padding: 12px 16px;
-            border: 1px solid #1a1a26;
-            backdrop-filter: blur(6px);
+            border: 1px solid #15151f;
         }
 
-        #location-hud { top: 20px; left: 20px; border-left: 4px solid var(--neon-blue); }
-        #directory-hud { top: 20px; right: 20px; text-align: right; border-right: 3px solid var(--neon-purple); }
-        #controls-hud { bottom: 20px; left: 20px; color: #888; border-bottom: 2px solid #222; }
+        #location-hud { top: 20px; left: 20px; border-left: 3px solid #444; }
+        #directory-hud { top: 20px; right: 20px; text-align: right; border-right: 3px solid #444; }
+        #controls-hud { bottom: 20px; left: 20px; color: #666; }
     </style>
 </head>
 <body>
 
     <div id="game-container">
         <div id="boot-screen">
-            <div style="letter-spacing: 3px; font-weight: bold; color: var(--neon-blue);">PIXELB8 V3.2: ROUTING RELATIVE NAVIGATION FIX...</div>
+            <div style="letter-spacing: 2px; font-weight: bold; color: #888;">PIXELB8 ENGINE: MATTE ARCHITECTURE REBUILD...</div>
             <div class="boot-log" id="log-target"></div>
         </div>
 
         <canvas id="renderCanvas"></canvas>
         
         <div id="location-hud" class="hud">
-            SYSTEM NODE:<br>
-            <strong id="zone-txt" style="font-size: 14px; color: var(--neon-blue); text-transform: uppercase;">INITIALIZING ENGINE...</strong>
-            <div id="coords-txt" style="color: #666; font-size: 10px; margin-top: 2px;">X: 0.0, Y: 0.0</div>
+            LOCATION NODE:<br>
+            <strong id="zone-txt" style="font-size: 14px; color: #aaa; text-transform: uppercase;">LOADING...</strong>
+            <div id="coords-txt" style="color: #444; font-size: 10px; margin-top: 2px;">X: 0.0, Y: 0.0</div>
         </div>
 
         <div id="directory-hud" class="hud">
-            RESOLVED INSTANCE TARGET:<br>
-            <span id="url-txt" style="color: var(--neon-purple); font-weight: bold;">/</span>
+            ROUTING DESTINATION:<br>
+            <span id="url-txt" style="color: #888; font-weight: bold;">/</span>
         </div>
 
         <div id="controls-hud" class="hud">
-            W, A, S, D / Arrows: Move | Drag Mouse: Look around | Walk completely through neon doors to load pages
+            W,A,S,D / Arrows: Navigate | Mouse Drag: Look | Cross doorways to enter pages
         </div>
     </div>
 
@@ -127,7 +125,7 @@
         canvas.width = R_WIDTH;
         canvas.height = R_HEIGHT;
 
-        function logConsole(msg, color = "#666") {
+        function logConsole(msg, color = "#444") {
             const tgt = document.getElementById("log-target");
             if(tgt) {
                 tgt.innerHTML += `<span style="color: ${color}">${msg}</span><br>`;
@@ -135,24 +133,22 @@
             }
         }
 
-        // --- CORE GRID MAP ---
+        // --- WORLD MATRIX ---
         const MAP_SIZE = 64; 
-        let map = new Array(MAP_SIZE * MAP_SIZE).fill(1); // 1 = Tech Commons Grid
+        let map = new Array(MAP_SIZE * MAP_SIZE).fill(1); // 1 = Dark Ground Outside
         let routeDirectoryMap = {};
         let sectorNames = {}; 
 
         const T_ROAD = 0;
-        const T_COMMONS = 1;
+        const T_GROUND = 1;
         const T_DOOR = 99;
 
-        // Vector calibration: Spawn facing east directly down the neon avenue line
         const player = { x: 4.5, y: 33.5, angle: 0, fov: Math.PI / 3, speed: 0.12, rotSpeed: 0.045 };
         const keys = { w:false, a:false, s:false, d:false, arrowleft:false, arrowright:false, arrowup:false, arrowdown:false };
-        let globalPulse = 0;
 
-        // --- WORLD LAYOUT GENERATOR ---
-        async function buildAdvancedCircuitCity() {
-            logConsole(`Querying repository tree structure...`, "var(--neon-blue)");
+        // --- COMPILER PIPELINE ---
+        async function buildAsphaltIndustrialCity() {
+            logConsole(`Fetching repository nodes from GitHub REST tree...`, "#666");
             let discoveredRoutes = [];
 
             try {
@@ -162,10 +158,7 @@
                 
                 if(Array.isArray(data)) {
                     data.forEach(item => {
-                        // Ignore current engine configurations, components, and hidden source control files
-                        if (item.name === "city.html" || item.name === "city" || item.name.startsWith(".")) {
-                            return;
-                        }
+                        if (item.name === "city.html" || item.name === "city" || item.name.startsWith(".")) return;
                         if (item.type === "dir") {
                             discoveredRoutes.push("/" + item.name);
                         } else if (item.type === "file" && item.name.endsWith(".html") && item.name !== "index.html") {
@@ -173,20 +166,25 @@
                         }
                     });
                 }
-                logConsole(`Decrypted ${discoveredRoutes.length} repo nodes successfully!`, "var(--neon-green)");
             } catch (err) {
-                logConsole(`API Restricted or Offline. Deploying fail-safe sector structures.`, "var(--neon-purple)");
+                logConsole(`Fallback architecture safely routing.`, "#884488");
                 discoveredRoutes = ["/shop", "/games", "/tools", "/stream", "/about"];
             }
 
-            // Always clear a massive, guaranteed highway down the middle row matrix
+            // --- INJECT CUSTOM ENTROPIA JUNKSHOP BLOCK ---
+            // Force this layout route even if it doesn't exist on server file structures yet
+            if (!discoveredRoutes.includes("/entropia-junkshop")) {
+                discoveredRoutes.push("/entropia-junkshop");
+            }
+
+            // Carve straight industrial thoroughfare highway down middle rows
             for (let x = 0; x < MAP_SIZE; x++) {
                 for (let y = 31; y <= 35; y++) {
                     map[y * MAP_SIZE + x] = T_ROAD; 
                 }
             }
 
-            let plotX = 8; // Offset slightly so player doesn't instantly collide with the first plot
+            let plotX = 8; 
             let onNorthSide = true;
 
             discoveredRoutes.forEach((path, index) => {
@@ -194,25 +192,31 @@
 
                 let buildingUID = 2 + index; 
                 let startY = onNorthSide ? 25 : 36; 
-                sectorNames[buildingUID] = path.replace("/", "").toUpperCase();
 
-                // Clear structural spaces
+                // Custom override label text formatting for our injected route block
+                if (path === "/entropia-junkshop") {
+                    sectorNames[buildingUID] = "ENTROPIA JUNKSHOP";
+                } else {
+                    sectorNames[buildingUID] = path.replace("/", "").toUpperCase();
+                }
+
+                // Carve building block matrices
                 for (let bx = 0; bx < 6; bx++) {
                     for (let by = 0; by < 5; by++) {
                         let cx = plotX + bx;
                         let cy = startY + by;
                         if (cx >= 0 && cx < MAP_SIZE && cy >= 0 && cy < MAP_SIZE) {
                             if (bx === 0 || bx === 5 || by === 0 || by === 4) {
-                                map[cy * MAP_SIZE + cx] = buildingUID; // Perimeter wall
+                                map[cy * MAP_SIZE + cx] = buildingUID; 
                             } else {
-                                map[cy * MAP_SIZE + cx] = T_ROAD; // Interior floor space
+                                map[cy * MAP_SIZE + cx] = T_ROAD; 
                             }
                             routeDirectoryMap[`${cx},${cy}`] = path;
                         }
                     }
                 }
 
-                // Inject doors precisely aligned with the highway borders
+                // Carve dedicated physical threshold entries (Doors) facing the main street lines
                 if (onNorthSide) {
                     let doorY = startY + 4;
                     let doorX = plotX + 3;
@@ -232,53 +236,39 @@
             setTimeout(() => { 
                 let boot = document.getElementById("boot-screen");
                 if(boot) boot.style.display = "none"; 
-            }, 800);
+            }, 600);
         }
 
-        // --- SYSTEM INPUT CAPTURES ---
-        window.addEventListener('keydown', e => { 
-            let k = e.key.toLowerCase(); 
-            if(k in keys) keys[k] = true; 
-        });
-        window.addEventListener('keyup', e => { 
-            let k = e.key.toLowerCase(); 
-            if(k in keys) keys[k] = false; 
-        });
+        // --- CONTROL ENGINE CAPTURES ---
+        window.addEventListener('keydown', e => { let k = e.key.toLowerCase(); if(k in keys) keys[k] = true; });
+        window.addEventListener('keyup', e => { let k = e.key.toLowerCase(); if(k in keys) keys[k] = false; });
         
         let dragActive = false;
         window.addEventListener('mousedown', () => dragActive = true);
         window.addEventListener('mouseup', () => dragActive = false);
-        window.addEventListener('mousemove', e => { 
-            if (dragActive) player.angle += e.movementX * 0.005; 
-        });
+        window.addEventListener('mousemove', e => { if (dragActive) player.angle += e.movementX * 0.005; });
 
         function attemptGridStep(dx, dy) {
-            let nx = player.x + dx; 
-            let ny = player.y + dy;
-            
+            let nx = player.x + dx; let ny = player.y + dy;
             if (nx >= 0 && nx < MAP_SIZE && ny >= 0 && ny < MAP_SIZE) {
                 let cell = map[Math.floor(ny) * MAP_SIZE + Math.floor(nx)];
                 
                 if (cell === T_DOOR) {
                     let targetRedirectPath = routeDirectoryMap[`${Math.floor(nx)},${Math.floor(ny)}`];
                     if (targetRedirectPath) {
-                        // CRITICAL NAVIGATION BUG FIX: Using standard root-relative absolute routing
                         let cleanSubPath = targetRedirectPath.startsWith('/') ? targetRedirectPath : '/' + targetRedirectPath;
                         window.location.href = cleanSubPath;
                     }
                     return;
                 }
 
-                if (cell === T_ROAD || cell === T_COMMONS) {
-                    player.x = nx; 
-                    player.y = ny;
+                if (cell === T_ROAD || cell === T_GROUND) {
+                    player.x = nx; player.y = ny;
                 }
             }
         }
 
         function updateSimulationLoop() {
-            globalPulse += 0.07;
-
             if (keys.w || keys.arrowup) attemptGridStep(Math.cos(player.angle) * player.speed, Math.sin(player.angle) * player.speed);
             if (keys.s || keys.arrowdown) attemptGridStep(-Math.cos(player.angle) * player.speed, -Math.sin(player.angle) * player.speed);
             if (keys.a) attemptGridStep(Math.cos(player.angle - Math.PI/2) * player.speed, Math.sin(player.angle - Math.PI/2) * player.speed);
@@ -287,22 +277,19 @@
             if (keys.arrowleft) player.angle -= player.rotSpeed;
             if (keys.arrowright) player.angle += player.rotSpeed;
 
-            // Update Head-up Displays
-            const px = Math.floor(player.x); 
-            const py = Math.floor(player.y);
+            const px = Math.floor(player.x); const py = Math.floor(player.y);
             const zoneTxt = document.getElementById("zone-txt");
             const urlTxt = document.getElementById("url-txt");
 
             if(zoneTxt && urlTxt) {
                 let currentPath = routeDirectoryMap[`${px},${py}`] || routeDirectoryMap[`${px},${py-1}`] || routeDirectoryMap[`${px},${py+1}`];
                 if (currentPath) {
-                    zoneTxt.innerText = `DISTRICT: ${currentPath.toUpperCase().replace(/\//g, '')}`;
-                    zoneTxt.style.color = "var(--neon-green)";
+                    zoneTxt.innerText = currentPath === "/entropia-junkshop" ? "ENTROPIA JUNKSHOP" : `SECTOR: ${currentPath.toUpperCase().replace(/\//g, '')}`;
+                    zoneTxt.style.color = "#fff";
                     urlTxt.innerText = window.location.host + currentPath;
                 } else {
-                    let tile = map[py * MAP_SIZE + px];
-                    zoneTxt.innerText = tile === T_COMMONS ? "DATA COMMONS CORES" : "MAIN SYSTEMS BOULEVARD";
-                    zoneTxt.style.color = tile === T_COMMONS ? "#33aa55" : "var(--neon-blue)";
+                    zoneTxt.innerText = "MAIN SYSTEM ROAD";
+                    zoneTxt.style.color = "#888";
                     urlTxt.innerText = window.location.host + "/";
                 }
             }
@@ -311,36 +298,21 @@
             if(coords) coords.innerText = `X: ${player.x.toFixed(1)}, Y: ${player.y.toFixed(1)}`;
         }
 
-        // --- RENDER ENGINE ---
+        // --- RENDER TIMELINE PERSPECTIVE PIPELINE ---
         function renderPerspectiveMatrix() {
-            // High-Fi Sky Gradient
+            // Smooth Sky Gradient
             let skyGrad = ctx.createLinearGradient(0, 0, 0, R_HEIGHT / 2);
-            skyGrad.addColorStop(0, "#020205");
-            skyGrad.addColorStop(0.6, "#0a0a1f");
-            skyGrad.addColorStop(1, "#1a0f2b");
-            ctx.fillStyle = skyGrad; 
-            ctx.fillRect(0, 0, R_WIDTH, R_HEIGHT / 2); 
+            skyGrad.addColorStop(0, "#020204");
+            skyGrad.addColorStop(1, "#0d0d14");
+            ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, R_WIDTH, R_HEIGHT / 2); 
 
-            // Deep textured floor space
-            ctx.fillStyle = "#09090f"; 
-            ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, R_HEIGHT / 2);
+            // Dark Concrete Floor Surface (No flashy gridlines)
+            ctx.fillStyle = "#060608"; ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, R_HEIGHT / 2);
 
-            // Ground grid lanes rendering loop
-            ctx.strokeStyle = "rgba(0, 240, 255, 0.07)";
-            ctx.lineWidth = 1;
-            for (let i = 0; i < 10; i++) {
-                let lineY = R_HEIGHT / 2 + (i * i * 1.6);
-                ctx.beginPath(); ctx.moveTo(0, lineY); ctx.lineTo(R_WIDTH, lineY); ctx.stroke();
-            }
-
-            // Raycasting Loop across horizontal scanlines
             for (let x = 0; x < R_WIDTH; x++) {
                 let rayAngle = (player.angle - player.fov / 2) + (x / R_WIDTH) * player.fov;
-                let distance = 0; 
-                let hit = false; 
-                let wallType = 0;
-                let vx = Math.cos(rayAngle); 
-                let vy = Math.sin(rayAngle);
+                let distance = 0; let hit = false; let wallType = 0;
+                let vx = Math.cos(rayAngle); let vy = Math.sin(rayAngle);
 
                 while (!hit && distance < 24) {
                     distance += 0.05;
@@ -348,13 +320,11 @@
                     let ty = Math.floor(player.y + vy * distance);
 
                     if (tx < 0 || tx >= MAP_SIZE || ty < 0 || ty >= MAP_SIZE) {
-                        hit = true; 
-                        distance = 24;
+                        hit = true; distance = 24;
                     } else {
                         let tile = map[ty * MAP_SIZE + tx];
                         if (tile > 1 || tile === T_DOOR) {
-                            hit = true; 
-                            wallType = tile;
+                            hit = true; wallType = tile;
                         }
                     }
                 }
@@ -364,54 +334,52 @@
                 let lineStart = (R_HEIGHT / 2) - (wallHeight / 2);
                 let lineEnd = (R_HEIGHT / 2) + (wallHeight / 2);
 
-                // Lighting mixes: Global ambient + precise headlights drop-offs
-                let baseLight = Math.min(1, 1 - (correctedD / 20));
-                let angleDiff = Math.abs(rayAngle - player.angle);
-                let headlight = angleDiff < 0.25 ? Math.max(0, 1 - (correctedD / 12)) * 0.7 : 0;
-                let finalLighting = Math.min(1, baseLight + headlight + 0.3); // Bright visibility channels
+                let lightShadingFactor = Math.min(1, 1 - (correctedD / 18)) + 0.15;
 
                 if (wallType === T_DOOR) {
-                    // Interactive Neon Gateways
-                    let pulse = Math.floor(130 + Math.sin(globalPulse * 3) * 125);
-                    ctx.strokeStyle = `rgba(0, ${pulse}, 255, ${finalLighting})`;
-                    ctx.beginPath(); ctx.moveTo(x, lineStart + (wallHeight * 0.15)); ctx.lineTo(x, lineEnd); ctx.stroke();
+                    // Physical Recessed Doorway Rendering Layer
+                    // Draws a dark threshold slit into the wall geometry instead of a glowing energy panel
+                    ctx.strokeStyle = `rgb(${Math.floor(12 * lightShadingFactor)}, ${Math.floor(12 * lightShadingFactor)}, ${Math.floor(16 * lightShadingFactor)})`;
+                    ctx.beginPath(); ctx.moveTo(x, lineStart + (wallHeight * 0.25)); ctx.lineTo(x, lineEnd); ctx.stroke();
+                    
+                    // Solid dark matte threshold door header beams
+                    ctx.strokeStyle = `rgb(${Math.floor(40 * lightShadingFactor)}, ${Math.floor(40 * lightShadingFactor)}, ${Math.floor(45 * lightShadingFactor)})`;
+                    ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineStart + (wallHeight * 0.25)); ctx.stroke();
                 } 
                 else if (wallType > 1) {
-                    // Structural colors
-                    let r = Math.floor((75 * wallType) % 120 + 40);
-                    let g = Math.floor((55 * wallType) % 90 + 30);
-                    let b = Math.floor((95 * wallType) % 140 + 70);
-
-                    // Cyber-grid horizontal stripe textures
-                    let stripeCheck = Math.floor(correctedD * 12) % 18;
-                    if (stripeCheck > 15) {
-                        r = Math.min(255, r + 90); g = Math.min(255, g + 90); b = Math.min(255, b + 150);
+                    // Muted Industrial Building Bricks Colors
+                    let r = 50, g = 52, b = 60;
+                    
+                    // Give the forced Entropia Junkshop a unique rusted iron hull color signature
+                    if (sectorNames[wallType] === "ENTROPIA JUNKSHOP") {
+                        r = 75; g = 50; b = 40;
                     }
 
-                    // Render wall slice
-                    ctx.strokeStyle = `rgb(${Math.floor(r * finalLighting)},${Math.floor(g * finalLighting)},${Math.floor(b * finalLighting)})`;
+                    // Render main structural wall panels split columns
+                    ctx.strokeStyle = `rgb(${Math.floor(r * lightShadingFactor)},${Math.floor(g * lightShadingFactor)},${Math.floor(b * lightShadingFactor)})`;
                     ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineEnd); ctx.stroke();
 
-                    // Geometric Sloped Roof Caps
-                    ctx.strokeStyle = `rgb(${Math.floor(r * 0.4 * finalLighting)},${Math.floor(g * 0.4 * finalLighting)},${Math.floor(b * 0.4 * finalLighting)})`;
-                    ctx.beginPath(); ctx.moveTo(x, lineStart); ctx.lineTo(x, lineStart - (wallHeight * 0.3)); ctx.stroke();
+                    // Flat horizontal structural window trim indicators
+                    let blockYPosition = Math.floor(correctedD * 10) % 24;
+                    if (blockYPosition > 21) {
+                        ctx.strokeStyle = `rgb(${Math.floor(r * 0.5 * lightShadingFactor)},${Math.floor(g * 0.5 * lightShadingFactor)},${Math.floor(b * 0.5 * lightShadingFactor)})`;
+                        ctx.beginPath(); ctx.moveTo(x, lineStart + (wallHeight * 0.4)); ctx.lineTo(x, lineStart + (wallHeight * 0.43)); ctx.stroke();
+                    }
 
-                    // --- INTEGRATED STRUCTURAL SIGNPOSTS ---
-                    if (x % 40 === 0 && wallHeight > 30) {
-                        ctx.fillStyle = `rgba(0, 240, 255, ${finalLighting * 0.95})`;
-                        ctx.fillRect(x - 35, lineStart - (wallHeight * 0.6), 70, 13);
+                    // --- COMPACT TEXT STREET SIGNS ---
+                    if (x % 45 === 0 && wallHeight > 35) {
+                        ctx.fillStyle = "rgba(10, 10, 12, 0.85)";
+                        ctx.fillRect(x - 40, lineStart - 18, 80, 13);
+                        ctx.strokeStyle = "#444";
+                        ctx.strokeRect(x - 40, lineStart - 18, 80, 13);
                         
-                        ctx.fillStyle = `#000`;
-                        ctx.font = "bold 8px monospace";
+                        ctx.fillStyle = "#aaa";
+                        ctx.font = "8px monospace";
                         let tag = sectorNames[wallType] || "NODE";
-                        ctx.fillText(tag, x - 30, lineStart - (wallHeight * 0.6) + 10);
+                        ctx.fillText(tag, x - 35, lineStart - 9);
                     }
                 }
             }
-
-            // High-intensity horizon separator guideline
-            ctx.fillStyle = "rgba(0, 240, 255, 0.25)";
-            ctx.fillRect(0, R_HEIGHT / 2, R_WIDTH, 2); 
         }
 
         function engineTickLoop() {
@@ -420,8 +388,7 @@
             requestAnimationFrame(engineTickLoop);
         }
 
-        // Initialize Runtime Boot Sequence Hook
-        buildAdvancedCircuitCity().then(() => {
+        buildAsphaltIndustrialCity().then(() => {
             engineTickLoop();
         });
     </script>
