@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aether Net: Real World Mapping</title>
+    <title>Aether Net: Drive Matrix Architecture</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -68,72 +68,85 @@
         #fpv-viewport {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 5; display: none; background: radial-gradient(circle at center, #0e0e1a 0%, #030306 100%);
-            perspective: 700px; 
-            perspective-origin: 50% calc(50% - 100px);
+            perspective: 600px; 
+            perspective-origin: 50% calc(50% - 60px);
         }
 
         #fpv-world {
             position: absolute; width: 100%; height: 100%;
             transform-style: preserve-3d;
-            transition: transform 0.1s cubic-bezier(0.1, 0.8, 0.2, 1);
         }
 
-        /* POLYGON EXTRUSION GEOMETRY CONTAINER */
+        /* 3D POLYHEDRAL BUILDING ENGINES */
         .building-3d {
             position: absolute; transform-style: preserve-3d;
-            width: 0px; height: 0px; top: 50%; left: 50%;
+            width: 0px; height: 0px;
         }
 
         .face {
             position: absolute; 
-            background: rgba(10, 15, 28, 0.94); 
+            background: rgba(15, 22, 42, 0.95); 
             border: 1px solid var(--neon-blue);
-            box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.15);
+            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.2);
             transform-origin: top left;
             backface-visibility: hidden;
         }
 
-        .face.owned-player {
-            border-color: var(--neon-green);
-            background: rgba(8, 28, 18, 0.94);
-            box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.2);
+        .roof-cap {
+            position: absolute;
+            background: #121829;
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            transform-origin: center center;
+            backface-visibility: hidden;
         }
 
-        .face.owned-upgraded {
-            border-color: var(--neon-magenta);
-            background: rgba(28, 8, 28, 0.94);
-            box-shadow: inset 0 0 20px rgba(255, 0, 255, 0.25);
-        }
+        .face.owned-player { border-color: var(--neon-green); background: rgba(10, 35, 20, 0.95); }
+        .face.owned-upgraded { border-color: var(--neon-magenta); background: rgba(35, 10, 35, 0.95); }
 
+        /* CLEAN INTERSECTING ROAD SEGMENTS */
         .road-3d {
             position: absolute; transform-style: preserve-3d;
-            width: 0px; height: 0px; top: 50%; left: 50%;
-            pointer-events: none;
+            width: 0px; height: 0px; pointer-events: none;
         }
 
-        .road-segment {
+        .road-canvas-plane {
             position: absolute;
-            background: rgba(16, 18, 30, 0.85);
-            border-left: 4px dashed rgba(0, 240, 255, 0.5);
-            border-right: 4px dashed rgba(0, 240, 255, 0.5);
-            transform-origin: top center;
+            background: #141622;
+            border-top: 2px dashed rgba(0, 240, 255, 0.4);
+            border-bottom: 2px dashed rgba(0, 240, 255, 0.4);
+            transform-origin: top left;
         }
 
         .fpv-ground {
-            position: absolute; width: 4000px; height: 4000px;
-            top: 50%; left: 50%; margin-left: -2000px; margin-top: -2000px;
+            position: absolute; width: 6000px; height: 6000px;
+            top: 50%; left: 50%; margin-left: -3000px; margin-top: -3000px;
             background-image: 
-                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px; background-position: center;
+                linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+            background-size: 80px 80px; background-position: center;
             transform: rotateX(90deg) translateZ(0px);
         }
 
-        .fpv-crosshair {
-            position: absolute; top: calc(50% - 100px); left: 50%;
-            width: 12px; height: 12px; transform: translate(-50%, -50%);
-            border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 50%; z-index: 10;
-            pointer-events: none;
+        /* VIRTUAL VEHICLE COCKPIT CHASSIS */
+        #vehicle-chassis {
+            position: absolute; bottom: 0; left: 50%;
+            width: 320px; height: 140px; transform: translateX(-50%);
+            z-index: 20; pointer-events: none;
+            display: none; flex-direction: column; justify-content: flex-end;
+        }
+
+        .canopy-hood {
+            width: 100%; height: 40px;
+            background: linear-gradient(to top, #09090f 0%, rgba(20, 24, 40, 0.8) 100%);
+            border-top: 3px solid var(--neon-blue);
+            border-left: 20px solid transparent; border-right: 20px solid transparent;
+            box-sizing: border-box; display: flex; justify-content: space-between; align-items: center;
+            padding: 0 30px; box-shadow: 0 -5px 25px rgba(0, 240, 255, 0.3);
+        }
+
+        .hud-digital-gauge {
+            font-size: 0.7rem; color: var(--neon-green); font-weight: bold;
+            text-shadow: 0 0 5px var(--neon-green);
         }
 
         #controls {
@@ -149,28 +162,7 @@
         .btn:active:not(:disabled) { background: var(--neon-blue); color: var(--dark-bg); }
         .btn:disabled { color: #444; border-color: #444; background: none; cursor: not-allowed; }
 
-        #build-btn { border-color: var(--neon-magenta); color: var(--neon-magenta); background: rgba(255, 0, 255, 0.05); }
-        #build-btn:active:not(:disabled) { background: var(--neon-magenta); color: var(--dark-bg); }
-
-        #claim-btn { border-color: var(--neon-green); color: var(--neon-green); background: rgba(0, 255, 102, 0.05); }
-        #claim-btn:active:not(:disabled) { background: var(--neon-green); color: var(--dark-bg); }
-
         .action-container { display: flex; gap: 6px; }
-
-        #blueprint-terminal {
-            display: none; background: #000; border: 1px solid var(--neon-magenta); padding: 10px; margin-top: 5px;
-        }
-        .blueprint-title { color: var(--neon-magenta); font-size: 0.8rem; margin: 0 0 8px 0; font-weight: bold; letter-spacing: 1px; }
-        .blueprint-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .blueprint-card {
-            background: rgba(255, 0, 255, 0.05); border: 1px solid #444; padding: 8px; font-size: 0.65rem;
-            cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: space-between;
-        }
-        .blueprint-card:hover:not(.disabled) { border-color: var(--neon-magenta); background: rgba(255, 0, 255, 0.1); }
-        .blueprint-card.disabled { opacity: 0.3; cursor: not-allowed; border-color: #222; }
-        .blueprint-name { font-weight: bold; color: #fff; margin-bottom: 4px; }
-        .blueprint-desc { color: #aaa; margin-bottom: 6px; font-size: 0.55rem; line-height: 1.2; }
-        .blueprint-cost { color: var(--neon-green); font-weight: bold; }
 
         .sim-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
@@ -182,25 +174,6 @@
             font-size: 0.7rem; color: #888; background: #000;
             padding: 6px; height: 40px; overflow-y: auto; border: 1px solid #222;
         }
-
-        #encounter-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(6, 6, 10, 0.95); z-index: 6000;
-            display: none; flex-direction: column; justify-content: center;
-            align-items: center; padding: 20px; box-sizing: border-box;
-            border: 4px solid var(--neon-magenta);
-        }
-        .encounter-modal {
-            max-width: 500px; width: 100%; background: #000;
-            border: 1px solid var(--neon-magenta); padding: 25px;
-            box-shadow: 0 0 35px rgba(255, 0, 255, 0.25); box-sizing: border-box;
-        }
-        .encounter-header { color: var(--neon-magenta); font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase; }
-        .encounter-desc { font-size: 0.85rem; color: #ccc; margin-bottom: 20px; line-height: 1.4; }
-        .encounter-actions { display: flex; flex-direction: column; gap: 8px; }
-        #encounter-arena { width: 100%; height: 180px; border: 1px dashed var(--neon-magenta); margin-top: 15px; position: relative; display: none; background: #05050a; overflow: hidden; }
-        .target-anomaly { position: absolute; width: 30px; height: 30px; background: var(--neon-magenta); border: 2px solid #fff; cursor: pointer; box-shadow: 0 0 15px var(--neon-magenta); animation: pulse 0.8s infinite alternate; }
-        @keyframes pulse { from { transform: scale(0.9); box-shadow: 0 0 10px var(--neon-magenta); } to { transform: scale(1.1); box-shadow: 0 0 20px var(--neon-magenta); } }
         
         .toggle-view-btn {
             background: rgba(255, 0, 255, 0.15); border: 1px solid var(--neon-magenta);
@@ -213,34 +186,20 @@
 
     <div id="boot-overlay">
         <div class="boot-modal">
-            <h2 style="color: var(--neon-blue); margin-top: 0; letter-spacing: 2px;">AETHER MAP MATRIX</h2>
+            <h2 style="color: var(--neon-blue); margin-top: 0; letter-spacing: 2px;">DRIVE MATRIX ENGAGEMENT</h2>
             <p style="font-size: 0.85rem; color: #aaa; text-align: left; line-height: 1.4;">
-                Connect to structural databases. Search for dense urban spaces to extract localized 3D data-cubes.
+                Extrude pixel-perfect polyhedrons and map structural highways into a smooth driving environment.
             </p>
             
             <div class="search-container">
-                <input type="text" id="search-input" value="new york, new york" placeholder="Enter City or Area...">
-                <button class="btn" style="margin-top:0; width:auto; padding: 0 15px;" id="search-go-btn" onclick="searchGlobalLocation()">Sync</button>
+                <input type="text" id="search-input" value="chicago, illinois" placeholder="Enter Area...">
+                <button class="btn" style="margin-top:0; width:auto; padding: 0 15px;" onclick="searchGlobalLocation()">Sync</button>
             </div>
             <div id="search-status" style="font-size:0.75rem; color:var(--neon-magenta); min-height:15px; margin-bottom:10px; text-align:left;"></div>
 
             <button class="btn" onclick="initPositionMode('gps')">📡 SCAN SATELLITE GPS</button>
             <div style="margin: 12px 0 8px 0; color: #555; font-size: 0.75rem;">— OR START AT FALLBACK COORDS —</div>
-            <button class="btn" style="border-color: #666; color: #aaa;" onclick="initPositionMode('custom')">BOOT MANUAL DATASTREAM</button>
-        </div>
-    </div>
-
-    <div id="encounter-overlay">
-        <div class="encounter-modal">
-            <div class="encounter-header" id="enc-title">CRITICAL ENCOUNTER DETECTED</div>
-            <div class="encounter-desc" id="enc-desc">An unstable spatial compression point has warped around your grid coordinates.</div>
-            
-            <div class="encounter-actions" id="enc-choices">
-                <button class="btn" id="enc-engage-btn" style="border-color: var(--neon-green); color: var(--neon-green);" onclick="executeEncounterCombat()">⚡ EXECUTE ENGAGEMENT IMMEDIATELY</button>
-                <button class="btn" id="enc-capture-btn" style="border-color: var(--neon-blue); color: var(--neon-blue);" onclick="captureEncounterMatrix()">📦 CAPTURE ENCOUNTER (CONTAIN SIG)</button>
-                <button class="btn" id="enc-skip-btn" style="border-color: var(--neon-magenta); color: var(--neon-magenta);" onclick="skipEncounterMatrix()">💸 PURGE CORRUPTION (-150 FRAGS)</button>
-            </div>
-            <div id="encounter-arena"></div>
+            <button class="btn" style="border-color: #666; color: #aaa;" onclick="initPositionMode('custom')">BOOT DRIVE GRID</button>
         </div>
     </div>
 
@@ -250,8 +209,8 @@
             <span>DATA FRAGMENTS: <span id="score-display" class="score">2500</span></span>
         </div>
         <div class="hud-row">
-            <span>PROPERTIES OWNED: <span id="grids-display" class="magenta">0</span></span>
-            <span>PASSIVE ENGINE: <span id="yield-display" style="color:var(--neon-green); font-weight:bold;">+0 F/s</span></span>
+            <span>PROPERTIES MAPPED: <span id="grids-display" class="magenta">0</span></span>
+            <span>VELOCITY: <span id="hud-speedometer-text" style="color:var(--neon-blue); font-weight:bold;">0.0 KM/H</span></span>
         </div>
         <div class="hud-row" style="margin-top: 2px; font-size: 0.7rem; border-top: 1px dashed #222; padding-top: 2px;">
             <span id="status-display">Syncing Engine Core...</span>
@@ -263,38 +222,36 @@
         <div id="map"></div>
         
         <div id="fpv-viewport">
-            <div class="fpv-crosshair"></div>
             <div id="fpv-world">
                 <div class="fpv-ground"></div>
+            </div>
+
+            <!-- DRIVABLE INTERACTIVE VEHICLE SYSTEM CHASSIS OVERLAY -->
+            <div id="vehicle-chassis">
+                <div class="canopy-hood">
+                    <div class="hud-digital-gauge" id="chassis-gear">GEAR: NEUTRAL</div>
+                    <div class="hud-digital-gauge" id="chassis-kmh" style="color:var(--neon-blue);">0 MPH</div>
+                    <div class="hud-digital-gauge" id="chassis-rpm">RPM: 900</div>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="controls">
         <div class="action-container">
-            <button id="action-btn" class="btn" disabled style="flex: 1.5;">Out of Interaction Range</button>
-            <button id="claim-btn" class="btn" disabled style="flex: 1.2;">MINT PROPERTY</button>
-            <button id="build-btn" class="btn" disabled style="flex: 1.2;">UPGRADE CORE</button>
-        </div>
-
-        <div id="blueprint-terminal">
-            <div class="blueprint-title">⚙️ SELECT RESTRUCTURING COMPONENT:</div>
-            <div class="blueprint-grid" id="blueprint-options-container"></div>
+            <button id="action-btn" class="btn" disabled style="flex: 1;">OUT OF AREA SPECTRUM</button>
+            <button id="claim-btn" class="btn" disabled style="flex: 1;">CLAIM SECTOR STRUCTURE</button>
         </div>
         
-        <div id="terminal-log">System initialized. Awaiting satellite array connection...</div>
+        <div id="terminal-log">System initializing. Drive Matrix environment ready...</div>
         
         <div class="sim-grid">
-            <button class="btn" onclick="rotateCameraHeading(-15)">↺ L</button>
-            <button class="btn" onclick="navigateStepRelative(1)">▲ FWD</button>
-            <button class="btn" onclick="rotateCameraHeading(15)">R ↻</button>
-            
-            <button class="btn" onclick="navigateStepRelative(0, -1)">◀ STR-L</button>
-            <button id="harvest-btn" class="btn" onclick="manualDataHarvest()" style="font-size:0.55rem; padding:2px; border-color:var(--neon-green); color:var(--neon-green);">HARVEST</button>
-            <button class="btn" onclick="navigateStepRelative(0, 1)">STR-R ▶</button>
+            <button class="btn" style="background:rgba(255,0,255,0.05);" onmousedown="startInput('steerLeft')" onmouseup="stopInput('steerLeft')" onmouseleave="stopInput('steerLeft')" ontouchstart="startInput('steerLeft')" ontouchend="stopInput('steerLeft')">◀ STEER</button>
+            <button class="btn" style="background:rgba(0,255,102,0.1);" onmousedown="startInput('gas')" onmouseup="stopInput('gas')" onmouseleave="stopInput('gas')" ontouchstart="startInput('gas')" ontouchend="stopInput('gas')">▲ GAS</button>
+            <button class="btn" style="background:rgba(255,0,255,0.05);" onmousedown="startInput('steerRight')" onmouseup="stopInput('steerRight')" onmouseleave="stopInput('steerRight')" ontouchstart="startInput('steerRight')" ontouchend="stopInput('steerRight')">STEER ▶</button>
             
             <div></div>
-            <button class="btn" onclick="navigateStepRelative(-1)">▼ BACK</button>
+            <button class="btn" style="background:rgba(255,0,0,0.1);" onmousedown="startInput('brake')" onmouseup="stopInput('brake')" onmouseleave="stopInput('brake')" ontouchstart="startInput('brake')" ontouchend="stopInput('brake')">▼ BRAKE</button>
             <div></div>
         </div>
     </div>
@@ -302,24 +259,19 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const CONFIG = {
-            interactionRadiusMeters: 40,
-            queryRadiusMeters: 250,
-            cooldownRadiusMeters: 150,
-            sectorCooldownDurationMS: 60 * 60 * 1000,
-            spawnSectorRadiusThreshold: 150, 
-            metersRequiredPerEncounterRoll: 25, 
-            encounterTriggerChance: 0.04, 
-            skipCostFragments: 150,
-            renderHorizonDistancePx: 800
+            interactionRadiusMeters: 50,
+            queryRadiusMeters: 300,
+            renderHorizonDistancePx: 1200,
+            roadWidthPx: 36,
+            // Physics variables
+            maxSpeed: 14.0, 
+            acceleration: 0.18,
+            brakingDecel: 0.35,
+            friction: 0.04,
+            steeringSpeed: 2.8
         };
 
-        const HOME_ANCHOR = { lat: 40.7128, lon: -74.0060 }; 
-
-        const ENCOUNTER_TYPES = [
-            { id: "rogue_subroutine", title: "⚠️ MALICIOUS DAEMON DETECTED", desc: "A fragmented firewall sub-routine is siphoning localized node telemetry.", reward: 250 },
-            { id: "quantum_leak", title: "🌀 SPACE-TIME DATA LEAK", desc: "A chronological buffer anomaly is exposing underlying system structural arrays.", reward: 350 },
-            { id: "proxy_specter", title: "👻 NET-RUNNER PROXY OVERFLOW", desc: "An old system phantom cache is mirroring your coordinates.", reward: 400 }
-        ];
+        const HOME_ANCHOR = { lat: 41.8781, lon: -87.6298 }; // Chicago Core
 
         let state = {
             playerLat: HOME_ANCHOR.lat, 
@@ -327,34 +279,23 @@
             playerHeading: 0, 
             viewMode: "2D", 
             score: 2500, 
-            isSimulating: true,
             realProperties: {}, 
             realRoads: {}, 
             activePropertyId: null,
             isFetchingData: false,
-            passiveGenerationRate: 0, 
-            mapDataNodes: {},
-            activeNodeIdInRange: null,
-            depletedSectors: [], 
-            spawnedSectors: [], 
-            metersWalkedSinceLastRoll: 0, 
-            blueprints: {
-                forge: { name: "Quantum Data Forge", costMult: 1.5, desc: "Yields dynamic background processing loops (+15 F/s)" },
-                vault: { name: "Secure Grid-Vault", costMult: 2.0, desc: "Reinforces structural encryption layers (+40% base value)" },
-                uplink: { name: "Aether Uplink Beacon", costMult: 2.5, desc: "Broadcasts continuous localized telemetry streams" }
-            },
-            capturedEncounters: [],
-            currentActiveEncounter: null
+            // Physics state
+            velocity: 0,
+            inputs: { gas: false, brake: false, steerLeft: false, steerRight: false }
         };
 
         const map = L.map('map', {
-            zoomControl: false, attributionControl: false, minZoom: 13, maxZoom: 19
+            zoomControl: false, attributionControl: false, minZoom: 14, maxZoom: 19
         }).setView([state.playerLat, state.playerLon], 18);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
         const interactionBoundary = L.circle([state.playerLat, state.playerLon], {
-            radius: CONFIG.interactionRadiusMeters, color: varStyle('--neon-blue'), weight: 1.5, dashArray: '5, 5', fillColor: 'transparent'
+            radius: CONFIG.interactionRadiusMeters, color: varStyle('--neon-blue'), weight: 1.5, dashArray: '4, 4', fillColor: 'transparent'
         }).addTo(map);
 
         const playerMarker = L.circleMarker([state.playerLat, state.playerLon], {
@@ -369,233 +310,150 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
+        // --- CONTROLS DISPATCH MATRIX ---
+        function startInput(type) { state.inputs[type] = true; }
+        function stopInput(type) { state.inputs[type] = false; }
+
+        // Keyboard Event Handlers
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'w') startInput('gas');
+            if (e.key === 'ArrowDown' || e.key === 's') startInput('brake');
+            if (e.key === 'ArrowLeft' || e.key === 'a') startInput('steerLeft');
+            if (e.key === 'ArrowRight' || e.key === 'd') startInput('steerRight');
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'w') stopInput('gas');
+            if (e.key === 'ArrowDown' || e.key === 's') stopInput('brake');
+            if (e.key === 'ArrowLeft' || e.key === 'a') stopInput('steerLeft');
+            if (e.key === 'ArrowRight' || e.key === 'd') stopInput('steerRight');
+        });
+
         function togglePerspectiveView() {
             const mapEl = document.getElementById('map');
             const fpvEl = document.getElementById('fpv-viewport');
             const toggleBtn = document.getElementById('view-toggle');
+            const chassis = document.getElementById('vehicle-chassis');
 
             if (state.viewMode === "2D") {
                 state.viewMode = "3D";
                 mapEl.style.display = 'none';
                 fpvEl.style.display = 'block';
-                toggleBtn.textContent = "MODE: 3D FIRST-PERSON";
-                sysLog("PERSPECTIVE LINK: Viewport adjusted to human eye-level matrix landscape.");
+                chassis.style.display = 'flex';
+                toggleBtn.textContent = "MODE: 3D DRIVE GRID";
+                sysLog("DRIVE ENGINE ACTIVE: Use WASD / Arrows or buttons to drive vehicle.");
             } else {
                 state.viewMode = "2D";
                 mapEl.style.display = 'block';
                 fpvEl.style.display = 'none';
+                chassis.style.display = 'none';
                 toggleBtn.textContent = "MODE: 2D TACTICAL";
-                sysLog("PERSPECTIVE LINK: Restored standard 2D top-down configuration.");
                 map.invalidateSize();
             }
-            renderFirstPersonGraphicsLoop();
+            renderDriveMatrixGraphics();
         }
 
-        function trackOdometerAndRoll(distanceMeters) {
-            state.metersWalkedSinceLastRoll += distanceMeters;
-            if (state.metersWalkedSinceLastRoll >= CONFIG.metersRequiredPerEncounterRoll) {
-                state.metersWalkedSinceLastRoll = 0; 
-                if (Math.random() < CONFIG.encounterTriggerChance) {
-                    const randomSelection = ENCOUNTER_TYPES[Math.floor(Math.random() * ENCOUNTER_TYPES.length)];
-                    triggerEncounterOverlay(randomSelection);
-                }
-            }
-        }
-
-        function triggerEncounterOverlay(encounterInstance) {
-            state.currentActiveEncounter = encounterInstance;
-            document.getElementById('enc-title').textContent = encounterInstance.title;
-            document.getElementById('enc-desc').textContent = encounterInstance.desc;
-            document.getElementById('enc-choices').style.display = 'flex';
-            document.getElementById('encounter-arena').style.display = 'none';
-            document.getElementById('encounter-arena').innerHTML = '';
-            document.getElementById('enc-skip-btn').disabled = state.score < CONFIG.skipCostFragments;
-            document.getElementById('encounter-overlay').style.display = 'flex';
-        }
-
-        function skipEncounterMatrix() {
-            if (state.score >= CONFIG.skipCostFragments) {
-                state.score -= CONFIG.skipCostFragments;
-                sysLog(`SYSTEM PROTOCOL: Paid ${CONFIG.skipCostFragments} fragments to force-purge spatial anomaly.`);
-                closeEncounterOverlay();
-            }
-        }
-
-        function captureEncounterMatrix() {
-            state.capturedEncounters.push(state.currentActiveEncounter);
-            sysLog(`CONTAINMENT CELL: Stored [${state.currentActiveEncounter.title}] into processing memory.`);
-            closeEncounterOverlay();
-        }
-
-        function executeEncounterCombat() {
-            document.getElementById('enc-choices').style.display = 'none';
-            const arena = document.getElementById('encounter-arena');
-            arena.style.display = 'block';
-            arena.innerHTML = '';
-
-            const anomalyTarget = document.createElement('div');
-            anomalyTarget.className = 'target-anomaly';
-            
-            const maxTop = arena.clientHeight - 35;
-            const maxLeft = arena.clientWidth - 35;
-            anomalyTarget.style.top = Math.floor(Math.random() * maxTop) + "px";
-            anomalyTarget.style.left = Math.floor(Math.random() * maxLeft) + "px";
-
-            anomalyTarget.addEventListener('click', () => {
-                const payout = state.currentActiveEncounter.reward;
-                state.score += payout;
-                sysLog(`THREAT RESOLVED: Extracted +${payout} Fragments from anomaly core breakdown.`);
-                closeEncounterOverlay();
-            });
-
-            arena.appendChild(anomalyTarget);
-        }
-
-        function closeEncounterOverlay() {
-            document.getElementById('encounter-overlay').style.display = 'none';
-            state.currentActiveEncounter = null;
-            syncGameplayState();
-        }
-
-        function rotateCameraHeading(degrees) {
-            state.playerHeading = (state.playerHeading + degrees + 360) % 360;
-            renderFirstPersonGraphicsLoop();
-        }
-
-        function navigateStepRelative(forwardDir, strafeDir = 0) {
-            if (!state.isSimulating) return;
-
-            const stepFactor = 0.00012; 
-            const approxMetersMoved = 14.2; 
-            const headingRad = (state.playerHeading * Math.PI) / 180;
-            
-            let deltaLat = 0;
-            let deltaLon = 0;
-
-            if (forwardDir !== 0) {
-                deltaLat += Math.cos(headingRad) * forwardDir * stepFactor;
-                deltaLon += Math.sin(headingRad) * forwardDir * stepFactor * 1.3;
-            }
-            if (strafeDir !== 0) {
-                const strafeRad = headingRad + (Math.PI / 2);
-                deltaLat += Math.cos(strafeRad) * strafeDir * stepFactor;
-                deltaLon += Math.sin(strafeRad) * strafeDir * stepFactor * 1.3;
+        // --- CENTRAL PHYSICS ENGINE LOGIC LOOP ---
+        setInterval(() => {
+            // Apply steering if moving
+            if (Math.abs(state.velocity) > 0.1) {
+                const steerDirection = state.velocity > 0 ? 1 : -1;
+                if (state.inputs.steerLeft) state.playerHeading = (state.playerHeading - CONFIG.steeringSpeed * steerDirection + 360) % 360;
+                if (state.inputs.steerRight) state.playerHeading = (state.playerHeading + CONFIG.steeringSpeed * steerDirection) % 360;
             }
 
-            state.playerLat += deltaLat;
-            state.playerLon += deltaLon;
-
-            trackOdometerAndRoll(approxMetersMoved);
-            fetchRealWorldBuildings(state.playerLat, state.playerLon);
-            syncGameplayState();
-        }
-
-        function calculatePolygonArea(latLngs) {
-            let totalArea = 0;
-            const len = latLngs.length;
-            if (len < 3) return 50; 
-            for (let i = 0; i < len; i++) {
-                let p1 = latLngs[i];
-                let p2 = latLngs[(i + 1) % len];
-                let x1 = p1[1] * 111320 * Math.cos(p1[0] * Math.PI / 180);
-                let y1 = p1[0] * 110574;
-                let x2 = p2[1] * 111320 * Math.cos(p2[0] * Math.PI / 180);
-                let y2 = p2[0] * 110574;
-                totalArea += (x1 * y2) - (x2 * y1);
+            // Acceleration & Braking Calculations
+            if (state.inputs.gas) {
+                state.velocity = Math.min(CONFIG.maxSpeed, state.velocity + CONFIG.acceleration);
+            } else if (state.inputs.brake) {
+                state.velocity = Math.max(-CONFIG.maxSpeed * 0.4, state.velocity - CONFIG.brakingDecel);
+            } else {
+                // Apply drag friction
+                if (state.velocity > 0) state.velocity = Math.max(0, state.velocity - CONFIG.friction);
+                if (state.velocity < 0) state.velocity = Math.min(0, state.velocity + CONFIG.friction);
             }
-            return Math.abs(totalArea / 2);
-        }
 
-        function analyzeRegionalDensityMatrix(elements) {
-            let commercialNodes = 0;
-            let totalElements = elements.length || 1;
-            elements.forEach(el => {
-                if (!el.tags) return;
-                const t = el.tags.amenity || el.tags.shop || el.tags.office || el.tags.building || "";
-                if (["commercial", "office", "retail", "supermarket", "bank", "work"].includes(t)) commercialNodes++;
-            });
-            const densityRatio = commercialNodes / totalElements;
-            if (densityRatio > 0.4) return { label: "High Density Commercial Core", scalar: 2.2 };
-            if (densityRatio > 0.15) return { label: "Urban Mixed-Use Sector", scalar: 1.5 };
-            return { label: "Low Density Residential Zone", scalar: 0.9 };
-        }
+            // Move coordinates based on real velocity scalar
+            if (Math.abs(state.velocity) > 0.001) {
+                const headingRad = (state.playerHeading * Math.PI) / 180;
+                const latFactor = 0.00001 * (state.velocity / 10);
+                const lonFactor = 0.00001 * (state.velocity / 10) * 1.3;
 
-        function evaluatePseudoPrice(area, levels, tags, neighborhoodScalar) {
-            let baseRate = 0.5; 
-            let effectiveFloorArea = area * levels;
-            let assetPremium = 1.0;
-            const structuralType = tags.amenity || tags.shop || tags.office || tags.building || "residential";
-            const tagWeights = { "bank": 4.5, "office": 3.0, "supermarket": 2.5, "commercial": 2.2 };
-            if (tagWeights[structuralType]) assetPremium = tagWeights[structuralType];
-            let finalCalculation = effectiveFloorArea * baseRate * assetPremium * neighborhoodScalar;
-            return Math.max(75, Math.min(12500, Math.round(finalCalculation)));
-        }
+                state.playerLat += Math.cos(headingRad) * latFactor;
+                state.playerLon += Math.sin(headingRad) * lonFactor;
 
-        function spawnAmbientGridLootNodes(centerLat, centerLon) {
-            const insideExistingSpawnZone = state.spawnedSectors.some(sector => {
-                return map.distance([centerLat, centerLon], [sector.lat, sector.lon]) < CONFIG.spawnSectorRadiusThreshold;
-            });
+                // Continuously query new structures as you drive
+                fetchRealWorldBuildings(state.playerLat, state.playerLon);
+                syncGameplayState();
+            }
 
-            if (insideExistingSpawnZone) return; 
-            state.spawnedSectors.push({ lat: centerLat, lon: centerLon });
-
-            for (let i = 0; i < 3; i++) {
-                const randomOffsetId = `node-${Math.floor(Math.random() * 1000000)}`;
-                const angle = Math.random() * Math.PI * 2;
-                const radiusScalar = (Math.random() * 90 + 40) / 111320; 
+            // Update Vehicle Chassis Cockpit HUD readouts
+            if (state.viewMode === "3D") {
+                const currentKmh = Math.abs(Math.round(state.velocity * 6.5));
+                document.getElementById('hud-speedometer-text').textContent = `${currentKmh} KM/H`;
+                document.getElementById('chassis-kmh').textContent = `${currentKmh} MPH`;
                 
-                const nodeLat = centerLat + (radiusScalar * Math.sin(angle));
-                const nodeLon = centerLon + (radiusScalar * Math.cos(angle) * Math.cos(centerLat * Math.PI / 180));
-                const computedPayload = Math.floor(Math.random() * 31) + 20;
-
-                const nodeMarker = L.circleMarker([nodeLat, nodeLon], {
-                    radius: 6, color: varStyle('--neon-green'), fillColor: '#000', fillOpacity: 0.8, weight: 2
-                }).addTo(map);
-
-                state.mapDataNodes[randomOffsetId] = {
-                    id: randomOffsetId, lat: nodeLat, lon: nodeLon, payload: computedPayload, layer: nodeMarker
-                };
+                let gear = "NEUTRAL";
+                if (state.velocity > 0.1) gear = "DRIVE";
+                if (state.velocity < -0.1) gear = "REVERSE";
+                document.getElementById('chassis-gear').textContent = `GEAR: ${gear}`;
+                
+                const calculatedRpm = Math.round(900 + (Math.abs(state.velocity) * 450));
+                document.getElementById('chassis-rpm').textContent = `RPM: ${calculatedRpm}`;
             }
+        }, 1000 / 40); // 40Hz Core Execution Frequency
+
+        function calculatePolygonCentroid(points) {
+            let latSum = 0, lonSum = 0, len = points.length;
+            points.forEach(p => { latSum += p.lat; lonSum += p.lon; });
+            return { lat: latSum / len, lon: lonSum / len };
         }
 
-        // --- SYNCHRONIZED GEOMETRY PROJECTION ENGINE ---
-        function renderFirstPersonGraphicsLoop() {
+        function calculateBoundingBoxDims(points, center, latScale, lonScale) {
+            let maxW = 0, maxD = 0;
+            points.forEach(p => {
+                const dx = Math.abs((p.lon - center.lon) * lonScale);
+                const dz = Math.abs((p.lat - center.lat) * latScale);
+                if (dx > maxW) maxW = dx;
+                if (dz > maxD) maxD = dz;
+            });
+            return { width: Math.max(10, maxW * 2), depth: Math.max(10, maxD * 2) };
+        }
+
+        // --- POLYHEDRON EXTRUSION & ROAD GEOMETRY ENGINE ---
+        function renderDriveMatrixGraphics() {
             if (state.viewMode !== "3D") return;
 
             const worldContainer = document.getElementById('fpv-world');
             worldContainer.querySelectorAll('.building-3d, .road-3d').forEach(el => el.remove());
 
-            worldContainer.style.transform = `translateY(100px) rotateY(${-state.playerHeading}deg)`;
+            // Synchronize the camera center directly over the vehicle bumper link
+            worldContainer.style.transform = `translateY(115px) rotateY(${-state.playerHeading}deg)`;
 
             const originLat = state.playerLat;
             const originLon = state.playerLon;
             const headingRad = (state.playerHeading * Math.PI) / 180;
 
-            const latToPixels = 111320 * 9.5; 
-            const lonToPixels = 111320 * Math.cos(originLat * Math.PI / 180) * 9.5;
+            const latToPixels = 111320 * 11.0; 
+            const lonToPixels = 111320 * Math.cos(originLat * Math.PI / 180) * 11.0;
 
             let renderingQueue = [];
 
-            // Process Highway Track Lines
+            // 1. Process Highways as clean rectangular ribbons
             Object.values(state.realRoads).forEach(road => {
-                for(let i = 0; i < road.geometry.length - 1; i++) {
+                for (let i = 0; i < road.geometry.length - 1; i++) {
                     const ptA = road.geometry[i];
                     const ptB = road.geometry[i+1];
                     
-                    const az = (ptA.lat - originLat) * latToPixels;
                     const ax = (ptA.lon - originLon) * lonToPixels;
-                    const bz = (ptB.lat - originLat) * latToPixels;
+                    const az = (ptA.lat - originLat) * latToPixels;
                     const bx = (ptB.lon - originLon) * lonToPixels;
+                    const bz = (ptB.lat - originLat) * latToPixels;
 
                     const midX = (ax + bx) / 2;
                     const midZ = (az + bz) / 2;
                     const distFromPlayer = Math.sqrt(midX * midX + midZ * midZ);
 
                     if (distFromPlayer > CONFIG.renderHorizonDistancePx) continue;
-
-                    const rx = midX * Math.cos(-headingRad) - (-midZ) * Math.sin(-headingRad);
-                    const rz = midX * Math.sin(-headingRad) + (-midZ) * Math.cos(-headingRad);
-                    if (rz < -60) continue;
 
                     renderingQueue.push({
                         type: 'road',
@@ -605,98 +463,109 @@
                 }
             });
 
-            // Process Footprint Polygon Walls
+            // 2. Process Buildings as complex closed polyhedrons
             Object.values(state.realProperties).forEach(prop => {
+                const cx = (prop.center.lon - originLon) * lonToPixels;
                 const cz = (prop.center.lat - originLat) * latToPixels;
-                const cx = (prop.center.lng - originLon) * lonToPixels;
                 const distFromPlayer = Math.sqrt(cx * cx + cz * cz);
 
                 if (distFromPlayer > CONFIG.renderHorizonDistancePx) return;
 
-                const rx = cx * Math.cos(-headingRad) - (-cz) * Math.sin(-headingRad);
-                const rz = cx * Math.sin(-headingRad) + (-cz) * Math.cos(-headingRad);
-                if (rz < -120) return; // Frustum drop
-
                 renderingQueue.push({
                     type: 'building',
                     distanceSq: distFromPlayer,
+                    centerOffset: { cx, cz },
                     data: prop
                 });
             });
 
+            // Sort arrays to drop matching items from back to front
             renderingQueue.sort((a, b) => b.distanceSq - a.distanceSq);
 
             renderingQueue.forEach(item => {
                 if (item.type === 'road') {
                     const { ax, az, bx, bz } = item.data;
-                    const deltaX = bx - ax;
-                    const deltaZ = bz - az;
-                    const segmentLength = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-                    if (segmentLength < 4) return;
+                    const dx = bx - ax;
+                    const dz = bz - az;
+                    const length = Math.sqrt(dx * dx + dz * dz);
+                    if (length < 2) return;
 
-                    const angleRotationDeg = Math.atan2(deltaX, deltaZ) * (180 / Math.PI);
+                    const angleDeg = Math.atan2(dx, dz) * (180 / Math.PI);
 
                     const roadWrapper = document.createElement('div');
                     roadWrapper.className = 'road-3d';
-                    roadWrapper.style.transform = `translate3d(${ax}px, 1px, ${-az}px)`;
+                    roadWrapper.style.transform = `translate3d(${ax}px, 0.5px, ${-az}px)`;
 
-                    const segment = document.createElement('div');
-                    segment.className = 'road-segment';
-                    segment.style.width = `42px`; 
-                    segment.style.marginLeft = `-21px`;
-                    segment.style.height = `${segmentLength}px`;
-                    segment.style.transform = `rotateX(90deg) rotateZ(${angleRotationDeg}deg)`;
+                    const planarAsphalt = document.createElement('div');
+                    planarAsphalt.className = 'road-canvas-plane';
+                    planarAsphalt.style.width = `${CONFIG.roadWidthPx}px`;
+                    planarAsphalt.style.marginLeft = `${-CONFIG.roadWidthPx / 2}px`;
+                    planarAsphalt.style.height = `${length}px`;
+                    
+                    // Rotate flat horizontally onto ground floor track layout
+                    planarAsphalt.style.transform = `rotateX(90deg) rotateZ(${angleDeg}deg)`;
 
-                    roadWrapper.appendChild(segment);
+                    roadWrapper.appendChild(planarAsphalt);
                     worldContainer.appendChild(roadWrapper);
 
                 } else if (item.type === 'building') {
                     const prop = item.data;
-                    const buildingHeight = Math.max(25, Math.min(260, (prop.levels * 16) + (Math.log(prop.area) * 4)));
+                    const { cx, cz } = item.centerOffset;
+                    const height = Math.max(30, Math.min(320, (prop.levels * 18) + (Math.log(prop.area) * 5)));
 
                     let faceModifierClass = "";
-                    if (prop.owned && prop.owner === "Player") {
-                        faceModifierClass = prop.upgradedStructure ? "owned-upgraded" : "owned-player";
-                    }
+                    if (prop.owned) faceModifierClass = "owned-player";
 
                     const b3d = document.createElement('div');
                     b3d.className = 'building-3d';
+                    b3d.style.transform = `translate3d(${cx}px, 0px, ${-cz}px)`;
 
-                    // Extrude individual polygon paths directly from OSM geometry segments
                     const nodes = prop.rawGeometryPoints;
+                    
+                    // Construct outer vertical walls tracing the exact 2D coordinates
                     for (let i = 0; i < nodes.length - 1; i++) {
                         const ptA = nodes[i];
                         const ptB = nodes[i+1];
 
-                        const ax = (ptA.lon - originLon) * lonToPixels;
-                        const az = (ptA.lat - originLat) * latToPixels;
-                        const bx = (ptB.lon - originLon) * lonToPixels;
-                        const bz = (ptB.lat - originLat) * latToPixels;
+                        const ax = (ptA.lon - prop.centroid.lon) * lonToPixels;
+                        const az = (ptA.lat - prop.centroid.lat) * latToPixels;
+                        const bx = (ptB.lon - prop.centroid.lon) * lonToPixels;
+                        const bz = (ptB.lat - prop.centroid.lat) * latToPixels;
 
                         const dx = bx - ax;
                         const dz = bz - az;
                         const wallLength = Math.sqrt(dx * dx + dz * dz);
-                        if (wallLength < 2) continue;
+                        if (wallLength < 1) continue;
 
-                        // Project angle between relative segment points
-                        const angleRad = Math.atan2(dx, dz);
-                        const angleDeg = angleRad * (180 / Math.PI);
+                        const angleDeg = Math.atan2(dx, dz) * (180 / Math.PI);
 
-                        const f = document.createElement('div');
-                        f.className = `face ${faceModifierClass}`;
-                        f.style.width = `${wallLength}px`;
-                        f.style.height = `${buildingHeight}px`;
+                        const wallFace = document.createElement('div');
+                        wallFace.className = `face ${faceModifierClass}`;
+                        wallFace.style.width = `${wallLength}px`;
+                        wallFace.style.height = `${height}px`;
+                        wallFace.style.transform = `translate3d(${ax}px, ${-height}px, ${-az}px) rotateY(${angleDeg}deg)`;
                         
-                        // Transform absolute space coordinates to matrix offsets
-                        f.style.transform = `translate3d(${ax}px, ${-buildingHeight}px, ${-az}px) rotateY(${angleDeg}deg)`;
-                        b3d.appendChild(f);
+                        b3d.appendChild(wallFace);
                     }
+
+                    // Construct a clean roof cap that encloses the extruded shape
+                    const roof = document.createElement('div');
+                    roof.className = 'roof-cap';
+                    roof.style.width = `${prop.boundingBox.width}px`;
+                    roof.style.height = `${prop.boundingBox.depth}px`;
+                    roof.style.left = `${-prop.boundingBox.width / 2}px`;
+                    roof.style.top = `${-prop.boundingBox.depth / 2}px`;
+                    
+                    // Flatten onto the top edge of the structure walls
+                    roof.style.transform = `translate3d(0px, ${-height}px, 0px) rotateX(90deg)`;
+                    b3d.appendChild(roof);
 
                     worldContainer.appendChild(b3d);
                 }
             });
         }
 
+        // --- LOCATION BOOTSTRAPPING ENGINE ---
         function searchGlobalLocation() {
             const query = document.getElementById('search-input').value.trim();
             const statusBox = document.getElementById('search-status');
@@ -711,34 +580,23 @@
                     if (data && data.length > 0) {
                         state.playerLat = parseFloat(data[0].lat);
                         state.playerLon = parseFloat(data[0].lon);
-                        state.isSimulating = true;
                         statusBox.style.color = "var(--neon-green)";
-                        statusBox.textContent = "Data lock complete. Building system pipeline...";
+                        statusBox.textContent = "Coordinate locked. Connecting streaming buffers...";
                         setTimeout(() => { completeBootPipeline(); }, 600);
                     } else {
                         statusBox.style.color = "var(--neon-magenta)";
-                        statusBox.textContent = "Target coordinate lookup failed.";
+                        statusBox.textContent = "Target lookup vector failed.";
                     }
                 });
         }
 
         function initPositionMode(mode) {
-            if (mode === 'gps') {
-                if (!navigator.geolocation) {
-                    sysLog("CRITICAL ERROR: Satellite array unreachable.");
-                    completeBootPipeline();
-                    return;
-                }
+            if (mode === 'gps' && navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
                     state.playerLat = pos.coords.latitude;
                     state.playerLon = pos.coords.longitude;
-                    state.isSimulating = false;
-                    sysLog("GPS LINK ACQUIRED: System locked to active spatial vector.");
                     completeBootPipeline();
-                }, () => {
-                    sysLog("GPS LINK FAILED: Reverting to fallback manual tracking vectors.");
-                    completeBootPipeline();
-                });
+                }, () => { completeBootPipeline(); });
             } else { completeBootPipeline(); }
         }
 
@@ -747,13 +605,10 @@
             map.setView([state.playerLat, state.playerLon], 18);
             
             Object.values(state.realProperties).forEach(p => map.removeLayer(p.layer));
-            Object.values(state.mapDataNodes).forEach(n => map.removeLayer(n.layer));
             Object.values(state.realRoads).forEach(r => map.removeLayer(r.layer));
             
             state.realProperties = {};
-            state.mapDataNodes = {};
             state.realRoads = {};
-            state.spawnedSectors = [];
 
             fetchRealWorldBuildings(state.playerLat, state.playerLon);
             syncGameplayState();
@@ -767,7 +622,6 @@
                 [out:json][timeout:25];
                 (
                   way["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
-                  relation["building"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
                   way["highway"](around:${CONFIG.queryRadiusMeters},${lat},${lon});
                 );
                 out geom;
@@ -778,137 +632,52 @@
                 .then(res => res.json())
                 .then(data => {
                     state.isFetchingData = false;
-                    spawnAmbientGridLootNodes(lat, lon);
-
                     if (!data.elements || data.elements.length === 0) return;
 
-                    const contextMatrix = analyzeRegionalDensityMatrix(data.elements);
+                    const latScale = 111320 * 11.0;
+                    const lonScale = 111320 * Math.cos(lat * Math.PI / 180) * 11.0;
 
                     data.elements.forEach(el => {
                         const id = el.id;
 
                         if (el.tags && el.tags.highway) {
                             if (state.realRoads[id] || !el.geometry) return;
-
                             const lineCoords = el.geometry.map(pt => [pt.lat, pt.lon]);
                             const roadPolyline = L.polyline(lineCoords, {
-                                color: 'rgba(0, 240, 255, 0.25)', weight: 3, interactive: false
+                                color: 'rgba(0, 240, 255, 0.4)', weight: 4, interactive: false
                             }).addTo(map);
 
-                            state.realRoads[id] = {
-                                id: id, geometry: el.geometry, layer: roadPolyline
-                            };
+                            state.realRoads[id] = { id: id, geometry: el.geometry, layer: roadPolyline };
                             return;
                         }
 
-                        if (state.realProperties[id]) return; 
+                        if (state.realProperties[id] || !el.geometry) return; 
 
-                        let latLngs = [];
-                        if (el.type === 'way' && el.geometry) {
-                            latLngs = el.geometry.map(pt => [pt.lat, pt.lon]);
-                        } else return; 
-
-                        const structuralAreaMeters = calculatePolygonArea(latLngs);
-                        const structuralBuildingLevels = parseInt(el.tags["building:levels"]) || 1;
-                        const finalMintCost = evaluatePseudoPrice(structuralAreaMeters, structuralBuildingLevels, el.tags, contextMatrix.scalar);
-
-                        const name = el.tags.name || "Commercial Sector Space";
-                        const type = el.tags.amenity || el.tags.shop || el.tags.office || el.tags.building || "Structure";
-                        const displayType = type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
-                        const streetAddress = el.tags["addr:street"] ? `${el.tags["addr:housenumber"] || ''} ${el.tags["addr:street"]}` : "Unregistered Sector Road";
-
+                        const latLngs = el.geometry.map(pt => [pt.lat, pt.lon]);
                         const polygonLayer = L.polygon(latLngs, {
-                            color: varStyle('--neon-blue'), weight: 1.5, fillColor: '#00f0ff', fillOpacity: 0.1
+                            color: varStyle('--neon-blue'), weight: 1.5, fillColor: '#00f0ff', fillOpacity: 0.15
                         }).addTo(map);
 
-                        const dynamicTokenHash = btoa(`aether-osm-${el.type}-${id}`).replace(/=/g, "");
+                        const centroid = calculatePolygonCentroid(el.geometry);
+                        const boundingBox = calculateBoundingBoxDims(el.geometry, centroid, latScale, lonScale);
 
                         state.realProperties[id] = {
-                            id: id, blockchainTokenId: dynamicTokenHash, name: name, type: displayType,
-                            address: streetAddress, layer: polygonLayer, center: polygonLayer.getBounds().getCenter(),
-                            mintCost: finalMintCost, area: Math.round(structuralAreaMeters), levels: structuralBuildingLevels,
-                            owned: false, owner: "System Corp", upgradedStructure: null,
-                            rawGeometryPoints: el.geometry // Track raw OSM footprint data array directly
+                            id: id,
+                            name: el.tags.name || "Structural Matrix Block",
+                            layer: polygonLayer,
+                            center: polygonLayer.getBounds().getCenter(),
+                            centroid: centroid,
+                            boundingBox: boundingBox,
+                            area: Math.round(boundingBox.width * boundingBox.depth),
+                            levels: parseInt(el.tags["building:levels"]) || Math.floor(Math.random() * 3) + 1,
+                            owned: false,
+                            rawGeometryPoints: el.geometry
                         };
-
-                        updatePropertyMetadataMarkup(state.realProperties[id]);
                     });
 
-                    calculatePassiveYieldTotals();
                     syncGameplayState();
                 })
-                .catch(() => {
-                    state.isFetchingData = false;
-                });
-        }
-
-        function updatePropertyMetadataMarkup(prop) {
-            let statusText = prop.owned 
-                ? `<span style="color:var(--neon-magenta); font-weight:bold;">SECURED BY: ${prop.owner}</span>`
-                : `<span style="color:var(--neon-green)">STATUS: FOR SALE [MINTABLE]</span>`;
-            if (prop.upgradedStructure) statusText += `<br><span style="color:var(--neon-magenta); font-weight:bold;">CORE MOD: ${prop.upgradedStructure}</span>`;
-
-            prop.layer.bindPopup(`
-                <div style="color:#fff; font-family:monospace; background:#000; padding:6px; min-width:180px; font-size: 0.75rem;">
-                    <b style="color:var(--neon-blue); font-size:0.85rem;">${prop.name}</b><br>
-                    <span style="color:#aaa;">Type: ${prop.type} (${prop.levels} Flr)</span><br><hr style="border-color:#222;">
-                    <div style="margin-bottom: 6px; font-weight: bold; color: var(--neon-green)">VALUE: ${prop.mintCost} FRAGS</div>
-                    ${statusText}
-                </div>
-            `);
-        }
-
-        function calculatePassiveYieldTotals() {
-            let dynamicSum = 0;
-            Object.values(state.realProperties).forEach(prop => {
-                if (prop.owned && prop.upgradedStructure === state.blueprints.forge.name) {
-                    dynamicSum += 15 + Math.floor(prop.area / 100);
-                }
-            });
-            state.passiveGenerationRate = dynamicSum;
-            document.getElementById('yield-display').textContent = `+${state.passiveGenerationRate} F/s`;
-        }
-
-        setInterval(() => {
-            if (state.passiveGenerationRate > 0) {
-                state.score += state.passiveGenerationRate;
-                document.getElementById('score-display').textContent = state.score;
-            }
-
-            if (!state.isSimulating && navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((pos) => {
-                    const prevLat = state.playerLat;
-                    const prevLon = state.playerLon;
-                    
-                    if (prevLat !== pos.coords.latitude || prevLon !== pos.coords.longitude) {
-                        state.playerLat = pos.coords.latitude;
-                        state.playerLon = pos.coords.longitude;
-                        
-                        const metersTraveled = map.distance([prevLat, prevLon], [state.playerLat, state.playerLon]);
-                        if (metersTraveled > 1) {
-                            trackOdometerAndRoll(metersTraveled);
-                            fetchRealWorldBuildings(state.playerLat, state.playerLon);
-                            syncGameplayState();
-                        }
-                    }
-                });
-            }
-        }, 1000);
-
-        function manualDataHarvest() {
-            if (!state.activeNodeIdInRange) return;
-            
-            const selectedNode = state.mapDataNodes[state.activeNodeIdInRange];
-            const yieldValue = selectedNode.payload;
-            
-            state.score += yieldValue;
-            sysLog(`HARVEST PROCESS: Successfully drew +${yieldValue} fragment data into ledger.`);
-            
-            map.removeLayer(selectedNode.layer);
-            delete state.mapDataNodes[state.activeNodeIdInRange];
-            state.activeNodeIdInRange = null;
-            
-            syncGameplayState();
+                .catch(() => { state.isFetchingData = false; });
         }
 
         function syncGameplayState() {
@@ -916,42 +685,12 @@
             playerMarker.setLatLng(currentPosition);
             interactionBoundary.setLatLng(currentPosition);
             
-            if (map.getZoom() >= 17 && state.viewMode === "2D") {
+            if (state.viewMode === "2D") {
                 map.panTo(currentPosition);
             }
 
             document.getElementById('gps-display').textContent = `${state.playerLat.toFixed(5)}, ${state.playerLon.toFixed(5)}`;
-            document.getElementById('score-display').textContent = state.score;
             
-            const totalOwned = Object.values(state.realProperties).filter(p => p.owner === "Player").length;
-            document.getElementById('grids-display').textContent = totalOwned;
-
-            let closestNodeId = null;
-            let closestNodeDistance = Infinity;
-
-            Object.values(state.mapDataNodes).forEach(node => {
-                const dist = map.distance(currentPosition, [node.lat, node.lon]);
-                if (dist < closestNodeDistance) {
-                    closestNodeDistance = dist;
-                    closestNodeId = node.id;
-                }
-            });
-
-            const harvestBtn = document.getElementById('harvest-btn');
-            if (closestNodeId && closestNodeDistance <= CONFIG.interactionRadiusMeters) {
-                state.activeNodeIdInRange = closestNodeId;
-                harvestBtn.textContent = `SIPHON (${state.mapDataNodes[closestNodeId].payload}F)`;
-                harvestBtn.disabled = false;
-                harvestBtn.style.borderColor = "var(--neon-green)";
-                harvestBtn.style.color = "var(--neon-green)";
-            } else {
-                state.activeNodeIdInRange = null;
-                harvestBtn.textContent = "SCANNING";
-                harvestBtn.disabled = true;
-                harvestBtn.style.borderColor = "#444";
-                harvestBtn.style.color = "#444";
-            }
-
             let currentActiveProp = null;
             let closestDistance = Infinity;
 
@@ -964,117 +703,46 @@
             });
 
             const claimBtn = document.getElementById('claim-btn');
-            const buildBtn = document.getElementById('build-btn');
             const actionBtn = document.getElementById('action-btn');
-            const blueprintTerminal = document.getElementById('blueprint-terminal');
 
             if (currentActiveProp && closestDistance <= CONFIG.interactionRadiusMeters) {
                 state.activePropertyId = currentActiveProp.id;
-                document.getElementById('status-display').innerHTML = `TARGET: <span style="color:var(--neon-blue)">${currentActiveProp.name}</span>`;
+                document.getElementById('status-display').innerHTML = `NODE: <span style="color:var(--neon-blue)">${currentActiveProp.name}</span>`;
                 actionBtn.disabled = false;
-                actionBtn.textContent = `INSPECT DATA [${Math.round(closestDistance)}m]`;
+                actionBtn.textContent = `INSPECT NODE DATA`;
 
                 if (!currentActiveProp.owned) {
-                    claimBtn.disabled = state.score < currentActiveProp.mintCost;
-                    claimBtn.textContent = `MINT PLOT (-${currentActiveProp.mintCost}F)`;
-                    buildBtn.disabled = true;
-                    blueprintTerminal.style.display = "none";
-                } else if (currentActiveProp.owner === "Player") {
+                    claimBtn.disabled = false;
+                    claimBtn.textContent = `CLAIM INTERSECTING PLOT`;
+                } else {
                     claimBtn.disabled = true;
-                    claimBtn.textContent = "PLOT ACQUIRED";
-                    buildBtn.disabled = !!currentActiveProp.upgradedStructure;
+                    claimBtn.textContent = `NODE CLAIMED`;
                 }
             } else {
                 state.activePropertyId = null;
-                document.getElementById('status-display').textContent = "SCANNING URBAN VECTOR PLOTS...";
+                document.getElementById('status-display').textContent = "NAVIGATING URBAN HIGHWAY MATRICES...";
                 actionBtn.disabled = true;
                 claimBtn.disabled = true;
-                buildBtn.disabled = true;
-                blueprintTerminal.style.display = "none";
             }
 
-            renderFirstPersonGraphicsLoop();
+            renderDriveMatrixGraphics();
         }
-
-        function renderBlueprintSelectionMatrix(prop) {
-            const container = document.getElementById('blueprint-options-container');
-            container.innerHTML = '';
-
-            Object.keys(state.blueprints).forEach(key => {
-                const blueprint = state.blueprints[key];
-                const finalCost = Math.round(prop.mintCost * blueprint.costMult);
-                const isAffordable = state.score >= finalCost;
-
-                const card = document.createElement('div');
-                card.className = `blueprint-card ${!isAffordable ? 'disabled' : ''}`;
-                card.innerHTML = `
-                    <div>
-                        <div class="blueprint-name">${blueprint.name}</div>
-                        <div class="blueprint-desc">${blueprint.desc}</div>
-                    </div>
-                    <div class="blueprint-cost">${finalCost} F</div>
-                `;
-
-                if (isAffordable) {
-                    card.addEventListener('click', () => {
-                        installCoreModule(prop.id, key, finalCost);
-                    });
-                }
-                container.appendChild(card);
-            });
-        }
-
-        function installCoreModule(propertyId, blueprintKey, cost) {
-            const prop = state.realProperties[propertyId];
-            const blueprint = state.blueprints[blueprintKey];
-
-            if (state.score >= cost) {
-                state.score -= cost;
-                prop.upgradedStructure = blueprint.name;
-                updatePropertyMetadataMarkup(prop);
-                sysLog(`SUCCESS: Installed [${blueprint.name}] on asset token registry.`);
-                document.getElementById('blueprint-terminal').style.display = "none";
-                calculatePassiveYieldTotals();
-                syncGameplayState();
-            }
-        }
-
-        document.getElementById('action-btn').addEventListener('click', () => {
-            if (state.activePropertyId) {
-                const prop = state.realProperties[state.activePropertyId];
-                if (state.viewMode === "2D") {
-                    prop.layer.openPopup(prop.center);
-                } else {
-                    sysLog(`INSPECTING EXTRUSION: ${prop.name} (${prop.area} m², Floors: ${prop.levels})`);
-                }
-            }
-        });
 
         document.getElementById('claim-btn').addEventListener('click', () => {
             if (!state.activePropertyId) return;
             const prop = state.realProperties[state.activePropertyId];
-            if (prop && !prop.owned && state.score >= prop.mintCost) {
-                state.score -= prop.mintCost;
+            if (prop && !prop.owned) {
                 prop.owned = true;
-                prop.owner = "Player";
                 prop.layer.setStyle({ color: varStyle('--neon-green'), fillColor: varStyle('--neon-green'), fillOpacity: 0.35 });
-                updatePropertyMetadataMarkup(prop);
-                sysLog(`ACQUIRED ASSET: Token registry secured for hash: ${prop.blockchainTokenId.substring(0,12)}...`);
+                sysLog(`GRID LOCKED: Structural perimeter successfully added to localized assets.`);
                 syncGameplayState();
             }
         });
 
-        document.getElementById('build-btn').addEventListener('click', () => {
-            if (!state.activePropertyId) return;
-            const prop = state.realProperties[state.activePropertyId];
-            const terminal = document.getElementById('blueprint-terminal');
-            if (prop && prop.owner === "Player" && !prop.upgradedStructure) {
-                if (terminal.style.display === "block") {
-                    terminal.style.display = "none";
-                } else {
-                    renderBlueprintSelectionMatrix(prop);
-                    terminal.style.display = "block";
-                }
+        document.getElementById('action-btn').addEventListener('click', () => {
+            if (state.activePropertyId) {
+                const prop = state.realProperties[state.activePropertyId];
+                sysLog(`INSPECT: ${prop.name} (Footprint Vol: ${prop.area}m³, Core Stories: ${prop.levels})`);
             }
         });
     </script>
