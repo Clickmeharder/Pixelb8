@@ -85,6 +85,10 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
         super("bit_miner_system");
         this.registry = createMinerRegistry();
         this.state = createMinerState();
+		this.canvas = document.getElementById("miner-canvas");
+		if (this.canvas) {
+			this.ctx = this.canvas.getContext("2d");
+		}
         this.loadData();
     }
 
@@ -114,25 +118,31 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
         `;
     }
 
-    injectUI() {
-        // Overlay mount
-        const overlayWrapper = document.getElementById("overlay-wrapper");
-        if (overlayWrapper && !document.getElementById("miner-overlay-element")) {
-            const overlayEl = document.createElement("div");
-            overlayEl.id = "miner-overlay-element";
-            overlayWrapper.appendChild(overlayEl);
-        }
+	injectUI() {
+		// 1. Overlay mount
+		const overlayWrapper = document.getElementById("overlay-wrapper");
+		if (overlayWrapper && !document.getElementById("miner-overlay-element")) {
+			const overlayEl = document.createElement("div");
+			overlayEl.id = "miner-overlay-element";
+			overlayEl.className = "p8-widget"; // Must have this class for positioning
+			overlayEl.style.position = "absolute";
+			
+			// ADD THIS: The widget needs its own canvas to draw on!
+			overlayEl.innerHTML = `<canvas id="miner-canvas"></canvas>`;
+			
+			overlayWrapper.appendChild(overlayEl);
+		}
 
-        // Control Panel mount
-        const controlContainer = document.getElementById("widget-control-wrapper");
-        if (controlContainer && !document.getElementById("miner-widget-controls")) {
-            const panelSection = document.createElement("div");
-            panelSection.id = "miner-widget-controls";
-            panelSection.className = "collapsible-section collapsed";
-            panelSection.innerHTML = StreamBitMinerWidget.controlsTemplate;
-            controlContainer.appendChild(panelSection);
-        }
-    }
+		// 2. Control Panel mount
+		const controlContainer = document.getElementById("widget-control-wrapper");
+		if (controlContainer && !document.getElementById("miner-widget-controls")) {
+			const panelSection = document.createElement("div");
+			panelSection.id = "miner-widget-controls";
+			panelSection.className = "collapsible-section collapsed";
+			panelSection.innerHTML = StreamBitMinerWidget.controlsTemplate;
+			controlContainer.appendChild(panelSection);
+		}
+	}
 
     bindEventListeners() {
         const controlContainer = document.getElementById("miner-widget-controls");
