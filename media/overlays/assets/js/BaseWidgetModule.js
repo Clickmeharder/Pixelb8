@@ -239,10 +239,11 @@ export class BaseWidgetModule {
 			container.style.border = "none";
 			container.style.background = "transparent";
 		} else {
-			container.style.border = "1px solid #27272a";
+			// Clear out inline overrides so your CSS variables take full control
+			container.style.border = "";
+			container.style.background = "";
 		}
 	}
-
 	setWidgetBubble(txt) {
 		// Target the bubble specific to THIS instance
 		const bubble = document.getElementById(`${this.baseId}-bubble`);
