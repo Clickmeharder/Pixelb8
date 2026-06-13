@@ -244,10 +244,11 @@ export class BaseWidgetModule {
 	}
 
 	setWidgetBubble(txt) {
-		const bubble = document.getElementById("bubble");
+		// Target the bubble specific to THIS instance
+		const bubble = document.getElementById(`${this.baseId}-bubble`);
 		if (!bubble) return;
 
-		// 1. Kill any overlapping timers running across instance frames
+		// 1. Kill any overlapping timers
 		if (this.bubbleTimeout) {
 			clearTimeout(this.bubbleTimeout);
 			this.bubbleTimeout = null;
