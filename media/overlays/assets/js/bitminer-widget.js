@@ -124,11 +124,14 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
 		if (overlayWrapper && !document.getElementById("miner-overlay-element")) {
 			const overlayEl = document.createElement("div");
 			overlayEl.id = "miner-overlay-element";
-			overlayEl.className = "p8-widget"; // Must have this class for positioning
+			overlayEl.className = "p8-widget"; 
 			overlayEl.style.position = "absolute";
 			
-			// ADD THIS: The widget needs its own canvas to draw on!
-			overlayEl.innerHTML = `<canvas id="miner-canvas"></canvas>`;
+			// IMPORTANT: Inject both the unique bubble AND the unique canvas here
+			overlayEl.innerHTML = `
+				<div id="miner-bubble" class="chat-bubble"></div>
+				<canvas id="miner-canvas"></canvas>
+			`;
 			
 			overlayWrapper.appendChild(overlayEl);
 		}
@@ -143,7 +146,31 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
 			controlContainer.appendChild(panelSection);
 		}
 	}
+	setWidgetBubble(txt) {
+		const bubble = document.getElementById("miner-bubble");
+		if (!bubble) return;
 
+		// Clear existing timer logic (copy-paste your existing logic)
+		if (this.bubbleTimeout) {
+			clearTimeout(this.bubbleTimeout);
+			this.bubbleTimeout = null;
+		}
+		if (bubble.dataset.timeoutId) {
+			clearTimeout(parseInt(bubble.dataset.timeoutId, 10));
+		}
+
+		bubble.textContent = txt;
+		bubble.classList.add("show");
+
+		const timerId = setTimeout(() => {
+			bubble.classList.remove("show");
+			if (this.bubbleTimeout === timerId) this.bubbleTimeout = null;
+			bubble.removeAttribute('data-timeout-id');
+		}, 3000);
+
+		this.bubbleTimeout = timerId;
+		bubble.dataset.timeoutId = timerId;
+	}
     bindEventListeners() {
         const controlContainer = document.getElementById("miner-widget-controls");
         if (!controlContainer) return;
