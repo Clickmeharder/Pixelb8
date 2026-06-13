@@ -779,7 +779,7 @@ function injectAllWidgetCommands() {
     const activeWidgets = [
         { name: "StreamPet", instance: window.streamPetEngine },
         { name: "EntropiaParser", instance: window.entropiaLogParser },
-        { name: "StreamJukebox", instance: window.streamJukeboxEngine }
+        { name: "StreamJukebox", instance: window.streamJukeboxEngine },
     ];
 
     console.log("📡 [Command Registry]: Starting automated injection scan...");
