@@ -757,6 +757,7 @@ async function init() {
         } catch (err) {
             console.error("❌ Failed to boot BitMiner Widget:", err);
         }
+	}
     // 2. Scan and inject any commands that were loaded during boot
     console.log("📡 [Command Registry]: Running boot scan...");
     injectAllWidgetCommands();
@@ -778,8 +779,7 @@ function injectAllWidgetCommands() {
     const activeWidgets = [
         { name: "StreamPet", instance: window.streamPetEngine },
         { name: "EntropiaParser", instance: window.entropiaLogParser },
-        { name: "StreamJukebox", instance: window.streamJukeboxEngine },
-		{ name: "BitMinerWidget", instance: window.streamBitMinerEngine }
+        { name: "StreamJukebox", instance: window.streamJukeboxEngine }
     ];
 
     console.log("📡 [Command Registry]: Starting automated injection scan...");
