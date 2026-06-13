@@ -282,7 +282,8 @@ const DYNAMIC_WIDGET_MAPS = [
     { idKey: "jukebox", settingsKey: "jukeboxWidgetEnabled" },
     { idKey: "entropia-widget", settingsKey: "entropiaWidgetEnabled" },
     { idKey: "timer-widget", settingsKey: "timerWidgetEnabled" },
-    { idKey: "pet-widget", settingsKey: "petWidgetEnabled" }
+    { idKey: "pet-widget", settingsKey: "petWidgetEnabled" },
+	{ idKey: "miner-widget", settingsKey: "bitminerWidgetEnabled" }
     // 🚀 To add future widgets, just drop a new line here! (e.g., { idKey: "goals-widget", settingsKey: "goalsWidgetEnabled" })
 ];
 const SETTINGS_SCHEMA = [
@@ -489,6 +490,30 @@ const SETTINGS_SCHEMA = [
                     }
                     
                     // Always sync up the visibility across windows instantly
+                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+                } 
+            },
+			{ 
+                label: "Enable BitMiner Widget", 
+                idKey: "miner-widget", 
+                get: () => (settings ? !!settings.bitminerWidgetEnabled : false), 
+                set: async (v) => {
+                    if (typeof settings !== 'undefined') settings.bitminerWidgetEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    
+                    // Hot-load bitminer-widget.js dynamically mid-session
+                    if (v && typeof window.streamBitMinerEngine === 'undefined') {
+                        try {
+                            const module = await import('./bitminer-widget.js');
+                            window.StreamBitMinerWidget = module.StreamBitMinerWidget;
+                            window.streamBitMinerEngine = new module.StreamBitMinerWidget();
+                            
+                            if (typeof injectAllWidgetCommands === 'function') injectAllWidgetCommands();
+                            console.log("⛏️ BitMiner Widget Hot-Loaded and Instantiated mid-session!");
+                        } catch (err) {
+                            console.error("❌ Failed to hot-load BitMiner Widget source:", err);
+                        }
+                    }
                     if (typeof syncAllToggleUI === "function") syncAllToggleUI();
                 } 
             }
@@ -723,7 +748,15 @@ async function init() {
             console.error("❌ Failed to boot Jukebox Module:", err);
         }
     }
-    
+	if (s.bitminerWidgetEnabled) {
+        try {
+            const module = await import('./bitminer-widget.js');
+            window.StreamBitMinerWidget = module.StreamBitMinerWidget;
+            window.streamBitMinerEngine = new module.StreamBitMinerWidget();
+            console.log("✅ BitMiner Widget Loaded on boot.");
+        } catch (err) {
+            console.error("❌ Failed to boot BitMiner Widget:", err);
+        }
     // 2. Scan and inject any commands that were loaded during boot
     console.log("📡 [Command Registry]: Running boot scan...");
     injectAllWidgetCommands();
@@ -745,7 +778,8 @@ function injectAllWidgetCommands() {
     const activeWidgets = [
         { name: "StreamPet", instance: window.streamPetEngine },
         { name: "EntropiaParser", instance: window.entropiaLogParser },
-        { name: "StreamJukebox", instance: window.streamJukeboxEngine }
+        { name: "StreamJukebox", instance: window.streamJukeboxEngine },
+		{ name: "BitMinerWidget", instance: window.streamBitMinerEngine }
     ];
 
     console.log("📡 [Command Registry]: Starting automated injection scan...");
