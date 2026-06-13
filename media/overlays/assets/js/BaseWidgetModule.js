@@ -74,8 +74,10 @@ export class BaseWidgetModule {
 			this.overlayId = `${this.baseId}-overlay`;
 			this.controlId = `${this.baseId}-controls`;
 
-			this.canvas = document.getElementById("companionCanvas");
-			if (this.canvas) this.ctx = this.canvas.getContext("2d");
+			this.canvas = document.getElementById(`${this.baseId}-canvas`);
+			if (this.canvas) {
+				this.ctx = this.canvas.getContext("2d");
+			}
 
 			this.registry = createDefaultWidgetRegistry();
 			this.state = createDefaultWidgetState();
@@ -174,26 +176,31 @@ export class BaseWidgetModule {
 	// INTERFACE BINDING & EVENT DISPATCH ENGINES
 	// ========================================================================
 	injectUI() {
-        // 1. Mount Overlay Viewport
-        const overlayWrapper = document.getElementById("overlay-wrapper");
-        if (overlayWrapper && !document.getElementById(this.overlayId)) {
-            const overlayEl = document.createElement("div");
-            overlayEl.id = this.overlayId;
-            overlayEl.className = "p8-widget"; // Added class for your CSS system
-            overlayEl.style.position = "absolute";
-            overlayWrapper.appendChild(overlayEl);
-        }
+		// 1. Mount Overlay Viewport
+		const overlayWrapper = document.getElementById("overlay-wrapper");
+		if (overlayWrapper && !document.getElementById(this.overlayId)) {
+			const overlayEl = document.createElement("div");
+			overlayEl.id = this.overlayId;
+			overlayEl.className = "p8-widget"; // Crucial for your CSS positioning system
+			overlayEl.style.position = "absolute";
+			
+			// Inject a UNIQUE canvas for this widget instance
+			// We use baseId so every widget has its own surface
+			overlayEl.innerHTML = `<canvas id="${this.baseId}-canvas"></canvas>`;
+			
+			overlayWrapper.appendChild(overlayEl);
+		}
 
-        // 2. Mount Control Panel
-        const controlWrapper = document.getElementById("widget-control-wrapper");
-        if (controlWrapper && !document.getElementById(this.controlId)) {
-            const panelSection = document.createElement("div");
-            panelSection.id = this.controlId;
-            panelSection.className = "collapsible-section collapsed";
-            panelSection.innerHTML = this.constructor.controlsTemplate;
-            controlWrapper.appendChild(panelSection);
-        }
-    }
+		// 2. Mount Control Panel
+		const controlWrapper = document.getElementById("widget-control-wrapper");
+		if (controlWrapper && !document.getElementById(this.controlId)) {
+			const panelSection = document.createElement("div");
+			panelSection.id = this.controlId;
+			panelSection.className = "collapsible-section collapsed";
+			panelSection.innerHTML = this.constructor.controlsTemplate;
+			controlWrapper.appendChild(panelSection);
+		}
+	}
 
 	bindEventListeners() {
 		const panelContainer = document.getElementById(this.controlId);
