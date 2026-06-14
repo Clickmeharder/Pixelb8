@@ -171,12 +171,13 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
 		this.bubbleTimeout = timerId;
 		bubble.dataset.timeoutId = timerId;
 	}
-    bindEventListeners() {
+	bindEventListeners() {
         const controlContainer = document.getElementById("miner-widget-controls");
         if (!controlContainer) return;
 
         controlContainer.addEventListener("change", (e) => {
-            if (e.target.id === "minerHideBorderToggle") {
+            // Target any checkbox inside your panel cleanly
+            if (e.target.type === "checkbox") {
                 this.state.hideBorder = e.target.checked;
                 this.applyVisibilityStates();
                 this.saveData();
@@ -274,3 +275,4 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
         this.ctx.fillRect(15, 52, (this.state.heatLevel / 100) * 120, 6);
     }
 }
+localStorage.removeItem('pixelb8_widget_bit_miner_system'); window.location.reload();
