@@ -681,6 +681,7 @@ console.warn = function(...args) {
 
 
 // Add 'async' to your init declaration so we can use 'await' inside it
+/* 
 async function init() {
     applyTheme(registry.active);
     const params = new URLSearchParams(window.location.search);
@@ -761,11 +762,69 @@ async function init() {
     
     console.log("🚀ttvoverlayapp.js version 0.112 finished loading");
 }
+ */
+async function init() {
+    applyTheme(registry.active);
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.get("token") && params.get("channel")) {
+        document.body.style.backgroundColor = "transparent";
+        document.body.style.backgroundImage = "none";
+        document.getElementById("overlay-wrapper").style.display = "block";
+        setEditMode(false);
+        startTwitch(params.get("channel"), params.get("token"));
+    } else {
+        document.body.style.backgroundColor = "#1a1a1a";
+        document.body.style.backgroundImage = "none";
+        document.getElementById("setup-interface").style.display = "block";
+        checkTwitchAuth();
+    }
+    
+    // Core Layout & Registry Loading
+    loadPositions();
+    renderSettingsWindow();
+    renderThemeControls();
+    
+    const s = typeof settings !== 'undefined' ? settings : {};
+
+    // =========================================================================
+    // ⚙️ SYSTEM EXTENSION ENGINE CASCADE
+    // =========================================================================
+    // Hand off ALL boot loading routines to the engine!
+    if (typeof WidgetEngine !== 'undefined') {
+        await WidgetEngine.initSavedWidgets(s);
+    }
+
+    // 2. Scan and inject any commands that were loaded during boot
+    console.log("📡 [Command Registry]: Running boot scan...");
+    injectAllWidgetCommands();
+    
+    // Populate registry array caches for rewards and bits
+    renderRewardsList(); 
+    populateCustomDropdowns();
+    initTimerEngine();
+    
+    // Bind all event listeners to the DOM and sync UI states
+    bindEvents();
+    if (typeof syncAllToggleUI === 'function') {
+        syncAllToggleUI();
+    }
+    
+    console.log("🚀 ttvoverlayapp.js version 0.112 finished loading");
+}
+
 function injectAllWidgetCommands() {
+    // 🔍 Read instances from both legacy window tags AND your modern engine tracks
     const activeWidgets = [
         { name: "StreamPet", instance: window.streamPetEngine },
         { name: "EntropiaParser", instance: window.entropiaLogParser },
         { name: "StreamJukebox", instance: window.streamJukeboxEngine },
+        
+        // ⚙️ Safely scan your new engine instances array if the engine is initialized
+        { 
+            name: "BitMiner (Engine)", 
+            instance: (typeof WidgetEngine !== 'undefined' && WidgetEngine.instances) ? WidgetEngine.instances.bitminer : null 
+        }
     ];
 
     console.log("📡 [Command Registry]: Starting automated injection scan...");

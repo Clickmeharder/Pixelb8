@@ -1,20 +1,15 @@
-/**
- * Global OBS-Safe stream widget Engine
- * 
- * Safe for multiple widgets on a single monolithic canvas.
- */
- console.log(" [Pixelb8 Stream Widget Engine]: initializing...");
+console.log(" [Pixelb8 Stream Widget Engine]: initializing...");
  
 /**
  * ============================================================================
- * PIXELB8 ECOSYSTEM: WIDGET ENGINE (Phase 1 - Co-Exist Mode)
- * Concern: Manages execution lifecycles for modern BaseWidgetModule components.
+ * PIXELB8 ECOSYSTEM: WIDGET ENGINE (Phase 1.5 - Hybrid Transition Bridge)
+ * Concern: Manages modern module lifecycles while bridging legacy boot components.
  * ============================================================================
  */
 
 export const WidgetEngine = {
     instances: {
-        bitminer: null
+        bitminer: null // Modern tracker
     },
 
     registryMap: {
@@ -26,7 +21,7 @@ export const WidgetEngine = {
     },
 
     /**
-     * Spawns or dismantles extended modules without touching your legacy items
+     * Spawns or dismantles extended modules
      */
     async toggleWidget(idKey, enable) {
         const config = this.registryMap[idKey];
@@ -37,8 +32,6 @@ export const WidgetEngine = {
                 try {
                     const module = await import(config.path);
                     const WidgetClass = module[config.className];
-                    
-                    // This creates the instance, triggering injectUI() and loadData() automatically
                     this.instances[config.instanceKey] = new WidgetClass();
                     
                     if (typeof window.injectAllWidgetCommands === 'function') {
@@ -62,34 +55,55 @@ export const WidgetEngine = {
     },
 
     /**
-     * Restores active state targets during initial app launch
+     * Handles the entire startup loading cascade for both modern and legacy tools
      */
-    initSavedWidgets(settings) {
+    async initSavedWidgets(settings) {
         if (!settings) return;
-        // Boot up only the bitminer through the engine pass for Phase 1
+
+        // 1. Boot up the modern BaseWidgetModule apps
         if (settings.bitminerWidgetEnabled) {
-            this.toggleWidget("miner-widget", true);
+            await this.toggleWidget("miner-widget", true);
+        }
+
+        // =========================================================================
+        // 🏛️ LEGACY COMPATIBILITY LAYER (To be refactored into classes later)
+        // =========================================================================
+        
+        // 🐾 Legacy Pet Widget Boot Pass
+        if (settings.petWidgetEnabled) {
+            try {
+                const module = await import('./pet-widget.js');
+                window.StreamPet = module.StreamPet;
+                window.streamPetEngine = new module.StreamPet();
+                console.log("⚙️ [WidgetEngine - Legacy Bridge]: Pet Widget attached to global scope.");
+            } catch (err) {
+                console.error("❌ [Engine Legacy Boot Failure] Pet Widget:", err);
+            }
+        }
+
+        // 🎯 Legacy Entropia Widget Boot Pass
+        if (settings.entropiaWidgetEnabled) {
+            try {
+                // Using your exact initialization file target path
+                const module = await import('./entropiauniverse-widget.js');
+                window.EntropiaWidget = module.EntropiaWidget;
+                window.entropiaLogParser = new module.EntropiaWidget();
+                console.log("⚙️ [WidgetEngine - Legacy Bridge]: Entropia Tracker attached to global scope.");
+            } catch (err) {
+                console.error("❌ [Engine Legacy Boot Failure] Entropia:", err);
+            }
+        }
+
+        // 🎸 Legacy Jukebox Boot Pass
+        if (settings.jukeboxWidgetEnabled) {
+            try {
+                const module = await import('./jukebox.js');
+                window.StreamJukebox = module.StreamJukebox;
+                window.streamJukeboxEngine = new module.StreamJukebox();
+                console.log("⚙️ [WidgetEngine - Legacy Bridge]: Jukebox attached to global scope.");
+            } catch (err) {
+                console.error("❌ [Engine Legacy Boot Failure] Jukebox:", err);
+            }
         }
     }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// =========================================================================
-// END OF HELPERFUNCTIONS FILE
-// =========================================================================
-console.log(" [Pixelb8 Stream Widget Engine]: Initialized.");
