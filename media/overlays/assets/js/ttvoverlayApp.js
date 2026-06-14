@@ -680,89 +680,7 @@ console.warn = function(...args) {
 
 
 
-// Add 'async' to your init declaration so we can use 'await' inside it
-/* 
-async function init() {
-    applyTheme(registry.active);
-    const params = new URLSearchParams(window.location.search);
-    
-    if (params.get("token") && params.get("channel")) {
-        document.body.style.backgroundColor = "transparent";
-        document.body.style.backgroundImage = "none";
-        document.getElementById("overlay-wrapper").style.display = "block";
-        setEditMode(false);
-        startTwitch(params.get("channel"), params.get("token"));
-    } else {
-        document.body.style.backgroundColor = "#1a1a1a";
-        document.body.style.backgroundImage = "none";
-        document.getElementById("setup-interface").style.display = "block";
-        checkTwitchAuth();
-    }
-    
-    // Core Layout & Registry Loading
-    loadPositions();
-    renderSettingsWindow();
-    renderThemeControls();
-    
-    const s = typeof settings !== 'undefined' ? settings : {};
 
-    // =========================================================================
-    // ⚙️ INITIAL BOOT LAZY-LOADING (Only runs if enabled on start)
-    // =========================================================================
-	// 🐾 Dynamic Pet Widget Fetch on boot
-    if (s.petWidgetEnabled) {
-        try {
-            const module = await import('./pet-widget.js');
-            window.StreamPet = module.StreamPet;
-            window.streamPetEngine = new module.StreamPet();
-            console.log("✅ Pet Widget Loaded on boot.");
-        } catch (err) {
-            console.error("❌ Failed to boot Pet Widget:", err);
-        }
-    }
-    if (s.entropiaWidgetEnabled) {
-        try {
-            const module = await import('./entropiauniverse-widget.js');
-            window.EntropiaWidget = module.EntropiaWidget;
-            window.entropiaLogParser = new module.EntropiaWidget();
-            console.log("✅ Entropia Widget Loaded on boot.");
-        } catch (err) {
-            console.error("❌ Failed to boot Entropia Tracker:", err);
-        }
-    }
-
-    if (s.jukeboxWidgetEnabled) {
-        try {
-            const module = await import('./jukebox.js');
-            window.StreamJukebox = module.StreamJukebox;
-            window.streamJukeboxEngine = new module.StreamJukebox();
-            console.log("✅ Jukebox Loaded on boot.");
-        } catch (err) {
-            console.error("❌ Failed to boot Jukebox Module:", err);
-        }
-    }
-// Handing off your bitminer to the isolated engine pass!
-    if (typeof WidgetEngine !== 'undefined') {
-        WidgetEngine.initSavedWidgets(s);
-    }
-    // 2. Scan and inject any commands that were loaded during boot
-    console.log("📡 [Command Registry]: Running boot scan...");
-    injectAllWidgetCommands();
-    
-    // Populate registry array caches for rewards and bits
-    renderRewardsList(); 
-    populateCustomDropdowns();
-    initTimerEngine();
-    
-    // Bind all event listeners to the DOM and sync UI states
-    bindEvents();
-    if (typeof syncAllToggleUI === 'function') {
-        syncAllToggleUI();
-    }
-    
-    console.log("🚀ttvoverlayapp.js version 0.112 finished loading");
-}
- */
 async function init() {
     applyTheme(registry.active);
     const params = new URLSearchParams(window.location.search);
@@ -871,6 +789,12 @@ function injectWidgetCommands(widgetInstance) {
     }
 }
 
+
+
+// ==========================================
+// --- Theme System ---
+// ==========================================
+
 function setEditMode(state) {
     isEditMode = state;
     document.body.classList.toggle('edit-mode', isEditMode);
@@ -914,11 +838,6 @@ function applyTheme(name) {
     localStorage.setItem('p8_registry', JSON.stringify(registry));
 }
 
-
-
-// ==========================================
-// --- REWARDS LIST GENERATION SYSTEM ---
-// ==========================================
 function renderThemeControls() {
     const container = document.getElementById('variable-controls');
     if (!container) return;
@@ -1237,7 +1156,10 @@ function renderSettingsWindow() {
 
     syncAllToggleUI();
 }
-// --- EVENT BINDING ---
+
+// ==========================================
+// --- Alert System ---
+// ==========================================
 // --- CENTRALIZED ALERT PIPELINE ENGINE ---
 // Handles formatting, visual injections, animations, and chat confirmation outputs
 function triggerAlertPipeline(reward, user, cost, message) {
