@@ -1,8 +1,14 @@
+
 /**
- * Global OBS-Safe High-Density Custom Dropdown Engine
- * Pure functional layout utility. Resolves native select clipping bugs in OBS Studio.
- * Safe for multiple widgets on a single monolithic canvas.
+ * Helper Functions script
+ * 
+ * 
  */
+ 
+ 
+ 
+ 
+ 
  console.log(" [Helper Functions]: Initializing initializing...");
  
 // --- color helpers ---
@@ -355,6 +361,82 @@ function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
     });
 }
 
+// ==========================================
+// 🛠️ emergency reset functions
+// ==========================================
+/**
+ * Universally deletes a setting key from both the monolithic settings wrapper 
+ * and independent localStorage entries, then syncs the active UI state.
+ * @param {string} key - The precise settings property name or independent localStorage key to remove.
+ * @param {boolean} [shouldReload=false] - Optional flag to force a hard reload after wiping.
+ */
+function deleteSetting(key, shouldReload = false) {
+    let wasDeleted = false;
+
+    // 1. Target the monolithic grouped settings object if it exists
+    if (localStorage.getItem('settings')) {
+        try {
+            let s = JSON.parse(localStorage.getItem('settings'));
+            
+            // Check if the property actively exists in the schema object
+            if (s && s.hasOwnProperty(key)) {
+                delete s[key];
+                localStorage.setItem('settings', JSON.stringify(s));
+                
+                // Mirror the deletion to your active top-level runtime settings variable
+                if (typeof settings !== 'undefined' && settings.hasOwnProperty(key)) {
+                    delete settings[key];
+                }
+                wasDeleted = true;
+                console.log(`[Storage] Cleaned property "${key}" out of the monolithic settings wrapper.`);
+            }
+        } catch (e) {
+            console.error(`[Storage Error] Failed to parse settings object while deleting key "${key}":`, e);
+        }
+    }
+
+    // 2. Fall back to checking independent localStorage cache keys (like legacy elements or positions)
+    if (localStorage.getItem(key) !== null) {
+        localStorage.removeItem(key);
+        wasDeleted = true;
+        console.log(`[Storage] Removed independent key entry "${key}" from localStorage directly.`);
+    }
+
+    // 3. Clear any active matching top-level global runtime variables if they exist
+    if (window.hasOwnProperty(key)) {
+        window[key] = undefined;
+        wasDeleted = true;
+    }
+
+    // 4. Determine post-execution routing flow
+    if (wasDeleted) {
+        if (shouldReload) {
+            console.log(`[Storage] Reload requested. Refreshing page wrapper context...`);
+            location.reload();
+            return;
+        }
+
+        // Live update the application UI context states without requiring a reload
+        if (typeof loadPositions === "function") loadPositions();
+        if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+        
+        console.log(`[Storage] Hot-sync complete. Element attributes updated across active layout components.`);
+    } else {
+        console.warn(`[Storage Wrapper] Specified key "${key}" was not located in active storage contexts.`);
+    }
+}
+
+//deleteSetting('chatHeight'); 
+// Instantly deletes it from storage and snaps the feed back to its default 175px CSS floor safely!
+
+//deleteSetting('p8_pos_chat-widget', true); 
+// Erases the manual drag tracking position memory and reloads the window to pop it back to 400px/20px baseline rules.
+async function systemReset() {
+    if(await p8Confirm("This will logout and reset your local settings. Proceed?")) {
+        localStorage.clear();
+        window.location.href = FULL_REDIRECT;
+    }
+}
 
 
 
