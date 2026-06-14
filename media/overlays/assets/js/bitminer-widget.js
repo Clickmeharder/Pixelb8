@@ -203,19 +203,6 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
         });
     }
 
-	applyVisibilityStates() {
-        const overlayEl = document.getElementById("miner-overlay-element");
-        if (!overlayEl) return;
-        
-        if (this.state.hideBorder) {
-            overlayEl.style.border = "none";
-            overlayEl.style.background = "transparent";
-        } else {
-            // Clear inline styles so the CSS file's var(--accent) takes over!
-            overlayEl.style.border = "";
-            overlayEl.style.background = "";
-        }
-    }
     loadData() {
         super.loadData();
         const borderToggle = document.getElementById("minerHideBorderToggle");
