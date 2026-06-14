@@ -227,18 +227,7 @@ if (!registry.bits) {
         }
     };
 }
-// Add to your registry initialization in ttvoverlayApp.js
-if (!registry.timers) {
-    registry.timers = {
-        defaults: {
-            labelFontSize: "14px",
-            labelFontWeight: "600",
-            timerFontSize: "24px",
-            timerFontColor: "#ffffff",
-            showMode: "always" // Options: "always", "counting", "never"
-        }
-    };
-}
+
 const styleConfig = [
     { 
         id: 'font', 
@@ -280,8 +269,7 @@ import { WidgetEngine } from './widgetEngine.js';
 // =========================================================================
 // --- CONFIGURATION MAPS & STRUCTS ---
 // =========================================================================
-
-// 🌐 GLOBAL CORE CONFIGURATION LAYER (Single Source of Truth)
+//
 const DYNAMIC_WIDGET_MAPS = [
     { idKey: "jukebox", settingsKey: "jukeboxWidgetEnabled" },
     { idKey: "entropia-widget", settingsKey: "entropiaWidgetEnabled" },
@@ -290,6 +278,128 @@ const DYNAMIC_WIDGET_MAPS = [
 	{ idKey: "miner-widget", settingsKey: "bitminerWidgetEnabled" }
     // 🚀 To add future widgets, just drop a new line here! (e.g., { idKey: "goals-widget", settingsKey: "goalsWidgetEnabled" })
 ];
+
+const PANEL_NAVIGATION_MAPS = [
+    { 
+        triggerId: "ctx-open-editor", 
+        targetId: "style-editor", 
+        onOpen: () => { if (typeof renderThemeList === "function") renderThemeList(); } 
+    },
+    { 
+        triggerId: "quick-theme-btn", 
+        targetId: "style-editor", 
+        onOpen: () => { if (typeof renderThemeList === "function") renderThemeList(); } 
+    },
+    { 
+        triggerId: "ctx-open-rewards", 
+        targetId: "rewards-manager", 
+        onOpen: () => { 
+            if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); 
+            if (typeof renderRewardsList === "function") renderRewardsList(); 
+        } 
+    },
+    { 
+        triggerId: "ctx-open-settings", 
+        targetId: "settings-window", 
+        onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); } 
+    },
+    // REFACTORED IN: Bits Manager context trigger
+    { 
+        triggerId: "ctx-open-bits", 
+        targetId: "bit-manager",
+        onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); }
+    },
+    // REFACTORED IN: Widgets Manager context trigger
+    { 
+        triggerId: "ctx-open-widgets", 
+        targetId: "widgets-manager" 
+    }
+];
+const BOOLEAN_TOGGLE_MAPS = [
+    // --- MASTER ALERTS ---
+    { 
+        id: "settings-toggle-master-alerts", type: "change", valuePath: "checked", invert: true, 
+        assignTo: (val) => { alertHidden = val; if (typeof settings !== 'undefined') settings.alertHidden = val; }, 
+        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
+    },
+    { 
+        id: "mgr-toggle-alert-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { alertHidden = !alertHidden; if (typeof settings !== 'undefined') settings.alertHidden = alertHidden; }, 
+        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
+    },
+
+    // --- REWARDS MANAGER CORES ---
+    { 
+        id: "mgr-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { 
+            if (typeof rewardsEnabled !== 'undefined') {
+                rewardsEnabled = !rewardsEnabled; 
+                if (typeof settings !== 'undefined') settings.rewardsEnabled = rewardsEnabled; 
+            } else if (typeof settings !== 'undefined') {
+                settings.rewardsEnabled = !settings.rewardsEnabled;
+            }
+        }, 
+        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
+    },
+
+    // --- BITS MANAGER CORES ---
+    { 
+        id: "mgr-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
+        assignTo: () => { 
+            if (typeof bitsEnabled !== 'undefined') {
+                bitsEnabled = !bitsEnabled; 
+                if (typeof settings !== 'undefined') settings.bitsEnabled = bitsEnabled; 
+            } else if (typeof settings !== 'undefined') {
+                settings.bitsEnabled = !settings.bitsEnabled;
+            }
+        }, 
+        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
+    }
+];// Straight utility mapping dictionary for clean event routing execution pipelines
+const SIMPLE_CLICK_MAPS = [
+    { id: "ctx-reset",     handler: () => systemReset() },
+    { id: "logout-btn-ui", handler: () => systemReset() },
+    { id: "ctx-lock",      handler: () => setEditMode(!isEditMode) }
+];
+const DRAGGABLE_WINDOWS_CONFIG = [
+    { winId: "bit-manager",           headerId: "bit-manager-header" },
+    { winId: "settings-window",       headerId: "settings-manager-header" },
+    { winId: "widgets-manager",       headerId: "widgets-manager-header" }
+];
+
+// Registry mapping overlay window elements to all actions that trigger their close event
+const WINDOW_CLOSE_MAPS = [
+    { win: "rewards-manager", triggers: ["close-rewards-btn", "close-rewards-top-btn"] },
+    { win: "bit-manager",     triggers: ["close-bit-manager-btn", "close-bits-top-btn"] },
+    { win: "settings-window",  triggers: ["close-settings-manager-btn", "close-settings-top-btn"] },
+    { win: "style-editor",     triggers: ["close-editor-btn", "close-editor-top-btn"] },
+	{ win: "widgets-manager",     triggers: [//"close-widgets-manager-btn",
+	"close-widgets-top-btn"] }
+];
+// Configuration layout matrix for the Custom Select dropdown boxes
+const DROPDOWN_CONFIGS = [
+    { display: "display-bit-text-in-anim",   options: "options-bit-text-in-anim",   list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
+    { display: "display-bit-text-out-anim",  options: "options-bit-text-out-anim",  list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] },
+    { display: "display-bit-img-in-anim",    options: "options-bit-img-in-anim",    list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
+    { display: "display-bit-img-out-anim",   options: "options-bit-img-out-anim",   list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] }
+];
+// Structural array mapping state variables to element inputs and persistent targets
+const REWARD_SELECTS_REGISTRY = [
+    { id: "reward-text-in-anim",  def: "none" },
+    { id: "reward-text-out-anim", def: "none" },
+    { id: "reward-img-in-anim",   def: "none" },
+    { id: "reward-img-out-anim",  def: "none" },
+    { id: "reward-font-weight",   def: "bold" },
+    { id: "reward-img-mode",      def: "loop" }
+];
+const REWARD_INPUTS_REGISTRY = [
+    { id: "reward-font-size",      type: "text" },
+    { id: "reward-text-outline",   type: "text" },
+    { id: "reward-img-size",       type: "text" },
+    { id: "reward-text-duration",  type: "text" },
+    { id: "reward-img-duration",   type: "text" }
+];
+
 const SETTINGS_SCHEMA = [
     {
         groupName: "🔔 Alert Core Management",
@@ -327,7 +437,6 @@ const SETTINGS_SCHEMA = [
             }
         ]
     },
-
     {
         groupName: "💬 Chat & UI Displays",
         items: [
@@ -517,148 +626,54 @@ const SETTINGS_SCHEMA = [
     }
 	
 ];
-// Maps trigger elements to their target interface panels and optional callback lifecycle hooks
-const PANEL_NAVIGATION_MAPS = [
-    { 
-        triggerId: "ctx-open-editor", 
-        targetId: "style-editor", 
-        onOpen: () => { if (typeof renderThemeList === "function") renderThemeList(); } 
-    },
-    { 
-        triggerId: "quick-theme-btn", 
-        targetId: "style-editor", 
-        onOpen: () => { if (typeof renderThemeList === "function") renderThemeList(); } 
-    },
-    { 
-        triggerId: "ctx-open-rewards", 
-        targetId: "rewards-manager", 
-        onOpen: () => { 
-            if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); 
-            if (typeof renderRewardsList === "function") renderRewardsList(); 
-        } 
-    },
-    { 
-        triggerId: "ctx-open-settings", 
-        targetId: "settings-window", 
-        onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); } 
-    },
-    // REFACTORED IN: Bits Manager context trigger
-    { 
-        triggerId: "ctx-open-bits", 
-        targetId: "bit-manager",
-        onOpen: () => { if (typeof updateAllBadgesUI === "function") updateAllBadgesUI(); }
-    },
-    // REFACTORED IN: Widgets Manager context trigger
-    { 
-        triggerId: "ctx-open-widgets", 
-        targetId: "widgets-manager" 
-    }
-];
-// Maps HTML inputs/buttons to reactive parameters, executing automated mutations and context syncs
-const BOOLEAN_TOGGLE_MAPS = [
-    // --- MASTER ALERTS ---
-    { 
-        id: "settings-toggle-master-alerts", type: "change", valuePath: "checked", invert: true, 
-        assignTo: (val) => { alertHidden = val; if (typeof settings !== 'undefined') settings.alertHidden = val; }, 
-        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
-    },
-    { 
-        id: "mgr-toggle-alert-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { alertHidden = !alertHidden; if (typeof settings !== 'undefined') settings.alertHidden = alertHidden; }, 
-        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
-    },
-
-    // --- REWARDS MANAGER CORES ---
-    { 
-        id: "mgr-toggle-rewards-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { 
-            if (typeof rewardsEnabled !== 'undefined') {
-                rewardsEnabled = !rewardsEnabled; 
-                if (typeof settings !== 'undefined') settings.rewardsEnabled = rewardsEnabled; 
-            } else if (typeof settings !== 'undefined') {
-                settings.rewardsEnabled = !settings.rewardsEnabled;
-            }
-        }, 
-        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
-    },
-
-    // --- BITS MANAGER CORES ---
-    { 
-        id: "mgr-toggle-bits-btn", type: "click", valuePath: null, invert: false, 
-        assignTo: () => { 
-            if (typeof bitsEnabled !== 'undefined') {
-                bitsEnabled = !bitsEnabled; 
-                if (typeof settings !== 'undefined') settings.bitsEnabled = bitsEnabled; 
-            } else if (typeof settings !== 'undefined') {
-                settings.bitsEnabled = !settings.bitsEnabled;
-            }
-        }, 
-        onSync: () => { if (typeof saveSettings === "function") saveSettings(); if (typeof syncAllToggleUI === "function") syncAllToggleUI(); } 
-    }
-];// Straight utility mapping dictionary for clean event routing execution pipelines
-const SIMPLE_CLICK_MAPS = [
-    { id: "ctx-reset",     handler: () => systemReset() },
-    { id: "logout-btn-ui", handler: () => systemReset() },
-    { id: "ctx-lock",      handler: () => setEditMode(!isEditMode) }
-];
-// Configuration layout for elements requiring dynamic dragging parameters
-const DRAGGABLE_WINDOWS_CONFIG = [
-    { winId: "bit-manager",           headerId: "bit-manager-header" },
-    { winId: "settings-window",       headerId: "settings-manager-header" },
-    { winId: "widgets-manager",       headerId: "widgets-manager-header" }
-];
-
-// Data registries for the options blocks
-// State engine to track actively selected values since we don't have standard .value anymore
-let customSelectValues = {
-    "reward-text-in-anim": "none",
-    "reward-text-out-anim": "none",
-    "reward-img-in-anim": "none",
-    "reward-img-out-anim": "none",
-    "reward-font-weight": "bold",
-    "reward-img-mode": "loop",
-    // Bit Cheer Manager State Fallbacks
-    "bit-tier-selector": "1",
-    "bit-text-in-anim": "none",
-    "bit-text-out-anim": "none",
-    "bit-img-in-anim": "none",
-    "bit-img-out-anim": "none"
+//================================================
+// --- OBS CONSOLE BRIDGE ---
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
+console.log = function(...args) {
+    originalLog.apply(console, args);
+    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+    displayConsoleMessage("DEBUG", msg);
 };
+console.error = function(...args) {
+    originalError.apply(console, args);
+    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+    displayConsoleMessage("ERROR", msg);
+};
+console.warn = function(...args) {
+    originalWarn.apply(console, args);
+    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+    displayConsoleMessage("WARN", msg);
+};
+function displayConsoleMessage(user, message) {
+    if (!consoleMessages) return;
+    const consoleContainer = document.getElementById("chat-feed");
+    if (!consoleContainer) return;
 
-// Registry mapping overlay window elements to all actions that trigger their close event
-const WINDOW_CLOSE_MAPS = [
-    { win: "rewards-manager", triggers: ["close-rewards-btn", "close-rewards-top-btn"] },
-    { win: "bit-manager",     triggers: ["close-bit-manager-btn", "close-bits-top-btn"] },
-    { win: "settings-window",  triggers: ["close-settings-manager-btn", "close-settings-top-btn"] },
-    { win: "style-editor",     triggers: ["close-editor-btn", "close-editor-top-btn"] },
-	{ win: "widgets-manager",     triggers: [//"close-widgets-manager-btn",
-	"close-widgets-top-btn"] }
-];
-// Configuration layout matrix for the Custom Select dropdown boxes
-const DROPDOWN_CONFIGS = [
-    { display: "display-bit-text-in-anim",   options: "options-bit-text-in-anim",   list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
-    { display: "display-bit-text-out-anim",  options: "options-bit-text-out-anim",  list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] },
-    { display: "display-bit-img-in-anim",    options: "options-bit-img-in-anim",    list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
-    { display: "display-bit-img-out-anim",   options: "options-bit-img-out-anim",   list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] }
-];
-// Structural array mapping state variables to element inputs and persistent targets
-const REWARD_SELECTS_REGISTRY = [
-    { id: "reward-text-in-anim",  def: "none" },
-    { id: "reward-text-out-anim", def: "none" },
-    { id: "reward-img-in-anim",   def: "none" },
-    { id: "reward-img-out-anim",  def: "none" },
-    { id: "reward-font-weight",   def: "bold" },
-    { id: "reward-img-mode",      def: "loop" }
-];
-const REWARD_INPUTS_REGISTRY = [
-    { id: "reward-font-size",      type: "text" },
-    { id: "reward-text-outline",   type: "text" },
-    { id: "reward-img-size",       type: "text" },
-    { id: "reward-text-duration",  type: "text" },
-    { id: "reward-img-duration",   type: "text" }
-];
+    const consoleMessage = document.createElement("div");
+    consoleMessage.classList.add("consoleMessage");
 
+    const usernameSpan = document.createElement("span");
+    usernameSpan.classList.add("consoleUser");
+    usernameSpan.innerHTML = `${user}: `;
 
+    const messageSpan = document.createElement("span");
+    messageSpan.classList.add("consoleMessageText");
+    messageSpan.innerHTML = message;
+
+    consoleMessage.appendChild(usernameSpan);
+    consoleMessage.appendChild(messageSpan);
+    consoleContainer.appendChild(consoleMessage);
+
+    setTimeout(() => { consoleMessage.style.opacity = '0'; }, 15000);
+    setTimeout(() => { consoleMessage.remove(); }, 15500);
+
+    if (consoleContainer.children.length > 5) {
+        consoleContainer.removeChild(consoleContainer.firstChild);
+    }
+}
+//=================================================
 
 
 

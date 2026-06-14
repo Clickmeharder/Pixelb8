@@ -5,59 +5,6 @@
  * 
  */
  
-// --- OBS CONSOLE BRIDGE ---
-const originalLog = console.log;
-const originalError = console.error;
-const originalWarn = console.warn;
-
-console.log = function(...args) {
-    originalLog.apply(console, args);
-    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
-    displayConsoleMessage("DEBUG", msg);
-};
-
-console.error = function(...args) {
-    originalError.apply(console, args);
-    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
-    displayConsoleMessage("ERROR", msg);
-};
-
-console.warn = function(...args) {
-    originalWarn.apply(console, args);
-    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
-    displayConsoleMessage("WARN", msg);
-};
-
-
-
-function displayConsoleMessage(user, message) {
-    if (!consoleMessages) return;
-    const consoleContainer = document.getElementById("chat-feed");
-    if (!consoleContainer) return;
-
-    const consoleMessage = document.createElement("div");
-    consoleMessage.classList.add("consoleMessage");
-
-    const usernameSpan = document.createElement("span");
-    usernameSpan.classList.add("consoleUser");
-    usernameSpan.innerHTML = `${user}: `;
-
-    const messageSpan = document.createElement("span");
-    messageSpan.classList.add("consoleMessageText");
-    messageSpan.innerHTML = message;
-
-    consoleMessage.appendChild(usernameSpan);
-    consoleMessage.appendChild(messageSpan);
-    consoleContainer.appendChild(consoleMessage);
-
-    setTimeout(() => { consoleMessage.style.opacity = '0'; }, 15000);
-    setTimeout(() => { consoleMessage.remove(); }, 15500);
-
-    if (consoleContainer.children.length > 5) {
-        consoleContainer.removeChild(consoleContainer.firstChild);
-    }
-}
-
  
  
  console.log(" [Helper Functions]: Initializing initializing...");
@@ -120,6 +67,21 @@ const AVAILABLE_OUT_ANIMATIONS = ["none", "fadeOut", "bounceOut", "zoomOut", "sl
     "bit-img-out-anim": AVAILABLE_OUT_ANIMATIONS
 };
  // Programmatic getter and setter wrappers to maintain backward compatibility with your save actions
+
+let customSelectValues = {
+    "reward-text-in-anim": "none",
+    "reward-text-out-anim": "none",
+    "reward-img-in-anim": "none",
+    "reward-img-out-anim": "none",
+    "reward-font-weight": "bold",
+    "reward-img-mode": "loop",
+    // Bit Cheer Manager State Fallbacks
+    "bit-tier-selector": "1",
+    "bit-text-in-anim": "none",
+    "bit-text-out-anim": "none",
+    "bit-img-in-anim": "none",
+    "bit-img-out-anim": "none"
+};
 function getCustomSelectValue(id) {
     return customSelectValues[id];
 }
@@ -779,6 +741,17 @@ function renderActiveTimersUI() {
 
         if (listContainer) listContainer.appendChild(row);
     });
+}
+if (!registry.timers) {
+    registry.timers = {
+        defaults: {
+            labelFontSize: "14px",
+            labelFontWeight: "600",
+            timerFontSize: "24px",
+            timerFontColor: "#ffffff",
+            showMode: "always" // Options: "always", "counting", "never"
+        }
+    };
 }
 document.addEventListener("DOMContentLoaded", () => {
     initTimerEngine();
