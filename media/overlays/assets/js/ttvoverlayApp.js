@@ -655,9 +655,6 @@ function displayConsoleMessage(user, message) {
     }
 }
 //=================================================
-
-
-
 async function init() {
     applyTheme(registry.active);
     const params = new URLSearchParams(window.location.search);
@@ -765,7 +762,6 @@ function injectWidgetCommands(widgetInstance) {
         }
     }
 }
-
 
 
 // ==========================================
@@ -1554,8 +1550,6 @@ function updateAllBadgesUI() {
 }
 //=============================================================================
 
-
-
 function displayChatMessage(user, message, flags = {}, extra = {}, processed = null) {
     const chatContainer = document.getElementById("chat-feed");
     if (!chatContainer) return;
@@ -1895,8 +1889,7 @@ async function checkTwitchAuth() {
     }
 }
 function startTwitch(channel, token) {
-    const formattedToken = token.startsWith("oauth:") ? token : `oauth:${token}`;
-    
+    const formattedToken = token.startsWith("oauth:") ? token : `oauth:${token}`;   
     ComfyJS.onConnected = () => {
         if(statusIndicator) {
             statusIndicator.innerText = "SYSTEM: ONLINE";
@@ -1905,26 +1898,20 @@ function startTwitch(channel, token) {
         if(statusText) statusText.innerText = `CONNECTED TO: ${channel.toUpperCase()}`;
         activeChannel = channel;
     };
-
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         const processed = processMessageWithEmotes(message, extra.messageEmotes);
         displayChatMessage(user, message, flags, extra, processed); 
     };
-
     // --- CHANNEL POINT REWARD TRIGGER ---
 	ComfyJS.onReward = (user, reward, cost, message, extra) => {
         if (!rewardsEnabled) return;
-        
         // 1. Normalize the reward name to look up in our command mapping
         const lookupKey = reward.toLowerCase().trim();
-
         // 2. Check if an active module (like StreamPet) registered a matching interaction
         if (commandsRegistry && commandsRegistry[lookupKey]) {
             console.log(`🎯 [Pet Sync]: Channel point match found for "${lookupKey}"! Triggering module...`);
-            
             // Build mock flags matching your standard chat handler layout
             const mockFlags = { broadcaster: false, mod: false, subscriber: false };
-            
             try {
                 // Fire the module's execution loop directly
                 commandsRegistry[lookupKey].execute(user, message, mockFlags);
@@ -1932,7 +1919,6 @@ function startTwitch(channel, token) {
                 console.error(`❌ [Pet Sync]: Failed to execute custom reward module logic for !${lookupKey}:`, err);
             }
         } else {
-            // 3. Fallback to standard graphic/audio overlay engine if no widget code intercepts it
             triggerAlertPipeline(reward, user, cost, message);
         }
     };
@@ -1943,7 +1929,6 @@ function startTwitch(channel, token) {
     ComfyJS.onCommand = (user, command, message, flags, extra) => {
         let targetCommand = command.toLowerCase();
         let targetArgs = message;
-
         if (useCmdPrefix) {
             if (targetCommand === CMD_PREFIX.toLowerCase()) {
                 const parts = message.trim().split(" ");
@@ -1953,7 +1938,6 @@ function startTwitch(channel, token) {
                 return; 
             }
         }
-        
         if (targetCommand === "helloworld") {
             if (alertText && alertWidget) {
                 alertText.innerText = `👋 Welcome, @${user}!`;
@@ -1963,7 +1947,6 @@ function startTwitch(channel, token) {
         }
         handlePixelCommands(user, targetCommand, targetArgs, flags);
     };
-
     ComfyJS.Init(channel, formattedToken);
 }
 

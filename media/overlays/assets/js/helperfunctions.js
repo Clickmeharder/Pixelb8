@@ -8,7 +8,21 @@
  
  
  console.log(" [Helper Functions]: Initializing initializing...");
- 
+let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
+    active: 'Default',
+    themes: {
+        'Default': { 
+            '--bg': 'rgba(24, 24, 27, 0.8)', 
+            '--accent': '#9146ff', 
+            '--border-color': '#9146ff', 
+            '--border-radius': '12px', 
+            '--font-size': '18px',
+            '--font-family': "'Segoe UI', sans-serif",
+            '--border-style': 'solid'
+        }
+    }
+};
+
 // --- color helpers ---
 function hexToHSLA(hex) {
     if(!hex || hex.startsWith('hsla')) return parseHSLA(hex || 'hsla(0,0%,0%,1)');
