@@ -844,6 +844,78 @@ function renderThemeList() {
         list.appendChild(opt);
     });
 }
+
+function renderSettingsWindow() {
+    const stackContainer = document.querySelector('#settings-window .settings-stack');
+    if (!stackContainer) return;
+    
+    // Clear the stack before drawing to ensure fresh state on re-renders
+    stackContainer.innerHTML = '';
+
+    // Remove any restrictive heights on the main stack container so sections can sit together naturally
+    stackContainer.style.cssText = "padding-top: 10px; display: flex; flex-direction: column; gap: 8px;";
+
+    // Feed globally defined constant structure directly down into the view assembler
+    SETTINGS_SCHEMA.forEach(group => {
+        const detailsEl = document.createElement('details');
+        detailsEl.className = 'settings-group-wrapper';
+        detailsEl.open = false; 
+        detailsEl.style.cssText = "border: 1px solid #27272a; border-radius: 4px; background: #09090b; overflow: hidden;";
+
+        const summaryEl = document.createElement('summary');
+        summaryEl.className = 'settings-group-header';
+        summaryEl.style.cssText = "padding: 6px 8px; font-size: 14px; font-weight: 600; color: var(--accent, #a855f7); background: #18181b; cursor: pointer; user-select: none; list-style: none; display: flex; align-items: center; justify-content: space-between;";
+        summaryEl.innerHTML = `<span>${group.groupName}</span><span class="group-arrow" style="font-size: 11px; opacity: 0.6;">▼</span>`;
+        
+        detailsEl.appendChild(summaryEl);
+
+        // 🎯 FIX: This inner container is where we restrict height and isolate the scroll area
+        const innerPanel = document.createElement('div');
+        innerPanel.className = 'settings-group-content';
+        innerPanel.style.cssText = `
+            padding: 6px 8px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+            background: #09090b;
+            max-height: 120px;       /* 🛑 Caps the height of just this category dropdown */
+            overflow-y: auto;        /* 🌟 Adds a scrollbar only to this block if items overflow */
+            overflow-x: hidden;
+            padding-right: 4px;      /* Prevents trackbars from clipping your toggle row layout */
+        `;
+
+        group.items.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'settings-toggle-row';
+            row.style.cssText = "display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;"; // flex-shrink: 0 stops items from compressing
+
+            row.innerHTML = `
+                <span class="settings-toggle-label" style="font-size: 11px; color: #e4e4e7;">${item.label}:</span>
+                <div class="settings-toggle-controls" style="display: flex; align-items: center; gap: 8px;">
+                    <span id="stg-${item.idKey}-status-badge" class="toggle-status-badge">---</span>
+                    <button type="button" id="stg-toggle-${item.idKey}-btn" class="toggle-action-btn">Toggle</button>
+                </div>
+            `;
+
+            const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
+			if (toggleBtn) {
+				toggleBtn.addEventListener('click', () => {
+					// Pure schema action execution—no multi-bound racing events!
+					const currentVal = item.get();
+					item.set(!currentVal); 
+					syncAllToggleUI(); 
+				});
+			}
+            innerPanel.appendChild(row);
+        });
+
+        detailsEl.appendChild(innerPanel);
+        stackContainer.appendChild(detailsEl);
+    });
+
+    syncAllToggleUI();
+}
+
 function renderRewardsList() {
     const container = document.getElementById("rewards-list-container");
     if (!container) return;
@@ -946,76 +1018,6 @@ function renderRewardsList() {
 
         container.appendChild(item);
     });
-}
-function renderSettingsWindow() {
-    const stackContainer = document.querySelector('#settings-window .settings-stack');
-    if (!stackContainer) return;
-    
-    // Clear the stack before drawing to ensure fresh state on re-renders
-    stackContainer.innerHTML = '';
-
-    // Remove any restrictive heights on the main stack container so sections can sit together naturally
-    stackContainer.style.cssText = "padding-top: 10px; display: flex; flex-direction: column; gap: 8px;";
-
-    // Feed globally defined constant structure directly down into the view assembler
-    SETTINGS_SCHEMA.forEach(group => {
-        const detailsEl = document.createElement('details');
-        detailsEl.className = 'settings-group-wrapper';
-        detailsEl.open = false; 
-        detailsEl.style.cssText = "border: 1px solid #27272a; border-radius: 4px; background: #09090b; overflow: hidden;";
-
-        const summaryEl = document.createElement('summary');
-        summaryEl.className = 'settings-group-header';
-        summaryEl.style.cssText = "padding: 6px 8px; font-size: 14px; font-weight: 600; color: var(--accent, #a855f7); background: #18181b; cursor: pointer; user-select: none; list-style: none; display: flex; align-items: center; justify-content: space-between;";
-        summaryEl.innerHTML = `<span>${group.groupName}</span><span class="group-arrow" style="font-size: 11px; opacity: 0.6;">▼</span>`;
-        
-        detailsEl.appendChild(summaryEl);
-
-        // 🎯 FIX: This inner container is where we restrict height and isolate the scroll area
-        const innerPanel = document.createElement('div');
-        innerPanel.className = 'settings-group-content';
-        innerPanel.style.cssText = `
-            padding: 6px 8px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 6px; 
-            background: #09090b;
-            max-height: 120px;       /* 🛑 Caps the height of just this category dropdown */
-            overflow-y: auto;        /* 🌟 Adds a scrollbar only to this block if items overflow */
-            overflow-x: hidden;
-            padding-right: 4px;      /* Prevents trackbars from clipping your toggle row layout */
-        `;
-
-        group.items.forEach(item => {
-            const row = document.createElement('div');
-            row.className = 'settings-toggle-row';
-            row.style.cssText = "display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;"; // flex-shrink: 0 stops items from compressing
-
-            row.innerHTML = `
-                <span class="settings-toggle-label" style="font-size: 11px; color: #e4e4e7;">${item.label}:</span>
-                <div class="settings-toggle-controls" style="display: flex; align-items: center; gap: 8px;">
-                    <span id="stg-${item.idKey}-status-badge" class="toggle-status-badge">---</span>
-                    <button type="button" id="stg-toggle-${item.idKey}-btn" class="toggle-action-btn">Toggle</button>
-                </div>
-            `;
-
-            const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
-			if (toggleBtn) {
-				toggleBtn.addEventListener('click', () => {
-					// Pure schema action execution—no multi-bound racing events!
-					const currentVal = item.get();
-					item.set(!currentVal); 
-					syncAllToggleUI(); 
-				});
-			}
-            innerPanel.appendChild(row);
-        });
-
-        detailsEl.appendChild(innerPanel);
-        stackContainer.appendChild(detailsEl);
-    });
-
-    syncAllToggleUI();
 }
 //=============================================================================
 //-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
