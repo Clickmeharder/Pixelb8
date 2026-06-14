@@ -841,23 +841,33 @@ function injectAllWidgetCommands() {
     console.log("🏁 [Command Registry]: Injection scan complete.");
 }
 function injectWidgetCommands(widgetInstance) {
-    // Pass the local botSay utility directly into the initialization layer
-    console.log("🔍 Attempting to inject commands for:", widgetInstance);
     if (widgetInstance && typeof widgetInstance.getCommands === 'function') {
         const widgetCommands = widgetInstance.getCommands(botSay);
-        console.log("📦 Commands received from widget:", widgetCommands);
+        
+        // Track successfully registered commands to print in a single line
+        const registeredKeys = [];
+
         widgetCommands.forEach(cmd => {
             const lookupKey = cmd.name.toLowerCase().trim();
             
             if (!commandsRegistry[lookupKey]) {
-                // Perfect, 1:1 schema assignment mirror
                 commandsRegistry[lookupKey] = {
                     adminOnly: cmd.adminOnly || false,
                     execute: cmd.execute
                 };
-                console.log(`📡 Registered Native Module Command: !${lookupKey} [AdminOnly: ${commandsRegistry[lookupKey].adminOnly}]`);
+                
+                // Append format tag to our logging collection array
+                const adminTag = cmd.adminOnly ? "🔒" : "👤";
+                registeredKeys.push(`!${lookupKey} ${adminTag}`);
             }
         });
+
+        // 📝 Consolidated Log: One clean printout statement per widget
+        if (registeredKeys.length > 0) {
+            console.log(`📡 [Commands]: Hooked [${registeredKeys.join(", ")}]`);
+        } else {
+            console.log(`📡 [Commands]: Scanning complete. No new command injections needed.`);
+        }
     }
 }
 
