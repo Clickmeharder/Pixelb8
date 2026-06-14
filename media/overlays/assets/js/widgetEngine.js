@@ -6,7 +6,63 @@ console.log(" [Pixelb8 Stream Widget Engine]: initializing...");
  * Concern: Manages modern module lifecycles while bridging legacy boot components.
  * ============================================================================
  */
+function injectAllWidgetCommands() {
+    // 🔍 Read instances from both legacy window tags AND your modern engine tracks
+    const activeWidgets = [
+        { name: "StreamPet", instance: window.streamPetEngine },
+        { name: "EntropiaParser", instance: window.entropiaLogParser },
+        { name: "StreamJukebox", instance: window.streamJukeboxEngine },
+        
+        // ⚙️ Safely scan your new engine instances array if the engine is initialized
+        { 
+            name: "BitMiner (Engine)", 
+            instance: (typeof WidgetEngine !== 'undefined' && WidgetEngine.instances) ? WidgetEngine.instances.bitminer : null 
+        }
+    ];
 
+    console.log("📡 [Command Registry]: Starting automated injection scan...");
+
+    activeWidgets.forEach(widget => {
+        if (widget.instance) {
+            console.log(`✅ [Command Registry]: Found active instance for ${widget.name}. Injecting...`);
+            injectWidgetCommands(widget.instance);
+        } else {
+            console.warn(`⚠️ [Command Registry]: Widget instance for ${widget.name} is null/undefined. Skipping.`);
+        }
+    });
+
+    console.log("🏁 [Command Registry]: Injection scan complete.");
+}
+function injectWidgetCommands(widgetInstance) {
+    if (widgetInstance && typeof widgetInstance.getCommands === 'function') {
+        const widgetCommands = widgetInstance.getCommands(botSay);
+        
+        // Track successfully registered commands to print in a single line
+        const registeredKeys = [];
+
+        widgetCommands.forEach(cmd => {
+            const lookupKey = cmd.name.toLowerCase().trim();
+            
+            if (!commandsRegistry[lookupKey]) {
+                commandsRegistry[lookupKey] = {
+                    adminOnly: cmd.adminOnly || false,
+                    execute: cmd.execute
+                };
+                
+                // Append format tag to our logging collection array
+                const adminTag = cmd.adminOnly ? "🔒" : "👤";
+                registeredKeys.push(`!${lookupKey} ${adminTag}`);
+            }
+        });
+
+        // 📝 Consolidated Log: One clean printout statement per widget
+        if (registeredKeys.length > 0) {
+            console.log(`📡 [Commands]: Hooked [${registeredKeys.join(", ")}]`);
+        } else {
+            console.log(`📡 [Commands]: Scanning complete. No new command injections needed.`);
+        }
+    }
+}
 export const WidgetEngine = {
     instances: {
         bitminer: null // Modern tracker
