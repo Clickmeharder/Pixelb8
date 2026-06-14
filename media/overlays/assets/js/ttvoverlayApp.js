@@ -117,28 +117,14 @@ function saveSettings() {
     }
 }
 
-// --- DYNAMIC REWARD ALERT REGISTRY ---
-// Allows streamers to store templates for any Channel Point reward name
-let rewardAlerts = JSON.parse(localStorage.getItem('p8_reward_alerts')) || {
-    "hydrate": {
-        text: "💧 DRINK WATER, {user.toUpperCase()}!",
-        image: "" // Optional URL string for custom gifs/images
-    },
-    "fart": {
-        text: "💨 {user} just let one loose! It stinks in here.",
-        image: ""
-    }
-};
-
-function saveRewardAlerts() {
-    localStorage.setItem('p8_reward_alerts', JSON.stringify(rewardAlerts));
-}
 
 const BOT_IDENTITY = "PIXELB8";
 const CLIENT_ID = "l1zvkm35dmtw4doj4y699nhnvx655c";
 const REDIRECT_URI = "pixelb8.lol/media/overlays/ezlay";
 const FULL_REDIRECT = "https://" + REDIRECT_URI;
 let activeChannel = "";
+
+let pendingImageBase64 = "";
 
 // Dom Elements (Adjusted for your new three-widget structure)
 const alertWidget = document.getElementById("alert-widget");
@@ -257,11 +243,6 @@ const styleConfig = [
     { id: 'radius', label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
 ];
 
-// ==========================================
-// --- CORE MAPS CONFIGURATIONS ---
-// ==========================================
-
-let pendingImageBase64 = "";
 //
 //==================================================
 import { WidgetEngine } from './widgetEngine.js';
@@ -1156,6 +1137,22 @@ function renderSettingsWindow() {
 // ==========================================
 // --- Alert System ---
 // ==========================================
+
+// --- DYNAMIC REWARD ALERT REGISTRY ---
+// Allows streamers to store templates for any Channel Point reward name
+let rewardAlerts = JSON.parse(localStorage.getItem('p8_reward_alerts')) || {
+    "hydrate": {
+        text: "💧 DRINK WATER, {user.toUpperCase()}!",
+        image: "" // Optional URL string for custom gifs/images
+    },
+    "fart": {
+        text: "💨 {user} just let one loose! It stinks in here.",
+        image: ""
+    }
+};
+function saveRewardAlerts() {
+    localStorage.setItem('p8_reward_alerts', JSON.stringify(rewardAlerts));
+}
 // --- CENTRALIZED ALERT PIPELINE ENGINE ---
 // Handles formatting, visual injections, animations, and chat confirmation outputs
 function triggerAlertPipeline(reward, user, cost, message) {
@@ -1555,6 +1552,9 @@ function updateAllBadgesUI() {
         });
     });
 }
+//=============================================================================
+
+
 
 function displayChatMessage(user, message, flags = {}, extra = {}, processed = null) {
     const chatContainer = document.getElementById("chat-feed");
