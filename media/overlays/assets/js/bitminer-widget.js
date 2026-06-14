@@ -1,20 +1,18 @@
 /**
  * ============================================================================
  * PIXELB8 ECOSYSTEM WIDGET COMPONENT: STREAM BIT-MINER
- * Architecture: Monolithic example extending the BaseWidgetModule template.
+ * Architecture: Clean Extension of the BaseWidgetModule Blueprint.
  * ============================================================================
  */
 
 import { BaseWidgetModule } from "./BaseWidgetModule.js";
 
-// 1. EXTRA MODULE SCHEMA MATRIX
 const MINER_CONFIG = {
     SAND_COLOR: "#dfc26d",
     ORE_COLOR: "#ffb703",
     SPARK_COLORS: ["#ff0055", "#00ffcc", "#ffcc00"]
 };
 
-// 2. STATE OVERRIDES & EXTENSIONS
 function createMinerRegistry() {
     return {
         activeProfile: "streamer_miner",
@@ -42,9 +40,6 @@ function createMinerState() {
     };
 }
 
-// ============================================================================
-// MINER ROUTER ACTION LIBRARY
-// ============================================================================
 const MINER_ACTION_LIBRARY = {
     idle: (widget, ctx) => {
         if (widget.state.heatLevel > 0) widget.state.heatLevel -= 0.2;
@@ -77,22 +72,21 @@ const MINER_ACTION_LIBRARY = {
     }
 };
 
-// ============================================================================
-// EXTENDED RUNTIME EXPORT CLASS
-// ============================================================================
 export class StreamBitMinerWidget extends BaseWidgetModule {
     constructor() {
+        // 1. Point initialization containment to your custom key
         super("bit_miner_system");
+        
+        // 2. Map the extended feature models cleanly over the factory state
         this.registry = createMinerRegistry();
         this.state = createMinerState();
-		this.canvas = document.getElementById("miner-canvas");
-		if (this.canvas) {
-			this.ctx = this.canvas.getContext("2d");
-		}
+
+        // 3. Re-sync saved instances over factory defaults
         this.loadData();
     }
 
-    static get controlsTemplate() {
+    // Dynamic generation using base contextual hooks
+    get controlsTemplate() {
         return `
             <div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
                 <span>⛏️ PixelB8 Deep-Core Bit Miner Matrix</span>
@@ -104,13 +98,13 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
                         <label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Telemetry Frame Config</label>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 12px; color: #fff;">
                             <span>Hide Overlay Framing Outline</span>
-                            <input type="checkbox" id="minerHideBorderToggle">
+                            <input type="checkbox" class="p8-border-toggle">
                         </div>
                     </div>
-                    <button type="button" id="btnMineVein" class="p8-btn" style="background: #e67e22; border: 1px solid #f39c12; padding: 8px 0; font-size: 11px; cursor: pointer; color: #fff; font-weight: bold; border-radius: 4px;">
+                    <button type="button" id="${this.baseId}-btnMine" class="p8-btn" style="background: #e67e22; border: 1px solid #f39c12; padding: 8px 0; font-size: 11px; cursor: pointer; color: #fff; font-weight: bold; border-radius: 4px;">
                         💥 ENGAGE SONIC EXCAVATOR DRILL
                     </button>
-                    <button type="button" id="btnMinerReset" class="p8-btn" style="background: #991b1b; border: 1px solid #ef4444; padding: 6px 0; font-size: 11px; margin-top: 5px; cursor: pointer; color: #fff; font-weight: bold; border-radius: 4px;">
+                    <button type="button" id="${this.baseId}-btnReset" class="p8-btn" style="background: #991b1b; border: 1px solid #ef4444; padding: 6px 0; font-size: 11px; margin-top: 5px; cursor: pointer; color: #fff; font-weight: bold; border-radius: 4px;">
                         ⚠️ PURGE MINERAL REGISTRY CACHE
                     </button>
                 </div>
@@ -118,85 +112,40 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
         `;
     }
 
-	injectUI() {
-		// 1. Overlay mount
-		const overlayWrapper = document.getElementById("overlay-wrapper");
-		if (overlayWrapper && !document.getElementById("miner-overlay-element")) {
-			const overlayEl = document.createElement("div");
-			overlayEl.id = "miner-overlay-element";
-			overlayEl.className = "p8-widget"; 
-			overlayEl.style.position = "absolute";
-			
-			// IMPORTANT: Inject both the unique bubble AND the unique canvas here
-			overlayEl.innerHTML = `
-				<div id="miner-bubble" class="chat-bubble"></div>
-				<canvas id="miner-canvas"></canvas>
-			`;
-			
-			overlayWrapper.appendChild(overlayEl);
-		}
+    injectUI() {
+        const overlayWrapper = document.getElementById("overlay-wrapper");
+        if (overlayWrapper && !document.getElementById(this.overlayId)) {
+            const overlayEl = document.createElement("div");
+            overlayEl.id = this.overlayId;
+            overlayEl.className = "p8-widget";
+            overlayEl.style.position = "absolute";
+            overlayEl.innerHTML = `
+                <div id="${this.baseId}-bubble" class="chat-bubble"></div>
+                <canvas id="${this.baseId}-canvas"></canvas>
+            `;
+            overlayWrapper.appendChild(overlayEl);
+            
+            // Map the freshly generated rendering nodes back to engine references
+            this.canvas = document.getElementById(`${this.baseId}-canvas`);
+            if (this.canvas) this.ctx = this.canvas.getContext("2d");
+        }
 
-		// 2. Control Panel mount
-		const controlContainer = document.getElementById("widget-control-wrapper");
-		if (controlContainer && !document.getElementById("miner-widget-controls")) {
-			const panelSection = document.createElement("div");
-			panelSection.id = "miner-widget-controls";
-			panelSection.className = "collapsible-section collapsed";
-			panelSection.innerHTML = StreamBitMinerWidget.controlsTemplate;
-			controlContainer.appendChild(panelSection);
-		}
-	}
-	// Inside your StreamBitMinerWidget class methods
-    destroy() {
-        // Run the baseline clock clearance loops from the parent class
-        if (this.saveInterval) clearInterval(this.saveInterval);
-        if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
-        
-        // Target and purge your hardcoded DOM elements cleanly
-        const overlayEl = document.getElementById("miner-overlay-element");
-        if (overlayEl) {
-            overlayEl.remove();
+        const controlContainer = document.getElementById("widget-control-wrapper");
+        if (controlContainer && !document.getElementById(this.controlId)) {
+            const panelSection = document.createElement("div");
+            panelSection.id = this.controlId;
+            panelSection.className = "collapsible-section collapsed";
+            panelSection.innerHTML = this.controlsTemplate;
+            controlContainer.appendChild(panelSection);
         }
-        
-        const controlEl = document.getElementById("miner-widget-controls");
-        if (controlEl) {
-            controlEl.remove();
-        }
-        
-        console.log("⛏️ [Lifecycle]: BitMiner instance completely wiped from viewport.");
     }
-	setWidgetBubble(txt) {
-		const bubble = document.getElementById("miner-bubble");
-		if (!bubble) return;
 
-		// Clear existing timer logic (copy-paste your existing logic)
-		if (this.bubbleTimeout) {
-			clearTimeout(this.bubbleTimeout);
-			this.bubbleTimeout = null;
-		}
-		if (bubble.dataset.timeoutId) {
-			clearTimeout(parseInt(bubble.dataset.timeoutId, 10));
-		}
-
-		bubble.textContent = txt;
-		bubble.classList.add("show");
-
-		const timerId = setTimeout(() => {
-			bubble.classList.remove("show");
-			if (this.bubbleTimeout === timerId) this.bubbleTimeout = null;
-			bubble.removeAttribute('data-timeout-id');
-		}, 3000);
-
-		this.bubbleTimeout = timerId;
-		bubble.dataset.timeoutId = timerId;
-	}
-	bindEventListeners() {
-        const controlContainer = document.getElementById("miner-widget-controls");
+    bindEventListeners() {
+        const controlContainer = document.getElementById(this.controlId);
         if (!controlContainer) return;
 
         controlContainer.addEventListener("change", (e) => {
-            // Target any checkbox inside your panel cleanly
-            if (e.target.type === "checkbox") {
+            if (e.target.classList.contains("p8-border-toggle")) {
                 this.state.hideBorder = e.target.checked;
                 this.applyVisibilityStates();
                 this.saveData();
@@ -204,7 +153,7 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
         });
 
         controlContainer.addEventListener("click", (e) => {
-            if (e.target.id === "btnMineVein") {
+            if (e.target.id === `${this.baseId}-btnMine`) {
                 if (this.state.heatLevel >= 85) {
                     this.setWidgetBubble("❌ DRILL CORE OVERHEATED! Allow thermal venting sequence.");
                     return;
@@ -213,7 +162,7 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
                 this.state.actionTimer = 90;
                 this.setWidgetBubble("⚡ Boring into crystalized bit-vein layers...");
             }
-            if (e.target.id === "btnMinerReset") {
+            if (e.target.id === `${this.baseId}-btnReset`) {
                 if (confirm("Are you sure you want to discard your mined minerals inventory data?")) {
                     localStorage.removeItem(this.STORAGE_KEY);
                     window.location.reload();
@@ -222,23 +171,13 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
         });
     }
 
-    loadData() {
-        super.loadData();
-        const borderToggle = document.getElementById("minerHideBorderToggle");
-        if (borderToggle) borderToggle.checked = this.state.hideBorder || false;
-        this.applyVisibilityStates();
-    }
-
     updateAI(t) {
         if (MINER_ACTION_LIBRARY[this.state.action]) {
             MINER_ACTION_LIBRARY[this.state.action](this, { t });
         }
         for (let i = this.state.particles.length - 1; i >= 0; i--) {
             const p = this.state.particles[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += 0.25;
-            p.life--;
+            p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.life--;
             if (p.life <= 0) this.state.particles.splice(i, 1);
         }
     }
@@ -281,3 +220,5 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
         this.ctx.fillRect(15, 52, (this.state.heatLevel / 100) * 120, 6);
     }
 }
+
+//fin script

@@ -146,32 +146,29 @@ export class BaseWidgetModule {
 	}
 
 	loadData() {
-		const saved = localStorage.getItem(this.STORAGE_KEY);
-		if (saved) {
-			try {
-				const loadedBundle = JSON.parse(saved);
-				if (loadedBundle.registry) this.registry = loadedBundle.registry;
-				if (loadedBundle.state) {
-					this.state = { ...this.state, ...loadedBundle.state };
-				}
+        const saved = localStorage.getItem(this.STORAGE_KEY);
+        if (saved) {
+            try {
+                const loadedBundle = JSON.parse(saved);
+                if (loadedBundle.registry) this.registry = loadedBundle.registry;
+                if (loadedBundle.state) {
+                    this.state = { ...this.state, ...loadedBundle.state };
+                }
 
-				// CHANGE: Scope the lookup to this widget's specific control container
-				const controlPanel = document.getElementById(this.controlId);
-				if (controlPanel) {
-					// Find the toggle inside this specific container only
-					const borderToggle = controlPanel.querySelector('input[type="checkbox"]');
-					if (borderToggle) {
-						borderToggle.checked = this.state.hideBorder || false;
-					}
-				}
-
-			} catch (err) {
-				console.error(`⚠️ [Boot Error]: Corrupted save string hit on namespace "${this.STORAGE_KEY}":`, err);
-			}
-		}
-		this.applyVisibilityStates();
-	}
-
+                const controlPanel = document.getElementById(this.controlId);
+                if (controlPanel) {
+                    // Look for the clean class selector instead of hardcoded strings
+                    const borderToggle = controlPanel.querySelector('.p8-border-toggle') || controlPanel.querySelector('input[type="checkbox"]');
+                    if (borderToggle) {
+                        borderToggle.checked = this.state.hideBorder || false;
+                    }
+                }
+            } catch (err) {
+                console.error(`⚠️ [Boot Error]: Save trace hit failure on namespace "${this.STORAGE_KEY}":`, err);
+            }
+        }
+        this.applyVisibilityStates();
+    }
 	// ========================================================================
 	// INTERFACE BINDING & EVENT DISPATCH ENGINES
 	// ========================================================================
