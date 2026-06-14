@@ -1899,9 +1899,7 @@ async function init() {
         await WidgetEngine.initSavedWidgets(s);
     }
 
-    // 2. Scan and inject any commands that were loaded during boot
-    console.log("📡 [Command Registry]: Running boot scan...");
-    injectAllWidgetCommands();
+
     
     // Populate registry array caches for rewards and bits
     renderRewardsList(); 

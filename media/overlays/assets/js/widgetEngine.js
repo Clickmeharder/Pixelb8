@@ -161,5 +161,8 @@ export const WidgetEngine = {
                 console.error("❌ [Engine Legacy Boot Failure] Jukebox:", err);
             }
         }
+		    // 2. Scan and inject any commands that were loaded during boot
+		console.log("📡 [Command Registry]: Running boot scan...");
+		injectAllWidgetCommands();
     }
 };
