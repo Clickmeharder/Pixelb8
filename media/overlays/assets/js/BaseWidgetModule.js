@@ -178,14 +178,38 @@ export class BaseWidgetModule {
 		if (overlayWrapper && !document.getElementById(this.overlayId)) {
 			const overlayEl = document.createElement("div");
 			overlayEl.id = this.overlayId;
-			overlayEl.className = "p8-widget"; // Crucial for your CSS positioning system
+			overlayEl.className = "p8-widget"; // 🎯 Triggers overlayapp.js drag tracking automatically
 			overlayEl.style.position = "absolute";
 			
-			// Inject a UNIQUE canvas for this widget instance
-			// We use baseId so every widget has its own surface
-			overlayEl.innerHTML = `<canvas id="${this.baseId}-canvas"></canvas>`;
+			// 📍 Check for coordinates saved by overlayapp.js's mouseup logic
+			const savedLayout = localStorage.getItem(`p8_pos_${this.overlayId}`);
+			if (savedLayout) {
+				try {
+					const coords = JSON.parse(savedLayout);
+					overlayEl.style.left = coords.left;
+					overlayEl.style.top = coords.top;
+				} catch (err) {
+					console.error(`⚠️ [Layout Error]: Corrupted position string for ${this.overlayId}:`, err);
+				}
+			} else {
+				// Fallback default starting coordinates if it's the first initialization
+				overlayEl.style.left = "100px";
+				overlayEl.style.top = "100px";
+			}
+			
+			// Inject a UNIQUE canvas and unique chat bubble template for this widget instance
+			overlayEl.innerHTML = `
+				<div id="${this.baseId}-bubble" class="chat-bubble"></div>
+				<canvas id="${this.baseId}-canvas"></canvas>
+			`;
 			
 			overlayWrapper.appendChild(overlayEl);
+
+			// Link the freshly generated rendering context back to the engine properties
+			this.canvas = document.getElementById(`${this.baseId}-canvas`);
+			if (this.canvas) {
+				this.ctx = this.canvas.getContext("2d");
+			}
 		}
 
 		// 2. Mount Control Panel
