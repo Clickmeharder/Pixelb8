@@ -1866,29 +1866,42 @@ function startTwitch(channel, token) {
 
 
 //============================
-
-async function init() {
-    applyTheme(registry.active);
+function determineExecutionEnvironment() {
     const params = new URLSearchParams(window.location.search);
-    
-    if (params.get("token") && params.get("channel")) {
+    const channel = params.get("channel");
+    const token = params.get("token");
+
+    if (token && channel) {
+        // 🎬 OBS BROWSER SOURCE ROUTE
         document.body.style.backgroundColor = "transparent";
         document.body.style.backgroundImage = "none";
-        document.getElementById("overlay-wrapper").style.display = "block";
+        
+        const wrapper = document.getElementById("overlay-wrapper");
+        if (wrapper) wrapper.style.display = "block";
+        
         setEditMode(false);
-        startTwitch(params.get("channel"), params.get("token"));
+        startTwitch(channel, token);
+        console.log(`🎬 [Environment]: Running as transparent OBS Overlay for channel: ${channel}`);
     } else {
+        // 💻 DESKTOP BROWSER CONFIGURATION ROUTE
         document.body.style.backgroundColor = "#1a1a1a";
         document.body.style.backgroundImage = "none";
-        document.getElementById("setup-interface").style.display = "block";
+        
+        const setupUI = document.getElementById("setup-interface");
+        if (setupUI) setupUI.style.display = "block";
+        
         checkTwitchAuth();
+        console.log("💻 [Environment]: Running as local Browser Config Dashboard");
     }
-    
+}
+async function init() {
+    applyTheme(registry.active);
+    // 🌐 Determine context environment modes (OBS Layer vs. Editor UI Dashboard)
+    determineExecutionEnvironment();
     // Core Layout & Registry Loading
     loadPositions();
     renderSettingsWindow();
     renderThemeControls();
-    
     const s = typeof settings !== 'undefined' ? settings : {};
 
     // =========================================================================
@@ -1907,7 +1920,6 @@ async function init() {
     renderRewardsList(); 
     populateCustomDropdowns();
     initTimerEngine();
-    
     // Bind all event listeners to the DOM and sync UI states
     bindEvents();
     if (typeof syncAllToggleUI === 'function') {
@@ -1980,13 +1992,6 @@ function injectWidgetCommands(widgetInstance) {
 // --- dom/bindings---
 // ==========================================
 
-// --- INITIALIZE DRAGGING FOR BOTH WINDOWS ---
-document.addEventListener("DOMContentLoaded", () => {
-    // Parameter 1: The Main Window Element ID
-    // Parameter 2: The Header/Handle Element ID
-    makeElementDraggable("style-editor", "theme-manager-header");
-    makeElementDraggable("rewards-manager", "rewards-manager-header");
-});
 
 function bindRewardsManagerEvents() {
     const rewardsPanel = document.getElementById("rewards-manager");

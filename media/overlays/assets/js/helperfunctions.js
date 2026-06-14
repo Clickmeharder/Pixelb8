@@ -286,6 +286,13 @@ function makeElementDraggable(targetId, handleId) {
     }
 }
 
+// --- INITIALIZE DRAGGING FOR BOTH WINDOWS ---
+document.addEventListener("DOMContentLoaded", () => {
+    // Parameter 1: The Main Window Element ID
+    // Parameter 2: The Header/Handle Element ID
+    makeElementDraggable("style-editor", "theme-manager-header");
+    makeElementDraggable("rewards-manager", "rewards-manager-header");
+});
 function setupCustomDropdownEngine(displayId, optionsId, optionItems, onSelectionCallback = null) {
     console.log(`[Global UI]: Mounting dropdown -> Display: ${displayId}, Items: ${optionItems ? optionItems.length : '0'}`);
     
