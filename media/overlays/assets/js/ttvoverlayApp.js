@@ -2249,7 +2249,7 @@ function bindBitManagerEvents() {
 // ==========================================
 // --- MAIN EVENT LISTENER BINDING ENGINE ---
 // ==========================================
-function bindEvents() {
+/* function bindEvents() {
     const SCOPES = "chat:read chat:edit channel:read:redemptions";
 
     // 1. Core Platform Auth & Clipboard Utility Wiring
@@ -2511,6 +2511,295 @@ function bindEvents() {
         syncAllToggleUI();
     }
 }
+ */
+// =========================================================================
+// ⚙️ MAIN EVENT LISTENER BINDING ENGINE
+// =========================================================================
+function bindEvents() {
+    // 1. Fire up targeted semantic subsystems
+    bindTwitchAuthEvents();
+    bindLayoutNavigationEvents();
+    bindTimerSystemEvents();
+    bindGlobalWindowInteractions();
+
+    // 2. Execute isolated downstream manager bindings
+    if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
+    if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
+    
+    // 3. Keep layout controls in perfect sync on load
+    if (typeof syncAllToggleUI === "function") {
+        syncAllToggleUI();
+    }
+}
+
+// =========================================================================
+// 🌐 SYSTEM MODULE SUB-BINDERS
+// =========================================================================
+
+/**
+ * Handles Twitch platform application handshake and credential management utilities
+ */
+function bindTwitchAuthEvents() {
+    const SCOPES = "chat:read chat:edit channel:read:redemptions";
+
+    onSafeClick("login-button", () => {
+        window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(FULL_REDIRECT)}&response_type=token&scope=${encodeURIComponent(SCOPES)}`;
+    });
+
+    onSafeClick("obs-url-output", (e, target) => {
+        navigator.clipboard.writeText(target.innerText);
+        const originalText = target.innerText;
+        target.innerText = "COPIED TO CLIPBOARD!";
+        setTimeout(() => target.innerText = originalText, 1500);
+    });
+}
+
+/**
+ * Manages configuration workspace panels, themes, map collections, and toggles
+ */
+function bindLayoutNavigationEvents() {
+    // Panel Router Navigation
+    PANEL_NAVIGATION_MAPS.forEach(cfg => {
+        onSafeClick(cfg.triggerId, () => {
+            const targetPanel = document.getElementById(cfg.targetId);
+            if (targetPanel) targetPanel.style.display = 'block';
+            closeContextMenu();
+            if (cfg.onOpen) cfg.onOpen();
+        });
+    });
+
+    // Binary Switch Registry Maps
+    BOOLEAN_TOGGLE_MAPS.forEach(cfg => {
+        const handler = (e) => {
+            const incomingVal = cfg.valuePath ? e.target[cfg.valuePath] : null;
+            const finalVal = cfg.invert ? !incomingVal : incomingVal;
+            cfg.assignTo(finalVal);
+            if (cfg.onSync) cfg.onSync();
+        };
+        if (cfg.type === "change") {
+            onSafeChange(cfg.id, handler);
+        } else {
+            onSafeClick(cfg.id, handler);
+        }
+    });
+
+    // Core Custom Theme Selections
+    onSafeClick("current-theme-display", () => {
+        const themeOptions = document.getElementById('theme-options');
+        if (themeOptions) {
+            themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+        }
+    }, true);
+
+    onSafeClick("save-theme-btn", async () => {
+        const nameInput = document.getElementById('theme-name-input');
+        const newName = (nameInput ? nameInput.value.trim() : '') || 'Custom Theme';
+        
+        if (typeof registry !== 'undefined' && registry.themes) {
+            registry.themes[newName] = JSON.parse(JSON.stringify(registry.themes[registry.active]));
+            registry.active = newName;
+            localStorage.setItem('p8_registry', JSON.stringify(registry));
+            
+            if (typeof renderThemeList === "function") renderThemeList();
+            if (typeof p8Confirm === "function") await p8Confirm('Theme Settings Saved', true);
+        }
+    });
+}
+
+/**
+ * Attaches handlers for generating and styling on-screen alert and countdown widgets
+ */
+function bindTimerSystemEvents() {
+    const colorPicker = document.getElementById("tmr-color");
+    const colorText = document.getElementById("tmr-color-text");
+
+    const updateTimerStyles = () => {
+        const color = colorText.value;
+        document.querySelectorAll('.p8-timer-widget').forEach(el => {
+            el.style.color = color;
+        });
+    };
+
+    if (colorPicker && colorText) {
+        colorPicker.addEventListener("input", (e) => {
+            colorText.value = e.target.value;
+            updateTimerStyles();
+        });
+
+        colorText.addEventListener("input", (e) => {
+            const val = e.target.value;
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                colorPicker.value = val;
+                updateTimerStyles();
+            }
+        });
+    }
+
+    onSafeClick("ui-create-timer-btn", () => {
+        const lblInput = document.getElementById("timer-label-input");
+        const durInput = document.getElementById("timer-duration-input");
+        
+        const label = lblInput.value.trim() || "Timer";
+        const duration = durInput.value || 0;
+        
+        const config = {
+            labelFontSize: document.getElementById("tmr-label-fz").value || "14px",
+            labelFontWeight: document.getElementById("tmr-label-fw").value || "600",
+            timerFontSize: document.getElementById("tmr-fz").value || "24px",
+            timerFontColor: colorText.value || "#ffffff",
+            showMode: document.getElementById("tmr-visibility").value || "always"
+        };
+
+        createTimerInstance(label, duration, config);
+        lblInput.value = "";
+        durInput.value = "";
+    });
+
+    onSafeClick("close-widgets-manager-btn", () => {
+        const widgetWin = document.getElementById("widgets-manager");
+        if (widgetWin) widgetWin.style.display = "none";
+    });
+
+    if (typeof WINDOW_CLOSE_MAPS !== 'undefined' && Array.isArray(WINDOW_CLOSE_MAPS)) {
+        WINDOW_CLOSE_MAPS.forEach(mapping => {
+            if (mapping && Array.isArray(mapping.triggers)) {
+                mapping.triggers.forEach(triggerId => {
+                    onSafeClick(triggerId, () => {
+                        const targetWindow = document.getElementById(mapping.win);
+                        if (targetWindow) targetWindow.style.display = 'none';
+                    });
+                });
+            }
+        });
+    }
+
+    SIMPLE_CLICK_MAPS.forEach(cfg => {
+        const shouldStopPropagation = (cfg.id === "ctx-lock");
+        onSafeClick(cfg.id, () => {
+            cfg.handler();
+            if (cfg.id.startsWith("ctx-")) closeContextMenu();
+        }, shouldStopPropagation);
+    });
+}
+
+/**
+ * Sets deep low-level global listeners for workspace structural manipulation
+ * (Drag-and-drop engines, context overrides, custom layout dropdown blur safety, and chat feed tracking)
+ */
+function bindGlobalWindowInteractions() {
+    // Draggable Window Headers Engine Wiring
+    if (typeof makeElementDraggable === "function") {
+        DRAGGABLE_WINDOWS_CONFIG.forEach(cfg => {
+            if (document.getElementById(cfg.winId)) {
+                makeElementDraggable(cfg.winId, cfg.headerId);
+            }
+        });
+    }
+
+    // 🗺️ Mouse Capture Drag States
+    window.addEventListener('mousedown', e => {
+        const ctxMenu = document.getElementById('p8-ctx-menu');
+        const themeOpts = document.getElementById('theme-options');
+        
+        if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) {
+            closeContextMenu();
+        }
+        
+        if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) {
+            themeOpts.style.display = 'none';
+        }
+
+        // Auto-blur dropdown select custom interfaces when clicking away
+        if (!e.target.closest('.custom-select-display') &&
+            !e.target.closest('.select-trigger') &&
+            !e.target.closest('.custom-select-options-box') &&
+            !e.target.closest('.select-options') &&
+            !e.target.closest('.option-item')) {
+            
+            document.querySelectorAll(".custom-select-options-box, .select-options").forEach(b => {
+                b.style.display = "none";
+            });
+        }
+        
+        if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 ||
+            e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, .timer-btn-group, .setup-container, .p8-modal')) {
+            return;
+        }
+        
+        dragTarget = e.target.closest('.p8-widget');
+        
+        if (dragTarget) {
+            const r = dragTarget.getBoundingClientRect();
+            const handleSize = 64; // Matches CSS resize zone size flag
+            
+            const isClickingResizer = (e.clientX > r.right - handleSize && 
+                                       e.clientY > r.bottom - handleSize);
+            
+            if (isClickingResizer) {
+                dragTarget = null;
+                return;
+            }
+            
+            offset = { x: e.clientX - r.left, y: e.clientY - r.top };
+        }
+    });
+
+    window.addEventListener('mousemove', e => {
+        if (typeof dragTarget !== 'undefined' && dragTarget) {
+            dragTarget.style.left = (e.clientX - offset.x) + 'px';
+            dragTarget.style.top = (e.clientY - offset.y) + 'px';
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (typeof dragTarget !== 'undefined' && dragTarget) {
+            localStorage.setItem(`p8_pos_${dragTarget.id}`, JSON.stringify({
+                top: dragTarget.style.top,
+                left: dragTarget.style.left
+            }));
+            dragTarget = null;
+        }
+    });
+
+    // Automated Resize Observers for Chat Area Height Caching
+    if (typeof chatFeed !== 'undefined' && chatFeed) {
+        let resizeTimeout;
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                const currentHeight = entry.contentRect.height;
+                if (currentHeight < 32) continue;
+
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    chatHeight = `${Math.round(currentHeight)}px`;
+                    
+                    if (typeof settings !== 'undefined') {
+                        settings.chatHeight = chatHeight;
+                    }
+                    if (typeof saveSettings === "function") {
+                        saveSettings();
+                    }
+                }, 200);
+            }
+        });
+        resizeObserver.observe(chatFeed);
+    }
+
+    // Right-Click Context Custom Navigation Capture
+    window.addEventListener('contextmenu', e => {
+        if (e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
+        e.preventDefault();
+        const ctxMenu = document.getElementById('p8-ctx-menu');
+        if (ctxMenu) {
+            ctxMenu.style.display = 'block';
+            ctxMenu.style.left = e.clientX + 'px';
+            ctxMenu.style.top = e.clientY + 'px';
+        }
+    });
+}
+
+
+
 init();
 //=============================================================================
 //-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
