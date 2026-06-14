@@ -361,6 +361,283 @@ function bindBase64FileReader(inputElement, onLoadedSuccess, onClearFallback) {
     });
 }
 
+
+// ===============================================================================================================
+// =========================================================================
+// --- TIMERS & RUNTIME CONTEXT ENGINE STATE ---
+// =========================================================================
+// Persistent configurations saved across sessions
+let activeTimers = JSON.parse(localStorage.getItem('p8_active_timers')) || {}; 
+let timerIntervalId = null;
+let savedCountdowns = JSON.parse(localStorage.getItem('p8_saved_countdowns')) || {};
+function saveCountdownsToStorage() {
+    localStorage.setItem('p8_saved_countdowns', JSON.stringify(savedCountdowns));
+}
+function saveActiveTimersToStorage() {
+    localStorage.setItem('p8_active_timers', JSON.stringify(activeTimers));
+}
+// Global Core Controller Initialization Wrapper
+function initTimerEngine() {
+    // Restore runtime ticks if active instances are pulled from storage on load
+    const keys = Object.keys(activeTimers);
+    if (keys.length > 0) {
+        const shouldRestart = keys.some(id => activeTimers[id].running);
+        if (shouldRestart && !timerIntervalId) {
+            timerIntervalId = setInterval(processTimersTick, 1000);
+        }
+    }
+
+    // Direct render draw call
+    renderActiveTimersUI();
+}
+function updateTimerStyles() {
+    const colorValue = document.getElementById('tmr-color-text').value;
+    
+    if (/^#[0-9A-F]{6}$/i.test(colorValue)) {
+        document.getElementById('tmr-color-picker').value = colorValue;
+    }
+
+    const timers = document.querySelectorAll('.timer-instance-class');
+    timers.forEach(t => {
+        t.style.color = colorValue;
+    });
+
+    settings.timerColor = colorValue;
+    saveSettings();
+}
+function createTimerInstance(label = "Timer", durationSeconds = 0, customStyles = {}) {
+    const id = "tmr_" + Date.now();
+    const type = parseInt(durationSeconds) > 0 ? "countdown" : "stopwatch";
+    
+    activeTimers[id] = {
+        id: id,
+        label: label,
+        duration: parseInt(durationSeconds) || 0,
+        elapsed: 0,
+        running: true,
+        splits: [],
+        type: type,
+        settings: {
+            labelFontSize: customStyles.labelFontSize || "14px",
+            labelFontWeight: customStyles.labelFontWeight || "600",
+            timerFontSize: customStyles.timerFontSize || "24px",
+            timerFontColor: customStyles.timerFontColor || "#ffffff",
+            showMode: customStyles.showMode || "always" // always, counting, never
+        }
+    };
+    
+    saveActiveTimersToStorage();
+    startTimerInstance(id);
+    return id;
+}
+function startTimerInstance(id) {
+    if (!activeTimers[id]) return;
+    activeTimers[id].running = true;
+    saveActiveTimersToStorage();
+    
+    if (!timerIntervalId) {
+        timerIntervalId = setInterval(processTimersTick, 1000);
+    }
+    renderActiveTimersUI();
+}
+function pauseTimerInstance(id) {
+    if (!activeTimers[id]) return;
+    activeTimers[id].running = false;
+    saveActiveTimersToStorage();
+    renderActiveTimersUI();
+}
+function resetTimerInstance(id) {
+    if (!activeTimers[id]) return;
+    activeTimers[id].elapsed = 0;
+    activeTimers[id].splits = [];
+    saveActiveTimersToStorage();
+    renderActiveTimersUI();
+}
+function stopTimerInstance(id) {
+    if (!activeTimers[id]) return;
+    delete activeTimers[id];
+    saveActiveTimersToStorage();
+    
+    if (Object.keys(activeTimers).length === 0) {
+        clearInterval(timerIntervalId);
+        timerIntervalId = null;
+    }
+    renderActiveTimersUI();
+}
+function splitTimerInstance(id) {
+    const t = activeTimers[id];
+    if (!t || !t.running) return;
+    const currentDisplay = formatTimeDigits(t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed);
+    t.splits.push(currentDisplay);
+    saveActiveTimersToStorage();
+    renderActiveTimersUI();
+}
+function processTimersTick() {
+    let hasRunningTimers = false;
+    let stateChanged = false;
+    
+    Object.keys(activeTimers).forEach(id => {
+        const t = activeTimers[id];
+        if (!t.running) return;
+        
+        hasRunningTimers = true;
+        t.elapsed++;
+        stateChanged = true;
+        
+        if (t.type === "countdown" && t.elapsed >= t.duration) {
+            t.elapsed = t.duration;
+            t.running = false;
+            if (typeof p8Confirm === "function") {
+                p8Confirm(`⏰ Countdown Finished: [${t.label}]`, true);
+            } else if (typeof botSay === "function") {
+                botSay(`⏰ Countdown Finished: [${t.label}]!`);
+            }
+        }
+    });
+    
+    if (stateChanged) saveActiveTimersToStorage();
+    
+    if (!hasRunningTimers && timerIntervalId) {
+        clearInterval(timerIntervalId);
+        timerIntervalId = null;
+    }
+    
+    renderActiveTimersUI();
+}
+function formatTimeDigits(totalSeconds) {
+    if (totalSeconds < 0) totalSeconds = 0;
+    const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const secs = String(totalSeconds % 60).padStart(2, '0');
+    return `${hrs}:${mins}:${secs}`;
+}
+function renderActiveTimersUI() {
+    const listContainer = document.getElementById("active-timers-list");
+    const overlayDigits = document.getElementById("timer-display-digits");
+    const overlayTitle = document.getElementById("timer-widget-title");
+    const overlaySplits = document.getElementById("timer-splits-container");
+    const timerWidget = document.getElementById("timer-widget");
+    
+    if (listContainer) listContainer.innerHTML = "";
+    if (overlaySplits) overlaySplits.innerHTML = "";
+    
+    const keys = Object.keys(activeTimers);
+    if (keys.length === 0) {
+        if (overlayDigits) overlayDigits.innerText = "00:00:00";
+        if (overlayTitle) overlayTitle.innerText = "⏱️ No Active Timers";
+        if (timerWidget) timerWidget.style.display = "none";
+        return;
+    }
+    
+    const primaryTimer = activeTimers[keys[keys.length - 1]];
+    if (primaryTimer) {
+        const s = primaryTimer.settings || {};
+        const remaining = primaryTimer.type === "countdown" ? (primaryTimer.duration - primaryTimer.elapsed) : primaryTimer.elapsed;
+        
+        if (overlayDigits) {
+            overlayDigits.innerText = formatTimeDigits(remaining);
+            overlayDigits.style.fontSize = s.timerFontSize || "24px";
+            overlayDigits.style.color = s.timerFontColor || "#ffffff";
+        }
+        
+        if (overlayTitle) {
+            overlayTitle.innerText = `${primaryTimer.type === 'stopwatch' ? '⏱️' : '⏳'} ${primaryTimer.label}`;
+            overlayTitle.style.fontSize = s.labelFontSize || "14px";
+            overlayTitle.style.fontWeight = s.labelFontWeight || "600";
+        }
+        
+        const editModeActive = (typeof isEditMode !== "undefined" && isEditMode);
+        const shouldShow = editModeActive ? true : (
+            s.showMode === "always" ? true :
+            s.showMode === "counting" ? primaryTimer.running :
+            false 
+        );
+        if (timerWidget) timerWidget.style.display = shouldShow ? "block" : "none";
+        
+        primaryTimer.splits.forEach((splitVal, index) => {
+            const div = document.createElement("div");
+            div.style.borderBottom = "1px solid rgba(255, 255, 255, 0.05)";
+            div.style.padding = "2px 0";
+            div.innerText = `Split 🟢 ${index + 1}: ${splitVal}`;
+            if (overlaySplits) overlaySplits.appendChild(div);
+        });
+    }
+    
+    keys.forEach(id => {
+        const t = activeTimers[id];
+        const rem = t.type === "countdown" ? (t.duration - t.elapsed) : t.elapsed;
+        
+        const row = document.createElement("div");
+        row.className = "timer-control-row";
+        row.style.cssText = "display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; background:rgba(0,0,0,0.2); padding:4px; border-radius:4px;";
+        
+        row.innerHTML = `
+            <span style="max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:${t.running ? 'var(--accent)' : '#a1a1aa'}">
+                ${t.type === 'stopwatch' ? '⏱️' : '⏳'} ${t.label} (${formatTimeDigits(rem)})
+            </span>
+            <div class="timer-btn-group" style="display:flex; gap:2px;">
+                <button type="button" class="t-start-btn" style="background:none; border:none; cursor:pointer;">▶️</button>
+                <button type="button" class="t-pause-btn" style="background:none; border:none; cursor:pointer;">⏸️</button>
+                <button type="button" class="t-reset-btn" style="background:none; border:none; cursor:pointer;">🔄</button>
+                <button type="button" class="t-split-btn" style="background:none; border:none; cursor:pointer; ${t.type === 'countdown' ? 'display:none;' : ''}">✂️</button>
+                <button type="button" class="t-delete-btn" style="background:none; border:none; cursor:pointer;">❌</button>
+            </div>
+        `;
+
+        // 🟢 DIRECT INLINE EVENT BINDING: Completely bypasses event delegation
+        row.querySelector(".t-start-btn").onclick = (e) => {
+            e.stopPropagation();
+            console.log(`⏱️ Start clicked for timer: ${t.id}`);
+            startTimerInstance(t.id);
+        };
+
+        row.querySelector(".t-pause-btn").onclick = (e) => {
+            e.stopPropagation();
+            console.log(`⏱️ Pause clicked for timer: ${t.id}`);
+            pauseTimerInstance(t.id);
+        };
+
+        row.querySelector(".t-reset-btn").onclick = (e) => {
+            e.stopPropagation();
+            console.log(`⏱️ Reset clicked for timer: ${t.id}`);
+            resetTimerInstance(t.id);
+        };
+
+        row.querySelector(".t-split-btn").onclick = (e) => {
+            e.stopPropagation();
+            console.log(`⏱️ Split clicked for timer: ${t.id}`);
+            splitTimerInstance(t.id);
+        };
+
+        row.querySelector(".t-delete-btn").onclick = (e) => {
+            e.stopPropagation();
+            console.log(`❌ Delete/Remove clicked for timer: ${t.id}`);
+            stopTimerInstance(t.id);
+        };
+
+        if (listContainer) listContainer.appendChild(row);
+    });
+}
+document.addEventListener("DOMContentLoaded", () => {
+    initTimerEngine();
+});
+function getLatestInstanceIdByType(type) {
+    const keys = Object.keys(activeTimers);
+    for (let i = keys.length - 1; i >= 0; i--) {
+        if (activeTimers[keys[i]].type === type) {
+            return keys[i];
+        }
+    }
+    return null;
+}
+
+// ================END OF TIMER SHIT========================================
+// ========================================================================================================================================================
+
+
+
+
+
 // ==========================================
 // 🛠️ emergency reset functions
 // ==========================================
