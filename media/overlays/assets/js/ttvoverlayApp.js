@@ -659,29 +659,6 @@ const REWARD_INPUTS_REGISTRY = [
 ];
 
 
-// --- OBS CONSOLE BRIDGE ---
-const originalLog = console.log;
-const originalError = console.error;
-const originalWarn = console.warn;
-
-console.log = function(...args) {
-    originalLog.apply(console, args);
-    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
-    displayConsoleMessage("DEBUG", msg);
-};
-
-console.error = function(...args) {
-    originalError.apply(console, args);
-    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
-    displayConsoleMessage("ERROR", msg);
-};
-
-console.warn = function(...args) {
-    originalWarn.apply(console, args);
-    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
-    displayConsoleMessage("WARN", msg);
-};
-
 
 
 
@@ -2003,10 +1980,6 @@ function startTwitch(channel, token) {
 
     ComfyJS.Init(channel, formattedToken);
 }
-
-
-
-
 
 
 // ==========================================
