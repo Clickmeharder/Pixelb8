@@ -51,7 +51,7 @@ future ideas:
 //__________________________________________________
 //==================================================
 
-
+import { WidgetEngine } from './widgetEngine.js';
 // --- STORAGE & SETTINGS INITIALIZATION ---
 let settings = JSON.parse(localStorage.getItem('p8_settings')) || {
     botPrefix: "🤖[BOT]:",
@@ -498,36 +498,14 @@ const SETTINGS_SCHEMA = [
                 idKey: "miner-widget", 
                 get: () => (settings ? !!settings.bitminerWidgetEnabled : false), 
                 set: async (v) => {
+                    // 1. Maintain your exact persistent state configuration
                     if (typeof settings !== 'undefined') settings.bitminerWidgetEnabled = v; 
                     if (typeof saveSettings === "function") saveSettings(); 
                     
-                    if (v) {
-                        // 🟢 CREATION PHASE: Instantiate on-demand if missing
-                        if (typeof window.streamBitMinerEngine === 'undefined' || window.streamBitMinerEngine === null) {
-                            try {
-                                const module = await import('./bitminer-widget.js');
-                                window.StreamBitMinerWidget = module.StreamBitMinerWidget;
-                                
-                                // This invokes the constructor which runs injectUI() automatically
-                                window.streamBitMinerEngine = new module.StreamBitMinerWidget();
-                                
-                                if (typeof injectAllWidgetCommands === 'function') injectAllWidgetCommands();
-                                console.log("⛏️ BitMiner Engine dynamically loaded and built.");
-                            } catch (err) {
-                                console.error("❌ Failed to instantiate BitMiner source:", err);
-                            }
-                        }
-                    } else {
-                        // 🔴 DESTROY PHASE: Run the lifecycle teardown sequence
-                        if (window.streamBitMinerEngine && typeof window.streamBitMinerEngine.destroy === 'function') {
-                            window.streamBitMinerEngine.destroy();
-                        }
-                        
-                        // Clear reference tags completely to drop memory tracking references
-                        window.streamBitMinerEngine = undefined;
-                        window.StreamBitMinerWidget = undefined;
-                    }
+                    // ⚙️ Hand execution logic over to the safe, isolated Phase 1 Engine
+                    await WidgetEngine.toggleWidget("miner-widget", v);
                     
+                    // 3. Keep standard UI cross-window sync mechanics running
                     if (typeof syncAllToggleUI === "function") syncAllToggleUI();
                 } 
             }
@@ -762,16 +740,10 @@ async function init() {
             console.error("❌ Failed to boot Jukebox Module:", err);
         }
     }
-	if (s.bitminerWidgetEnabled) {
-        try {
-            const module = await import('./bitminer-widget.js');
-            window.StreamBitMinerWidget = module.StreamBitMinerWidget;
-            window.streamBitMinerEngine = new module.StreamBitMinerWidget();
-            console.log("✅ BitMiner Widget Loaded on boot.");
-        } catch (err) {
-            console.error("❌ Failed to boot BitMiner Widget:", err);
-        }
-	}
+// Handing off your bitminer to the isolated engine pass!
+    if (typeof WidgetEngine !== 'undefined') {
+        WidgetEngine.initSavedWidgets(s);
+    }
     // 2. Scan and inject any commands that were loaded during boot
     console.log("📡 [Command Registry]: Running boot scan...");
     injectAllWidgetCommands();
