@@ -1,6 +1,3 @@
-
-//----
-
 /* 
 NOTES:
 
@@ -48,10 +45,17 @@ future ideas:
 	-> party lights
 	-?filters?
 */
-//__________________________________________________
-//==================================================
 
+//==================================================================================
+// Start of File
+//--------------------------------------------------------------
+
+//
+//==================================================
 import { WidgetEngine } from './widgetEngine.js';
+//==================================================
+//
+//
 // --- STORAGE & SETTINGS INITIALIZATION ---
 let settings = JSON.parse(localStorage.getItem('p8_settings')) || {
     botPrefix: "🤖[BOT]:",
@@ -2382,11 +2386,6 @@ function getLatestInstanceIdByType(type) {
         }
     }
     return null;
-}
-function resolveTargetId(message, type) {
-    const parts = message.trim().split(" ");
-    const id = parts[0]; // Assume first argument is the ID
-    return activeTimers[id] && activeTimers[id].type === type ? id : getLatestInstanceIdByType(type);
 }
 
 // ================END OF TIMER SHIT========================================
