@@ -49,10 +49,13 @@ future ideas:
 //==================================================================================
 // Start of File
 //--------------------------------------------------------------
+//==================================================
+import { WidgetEngine } from './widgetEngine.js';
+//==================================================
+//=============================================================================
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
-
-//
-//
 // --- STORAGE & SETTINGS INITIALIZATION ---
 let settings = JSON.parse(localStorage.getItem('p8_settings')) || {
     botPrefix: "🤖[BOT]:",
@@ -117,6 +120,62 @@ function saveSettings() {
     }
 }
 
+//================================================
+// --- OBS CONSOLE BRIDGE ---
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
+console.log = function(...args) {
+    originalLog.apply(console, args);
+    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+    displayConsoleMessage("DEBUG", msg);
+};
+console.error = function(...args) {
+    originalError.apply(console, args);
+    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+    displayConsoleMessage("ERROR", msg);
+};
+console.warn = function(...args) {
+    originalWarn.apply(console, args);
+    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+    displayConsoleMessage("WARN", msg);
+};
+function displayConsoleMessage(user, message) {
+    if (!consoleMessages) return;
+    const consoleContainer = document.getElementById("chat-feed");
+    if (!consoleContainer) return;
+
+    const consoleMessage = document.createElement("div");
+    consoleMessage.classList.add("consoleMessage");
+
+    const usernameSpan = document.createElement("span");
+    usernameSpan.classList.add("consoleUser");
+    usernameSpan.innerHTML = `${user}: `;
+
+    const messageSpan = document.createElement("span");
+    messageSpan.classList.add("consoleMessageText");
+    messageSpan.innerHTML = message;
+
+    consoleMessage.appendChild(usernameSpan);
+    consoleMessage.appendChild(messageSpan);
+    consoleContainer.appendChild(consoleMessage);
+
+    setTimeout(() => { consoleMessage.style.opacity = '0'; }, 15000);
+    setTimeout(() => { consoleMessage.remove(); }, 15500);
+
+    if (consoleContainer.children.length > 5) {
+        consoleContainer.removeChild(consoleContainer.firstChild);
+    }
+}
+//=================================================
+
+//=============================================================================
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
 const BOT_IDENTITY = "PIXELB8";
 const CLIENT_ID = "l1zvkm35dmtw4doj4y699nhnvx655c";
@@ -135,7 +194,10 @@ const statusIndicator = document.getElementById("status-indicator");
 const statusText = document.getElementById("status-text");
 const chatWidget = document.getElementById('chat-widget');
 const chatFeed = document.getElementById('chat-feed');
-let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 }, fadeTimeout;
+//=============================================================================
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
 
 // --- DYNAMIC THEMING & ALERTS DATA CORES ---
 let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
@@ -214,39 +276,10 @@ if (!registry.bits) {
     };
 }
 
-const styleConfig = [
-    { 
-        id: 'font', 
-        label: 'Font Family', 
-        var: '--font-family', 
-        type: 'select', 
-        options: [
-            "'Segoe UI', system-ui, sans-serif", 
-            "Inter, 'Helvetica Neue', Arial, sans-serif",
-            "'Courier New', monospace", 
-            "'Lucida Console', Monaco, monospace",
-            "Consolas, 'Andale Mono', monospace",
-            "Impact, Charcoal, sans-serif", 
-            "'Arial Black', Gadget, sans-serif",
-            "Georgia, serif", 
-            "'Times New Roman', Times, serif",
-            "'Palatino Linotype', 'Book Antiqua', serif",
-            "cursive", 
-            "'Comic Sans MS', 'Comic Sans', cursive",
-            "Trebuchet MS, sans-serif"
-        ] 
-    },
-    { id: 'size', label: 'Text Size', var: '--font-size', type: 'range', min: 12, max: 48 },
-    { id: 'bg', label: 'Widget Background', var: '--bg', type: 'hsla' },
-    { id: 'bstyle', label: 'Border Style', var: '--border-style', type: 'select', options: ['solid', 'dashed', 'dotted', 'double', 'none'] },
-    { id: 'accent', label: 'Accent & Border Color', var: '--accent', type: 'hsla' },
-    { id: 'radius', label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
-];
-
 //
-//==================================================
-import { WidgetEngine } from './widgetEngine.js';
-//==================================================
+//=============================================================================
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 // =========================================================================
 // --- CONFIGURATION MAPS & STRUCTS ---
 // =========================================================================
@@ -356,29 +389,6 @@ const WINDOW_CLOSE_MAPS = [
     { win: "style-editor",     triggers: ["close-editor-btn", "close-editor-top-btn"] },
 	{ win: "widgets-manager",     triggers: [//"close-widgets-manager-btn",
 	"close-widgets-top-btn"] }
-];
-// Configuration layout matrix for the Custom Select dropdown boxes
-const DROPDOWN_CONFIGS = [
-    { display: "display-bit-text-in-anim",   options: "options-bit-text-in-anim",   list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
-    { display: "display-bit-text-out-anim",  options: "options-bit-text-out-anim",  list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] },
-    { display: "display-bit-img-in-anim",    options: "options-bit-img-in-anim",    list: ["bounceIn", "fadeIn", "slideInLeft", "slideInRight", "zoomIn", "none"] },
-    { display: "display-bit-img-out-anim",   options: "options-bit-img-out-anim",   list: ["bounceOut", "fadeOut", "slideOutLeft", "slideOutRight", "zoomOut", "none"] }
-];
-// Structural array mapping state variables to element inputs and persistent targets
-const REWARD_SELECTS_REGISTRY = [
-    { id: "reward-text-in-anim",  def: "none" },
-    { id: "reward-text-out-anim", def: "none" },
-    { id: "reward-img-in-anim",   def: "none" },
-    { id: "reward-img-out-anim",  def: "none" },
-    { id: "reward-font-weight",   def: "bold" },
-    { id: "reward-img-mode",      def: "loop" }
-];
-const REWARD_INPUTS_REGISTRY = [
-    { id: "reward-font-size",      type: "text" },
-    { id: "reward-text-outline",   type: "text" },
-    { id: "reward-img-size",       type: "text" },
-    { id: "reward-text-duration",  type: "text" },
-    { id: "reward-img-duration",   type: "text" }
 ];
 
 const SETTINGS_SCHEMA = [
@@ -607,166 +617,44 @@ const SETTINGS_SCHEMA = [
     }
 	
 ];
-//================================================
-// --- OBS CONSOLE BRIDGE ---
-const originalLog = console.log;
-const originalError = console.error;
-const originalWarn = console.warn;
-console.log = function(...args) {
-    originalLog.apply(console, args);
-    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
-    displayConsoleMessage("DEBUG", msg);
-};
-console.error = function(...args) {
-    originalError.apply(console, args);
-    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
-    displayConsoleMessage("ERROR", msg);
-};
-console.warn = function(...args) {
-    originalWarn.apply(console, args);
-    const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
-    displayConsoleMessage("WARN", msg);
-};
-function displayConsoleMessage(user, message) {
-    if (!consoleMessages) return;
-    const consoleContainer = document.getElementById("chat-feed");
-    if (!consoleContainer) return;
-
-    const consoleMessage = document.createElement("div");
-    consoleMessage.classList.add("consoleMessage");
-
-    const usernameSpan = document.createElement("span");
-    usernameSpan.classList.add("consoleUser");
-    usernameSpan.innerHTML = `${user}: `;
-
-    const messageSpan = document.createElement("span");
-    messageSpan.classList.add("consoleMessageText");
-    messageSpan.innerHTML = message;
-
-    consoleMessage.appendChild(usernameSpan);
-    consoleMessage.appendChild(messageSpan);
-    consoleContainer.appendChild(consoleMessage);
-
-    setTimeout(() => { consoleMessage.style.opacity = '0'; }, 15000);
-    setTimeout(() => { consoleMessage.remove(); }, 15500);
-
-    if (consoleContainer.children.length > 5) {
-        consoleContainer.removeChild(consoleContainer.firstChild);
-    }
-}
-//=================================================
-async function init() {
-    applyTheme(registry.active);
-    const params = new URLSearchParams(window.location.search);
-    
-    if (params.get("token") && params.get("channel")) {
-        document.body.style.backgroundColor = "transparent";
-        document.body.style.backgroundImage = "none";
-        document.getElementById("overlay-wrapper").style.display = "block";
-        setEditMode(false);
-        startTwitch(params.get("channel"), params.get("token"));
-    } else {
-        document.body.style.backgroundColor = "#1a1a1a";
-        document.body.style.backgroundImage = "none";
-        document.getElementById("setup-interface").style.display = "block";
-        checkTwitchAuth();
-    }
-    
-    // Core Layout & Registry Loading
-    loadPositions();
-    renderSettingsWindow();
-    renderThemeControls();
-    
-    const s = typeof settings !== 'undefined' ? settings : {};
-
-    // =========================================================================
-    // ⚙️ SYSTEM EXTENSION ENGINE CASCADE
-    // =========================================================================
-    // Hand off ALL boot loading routines to the engine!
-    if (typeof WidgetEngine !== 'undefined') {
-        await WidgetEngine.initSavedWidgets(s);
-    }
-
-    // 2. Scan and inject any commands that were loaded during boot
-    console.log("📡 [Command Registry]: Running boot scan...");
-    injectAllWidgetCommands();
-    
-    // Populate registry array caches for rewards and bits
-    renderRewardsList(); 
-    populateCustomDropdowns();
-    initTimerEngine();
-    
-    // Bind all event listeners to the DOM and sync UI states
-    bindEvents();
-    if (typeof syncAllToggleUI === 'function') {
-        syncAllToggleUI();
-    }
-    
-    console.log("🚀 ttvoverlayapp.js version 0.112 finished loading");
-}
-
-function injectAllWidgetCommands() {
-    // 🔍 Read instances from both legacy window tags AND your modern engine tracks
-    const activeWidgets = [
-        { name: "StreamPet", instance: window.streamPetEngine },
-        { name: "EntropiaParser", instance: window.entropiaLogParser },
-        { name: "StreamJukebox", instance: window.streamJukeboxEngine },
-        
-        // ⚙️ Safely scan your new engine instances array if the engine is initialized
-        { 
-            name: "BitMiner (Engine)", 
-            instance: (typeof WidgetEngine !== 'undefined' && WidgetEngine.instances) ? WidgetEngine.instances.bitminer : null 
-        }
-    ];
-
-    console.log("📡 [Command Registry]: Starting automated injection scan...");
-
-    activeWidgets.forEach(widget => {
-        if (widget.instance) {
-            console.log(`✅ [Command Registry]: Found active instance for ${widget.name}. Injecting...`);
-            injectWidgetCommands(widget.instance);
-        } else {
-            console.warn(`⚠️ [Command Registry]: Widget instance for ${widget.name} is null/undefined. Skipping.`);
-        }
-    });
-
-    console.log("🏁 [Command Registry]: Injection scan complete.");
-}
-function injectWidgetCommands(widgetInstance) {
-    if (widgetInstance && typeof widgetInstance.getCommands === 'function') {
-        const widgetCommands = widgetInstance.getCommands(botSay);
-        
-        // Track successfully registered commands to print in a single line
-        const registeredKeys = [];
-
-        widgetCommands.forEach(cmd => {
-            const lookupKey = cmd.name.toLowerCase().trim();
-            
-            if (!commandsRegistry[lookupKey]) {
-                commandsRegistry[lookupKey] = {
-                    adminOnly: cmd.adminOnly || false,
-                    execute: cmd.execute
-                };
-                
-                // Append format tag to our logging collection array
-                const adminTag = cmd.adminOnly ? "🔒" : "👤";
-                registeredKeys.push(`!${lookupKey} ${adminTag}`);
-            }
-        });
-
-        // 📝 Consolidated Log: One clean printout statement per widget
-        if (registeredKeys.length > 0) {
-            console.log(`📡 [Commands]: Hooked [${registeredKeys.join(", ")}]`);
-        } else {
-            console.log(`📡 [Commands]: Scanning complete. No new command injections needed.`);
-        }
-    }
-}
 
 
+//=============================================================================
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
 // ==========================================
 // --- Theme System ---
 // ==========================================
+let isEditMode = true, dragTarget = null, offset = { x: 0, y: 0 }, fadeTimeout;
+const styleConfig = [
+    { 
+        id: 'font', 
+        label: 'Font Family', 
+        var: '--font-family', 
+        type: 'select', 
+        options: [
+            "'Segoe UI', system-ui, sans-serif", 
+            "Inter, 'Helvetica Neue', Arial, sans-serif",
+            "'Courier New', monospace", 
+            "'Lucida Console', Monaco, monospace",
+            "Consolas, 'Andale Mono', monospace",
+            "Impact, Charcoal, sans-serif", 
+            "'Arial Black', Gadget, sans-serif",
+            "Georgia, serif", 
+            "'Times New Roman', Times, serif",
+            "'Palatino Linotype', 'Book Antiqua', serif",
+            "cursive", 
+            "'Comic Sans MS', 'Comic Sans', cursive",
+            "Trebuchet MS, sans-serif"
+        ] 
+    },
+    { id: 'size', label: 'Text Size', var: '--font-size', type: 'range', min: 12, max: 48 },
+    { id: 'bg', label: 'Widget Background', var: '--bg', type: 'hsla' },
+    { id: 'bstyle', label: 'Border Style', var: '--border-style', type: 'select', options: ['solid', 'dashed', 'dotted', 'double', 'none'] },
+    { id: 'accent', label: 'Accent & Border Color', var: '--accent', type: 'hsla' },
+    { id: 'radius', label: 'Corner Radius', var: '--border-radius', type: 'range', min: 0, max: 50 }
+];
 
 function setEditMode(state) {
     isEditMode = state;
@@ -1129,13 +1017,33 @@ function renderSettingsWindow() {
 
     syncAllToggleUI();
 }
-
+//=============================================================================
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
 // ==========================================
 // --- Alert System ---
 // ==========================================
 
 // --- DYNAMIC REWARD ALERT REGISTRY ---
 // Allows streamers to store templates for any Channel Point reward name
+// Structural array mapping state variables to element inputs and persistent targets
+const REWARD_SELECTS_REGISTRY = [
+    { id: "reward-text-in-anim",  def: "none" },
+    { id: "reward-text-out-anim", def: "none" },
+    { id: "reward-img-in-anim",   def: "none" },
+    { id: "reward-img-out-anim",  def: "none" },
+    { id: "reward-font-weight",   def: "bold" },
+    { id: "reward-img-mode",      def: "loop" }
+];
+const REWARD_INPUTS_REGISTRY = [
+    { id: "reward-font-size",      type: "text" },
+    { id: "reward-text-outline",   type: "text" },
+    { id: "reward-img-size",       type: "text" },
+    { id: "reward-text-duration",  type: "text" },
+    { id: "reward-img-duration",   type: "text" }
+];
+
 let rewardAlerts = JSON.parse(localStorage.getItem('p8_reward_alerts')) || {
     "hydrate": {
         text: "💧 DRINK WATER, {user.toUpperCase()}!",
@@ -1549,6 +1457,8 @@ function updateAllBadgesUI() {
     });
 }
 //=============================================================================
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
 function displayChatMessage(user, message, flags = {}, extra = {}, processed = null) {
     const chatContainer = document.getElementById("chat-feed");
@@ -1949,8 +1859,123 @@ function startTwitch(channel, token) {
     };
     ComfyJS.Init(channel, formattedToken);
 }
+//
+//=============================================================================
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
 
+//============================
+
+async function init() {
+    applyTheme(registry.active);
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.get("token") && params.get("channel")) {
+        document.body.style.backgroundColor = "transparent";
+        document.body.style.backgroundImage = "none";
+        document.getElementById("overlay-wrapper").style.display = "block";
+        setEditMode(false);
+        startTwitch(params.get("channel"), params.get("token"));
+    } else {
+        document.body.style.backgroundColor = "#1a1a1a";
+        document.body.style.backgroundImage = "none";
+        document.getElementById("setup-interface").style.display = "block";
+        checkTwitchAuth();
+    }
+    
+    // Core Layout & Registry Loading
+    loadPositions();
+    renderSettingsWindow();
+    renderThemeControls();
+    
+    const s = typeof settings !== 'undefined' ? settings : {};
+
+    // =========================================================================
+    // ⚙️ SYSTEM EXTENSION ENGINE CASCADE
+    // =========================================================================
+    // Hand off ALL boot loading routines to the engine!
+    if (typeof WidgetEngine !== 'undefined') {
+        await WidgetEngine.initSavedWidgets(s);
+    }
+
+    // 2. Scan and inject any commands that were loaded during boot
+    console.log("📡 [Command Registry]: Running boot scan...");
+    injectAllWidgetCommands();
+    
+    // Populate registry array caches for rewards and bits
+    renderRewardsList(); 
+    populateCustomDropdowns();
+    initTimerEngine();
+    
+    // Bind all event listeners to the DOM and sync UI states
+    bindEvents();
+    if (typeof syncAllToggleUI === 'function') {
+        syncAllToggleUI();
+    }
+    
+    console.log("🚀 ttvoverlayapp.js version 0.112 finished loading");
+}
+function injectAllWidgetCommands() {
+    // 🔍 Read instances from both legacy window tags AND your modern engine tracks
+    const activeWidgets = [
+        { name: "StreamPet", instance: window.streamPetEngine },
+        { name: "EntropiaParser", instance: window.entropiaLogParser },
+        { name: "StreamJukebox", instance: window.streamJukeboxEngine },
+        
+        // ⚙️ Safely scan your new engine instances array if the engine is initialized
+        { 
+            name: "BitMiner (Engine)", 
+            instance: (typeof WidgetEngine !== 'undefined' && WidgetEngine.instances) ? WidgetEngine.instances.bitminer : null 
+        }
+    ];
+
+    console.log("📡 [Command Registry]: Starting automated injection scan...");
+
+    activeWidgets.forEach(widget => {
+        if (widget.instance) {
+            console.log(`✅ [Command Registry]: Found active instance for ${widget.name}. Injecting...`);
+            injectWidgetCommands(widget.instance);
+        } else {
+            console.warn(`⚠️ [Command Registry]: Widget instance for ${widget.name} is null/undefined. Skipping.`);
+        }
+    });
+
+    console.log("🏁 [Command Registry]: Injection scan complete.");
+}
+function injectWidgetCommands(widgetInstance) {
+    if (widgetInstance && typeof widgetInstance.getCommands === 'function') {
+        const widgetCommands = widgetInstance.getCommands(botSay);
+        
+        // Track successfully registered commands to print in a single line
+        const registeredKeys = [];
+
+        widgetCommands.forEach(cmd => {
+            const lookupKey = cmd.name.toLowerCase().trim();
+            
+            if (!commandsRegistry[lookupKey]) {
+                commandsRegistry[lookupKey] = {
+                    adminOnly: cmd.adminOnly || false,
+                    execute: cmd.execute
+                };
+                
+                // Append format tag to our logging collection array
+                const adminTag = cmd.adminOnly ? "🔒" : "👤";
+                registeredKeys.push(`!${lookupKey} ${adminTag}`);
+            }
+        });
+
+        // 📝 Consolidated Log: One clean printout statement per widget
+        if (registeredKeys.length > 0) {
+            console.log(`📡 [Commands]: Hooked [${registeredKeys.join(", ")}]`);
+        } else {
+            console.log(`📡 [Commands]: Scanning complete. No new command injections needed.`);
+        }
+    }
+}
+//=============================================================================
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 // ==========================================
 // --- dom/bindings---
 // ==========================================
@@ -2480,4 +2505,13 @@ function bindEvents() {
     }
 }
 init();
-
+//=============================================================================
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+//=================================================================================
+//---------------------------------------------------------------------------------
+//_________________________________________________________________________________

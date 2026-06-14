@@ -4,10 +4,10 @@
  * 
  * 
  */
- 
- 
- 
  console.log(" [Helper Functions]: Initializing initializing...");
+
+
+
 let registry = JSON.parse(localStorage.getItem('p8_registry')) || {
     active: 'Default',
     themes: {
