@@ -275,4 +275,3 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
         this.ctx.fillRect(15, 52, (this.state.heatLevel / 100) * 120, 6);
     }
 }
-localStorage.removeItem('pixelb8_widget_bit_miner_system'); window.location.reload();
