@@ -146,6 +146,25 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
 			controlContainer.appendChild(panelSection);
 		}
 	}
+	// Inside your StreamBitMinerWidget class methods
+    destroy() {
+        // Run the baseline clock clearance loops from the parent class
+        if (this.saveInterval) clearInterval(this.saveInterval);
+        if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+        
+        // Target and purge your hardcoded DOM elements cleanly
+        const overlayEl = document.getElementById("miner-overlay-element");
+        if (overlayEl) {
+            overlayEl.remove();
+        }
+        
+        const controlEl = document.getElementById("miner-widget-controls");
+        if (controlEl) {
+            controlEl.remove();
+        }
+        
+        console.log("⛏️ [Lifecycle]: BitMiner instance completely wiped from viewport.");
+    }
 	setWidgetBubble(txt) {
 		const bubble = document.getElementById("miner-bubble");
 		if (!bubble) return;

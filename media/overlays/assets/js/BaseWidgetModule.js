@@ -201,7 +201,35 @@ export class BaseWidgetModule {
 			controlWrapper.appendChild(panelSection);
 		}
 	}
+	// Add this inside the class methods of BaseWidgetModule
 
+    destroy() {
+        // 1. Terminate the data reconciliation engine loop
+        if (this.saveInterval) {
+            clearInterval(this.saveInterval);
+            this.saveInterval = null;
+        }
+        
+        // 2. Halt the graphics loop immediately to free up GPU resources
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+
+        // 3. Purge the overlay canvas wrapper node from the DOM matrix
+        const overlayEl = document.getElementById(this.overlayId);
+        if (overlayEl) {
+            overlayEl.remove();
+        }
+
+        // 4. Purge the control panel sub-matrix from the dashboard wrapper
+        const controlEl = document.getElementById(this.controlId);
+        if (controlEl) {
+            controlEl.remove();
+        }
+        
+        console.log(`🛑 [Lifecycle]: Module safely unloaded and components destroyed.`);
+    }
 	bindEventListeners() {
 		const panelContainer = document.getElementById(this.controlId);
 		if (!panelContainer) return;

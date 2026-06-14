@@ -501,19 +501,33 @@ const SETTINGS_SCHEMA = [
                     if (typeof settings !== 'undefined') settings.bitminerWidgetEnabled = v; 
                     if (typeof saveSettings === "function") saveSettings(); 
                     
-                    // Hot-load bitminer-widget.js dynamically mid-session
-                    if (v && typeof window.streamBitMinerEngine === 'undefined') {
-                        try {
-                            const module = await import('./bitminer-widget.js');
-                            window.StreamBitMinerWidget = module.StreamBitMinerWidget;
-                            window.streamBitMinerEngine = new module.StreamBitMinerWidget();
-                            
-                            if (typeof injectAllWidgetCommands === 'function') injectAllWidgetCommands();
-                            console.log("⛏️ BitMiner Widget Hot-Loaded and Instantiated mid-session!");
-                        } catch (err) {
-                            console.error("❌ Failed to hot-load BitMiner Widget source:", err);
+                    if (v) {
+                        // 🟢 CREATION PHASE: Instantiate on-demand if missing
+                        if (typeof window.streamBitMinerEngine === 'undefined' || window.streamBitMinerEngine === null) {
+                            try {
+                                const module = await import('./bitminer-widget.js');
+                                window.StreamBitMinerWidget = module.StreamBitMinerWidget;
+                                
+                                // This invokes the constructor which runs injectUI() automatically
+                                window.streamBitMinerEngine = new module.StreamBitMinerWidget();
+                                
+                                if (typeof injectAllWidgetCommands === 'function') injectAllWidgetCommands();
+                                console.log("⛏️ BitMiner Engine dynamically loaded and built.");
+                            } catch (err) {
+                                console.error("❌ Failed to instantiate BitMiner source:", err);
+                            }
                         }
+                    } else {
+                        // 🔴 DESTROY PHASE: Run the lifecycle teardown sequence
+                        if (window.streamBitMinerEngine && typeof window.streamBitMinerEngine.destroy === 'function') {
+                            window.streamBitMinerEngine.destroy();
+                        }
+                        
+                        // Clear reference tags completely to drop memory tracking references
+                        window.streamBitMinerEngine = undefined;
+                        window.StreamBitMinerWidget = undefined;
                     }
+                    
                     if (typeof syncAllToggleUI === "function") syncAllToggleUI();
                 } 
             }
