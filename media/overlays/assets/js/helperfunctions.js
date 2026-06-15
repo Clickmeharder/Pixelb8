@@ -763,6 +763,54 @@ function renderActiveTimersUI() {
         if (listContainer) listContainer.appendChild(row);
     });
 }
+function bindTimerSystemEvents() {
+    const colorPicker = document.getElementById("tmr-color");
+    const colorText = document.getElementById("tmr-color-text");
+
+    const updateTimerStyles = () => {
+        const color = colorText.value;
+        document.querySelectorAll('.p8-timer-widget').forEach(el => {
+            el.style.color = color;
+        });
+    };
+
+    if (colorPicker && colorText) {
+        colorPicker.addEventListener("input", (e) => {
+            colorText.value = e.target.value;
+            updateTimerStyles();
+        });
+
+        colorText.addEventListener("input", (e) => {
+            const val = e.target.value;
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                colorPicker.value = val;
+                updateTimerStyles();
+            }
+        });
+    }
+
+    onSafeClick("ui-create-timer-btn", () => {
+        const lblInput = document.getElementById("timer-label-input");
+        const durInput = document.getElementById("timer-duration-input");
+        
+        const label = lblInput.value.trim() || "Timer";
+        const duration = durInput.value || 0;
+        
+        const config = {
+            labelFontSize: document.getElementById("tmr-label-fz").value || "14px",
+            labelFontWeight: document.getElementById("tmr-label-fw").value || "600",
+            timerFontSize: document.getElementById("tmr-fz").value || "24px",
+            timerFontColor: colorText.value || "#ffffff",
+            showMode: document.getElementById("tmr-visibility").value || "always"
+        };
+
+        createTimerInstance(label, duration, config);
+        lblInput.value = "";
+        durInput.value = "";
+    });
+}
+
+
 if (!registry.timers) {
     registry.timers = {
         defaults: {
