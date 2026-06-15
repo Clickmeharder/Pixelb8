@@ -107,7 +107,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                     <div id="jb-upnext-Label">Up Next</div>
                     <div id="jb-upnext-title" class="jb-next-title">Nothing queued</div>
                     
-                    <div style="display: flex; gap: 5px; margin-top: 8px; align-items: center;">
+                    <div id="jb-current-controlbar">
                         <div class="jb-volume-control" style="display: flex; align-items: center; gap: 8px; flex: 1;">
                             <span style="font-size: 12px; color: #a1a1aa;">VOL</span>
                             <input type="range" id="jb-volume-slider" min="0" max="100" value="50" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
