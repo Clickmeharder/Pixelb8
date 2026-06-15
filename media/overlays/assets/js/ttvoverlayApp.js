@@ -1939,7 +1939,7 @@ function injectAllWidgetCommands() {
         { 
 			name: "StreamJukebox (Engine)", 
 			instance: (typeof WidgetEngine !== 'undefined' && WidgetEngine.instances) ? WidgetEngine.instances.streamjukebox : null 
-		}
+		},
         // ⚙️ Safely scan your new engine instances array if the engine is initialized
         { 
             name: "BitMiner (Engine)", 
