@@ -112,7 +112,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                             <span style="font-size: 12px; color: #a1a1aa;">VOL</span>
                             <input type="range" id="jb-volume-slider" min="0" max="100" value="50" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
                         </div>
-                        <button id="jb-skip-btn" class="p8-btn p8-btn-warning">⏭</button>
+                        <button id="jb-skip-btn" class="p8-btn">⏭</button>
                         <button id="jb-current-heart" class="p8-btn" >❤</button>
                     </div>
                 </div>
