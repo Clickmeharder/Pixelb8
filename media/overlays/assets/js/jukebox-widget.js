@@ -61,7 +61,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                         
 
                         <div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span class="settings-toggle-label" style="font-size: 12px;">Accept Requests</span>
+                            <span class="settings-toggle-label" style="font-size: 14px;">Accept Requests</span>
                             <div class="settings-toggle-controls">
                                 <span id="req-status-badge" class="toggle-status-badge">ON</span>
                                 <input type="checkbox" id="stg-toggle-requests-checkbox" checked>
@@ -69,7 +69,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                         </div>
 
                         <div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span class="settings-toggle-label" style="font-size: 12px;">Audio Only</span>
+                            <span class="settings-toggle-label" style="font-size: 14px;">Audio Only</span>
                             <div class="settings-toggle-controls">
                                 <span id="audio-status-badge" class="toggle-status-badge">OFF</span>
                                 <input type="checkbox" id="stg-toggle-audio-only-checkbox">
@@ -77,7 +77,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                         </div>
 
                         <div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span class="settings-toggle-label" style="font-size: 12px;">Fake Visualizer</span>
+                            <span class="settings-toggle-label" style="font-size: 14px;">Fake Visualizer</span>
                             <div class="settings-toggle-controls">
                                 <span id="av-status-badge" class="toggle-status-badge">OFF</span>
                                 <input type="checkbox" id="stg-toggle-visualizer-checkbox">
