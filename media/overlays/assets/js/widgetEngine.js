@@ -20,7 +20,7 @@ export const WidgetEngine = {
         },
         // 🎵 Added structural registry mapping pointing to your new class
         "jukebox-widget": {
-            path: './jukebox.js',
+            path: './jukebox-widget.js',
             className: 'StreamJukeboxModule',
             instanceKey: 'streamjukebox'
         }
