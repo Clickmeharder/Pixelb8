@@ -686,94 +686,6 @@ body.edit-mode .p8-widget#pet-widget::-webkit-resizer {
 				</div>
 			</div>
 
-<!-- 			<div id="jukebox-widget-controls" class="collapsible-section collapsed">
-				<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-					<span>🎵 Song Request Jukebox</span>
-					<span class="collapse-icon">▼</span>
-				</div>
-				<div class="collapsible-content">
-
-
-					<details style="margin-bottom: 15px; border: 2px solid #27272a; border-radius: 6px; background: #18181b;">
-						<summary style="padding: 10px; cursor: pointer; font-weight: bold; font-size: 13px; color: #fff; outline: none; ">
-							⚙️ Jukebox Configuration
-						</summary>
-						<div style="padding: 10px; border-top: 1px solid #27272a;">
-							<div class="settings-toggle-row" style="margin-bottom: 10px;">
-								<span class="settings-toggle-label">Enable Jukebox</span>
-								<div class="settings-toggle-controls">
-									<span id="jb-status-badge" class="toggle-status-badge">ON</span>
-									<label style="position: relative; display: inline-block; width: 34px; height: 20px; cursor: pointer;">
-										<input type="checkbox" id="stg-toggle-jukebox-checkbox" style="opacity: 0; width: 0; height: 0;">
-										<span style="position: absolute; inset: 0px; background-color: #3f3f46; transition: 0.3s; border-radius: 20px;"></span>
-									</label>
-								</div>
-							</div>
-							<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-								<span class="settings-toggle-label" style="font-size: 12px;">Accept Requests</span>
-								<div class="settings-toggle-controls">
-									<span id="req-status-badge" class="toggle-status-badge">ON</span>
-									<input type="checkbox" id="stg-toggle-requests-checkbox">
-								</div>
-							</div>
-
-							<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-								<span class="settings-toggle-label" style="font-size: 12px;">Audio Only</span>
-								<div class="settings-toggle-controls">
-									<span id="audio-status-badge" class="toggle-status-badge">OFF</span>
-									<input type="checkbox" id="stg-toggle-audio-only-checkbox">
-								</div>
-							</div>
-
-							<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-								<span class="settings-toggle-label" style="font-size: 12px;">Fake Visualizer</span>
-								<div class="settings-toggle-controls">
-									<span id="av-status-badge" class="toggle-status-badge">OFF</span>
-									<input type="checkbox" id="stg-toggle-visualizer-checkbox">
-								</div>
-							</div>
-
-							<div style="background: #141414; padding: 10px; border-radius: 4px; border: 1px solid #27272a;">
-								<label style="display: block; font-size: 10px; color: #a1a1aa; text-transform: uppercase; margin-bottom: 4px;">Vote Requirements</label>
-								<input type="number" id="jb-vote-req-input" class="p8-input" value="2" style="width: 100%; background: #000; border: 1px solid #3f3f46; color: #fff; padding: 4px;">
-							</div>
-
-						</div>
-					</details>
-					<div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
-						<input type="text" id="jb-search-input" class="p8-input" placeholder="Search or YouTube URL...">
-						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-							<button id="jb-add-queue-btn" class="p8-btn">Queue</button>
-							<button id="jb-add-fallback-btn" class="p8-btn alt-btn">Playlist</button>
-						</div>
-					</div>
-					<div id="jb-controls-nowplaying-section" style="background: #18181b; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #3f3f46;">
-						<div style="font-size: 10px; color: #a1a1aa; text-transform: uppercase; margin-bottom: 5px;">Playing Now</div>
-						<div id="jb-current-title" class="jb-current-title" style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; word-break: break-all;">No Track Loaded</div>
-						
-						<div style="font-size: 10px; color: #a1a1aa; text-transform: uppercase; margin-bottom: 2px; border-top: 1px solid #27272a; padding-top: 5px;">Up Next</div>
-						<div id="jb-next-title" class="jb-next-title" style="font-size: 11px; color: #71717a; font-style: italic;">Nothing queued</div>
-						<div style="display: flex; gap: 5px; margin-top: 8px;">
-							<div class="jb-volume-control" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
-								<span style="font-size: 12px; color: #a1a1aa;">VOL</span>
-								<input type="range" id="jb-volume-slider" min="0" max="100" value="50" 
-									   style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
-							</div>
-							<button id="jb-skip-btn" class="p8-btn p8-btn-warning" style="padding: 6px;">⏭</button>
-							<button id="jb-current-heart" class="p8-btn" style="flex: 1; background: #e11d48;">❤</button>
-						</div>
-					</div>
-					<div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; margin-top: 10px;">📋 Active Queue</div>
-					<div id="jb-queue-list" style="display: flex; flex-direction: column; gap: 4px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 2px inset #3f3f46; margin-bottom: 10px;"></div>
-					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
-						<button id="jb-clear-btn" class="p8-btn" style="margin:auto;padding: 6px; background: #991b1b;">CLEAR QUEUE</button>
-					</div>
-					<br>
-					<div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px;">📋 Fallback Playlist</div>
-					<div id="jb-fallback-list" style="display: flex; flex-direction: column; gap: 4px; height:64px;max-height: 150px; overflow-y: auto;resize:vertical; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 2px inset #3f3f46;"></div>
-				</div>
-			</div>
- -->
 		</div>
 		<div id="widgets-manager-footer" class="widget-footer">
 
@@ -796,8 +708,5 @@ body.edit-mode .p8-widget#pet-widget::-webkit-resizer {
 	
     <script type="module" src="../assets/js/ttvoverlayApp.js"></script>
 	<script type="module" src="../assets/js/widgetEngine.js"></script>
-	<!-- <script type="module" src="../assets/js/entropia-widget.js"></script> -->
-	<!-- <script type="module" src="../assets/js/entropia-widget-refactored.js"></script> -->
-    <!-- <script src="/assets/js/pixelpaint.js"></script> -->
 </body>
 </html>

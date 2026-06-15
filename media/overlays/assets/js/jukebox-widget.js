@@ -118,11 +118,13 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                 </div>
 
                 <div id="jb-queue-list-label">📋 Active Queue</div>
-                <div id="jb-queue-list" style=""></div>
+                <div id="jb-queue-list" style="">
+					<div id="jb-queue-list-controls">
+						<button id="jb-clear-btn" class="p8-btn">CLEAR QUEUE</button>
+					</div>
+				</div>
                 
-                <div id="jb-queue-list-controls">
-                    <button id="jb-clear-btn" class="p8-btn">CLEAR QUEUE</button>
-                </div>
+
                 <br>
                 <div id="jb-fallback-list-label">📋 Fallback Playlist</div>
                 <div id="jb-fallback-list"></div>
