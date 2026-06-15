@@ -112,20 +112,20 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                             <span style="font-size: 12px; color: #a1a1aa;">VOL</span>
                             <input type="range" id="jb-volume-slider" min="0" max="100" value="50" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
                         </div>
-                        <button id="jb-skip-btn" class="p8-btn p8-btn-warning" style="padding: 6px;">⏭</button>
-                        <button id="jb-current-heart" class="p8-btn" style="padding: 6px 12px; background: #e11d48; border: none; color: white; cursor: pointer; border-radius: 4px;">❤</button>
+                        <button id="jb-skip-btn" class="p8-btn p8-btn-warning">⏭</button>
+                        <button id="jb-current-heart" class="p8-btn" >❤</button>
                     </div>
                 </div>
 
-                <div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; margin-top: 10px;">📋 Active Queue</div>
-                <div id="jb-queue-list" style="display: flex; flex-direction: column; gap: 4px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 2px inset #3f3f46; margin-bottom: 10px;"></div>
+                <div id="jb-queue-list-label">📋 Active Queue</div>
+                <div id="jb-queue-list" style=""></div>
                 
-                <div style="display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px;">
-                    <button id="jb-clear-btn" class="p8-btn" style="margin: auto; padding: 6px; background: #991b1b; border: none; color: white; border-radius: 4px; cursor: pointer; width: 100%;">CLEAR QUEUE</button>
+                <div id="jb-queue-list-controls">
+                    <button id="jb-clear-btn" class="p8-btn">CLEAR QUEUE</button>
                 </div>
                 <br>
-                <div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px;">📋 Fallback Playlist</div>
-                <div id="jb-fallback-list" style="display: flex; flex-direction: column; gap: 4px; height: 64px; max-height: 150px; overflow-y: auto; resize: vertical; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 2px inset #3f3f46;"></div>
+                <div id="jb-fallback-list-label">📋 Fallback Playlist</div>
+                <div id="jb-fallback-list"></div>
             </div>
         `;
     }

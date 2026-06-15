@@ -193,6 +193,13 @@ body.edit-mode .p8-widget#pet-widget::-webkit-resizer {
 		margin-top: 8px;
 		align-items: center;
 	  }
+	  #jb-skip-btn{padding: 6px;
+	  }
+	  #jb-current-heart{
+	  padding: 6px 12px; background: #e11d48; border: none; color: white; cursor: pointer; border-radius: 4px;
+	  }
+	  
+	  
 	  #jb-upnext-label{
 		font-size: 14px;
 		color: #a1a1aa;
@@ -206,7 +213,16 @@ body.edit-mode .p8-widget#pet-widget::-webkit-resizer {
 		color: #71717a;
 		font-style: italic;
 	}
-	  
+	 #jb-queue-list-label{
+	 font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; margin-top: 10px;
+	 }
+	 #jb-queue-list{display: flex; flex-direction: column; gap: 4px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 2px inset #3f3f46; margin-bottom: 10px;
+	 }
+	 #jb-queue-list-controls{display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px;}
+	 #jb-clear-btn{margin: auto; padding: 6px; background: #991b1b; border: none; color: white; border-radius: 4px; cursor: pointer; width: 100%;}
+	 
+	 #jb-fallback-list-label{font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px;}
+	 #jb-fallback-list{display: flex; flex-direction: column; gap: 4px; height: 64px; max-height: 150px; overflow-y: auto; resize: vertical; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 2px inset #3f3f46;}
 	</style>
 </head>
 
