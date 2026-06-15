@@ -8,7 +8,7 @@ console.log(" [Pixelb8 Stream Widget Engine]: initializing...");
  */
 export const WidgetEngine = {
     instances: {
-        bitminer: null // Modern tracker
+        bitminer: null, // Modern tracker
 		streamjukebox: null  // 🎵 Modernized Jukebox instance slot
     },
 
