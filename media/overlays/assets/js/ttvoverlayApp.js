@@ -2516,17 +2516,17 @@ function bindBitManagerEvents() {
 // ⚙️ MAIN EVENT LISTENER BINDING ENGINE
 // =========================================================================
 function bindEvents() {
-    // 1. Fire up targeted semantic subsystems
+    // Fire up targeted semantic subsystems
     bindTwitchAuthEvents();
     bindLayoutNavigationEvents();
     bindTimerSystemEvents();
-    bindGlobalWindowInteractions();
+    bindActionRegistryMaps();
+    bindGlobalWindowInteractions(); // Runs layout close codes + global mouse canvas rules
 
-    // 2. Execute isolated downstream manager bindings
+    // Execute isolated downstream manager bindings
     if (typeof bindRewardsManagerEvents === "function") bindRewardsManagerEvents();
     if (typeof bindBitManagerEvents === "function") bindBitManagerEvents();
     
-    // 3. Keep layout controls in perfect sync on load
     if (typeof syncAllToggleUI === "function") {
         syncAllToggleUI();
     }
@@ -2590,7 +2590,23 @@ function bindLayoutNavigationEvents() {
             themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
         }
     }, true);
+    onSafeClick("close-widgets-manager-btn", () => {
+        const widgetWin = document.getElementById("widgets-manager");
+        if (widgetWin) widgetWin.style.display = "none";
+    });
 
+    if (typeof WINDOW_CLOSE_MAPS !== 'undefined' && Array.isArray(WINDOW_CLOSE_MAPS)) {
+        WINDOW_CLOSE_MAPS.forEach(mapping => {
+            if (mapping && Array.isArray(mapping.triggers)) {
+                mapping.triggers.forEach(triggerId => {
+                    onSafeClick(triggerId, () => {
+                        const targetWindow = document.getElementById(mapping.win);
+                        if (targetWindow) targetWindow.style.display = 'none';
+                    });
+                });
+            }
+        });
+    }
     onSafeClick("save-theme-btn", async () => {
         const nameInput = document.getElementById('theme-name-input');
         const newName = (nameInput ? nameInput.value.trim() : '') || 'Custom Theme';
@@ -2654,12 +2670,41 @@ function bindTimerSystemEvents() {
         lblInput.value = "";
         durInput.value = "";
     });
+}
 
+/**
+ * Loops through unified abstract action registries to parse simple system state routines
+ * (Resets, logouts, canvas edit-locking flags, and context-menu auto-collapsing)
+ */
+function bindActionRegistryMaps() {
+    if (typeof SIMPLE_CLICK_MAPS !== 'undefined' && Array.isArray(SIMPLE_CLICK_MAPS)) {
+        SIMPLE_CLICK_MAPS.forEach(cfg => {
+            const shouldStopPropagation = (cfg.id === "ctx-lock");
+            
+            onSafeClick(cfg.id, () => {
+                cfg.handler();
+                if (cfg.id.startsWith("ctx-")) {
+                    closeContextMenu();
+                }
+            }, shouldStopPropagation);
+        });
+    }
+}
+
+/**
+ * Sets deep window-level interaction rules and interface layout wrappers
+ * (Draggable windows, close maps, click-away blurs, context menus, and resize canvas caching)
+ */
+function bindGlobalWindowInteractions() {
+    // =========================================================================
+    // 🪟 EXPLICIT WINDOW LAYOUT & PANEL VISIBILITY CONTROLS
+    // =========================================================================
+    // Manual close override for widgets settings drawer
     onSafeClick("close-widgets-manager-btn", () => {
         const widgetWin = document.getElementById("widgets-manager");
         if (widgetWin) widgetWin.style.display = "none";
     });
-
+    // Iterative registry handling for abstract system modal loops
     if (typeof WINDOW_CLOSE_MAPS !== 'undefined' && Array.isArray(WINDOW_CLOSE_MAPS)) {
         WINDOW_CLOSE_MAPS.forEach(mapping => {
             if (mapping && Array.isArray(mapping.triggers)) {
@@ -2672,22 +2717,7 @@ function bindTimerSystemEvents() {
             }
         });
     }
-
-    SIMPLE_CLICK_MAPS.forEach(cfg => {
-        const shouldStopPropagation = (cfg.id === "ctx-lock");
-        onSafeClick(cfg.id, () => {
-            cfg.handler();
-            if (cfg.id.startsWith("ctx-")) closeContextMenu();
-        }, shouldStopPropagation);
-    });
-}
-
-/**
- * Sets deep low-level global listeners for workspace structural manipulation
- * (Drag-and-drop engines, context overrides, custom layout dropdown blur safety, and chat feed tracking)
- */
-function bindGlobalWindowInteractions() {
-    // Draggable Window Headers Engine Wiring
+    // Draggable UI Windows configurations hook
     if (typeof makeElementDraggable === "function") {
         DRAGGABLE_WINDOWS_CONFIG.forEach(cfg => {
             if (document.getElementById(cfg.winId)) {
@@ -2695,21 +2725,24 @@ function bindGlobalWindowInteractions() {
             }
         });
     }
-
-    // 🗺️ Mouse Capture Drag States
+    // =========================================================================
+    // 🖱️ LOW-LEVEL GLOBAL CAPTURE LISTENERS (Mouse & Canvas Operations)
+    // =========================================================================
     window.addEventListener('mousedown', e => {
         const ctxMenu = document.getElementById('p8-ctx-menu');
         const themeOpts = document.getElementById('theme-options');
         
+        // Auto-collapse layout context settings
         if (ctxMenu && ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) {
             closeContextMenu();
         }
         
+        // Auto-collapse open theme selectors
         if (themeOpts && themeOpts.style.display === 'block' && !e.target.closest('#theme-selector')) {
             themeOpts.style.display = 'none';
         }
 
-        // Auto-blur dropdown select custom interfaces when clicking away
+        // Auto-blur dynamic dropdown boxes when clicking canvas dead space
         if (!e.target.closest('.custom-select-display') &&
             !e.target.closest('.select-trigger') &&
             !e.target.closest('.custom-select-options-box') &&
@@ -2721,6 +2754,7 @@ function bindGlobalWindowInteractions() {
             });
         }
         
+        // Drag validation tracking gate
         if (typeof isEditMode === 'undefined' || !isEditMode || e.button !== 0 ||
             e.target.closest('#style-editor, #rewards-manager, #bit-manager, #settings-window, #widgets-manager, .timer-btn-group, .setup-container, .p8-modal')) {
             return;
@@ -2730,7 +2764,7 @@ function bindGlobalWindowInteractions() {
         
         if (dragTarget) {
             const r = dragTarget.getBoundingClientRect();
-            const handleSize = 64; // Matches CSS resize zone size flag
+            const handleSize = 64; 
             
             const isClickingResizer = (e.clientX > r.right - handleSize && 
                                        e.clientY > r.bottom - handleSize);
@@ -2760,8 +2794,9 @@ function bindGlobalWindowInteractions() {
             dragTarget = null;
         }
     });
-
-    // Automated Resize Observers for Chat Area Height Caching
+    // =========================================================================
+    // 📊 LAYOUT OBSERVERS & CONTEXT INTERCEPTORS
+    // =========================================================================
     if (typeof chatFeed !== 'undefined' && chatFeed) {
         let resizeTimeout;
         const resizeObserver = new ResizeObserver(entries => {
@@ -2785,7 +2820,6 @@ function bindGlobalWindowInteractions() {
         resizeObserver.observe(chatFeed);
     }
 
-    // Right-Click Context Custom Navigation Capture
     window.addEventListener('contextmenu', e => {
         if (e.target.closest('.setup-container') || e.target.closest('.p8-modal')) return;
         e.preventDefault();
@@ -2797,8 +2831,6 @@ function bindGlobalWindowInteractions() {
         }
     });
 }
-
-
 
 init();
 //=============================================================================
