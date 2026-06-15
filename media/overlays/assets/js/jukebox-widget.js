@@ -43,7 +43,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     }
 
     // ========================================================================
-    // 🪟 DECLARATIVE TEMPLATE ENGINE (Dashboard Panel HTML Matrix)
+    // 🪟 DECLARATIVE TEMPLATE ENGINE (Exact Original HTML Layout Restoration)
     // ========================================================================
     static get controlsTemplate() {
         return `
@@ -52,31 +52,44 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                 <span class="collapse-icon">▼</span>
             </div>
             <div class="collapsible-content">
+
                 <details style="margin-bottom: 15px; border: 2px solid #27272a; border-radius: 6px; background: #18181b;">
                     <summary style="padding: 10px; cursor: pointer; font-weight: bold; font-size: 13px; color: #fff; outline: none;">
                         ⚙️ Jukebox Configuration
                     </summary>
                     <div style="padding: 10px; border-top: 1px solid #27272a;">
-                        <div class="settings-toggle-row" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                            <span class="settings-toggle-label">Accept Requests</span>
-                            <div class="settings-toggle-controls" style="display: flex; align-items: center; gap: 8px;">
-                                <span id="req-status-badge" class="toggle-status-badge" style="font-size: 10px; padding: 2px 6px; background: #22c55e; color: #fff; border-radius: 3px; font-weight: bold;">ON</span>
+                        
+                        <div class="settings-toggle-row" style="margin-bottom: 10px;">
+                            <span class="settings-toggle-label">Enable Jukebox</span>
+                            <div class="settings-toggle-controls">
+                                <span id="jb-status-badge" class="toggle-status-badge">ON</span>
+                                <label style="position: relative; display: inline-block; width: 34px; height: 20px; cursor: pointer;">
+                                    <input type="checkbox" id="stg-toggle-jukebox-checkbox" style="opacity: 0; width: 0; height: 0;" checked>
+                                    <span style="position: absolute; inset: 0px; background-color: #3f3f46; transition: 0.3s; border-radius: 20px;"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span class="settings-toggle-label" style="font-size: 12px;">Accept Requests</span>
+                            <div class="settings-toggle-controls">
+                                <span id="req-status-badge" class="toggle-status-badge">ON</span>
                                 <input type="checkbox" id="stg-toggle-requests-checkbox" checked>
                             </div>
                         </div>
 
                         <div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span class="settings-toggle-label">Audio Only</span>
-                            <div class="settings-toggle-controls" style="display: flex; align-items: center; gap: 8px;">
-                                <span id="audio-status-badge" class="toggle-status-badge" style="font-size: 10px; padding: 2px 6px; background: #ef4444; color: #fff; border-radius: 3px; font-weight: bold;">OFF</span>
+                            <span class="settings-toggle-label" style="font-size: 12px;">Audio Only</span>
+                            <div class="settings-toggle-controls">
+                                <span id="audio-status-badge" class="toggle-status-badge">OFF</span>
                                 <input type="checkbox" id="stg-toggle-audio-only-checkbox">
                             </div>
                         </div>
 
                         <div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span class="settings-toggle-label">Audio Wave Visualizer</span>
-                            <div class="settings-toggle-controls" style="display: flex; align-items: center; gap: 8px;">
-                                <span id="av-status-badge" class="toggle-status-badge" style="font-size: 10px; padding: 2px 6px; background: #ef4444; color: #fff; border-radius: 3px; font-weight: bold;">OFF</span>
+                            <span class="settings-toggle-label" style="font-size: 12px;">Fake Visualizer</span>
+                            <div class="settings-toggle-controls">
+                                <span id="av-status-badge" class="toggle-status-badge">OFF</span>
                                 <input type="checkbox" id="stg-toggle-visualizer-checkbox">
                             </div>
                         </div>
@@ -85,32 +98,32 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                             <label style="display: block; font-size: 10px; color: #a1a1aa; text-transform: uppercase; margin-bottom: 4px;">Vote Requirements</label>
                             <input type="number" id="jb-vote-req-input" class="p8-input" value="2" style="width: 100%; background: #000; border: 1px solid #3f3f46; color: #fff; padding: 4px; box-sizing: border-box;">
                         </div>
+
                     </div>
                 </details>
 
                 <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
                     <input type="text" id="jb-search-input" class="p8-input" placeholder="Search or YouTube URL..." style="width: 100%; box-sizing: border-box;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-                        <button id="jb-add-queue-btn" class="p8-btn" style="width:100%;">Queue</button>
-                        <button id="jb-add-fallback-btn" class="p8-btn alt-btn" style="width:100%;">Playlist</button>
+                        <button id="jb-add-queue-btn" class="p8-btn">Queue</button>
+                        <button id="jb-add-fallback-btn" class="p8-btn alt-btn">Playlist</button>
                     </div>
                 </div>
 
                 <div id="jb-controls-nowplaying-section" style="background: #18181b; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #3f3f46;">
                     <div style="font-size: 10px; color: #a1a1aa; text-transform: uppercase; margin-bottom: 5px;">Playing Now</div>
-                    <div class="jb-current-title" style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; word-break: break-all;">No Track Loaded</div>
+                    <div id="jb-current-title" class="jb-current-title" style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; word-break: break-all;">No Track Loaded</div>
                     
                     <div style="font-size: 10px; color: #a1a1aa; text-transform: uppercase; margin-bottom: 2px; border-top: 1px solid #27272a; padding-top: 5px;">Up Next</div>
                     <div id="jb-next-title" class="jb-next-title" style="font-size: 11px; color: #71717a; font-style: italic;">Nothing queued</div>
                     
-                    <div class="jb-volume-control" style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 10px;">
-                        <span style="font-size: 12px; color: #a1a1aa;">VOL</span>
-                        <input type="range" id="jb-volume-slider" min="0" max="100" value="50" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
-                    </div>
-                    
-                    <div style="display: flex; gap: 5px;">
-                        <button id="jb-skip-btn" class="p8-btn p8-btn-warning" style="padding: 6px; flex: 1;">⏭ Skip</button>
-                        <button id="jb-current-heart" class="p8-btn" style="flex: 1; background: #e11d48;">❤ Like</button>
+                    <div style="display: flex; gap: 5px; margin-top: 8px; align-items: center;">
+                        <div class="jb-volume-control" style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                            <span style="font-size: 12px; color: #a1a1aa;">VOL</span>
+                            <input type="range" id="jb-volume-slider" min="0" max="100" value="50" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
+                        </div>
+                        <button id="jb-skip-btn" class="p8-btn p8-btn-warning" style="padding: 6px;">⏭</button>
+                        <button id="jb-current-heart" class="p8-btn" style="padding: 6px 12px; background: #e11d48; border: none; color: white; cursor: pointer; border-radius: 4px;">❤</button>
                     </div>
                 </div>
 
@@ -118,11 +131,11 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                 <div id="jb-queue-list" style="display: flex; flex-direction: column; gap: 4px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 2px inset #3f3f46; margin-bottom: 10px;"></div>
                 
                 <div style="display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px;">
-                    <button id="jb-clear-btn" class="p8-btn" style="width: 100%; padding: 6px; background: #991b1b; color: white;">CLEAR QUEUE</button>
+                    <button id="jb-clear-btn" class="p8-btn" style="margin: auto; padding: 6px; background: #991b1b; border: none; color: white; border-radius: 4px; cursor: pointer; width: 100%;">CLEAR QUEUE</button>
                 </div>
                 <br>
                 <div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px;">📋 Fallback Playlist</div>
-                <div id="jb-fallback-list" style="display: flex; flex-direction: column; gap: 4px; height:64px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 2px inset #3f3f46;"></div>
+                <div id="jb-fallback-list" style="display: flex; flex-direction: column; gap: 4px; height: 64px; max-height: 150px; overflow-y: auto; resize: vertical; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px; border: 2px inset #3f3f46;"></div>
             </div>
         `;
     }
@@ -131,7 +144,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     // 🪟 VIEWPORT INJECTION LAYER OVERRIDES
     // ========================================================================
     injectUI() {
-        // 1. Mount Overlay Viewport Container Matching Your Exact Design Parameters
+        // 1. Mount Overlay Viewport Container
         const overlayWrapper = document.getElementById("overlay-wrapper");
         if (overlayWrapper && !document.getElementById(this.overlayId)) {
             const overlayEl = document.createElement("div");
@@ -139,7 +152,6 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             overlayEl.className = "p8-widget"; 
             overlayEl.style.cssText = `position: absolute; width: 300px; background: rgba(15,15,15,0.95); border: 1px solid var(--accent, #a855f7); border-radius: 4px; padding: 10px; color: #fff; font-family: monospace; z-index: 100;`;
             
-            // Restore persistent visual coordinates or handle initialization coordinates cleanly
             const savedLayout = localStorage.getItem(`p8_pos_${this.overlayId}`);
             if (savedLayout) {
                 try {
@@ -252,14 +264,19 @@ export class StreamJukeboxModule extends BaseWidgetModule {
 
         // Configuration Toggles & Status Badging Routing Pass
         panel.addEventListener("change", (e) => {
+            if (e.target.id === "stg-toggle-jukebox-checkbox") {
+                // Connects the inner layout visibility toggle selector to the master application schema handler
+                const badge = panel.querySelector('#jb-status-badge');
+                if (badge) badge.textContent = e.target.checked ? "ON" : "OFF";
+                if (typeof WidgetEngine !== 'undefined') {
+                    WidgetEngine.toggleWidget("jukebox", e.target.checked);
+                }
+            }
             if (e.target.id === "stg-toggle-requests-checkbox") {
                 this.acceptRequests = e.target.checked;
                 localStorage.setItem("jbAcceptRequests", e.target.checked);
                 const badge = panel.querySelector('#req-status-badge');
-                if (badge) {
-                    badge.textContent = e.target.checked ? "ON" : "OFF";
-                    badge.style.background = e.target.checked ? "#22c55e" : "#ef4444";
-                }
+                if (badge) badge.textContent = e.target.checked ? "ON" : "OFF";
             }
             if (e.target.id === "stg-toggle-audio-only-checkbox") {
                 this.state.isAudioOnly = e.target.checked;
@@ -300,7 +317,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             }
         });
 
-        // Vote Requirement Dynamic Value Capture
+        // Vote Requirement Value Input Observer
         const voteInput = panel.querySelector('#jb-vote-req-input');
         if (voteInput) {
             voteInput.addEventListener('input', (e) => {
@@ -310,7 +327,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             });
         }
 
-        // Volume Level Audio Tickers
+        // Slider Value Audio Handlers
         const volSlider = panel.querySelector('#jb-volume-slider');
         if (volSlider) {
             volSlider.oninput = (e) => {
@@ -331,10 +348,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         if (reqToggle) {
             reqToggle.checked = this.acceptRequests;
             const badge = panel.querySelector('#req-status-badge');
-            if (badge) {
-                badge.textContent = this.acceptRequests ? "ON" : "OFF";
-                badge.style.background = this.acceptRequests ? "#22c55e" : "#ef4444";
-            }
+            if (badge) badge.textContent = this.acceptRequests ? "ON" : "OFF";
         }
 
         const audioToggle = panel.querySelector('#stg-toggle-audio-only-checkbox');
@@ -373,6 +387,8 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         const barWidth = 6;
         const barGap = 4;
         const totalBars = Math.ceil(canvas.width / (barWidth + barGap));
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         for (let i = 0; i < totalBars; i++) {
             const baseWave1 = Math.sin(i * this.visualSignature.waveFreq1 + synchronizedTimeTicker);
