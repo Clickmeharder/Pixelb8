@@ -54,7 +54,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             <div class="collapsible-content">
 
                 <details style="margin-bottom: 15px; border: 2px solid #27272a; border-radius: 6px; background: #18181b;">
-                    <summary style="padding: 10px; cursor: pointer; font-weight: bold; font-size: 13px; color: #fff; outline: none;">
+                    <summary id="jb-config-header">
                         ⚙️ Jukebox Configuration
                     </summary>
                     <div style="padding: 10px; border-top: 1px solid #27272a;">
