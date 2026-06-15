@@ -101,11 +101,11 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                 </div>
 
                 <div id="jb-controls-nowplaying-section" style="background: #18181b; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #3f3f46;">
-                    <div style="font-size: 10px; color: #a1a1aa; text-transform: uppercase; margin-bottom: 5px;">Playing Now</div>
-                    <div id="jb-current-title" class="jb-current-title" style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; word-break: break-all;">No Track Loaded</div>
+                    <div id="jb-current-Label">Playing Now</div>
+                    <div id="jb-current-title" class="jb-current-title" >No Track Loaded</div>
                     
-                    <div style="font-size: 10px; color: #a1a1aa; text-transform: uppercase; margin-bottom: 2px; border-top: 1px solid #27272a; padding-top: 5px;">Up Next</div>
-                    <div id="jb-next-title" class="jb-next-title" style="font-size: 11px; color: #71717a; font-style: italic;">Nothing queued</div>
+                    <div id="jb-upnext-Label">Up Next</div>
+                    <div id="jb-upnext-title" class="jb-next-title">Nothing queued</div>
                     
                     <div style="display: flex; gap: 5px; margin-top: 8px; align-items: center;">
                         <div class="jb-volume-control" style="display: flex; align-items: center; gap: 8px; flex: 1;">
