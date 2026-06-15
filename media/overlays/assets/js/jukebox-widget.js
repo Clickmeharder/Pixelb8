@@ -84,9 +84,9 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                             </div>
                         </div>
 
-                        <div style="background: #141414; padding: 10px; border-radius: 4px; border: 1px solid #27272a;">
-                            <label style="display: block; font-size: 10px; color: #a1a1aa; text-transform: uppercase; margin-bottom: 4px;">Vote Requirements</label>
-                            <input type="number" id="jb-vote-req-input" class="p8-input" value="2" style="width: 100%; background: #000; border: 1px solid #3f3f46; color: #fff; padding: 4px; box-sizing: border-box;">
+                        <div id="jb-vote-req-wrapper">
+                            <label id="jb-vote-req-label">Vote Requirements</label>
+                            <input type="number" id="jb-vote-req-input" class="p8-input" value="2">
                         </div>
 
                     </div>
