@@ -343,7 +343,7 @@ export class BaseWidgetModule {
 		// 🎨 Inject module drawing pipelines (Phase 0 -> Phase 6 layout operations) here
 	}
 
-	animate(timestamp) {
+/* 	animate(timestamp) {
 		const tick = Math.floor(timestamp / 16.67); // Normalized 60hz engine loop metric
 
 		this.updateAI(tick);
@@ -361,5 +361,35 @@ export class BaseWidgetModule {
 		}
 
 		this.animationFrameId = requestAnimationFrame(this.animate);
+	} */
+	animate(timestamp) {
+		// 🛑 SAFETY GATE: If the widget has been flagged for destruction or is hidden,
+		// kill the animation pipeline immediately and release the frame request.
+		if (this.state && this.state.isVisible === false) {
+			if (this.animationFrameId) {
+				cancelAnimationFrame(this.animationFrameId);
+				this.animationFrameId = null;
+			}
+			return;
+		}
+
+		const tick = Math.floor(timestamp / 16.67); // Normalized 60hz engine loop metric
+
+		this.updateAI(tick);
+
+		if (this.ctx && this.canvas) {
+			// Wipe frame clear for next redraw stack pass
+			this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			
+			this.ctx.save();
+			// Scale variables and camera anchor operations run cleanly here...
+			
+			this.drawEnvironment(tick);
+			
+			this.ctx.restore();
+		}
+
+		// Recurse cleanly, capturing the frame ID context handle for zero-leak clearing
+		this.animationFrameId = requestAnimationFrame(this.animate.bind(this));
 	}
 }

@@ -1935,8 +1935,11 @@ function injectAllWidgetCommands() {
     const activeWidgets = [
         { name: "StreamPet", instance: window.streamPetEngine },
         { name: "EntropiaParser", instance: window.entropiaLogParser },
-        { name: "StreamJukebox", instance: window.streamJukeboxEngine },
-        
+        // { name: "StreamJukebox", instance: window.streamJukeboxEngine },
+        { 
+			name: "StreamJukebox (Engine)", 
+			instance: (typeof WidgetEngine !== 'undefined' && WidgetEngine.instances) ? WidgetEngine.instances.streamjukebox : null 
+		}
         // ⚙️ Safely scan your new engine instances array if the engine is initialized
         { 
             name: "BitMiner (Engine)", 
@@ -2519,6 +2522,7 @@ function bindEvents() {
     // Fire up targeted semantic subsystems
     bindTwitchAuthEvents();
     bindLayoutNavigationEvents();
+	//bindtimersystemevents is currently inside helper functions and the timer logic should eventually be put into its own widget
     bindTimerSystemEvents();
     bindActionRegistryMaps();
     bindGlobalWindowInteractions(); // Runs layout close codes + global mouse canvas rules

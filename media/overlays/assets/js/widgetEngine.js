@@ -9,6 +9,7 @@ console.log(" [Pixelb8 Stream Widget Engine]: initializing...");
 export const WidgetEngine = {
     instances: {
         bitminer: null // Modern tracker
+		streamjukebox: null  // 🎵 Modernized Jukebox instance slot
     },
 
     registryMap: {
@@ -16,6 +17,12 @@ export const WidgetEngine = {
             path: './bitminer-widget.js',
             className: 'StreamBitMinerWidget',
             instanceKey: 'bitminer'
+        },
+        // 🎵 Added structural registry mapping pointing to your new class
+        "jukebox-widget": {
+            path: './jukebox.js',
+            className: 'StreamJukeboxModule',
+            instanceKey: 'streamjukebox'
         }
     },
 
@@ -63,7 +70,10 @@ export const WidgetEngine = {
         if (settings.bitminerWidgetEnabled) {
             await this.toggleWidget("miner-widget", true);
         }
-
+		// 🎵 PROMOTED UPWARD: The Jukebox now spawns cleanly via the modern class handler
+        if (settings.jukeboxWidgetEnabled) {
+            await this.toggleWidget("jukebox-widget", true);
+        }
         // =========================================================================
         // 🏛️ LEGACY COMPATIBILITY LAYER (To be refactored into classes later)
         // =========================================================================
@@ -94,7 +104,7 @@ export const WidgetEngine = {
         }
 
         // 🎸 Legacy Jukebox Boot Pass
-        if (settings.jukeboxWidgetEnabled) {
+/*         if (settings.jukeboxWidgetEnabled) {
             try {
                 const module = await import('./jukebox.js');
                 window.StreamJukebox = module.StreamJukebox;
@@ -103,7 +113,7 @@ export const WidgetEngine = {
             } catch (err) {
                 console.error("❌ [Engine Legacy Boot Failure] Jukebox:", err);
             }
-        }
+        } */
 		    // 2. Scan and inject any commands that were loaded during boot
 
     }
