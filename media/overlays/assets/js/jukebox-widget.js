@@ -59,16 +59,6 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                     </summary>
                     <div style="padding: 10px; border-top: 1px solid #27272a;">
                         
-                        <div class="settings-toggle-row" style="margin-bottom: 10px;">
-                            <span class="settings-toggle-label">Enable Jukebox</span>
-                            <div class="settings-toggle-controls">
-                                <span id="jb-status-badge" class="toggle-status-badge">ON</span>
-                                <label style="position: relative; display: inline-block; width: 34px; height: 20px; cursor: pointer;">
-                                    <input type="checkbox" id="stg-toggle-jukebox-checkbox" style="opacity: 0; width: 0; height: 0;" checked>
-                                    <span style="position: absolute; inset: 0px; background-color: #3f3f46; transition: 0.3s; border-radius: 20px;"></span>
-                                </label>
-                            </div>
-                        </div>
 
                         <div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <span class="settings-toggle-label" style="font-size: 12px;">Accept Requests</span>
@@ -264,14 +254,6 @@ export class StreamJukeboxModule extends BaseWidgetModule {
 
         // Configuration Toggles & Status Badging Routing Pass
         panel.addEventListener("change", (e) => {
-            if (e.target.id === "stg-toggle-jukebox-checkbox") {
-                // Connects the inner layout visibility toggle selector to the master application schema handler
-                const badge = panel.querySelector('#jb-status-badge');
-                if (badge) badge.textContent = e.target.checked ? "ON" : "OFF";
-                if (typeof WidgetEngine !== 'undefined') {
-                    WidgetEngine.toggleWidget("jukebox", e.target.checked);
-                }
-            }
             if (e.target.id === "stg-toggle-requests-checkbox") {
                 this.acceptRequests = e.target.checked;
                 localStorage.setItem("jbAcceptRequests", e.target.checked);
