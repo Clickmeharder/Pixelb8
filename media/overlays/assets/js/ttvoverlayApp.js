@@ -543,7 +543,7 @@ const SETTINGS_SCHEMA = [
                     if (typeof syncAllToggleUI === "function") syncAllToggleUI();
                 } 
             },
-            { 
+/*             { 
                 label: "Enable Jukebox Widget", 
                 idKey: "jukebox", 
                 get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
@@ -567,6 +567,26 @@ const SETTINGS_SCHEMA = [
                     }
                     
                     // Always sync up the visibility across windows instantly
+                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+                } 
+            }, */
+			{ 
+                label: "Enable Jukebox Widget", 
+                idKey: "jukebox", 
+                get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
+                set: async (v) => {
+                    // 1. Maintain your exact persistent state configuration safely
+                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    
+                    // ⚙️ Hand execution lifecycle rules cleanly over to the modern unified Engine!
+                    if (typeof WidgetEngine !== 'undefined' && typeof WidgetEngine.toggleWidget === 'function') {
+                        await WidgetEngine.toggleWidget("jukebox-widget", v);
+                    } else {
+                        console.warn("⚠️ [Schema Router]: WidgetEngine unavailable for Jukebox lifecycle modification.");
+                    }
+                    
+                    // 3. Keep standard UI cross-window sync mechanics running
                     if (typeof syncAllToggleUI === "function") syncAllToggleUI();
                 } 
             },
