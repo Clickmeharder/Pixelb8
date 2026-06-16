@@ -45,43 +45,24 @@ const Emojinko_HTMLTEMPLATES = {
 
 export class StreamEmojinkoModule extends BaseWidgetModule {
 	constructor() {
-		super("stream_Emojinko", {
-			menuTitle: "🎯 Emojinko"
+		// Pass namespace key up to Base configuration setup parameters
+		super("emojinko", {
+			menuTitle: "🎯 Emojinko Plinko Game"
 		});
 
-		this.state = {
-			gameEnabled: true,
-			dropDuration: 4, 
-			maxDropsPerUser: 3, 
-			scores: {},      
-			userDropTracker: {}, 
-			commandAccess: this.state?.commandAccess || {}
-		};
-
-		this.pegs = [];
-		this.activeTokens = [];
-		this.canvas = null;
-		this.ctx = null;
-		this.animationFrameId = null;
-
-		this.loadData();
-
-		const matrixTarget = document.getElementById(this.controlId)?.querySelector('.matrix-container-target');
-		if (matrixTarget) {
-			matrixTarget.innerHTML = this.renderCommandRouterMatrixHTML();
-		}
-
-		// Delay overlay generation slightly to let base templates anchor in place
-		setTimeout(() => this.injectViewportOverlay(), 500);
-	}
-
-	loadData() {
-		super.loadData(); 
-
+		// Enforce state configurations safely post-loadData cascade sequences
+		this.state.gameEnabled = this.state.gameEnabled !== undefined ? this.state.gameEnabled : true;
+		this.state.dropDuration = this.state.dropDuration || 4;
+		this.state.maxDropsPerUser = this.state.maxDropsPerUser || 3;
 		if (!this.state.scores) this.state.scores = {};
 		if (!this.state.userDropTracker) this.state.userDropTracker = {};
-		if (this.state.dropDuration === undefined) this.state.dropDuration = 4;
-		if (this.state.maxDropsPerUser === undefined) this.state.maxDropsPerUser = 3;
+
+		// 🛠️ FIX: Decouple entirely from base execution layers
+		this.physicsCanvas = null;
+		this.physicsCtx = null;
+		this.pegs = [];
+		this.activeTokens = [];
+		this.physicsLoopId = null;
 
 		this.scoreZones = [
 			{ minX: 0, maxX: 25, label: "100 Pts", multiplier: 100 },
@@ -89,47 +70,32 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			{ minX: 50, maxX: 75, label: "🍀 LUCKY", multiplier: 500 },
 			{ minX: 75, maxX: 100, label: "50 Pts", multiplier: 50 }
 		];
+
+		// Force re-execution under clean context properties
+		this.injectViewportOverlay();
 	}
 
 	getControlsMarkup() {
 		return `
-			${Emojinko_HTMLTEMPLATES.dashboard(this.state.dropDuration, this.state.maxDropsPerUser)}
+			${Emojinko_HTMLTEMPLATES.dashboard(this.state.dropDuration || 4, this.state.maxDropsPerUser || 3)}
 			${Emojinko_HTMLTEMPLATES.leaderboard}
 		`;
 	}
 
 	injectViewportOverlay() {
-		// Guard: If we already have a canvas, don't build another layout frame
-		if (document.getElementById(this.overlayId)) return;
+		if (document.getElementById("dz-emojinko-overlay-container")) return;
 
-		// Context Anchor: Force finding streaming viewport slots first before defaulting to documents
-		let overlayWrapper = document.getElementById("overlay-frame") ||
-		                     document.getElementById("overlay-wrapper") || 
+		let overlayWrapper = document.getElementById("overlay-wrapper") || 
 		                     document.getElementById("main-layout") || 
-		                     document.querySelector(".ttv-overlay-container");
-
-		// 🌟 CRITICAL CONTEXT GUARD: If no explicit stream overlay canvas wrappers exist,
-		// and we are running inside a dashboard panel container, target document body safely
-		// but skip injecting into small nested config layout windows.
-		if (!overlayWrapper) {
-			const potentialDashboard = document.getElementById(this.controlId);
-			if (potentialDashboard && !window.location.href.includes('overlay')) {
-				console.log("⚠️ [Emojinko Engine]: Dashboard window execution detected. Retaining processing for viewports.");
-				overlayWrapper = document.body;
-			} else {
-				overlayWrapper = document.body;
-			}
-		}
+		                     document.body;
 		
 		const overlayEl = document.createElement("div");
-		overlayEl.id = this.overlayId;
-		
-		// Cleaned, absolute frame properties bypass layout collapses completely
+		overlayEl.id = "dz-emojinko-overlay-container";
 		overlayEl.style.cssText = "position:absolute;top:0;left:0;width:100vw;height:100vh;pointer-events:none;overflow:hidden;z-index:99999;";
 		
 		overlayEl.innerHTML = `
-			<canvas id="dz-physics-canvas" style="position:absolute;top:0;left:0;width:100vw;height:100vh;pointer-events:none;display:block;"></canvas>
-			<div id="dz-bucket-row" style="position:absolute;bottom:0;left:0;width:100vw;height:40px;display:flex;background:rgba(24,24,27,0.95);border-top:2px solid var(--accent,#a855f7);font-family:monospace;text-align:center;line-height:40px;font-weight:bold;color:#fff;font-size:11px;z-index:100000;">
+			<canvas id="dz-physics-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;display:block;"></canvas>
+			<div id="dz-bucket-row" style="position:absolute;bottom:0;left:0;width:100%;height:40px;display:flex;background:rgba(24,24,27,0.95);border-top:2px solid var(--accent,#a855f7);font-family:monospace;text-align:center;line-height:40px;font-weight:bold;color:#fff;font-size:11px;z-index:100000;">
 				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(168,85,247,0.1);">100 PTS</div>
 				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(239,68,68,0.1);color:#ef4444;">💥 RIP</div>
 				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(34,197,94,0.1);color:#22c55e;">🍀 LUCKY</div>
@@ -139,56 +105,54 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		
 		overlayWrapper.appendChild(overlayEl);
 
-		this.canvas = document.getElementById("dz-physics-canvas");
-		if (this.canvas) {
-			this.ctx = this.canvas.getContext("2d");
+		this.physicsCanvas = document.getElementById("dz-physics-canvas");
+		if (this.physicsCanvas) {
+			this.physicsCtx = this.physicsCanvas.getContext("2d");
 			
+			// 🛠️ Neutralize the BaseWidgetModule canvas pointers so it can't clear our screen
+			this.canvas = null;
+			this.ctx = null;
+
 			this.resizePhysicsCanvas();
 			
 			window.removeEventListener('resize', () => this.resizePhysicsCanvas());
 			window.addEventListener('resize', () => this.resizePhysicsCanvas());
 			
 			this.startPhysicsLoop();
-			console.log("✅ [Emojinko Engine]: Stream Viewport Assembly fully active.");
 		}
 	}
 
 	resizePhysicsCanvas() {
-		if (!this.canvas) return;
+		if (!this.physicsCanvas) return;
 		
-		// 🌟 FORCED ABSOLUTE RESOLUTION MAPPING
-		// Don't rely on container tracking calculations which collapse inside flex elements
 		let targetWidth = window.innerWidth;
 		let targetHeight = window.innerHeight;
 
-		if (targetWidth < 200) targetWidth = 1920;
-		if (targetHeight < 200) targetHeight = 1080;
+		if (targetWidth < 100) targetWidth = 1920;
+		if (targetHeight < 100) targetHeight = 1080;
 		
-		this.canvas.width = targetWidth;
-		this.canvas.height = targetHeight;
+		this.physicsCanvas.width = targetWidth;
+		this.physicsCanvas.height = targetHeight;
 		
-		console.log(`📐 [Emojinko Engine]: Bounds locked to ${targetWidth}x${targetHeight}`);
-		
-		// Force absolute generation loop sequence execution
 		this.generatePlinkoPegMatrix(); 
 	}
 
 	generatePlinkoPegMatrix() {
-		if (!this.canvas) return;
+		if (!this.physicsCanvas) return;
 		this.pegs = [];
 
-		const width = this.canvas.width;
-		const height = this.canvas.height;
+		const width = this.physicsCanvas.width;
+		const height = this.physicsCanvas.height;
 		
-		const rows = 9;              
-		const startY = height * 0.20; 
-		const endY = height * 0.85;   
+		const rows = 8;              
+		const startY = height * 0.22; 
+		const endY = height * 0.82;   
 		const rowSpacing = (endY - startY) / rows;
 
 		for (let r = 0; r < rows; r++) {
 			const currentY = startY + (r * rowSpacing);
 			const isEven = (r % 2 === 0);
-			const pegCount = isEven ? 10 : 11; 
+			const pegCount = isEven ? 9 : 10; 
 			const colSpacing = width / (pegCount + 1);
 
 			for (let c = 0; c < pegCount; c++) {
@@ -196,11 +160,10 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				this.pegs.push({
 					x: currentX,
 					y: currentY,
-					radius: 6
+					radius: 5
 				});
 			}
 		}
-		console.log(`📌 [Emojinko Engine]: Constructed ${this.pegs.length} active physics pegs layout array.`);
 	}
 
 	bindEventListeners() {
@@ -211,59 +174,45 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 		this.renderLeaderboardUI();
 
-		const activeToggle = panel.querySelector('#dz-toggle-active');
-		if (activeToggle) {
-			activeToggle.checked = this.state.gameEnabled;
-			activeToggle.addEventListener('change', (e) => {
+		panel.addEventListener('change', (e) => {
+			if (e.target.id === 'dz-toggle-active') {
 				this.state.gameEnabled = e.target.checked;
 				this.saveData();
-			});
-		}
+			}
+		});
 
-		const gravSlider = panel.querySelector('#dz-gravity-slider');
-		const gravTxt = panel.querySelector('#dz-grav-txt');
-		if (gravSlider) {
-			gravSlider.value = this.state.dropDuration;
-			gravTxt.textContent = `${this.state.dropDuration}s`;
-			gravSlider.addEventListener('input', (e) => {
+		panel.addEventListener('input', (e) => {
+			if (e.target.id === 'dz-gravity-slider') {
 				this.state.dropDuration = parseInt(e.target.value, 10);
-				gravTxt.textContent = `${this.state.dropDuration}s`;
+				const txt = panel.querySelector('#dz-grav-txt');
+				if (txt) txt.textContent = `${this.state.dropDuration}s`;
 				this.saveData();
-			});
-		}
-
-		const limitSlider = panel.querySelector('#dz-limit-slider');
-		const limitTxt = panel.querySelector('#dz-limit-txt');
-		if (limitSlider) {
-			limitSlider.value = this.state.maxDropsPerUser;
-			limitTxt.textContent = this.state.maxDropsPerUser;
-			limitSlider.addEventListener('input', (e) => {
+			}
+			if (e.target.id === 'dz-limit-slider') {
 				this.state.maxDropsPerUser = parseInt(e.target.value, 10);
-				limitTxt.textContent = e.target.value;
+				const txt = panel.querySelector('#dz-limit-txt');
+				if (txt) txt.textContent = this.state.maxDropsPerUser;
 				this.saveData();
-			});
-		}
+			}
+		});
 
-		const clearBtn = panel.querySelector('#dz-btn-clear');
-		if (clearBtn) {
-			clearBtn.addEventListener('click', (e) => {
+		panel.addEventListener('click', (e) => {
+			if (e.target.id === 'dz-btn-clear') {
 				e.preventDefault();
-				e.stopPropagation();
 				this.state.scores = {};
 				this.state.userDropTracker = {}; 
 				this.activeTokens = [];
 				this.saveData();
 				this.renderLeaderboardUI();
 				this.sendNotice("🧹 Emojinko scoreboard, tokens, and drop limits cleared!");
-			});
-		}
+			}
+		});
 	}
 
 	executeDropAction(user, customToken = "🪙", targetSlot = null) {
 		if (!this.state.gameEnabled) return;
 		
-		// Re-verify viewport integrity on drop invocations
-		if (!this.canvas || !document.getElementById(this.overlayId)) {
+		if (!this.physicsCanvas) {
 			this.injectViewportOverlay();
 		}
 
@@ -278,62 +227,57 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		this.state.userDropTracker[user] = userCount + 1;
 		this.saveData();
 
-		// Fallback emoji isolation filters
-		const cleanToken = customToken ? customToken.substring(0, 5) : "🪙";
-		const width = this.canvas ? this.canvas.width : window.innerWidth;
+		const cleanToken = customToken.substring(0, 5);
+		const width = this.physicsCanvas ? this.physicsCanvas.width : window.innerWidth;
 		
 		let startX = Math.random() * (width * 0.8) + (width * 0.1);
 
 		if (targetSlot !== null) {
 			const slot = Math.max(1, Math.min(4, targetSlot));
 			const sectionSize = width / 4;
-			startX = (sectionSize * (slot - 1)) + (sectionSize / 2) + ((Math.random() * 40) - 20);
+			startX = (sectionSize * (slot - 1)) + (sectionSize / 2) + ((Math.random() * 20) - 10);
 		}
 
-		// Instantiate token right down below top header bars to guarantee high visual feedback loops
-		const newToken = {
+		this.activeTokens.push({
 			user: user,
 			token: cleanToken,
 			x: startX,
-			y: 30, 
-			vx: (Math.random() * 3) - 1.5, 
-			vy: 1,                       
-			radius: 14,                  
+			y: 15, 
+			vx: (Math.random() * 2) - 1, 
+			vy: 2,                        
+			radius: 12,                   
 			scale: 1,
 			opacity: 1,
 			isDying: false
-		};
-
-		this.activeTokens.push(newToken);
-		console.log(`💥 [Emojinko Engine]: Token dropped for user ${user} at coordinates (${startX}, 30)`);
+		});
 	}
 
 	startPhysicsLoop() {
-		if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+		if (this.physicsLoopId) cancelAnimationFrame(this.physicsLoopId);
 
 		const loop = () => {
 			this.updatePhysicsState();
 			this.drawPhysicsScene();
-			this.animationFrameId = requestAnimationFrame(loop);
+			this.physicsLoopId = requestAnimationFrame(loop);
 		};
-		this.animationFrameId = requestAnimationFrame(loop);
+		this.physicsLoopId = requestAnimationFrame(loop);
 	}
 
 	updatePhysicsState() {
-		if (!this.canvas) return;
+		if (!this.physicsCanvas) return;
 
-		const width = this.canvas.width;
-		const height = this.canvas.height;
+		const width = this.physicsCanvas.width;
+		const height = this.physicsCanvas.height;
 
-		const gravityForce = (11 - this.state.dropDuration) * 0.04 + 0.12; 
-		const dynamicFriction = 0.52; 
+		const gravityForce = (11 - (this.state.dropDuration || 4)) * 0.05 + 0.1; 
+		const dynamicFriction = 0.55; 
 
 		for (let i = this.activeTokens.length - 1; i >= 0; i--) {
 			const t = this.activeTokens[i];
 
 			if (t.isDying) {
-				t.scale += 0.05;
-				t.opacity -= 0.1;
+				t.scale += 0.04;
+				t.opacity -= 0.08;
 				if (t.opacity <= 0) {
 					this.activeTokens.splice(i, 1);
 				}
@@ -344,7 +288,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			t.x += t.vx;
 			t.y += t.vy;
 
-			// Boundary Wall Deflections
 			if (t.x - t.radius < 0) {
 				t.x = t.radius;
 				t.vx *= -dynamicFriction;
@@ -353,7 +296,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				t.vx *= -dynamicFriction;
 			}
 
-			// Core Circle-to-Circle Peg Deflection Calculations
 			for (let p of this.pegs) {
 				const dx = t.x - p.x;
 				const dy = t.y - p.y;
@@ -372,13 +314,11 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 					t.vx = (t.vx - 2 * dotProduct * nx) * dynamicFriction;
 					t.vy = (t.vy - 2 * dotProduct * ny) * dynamicFriction;
 
-					// Induce erratic dispersion splits to maximize pinball scattering mechanics
-					t.vx += (Math.random() * 1.6) - 0.8;
+					t.vx += (Math.random() * 1.2) - 0.6;
 				}
 			}
 
-			// Destination Bucket Floor Checks
-			const floorLine = height > 100 ? height - 42 : window.innerHeight - 42;
+			const floorLine = height > 150 ? height - 45 : 100;
 			if (t.y >= floorLine) {
 				t.isDying = true;
 				const finalXPercent = (t.x / width) * 100;
@@ -388,57 +328,50 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 	}
 
 	drawPhysicsScene() {
-		if (!this.ctx || !this.canvas) return;
+		if (!this.physicsCtx || !this.physicsCanvas) return;
 
-		// Clean viewport frames explicitly
-		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		this.physicsCtx.clearRect(0, 0, this.physicsCanvas.width, this.physicsCanvas.height);
 
-		// 1. Draw Peg Pins Lattice Frame Array
+		// Draw Peg Matrix Pins Layout
 		for (let p of this.pegs) {
-			this.ctx.fillStyle = "rgba(168, 85, 247, 0.7)";
-			this.ctx.beginPath();
-			this.ctx.arc(p.x, p.y, p.radius + 2, 0, Math.PI * 2);
-			this.ctx.fill();
+			this.physicsCtx.fillStyle = "rgba(168, 85, 247, 0.6)";
+			this.physicsCtx.beginPath();
+			this.physicsCtx.arc(p.x, p.y, p.radius + 1, 0, Math.PI * 2);
+			this.physicsCtx.fill();
 			
-			this.ctx.fillStyle = "#ffffff";
-			this.ctx.beginPath();
-			this.ctx.arc(p.x, p.y, p.radius * 0.4, 0, Math.PI * 2);
-			this.ctx.fill();
+			this.physicsCtx.fillStyle = "#ffffff";
+			this.physicsCtx.beginPath();
+			this.physicsCtx.arc(p.x, p.y, p.radius * 0.4, 0, Math.PI * 2);
+			this.physicsCtx.fill();
 		}
 
-		// 2. Draw Active Falling User Custom Emoji Tokens
-		this.ctx.textAlign = "center";
-		this.ctx.textBaseline = "middle";
+		// Draw Falling Tokens Layout
+		this.physicsCtx.textAlign = "center";
+		this.physicsCtx.textBaseline = "middle";
 
 		this.activeTokens.forEach(t => {
-			this.ctx.save();
-			this.ctx.globalAlpha = t.opacity;
-			this.ctx.translate(t.x, t.y);
-			this.ctx.scale(t.scale, t.scale);
+			this.physicsCtx.save();
+			this.physicsCtx.globalAlpha = t.opacity;
+			this.physicsCtx.translate(t.x, t.y);
+			this.physicsCtx.scale(t.scale, t.scale);
 
-			// Render drop shadow core under target emoji asset
-			this.ctx.font = "26px Arial";
-			this.ctx.fillStyle = "rgba(0,0,0,0.5)";
-			this.ctx.fillText(t.token, 1.5, 1.5);
-			this.ctx.fillStyle = "#ffffff";
-			this.ctx.fillText(t.token, 0, 0);
+			this.physicsCtx.font = "24px Arial";
+			this.physicsCtx.fillText(t.token, 0, 0);
 
-			// Render Username Tag Banner Assembly below individual drops
-			this.ctx.font = "bold 10px monospace";
-			this.ctx.fillStyle = "rgba(24, 24, 27, 0.85)";
-			const textWidth = this.ctx.measureText(t.user).width;
+			this.physicsCtx.font = "bold 10px monospace";
+			this.physicsCtx.fillStyle = "rgba(24, 24, 27, 0.85)";
+			const textWidth = this.physicsCtx.measureText(t.user).width;
 			
-			this.ctx.fillRect(-((textWidth + 8) / 2), 16, textWidth + 8, 14);
-			this.ctx.fillStyle = "#f4f4f5";
-			this.ctx.fillText(t.user, 0, 23);
+			this.physicsCtx.fillRect(-((textWidth + 6) / 2), 14, textWidth + 6, 13);
+			this.physicsCtx.fillStyle = "#ffffff";
+			this.physicsCtx.fillText(t.user, 0, 20);
 
-			this.ctx.restore();
+			this.physicsCtx.restore();
 		});
 	}
 
 	evaluateLandingZoneScore(user, finalXPercent) {
 		const matchedBucket = this.scoreZones.find(zone => finalXPercent >= zone.minX && finalXPercent <= zone.maxX) || this.scoreZones[3];
-		if (!this.state.scores) this.state.scores = {};
 		
 		const currentHigh = this.state.scores[user] || 0;
 		if (matchedBucket.multiplier > currentHigh) {
@@ -459,7 +392,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		const container = panel?.querySelector('#dz-leaderboard-list');
 		if (!container) return;
 
-		const scoreLedger = this.state?.scores || {};
+		const scoreLedger = this.state.scores || {};
 		const sortedEntries = Object.entries(scoreLedger)
 			.sort((a, b) => b[1] - a[1])
 			.slice(0, 5);
@@ -475,6 +408,15 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				<span style="color: #22c55e;">${score} Pts</span>
 			</div>
 		`).join('');
+	}
+
+	destroy() {
+		if (this.physicsLoopId) {
+			cancelAnimationFrame(this.physicsLoopId);
+		}
+		const container = document.getElementById("dz-emojinko-overlay-container");
+		if (container) container.remove();
+		super.destroy();
 	}
 
 	getModuleCommands() {
