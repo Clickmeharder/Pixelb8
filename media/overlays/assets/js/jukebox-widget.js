@@ -86,299 +86,404 @@ const JUKEBOX_HTMLTEMPLATES = {
 
 
 export class StreamJukeboxModule extends BaseWidgetModule {
-    constructor() {
-        // Initializes state under local storage namespace allocations
-	super("stream_jukebox", {
-            menuTitle: "🎵 Song Request Jukebox"
-        });
-    }
+	constructor() {
+		super("stream_jukebox", {
+			menuTitle: "🎵 Song Request Jukebox"
+		});
 
-    // ========================================================================
-    // ⚙️ INITIALIZATION & RECONCILIATION LAYERS
-    // ========================================================================
-    loadData() {
-        super.loadData();
+		// ✅ Safe Architectural State Extension Pattern
+		this.registry.profiles = {
+			...this.registry.profiles,
+			default: { name: "System Echo", totalTicks: 0, level: 1 }
+		};
 
-        // Core runtime engine queues and state variables
-        this.queue = [];
-        this.fallbackPlaylist = JSON.parse(localStorage.getItem("jukeboxFallbackPlaylist")) || [];
-        this.ytPlayer = null;
-        this.ytPlayerReady = false;
-        this.currentTrackData = null;
-        this.currentTrackVotes = new Set();
-        this.currentTrackSkipVotes = new Set();
-        this.progressInterval = null; 
-        this.captureTimer = null;     
-        this.trackVolumeLevel = 0;    
-        
-        this.visualSignature = {
-            baseHue: 270,
-            waveFreq1: 0.15,
-            waveFreq2: 0.05,
-            speedScale: 0.08
-        };
-        
-        this.VOTE_REQUIREMENT = parseInt(localStorage.getItem("jbVoteReq")) || 2;
-        this.isPlayingSong = false;
-        this.streamerName = "jaedraze";
-        this.acceptRequests = localStorage.getItem("jbAcceptRequests") !== "false"; 
-        
-		// Balanced directly to point inside global module engine state schemas safely
-        if (this.state.isAudioOnly === undefined) this.state.isAudioOnly = false;
-        if (this.state.showVisualizer === undefined) this.state.showVisualizer = false;
+		this.state = {
+			...this.state,
+			isAudioOnly: false,
+			showVisualizer: false,
+			commandAccess: this.state.commandAccess || {}
+		};
 
-        this.initYouTubeAPI();
-    }
+		this.loadData();
 
-    // ========================================================================
-    // 🪟 DECLARATIVE TEMPLATE ENGINE
-    // ========================================================================
+		// Force execution rendering pass over command matrix panels
+		const matrixTarget = document.getElementById(this.controlId)?.querySelector('.matrix-container-target');
+		if (matrixTarget) {
+			matrixTarget.innerHTML = this.renderCommandRouterMatrixHTML();
+		}
+	}
+	// ========================================================================
+	// ⚙️ INITIALIZATION & RECONCILIATION LAYERS
+	// ========================================================================
+	loadData() {
+		super.loadData();
+
+		// Core module specific variables
+		this.queue = [];
+		this.fallbackPlaylist = JSON.parse(localStorage.getItem("jukeboxFallbackPlaylist")) || [];
+		this.ytPlayer = null;
+		this.ytPlayerReady = false;
+		this.currentTrackData = null;
+		this.currentTrackVotes = new Set();
+		this.currentTrackSkipVotes = new Set();
+		this.progressInterval = null; 
+		this.captureTimer = null;     
+		this.trackVolumeLevel = 0;    
+		
+		this.visualSignature = {
+			baseHue: 270,
+			waveFreq1: 0.15,
+			waveFreq2: 0.05,
+			speedScale: 0.08
+		};
+		
+		this.VOTE_REQUIREMENT = parseInt(localStorage.getItem("jbVoteReq")) || 2;
+		this.isPlayingSong = false;
+		this.streamerName = "jaedraze";
+		this.acceptRequests = localStorage.getItem("jbAcceptRequests") !== "false"; 
+
+		this.initYouTubeAPI();
+	}
+
+	// ========================================================================
+	// 🪟 DECLARATIVE TEMPLATE ENGINE
+	// ========================================================================
 	getControlsMarkup() {
-        // Return pure templates fragments. Parent wrapper stitches details and command matrices.
-        return `
-            ${JUKEBOX_HTMLTEMPLATES.config}
-            ${JUKEBOX_HTMLTEMPLATES.nowPlaying}
-            ${JUKEBOX_HTMLTEMPLATES.lists}
-        `;
-    }
+		return `
+			${JUKEBOX_HTMLTEMPLATES.config}
+			${JUKEBOX_HTMLTEMPLATES.nowPlaying}
+			${JUKEBOX_HTMLTEMPLATES.lists}
+		`;
+	}
 
-    // ========================================================================
+	// ========================================================================
     // 🪟 VIEWPORT INJECTION LAYER OVERRIDES
     // ========================================================================
+injectViewportOverlay() {
+		const overlayWrapper = document.getElementById("overlay-wrapper");
+		if (!overlayWrapper || document.getElementById(this.overlayId)) return;
 
-// ========================================================================
-    // 🪟 VIEWPORT INJECTION LAYER OVERRIDES
-    // ========================================================================
-    injectViewportOverlay() {
-        // Setup local overlay player viewports cleanly on its own thread channel
-        const overlayWrapper = document.getElementById("overlay-wrapper");
-        if (overlayWrapper && !document.getElementById(this.overlayId)) {
-            const overlayEl = document.createElement("div");
-            overlayEl.id = this.overlayId;
-            overlayEl.className = "p8-widget"; 
-            overlayEl.style.cssText = `position: absolute; width: 300px; background: rgba(15,15,15,0.95); border: 1px solid var(--accent, #a855f7); border-radius: 4px; padding: 10px; color: #fff; font-family: monospace; z-index: 100;`;
-            
-            const savedLayout = localStorage.getItem(`p8_pos_${this.overlayId}`);
-            if (savedLayout) {
-                try {
-                    const coords = JSON.parse(savedLayout);
-                    overlayEl.style.left = coords.left;
-                    overlayEl.style.top = coords.top;
-                } catch (err) { console.error(err); }
-            } else {
-                overlayEl.style.left = "400px";
-                overlayEl.style.top = "150px";
-            }
-            
-            overlayEl.innerHTML = `
-                <div id="jukebox-video-wrapper" style="width: 100%; height: 168px; background: #000; border-radius: 2px; overflow: hidden; position: relative;">
-                    <div id="player" style="width: 100%; height: 100%;"></div>
-                </div>
-                <div id="jb-status-container" style="margin-top: 8px; font-size: 12px; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 2px;">
-                    <div class="jb-current-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: var(--accent, #a855f7);">No Track Loaded</div>
-                    <div id="jb-status-text" style="font-size: 10px; color: #a1a1aa; margin-top: 2px;">Status: Standby</div>
-                </div>
-            `;
-            
-            overlayWrapper.appendChild(overlayEl);
-        }
-    }
-    // ========================================================================
-    // 🔌 YOUTUBE IFRAME API MANAGEMENT
-    // ========================================================================
-    initYouTubeAPI() {
-        if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-            const tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            document.head.appendChild(tag);
-        }
+		const overlayEl = document.createElement("div");
+		overlayEl.id = this.overlayId;
+		overlayEl.className = "p8-widget"; 
+		overlayEl.style.cssText = `position: absolute; width: 300px; background: rgba(15,15,15,0.95); border: 1px solid var(--accent, #a855f7); border-radius: 4px; padding: 10px; color: #fff; font-family: monospace; z-index: 100;`;
+		
+		// Use native coordinate positioning helpers if available
+		const savedLayout = localStorage.getItem(`p8_pos_${this.overlayId}`);
+		if (savedLayout) {
+			try {
+				const coords = JSON.parse(savedLayout);
+				overlayEl.style.left = coords.left;
+				overlayEl.style.top = coords.top;
+			} catch (err) { console.error(err); }
+		} else {
+			overlayEl.style.left = "400px";
+			overlayEl.style.top = "150px";
+		}
+		
+		overlayEl.innerHTML = `
+			<div id="jukebox-video-wrapper" style="width: 100%; height: 168px; background: #000; border-radius: 2px; overflow: hidden; position: relative;">
+				<div id="player" style="width: 100%; height: 100%;"></div>
+			</div>
+			<div id="jb-status-container" style="margin-top: 8px; font-size: 12px; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 2px;">
+				<div class="jb-current-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: var(--accent, #a855f7);">No Track Loaded</div>
+				<div id="jb-status-text" style="font-size: 10px; color: #a1a1aa; margin-top: 2px;">Status: Standby</div>
+			</div>
+		`;
+		
+		overlayWrapper.appendChild(overlayEl);
+	}
 
-        const setupPlayer = () => {
-            this.ytPlayer = new YT.Player('player', {
-                height: '100%', 
-                width: '100%',
-                playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1, 'fs': 0 },
-                events: {
-                    'onReady': () => { 
-                        this.ytPlayerReady = true; 
-                        const savedHeight = localStorage.getItem("jb_wrapper_height");
-                        const wrapper = document.getElementById('jukebox-video-wrapper');
-                        if (wrapper && savedHeight && !this.isAudioOnly) {
-                            wrapper.style.height = savedHeight;
-                        }
-                        
-                        this.bindResizePersistence(); 
-                        const savedVol = localStorage.getItem("jbVolume") || 50;
-                        this.ytPlayer.setVolume(parseInt(savedVol));
-                        
-                        this.syncUIPanelElements();
-                        this.renderFallbackList();
-                        this.renderQueueList();
-                        this.playNextSong(() => {}); 
-                    },
-                    'onStateChange': (e) => {
-                        const statusText = document.getElementById('jb-status-text');
-                        if (e.data === YT.PlayerState.ENDED) {
-                            if (statusText) statusText.textContent = "Status: Track Ended";
-                            this.playNextSong(() => {});
-                        }
-                        if (e.data === YT.PlayerState.PLAYING) {
-                            if (statusText) statusText.textContent = "Status: Live Playback";
-                            const videoData = this.ytPlayer.getVideoData();
-                            if (videoData?.title) {
-                                this.currentTrackData = { 
-                                    id: videoData.video_id || this.currentTrackData?.id, 
-                                    title: videoData.title 
-                                };
-                            }
-                            this.generateTrackVisualSignature();
-                            this.updatePlayerDisplay();
-                            this.startAudioProgressTracking();
-                        } else if (e.data === YT.PlayerState.PAUSED) {
-                            if (statusText) statusText.textContent = "Status: Paused";
-                            this.stopAudioProgressTracking();
-                        }
-                    }
-                }
-            });
-        };
+	// ========================================================================
+	// 🔌 YOUTUBE IFRAME API MANAGEMENT
+	// ========================================================================
+	initYouTubeAPI() {
+		if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+			const tag = document.createElement('script');
+			tag.src = "https://www.youtube.com/iframe_api";
+			document.head.appendChild(tag);
+		}
 
-        if (window.YT && window.YT.Player) {
-            setupPlayer();
-        } else {
-            window.onYouTubeIframeAPIReady = setupPlayer;
-        }
-    }
+		const setupPlayer = () => {
+			this.ytPlayer = new YT.Player('player', {
+				height: '100%', 
+				width: '100%',
+				playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi': 1, 'fs': 0 },
+				events: {
+					'onReady': () => { 
+						this.ytPlayerReady = true; 
+						const savedHeight = localStorage.getItem("jb_wrapper_height");
+						const wrapper = document.getElementById('jukebox-video-wrapper');
+						if (wrapper && savedHeight && !this.state.isAudioOnly) {
+							wrapper.style.height = savedHeight;
+						}
+						
+						this.bindResizePersistence(); 
+						const savedVol = localStorage.getItem("jbVolume") || 50;
+						this.ytPlayer.setVolume(parseInt(savedVol));
+						
+						this.syncUIPanelElements();
+						this.renderFallbackList();
+						this.renderQueueList();
+						this.playNextSong(() => {}); 
+					},
+					'onStateChange': (e) => {
+						const statusText = document.getElementById('jb-status-text');
+						if (e.data === YT.PlayerState.ENDED) {
+							if (statusText) statusText.textContent = "Status: Track Ended";
+							this.playNextSong(() => {});
+						}
+						if (e.data === YT.PlayerState.PLAYING) {
+							if (statusText) statusText.textContent = "Status: Live Playback";
+							const videoData = this.ytPlayer.getVideoData();
+							if (videoData?.title) {
+								this.currentTrackData = { 
+									id: videoData.video_id || this.currentTrackData?.id, 
+									title: videoData.title 
+								};
+							}
+							this.generateTrackVisualSignature();
+							this.updatePlayerDisplay();
+							this.startAudioProgressTracking();
+						} else if (e.data === YT.PlayerState.PAUSED) {
+							if (statusText) statusText.textContent = "Status: Paused";
+							this.stopAudioProgressTracking();
+						}
+					}
+				}
+			});
+		};
 
-    // ========================================================================
-    // 🎛️ EVENT HANDLERS & INPUT BINDINGS
-    // ========================================================================
-// ========================================================================
-    // 🎛️ EVENT HANDLERS & INPUT BINDINGS
-    // ========================================================================
+		if (window.YT && window.YT.Player) {
+			setupPlayer();
+		} else {
+			window.onYouTubeIframeAPIReady = setupPlayer;
+		}
+	}
+
+	// ========================================================================
+	// 🎛️ EVENT HANDLERS & INPUT BINDINGS
+	// ========================================================================
 	bindEventListeners() {
-        // Invoke base routing matrix listeners (Chat/CP checkboxes & manual click dispatches)
-        if (typeof super.bindEventListeners === 'function') {
-            super.bindEventListeners();
-        }
+		super.bindEventListeners();
 
-        const panel = document.getElementById(this.controlId);
-        if (!panel) return;
+		const panel = document.getElementById(this.controlId);
+		if (!panel) return;
 
-        // Unified notifications bubble fallback pipeline
-        const fallbackNotice = (txt) => {
-            if (typeof this.setWidgetBubble === 'function') this.setWidgetBubble(txt);
-            if (typeof window.botSay === 'function') window.botSay(txt);
-        };
+		// Configuration Toggles & Badging Changes
+		panel.addEventListener("change", (e) => {
+			if (e.target.id === "stg-toggle-requests-checkbox") {
+				this.acceptRequests = e.target.checked;
+				localStorage.setItem("jbAcceptRequests", e.target.checked);
+				const badge = panel.querySelector('#req-status-badge');
+				if (badge) badge.textContent = e.target.checked ? "ON" : "OFF";
+			}
+			if (e.target.id === "stg-toggle-audio-only-checkbox") {
+				this.state.isAudioOnly = e.target.checked;
+				this.toggleAudioOnly(e.target.checked);
+				this.saveData();
+			}
+			if (e.target.id === "stg-toggle-visualizer-checkbox") {
+				this.state.showVisualizer = e.target.checked;
+				this.toggleVisualizer(e.target.checked);
+				this.saveData();
+			}
+		});
 
-        // Configuration Toggles & Badging Changes
-        panel.addEventListener("change", (e) => {
-            if (e.target.id === "stg-toggle-requests-checkbox") {
-                this.acceptRequests = e.target.checked;
-                localStorage.setItem("jbAcceptRequests", e.target.checked);
-                const badge = panel.querySelector('#req-status-badge');
-                if (badge) badge.textContent = e.target.checked ? "ON" : "OFF";
-            }
-            if (e.target.id === "stg-toggle-audio-only-checkbox") {
-                this.state.isAudioOnly = e.target.checked;
-                this.toggleAudioOnly(e.target.checked);
-                this.saveData();
-            }
-            if (e.target.id === "stg-toggle-visualizer-checkbox") {
-                this.state.showVisualizer = e.target.checked;
-                this.toggleVisualizer(e.target.checked);
-                this.saveData();
-            }
-        });
+		// Click Controls Routing Intersections
+		panel.addEventListener("click", (e) => {
+			if (e.target.id === "jb-skip-btn") {
+				this.skipCurrentSong((txt) => this.sendNotice(txt));
+			}
+			if (e.target.id === "jb-current-heart") {
+				this.handleLikeSong('DashboardUI', (txt) => this.sendNotice(txt));
+			}
+			if (e.target.id === "jb-clear-btn") {
+				this.queue = [];
+				if (typeof this.renderQueueList === 'function') this.renderQueueList();
+				if (typeof this.updatePlayerDisplay === 'function') this.updatePlayerDisplay();
+				this.sendNotice(`🧹 Queue cleared from dashboard control matrix.`);
+			}
+			if (e.target.id === "jb-add-queue-btn" || e.target.id === "jb-add-fallback-btn") {
+				const input = panel.querySelector('#jb-search-input');
+				if (!input || !input.value.trim()) return;
+				
+				const queryStr = input.value.trim();
+				if (e.target.id === "jb-add-queue-btn") {
+					this.handleSongRequest('StreamDashboard', queryStr, (txt) => this.sendNotice(txt));
+				} else {
+					const id = typeof this.extractYouTubeId === 'function' ? this.extractYouTubeId(queryStr) : "Custom";
+					this.saveFallbackItem({ id: id || "Custom", title: queryStr }, 'Streamer');
+					this.sendNotice(`💾 Added to Fallback Playlist rotation.`);
+				}
+				input.value = '';
+			}
+		});
 
-        // Click Controls Routing Intersections
-        panel.addEventListener("click", (e) => {
-            if (e.target.id === "jb-skip-btn") {
-                this.skipCurrentSong(fallbackNotice);
-            }
-            if (e.target.id === "jb-current-heart") {
-                this.handleLikeSong('DashboardUI', fallbackNotice);
-            }
-            if (e.target.id === "jb-clear-btn") {
-                this.queue = [];
-                if (typeof this.renderQueueList === 'function') this.renderQueueList();
-                if (typeof this.updatePlayerDisplay === 'function') this.updatePlayerDisplay();
-                fallbackNotice(`🧹 Queue cleared from dashboard control matrix.`);
-            }
-            if (e.target.id === "jb-add-queue-btn" || e.target.id === "jb-add-fallback-btn") {
-                const input = panel.querySelector('#jb-search-input');
-                if (!input || !input.value.trim()) return;
-                
-                const queryStr = input.value.trim();
-                if (e.target.id === "jb-add-queue-btn") {
-                    this.handleSongRequest('StreamDashboard', queryStr, fallbackNotice);
-                } else {
-                    const id = typeof this.extractYouTubeId === 'function' ? this.extractYouTubeId(queryStr) : "Custom";
-                    this.saveFallbackItem({ id: id || "Custom", title: queryStr }, 'Streamer');
-                    fallbackNotice(`💾 Added to Fallback Playlist rotation.`);
-                }
-                input.value = '';
-            }
-        });
+		// Skip Vote Requirement Modifications
+		const voteInput = panel.querySelector('#jb-vote-req-input');
+		if (voteInput) {
+			voteInput.addEventListener('input', (e) => {
+				const val = parseInt(e.target.value, 10) || 2;
+				this.VOTE_REQUIREMENT = val;
+				localStorage.setItem("jbVoteReq", val);
+			});
+		}
 
-        // Skip Vote Requirement Modifications
-        const voteInput = panel.querySelector('#jb-vote-req-input');
-        if (voteInput) {
-            voteInput.addEventListener('input', (e) => {
-                const val = parseInt(e.target.value, 10) || 2;
-                this.VOTE_REQUIREMENT = val;
-                localStorage.setItem("jbVoteReq", val);
-            });
-        }
+		// Live Dynamic Volume Sliders Matrix Operations
+		const volSlider = panel.querySelector('#jb-volume-slider');
+		if (volSlider) {
+			volSlider.addEventListener('input', (e) => {
+				const vol = parseInt(e.target.value, 10);
+				this.trackVolumeLevel = vol;
+				localStorage.setItem("jbVolume", vol);
+				if (this.ytPlayer && typeof this.ytPlayer.setVolume === 'function') {
+					this.ytPlayer.setVolume(vol);
+				}
+			});
+		}
+	}
 
-        // Live Dynamic Volume Sliders Matrix Operations
-        const volSlider = panel.querySelector('#jb-volume-slider');
-        if (volSlider) {
-            volSlider.addEventListener('input', (e) => {
-                const vol = parseInt(e.target.value, 10);
-                this.trackVolumeLevel = vol;
-                localStorage.setItem("jbVolume", vol);
-                if (this.ytPlayer && typeof this.ytPlayer.setVolume === 'function') {
-                    this.ytPlayer.setVolume(vol);
-                }
-            });
-        }
-    }
 	syncUIPanelElements() {
-        const panel = document.getElementById(this.controlId);
-        if (!panel) return;
+		const panel = document.getElementById(this.controlId);
+		if (!panel) return;
 
-        // 1. Reconcile Request Acceptance Toggles
-        const reqToggle = panel.querySelector('#stg-toggle-requests-checkbox');
-        if (reqToggle) {
-            reqToggle.checked = this.acceptRequests;
-            const badge = panel.querySelector('#req-status-badge');
-            if (badge) badge.textContent = this.acceptRequests ? "ON" : "OFF";
-        }
+		const reqToggle = panel.querySelector('#stg-toggle-requests-checkbox');
+		if (reqToggle) {
+			reqToggle.checked = this.acceptRequests;
+			const badge = panel.querySelector('#req-status-badge');
+			if (badge) badge.textContent = this.acceptRequests ? "ON" : "OFF";
+		}
 
-        // 2. Align Interface Layout Checkboxes
-        const audioToggle = panel.querySelector('#stg-toggle-audio-only-checkbox');
-        if (audioToggle) audioToggle.checked = !!this.state.isAudioOnly;
+		const audioToggle = panel.querySelector('#stg-toggle-audio-only-checkbox');
+		if (audioToggle) audioToggle.checked = !!this.state.isAudioOnly;
 
-        const avToggle = panel.querySelector('#stg-toggle-visualizer-checkbox');
-        if (avToggle) avToggle.checked = !!this.state.showVisualizer;
+		const avToggle = panel.querySelector('#stg-toggle-visualizer-checkbox');
+		if (avToggle) avToggle.checked = !!this.state.showVisualizer;
 
-        // 3. Fallback Volume Initialization Safety Layer
-        const volSlider = panel.querySelector('#jb-volume-slider');
-        if (volSlider) {
-            const savedVol = localStorage.getItem("jbVolume");
-            if (this.ytPlayer && typeof this.ytPlayer.getVolume === 'function') {
-                volSlider.value = this.ytPlayer.getVolume();
-            } else {
-                volSlider.value = savedVol !== null ? parseInt(savedVol, 10) : 50;
-            }
-            this.trackVolumeLevel = parseInt(volSlider.value, 10);
-        }
+		const volSlider = panel.querySelector('#jb-volume-slider');
+		if (volSlider) {
+			const savedVol = localStorage.getItem("jbVolume");
+			if (this.ytPlayer && typeof this.ytPlayer.getVolume === 'function') {
+				volSlider.value = this.ytPlayer.getVolume();
+			} else {
+				volSlider.value = savedVol !== null ? parseInt(savedVol, 10) : 50;
+			}
+			this.trackVolumeLevel = parseInt(volSlider.value, 10);
+		}
 
-        // 4. Cascade view transforms cleanly down onto UI layout contexts
-        if (typeof this.toggleAudioOnly === 'function') this.toggleAudioOnly(!!this.state.isAudioOnly);
-        if (typeof this.toggleVisualizer === 'function') this.toggleVisualizer(!!this.state.showVisualizer);
-    }
+		if (typeof this.toggleAudioOnly === 'function') this.toggleAudioOnly(!!this.state.isAudioOnly);
+		if (typeof this.toggleVisualizer === 'function') this.toggleVisualizer(!!this.state.showVisualizer);
+	}
+
+	// ========================================================================
+	// CORE SYSTEM INTERACTION ROUTERS (Matrix Manifest Mapping)
+	// ========================================================================
+	getModuleCommands() {
+		const processMasterJukeboxSubRoute = (user, message, flags) => {
+			const parts = message.trim().split(/\s+/);
+			const subCommand = parts[0]?.toLowerCase();
+			const payloadString = parts.slice(1).join(' ');
+
+			if (!subCommand) {
+				this.sendNotice(`🎵 [Jukebox]: Subroutines: sr | skip | like | status | queue`);
+				return;
+			}
+
+			switch (subCommand) {
+				case 'help':
+					this.sendNotice(`🎵 [Jukebox]: !sr [query] | !jb like | !jb skip | !jb status | !jb queue`);
+					break;
+				case 'sr':
+				case 'request':
+					this.handleSongRequestRoute(user, payloadString, flags, (t) => this.sendNotice(t));
+					break;
+				case 'queue':
+					this.handleQueueCheckRoute(user, flags, (t) => this.sendNotice(t));
+					break;
+				case 'skip':
+					this.handleSkipRoute(user, flags, (t) => this.sendNotice(t));
+					break;
+				case 'like':
+				case 'love':
+					this.handleLikeRoute(user, flags, (t) => this.sendNotice(t));
+					break;
+				case 'clear':
+					this.handleClearQueueRoute(user, flags, (t) => this.sendNotice(t));
+					break;
+				case 'status':
+					this.handleStatusCheckRoute(user, flags, (t) => this.sendNotice(t));
+					break;
+				default:
+					this.sendNotice(`❌ Unknown jukebox execution argument: "${subCommand}"`);
+					break;
+			}
+		};
+
+		return [
+			{
+				name: 'sr',
+				defaultChat: true,
+				defaultCp: true,
+				execute: (user, message, flags) => this.handleSongRequestRoute(user, message, flags, (t) => this.sendNotice(t))
+			},
+			{
+				name: 'request',
+				defaultChat: true,
+				defaultCp: false,
+				execute: (user, message, flags) => this.handleSongRequestRoute(user, message, flags, (t) => this.sendNotice(t))
+			},
+			{
+				name: 'skip',
+				defaultChat: true,
+				defaultCp: true,
+				execute: (user, message, flags) => this.handleSkipRoute(user, flags, (t) => this.sendNotice(t))
+			},
+			{
+				name: 'like',
+				defaultChat: true,
+				defaultCp: false,
+				execute: (user, message, flags) => this.handleLikeRoute(user, flags, (t) => this.sendNotice(t))
+			},
+			{
+				name: 'queue',
+				defaultChat: true,
+				defaultCp: false,
+				execute: (user, message, flags) => this.handleQueueCheckRoute(user, flags, (t) => this.sendNotice(t))
+			},
+			{
+				name: 'jbstatus',
+				defaultChat: true,
+				defaultCp: false,
+				execute: (user, message, flags) => this.handleStatusCheckRoute(user, flags, (t) => this.sendNotice(t))
+			},
+			{
+				name: 'jbclear',
+				defaultChat: false, 
+				defaultCp: false,
+				execute: (user, message, flags) => this.handleClearQueueRoute(user, flags, (t) => this.sendNotice(t))
+			},
+			{
+				name: 'jb',
+				defaultChat: true,
+				defaultCp: false,
+				execute: (user, message, flags) => {
+					if (!this.isCommandAllowed('jb', flags)) return;
+					processMasterJukeboxSubRoute(user, message, flags);
+				}
+			},
+			{
+				name: 'jukebox',
+				defaultChat: true,
+				defaultCp: false,
+				execute: (user, message, flags) => {
+					if (!this.isCommandAllowed('jukebox', flags)) return;
+					processMasterJukeboxSubRoute(user, message, flags);
+				}
+			}
+		];
+	}
+
     // ========================================================================
     // 🎨 DRIVEN CANVAS REDRAW VISUALIZER WAVES
     // ========================================================================
@@ -429,126 +534,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     // ========================================================================
     // 🎮 CHAT COMMAND ROUTER
     // ========================================================================
-// ========================================================================
-    // CORE SYSTEM INTERACTION ROUTERS (Matrix Manifest Mapping)
-    // ========================================================================
-	getModuleCommands() {
-        // ✅ The fix: keep your custom text routing, but point safely to the window scope
-        const sendNotice = (txt) => {
-            this.setWidgetBubble(txt);
-            
-            if (typeof window.botSay === 'function') {
-                window.botSay(txt);
-            } else {
-                console.warn("⚠️ [Jukebox Engine]: window.botSay is not available contextually.");
-            }
-        };
-
-        const processMasterJukeboxSubRoute = (user, message, flags) => {
-            const parts = message.trim().split(/\s+/);
-            const subCommand = parts[0]?.toLowerCase();
-            const payloadString = parts.slice(1).join(' ');
-
-            if (!subCommand) {
-                sendNotice(`🎵 [Jukebox]: Subroutines: sr | skip | like | status | queue`);
-                return;
-            }
-
-            switch (subCommand) {
-                case 'help':
-                    sendNotice(`🎵 [Jukebox]: !sr [query] | !jb like | !jb skip | !jb status | !jb queue`);
-                    break;
-                case 'sr':
-                case 'request':
-                    this.handleSongRequestRoute(user, payloadString, flags, sendNotice);
-                    break;
-                case 'queue':
-                    this.handleQueueCheckRoute(user, flags, sendNotice);
-                    break;
-                case 'skip':
-                    this.handleSkipRoute(user, flags, sendNotice);
-                    break;
-                case 'like':
-                case 'love':
-                    this.handleLikeRoute(user, flags, sendNotice);
-                    break;
-                case 'clear':
-                    this.handleClearQueueRoute(user, flags, sendNotice);
-                    break;
-                case 'status':
-                    this.handleStatusCheckRoute(user, flags, sendNotice);
-                    break;
-                default:
-                    sendNotice(`❌ Unknown jukebox execution argument: "${subCommand}"`);
-                    break;
-            }
-        };
-
-        return [
-            {
-                name: 'sr',
-                defaultChat: true,
-                defaultCp: true,
-                execute: (user, message, flags) => this.handleSongRequestRoute(user, message, flags, sendNotice)
-            },
-            {
-                name: 'request',
-                defaultChat: true,
-                defaultCp: false,
-                execute: (user, message, flags) => this.handleSongRequestRoute(user, message, flags, sendNotice)
-            },
-            {
-                name: 'skip',
-                defaultChat: true,
-                defaultCp: true,
-                execute: (user, message, flags) => this.handleSkipRoute(user, flags, sendNotice)
-            },
-            {
-                name: 'like',
-                defaultChat: true,
-                defaultCp: false,
-                execute: (user, message, flags) => this.handleLikeRoute(user, flags, sendNotice)
-            },
-            {
-                name: 'queue',
-                defaultChat: true,
-                defaultCp: false,
-                execute: (user, message, flags) => this.handleQueueCheckRoute(user, flags, sendNotice)
-            },
-            {
-                name: 'jbstatus',
-                defaultChat: true,
-                defaultCp: false,
-                execute: (user, message, flags) => this.handleStatusCheckRoute(user, flags, sendNotice)
-            },
-            {
-                name: 'jbclear',
-                defaultChat: false, 
-                defaultCp: false,
-                execute: (user, message, flags) => this.handleClearQueueRoute(user, flags, sendNotice)
-            },
-            {
-                name: 'jb',
-                defaultChat: true,
-                defaultCp: false,
-                execute: (user, message, flags) => {
-                    if (!this.isCommandAllowed('jb', flags)) return;
-                    processMasterJukeboxSubRoute(user, message, flags);
-                }
-            },
-            {
-                name: 'jukebox',
-                defaultChat: true,
-                defaultCp: false,
-                execute: (user, message, flags) => {
-                    if (!this.isCommandAllowed('jukebox', flags)) return;
-                    processMasterJukeboxSubRoute(user, message, flags);
-                }
-            }
-        ];
-    }
-
-    // ========================================================================
+  // ========================================================================
     // 🧱 MEDIA TRACK MANAGEMENT CORE LOGIC
     // ========================================================================
 	updatePlayerDisplay(customTitle = null) {
