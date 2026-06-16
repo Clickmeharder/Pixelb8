@@ -49,7 +49,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			menuTitle: "🎯 Emojinko"
 		});
 
-		// 🌟 FIX 1: Establish safe fallback baselines before loadData executes parsing maps
 		this.state = {
 			gameEnabled: true,
 			dropDuration: 4, 
@@ -59,7 +58,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			commandAccess: this.state?.commandAccess || {}
 		};
 
-		// Loop Variables for our native 2D canvas simulation loop
 		this.pegs = [];
 		this.activeTokens = [];
 		this.canvas = null;
@@ -68,20 +66,17 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 		this.loadData();
 
-		// Kick off mandatory control matrix DOM reevaluation patterns
 		const matrixTarget = document.getElementById(this.controlId)?.querySelector('.matrix-container-target');
 		if (matrixTarget) {
 			matrixTarget.innerHTML = this.renderCommandRouterMatrixHTML();
 		}
 
-		// 🌟 FIX 2: Trigger viewport initialization immediately at module boot sequence phase
 		setTimeout(() => this.injectViewportOverlay(), 200);
 	}
 
 	loadData() {
 		super.loadData(); 
 
-		// Ensure nested complex tracking objects aren't dropped during runtime extensions
 		if (!this.state.scores) this.state.scores = {};
 		if (!this.state.userDropTracker) this.state.userDropTracker = {};
 		if (this.state.dropDuration === undefined) this.state.dropDuration = 4;
@@ -96,49 +91,33 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 	}
 
 	getControlsMarkup() {
-		// 🌟 FIX 3: Dynamic parameter interpolation avoids 'undefined' value displays on load
 		return `
 			${Emojinko_HTMLTEMPLATES.dashboard(this.state.dropDuration, this.state.maxDropsPerUser)}
 			${Emojinko_HTMLTEMPLATES.leaderboard}
 		`;
 	}
 
-	/**
-	 * VIEWPORT OVERLAY CANVAS ASSEMBLY
-	 */
 	injectViewportOverlay() {
-		// 1. Ensure we don't duplicate the element layer
 		if (document.getElementById(this.overlayId)) return;
 
-		// 2. Locate your streaming container layout template target
 		let overlayWrapper = document.getElementById("overlay-wrapper") || 
 		                     document.getElementById("main-layout") || 
-		                     document.querySelector(".ttv-overlay-container") || // Added fallbacks
+		                     document.querySelector(".ttv-overlay-container") || 
 		                     document.body;
 		
 		const overlayEl = document.createElement("div");
 		overlayEl.id = this.overlayId;
 		
-		// 🌟 FIX: Force explicit high-visibility bounds on the wrapper layout element
-		overlayEl.style.cssText = `
-			position: absolute; 
-			top: 0; 
-			left: 0; 
-			width: 100vw; 
-			height: 100vh; 
-			pointer-events: none; 
-			overflow: hidden; 
-			z-index: 9999;
-		`;
+		// 🌟 FIX 1: Cleaned out raw non-breaking hidden whitespace characters that break CSS parsing
+		overlayEl.style.cssText = "position:absolute;top:0;left:0;width:100vw;height:100vh;pointer-events:none;overflow:hidden;z-index:9999;";
 		
 		overlayEl.innerHTML = `
-			<canvas id="dz-physics-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: block;"></canvas>
-
-			<div id="dz-bucket-row" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; display: flex; background: rgba(24,24,27,0.9); border-top: 2px solid var(--accent, #a855f7); font-family: monospace; text-align: center; line-height: 40px; font-weight: bold; color: #fff; font-size: 11px; z-index: 10000;">
-				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(168,85,247,0.1);">100 PTS</div>
-				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(239,68,68,0.1); color: #ef4444;">💥 RIP</div>
-				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(34,197,94,0.1); color: #22c55e;">🍀 LUCKY</div>
-				<div style="flex: 1; background: rgba(168,85,247,0.1);">50 PTS</div>
+			<canvas id="dz-physics-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;display:block;"></canvas>
+			<div id="dz-bucket-row" style="position:absolute;bottom:0;left:0;width:100%;height:40px;display:flex;background:rgba(24,24,27,0.9);border-top:2px solid var(--accent,#a855f7);font-family:monospace;text-align:center;line-height:40px;font-weight:bold;color:#fff;font-size:11px;z-index:10000;">
+				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(168,85,247,0.1);">100 PTS</div>
+				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(239,68,68,0.1);color:#ef4444;">💥 RIP</div>
+				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(34,197,94,0.1);color:#22c55e;">🍀 LUCKY</div>
+				<div style="flex:1;background:rgba(168,85,247,0.1);">50 PTS</div>
 			</div>
 		`;
 		
@@ -148,10 +127,8 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		if (this.canvas) {
 			this.ctx = this.canvas.getContext("2d");
 			
-			// Force layout sizing calculations
 			this.resizePhysicsCanvas();
 			
-			// Safely bind scaling listeners
 			window.removeEventListener('resize', () => this.resizePhysicsCanvas());
 			window.addEventListener('resize', () => this.resizePhysicsCanvas());
 			
@@ -162,21 +139,20 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 	resizePhysicsCanvas() {
 		if (!this.canvas) return;
 		
-		// 🌟 FIX: If layout container parameters parse to 0, default directly to screen view dimensions
-		const targetWidth = this.canvas.parentElement.clientWidth || window.innerWidth;
-		const targetHeight = this.canvas.parentElement.clientHeight || window.innerHeight;
+		// 🌟 FIX 2: If the parent element returns 0, bypass it entirely and bind directly to window coordinates
+		let targetWidth = this.canvas.parentElement.clientWidth;
+		let targetHeight = this.canvas.parentElement.clientHeight;
+
+		if (!targetWidth || targetWidth < 100) targetWidth = window.innerWidth;
+		if (!targetHeight || targetHeight < 100) targetHeight = window.innerHeight;
 		
 		this.canvas.width = targetWidth;
 		this.canvas.height = targetHeight;
 		
-		console.log(`📐 [Emojinko Engine]: Physics Resolution set to ${targetWidth}x${targetHeight}`);
-		
-		// Recompute peg geometry arrays safely inside the new valid boundaries
+		// Force re-generation of peg arrays inside verified non-zero boundaries
 		this.generatePlinkoPegMatrix(); 
 	}
-	/**
-	 * PLINKO PEG FIELD GENERATOR
-	 */
+
 	generatePlinkoPegMatrix() {
 		if (!this.canvas) return;
 		this.pegs = [];
@@ -191,13 +167,11 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 		for (let r = 0; r < rows; r++) {
 			const currentY = startY + (r * rowSpacing);
-			// Stagger peg layouts per column to generate true organic pin reactions
 			const isEven = (r % 2 === 0);
 			const pegCount = isEven ? 9 : 10; 
 			const colSpacing = width / (pegCount + 1);
 
 			for (let c = 0; c < pegCount; c++) {
-				// Offset even paths slightly to maintain proper lattice triangles
 				const currentX = colSpacing * (c + 1);
 				this.pegs.push({
 					x: currentX,
@@ -249,7 +223,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			});
 		}
 
-		// 🌟 FIX 4: Complete reset coverage maps across all runtime scopes
 		const clearBtn = panel.querySelector('#dz-btn-clear');
 		if (clearBtn) {
 			clearBtn.addEventListener('click', (e) => {
@@ -257,7 +230,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				e.stopPropagation();
 				this.state.scores = {};
 				this.state.userDropTracker = {}; 
-				this.activeTokens = []; // Clear current active tokens
+				this.activeTokens = [];
 				this.saveData();
 				this.renderLeaderboardUI();
 				this.sendNotice("🧹 Emojinko scoreboard, tokens, and drop limits cleared!");
@@ -265,13 +238,9 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		}
 	}
 
-	/**
-	 * CHAT DROP ACTION WITH TARGET BOUNDS
-	 */
 	executeDropAction(user, customToken = "🪙", targetSlot = null) {
 		if (!this.state.gameEnabled) return;
 		
-		// Force dynamic instantiation loop check to ensure canvas references aren't broken
 		if (!this.canvas || !document.getElementById(this.overlayId)) {
 			this.injectViewportOverlay();
 		}
@@ -298,13 +267,14 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			startX = (sectionSize * (slot - 1)) + (sectionSize / 2) + ((Math.random() * 20) - 10);
 		}
 
+		// 🌟 FIX 3: Start Y at a negative point offset, but give it an initial downward velocity base
 		this.activeTokens.push({
 			user: user,
 			token: cleanToken,
 			x: startX,
-			y: -20,
-			vx: (Math.random() * 1.5) - 0.75, 
-			vy: 1,                       
+			y: 10, 
+			vx: (Math.random() * 2) - 1, 
+			vy: 2,                       
 			radius: 12,                  
 			scale: 1,
 			opacity: 1,
@@ -329,9 +299,8 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		const width = this.canvas.width;
 		const height = this.canvas.height;
 
-		// Normalized physical gravity vector constant translations
-		const gravityForce = (11 - this.state.dropDuration) * 0.04 + 0.05; 
-		const dynamicFriction = 0.58; 
+		const gravityForce = (11 - this.state.dropDuration) * 0.05 + 0.1; 
+		const dynamicFriction = 0.55; 
 
 		for (let i = this.activeTokens.length - 1; i >= 0; i--) {
 			const t = this.activeTokens[i];
@@ -349,7 +318,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			t.x += t.vx;
 			t.y += t.vy;
 
-			// Handle edge bounces
 			if (t.x - t.radius < 0) {
 				t.x = t.radius;
 				t.vx *= -dynamicFriction;
@@ -358,7 +326,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				t.vx *= -dynamicFriction;
 			}
 
-			// Core Circle-to-Point Peg Vector Collisions
+			// Collision engine step loops
 			for (let p of this.pegs) {
 				const dx = t.x - p.x;
 				const dy = t.y - p.y;
@@ -370,7 +338,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 					const nx = dx / dist;
 					const ny = dy / dist;
 
-					// Push token out of the peg path geometry space
 					t.x += nx * overlap;
 					t.y += ny * overlap;
 
@@ -378,13 +345,13 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 					t.vx = (t.vx - 2 * dotProduct * nx) * dynamicFriction;
 					t.vy = (t.vy - 2 * dotProduct * ny) * dynamicFriction;
 
-					// Inject horizontal dispersion variance
-					t.vx += (Math.random() * 0.8) - 0.4;
+					t.vx += (Math.random() * 1.2) - 0.6;
 				}
 			}
 
-			// Landing Row detection boundaries
-			if (t.y >= height - 55) {
+			// 🌟 FIX 4: Safety buffer. If height is completely flat or bugged, trigger score checks safely
+			const floorLine = height > 150 ? height - 45 : 100;
+			if (t.y >= floorLine) {
 				t.isDying = true;
 				const finalXPercent = (t.x / width) * 100;
 				this.evaluateLandingZoneScore(t.user, finalXPercent);
@@ -397,20 +364,20 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-		// 1. Render Peg Matrix Pins Layout
+		// Draw Peg Matrix Pins Layout
 		for (let p of this.pegs) {
-			this.ctx.fillStyle = "rgba(168, 85, 247, 0.35)";
+			this.ctx.fillStyle = "rgba(168, 85, 247, 0.6)";
 			this.ctx.beginPath();
-			this.ctx.arc(p.x, p.y, p.radius + 2, 0, Math.PI * 2);
+			this.ctx.arc(p.x, p.y, p.radius + 1, 0, Math.PI * 2);
 			this.ctx.fill();
 			
 			this.ctx.fillStyle = "#ffffff";
 			this.ctx.beginPath();
-			this.ctx.arc(p.x, p.y, p.radius * 0.5, 0, Math.PI * 2);
+			this.ctx.arc(p.x, p.y, p.radius * 0.4, 0, Math.PI * 2);
 			this.ctx.fill();
 		}
 
-		// 2. Render Falling Tokens Layout Arrays
+		// Draw Falling Tokens Layout Arrays
 		this.ctx.textAlign = "center";
 		this.ctx.textBaseline = "middle";
 
@@ -421,17 +388,14 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			this.ctx.scale(t.scale, t.scale);
 
 			this.ctx.font = "24px Arial";
-			this.ctx.fillStyle = "#000000";
-			this.ctx.fillText(t.token, 1.5, 1.5);
-			this.ctx.fillStyle = "#ffffff";
 			this.ctx.fillText(t.token, 0, 0);
 
-			this.ctx.font = "bold 9px monospace";
-			this.ctx.fillStyle = "rgba(15, 15, 15, 0.8)";
+			this.ctx.font = "bold 10px monospace";
+			this.ctx.fillStyle = "rgba(24, 24, 27, 0.85)";
 			const textWidth = this.ctx.measureText(t.user).width;
 			
-			this.ctx.fillRect(-((textWidth + 6) / 2), 14, textWidth + 6, 11);
-			this.ctx.fillStyle = "#e4e4e7";
+			this.ctx.fillRect(-((textWidth + 6) / 2), 14, textWidth + 6, 13);
+			this.ctx.fillStyle = "#ffffff";
 			this.ctx.fillText(t.user, 0, 20);
 
 			this.ctx.restore();
