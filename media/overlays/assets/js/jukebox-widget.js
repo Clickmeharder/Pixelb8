@@ -159,7 +159,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
 	// ========================================================================
     // 🪟 VIEWPORT INJECTION LAYER OVERRIDES
     // ========================================================================
-injectViewportOverlay() {
+	injectViewportOverlay() {
 		const overlayWrapper = document.getElementById("overlay-wrapper");
 		if (!overlayWrapper || document.getElementById(this.overlayId)) return;
 

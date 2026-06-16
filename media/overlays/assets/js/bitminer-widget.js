@@ -46,9 +46,9 @@ function createMinerState() {
 const MINER_ACTION_LIBRARY = {
 	idle: (widget, ctx) => {
 		if (widget.state.heatLevel > 0) widget.state.heatLevel -= 0.2;
-		if (ctx.t % 300 === 0 && Math.random() < 0.3) {
+/* 		if (ctx.t % 300 === 0 && Math.random() < 0.3) {
 			widget.setWidgetBubble("Sensors scanning subterranean layers...");
-		}
+		} */
 	},
 	processing: (widget, ctx) => {
 		if (widget.state.actionTimer > 0) {
