@@ -2,7 +2,7 @@ console.log("🚀 [Pixelb8 Stream Widget Engine]: initializing...");
 
 /**
  * ============================================================================
- * PIXELB8 ECOSYSTEM: WIDGET ENGINE (Phase 1.7 - Data-Driven Core System)
+ * PIXELB8 ECOSYSTEM: WIDGET ENGINE (Phase 1.8 - Data-Driven Core System)
  * Concern: Manages modern module lifecycles while bridging legacy boot components.
  * ============================================================================
  */
@@ -128,7 +128,10 @@ export const WidgetEngine = {
                     // Direct pipeline down to dynamic lifecycle hot-swaps
                     await this.toggleWidget(idKey, v);
 
-                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+                    // 🌐 Bridge window context explicit tier check to cross module script closures cleanly
+                    if (typeof window.syncAllToggleUI === "function") {
+                        window.syncAllToggleUI();
+                    }
                 }
             });
         });
@@ -178,3 +181,8 @@ export const WidgetEngine = {
         }
     }
 };
+
+// Expose safely to window scope to allow easy integration into classic dashboard handlers
+if (typeof window !== 'undefined') {
+    window.WidgetEngine = WidgetEngine;
+}

@@ -1421,6 +1421,7 @@ function syncAllToggleUI() {
         window.streamJukeboxEngine.setWidgetActiveState(!!s.jukeboxWidgetEnabled);
     }
 }
+window.syncAllToggleUI = syncAllToggleUI;
 function updateAllBadgesUI() {
     // 1. Resolve State Flags
     // Read variables matching your memory allocation rules
