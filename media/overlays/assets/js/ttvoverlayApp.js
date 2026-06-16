@@ -1897,19 +1897,33 @@ async function init() {
     determineExecutionEnvironment();
     // Core Layout & Registry Loading
     loadPositions();
-    renderSettingsWindow();
+
+    // =========================================================================
+    // 🧩 1. INJECT DYNAMIC ENGINE WIDGETS INTO SCHEMA BEFORE RENDERING
+    // =========================================================================
+    if (typeof WidgetEngine !== 'undefined' && typeof WidgetEngine.injectWidgetsIntoSchema === 'function') {
+        WidgetEngine.injectWidgetsIntoSchema(SETTINGS_SCHEMA);
+        console.log("🧩 [WidgetEngine]: Successfully injected dynamic entries into SETTINGS_SCHEMA.");
+    } else {
+        console.warn("⚠️ [WidgetEngine]: Injection skipped. Engine layout configuration not detected.");
+    }
+
+    // =========================================================================
+    // 🖥️ 2. RENDER THE INTERFACE NOW THAT THE MANIFEST IS COMPLETE
+    // =========================================================================
+    renderSettingsWindow(); 
     renderThemeControls();
+    
     const s = typeof settings !== 'undefined' ? settings : {};
 
     // =========================================================================
-    // ⚙️ SYSTEM EXTENSION ENGINE CASCADE
+    // ⚙️ 3. SYSTEM EXTENSION ENGINE CASCADE (BOOT ACTIVE SYSTEM UNITS)
     // =========================================================================
-    // Hand off ALL boot loading routines to the engine!
     if (typeof WidgetEngine !== 'undefined') {
         await WidgetEngine.initSavedWidgets(s);
     }
 
-    // 2. Scan and inject any commands that were loaded during boot
+    // 4. Scan and inject any commands that were loaded during boot
     console.log("📡 [Command Registry]: Running boot scan...");
     injectAllWidgetCommands();
     
@@ -1917,6 +1931,7 @@ async function init() {
     renderRewardsList(); 
     populateCustomDropdowns();
     initTimerEngine();
+    
     // Bind all event listeners to the DOM and sync UI states
     bindEvents();
     if (typeof syncAllToggleUI === 'function') {
@@ -1926,21 +1941,24 @@ async function init() {
     console.log("🚀 ttvoverlayapp.js version 0.112 finished loading");
 }
 function injectAllWidgetCommands() {
-    // 🔍 Read instances from both legacy window tags AND your modern engine tracks
+    // 🔍 Dynamic Registry Mapping Arrays
     const activeWidgets = [
         { name: "StreamPet", instance: window.streamPetEngine },
-        { name: "EntropiaParser", instance: window.entropiaLogParser },
-        // { name: "StreamJukebox", instance: window.streamJukeboxEngine },
-        { 
-			name: "StreamJukebox (Engine)", 
-			instance: (typeof WidgetEngine !== 'undefined' && WidgetEngine.instances) ? WidgetEngine.instances.streamjukebox : null 
-		},
-        // ⚙️ Safely scan your new engine instances array if the engine is initialized
-        { 
-            name: "BitMiner (Engine)", 
-            instance: (typeof WidgetEngine !== 'undefined' && WidgetEngine.instances) ? WidgetEngine.instances.bitminer : null 
-        }
+        { name: "EntropiaParser", instance: window.entropiaLogParser }
     ];
+
+    // ⚙️ AUTOMATED ENGINE INSTANCE COLLECTION LAYER
+    if (typeof WidgetEngine !== 'undefined' && WidgetEngine.instances && WidgetEngine.registryMap) {
+        Object.entries(WidgetEngine.registryMap).forEach(([idKey, config]) => {
+            const liveInstance = WidgetEngine.instances[config.instanceKey];
+            if (liveInstance) {
+                activeWidgets.push({
+                    name: `${config.className} (Engine)`,
+                    instance: liveInstance
+                });
+            }
+        });
+    }
 
     console.log("📡 [Command Registry]: Starting automated injection scan...");
 
