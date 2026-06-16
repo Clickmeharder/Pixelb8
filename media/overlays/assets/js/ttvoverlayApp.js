@@ -543,53 +543,7 @@ const SETTINGS_SCHEMA = [
                     if (typeof syncAllToggleUI === "function") syncAllToggleUI();
                 } 
             },
-/*             { 
-                label: "Enable Jukebox Widget", 
-                idKey: "jukebox", 
-                get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
-                set: async (v) => { // 🔄 Marked async for on-the-fly streaming
-                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                    
-                    // If turning ON and it hasn't been imported yet, load and instantiate it now!
-                    if (v && typeof window.streamJukeboxEngine === 'undefined') {
-                        try {
-                            const module = await import('./jukebox.js');
-                            window.StreamJukebox = module.StreamJukebox;
-                            window.streamJukeboxEngine = new module.StreamJukebox();
-                            
-                            // Hot-inject the new commands into your active chat listener
-                            if (typeof injectAllWidgetCommands === 'function') injectAllWidgetCommands();
-                            console.log("🎸 Jukebox Hot-Loaded and Instantiated mid-session!");
-                        } catch (err) {
-                            console.error("❌ Failed to hot-load Jukebox:", err);
-                        }
-                    }
-                    
-                    // Always sync up the visibility across windows instantly
-                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
-                } 
-            }, */
-			{ 
-                label: "Enable Jukebox Widget", 
-                idKey: "jukebox", 
-                get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
-                set: async (v) => {
-                    // 1. Maintain your exact persistent state configuration safely
-                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
-                    if (typeof saveSettings === "function") saveSettings(); 
-                    
-                    // ⚙️ Hand execution lifecycle rules cleanly over to the modern unified Engine!
-                    if (typeof WidgetEngine !== 'undefined' && typeof WidgetEngine.toggleWidget === 'function') {
-                        await WidgetEngine.toggleWidget("jukebox-widget", v);
-                    } else {
-                        console.warn("⚠️ [Schema Router]: WidgetEngine unavailable for Jukebox lifecycle modification.");
-                    }
-                    
-                    // 3. Keep standard UI cross-window sync mechanics running
-                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
-                } 
-            },
+
             { 
                 label: "Enable Entropia Widget", 
                 idKey: "entropia-widget", 
@@ -617,6 +571,26 @@ const SETTINGS_SCHEMA = [
                     if (typeof syncAllToggleUI === "function") syncAllToggleUI();
                 } 
             },
+/* 			{ 
+                label: "Enable Jukebox Widget", 
+                idKey: "jukebox", 
+                get: () => (settings ? !!settings.jukeboxWidgetEnabled : false), 
+                set: async (v) => {
+                    // 1. Maintain your exact persistent state configuration safely
+                    if (typeof settings !== 'undefined') settings.jukeboxWidgetEnabled = v; 
+                    if (typeof saveSettings === "function") saveSettings(); 
+                    
+                    // ⚙️ Hand execution lifecycle rules cleanly over to the modern unified Engine!
+                    if (typeof WidgetEngine !== 'undefined' && typeof WidgetEngine.toggleWidget === 'function') {
+                        await WidgetEngine.toggleWidget("jukebox-widget", v);
+                    } else {
+                        console.warn("⚠️ [Schema Router]: WidgetEngine unavailable for Jukebox lifecycle modification.");
+                    }
+                    
+                    // 3. Keep standard UI cross-window sync mechanics running
+                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+                } 
+            },
 			{ 
                 label: "Enable BitMiner Widget", 
                 idKey: "miner-widget", 
@@ -632,7 +606,7 @@ const SETTINGS_SCHEMA = [
                     // 3. Keep standard UI cross-window sync mechanics running
                     if (typeof syncAllToggleUI === "function") syncAllToggleUI();
                 } 
-            }
+            } */
         ]
     }
 	
