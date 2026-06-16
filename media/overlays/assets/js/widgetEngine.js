@@ -120,19 +120,29 @@ export const WidgetEngine = {
             widgetGroup.items.push({
                 label: `Enable ${cleanName} Widget`,
                 idKey: idKey,
-                get: () => (typeof settings !== 'undefined' ? !!settings[config.settingsKey] : false),
-                set: async (v) => {
-                    if (typeof settings !== 'undefined') settings[config.settingsKey] = v;
-                    if (typeof saveSettings === "function") saveSettings();
+				// Change your get and set lines in WidgetEngine to point clearly to window level references:
+				get: () => {
+					const activeSettings = window.settings || typeof settings !== 'undefined' ? settings : null;
+					return activeSettings ? !!activeSettings[config.settingsKey] : false;
+				},
+				set: async (v) => {
+					const activeSettings = window.settings || typeof settings !== 'undefined' ? settings : null;
+					if (activeSettings) {
+						activeSettings[config.settingsKey] = v;
+					}
+					
+					if (typeof window.saveSettings === "function") {
+						window.saveSettings();
+					} else if (typeof saveSettings === "function") {
+						saveSettings();
+					}
 
-                    // Direct pipeline down to dynamic lifecycle hot-swaps
-                    await this.toggleWidget(idKey, v);
+					await this.toggleWidget(idKey, v);
 
-                    // Bridge window context explicit tier check to cross module script closures cleanly
-                    if (typeof window.syncAllToggleUI === "function") {
-                        window.syncAllToggleUI();
-                    }
-                }
+					if (typeof window.syncAllToggleUI === "function") {
+						window.syncAllToggleUI();
+					}
+				}
             });
         });
     },
