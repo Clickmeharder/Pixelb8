@@ -93,6 +93,7 @@ let chatHeight = settings.chatHeight || "350px";
 
 
 function saveSettings() {
+    // 1. Maintain classic local variable assignments
     settings.botPrefix = BOT_PREFIX;
     settings.useBotPrefix = useBotPrefix;
     settings.cmdPrefix = CMD_PREFIX;
@@ -101,25 +102,35 @@ function saveSettings() {
     settings.floatingEmotes = floatingEmotes;
     
     settings.chatHidden = chatHidden;
-
     settings.statusHidden = statusHidden;
-    //---------------------------------------
-	// Alert Widget
-	settings.alertHidden = alertHidden;
-	settings.rewardsEnabled = rewardsEnabled;
+    
+    // Alert Widget
+    settings.alertHidden = alertHidden;
+    settings.rewardsEnabled = rewardsEnabled;
     settings.bitsEnabled = bitsEnabled;
-	// Add these lines to commit reward/bit values to disk
-	settings.chatHeight = chatHeight;
-	//---------------------------------------
+    settings.chatHeight = chatHeight;
+
+    // 🌟 FIX: Explicitly ensure modern dynamically tracking keys are not dropped!
+    if (typeof WidgetEngine !== 'undefined' && WidgetEngine.registryMap) {
+        Object.values(WidgetEngine.registryMap).forEach(config => {
+            // If the schema altered this value, preserve it. Otherwise, fallback to its existing state or false.
+            if (settings[config.settingsKey] !== undefined) {
+                // Keep it as is
+            } else {
+                settings[config.settingsKey] = false;
+            }
+        });
+    }
+    
+    // 2. Commit the entire preserved memory profile cleanly to disk
     localStorage.setItem('p8_settings', JSON.stringify(settings));
     
     // Auto-refresh panel states inside active DOM elements if they exist
     if (typeof updateManagerBadgesUI === "function") {
         updateManagerBadgesUI();
-		updateAllBadgesUI();
+        updateAllBadgesUI();
     }
 }
-
 //================================================
 // --- OBS CONSOLE BRIDGE ---
 const originalLog = console.log;
