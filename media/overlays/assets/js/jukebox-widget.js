@@ -1,4 +1,89 @@
 import { BaseWidgetModule } from './BaseWidgetModule.js';
+// ============================================================================
+// 🎨 JUKEBOX VIEW TEMPLATES (Collapsible UI Object Map)
+// ============================================================================
+//region Jukebox Templates
+const JUKEBOX_HTMLTEMPLATES = {
+    config: `
+		<details style="margin-bottom: 15px; border: 2px solid #27272a; border-radius: 6px; background: #18181b;">
+			<summary id="jb-config-header">
+				⚙️ Jukebox Configuration
+			</summary>
+			<div style="padding: 10px; border-top: 1px solid #27272a;">
+				<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+					<span class="settings-toggle-label" style="font-size: 14px;">Accept Requests</span>
+					<div class="settings-toggle-controls">
+						<span id="req-status-badge" class="toggle-status-badge">ON</span>
+						<input type="checkbox" id="stg-toggle-requests-checkbox" checked>
+					</div>
+				</div>
+
+				<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+					<span class="settings-toggle-label" style="font-size: 14px;">Audio Only</span>
+					<div class="settings-toggle-controls">
+						<span id="audio-status-badge" class="toggle-status-badge">OFF</span>
+						<input type="checkbox" id="stg-toggle-audio-only-checkbox">
+					</div>
+				</div>
+
+				<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+					<span class="settings-toggle-label" style="font-size: 14px;">Fake Visualizer</span>
+					<div class="settings-toggle-controls">
+						<span id="av-status-badge" class="toggle-status-badge">OFF</span>
+						<input type="checkbox" id="stg-toggle-visualizer-checkbox">
+					</div>
+				</div>
+
+				<div id="jb-vote-req-wrapper">
+					<label id="jb-vote-req-label">Vote Requirements</label>
+					<input type="number" id="jb-vote-req-input" class="p8-input" value="2">
+				</div>
+			</div>
+		</details>
+    `, // <-- Your editor can collapse this individual property block
+
+    nowPlaying: `
+		<div id="jb-controls-nowplaying-section" style="background: #18181b; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #3f3f46;">
+			<div id="jb-current-Label">Playing Now</div>
+			<div id="jb-current-title" class="jb-current-title">No Track Loaded</div>
+			
+			<div id="jb-upnext-Label">Up Next</div>
+			<div id="jb-upnext-title" class="jb-next-title">waiting...</div>
+			
+			<div id="jb-current-controlbar">
+				<div class="jb-volume-control" style="display: flex; align-items: center; gap: 8px; flex: 1;">
+					<span style="font-size: 12px; color: #a1a1aa;">VOL</span>
+					<input type="range" id="jb-volume-slider" min="0" max="100" value="50" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
+				</div>
+				<button id="jb-skip-btn" class="p8-btn">⏭</button>
+				<button id="jb-current-heart" class="p8-btn">❤</button>
+			</div>
+		</div>
+    `, // <-- Your editor can collapse this individual property block
+
+    lists: `
+		<div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
+			<input type="text" id="jb-search-input" class="p8-input" placeholder="Search or YouTube URL..." style="width: 100%; box-sizing: border-box;">
+			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+				<button id="jb-add-queue-btn" class="p8-btn">Queue</button>
+				<button id="jb-add-fallback-btn" class="p8-btn alt-btn">Playlist</button>
+			</div>
+		</div>
+
+		<div id="jb-queue-list-label">📋 Active Queue</div>
+		<div id="jb-queue-list">
+			<div id="jb-queue-list-controls">
+				<button id="jb-clear-btn" class="p8-btn">CLEAR QUEUE</button>
+			</div>
+		</div>
+		
+		<br>
+		<div id="jb-fallback-list-label">📋 Fallback Playlist</div>
+		<div id="jb-fallback-list"></div>
+    `  // <-- Your editor can collapse this individual property block
+};
+// #endregion
+
 
 export class StreamJukeboxModule extends BaseWidgetModule {
     constructor() {
@@ -43,95 +128,21 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     }
 
     // ========================================================================
-    // 🪟 DECLARATIVE TEMPLATE ENGINE (Exact Original HTML Layout Restoration)
+    // 🪟 DECLARATIVE TEMPLATE ENGINE
     // ========================================================================
-    static get controlsTemplate() {
+	static get controlsTemplate() {
         return `
             <div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
                 <span>🎵 Song Request Jukebox</span>
                 <span class="collapse-icon">▼</span>
             </div>
             <div class="collapsible-content">
-
-                <details style="margin-bottom: 15px; border: 2px solid #27272a; border-radius: 6px; background: #18181b;">
-                    <summary id="jb-config-header">
-                        ⚙️ Jukebox Configuration
-                    </summary>
-                    <div style="padding: 10px; border-top: 1px solid #27272a;">
-                        
-
-                        <div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span class="settings-toggle-label" style="font-size: 14px;">Accept Requests</span>
-                            <div class="settings-toggle-controls">
-                                <span id="req-status-badge" class="toggle-status-badge">ON</span>
-                                <input type="checkbox" id="stg-toggle-requests-checkbox" checked>
-                            </div>
-                        </div>
-
-                        <div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span class="settings-toggle-label" style="font-size: 14px;">Audio Only</span>
-                            <div class="settings-toggle-controls">
-                                <span id="audio-status-badge" class="toggle-status-badge">OFF</span>
-                                <input type="checkbox" id="stg-toggle-audio-only-checkbox">
-                            </div>
-                        </div>
-
-                        <div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span class="settings-toggle-label" style="font-size: 14px;">Fake Visualizer</span>
-                            <div class="settings-toggle-controls">
-                                <span id="av-status-badge" class="toggle-status-badge">OFF</span>
-                                <input type="checkbox" id="stg-toggle-visualizer-checkbox">
-                            </div>
-                        </div>
-
-                        <div id="jb-vote-req-wrapper">
-                            <label id="jb-vote-req-label">Vote Requirements</label>
-                            <input type="number" id="jb-vote-req-input" class="p8-input" value="2">
-                        </div>
-
-                    </div>
-                </details>
-
-                <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
-                    <input type="text" id="jb-search-input" class="p8-input" placeholder="Search or YouTube URL..." style="width: 100%; box-sizing: border-box;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-                        <button id="jb-add-queue-btn" class="p8-btn">Queue</button>
-                        <button id="jb-add-fallback-btn" class="p8-btn alt-btn">Playlist</button>
-                    </div>
-                </div>
-
-                <div id="jb-controls-nowplaying-section" style="background: #18181b; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #3f3f46;">
-                    <div id="jb-current-Label">Playing Now</div>
-                    <div id="jb-current-title" class="jb-current-title" >No Track Loaded</div>
-                    
-                    <div id="jb-upnext-Label">Up Next</div>
-                    <div id="jb-upnext-title" class="jb-next-title">waiting...</div>
-                    
-                    <div id="jb-current-controlbar">
-                        <div class="jb-volume-control" style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                            <span style="font-size: 12px; color: #a1a1aa;">VOL</span>
-                            <input type="range" id="jb-volume-slider" min="0" max="100" value="50" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
-                        </div>
-                        <button id="jb-skip-btn" class="p8-btn">⏭</button>
-                        <button id="jb-current-heart" class="p8-btn" >❤</button>
-                    </div>
-                </div>
-
-                <div id="jb-queue-list-label">📋 Active Queue</div>
-                <div id="jb-queue-list" style="">
-					<div id="jb-queue-list-controls">
-						<button id="jb-clear-btn" class="p8-btn">CLEAR QUEUE</button>
-					</div>
-				</div>
-                
-
-                <br>
-                <div id="jb-fallback-list-label">📋 Fallback Playlist</div>
-                <div id="jb-fallback-list"></div>
+                ${JUKEBOX_HTMLTEMPLATES.config}
+                ${JUKEBOX_HTMLTEMPLATES.nowPlaying}
+                ${JUKEBOX_HTMLTEMPLATES.lists}
             </div>
         `;
     }
-
     // ========================================================================
     // 🪟 VIEWPORT INJECTION LAYER OVERRIDES
     // ========================================================================
