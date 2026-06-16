@@ -901,10 +901,12 @@ function renderSettingsWindow() {
                     const currentVal = item.get();
                     
                     // ⏳ Await the setter promise completion before executing the UI sync
-                    await item.set(!currentVal); 
-                    
+                    await item.set(!currentVal);
+					console.log('togglebtn clicked:'+ togglebtn);
+					console.log('currentVal = '+ currentVal);
                     if (typeof syncAllToggleUI === 'function') {
                         syncAllToggleUI(); 
+						console.log('syncAllToggleUI was called:');
                     }
                 });
             }
