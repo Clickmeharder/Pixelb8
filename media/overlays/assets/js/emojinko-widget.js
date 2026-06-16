@@ -107,22 +107,34 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 	 * VIEWPORT OVERLAY CANVAS ASSEMBLY
 	 */
 	injectViewportOverlay() {
-		// Target overlay-wrapper or fall back straight to active scene canvas layouts
-		let overlayWrapper = document.getElementById("overlay-wrapper");
-		if (!overlayWrapper) {
-			overlayWrapper = document.getElementById("main-layout") || document.body;
-		}
-		
+		// 1. Ensure we don't duplicate the element layer
 		if (document.getElementById(this.overlayId)) return;
 
+		// 2. Locate your streaming container layout template target
+		let overlayWrapper = document.getElementById("overlay-wrapper") || 
+		                     document.getElementById("main-layout") || 
+		                     document.querySelector(".ttv-overlay-container") || // Added fallbacks
+		                     document.body;
+		
 		const overlayEl = document.createElement("div");
 		overlayEl.id = this.overlayId;
-		overlayEl.style.cssText = `position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 10;`;
+		
+		// 🌟 FIX: Force explicit high-visibility bounds on the wrapper layout element
+		overlayEl.style.cssText = `
+			position: absolute; 
+			top: 0; 
+			left: 0; 
+			width: 100vw; 
+			height: 100vh; 
+			pointer-events: none; 
+			overflow: hidden; 
+			z-index: 9999;
+		`;
 		
 		overlayEl.innerHTML = `
 			<canvas id="dz-physics-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: block;"></canvas>
 
-			<div id="dz-bucket-row" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; display: flex; background: rgba(24,24,27,0.85); border-top: 2px solid var(--accent, #a855f7); font-family: monospace; text-align: center; line-height: 40px; font-weight: bold; color: #fff; font-size: 11px;">
+			<div id="dz-bucket-row" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; display: flex; background: rgba(24,24,27,0.9); border-top: 2px solid var(--accent, #a855f7); font-family: monospace; text-align: center; line-height: 40px; font-weight: bold; color: #fff; font-size: 11px; z-index: 10000;">
 				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(168,85,247,0.1);">100 PTS</div>
 				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(239,68,68,0.1); color: #ef4444;">💥 RIP</div>
 				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(34,197,94,0.1); color: #22c55e;">🍀 LUCKY</div>
@@ -135,25 +147,33 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		this.canvas = document.getElementById("dz-physics-canvas");
 		if (this.canvas) {
 			this.ctx = this.canvas.getContext("2d");
+			
+			// Force layout sizing calculations
 			this.resizePhysicsCanvas();
 			
-			// De-register historical instances before binding layout listeners
+			// Safely bind scaling listeners
 			window.removeEventListener('resize', () => this.resizePhysicsCanvas());
 			window.addEventListener('resize', () => this.resizePhysicsCanvas());
 			
-			this.generatePlinkoPegMatrix();
 			this.startPhysicsLoop();
 		}
 	}
 
 	resizePhysicsCanvas() {
 		if (!this.canvas) return;
-		// Pull sizing vectors directly from parent client viewport limits
-		this.canvas.width = this.canvas.parentElement.clientWidth || window.innerWidth;
-		this.canvas.height = this.canvas.parentElement.clientHeight || window.innerHeight;
+		
+		// 🌟 FIX: If layout container parameters parse to 0, default directly to screen view dimensions
+		const targetWidth = this.canvas.parentElement.clientWidth || window.innerWidth;
+		const targetHeight = this.canvas.parentElement.clientHeight || window.innerHeight;
+		
+		this.canvas.width = targetWidth;
+		this.canvas.height = targetHeight;
+		
+		console.log(`📐 [Emojinko Engine]: Physics Resolution set to ${targetWidth}x${targetHeight}`);
+		
+		// Recompute peg geometry arrays safely inside the new valid boundaries
 		this.generatePlinkoPegMatrix(); 
 	}
-
 	/**
 	 * PLINKO PEG FIELD GENERATOR
 	 */
