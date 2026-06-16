@@ -435,9 +435,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     getModuleCommands() {
         const sendNotice = (txt) => {
             this.setWidgetBubble(txt);
-            if (typeof window.botSay === 'function') {
-                window.botSay(txt);
-            }
+                botSay(txt);
         };
 
         const processMasterJukeboxSubRoute = (user, message, flags) => {
