@@ -639,19 +639,64 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         }
     }
 
-    async handleSongRequest(user, message, botSay) {
+	async handleSongRequest(user, message, botSay) {
         if (!message) return;
-        if (!this.acceptRequests) { botSay(`🚫 Song requests are disabled.`); return; }
+        if (!this.acceptRequests) { 
+            if (typeof botSay === 'function') botSay(`🚫 Song requests are disabled.`); 
+            return; 
+        }
 
+        // Notify chat/UI that the jukebox is searching to account for API latency
+        if (typeof botSay === 'function' && !this.extractYouTubeId(message)) {
+            botSay(`🔍 Searching for "${message}"...`);
+        }
+
+        let trackToQueue = null;
         const id = this.extractYouTubeId(message);
-        this.queue.push({ user, title: id ? "YouTube Video Link" : message, id: id || message, isSearch: !id });
+
+        if (id) {
+            // It's a direct YouTube URL link, so we pass it straight through
+            trackToQueue = { 
+                id: id, 
+                title: "YouTube Video Link", 
+                user: user 
+            };
+        } else {
+            // It's a search term keyword request, fetch and resolve it right now
+            const fetched = await this.fetchTrack(message);
+            if (fetched) {
+                trackToQueue = { 
+                    id: fetched.id, 
+                    title: fetched.title, 
+                    user: user 
+                };
+            }
+        }
+
+        // Drop out if the track wasn't found or couldn't resolve
+        if (!trackToQueue) {
+            if (typeof botSay === 'function') {
+                botSay(`❌ Could not find any tracks matching "${message}".`);
+            }
+            return;
+        }
+
+        // The track is confirmed valid! Push it into the queue pipeline securely
+        this.queue.push(trackToQueue);
+        
         this.renderQueueList();
         this.updatePlayerDisplay();
-        
-        if (!this.isPlayingSong) this.playNextSong(botSay);
-    }
 
-    async playNextSong(botSay) {
+        if (typeof botSay === 'function') {
+            botSay(`🎵 Added to Queue: "${trackToQueue.title}" (Requested by ${user})`);
+        }
+        
+        // Bootstrap playback immediately if the player is idling on standby
+        if (!this.isPlayingSong) {
+            this.playNextSong(botSay);
+        }
+    }
+	async playNextSong(botSay) {
         if (!this.ytPlayerReady) return;
         this.currentTrackVotes.clear();
         this.currentTrackSkipVotes.clear();
@@ -659,15 +704,17 @@ export class StreamJukeboxModule extends BaseWidgetModule {
 
         if (this.queue.length > 0) {
             this.isPlayingSong = true;
-            const next = this.queue.shift();
-            this.renderQueueList();
             
-            let fetchedTrack = next.isSearch ? await this.fetchTrack(next.id) : { id: next.id, title: next.title };
-            if (fetchedTrack) {
-                this.currentTrackData = fetchedTrack;
-                this.updatePlayerDisplay();
-                this.ytPlayer.loadVideoById(this.currentTrackData.id);
-            } else { this.playNextSong(botSay); }
+            // Pluck the next pre-verified track out of the array slot
+            const nextTrack = this.queue.shift();
+            
+            this.renderQueueList();
+            this.currentTrackData = nextTrack;
+            this.updatePlayerDisplay();
+            
+            // Instantly load the media track profile
+            this.ytPlayer.loadVideoById(this.currentTrackData.id);
+            
         } else if (this.fallbackPlaylist.length > 0) {
             this.isPlayingSong = true;
             this.currentTrackData = this.fallbackPlaylist[Math.floor(Math.random() * this.fallbackPlaylist.length)];
@@ -676,6 +723,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         } else {
             this.isPlayingSong = false;
             this.updatePlayerDisplay("No Track Loaded");
+            if (typeof botSay === 'function') botSay("📭 Jukebox queue empty.");
         }
     }
 
