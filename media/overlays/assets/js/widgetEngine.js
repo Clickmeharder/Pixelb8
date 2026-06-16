@@ -36,15 +36,17 @@ export const WidgetEngine = {
      * Loops over all modern registry items and toggles them based on incoming settings flags.
      */
     async autoBootModernWidgets(settings) {
-        // Grab every entry key (e.g., "miner-widget", "emojinko-widget")
         const widgetKeys = Object.keys(this.registryMap);
         
         for (const idKey of widgetKeys) {
             const config = this.registryMap[idKey];
             
-            // If the settings payload has this widget's unique settings key marked true, fire it up
+            // Explicitly sync window.settings to protect boot states
+            if (window.settings && window.settings[config.settingsKey] !== undefined) {
+                settings[config.settingsKey] = window.settings[config.settingsKey];
+            }
+            
             if (settings[config.settingsKey]) {
-                // Pass true to third argument to defer mass chat command re-injection passes until the loop wraps up
                 await this.toggleWidget(idKey, true, true);
             }
         }
@@ -52,9 +54,6 @@ export const WidgetEngine = {
 
     /**
      * Spawns or dismantles extended modules
-     * @param {string} idKey - Core registry key entry identifier
-     * @param {boolean} enable - Target toggle operational condition
-     * @param {boolean} deferCommandRefresh - If true, skips updating global chat maps instantly
      */
     async toggleWidget(idKey, enable, deferCommandRefresh = false) {
         const config = this.registryMap[idKey];
@@ -67,7 +66,6 @@ export const WidgetEngine = {
                     const module = await import(config.path + cacheBuster);
                     const WidgetClass = module[config.className];
                     
-                    // 🌟 FIX: Forward the dynamic registry matching idKey directly into the class instance constructor!
                     this.instances[config.instanceKey] = new WidgetClass(idKey);
                     console.log(`⚙️ [WidgetEngine]: Modern module "${config.className}" initialized safely with namespace scope "${idKey}".`);
                     
@@ -101,9 +99,8 @@ export const WidgetEngine = {
 
     /**
      * Dynamically injects schema rules into your UI settings panels directly from the registry definitions
-     * @param {Array} schema - Your core SETTINGS_SCHEMA structure array from ttvoverlay.js
      */
-	injectWidgetsIntoSchema(schema) {
+    injectWidgetsIntoSchema(schema) {
         const widgetGroup = schema.find(group => group.groupName === "🧩 Widgets Settings");
         if (!widgetGroup) return;
 
@@ -118,25 +115,19 @@ export const WidgetEngine = {
             widgetGroup.items.push({
                 label: `Enable ${cleanName} Widget`,
                 idKey: idKey,
-                // 🌟 FORCE GLOBAL WINDOW LOOKUP
                 get: () => {
-                    const globalSettings = window.settings || (typeof settings !== 'undefined' ? settings : {});
+                    const globalSettings = window.settings || {};
                     return !!globalSettings[config.settingsKey];
                 },
                 set: async (v) => {
-                    // 🌟 FORCE MUTATION ON GLOBAL WINDOW LOOKUP
-                    if (!window.settings && typeof settings !== 'undefined') {
-                        window.settings = settings; 
-                    } else if (!window.settings) {
-                        window.settings = {};
-                    }
+                    if (!window.settings) window.settings = {};
                     
+                    // Force state alignment instantly in memory
                     window.settings[config.settingsKey] = v;
 
+                    // Trigger the updated global save sequence
                     if (typeof window.saveSettings === "function") {
                         window.saveSettings();
-                    } else if (typeof saveSettings === "function") {
-                        saveSettings();
                     }
 
                     await this.toggleWidget(idKey, v);
@@ -148,20 +139,18 @@ export const WidgetEngine = {
             });
         });
     },
+
     /**
      * Handles the entire startup loading cascade for both modern and legacy tools
      */
     async initSavedWidgets(settings) {
         if (!settings) return;
 
-        // 1. Cleanly execute the dynamic modern auto-boot engine sequence
         await this.autoBootModernWidgets(settings);
 
         // =========================================================================
-        // 🏛️ LEGACY COMPATIBILITY LAYER (To be refactored into classes later)
+        // 🏛️ LEGACY COMPATIBILITY LAYER
         // =========================================================================
-        
-        // 🐾 Legacy Pet Widget Boot Pass
         if (settings.petWidgetEnabled) {
             try {
                 const module = await import('./pet-widget.js');
@@ -173,7 +162,6 @@ export const WidgetEngine = {
             }
         }
 
-        // 🎯 Legacy Entropia Widget Boot Pass
         if (settings.entropiaWidgetEnabled) {
             try {
                 const module = await import('./entropiauniverse-widget.js');
@@ -185,7 +173,6 @@ export const WidgetEngine = {
             }
         }
 
-        // 2. UNIFIED INJECTION POINT: Safely rebuild command routing arrays once core loads wrap up
         if (typeof window.injectAllWidgetCommands === 'function') {
             window.injectAllWidgetCommands();
             console.log("⚙️ [WidgetEngine]: Core manifest mapping compiled cleanly for active chat listeners.");
@@ -193,7 +180,13 @@ export const WidgetEngine = {
     }
 };
 
-// Expose safely to window scope to allow easy integration into classic dashboard handlers
+// ============================================================================
+// 🔌 GLOBAL REGISTRY HOOKS FOR TTVOVERLAYAPP.JS
+// Exposes references so storage serialization engines know what keys to write.
+// ============================================================================
 if (typeof window !== 'undefined') {
     window.WidgetEngine = WidgetEngine;
+    
+    // Map registry definitions down into an iterable array flat list for saveSettings()
+    window.DYNAMIC_WIDGET_MAPS = Object.values(WidgetEngine.registryMap);
 }

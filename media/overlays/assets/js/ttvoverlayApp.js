@@ -93,31 +93,60 @@ let chatHeight = settings.chatHeight || "350px";
 
 
 function saveSettings() {
-    // Fallback alignment check
-    const state = window.settings || settings;
-    if (!state) return;
+    // Ground the context state object reference safely
+    const state = window.settings || settings || {};
 
-    state.botPrefix = BOT_PREFIX;
-    state.useBotPrefix = useBotPrefix;
-    state.cmdPrefix = CMD_PREFIX;
-    state.useCmdPrefix = useCmdPrefix;
-    state.consoleMessages = consoleMessages;
-    state.floatingEmotes = floatingEmotes;
-    state.chatHidden = chatHidden;
-    state.statusHidden = statusHidden;
-    state.alertHidden = alertHidden;
-    state.rewardsEnabled = rewardsEnabled;
-    state.bitsEnabled = bitsEnabled;
-    state.chatHeight = chatHeight;
+    // 1. Core Hardcoded Legacy Parameters Mapping
+    state.botPrefix = typeof BOT_PREFIX !== 'undefined' ? BOT_PREFIX : state.botPrefix;
+    state.useBotPrefix = typeof useBotPrefix !== 'undefined' ? useBotPrefix : state.useBotPrefix;
+    state.cmdPrefix = typeof CMD_PREFIX !== 'undefined' ? CMD_PREFIX : state.cmdPrefix;
+    state.useCmdPrefix = typeof useCmdPrefix !== 'undefined' ? useCmdPrefix : state.useCmdPrefix;
+    state.consoleMessages = typeof consoleMessages !== 'undefined' ? consoleMessages : state.consoleMessages;
+    state.floatingEmotes = typeof floatingEmotes !== 'undefined' ? floatingEmotes : state.floatingEmotes;
+    state.chatHidden = typeof chatHidden !== 'undefined' ? chatHidden : state.chatHidden;
+    state.statusHidden = typeof statusHidden !== 'undefined' ? statusHidden : state.statusHidden;
+    state.alertHidden = typeof alertHidden !== 'undefined' ? alertHidden : state.alertHidden;
+    state.rewardsEnabled = typeof rewardsEnabled !== 'undefined' ? rewardsEnabled : state.rewardsEnabled;
+    state.bitsEnabled = typeof bitsEnabled !== 'undefined' ? bitsEnabled : state.bitsEnabled;
+    state.chatHeight = typeof chatHeight !== 'undefined' ? chatHeight : state.chatHeight;
 
-    // Save the unified object
-    localStorage.setItem('p8_settings', JSON.stringify(state));
-    
-    if (typeof updateManagerBadgesUI === "function") {
-        updateManagerBadgesUI();
-        updateAllBadgesUI();
+    // =========================================================================
+    // 🧩 2. DYNAMIC LOOKUP LAYER: Map settings keys straight from WidgetEngine
+    // =========================================================================
+    if (window.DYNAMIC_WIDGET_MAPS && Array.isArray(window.DYNAMIC_WIDGET_MAPS)) {
+        window.DYNAMIC_WIDGET_MAPS.forEach(config => {
+            // Check if the current layout schema has updated state frames
+            if (typeof SETTINGS_SCHEMA !== 'undefined') {
+                const schemaItem = SETTINGS_SCHEMA.flatMap(g => g.items || []).find(i => i.idKey === config.settingsKey || i.idKey === config.settingsKey.replace('WidgetEnabled', '-widget'));
+                if (schemaItem && typeof schemaItem.get === 'function') {
+                    state[config.settingsKey] = schemaItem.get();
+                    return;
+                }
+            }
+            
+            // Fallback: If not in schema UI yet, don't drop current structural memory values
+            if (state[config.settingsKey] === undefined) {
+                state[config.settingsKey] = false;
+            }
+        });
     }
+
+    // Unify all referencing states back to the global execution target
+    window.settings = state;
+    if (typeof settings !== 'undefined') {
+        settings = state;
+    }
+
+    // 3. Save directly to disk
+    localStorage.setItem('p8_settings', JSON.stringify(state));
+    console.log("💾 [Storage Engine]: All configuration entries and dynamic widgets saved successfully.");
+    
+    if (typeof updateManagerBadgesUI === "function") updateManagerBadgesUI();
+    if (typeof updateAllBadgesUI === "function") updateAllBadgesUI();
 }
+
+// Ensure it is bound to window for module scripts
+window.saveSettings = saveSettings;
 //================================================
 // --- OBS CONSOLE BRIDGE ---
 const originalLog = console.log;
