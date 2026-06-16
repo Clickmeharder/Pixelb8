@@ -289,7 +289,10 @@ const DYNAMIC_WIDGET_MAPS = [
     { idKey: "entropia-widget", settingsKey: "entropiaWidgetEnabled" },
     { idKey: "timer-widget", settingsKey: "timerWidgetEnabled" },
     { idKey: "pet-widget", settingsKey: "petWidgetEnabled" },
-	{ idKey: "miner-widget", settingsKey: "bitminerWidgetEnabled" }
+	// ⚙️ Modern WidgetEngine Mappings:
+	{ idKey: "miner-widget", settingsKey: "bitminerWidgetEnabled" },
+    { idKey: "jukebox-widget", settingsKey: "jukeboxWidgetEnabled" },
+    { idKey: "emojinko-widget", settingsKey: "emojinkoWidgetEnabled" }
     // 🚀 To add future widgets, just drop a new line here! (e.g., { idKey: "goals-widget", settingsKey: "goalsWidgetEnabled" })
 ];
 
@@ -863,7 +866,7 @@ function renderSettingsWindow() {
         
         detailsEl.appendChild(summaryEl);
 
-        // 🎯 FIX: This inner container is where we restrict height and isolate the scroll area
+        // This inner container is where we restrict height and isolate the scroll area
         const innerPanel = document.createElement('div');
         innerPanel.className = 'settings-group-content';
         innerPanel.style.cssText = `
@@ -892,14 +895,19 @@ function renderSettingsWindow() {
             `;
 
             const toggleBtn = row.querySelector(`#stg-toggle-${item.idKey}-btn`);
-			if (toggleBtn) {
-				toggleBtn.addEventListener('click', () => {
-					// Pure schema action execution—no multi-bound racing events!
-					const currentVal = item.get();
-					item.set(!currentVal); 
-					syncAllToggleUI(); 
-				});
-			}
+            if (toggleBtn) {
+                // 🌟 FIX: Make this callback async so it handles async widget booting safely
+                toggleBtn.addEventListener('click', async () => {
+                    const currentVal = item.get();
+                    
+                    // ⏳ Await the setter promise completion before executing the UI sync
+                    await item.set(!currentVal); 
+                    
+                    if (typeof syncAllToggleUI === 'function') {
+                        syncAllToggleUI(); 
+                    }
+                });
+            }
             innerPanel.appendChild(row);
         });
 
@@ -907,9 +915,10 @@ function renderSettingsWindow() {
         stackContainer.appendChild(detailsEl);
     });
 
-    syncAllToggleUI();
+    if (typeof syncAllToggleUI === 'function') {
+        syncAllToggleUI();
+    }
 }
-
 function renderRewardsList() {
     const container = document.getElementById("rewards-list-container");
     if (!container) return;
