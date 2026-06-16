@@ -77,17 +77,32 @@ const MINER_ACTION_LIBRARY = {
 
 export class StreamBitMinerWidget extends BaseWidgetModule {
 	constructor() {
-		// 1. Pass custom identifier and control panel menu header string down to base class layout engines
+		// 1. Initialize the base class framework
 		super("bit_miner_system", {
 			menuTitle: "⛏️ PixelB8 Deep-Core Bit Miner Matrix"
 		});
 		
-		// 2. Map extended feature profiles over default parameters cleanly
-		this.registry = createMinerRegistry();
-		this.state = createMinerState();
+		// 2. ✅ MERGE state and registry instead of overwriting them completely
+		this.registry.profiles = {
+			...this.registry.profiles,
+			...createMinerRegistry().profiles
+		};
+		this.registry.activeProfile = "streamer_miner";
 
-		// 3. Re-sync saved user instances over local structural defaults
+		this.state = {
+			...this.state,
+			...createMinerState(),
+			commandAccess: this.state.commandAccess || {} // Retain the matrix reference
+		};
+
+		// 3. Re-sync data and force the UI Matrix re-render pass
 		this.loadData();
+		
+		// 4. Force a fresh markup calculation now that commands are reconciled
+		const matrixTarget = document.getElementById(this.controlId)?.querySelector('.matrix-container-target');
+		if (matrixTarget) {
+			matrixTarget.innerHTML = this.renderCommandRouterMatrixHTML();
+		}
 	}
 
 	/**
