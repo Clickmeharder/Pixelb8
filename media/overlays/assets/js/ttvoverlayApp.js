@@ -902,7 +902,7 @@ function renderSettingsWindow() {
                     
                     // ⏳ Await the setter promise completion before executing the UI sync
                     await item.set(!currentVal);
-					console.log('togglebtn clicked:'+ togglebtn);
+					console.log('togglebtn clicked:'+ toggleBtn);
 					console.log('currentVal = '+ currentVal);
                     if (typeof syncAllToggleUI === 'function') {
                         syncAllToggleUI(); 
