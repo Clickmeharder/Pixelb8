@@ -739,7 +739,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             this.ctx = null;
         }
     }
-// ========================================================================
+	// ========================================================================
     // MODULE COMMAND INTERCEPT ROUTERS
     // ========================================================================
     async handleSongRequestRoute(user, message, flags, sendNotice) {
