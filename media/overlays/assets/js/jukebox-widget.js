@@ -456,13 +456,19 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     // ========================================================================
     // 🧱 MEDIA TRACK MANAGEMENT CORE LOGIC
     // ========================================================================
-    updatePlayerDisplay(customTitle = null) {
+	updatePlayerDisplay(customTitle = null) {
         const titleElements = document.querySelectorAll('.jb-current-title');
         const displayTitle = customTitle || (this.currentTrackData ? this.currentTrackData.title : "No Track Loaded");
         
         titleElements.forEach(el => { el.textContent = displayTitle; });
 
-        let upNextString = this.queue.length > 0 ? this.queue[0].title : (this.fallbackPlaylist.length > 0 ? "Random Playlist Selection" : "Nothing queued");
+        // Explicitly extract the title of the 1st song in the queue, fallback, or nothing
+        let upNextString = "Nothing queued";
+        if (this.queue.length > 0) {
+            upNextString = this.queue[0].title;
+        } else if (this.fallbackPlaylist.length > 0) {
+            upNextString = "Random Playlist Selection";
+        }
         
         const nextTitleEl = document.getElementById('jb-next-title');
         if (nextTitleEl) nextTitleEl.textContent = upNextString;
@@ -470,7 +476,6 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         const audioNextEl = document.getElementById('jb-audio-next-title');
         if (audioNextEl) audioNextEl.textContent = upNextString;
     }
-
     generateTrackVisualSignature() {
         const trackId = this.currentTrackData?.id || "default";
         let hash = 0;
