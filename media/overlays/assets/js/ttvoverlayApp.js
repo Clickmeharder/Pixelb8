@@ -1981,10 +1981,15 @@ function injectAllWidgetCommands() {
     console.log("🏁 [Command Registry]: Injection scan complete.");
 }
 function injectWidgetCommands(widgetInstance) {
-    if (widgetInstance && typeof widgetInstance.getCommands === 'function') {
-        const widgetCommands = widgetInstance.getCommands(botSay);
+    if (!widgetInstance) return;
+
+    // ✅ FIXED: Check for both modern architectural naming and legacy fallback naming
+    const getCommandsFn = widgetInstance.getModuleCommands || widgetInstance.getCommands;
+
+    if (typeof getCommandsFn === 'function') {
+        // Run the function contextually bound to its instance
+        const widgetCommands = getCommandsFn.call(widgetInstance, botSay);
         
-        // Track successfully registered commands to print in a single line
         const registeredKeys = [];
 
         widgetCommands.forEach(cmd => {
@@ -1996,18 +2001,18 @@ function injectWidgetCommands(widgetInstance) {
                     execute: cmd.execute
                 };
                 
-                // Append format tag to our logging collection array
                 const adminTag = cmd.adminOnly ? "🔒" : "👤";
                 registeredKeys.push(`!${lookupKey} ${adminTag}`);
             }
         });
 
-        // 📝 Consolidated Log: One clean printout statement per widget
         if (registeredKeys.length > 0) {
             console.log(`📡 [Commands]: Hooked [${registeredKeys.join(", ")}]`);
         } else {
             console.log(`📡 [Commands]: Scanning complete. No new command injections needed.`);
         }
+    } else {
+        console.warn(`⚠️ [Command Registry]: Instance found but matches no blueprint command signatures.`);
     }
 }
 //=============================================================================
