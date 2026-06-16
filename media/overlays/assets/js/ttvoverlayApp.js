@@ -1904,22 +1904,42 @@ function determineExecutionEnvironment() {
 async function init() {
     // 1. Initial Core Boot Sequence
     applyTheme(registry.active);
-    // 🌐 Determine context environment modes (OBS Layer vs. Editor UI Dashboard)
     determineExecutionEnvironment();
+    
     // Core Layout & Registry Loading
     loadPositions();
 
     // =========================================================================
-    // 🌐 UNIFY GLOBALS & GROUND DATA
-    // Fixes the scope reference mutation disconnect so toggles read/write to the same memory space.
+    // 🌐 UNIFY GLOBALS & DE-SERIALIZE PERSISTED DISK DATA FIRST
+    // Fixes the boot race condition by pulling saved states before grounding passes.
     // =========================================================================
-    if (typeof settings !== 'undefined') {
-        window.settings = settings;
-    } else {
+    try {
+        const rawSavedSettings = localStorage.getItem('p8_settings');
+        if (rawSavedSettings) {
+            // Hydrate global window storage with real history frames
+            window.settings = JSON.parse(rawSavedSettings);
+            // Sync the legacy local scoping reference if it exists in this execution layer
+            if (typeof settings !== 'undefined') {
+                settings = window.settings;
+            }
+            console.log("💾 [Init Storage Pass]: Successfully loaded persisted settings from disk.");
+        } else {
+            // Fallback initialization if user has a totally clear cache
+            if (typeof settings !== 'undefined') {
+                window.settings = settings;
+            } else {
+                window.settings = window.settings || {};
+            }
+        }
+    } catch (err) {
+        console.error("❌ [Init Storage Pass]: Failed to parse local storage profile:", err);
         window.settings = window.settings || {};
     }
 
-    // Force basic default structure to exist before injection checks pass over it
+    // =========================================================================
+    // 🎛️ DATA GROUNDING PASS
+    // Safe to run now! Will only apply false if it doesn't exist on disk.
+    // =========================================================================
     if (typeof WidgetEngine !== 'undefined' && WidgetEngine.registryMap) {
         Object.values(WidgetEngine.registryMap).forEach(config => {
             if (window.settings[config.settingsKey] === undefined) {
