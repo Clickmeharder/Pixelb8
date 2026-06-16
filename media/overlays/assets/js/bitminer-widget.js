@@ -184,7 +184,81 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
             }
         });
     }
+// ========================================================================
+    // MODULE COMMAND INTERCEPT ROUTERS & MATRIX HOOKS
+    // ========================================================================
+    getModuleCommands() {
+        // Unified routing notification pipeline - handles both UI bubble and Twitch chat
+        const sendNotice = (txt) => {
+            this.setWidgetBubble(txt);
+            if (typeof window.botSay === 'function') {
+                window.botSay(txt);
+            }
+        };
 
+        return [
+            {
+                name: 'mine',
+                defaultChat: true,
+                defaultCp: false,
+                execute: (user, message, flags) => {
+                    if (!this.isCommandAllowed('mine', flags)) return;
+                    
+                    // 1. Check thermal restrictions
+                    if (this.state.heatLevel >= 85) {
+                        sendNotice(`⚠️ [${user}]: ❌ Deep-Core Drill is overheated (${Math.floor(this.state.heatLevel)}%)! Allow thermal venting sequence.`);
+                        return;
+                    }
+                    
+                    // 2. Reject commands if already processing a mining sequence
+                    if (this.state.action === "processing") {
+                        sendNotice(`⛏️ [${user}]: The sonic excavator drill is already boring into an active vein!`);
+                        return;
+                    }
+
+                    // 3. Trip state parameters to start updating via updateAI loop
+                    this.state.action = "processing";
+                    this.state.actionTimer = 90; // Runs animation pipeline for 90 ticks
+                    sendNotice(`⛏️ [${user}] activated the Excavator! Boring into crystalized bit-vein layers...`);
+                }
+            },
+            {
+                name: 'minerstatus',
+                defaultChat: true,
+                defaultCp: false,
+                execute: (user, message, flags) => {
+                    if (!this.isCommandAllowed('minerstatus', flags)) return;
+                    
+                    const profile = this.registry.profiles.streamer_miner;
+                    const thermalStatus = this.state.heatLevel > 70 ? "CRITICAL/OVERHEATED" : "STABLE";
+                    
+                    sendNotice(`🛰️ [Miner Telemetry] Profile: ${profile.name} | Total Mined: ${profile.totalMined} P8-Bits | Current Depth: ${profile.depthMeters}m | Core Temp: ${Math.floor(this.state.heatLevel)}% (${thermalStatus})`);
+                }
+            },
+            {
+                name: 'vent',
+                defaultChat: true,
+                defaultCp: false,
+                execute: (user, message, flags) => {
+                    if (!this.isCommandAllowed('vent', flags)) return;
+                    
+                    // Broadcaster or Mod execution bypass rule
+                    if (flags?.broadcaster || flags?.mod || user.toLowerCase() === this.streamerName) {
+                        this.state.heatLevel = 0;
+                        sendNotice(`💨 [Mod Override]: Emergency coolant released! Core temperature dropped back to 0%.`);
+                    } else {
+                        // Regular chatters can vent a tiny bit manually
+                        if (this.state.heatLevel > 0) {
+                            this.state.heatLevel = Math.max(0, this.state.heatLevel - 15);
+                            sendNotice(`💨 ${user} manually purged a high-pressure thermal escape valve. Core dropped by 15%!`);
+                        } else {
+                            sendNotice(`💨 ${user}, core temperature is already completely stable.`);
+                        }
+                    }
+                }
+            }
+        ];
+    }
     updateAI(t) {
         if (MINER_ACTION_LIBRARY[this.state.action]) {
             MINER_ACTION_LIBRARY[this.state.action](this, { t });

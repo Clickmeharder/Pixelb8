@@ -102,6 +102,15 @@ export class BaseWidgetModule {
 	 * @returns {Array<{name: string, defaultChat: boolean, defaultCp: boolean, execute: Function}>}
 	 */
 	getModuleCommands() {
+		const sendNotice = (txt) => {
+            this.setWidgetBubble(txt);
+            
+            if (typeof window.botSay === 'function') {
+                window.botSay(txt);
+            } else {
+                console.warn("⚠️ [Jukebox Engine]: window.botSay is not available contextually.");
+            }
+        };
 		return [];
 	}
 
