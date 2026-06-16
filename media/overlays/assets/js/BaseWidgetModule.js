@@ -1,8 +1,9 @@
 /**
  * ============================================================================
- * PIXELB8 ECOSYSTEM WIDGET COMPONENT BLUEPRINT (v1.1)
+ * PIXELB8 ECOSYSTEM WIDGET COMPONENT BLUEPRINT (v1.2)
  * Architecture: Monolithic, sovereign, zero-external-dependencies.
  * Memory Strategy: Dynamic Instance-Key Isolate System
+ * Features: Core Command Routing & Simulated Matrix Framework
  * ============================================================================
  */
 
@@ -31,6 +32,7 @@ function createDefaultWidgetState() {
 		particles: [],
 		action: "idle",
 		actionTimer: 0,
+		commandAccess: {}, // 🛠️ Master matrix mapping configuration node
 		layout: {
 			anchorX: 50,
 			anchorY: 50,
@@ -44,13 +46,11 @@ function createDefaultWidgetState() {
 // ============================================================================
 const WIDGET_ACTION_LIBRARY = {
 	idle: (widget, ctx) => {
-		// Standard non-blocking frame cycle updates
 		if (Math.random() < 0.01) {
 			widget.setWidgetBubble("System Status: Nominal.");
 		}
 	},
 	processing: (widget, ctx) => {
-		// Active algorithmic manipulation states
 		if (widget.state.actionTimer > 0) {
 			widget.state.actionTimer--;
 		} else {
@@ -68,8 +68,9 @@ export class BaseWidgetModule {
 	 * @param {string} widgetSubKey - Unique namespace identifier for LocalStorage containment.
 	 */
 	constructor(widgetSubKey = "generic_system") {
+			this.widgetSubKey = widgetSubKey; // Retain raw identifier for scoping handles
 			this.STORAGE_KEY = `pixelb8_widget_${widgetSubKey}`;
-			// Generate unique IDs based on the Class Name (e.g., streambitminerwidget)
+			
 			this.baseId = this.constructor.name.toLowerCase();
 			this.overlayId = `${this.baseId}-overlay`;
 			this.controlId = `${this.baseId}-controls`;
@@ -83,21 +84,112 @@ export class BaseWidgetModule {
 			this.state = createDefaultWidgetState();
 
 			this.injectUI();
-			this.bindEventListeners(); // Now uses dynamic targets
-			this.loadData();
+			this.bindEventListeners(); 
+			this.loadData(); // Will parse and reconcile the active command suites
 			
 			this.saveInterval = setInterval(() => this.saveData(), 5000);
 			this.animate = this.animate.bind(this);
 			requestAnimationFrame(this.animate);
 		}
 
+	/**
+	 * Fallback schema configuration method. Children override this to supply 
+	 * the router matrix with commands, defaults, and functional callback references.
+	 * @returns {Array<{name: string, defaultChat: boolean, defaultCp: boolean, execute: Function}>}
+	 */
+	getModuleCommands() {
+		return [];
+	}
+
+	/**
+	 * Security Core Gate: Validates if incoming chat arguments or channel points 
+	 * can trigger behaviors according to the live broadcaster toggles.
+	 */
+	isCommandAllowed(cmdName, flags = {}) {
+		if (!this.state.commandAccess || !this.state.commandAccess[cmdName]) return true;
+		
+		const config = this.state.commandAccess[cmdName];
+		const isChannelPoint = !!(flags.customRewardId || flags.channelPointRedemption || flags.isRewardSimulated);
+
+		if (isChannelPoint) return config.cp;
+		return config.chat;
+	}
+
+	/**
+	 * Loops through current runtime code schemas and ensures local state parameters 
+	 * match saved settings, appending safety blueprints if empty.
+	 */
+	reconcileCommandMatrix() {
+		const structuralCommands = this.getModuleCommands();
+		if (!structuralCommands || structuralCommands.length === 0) return;
+
+		if (!this.state.commandAccess) this.state.commandAccess = {};
+
+		structuralCommands.forEach(cmd => {
+			if (!this.state.commandAccess[cmd.name]) {
+				this.state.commandAccess[cmd.name] = {
+					chat: cmd.defaultChat !== undefined ? cmd.defaultChat : true,
+					cp: cmd.defaultCp !== undefined ? cmd.defaultCp : false
+				};
+			}
+		});
+	}
+
+	/**
+	 * Universal Dynamic Render String Core.
+	 * Spits out the styled dark-matrix configuration parameters directly into the parent template.
+	 */
+	renderCommandRouterMatrixHTML() {
+		const keys = Object.keys(this.state.commandAccess || {});
+		if (keys.length === 0) {
+			return `<p style="font-size: 11px; color: #71717a; padding: 4px 6px; margin: 0;">No routable commands registered for this module architecture.</p>`;
+		}
+
+		let html = `
+			<p style="font-size: 11px; color: #a1a1aa; margin-top: 0; margin-bottom: 8px; line-height: 1.3;">
+				Toggle interaction methods or fire a manual trigger to run routines and actions instantly.
+			</p>
+			<div class="matrix-table" style="width: 100%; font-family: sans-serif; font-size: 11px; display: flex; flex-direction: column; gap: 3px;">
+				<div class="matrix-header" style="display: flex; font-weight: bold; padding: 4px 6px; background: #141414; border-radius: 4px; color: #a1a1aa; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;">
+					<div style="flex: 1.8;">Command Core</div>
+					<div style="flex: 1; text-align: center;">💬 Chat</div>
+					<div style="flex: 1; text-align: center;">🎁 Reward</div>
+					<div style="flex: 0.8; text-align: center;">⚡ Test</div>
+				</div>
+		`;
+
+		keys.forEach(cmd => {
+			const config = this.state.commandAccess[cmd];
+			html += `
+				<div class="matrix-row" style="display: flex; padding: 6px; background: #141414; border-radius: 4px; align-items: center;">
+					<div style="flex: 1.8; font-weight: bold; text-transform: lowercase; color: #fff; font-family: monospace;">!${cmd}</div>
+					<div style="flex: 1; text-align: center; display: flex; justify-content: center;">
+						<input type="checkbox" data-cmd="${cmd}" data-type="chat" ${config.chat ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
+					</div>
+					<div style="flex: 1; text-align: center; display: flex; justify-content: center;">
+						<input type="checkbox" data-cmd="${cmd}" data-type="cp" ${config.cp ? 'checked' : ''} class="matrix-toggle" style="cursor: pointer; accent-color: #3498db; width: 14px; height: 14px; margin: 0;">
+					</div>
+					<div style="flex: 0.8; text-align: center; display: flex; justify-content: center;">
+						<button data-cmd="${cmd}" class="matrix-test-btn" style="cursor: pointer; background: #27272a; color: #3498db; border: 1px solid #3f3f46; border-radius: 4px; font-size: 10px; padding: 2px 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; height: 20px; min-width: 28px;" onmouseover="this.style.background='#3f3f46'; this.style.color='#fff';" onmouseout="this.style.background='#27272a'; this.style.color='#3498db';">
+							▶
+						</button>
+					</div>
+				</div>
+			`;
+		});
+
+		html += `</div>`;
+		return html;
+	}
+
 	// ========================================================================
 	// DECLARATIVE CONTROL INTERFACE SPECIFICATIONS
 	// ========================================================================
-	static get controlsTemplate() {
+	static getBaseControlsMarkup(instance) {
+		// Appends child configuration matrices inside a uniform template frame layout
 		return `
 			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-				<span>🛠️ Widget Module Interface Matrix</span>
+				<span>🛠️ ${instance.constructor.name} Matrix Interface</span>
 				<span class="collapse-icon">▼</span>
 			</div>
 			<div class="collapsible-content">
@@ -110,6 +202,13 @@ export class BaseWidgetModule {
 							<input type="checkbox" id="widgetHideBorderToggle">
 						</div>
 					</div>
+
+					<details open style="border: 1px solid #27272a; border-radius: 6px; background: #18181b; margin-top: 5px;">
+						<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🛠️ Live Command Router Matrix</summary>
+						<div class="matrix-container-target" style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 4px;">
+							${instance.renderCommandRouterMatrixHTML()}
+						</div>
+					</details>
 
 					<button type="button" id="btnWidgetTrigger" class="p8-btn" style="background: #1e3a8a; border: 1px solid #3b82f6; padding: 6px 0; font-size: 11px; cursor: pointer; color: #fff; font-weight: bold; border-radius: 4px;">
 						EXECUTE MATRIX ALGORITHM
@@ -146,42 +245,49 @@ export class BaseWidgetModule {
 	}
 
 	loadData() {
-        const saved = localStorage.getItem(this.STORAGE_KEY);
-        if (saved) {
-            try {
-                const loadedBundle = JSON.parse(saved);
-                if (loadedBundle.registry) this.registry = loadedBundle.registry;
-                if (loadedBundle.state) {
-                    this.state = { ...this.state, ...loadedBundle.state };
-                }
+		const saved = localStorage.getItem(this.STORAGE_KEY);
+		if (saved) {
+			try {
+				const loadedBundle = JSON.parse(saved);
+				if (loadedBundle.registry) this.registry = loadedBundle.registry;
+				if (loadedBundle.state) {
+					this.state = { ...this.state, ...loadedBundle.state };
+				}
 
-                const controlPanel = document.getElementById(this.controlId);
-                if (controlPanel) {
-                    // Look for the clean class selector instead of hardcoded strings
-                    const borderToggle = controlPanel.querySelector('.p8-border-toggle') || controlPanel.querySelector('input[type="checkbox"]');
-                    if (borderToggle) {
-                        borderToggle.checked = this.state.hideBorder || false;
-                    }
-                }
-            } catch (err) {
-                console.error(`⚠️ [Boot Error]: Save trace hit failure on namespace "${this.STORAGE_KEY}":`, err);
-            }
-        }
-        this.applyVisibilityStates();
-    }
+				const controlPanel = document.getElementById(this.controlId);
+				if (controlPanel) {
+					const borderToggle = controlPanel.querySelector('#widgetHideBorderToggle') || controlPanel.querySelector('input[type="checkbox"]');
+					if (borderToggle) {
+						borderToggle.checked = this.state.hideBorder || false;
+					}
+				}
+			} catch (err) {
+				console.error(`⚠️ [Boot Error]: Save trace hit failure on namespace "${this.STORAGE_KEY}":`, err);
+			}
+		}
+		
+		// Run core alignment checks to inject commands into empty arrays seamlessly
+		this.reconcileCommandMatrix();
+		this.applyVisibilityStates();
+		
+		// Re-render internal matrix target values to reflect matching active updates
+		const matrixTarget = document.getElementById(this.controlId)?.querySelector('.matrix-container-target');
+		if (matrixTarget) {
+			matrixTarget.innerHTML = this.renderCommandRouterMatrixHTML();
+		}
+	}
+
 	// ========================================================================
 	// INTERFACE BINDING & EVENT DISPATCH ENGINES
 	// ========================================================================
 	injectUI() {
-		// 1. Mount Overlay Viewport
 		const overlayWrapper = document.getElementById("overlay-wrapper");
 		if (overlayWrapper && !document.getElementById(this.overlayId)) {
 			const overlayEl = document.createElement("div");
 			overlayEl.id = this.overlayId;
-			overlayEl.className = "p8-widget"; // 🎯 Triggers overlayapp.js drag tracking automatically
+			overlayEl.className = "p8-widget"; 
 			overlayEl.style.position = "absolute";
 			
-			// 📍 Check for coordinates saved by overlayapp.js's mouseup logic
 			const savedLayout = localStorage.getItem(`p8_pos_${this.overlayId}`);
 			if (savedLayout) {
 				try {
@@ -192,12 +298,10 @@ export class BaseWidgetModule {
 					console.error(`⚠️ [Layout Error]: Corrupted position string for ${this.overlayId}:`, err);
 				}
 			} else {
-				// Fallback default starting coordinates if it's the first initialization
 				overlayEl.style.left = "100px";
 				overlayEl.style.top = "100px";
 			}
 			
-			// Inject a UNIQUE canvas and unique chat bubble template for this widget instance
 			overlayEl.innerHTML = `
 				<div id="${this.baseId}-bubble" class="chat-bubble"></div>
 				<canvas id="${this.baseId}-canvas"></canvas>
@@ -205,76 +309,98 @@ export class BaseWidgetModule {
 			
 			overlayWrapper.appendChild(overlayEl);
 
-			// Link the freshly generated rendering context back to the engine properties
 			this.canvas = document.getElementById(`${this.baseId}-canvas`);
 			if (this.canvas) {
 				this.ctx = this.canvas.getContext("2d");
 			}
 		}
 
-		// 2. Mount Control Panel
 		const controlWrapper = document.getElementById("widget-control-wrapper");
 		if (controlWrapper && !document.getElementById(this.controlId)) {
 			const panelSection = document.createElement("div");
 			panelSection.id = this.controlId;
 			panelSection.className = "collapsible-section collapsed";
-			panelSection.innerHTML = this.constructor.controlsTemplate;
+			
+			// Call the dynamic markup assembler mapping context pointers safely
+			panelSection.innerHTML = BaseWidgetModule.getBaseControlsMarkup(this);
 			controlWrapper.appendChild(panelSection);
 		}
 	}
-	// Add this inside the class methods of BaseWidgetModule
 
-    destroy() {
-        // 1. Terminate the data reconciliation engine loop
-        if (this.saveInterval) {
-            clearInterval(this.saveInterval);
-            this.saveInterval = null;
-        }
-        
-        // 2. Halt the graphics loop immediately to free up GPU resources
-        if (this.animationFrameId) {
-            cancelAnimationFrame(this.animationFrameId);
-            this.animationFrameId = null;
-        }
+	destroy() {
+		if (this.saveInterval) {
+			clearInterval(this.saveInterval);
+			this.saveInterval = null;
+		}
+		
+		if (this.animationFrameId) {
+			cancelAnimationFrame(this.animationFrameId);
+			this.animationFrameId = null;
+		}
 
-        // 3. Purge the overlay canvas wrapper node from the DOM matrix
-        const overlayEl = document.getElementById(this.overlayId);
-        if (overlayEl) {
-            overlayEl.remove();
-        }
+		const overlayEl = document.getElementById(this.overlayId);
+		if (overlayEl) overlayEl.remove();
 
-        // 4. Purge the control panel sub-matrix from the dashboard wrapper
-        const controlEl = document.getElementById(this.controlId);
-        if (controlEl) {
-            controlEl.remove();
-        }
-        
-        console.log(`🛑 [Lifecycle]: Module safely unloaded and components destroyed.`);
-    }
+		const controlEl = document.getElementById(this.controlId);
+		if (controlEl) controlEl.remove();
+		
+		console.log(`🛑 [Lifecycle]: Module safely unloaded and components destroyed.`);
+	}
+
 	bindEventListeners() {
 		const panelContainer = document.getElementById(this.controlId);
 		if (!panelContainer) return;
 
-		// Delegated Change Input Capturing Pattern
 		panelContainer.addEventListener("change", (e) => {
 			if (e.target.id === "widgetHideBorderToggle") {
 				this.state.hideBorder = e.target.checked;
 				this.applyVisibilityStates();
 				this.saveData();
 			}
+
+			// ⚡ CAPTURE INNER ROUTER MATRIX CHECKBOX ALTERATIONS
+			if (e.target.classList.contains("matrix-toggle")) {
+				const cmd = e.target.getAttribute("data-cmd");
+				const type = e.target.getAttribute("data-type");
+				const isChecked = e.target.checked;
+
+				if (this.state.commandAccess && this.state.commandAccess[cmd]) {
+					this.state.commandAccess[cmd][type] = isChecked;
+					this.saveData();
+					console.log(`[Config Router - ${this.constructor.name}]: Updated "${cmd}" -> [${type.toUpperCase()}]: ${isChecked}`);
+				}
+			}
 		});
 
-		// Delegated Action Click Capturing Pattern
 		panelContainer.addEventListener("click", (e) => {
 			if (e.target.id === "btnWidgetTrigger") {
 				this.state.action = "processing";
-				this.state.actionTimer = 120; // 2 seconds running at 60hz
+				this.state.actionTimer = 120;
 				this.setWidgetBubble("Executing state processing routing vectors...");
 			}
 			if (e.target.id === "btnWidgetReset") {
 				if (confirm(`Are you completely sure you want to clear metrics for this tracking node? This will wipe: ${this.STORAGE_KEY}`)) {
 					localStorage.removeItem(this.STORAGE_KEY);
 					window.location.reload();
+				}
+			}
+
+			// ⚡ CAPTURE MATRIX SIMULATED PLAY TRIGGER BUTTON PRESSES
+			const testBtn = e.target.closest(".matrix-test-btn");
+			if (testBtn) {
+				const cmdName = testBtn.getAttribute("data-cmd");
+				console.log(`[Test Simulator - ${this.constructor.name}]: Forcing simulated payload pass -> !${cmdName}`);
+
+				const suite = this.getModuleCommands();
+				const targetCommand = suite.find(c => c.name === cmdName);
+
+				if (targetCommand && typeof targetCommand.execute === 'function') {
+					const simulatedFlags = {
+						broadcaster: true,
+						mod: false,
+						isRewardSimulated: true // Bypasses permission validations for hardware configuration views
+					};
+					targetCommand.execute("BroadcasterConsole", "", simulatedFlags);
 				}
 			}
 		});
@@ -288,17 +414,15 @@ export class BaseWidgetModule {
 			container.style.border = "none";
 			container.style.background = "transparent";
 		} else {
-			// Clear out inline overrides so your CSS variables take full control
 			container.style.border = "";
 			container.style.background = "";
 		}
 	}
+
 	setWidgetBubble(txt) {
-		// Target the bubble specific to THIS instance
 		const bubble = document.getElementById(`${this.baseId}-bubble`);
 		if (!bubble) return;
 
-		// 1. Kill any overlapping timers
 		if (this.bubbleTimeout) {
 			clearTimeout(this.bubbleTimeout);
 			this.bubbleTimeout = null;
@@ -307,11 +431,9 @@ export class BaseWidgetModule {
 			clearTimeout(parseInt(bubble.dataset.timeoutId, 10));
 		}
 
-		// 2. Paint text properties 
 		bubble.textContent = txt;
 		bubble.classList.add("show");
 
-		// 3. Set up the absolute double-lock execution tracker
 		const timerId = setTimeout(() => {
 			bubble.classList.remove("show");
 			if (this.bubbleTimeout === timerId) this.bubbleTimeout = null;
@@ -322,9 +444,6 @@ export class BaseWidgetModule {
 		bubble.dataset.timeoutId = timerId;
 	}
 
-	// ========================================================================
-	// RENDER PROCESSING TIMELINE PASSES
-	// ========================================================================
 	updateAI(t) {
 		const ctx = {
 			t,
@@ -332,7 +451,6 @@ export class BaseWidgetModule {
 			height: this.canvas ? this.canvas.height : 0
 		};
 
-		// Route real-time state changes through the action library matrix
 		if (WIDGET_ACTION_LIBRARY[this.state.action]) {
 			WIDGET_ACTION_LIBRARY[this.state.action](this, ctx);
 		}
@@ -340,31 +458,9 @@ export class BaseWidgetModule {
 
 	drawEnvironment(tick) {
 		if (!this.ctx) return;
-		// 🎨 Inject module drawing pipelines (Phase 0 -> Phase 6 layout operations) here
 	}
 
-/* 	animate(timestamp) {
-		const tick = Math.floor(timestamp / 16.67); // Normalized 60hz engine loop metric
-
-		this.updateAI(tick);
-
-		if (this.ctx && this.canvas) {
-			// Wipe frame clear for next redraw stack pass
-			this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-			
-			this.ctx.save();
-			// Scale variables and camera anchor operations run cleanly here...
-			
-			this.drawEnvironment(tick);
-			
-			this.ctx.restore();
-		}
-
-		this.animationFrameId = requestAnimationFrame(this.animate);
-	} */
 	animate(timestamp) {
-		// 🛑 SAFETY GATE: If the widget has been flagged for destruction or is hidden,
-		// kill the animation pipeline immediately and release the frame request.
 		if (this.state && this.state.isVisible === false) {
 			if (this.animationFrameId) {
 				cancelAnimationFrame(this.animationFrameId);
@@ -373,23 +469,16 @@ export class BaseWidgetModule {
 			return;
 		}
 
-		const tick = Math.floor(timestamp / 16.67); // Normalized 60hz engine loop metric
-
+		const tick = Math.floor(timestamp / 16.67);
 		this.updateAI(tick);
 
 		if (this.ctx && this.canvas) {
-			// Wipe frame clear for next redraw stack pass
 			this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-			
 			this.ctx.save();
-			// Scale variables and camera anchor operations run cleanly here...
-			
 			this.drawEnvironment(tick);
-			
 			this.ctx.restore();
 		}
 
-		// Recurse cleanly, capturing the frame ID context handle for zero-leak clearing
 		this.animationFrameId = requestAnimationFrame(this.animate.bind(this));
 	}
 }

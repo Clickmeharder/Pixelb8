@@ -130,6 +130,26 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     // ========================================================================
     // 🪟 DECLARATIVE TEMPLATE ENGINE
     // ========================================================================
+	getControlsMarkup() {
+		// Compile structural fields
+		let configMarkup = JUKEBOX_HTMLTEMPLATES.config;
+		
+		// Inject the matrix rows string inside our node placement token
+		const matrixRowsHTML = this.renderCommandRouterMatrixHTML();
+		configMarkup = configMarkup.replace('', matrixRowsHTML);
+
+		return `
+			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
+				<span>🎵 Song Request Jukebox</span>
+				<span class="collapse-icon">▼</span>
+			</div>
+			<div class="collapsible-content" style="padding: 10px; display: flex; flex-direction: column; gap: 2px;">
+				${configMarkup}
+				${JUKEBOX_HTMLTEMPLATES.nowPlaying}
+				${JUKEBOX_HTMLTEMPLATES.lists}
+			</div>
+		`;
+	}
 	static get controlsTemplate() {
         return `
             <div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
@@ -144,6 +164,9 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         `;
     }
     // ========================================================================
+    // 🪟 VIEWPORT INJECTION LAYER OVERRIDES
+    // ========================================================================
+// ========================================================================
     // 🪟 VIEWPORT INJECTION LAYER OVERRIDES
     // ========================================================================
     injectUI() {
@@ -186,7 +209,9 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             const panelSection = document.createElement("div");
             panelSection.id = this.controlId;
             panelSection.className = "collapsible-section collapsed";
-            panelSection.innerHTML = this.constructor.controlsTemplate;
+            
+            // ✅ Dynamic Instance Hook integration injection pass
+            panelSection.innerHTML = this.getControlsMarkup();
             controlWrapper.appendChild(panelSection);
         }
     }
@@ -411,59 +436,123 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     // ========================================================================
     // 🎮 CHAT COMMAND ROUTER
     // ========================================================================
-    getCommands(sendNotice) {
-        const jukeboxExecution = (user, message, flags) => {
-            const parts = message.trim().toLowerCase().split(/\s+/);
-            const subCommand = parts[0];
-            const isAdmin = flags.broadcaster || flags.mod;
+	getModuleCommands() {
+        // Universal notification bridge using your internal widget bubbles as an interface fallback
+        const sendNotice = (txt) => {
+            this.setWidgetBubble(txt);
+            // If your core system provides a global chat-bot output handler, hook it here:
+            if (typeof window.botSay === 'function') {
+                window.botSay(txt);
+            }
+        };
+
+        // Master parser wrapper for sub-argument processing (handles legacy fallback routing for !jb [action])
+        const processMasterJukeboxSubRoute = (user, message, flags) => {
+            const parts = message.trim().split(/\s+/);
+            const subCommand = parts[0]?.toLowerCase();
+            const payloadString = parts.slice(1).join(' ');
 
             if (!subCommand) {
-                sendNotice(`🎵 [Jukebox]: Available: !jb [sr | skip | like | status | help | queue]`);
+                sendNotice(`🎵 [Jukebox]: Available subroutines: sr | skip | like | status | queue`);
                 return;
             }
 
+            // Route to specific standalone implementations while passing down parameters cleanly
             switch (subCommand) {
                 case 'help':
-                    sendNotice(`🎵 [Jukebox]: !sr [link/query] | !jb like | !jb skip | !jb status | !jb queue`);
+                    sendNotice(`🎵 [Jukebox]: !sr [query] | !jb like | !jb skip | !jb status | !jb queue`);
                     break;
                 case 'sr':
                 case 'request':
-                    this.handleSongRequest(user, parts.slice(1).join(' '), sendNotice);
+                    this.handleSongRequestRoute(user, payloadString, flags, sendNotice);
                     break;
                 case 'queue':
-                    sendNotice(`🎵 [Jukebox]: Queue size: ${this.queue.length}.`);
+                    this.handleQueueCheckRoute(user, flags, sendNotice);
                     break;
                 case 'skip':
-                    if (isAdmin) this.skipCurrentSong(sendNotice);
-                    else this.handleVoteSkip(user, sendNotice);
+                    this.handleSkipRoute(user, flags, sendNotice);
                     break;
                 case 'like':
                 case 'love':
-                    this.handleLikeSong(user, sendNotice);
+                    this.handleLikeRoute(user, flags, sendNotice);
                     break;
                 case 'clear':
-                    if (isAdmin) { 
-                        this.queue = []; 
-                        this.renderQueueList();
-                        this.skipCurrentSong(sendNotice); 
-                        sendNotice(`🧹 Queue cleared.`);
-                    }
+                    this.handleClearQueueRoute(user, flags, sendNotice);
                     break;
                 case 'status':
-                    sendNotice(`🎵 Playing: ${this.currentTrackData?.title || 'Nothing'}`);
+                    this.handleStatusCheckRoute(user, flags, sendNotice);
+                    break;
+                default:
+                    sendNotice(`❌ Unknown jukebox runtime parameter: "${subCommand}"`);
                     break;
             }
         };
 
+        // Return a flattened manifest of explicit entry points mapped to the control panel matrix checks
         return [
-            { name: 'jb', adminOnly: false, execute: jukeboxExecution },
-            { name: 'jukebox', adminOnly: false, execute: jukeboxExecution },
-            { name: 'skip', adminOnly: false, execute: (user, message, flags) => jukeboxExecution(user, 'skip', flags) },
-            { name: 'sr', adminOnly: false, execute: (user, message, flags) => this.handleSongRequest(user, message, sendNotice) },
-            { name: 'request', adminOnly: false, execute: (user, message, flags) => this.handleSongRequest(user, message, sendNotice) }
+            {
+                name: 'sr',
+                defaultChat: true,
+                defaultCp: true,
+                execute: (user, message, flags) => this.handleSongRequestRoute(user, message, flags, sendNotice)
+            },
+            {
+                name: 'request',
+                defaultChat: true,
+                defaultCp: false,
+                execute: (user, message, flags) => this.handleSongRequestRoute(user, message, flags, sendNotice)
+            },
+            {
+                name: 'skip',
+                defaultChat: true,
+                defaultCp: true,
+                execute: (user, message, flags) => this.handleSkipRoute(user, flags, sendNotice)
+            },
+            {
+                name: 'like',
+                defaultChat: true,
+                defaultCp: false,
+                execute: (user, message, flags) => this.handleLikeRoute(user, flags, sendNotice)
+            },
+            {
+                name: 'queue',
+                defaultChat: true,
+                defaultCp: false,
+                execute: (user, message, flags) => this.handleQueueCheckRoute(user, flags, sendNotice)
+            },
+            {
+                name: 'jbstatus',
+                defaultChat: true,
+                defaultCp: false,
+                execute: (user, message, flags) => this.handleStatusCheckRoute(user, flags, sendNotice)
+            },
+            {
+                name: 'jbclear',
+                defaultChat: false, // Core security protection profile template default
+                defaultCp: false,
+                execute: (user, message, flags) => this.handleClearQueueRoute(user, flags, sendNotice)
+            },
+            // Legacy structural aliases: Mapped to bypass routing rules if the parent '!jb' catch-all is disabled
+            {
+                name: 'jb',
+                defaultChat: true,
+                defaultCp: false,
+                execute: (user, message, flags) => {
+                    if (!this.isCommandAllowed('jb', flags)) return;
+                    processMasterJukeboxSubRoute(user, message, flags);
+                }
+            },
+            {
+                name: 'jukebox',
+                defaultChat: true,
+                defaultCp: false,
+                execute: (user, message, flags) => {
+                    if (!this.isCommandAllowed('jukebox', flags)) return;
+                    processMasterJukeboxSubRoute(user, message, flags);
+                }
+            }
         ];
     }
-
     // ========================================================================
     // 🧱 MEDIA TRACK MANAGEMENT CORE LOGIC
     // ========================================================================
@@ -656,16 +745,16 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         }
     }
 
-	async handleSongRequest(user, message, botSay) {
+    async handleSongRequest(user, message, sendNotice) {
         if (!message) return;
         if (!this.acceptRequests) { 
-            if (typeof botSay === 'function') botSay(`🚫 Song requests are disabled.`); 
+            if (typeof sendNotice === 'function') sendNotice(`🚫 Song requests are disabled.`); 
             return; 
         }
 
         // Notify chat/UI that the jukebox is searching to account for API latency
-        if (typeof botSay === 'function' && !this.extractYouTubeId(message)) {
-            botSay(`🔍 Searching for "${message}"...`);
+        if (typeof sendNotice === 'function' && !this.extractYouTubeId(message)) {
+            sendNotice(`🔍 Searching for "${message}"...`);
         }
 
         let trackToQueue = null;
@@ -692,8 +781,8 @@ export class StreamJukeboxModule extends BaseWidgetModule {
 
         // Drop out if the track wasn't found or couldn't resolve
         if (!trackToQueue) {
-            if (typeof botSay === 'function') {
-                botSay(`❌ Could not find any tracks matching "${message}".`);
+            if (typeof sendNotice === 'function') {
+                sendNotice(`❌ Could not find any tracks matching "${message}".`);
             }
             return;
         }
@@ -704,16 +793,17 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         this.renderQueueList();
         this.updatePlayerDisplay();
 
-        if (typeof botSay === 'function') {
-            botSay(`🎵 Added to Queue: "${trackToQueue.title}" (Requested by ${user})`);
+        if (typeof sendNotice === 'function') {
+            sendNotice(`🎵 Added to Queue: "${trackToQueue.title}" (Requested by ${user})`);
         }
         
         // Bootstrap playback immediately if the player is idling on standby
         if (!this.isPlayingSong) {
-            this.playNextSong(botSay);
+            this.playNextSong(sendNotice); // ✅ Fixed: Correctly passes notification callback forward
         }
     }
-	async playNextSong(botSay) {
+
+    async playNextSong(sendNotice) {
         if (!this.ytPlayerReady) return;
         this.currentTrackVotes.clear();
         this.currentTrackSkipVotes.clear();
@@ -740,34 +830,55 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         } else {
             this.isPlayingSong = false;
             this.updatePlayerDisplay("No Track Loaded");
-            if (typeof botSay === 'function') botSay("📭 Jukebox queue empty.");
+            if (typeof sendNotice === 'function') sendNotice("📭 Jukebox queue empty.");
         }
     }
 
-    async handleLikeSong(user, botSay) {
+    async handleLikeSong(user, sendNotice) {
         if (!this.currentTrackData) return;
         const voter = user.toLowerCase();
         if (this.currentTrackVotes.has(voter)) return;
         
         this.currentTrackVotes.add(voter);
+        
+        // Add chat feedback to notify users their vote was counted
+        if (typeof sendNotice === 'function') {
+            const votesNeeded = this.VOTE_REQUIREMENT - this.currentTrackVotes.size;
+            if (votesNeeded <= 0) {
+                sendNotice(`❤️ "${this.currentTrackData.title}" saved to fallback playlist playlist rotation updates!`);
+            } else {
+                sendNotice(`❤️ ${user} liked this song. [${this.currentTrackVotes.size}/${this.VOTE_REQUIREMENT}] votes to save.`);
+            }
+        }
+
         if (this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
             this.saveFallbackItem(this.currentTrackData, "Community");
         }
     }
 
-    async handleVoteSkip(user, botSay) {
+    async handleVoteSkip(user, sendNotice) {
         if (!this.currentTrackData) return;
         const voter = user.toLowerCase();
         if (this.currentTrackSkipVotes.has(voter)) return;
 
         this.currentTrackSkipVotes.add(voter);
+        
+        // Add dynamic feedback counting remaining votes needed to trigger execution passes
+        if (typeof sendNotice === 'function' && this.currentTrackSkipVotes.size < this.VOTE_REQUIREMENT) {
+            sendNotice(`⏩ Vote to skip registered by ${user}. [${this.currentTrackSkipVotes.size}/${this.VOTE_REQUIREMENT}] votes reached.`);
+        }
+
         if (this.currentTrackSkipVotes.size >= this.VOTE_REQUIREMENT) {
-            this.skipCurrentSong(botSay);
+            if (typeof sendNotice === 'function') sendNotice(`⏩ Vote threshold reached! Skipping current video track sequence...`);
+            this.skipCurrentSong(sendNotice);
         }
     }
 
-    skipCurrentSong(botSay) {
-        if (this.ytPlayer) { this.ytPlayer.stopVideo(); this.playNextSong(botSay); }
+    skipCurrentSong(sendNotice) {
+        if (this.ytPlayer) { 
+            this.ytPlayer.stopVideo(); 
+            this.playNextSong(sendNotice); 
+        }
     }
 
     saveFallbackItem(item, username = 'System') {
