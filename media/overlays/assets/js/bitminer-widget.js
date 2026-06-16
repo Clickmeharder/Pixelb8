@@ -79,7 +79,7 @@ export class StreamBitMinerWidget extends BaseWidgetModule {
 	constructor() {
 		// 1. Initialize the base class framework
 		super("bit_miner_system", {
-			menuTitle: "⛏️ PixelB8 Deep-Core Bit Miner Matrix"
+			menuTitle: "⛏️ PixelBit miner"
 		});
 		
 		// 2. ✅ MERGE state and registry instead of overwriting them completely
