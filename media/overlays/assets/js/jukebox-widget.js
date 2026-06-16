@@ -707,6 +707,22 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             this.renderFallbackList();
         }
     }
+
+    renderQueueList() {
+        const list = document.getElementById('jb-queue-list');
+        if (!list) return; list.innerHTML = '';
+        this.queue.forEach((item, idx) => {
+            const el = document.createElement('div');
+            el.style.cssText = "font-size:10px; color:#a1a1aa; border-bottom:1px solid #222; padding:4px; display:flex; justify-content:space-between; align-items:center;";
+            el.innerHTML = `<span>${idx+1}. ${item.title.substring(0,25)}</span><span style="color:#991b1b; cursor:pointer; font-weight:bold; padding:0 4px;" class="remove-queue-item">✕</span>`;
+            el.querySelector('.remove-queue-item').onclick = () => {
+                this.queue.splice(idx, 1);
+                this.renderQueueList();
+                this.updatePlayerDisplay();
+            };
+            list.appendChild(el);
+        });
+    }
 	enqueueFromFallback(item) {
         // Formulates a queue payload matching standard request object format
         this.queue.push({
@@ -783,23 +799,6 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             list.appendChild(el);
         });
     }
-
-    renderFallbackList() {
-        const list = document.getElementById('jb-fallback-list');
-        if (!list) return; list.innerHTML = '';
-        this.fallbackPlaylist.forEach((item, idx) => {
-            const el = document.createElement('div');
-            el.style.cssText = "font-size:16px; color:#e4e4e7; padding:4px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #222;";
-            el.innerHTML = `<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85%;">• ${item.title}</span><span style="color:#991b1b; cursor:pointer; font-weight:bold;" class="remove-fallback-item">✕</span>`;
-            el.querySelector('.remove-fallback-item').onclick = () => {
-                this.fallbackPlaylist.splice(idx, 1);
-                localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
-                this.renderFallbackList();
-            };
-            list.appendChild(el);
-        });
-    }
-
     async fetchTrack(keywords) {
         const instances = ['https://invidious.flokinet.to', 'https://yewtu.be'];
         for (let host of instances) {
