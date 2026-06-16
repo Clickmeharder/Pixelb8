@@ -7,21 +7,45 @@ console.log("🚀 [Pixelb8 Stream Widget Engine]: initializing...");
  * ============================================================================
  */
 export const WidgetEngine = {
-    instances: {
-        bitminer: null, 
-        streamjukebox: null  
-    },
+    instances: {},
 
+// 💡 THE SINGLE SOURCE OF TRUTH: Add a widget here, and it handles everything else.
     registryMap: {
         "miner-widget": {
             path: './bitminer-widget.js',
             className: 'StreamBitMinerWidget',
-            instanceKey: 'bitminer'
+            instanceKey: 'bitminer',
+            settingsKey: 'bitminerWidgetEnabled' // Links registry directly to your settings payload
         },
         "jukebox-widget": {
             path: './jukebox-widget.js',
             className: 'StreamJukeboxModule',
-            instanceKey: 'streamjukebox'
+            instanceKey: 'streamjukebox',
+            settingsKey: 'jukeboxWidgetEnabled'
+        },
+        "emojinko-widget": {
+            path: './emojinko-widget.js',
+            className: 'StreamEmojinkoModule',
+            instanceKey: 'emojinko',
+            settingsKey: 'emojinkoWidgetEnabled'
+        }
+    },
+
+    /**
+     * Loops over all modern registry items and toggles them based on incoming settings flags.
+     */
+    async autoBootModernWidgets(settings) {
+        // Grab every entry key (e.g., "miner-widget", "emojinko-widget")
+        const widgetKeys = Object.keys(this.registryMap);
+        
+        for (const idKey of widgetKeys) {
+            const config = this.registryMap[idKey];
+            
+            // If the settings payload has this widget's unique settings key marked true, fire it up
+            if (settings[config.settingsKey]) {
+                // Pass true to third argument to defer mass chat command re-injection passes until the loop wraps up
+                await this.toggleWidget(idKey, true, true);
+            }
         }
     },
 
@@ -31,18 +55,18 @@ export const WidgetEngine = {
      * @param {boolean} enable - Target toggle operational condition
      * @param {boolean} deferCommandRefresh - If true, skips updating global chat maps instantly
      */
-    async toggleWidget(idKey, enable, deferCommandRefresh = false) {
+	async toggleWidget(idKey, enable, deferCommandRefresh = false) {
         const config = this.registryMap[idKey];
         if (!config) return; 
 
         if (enable) {
             if (!this.instances[config.instanceKey]) {
                 try {
-                    // Cache bust string additions ensure updates serve cleanly across hot-reloads
                     const cacheBuster = `?v=${Date.now()}`;
                     const module = await import(config.path + cacheBuster);
                     const WidgetClass = module[config.className];
                     
+                    // The dynamic instances tracking assignment slot initializes right here automatically
                     this.instances[config.instanceKey] = new WidgetClass();
                     console.log(`⚙️ [WidgetEngine]: Modern module "${config.className}" initialized safely.`);
                     
@@ -50,7 +74,7 @@ export const WidgetEngine = {
                         window.injectAllWidgetCommands();
                     }
                 } catch (err) {
-                    console.error(`❌ [WidgetEngine Init Failure]:`, err);
+                    console.error(`❌ [WidgetEngine Init Failure] for ${config.className}:`, err);
                 }
             }
         } else {
@@ -80,13 +104,8 @@ export const WidgetEngine = {
     async initSavedWidgets(settings) {
         if (!settings) return;
 
-        // 1. Boot modern BaseWidgetModule systems silently, deferring command injection passes
-        if (settings.bitminerWidgetEnabled) {
-            await this.toggleWidget("miner-widget", true, true);
-        }
-        if (settings.jukeboxWidgetEnabled) {
-            await this.toggleWidget("jukebox-widget", true, true);
-        }
+        // 1. Cleanly execute the dynamic modern auto-boot engine sequence
+        await this.autoBootModernWidgets(settings);
 
         // =========================================================================
         // 🏛️ LEGACY COMPATIBILITY LAYER (To be refactored into classes later)
@@ -122,4 +141,6 @@ export const WidgetEngine = {
             console.log("⚙️ [WidgetEngine]: Core manifest mapping compiled cleanly for active chat listeners.");
         }
     }
+};
+
 };
