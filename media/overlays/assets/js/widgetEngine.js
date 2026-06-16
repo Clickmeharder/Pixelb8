@@ -1,5 +1,5 @@
 console.log("🚀 [Pixelb8 Stream Widget Engine]: initializing...");
- 
+
 /**
  * ============================================================================
  * PIXELB8 ECOSYSTEM: WIDGET ENGINE (Phase 1.6 - Unified Core System)
@@ -27,22 +27,28 @@ export const WidgetEngine = {
 
     /**
      * Spawns or dismantles extended modules
+     * @param {string} idKey - Core registry key entry identifier
+     * @param {boolean} enable - Target toggle operational condition
+     * @param {boolean} deferCommandRefresh - If true, skips updating global chat maps instantly
      */
-    async toggleWidget(idKey, enable) {
+    async toggleWidget(idKey, enable, deferCommandRefresh = false) {
         const config = this.registryMap[idKey];
         if (!config) return; 
 
         if (enable) {
             if (!this.instances[config.instanceKey]) {
                 try {
-                    const module = await import(config.path);
+                    // Cache bust string additions ensure updates serve cleanly across hot-reloads
+                    const cacheBuster = `?v=${Date.now()}`;
+                    const module = await import(config.path + cacheBuster);
                     const WidgetClass = module[config.className];
-                    this.instances[config.instanceKey] = new WidgetClass();
                     
-                    if (typeof window.injectAllWidgetCommands === 'function') {
+                    this.instances[config.instanceKey] = new WidgetClass();
+                    console.log(`⚙️ [WidgetEngine]: Modern module "${config.className}" initialized safely.`);
+                    
+                    if (!deferCommandRefresh && typeof window.injectAllWidgetCommands === 'function') {
                         window.injectAllWidgetCommands();
                     }
-                    console.log(`⚙️ [WidgetEngine]: Modern module "${config.className}" initialized safely.`);
                 } catch (err) {
                     console.error(`❌ [WidgetEngine Init Failure]:`, err);
                 }
@@ -50,13 +56,18 @@ export const WidgetEngine = {
         } else {
             const activeInstance = this.instances[config.instanceKey];
             if (activeInstance) {
-                if (typeof activeInstance.destroy === 'function') {
-                    activeInstance.destroy();
+                try {
+                    if (typeof activeInstance.destroy === 'function') {
+                        activeInstance.destroy();
+                    }
+                } catch (err) {
+                    console.error(`❌ [WidgetEngine Teardown Error] for ${config.className}:`, err);
                 }
+                
                 this.instances[config.instanceKey] = null;
                 console.log(`⚙️ [WidgetEngine]: Cleaned structural footprint for ${config.className}.`);
                 
-                if (typeof window.injectAllWidgetCommands === 'function') {
+                if (!deferCommandRefresh && typeof window.injectAllWidgetCommands === 'function') {
                     window.injectAllWidgetCommands();
                 }
             }
@@ -69,12 +80,12 @@ export const WidgetEngine = {
     async initSavedWidgets(settings) {
         if (!settings) return;
 
-        // 1. Boot up the modern BaseWidgetModule apps
+        // 1. Boot modern BaseWidgetModule systems silently, deferring command injection passes
         if (settings.bitminerWidgetEnabled) {
-            await this.toggleWidget("miner-widget", true);
+            await this.toggleWidget("miner-widget", true, true);
         }
         if (settings.jukeboxWidgetEnabled) {
-            await this.toggleWidget("jukebox-widget", true);
+            await this.toggleWidget("jukebox-widget", true, true);
         }
 
         // =========================================================================
@@ -103,6 +114,12 @@ export const WidgetEngine = {
             } catch (err) {
                 console.error("❌ [Engine Legacy Boot Failure] Entropia:", err);
             }
+        }
+
+        // 2. UNIFIED INJECTION POINT: Safely rebuild command routing arrays once core loads wrap up
+        if (typeof window.injectAllWidgetCommands === 'function') {
+            window.injectAllWidgetCommands();
+            console.log("⚙️ [WidgetEngine]: Core manifest mapping compiled cleanly for active chat listeners.");
         }
     }
 };

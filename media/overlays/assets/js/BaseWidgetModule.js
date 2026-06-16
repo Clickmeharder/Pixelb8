@@ -66,8 +66,9 @@ const WIDGET_ACTION_LIBRARY = {
 export class BaseWidgetModule {
 	/**
 	 * @param {string} widgetSubKey - Unique namespace identifier for LocalStorage containment.
+	 * @param {Object} options - Custom configuration parameters passed down from child instances.
 	 */
-	constructor(widgetSubKey = "generic_system") {
+	constructor(widgetSubKey = "generic_system", options = {}) {
 		this.widgetSubKey = widgetSubKey; // Retain raw identifier for scoping handles
 		this.STORAGE_KEY = `pixelb8_widget_${widgetSubKey}`;
 		
@@ -75,8 +76,8 @@ export class BaseWidgetModule {
 		this.overlayId = `${this.baseId}-overlay`;
 		this.controlId = `${this.baseId}-controls`;
 
-		// Fallback menu text read universally by parent template compilers
-		this.widgetMenuTitle = this.widgetMenuTitle || `🛠️ ${this.constructor.name} Matrix Interface`;
+		// ✅ FIXED: Evaluates options profile fields first before selecting generic fallbacks
+		this.widgetMenuTitle = options.menuTitle || `🛠️ ${this.constructor.name} Matrix Interface`;
 
 		this.canvas = document.getElementById(`${this.baseId}-canvas`);
 		if (this.canvas) {
@@ -190,7 +191,6 @@ export class BaseWidgetModule {
 	 * Merges clean local widget dashboards with core settings and matrix systems globally.
 	 */
 	getUniversalControlsTemplate() {
-		// Evaluates child controls template markup block safely
 		const childMarkup = typeof this.getControlsMarkup === 'function'
 			? this.getControlsMarkup()
 			: `
@@ -205,7 +205,6 @@ export class BaseWidgetModule {
 
 		const matrixRowsHTML = this.renderCommandRouterMatrixHTML();
 		
-		// Setup live attachment matrix block
 		const matrixSection = `
 			<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b; margin-top: 5px;">
 				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none; user-select: none;">🛠️ Live Command Router Matrix</summary>
@@ -215,7 +214,6 @@ export class BaseWidgetModule {
 			</details>
 		`;
 
-		// Shared utilities standard operational system footers
 		const actionButtons = typeof this.getControlsMarkup === 'function' ? '' : `
 			<button type="button" id="btnWidgetTrigger" class="p8-btn" style="background: #1e3a8a; border: 1px solid #3b82f6; padding: 6px 0; font-size: 11px; cursor: pointer; color: #fff; font-weight: bold; border-radius: 4px; margin-top: 5px;">
 				EXECUTE MATRIX ALGORITHM
@@ -284,11 +282,9 @@ export class BaseWidgetModule {
 			}
 		}
 		
-		// Run core alignment checks to inject commands into empty arrays seamlessly
 		this.reconcileCommandMatrix();
 		this.applyVisibilityStates();
 		
-		// Re-render internal matrix target values to reflect matching active updates
 		const matrixTarget = document.getElementById(this.controlId)?.querySelector('.matrix-container-target');
 		if (matrixTarget) {
 			matrixTarget.innerHTML = this.renderCommandRouterMatrixHTML();
@@ -299,11 +295,9 @@ export class BaseWidgetModule {
 	// INTERFACE BINDING & EVENT DISPATCH ENGINES
 	// ========================================================================
 	injectUI() {
-		// 1. Run local viewport injection layer checks if added inside extended modules
 		if (typeof this.injectViewportOverlay === 'function') {
 			this.injectViewportOverlay();
 		} else {
-			// Base standard implementation fallback
 			const overlayWrapper = document.getElementById("overlay-wrapper");
 			if (overlayWrapper && !document.getElementById(this.overlayId)) {
 				const overlayEl = document.createElement("div");
@@ -339,18 +333,15 @@ export class BaseWidgetModule {
 			}
 		}
 
-		// 2. Build and inject Control Dashboard structures cleanly
 		const controlWrapper = document.getElementById("widget-control-wrapper") || document.getElementById("widgets-manager");
 		if (controlWrapper && !document.getElementById(this.controlId)) {
 			const panelSection = document.createElement("div");
 			panelSection.id = this.controlId;
 			panelSection.className = "collapsible-section collapsed";
 			
-			// Auto compiles the unified multi-layered dashboard markup
 			panelSection.innerHTML = this.getUniversalControlsTemplate();
 			controlWrapper.appendChild(panelSection);
 
-			// Immediately normalize toggles, inputs, badges and local layout adjustments
 			if (typeof this.syncUIPanelElements === 'function') {
 				this.syncUIPanelElements();
 			}
@@ -388,7 +379,6 @@ export class BaseWidgetModule {
 				this.saveData();
 			}
 
-			// ⚡ AUTOMATED: CAPTURE INNER ROUTER MATRIX CHECKBOX ALTERATIONS UNIVERSALLY
 			if (e.target.classList.contains("matrix-toggle")) {
 				const cmd = e.target.getAttribute("data-cmd");
 				const type = e.target.getAttribute("data-type");
@@ -415,7 +405,6 @@ export class BaseWidgetModule {
 				}
 			}
 
-			// ⚡ AUTOMATED: CAPTURE MATRIX SIMULATED PLAY TRIGGER BUTTON PRESSES UNIVERSALLY
 			const testBtn = e.target.closest(".matrix-test-btn");
 			if (testBtn) {
 				const cmdName = testBtn.getAttribute("data-cmd");
@@ -428,7 +417,7 @@ export class BaseWidgetModule {
 					const simulatedFlags = {
 						broadcaster: true,
 						mod: false,
-						isRewardSimulated: true // Bypasses permission validations
+						isRewardSimulated: true
 					};
 					targetCommand.execute("BroadcasterConsole", "", simulatedFlags);
 				}

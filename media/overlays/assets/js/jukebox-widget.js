@@ -5,34 +5,41 @@ import { BaseWidgetModule } from './BaseWidgetModule.js';
 //region Jukebox Templates
 const JUKEBOX_HTMLTEMPLATES = {
     config: `
-		<div style="background: #141414; padding: 8px; border-radius: 4px; border: 1px solid #27272a; margin-bottom: 4px;">
-			<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-				<span class="settings-toggle-label" style="font-size: 14px; color: #fff;">Accept Requests</span>
-				<div class="settings-toggle-controls">
-					<span id="req-status-badge" class="toggle-status-badge" style="font-size: 11px; font-weight: bold; color: var(--accent, #a855f7); margin-right: 6px;">ON</span>
-					<input type="checkbox" id="stg-toggle-requests-checkbox" checked style="cursor: pointer;">
+		<details style="margin-bottom: 15px; border: 2px solid #27272a; border-radius: 6px; background: #18181b;">
+			<summary id="jb-config-header">
+				⚙️ Jukebox Configuration
+			</summary>
+			<div style="padding: 10px; border-top: 1px solid #27272a;">
+				<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+					<span class="settings-toggle-label" style="font-size: 14px;">Accept Requests</span>
+					<div class="settings-toggle-controls">
+						<span id="req-status-badge" class="toggle-status-badge">ON</span>
+						<input type="checkbox" id="stg-toggle-requests-checkbox" checked>
+					</div>
+				</div>
+
+				<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+					<span class="settings-toggle-label" style="font-size: 14px;">Audio Only</span>
+					<div class="settings-toggle-controls">
+						<span id="audio-status-badge" class="toggle-status-badge">OFF</span>
+						<input type="checkbox" id="stg-toggle-audio-only-checkbox">
+					</div>
+				</div>
+
+				<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+					<span class="settings-toggle-label" style="font-size: 14px;">Fake Visualizer</span>
+					<div class="settings-toggle-controls">
+						<span id="av-status-badge" class="toggle-status-badge">OFF</span>
+						<input type="checkbox" id="stg-toggle-visualizer-checkbox">
+					</div>
+				</div>
+
+				<div id="jb-vote-req-wrapper">
+					<label id="jb-vote-req-label">Vote Requirements</label>
+					<input type="number" id="jb-vote-req-input" class="p8-input" value="2">
 				</div>
 			</div>
-
-			<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-				<span class="settings-toggle-label" style="font-size: 14px; color: #fff;">Audio Only</span>
-				<div class="settings-toggle-controls">
-					<input type="checkbox" id="stg-toggle-audio-only-checkbox" style="cursor: pointer;">
-				</div>
-			</div>
-
-			<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-				<span class="settings-toggle-label" style="font-size: 14px; color: #fff;">Visualizer Canvas Overlay</span>
-				<div class="settings-toggle-controls">
-					<input type="checkbox" id="stg-toggle-visualizer-checkbox" style="cursor: pointer;">
-				</div>
-			</div>
-
-			<div id="jb-vote-req-wrapper" style="display: flex; justify-content: space-between; align-items: center;">
-				<label id="jb-vote-req-label" style="font-size: 12px; color: #a1a1aa;">Skip Vote Requirement</label>
-				<input type="number" id="jb-vote-req-input" class="p8-input" value="2" style="width: 50px; text-align: center; background: #18181b; border: 1px solid #27272a; color: #fff; border-radius: 4px; padding: 2px;">
-			</div>
-		</div>
+		</details>
     `,
 
     nowPlaying: `
@@ -80,8 +87,9 @@ const JUKEBOX_HTMLTEMPLATES = {
 export class StreamJukeboxModule extends BaseWidgetModule {
     constructor() {
         // Initializes state under local storage namespace allocations
-        super("stream_jukebox");
-		this.widgetMenuTitle = "🎵 Song Request Jukebox";
+	super("stream_jukebox", {
+            menuTitle: "🎵 Song Request Jukebox"
+        });
     }
 
     // ========================================================================
@@ -247,7 +255,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
 // ========================================================================
     // 🎛️ EVENT HANDLERS & INPUT BINDINGS
     // ========================================================================
-bindEventListeners() {
+	bindEventListeners() {
         // Invoke base routing matrix listeners (Chat/CP checkboxes & manual click dispatches)
         if (typeof super.bindEventListeners === 'function') {
             super.bindEventListeners();
