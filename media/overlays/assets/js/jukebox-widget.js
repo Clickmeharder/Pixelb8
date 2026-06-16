@@ -105,7 +105,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                     <div id="jb-current-title" class="jb-current-title" >No Track Loaded</div>
                     
                     <div id="jb-upnext-Label">Up Next</div>
-                    <div id="jb-upnext-title" class="jb-next-title">Nothing queued</div>
+                    <div id="jb-upnext-title" class="jb-next-title">waiting...</div>
                     
                     <div id="jb-current-controlbar">
                         <div class="jb-volume-control" style="display: flex; align-items: center; gap: 8px; flex: 1;">
@@ -457,26 +457,30 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     // 🧱 MEDIA TRACK MANAGEMENT CORE LOGIC
     // ========================================================================
 	updatePlayerDisplay(customTitle = null) {
-        // Targets all elements with the .jb-current-title class uniformly
+        // 1. Sync all active track title elements
         const titleElements = document.querySelectorAll('.jb-current-title');
-        
-        // Resolve the title text safely
         const displayTitle = customTitle || (this.currentTrackData ? this.currentTrackData.title : "No Track Loaded");
         
-        // Loop through every matching title element in the DOM and sync its text content
         titleElements.forEach(el => { 
             el.textContent = displayTitle; 
         });
 
-        // Explicitly extract the title of the 1st song in the queue, fallback, or nothing
+        // 2. Resolve the string for the immediate next track
         let upNextString = "Nothing queued";
         if (this.queue.length > 0) {
             upNextString = this.queue[0].title;
-            console.log("upNextString =" + this.queue[0].title);
+            console.log("upNextString = " + this.queue[0].title);
         } else if (this.fallbackPlaylist.length > 0) {
             upNextString = "Random Playlist Selection";
         }
         
+        // 3. Sync all elements using the .jb-next-title class
+        const nextTitleElements = document.querySelectorAll('.jb-next-title');
+        nextTitleElements.forEach(el => {
+            el.textContent = upNextString;
+        });
+
+        // 4. Fallback explicit ID checks to catch legacy elements missing the class attribute
         const nextTitleEl = document.getElementById('jb-next-title');
         if (nextTitleEl) nextTitleEl.textContent = upNextString;
 
