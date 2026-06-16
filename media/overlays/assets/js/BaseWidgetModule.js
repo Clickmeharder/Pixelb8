@@ -1,9 +1,9 @@
 /**
  * ============================================================================
- * PIXELB8 ECOSYSTEM WIDGET COMPONENT BLUEPRINT (v1.3 - Architecture Variant)
+ * PIXELB8 ECOSYSTEM WIDGET COMPONENT BLUEPRINT (v1.4 - Architecture Variant)
  * Architecture: Monolithic, sovereign, zero-external-dependencies.
  * Lifecycle Layer: Centralized UI Injections with Cascaded Downstream Hooks
- * Features: Core Command Routing & Simulated Matrix Framework
+ * Features: Core Command Routing, Automated Matrix Framework, Global Notice Pipeline
  * ============================================================================
  */
 
@@ -76,7 +76,7 @@ export class BaseWidgetModule {
 		this.overlayId = `${this.baseId}-overlay`;
 		this.controlId = `${this.baseId}-controls`;
 
-		// ✅ FIXED: Evaluates options profile fields first before selecting generic fallbacks
+		// Evaluates options profile fields first before selecting generic fallbacks
 		this.widgetMenuTitle = options.menuTitle || `🛠️ ${this.constructor.name} Matrix Interface`;
 
 		this.canvas = document.getElementById(`${this.baseId}-canvas`);
@@ -91,9 +91,27 @@ export class BaseWidgetModule {
 		this.bindEventListeners(); 
 		this.loadData(); // Will parse and reconcile the active command suites
 		
-		this.saveInterval = setInterval(() => this.saveData(), 5000);
+		this.saveInterval = setInterval(() => this.saveData(), WIDGET_CONFIG_DEFAULTS.SAVE_INTERVAL_MS);
 		this.animate = this.animate.bind(this);
 		requestAnimationFrame(this.animate);
+	}
+
+	/**
+	 * Centralized message routing pipeline.
+	 * Accessible by all child widgets using this.sendNotice(txt)
+	 */
+	sendNotice(txt) {
+		// 1. Instantly update the UI visual workspace bubble component
+		if (typeof this.setWidgetBubble === 'function') {
+			this.setWidgetBubble(txt);
+		}
+		
+		// 2. Broadcast across the module context layer straight into Twitch chat
+		if (typeof window.botSay === 'function') {
+			window.botSay(txt);
+		} else {
+			console.warn(`⚠️ [${this.baseId} Base Engine]: window.botSay is not available contextually.`);
+		}
 	}
 
 	/**
@@ -102,15 +120,6 @@ export class BaseWidgetModule {
 	 * @returns {Array<{name: string, defaultChat: boolean, defaultCp: boolean, execute: Function}>}
 	 */
 	getModuleCommands() {
-		const sendNotice = (txt) => {
-            this.setWidgetBubble(txt);
-            
-            if (typeof window.botSay === 'function') {
-                window.botSay(txt);
-            } else {
-                console.warn("⚠️ [Jukebox Engine]: window.botSay is not available contextually.");
-            }
-        };
 		return [];
 	}
 
