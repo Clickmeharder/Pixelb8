@@ -93,39 +93,26 @@ let chatHeight = settings.chatHeight || "350px";
 
 
 function saveSettings() {
-    // 1. Maintain classic local variable assignments
-    settings.botPrefix = BOT_PREFIX;
-    settings.useBotPrefix = useBotPrefix;
-    settings.cmdPrefix = CMD_PREFIX;
-    settings.useCmdPrefix = useCmdPrefix;
-    settings.consoleMessages = consoleMessages;
-    settings.floatingEmotes = floatingEmotes;
-    
-    settings.chatHidden = chatHidden;
-    settings.statusHidden = statusHidden;
-    
-    // Alert Widget
-    settings.alertHidden = alertHidden;
-    settings.rewardsEnabled = rewardsEnabled;
-    settings.bitsEnabled = bitsEnabled;
-    settings.chatHeight = chatHeight;
+    // Fallback alignment check
+    const state = window.settings || settings;
+    if (!state) return;
 
-    // 🌟 FIX: Explicitly ensure modern dynamically tracking keys are not dropped!
-    if (typeof WidgetEngine !== 'undefined' && WidgetEngine.registryMap) {
-        Object.values(WidgetEngine.registryMap).forEach(config => {
-            // If the schema altered this value, preserve it. Otherwise, fallback to its existing state or false.
-            if (settings[config.settingsKey] !== undefined) {
-                // Keep it as is
-            } else {
-                settings[config.settingsKey] = false;
-            }
-        });
-    }
+    state.botPrefix = BOT_PREFIX;
+    state.useBotPrefix = useBotPrefix;
+    state.cmdPrefix = CMD_PREFIX;
+    state.useCmdPrefix = useCmdPrefix;
+    state.consoleMessages = consoleMessages;
+    state.floatingEmotes = floatingEmotes;
+    state.chatHidden = chatHidden;
+    state.statusHidden = statusHidden;
+    state.alertHidden = alertHidden;
+    state.rewardsEnabled = rewardsEnabled;
+    state.bitsEnabled = bitsEnabled;
+    state.chatHeight = chatHeight;
+
+    // Save the unified object
+    localStorage.setItem('p8_settings', JSON.stringify(state));
     
-    // 2. Commit the entire preserved memory profile cleanly to disk
-    localStorage.setItem('p8_settings', JSON.stringify(settings));
-    
-    // Auto-refresh panel states inside active DOM elements if they exist
     if (typeof updateManagerBadgesUI === "function") {
         updateManagerBadgesUI();
         updateAllBadgesUI();
@@ -1915,6 +1902,7 @@ function determineExecutionEnvironment() {
     }
 }
 async function init() {
+    // 1. Initial Core Boot Sequence
     applyTheme(registry.active);
     // 🌐 Determine context environment modes (OBS Layer vs. Editor UI Dashboard)
     determineExecutionEnvironment();
@@ -1922,7 +1910,27 @@ async function init() {
     loadPositions();
 
     // =========================================================================
-    // 🧩 1. INJECT DYNAMIC ENGINE WIDGETS INTO SCHEMA BEFORE RENDERING
+    // 🌐 UNIFY GLOBALS & GROUND DATA
+    // Fixes the scope reference mutation disconnect so toggles read/write to the same memory space.
+    // =========================================================================
+    if (typeof settings !== 'undefined') {
+        window.settings = settings;
+    } else {
+        window.settings = window.settings || {};
+    }
+
+    // Force basic default structure to exist before injection checks pass over it
+    if (typeof WidgetEngine !== 'undefined' && WidgetEngine.registryMap) {
+        Object.values(WidgetEngine.registryMap).forEach(config => {
+            if (window.settings[config.settingsKey] === undefined) {
+                window.settings[config.settingsKey] = false;
+                console.log(`✨ [Init Data Pass]: Grounded missing flag "${config.settingsKey}" to false.`);
+            }
+        });
+    }
+
+    // =========================================================================
+    // 🧩 2. INJECT DYNAMIC ENGINE WIDGETS INTO SCHEMA BEFORE RENDERING
     // =========================================================================
     if (typeof WidgetEngine !== 'undefined' && typeof WidgetEngine.injectWidgetsIntoSchema === 'function') {
         WidgetEngine.injectWidgetsIntoSchema(SETTINGS_SCHEMA);
@@ -1932,21 +1940,22 @@ async function init() {
     }
 
     // =========================================================================
-    // 🖥️ 2. RENDER THE INTERFACE NOW THAT THE MANIFEST IS COMPLETE
+    // 🖥️ 3. RENDER THE INTERFACE NOW THAT THE MANIFEST IS COMPLETE
     // =========================================================================
     renderSettingsWindow(); 
     renderThemeControls();
     
-    const s = typeof settings !== 'undefined' ? settings : {};
+    // Legacy compatibility snapshot assignment block
+    const s = window.settings;
 
     // =========================================================================
-    // ⚙️ 3. SYSTEM EXTENSION ENGINE CASCADE (BOOT ACTIVE SYSTEM UNITS)
+    // ⚙️ 4. SYSTEM EXTENSION ENGINE CASCADE (BOOT ACTIVE SYSTEM UNITS)
     // =========================================================================
     if (typeof WidgetEngine !== 'undefined') {
         await WidgetEngine.initSavedWidgets(s);
     }
 
-    // 4. Scan and inject any commands that were loaded during boot
+    // 5. Scan and inject any commands that were loaded during boot
     console.log("📡 [Command Registry]: Running boot scan...");
     injectAllWidgetCommands();
     

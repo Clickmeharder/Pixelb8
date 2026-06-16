@@ -103,15 +103,13 @@ export const WidgetEngine = {
      * Dynamically injects schema rules into your UI settings panels directly from the registry definitions
      * @param {Array} schema - Your core SETTINGS_SCHEMA structure array from ttvoverlay.js
      */
-    injectWidgetsIntoSchema(schema) {
+	injectWidgetsIntoSchema(schema) {
         const widgetGroup = schema.find(group => group.groupName === "🧩 Widgets Settings");
         if (!widgetGroup) return;
 
         Object.entries(this.registryMap).forEach(([idKey, config]) => {
-            // Check to prevent accidental duplicate appends across hot-reloads
             if (widgetGroup.items.some(item => item.idKey === idKey)) return;
 
-            // Clean strings (e.g., "StreamEmojinkoModule" -> "Emojinko")
             const cleanName = config.className
                 .replace('Stream', '')
                 .replace('Widget', '')
@@ -120,33 +118,36 @@ export const WidgetEngine = {
             widgetGroup.items.push({
                 label: `Enable ${cleanName} Widget`,
                 idKey: idKey,
-				// Change your get and set lines in WidgetEngine to point clearly to window level references:
-				get: () => {
-					const activeSettings = window.settings || typeof settings !== 'undefined' ? settings : null;
-					return activeSettings ? !!activeSettings[config.settingsKey] : false;
-				},
-				set: async (v) => {
-					const activeSettings = window.settings || typeof settings !== 'undefined' ? settings : null;
-					if (activeSettings) {
-						activeSettings[config.settingsKey] = v;
-					}
-					
-					if (typeof window.saveSettings === "function") {
-						window.saveSettings();
-					} else if (typeof saveSettings === "function") {
-						saveSettings();
-					}
+                // 🌟 FORCE GLOBAL WINDOW LOOKUP
+                get: () => {
+                    const globalSettings = window.settings || (typeof settings !== 'undefined' ? settings : {});
+                    return !!globalSettings[config.settingsKey];
+                },
+                set: async (v) => {
+                    // 🌟 FORCE MUTATION ON GLOBAL WINDOW LOOKUP
+                    if (!window.settings && typeof settings !== 'undefined') {
+                        window.settings = settings; 
+                    } else if (!window.settings) {
+                        window.settings = {};
+                    }
+                    
+                    window.settings[config.settingsKey] = v;
 
-					await this.toggleWidget(idKey, v);
+                    if (typeof window.saveSettings === "function") {
+                        window.saveSettings();
+                    } else if (typeof saveSettings === "function") {
+                        saveSettings();
+                    }
 
-					if (typeof window.syncAllToggleUI === "function") {
-						window.syncAllToggleUI();
-					}
-				}
+                    await this.toggleWidget(idKey, v);
+
+                    if (typeof window.syncAllToggleUI === "function") {
+                        window.syncAllToggleUI();
+                    }
+                }
             });
         });
     },
-
     /**
      * Handles the entire startup loading cascade for both modern and legacy tools
      */
