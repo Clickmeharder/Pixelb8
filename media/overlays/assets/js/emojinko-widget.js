@@ -4,7 +4,7 @@ import { BaseWidgetModule } from './BaseWidgetModule.js';
 // 🎨 Emojinko VIEW TEMPLATES (Dashboard Manager Layout)
 // ============================================================================
 const Emojinko_HTMLTEMPLATES = {
-	dashboard: (dropDuration, maxDrops) => `
+	dashboard: `
 		<div style="background: #18181b; padding: 12px; border: 1px solid #27272a; border-radius: 6px; margin-bottom: 15px;">
 			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
 				<h4 style="margin: 0; color: var(--accent, #a855f7); font-size: 14px;">🎯 Emojinko Controller</h4>
@@ -19,16 +19,10 @@ const Emojinko_HTMLTEMPLATES = {
 				</label>
 			</div>
 
-			<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-				<span style="font-size: 12px; color: #a1a1aa; min-width: 70px;">Gravity Velocity</span>
-				<input type="range" id="dz-gravity-slider" min="1" max="10" value="${dropDuration}" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
-				<span id="dz-grav-txt" style="font-size: 12px; font-family: monospace;">${dropDuration}s</span>
-			</div>
-
 			<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-				<span style="font-size: 12px; color: #a1a1aa; min-width: 70px;">Drops / User</span>
-				<input type="range" id="dz-limit-slider" min="1" max="20" value="${maxDrops}" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
-				<span id="dz-limit-txt" style="font-size: 12px; font-family: monospace;">${maxDrops}</span>
+				<span style="font-size: 12px; color: #a1a1aa; min-width: 70px;">Gravity Velocity</span>
+				<input type="range" id="dz-gravity-slider" min="1" max="10" value="4" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
+				<span id="dz-grav-txt" style="font-size: 12px; font-family: monospace;">4s</span>
 			</div>
 		</div>
 	`,
@@ -44,334 +38,187 @@ const Emojinko_HTMLTEMPLATES = {
 };
 
 export class StreamEmojinkoModule extends BaseWidgetModule {
+	/**
+	 * 1. THE CONSTRUCTOR
+	 * Harnesses base registrations and applies the constructor state-merging blueprint
+	 * to safeguard properties against central routing drops.
+	 */
 	constructor() {
-		// Pass namespace key up to Base configuration setup parameters
-		super("emojinko", {
-			menuTitle: "🎯 Emojinko Plinko Game"
+		super("stream_Emojinko", {
+			menuTitle: "🎯 Emojinko"
 		});
 
-		// Enforce state configurations safely post-loadData cascade sequences
-		this.state.gameEnabled = this.state.gameEnabled !== undefined ? this.state.gameEnabled : true;
-		this.state.dropDuration = this.state.dropDuration || 4;
-		this.state.maxDropsPerUser = this.state.maxDropsPerUser || 3;
-		if (!this.state.scores) this.state.scores = {};
-		if (!this.state.userDropTracker) this.state.userDropTracker = {};
+		// ✅ Safe Architectural State Extension Pattern
+		this.state = {
+			gameEnabled: true,
+			dropDuration: 4, // Seconds it takes to fall
+			scores: {},      // Persistent tracking ledger: { username: highscore }
+			commandAccess: this.state?.commandAccess || {}
+		};
 
-		// 🛠️ FIX: Decouple entirely from base execution layers
-		this.physicsCanvas = null;
-		this.physicsCtx = null;
-		this.pegs = [];
-		this.activeTokens = [];
-		this.physicsLoopId = null;
+		this.loadData();
 
+		// Kick off mandatory control matrix DOM reevaluation patterns
+		const matrixTarget = document.getElementById(this.controlId)?.querySelector('.matrix-container-target');
+		if (matrixTarget) {
+			matrixTarget.innerHTML = this.renderCommandRouterMatrixHTML();
+		}
+	}
+
+	/**
+	 * 2. DATA FRAMEWORK LOADING
+	 * Setup tracking structures, static definitions, and persistent scoring rules.
+	 */
+	loadData() {
+		super.loadData(); // Syncs baseline settings out of local cached structures automatically
+
+		// Map configuration bucket boundaries for your overlay drop logic
 		this.scoreZones = [
 			{ minX: 0, maxX: 25, label: "100 Pts", multiplier: 100 },
 			{ minX: 25, maxX: 50, label: "💥 RIP", multiplier: 0 },
 			{ minX: 50, maxX: 75, label: "🍀 LUCKY", multiplier: 500 },
 			{ minX: 75, maxX: 100, label: "50 Pts", multiplier: 50 }
 		];
-
-		// Force re-execution under clean context properties
-		this.injectViewportOverlay();
 	}
 
+	/**
+	 * 3. DECLARATIVE DASHBOARD LAYOUTS
+	 * Supplies template streams directly to the browser monolithic canvas frame stack.
+	 */
 	getControlsMarkup() {
 		return `
-			${Emojinko_HTMLTEMPLATES.dashboard(this.state.dropDuration || 4, this.state.maxDropsPerUser || 3)}
+			${Emojinko_HTMLTEMPLATES.dashboard}
 			${Emojinko_HTMLTEMPLATES.leaderboard}
 		`;
 	}
 
+	/**
+	 * 4. VIEWPORT OVERLAY CANVAS ASSEMBLY
+	 * Instantiates the dynamic physical sandbox right on top of your OBS browser layout frame.
+	 */
 	injectViewportOverlay() {
-		if (document.getElementById("dz-emojinko-overlay-container")) return;
+		const overlayWrapper = document.getElementById("overlay-wrapper");
+		if (!overlayWrapper || document.getElementById(this.overlayId)) return;
 
-		let overlayWrapper = document.getElementById("overlay-wrapper") || 
-		                     document.getElementById("main-layout") || 
-		                     document.body;
-		
 		const overlayEl = document.createElement("div");
-		overlayEl.id = "dz-emojinko-overlay-container";
-		overlayEl.style.cssText = "position:absolute;top:0;left:0;width:100vw;height:100vh;pointer-events:none;overflow:hidden;z-index:99999;";
+		overlayEl.id = this.overlayId;
+		overlayEl.style.cssText = `position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 10;`;
 		
+		// Build visual indicators for your buckets at the bottom of the stream window scene
 		overlayEl.innerHTML = `
-			<canvas id="dz-physics-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;display:block;"></canvas>
-			<div id="dz-bucket-row" style="position:absolute;bottom:0;left:0;width:100%;height:40px;display:flex;background:rgba(24,24,27,0.95);border-top:2px solid var(--accent,#a855f7);font-family:monospace;text-align:center;line-height:40px;font-weight:bold;color:#fff;font-size:11px;z-index:100000;">
-				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(168,85,247,0.1);">100 PTS</div>
-				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(239,68,68,0.1);color:#ef4444;">💥 RIP</div>
-				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(34,197,94,0.1);color:#22c55e;">🍀 LUCKY</div>
-				<div style="flex:1;background:rgba(168,85,247,0.1);">50 PTS</div>
+			<div id="dz-bucket-row" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; display: flex; background: rgba(24,24,27,0.5); border-top: 2px solid var(--accent, #a855f7); font-family: monospace; text-align: center; line-height: 40px; font-weight: bold; color: #fff; font-size: 11px;">
+				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(168,85,247,0.1);">100 PTS</div>
+				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(239,68,68,0.1); color: #ef4444;">💥 RIP</div>
+				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(34,197,94,0.1); color: #22c55e;">🍀 LUCKY</div>
+				<div style="flex: 1; background: rgba(168,85,247,0.1);">50 PTS</div>
 			</div>
 		`;
 		
 		overlayWrapper.appendChild(overlayEl);
-
-		this.physicsCanvas = document.getElementById("dz-physics-canvas");
-		if (this.physicsCanvas) {
-			this.physicsCtx = this.physicsCanvas.getContext("2d");
-			
-			// 🛠️ Neutralize the BaseWidgetModule canvas pointers so it can't clear our screen
-			this.canvas = null;
-			this.ctx = null;
-
-			this.resizePhysicsCanvas();
-			
-			window.removeEventListener('resize', () => this.resizePhysicsCanvas());
-			window.addEventListener('resize', () => this.resizePhysicsCanvas());
-			
-			this.startPhysicsLoop();
-		}
 	}
 
-	resizePhysicsCanvas() {
-		if (!this.physicsCanvas) return;
-		
-		let targetWidth = window.innerWidth;
-		let targetHeight = window.innerHeight;
-
-		if (targetWidth < 100) targetWidth = 1920;
-		if (targetHeight < 100) targetHeight = 1080;
-		
-		this.physicsCanvas.width = targetWidth;
-		this.physicsCanvas.height = targetHeight;
-		
-		this.generatePlinkoPegMatrix(); 
-	}
-
-	generatePlinkoPegMatrix() {
-		if (!this.physicsCanvas) return;
-		this.pegs = [];
-
-		const width = this.physicsCanvas.width;
-		const height = this.physicsCanvas.height;
-		
-		const rows = 8;              
-		const startY = height * 0.22; 
-		const endY = height * 0.82;   
-		const rowSpacing = (endY - startY) / rows;
-
-		for (let r = 0; r < rows; r++) {
-			const currentY = startY + (r * rowSpacing);
-			const isEven = (r % 2 === 0);
-			const pegCount = isEven ? 9 : 10; 
-			const colSpacing = width / (pegCount + 1);
-
-			for (let c = 0; c < pegCount; c++) {
-				const currentX = colSpacing * (c + 1);
-				this.pegs.push({
-					x: currentX,
-					y: currentY,
-					radius: 5
-				});
-			}
-		}
-	}
-
+	/**
+	 * 5. DYNAMIC DOM INTERFACES & CONTROL SELECTION
+	 * Synchronizes settings changes inside your Control Panel interface elements.
+	 */
 	bindEventListeners() {
-		super.bindEventListeners(); 
+		super.bindEventListeners(); // Keeps layout panel collapsibility operational
 
 		const panel = document.getElementById(this.controlId);
 		if (!panel) return;
 
 		this.renderLeaderboardUI();
 
-		panel.addEventListener('change', (e) => {
-			if (e.target.id === 'dz-toggle-active') {
+		// Toggle Game Access Loop state changes
+		const activeToggle = panel.querySelector('#dz-toggle-active');
+		if (activeToggle) {
+			activeToggle.checked = this.state.gameEnabled;
+			activeToggle.addEventListener('change', (e) => {
 				this.state.gameEnabled = e.target.checked;
 				this.saveData();
-			}
-		});
+			});
+		}
 
-		panel.addEventListener('input', (e) => {
-			if (e.target.id === 'dz-gravity-slider') {
+		// Handle Fall Acceleration Slider
+		const gravSlider = panel.querySelector('#dz-gravity-slider');
+		const gravTxt = panel.querySelector('#dz-grav-txt');
+		if (gravSlider) {
+			gravSlider.value = this.state.dropDuration;
+			if (gravTxt) gravTxt.textContent = `${this.state.dropDuration}s`;
+
+			gravSlider.addEventListener('input', (e) => {
 				this.state.dropDuration = parseInt(e.target.value, 10);
-				const txt = panel.querySelector('#dz-grav-txt');
-				if (txt) txt.textContent = `${this.state.dropDuration}s`;
+				if (gravTxt) gravTxt.textContent = `${this.state.dropDuration}s`;
 				this.saveData();
-			}
-			if (e.target.id === 'dz-limit-slider') {
-				this.state.maxDropsPerUser = parseInt(e.target.value, 10);
-				const txt = panel.querySelector('#dz-limit-txt');
-				if (txt) txt.textContent = this.state.maxDropsPerUser;
-				this.saveData();
-			}
-		});
+			});
+		}
 
+		// Reset Scores Interaction Hook
 		panel.addEventListener('click', (e) => {
 			if (e.target.id === 'dz-btn-clear') {
-				e.preventDefault();
 				this.state.scores = {};
-				this.state.userDropTracker = {}; 
-				this.activeTokens = [];
 				this.saveData();
 				this.renderLeaderboardUI();
-				this.sendNotice("🧹 Emojinko scoreboard, tokens, and drop limits cleared!");
+				this.sendNotice("🧹 Drop Zone scoreboard database cleared!");
 			}
 		});
 	}
 
-	executeDropAction(user, customToken = "🪙", targetSlot = null) {
+	/**
+	 * 6. CHAT DROP PHYSICS SIMULATION ENGINE
+	 * Allocates a floating element onto the screen wrapper scene on command request.
+	 */
+	executeDropAction(user, customToken = "🪙") {
 		if (!this.state.gameEnabled) return;
-		
-		if (!this.physicsCanvas) {
-			this.injectViewportOverlay();
-		}
 
-		if (!this.state.userDropTracker) this.state.userDropTracker = {};
-		
-		const userCount = this.state.userDropTracker[user] || 0;
-		if (userCount >= this.state.maxDropsPerUser) {
-			this.sendNotice(`🚫 Sorry @${user}, you've hit your max entry limit of ${this.state.maxDropsPerUser} drops this game!`);
-			return;
-		}
+		const overlay = document.getElementById(this.overlayId);
+		if (!overlay) return;
 
-		this.state.userDropTracker[user] = userCount + 1;
-		this.saveData();
-
+		// Clean up overly long strings to keep layout structures intact
 		const cleanToken = customToken.substring(0, 5);
-		const width = this.physicsCanvas ? this.physicsCanvas.width : window.innerWidth;
 		
-		let startX = Math.random() * (width * 0.8) + (width * 0.1);
+		// Generate random horizontal entry anchor point vector percentage (0% to 90%)
+		const startXPercent = Math.floor(Math.random() * 90);
 
-		if (targetSlot !== null) {
-			const slot = Math.max(1, Math.min(4, targetSlot));
-			const sectionSize = width / 4;
-			startX = (sectionSize * (slot - 1)) + (sectionSize / 2) + ((Math.random() * 20) - 10);
-		}
+		const dropNode = document.createElement('div');
+		dropNode.style.cssText = `position: absolute; top: -50px; left: ${startXPercent}%; font-size: 24px; padding: 6px; white-space: nowrap; font-family: monospace; text-shadow: 0 2px 4px rgba(0,0,0,0.8); color: #fff; text-align: center; transition: top ${this.state.dropDuration}s cubic-bezier(0.47, 0, 0.745, 0.715), left ${this.state.dropDuration}s ease-in-out;`;
+		dropNode.innerHTML = `<div>${cleanToken}</div><div style="font-size: 9px; background: rgba(0,0,0,0.6); padding: 1px 4px; border-radius: 3px; margin-top: 2px;">${user}</div>`;
+		
+		overlay.appendChild(dropNode);
 
-		this.activeTokens.push({
-			user: user,
-			token: cleanToken,
-			x: startX,
-			y: 15, 
-			vx: (Math.random() * 2) - 1, 
-			vy: 2,                        
-			radius: 12,                   
-			scale: 1,
-			opacity: 1,
-			isDying: false
-		});
-	}
+		// Trigger CSS-driven falling simulation engine sequences frames via timeout execution channels
+		setTimeout(() => {
+			dropNode.style.top = `calc(100% - 85px)`;
+			// Apply a slight horizontal physics drift as the element travels down
+			const driftFactor = (Math.random() * 15) - 7.5; 
+			const finalX = Math.max(0, Math.min(92, startXPercent + driftFactor));
+			dropNode.style.left = `${finalX}%`;
+		}, 50);
 
-	startPhysicsLoop() {
-		if (this.physicsLoopId) cancelAnimationFrame(this.physicsLoopId);
-
-		const loop = () => {
-			this.updatePhysicsState();
-			this.drawPhysicsScene();
-			this.physicsLoopId = requestAnimationFrame(loop);
-		};
-		this.physicsLoopId = requestAnimationFrame(loop);
-	}
-
-	updatePhysicsState() {
-		if (!this.physicsCanvas) return;
-
-		const width = this.physicsCanvas.width;
-		const height = this.physicsCanvas.height;
-
-		const gravityForce = (11 - (this.state.dropDuration || 4)) * 0.05 + 0.1; 
-		const dynamicFriction = 0.55; 
-
-		for (let i = this.activeTokens.length - 1; i >= 0; i--) {
-			const t = this.activeTokens[i];
-
-			if (t.isDying) {
-				t.scale += 0.04;
-				t.opacity -= 0.08;
-				if (t.opacity <= 0) {
-					this.activeTokens.splice(i, 1);
-				}
-				continue;
-			}
-
-			t.vy += gravityForce;
-			t.x += t.vx;
-			t.y += t.vy;
-
-			if (t.x - t.radius < 0) {
-				t.x = t.radius;
-				t.vx *= -dynamicFriction;
-			} else if (t.x + t.radius > width) {
-				t.x = width - t.radius;
-				t.vx *= -dynamicFriction;
-			}
-
-			for (let p of this.pegs) {
-				const dx = t.x - p.x;
-				const dy = t.y - p.y;
-				const dist = Math.sqrt(dx * dx + dy * dy);
-				const minDist = t.radius + p.radius;
-
-				if (dist < minDist) {
-					const overlap = minDist - dist;
-					const nx = dx / dist;
-					const ny = dy / dist;
-
-					t.x += nx * overlap;
-					t.y += ny * overlap;
-
-					const dotProduct = t.vx * nx + t.vy * ny;
-					t.vx = (t.vx - 2 * dotProduct * nx) * dynamicFriction;
-					t.vy = (t.vy - 2 * dotProduct * ny) * dynamicFriction;
-
-					t.vx += (Math.random() * 1.2) - 0.6;
-				}
-			}
-
-			const floorLine = height > 150 ? height - 45 : 100;
-			if (t.y >= floorLine) {
-				t.isDying = true;
-				const finalXPercent = (t.x / width) * 100;
-				this.evaluateLandingZoneScore(t.user, finalXPercent);
-			}
-		}
-	}
-
-	drawPhysicsScene() {
-		if (!this.physicsCtx || !this.physicsCanvas) return;
-
-		this.physicsCtx.clearRect(0, 0, this.physicsCanvas.width, this.physicsCanvas.height);
-
-		// Draw Peg Matrix Pins Layout
-		for (let p of this.pegs) {
-			this.physicsCtx.fillStyle = "rgba(168, 85, 247, 0.6)";
-			this.physicsCtx.beginPath();
-			this.physicsCtx.arc(p.x, p.y, p.radius + 1, 0, Math.PI * 2);
-			this.physicsCtx.fill();
+		// Process target landing tracking evaluations when timeout lifecycle bounds end
+		setTimeout(() => {
+			// Read pixel positions or calculate percentage distributions to evaluate scored zones
+			const finishedLeftPercent = parseFloat(dropNode.style.left);
+			this.evaluateLandingZoneScore(user, finishedLeftPercent);
 			
-			this.physicsCtx.fillStyle = "#ffffff";
-			this.physicsCtx.beginPath();
-			this.physicsCtx.arc(p.x, p.y, p.radius * 0.4, 0, Math.PI * 2);
-			this.physicsCtx.fill();
-		}
-
-		// Draw Falling Tokens Layout
-		this.physicsCtx.textAlign = "center";
-		this.physicsCtx.textBaseline = "middle";
-
-		this.activeTokens.forEach(t => {
-			this.physicsCtx.save();
-			this.physicsCtx.globalAlpha = t.opacity;
-			this.physicsCtx.translate(t.x, t.y);
-			this.physicsCtx.scale(t.scale, t.scale);
-
-			this.physicsCtx.font = "24px Arial";
-			this.physicsCtx.fillText(t.token, 0, 0);
-
-			this.physicsCtx.font = "bold 10px monospace";
-			this.physicsCtx.fillStyle = "rgba(24, 24, 27, 0.85)";
-			const textWidth = this.physicsCtx.measureText(t.user).width;
+			// Visual pop fade sequence before removing object from DOM tree structure safely
+			dropNode.style.transform = "scale(1.3)";
+			dropNode.style.opacity = "0";
+			dropNode.style.transition = "all 0.4s ease-out";
 			
-			this.physicsCtx.fillRect(-((textWidth + 6) / 2), 14, textWidth + 6, 13);
-			this.physicsCtx.fillStyle = "#ffffff";
-			this.physicsCtx.fillText(t.user, 0, 20);
-
-			this.physicsCtx.restore();
-		});
+			setTimeout(() => dropNode.remove(), 400);
+		}, this.state.dropDuration * 1000);
 	}
 
+	/**
+	 * Core math routing evaluator processing entry impacts inside landing buckets
+	 */
 	evaluateLandingZoneScore(user, finalXPercent) {
+		// Find matching bucket index based on position percentage maps
 		const matchedBucket = this.scoreZones.find(zone => finalXPercent >= zone.minX && finalXPercent <= zone.maxX) || this.scoreZones[3];
+		
+		// Guard state.scores initialization boundary completely
+		if (!this.state.scores) this.state.scores = {};
 		
 		const currentHigh = this.state.scores[user] || 0;
 		if (matchedBucket.multiplier > currentHigh) {
@@ -380,19 +227,25 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			this.renderLeaderboardUI();
 		}
 
+		// Push output confirmations back down to native bot chat loops
 		if (matchedBucket.multiplier > 0) {
-			this.sendNotice(`🎯 @${user} bounced into [${matchedBucket.label}], hitting a highscore of ${matchedBucket.multiplier}!`);
+			this.sendNotice(`🎯 @${user} landed in the [${matchedBucket.label}] zone, unlocking a highscore of ${matchedBucket.multiplier}!`);
 		} else {
-			this.sendNotice(`💀 Oof! @${user} smashed right into a [${matchedBucket.label}] hazard zone!`);
+			this.sendNotice(`💀 Oof! @${user} dropped straight into the [${matchedBucket.label}] hazard!`);
 		}
 	}
 
+	/**
+	 * Panel list renderer refresh tool parsing local configurations structures maps
+	 */
 	renderLeaderboardUI() {
 		const panel = document.getElementById(this.controlId);
 		const container = panel?.querySelector('#dz-leaderboard-list');
 		if (!container) return;
 
-		const scoreLedger = this.state.scores || {};
+		// 🛡️ SHIELDED SHUNT: Fallback safely to empty object map if storage hasn't initialized yet
+		const scoreLedger = this.state?.scores || {};
+
 		const sortedEntries = Object.entries(scoreLedger)
 			.sort((a, b) => b[1] - a[1])
 			.slice(0, 5);
@@ -410,40 +263,24 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		`).join('');
 	}
 
-	destroy() {
-		if (this.physicsLoopId) {
-			cancelAnimationFrame(this.physicsLoopId);
-		}
-		const container = document.getElementById("dz-emojinko-overlay-container");
-		if (container) container.remove();
-		super.destroy();
-	}
-
+	// ========================================================================
+	// 🔌 7. THE CHAT ROUTING AND COMMAND MATRIX MANIFEST
+	// ========================================================================
+	/**
+	 * Publishes game execution hooks back up inside the application's central manager.
+	 */
 	getModuleCommands() {
 		return [
 			{
-				name: 'drop',
+				name: 'drop', // Command usage trigger condition parameter: !drop [emoji/token]
 				defaultChat: true,
 				defaultCp: true,
 				execute: (user, message, flags) => {
+					// Guard block routing using central layout permissions checklist maps
 					if (!this.isCommandAllowed('drop', flags)) return;
 
-					const parts = message.trim().split(/\s+/);
-					let targetToken = "🪙";
-					let chosenSlot = null;
-
-					if (parts.length > 0 && parts[0] !== "") {
-						targetToken = parts[0];
-					}
-
-					if (parts.length > 1) {
-						const parsedInt = parseInt(parts[1], 10);
-						if (!isNaN(parsedInt) && parsedInt >= 1 && parsedInt <= 4) {
-							chosenSlot = parsedInt;
-						}
-					}
-
-					this.executeDropAction(user, targetToken, chosenSlot);
+					const targetToken = message.trim() || "🪙";
+					this.executeDropAction(user, targetToken);
 				}
 			}
 		];
