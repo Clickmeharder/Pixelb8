@@ -40,7 +40,7 @@ const JUKEBOX_HTMLTEMPLATES = {
 				</div>
 			</div>
 		</details>
-    `, // <-- Your editor can collapse this individual property block
+    `,
 
     nowPlaying: `
 		<div id="jb-controls-nowplaying-section" style="background: #18181b; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #3f3f46;">
@@ -59,7 +59,7 @@ const JUKEBOX_HTMLTEMPLATES = {
 				<button id="jb-current-heart" class="p8-btn">❤</button>
 			</div>
 		</div>
-    `, // <-- Your editor can collapse this individual property block
+    `,
 
     lists: `
 		<div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
@@ -80,7 +80,7 @@ const JUKEBOX_HTMLTEMPLATES = {
 		<br>
 		<div id="jb-fallback-list-label">📋 Fallback Playlist</div>
 		<div id="jb-fallback-list"></div>
-    `  // <-- Your editor can collapse this individual property block
+    `
 };
 // #endregion
 
