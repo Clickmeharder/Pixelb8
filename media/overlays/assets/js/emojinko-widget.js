@@ -1,4 +1,3 @@
-
 import { BaseWidgetModule } from './BaseWidgetModule.js';
 
 // ============================================================================
@@ -54,7 +53,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			gameEnabled: true,
 			dropDuration: 4, // Seconds it takes to fall
 			scores: {},      // Persistent tracking ledger: { username: highscore }
-			commandAccess: this.state.commandAccess || {}
+			commandAccess: this.state?.commandAccess || {}
 		};
 
 		this.loadData();
@@ -218,6 +217,9 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		// Find matching bucket index based on position percentage maps
 		const matchedBucket = this.scoreZones.find(zone => finalXPercent >= zone.minX && finalXPercent <= zone.maxX) || this.scoreZones[3];
 		
+		// Guard state.scores initialization boundary completely
+		if (!this.state.scores) this.state.scores = {};
+		
 		const currentHigh = this.state.scores[user] || 0;
 		if (matchedBucket.multiplier > currentHigh) {
 			this.state.scores[user] = matchedBucket.multiplier;
@@ -241,7 +243,10 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		const container = panel?.querySelector('#dz-leaderboard-list');
 		if (!container) return;
 
-		const sortedEntries = Object.entries(this.state.scores)
+		// 🛡️ SHIELDED SHUNT: Fallback safely to empty object map if storage hasn't initialized yet
+		const scoreLedger = this.state?.scores || {};
+
+		const sortedEntries = Object.entries(scoreLedger)
 			.sort((a, b) => b[1] - a[1])
 			.slice(0, 5);
 
