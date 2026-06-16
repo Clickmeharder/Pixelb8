@@ -2,14 +2,15 @@ console.log("🚀 [Pixelb8 Stream Widget Engine]: initializing...");
 
 /**
  * ============================================================================
- * PIXELB8 ECOSYSTEM: WIDGET ENGINE (Phase 1.6 - Unified Core System)
+ * PIXELB8 ECOSYSTEM: WIDGET ENGINE (Phase 1.7 - Data-Driven Core System)
  * Concern: Manages modern module lifecycles while bridging legacy boot components.
  * ============================================================================
  */
 export const WidgetEngine = {
+    // Dynamic runtime registry tracking active instances automatically on the fly
     instances: {},
 
-// 💡 THE SINGLE SOURCE OF TRUTH: Add a widget here, and it handles everything else.
+    // 💡 THE SINGLE SOURCE OF TRUTH: Add a widget here, and it handles everything else.
     registryMap: {
         "miner-widget": {
             path: './bitminer-widget.js',
@@ -55,7 +56,7 @@ export const WidgetEngine = {
      * @param {boolean} enable - Target toggle operational condition
      * @param {boolean} deferCommandRefresh - If true, skips updating global chat maps instantly
      */
-	async toggleWidget(idKey, enable, deferCommandRefresh = false) {
+    async toggleWidget(idKey, enable, deferCommandRefresh = false) {
         const config = this.registryMap[idKey];
         if (!config) return; 
 
@@ -96,6 +97,41 @@ export const WidgetEngine = {
                 }
             }
         }
+    },
+
+    /**
+     * Dynamically injects schema rules into your UI settings panels directly from the registry definitions
+     * @param {Array} schema - Your core SETTINGS_SCHEMA structure array from ttvoverlay.js
+     */
+    injectWidgetsIntoSchema(schema) {
+        const widgetGroup = schema.find(group => group.groupName === "🧩 Widgets Settings");
+        if (!widgetGroup) return;
+
+        Object.entries(this.registryMap).forEach(([idKey, config]) => {
+            // Check to prevent accidental duplicate appends across hot-reloads
+            if (widgetGroup.items.some(item => item.idKey === idKey)) return;
+
+            // Clean strings (e.g., "StreamEmojinkoModule" -> "Emojinko")
+            const cleanName = config.className
+                .replace('Stream', '')
+                .replace('Widget', '')
+                .replace('Module', '');
+
+            widgetGroup.items.push({
+                label: `Enable ${cleanName} Widget`,
+                idKey: idKey,
+                get: () => (typeof settings !== 'undefined' ? !!settings[config.settingsKey] : false),
+                set: async (v) => {
+                    if (typeof settings !== 'undefined') settings[config.settingsKey] = v;
+                    if (typeof saveSettings === "function") saveSettings();
+
+                    // Direct pipeline down to dynamic lifecycle hot-swaps
+                    await this.toggleWidget(idKey, v);
+
+                    if (typeof syncAllToggleUI === "function") syncAllToggleUI();
+                }
+            });
+        });
     },
 
     /**
