@@ -1579,6 +1579,7 @@ function botSay(msg) {
         console.warn("BotSay failed: ComfyJS not initialized or channel missing.");
     }
 }
+window.botSay = botSay;
 
 // --- CORE COMMAND LOGIC & WIDGET VISIBILITY CONTROLS ---
 // --- CENTRALIZED COMMAND REGISTRY ---
