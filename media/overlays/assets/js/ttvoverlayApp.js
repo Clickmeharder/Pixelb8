@@ -555,7 +555,7 @@ const SETTINGS_SCHEMA = [
                     // If turning ON and it hasn't been imported yet, load and instantiate it now!
                     if (v && typeof window.entropiaLogParser === 'undefined') {
                         try {
-                            const module = await import('./entropia-widget-refactored.js');
+                            const module = await import('./entropia-widget.js');
                             window.EntropiaWidget = module.EntropiaWidget;
                             window.entropiaLogParser = new module.EntropiaWidget();
                             
