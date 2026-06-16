@@ -52,20 +52,21 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 		// 🛡️ Safe Architectural State Extension Pattern
 		this.state = {
-			gameEnabled: this.state?.gameEnabled !== undefined ? this.state.gameEnabled : true,
-			dropDuration: this.state?.dropDuration || 4,
-			maxDropsPerUser: this.state?.maxDropsPerUser || 3,
-			scores: this.state?.scores || {},
-			userDropTracker: this.state?.userDropTracker || {},
+			gameEnabled: true,
+			dropDuration: 4,
+			maxDropsPerUser: 3,
+			scores: {},
+			userDropTracker: {},
 			commandAccess: this.state?.commandAccess || {}
 		};
 
-		// Isolated engine components
+		// Isolated canvas engine component structures
 		this.physicsCanvas = null;
 		this.physicsCtx = null;
 		this.pegs = [];
 		this.activeTokens = [];
 		this.physicsLoopId = null;
+		this._resizeHandler = null;
 
 		this.scoreZones = [
 			{ minX: 0, maxX: 25, label: "100 Pts", multiplier: 100 },
@@ -143,6 +144,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		let targetWidth = parent ? parent.clientWidth : window.innerWidth;
 		let targetHeight = parent ? parent.clientHeight : window.innerHeight;
 
+		// Shield canvas engine against zeroed bounding rect evaluations inside hidden wrappers
 		if (targetWidth < 100) targetWidth = 1920;
 		if (targetHeight < 100) targetHeight = 1080;
 		
@@ -159,7 +161,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		const width = this.physicsCanvas.width;
 		const height = this.physicsCanvas.height;
 		
-		const rows = 8;              
+		const rows = 8;               
 		const startY = height * 0.22; 
 		const endY = height * 0.82;   
 		const rowSpacing = (endY - startY) / rows;
@@ -270,7 +272,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			x: startX,
 			y: -20, 
 			vx: (Math.random() * 3) - 1.5, 
-			vy: 1,                        
+			vy: 1,                         
 			radius: 14,                    
 			scale: 1,
 			opacity: 1,
@@ -295,11 +297,12 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		const width = this.physicsCanvas.width;
 		const height = this.physicsCanvas.height;
 
+		// Inverse duration value mapping to determine gravity velocity acceleration constants
 		const gravityForce = (11 - (this.state.dropDuration || 4)) * 0.04 + 0.08; 
 		const dynamicFriction = 0.58; 
 
-		for (let i = this.activeTokens.length - i; i >= 0; i--) {
-			if (i >= this.activeTokens.length) continue;
+		// Handle safely decreasing array loops from right to left to avoid array splicing mutations
+		for (let i = this.activeTokens.length - 1; i >= 0; i--) {
 			const t = this.activeTokens[i];
 			if (!t) continue;
 
@@ -316,6 +319,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			t.x += t.vx;
 			t.y += t.vy;
 
+			// Viewport Border Collisions
 			if (t.x - t.radius < 0) {
 				t.x = t.radius;
 				t.vx *= -dynamicFriction;
@@ -324,6 +328,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				t.vx *= -dynamicFriction;
 			}
 
+			// Core Grid Peg Collision Matrix Loops
 			for (let p of this.pegs) {
 				const dx = t.x - p.x;
 				const dy = t.y - p.y;
@@ -342,6 +347,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 					t.vx = (t.vx - 2 * dotProduct * nx) * dynamicFriction;
 					t.vy = (t.vy - 2 * dotProduct * ny) * dynamicFriction;
 
+					// Inject small kinetic variance force to prevent static tokens falling in a line
 					t.vx += (Math.random() * 1.4) - 0.7;
 				}
 			}
