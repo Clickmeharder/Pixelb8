@@ -432,10 +432,16 @@ export class StreamJukeboxModule extends BaseWidgetModule {
 // ========================================================================
     // CORE SYSTEM INTERACTION ROUTERS (Matrix Manifest Mapping)
     // ========================================================================
-    getModuleCommands() {
+	getModuleCommands() {
+        // ✅ The fix: keep your custom text routing, but point safely to the window scope
         const sendNotice = (txt) => {
             this.setWidgetBubble(txt);
-                botSay(txt);
+            
+            if (typeof window.botSay === 'function') {
+                window.botSay(txt);
+            } else {
+                console.warn("⚠️ [Jukebox Engine]: window.botSay is not available contextually.");
+            }
         };
 
         const processMasterJukeboxSubRoute = (user, message, flags) => {
