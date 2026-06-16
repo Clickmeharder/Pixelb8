@@ -1,8 +1,8 @@
 /**
  * ============================================================================
- * PIXELB8 ECOSYSTEM WIDGET COMPONENT BLUEPRINT (v1.2)
+ * PIXELB8 ECOSYSTEM WIDGET COMPONENT BLUEPRINT (v1.3 - Architecture Variant)
  * Architecture: Monolithic, sovereign, zero-external-dependencies.
- * Memory Strategy: Dynamic Instance-Key Isolate System
+ * Lifecycle Layer: Centralized UI Injections with Cascaded Downstream Hooks
  * Features: Core Command Routing & Simulated Matrix Framework
  * ============================================================================
  */
@@ -68,29 +68,32 @@ export class BaseWidgetModule {
 	 * @param {string} widgetSubKey - Unique namespace identifier for LocalStorage containment.
 	 */
 	constructor(widgetSubKey = "generic_system") {
-			this.widgetSubKey = widgetSubKey; // Retain raw identifier for scoping handles
-			this.STORAGE_KEY = `pixelb8_widget_${widgetSubKey}`;
-			
-			this.baseId = this.constructor.name.toLowerCase();
-			this.overlayId = `${this.baseId}-overlay`;
-			this.controlId = `${this.baseId}-controls`;
+		this.widgetSubKey = widgetSubKey; // Retain raw identifier for scoping handles
+		this.STORAGE_KEY = `pixelb8_widget_${widgetSubKey}`;
+		
+		this.baseId = this.constructor.name.toLowerCase();
+		this.overlayId = `${this.baseId}-overlay`;
+		this.controlId = `${this.baseId}-controls`;
 
-			this.canvas = document.getElementById(`${this.baseId}-canvas`);
-			if (this.canvas) {
-				this.ctx = this.canvas.getContext("2d");
-			}
+		// Fallback menu text read universally by parent template compilers
+		this.widgetMenuTitle = this.widgetMenuTitle || `🛠️ ${this.constructor.name} Matrix Interface`;
 
-			this.registry = createDefaultWidgetRegistry();
-			this.state = createDefaultWidgetState();
-
-			this.injectUI();
-			this.bindEventListeners(); 
-			this.loadData(); // Will parse and reconcile the active command suites
-			
-			this.saveInterval = setInterval(() => this.saveData(), 5000);
-			this.animate = this.animate.bind(this);
-			requestAnimationFrame(this.animate);
+		this.canvas = document.getElementById(`${this.baseId}-canvas`);
+		if (this.canvas) {
+			this.ctx = this.canvas.getContext("2d");
 		}
+
+		this.registry = createDefaultWidgetRegistry();
+		this.state = createDefaultWidgetState();
+
+		this.injectUI();
+		this.bindEventListeners(); 
+		this.loadData(); // Will parse and reconcile the active command suites
+		
+		this.saveInterval = setInterval(() => this.saveData(), 5000);
+		this.animate = this.animate.bind(this);
+		requestAnimationFrame(this.animate);
+	}
 
 	/**
 	 * Fallback schema configuration method. Children override this to supply 
@@ -182,41 +185,56 @@ export class BaseWidgetModule {
 		return html;
 	}
 
-	// ========================================================================
-	// DECLARATIVE CONTROL INTERFACE SPECIFICATIONS
-	// ========================================================================
-	static getBaseControlsMarkup(instance) {
-		// Appends child configuration matrices inside a uniform template frame layout
+	/**
+	 * UNIVERSAL AUTOMATED MARKUP INTERSECTION FRAMEWORK
+	 * Merges clean local widget dashboards with core settings and matrix systems globally.
+	 */
+	getUniversalControlsTemplate() {
+		// Evaluates child controls template markup block safely
+		const childMarkup = typeof this.getControlsMarkup === 'function'
+			? this.getControlsMarkup()
+			: `
+				<div style="background: #141414; padding: 8px; border-radius: 4px; border: 1px solid #27272a;">
+					<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Interface Toggles</label>
+					<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 12px; color: #fff;">
+						<span>Hide Blueprint Outer Border</span>
+						<input type="checkbox" id="widgetHideBorderToggle">
+					</div>
+				</div>
+			`;
+
+		const matrixRowsHTML = this.renderCommandRouterMatrixHTML();
+		
+		// Setup live attachment matrix block
+		const matrixSection = `
+			<details style="border: 1px solid #27272a; border-radius: 6px; background: #18181b; margin-top: 5px;">
+				<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none; user-select: none;">🛠️ Live Command Router Matrix</summary>
+				<div class="matrix-container-target" style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 4px;">
+					${matrixRowsHTML}
+				</div>
+			</details>
+		`;
+
+		// Shared utilities standard operational system footers
+		const actionButtons = typeof this.getControlsMarkup === 'function' ? '' : `
+			<button type="button" id="btnWidgetTrigger" class="p8-btn" style="background: #1e3a8a; border: 1px solid #3b82f6; padding: 6px 0; font-size: 11px; cursor: pointer; color: #fff; font-weight: bold; border-radius: 4px; margin-top: 5px;">
+				EXECUTE MATRIX ALGORITHM
+			</button>
+			<button type="button" id="btnWidgetReset" class="p8-btn" style="background: #991b1b; border: 1px solid #ef4444; padding: 6px 0; font-size: 11px; margin-top: 5px; cursor: pointer; color: #fff; font-weight: bold; border-radius: 4px;">
+				⚠️ PURGE INSTANCE DATA CACHE
+			</button>
+		`;
+
 		return `
 			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-				<span>🛠️ ${instance.constructor.name} Matrix Interface</span>
+				<span>${this.widgetMenuTitle}</span>
 				<span class="collapse-icon">▼</span>
 			</div>
 			<div class="collapsible-content">
 				<div style="display: flex; flex-direction: column; gap: 12px; padding: 10px; background: #111114;">
-					
-					<div style="background: #141414; padding: 8px; border-radius: 4px; border: 1px solid #27272a;">
-						<label style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Interface Toggles</label>
-						<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 12px; color: #fff;">
-							<span>Hide Blueprint Outer Border</span>
-							<input type="checkbox" id="widgetHideBorderToggle">
-						</div>
-					</div>
-
-					<details open style="border: 1px solid #27272a; border-radius: 6px; background: #18181b; margin-top: 5px;">
-						<summary style="padding: 8px 10px; cursor: pointer; font-weight: bold; font-size: 12px; color: #fff; outline: none;">🛠️ Live Command Router Matrix</summary>
-						<div class="matrix-container-target" style="padding: 10px; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 4px;">
-							${instance.renderCommandRouterMatrixHTML()}
-						</div>
-					</details>
-
-					<button type="button" id="btnWidgetTrigger" class="p8-btn" style="background: #1e3a8a; border: 1px solid #3b82f6; padding: 6px 0; font-size: 11px; cursor: pointer; color: #fff; font-weight: bold; border-radius: 4px;">
-						EXECUTE MATRIX ALGORITHM
-					</button>
-
-					<button type="button" id="btnWidgetReset" class="p8-btn" style="background: #991b1b; border: 1px solid #ef4444; padding: 6px 0; font-size: 11px; margin-top: 5px; cursor: pointer; color: #fff; font-weight: bold; border-radius: 4px;">
-						⚠️ PURGE INSTANCE DATA CACHE
-					</button>
+					${childMarkup}
+					${matrixSection}
+					${actionButtons}
 				</div>
 			</div>
 		`;
@@ -256,7 +274,7 @@ export class BaseWidgetModule {
 
 				const controlPanel = document.getElementById(this.controlId);
 				if (controlPanel) {
-					const borderToggle = controlPanel.querySelector('#widgetHideBorderToggle') || controlPanel.querySelector('input[type="checkbox"]');
+					const borderToggle = controlPanel.querySelector('#widgetHideBorderToggle');
 					if (borderToggle) {
 						borderToggle.checked = this.state.hideBorder || false;
 					}
@@ -281,49 +299,61 @@ export class BaseWidgetModule {
 	// INTERFACE BINDING & EVENT DISPATCH ENGINES
 	// ========================================================================
 	injectUI() {
-		const overlayWrapper = document.getElementById("overlay-wrapper");
-		if (overlayWrapper && !document.getElementById(this.overlayId)) {
-			const overlayEl = document.createElement("div");
-			overlayEl.id = this.overlayId;
-			overlayEl.className = "p8-widget"; 
-			overlayEl.style.position = "absolute";
-			
-			const savedLayout = localStorage.getItem(`p8_pos_${this.overlayId}`);
-			if (savedLayout) {
-				try {
-					const coords = JSON.parse(savedLayout);
-					overlayEl.style.left = coords.left;
-					overlayEl.style.top = coords.top;
-				} catch (err) {
-					console.error(`⚠️ [Layout Error]: Corrupted position string for ${this.overlayId}:`, err);
+		// 1. Run local viewport injection layer checks if added inside extended modules
+		if (typeof this.injectViewportOverlay === 'function') {
+			this.injectViewportOverlay();
+		} else {
+			// Base standard implementation fallback
+			const overlayWrapper = document.getElementById("overlay-wrapper");
+			if (overlayWrapper && !document.getElementById(this.overlayId)) {
+				const overlayEl = document.createElement("div");
+				overlayEl.id = this.overlayId;
+				overlayEl.className = "p8-widget"; 
+				overlayEl.style.position = "absolute";
+				
+				const savedLayout = localStorage.getItem(`p8_pos_${this.overlayId}`);
+				if (savedLayout) {
+					try {
+						const coords = JSON.parse(savedLayout);
+						overlayEl.style.left = coords.left;
+						overlayEl.style.top = coords.top;
+					} catch (err) {
+						console.error(`⚠️ [Layout Error]: Corrupted position string for ${this.overlayId}:`, err);
+					}
+				} else {
+					overlayEl.style.left = "100px";
+					overlayEl.style.top = "100px";
 				}
-			} else {
-				overlayEl.style.left = "100px";
-				overlayEl.style.top = "100px";
-			}
-			
-			overlayEl.innerHTML = `
-				<div id="${this.baseId}-bubble" class="chat-bubble"></div>
-				<canvas id="${this.baseId}-canvas"></canvas>
-			`;
-			
-			overlayWrapper.appendChild(overlayEl);
+				
+				overlayEl.innerHTML = `
+					<div id="${this.baseId}-bubble" class="chat-bubble"></div>
+					<canvas id="${this.baseId}-canvas"></canvas>
+				`;
+				
+				overlayWrapper.appendChild(overlayEl);
 
-			this.canvas = document.getElementById(`${this.baseId}-canvas`);
-			if (this.canvas) {
-				this.ctx = this.canvas.getContext("2d");
+				this.canvas = document.getElementById(`${this.baseId}-canvas`);
+				if (this.canvas) {
+					this.ctx = this.canvas.getContext("2d");
+				}
 			}
 		}
 
-		const controlWrapper = document.getElementById("widget-control-wrapper");
+		// 2. Build and inject Control Dashboard structures cleanly
+		const controlWrapper = document.getElementById("widget-control-wrapper") || document.getElementById("widgets-manager");
 		if (controlWrapper && !document.getElementById(this.controlId)) {
 			const panelSection = document.createElement("div");
 			panelSection.id = this.controlId;
 			panelSection.className = "collapsible-section collapsed";
 			
-			// Call the dynamic markup assembler mapping context pointers safely
-			panelSection.innerHTML = BaseWidgetModule.getBaseControlsMarkup(this);
+			// Auto compiles the unified multi-layered dashboard markup
+			panelSection.innerHTML = this.getUniversalControlsTemplate();
 			controlWrapper.appendChild(panelSection);
+
+			// Immediately normalize toggles, inputs, badges and local layout adjustments
+			if (typeof this.syncUIPanelElements === 'function') {
+				this.syncUIPanelElements();
+			}
 		}
 	}
 
@@ -358,7 +388,7 @@ export class BaseWidgetModule {
 				this.saveData();
 			}
 
-			// ⚡ CAPTURE INNER ROUTER MATRIX CHECKBOX ALTERATIONS
+			// ⚡ AUTOMATED: CAPTURE INNER ROUTER MATRIX CHECKBOX ALTERATIONS UNIVERSALLY
 			if (e.target.classList.contains("matrix-toggle")) {
 				const cmd = e.target.getAttribute("data-cmd");
 				const type = e.target.getAttribute("data-type");
@@ -385,7 +415,7 @@ export class BaseWidgetModule {
 				}
 			}
 
-			// ⚡ CAPTURE MATRIX SIMULATED PLAY TRIGGER BUTTON PRESSES
+			// ⚡ AUTOMATED: CAPTURE MATRIX SIMULATED PLAY TRIGGER BUTTON PRESSES UNIVERSALLY
 			const testBtn = e.target.closest(".matrix-test-btn");
 			if (testBtn) {
 				const cmdName = testBtn.getAttribute("data-cmd");
@@ -398,7 +428,7 @@ export class BaseWidgetModule {
 					const simulatedFlags = {
 						broadcaster: true,
 						mod: false,
-						isRewardSimulated: true // Bypasses permission validations for hardware configuration views
+						isRewardSimulated: true // Bypasses permission validations
 					};
 					targetCommand.execute("BroadcasterConsole", "", simulatedFlags);
 				}

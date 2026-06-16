@@ -5,81 +5,73 @@ import { BaseWidgetModule } from './BaseWidgetModule.js';
 //region Jukebox Templates
 const JUKEBOX_HTMLTEMPLATES = {
     config: `
-		<details style="margin-bottom: 15px; border: 2px solid #27272a; border-radius: 6px; background: #18181b;">
-			<summary id="jb-config-header">
-				⚙️ Jukebox Configuration
-			</summary>
-			<div style="padding: 10px; border-top: 1px solid #27272a;">
-				<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-					<span class="settings-toggle-label" style="font-size: 14px;">Accept Requests</span>
-					<div class="settings-toggle-controls">
-						<span id="req-status-badge" class="toggle-status-badge">ON</span>
-						<input type="checkbox" id="stg-toggle-requests-checkbox" checked>
-					</div>
-				</div>
-
-				<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-					<span class="settings-toggle-label" style="font-size: 14px;">Audio Only</span>
-					<div class="settings-toggle-controls">
-						<span id="audio-status-badge" class="toggle-status-badge">OFF</span>
-						<input type="checkbox" id="stg-toggle-audio-only-checkbox">
-					</div>
-				</div>
-
-				<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-					<span class="settings-toggle-label" style="font-size: 14px;">Fake Visualizer</span>
-					<div class="settings-toggle-controls">
-						<span id="av-status-badge" class="toggle-status-badge">OFF</span>
-						<input type="checkbox" id="stg-toggle-visualizer-checkbox">
-					</div>
-				</div>
-
-				<div id="jb-vote-req-wrapper">
-					<label id="jb-vote-req-label">Vote Requirements</label>
-					<input type="number" id="jb-vote-req-input" class="p8-input" value="2">
+		<div style="background: #141414; padding: 8px; border-radius: 4px; border: 1px solid #27272a; margin-bottom: 4px;">
+			<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+				<span class="settings-toggle-label" style="font-size: 14px; color: #fff;">Accept Requests</span>
+				<div class="settings-toggle-controls">
+					<span id="req-status-badge" class="toggle-status-badge" style="font-size: 11px; font-weight: bold; color: var(--accent, #a855f7); margin-right: 6px;">ON</span>
+					<input type="checkbox" id="stg-toggle-requests-checkbox" checked style="cursor: pointer;">
 				</div>
 			</div>
-		</details>
+
+			<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+				<span class="settings-toggle-label" style="font-size: 14px; color: #fff;">Audio Only</span>
+				<div class="settings-toggle-controls">
+					<input type="checkbox" id="stg-toggle-audio-only-checkbox" style="cursor: pointer;">
+				</div>
+			</div>
+
+			<div class="settings-toggle-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+				<span class="settings-toggle-label" style="font-size: 14px; color: #fff;">Visualizer Canvas Overlay</span>
+				<div class="settings-toggle-controls">
+					<input type="checkbox" id="stg-toggle-visualizer-checkbox" style="cursor: pointer;">
+				</div>
+			</div>
+
+			<div id="jb-vote-req-wrapper" style="display: flex; justify-content: space-between; align-items: center;">
+				<label id="jb-vote-req-label" style="font-size: 12px; color: #a1a1aa;">Skip Vote Requirement</label>
+				<input type="number" id="jb-vote-req-input" class="p8-input" value="2" style="width: 50px; text-align: center; background: #18181b; border: 1px solid #27272a; color: #fff; border-radius: 4px; padding: 2px;">
+			</div>
+		</div>
     `,
 
     nowPlaying: `
-		<div id="jb-controls-nowplaying-section" style="background: #18181b; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #3f3f46;">
-			<div id="jb-current-Label">Playing Now</div>
-			<div id="jb-current-title" class="jb-current-title">No Track Loaded</div>
+		<div id="jb-controls-nowplaying-section" style="background: #18181b; padding: 10px; border-radius: 6px; margin: 4px 0; border: 1px solid #27272a;">
+			<div id="jb-current-Label" style="font-size: 10px; color: #a1a1aa; text-transform: uppercase;">Playing Now</div>
+			<div id="jb-current-title" class="jb-current-title" style="font-weight: bold; color: #fff; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">No Track Loaded</div>
 			
-			<div id="jb-upnext-Label">Up Next</div>
-			<div id="jb-upnext-title" class="jb-next-title">waiting...</div>
+			<div id="jb-upnext-Label" style="font-size: 10px; color: #a1a1aa; text-transform: uppercase;">Up Next</div>
+			<div id="jb-upnext-title" class="jb-next-title" style="color: #71717a; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">waiting...</div>
 			
-			<div id="jb-current-controlbar">
+			<div id="jb-current-controlbar" style="display: flex; align-items: center; gap: 8px;">
 				<div class="jb-volume-control" style="display: flex; align-items: center; gap: 8px; flex: 1;">
-					<span style="font-size: 12px; color: #a1a1aa;">VOL</span>
+					<span style="font-size: 11px; color: #a1a1aa; font-family: monospace;">VOL</span>
 					<input type="range" id="jb-volume-slider" min="0" max="100" value="50" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
 				</div>
-				<button id="jb-skip-btn" class="p8-btn">⏭</button>
-				<button id="jb-current-heart" class="p8-btn">❤</button>
+				<button id="jb-skip-btn" class="p8-btn" style="cursor: pointer; background: #27272a; border: 1px solid #3f3f46; color: #fff; border-radius: 4px; padding: 2px 8px;">⏭</button>
+				<button id="jb-current-heart" class="p8-btn" style="cursor: pointer; background: #27272a; border: 1px solid #3f3f46; color: #fff; border-radius: 4px; padding: 2px 8px;">❤</button>
 			</div>
 		</div>
     `,
 
     lists: `
-		<div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
-			<input type="text" id="jb-search-input" class="p8-input" placeholder="Search or YouTube URL..." style="width: 100%; box-sizing: border-box;">
+		<div style="display: flex; flex-direction: column; gap: 5px; margin-top: 4px; margin-bottom: 10px;">
+			<input type="text" id="jb-search-input" class="p8-input" placeholder="Search or YouTube URL..." style="width: 100%; box-sizing: border-box; background: #141414; border: 1px solid #27272a; color: #fff; padding: 6px; border-radius: 4px; font-family: monospace; font-size: 12px;">
 			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-				<button id="jb-add-queue-btn" class="p8-btn">Queue</button>
-				<button id="jb-add-fallback-btn" class="p8-btn alt-btn">Playlist</button>
+				<button id="jb-add-queue-btn" class="p8-btn" style="cursor: pointer; background: #1e3a8a; border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; font-size: 12px; font-weight: bold;">Queue</button>
+				<button id="jb-add-fallback-btn" class="p8-btn alt-btn" style="cursor: pointer; background: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 4px; border-radius: 4px; font-size: 12px;">Playlist</button>
 			</div>
 		</div>
 
-		<div id="jb-queue-list-label">📋 Active Queue</div>
-		<div id="jb-queue-list">
+		<div id="jb-queue-list-label" style="font-size: 11px; font-weight: bold; color: #a1a1aa; text-transform: uppercase; margin-bottom: 4px;">📋 Active Queue</div>
+		<div id="jb-queue-list" style="max-height: 120px; overflow-y: auto; background: #141414; border-radius: 4px; padding: 4px; border: 1px solid #27272a;">
 			<div id="jb-queue-list-controls">
-				<button id="jb-clear-btn" class="p8-btn">CLEAR QUEUE</button>
+				<button id="jb-clear-btn" class="p8-btn" style="cursor: pointer; background: #991b1b; border: 1px solid #ef4444; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; width: 100%;">CLEAR QUEUE</button>
 			</div>
 		</div>
 		
-		<br>
-		<div id="jb-fallback-list-label">📋 Fallback Playlist</div>
-		<div id="jb-fallback-list"></div>
+		<div id="jb-fallback-list-label" style="font-size: 11px; font-weight: bold; color: #a1a1aa; text-transform: uppercase; margin-top: 10px; margin-bottom: 4px;">📋 Fallback Playlist</div>
+		<div id="jb-fallback-list" style="max-height: 120px; overflow-y: auto; background: #141414; border-radius: 4px; padding: 4px; border: 1px solid #27272a;"></div>
     `
 };
 // #endregion
@@ -89,6 +81,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     constructor() {
         // Initializes state under local storage namespace allocations
         super("stream_jukebox");
+		this.widgetMenuTitle = "🎵 Song Request Jukebox";
     }
 
     // ========================================================================
@@ -121,8 +114,9 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         this.streamerName = "jaedraze";
         this.acceptRequests = localStorage.getItem("jbAcceptRequests") !== "false"; 
         
-        this.isAudioOnly = this.state.isAudioOnly ?? false;
-        this.showVisualizer = this.state.showVisualizer ?? false;
+		// Balanced directly to point inside global module engine state schemas safely
+        if (this.state.isAudioOnly === undefined) this.state.isAudioOnly = false;
+        if (this.state.showVisualizer === undefined) this.state.showVisualizer = false;
 
         this.initYouTubeAPI();
     }
@@ -131,46 +125,23 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     // 🪟 DECLARATIVE TEMPLATE ENGINE
     // ========================================================================
 	getControlsMarkup() {
-		// Compile structural fields
-		let configMarkup = JUKEBOX_HTMLTEMPLATES.config;
-		
-		// Inject the matrix rows string inside our node placement token
-		const matrixRowsHTML = this.renderCommandRouterMatrixHTML();
-		configMarkup = configMarkup.replace('', matrixRowsHTML);
-
-		return `
-			<div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-				<span>🎵 Song Request Jukebox</span>
-				<span class="collapse-icon">▼</span>
-			</div>
-			<div class="collapsible-content" style="padding: 10px; display: flex; flex-direction: column; gap: 2px;">
-				${configMarkup}
-				${JUKEBOX_HTMLTEMPLATES.nowPlaying}
-				${JUKEBOX_HTMLTEMPLATES.lists}
-			</div>
-		`;
-	}
-	static get controlsTemplate() {
+        // Return pure templates fragments. Parent wrapper stitches details and command matrices.
         return `
-            <div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-                <span>🎵 Song Request Jukebox</span>
-                <span class="collapse-icon">▼</span>
-            </div>
-            <div class="collapsible-content">
-                ${JUKEBOX_HTMLTEMPLATES.config}
-                ${JUKEBOX_HTMLTEMPLATES.nowPlaying}
-                ${JUKEBOX_HTMLTEMPLATES.lists}
-            </div>
+            ${JUKEBOX_HTMLTEMPLATES.config}
+            ${JUKEBOX_HTMLTEMPLATES.nowPlaying}
+            ${JUKEBOX_HTMLTEMPLATES.lists}
         `;
     }
+
     // ========================================================================
     // 🪟 VIEWPORT INJECTION LAYER OVERRIDES
     // ========================================================================
+
 // ========================================================================
     // 🪟 VIEWPORT INJECTION LAYER OVERRIDES
     // ========================================================================
-    injectUI() {
-        // 1. Mount Overlay Viewport Container
+    injectViewportOverlay() {
+        // Setup local overlay player viewports cleanly on its own thread channel
         const overlayWrapper = document.getElementById("overlay-wrapper");
         if (overlayWrapper && !document.getElementById(this.overlayId)) {
             const overlayEl = document.createElement("div");
@@ -202,20 +173,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             
             overlayWrapper.appendChild(overlayEl);
         }
-
-        // 2. Mount Control Panel Section Menu Matrix
-        const controlWrapper = document.getElementById("widget-control-wrapper") || document.getElementById("widgets-manager");
-        if (controlWrapper && !document.getElementById(this.controlId)) {
-            const panelSection = document.createElement("div");
-            panelSection.id = this.controlId;
-            panelSection.className = "collapsible-section collapsed";
-            
-            // ✅ Dynamic Instance Hook integration injection pass
-            panelSection.innerHTML = this.getControlsMarkup();
-            controlWrapper.appendChild(panelSection);
-        }
     }
-
     // ========================================================================
     // 🔌 YOUTUBE IFRAME API MANAGEMENT
     // ========================================================================
@@ -286,11 +244,25 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     // ========================================================================
     // 🎛️ EVENT HANDLERS & INPUT BINDINGS
     // ========================================================================
-    bindEventListeners() {
+// ========================================================================
+    // 🎛️ EVENT HANDLERS & INPUT BINDINGS
+    // ========================================================================
+bindEventListeners() {
+        // Invoke base routing matrix listeners (Chat/CP checkboxes & manual click dispatches)
+        if (typeof super.bindEventListeners === 'function') {
+            super.bindEventListeners();
+        }
+
         const panel = document.getElementById(this.controlId);
         if (!panel) return;
 
-        // Configuration Toggles & Status Badging Routing Pass
+        // Unified notifications bubble fallback pipeline
+        const fallbackNotice = (txt) => {
+            if (typeof this.setWidgetBubble === 'function') this.setWidgetBubble(txt);
+            if (typeof window.botSay === 'function') window.botSay(txt);
+        };
+
+        // Configuration Toggles & Badging Changes
         panel.addEventListener("change", (e) => {
             if (e.target.id === "stg-toggle-requests-checkbox") {
                 this.acceptRequests = e.target.checked;
@@ -310,34 +282,37 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             }
         });
 
-        // Click Controls Dispatch Mapping
+        // Click Controls Routing Intersections
         panel.addEventListener("click", (e) => {
             if (e.target.id === "jb-skip-btn") {
-                this.skipCurrentSong(() => {});
+                this.skipCurrentSong(fallbackNotice);
             }
             if (e.target.id === "jb-current-heart") {
-                this.handleLikeSong('DashboardUI', () => {});
+                this.handleLikeSong('DashboardUI', fallbackNotice);
             }
             if (e.target.id === "jb-clear-btn") {
                 this.queue = [];
-                this.renderQueueList();
-                this.updatePlayerDisplay();
+                if (typeof this.renderQueueList === 'function') this.renderQueueList();
+                if (typeof this.updatePlayerDisplay === 'function') this.updatePlayerDisplay();
+                fallbackNotice(`🧹 Queue cleared from dashboard control matrix.`);
             }
             if (e.target.id === "jb-add-queue-btn" || e.target.id === "jb-add-fallback-btn") {
                 const input = panel.querySelector('#jb-search-input');
                 if (!input || !input.value.trim()) return;
                 
+                const queryStr = input.value.trim();
                 if (e.target.id === "jb-add-queue-btn") {
-                    this.handleSongRequest('StreamDashboard', input.value.trim(), () => {});
+                    this.handleSongRequest('StreamDashboard', queryStr, fallbackNotice);
                 } else {
-                    const id = this.extractYouTubeId(input.value.trim());
-                    this.saveFallbackItem({ id: id || "Custom", title: input.value.trim() }, 'Streamer');
+                    const id = typeof this.extractYouTubeId === 'function' ? this.extractYouTubeId(queryStr) : "Custom";
+                    this.saveFallbackItem({ id: id || "Custom", title: queryStr }, 'Streamer');
+                    fallbackNotice(`💾 Added to Fallback Playlist rotation.`);
                 }
                 input.value = '';
             }
         });
 
-        // Vote Requirement Value Input Observer
+        // Skip Vote Requirement Modifications
         const voteInput = panel.querySelector('#jb-vote-req-input');
         if (voteInput) {
             voteInput.addEventListener('input', (e) => {
@@ -347,23 +322,24 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             });
         }
 
-        // Slider Value Audio Handlers
+        // Live Dynamic Volume Sliders Matrix Operations
         const volSlider = panel.querySelector('#jb-volume-slider');
         if (volSlider) {
-            volSlider.oninput = (e) => {
+            volSlider.addEventListener('input', (e) => {
                 const vol = parseInt(e.target.value, 10);
+                this.trackVolumeLevel = vol;
+                localStorage.setItem("jbVolume", vol);
                 if (this.ytPlayer && typeof this.ytPlayer.setVolume === 'function') {
                     this.ytPlayer.setVolume(vol);
-                    localStorage.setItem("jbVolume", vol);
                 }
-            };
+            });
         }
     }
-
-    syncUIPanelElements() {
+	syncUIPanelElements() {
         const panel = document.getElementById(this.controlId);
         if (!panel) return;
 
+        // 1. Reconcile Request Acceptance Toggles
         const reqToggle = panel.querySelector('#stg-toggle-requests-checkbox');
         if (reqToggle) {
             reqToggle.checked = this.acceptRequests;
@@ -371,21 +347,29 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             if (badge) badge.textContent = this.acceptRequests ? "ON" : "OFF";
         }
 
+        // 2. Align Interface Layout Checkboxes
         const audioToggle = panel.querySelector('#stg-toggle-audio-only-checkbox');
-        if (audioToggle) audioToggle.checked = this.isAudioOnly;
+        if (audioToggle) audioToggle.checked = !!this.state.isAudioOnly;
 
         const avToggle = panel.querySelector('#stg-toggle-visualizer-checkbox');
-        if (avToggle) avToggle.checked = this.showVisualizer;
+        if (avToggle) avToggle.checked = !!this.state.showVisualizer;
 
+        // 3. Fallback Volume Initialization Safety Layer
         const volSlider = panel.querySelector('#jb-volume-slider');
-        if (volSlider && this.ytPlayer && typeof this.ytPlayer.getVolume === 'function') {
-            volSlider.value = this.ytPlayer.getVolume();
+        if (volSlider) {
+            const savedVol = localStorage.getItem("jbVolume");
+            if (this.ytPlayer && typeof this.ytPlayer.getVolume === 'function') {
+                volSlider.value = this.ytPlayer.getVolume();
+            } else {
+                volSlider.value = savedVol !== null ? parseInt(savedVol, 10) : 50;
+            }
+            this.trackVolumeLevel = parseInt(volSlider.value, 10);
         }
 
-        this.toggleAudioOnly(this.isAudioOnly);
-        this.toggleVisualizer(this.showVisualizer);
+        // 4. Cascade view transforms cleanly down onto UI layout contexts
+        if (typeof this.toggleAudioOnly === 'function') this.toggleAudioOnly(!!this.state.isAudioOnly);
+        if (typeof this.toggleVisualizer === 'function') this.toggleVisualizer(!!this.state.showVisualizer);
     }
-
     // ========================================================================
     // 🎨 DRIVEN CANVAS REDRAW VISUALIZER WAVES
     // ========================================================================
@@ -436,28 +420,27 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     // ========================================================================
     // 🎮 CHAT COMMAND ROUTER
     // ========================================================================
-	getModuleCommands() {
-        // Universal notification bridge using your internal widget bubbles as an interface fallback
+// ========================================================================
+    // CORE SYSTEM INTERACTION ROUTERS (Matrix Manifest Mapping)
+    // ========================================================================
+    getModuleCommands() {
         const sendNotice = (txt) => {
             this.setWidgetBubble(txt);
-            // If your core system provides a global chat-bot output handler, hook it here:
             if (typeof window.botSay === 'function') {
                 window.botSay(txt);
             }
         };
 
-        // Master parser wrapper for sub-argument processing (handles legacy fallback routing for !jb [action])
         const processMasterJukeboxSubRoute = (user, message, flags) => {
             const parts = message.trim().split(/\s+/);
             const subCommand = parts[0]?.toLowerCase();
             const payloadString = parts.slice(1).join(' ');
 
             if (!subCommand) {
-                sendNotice(`🎵 [Jukebox]: Available subroutines: sr | skip | like | status | queue`);
+                sendNotice(`🎵 [Jukebox]: Subroutines: sr | skip | like | status | queue`);
                 return;
             }
 
-            // Route to specific standalone implementations while passing down parameters cleanly
             switch (subCommand) {
                 case 'help':
                     sendNotice(`🎵 [Jukebox]: !sr [query] | !jb like | !jb skip | !jb status | !jb queue`);
@@ -483,12 +466,11 @@ export class StreamJukeboxModule extends BaseWidgetModule {
                     this.handleStatusCheckRoute(user, flags, sendNotice);
                     break;
                 default:
-                    sendNotice(`❌ Unknown jukebox runtime parameter: "${subCommand}"`);
+                    sendNotice(`❌ Unknown jukebox execution argument: "${subCommand}"`);
                     break;
             }
         };
 
-        // Return a flattened manifest of explicit entry points mapped to the control panel matrix checks
         return [
             {
                 name: 'sr',
@@ -528,11 +510,10 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             },
             {
                 name: 'jbclear',
-                defaultChat: false, // Core security protection profile template default
+                defaultChat: false, 
                 defaultCp: false,
                 execute: (user, message, flags) => this.handleClearQueueRoute(user, flags, sendNotice)
             },
-            // Legacy structural aliases: Mapped to bypass routing rules if the parent '!jb' catch-all is disabled
             {
                 name: 'jb',
                 defaultChat: true,
@@ -553,6 +534,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             }
         ];
     }
+
     // ========================================================================
     // 🧱 MEDIA TRACK MANAGEMENT CORE LOGIC
     // ========================================================================
@@ -744,11 +726,68 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             this.ctx = null;
         }
     }
+// ========================================================================
+    // MODULE COMMAND INTERCEPT ROUTERS
+    // ========================================================================
+    async handleSongRequestRoute(user, message, flags, sendNotice) {
+        // Enforce basic message length checks before running asynchronous queries
+        if (!message || !message.trim()) {
+            if (typeof sendNotice === 'function') sendNotice("🎵 Please provide a search term or YouTube URL link.");
+            return;
+        }
+        await this.handleSongRequest(user, message.trim(), sendNotice);
+    }
 
+    handleSkipRoute(user, flags, sendNotice) {
+        // Broadcaster/Mod bypass: Instantly skip without triggering a voting sequence
+        if (flags?.broadcaster || flags?.mod || user.toLowerCase() === this.streamerName) {
+            if (typeof sendNotice === 'function') sendNotice(`⏭️ Mod Action: Skipping current track...`);
+            this.skipCurrentSong(sendNotice);
+        } else {
+            this.handleVoteSkip(user, sendNotice);
+        }
+    }
+
+    handleLikeRoute(user, flags, sendNotice) {
+        this.handleLikeSong(user, sendNotice);
+    }
+
+    handleClearQueueRoute(user, flags, sendNotice) {
+        if (flags?.broadcaster || flags?.mod || user.toLowerCase() === this.streamerName) {
+            this.queue = [];
+            this.renderQueueList();
+            this.updatePlayerDisplay();
+            if (typeof sendNotice === 'function') sendNotice("🧹 Jukebox active queue cleared by moderator command.");
+        }
+    }
+
+    handleQueueCheckRoute(user, flags, sendNotice) {
+        if (typeof sendNotice !== 'function') return;
+        if (this.queue.length === 0) {
+            sendNotice("📋 The active request queue is empty.");
+            return;
+        }
+        const manifest = this.queue.slice(0, 3).map((t, idx) => `${idx + 1}. ${t.title}`).join(' | ');
+        const totalCount = this.queue.length > 3 ? ` (+${this.queue.length - 3} more)` : '';
+        sendNotice(`📋 Next Tracks: ${manifest}${totalCount}`);
+    }
+
+    handleStatusCheckRoute(user, flags, sendNotice) {
+        if (typeof sendNotice !== 'function') return;
+        if (this.currentTrackData) {
+            sendNotice(`🎵 Currently Playing: "${this.currentTrackData.title}" | Likes: [${this.currentTrackVotes.size}/${this.VOTE_REQUIREMENT}]`);
+        } else {
+            sendNotice("💤 Jukebox status: Standby. Send requests using !sr [song name]");
+        }
+    }
+
+    // ========================================================================
+    // CORE RUNTIME JUKEBOX ENGINE
+    // ========================================================================
     async handleSongRequest(user, message, sendNotice) {
         if (!message) return;
         if (!this.acceptRequests) { 
-            if (typeof sendNotice === 'function') sendNotice(`🚫 Song requests are disabled.`); 
+            if (typeof sendNotice === 'function') sendNotice(`🚫 Song requests are currently disabled.`); 
             return; 
         }
 
@@ -758,17 +797,15 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         }
 
         let trackToQueue = null;
-        const id = this.extractYouTubeId(message);
+        const id = typeof this.extractYouTubeId === 'function' ? this.extractYouTubeId(message) : null;
 
         if (id) {
-            // It's a direct YouTube URL link, so we pass it straight through
             trackToQueue = { 
                 id: id, 
                 title: "YouTube Video Link", 
                 user: user 
             };
-        } else {
-            // It's a search term keyword request, fetch and resolve it right now
+        } else if (typeof this.fetchTrack === 'function') {
             const fetched = await this.fetchTrack(message);
             if (fetched) {
                 trackToQueue = { 
@@ -779,7 +816,6 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             }
         }
 
-        // Drop out if the track wasn't found or couldn't resolve
         if (!trackToQueue) {
             if (typeof sendNotice === 'function') {
                 sendNotice(`❌ Could not find any tracks matching "${message}".`);
@@ -787,49 +823,49 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             return;
         }
 
-        // The track is confirmed valid! Push it into the queue pipeline securely
         this.queue.push(trackToQueue);
         
-        this.renderQueueList();
-        this.updatePlayerDisplay();
+        if (typeof this.renderQueueList === 'function') this.renderQueueList();
+        if (typeof this.updatePlayerDisplay === 'function') this.updatePlayerDisplay();
 
         if (typeof sendNotice === 'function') {
             sendNotice(`🎵 Added to Queue: "${trackToQueue.title}" (Requested by ${user})`);
         }
         
-        // Bootstrap playback immediately if the player is idling on standby
         if (!this.isPlayingSong) {
-            this.playNextSong(sendNotice); // ✅ Fixed: Correctly passes notification callback forward
+            this.playNextSong(sendNotice);
         }
     }
 
     async playNextSong(sendNotice) {
-        if (!this.ytPlayerReady) return;
+        if (!this.ytPlayerReady || !this.ytPlayer) return;
+        
         this.currentTrackVotes.clear();
         this.currentTrackSkipVotes.clear();
-        this.stopAudioProgressTracking();
+        if (typeof this.stopAudioProgressTracking === 'function') {
+            this.stopAudioProgressTracking();
+        }
 
         if (this.queue.length > 0) {
             this.isPlayingSong = true;
-            
-            // Pluck the next pre-verified track out of the array slot
             const nextTrack = this.queue.shift();
             
-            this.renderQueueList();
             this.currentTrackData = nextTrack;
-            this.updatePlayerDisplay();
+            if (typeof this.renderQueueList === 'function') this.renderQueueList();
+            if (typeof this.updatePlayerDisplay === 'function') this.updatePlayerDisplay();
             
-            // Instantly load the media track profile
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
             
         } else if (this.fallbackPlaylist.length > 0) {
             this.isPlayingSong = true;
             this.currentTrackData = this.fallbackPlaylist[Math.floor(Math.random() * this.fallbackPlaylist.length)];
-            this.updatePlayerDisplay();
+            
+            if (typeof this.updatePlayerDisplay === 'function') this.updatePlayerDisplay();
             this.ytPlayer.loadVideoById(this.currentTrackData.id);
         } else {
             this.isPlayingSong = false;
-            this.updatePlayerDisplay("No Track Loaded");
+            this.currentTrackData = null;
+            if (typeof this.updatePlayerDisplay === 'function') this.updatePlayerDisplay("No Track Loaded");
             if (typeof sendNotice === 'function') sendNotice("📭 Jukebox queue empty.");
         }
     }
@@ -841,18 +877,19 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         
         this.currentTrackVotes.add(voter);
         
-        // Add chat feedback to notify users their vote was counted
         if (typeof sendNotice === 'function') {
             const votesNeeded = this.VOTE_REQUIREMENT - this.currentTrackVotes.size;
             if (votesNeeded <= 0) {
-                sendNotice(`❤️ "${this.currentTrackData.title}" saved to fallback playlist playlist rotation updates!`);
+                sendNotice(`❤️ "${this.currentTrackData.title}" saved to fallback rotation playlist updates!`);
             } else {
                 sendNotice(`❤️ ${user} liked this song. [${this.currentTrackVotes.size}/${this.VOTE_REQUIREMENT}] votes to save.`);
             }
         }
 
         if (this.currentTrackVotes.size >= this.VOTE_REQUIREMENT) {
-            this.saveFallbackItem(this.currentTrackData, "Community");
+            if (typeof this.saveFallbackItem === 'function') {
+                this.saveFallbackItem(this.currentTrackData, "Community");
+            }
         }
     }
 
@@ -863,7 +900,6 @@ export class StreamJukeboxModule extends BaseWidgetModule {
 
         this.currentTrackSkipVotes.add(voter);
         
-        // Add dynamic feedback counting remaining votes needed to trigger execution passes
         if (typeof sendNotice === 'function' && this.currentTrackSkipVotes.size < this.VOTE_REQUIREMENT) {
             sendNotice(`⏩ Vote to skip registered by ${user}. [${this.currentTrackSkipVotes.size}/${this.VOTE_REQUIREMENT}] votes reached.`);
         }
@@ -875,12 +911,11 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     }
 
     skipCurrentSong(sendNotice) {
-        if (this.ytPlayer) { 
+        if (this.ytPlayer && typeof this.ytPlayer.stopVideo === 'function') { 
             this.ytPlayer.stopVideo(); 
             this.playNextSong(sendNotice); 
         }
     }
-
     saveFallbackItem(item, username = 'System') {
         if (!this.fallbackPlaylist.some(e => e.id === item.id)) {
             this.fallbackPlaylist.push({ ...item, user: username });

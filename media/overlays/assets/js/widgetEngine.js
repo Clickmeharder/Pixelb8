@@ -1,4 +1,4 @@
-console.log(" [Pixelb8 Stream Widget Engine]: initializing...");
+console.log("🚀 [Pixelb8 Stream Widget Engine]: initializing...");
  
 /**
  * ============================================================================
@@ -9,7 +9,7 @@ console.log(" [Pixelb8 Stream Widget Engine]: initializing...");
 export const WidgetEngine = {
     instances: {
         bitminer: null, 
-		streamjukebox: null  
+        streamjukebox: null  
     },
 
     registryMap: {
