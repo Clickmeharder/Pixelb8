@@ -466,6 +466,7 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         let upNextString = "Nothing queued";
         if (this.queue.length > 0) {
             upNextString = this.queue[0].title;
+			console.log("upNextString ="+ this.queue[0].title);
         } else if (this.fallbackPlaylist.length > 0) {
             upNextString = "Random Playlist Selection";
         }
