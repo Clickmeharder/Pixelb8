@@ -479,11 +479,6 @@ export class StreamJukeboxModule extends BaseWidgetModule {
         nextTitleElements.forEach(el => {
             el.textContent = upNextString;
         });
-
-        // 4. Fallback explicit ID checks to catch legacy elements missing the class attribute
-        const nextTitleEl = document.getElementById('jb-next-title');
-        if (nextTitleEl) nextTitleEl.textContent = upNextString;
-
         const audioNextEl = document.getElementById('jb-audio-next-title');
         if (audioNextEl) audioNextEl.textContent = upNextString;
     }
