@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * PIXELB8 ECOSYSTEM WIDGET COMPONENT BLUEPRINT (v1.4 - Architecture Variant)
+ * PIXELB8 ECOSYSTEM WIDGET COMPONENT BLUEPRINT (v1.5 - Restructured Architecture)
  * Architecture: Monolithic, sovereign, zero-external-dependencies.
  * Lifecycle Layer: Centralized UI Injections with Cascaded Downstream Hooks
  * Features: Core Command Routing, Automated Matrix Framework, Global Notice Pipeline
@@ -72,8 +72,9 @@ export class BaseWidgetModule {
 		this.widgetSubKey = widgetSubKey; // Retain raw identifier for scoping handles
 		this.STORAGE_KEY = `pixelb8_widget_${widgetSubKey}`;
 		
-		this.baseId = this.constructor.name.toLowerCase();
-		this.overlayId = `${this.baseId}-overlay`;
+		// 🌐 SYNCHRONIZED ECOSYSTEM MATCHING: Use the precise sub-key matching your WidgetEngine maps
+		this.baseId = widgetSubKey; 
+		this.overlayId = `${this.baseId}`;
 		this.controlId = `${this.baseId}-controls`;
 
 		// Evaluates options profile fields first before selecting generic fallbacks
@@ -87,9 +88,10 @@ export class BaseWidgetModule {
 		this.registry = createDefaultWidgetRegistry();
 		this.state = createDefaultWidgetState();
 
+		// Safe loading execution waterfall
 		this.injectUI();
 		this.bindEventListeners(); 
-		this.loadData(); // Will parse and reconcile the active command suites
+		this.loadData(); 
 		
 		this.saveInterval = setInterval(() => this.saveData(), WIDGET_CONFIG_DEFAULTS.SAVE_INTERVAL_MS);
 		this.animate = this.animate.bind(this);
@@ -300,6 +302,7 @@ export class BaseWidgetModule {
 			}
 		}
 		
+		// Run core data initialization alignment passes
 		this.reconcileCommandMatrix();
 		this.applyVisibilityStates();
 		
@@ -390,6 +393,7 @@ export class BaseWidgetModule {
 		const panelContainer = document.getElementById(this.controlId);
 		if (!panelContainer) return;
 
+		// ⚡ EVENT DELEGATION UPGRADE: Captures dynamic inputs without dropping on innerHTML overwrites
 		panelContainer.addEventListener("change", (e) => {
 			if (e.target.id === "widgetHideBorderToggle") {
 				this.state.hideBorder = e.target.checked;

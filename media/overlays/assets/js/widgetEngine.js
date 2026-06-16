@@ -2,7 +2,7 @@ console.log("🚀 [Pixelb8 Stream Widget Engine]: initializing...");
 
 /**
  * ============================================================================
- * PIXELB8 ECOSYSTEM: WIDGET ENGINE (Phase 1.8 - Data-Driven Core System)
+ * PIXELB8 ECOSYSTEM: WIDGET ENGINE (Phase 1.9 - Synchronized Lifecycles)
  * Concern: Manages modern module lifecycles while bridging legacy boot components.
  * ============================================================================
  */
@@ -67,9 +67,9 @@ export const WidgetEngine = {
                     const module = await import(config.path + cacheBuster);
                     const WidgetClass = module[config.className];
                     
-                    // The dynamic instances tracking assignment slot initializes right here automatically
-                    this.instances[config.instanceKey] = new WidgetClass();
-                    console.log(`⚙️ [WidgetEngine]: Modern module "${config.className}" initialized safely.`);
+                    // 🌟 FIX: Forward the dynamic registry matching idKey directly into the class instance constructor!
+                    this.instances[config.instanceKey] = new WidgetClass(idKey);
+                    console.log(`⚙️ [WidgetEngine]: Modern module "${config.className}" initialized safely with namespace scope "${idKey}".`);
                     
                     if (!deferCommandRefresh && typeof window.injectAllWidgetCommands === 'function') {
                         window.injectAllWidgetCommands();
@@ -128,7 +128,7 @@ export const WidgetEngine = {
                     // Direct pipeline down to dynamic lifecycle hot-swaps
                     await this.toggleWidget(idKey, v);
 
-                    // 🌐 Bridge window context explicit tier check to cross module script closures cleanly
+                    // Bridge window context explicit tier check to cross module script closures cleanly
                     if (typeof window.syncAllToggleUI === "function") {
                         window.syncAllToggleUI();
                     }
