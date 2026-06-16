@@ -707,19 +707,79 @@ export class StreamJukeboxModule extends BaseWidgetModule {
             this.renderFallbackList();
         }
     }
+	enqueueFromFallback(item) {
+        // Formulates a queue payload matching standard request object format
+        this.queue.push({
+            user: item.user || 'Fallback',
+            title: item.title,
+            id: item.id,
+            isSearch: false
+        });
+        
+        this.renderQueueList();
+        this.updatePlayerDisplay();
+        
+        // If the player is currently sitting idle on fallback mode or silent, fire it up
+        if (!this.isPlayingSong) {
+            this.playNextSong(() => {});
+        }
+    }
 
-    renderQueueList() {
-        const list = document.getElementById('jb-queue-list');
-        if (!list) return; list.innerHTML = '';
-        this.queue.forEach((item, idx) => {
+    playNextFromFallback(item) {
+        // Inserts directly at index 0, sliding the rest of the queue items down one slot
+        this.queue.unshift({
+            user: item.user || 'Fallback',
+            title: item.title,
+            id: item.id,
+            isSearch: false
+        });
+        
+        this.renderQueueList();
+        this.updatePlayerDisplay();
+        
+        // Bootstraps playback immediately if the jukebox is stalled on standby
+        if (!this.isPlayingSong) {
+            this.playNextSong(() => {});
+        }
+    }
+	renderFallbackList() {
+        const list = document.getElementById('jb-fallback-list');
+        if (!list) return; 
+        list.innerHTML = '';
+
+        this.fallbackPlaylist.forEach((item, idx) => {
             const el = document.createElement('div');
-            el.style.cssText = "font-size:10px; color:#a1a1aa; border-bottom:1px solid #222; padding:4px; display:flex; justify-content:space-between; align-items:center;";
-            el.innerHTML = `<span>${idx+1}. ${item.title.substring(0,25)}</span><span style="color:#991b1b; cursor:pointer; font-weight:bold; padding:0 4px;" class="remove-queue-item">✕</span>`;
-            el.querySelector('.remove-queue-item').onclick = () => {
-                this.queue.splice(idx, 1);
-                this.renderQueueList();
-                this.updatePlayerDisplay();
+            el.style.cssText = "font-size:10px; color:#e4e4e7; padding:4px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #222; gap:4px;";
+            
+            // Track title container (clipped if too long)
+            el.innerHTML = `
+                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0;" title="${item.title}">
+                    • ${item.title}
+                </span>
+                <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
+                    <span class="fallback-action-btn fb-enqueue-btn" style="color:#a855f7; cursor:pointer; font-weight:bold; padding:0 2px;" title="Add to Queue">➕</span>
+                    <span class="fallback-action-btn fb-playnext-btn" style="color:#22c55e; cursor:pointer; font-size:11px;" title="Play Next">▶</span>
+                    <span class="fallback-action-btn fb-remove-btn" style="color:#991b1b; cursor:pointer; font-weight:bold; padding:0 2px;" title="Remove Permanently">✕</span>
+                </div>
+            `;
+
+            // Action 1: Add to bottom of the queue
+            el.querySelector('.fb-enqueue-btn').onclick = () => {
+                this.enqueueFromFallback(item);
             };
+
+            // Action 2: Insert at top of the queue (Play Next)
+            el.querySelector('.fb-playnext-btn').onclick = () => {
+                this.playNextFromFallback(item);
+            };
+
+            // Action 3: Remove from the fallback playlist selection entirely
+            el.querySelector('.fb-remove-btn').onclick = () => {
+                this.fallbackPlaylist.splice(idx, 1);
+                localStorage.setItem("jukeboxFallbackPlaylist", JSON.stringify(this.fallbackPlaylist));
+                this.renderFallbackList();
+            };
+
             list.appendChild(el);
         });
     }
