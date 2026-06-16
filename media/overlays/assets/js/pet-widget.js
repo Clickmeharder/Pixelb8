@@ -794,7 +794,7 @@ export class StreamPet {
 
         return `
             <div class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">
-				<span>🐾 PixelPets</span>
+				<span>🐾 PixelPets (updates soon!)</span>
 				<span class="collapse-icon">▼</span>
 			</div>
 			<div class="collapsible-content">
