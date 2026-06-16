@@ -43,42 +43,43 @@ const JUKEBOX_HTMLTEMPLATES = {
     `,
 
     nowPlaying: `
-		<div id="jb-controls-nowplaying-section" style="background: #18181b; padding: 10px; border-radius: 6px; margin: 4px 0; border: 1px solid #27272a;">
-			<div id="jb-current-Label" style="font-size: 10px; color: #a1a1aa; text-transform: uppercase;">Playing Now</div>
-			<div id="jb-current-title" class="jb-current-title" style="font-weight: bold; color: #fff; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">No Track Loaded</div>
+		<div id="jb-controls-nowplaying-section" style="background: #18181b; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #3f3f46;">
+			<div id="jb-current-Label">Playing Now</div>
+			<div id="jb-current-title" class="jb-current-title">No Track Loaded</div>
 			
-			<div id="jb-upnext-Label" style="font-size: 10px; color: #a1a1aa; text-transform: uppercase;">Up Next</div>
-			<div id="jb-upnext-title" class="jb-next-title" style="color: #71717a; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">waiting...</div>
+			<div id="jb-upnext-Label">Up Next</div>
+			<div id="jb-upnext-title" class="jb-next-title">waiting...</div>
 			
-			<div id="jb-current-controlbar" style="display: flex; align-items: center; gap: 8px;">
+			<div id="jb-current-controlbar">
 				<div class="jb-volume-control" style="display: flex; align-items: center; gap: 8px; flex: 1;">
-					<span style="font-size: 11px; color: #a1a1aa; font-family: monospace;">VOL</span>
+					<span style="font-size: 12px; color: #a1a1aa;">VOL</span>
 					<input type="range" id="jb-volume-slider" min="0" max="100" value="50" style="flex: 1; cursor: pointer; accent-color: var(--accent, #a855f7);">
 				</div>
-				<button id="jb-skip-btn" class="p8-btn" style="cursor: pointer; background: #27272a; border: 1px solid #3f3f46; color: #fff; border-radius: 4px; padding: 2px 8px;">⏭</button>
-				<button id="jb-current-heart" class="p8-btn" style="cursor: pointer; background: #27272a; border: 1px solid #3f3f46; color: #fff; border-radius: 4px; padding: 2px 8px;">❤</button>
+				<button id="jb-skip-btn" class="p8-btn">⏭</button>
+				<button id="jb-current-heart" class="p8-btn">❤</button>
 			</div>
 		</div>
     `,
 
     lists: `
-		<div style="display: flex; flex-direction: column; gap: 5px; margin-top: 4px; margin-bottom: 10px;">
-			<input type="text" id="jb-search-input" class="p8-input" placeholder="Search or YouTube URL..." style="width: 100%; box-sizing: border-box; background: #141414; border: 1px solid #27272a; color: #fff; padding: 6px; border-radius: 4px; font-family: monospace; font-size: 12px;">
+		<div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
+			<input type="text" id="jb-search-input" class="p8-input" placeholder="Search or YouTube URL..." style="width: 100%; box-sizing: border-box;">
 			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-				<button id="jb-add-queue-btn" class="p8-btn" style="cursor: pointer; background: #1e3a8a; border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; font-size: 12px; font-weight: bold;">Queue</button>
-				<button id="jb-add-fallback-btn" class="p8-btn alt-btn" style="cursor: pointer; background: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 4px; border-radius: 4px; font-size: 12px;">Playlist</button>
+				<button id="jb-add-queue-btn" class="p8-btn">Queue</button>
+				<button id="jb-add-fallback-btn" class="p8-btn alt-btn">Playlist</button>
 			</div>
 		</div>
 
-		<div id="jb-queue-list-label" style="font-size: 11px; font-weight: bold; color: #a1a1aa; text-transform: uppercase; margin-bottom: 4px;">📋 Active Queue</div>
-		<div id="jb-queue-list" style="max-height: 120px; overflow-y: auto; background: #141414; border-radius: 4px; padding: 4px; border: 1px solid #27272a;">
+		<div id="jb-queue-list-label">📋 Active Queue</div>
+		<div id="jb-queue-list">
 			<div id="jb-queue-list-controls">
-				<button id="jb-clear-btn" class="p8-btn" style="cursor: pointer; background: #991b1b; border: 1px solid #ef4444; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; width: 100%;">CLEAR QUEUE</button>
+				<button id="jb-clear-btn" class="p8-btn">CLEAR QUEUE</button>
 			</div>
 		</div>
 		
-		<div id="jb-fallback-list-label" style="font-size: 11px; font-weight: bold; color: #a1a1aa; text-transform: uppercase; margin-top: 10px; margin-bottom: 4px;">📋 Fallback Playlist</div>
-		<div id="jb-fallback-list" style="max-height: 120px; overflow-y: auto; background: #141414; border-radius: 4px; padding: 4px; border: 1px solid #27272a;"></div>
+		<br>
+		<div id="jb-fallback-list-label">📋 Fallback Playlist</div>
+		<div id="jb-fallback-list"></div>
     `
 };
 // #endregion
