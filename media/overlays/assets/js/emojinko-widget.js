@@ -45,26 +45,28 @@ const Emojinko_HTMLTEMPLATES = {
 
 export class StreamEmojinkoModule extends BaseWidgetModule {
 	constructor() {
-		// Pass clean matching subkey identifier down to base layer configurations
-		super("emojinko", {
+		// Use the correct internal namespace mapped out inside your widget system setup
+		super("stream_Emojinko", {
 			menuTitle: "🎯 Emojinko Plinko Game"
 		});
 
-		// 🛡️ HYDRATE EXTENDED STATE SAFE-GUARDS WITHOUT OVERWRITING CENTRAL STORAGE
-		this.state.gameEnabled = this.state.gameEnabled !== undefined ? this.state.gameEnabled : true;
-		this.state.dropDuration = this.state.dropDuration || 4;
-		this.state.maxDropsPerUser = this.state.maxDropsPerUser || 3;
-		if (!this.state.scores) this.state.scores = {};
-		if (!this.state.userDropTracker) this.state.userDropTracker = {};
+		// 🛡️ Safe Architectural State Extension Pattern
+		this.state = {
+			gameEnabled: this.state?.gameEnabled !== undefined ? this.state.gameEnabled : true,
+			dropDuration: this.state?.dropDuration || 4,
+			maxDropsPerUser: this.state?.maxDropsPerUser || 3,
+			scores: this.state?.scores || {},
+			userDropTracker: this.state?.userDropTracker || {},
+			commandAccess: this.state?.commandAccess || {}
+		};
 
-		// Dedicated local 2D environment properties isolated completely from base frame calls
+		// Isolated engine components
 		this.physicsCanvas = null;
 		this.physicsCtx = null;
 		this.pegs = [];
 		this.activeTokens = [];
 		this.physicsLoopId = null;
 
-		// Explicit bucket coordinates mapped out across 100% vector bounds
 		this.scoreZones = [
 			{ minX: 0, maxX: 25, label: "100 Pts", multiplier: 100 },
 			{ minX: 25, maxX: 50, label: "💥 RIP", multiplier: 0 },
@@ -72,14 +74,13 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			{ minX: 75, maxX: 100, label: "50 Pts", multiplier: 50 }
 		];
 
-		// Neutralize internal system hooks so they won't compete for canvas space
+		// Neutralize internal base class canvas pointers completely
 		this.canvas = null;
 		this.ctx = null;
 
-		// Kickoff canvas generation
-		this.injectViewportOverlay();
-		
-		// Synchronize permissions structure grid maps inside the dashboard
+		this.loadData();
+
+		// Synchronize permissions structural matrix inside the panel layout window
 		const matrixTarget = document.getElementById(this.controlId)?.querySelector('.matrix-container-target');
 		if (matrixTarget) {
 			matrixTarget.innerHTML = this.renderCommandRouterMatrixHTML();
@@ -93,36 +94,41 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		`;
 	}
 
+	/**
+	 * 🛠️ CORE HOOK OVERRIDE
+	 * Ensures the overlay assembly hooks fire ONLY when the framework layout completes its cycles.
+	 */
 	injectViewportOverlay() {
-		if (document.getElementById("dz-emojinko-overlay-container")) return;
+		const overlayWrapper = document.getElementById("overlay-wrapper") || document.body;
+		if (!overlayWrapper) return;
 
-		const overlayWrapper = document.getElementById("overlay-wrapper") || 
-		                       document.getElementById("main-layout") || 
-		                       document.body;
-		
+		// Clean old canvas instances out completely before recreating
+		const existingOverlay = document.getElementById(this.overlayId);
+		if (existingOverlay) existingOverlay.remove();
+
 		const overlayEl = document.createElement("div");
-		overlayEl.id = "dz-emojinko-overlay-container";
-		overlayEl.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:99999;";
+		overlayEl.id = this.overlayId;
+		overlayEl.style.cssText = "position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 9999;";
 		
 		overlayEl.innerHTML = `
-			<canvas id="dz-physics-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;display:block;"></canvas>
-			<div id="dz-bucket-row" style="position:absolute;bottom:0;left:0;width:100%;height:40px;display:flex;background:rgba(24,24,27,0.95);border-top:2px solid var(--accent,#a855f7);font-family:monospace;text-align:center;line-height:40px;font-weight:bold;color:#fff;font-size:11px;z-index:100000;">
-				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(168,85,247,0.05);">100 PTS</div>
-				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(239,68,68,0.1);color:#ef4444;">💥 RIP</div>
-				<div style="flex:1;border-right:1px dashed #3f3f46;background:rgba(34,197,94,0.1);color:#22c55e;">🍀 LUCKY</div>
-				<div style="flex:1;background:rgba(168,85,247,0.05);">50 PTS</div>
+			<canvas id="dz-physics-canvas-${this.overlayId}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: block;"></canvas>
+			<div id="dz-bucket-row" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; display: flex; background: rgba(24,24,27,0.95); border-top: 2px solid var(--accent, #a855f7); font-family: monospace; text-align: center; line-height: 40px; font-weight: bold; color: #fff; font-size: 11px; z-index: 10000;">
+				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(168,85,247,0.05);">100 PTS</div>
+				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(239,68,68,0.1); color: #ef4444;">💥 RIP</div>
+				<div style="flex: 1; border-right: 1px dashed #3f3f46; background: rgba(34,197,94,0.1); color: #22c55e;">🍀 LUCKY</div>
+				<div style="flex: 1; background: rgba(168,85,247,0.05);">50 PTS</div>
 			</div>
 		`;
 		
 		overlayWrapper.appendChild(overlayEl);
 
-		this.physicsCanvas = document.getElementById("dz-physics-canvas");
+		this.physicsCanvas = document.getElementById(`dz-physics-canvas-${this.overlayId}`);
 		if (this.physicsCanvas) {
 			this.physicsCtx = this.physicsCanvas.getContext("2d");
 
 			this.resizePhysicsCanvas();
 			
-			// Safe window hook handling patterns
+			if (this._resizeHandler) window.removeEventListener('resize', this._resizeHandler);
 			this._resizeHandler = () => this.resizePhysicsCanvas();
 			window.addEventListener('resize', this._resizeHandler);
 			
@@ -182,8 +188,8 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		if (!panel) return;
 
 		this.renderLeaderboardUI();
+		this.injectViewportOverlay(); // Re-sync active viewport references safely here
 
-		// Handle live changes explicitly mapping back down to UI text elements
 		const activeToggle = panel.querySelector('#dz-toggle-active');
 		if (activeToggle) {
 			activeToggle.checked = this.state.gameEnabled;
@@ -231,7 +237,8 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 	executeDropAction(user, customToken = "🪙", targetSlot = null) {
 		if (!this.state.gameEnabled) return;
 		
-		if (!this.physicsCanvas || !document.getElementById("dz-emojinko-overlay-container")) {
+		// Fallback check to ensure canvas layer target state is completely stable
+		if (!this.physicsCanvas || !document.getElementById(this.overlayId)) {
 			this.injectViewportOverlay();
 		}
 
@@ -288,12 +295,13 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		const width = this.physicsCanvas.width;
 		const height = this.physicsCanvas.height;
 
-		// Calculate realistic speed vectors using the control panel slider properties safely
 		const gravityForce = (11 - (this.state.dropDuration || 4)) * 0.04 + 0.08; 
 		const dynamicFriction = 0.58; 
 
-		for (let i = this.activeTokens.length - 1; i >= 0; i--) {
+		for (let i = this.activeTokens.length - i; i >= 0; i--) {
+			if (i >= this.activeTokens.length) continue;
 			const t = this.activeTokens[i];
+			if (!t) continue;
 
 			if (t.isDying) {
 				t.scale += 0.05;
@@ -308,7 +316,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			t.x += t.vx;
 			t.y += t.vy;
 
-			// Handle boundaries
 			if (t.x - t.radius < 0) {
 				t.x = t.radius;
 				t.vx *= -dynamicFriction;
@@ -317,7 +324,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				t.vx *= -dynamicFriction;
 			}
 
-			// Rigid peg interaction math
 			for (let p of this.pegs) {
 				const dx = t.x - p.x;
 				const dy = t.y - p.y;
@@ -336,7 +342,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 					t.vx = (t.vx - 2 * dotProduct * nx) * dynamicFriction;
 					t.vy = (t.vy - 2 * dotProduct * ny) * dynamicFriction;
 
-					// Add extra organic plinko bounce variation
 					t.vx += (Math.random() * 1.4) - 0.7;
 				}
 			}
@@ -373,6 +378,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		this.physicsCtx.textBaseline = "middle";
 
 		this.activeTokens.forEach(t => {
+			if (!t) return;
 			this.physicsCtx.save();
 			this.physicsCtx.globalAlpha = t.opacity;
 			this.physicsCtx.translate(t.x, t.y);
@@ -442,7 +448,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		if (this._resizeHandler) {
 			window.removeEventListener('resize', this._resizeHandler);
 		}
-		const container = document.getElementById("dz-emojinko-overlay-container");
+		const container = document.getElementById(this.overlayId);
 		if (container) container.remove();
 		super.destroy();
 	}
