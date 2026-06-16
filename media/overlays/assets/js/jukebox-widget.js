@@ -457,16 +457,22 @@ export class StreamJukeboxModule extends BaseWidgetModule {
     // 🧱 MEDIA TRACK MANAGEMENT CORE LOGIC
     // ========================================================================
 	updatePlayerDisplay(customTitle = null) {
+        // Targets all elements with the .jb-current-title class uniformly
         const titleElements = document.querySelectorAll('.jb-current-title');
+        
+        // Resolve the title text safely
         const displayTitle = customTitle || (this.currentTrackData ? this.currentTrackData.title : "No Track Loaded");
         
-        titleElements.forEach(el => { el.textContent = displayTitle; });
+        // Loop through every matching title element in the DOM and sync its text content
+        titleElements.forEach(el => { 
+            el.textContent = displayTitle; 
+        });
 
         // Explicitly extract the title of the 1st song in the queue, fallback, or nothing
         let upNextString = "Nothing queued";
         if (this.queue.length > 0) {
             upNextString = this.queue[0].title;
-			console.log("upNextString ="+ this.queue[0].title);
+            console.log("upNextString =" + this.queue[0].title);
         } else if (this.fallbackPlaylist.length > 0) {
             upNextString = "Random Playlist Selection";
         }
