@@ -309,6 +309,7 @@ body.edit-mode .p8-widget:active {
     max-height: 80vh; 
     overflow-y: auto;    
     box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+	resize: both;
 }
 #widgets-manager-header {
     display: flex; 
@@ -317,7 +318,8 @@ body.edit-mode .p8-widget:active {
     margin-bottom: 15px; 
     border-bottom: 1px solid #27272a; 
     padding-bottom: 10px; 
-    position: sticky; 
+    position: sticky;
+	color:var(--accent);
     top: -20px; 
     background: #09090b;
     z-index: 10;
