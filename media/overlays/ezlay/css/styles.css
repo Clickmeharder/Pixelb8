@@ -319,7 +319,6 @@ body.edit-mode .p8-widget:active {
     border-bottom: 1px solid #27272a; 
     padding-bottom: 10px; 
     position: sticky;
-	color:var(--accent);
     top: -20px; 
     background: #09090b;
     z-index: 10;
