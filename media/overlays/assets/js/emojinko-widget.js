@@ -191,32 +191,62 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		this.generatePlinkoPegMatrix(); 
 	}
 
+	/**
+	 * 📐 GEOMETRIC QUINCUNX (GALTON BOARD) PEG GENERATOR
+	 * Re-engineered to build a perfectly alternating, staggered triangle pattern.
+	 */
 	generatePlinkoPegMatrix() {
 		if (!this.physicsCanvas) return;
 		this.pegs = [];
 
 		const width = this.physicsCanvas.width;
 		const height = this.physicsCanvas.height;
+		const isSmallPreview = width < 600;
+
+		const pegRadius = isSmallPreview ? 3 : 5;
 		
-		const rows = 8;               
-		const startY = height * 0.18; 
-		const endY = height * 0.76;   
-		const rowSpacing = (endY - startY) / rows;
+		// Setup columns dynamically based on resolution bounds
+		const columnsCount = isSmallPreview ? 9 : 13;
+		const colSpacing = width / (columnsCount + 1);
+		
+		// Enforce standard Equilateral triangle height-to-width ratio (sqrt(3)/2 ≈ 0.866)
+		const rowSpacing = colSpacing * (Math.sqrt(3) / 2);
 
-		for (let r = 0; r < rows; r++) {
+		const startY = height * 0.16;
+		const endY = height * 0.76;
+		const maxRows = Math.floor((endY - startY) / rowSpacing);
+
+		for (let r = 0; r < maxRows; r++) {
 			const currentY = startY + (r * rowSpacing);
-			const isEven = (r % 2 === 0);
-			
-			const pegCount = isEven ? 10 : 11; 
-			const colSpacing = width / (pegCount + 1);
+			const isEvenRow = (r % 2 === 0);
 
-			for (let c = 0; c < pegCount; c++) {
-				const currentX = colSpacing * (c + 1);
-				this.pegs.push({
-					x: currentX,
-					y: currentY,
-					radius: width < 600 ? 3 : 5
-				});
+			// Alternating rows get an explicit offset of exactly 1/2 horizontal spacing width
+			const rowShiftOffset = isEvenRow ? 0 : (colSpacing / 2);
+			
+			// Even rows render full length, Odd rows drop 1 column loop count to fit boundaries smoothly
+			const activeLoopCols = isEvenRow ? columnsCount : (columnsCount - 1);
+			const baseMarginPadding = isEvenRow ? colSpacing : (colSpacing + rowShiftOffset);
+
+			for (let c = 0; c < activeLoopCols; c++) {
+				const currentX = baseMarginPadding + (c * colSpacing);
+				
+				// Keep a comfortable buffer window away from canvas edges to protect physics tracking
+				if (currentX > pegRadius * 2 && currentX < (width - pegRadius * 2)) {
+					this.pegs.push({
+						x: currentX,
+						y: currentY,
+						radius: pegRadius
+					});
+				}
+			}
+
+			// Failsafe: Inject wall safety pegs on odd/short rows to cleanly bounce edge drops back inward
+			if (!isEvenRow) {
+				const leftWallPegX = colSpacing / 2;
+				const rightWallPegX = width - (colSpacing / 2);
+				
+				if (leftWallPegX > 0) this.pegs.push({ x: leftWallPegX, y: currentY, radius: pegRadius });
+				if (rightWallPegX < width) this.pegs.push({ x: rightWallPegX, y: currentY, radius: pegRadius });
 			}
 		}
 	}
@@ -583,7 +613,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 	}
 
 	getModuleCommands() {
-		// Clean and split the emoji bank into an indexable array
 		const rawEmojiString = "😀 😃 😄 😁 😆 😅 🤣 😂 🙂 🙃 😉 😊 😇 🥰 😍 🤩 😘 😗 ☺️ 😚 😙 🥲 😋 🤐 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤨 😐 😑 😶 😏 😒 🙄 😬 🤥 😌 🥵 🤢 🤮 🤒 🤕 🤤 🥴 😵 🥸 🤓 😎 🤬 😡 😈 👿 💀 ☠️ 💩 🤡 👹 👺 👻 👽 👾 🤖 😺 😸 😹 😻 😼 😽 🙀 😿 😾 🙈 🙉 🙊 💋 💌 💘 💝 💖 💗 💓 💞 💕 💟 ❣️ 💔 ❤️ 🧡 💛 💚 💙 🤎 💜 🖤 🤍 💣";
 		const someEmojis = rawEmojiString.split(/\s+/).filter(e => e.length > 0);
 
@@ -624,19 +653,16 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 					let slot = null;
 
 					if (parts.length > 0) {
-						// Check if the first argument is explicitly a pure slot target (e.g. !drop 3)
 						if (/^\d+$/.test(parts[0])) {
 							slot = parseInt(parts[0], 10);
 							token = someEmojis[Math.floor(Math.random() * someEmojis.length)];
 						} else {
-							// Otherwise, first argument is treated as the user's custom token
 							token = parts[0];
 							if (parts.length > 1 && /^\d+$/.test(parts[1])) {
 								slot = parseInt(parts[1], 10);
 							}
 						}
 					} else {
-						// Fallback if message is completely empty (!drop)
 						token = someEmojis[Math.floor(Math.random() * someEmojis.length)];
 					}
 
