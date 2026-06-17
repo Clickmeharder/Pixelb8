@@ -24,6 +24,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			commandAccess: this.state?.commandAccess || {}
 		};
 
+		// Isolated physics attributes
 		this.physicsCanvas = null;
 		this.physicsCtx = null;
 		this.pegs = [];
@@ -234,19 +235,13 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		`).join('');
 	}
 
-	/**
-	 * 🛠️ CORE VISIBILITY TOGGLE PIPELINE
-	 * Handled cleanly by both dashboard UI interaction and remote chat parser systems.
-	 */
 	setOverlayVisibility(visible) {
 		this.state.overlayVisible = visible;
 		this.saveData();
 
-		// Sync the active display viewport bounds
 		const overlay = document.getElementById(this.overlayId);
 		if (overlay) overlay.style.display = visible ? 'block' : 'none';
 
-		// Sync administrative dashboard panel checkboxes
 		const visToggle = document.getElementById(this.controlId)?.querySelector('#dz-toggle-visibility');
 		if (visToggle) visToggle.checked = visible;
 	}
@@ -588,10 +583,14 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 	}
 
 	getModuleCommands() {
+		// Clean and split the emoji bank into an indexable array
+		const rawEmojiString = "😀 😃 😄 😁 😆 😅 🤣 😂 🙂 🙃 😉 😊 😇 🥰 😍 🤩 😘 😗 ☺️ 😚 😙 🥲 😋 🤐 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤨 😐 😑 😶 😏 😒 🙄 😬 🤥 😌 🥵 🤢 🤮 🤒 🤕 🤤 🥴 😵 🥸 🤓 😎 🤬 😡 😈 👿 💀 ☠️ 💩 🤡 👹 👺 👻 👽 👾 🤖 😺 😸 😹 😻 😼 😽 🙀 😿 😾 🙈 🙉 🙊 💋 💌 💘 💝 💖 💗 💓 💞 💕 💟 ❣️ 💔 ❤️ 🧡 💛 💚 💙 🤎 💜 🖤 🤍 💣";
+		const someEmojis = rawEmojiString.split(/\s+/).filter(e => e.length > 0);
+
 		return [
 			{
 				name: 'emojinko',
-				defaultChat: false, // Defaulting to dashboard/mods control rather than open public chat spam
+				defaultChat: false,
 				defaultCp: true,
 				execute: (user, message, flags) => {
 					if (!this.isCommandAllowed('emojinko', flags)) return;
@@ -599,8 +598,8 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 					const args = message.trim().toLowerCase().split(/\s+/);
 					if (args.length < 2) return;
 
-					const action = args[0]; // 'show' or 'hide'
-					const target = args[1]; // 'overlay'
+					const action = args[0];
+					const target = args[1];
 
 					if (target === 'overlay') {
 						if (action === 'show') {
@@ -619,12 +618,28 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				defaultCp: true,
 				execute: (user, message, flags) => {
 					if (!this.isCommandAllowed('drop', flags)) return;
-					const parts = message.trim().split(/\s+/);
-					let token = "🪙"; let slot = null;
-					if (parts.length > 0 && parts[0] !== "") token = parts[0];
-					if (parts.length > 1) {
-						const pInt = parseInt(parts[1], 10); if (!isNaN(pInt)) slot = pInt;
+					const parts = message.trim().split(/\s+/).filter(p => p !== "");
+					
+					let token = null;
+					let slot = null;
+
+					if (parts.length > 0) {
+						// Check if the first argument is explicitly a pure slot target (e.g. !drop 3)
+						if (/^\d+$/.test(parts[0])) {
+							slot = parseInt(parts[0], 10);
+							token = someEmojis[Math.floor(Math.random() * someEmojis.length)];
+						} else {
+							// Otherwise, first argument is treated as the user's custom token
+							token = parts[0];
+							if (parts.length > 1 && /^\d+$/.test(parts[1])) {
+								slot = parseInt(parts[1], 10);
+							}
+						}
+					} else {
+						// Fallback if message is completely empty (!drop)
+						token = someEmojis[Math.floor(Math.random() * someEmojis.length)];
 					}
+
 					this.executeDropAction(user, token, slot, false);
 				}
 			},
@@ -634,12 +649,25 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				defaultCp: true,
 				execute: (user, message, flags) => {
 					if (!this.isCommandAllowed('dropemoji', flags)) return;
-					const parts = message.trim().split(/\s+/);
-					let token = "✨"; let slot = null;
-					if (parts.length > 0 && parts[0] !== "") token = parts[0];
-					if (parts.length > 1) {
-						const pInt = parseInt(parts[1], 10); if (!isNaN(pInt)) slot = pInt;
+					const parts = message.trim().split(/\s+/).filter(p => p !== "");
+					
+					let token = null;
+					let slot = null;
+
+					if (parts.length > 0) {
+						if (/^\d+$/.test(parts[0])) {
+							slot = parseInt(parts[0], 10);
+							token = someEmojis[Math.floor(Math.random() * someEmojis.length)];
+						} else {
+							token = parts[0];
+							if (parts.length > 1 && /^\d+$/.test(parts[1])) {
+								slot = parseInt(parts[1], 10);
+							}
+						}
+					} else {
+						token = someEmojis[Math.floor(Math.random() * someEmojis.length)];
 					}
+
 					this.executeDropAction(user, token, slot, true);
 				}
 			},
