@@ -15,7 +15,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			scores: this.state?.scores || {},
 			currentMatchScores: this.state?.currentMatchScores || {},
 			userDropTracker: this.state?.userDropTracker || {},
-			// Default configurable arrays stored inside state for complete panel mutability
 			scoreZones: this.state?.scoreZones || [
 				{ label: "100 PTS", multiplier: 100, color: "rgba(168,85,247,0.05)", textColor: "#ffffff" },
 				{ label: "💥 RIP", multiplier: 0, color: "rgba(239,68,68,0.1)", textColor: "#ef4444" },
@@ -25,7 +24,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			commandAccess: this.state?.commandAccess || {}
 		};
 
-		// Engine tracking properties isolated from core base canvases
 		this.physicsCanvas = null;
 		this.physicsCtx = null;
 		this.pegs = [];
@@ -33,26 +31,20 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		this.physicsLoopId = null;
 		this._resizeHandler = null;
 
-		// Explicitly decouple base framework classic canvas variables
 		this.canvas = null;
 		this.ctx = null;
 
 		this.loadData();
 
-		// Synchronize internal permissions grid systems inside parent interface windows
 		const matrixTarget = document.getElementById(this.controlId)?.querySelector('.matrix-container-target');
 		if (matrixTarget) {
 			matrixTarget.innerHTML = this.renderCommandRouterMatrixHTML();
 		}
 	}
 
-	/**
-	 * 🎨 RENDERS CONFIGURABLE SETTINGS AND LEDGERS
-	 */
 	getControlsMarkup() {
 		const zones = this.state.scoreZones || [];
 		
-		// Map dynamic structural settings markup inputs with inline delete actions
 		const bucketInputsHTML = zones.map((zone, idx) => `
 			<div class="dz-bucket-config-row" data-idx="${idx}" style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; border: 1px solid #27272a;">
 				<span style="font-size: 11px; font-family: monospace; color: #a1a1aa; width: 14px;">#${idx + 1}</span>
@@ -228,9 +220,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		}
 	}
 
-	/**
-	 * 🛠️ HELPER RE-RENDER FUNCTION FOR THE BUCKETS INPUT PANEL
-	 */
 	renderBucketsEditorUI(panel) {
 		const wrap = panel.querySelector('#dz-buckets-editor-wrap');
 		if (!wrap) return;
@@ -243,6 +232,23 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				<button class="dz-btn-remove-bucket" data-idx="${idx}" style="background: rgba(239,68,68,0.15); border: 1px solid #ef4444; color: #f87171; font-size: 10px; padding: 2px 5px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Remove Slot">❌</button>
 			</div>
 		`).join('');
+	}
+
+	/**
+	 * 🛠️ CORE VISIBILITY TOGGLE PIPELINE
+	 * Handled cleanly by both dashboard UI interaction and remote chat parser systems.
+	 */
+	setOverlayVisibility(visible) {
+		this.state.overlayVisible = visible;
+		this.saveData();
+
+		// Sync the active display viewport bounds
+		const overlay = document.getElementById(this.overlayId);
+		if (overlay) overlay.style.display = visible ? 'block' : 'none';
+
+		// Sync administrative dashboard panel checkboxes
+		const visToggle = document.getElementById(this.controlId)?.querySelector('#dz-toggle-visibility');
+		if (visToggle) visToggle.checked = visible;
 	}
 
 	bindEventListeners() {
@@ -269,10 +275,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		const visToggle = panel.querySelector('#dz-toggle-visibility');
 		if (visToggle) {
 			visToggle.addEventListener('change', (e) => {
-				this.state.overlayVisible = e.target.checked;
-				this.saveData();
-				const overlay = document.getElementById(this.overlayId);
-				if (overlay) overlay.style.display = this.state.overlayVisible ? 'block' : 'none';
+				this.setOverlayVisibility(e.target.checked);
 			});
 		}
 
@@ -296,7 +299,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			});
 		}
 
-		// Sync function for matching inline updates
 		const syncBucketInputsState = () => {
 			const rows = panel.querySelectorAll('.dz-bucket-config-row');
 			const updatedZones = [];
@@ -322,19 +324,14 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			}
 		});
 
-		// ❌ REMOVE SLOT ACTION BUTTON (Via Event Delegation)
 		panel.addEventListener('click', (e) => {
 			const removeBtn = e.target.closest('.dz-btn-remove-bucket');
 			if (removeBtn) {
 				e.preventDefault();
-				if (this.state.scoreZones.length <= 1) {
-					return; // Safety guard: don't allow zero active buckets
-				}
+				if (this.state.scoreZones.length <= 1) return;
 				const targetIndex = parseInt(removeBtn.getAttribute('data-idx'), 10);
 				this.state.scoreZones.splice(targetIndex, 1);
 				this.saveData();
-				
-				// Repaint both elements instantly
 				this.renderBucketsEditorUI(panel);
 				this.injectViewportOverlay();
 			}
@@ -371,7 +368,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		this.state.currentMatchScores = {};
 		this.state.userDropTracker = {};
 		this.saveData();
-		
 		this.updateControllerButtonUI();
 		this.renderLeaderboardUI();
 		this.sendNotice("... Game Started ...");
@@ -593,6 +589,30 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 	getModuleCommands() {
 		return [
+			{
+				name: 'emojinko',
+				defaultChat: false, // Defaulting to dashboard/mods control rather than open public chat spam
+				defaultCp: true,
+				execute: (user, message, flags) => {
+					if (!this.isCommandAllowed('emojinko', flags)) return;
+					
+					const args = message.trim().toLowerCase().split(/\s+/);
+					if (args.length < 2) return;
+
+					const action = args[0]; // 'show' or 'hide'
+					const target = args[1]; // 'overlay'
+
+					if (target === 'overlay') {
+						if (action === 'show') {
+							this.setOverlayVisibility(true);
+							this.sendNotice("👁️ Emojinko Plinko view overlay turned ON.");
+						} else if (action === 'hide') {
+							this.setOverlayVisibility(false);
+							this.sendNotice("🙈 Emojinko Plinko view overlay turned OFF.");
+						}
+					}
+				}
+			},
 			{
 				name: 'drop',
 				defaultChat: true,
