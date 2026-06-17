@@ -52,12 +52,13 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 	getControlsMarkup() {
 		const zones = this.state.scoreZones || [];
 		
-		// Map dynamic structural settings markup inputs for mutable bucket array customization
+		// Map dynamic structural settings markup inputs with inline delete actions
 		const bucketInputsHTML = zones.map((zone, idx) => `
 			<div class="dz-bucket-config-row" data-idx="${idx}" style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; border: 1px solid #27272a;">
 				<span style="font-size: 11px; font-family: monospace; color: #a1a1aa; width: 14px;">#${idx + 1}</span>
 				<input type="text" class="dz-bucket-label-in" value="${zone.label}" placeholder="Label" style="flex: 2; background: #09090b; border: 1px solid #3f3f46; color: #fff; font-size: 11px; padding: 2px 4px; border-radius: 3px;">
-				<input type="number" class="dz-bucket-val-in" value="${zone.multiplier}" placeholder="Pts" style="width: 55px; background: #09090b; border: 1px solid #3f3f46; color: #22c55e; font-size: 11px; padding: 2px 4px; border-radius: 3px; font-family: monospace;">
+				<input type="number" class="dz-bucket-val-in" value="${zone.multiplier}" placeholder="Pts" style="width: 50px; background: #09090b; border: 1px solid #3f3f46; color: #22c55e; font-size: 11px; padding: 2px 4px; border-radius: 3px; font-family: monospace;">
+				<button class="dz-btn-remove-bucket" data-idx="${idx}" style="background: rgba(239,68,68,0.15); border: 1px solid #ef4444; color: #f87171; font-size: 10px; padding: 2px 5px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Remove Slot">❌</button>
 			</div>
 		`).join('');
 
@@ -130,15 +131,10 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		`;
 	}
 
-	/**
-	 * 🛠️ ROBUST INJECTION SHUNT OVERRIDE
-	 * Fixes dropping issue by automatically providing a container mount path if #overlay-wrapper is missing.
-	 */
 	injectViewportOverlay() {
 		let overlayWrapper = document.getElementById("overlay-wrapper");
 		let fallbackContext = false;
 
-		// Structural Fallback Switch: if overlay wrapper doesn't exist, we are loading in the admin portal layout context
 		if (!overlayWrapper) {
 			const previewSection = document.getElementById("dz-dashboard-embedded-preview-container");
 			const mountNode = document.getElementById("dz-preview-mount-node");
@@ -160,7 +156,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		
 		const zones = this.state.scoreZones || [];
 		const bucketDivs = zones.map(z => `
-			<div style="flex: 1; border-right: 1px solid rgba(63,63,70,0.4); background: ${z.color || 'rgba(168,85,247,0.05)'}; color: ${z.textColor || '#fff'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: ${fallbackContext ? '9px' : '11px'}.">
+			<div style="flex: 1; border-right: 1px solid rgba(63,63,70,0.4); background: ${z.color || 'rgba(168,85,247,0.05)'}; color: ${z.textColor || '#fff'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: ${fallbackContext ? '9px' : '11px'};">
 				${z.label}
 			</div>
 		`).join('');
@@ -202,9 +198,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		this.generatePlinkoPegMatrix(); 
 	}
 
-	/**
-	 * 📐 TRULY INTERLOCKED TRIANGULAR MATRIX
-	 */
 	generatePlinkoPegMatrix() {
 		if (!this.physicsCanvas) return;
 		this.pegs = [];
@@ -221,7 +214,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			const currentY = startY + (r * rowSpacing);
 			const isEven = (r % 2 === 0);
 			
-			// Alternating configuration widths completely stops direct vertical fall-through
 			const pegCount = isEven ? 10 : 11; 
 			const colSpacing = width / (pegCount + 1);
 
@@ -230,10 +222,27 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				this.pegs.push({
 					x: currentX,
 					y: currentY,
-					radius: width < 600 ? 3 : 5 // Responsive scale adjustments for panel testing boxes
+					radius: width < 600 ? 3 : 5
 				});
 			}
 		}
+	}
+
+	/**
+	 * 🛠️ HELPER RE-RENDER FUNCTION FOR THE BUCKETS INPUT PANEL
+	 */
+	renderBucketsEditorUI(panel) {
+		const wrap = panel.querySelector('#dz-buckets-editor-wrap');
+		if (!wrap) return;
+
+		wrap.innerHTML = this.state.scoreZones.map((zone, idx) => `
+			<div class="dz-bucket-config-row" data-idx="${idx}" style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; border: 1px solid #27272a;">
+				<span style="font-size: 11px; font-family: monospace; color: #a1a1aa; width: 14px;">#${idx + 1}</span>
+				<input type="text" class="dz-bucket-label-in" value="${zone.label}" placeholder="Label" style="flex: 2; background: #09090b; border: 1px solid #3f3f46; color: #fff; font-size: 11px; padding: 2px 4px; border-radius: 3px;">
+				<input type="number" class="dz-bucket-val-in" value="${zone.multiplier}" placeholder="Pts" style="width: 50px; background: #09090b; border: 1px solid #3f3f46; color: #22c55e; font-size: 11px; padding: 2px 4px; border-radius: 3px; font-family: monospace;">
+				<button class="dz-btn-remove-bucket" data-idx="${idx}" style="background: rgba(239,68,68,0.15); border: 1px solid #ef4444; color: #f87171; font-size: 10px; padding: 2px 5px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Remove Slot">❌</button>
+			</div>
+		`).join('');
 	}
 
 	bindEventListeners() {
@@ -241,15 +250,13 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		const panel = document.getElementById(this.controlId);
 		if (!panel) return;
 
-		// Mount dynamic layout wrappers immediately
 		this.injectViewportOverlay();
 		this.updateControllerButtonUI();
 		this.renderLeaderboardUI();
 
-		// Interactive Game Trigger Lifecycle Manager
 		const toggleGameBtn = panel.querySelector('#dz-btn-toggle-game');
 		if (toggleGameBtn) {
-			toggleGameBtn.replaceWith(toggleGameBtn.cloneNode(true)); // Wipe dangling edge handlers
+			toggleGameBtn.replaceWith(toggleGameBtn.cloneNode(true));
 			panel.querySelector('#dz-btn-toggle-game').addEventListener('click', () => {
 				if (this.state.gameActive) {
 					this.endEmojinkoGame();
@@ -259,7 +266,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			});
 		}
 
-		// Stage Visibility Monitor Input
 		const visToggle = panel.querySelector('#dz-toggle-visibility');
 		if (visToggle) {
 			visToggle.addEventListener('change', (e) => {
@@ -290,7 +296,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			});
 		}
 
-		// 📥 REAL-TIME CONFIGURATION BINDINGS FOR LIVE BUCKET SLOTS
+		// Sync function for matching inline updates
 		const syncBucketInputsState = () => {
 			const rows = panel.querySelectorAll('.dz-bucket-config-row');
 			const updatedZones = [];
@@ -298,7 +304,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 				const labelVal = row.querySelector('.dz-bucket-label-in').value || "SCORE";
 				const multVal = parseInt(row.querySelector('.dz-bucket-val-in').value, 10) || 0;
 				
-				// Keep matching background highlights synced cleanly
 				let color = "rgba(168,85,247,0.05)";
 				let textColor = "#ffffff";
 				if (multVal === 0) { color = "rgba(239,68,68,0.1)"; textColor = "#ef4444"; }
@@ -308,7 +313,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			});
 			this.state.scoreZones = updatedZones;
 			this.saveData();
-			this.injectViewportOverlay(); // Instantly update viewports!
+			this.injectViewportOverlay();
 		};
 
 		panel.addEventListener('input', (e) => {
@@ -317,24 +322,32 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			}
 		});
 
+		// ❌ REMOVE SLOT ACTION BUTTON (Via Event Delegation)
+		panel.addEventListener('click', (e) => {
+			const removeBtn = e.target.closest('.dz-btn-remove-bucket');
+			if (removeBtn) {
+				e.preventDefault();
+				if (this.state.scoreZones.length <= 1) {
+					return; // Safety guard: don't allow zero active buckets
+				}
+				const targetIndex = parseInt(removeBtn.getAttribute('data-idx'), 10);
+				this.state.scoreZones.splice(targetIndex, 1);
+				this.saveData();
+				
+				// Repaint both elements instantly
+				this.renderBucketsEditorUI(panel);
+				this.injectViewportOverlay();
+			}
+		});
+
 		const addBucketBtn = panel.querySelector('#dz-btn-add-bucket');
 		if (addBucketBtn) {
 			addBucketBtn.addEventListener('click', (e) => {
 				e.preventDefault();
-				if (this.state.scoreZones.length >= 8) return; // Keep distribution sizes safe
+				if (this.state.scoreZones.length >= 10) return;
 				this.state.scoreZones.push({ label: "50 PTS", multiplier: 50, color: "rgba(168,85,247,0.05)", textColor: "#ffffff" });
 				this.saveData();
-				// Re-render UI inputs box completely
-				const wrap = panel.querySelector('#dz-buckets-editor-wrap');
-				if (wrap) {
-					wrap.innerHTML = this.state.scoreZones.map((zone, idx) => `
-						<div class="dz-bucket-config-row" data-idx="${idx}" style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; border: 1px solid #27272a;">
-							<span style="font-size: 11px; font-family: monospace; color: #a1a1aa; width: 14px;">#${idx + 1}</span>
-							<input type="text" class="dz-bucket-label-in" value="${zone.label}">
-							<input type="number" class="dz-bucket-val-in" value="${zone.multiplier}">
-						</div>
-					`).join('');
-				}
+				this.renderBucketsEditorUI(panel);
 				this.injectViewportOverlay();
 			});
 		}
@@ -361,22 +374,17 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		
 		this.updateControllerButtonUI();
 		this.renderLeaderboardUI();
-		this.sendNotice("🎮 A new match of Emojinko has begun! Type !drop [emoji] [slot] to join the standings!");
+		this.sendNotice("... Game Started ...");
 	}
 
 	endEmojinkoGame() {
 		this.state.gameActive = false;
 		this.saveData();
-		
 		this.updateControllerButtonUI();
 		
-		const matchEntries = Object.entries(this.state.currentMatchScores || {})
-			.sort((a, b) => b[1] - a[1]);
-			
+		const matchEntries = Object.entries(this.state.currentMatchScores || {}).sort((a, b) => b[1] - a[1]);
 		if (matchEntries.length > 0) {
-			this.sendNotice(`🛑 The match has concluded! Winner: @${matchEntries[0][0]} with ${matchEntries[0][1]} Pts!`);
-		} else {
-			this.sendNotice("🛑 The match has concluded! No scores were registered this round.");
+			this.sendNotice(`🛑 Match over! Winner: @${matchEntries[0][0]} (${matchEntries[0][1]} Pts)!`);
 		}
 	}
 
@@ -396,7 +404,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 	executeDropAction(user, customToken = "🪙", targetSlot = null, bypassMatchCheck = false) {
 		if (!this.state.gameActive && !bypassMatchCheck) {
-			this.sendNotice(`🚫 There is no match running right now, @${user}. Wait for the stream game to start!`);
+			this.sendNotice(`🚫 There is no match running right now, @${user}.`);
 			return;
 		}
 
@@ -410,7 +418,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 		const cleanToken = customToken.substring(0, 5);
 		const width = this.physicsCanvas ? this.physicsCanvas.width : 400;
-		
 		let startX = Math.random() * (width * 0.8) + (width * 0.1);
 
 		if (targetSlot !== null) {
@@ -421,17 +428,9 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		}
 
 		this.activeTokens.push({
-			user: user,
-			token: cleanToken,
-			x: startX,
-			y: -20, 
-			vx: (Math.random() * 2.5) - 1.25, 
-			vy: 1,                         
-			radius: width < 600 ? 10 : 22, // Size-adaptive responsive downscaling layout limits
-			scale: 1,
-			opacity: 1,
-			isDying: false,
-			isSolo: bypassMatchCheck
+			user: user, token: cleanToken, x: startX, y: -20,
+			vx: (Math.random() * 2.5) - 1.25, vy: 1,                         
+			radius: width < 600 ? 10 : 22, scale: 1, opacity: 1, isDying: false, isSolo: bypassMatchCheck
 		});
 	}
 
@@ -447,10 +446,8 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 	updatePhysicsState() {
 		if (!this.physicsCanvas) return;
-
 		const width = this.physicsCanvas.width;
 		const height = this.physicsCanvas.height;
-
 		const gravityForce = (11 - (this.state.dropDuration || 4)) * 0.03 + 0.07; 
 		const dynamicFriction = 0.55; 
 
@@ -459,15 +456,12 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			if (!t) continue;
 
 			if (t.isDying) {
-				t.scale += 0.05;
-				t.opacity -= 0.1;
+				t.scale += 0.05; t.opacity -= 0.1;
 				if (t.opacity <= 0) this.activeTokens.splice(i, 1);
 				continue;
 			}
 
-			t.vy += gravityForce;
-			t.x += t.vx;
-			t.y += t.vy;
+			t.vy += gravityForce; t.x += t.vx; t.y += t.vy;
 
 			if (t.x - t.radius < 0) {
 				t.x = t.radius; t.vx *= -dynamicFriction;
@@ -476,16 +470,13 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			}
 
 			for (let p of this.pegs) {
-				const dx = t.x - p.x;
-				const dy = t.y - p.y;
+				const dx = t.x - p.x; const dy = t.y - p.y;
 				const dist = Math.sqrt(dx * dx + dy * dy);
 				const minDist = t.radius + p.radius;
 
 				if (dist < minDist) {
 					const overlap = minDist - dist;
-					t.x += (dx / dist) * overlap;
-					t.y += (dy / dist) * overlap;
-
+					t.x += (dx / dist) * overlap; t.y += (dy / dist) * overlap;
 					const dotProduct = t.vx * (dx / dist) + t.vy * (dy / dist);
 					t.vx = (t.vx - 2 * dotProduct * (dx / dist)) * dynamicFriction;
 					t.vy = (t.vy - 2 * dotProduct * (dy / dist)) * dynamicFriction;
@@ -507,23 +498,18 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		const width = this.physicsCanvas.width;
 		this.physicsCtx.clearRect(0, 0, width, this.physicsCanvas.height);
 
-		// Peg Renderer
 		for (let p of this.pegs) {
 			this.physicsCtx.fillStyle = "rgba(168, 85, 247, 0.4)";
 			this.physicsCtx.beginPath(); this.physicsCtx.arc(p.x, p.y, p.radius + 1, 0, Math.PI * 2); this.physicsCtx.fill();
 		}
 
-		this.physicsCtx.textAlign = "center";
-		this.physicsCtx.textBaseline = "middle";
+		this.physicsCtx.textAlign = "center"; this.physicsCtx.textBaseline = "middle";
 
 		this.activeTokens.forEach(t => {
 			if (!t) return;
 			this.physicsCtx.save();
-			this.physicsCtx.globalAlpha = t.opacity;
-			this.physicsCtx.translate(t.x, t.y);
-			this.physicsCtx.scale(t.scale, t.scale);
+			this.physicsCtx.globalAlpha = t.opacity; this.physicsCtx.translate(t.x, t.y); this.physicsCtx.scale(t.scale, t.scale);
 
-			// Scale rendering fonts based on running sandbox wrapper sizes
 			const sizeSmall = width < 600;
 			this.physicsCtx.font = sizeSmall ? "16px Arial" : "34px Arial";
 			this.physicsCtx.fillText(t.token, 0, sizeSmall ? -1 : -4);
@@ -533,8 +519,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 			const textWidth = this.physicsCtx.measureText(t.user).width;
 			
 			this.physicsCtx.fillRect(-((textWidth + 6) / 2), sizeSmall ? 7 : 18, textWidth + 6, sizeSmall ? 9 : 14);
-			this.physicsCtx.fillStyle = "#ffffff";
-			this.physicsCtx.fillText(t.user, 0, sizeSmall ? 11 : 25);
+			this.physicsCtx.fillStyle = "#ffffff"; this.physicsCtx.fillText(t.user, 0, sizeSmall ? 11 : 25);
 			this.physicsCtx.restore();
 		});
 	}
@@ -542,16 +527,11 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 	evaluateLandingZoneScore(user, finalXPercent, isSolo = false) {
 		const zones = this.state.scoreZones || [];
 		const numZones = zones.length || 4;
-		
 		const zoneIndex = Math.min(numZones - 1, Math.floor(finalXPercent / (100 / numZones)));
 		const matchedBucket = zones[zoneIndex] || zones[numZones - 1];
 		
 		if (isSolo) {
-			if (matchedBucket.multiplier > 0) {
-				this.sendNotice(`✨ [SOLO] @${user} hit the [${matchedBucket.label}] slot for a casual ${matchedBucket.multiplier} points!`);
-			} else {
-				this.sendNotice(`💨 [SOLO] @${user} dropped straight into the [${matchedBucket.label}] hazard!`);
-			}
+			this.sendNotice(`✨ [SOLO] @${user} landed in [${matchedBucket.label}] (${matchedBucket.multiplier} pts)!`);
 			return; 
 		}
 
@@ -559,23 +539,13 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 		if (!this.state.currentMatchScores) this.state.currentMatchScores = {};
 
 		const currentMatchHigh = this.state.currentMatchScores[user] || 0;
-		if (matchedBucket.multiplier > currentMatchHigh) {
-			this.state.currentMatchScores[user] = matchedBucket.multiplier;
-		}
+		if (matchedBucket.multiplier > currentMatchHigh) this.state.currentMatchScores[user] = matchedBucket.multiplier;
 
 		const currentSessionHigh = this.state.scores[user] || 0;
-		if (matchedBucket.multiplier > currentSessionHigh) {
-			this.state.scores[user] = matchedBucket.multiplier;
-		}
+		if (matchedBucket.multiplier > currentSessionHigh) this.state.scores[user] = matchedBucket.multiplier;
 
-		this.saveData();
-		this.renderLeaderboardUI();
-
-		if (matchedBucket.multiplier > 0) {
-			this.sendNotice(`🎯 @${user} bounced into [${matchedBucket.label}], securing a score of ${matchedBucket.multiplier}!`);
-		} else {
-			this.sendNotice(`💀 Oof! @${user} plummeted into a [${matchedBucket.label}] danger slot!`);
-		}
+		this.saveData(); this.renderLeaderboardUI();
+		this.sendNotice(`🎯 @${user} hit [${matchedBucket.label}] (${matchedBucket.multiplier} Pts)!`);
 	}
 
 	renderLeaderboardUI() {
@@ -584,9 +554,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 		const matchContainer = panel.querySelector('#dz-match-list');
 		if (matchContainer) {
-			const matchEntries = Object.entries(this.state.currentMatchScores || {})
-				.sort((a, b) => b[1] - a[1]).slice(0, 5);
-
+			const matchEntries = Object.entries(this.state.currentMatchScores || {}).sort((a, b) => b[1] - a[1]).slice(0, 5);
 			if (matchEntries.length === 0) {
 				matchContainer.innerHTML = `<div style="color: #71717a; text-align: center; padding: 6px 0;">No active match scores...</div>`;
 			} else {
@@ -601,9 +569,7 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 
 		const leaderContainer = panel.querySelector('#dz-leaderboard-list');
 		if (leaderContainer) {
-			const sessionEntries = Object.entries(this.state.scores || {})
-				.sort((a, b) => b[1] - a[1]).slice(0, 5);
-
+			const sessionEntries = Object.entries(this.state.scores || {}).sort((a, b) => b[1] - a[1]).slice(0, 5);
 			if (sessionEntries.length === 0) {
 				leaderContainer.innerHTML = `<div style="color: #71717a; text-align: center; padding: 6px 0;">No entries indexed yet...</div>`;
 			} else {
@@ -684,7 +650,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 					const val = parseInt(message.trim(), 10);
 					if (!isNaN(val) && val >= 1 && val <= 10) {
 						this.state.dropDuration = val; this.saveData();
-						this.sendNotice(`⚙️ Emojinko gravity drop duration set to ${val}s.`);
 						const slider = document.getElementById(this.controlId)?.querySelector('#dz-gravity-slider');
 						if (slider) slider.value = val;
 					}
@@ -699,7 +664,6 @@ export class StreamEmojinkoModule extends BaseWidgetModule {
 					const val = parseInt(message.trim(), 10);
 					if (!isNaN(val) && val >= 1 && val <= 20) {
 						this.state.maxDropsPerUser = val; this.saveData();
-						this.sendNotice(`⚙️ Emojinko entry drop cap set to ${val}.`);
 						const slider = document.getElementById(this.controlId)?.querySelector('#dz-limit-slider');
 						if (slider) slider.value = val;
 					}
