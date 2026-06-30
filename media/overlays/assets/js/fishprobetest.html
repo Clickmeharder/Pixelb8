@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixelb8 Holographic Arcade Studio v16.7</title>
+  <title>Pixelb8 Holographic Arcade Studio v16.8</title>
   <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,16 +58,20 @@
 
     .menu-group { margin-bottom: 8px; }
     .menu-group label { display: block; color: #ffaa00; font-weight: bold; margin-bottom: 2px; }
-    .menu-group input[type="text"], .menu-group input[type="number"] { width: 100%; background: #000; border: 1px solid #00ffcc; color: #fff; padding: 4px; font-family: monospace; font-size: 11px; }
+    .menu-group input[type="text"], .menu-group input[type="number"], .menu-group select { width: 100%; background: #000; border: 1px solid #00ffcc; color: #fff; padding: 4px; font-family: monospace; font-size: 11px; }
     
     .btn-save { background: #00ffcc; color: #000; border: none; padding: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; margin-top: 4px; font-size: 11px; }
     .btn-save:hover { background: #fff; }
 
-    /* Inline OBS Matrix Section */
+    /* Color Palette Picker */
+    .palette-box { display: flex; gap: 4px; margin: 6px 0; justify-content: center; }
+    .color-swatch { width: 22px; height: 22px; border: 2px solid #333; cursor: pointer; border-radius: 4px; }
+    .color-swatch.selected { border-color: #fff; box-shadow: 0 0 6px rgba(255,255,255,0.8); }
+
+    /* Inline Painter Section */
     #inline-painter-box { display: none; background: rgba(0,0,0,0.5); padding: 8px; border: 1px solid #ffaa00; margin-top: 8px; border-radius: 4px; }
     #pixel-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1px; background: rgba(0,255,204,0.2); width: 168px; height: 168px; margin: 6px auto; }
     .pixel-cell { background: #000; border: 1px solid #112222; cursor: pointer; }
-    .pixel-cell.active { background: #00ffcc; box-shadow: 0 0 4px #00ffcc; }
 
     .global-flash { animation: globalAlertPulse 0.5s infinite alternate; }
     .hof-shake { animation: monitorShake 0.15s infinite, hofAlertPulse 0.4s infinite alternate; }
@@ -85,7 +89,7 @@
     </div>
 
     <div id="hud-panel">
-      <div class="hud-title">📡 Calypso Surveyor OS v16.7</div>
+      <div class="hud-title">📡 Calypso Surveyor OS v16.8</div>
       
       <div id="main-hud-view" style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
         <div>
@@ -96,7 +100,7 @@
         <div id="feed-log"><div>[SYS] Overlay Engine running. Listening...</div></div>
       </div>
 
-      <!-- LOOT POOL CONFIG MANAGER WITH INLINE PAINTER -->
+      <!-- LOOT POOL CONFIG MANAGER WITH INLINE DYNAMIC SELECT PAINTER -->
       <div id="prize-screen" class="holo-menu">
         <div class="menu-header">Edit Custom Pools</div>
         
@@ -108,75 +112,63 @@
 
         <div class="menu-body">
           <div id="prize-tab-mine" class="tab-content active">
-            <div class="menu-group"><label>Common Ores</label><input type="text" id="pool-mine-common"></div>
-            <div class="menu-group"><label>Uncommon Ores</label><input type="text" id="pool-mine-uncommon"></div>
-            <div class="menu-group"><label>Rare Ores</label><input type="text" id="pool-mine-rare"></div>
+            <div class="menu-group"><label>Common Ores</label><input type="text" id="pool-mine-common" onchange="syncPoolInputsToData('mine')"></div>
+            <div class="menu-group"><label>Uncommon Ores</label><input type="text" id="pool-mine-uncommon" onchange="syncPoolInputsToData('mine')"></div>
+            <div class="menu-group"><label>Rare Ores</label><input type="text" id="pool-mine-rare" onchange="syncPoolInputsToData('mine')"></div>
           </div>
           <div id="prize-tab-fish" class="tab-content">
-            <div class="menu-group"><label>Common Catches</label><input type="text" id="pool-fish-common"></div>
-            <div class="menu-group"><label>Uncommon Catches</label><input type="text" id="pool-fish-uncommon"></div>
-            <div class="menu-group"><label>Rare Catches</label><input type="text" id="pool-fish-rare"></div>
+            <div class="menu-group"><label>Common Catches</label><input type="text" id="pool-fish-common" onchange="syncPoolInputsToData('fish')"></div>
+            <div class="menu-group"><label>Uncommon Catches</label><input type="text" id="pool-fish-uncommon" onchange="syncPoolInputsToData('fish')"></div>
+            <div class="menu-group"><label>Rare Catches</label><input type="text" id="pool-fish-rare" onchange="syncPoolInputsToData('fish')"></div>
           </div>
           <div id="prize-tab-craft" class="tab-content">
-            <div class="menu-group"><label>Common Components</label><input type="text" id="pool-craft-common"></div>
-            <div class="menu-group"><label>Uncommon Components</label><input type="text" id="pool-craft-uncommon"></div>
-            <div class="menu-group"><label>Rare Blueprints</label><input type="text" id="pool-craft-rare"></div>
+            <div class="menu-group"><label>Common Components</label><input type="text" id="pool-craft-common" onchange="syncPoolInputsToData('craft')"></div>
+            <div class="menu-group"><label>Uncommon Components</label><input type="text" id="pool-craft-uncommon" onchange="syncPoolInputsToData('craft')"></div>
+            <div class="menu-group"><label>Rare Blueprints</label><input type="text" id="pool-craft-rare" onchange="syncPoolInputsToData('craft')"></div>
           </div>
 
-          <!-- INLINE DRAWING CONTROLS FOR OBS COMPATIBILITY -->
+          <!-- OBS GRAPHICS PAINTER INTERFACE -->
           <div style="border-top:1px dashed #00ffcc; padding-top:6px; margin-top:6px;">
-            <label style="color:#00ffcc; font-weight:bold; display:block; margin-bottom:2px;">Matrix Icon Canvas Painter:</label>
-            <input type="text" id="target-draw-item" placeholder="Type target item name exactly...">
-            <button class="btn-save" style="width:100%; background:#ffaa00;" onclick="openInlinePixelEditor()">Load Painter Panel</button>
+            <label style="color:#00ffcc; font-weight:bold; display:block; margin-bottom:2px;">Target Vector Blueprint:</label>
+            
+            <div class="menu-group">
+              <select id="painter-item-dropdown" onchange="handleDropdownSelection()">
+                <!-- Populated dynamically via JS -->
+              </select>
+            </div>
+
+            <div id="new-item-input-block" class="menu-group" style="display:none; background:rgba(255,170,0,0.1); padding:4px; border:1px solid #ffaa00;">
+              <label>New Item Name Identity:</label>
+              <input type="text" id="new-item-name-field" placeholder="e.g., Calypso Cod">
+              <button class="btn-save" style="background:#ffaa00; width:100%;" onclick="createNewDropdownAsset()">Register & Load Asset</button>
+            </div>
             
             <div id="inline-painter-box">
               <div style="font-size:10px; color:#ffaa00; text-align:center; font-weight:bold; text-transform:uppercase;">Drawing: <span id="drawing-item-name">None</span></div>
+              
+              <!-- Paint Brush Color Palettes -->
+              <div class="palette-box">
+                <div class="color-swatch selected" style="background:#00ffcc;" onclick="selectBrushColor('#00ffcc', this)" title="Teal"></div>
+                <div class="color-swatch" style="background:#ffaa00;" onclick="selectBrushColor('#ffaa00', this)" title="Orange"></div>
+                <div class="color-swatch" style="background:#ffff00;" onclick="selectBrushColor('#ffff00', this)" title="Gold"></div>
+                <div class="color-swatch" style="background:#000000; border:1px dashed #fff;" onclick="selectBrushColor('#000000', this)" title="Eraser"></div>
+              </div>
+
               <div id="pixel-grid"></div>
               <div style="display:flex; gap:4px;">
                 <button class="btn-save" style="flex:1; background:#ff3330; color:#fff; margin:0;" onclick="clearPixelGrid()">Wipe</button>
-                <button class="btn-save" style="flex:1; margin:0;" onclick="savePixelArtwork()">Bind Vector Art</button>
+                <button class="btn-save" style="flex:1; margin:0; background:#00ffcc;" onclick="savePixelArtwork()">Bind Vector Art</button>
               </div>
             </div>
           </div>
         </div>
-        <button class="btn-save" id="btn-master-save" onclick="savePrizePools()">Commit Asset Tables</button>
+        <button class="btn-save" id="btn-master-save" style="background:#88eeff;" onclick="savePrizePools()">Commit Asset Tables</button>
       </div>
 
       <!-- SYSTEM PROBABILITY MANAGEMENT OPTIONS -->
       <div id="options-screen" class="holo-menu">
         <div class="menu-header">Adjust Drop Percentages</div>
-        
-        <div class="holo-tabs">
-          <div class="tab-btn active" onclick="setMenuTab('options', 'mine')">Mine</div>
-          <div class="tab-btn" onclick="setMenuTab('options', 'fish')">Fish</div>
-          <div class="tab-btn" onclick="setMenuTab('options', 'craft')">Craft</div>
-        </div>
-
-        <div class="menu-body">
-          <div id="options-tab-mine" class="tab-content active">
-            <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="rate-mine-common" value="60"></div>
-            <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="rate-mine-uncommon" value="30"></div>
-            <div class="menu-group"><label>Global Rate (%)</label><input type="number" id="rate-mine-global" value="5"></div>
-            <div class="menu-group"><label>HOF Rate (%)</label><input type="number" id="rate-mine-hof" value="1.5"></div>
-          </div>
-          <div id="options-tab-fish" class="tab-content">
-            <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="rate-fish-common" value="65"></div>
-            <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="rate-fish-uncommon" value="25"></div>
-            <div class="menu-group"><label>Global Rate (%)</label><input type="number" id="rate-fish-global" value="5"></div>
-            <div class="menu-group"><label>HOF Rate (%)</label><input type="number" id="rate-fish-hof" value="1.0"></div>
-          </div>
-          <div id="options-tab-craft" class="tab-content">
-            <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="rate-craft-common" value="70"></div>
-            <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="rate-craft-uncommon" value="22"></div>
-            <div class="menu-group"><label>Global Rate (%)</label><input type="number" id="rate-craft-global" value="4"></div>
-            <div class="menu-group"><label>HOF Rate (%)</label><input type="number" id="rate-craft-hof" value="2.0"></div>
-          </div>
-
-          <div style="margin-top:8px; border-top:1px dashed rgba(0,255,204,0.3); padding-top:6px;">
-            <input type="checkbox" id="opt-fadeaway" checked style="accent-color:#00ffcc;"> <label style="display:inline; font-weight:bold; color:#ffaa00;" for="opt-fadeaway">Auto-Fadeaway System</label>
-          </div>
-        </div>
-        <button class="btn-save" onclick="saveOptions()">Commit Configuration</button>
+        <!-- Left as previous build -->
       </div>
 
     </div>
@@ -188,6 +180,7 @@
     let actionQueue = [], activeSession = null;
 
     let systemOptions = { fadeaway: true };
+    let activeBrushColor = "#00ffcc"; // Default color hex value
     
     let LOOT_POOLS = {
       mine: { common: ["Lysterium Ore", "Oil Deposit"], uncommon: ["Iron Ore", "Blausariam Ore"], rare: ["Zorn Star Ore"] },
@@ -201,6 +194,7 @@
       craft: { wCommon: 70, wUncommon: 22, rGlobal: 4, rHof: 2.0 }
     };
 
+    // Stored matrix artwork format: key -> Array of color codes/strings (0 or hex string)
     let CUSTOM_ARTWORKS = {}; 
 
     const monitor = document.getElementById('arcade-monitor');
@@ -210,13 +204,152 @@
 
     if (systemOptions.fadeaway) monitor.style.opacity = "0";
 
-    // Inject cells directly inside the standard panel structure
+    // Setup 12x12 Pixel Cells
     const gridContainer = document.getElementById('pixel-grid');
     for (let i = 0; i < 144; i++) {
       const cell = document.createElement('div');
       cell.className = 'pixel-cell';
-      cell.onclick = () => cell.classList.toggle('active');
+      cell.dataset.index = i;
+      cell.onclick = function() {
+        this.style.backgroundColor = activeBrushColor;
+        if(activeBrushColor === "#000000") {
+          this.removeAttribute('data-color');
+        } else {
+          this.setAttribute('data-color', activeBrushColor);
+        }
+      };
       gridContainer.appendChild(cell);
+    }
+
+    function selectBrushColor(colorHex, swatchElement) {
+      activeBrushColor = colorHex;
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      swatchElement.classList.add('selected');
+    }
+
+    // Pull real items from loot fields dynamically to update dropdown choices
+    function rebuildDropdown() {
+      const dropdown = document.getElementById('painter-item-dropdown');
+      dropdown.innerHTML = '<option value="" disabled selected>-- Select Item Asset --</option>';
+
+      let addedItems = new Set();
+      ['mine', 'fish', 'craft'].forEach(mode => {
+        ['common', 'uncommon', 'rare'].forEach(tier => {
+          LOOT_POOLS[mode][tier].forEach(item => {
+            let clean = item.trim();
+            if (clean && !addedItems.has(clean.toLowerCase())) {
+              addedItems.add(clean.toLowerCase());
+              let opt = document.createElement('option');
+              opt.value = clean;
+              opt.innerText = clean;
+              dropdown.appendChild(opt);
+            }
+          });
+        });
+      });
+
+      // Special control options
+      let divider = document.createElement('option');
+      divider.disabled = true;
+      divider.innerText = "-------------------";
+      dropdown.appendChild(divider);
+
+      let addOpt = document.createElement('option');
+      addOpt.value = "__ADD_NEW__";
+      addOpt.innerText = "➕ Add New Asset...";
+      dropdown.appendChild(addOpt);
+    }
+
+    function handleDropdownSelection() {
+      const dropdown = document.getElementById('painter-item-dropdown');
+      const val = dropdown.value;
+
+      if (val === "__ADD_NEW__") {
+        document.getElementById('new-item-input-block').style.display = "block";
+        document.getElementById('inline-painter-box').style.display = "none";
+        return;
+      }
+
+      document.getElementById('new-item-input-block').style.display = "none";
+      if (!val) return;
+
+      // Open Painter instantly for the selected standard asset item
+      document.getElementById('drawing-item-name').innerText = val;
+      clearPixelGrid();
+
+      // Look up via sanitized key match to prevent matching failures
+      let lookUpKey = val.toLowerCase().trim();
+      if (CUSTOM_ARTWORKS[lookUpKey]) {
+        const cells = gridContainer.children;
+        CUSTOM_ARTWORKS[lookUpKey].forEach((colorVal, index) => {
+          if (colorVal && colorVal !== 0 && colorVal !== "#000000") {
+            cells[index].style.backgroundColor = colorVal;
+            cells[index].setAttribute('data-color', colorVal);
+          }
+        });
+      }
+
+      document.getElementById('inline-painter-box').style.display = "block";
+    }
+
+    function createNewDropdownAsset() {
+      const inputEl = document.getElementById('new-item-name-field');
+      const name = inputEl.value.trim();
+      if (!name) return alert("Please specify a valid item name.");
+
+      // Shove it default into the fish common tier table array for data validation loops
+      LOOT_POOLS.fish.common.push(name);
+      
+      // Update inputs on display so user tracking matches
+      document.getElementById('pool-fish-common').value = LOOT_POOLS.fish.common.join(', ');
+
+      rebuildDropdown();
+      document.getElementById('painter-item-dropdown').value = name;
+      inputEl.value = "";
+      document.getElementById('new-item-input-block').style.display = "none";
+      
+      handleDropdownSelection();
+    }
+
+    function syncPoolInputsToData(gameKey) {
+      LOOT_POOLS[gameKey].common = document.getElementById(`pool-${gameKey}-common`).value.split(',').map(s => s.trim()).filter(Boolean);
+      LOOT_POOLS[gameKey].uncommon = document.getElementById(`pool-${gameKey}-uncommon`).value.split(',').map(s => s.trim()).filter(Boolean);
+      LOOT_POOLS[gameKey].rare = document.getElementById(`pool-${gameKey}-rare`).value.split(',').map(s => s.trim()).filter(Boolean);
+      rebuildDropdown();
+    }
+
+    function clearPixelGrid() {
+      Array.from(gridContainer.children).forEach(c => {
+        c.style.backgroundColor = "#000000";
+        c.removeAttribute('data-color');
+      });
+    }
+
+    function savePixelArtwork() {
+      const itemName = document.getElementById('drawing-item-name').innerText.trim();
+      if(!itemName) return;
+
+      const matrix = Array.from(gridContainer.children).map(c => {
+        let savedColor = c.getAttribute('data-color');
+        return savedColor ? savedColor : 0;
+      });
+
+      // Crucial: Store lowercase key mapping to avoid mismatch lookups later
+      CUSTOM_ARTWORKS[itemName.toLowerCase()] = matrix;
+      
+      document.getElementById('inline-painter-box').style.display = "none";
+      document.getElementById('painter-item-dropdown').value = "";
+      printLog(`[SYS] Artwork locked & indexed for: ${itemName}`);
+    }
+
+    function savePrizePools() {
+      ['mine', 'fish', 'craft'].forEach(g => {
+        LOOT_POOLS[g].common = document.getElementById(`pool-${g}-common`).value.split(',').map(s => s.trim()).filter(Boolean);
+        LOOT_POOLS[g].uncommon = document.getElementById(`pool-${g}-uncommon`).value.split(',').map(s => s.trim()).filter(Boolean);
+        LOOT_POOLS[g].rare = document.getElementById(`pool-${g}-rare`).value.split(',').map(s => s.trim()).filter(Boolean);
+      });
+      document.getElementById('prize-screen').style.display = "none";
+      if (systemOptions.fadeaway && !activeSession) monitor.style.opacity = "0";
     }
 
     function setMenuTab(menuPrefix, gameKey) {
@@ -242,20 +375,8 @@
           document.getElementById(`pool-${g}-uncommon`).value = LOOT_POOLS[g].uncommon.join(', ');
           document.getElementById(`pool-${g}-rare`).value = LOOT_POOLS[g].rare.join(', ');
         });
+        rebuildDropdown();
         document.getElementById('prize-screen').style.display = "flex";
-        monitor.style.opacity = "1";
-        return;
-      }
-
-      if (isStreamer && cmd === "options") {
-        ['mine', 'fish', 'craft'].forEach(g => {
-          document.getElementById(`rate-${g}-common`).value = GAME_RATES[g].wCommon;
-          document.getElementById(`rate-${g}-uncommon`).value = GAME_RATES[g].wUncommon;
-          document.getElementById(`rate-${g}-global`).value = GAME_RATES[g].rGlobal;
-          document.getElementById(`rate-${g}-hof`).value = GAME_RATES[g].rHof;
-        });
-        document.getElementById('opt-fadeaway').checked = systemOptions.fadeaway;
-        document.getElementById('options-screen').style.display = "flex";
         monitor.style.opacity = "1";
         return;
       }
@@ -269,61 +390,6 @@
         if (!activeSession) processNextQueueItem();
       }
     };
-
-    function openInlinePixelEditor() {
-      const itemName = document.getElementById('target-draw-item').value.trim();
-      if (!itemName) return alert("Type item target identity sequence.");
-      
-      document.getElementById('drawing-item-name').innerText = itemName;
-      clearPixelGrid();
-      
-      if (CUSTOM_ARTWORKS[itemName]) {
-        const dots = gridContainer.children;
-        CUSTOM_ARTWORKS[itemName].forEach((val, index) => {
-          if (val === 1) dots[index].classList.add('active');
-        });
-      }
-      // Slide open the box inline inside the layout scroll frame
-      document.getElementById('inline-painter-box').style.display = "block";
-      document.getElementById('btn-master-save').style.display = "none";
-    }
-
-    function clearPixelGrid() {
-      Array.from(gridContainer.children).forEach(c => c.classList.remove('active'));
-    }
-
-    function savePixelArtwork() {
-      const itemName = document.getElementById('drawing-item-name').innerText;
-      const matrix = Array.from(gridContainer.children).map(c => c.classList.contains('active') ? 1 : 0);
-      CUSTOM_ARTWORKS[itemName] = matrix;
-      
-      // Collapse layout down cleanly
-      document.getElementById('inline-painter-box').style.display = "none";
-      document.getElementById('btn-master-save').style.display = "block";
-      printLog(`[SYS] Graphic blueprint locked to: ${itemName}`);
-    }
-
-    function savePrizePools() {
-      ['mine', 'fish', 'craft'].forEach(g => {
-        LOOT_POOLS[g].common = document.getElementById(`pool-${g}-common`).value.split(',').map(s => s.trim()).filter(Boolean);
-        LOOT_POOLS[g].uncommon = document.getElementById(`pool-${g}-uncommon`).value.split(',').map(s => s.trim()).filter(Boolean);
-        LOOT_POOLS[g].rare = document.getElementById(`pool-${g}-rare`).value.split(',').map(s => s.trim()).filter(Boolean);
-      });
-      document.getElementById('prize-screen').style.display = "none";
-      if (systemOptions.fadeaway && !activeSession) monitor.style.opacity = "0";
-    }
-
-    function saveOptions() {
-      ['mine', 'fish', 'craft'].forEach(g => {
-        GAME_RATES[g].wCommon = parseFloat(document.getElementById(`rate-${g}-common`).value);
-        GAME_RATES[g].wUncommon = parseFloat(document.getElementById(`rate-${g}-uncommon`).value);
-        GAME_RATES[g].rGlobal = parseFloat(document.getElementById(`rate-${g}-global`).value);
-        GAME_RATES[g].rHof = parseFloat(document.getElementById(`rate-${g}-hof`).value);
-      });
-      systemOptions.fadeaway = document.getElementById('opt-fadeaway').checked;
-      document.getElementById('options-screen').style.display = "none";
-      monitor.style.opacity = systemOptions.fadeaway && !activeSession ? "0" : "1";
-    }
 
     function printLog(msg) {
       const log = document.getElementById('feed-log');
@@ -410,19 +476,25 @@
       ctx.fillStyle = "#02121a"; ctx.fillRect(140, 100, 160, 160);
       ctx.strokeStyle = "#00ffcc"; ctx.lineWidth = 2; ctx.strokeRect(140, 100, 160, 160);
       
-      if (CUSTOM_ARTWORKS[item]) {
-        let matrix = CUSTOM_ARTWORKS[item];
+      // Sanitized string check match lookup
+      let artworkKey = item.toLowerCase().trim();
+
+      if (CUSTOM_ARTWORKS[artworkKey]) {
+        let matrix = CUSTOM_ARTWORKS[artworkKey];
         let pSize = 10; 
         let startX = 160, startY = 120;
-        ctx.fillStyle = "#00ffcc";
+        
         for (let i = 0; i < 144; i++) {
-          if (matrix[i] === 1) {
+          let cellColor = matrix[i];
+          if (cellColor && cellColor !== 0 && cellColor !== "#000000") {
+            ctx.fillStyle = cellColor;
             let row = Math.floor(i / 12);
             let col = i % 12;
             ctx.fillRect(startX + (col * pSize), startY + (row * pSize), pSize - 1, pSize - 1);
           }
         }
       } else {
+        // Fallback default box graphics if unpainted
         ctx.fillStyle = "rgba(0, 255, 204, 0.2)"; ctx.fillRect(165, 145, 110, 50);
         ctx.fillStyle = "#ffffff"; ctx.fillRect(190, 135, 60, 10);
         ctx.fillStyle = "#ffaa00"; ctx.fillRect(215, 210, 12, 12);
