@@ -1,156 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixelb8 Retro Arcade Colonist Overlay</title>
   <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Roboto+Mono&display=swap');
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: transparent;
-      margin: 0;
-      font-family: 'Roboto Mono', monospace;
+      background-color: transparent;
+      font-family: 'Courier New', Courier, monospace;
       overflow: hidden;
-    }
-
-    #overlay {
       width: 800px;
-      height: 400px;
-      position: relative;
-      background: rgba(10, 15, 20, 0.7);
-      border: 2px solid #00f2ff;
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
+      height: 450px;
     }
 
-    /* CRT Scanline Effect */
-    #overlay::before {
-      content: " ";
+    /* CRT Monitor Frame Container */
+    #arcade-monitor {
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
+      top: 20px;
+      left: 20px;
+      width: 760px;
+      height: 410px;
+      background: #020b08;
+      border: 4px solid #33ff66;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(51, 255, 102, 0.5), inset 0 0 30px rgba(0,0,0,0.9);
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+    }
+
+    /* Moving Retro Scanlines Overlay Effect */
+    #arcade-monitor::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
       background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-      background-size: 100% 4px, 3px 100%;
+      z-index: 10;
+      background-size: 100% 4px, 6px 100%;
       pointer-events: none;
     }
 
-    #header {
-      padding: 15px 25px;
+    /* Game Screen Left */
+    #view-screen {
+      width: 440px;
+      height: 100%;
+      position: relative;
+      background: #000;
+      border-right: 2px dashed rgba(51, 255, 102, 0.4);
+    }
+    
+    canvas {
+      display: block;
+      image-rendering: pixelated;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* HUD Content Right */
+    #hud-panel {
+      width: 320px;
+      height: 100%;
+      padding: 15px;
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(0, 242, 255, 0.3);
-      color: #00f2ff;
-      font-family: 'Orbitron', sans-serif;
+      background: rgba(4, 15, 10, 0.9);
+      color: #33ff66;
     }
 
-    #main-display {
-      display: flex;
-      height: 250px;
-      align-items: center;
-      justify-content: space-around;
-      padding: 20px;
+    .hud-title {
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      letter-spacing: 2px;
+      border-bottom: 2px solid #33ff66;
+      padding-bottom: 6px;
+      animation: flicker 2s infinite;
     }
 
-    /* SVG Animation Container */
-    #visual-rig { width: 200px; height: 200px; }
-
-    #info-panel { flex: 1; margin-left: 20px; }
-
-    .stat-line { margin: 8px 0; color: #fff; font-size: 14px; }
-    .stat-label { color: #888; margin-right: 10px; }
-
-    /* Animations */
-    @keyframes dropProbe {
-      0% { transform: translateY(-50px); opacity: 0; }
-      20% { transform: translateY(0); opacity: 1; }
-      80% { transform: translateY(0); }
-      100% { transform: translateY(-50px); opacity: 0; }
+    #result-title {
+      font-size: 22px;
+      font-weight: 900;
+      margin-top: 15px;
+      text-transform: uppercase;
+      text-align: center;
+      min-height: 30px;
     }
-    .animate-rig { animation: dropProbe 2.5s ease-in-out; }
 
-    .global-text { color: #ff3c00; font-weight: bold; text-shadow: 0 0 10px #ff3c00; }
-    .hof-text { color: #ffd700; font-weight: bold; font-size: 1.2em; text-shadow: 0 0 15px #ffd700; }
+    #result-item {
+      font-size: 14px;
+      text-align: center;
+      color: #ffffff;
+      margin: 5px 0;
+    }
+
+    .ped-counter {
+      font-size: 36px;
+      text-align: center;
+      font-weight: bold;
+      color: #ffcc00;
+      text-shadow: 0 0 8px rgba(255,204,0,0.6);
+      margin: 10px 0;
+    }
+
+    #feed-log {
+      font-size: 11px;
+      height: 90px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(51, 255, 102, 0.2);
+      padding: 5px;
+      overflow: hidden;
+    }
+
+    .global-flash { animation: screenFlash 0.4s infinite alternate; }
+    .hof-shake { animation: monitorShake 0.15s infinite; }
+
+    @keyframes flicker {
+      0% { opacity: 0.95; } 50% { opacity: 1; } 55% { opacity: 0.85; } 100% { opacity: 1; }
+    }
+    @keyframes screenFlash {
+      from { background-color: rgba(4, 15, 10, 0.9); }
+      to { background-color: rgba(150, 20, 0, 0.8); }
+    }
+    @keyframes monitorShake {
+      0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(2px, 1px); }
+    }
   </style>
 </head>
 <body>
 
-<div id="overlay">
-  <div id="header">
-    <span>ENTROPIA_SURVEYOR_V1</span>
-    <span id="status">READY</span>
-  </div>
-  
-  <div id="main-display">
-    <svg id="visual-rig" viewBox="0 0 100 100">
-      <defs>
-        <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#00f2ff" />
-          <stop offset="100%" stop-color="#0066ff" />
-        </linearGradient>
-      </defs>
-      <!-- Base Structure -->
-      <rect x="45" y="10" width="10" height="40" fill="#333" />
-      <!-- Animated Probe -->
-      <g id="probe-group" style="opacity:0">
-        <rect x="47.5" y="50" width="5" height="30" fill="url(#glow)" />
-        <circle cx="50" cy="85" r="5" fill="#ff3c00" />
-      </g>
-    </svg>
+  <div id="arcade-monitor">
+    <!-- Visual Game Animation Zone -->
+    <div id="view-screen">
+      <canvas id="retroCanvas" width="440" height="410"></canvas>
+    </div>
 
-    <div id="info-panel">
-      <div class="stat-line"><span class="stat-label">OPERATOR:</span><span id="user-display">N/A</span></div>
-      <div class="stat-line"><span class="stat-label">ACTION:</span><span id="action-display">IDLE</span></div>
-      <div class="stat-line"><span class="stat-label">RESULT:</span><span id="result-display">WAITING_INPUT</span></div>
+    <!-- Telemetry Readout Panel -->
+    <div id="hud-panel">
+      <div class="hud-title">▼ AM_SURVEYOR OS v16.3 ▼</div>
+      
+      <div>
+        <div id="result-title">READY</div>
+        <div id="result-item">Waiting for command...</div>
+        <div class="ped-counter"><span id="ped-val">0.00</span> <span style="font-size:16px;">PED</span></div>
+      </div>
+
+      <div id="feed-log">
+        <div>[SYS] System initialised. Listening to jaedraze.</div>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-  const probe = document.getElementById('probe-group');
-  const userDisp = document.getElementById('user-display');
-  const actionDisp = document.getElementById('action-display');
-  const resultDisp = document.getElementById('result-display');
-  const statusDisp = document.getElementById('status');
+  <script>
+    const STREAMER_NAME = "jaedraze";
+    const userCooldowns = new Map();
+    let actionQueue = [];
+    let activeSession = null;
 
-  const LOOT = ["Lysterium Ore", "Iron Ore", "Blausariam Ore", "Calypso Cod", "Oil Deposit", "Acid Root"];
+    // Customizable pools via streamer triggers
+    let LOOT_TABLES = {
+      fish: ["Calypso Cod", "Rigid Snapper", "Moonfish", "Deep Sea Skreem", "Rusty Hook"],
+      mine: ["Lysterium Ore", "Iron Ore", "Blausariam Ore", "Oil Deposit", "Zorn Star Ore"],
+      craft: ["Standard Matrix", "Electronic Component", "Armor Plate", "Weapon Blueprint", "Explosive Pack"]
+    };
 
-  ComfyJS.onCommand = (user, command) => {
-    if (command === "fish" || command === "mine") {
-      runSequence(user, command);
-    }
-  };
+    const canvas = document.getElementById('retroCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
 
-  function runSequence(user, cmd) {
-    // Reset & Start
-    probe.classList.remove('animate-rig');
-    void probe.offsetWidth; 
-    probe.classList.add('animate-rig');
-    
-    userDisp.innerText = user;
-    actionDisp.innerText = cmd.toUpperCase();
-    statusDisp.innerText = "ACTIVE";
-    resultDisp.className = "";
-    resultDisp.innerText = "SCANNING...";
+    // Standard ComfyJS hooks
+    ComfyJS.onCommand = (user, command, message, flags, extra) => {
+      const cmd = command.toLowerCase();
+      const isStreamer = (user.toLowerCase() === STREAMER_NAME.toLowerCase() || flags.broadcaster || flags.mod);
 
-    setTimeout(() => {
-      const roll = Math.random();
-      let lootName = LOOT[Math.floor(Math.random() * LOOT.length)];
-      let ped = (Math.random() * 50).toFixed(2);
-      
-      if (roll > 0.98) {
-        resultDisp.className = "hof-text";
-        resultDisp.innerText = `HOF! ${ped} PED ${lootName}`;
-      } else if (roll > 0.90) {
-        resultDisp.className = "global-text";
-        resultDisp.innerText = `GLOBAL! ${ped} PED ${lootName}`;
-      } else {
-        resultDisp.innerText = `${ped} PED ${lootName}`;
+      // Streamer Admin System Controls
+      if (isStreamer && (cmd === "addprize" || cmd === "changeprize")) {
+        const parts = message.split(' ');
+        const poolTarget = parts[0]?.toLowerCase();
+        const prizeName = parts.slice(1).join(' ');
+        
+        if (LOOT_TABLES[poolTarget] && prizeName) {
+          LOOT_TABLES[poolTarget].push(prizeName);
+          printLog(`[ADMIN] Added ${prizeName} to ${poolTarget}`);
+        }
+        return;
       }
-      
-      statusDisp.innerText = "READY";
-    }, 1250);
-  }
 
-  ComfyJS.Init("jaedraze");
-</script>
+      // Action Commands
+      if (cmd === "fish" || cmd === "mine" || cmd === "craft") {
+        const now = Date.now();
+        if (!isStreamer && userCooldowns.has(user) && (now - userCooldowns.get(user) < 10000)) return;
+        
+        userCooldowns.set(user, now);
+        actionQueue.push({ user, type: cmd });
+        if (!activeSession) processNextQueueItem();
+      }
+    };
+
+    function printLog(msg) {
+      const log = document.getElementById('feed-log');
+      const div = document.createElement('div');
+      div.innerText = msg;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+      if (log.children.length > 6) log.removeChild(log.firstChild);
+    }
+
+    function processNextQueueItem() {
+      if (actionQueue.length === 0) {
+        activeSession = null;
+        resetCanvasFrame();
+        return;
+      }
+      activeSession = actionQueue.shift();
+      initAnimation(activeSession.type, activeSession.user);
+    }
+
+    function resetCanvasFrame() {
+      ctx.fillStyle = "#030303";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#33ff66";
+      ctx.font = "14px 'Courier New'";
+      ctx.fillText("SYSTEM STANDBY: ENTER !FISH, !MINE, !CRAFT", 25, 200);
+      document.getElementById('arcade-monitor').className = "";
+      document.getElementById('result-title').innerText = "STANDBY";
+      document.getElementById('result-item').innerText = "Awaiting connection...";
+    }
+
+    function initAnimation(type, user) {
+      let frame = 0;
+      const maxFrames = 120; // ~2 seconds animation execution
+      const pool = LOOT_TABLES[type];
+      const winItem = pool[Math.floor(Math.random() * pool.length)];
+      
+      const roll = Math.random() * 100;
+      let sizeText = "Minimal (Size I)";
+      let ped = (Math.random() * 2).toFixed(2);
+      let classification = "normal";
+
+      if (roll > 98) { sizeText = "HALL OF FAME!!"; ped = (Math.random() * 1200 + 1000).toFixed(2); classification = "hof"; }
+      else if (roll > 92) { sizeText = "GLOBAL!"; ped = (Math.random() * 300 + 200).toFixed(2); classification = "global"; }
+      else if (roll > 60) { sizeText = "Sizable Find"; ped = (Math.random() * 40 + 10).toFixed(2); }
+
+      document.getElementById('result-title').innerText = type.toUpperCase();
+      document.getElementById('result-item').innerText = `Surveying: ${user}...`;
+
+      function renderLoop() {
+        ctx.fillStyle = "#050f0c";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Pixel grid backdrop lines
+        ctx.strokeStyle = "rgba(51, 255, 102, 0.05)";
+        for(let i=0; i<canvas.width; i+=20) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+
+        if (type === 'fish') {
+          // Fishing Render
+          ctx.fillStyle = "#025577"; ctx.fillRect(0, 250, canvas.width, 160); // Pond base
+          ctx.fillStyle = "#ffffff"; ctx.fillRect(40, 220, 15, 30); // Retro Fisher block
+          ctx.strokeStyle = "#ffffff"; ctx.beginPath(); ctx.moveTo(55, 225); ctx.lineTo(180 + (frame*0.5), 250 + Math.sin(frame*0.2)*5); ctx.stroke(); // line
+        } 
+        else if (type === 'mine') {
+          // Mining Render
+          ctx.fillStyle = "#3a2212"; ctx.fillRect(0, 150, canvas.width, 260); // Earth block
+          ctx.fillStyle = "#00ffcc"; ctx.fillRect(200, 30, 40, 20); // Extractor rig
+          ctx.fillStyle = "#ff3300"; ctx.fillRect(218, 50, 4, Math.min(frame * 3, 300)); // Laser drill vector beam
+        } 
+        else if (type === 'craft') {
+          // Crafting Assembler Render
+          ctx.fillStyle = "#222"; ctx.fillRect(120, 130, 200, 150);
+          ctx.fillStyle = (frame % 4 < 2) ? "#ffcc00" : "#33ff66";
+          ctx.fillRect(170 + Math.sin(frame)*4, 170, 100, 60); // Processing Matrix box
+        }
+
+        frame++;
+        if (frame < maxFrames) {
+          requestAnimationFrame(renderLoop);
+        } else {
+          // Trigger item generation display state
+          triggerLootReveal(user, winItem, ped, sizeText, classification);
+        }
+      }
+      renderLoop();
+    }
+
+    function triggerLootReveal(user, item, ped, sizeText, classification) {
+      document.getElementById('result-title').innerText = sizeText;
+      document.getElementById('result-item').innerText = `${user} extracted: ${item}`;
+      document.getElementById('ped-val').innerText = ped;
+      printLog(`[FIND] ${user} got ${item} (${ped} PED)`);
+
+      const monitor = document.getElementById('arcade-monitor');
+      monitor.className = "";
+      if (classification === 'global') monitor.classList.add('global-flash');
+      if (classification === 'hof') monitor.classList.add('hof-shake');
+
+      // Draw the pixel graphic box on the canvas
+      ctx.fillStyle = "#000"; ctx.fillRect(120, 100, 200, 200);
+      ctx.strokeStyle = "#33ff66"; ctx.lineWidth = 3; ctx.strokeRect(120, 100, 200, 200);
+      
+      // Abstract procedural block drawing representing item matrix
+      ctx.fillStyle = "#ffcc00"; ctx.fillRect(170, 160, 100, 50);
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(190, 150, 60, 10);
+      ctx.fillStyle = "#ff3300"; ctx.fillRect(215, 230, 10, 10);
+
+      setTimeout(() => { processNextQueueItem(); }, 6000);
+    }
+
+    ComfyJS.Init(STREAMER_NAME);
+    resetCanvasFrame();
+  </script>
 </body>
 </html>
