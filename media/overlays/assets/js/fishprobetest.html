@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixelb8 Advanced Holo-Arcade Studio</title>
+  <title>Pixelb8 Holographic Arcade Studio v16.6</title>
   <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,16 +46,24 @@
     #feed-log { font-size: 11px; font-family: 'Courier New', monospace; background: rgba(0,0,0,0.4); border: 1px solid rgba(0, 255, 204, 0.2); padding: 6px; height: 85px; overflow: hidden; color: #88ccff; }
 
     .holo-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 22, 31, 0.98); z-index: 5; padding: 12px; display: none; flex-direction: column; border-left: 2px solid #00ffcc; }
-    .menu-header { font-size: 13px; font-weight: bold; color: #00ffcc; border-bottom: 1px solid #00ffcc; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
-    .menu-body { flex-grow: 1; overflow-y: auto; font-size: 11px; }
+    .menu-header { font-size: 13px; font-weight: bold; color: #00ffcc; text-transform: uppercase; margin-bottom: 4px; }
+    
+    /* Interactive Tab Bars */
+    .holo-tabs { display: flex; gap: 2px; margin-bottom: 10px; border-bottom: 1px solid rgba(0, 255, 204, 0.4); padding-bottom: 2px; }
+    .tab-btn { flex: 1; background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.3); color: #88eeff; padding: 4px 0; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; text-align: center; }
+    .tab-btn.active { background: #00ffcc; color: #000; border-color: #00ffcc; }
+
+    .menu-body { flex-grow: 1; overflow-y: auto; font-size: 11px; padding-right: 2px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
     .menu-group { margin-bottom: 8px; }
     .menu-group label { display: block; color: #ffaa00; font-weight: bold; margin-bottom: 2px; }
-    .menu-group input[type="text"], .menu-group input[type="number"] { width: 100%; background: #000; border: 1px solid #00ffcc; color: #fff; padding: 4px; font-family: monospace; }
+    .menu-group input[type="text"], .menu-group input[type="number"] { width: 100%; background: #000; border: 1px solid #00ffcc; color: #fff; padding: 4px; font-family: monospace; font-size: 11px; }
     
     .btn-save { background: #00ffcc; color: #000; border: none; padding: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; margin-top: 4px; font-size: 11px; }
     .btn-save:hover { background: #fff; }
 
-    /* Pixel Editor Layout */
     #pixel-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1px; background: rgba(0,255,204,0.2); width: 180px; height: 180px; margin: 10px auto; }
     .pixel-cell { background: #000; border: 1px solid #112222; cursor: pointer; }
     .pixel-cell.active { background: #00ffcc; box-shadow: 0 0 4px #00ffcc; }
@@ -76,65 +84,103 @@
     </div>
 
     <div id="hud-panel">
-      <div class="hud-title">📡 Calypso Surveyor OS v16.5</div>
+      <div class="hud-title">📡 Calypso Surveyor OS v16.6</div>
       
-      <!-- Primary Core Screen -->
       <div id="main-hud-view" style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
         <div>
           <div id="result-title">STANDBY</div>
           <div id="result-item">Enter !fish, !mine, or !craft</div>
           <div class="ped-counter"><span id="ped-val">0.00</span> <span style="font-size:14px; color: rgba(0, 255, 204, 0.6);">PED</span></div>
         </div>
-        <div id="feed-log"><div>[SYS] HUD Ready. Listening to jaedraze...</div></div>
+        <div id="feed-log"><div>[SYS] System calibrated. Awaiting chat commands...</div></div>
       </div>
 
       <!-- LOOT POOL CONFIG MANAGER -->
       <div id="prize-screen" class="holo-menu">
-        <div class="menu-header">Edit Rarity Pools</div>
+        <div class="menu-header">Edit Custom Pools</div>
+        
+        <div class="holo-tabs">
+          <div class="tab-btn active" onclick="setMenuTab('prize', 'mine')">Mine</div>
+          <div class="tab-btn" onclick="setMenuTab('prize', 'fish')">Fish</div>
+          <div class="tab-btn" onclick="setMenuTab('prize', 'craft')">Craft</div>
+        </div>
+
         <div class="menu-body">
-          <div class="menu-group">
-            <label>Common Items (Comma Sep.)</label>
-            <input type="text" id="pool-common">
+          <!-- Mining Loot Content -->
+          <div id="prize-tab-mine" class="tab-content active">
+            <div class="menu-group"><label>Common Ores</label><input type="text" id="pool-mine-common"></div>
+            <div class="menu-group"><label>Uncommon Ores</label><input type="text" id="pool-mine-uncommon"></div>
+            <div class="menu-group"><label>Rare Ores</label><input type="text" id="pool-mine-rare"></div>
           </div>
-          <div class="menu-group">
-            <label>Uncommon Items (Comma Sep.)</label>
-            <input type="text" id="pool-uncommon">
+          <!-- Fishing Loot Content -->
+          <div id="prize-tab-fish" class="tab-content">
+            <div class="menu-group"><label>Common Catches</label><input type="text" id="pool-fish-common"></div>
+            <div class="menu-group"><label>Uncommon Catches</label><input type="text" id="pool-fish-uncommon"></div>
+            <div class="menu-group"><label>Rare Catches</label><input type="text" id="pool-fish-rare"></div>
           </div>
-          <div class="menu-group">
-            <label>Rare Items (Comma Sep.)</label>
-            <input type="text" id="pool-rare">
+          <!-- Crafting Loot Content -->
+          <div id="prize-tab-craft" class="tab-content">
+            <div class="menu-group"><label>Common Components</label><input type="text" id="pool-craft-common"></div>
+            <div class="menu-group"><label>Uncommon Components</label><input type="text" id="pool-craft-uncommon"></div>
+            <div class="menu-group"><label>Rare Blueprints</label><input type="text" id="pool-craft-rare"></div>
           </div>
-          <div style="border-top:1px dashed #00ffcc; padding-top:5px; margin-top:5px;">
-            <label style="color:#00ffcc;">Target Matrix Drawing tool:</label>
-            <input type="text" id="target-draw-item" placeholder="Type exact item name to draw...">
-            <button class="btn-save" style="width:100%; background:#ffaa00;" onclick="openPixelEditor()">Open Matrix Canvas Box</button>
+
+          <div style="border-top:1px dashed #00ffcc; padding-top:4px; margin-top:4px;">
+            <label style="color:#00ffcc; font-weight:bold; display:block; margin-bottom:2px;">Matrix Icon Canvas Painter:</label>
+            <input type="text" id="target-draw-item" placeholder="Type target item name exactly...">
+            <button class="btn-save" style="width:100%; background:#ffaa00;" onclick="openPixelEditor()">Load Painter Panel</button>
           </div>
         </div>
-        <button class="btn-save" onclick="savePrizePools()">Save Setup</button>
+        <button class="btn-save" onclick="savePrizePools()">Commit Asset Tables</button>
       </div>
 
-      <!-- RATES OPTIONS SCREEN -->
+      <!-- SYSTEM PROBABILITY MANAGEMENT OPTIONS -->
       <div id="options-screen" class="holo-menu">
-        <div class="menu-header">Adjust Probability %</div>
+        <div class="menu-header">Adjust Drop Percentages</div>
+        
+        <div class="holo-tabs">
+          <div class="tab-btn active" onclick="setMenuTab('options', 'mine')">Mine</div>
+          <div class="tab-btn" onclick="setMenuTab('options', 'fish')">Fish</div>
+          <div class="tab-btn" onclick="setMenuTab('options', 'craft')">Craft</div>
+        </div>
+
         <div class="menu-body">
-          <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="weight-common" value="60"></div>
-          <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="weight-uncommon" value="30"></div>
-          <div class="menu-group"><label>Global Threshold Probability (%)</label><input type="number" id="rate-global" value="5"></div>
-          <div class="menu-group"><label>HOF Threshold Probability (%)</label><input type="number" id="rate-hof" value="1.5"></div>
-          <div style="margin-top:10px;">
-            <input type="checkbox" id="opt-fadeaway" checked> <label style="display:inline;" for="opt-fadeaway">Auto-Fadeaway</label>
+          <!-- Mining Ratios -->
+          <div id="options-tab-mine" class="tab-content active">
+            <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="rate-mine-common" value="60"></div>
+            <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="rate-mine-uncommon" value="30"></div>
+            <div class="menu-group"><label>Global Rate (%)</label><input type="number" id="rate-mine-global" value="5"></div>
+            <div class="menu-group"><label>HOF Rate (%)</label><input type="number" id="rate-mine-hof" value="1.5"></div>
+          </div>
+          <!-- Fishing Ratios -->
+          <div id="options-tab-fish" class="tab-content">
+            <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="rate-fish-common" value="65"></div>
+            <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="rate-fish-uncommon" value="25"></div>
+            <div class="menu-group"><label>Global Rate (%)</label><input type="number" id="rate-fish-global" value="5"></div>
+            <div class="menu-group"><label>HOF Rate (%)</label><input type="number" id="rate-fish-hof" value="1.0"></div>
+          </div>
+          <!-- Crafting Ratios -->
+          <div id="options-tab-craft" class="tab-content">
+            <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="rate-craft-common" value="70"></div>
+            <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="rate-craft-uncommon" value="22"></div>
+            <div class="menu-group"><label>Global Rate (%)</label><input type="number" id="rate-craft-global" value="4"></div>
+            <div class="menu-group"><label>HOF Rate (%)</label><input type="number" id="rate-craft-hof" value="2.0"></div>
+          </div>
+
+          <div style="margin-top:8px; border-top:1px dashed rgba(0,255,204,0.3); padding-top:6px;">
+            <input type="checkbox" id="opt-fadeaway" checked style="accent-color:#00ffcc;"> <label style="display:inline; font-weight:bold; color:#ffaa00;" for="opt-fadeaway">Auto-Fadeaway System</label>
           </div>
         </div>
-        <button class="btn-save" onclick="saveOptions()">Apply Parameters</button>
+        <button class="btn-save" onclick="saveOptions()">Commit Configuration</button>
       </div>
 
-      <!-- PIXEL DESIGN MATRIX FRAME -->
+      <!-- PIXEL CANVAS SUB-BOX -->
       <div id="pixel-editor-screen" class="holo-menu" style="z-index:10;">
-        <div class="menu-header">Drawing: <span id="drawing-item-name" style="color:#ffaa00;">None</span></div>
+        <div class="menu-header">Artwork Matrix: <span id="drawing-item-name" style="color:#ffaa00;">None</span></div>
         <div id="pixel-grid"></div>
         <div style="display:flex; gap:5px;">
-          <button class="btn-save" style="flex:1; background:#ff3330; color:#fff;" onclick="clearPixelGrid()">Clear</button>
-          <button class="btn-save" style="flex:1;" onclick="savePixelArtwork()">Bind Image</button>
+          <button class="btn-save" style="flex:1; background:#ff3330; color:#fff;" onclick="clearPixelGrid()">Wipe</button>
+          <button class="btn-save" style="flex:1;" onclick="savePixelArtwork()">Bind Vector</button>
         </div>
       </div>
 
@@ -146,15 +192,23 @@
     const userCooldowns = new Map();
     let actionQueue = [], activeSession = null;
 
-    let systemOptions = { fadeaway: true, wCommon: 60, wUncommon: 30, rGlobal: 5, rHof: 1.5 };
+    let systemOptions = { fadeaway: true };
     
+    // Complete separation of sub-tier loot objects per minigame type
     let LOOT_POOLS = {
-      common: ["Lysterium Ore", "Calypso Cod", "Rusty Hook", "Standard Matrix"],
-      uncommon: ["Iron Ore", "Rigid Snapper", "Electronic Component"],
-      rare: ["Zorn Star Ore", "Deep Sea Skreem", "Weapon Blueprint"]
+      mine: { common: ["Lysterium Ore", "Oil Deposit"], uncommon: ["Iron Ore", "Blausariam Ore"], rare: ["Zorn Star Ore"] },
+      fish: { common: ["Calypso Cod", "Rusty Hook"], uncommon: ["Rigid Snapper", "Moonfish"], rare: ["Deep Sea Skreem"] },
+      craft: { common: ["Standard Matrix"], uncommon: ["Electronic Component"], rare: ["Weapon Blueprint", "Armor Plate"] }
     };
 
-    let CUSTOM_ARTWORKS = {}; // Holds string mapping of 144 bit matrices
+    // Fine-tuned independent target matrix coefficients
+    let GAME_RATES = {
+      mine: { wCommon: 60, wUncommon: 30, rGlobal: 5, rHof: 1.5 },
+      fish: { wCommon: 65, wUncommon: 25, rGlobal: 5, rHof: 1.0 },
+      craft: { wCommon: 70, wUncommon: 22, rGlobal: 4, rHof: 2.0 }
+    };
+
+    let CUSTOM_ARTWORKS = {}; 
 
     const monitor = document.getElementById('arcade-monitor');
     const canvas = document.getElementById('retroCanvas');
@@ -163,7 +217,7 @@
 
     if (systemOptions.fadeaway) monitor.style.opacity = "0";
 
-    // Build the 12x12 Editor Matrix grid components dynamically
+    // Setup interactive 12x12 matrix engine
     const gridContainer = document.getElementById('pixel-grid');
     for (let i = 0; i < 144; i++) {
       const cell = document.createElement('div');
@@ -172,24 +226,44 @@
       gridContainer.appendChild(cell);
     }
 
+    // Interactive Tab Controller logic
+    function setMenuTab(menuPrefix, gameKey) {
+      const containerId = menuPrefix === 'prize' ? 'prize-screen' : 'options-screen';
+      const container = document.getElementById(containerId);
+      
+      // Update Tab Button highlights
+      const tabs = container.querySelectorAll('.tab-btn');
+      tabs.forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Update Panel Layout views
+      const contents = container.querySelectorAll('.tab-content');
+      contents.forEach(c => c.classList.remove('active'));
+      container.querySelector(`#${menuPrefix}-tab-${gameKey}`).classList.add('active');
+    }
+
     ComfyJS.onCommand = (user, command, message, flags, extra) => {
       const cmd = command.toLowerCase();
       const isStreamer = (user.toLowerCase() === STREAMER_NAME.toLowerCase() || flags.broadcaster || flags.mod);
 
-      if (isStreamer && cmd === "editholoscreenprizes") {
-        document.getElementById('pool-common').value = LOOT_POOLS.common.join(', ');
-        document.getElementById('pool-uncommon').value = LOOT_POOLS.uncommon.join(', ');
-        document.getElementById('pool-rare').value = LOOT_POOLS.rare.join(', ');
+      if (isStreamer && cmd === "pixelgame editprizes") {
+        ['mine', 'fish', 'craft'].forEach(g => {
+          document.getElementById(`pool-${g}-common`).value = LOOT_POOLS[g].common.join(', ');
+          document.getElementById(`pool-${g}-uncommon`).value = LOOT_POOLS[g].uncommon.join(', ');
+          document.getElementById(`pool-${g}-rare`).value = LOOT_POOLS[g].rare.join(', ');
+        });
         document.getElementById('prize-screen').style.display = "flex";
         monitor.style.opacity = "1";
         return;
       }
 
-      if (isStreamer && cmd === "options") {
-        document.getElementById('weight-common').value = systemOptions.wCommon;
-        document.getElementById('weight-uncommon').value = systemOptions.wUncommon;
-        document.getElementById('rate-global').value = systemOptions.rGlobal;
-        document.getElementById('rate-hof').value = systemOptions.rHof;
+      if (isStreamer && cmd === "Pixelgame options") {
+        ['mine', 'fish', 'craft'].forEach(g => {
+          document.getElementById(`rate-${g}-common`).value = GAME_RATES[g].wCommon;
+          document.getElementById(`rate-${g}-uncommon`).value = GAME_RATES[g].wUncommon;
+          document.getElementById(`rate-${g}-global`).value = GAME_RATES[g].rGlobal;
+          document.getElementById(`rate-${g}-hof`).value = GAME_RATES[g].rHof;
+        });
         document.getElementById('opt-fadeaway').checked = systemOptions.fadeaway;
         document.getElementById('options-screen').style.display = "flex";
         monitor.style.opacity = "1";
@@ -208,7 +282,7 @@
 
     function openPixelEditor() {
       const itemName = document.getElementById('target-draw-item').value.trim();
-      if (!itemName) return alert("Please enter a valid item name first!");
+      if (!itemName) return alert("Enter item target key tag identity sequence.");
       document.getElementById('drawing-item-name').innerText = itemName;
       clearPixelGrid();
       
@@ -230,22 +304,26 @@
       const matrix = Array.from(gridContainer.children).map(c => c.classList.contains('active') ? 1 : 0);
       CUSTOM_ARTWORKS[itemName] = matrix;
       document.getElementById('pixel-editor-screen').style.display = "none";
-      printLog(`[SYS] Custom matrix artwork bound to ${itemName}`);
+      printLog(`[SYS] Graphic blueprint locked to: ${itemName}`);
     }
 
     function savePrizePools() {
-      LOOT_POOLS.common = document.getElementById('pool-common').value.split(',').map(s => s.trim()).filter(Boolean);
-      LOOT_POOLS.uncommon = document.getElementById('pool-uncommon').value.split(',').map(s => s.trim()).filter(Boolean);
-      LOOT_POOLS.rare = document.getElementById('pool-rare').value.split(',').map(s => s.trim()).filter(Boolean);
+      ['mine', 'fish', 'craft'].forEach(g => {
+        LOOT_POOLS[g].common = document.getElementById(`pool-${g}-common`).value.split(',').map(s => s.trim()).filter(Boolean);
+        LOOT_POOLS[g].uncommon = document.getElementById(`pool-${g}-uncommon`).value.split(',').map(s => s.trim()).filter(Boolean);
+        LOOT_POOLS[g].rare = document.getElementById(`pool-${g}-rare`).value.split(',').map(s => s.trim()).filter(Boolean);
+      });
       document.getElementById('prize-screen').style.display = "none";
       if (systemOptions.fadeaway && !activeSession) monitor.style.opacity = "0";
     }
 
     function saveOptions() {
-      systemOptions.wCommon = parseFloat(document.getElementById('weight-common').value);
-      systemOptions.wUncommon = parseFloat(document.getElementById('weight-uncommon').value);
-      systemOptions.rGlobal = parseFloat(document.getElementById('rate-global').value);
-      systemOptions.rHof = parseFloat(document.getElementById('rate-hof').value);
+      ['mine', 'fish', 'craft'].forEach(g => {
+        GAME_RATES[g].wCommon = parseFloat(document.getElementById(`rate-${g}-common`).value);
+        GAME_RATES[g].wUncommon = parseFloat(document.getElementById(`rate-${g}-uncommon`).value);
+        GAME_RATES[g].rGlobal = parseFloat(document.getElementById(`rate-${g}-global`).value);
+        GAME_RATES[g].rHof = parseFloat(document.getElementById(`rate-${g}-hof`).value);
+      });
       systemOptions.fadeaway = document.getElementById('opt-fadeaway').checked;
       document.getElementById('options-screen').style.display = "none";
       monitor.style.opacity = systemOptions.fadeaway && !activeSession ? "0" : "1";
@@ -271,7 +349,7 @@
     function resetCanvasFrame() {
       ctx.fillStyle = "#010a0f"; ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#00ffcc"; ctx.font = "bold 11px monospace";
-      ctx.fillText("SYSTEM LOGGED // WAITING FOR DIRECTIVE", 40, 200);
+      ctx.fillText("SYSTEM ONLINE // MONITORS LOGGED", 40, 200);
       monitor.className = "";
       document.getElementById('result-title').innerText = "STANDBY";
       document.getElementById('result-item').innerText = "Enter !fish, !mine, or !craft";
@@ -279,25 +357,25 @@
 
     function initAnimation(type, user) {
       let frame = 0, maxFrames = 100;
-      
-      // Roll Rarity Tier based on weights
+      const rates = GAME_RATES[type];
+
+      // Target calculations for selected minigame configuration
       const rollTier = Math.random() * 100;
       let activeTier = "common";
-      if (rollTier > systemOptions.wCommon + systemOptions.wUncommon) activeTier = "rare";
-      else if (rollTier > systemOptions.wCommon) activeTier = "uncommon";
+      if (rollTier > rates.wCommon + rates.wUncommon) activeTier = "rare";
+      else if (rollTier > rates.wCommon) activeTier = "uncommon";
       
-      const pool = LOOT_POOLS[activeTier];
-      const winItem = pool[Math.floor(Math.random() * pool.length)] || "Spelt Fragment";
+      const pool = LOOT_POOLS[type][activeTier];
+      const winItem = pool[Math.floor(Math.random() * pool.length)] || "Spelt Residue";
 
-      // Roll Cash Returns (Global / HOF Checks)
       const rollGold = Math.random() * 100;
-      let sizeText = "Minimal Find", classification = "normal", ped = (Math.random() * 1.2 + 0.02).toFixed(2);
+      let sizeText = "Minimal Trace", classification = "normal", ped = (Math.random() * 1.4 + 0.01).toFixed(2);
 
-      if (rollGold < systemOptions.rHof) { sizeText = "HALL OF FAME!!!"; ped = (Math.random() * 1200 + 1000).toFixed(2); classification = "hof"; }
-      else if (rollGold < systemOptions.rHof + systemOptions.rGlobal) { sizeText = "GLOBAL!"; ped = (Math.random() * 300 + 200).toFixed(2); classification = "global"; }
-      else if (rollGold < 30) { sizeText = "Sizable Extract"; ped = (Math.random() * 35 + 8).toFixed(2); }
+      if (rollGold < rates.rHof) { sizeText = "HALL OF FAME!!!"; ped = (Math.random() * 1500 + 1000).toFixed(2); classification = "hof"; }
+      else if (rollGold < rates.rHof + rates.rGlobal) { sizeText = "GLOBAL!"; ped = (Math.random() * 350 + 200).toFixed(2); classification = "global"; }
+      else if (rollGold < 25) { sizeText = "Sizable Return"; ped = (Math.random() * 40 + 7).toFixed(2); }
 
-      document.getElementById('result-title').innerText = "SCANNING...";
+      document.getElementById('result-title').innerText = "CALIBRATING...";
       document.getElementById('result-item').innerText = `Target Lock: ${user}`;
 
       function renderLoop() {
@@ -334,14 +412,12 @@
       if (classification === 'global') monitor.classList.add('global-flash');
       if (classification === 'hof') monitor.classList.add('hof-shake');
 
-      // Draw item matrix display container card 
       ctx.fillStyle = "#02121a"; ctx.fillRect(140, 100, 160, 160);
       ctx.strokeStyle = "#00ffcc"; ctx.lineWidth = 2; ctx.strokeRect(140, 100, 160, 160);
       
       if (CUSTOM_ARTWORKS[item]) {
-        // Render Streamer Custom Pixels
         let matrix = CUSTOM_ARTWORKS[item];
-        let pSize = 10; // Pixel size bounds
+        let pSize = 10; 
         let startX = 160, startY = 120;
         ctx.fillStyle = "#00ffcc";
         for (let i = 0; i < 144; i++) {
@@ -352,7 +428,6 @@
           }
         }
       } else {
-        // Procedural Fallback Blueprint Default Image
         ctx.fillStyle = "rgba(0, 255, 204, 0.2)"; ctx.fillRect(165, 145, 110, 50);
         ctx.fillStyle = "#ffffff"; ctx.fillRect(190, 135, 60, 10);
         ctx.fillStyle = "#ffaa00"; ctx.fillRect(215, 210, 12, 12);
