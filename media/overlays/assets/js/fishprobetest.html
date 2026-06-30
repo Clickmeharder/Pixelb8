@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Roboto+Mono&display=swap');
+
+    body {
+      background: transparent;
+      margin: 0;
+      font-family: 'Roboto Mono', monospace;
+      overflow: hidden;
+    }
+
+    #overlay {
+      width: 800px;
+      height: 400px;
+      position: relative;
+      background: rgba(10, 15, 20, 0.7);
+      border: 2px solid #00f2ff;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    /* CRT Scanline Effect */
+    #overlay::before {
+      content: " ";
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 3px 100%;
+      pointer-events: none;
+    }
+
+    #header {
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+      color: #00f2ff;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    #main-display {
+      display: flex;
+      height: 250px;
+      align-items: center;
+      justify-content: space-around;
+      padding: 20px;
+    }
+
+    /* SVG Animation Container */
+    #visual-rig { width: 200px; height: 200px; }
+
+    #info-panel { flex: 1; margin-left: 20px; }
+
+    .stat-line { margin: 8px 0; color: #fff; font-size: 14px; }
+    .stat-label { color: #888; margin-right: 10px; }
+
+    /* Animations */
+    @keyframes dropProbe {
+      0% { transform: translateY(-50px); opacity: 0; }
+      20% { transform: translateY(0); opacity: 1; }
+      80% { transform: translateY(0); }
+      100% { transform: translateY(-50px); opacity: 0; }
+    }
+    .animate-rig { animation: dropProbe 2.5s ease-in-out; }
+
+    .global-text { color: #ff3c00; font-weight: bold; text-shadow: 0 0 10px #ff3c00; }
+    .hof-text { color: #ffd700; font-weight: bold; font-size: 1.2em; text-shadow: 0 0 15px #ffd700; }
+  </style>
+</head>
+<body>
+
+<div id="overlay">
+  <div id="header">
+    <span>ENTROPIA_SURVEYOR_V1</span>
+    <span id="status">READY</span>
+  </div>
+  
+  <div id="main-display">
+    <svg id="visual-rig" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#00f2ff" />
+          <stop offset="100%" stop-color="#0066ff" />
+        </linearGradient>
+      </defs>
+      <!-- Base Structure -->
+      <rect x="45" y="10" width="10" height="40" fill="#333" />
+      <!-- Animated Probe -->
+      <g id="probe-group" style="opacity:0">
+        <rect x="47.5" y="50" width="5" height="30" fill="url(#glow)" />
+        <circle cx="50" cy="85" r="5" fill="#ff3c00" />
+      </g>
+    </svg>
+
+    <div id="info-panel">
+      <div class="stat-line"><span class="stat-label">OPERATOR:</span><span id="user-display">N/A</span></div>
+      <div class="stat-line"><span class="stat-label">ACTION:</span><span id="action-display">IDLE</span></div>
+      <div class="stat-line"><span class="stat-label">RESULT:</span><span id="result-display">WAITING_INPUT</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const probe = document.getElementById('probe-group');
+  const userDisp = document.getElementById('user-display');
+  const actionDisp = document.getElementById('action-display');
+  const resultDisp = document.getElementById('result-display');
+  const statusDisp = document.getElementById('status');
+
+  const LOOT = ["Lysterium Ore", "Iron Ore", "Blausariam Ore", "Calypso Cod", "Oil Deposit", "Acid Root"];
+
+  ComfyJS.onCommand = (user, command) => {
+    if (command === "fish" || command === "mine") {
+      runSequence(user, command);
+    }
+  };
+
+  function runSequence(user, cmd) {
+    // Reset & Start
+    probe.classList.remove('animate-rig');
+    void probe.offsetWidth; 
+    probe.classList.add('animate-rig');
+    
+    userDisp.innerText = user;
+    actionDisp.innerText = cmd.toUpperCase();
+    statusDisp.innerText = "ACTIVE";
+    resultDisp.className = "";
+    resultDisp.innerText = "SCANNING...";
+
+    setTimeout(() => {
+      const roll = Math.random();
+      let lootName = LOOT[Math.floor(Math.random() * LOOT.length)];
+      let ped = (Math.random() * 50).toFixed(2);
+      
+      if (roll > 0.98) {
+        resultDisp.className = "hof-text";
+        resultDisp.innerText = `HOF! ${ped} PED ${lootName}`;
+      } else if (roll > 0.90) {
+        resultDisp.className = "global-text";
+        resultDisp.innerText = `GLOBAL! ${ped} PED ${lootName}`;
+      } else {
+        resultDisp.innerText = `${ped} PED ${lootName}`;
+      }
+      
+      statusDisp.innerText = "READY";
+    }, 1250);
+  }
+
+  ComfyJS.Init("jaedraze");
+</script>
+</body>
+</html>
