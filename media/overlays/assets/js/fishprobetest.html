@@ -246,7 +246,7 @@
       const cmd = command.toLowerCase();
       const isStreamer = (user.toLowerCase() === STREAMER_NAME.toLowerCase() || flags.broadcaster || flags.mod);
 
-      if (isStreamer && cmd === "pixelgame editprizes") {
+      if (isStreamer && cmd === "pixelgameprizes") {
         ['mine', 'fish', 'craft'].forEach(g => {
           document.getElementById(`pool-${g}-common`).value = LOOT_POOLS[g].common.join(', ');
           document.getElementById(`pool-${g}-uncommon`).value = LOOT_POOLS[g].uncommon.join(', ');
@@ -257,7 +257,7 @@
         return;
       }
 
-      if (isStreamer && cmd === "Pixelgame options") {
+      if (isStreamer && cmd === "pixelgameoptions") {
         ['mine', 'fish', 'craft'].forEach(g => {
           document.getElementById(`rate-${g}-common`).value = GAME_RATES[g].wCommon;
           document.getElementById(`rate-${g}-uncommon`).value = GAME_RATES[g].wUncommon;
