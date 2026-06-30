@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixelb8 Holographic Arcade Studio v16.6</title>
+  <title>Pixelb8 Holographic Arcade Studio v16.7</title>
   <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,7 +48,6 @@
     .holo-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 22, 31, 0.98); z-index: 5; padding: 12px; display: none; flex-direction: column; border-left: 2px solid #00ffcc; }
     .menu-header { font-size: 13px; font-weight: bold; color: #00ffcc; text-transform: uppercase; margin-bottom: 4px; }
     
-    /* Interactive Tab Bars */
     .holo-tabs { display: flex; gap: 2px; margin-bottom: 10px; border-bottom: 1px solid rgba(0, 255, 204, 0.4); padding-bottom: 2px; }
     .tab-btn { flex: 1; background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.3); color: #88eeff; padding: 4px 0; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; text-align: center; }
     .tab-btn.active { background: #00ffcc; color: #000; border-color: #00ffcc; }
@@ -64,7 +63,9 @@
     .btn-save { background: #00ffcc; color: #000; border: none; padding: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; margin-top: 4px; font-size: 11px; }
     .btn-save:hover { background: #fff; }
 
-    #pixel-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1px; background: rgba(0,255,204,0.2); width: 180px; height: 180px; margin: 10px auto; }
+    /* Inline OBS Matrix Section */
+    #inline-painter-box { display: none; background: rgba(0,0,0,0.5); padding: 8px; border: 1px solid #ffaa00; margin-top: 8px; border-radius: 4px; }
+    #pixel-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1px; background: rgba(0,255,204,0.2); width: 168px; height: 168px; margin: 6px auto; }
     .pixel-cell { background: #000; border: 1px solid #112222; cursor: pointer; }
     .pixel-cell.active { background: #00ffcc; box-shadow: 0 0 4px #00ffcc; }
 
@@ -84,7 +85,7 @@
     </div>
 
     <div id="hud-panel">
-      <div class="hud-title">📡 Calypso Surveyor OS v16.6</div>
+      <div class="hud-title">📡 Calypso Surveyor OS v16.7</div>
       
       <div id="main-hud-view" style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
         <div>
@@ -92,10 +93,10 @@
           <div id="result-item">Enter !fish, !mine, or !craft</div>
           <div class="ped-counter"><span id="ped-val">0.00</span> <span style="font-size:14px; color: rgba(0, 255, 204, 0.6);">PED</span></div>
         </div>
-        <div id="feed-log"><div>[SYS] System calibrated. Awaiting chat commands...</div></div>
+        <div id="feed-log"><div>[SYS] Overlay Engine running. Listening...</div></div>
       </div>
 
-      <!-- LOOT POOL CONFIG MANAGER -->
+      <!-- LOOT POOL CONFIG MANAGER WITH INLINE PAINTER -->
       <div id="prize-screen" class="holo-menu">
         <div class="menu-header">Edit Custom Pools</div>
         
@@ -106,32 +107,39 @@
         </div>
 
         <div class="menu-body">
-          <!-- Mining Loot Content -->
           <div id="prize-tab-mine" class="tab-content active">
             <div class="menu-group"><label>Common Ores</label><input type="text" id="pool-mine-common"></div>
             <div class="menu-group"><label>Uncommon Ores</label><input type="text" id="pool-mine-uncommon"></div>
             <div class="menu-group"><label>Rare Ores</label><input type="text" id="pool-mine-rare"></div>
           </div>
-          <!-- Fishing Loot Content -->
           <div id="prize-tab-fish" class="tab-content">
             <div class="menu-group"><label>Common Catches</label><input type="text" id="pool-fish-common"></div>
             <div class="menu-group"><label>Uncommon Catches</label><input type="text" id="pool-fish-uncommon"></div>
             <div class="menu-group"><label>Rare Catches</label><input type="text" id="pool-fish-rare"></div>
           </div>
-          <!-- Crafting Loot Content -->
           <div id="prize-tab-craft" class="tab-content">
             <div class="menu-group"><label>Common Components</label><input type="text" id="pool-craft-common"></div>
             <div class="menu-group"><label>Uncommon Components</label><input type="text" id="pool-craft-uncommon"></div>
             <div class="menu-group"><label>Rare Blueprints</label><input type="text" id="pool-craft-rare"></div>
           </div>
 
-          <div style="border-top:1px dashed #00ffcc; padding-top:4px; margin-top:4px;">
+          <!-- INLINE DRAWING CONTROLS FOR OBS COMPATIBILITY -->
+          <div style="border-top:1px dashed #00ffcc; padding-top:6px; margin-top:6px;">
             <label style="color:#00ffcc; font-weight:bold; display:block; margin-bottom:2px;">Matrix Icon Canvas Painter:</label>
             <input type="text" id="target-draw-item" placeholder="Type target item name exactly...">
-            <button class="btn-save" style="width:100%; background:#ffaa00;" onclick="openPixelEditor()">Load Painter Panel</button>
+            <button class="btn-save" style="width:100%; background:#ffaa00;" onclick="openInlinePixelEditor()">Load Painter Panel</button>
+            
+            <div id="inline-painter-box">
+              <div style="font-size:10px; color:#ffaa00; text-align:center; font-weight:bold; text-transform:uppercase;">Drawing: <span id="drawing-item-name">None</span></div>
+              <div id="pixel-grid"></div>
+              <div style="display:flex; gap:4px;">
+                <button class="btn-save" style="flex:1; background:#ff3330; color:#fff; margin:0;" onclick="clearPixelGrid()">Wipe</button>
+                <button class="btn-save" style="flex:1; margin:0;" onclick="savePixelArtwork()">Bind Vector Art</button>
+              </div>
+            </div>
           </div>
         </div>
-        <button class="btn-save" onclick="savePrizePools()">Commit Asset Tables</button>
+        <button class="btn-save" id="btn-master-save" onclick="savePrizePools()">Commit Asset Tables</button>
       </div>
 
       <!-- SYSTEM PROBABILITY MANAGEMENT OPTIONS -->
@@ -145,21 +153,18 @@
         </div>
 
         <div class="menu-body">
-          <!-- Mining Ratios -->
           <div id="options-tab-mine" class="tab-content active">
             <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="rate-mine-common" value="60"></div>
             <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="rate-mine-uncommon" value="30"></div>
             <div class="menu-group"><label>Global Rate (%)</label><input type="number" id="rate-mine-global" value="5"></div>
             <div class="menu-group"><label>HOF Rate (%)</label><input type="number" id="rate-mine-hof" value="1.5"></div>
           </div>
-          <!-- Fishing Ratios -->
           <div id="options-tab-fish" class="tab-content">
             <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="rate-fish-common" value="65"></div>
             <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="rate-fish-uncommon" value="25"></div>
             <div class="menu-group"><label>Global Rate (%)</label><input type="number" id="rate-fish-global" value="5"></div>
             <div class="menu-group"><label>HOF Rate (%)</label><input type="number" id="rate-fish-hof" value="1.0"></div>
           </div>
-          <!-- Crafting Ratios -->
           <div id="options-tab-craft" class="tab-content">
             <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="rate-craft-common" value="70"></div>
             <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="rate-craft-uncommon" value="22"></div>
@@ -174,16 +179,6 @@
         <button class="btn-save" onclick="saveOptions()">Commit Configuration</button>
       </div>
 
-      <!-- PIXEL CANVAS SUB-BOX -->
-      <div id="pixel-editor-screen" class="holo-menu" style="z-index:10;">
-        <div class="menu-header">Artwork Matrix: <span id="drawing-item-name" style="color:#ffaa00;">None</span></div>
-        <div id="pixel-grid"></div>
-        <div style="display:flex; gap:5px;">
-          <button class="btn-save" style="flex:1; background:#ff3330; color:#fff;" onclick="clearPixelGrid()">Wipe</button>
-          <button class="btn-save" style="flex:1;" onclick="savePixelArtwork()">Bind Vector</button>
-        </div>
-      </div>
-
     </div>
   </div>
 
@@ -194,14 +189,12 @@
 
     let systemOptions = { fadeaway: true };
     
-    // Complete separation of sub-tier loot objects per minigame type
     let LOOT_POOLS = {
       mine: { common: ["Lysterium Ore", "Oil Deposit"], uncommon: ["Iron Ore", "Blausariam Ore"], rare: ["Zorn Star Ore"] },
       fish: { common: ["Calypso Cod", "Rusty Hook"], uncommon: ["Rigid Snapper", "Moonfish"], rare: ["Deep Sea Skreem"] },
       craft: { common: ["Standard Matrix"], uncommon: ["Electronic Component"], rare: ["Weapon Blueprint", "Armor Plate"] }
     };
 
-    // Fine-tuned independent target matrix coefficients
     let GAME_RATES = {
       mine: { wCommon: 60, wUncommon: 30, rGlobal: 5, rHof: 1.5 },
       fish: { wCommon: 65, wUncommon: 25, rGlobal: 5, rHof: 1.0 },
@@ -217,7 +210,7 @@
 
     if (systemOptions.fadeaway) monitor.style.opacity = "0";
 
-    // Setup interactive 12x12 matrix engine
+    // Inject cells directly inside the standard panel structure
     const gridContainer = document.getElementById('pixel-grid');
     for (let i = 0; i < 144; i++) {
       const cell = document.createElement('div');
@@ -226,17 +219,14 @@
       gridContainer.appendChild(cell);
     }
 
-    // Interactive Tab Controller logic
     function setMenuTab(menuPrefix, gameKey) {
       const containerId = menuPrefix === 'prize' ? 'prize-screen' : 'options-screen';
       const container = document.getElementById(containerId);
       
-      // Update Tab Button highlights
       const tabs = container.querySelectorAll('.tab-btn');
       tabs.forEach(t => t.classList.remove('active'));
       event.target.classList.add('active');
 
-      // Update Panel Layout views
       const contents = container.querySelectorAll('.tab-content');
       contents.forEach(c => c.classList.remove('active'));
       container.querySelector(`#${menuPrefix}-tab-${gameKey}`).classList.add('active');
@@ -246,7 +236,7 @@
       const cmd = command.toLowerCase();
       const isStreamer = (user.toLowerCase() === STREAMER_NAME.toLowerCase() || flags.broadcaster || flags.mod);
 
-      if (isStreamer && cmd === "pixelgameprizes") {
+      if (isStreamer && cmd === "editholoscreenprizes") {
         ['mine', 'fish', 'craft'].forEach(g => {
           document.getElementById(`pool-${g}-common`).value = LOOT_POOLS[g].common.join(', ');
           document.getElementById(`pool-${g}-uncommon`).value = LOOT_POOLS[g].uncommon.join(', ');
@@ -257,7 +247,7 @@
         return;
       }
 
-      if (isStreamer && cmd === "pixelgameoptions") {
+      if (isStreamer && cmd === "options") {
         ['mine', 'fish', 'craft'].forEach(g => {
           document.getElementById(`rate-${g}-common`).value = GAME_RATES[g].wCommon;
           document.getElementById(`rate-${g}-uncommon`).value = GAME_RATES[g].wUncommon;
@@ -280,9 +270,10 @@
       }
     };
 
-    function openPixelEditor() {
+    function openInlinePixelEditor() {
       const itemName = document.getElementById('target-draw-item').value.trim();
-      if (!itemName) return alert("Enter item target key tag identity sequence.");
+      if (!itemName) return alert("Type item target identity sequence.");
+      
       document.getElementById('drawing-item-name').innerText = itemName;
       clearPixelGrid();
       
@@ -292,7 +283,9 @@
           if (val === 1) dots[index].classList.add('active');
         });
       }
-      document.getElementById('pixel-editor-screen').style.display = "flex";
+      // Slide open the box inline inside the layout scroll frame
+      document.getElementById('inline-painter-box').style.display = "block";
+      document.getElementById('btn-master-save').style.display = "none";
     }
 
     function clearPixelGrid() {
@@ -303,7 +296,10 @@
       const itemName = document.getElementById('drawing-item-name').innerText;
       const matrix = Array.from(gridContainer.children).map(c => c.classList.contains('active') ? 1 : 0);
       CUSTOM_ARTWORKS[itemName] = matrix;
-      document.getElementById('pixel-editor-screen').style.display = "none";
+      
+      // Collapse layout down cleanly
+      document.getElementById('inline-painter-box').style.display = "none";
+      document.getElementById('btn-master-save').style.display = "block";
       printLog(`[SYS] Graphic blueprint locked to: ${itemName}`);
     }
 
@@ -349,7 +345,7 @@
     function resetCanvasFrame() {
       ctx.fillStyle = "#010a0f"; ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#00ffcc"; ctx.font = "bold 11px monospace";
-      ctx.fillText("SYSTEM ONLINE // MONITORS LOGGED", 40, 200);
+      ctx.fillText("SYSTEM ONLINE // OBS CHANNELS BOUND", 40, 200);
       monitor.className = "";
       document.getElementById('result-title').innerText = "STANDBY";
       document.getElementById('result-item').innerText = "Enter !fish, !mine, or !craft";
@@ -359,7 +355,6 @@
       let frame = 0, maxFrames = 100;
       const rates = GAME_RATES[type];
 
-      // Target calculations for selected minigame configuration
       const rollTier = Math.random() * 100;
       let activeTier = "common";
       if (rollTier > rates.wCommon + rates.wUncommon) activeTier = "rare";
