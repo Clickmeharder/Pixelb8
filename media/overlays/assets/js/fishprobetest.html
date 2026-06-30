@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixelb8 Advanced Holo-Arcade Overlay</title>
+  <title>Pixelb8 Advanced Holo-Arcade Studio</title>
   <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,232 +15,127 @@
       height: 450px;
     }
 
-    /* CRT Monitor Frame Container */
     #arcade-monitor {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      width: 760px;
-      height: 410px;
-      background: #02121a;
-      border: 3px solid #00ffcc;
-      border-radius: 16px;
+      top: 20px; left: 20px; width: 760px; height: 410px;
+      background: #02121a; border: 3px solid #00ffcc; border-radius: 16px;
       box-shadow: 0 0 25px rgba(0, 255, 204, 0.4), inset 0 0 30px rgba(0,0,0,0.9);
-      overflow: hidden;
-      display: flex;
-      flex-direction: row;
-      opacity: 1;
+      overflow: hidden; display: flex; flex-direction: row; opacity: 1;
       transition: opacity 0.8s ease-in-out;
     }
 
-    /* Scanlines Overlay Effect */
     #arcade-monitor::before {
-      content: " ";
-      display: block;
-      position: absolute;
-      top: 0; left: 0; bottom: 0; right: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(0, 255, 204, 0.04), rgba(0, 0, 0, 0), rgba(0, 255, 204, 0.04));
-      z-index: 10;
-      background-size: 100% 4px, 6px 100%;
-      pointer-events: none;
+      content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+      z-index: 10; background-size: 100% 4px; pointer-events: none;
     }
 
-    /* Game Screen Left */
-    #view-screen {
-      width: 440px;
-      height: 100%;
-      position: relative;
-      background: #010a0f;
-      border-right: 2px dashed rgba(0, 255, 204, 0.3);
-    }
-    
-    canvas {
-      display: block;
-      image-rendering: pixelated;
-      width: 100%;
-      height: 100%;
-    }
+    #view-screen { width: 440px; height: 100%; background: #010a0f; border-right: 2px dashed rgba(0, 255, 204, 0.3); }
+    canvas { display: block; image-rendering: pixelated; width: 100%; height: 100%; }
 
-    /* HUD Content Right */
     #hud-panel {
-      width: 320px;
-      height: 100%;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      background: linear-gradient(135deg, rgba(2, 18, 26, 0.95) 0%, rgba(5, 40, 50, 0.9) 100%);
-      color: #ffffff;
-      position: relative;
+      width: 320px; height: 100%; padding: 15px; display: flex; flex-direction: column;
+      justify-content: space-between; background: linear-gradient(135deg, rgba(2, 18, 26, 0.95) 0%, rgba(5, 40, 50, 0.9) 100%);
+      color: #ffffff; position: relative;
     }
 
-    .hud-title {
-      font-size: 13px;
-      font-weight: bold;
-      text-align: center;
-      letter-spacing: 2px;
-      color: #88eeff;
-      border-bottom: 1px solid rgba(0, 255, 204, 0.3);
-      padding-bottom: 6px;
-      text-transform: uppercase;
-    }
+    .hud-title { font-size: 12px; font-weight: bold; text-align: center; color: #88eeff; border-bottom: 1px solid rgba(0, 255, 204, 0.3); padding-bottom: 6px; }
+    #result-title { font-size: 20px; font-weight: 900; margin-top: 10px; text-transform: uppercase; text-align: center; color: #ffaa00; min-height: 30px; }
+    #result-item { font-size: 13px; text-align: center; color: #ffffff; margin: 4px 0; }
+    .ped-counter { font-size: 36px; text-align: center; font-weight: 900; color: #00ffcc; font-family: 'Courier New', monospace; margin: 5px 0; }
+    #feed-log { font-size: 11px; font-family: 'Courier New', monospace; background: rgba(0,0,0,0.4); border: 1px solid rgba(0, 255, 204, 0.2); padding: 6px; height: 85px; overflow: hidden; color: #88ccff; }
 
-    #result-title {
-      font-size: 20px;
-      font-weight: 900;
-      margin-top: 15px;
-      text-transform: uppercase;
-      text-align: center;
-      color: #ffaa00;
-      letter-spacing: 1px;
-      min-height: 30px;
-    }
-
-    #result-item {
-      font-size: 14px;
-      text-align: center;
-      color: #ffffff;
-      margin: 8px 0;
-    }
-
-    .ped-counter {
-      font-size: 38px;
-      text-align: center;
-      font-weight: 900;
-      color: #00ffcc;
-      font-family: 'Courier New', monospace;
-      text-shadow: 0 0 10px rgba(0,255,204,0.5);
-      margin: 10px 0;
-    }
-
-    #feed-log {
-      font-size: 11px;
-      font-family: 'Courier New', monospace;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(0, 255, 204, 0.2);
-      padding: 6px;
-      height: 90px;
-      overflow: hidden;
-      color: #88ccff;
-    }
-
-    /* INTERACTIVE MENUS OVERLAYS */
-    .holo-menu {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(2, 22, 31, 0.98);
-      z-index: 5;
-      padding: 15px;
-      display: none;
-      flex-direction: column;
-      border-left: 2px solid #00ffcc;
-    }
-
-    .menu-header {
-      font-size: 14px;
-      font-weight: bold;
-      color: #00ffcc;
-      border-bottom: 1px solid #00ffcc;
-      padding-bottom: 5px;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-    }
-
-    .menu-body {
-      flex-grow: 1;
-      overflow-y: auto;
-      font-size: 12px;
-    }
-
-    .menu-group { margin-bottom: 10px; }
+    .holo-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 22, 31, 0.98); z-index: 5; padding: 12px; display: none; flex-direction: column; border-left: 2px solid #00ffcc; }
+    .menu-header { font-size: 13px; font-weight: bold; color: #00ffcc; border-bottom: 1px solid #00ffcc; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
+    .menu-body { flex-grow: 1; overflow-y: auto; font-size: 11px; }
+    .menu-group { margin-bottom: 8px; }
     .menu-group label { display: block; color: #ffaa00; font-weight: bold; margin-bottom: 2px; }
-    .menu-group input[type="text"] {
-      width: 100%; background: #000; border: 1px solid #00ffcc; color: #fff; padding: 4px; font-family: monospace;
-    }
-
-    .btn-save {
-      background: #00ffcc; color: #000; border: none; padding: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; margin-top: 5px;
-    }
+    .menu-group input[type="text"], .menu-group input[type="number"] { width: 100%; background: #000; border: 1px solid #00ffcc; color: #fff; padding: 4px; font-family: monospace; }
+    
+    .btn-save { background: #00ffcc; color: #000; border: none; padding: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; margin-top: 4px; font-size: 11px; }
     .btn-save:hover { background: #fff; }
 
-    /* Hit Reactions */
-    .global-flash { animation: globalAlertPulse 0.5s infinite alternate; }
-    .global-flash #result-title { color: #ff5500 !important; }
-    .global-flash .ped-counter { color: #ff5500 !important; text-shadow: 0 0 10px #ff5500; }
-    
-    .hof-shake { animation: monitorShake 0.15s infinite, hofAlertPulse 0.4s infinite alternate; }
-    .hof-shake #result-title { color: #ffcc00 !important; }
-    .hof-shake .ped-counter { color: #ffcc00 !important; text-shadow: 0 0 15px #ffcc00; }
+    /* Pixel Editor Layout */
+    #pixel-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1px; background: rgba(0,255,204,0.2); width: 180px; height: 180px; margin: 10px auto; }
+    .pixel-cell { background: #000; border: 1px solid #112222; cursor: pointer; }
+    .pixel-cell.active { background: #00ffcc; box-shadow: 0 0 4px #00ffcc; }
 
-    @keyframes globalAlertPulse {
-      from { border-color: #00ffcc; box-shadow: 0 0 25px rgba(0, 255, 204, 0.4); }
-      to { border-color: #ff5500; box-shadow: 0 0 35px rgba(255, 85, 0, 0.8); }
-    }
-    @keyframes hofAlertPulse {
-      from { border-color: #00ffcc; box-shadow: 0 0 25px rgba(0, 255, 204, 0.4); }
-      to { border-color: #ffcc00; box-shadow: 0 0 45px rgba(255, 204, 0, 1); }
-    }
-    @keyframes monitorShake {
-      0% { transform: translate(1px, 2px); } 50% { transform: translate(-2px, -1px); } 100% { transform: translate(2px, 1px); }
-    }
+    .global-flash { animation: globalAlertPulse 0.5s infinite alternate; }
+    .hof-shake { animation: monitorShake 0.15s infinite, hofAlertPulse 0.4s infinite alternate; }
+
+    @keyframes globalAlertPulse { from { border-color: #00ffcc; } to { border-color: #ff5500; } }
+    @keyframes hofAlertPulse { from { border-color: #00ffcc; } to { border-color: #ffcc00; } }
+    @keyframes monitorShake { 0% { transform: translate(1px, 2px); } 50% { transform: translate(-2px, -1px); } 100% { transform: translate(2px, 1px); } }
   </style>
 </head>
 <body>
 
   <div id="arcade-monitor">
-    <!-- Visual Game Animation Zone -->
     <div id="view-screen">
       <canvas id="retroCanvas" width="440" height="410"></canvas>
     </div>
 
-    <!-- Telemetry Readout Panel -->
     <div id="hud-panel">
-      <div class="hud-title">📡 Calypso Surveyor OS v16.4</div>
+      <div class="hud-title">📡 Calypso Surveyor OS v16.5</div>
       
       <!-- Primary Core Screen -->
       <div id="main-hud-view" style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
         <div>
           <div id="result-title">STANDBY</div>
           <div id="result-item">Enter !fish, !mine, or !craft</div>
-          <div class="ped-counter"><span id="ped-val">0.00</span> <span style="font-size:16px; color: rgba(0, 255, 204, 0.6);">PED</span></div>
+          <div class="ped-counter"><span id="ped-val">0.00</span> <span style="font-size:14px; color: rgba(0, 255, 204, 0.6);">PED</span></div>
         </div>
-
-        <div id="feed-log">
-          <div>[SYS] HUD initialized. Listening to jaedraze...</div>
-        </div>
+        <div id="feed-log"><div>[SYS] HUD Ready. Listening to jaedraze...</div></div>
       </div>
 
-      <!-- INTERACTIVE PRIZE SCREEN -->
+      <!-- LOOT POOL CONFIG MANAGER -->
       <div id="prize-screen" class="holo-menu">
-        <div class="menu-header">Edit Holoscreen Pools</div>
+        <div class="menu-header">Edit Rarity Pools</div>
         <div class="menu-body">
           <div class="menu-group">
-            <label>!fish items (comma separated)</label>
-            <input type="text" id="input-fish">
+            <label>Common Items (Comma Sep.)</label>
+            <input type="text" id="pool-common">
           </div>
           <div class="menu-group">
-            <label>!mine items (comma separated)</label>
-            <input type="text" id="input-mine">
+            <label>Uncommon Items (Comma Sep.)</label>
+            <input type="text" id="pool-uncommon">
           </div>
           <div class="menu-group">
-            <label>!craft items (comma separated)</label>
-            <input type="text" id="input-craft">
+            <label>Rare Items (Comma Sep.)</label>
+            <input type="text" id="pool-rare">
+          </div>
+          <div style="border-top:1px dashed #00ffcc; padding-top:5px; margin-top:5px;">
+            <label style="color:#00ffcc;">Target Matrix Drawing tool:</label>
+            <input type="text" id="target-draw-item" placeholder="Type exact item name to draw...">
+            <button class="btn-save" style="width:100%; background:#ffaa00;" onclick="openPixelEditor()">Open Matrix Canvas Box</button>
           </div>
         </div>
-        <button class="btn-save" onclick="savePrizePools()">Save & Return</button>
+        <button class="btn-save" onclick="savePrizePools()">Save Setup</button>
       </div>
 
-      <!-- INTERACTIVE OPTIONS SCREEN -->
+      <!-- RATES OPTIONS SCREEN -->
       <div id="options-screen" class="holo-menu">
-        <div class="menu-header">System Parameters</div>
+        <div class="menu-header">Adjust Probability %</div>
         <div class="menu-body">
-          <div style="margin-bottom: 15px;">
-            <input type="checkbox" id="opt-fadeaway" checked style="accent-color: #00ffcc;">
-            <label for="opt-fadeaway" style="color: #ffaa00; display: inline; margin-left: 5px; font-weight: bold;">Enable Auto-Fadeaway</label>
-            <p style="color: #88ccff; font-size: 11px; margin-top: 4px;">If active, HUD stays invisible at 0% opacity until a command runs, then rolls out smoothly.</p>
+          <div class="menu-group"><label>Common Tier Weight (%)</label><input type="number" id="weight-common" value="60"></div>
+          <div class="menu-group"><label>Uncommon Tier Weight (%)</label><input type="number" id="weight-uncommon" value="30"></div>
+          <div class="menu-group"><label>Global Threshold Probability (%)</label><input type="number" id="rate-global" value="5"></div>
+          <div class="menu-group"><label>HOF Threshold Probability (%)</label><input type="number" id="rate-hof" value="1.5"></div>
+          <div style="margin-top:10px;">
+            <input type="checkbox" id="opt-fadeaway" checked> <label style="display:inline;" for="opt-fadeaway">Auto-Fadeaway</label>
           </div>
         </div>
-        <button class="btn-save" onclick="saveOptions()">Apply changes</button>
+        <button class="btn-save" onclick="saveOptions()">Apply Parameters</button>
+      </div>
+
+      <!-- PIXEL DESIGN MATRIX FRAME -->
+      <div id="pixel-editor-screen" class="holo-menu" style="z-index:10;">
+        <div class="menu-header">Drawing: <span id="drawing-item-name" style="color:#ffaa00;">None</span></div>
+        <div id="pixel-grid"></div>
+        <div style="display:flex; gap:5px;">
+          <button class="btn-save" style="flex:1; background:#ff3330; color:#fff;" onclick="clearPixelGrid()">Clear</button>
+          <button class="btn-save" style="flex:1;" onclick="savePixelArtwork()">Bind Image</button>
+        </div>
       </div>
 
     </div>
@@ -249,93 +144,124 @@
   <script>
     const STREAMER_NAME = "jaedraze";
     const userCooldowns = new Map();
-    let actionQueue = [];
-    let activeSession = null;
+    let actionQueue = [], activeSession = null;
 
-    // Config Options
-    let systemOptions = { fadeaway: true };
-
-    // Default Prize pools
-    let LOOT_TABLES = {
-      fish: ["Calypso Cod", "Rigid Snapper", "Moonfish", "Deep Sea Skreem", "Rusty Hook"],
-      mine: ["Lysterium Ore", "Iron Ore", "Blausariam Ore", "Oil Deposit", "Zorn Star Ore"],
-      craft: ["Standard Matrix", "Electronic Component", "Armor Plate", "Weapon Blueprint", "Explosive Pack"]
+    let systemOptions = { fadeaway: true, wCommon: 60, wUncommon: 30, rGlobal: 5, rHof: 1.5 };
+    
+    let LOOT_POOLS = {
+      common: ["Lysterium Ore", "Calypso Cod", "Rusty Hook", "Standard Matrix"],
+      uncommon: ["Iron Ore", "Rigid Snapper", "Electronic Component"],
+      rare: ["Zorn Star Ore", "Deep Sea Skreem", "Weapon Blueprint"]
     };
+
+    let CUSTOM_ARTWORKS = {}; // Holds string mapping of 144 bit matrices
 
     const monitor = document.getElementById('arcade-monitor');
     const canvas = document.getElementById('retroCanvas');
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    // Handle initial state transparency
-    if (systemOptions.fadeaway) { monitor.style.opacity = "0"; }
+    if (systemOptions.fadeaway) monitor.style.opacity = "0";
+
+    // Build the 12x12 Editor Matrix grid components dynamically
+    const gridContainer = document.getElementById('pixel-grid');
+    for (let i = 0; i < 144; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'pixel-cell';
+      cell.onclick = () => cell.classList.toggle('active');
+      gridContainer.appendChild(cell);
+    }
 
     ComfyJS.onCommand = (user, command, message, flags, extra) => {
       const cmd = command.toLowerCase();
       const isStreamer = (user.toLowerCase() === STREAMER_NAME.toLowerCase() || flags.broadcaster || flags.mod);
 
-      // 1. Menu Controls
       if (isStreamer && cmd === "editholoscreenprizes") {
-        document.getElementById('input-fish').value = LOOT_TABLES.fish.join(', ');
-        document.getElementById('input-mine').value = LOOT_TABLES.mine.join(', ');
-        document.getElementById('input-craft').value = LOOT_TABLES.craft.join(', ');
+        document.getElementById('pool-common').value = LOOT_POOLS.common.join(', ');
+        document.getElementById('pool-uncommon').value = LOOT_POOLS.uncommon.join(', ');
+        document.getElementById('pool-rare').value = LOOT_POOLS.rare.join(', ');
         document.getElementById('prize-screen').style.display = "flex";
-        if (systemOptions.fadeaway) monitor.style.opacity = "1";
+        monitor.style.opacity = "1";
         return;
       }
 
       if (isStreamer && cmd === "options") {
+        document.getElementById('weight-common').value = systemOptions.wCommon;
+        document.getElementById('weight-uncommon').value = systemOptions.wUncommon;
+        document.getElementById('rate-global').value = systemOptions.rGlobal;
+        document.getElementById('rate-hof').value = systemOptions.rHof;
         document.getElementById('opt-fadeaway').checked = systemOptions.fadeaway;
         document.getElementById('options-screen').style.display = "flex";
-        if (systemOptions.fadeaway) monitor.style.opacity = "1";
+        monitor.style.opacity = "1";
         return;
       }
 
-      // 2. Gameplay Operations
       if (cmd === "fish" || cmd === "mine" || cmd === "craft") {
         const now = Date.now();
         if (!isStreamer && userCooldowns.has(user) && (now - userCooldowns.get(user) < 10000)) return;
-        
         userCooldowns.set(user, now);
         actionQueue.push({ user, type: cmd });
-        
         if (systemOptions.fadeaway) monitor.style.opacity = "1";
         if (!activeSession) processNextQueueItem();
       }
     };
 
+    function openPixelEditor() {
+      const itemName = document.getElementById('target-draw-item').value.trim();
+      if (!itemName) return alert("Please enter a valid item name first!");
+      document.getElementById('drawing-item-name').innerText = itemName;
+      clearPixelGrid();
+      
+      if (CUSTOM_ARTWORKS[itemName]) {
+        const dots = gridContainer.children;
+        CUSTOM_ARTWORKS[itemName].forEach((val, index) => {
+          if (val === 1) dots[index].classList.add('active');
+        });
+      }
+      document.getElementById('pixel-editor-screen').style.display = "flex";
+    }
+
+    function clearPixelGrid() {
+      Array.from(gridContainer.children).forEach(c => c.classList.remove('active'));
+    }
+
+    function savePixelArtwork() {
+      const itemName = document.getElementById('drawing-item-name').innerText;
+      const matrix = Array.from(gridContainer.children).map(c => c.classList.contains('active') ? 1 : 0);
+      CUSTOM_ARTWORKS[itemName] = matrix;
+      document.getElementById('pixel-editor-screen').style.display = "none";
+      printLog(`[SYS] Custom matrix artwork bound to ${itemName}`);
+    }
+
     function savePrizePools() {
-      LOOT_TABLES.fish = document.getElementById('input-fish').value.split(',').map(s => s.trim()).filter(Boolean);
-      LOOT_TABLES.mine = document.getElementById('input-mine').value.split(',').map(s => s.trim()).filter(Boolean);
-      LOOT_TABLES.craft = document.getElementById('input-craft').value.split(',').map(s => s.trim()).filter(Boolean);
+      LOOT_POOLS.common = document.getElementById('pool-common').value.split(',').map(s => s.trim()).filter(Boolean);
+      LOOT_POOLS.uncommon = document.getElementById('pool-uncommon').value.split(',').map(s => s.trim()).filter(Boolean);
+      LOOT_POOLS.rare = document.getElementById('pool-rare').value.split(',').map(s => s.trim()).filter(Boolean);
       document.getElementById('prize-screen').style.display = "none";
-      printLog("[SYS] Custom prize configurations saved successfully.");
       if (systemOptions.fadeaway && !activeSession) monitor.style.opacity = "0";
     }
 
     function saveOptions() {
+      systemOptions.wCommon = parseFloat(document.getElementById('weight-common').value);
+      systemOptions.wUncommon = parseFloat(document.getElementById('weight-uncommon').value);
+      systemOptions.rGlobal = parseFloat(document.getElementById('rate-global').value);
+      systemOptions.rHof = parseFloat(document.getElementById('rate-hof').value);
       systemOptions.fadeaway = document.getElementById('opt-fadeaway').checked;
       document.getElementById('options-screen').style.display = "none";
-      printLog(`[SYS] Parameters adjusted. Fadeaway: ${systemOptions.fadeaway}`);
       monitor.style.opacity = systemOptions.fadeaway && !activeSession ? "0" : "1";
     }
 
     function printLog(msg) {
       const log = document.getElementById('feed-log');
-      const div = document.createElement('div');
-      div.innerText = msg;
-      log.appendChild(div);
+      const div = document.createElement('div'); div.innerText = msg; log.appendChild(div);
       log.scrollTop = log.scrollHeight;
-      if (log.children.length > 6) log.removeChild(log.firstChild);
+      if (log.children.length > 5) log.removeChild(log.firstChild);
     }
 
     function processNextQueueItem() {
       if (actionQueue.length === 0) {
-        activeSession = null;
-        resetCanvasFrame();
-        if (systemOptions.fadeaway) {
-          setTimeout(() => { if (!activeSession && actionQueue.length === 0) monitor.style.opacity = "0"; }, 1500);
-        }
+        activeSession = null; resetCanvasFrame();
+        if (systemOptions.fadeaway) setTimeout(() => { if (!activeSession) monitor.style.opacity = "0"; }, 1500);
         return;
       }
       activeSession = actionQueue.shift();
@@ -344,73 +270,63 @@
 
     function resetCanvasFrame() {
       ctx.fillStyle = "#010a0f"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = "rgba(0, 255, 204, 0.05)";
-      for(let i=0; i<canvas.width; i+=25) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
-      }
-      ctx.fillStyle = "#00ffcc"; ctx.font = "bold 12px monospace";
-      ctx.fillText("SYSTEM ACTIVE // CHAT CHANNELS LOGGED", 40, 200);
+      ctx.fillStyle = "#00ffcc"; ctx.font = "bold 11px monospace";
+      ctx.fillText("SYSTEM LOGGED // WAITING FOR DIRECTIVE", 40, 200);
       monitor.className = "";
       document.getElementById('result-title').innerText = "STANDBY";
       document.getElementById('result-item').innerText = "Enter !fish, !mine, or !craft";
     }
 
     function initAnimation(type, user) {
-      let frame = 0;
-      const maxFrames = 110; 
-      const pool = LOOT_TABLES[type];
-      const winItem = pool[Math.floor(Math.random() * pool.length)] || "Unknown Fragment";
+      let frame = 0, maxFrames = 100;
       
-      const roll = Math.random() * 100;
-      let sizeText = "Minimal (Size I)";
-      let ped = (Math.random() * 1.5 + 0.05).toFixed(2);
-      let classification = "normal";
+      // Roll Rarity Tier based on weights
+      const rollTier = Math.random() * 100;
+      let activeTier = "common";
+      if (rollTier > systemOptions.wCommon + systemOptions.wUncommon) activeTier = "rare";
+      else if (rollTier > systemOptions.wCommon) activeTier = "uncommon";
+      
+      const pool = LOOT_POOLS[activeTier];
+      const winItem = pool[Math.floor(Math.random() * pool.length)] || "Spelt Fragment";
 
-      if (roll > 98) { sizeText = "HALL OF FAME!!!"; ped = (Math.random() * 1500 + 1000).toFixed(2); classification = "hof"; }
-      else if (roll > 91) { sizeText = "GLOBAL!"; ped = (Math.random() * 400 + 200).toFixed(2); classification = "global"; }
-      else if (roll > 65) { sizeText = "Sizable Find"; ped = (Math.random() * 45 + 12).toFixed(2); }
+      // Roll Cash Returns (Global / HOF Checks)
+      const rollGold = Math.random() * 100;
+      let sizeText = "Minimal Find", classification = "normal", ped = (Math.random() * 1.2 + 0.02).toFixed(2);
+
+      if (rollGold < systemOptions.rHof) { sizeText = "HALL OF FAME!!!"; ped = (Math.random() * 1200 + 1000).toFixed(2); classification = "hof"; }
+      else if (rollGold < systemOptions.rHof + systemOptions.rGlobal) { sizeText = "GLOBAL!"; ped = (Math.random() * 300 + 200).toFixed(2); classification = "global"; }
+      else if (rollGold < 30) { sizeText = "Sizable Extract"; ped = (Math.random() * 35 + 8).toFixed(2); }
 
       document.getElementById('result-title').innerText = "SCANNING...";
       document.getElementById('result-item').innerText = `Target Lock: ${user}`;
 
       function renderLoop() {
-        ctx.fillStyle = "#010a0f";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#010a0f"; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         if (type === 'fish') {
           ctx.fillStyle = "#022433"; ctx.fillRect(0, 240, canvas.width, 170); 
           ctx.fillStyle = "#00ffcc"; ctx.fillRect(40, 210, 15, 30); 
           ctx.strokeStyle = "#88eeff"; ctx.lineWidth = 2;
           ctx.beginPath(); ctx.moveTo(55, 215); ctx.lineTo(190 + (frame*0.4), 245 + Math.sin(frame*0.25)*6); ctx.stroke(); 
-        } 
-        else if (type === 'mine') {
-          // Classic rich brown dirt layer brought back safely
+        } else if (type === 'mine') {
           ctx.fillStyle = "#3a2212"; ctx.fillRect(0, 160, canvas.width, 250); 
-          ctx.fillStyle = "#1c1008"; ctx.fillRect(0, 160, canvas.width, 10); // crust crust detail
           ctx.fillStyle = "#00ffcc"; ctx.fillRect(200, 40, 40, 20); 
-          ctx.fillStyle = "#ffaa00"; ctx.fillRect(218, 60, 4, Math.min(frame * 3.5, 280)); 
-        } 
-        else if (type === 'craft') {
+          ctx.fillStyle = "#ffaa00"; ctx.fillRect(218, 60, 4, Math.min(frame * 4, 280)); 
+        } else if (type === 'craft') {
           ctx.fillStyle = "rgba(0, 255, 204, 0.05)"; ctx.fillRect(120, 130, 200, 150);
-          ctx.strokeStyle = "rgba(0, 255, 204, 0.2)"; ctx.strokeRect(120, 130, 200, 150);
-          ctx.fillStyle = (frame % 6 < 3) ? "#ffaa00" : "#00ffcc";
-          ctx.fillRect(170 + Math.sin(frame*0.5)*3, 175, 100, 60); 
+          ctx.fillStyle = (frame % 6 < 3) ? "#ffaa00" : "#00ffcc"; ctx.fillRect(170 + Math.sin(frame*0.5)*3, 175, 100, 60); 
         }
 
         frame++;
-        if (frame < maxFrames) {
-          requestAnimationFrame(renderLoop);
-        } else {
-          triggerLootReveal(user, winItem, ped, sizeText, classification);
-        }
+        if (frame < maxFrames) requestAnimationFrame(renderLoop);
+        else triggerLootReveal(user, winItem, ped, sizeText, classification);
       }
       renderLoop();
     }
 
     function triggerLootReveal(user, item, ped, sizeText, classification) {
       document.getElementById('result-title').innerText = sizeText;
-      document.getElementById('result-item').innerText = `${user} got: ${item}`;
+      document.getElementById('result-item').innerText = `${user} extracted: ${item}`;
       document.getElementById('ped-val').innerText = ped;
       printLog(`[FIND] ${user} -> ${item} (${ped} PED)`);
 
@@ -418,11 +334,29 @@
       if (classification === 'global') monitor.classList.add('global-flash');
       if (classification === 'hof') monitor.classList.add('hof-shake');
 
-      ctx.fillStyle = "#02121a"; ctx.fillRect(120, 100, 200, 200);
-      ctx.strokeStyle = "#00ffcc"; ctx.lineWidth = 3; ctx.strokeRect(120, 100, 200, 200);
-      ctx.fillStyle = "#00ffcc"; ctx.fillRect(165, 165, 110, 50);
-      ctx.fillStyle = "#ffffff"; ctx.fillRect(190, 155, 60, 10);
-      ctx.fillStyle = "#ffaa00"; ctx.fillRect(215, 230, 12, 12);
+      // Draw item matrix display container card 
+      ctx.fillStyle = "#02121a"; ctx.fillRect(140, 100, 160, 160);
+      ctx.strokeStyle = "#00ffcc"; ctx.lineWidth = 2; ctx.strokeRect(140, 100, 160, 160);
+      
+      if (CUSTOM_ARTWORKS[item]) {
+        // Render Streamer Custom Pixels
+        let matrix = CUSTOM_ARTWORKS[item];
+        let pSize = 10; // Pixel size bounds
+        let startX = 160, startY = 120;
+        ctx.fillStyle = "#00ffcc";
+        for (let i = 0; i < 144; i++) {
+          if (matrix[i] === 1) {
+            let row = Math.floor(i / 12);
+            let col = i % 12;
+            ctx.fillRect(startX + (col * pSize), startY + (row * pSize), pSize - 1, pSize - 1);
+          }
+        }
+      } else {
+        // Procedural Fallback Blueprint Default Image
+        ctx.fillStyle = "rgba(0, 255, 204, 0.2)"; ctx.fillRect(165, 145, 110, 50);
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(190, 135, 60, 10);
+        ctx.fillStyle = "#ffaa00"; ctx.fillRect(215, 210, 12, 12);
+      }
 
       setTimeout(() => { processNextQueueItem(); }, 6000);
     }
