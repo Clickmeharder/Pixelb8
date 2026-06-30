@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixelb8 Retro Hologram Colonist Overlay</title>
+  <title>Pixelb8 Advanced Holo-Arcade Overlay</title>
   <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,7 +15,7 @@
       height: 450px;
     }
 
-    /* CRT Monitor Frame Container (Hologram Color Palette) */
+    /* CRT Monitor Frame Container */
     #arcade-monitor {
       position: absolute;
       top: 20px;
@@ -29,6 +29,8 @@
       overflow: hidden;
       display: flex;
       flex-direction: row;
+      opacity: 1;
+      transition: opacity 0.8s ease-in-out;
     }
 
     /* Scanlines Overlay Effect */
@@ -63,12 +65,13 @@
     #hud-panel {
       width: 320px;
       height: 100%;
-      padding: 20px 15px;
+      padding: 15px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       background: linear-gradient(135deg, rgba(2, 18, 26, 0.95) 0%, rgba(5, 40, 50, 0.9) 100%);
       color: #ffffff;
+      position: relative;
     }
 
     .hud-title {
@@ -121,6 +124,45 @@
       color: #88ccff;
     }
 
+    /* INTERACTIVE MENUS OVERLAYS */
+    .holo-menu {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(2, 22, 31, 0.98);
+      z-index: 5;
+      padding: 15px;
+      display: none;
+      flex-direction: column;
+      border-left: 2px solid #00ffcc;
+    }
+
+    .menu-header {
+      font-size: 14px;
+      font-weight: bold;
+      color: #00ffcc;
+      border-bottom: 1px solid #00ffcc;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .menu-body {
+      flex-grow: 1;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+
+    .menu-group { margin-bottom: 10px; }
+    .menu-group label { display: block; color: #ffaa00; font-weight: bold; margin-bottom: 2px; }
+    .menu-group input[type="text"] {
+      width: 100%; background: #000; border: 1px solid #00ffcc; color: #fff; padding: 4px; font-family: monospace;
+    }
+
+    .btn-save {
+      background: #00ffcc; color: #000; border: none; padding: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; margin-top: 5px;
+    }
+    .btn-save:hover { background: #fff; }
+
     /* Hit Reactions */
     .global-flash { animation: globalAlertPulse 0.5s infinite alternate; }
     .global-flash #result-title { color: #ff5500 !important; }
@@ -153,17 +195,54 @@
 
     <!-- Telemetry Readout Panel -->
     <div id="hud-panel">
-      <div class="hud-title">📡 Calypso Surveyor OS v16.3</div>
+      <div class="hud-title">📡 Calypso Surveyor OS v16.4</div>
       
-      <div>
-        <div id="result-title">STANDBY</div>
-        <div id="result-item">Awaiting user connection...</div>
-        <div class="ped-counter"><span id="ped-val">0.00</span> <span style="font-size:16px; color: rgba(0, 255, 204, 0.6);">PED</span></div>
+      <!-- Primary Core Screen -->
+      <div id="main-hud-view" style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
+        <div>
+          <div id="result-title">STANDBY</div>
+          <div id="result-item">Enter !fish, !mine, or !craft</div>
+          <div class="ped-counter"><span id="ped-val">0.00</span> <span style="font-size:16px; color: rgba(0, 255, 204, 0.6);">PED</span></div>
+        </div>
+
+        <div id="feed-log">
+          <div>[SYS] HUD initialized. Listening to jaedraze...</div>
+        </div>
       </div>
 
-      <div id="feed-log">
-        <div>[SYS] HUD initialized. Listening to jaedraze...</div>
+      <!-- INTERACTIVE PRIZE SCREEN -->
+      <div id="prize-screen" class="holo-menu">
+        <div class="menu-header">Edit Holoscreen Pools</div>
+        <div class="menu-body">
+          <div class="menu-group">
+            <label>!fish items (comma separated)</label>
+            <input type="text" id="input-fish">
+          </div>
+          <div class="menu-group">
+            <label>!mine items (comma separated)</label>
+            <input type="text" id="input-mine">
+          </div>
+          <div class="menu-group">
+            <label>!craft items (comma separated)</label>
+            <input type="text" id="input-craft">
+          </div>
+        </div>
+        <button class="btn-save" onclick="savePrizePools()">Save & Return</button>
       </div>
+
+      <!-- INTERACTIVE OPTIONS SCREEN -->
+      <div id="options-screen" class="holo-menu">
+        <div class="menu-header">System Parameters</div>
+        <div class="menu-body">
+          <div style="margin-bottom: 15px;">
+            <input type="checkbox" id="opt-fadeaway" checked style="accent-color: #00ffcc;">
+            <label for="opt-fadeaway" style="color: #ffaa00; display: inline; margin-left: 5px; font-weight: bold;">Enable Auto-Fadeaway</label>
+            <p style="color: #88ccff; font-size: 11px; margin-top: 4px;">If active, HUD stays invisible at 0% opacity until a command runs, then rolls out smoothly.</p>
+          </div>
+        </div>
+        <button class="btn-save" onclick="saveOptions()">Apply changes</button>
+      </div>
+
     </div>
   </div>
 
@@ -173,45 +252,73 @@
     let actionQueue = [];
     let activeSession = null;
 
-    // Custom Prize Lists
+    // Config Options
+    let systemOptions = { fadeaway: true };
+
+    // Default Prize pools
     let LOOT_TABLES = {
       fish: ["Calypso Cod", "Rigid Snapper", "Moonfish", "Deep Sea Skreem", "Rusty Hook"],
       mine: ["Lysterium Ore", "Iron Ore", "Blausariam Ore", "Oil Deposit", "Zorn Star Ore"],
       craft: ["Standard Matrix", "Electronic Component", "Armor Plate", "Weapon Blueprint", "Explosive Pack"]
     };
 
+    const monitor = document.getElementById('arcade-monitor');
     const canvas = document.getElementById('retroCanvas');
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    // ComfyJS Hook Configuration
+    // Handle initial state transparency
+    if (systemOptions.fadeaway) { monitor.style.opacity = "0"; }
+
     ComfyJS.onCommand = (user, command, message, flags, extra) => {
       const cmd = command.toLowerCase();
       const isStreamer = (user.toLowerCase() === STREAMER_NAME.toLowerCase() || flags.broadcaster || flags.mod);
 
-      // Prize Pool Customizer Engine
-      if (isStreamer && (cmd === "addprize" || cmd === "changeprize")) {
-        const parts = message.split(' ');
-        const poolTarget = parts[0]?.toLowerCase();
-        const prizeName = parts.slice(1).join(' ');
-        
-        if (LOOT_TABLES[poolTarget] && prizeName) {
-          LOOT_TABLES[poolTarget].push(prizeName);
-          printLog(`[ADMIN] Added "${prizeName}" to ${poolTarget}`);
-        }
+      // 1. Menu Controls
+      if (isStreamer && cmd === "editholoscreenprizes") {
+        document.getElementById('input-fish').value = LOOT_TABLES.fish.join(', ');
+        document.getElementById('input-mine').value = LOOT_TABLES.mine.join(', ');
+        document.getElementById('input-craft').value = LOOT_TABLES.craft.join(', ');
+        document.getElementById('prize-screen').style.display = "flex";
+        if (systemOptions.fadeaway) monitor.style.opacity = "1";
         return;
       }
 
-      // User triggers
+      if (isStreamer && cmd === "options") {
+        document.getElementById('opt-fadeaway').checked = systemOptions.fadeaway;
+        document.getElementById('options-screen').style.display = "flex";
+        if (systemOptions.fadeaway) monitor.style.opacity = "1";
+        return;
+      }
+
+      // 2. Gameplay Operations
       if (cmd === "fish" || cmd === "mine" || cmd === "craft") {
         const now = Date.now();
         if (!isStreamer && userCooldowns.has(user) && (now - userCooldowns.get(user) < 10000)) return;
         
         userCooldowns.set(user, now);
         actionQueue.push({ user, type: cmd });
+        
+        if (systemOptions.fadeaway) monitor.style.opacity = "1";
         if (!activeSession) processNextQueueItem();
       }
     };
+
+    function savePrizePools() {
+      LOOT_TABLES.fish = document.getElementById('input-fish').value.split(',').map(s => s.trim()).filter(Boolean);
+      LOOT_TABLES.mine = document.getElementById('input-mine').value.split(',').map(s => s.trim()).filter(Boolean);
+      LOOT_TABLES.craft = document.getElementById('input-craft').value.split(',').map(s => s.trim()).filter(Boolean);
+      document.getElementById('prize-screen').style.display = "none";
+      printLog("[SYS] Custom prize configurations saved successfully.");
+      if (systemOptions.fadeaway && !activeSession) monitor.style.opacity = "0";
+    }
+
+    function saveOptions() {
+      systemOptions.fadeaway = document.getElementById('opt-fadeaway').checked;
+      document.getElementById('options-screen').style.display = "none";
+      printLog(`[SYS] Parameters adjusted. Fadeaway: ${systemOptions.fadeaway}`);
+      monitor.style.opacity = systemOptions.fadeaway && !activeSession ? "0" : "1";
+    }
 
     function printLog(msg) {
       const log = document.getElementById('feed-log');
@@ -226,6 +333,9 @@
       if (actionQueue.length === 0) {
         activeSession = null;
         resetCanvasFrame();
+        if (systemOptions.fadeaway) {
+          setTimeout(() => { if (!activeSession && actionQueue.length === 0) monitor.style.opacity = "0"; }, 1500);
+        }
         return;
       }
       activeSession = actionQueue.shift();
@@ -233,21 +343,15 @@
     }
 
     function resetCanvasFrame() {
-      ctx.fillStyle = "#010a0f";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw slick cyan grid mesh lines
+      ctx.fillStyle = "#010a0f"; ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = "rgba(0, 255, 204, 0.05)";
       for(let i=0; i<canvas.width; i+=25) {
         ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
       }
-
-      ctx.fillStyle = "#00ffcc";
-      ctx.font = "bold 12px monospace";
-      ctx.fillText("SYSTEM ACTIVE // READY FOR CHAT EXTRAC", 40, 200);
-      
-      document.getElementById('arcade-monitor').className = "";
+      ctx.fillStyle = "#00ffcc"; ctx.font = "bold 12px monospace";
+      ctx.fillText("SYSTEM ACTIVE // CHAT CHANNELS LOGGED", 40, 200);
+      monitor.className = "";
       document.getElementById('result-title').innerText = "STANDBY";
       document.getElementById('result-item').innerText = "Enter !fish, !mine, or !craft";
     }
@@ -256,7 +360,7 @@
       let frame = 0;
       const maxFrames = 110; 
       const pool = LOOT_TABLES[type];
-      const winItem = pool[Math.floor(Math.random() * pool.length)];
+      const winItem = pool[Math.floor(Math.random() * pool.length)] || "Unknown Fragment";
       
       const roll = Math.random() * 100;
       let sizeText = "Minimal (Size I)";
@@ -273,28 +377,25 @@
       function renderLoop() {
         ctx.fillStyle = "#010a0f";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Static background grid
-        ctx.strokeStyle = "rgba(0, 255, 204, 0.03)";
-        for(let i=0; i<canvas.width; i+=20) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
 
         if (type === 'fish') {
-          // Darker deep water blue gradient for the holographic look
           ctx.fillStyle = "#022433"; ctx.fillRect(0, 240, canvas.width, 170); 
-          ctx.fillStyle = "#00ffcc"; ctx.fillRect(40, 210, 15, 30); // Fisher element
+          ctx.fillStyle = "#00ffcc"; ctx.fillRect(40, 210, 15, 30); 
           ctx.strokeStyle = "#88eeff"; ctx.lineWidth = 2;
           ctx.beginPath(); ctx.moveTo(55, 215); ctx.lineTo(190 + (frame*0.4), 245 + Math.sin(frame*0.25)*6); ctx.stroke(); 
         } 
         else if (type === 'mine') {
-          ctx.fillStyle = "#120902"; ctx.fillRect(0, 160, canvas.width, 250); // Under-crust layer
-          ctx.fillStyle = "#00ffcc"; ctx.fillRect(200, 40, 40, 20); // Sub-probe unit
-          ctx.fillStyle = "#ffaa00"; ctx.fillRect(218, 60, 4, Math.min(frame * 3.5, 280)); // Laser drill vector beam
+          // Classic rich brown dirt layer brought back safely
+          ctx.fillStyle = "#3a2212"; ctx.fillRect(0, 160, canvas.width, 250); 
+          ctx.fillStyle = "#1c1008"; ctx.fillRect(0, 160, canvas.width, 10); // crust crust detail
+          ctx.fillStyle = "#00ffcc"; ctx.fillRect(200, 40, 40, 20); 
+          ctx.fillStyle = "#ffaa00"; ctx.fillRect(218, 60, 4, Math.min(frame * 3.5, 280)); 
         } 
         else if (type === 'craft') {
           ctx.fillStyle = "rgba(0, 255, 204, 0.05)"; ctx.fillRect(120, 130, 200, 150);
           ctx.strokeStyle = "rgba(0, 255, 204, 0.2)"; ctx.strokeRect(120, 130, 200, 150);
           ctx.fillStyle = (frame % 6 < 3) ? "#ffaa00" : "#00ffcc";
-          ctx.fillRect(170 + Math.sin(frame*0.5)*3, 175, 100, 60); // Material Matrix Compactor
+          ctx.fillRect(170 + Math.sin(frame*0.5)*3, 175, 100, 60); 
         }
 
         frame++;
@@ -311,18 +412,14 @@
       document.getElementById('result-title').innerText = sizeText;
       document.getElementById('result-item').innerText = `${user} got: ${item}`;
       document.getElementById('ped-val').innerText = ped;
-      printLog(`[EXTRACTED] ${user} -> ${item} (${ped} PED)`);
+      printLog(`[FIND] ${user} -> ${item} (${ped} PED)`);
 
-      const monitor = document.getElementById('arcade-monitor');
       monitor.className = "";
       if (classification === 'global') monitor.classList.add('global-flash');
       if (classification === 'hof') monitor.classList.add('hof-shake');
 
-      // Draw pixel loot display container frame
       ctx.fillStyle = "#02121a"; ctx.fillRect(120, 100, 200, 200);
       ctx.strokeStyle = "#00ffcc"; ctx.lineWidth = 3; ctx.strokeRect(120, 100, 200, 200);
-      
-      // Procedural neon core component sketch
       ctx.fillStyle = "#00ffcc"; ctx.fillRect(165, 165, 110, 50);
       ctx.fillStyle = "#ffffff"; ctx.fillRect(190, 155, 60, 10);
       ctx.fillStyle = "#ffaa00"; ctx.fillRect(215, 230, 12, 12);
