@@ -147,12 +147,17 @@
               <div style="font-size:10px; color:#ffaa00; text-align:center; font-weight:bold; text-transform:uppercase;">Drawing: <span id="drawing-item-name">None</span></div>
               
               <!-- Paint Brush Color Palettes -->
-              <div class="palette-box">
-                <div class="color-swatch selected" style="background:#00ffcc;" onclick="selectBrushColor('#00ffcc', this)" title="Teal"></div>
-                <div class="color-swatch" style="background:#ffaa00;" onclick="selectBrushColor('#ffaa00', this)" title="Orange"></div>
-                <div class="color-swatch" style="background:#ffff00;" onclick="selectBrushColor('#ffff00', this)" title="Gold"></div>
-                <div class="color-swatch" style="background:#000000; border:1px dashed #fff;" onclick="selectBrushColor('#000000', this)" title="Eraser"></div>
-              </div>
+			<div class="palette-box" style="display: flex; gap: 3px; margin: 8px 0; justify-content: center; flex-wrap: wrap;">
+			  <div class="color-swatch selected" style="background:#00ffcc;" onclick="selectBrushColor('#00ffcc', this)" title="Neon Teal"></div>
+			  <div class="color-swatch" style="background:#ffaa00;" onclick="selectBrushColor('#ffaa00', this)" title="Fire Orange"></div>
+			  <div class="color-swatch" style="background:#ffff00;" onclick="selectBrushColor('#ffff00', this)" title="Calypso Gold"></div>
+			  <div class="color-swatch" style="background:#ff3366;" onclick="selectBrushColor('#ff3366', this)" title="Hot Pink"></div>
+			  <div class="color-swatch" style="background:#9933ff;" onclick="selectBrushColor('#9933ff', this)" title="Deep Purple"></div>
+			  <div class="color-swatch" style="background:#33ccff;" onclick="selectBrushColor('#33ccff', this)" title="Electric Blue"></div>
+			  <div class="color-swatch" style="background:#33ff33;" onclick="selectBrushColor('#33ff33', this)" title="Acid Green"></div>
+			  <div class="color-swatch" style="background:#ffffff;" onclick="selectBrushColor('#ffffff', this)" title="Pure White"></div>
+			  <div class="color-swatch" style="background:#000000; border:1px dashed #ffaa00;" onclick="selectBrushColor('#000000', this)" title="Eraser"></div>
+			</div>
 
               <div id="pixel-grid"></div>
               <div style="display:flex; gap:4px;">
@@ -260,37 +265,39 @@
       dropdown.appendChild(addOpt);
     }
 
-    function handleDropdownSelection() {
-      const dropdown = document.getElementById('painter-item-dropdown');
-      const val = dropdown.value;
+	function handleDropdownSelection() {
+	  const dropdown = document.getElementById('painter-item-dropdown');
+	  const val = dropdown.value;
 
-      if (val === "__ADD_NEW__") {
-        document.getElementById('new-item-input-block').style.display = "block";
-        document.getElementById('inline-painter-box').style.display = "none";
-        return;
-      }
+	  if (val === "__ADD_NEW__") {
+		document.getElementById('new-item-input-block').style.display = "block";
+		document.getElementById('inline-painter-box').style.display = "none";
+		return;
+	  }
 
-      document.getElementById('new-item-input-block').style.display = "none";
-      if (!val) return;
+	  document.getElementById('new-item-input-block').style.display = "none";
+	  if (!val) return;
 
-      // Open Painter instantly for the selected standard asset item
-      document.getElementById('drawing-item-name').innerText = val;
-      clearPixelGrid();
+	  document.getElementById('drawing-item-name').innerText = val;
+	  clearPixelGrid();
 
-      // Look up via sanitized key match to prevent matching failures
-      let lookUpKey = val.toLowerCase().trim();
-      if (CUSTOM_ARTWORKS[lookUpKey]) {
-        const cells = gridContainer.children;
-        CUSTOM_ARTWORKS[lookUpKey].forEach((colorVal, index) => {
-          if (colorVal && colorVal !== 0 && colorVal !== "#000000") {
-            cells[index].style.backgroundColor = colorVal;
-            cells[index].setAttribute('data-color', colorVal);
-          }
-        });
-      }
+	  let lookUpKey = val.toLowerCase().trim();
+	  if (CUSTOM_ARTWORKS[lookUpKey]) {
+		const cells = gridContainer.children;
+		CUSTOM_ARTWORKS[lookUpKey].forEach((colorVal, index) => {
+		  // Clear or paint with precise hex codes loaded out of vector arrays
+		  if (colorVal && colorVal !== 0 && colorVal !== "#000000") {
+			cells[index].style.backgroundColor = colorVal;
+			cells[index].setAttribute('data-color', colorVal);
+		  } else {
+			cells[index].style.backgroundColor = "#000000";
+			cells[index].removeAttribute('data-color');
+		  }
+		});
+	  }
 
-      document.getElementById('inline-painter-box').style.display = "block";
-    }
+	  document.getElementById('inline-painter-box').style.display = "block";
+	}
 
     function createNewDropdownAsset() {
       const inputEl = document.getElementById('new-item-name-field');
