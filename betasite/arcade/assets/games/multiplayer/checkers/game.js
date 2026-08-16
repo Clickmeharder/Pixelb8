@@ -80,8 +80,8 @@
                     SoundFX.playJoin();
                 }
                 lastPlayerCount = roster.length;
+                if (isHost) assignPlayers(roster);
                 renderRoster(roster); 
-                if (isHost) assignPlayers(roster); 
             },
             onConnected: info => { roomCode = info.code; myId = info.clientId; isHost = info.isHost; enterTable(); },
             onMessage: handleNetworkMessage,
@@ -149,6 +149,10 @@
             
             safePublish('SYNC_PLAYERS', { p1Id, p2Id });
 
+            // Refresh host-local UI immediately; host ignores its own echoed SYNC_* packets.
+            renderRoster(roster);
+            updateStatusBanner();
+
             if (p1Id && p2Id && gameStatus === 'waiting') {
                 hostInitiateCountdown(30);
             }
@@ -194,6 +198,10 @@
 
             safePublish('SYNC_BOARD', { boardState, currentTurn: 0, gameStatus, jumpRule, multiJumpingPiece });
             safePublish('SYNC_TIME', { turnTimeLeft, currentTurn: 0 });
+
+            updateStatusBanner();
+            drawBoard();
+            updateTimerDisplay(turnTimeLeft, 0);
         }
 
         function hostStartGame() {
@@ -203,6 +211,10 @@
             
             safePublish('SYNC_BOARD', { boardState, currentTurn, gameStatus, jumpRule, multiJumpingPiece });
             safePublish('SYNC_TIME', { turnTimeLeft, currentTurn });
+
+            updateStatusBanner();
+            drawBoard();
+            updateTimerDisplay(turnTimeLeft, currentTurn);
         }
 
         function hostTimeTick() {
@@ -213,6 +225,7 @@
                     hostStartGame();
                 } else {
                     safePublish('SYNC_TIME', { turnTimeLeft, currentTurn: 0 });
+                    updateTimerDisplay(turnTimeLeft, 0);
                 }
                 return;
             }
@@ -223,6 +236,7 @@
                     return;
                 }
                 safePublish('SYNC_TIME', { turnTimeLeft, currentTurn });
+                updateTimerDisplay(turnTimeLeft, currentTurn);
             }
         }
 
