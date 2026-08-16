@@ -95,7 +95,9 @@
 
         function safePublish(type, payload = {}) {
             MP.publish(type, payload);
-            if (isHost) handleNetworkMessage({ type, senderId: myId, ...payload });
+            // Apply host-authored sync state immediately on the host. The
+            // broker echo is ignored below so this executes exactly once.
+            if (isHost) handleNetworkMessage({ type, senderId: myId, _localHostSync: true, ...payload });
         }
         function rememberName() { displayName = $('#player-name').value.trim().slice(0, 18) || displayName; localStorage.setItem('pixelb8ConnectName', displayName); MP.setPlayerName(displayName); }
         function joinRoom(code) { rememberName(); code = String(code || '').trim().toUpperCase(); if (code) MP.joinRoom(code, 'player'); }
@@ -313,8 +315,10 @@
                 return;
             }
 
-            // Block echoed network messages from host to prevent double execution
-            if (isHost && msg.senderId === myId && msg.type !== 'MOVE') return; 
+            // Ignore the broker echo of host-authored sync messages, but allow
+            // safePublish() to apply the same state locally once. MOVE remains
+            // broker-driven so the host can process its own move request.
+            if (isHost && msg.senderId === myId && msg.type !== 'MOVE' && !msg._localHostSync) return; 
 
             if (msg.type === 'SYNC_PLAYERS') {
                 p1Id = msg.p1Id; p2Id = msg.p2Id;
