@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PixelB8 Voice Web</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
+<style>
+:root{color-scheme:dark;font-family:Inter,Segoe UI,Arial,sans-serif}*{box-sizing:border-box}body{margin:0;background:#080b11;color:#edf4ff}.wrap{max-width:760px;margin:0 auto;padding:24px}.title{font-weight:900;font-size:26px}.sub{color:#91a4bf;font-size:13px;margin-top:5px}.card{margin-top:16px;background:#101722;border:1px solid #29394f;border-radius:14px;padding:16px}label{display:block;color:#9fb2cd;font-size:12px;margin-bottom:5px}.row{display:flex;gap:8px;align-items:center}.row>*{min-width:0}input,select,button{font:inherit}input,select{width:100%;background:#090f18;color:#eef4ff;border:1px solid #354a65;border-radius:8px;padding:9px}button{background:#1e2d42;color:#eef4ff;border:1px solid #425b7d;border-radius:8px;padding:10px 13px;cursor:pointer}.start{background:#15543d;border-color:#2a996d}.stop{background:#63272e;border-color:#a34551}.status{margin-top:10px;padding:8px 10px;background:#080d14;border-radius:8px;font:12px Consolas,monospace;word-break:break-word}.good{color:#5be49c}.bad{color:#ff808a}.muted{color:#91a4bf}.meter{height:12px;background:#070b11;border:1px solid #293a51;border-radius:99px;overflow:hidden}.meter>div{height:100%;width:0;background:linear-gradient(90deg,#409b78,#66e0a4);transition:width .06s linear}.transcript{min-height:90px;font-size:23px;line-height:1.4;padding:14px;background:#080d14;border-radius:10px}.final{color:#fff}.interim{color:#91a4bf}.tiny{font-size:11px;color:#8ea1ba;line-height:1.45}.badge{display:inline-block;padding:3px 7px;border:1px solid #344b68;border-radius:99px;font-size:11px}.grid{display:grid;grid-template-columns:1fr auto;gap:8px}.buttons{display:flex;gap:8px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">PixelB8 Voice Web</div>
+  <div class="sub">Host this page on HTTPS and open it in normal Chrome. Final speech is sent to the desktop Voice Bridge over MQTT.</div>
+
+  <div class="card">
+    <label>Bridge room</label>
+    <div class="grid">
+      <input id="room" spellcheck="false">
+      <button id="connect">Connect</button>
+    </div>
+    <div id="mqttStatus" class="status muted">MQTT: disconnected</div>
+    <div id="desktopStatus" class="status muted">Desktop bridge: unknown</div>
+  </div>
+
+  <div class="card">
+    <label>Microphone</label>
+    <div class="grid">
+      <select id="mic"></select>
+      <button id="refreshMics">Refresh</button>
+    </div>
+    <div style="height:12px"></div>
+    <label>Live microphone level <span id="levelText" class="badge">0%</span></label>
+    <div class="meter"><div id="level"></div></div>
+    <div id="micNote" class="status muted">Choose a microphone, then start voice.</div>
+  </div>
+
+  <div class="card">
+    <div class="buttons">
+      <button id="start" class="start">Start Voice</button>
+      <button id="stop" class="stop" disabled>Stop Voice</button>
+    </div>
+    <div id="speechStatus" class="status muted">Speech recognition: stopped</div>
+    <div id="originNote" class="status muted"></div>
+    <div style="height:12px"></div>
+    <label>Live transcript</label>
+    <div id="transcript" class="transcript">—</div>
+    <div style="height:12px"></div>
+    <label>Last message sent to desktop</label>
+    <div id="sent" class="status muted">—</div>
+  </div>
+
+  <div class="card tiny">
+    Only finalized phrases are published. Say <b>set channel local</b>, <b>set channel universe</b>, or <b>set channel rookie</b>; the desktop bridge handles those commands without typing them into chat. This test bridge uses a public MQTT broker, so the random room code is important and you should not use it for private/sensitive speech.
+  </div>
+</div>
+<script>
+const BROKER_HOST="broker.emqx.io";
+const BROKER_PORT=8084;
+const BROKER_PATH="/mqtt";
+const $=id=>document.getElementById(id);
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+const isHttps=location.protocol==="https:";
+$("originNote").textContent=isHttps
+  ? "Origin: HTTPS · recommended. Use current Google Chrome for the most reliable Web Speech support."
+  : `Origin: ${location.protocol} · upload this file to an HTTPS site before testing speech recognition.`;
+$("originNote").className=`status ${isHttps?"good":"bad"}`;
+
+let mqttClient=null;
+let mqttConnected=false;
+let recognition=null;
+let listening=false;
+let restartTimer=null;
+let fatalSpeechError=false;
+let restartCount=0;
+let lastStartAt=0;
+let micStream=null;
+let audioContext=null;
+let analyser=null;
+let meterFrame=null;
+let selectedTrack=null;
+let room="";
+
+function cleanRoom(value){return String(value||"").trim().replace(/[^a-zA-Z0-9_-]/g,"").slice(0,64)}
+function topicBase(){return `pixelb8/voicebridge/${room}`}
+function clientId(){return `pixelb8-web-${Math.random().toString(16).slice(2)}-${Date.now().toString(16)}`}
+function setSpeechStatus(text,cls="muted"){$("speechStatus").textContent=`Speech recognition: ${text}`;$("speechStatus").className=`status ${cls}`}
+
+function connectMqtt(){
+  const next=cleanRoom($("room").value);
+  if(next.length<6){alert("Room code must be at least 6 characters.");return}
+  room=next;
+  localStorage.setItem("pixelb8-voice-room",room);
+  const url=new URL(location.href);url.searchParams.set("room",room);history.replaceState(null,"",url);
+
+  if(mqttClient){try{mqttClient.disconnect()}catch{}}
+  $("mqttStatus").textContent="MQTT: connecting…";
+  $("mqttStatus").className="status muted";
+
+  mqttClient=new Paho.Client(BROKER_HOST,BROKER_PORT,BROKER_PATH,clientId());
+  mqttClient.onConnectionLost=response=>{
+    mqttConnected=false;
+    $("mqttStatus").textContent=`MQTT: disconnected ${response?.errorMessage||""}`;
+    $("mqttStatus").className="status bad";
+  };
+  mqttClient.onMessageArrived=message=>{
+    if(message.destinationName!==`${topicBase()}/status`)return;
+    try{
+      const data=JSON.parse(message.payloadString);
+      $("desktopStatus").textContent=`Desktop bridge: ${data.online?"online":"offline"} · ${data.armed?"typing armed":"typing NOT armed"} · ${data.channel||""}`;
+      $("desktopStatus").className=`status ${data.online?"good":"bad"}`;
+    }catch{}
+  };
+
+  mqttClient.connect({
+    useSSL:true,
+    timeout:10,
+    keepAliveInterval:30,
+    cleanSession:true,
+    onSuccess:()=>{
+      mqttConnected=true;
+      $("mqttStatus").textContent=`MQTT: connected · ${topicBase()}`;
+      $("mqttStatus").className="status good";
+      mqttClient.subscribe(`${topicBase()}/status`);
+    },
+    onFailure:err=>{
+      mqttConnected=false;
+      $("mqttStatus").textContent=`MQTT: failed · ${err?.errorMessage||"unknown error"}`;
+      $("mqttStatus").className="status bad";
+    }
+  });
+}
+
+function publishFinal(text){
+  const finalText=String(text||"").replace(/\s+/g," ").trim();
+  if(!finalText||!mqttConnected)return;
+  const payload=JSON.stringify({type:"voice-final",text:finalText,ts:Date.now()});
+  const message=new Paho.Message(payload);
+  message.destinationName=`${topicBase()}/voice`;
+  message.qos=0;
+  mqttClient.send(message);
+  $("sent").textContent=finalText;
+}
+
+async function listMics(){
+  try{
+    const temp=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    temp.getTracks().forEach(t=>t.stop());
+    const devices=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="audioinput");
+    const previous=$("mic").value||localStorage.getItem("pixelb8-voice-mic")||"";
+    $("mic").innerHTML="";
+    devices.forEach((d,i)=>{
+      const option=document.createElement("option");
+      option.value=d.deviceId;option.textContent=d.label||`Microphone ${i+1}`;$("mic").appendChild(option);
+    });
+    if(previous&&devices.some(d=>d.deviceId===previous))$("mic").value=previous;
+    if(!$("mic").value&&devices[0])$("mic").value=devices[0].deviceId;
+  }catch(err){$("micNote").textContent=`Microphone error: ${err.message}`;$("micNote").className="status bad"}
+}
+
+async function startMeter(){
+  await stopMeter();
+  const deviceId=$("mic").value;
+  if(!deviceId)throw new Error("No microphone selected.");
+  localStorage.setItem("pixelb8-voice-mic",deviceId);
+  micStream=await navigator.mediaDevices.getUserMedia({audio:{deviceId:{exact:deviceId}},video:false});
+  selectedTrack=micStream.getAudioTracks()[0]||null;
+  audioContext=new AudioContext();
+  const source=audioContext.createMediaStreamSource(micStream);
+  analyser=audioContext.createAnalyser();analyser.fftSize=1024;source.connect(analyser);
+  const data=new Uint8Array(analyser.fftSize);
+  const draw=()=>{
+    analyser.getByteTimeDomainData(data);let sum=0;
+    for(const v of data){const n=(v-128)/128;sum+=n*n}
+    const rms=Math.sqrt(sum/data.length);const pct=Math.min(100,Math.round(rms*550));
+    $("level").style.width=`${pct}%`;$("levelText").textContent=`${pct}%`;
+    meterFrame=requestAnimationFrame(draw);
+  };
+  draw();
+}
+
+async function stopMeter(){
+  if(meterFrame)cancelAnimationFrame(meterFrame);meterFrame=null;
+  micStream?.getTracks().forEach(t=>t.stop());micStream=null;selectedTrack=null;
+  try{await audioContext?.close()}catch{}audioContext=null;analyser=null;
+  $("level").style.width="0%";$("levelText").textContent="0%";
+}
+
+function buildRecognition(){
+  if(!SpeechRecognition)throw new Error("This browser does not provide SpeechRecognition/webkitSpeechRecognition.");
+  recognition=new SpeechRecognition();
+  recognition.lang="en-US";
+  recognition.interimResults=true;
+  recognition.maxAlternatives=1;
+  recognition.continuous=true;
+
+  recognition.onstart=()=>{lastStartAt=Date.now();restartCount=0;setSpeechStatus("listening","good")};
+  recognition.onspeechstart=()=>setSpeechStatus("hearing you…","good");
+  recognition.onerror=event=>{
+    console.error("SpeechRecognition error:",event.error,event.message||"");
+    const fatal=["network","not-allowed","service-not-allowed","audio-capture","language-not-supported"];
+    if(fatal.includes(event.error)){
+      fatalSpeechError=true;listening=false;
+      setSpeechStatus(`${event.error} — stopped; not restarting. Use HTTPS + Chrome; MQTT is still okay.`,`bad`);
+      $("start").disabled=false;$("stop").disabled=true;
+    }else{
+      setSpeechStatus(event.error||"error","bad");
+    }
+  };
+
+  recognition.onresult=event=>{
+    let interim="";let finals="";
+    for(let i=event.resultIndex;i<event.results.length;i++){
+      const text=event.results[i][0].transcript.trim();
+      if(event.results[i].isFinal)finals+=text+" ";else interim+=text+" ";
+    }
+    const finalText=finals.trim();const interimText=interim.trim();
+    $("transcript").innerHTML=interimText
+      ? `<span class="interim"></span>`
+      : `<span class="final"></span>`;
+    $("transcript").firstChild.textContent=interimText||finalText||"—";
+    if(finalText)publishFinal(finalText);
+  };
+
+  recognition.onend=()=>{
+    if(!listening||fatalSpeechError){
+      setSpeechStatus(fatalSpeechError?"stopped after error":"stopped",fatalSpeechError?"bad":"muted");
+      return;
+    }
+
+    const livedFor=Date.now()-lastStartAt;
+
+    if(livedFor<1200){
+      restartCount++;
+    }else{
+      restartCount=0;
+    }
+
+    if(restartCount>=3){
+      listening=false;
+      setSpeechStatus("stopped — too many rapid restarts","bad");
+      $("start").disabled=false;
+      $("stop").disabled=true;
+      return;
+    }
+
+    const delay=Math.min(2000,500+(restartCount*500));
+    setSpeechStatus(`paused; resuming in ${delay}ms…`,"muted");
+
+    clearTimeout(restartTimer);
+    restartTimer=setTimeout(()=>{
+      if(!listening||fatalSpeechError)return;
+      try{
+        if(selectedTrack && typeof selectedTrack.kind==="string"){
+          try{
+            recognition.start(selectedTrack);
+            return;
+          }catch(err){
+            console.warn("Speech track start fallback:",err);
+          }
+        }
+        recognition.start();
+      }catch(err){
+        console.warn("SpeechRecognition restart failed:",err);
+        listening=false;
+        setSpeechStatus("restart failed — stopped","bad");
+        $("start").disabled=false;
+        $("stop").disabled=true;
+      }
+    },delay);
+  };
+}
+
+function tryStartRecognition(){
+  if(!recognition)buildRecognition();
+  try{
+    if(selectedTrack){
+      try{recognition.start(selectedTrack);$("micNote").textContent="Recognition requested from selected microphone track.";return}catch(err){
+        console.warn("start(audioTrack) unavailable; falling back to browser speech input:",err);
+        $("micNote").textContent="Mic meter uses your selected microphone. SpeechRecognition is using the browser's speech input/default mic because this browser does not accept start(audioTrack).";
+      }
+    }
+    recognition.start();
+  }catch(err){
+    if(err.name!=="InvalidStateError"){
+      fatalSpeechError=true;listening=false;setSpeechStatus(err.message||String(err),"bad");
+    }
+  }
+}
+
+async function startVoice(){
+  fatalSpeechError=false;listening=true;
+  try{
+    if(!mqttConnected)connectMqtt();
+    await startMeter();
+    buildRecognition();
+    tryStartRecognition();
+    $("start").disabled=true;$("stop").disabled=false;
+  }catch(err){
+    listening=false;setSpeechStatus(err.message||String(err),"bad");
+    await stopMeter();
+  }
+}
+
+async function stopVoice(){
+  listening=false;fatalSpeechError=false;clearTimeout(restartTimer);
+  try{recognition?.stop()}catch{}recognition=null;
+  await stopMeter();setSpeechStatus("stopped","muted");
+  $("start").disabled=false;$("stop").disabled=true;
+}
+
+$("connect").onclick=connectMqtt;
+$("refreshMics").onclick=listMics;
+$("mic").onchange=async()=>{localStorage.setItem("pixelb8-voice-mic",$("mic").value);if(listening){await startMeter();try{recognition?.stop()}catch{}}};
+$("start").onclick=startVoice;
+$("stop").onclick=stopVoice;
+
+const params=new URLSearchParams(location.search);
+$("room").value=cleanRoom(params.get("room")||localStorage.getItem("pixelb8-voice-room")||"");
+listMics().then(()=>{if($("room").value.length>=6)connectMqtt()});
+</script>
+</body>
+</html>
