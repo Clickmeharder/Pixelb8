@@ -1,325 +1,547 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PixelB8 Voice Web</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
-<style>
-:root{color-scheme:dark;font-family:Inter,Segoe UI,Arial,sans-serif}*{box-sizing:border-box}body{margin:0;background:#080b11;color:#edf4ff}.wrap{max-width:760px;margin:0 auto;padding:24px}.title{font-weight:900;font-size:26px}.sub{color:#91a4bf;font-size:13px;margin-top:5px}.card{margin-top:16px;background:#101722;border:1px solid #29394f;border-radius:14px;padding:16px}label{display:block;color:#9fb2cd;font-size:12px;margin-bottom:5px}.row{display:flex;gap:8px;align-items:center}.row>*{min-width:0}input,select,button{font:inherit}input,select{width:100%;background:#090f18;color:#eef4ff;border:1px solid #354a65;border-radius:8px;padding:9px}button{background:#1e2d42;color:#eef4ff;border:1px solid #425b7d;border-radius:8px;padding:10px 13px;cursor:pointer}.start{background:#15543d;border-color:#2a996d}.stop{background:#63272e;border-color:#a34551}.status{margin-top:10px;padding:8px 10px;background:#080d14;border-radius:8px;font:12px Consolas,monospace;word-break:break-word}.good{color:#5be49c}.bad{color:#ff808a}.muted{color:#91a4bf}.meter{height:12px;background:#070b11;border:1px solid #293a51;border-radius:99px;overflow:hidden}.meter>div{height:100%;width:0;background:linear-gradient(90deg,#409b78,#66e0a4);transition:width .06s linear}.transcript{min-height:90px;font-size:23px;line-height:1.4;padding:14px;background:#080d14;border-radius:10px}.final{color:#fff}.interim{color:#91a4bf}.tiny{font-size:11px;color:#8ea1ba;line-height:1.45}.badge{display:inline-block;padding:3px 7px;border:1px solid #344b68;border-radius:99px;font-size:11px}.grid{display:grid;grid-template-columns:1fr auto;gap:8px}.buttons{display:flex;gap:8px;flex-wrap:wrap}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EzCaptions</title>
+	<link rel="icon" type="image/png" href="/assets/images/logo/pixelbotfavicon.png">
+	<link rel="stylesheet" href="/core/css/animations.css">
+	<link rel="stylesheet" href="/core/css/pixelb8-holotheme.css">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@1,700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 </head>
-<body>
-<div class="wrap">
-  <div class="title">PixelB8 Voice Web</div>
-  <div class="sub">Host this page on HTTPS and open it in normal Chrome. Final speech is sent to the desktop Voice Bridge over MQTT.</div>
 
-  <div class="card">
-    <label>Bridge room</label>
-    <div class="grid">
-      <input id="room" spellcheck="false">
-      <button id="connect">Connect</button>
-    </div>
-    <div id="mqttStatus" class="status muted">MQTT: disconnected</div>
-    <div id="desktopStatus" class="status muted">Desktop bridge: unknown</div>
-  </div>
-
-  <div class="card">
-    <label>Microphone</label>
-    <div class="grid">
-      <select id="mic"></select>
-      <button id="refreshMics">Refresh</button>
-    </div>
-    <div style="height:12px"></div>
-    <label>Live microphone level <span id="levelText" class="badge">0%</span></label>
-    <div class="meter"><div id="level"></div></div>
-    <div id="micNote" class="status muted">Choose a microphone, then start voice.</div>
-  </div>
-
-  <div class="card">
-    <div class="buttons">
-      <button id="start" class="start">Start Voice</button>
-      <button id="stop" class="stop" disabled>Stop Voice</button>
-    </div>
-    <div id="speechStatus" class="status muted">Speech recognition: stopped</div>
-    <div id="originNote" class="status muted"></div>
-    <div style="height:12px"></div>
-    <label>Live transcript</label>
-    <div id="transcript" class="transcript">—</div>
-    <div style="height:12px"></div>
-    <label>Last message sent to desktop</label>
-    <div id="sent" class="status muted">—</div>
-  </div>
-
-  <div class="card tiny">
-    Only finalized phrases are published. Say <b>set channel local</b>, <b>set channel universe</b>, or <b>set channel rookie</b>; the desktop bridge handles those commands without typing them into chat. This test bridge uses a public MQTT broker, so the random room code is important and you should not use it for private/sensitive speech.
-  </div>
-</div>
+<style>
+body{background:#00FF00;}
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+        #caption-controls {
+          position: fixed;
+          top: 2%;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(30, 30, 30, 0.9);
+          color: white;
+          padding: 1rem;
+          border-radius: 0.5rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          font-size: 0.9rem;
+          z-index: 10001;
+        }
+        #caption-controls label {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        #toggle-controls {
+          position: fixed;
+          bottom: 1%;
+          left: 1%;
+          background: #444;
+          color: white;
+          border: none;
+          padding: 0.5rem 0.8rem;
+          border-radius: 0.3rem;
+          z-index: 10002;
+          cursor: pointer;
+		  opacity:0.00;
+		  transition: all 0.3s ease;
+        }
+		#toggle-controls:hover {
+			opacity:0.85;
+		}
+</style>
+	<body>
+		<div id="underlay"></div>
 <script>
-const BROKER_HOST="broker.emqx.io";
-const BROKER_PORT=8084;
-const BROKER_PATH="/mqtt";
-const $=id=>document.getElementById(id);
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let captionText;
+let captionsDiv;
 
-const isHttps=location.protocol==="https:";
-$("originNote").textContent=isHttps
-  ? "Origin: HTTPS · recommended. Use current Google Chrome for the most reliable Web Speech support."
-  : `Origin: ${location.protocol} · upload this file to an HTTPS site before testing speech recognition.`;
-$("originNote").className=`status ${isHttps?"good":"bad"}`;
+function ensureElement(id, tag = "div", styles = {}) {
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement(tag);
+    el.id = id;
+    document.body.appendChild(el);
+  }
+  Object.assign(el.style, styles);
+  return el;
+}
 
-let mqttClient=null;
-let mqttConnected=false;
-let recognition=null;
-let listening=false;
-let restartTimer=null;
-let fatalSpeechError=false;
-let restartCount=0;
-let lastStartAt=0;
-let micStream=null;
-let audioContext=null;
-let analyser=null;
-let meterFrame=null;
-let selectedTrack=null;
-let room="";
+function ensureUIElements() {
+  // Captions Wrapper
+  captionsDiv = ensureElement("captions", "div", {
+    position: "fixed",
+    bottom: "10%",
+    left: "50%",
+    transform: "translateX(-50%)",
+    fontSize: "2rem",
+    padding: "0.5rem 1rem",
+    borderRadius: "0.5rem",
+    zIndex: "10000",
+    transition: "all 0.3s ease"
+  });
 
-function cleanRoom(value){return String(value||"").trim().replace(/[^a-zA-Z0-9_-]/g,"").slice(0,64)}
-function topicBase(){return `pixelb8/voicebridge/${room}`}
-function clientId(){return `pixelb8-web-${Math.random().toString(16).slice(2)}-${Date.now().toString(16)}`}
-function setSpeechStatus(text,cls="muted"){$("speechStatus").textContent=`Speech recognition: ${text}`;$("speechStatus").className=`status ${cls}`}
+  // Caption Text
+  captionText = document.getElementById("caption-text");
+  if (!captionText) {
+    captionText = document.createElement("span");
+    captionText.id = "caption-text";
+    captionsDiv.appendChild(captionText);
+  }
 
-function connectMqtt(){
-  const next=cleanRoom($("room").value);
-  if(next.length<6){alert("Room code must be at least 6 characters.");return}
-  room=next;
-  localStorage.setItem("pixelb8-voice-room",room);
-  const url=new URL(location.href);url.searchParams.set("room",room);history.replaceState(null,"",url);
+  // Toggle Button
+  let toggleBtn = document.getElementById("toggle-controls");
+  if (!toggleBtn) {
+    toggleBtn = document.createElement("button");
+    toggleBtn.id = "toggle-controls";
+    toggleBtn.textContent = "⚙️ Captions Settings";
+    toggleBtn.addEventListener("click", () => {
+      const panel = document.getElementById("caption-controls");
+      panel.style.display = panel.style.display === "none" ? "flex" : "none";
+    });
+    document.body.appendChild(toggleBtn);
+  }
 
-  if(mqttClient){try{mqttClient.disconnect()}catch{}}
-  $("mqttStatus").textContent="MQTT: connecting…";
-  $("mqttStatus").className="status muted";
+  // Caption Controls Panel
+  let controls = document.getElementById("caption-controls");
+  if (!controls) {
+    controls = document.createElement("div");
+    controls.id = "caption-controls";
+    controls.style.display = "none";
+    controls.style.flexDirection = "column";
+    controls.style.gap = "0.5rem";
+    controls.style.padding = "1rem";
+    controls.style.backgroundColor = "#222";
+    controls.style.color = "#fff";
+    controls.style.position = "fixed";
+    controls.style.top = "2%";
+    controls.style.left = "5%";
+    controls.style.transform = "translateX(-50%)";
+    controls.style.borderRadius = "0.5rem";
+    controls.style.zIndex = "9000";
 
-  mqttClient=new Paho.Client(BROKER_HOST,BROKER_PORT,BROKER_PATH,clientId());
-  mqttClient.onConnectionLost=response=>{
-    mqttConnected=false;
-    $("mqttStatus").textContent=`MQTT: disconnected ${response?.errorMessage||""}`;
-    $("mqttStatus").className="status bad";
+    controls.innerHTML = `
+      <label>Shadow Size <input type="range" id="shadow-size" min="0" max="10" value="4"></label>
+      <label>Shadow Color <input type="color" id="shadow-color" value="#000000"></label>
+      <label>Text Color <input type="color" id="text-color" value="#ffffff"></label>
+      <label>Background Color <input type="color" id="bg-color" value="#000000"></label>
+      <label>Blur Glow <input type="checkbox" id="blur-glow"></label>
+      <label>Outline Text <input type="checkbox" id="outline-text"></label>
+      <hr style="width:100%;border:0;border-top:1px solid #555;">
+      <label>Voice Bridge Room <input type="text" id="mqtt-room" spellcheck="false" placeholder="room code"></label>
+      <button id="mqtt-connect">Connect Voice Bridge</button>
+      <div id="mqtt-status">MQTT: disconnected</div>
+      <button id="reset-captions">Reset</button>
+    `;
+    document.body.appendChild(controls);
+  }
+
+  // Output Element
+  let output = document.getElementById("output");
+  if (!output) {
+    output = document.createElement("div");
+    output.id = "output";
+    Object.assign(output.style, {
+      fontSize: "1.2rem",
+      padding: "0.5rem",
+      borderRadius: "0.3rem",
+      backgroundColor: "rgba(0, 0, 0, 0.7)",
+      color: "#fff"
+    });
+    controls.appendChild(output);
+  }
+
+  // Start Button
+  if (!document.getElementById("voice-btn")) {
+    const startBtn = document.createElement("button");
+    startBtn.id = "voice-btn";
+    startBtn.textContent = "Start Voice";
+    Object.assign(startBtn.style, {
+      padding: "0.5rem 1rem",
+      fontSize: "1rem",
+      backgroundColor: "#4CAF50",
+      color: "white",
+      border: "none",
+      borderRadius: "0.3rem",
+      cursor: "pointer"
+    });
+    controls.appendChild(startBtn);
+  }
+
+  // Stop Button
+  if (!document.getElementById("stop-voice-btn")) {
+    const stopBtn = document.createElement("button");
+    stopBtn.id = "stop-voice-btn";
+    stopBtn.textContent = "Stop Voice";
+    Object.assign(stopBtn.style, {
+      padding: "0.5rem 1rem",
+      fontSize: "1rem",
+      backgroundColor: "#f44336",
+      color: "white",
+      border: "none",
+      borderRadius: "0.3rem",
+      cursor: "pointer"
+    });
+    controls.appendChild(stopBtn);
+  }
+
+  // Reset Logic
+  const resetButton = document.getElementById("reset-captions");
+  const applyDefaults = () => {
+    document.getElementById("shadow-size").value = 4;
+    document.getElementById("shadow-color").value = "#000000";
+    document.getElementById("text-color").value = "#ffffff";
+    document.getElementById("bg-color").value = "#000000";
+    document.getElementById("blur-glow").checked = false;
+    document.getElementById("outline-text").checked = false;
+    updateCaptionStyles();
   };
-  mqttClient.onMessageArrived=message=>{
-    if(message.destinationName!==`${topicBase()}/status`)return;
-    try{
-      const data=JSON.parse(message.payloadString);
-      $("desktopStatus").textContent=`Desktop bridge: ${data.online?"online":"offline"} · ${data.armed?"typing armed":"typing NOT armed"} · ${data.channel||""}`;
-      $("desktopStatus").className=`status ${data.online?"good":"bad"}`;
-    }catch{}
-  };
+  if (resetButton) {
+    resetButton.addEventListener("click", applyDefaults);
+  } else {
+    setTimeout(() => {
+      const resetButton = document.getElementById("reset-captions");
+      if (resetButton) resetButton.addEventListener("click", applyDefaults);
+    }, 100);
+  }
+}
 
-  mqttClient.connect({
-    useSSL:true,
-    timeout:10,
-    keepAliveInterval:30,
-    cleanSession:true,
-    onSuccess:()=>{
-      mqttConnected=true;
-      $("mqttStatus").textContent=`MQTT: connected · ${topicBase()}`;
-      $("mqttStatus").className="status good";
-      mqttClient.subscribe(`${topicBase()}/status`);
-    },
-    onFailure:err=>{
-      mqttConnected=false;
-      $("mqttStatus").textContent=`MQTT: failed · ${err?.errorMessage||"unknown error"}`;
-      $("mqttStatus").className="status bad";
+ensureUIElements();
+</script>
+
+<script>
+	function poopSplat() {
+	  const poop = document.createElement("div");
+	  poop.textContent = "💩";
+	  poop.style.position = "fixed";
+
+	  const top = Math.random() * 80 + 10;
+	  const left = Math.random() * 80 + 10;
+	  const size = Math.random() * 4 + 2;
+	  const rotation = Math.floor(Math.random() * 360);
+
+	  poop.style.top = `${top}%`;
+	  poop.style.left = `${left}%`;
+	  poop.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+	  poop.style.fontSize = `${size}rem`;
+	  poop.style.opacity = "0";
+	  poop.style.transition = "opacity 0.4s ease";
+	  poop.style.zIndex = "99999";
+	  poop.style.pointerEvents = "none";
+
+	  document.getElementById("underlay").appendChild(poop);
+
+	  requestAnimationFrame(() => {
+		poop.style.opacity = "1";
+	  });
+
+	  setTimeout(() => {
+		poop.style.opacity = "0";
+		setTimeout(() => {
+		  poop.remove();
+		}, 400);
+	  }, 1100);
+	}
+
+// === PixelB8 MQTT Voice Bridge ===
+const PIXELB8_MQTT_BROKER = "wss://broker.emqx.io:8084/mqtt";
+let pixelb8MqttClient = null;
+let pixelb8MqttConnected = false;
+let pixelb8Room = "";
+const pixelb8Pending = [];
+
+function pixelb8SetMqttStatus(text, ok = false) {
+  const el = document.getElementById("mqtt-status");
+  if (!el) return;
+  el.textContent = `MQTT: ${text}`;
+  el.style.color = ok ? "#8cff9b" : "#fff";
+}
+
+function pixelb8RoomFromPage() {
+  const fromUrl = new URLSearchParams(location.search).get("room") || "";
+  const fromSaved = localStorage.getItem("pixelb8VoiceBridgeRoom") || "";
+  return (fromUrl || fromSaved).trim();
+}
+
+function pixelb8VoiceTopic() {
+  return `pixelb8/voicebridge/${pixelb8Room}/voice`;
+}
+
+function connectPixelb8Mqtt(room = null) {
+  const roomInput = document.getElementById("mqtt-room");
+  const nextRoom = String(room ?? roomInput?.value ?? pixelb8RoomFromPage()).trim();
+
+  if (!/^[a-zA-Z0-9_-]{6,64}$/.test(nextRoom)) {
+    pixelb8SetMqttStatus("enter a valid room code");
+    return;
+  }
+
+  pixelb8Room = nextRoom;
+  localStorage.setItem("pixelb8VoiceBridgeRoom", pixelb8Room);
+  if (roomInput) roomInput.value = pixelb8Room;
+
+  if (pixelb8MqttClient) {
+    try { pixelb8MqttClient.end(true); } catch {}
+    pixelb8MqttClient = null;
+  }
+
+  pixelb8MqttConnected = false;
+  pixelb8SetMqttStatus("connecting…");
+
+  pixelb8MqttClient = mqtt.connect(PIXELB8_MQTT_BROKER, {
+    clientId: `pixelb8-web-${Math.random().toString(16).slice(2)}-${Date.now().toString(16)}`,
+    clean: true,
+    reconnectPeriod: 2000,
+    connectTimeout: 10000,
+    keepalive: 30
+  });
+
+  pixelb8MqttClient.on("connect", () => {
+    pixelb8MqttConnected = true;
+    pixelb8SetMqttStatus(`connected to room ${pixelb8Room}`, true);
+
+    while (pixelb8Pending.length) {
+      const message = pixelb8Pending.shift();
+      pixelb8MqttClient.publish(pixelb8VoiceTopic(), JSON.stringify(message));
     }
+  });
+
+  pixelb8MqttClient.on("reconnect", () => {
+    pixelb8MqttConnected = false;
+    pixelb8SetMqttStatus("reconnecting…");
+  });
+
+  pixelb8MqttClient.on("close", () => {
+    pixelb8MqttConnected = false;
+    pixelb8SetMqttStatus("disconnected");
+  });
+
+  pixelb8MqttClient.on("error", error => {
+    pixelb8MqttConnected = false;
+    console.error("PixelB8 MQTT error:", error);
+    pixelb8SetMqttStatus(error?.message || "connection error");
   });
 }
 
-function publishFinal(text){
-  const finalText=String(text||"").replace(/\s+/g," ").trim();
-  if(!finalText||!mqttConnected)return;
-  const payload=JSON.stringify({type:"voice-final",text:finalText,ts:Date.now()});
-  const message=new Paho.Message(payload);
-  message.destinationName=`${topicBase()}/voice`;
-  message.qos=0;
-  mqttClient.send(message);
-  $("sent").textContent=finalText;
-}
+function publishPixelb8VoiceFinal(text) {
+  const clean = String(text || "").replace(/\s+/g, " ").trim();
+  if (!clean) return;
 
-async function listMics(){
-  try{
-    const temp=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-    temp.getTracks().forEach(t=>t.stop());
-    const devices=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="audioinput");
-    const previous=$("mic").value||localStorage.getItem("pixelb8-voice-mic")||"";
-    $("mic").innerHTML="";
-    devices.forEach((d,i)=>{
-      const option=document.createElement("option");
-      option.value=d.deviceId;option.textContent=d.label||`Microphone ${i+1}`;$("mic").appendChild(option);
-    });
-    if(previous&&devices.some(d=>d.deviceId===previous))$("mic").value=previous;
-    if(!$("mic").value&&devices[0])$("mic").value=devices[0].deviceId;
-  }catch(err){$("micNote").textContent=`Microphone error: ${err.message}`;$("micNote").className="status bad"}
-}
-
-async function startMeter(){
-  await stopMeter();
-  const deviceId=$("mic").value;
-  if(!deviceId)throw new Error("No microphone selected.");
-  localStorage.setItem("pixelb8-voice-mic",deviceId);
-  micStream=await navigator.mediaDevices.getUserMedia({audio:{deviceId:{exact:deviceId}},video:false});
-  selectedTrack=micStream.getAudioTracks()[0]||null;
-  audioContext=new AudioContext();
-  const source=audioContext.createMediaStreamSource(micStream);
-  analyser=audioContext.createAnalyser();analyser.fftSize=1024;source.connect(analyser);
-  const data=new Uint8Array(analyser.fftSize);
-  const draw=()=>{
-    analyser.getByteTimeDomainData(data);let sum=0;
-    for(const v of data){const n=(v-128)/128;sum+=n*n}
-    const rms=Math.sqrt(sum/data.length);const pct=Math.min(100,Math.round(rms*550));
-    $("level").style.width=`${pct}%`;$("levelText").textContent=`${pct}%`;
-    meterFrame=requestAnimationFrame(draw);
-  };
-  draw();
-}
-
-async function stopMeter(){
-  if(meterFrame)cancelAnimationFrame(meterFrame);meterFrame=null;
-  micStream?.getTracks().forEach(t=>t.stop());micStream=null;selectedTrack=null;
-  try{await audioContext?.close()}catch{}audioContext=null;analyser=null;
-  $("level").style.width="0%";$("levelText").textContent="0%";
-}
-
-function buildRecognition(){
-  if(!SpeechRecognition)throw new Error("This browser does not provide SpeechRecognition/webkitSpeechRecognition.");
-  recognition=new SpeechRecognition();
-  recognition.lang="en-US";
-  recognition.interimResults=true;
-  recognition.maxAlternatives=1;
-  recognition.continuous=true;
-
-  recognition.onstart=()=>{lastStartAt=Date.now();restartCount=0;setSpeechStatus("listening","good")};
-  recognition.onspeechstart=()=>setSpeechStatus("hearing you…","good");
-  recognition.onerror=event=>{
-    console.error("SpeechRecognition error:",event.error,event.message||"");
-    const fatal=["network","not-allowed","service-not-allowed","audio-capture","language-not-supported"];
-    if(fatal.includes(event.error)){
-      fatalSpeechError=true;listening=false;
-      setSpeechStatus(`${event.error} — stopped; not restarting. Use HTTPS + Chrome; MQTT is still okay.`,`bad`);
-      $("start").disabled=false;$("stop").disabled=true;
-    }else{
-      setSpeechStatus(event.error||"error","bad");
-    }
+  const message = {
+    type: "voice-final",
+    text: clean,
+    ts: Date.now()
   };
 
-  recognition.onresult=event=>{
-    let interim="";let finals="";
-    for(let i=event.resultIndex;i<event.results.length;i++){
-      const text=event.results[i][0].transcript.trim();
-      if(event.results[i].isFinal)finals+=text+" ";else interim+=text+" ";
-    }
-    const finalText=finals.trim();const interimText=interim.trim();
-    $("transcript").innerHTML=interimText
-      ? `<span class="interim"></span>`
-      : `<span class="final"></span>`;
-    $("transcript").firstChild.textContent=interimText||finalText||"—";
-    if(finalText)publishFinal(finalText);
-  };
-
-  recognition.onend=()=>{
-    if(!listening||fatalSpeechError){
-      setSpeechStatus(fatalSpeechError?"stopped after error":"stopped",fatalSpeechError?"bad":"muted");
-      return;
-    }
-
-    const livedFor=Date.now()-lastStartAt;
-
-    if(livedFor<1200){
-      restartCount++;
-    }else{
-      restartCount=0;
-    }
-
-    if(restartCount>=3){
-      listening=false;
-      setSpeechStatus("stopped — too many rapid restarts","bad");
-      $("start").disabled=false;
-      $("stop").disabled=true;
-      return;
-    }
-
-    const delay=Math.min(2000,500+(restartCount*500));
-    setSpeechStatus(`paused; resuming in ${delay}ms…`,"muted");
-
-    clearTimeout(restartTimer);
-    restartTimer=setTimeout(()=>{
-      if(!listening||fatalSpeechError)return;
-      try{
-        if(selectedTrack && typeof selectedTrack.kind==="string"){
-          try{
-            recognition.start(selectedTrack);
-            return;
-          }catch(err){
-            console.warn("Speech track start fallback:",err);
-          }
-        }
-        recognition.start();
-      }catch(err){
-        console.warn("SpeechRecognition restart failed:",err);
-        listening=false;
-        setSpeechStatus("restart failed — stopped","bad");
-        $("start").disabled=false;
-        $("stop").disabled=true;
-      }
-    },delay);
-  };
-}
-
-function tryStartRecognition(){
-  if(!recognition)buildRecognition();
-  try{
-    if(selectedTrack){
-      try{recognition.start(selectedTrack);$("micNote").textContent="Recognition requested from selected microphone track.";return}catch(err){
-        console.warn("start(audioTrack) unavailable; falling back to browser speech input:",err);
-        $("micNote").textContent="Mic meter uses your selected microphone. SpeechRecognition is using the browser's speech input/default mic because this browser does not accept start(audioTrack).";
-      }
-    }
-    recognition.start();
-  }catch(err){
-    if(err.name!=="InvalidStateError"){
-      fatalSpeechError=true;listening=false;setSpeechStatus(err.message||String(err),"bad");
-    }
+  if (pixelb8MqttConnected && pixelb8MqttClient) {
+    pixelb8MqttClient.publish(pixelb8VoiceTopic(), JSON.stringify(message));
+    console.log("PixelB8 voice sent:", clean);
+  } else {
+    pixelb8Pending.push(message);
+    pixelb8SetMqttStatus("not connected — final phrase queued");
   }
 }
 
-async function startVoice(){
-  fatalSpeechError=false;listening=true;
-  try{
-    if(!mqttConnected)connectMqtt();
-    await startMeter();
-    buildRecognition();
-    tryStartRecognition();
-    $("start").disabled=true;$("stop").disabled=false;
-  }catch(err){
-    listening=false;setSpeechStatus(err.message||String(err),"bad");
-    await stopMeter();
+setTimeout(() => {
+  const roomInput = document.getElementById("mqtt-room");
+  const connectBtn = document.getElementById("mqtt-connect");
+  const initialRoom = pixelb8RoomFromPage();
+
+  if (roomInput) roomInput.value = initialRoom;
+  if (connectBtn) {
+    connectBtn.addEventListener("click", () => connectPixelb8Mqtt());
   }
+
+  if (initialRoom) connectPixelb8Mqtt(initialRoom);
+}, 0);
+
+	// 🎙️ Voice Recognition Logic
+	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+	let closedCaptionsEnabled = true;
+
+	if (SpeechRecognition) {
+	  const recognition = new SpeechRecognition();
+	  recognition.lang = 'en-US';
+	  recognition.interimResults = true;
+	  recognition.maxAlternatives = 1;
+	  recognition.continuous = true;
+
+	  const output = document.getElementById('output');
+	  const startBtn = document.getElementById('voice-btn');
+	  const stopBtn = document.getElementById('stop-voice-btn');
+	  const captionsDiv = document.getElementById("captions");
+	  const captionText = captionsDiv.querySelector("#caption-text"); // ✅ Add this
+
+	  let isListening = true;
+
+	  startBtn.addEventListener('click', () => {
+		isListening = true;
+		recognition.start();
+		output.textContent = "🎙️ Listening...";
+		startBtn.disabled = true;
+		stopBtn.disabled = false;
+	  });
+
+	  stopBtn.addEventListener('click', () => {
+		isListening = false;
+		recognition.stop();
+		output.textContent = "🛑 Stopped listening.";
+		startBtn.disabled = false;
+		stopBtn.disabled = true;
+	  });
+
+	  recognition.addEventListener('result', (event) => {
+		let finalTranscript = "";
+		let interimTranscript = "";
+
+		for (let i = event.resultIndex; i < event.results.length; ++i) {
+		  const transcript = event.results[i][0].transcript.trim();
+		  if (event.results[i].isFinal) {
+			finalTranscript += transcript + " ";
+		  } else {
+			interimTranscript += transcript + " ";
+		  }
+		}
+
+		const captionsDiv = document.getElementById("captions");
+		
+		if (closedCaptionsEnabled && captionsDiv) {
+		  captionText.textContent = interimTranscript || finalTranscript;
+		}
+
+		const finalLower = finalTranscript.toLowerCase();
+
+		if (finalLower.includes("spin wheel")) pullDiscRotationLever?.();
+		if (finalLower.includes("play trivia")) startentrivia?.();
+		if (finalLower.includes("put a random question on the screen")) startentriviaAsk?.();
+		if (interimTranscript.toLowerCase().includes("poop")) poopSplat();
+
+		if (finalTranscript) {
+		  output.textContent = `🗣️ You said: "${finalTranscript.trim()}"`;
+		  if (captionsDiv) captionText.textContent = finalTranscript.trim();
+		  publishPixelb8VoiceFinal(finalTranscript.trim());
+		}
+
+		let fadeTimeout;
+		if (closedCaptionsEnabled && captionsDiv) {
+		  captionText.textContent = interimTranscript || finalTranscript;
+		  captionText.classList.remove('fade-out');
+
+		  clearTimeout(fadeTimeout);
+		  fadeTimeout = setTimeout(() => {
+			captionText.classList.add('fade-out');
+		  }, 4000);
+		}
+	  });
+
+	  recognition.addEventListener('end', () => {
+		if (isListening) {
+		  console.log("Recognition ended, restarting...");
+		  recognition.start();
+		} else {
+		  console.log("Recognition stopped by user.");
+		}
+	  });
+	}
+	</script>
+<script>
+
+// === Style Handler ===
+function updateCaptionStyles() {
+  const size = document.getElementById("shadow-size").value;
+  const color = document.getElementById("shadow-color").value;
+  const text = document.getElementById("text-color").value;
+  const blur = document.getElementById("blur-glow").checked;
+  const outline = document.getElementById("outline-text").checked;
+const hex = document.getElementById("bg-color").value;
+const alpha = 0.7; // Adjust this value for more/less transparency
+
+// Convert hex to rgba
+function hexToRGBA(hex, alpha = 1) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-async function stopVoice(){
-  listening=false;fatalSpeechError=false;clearTimeout(restartTimer);
-  try{recognition?.stop()}catch{}recognition=null;
-  await stopMeter();setSpeechStatus("stopped","muted");
-  $("start").disabled=false;$("stop").disabled=true;
+
+  // Text shadow
+  let textShadow = `${size}px ${size}px ${size}px ${color}`;
+  if (blur) {
+    textShadow += `, 0 0 ${size * 2}px ${color}`;
+  }
+
+  // Apply styles to inner text
+  captionText.style.textShadow = textShadow;
+  captionText.style.color = text;
+  captionText.style.webkitTextStroke = outline ? "1px black" : "0";
+  // Apply background to outer wrapper
+  captionsDiv.style.backgroundColor = hexToRGBA(hex, alpha);
+
+  // Save settings
+  localStorage.setItem("captionPrefs", JSON.stringify({
+    size, color, text, bg, blur, outline
+  }));
 }
 
-$("connect").onclick=connectMqtt;
-$("refreshMics").onclick=listMics;
-$("mic").onchange=async()=>{localStorage.setItem("pixelb8-voice-mic",$("mic").value);if(listening){await startMeter();try{recognition?.stop()}catch{}}};
-$("start").onclick=startVoice;
-$("stop").onclick=stopVoice;
+// === Load Settings on Init ===
+function loadCaptionStyles() {
+  const saved = JSON.parse(localStorage.getItem("captionPrefs") || "{}");
 
-const params=new URLSearchParams(location.search);
-$("room").value=cleanRoom(params.get("room")||localStorage.getItem("pixelb8-voice-room")||"");
-listMics().then(()=>{if($("room").value.length>=6)connectMqtt()});
+  document.getElementById("shadow-size").value = saved.size || 4;
+  document.getElementById("shadow-color").value = saved.color || "#000000";
+  document.getElementById("text-color").value = saved.text || "#ffffff";
+  document.getElementById("bg-color").value = saved.bg || "#000000";
+  document.getElementById("blur-glow").checked = saved.blur || false;
+  document.getElementById("outline-text").checked = saved.outline || false;
+
+  updateCaptionStyles();
+}
+
+// Reset to Default Handler
+document.getElementById("reset-captions").addEventListener("click", () => {
+  const defaults = {
+    size: 4,
+    color: "#000000",
+    text: "#ffffff",
+    bg: "#000000",
+    blur: false,
+    outline: false
+  };
+
+  document.getElementById("shadow-size").value = defaults.size;
+  document.getElementById("shadow-color").value = defaults.color;
+  document.getElementById("text-color").value = defaults.text;
+  document.getElementById("bg-color").value = defaults.bg;
+  document.getElementById("blur-glow").checked = defaults.blur;
+  document.getElementById("outline-text").checked = defaults.outline;
+
+  updateCaptionStyles();
+});
+
+// Hook up all input events
+[
+  "shadow-size", "shadow-color", "text-color",
+  "bg-color", "blur-glow", "outline-text"
+].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", updateCaptionStyles);
+});
+
+// Run on page load
+
+loadCaptionStyles();
+console.log("shieeet");
 </script>
-</body>
+
+	</body>
 </html>
