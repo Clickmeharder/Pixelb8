@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropia: Grid-Runner</title>
+    <!-- Dependencies -->
+    <link rel="stylesheet" href="../chat.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="../multiplayer.js"></script>
+
+    <style>
+
+    </style>
+</head>
+<body>
+
+    <div class="app">
+        <!-- HEADER -->
+        <header class="topbar">
+            <div class="brand">GRID-RUNNER<small>CYBERNETIC TURF WAR</small></div>
+            <div class="connection" id="connection">Connecting...</div>
+        </header>
+
+        <!-- MAIN MENU -->
+        <main id="lobby-view" class="view-panel main-menu">
+            <section class="menu-block">
+                <h2>Syndicate Profile</h2>
+                <div class="field"><label>Fixer Name</label><input id="player-name" maxlength="18" value="Runner"></div>
+                <div class="divider"></div>
+                
+                <h2>Host a Sprawl</h2>
+                <div class="field">
+                    <label>Game Mode</label>
+                    <select id="game-mode-select">
+                        <option value="pvp">Multiplayer (PvP)</option>
+                        <option value="pve-easy">Single Player vs AI (Easy)</option>
+                        <option value="pve-medium">Single Player vs AI (Medium)</option>
+                        <option value="pve-hard">Single Player vs AI (Hard)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Grid Dimensions</label>
+                    <select id="grid-size-select">
+                        <option value="4">4x4 (Arcade Blitz)</option>
+                        <option value="8">8x8 (Tactical Sprawl)</option>
+                        <option value="12">12x12 (Warzone)</option>
+                        <option value="16">16x16 (Mega Sprawl)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Syndicate Capacity</label>
+                    <select id="max-players-select">
+                        <option value="2">2 Players (Duel)</option>
+                        <option value="4">4 Players (Free For All)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Private Sector Code</label>
+                    <input id="custom-code" maxlength="6" placeholder="AUTO">
+                </div>
+                <button class="primary" id="create-room">DEPLOY TO SECTOR</button>
+                
+                <div class="divider"></div>
+                
+                <h2>Join Sprawl</h2>
+                <div style="display:flex;gap:8px;"><input id="join-code" maxlength="6" placeholder="ROOM CODE" style="flex:1;"><button id="join-code-btn">JOIN</button></div>
+                
+                <div class="hint" style="margin-top:10px;">
+                    <b>Rules of Engagement:</b><br>
+                    • Attack adjacent neutral/enemy sectors.<br>
+                    • Reinforce ANY adjacent friendly node.<br>
+                    • <b>Docks</b>: Perimeter edges (+2 units/round).<br>
+                    • <b>Tech Cores</b>: Center points (+4 units every 2 rounds).<br>
+                    <b>Victory:</b> Wipe out all rival garrisons.
+                </div>
+            </section>
+
+            <section class="menu-block" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
+                <h2>Active Urban Sectors</h2>
+                <div class="room-list" id="room-list"><div class="empty">Scanning network…</div></div>
+            </section>
+        </main>
+
+        <!-- GAME VIEW -->
+        <main id="game-view" class="view-panel game-grid hidden">
+            <aside class="sidebar">
+                <div class="room-heading"><b id="room-title">Match Room</b><small id="room-details">Sector ----</small></div>
+                <div class="roster" id="roster"></div>
+                
+                <!-- CYBER-COMMS (UNIVERSAL CHAT) -->
+                <div id="cyber-chat" class="chat-container"></div>
+
+                <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+                    <button id="copy-code">COPY CODE</button>
+                    <button class="danger" id="leave-room">ABANDON SECTOR</button>
+                </div>
+            </aside>
+            
+            <section class="board-container">
+                <div id="status-banner" class="status-banner">
+                    <span id="turn-indicator">Waiting for host to start...</span>
+                    <span id="timer-display" class="timer-display hidden">--</span>
+                </div>
+
+                <div class="hud-row">
+                    <div class="resource-hud" id="resource-hud"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="btn-toggle-icons" class="primary" style="padding: 6px 12px; font-size: 0.8rem;">👀 HIDE ICONS</button>
+                        <button id="btn-zoom" class="primary" style="padding: 6px 12px; font-size: 0.8rem;">🔍 ZOOM OUT</button>
+                    </div>
+                </div>
+                
+                <div class="game-battlefield">
+                    <div class="control-bar-wrapper">
+                        <span class="control-bar-label">Control Ratio</span>
+                        <div class="control-bar" id="control-bar">
+                            <div class="bar-segment p4" id="bar-p4"></div>
+                            <div class="bar-segment p3" id="bar-p3"></div>
+                            <div class="bar-segment p2" id="bar-p2"></div>
+                            <div class="bar-segment p1" id="bar-p1"></div>
+                        </div>
+                    </div>
+
+                    <div class="board-scroll-area">
+                        <div class="turf-grid zoomed-in" id="board"></div>
+                    </div>
+                </div>
+
+                <div id="cyber-tooltip" class="cyber-tooltip"></div>
+
+                <!-- CINEMATIC INTRO CANVAS & DIALOGUE -->
+                <div id="cinematic-screen" class="cinematic-overlay hidden">
+                    <canvas id="cine-canvas"></canvas>
+                    <div class="cine-textbox">
+                        <div id="cine-text" class="cinematic-text"></div>
+                    </div>
+                </div>
+
+                <!-- WINNER SCREEN -->
+                <div id="winner-screen" class="overlay hidden">
+                    <h1 class="winner-title" id="winner-title">SYNDICATE WINS</h1>
+                    <p class="winner-subtitle" id="winner-subtitle">SPRAWL SECURED</p>
+                    <p class="winner-loser-text" id="winner-loser-text"></p>
+                    <div style="display:flex; gap: 10px; margin-top: 20px;">
+                        <button class="primary hidden" id="rematch-btn">HOST REMATCH</button>
+                        <button class="danger" onclick="location.reload()">RETURN TO LOBBY</button>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <script src="game.js"></script>
+
+</body>
+</html>

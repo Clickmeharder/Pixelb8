@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropia Chronicles — TCG Arena</title>
+    <link rel="stylesheet" href="../chat.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="../multiplayer.js"></script>
+    <style>
+   </style>
+</head>
+<body>
+<div class="app">
+    <header class="topbar">
+        <div class="brand">ENTROPIA CHRONICLES<small>TCG ARENA · CALYPSO CIRCUIT</small></div>
+        <div class="connection" id="connection">Connecting to arena directory…</div>
+    </header>
+
+    <main class="lobby" id="lobby">
+        <section class="panel setup">
+            <h2>Avatar registration</h2>
+            <div class="field"><label>Entropia avatar name</label><input id="avatar-name" maxlength="18" placeholder="AVATAR NAME"></div>
+            <div class="divider"></div>
+            <h2>Host battle</h2>
+            <div class="field"><label>Optional private room code</label><input id="host-code" maxlength="6" placeholder="AUTO PUBLIC CODE"></div>
+            <button class="primary" id="host-room">HOST OPEN MATCH</button>
+            <div class="divider"></div>
+            <h2>Join by code</h2>
+            <div class="split"><input id="join-code" maxlength="6" placeholder="CODE"><button id="join-room">JOIN</button></div>
+            <p class="rule-note">Two-player matches. Each avatar begins at 30 HP with a shuffled starter deck. Summon creatures, fire weapons using ammo, and use tools to heal or resupply.</p>
+        </section>
+        <section class="panel rooms">
+            <div class="rooms-head"><h2>Open Entropia battles</h2><span class="summary" id="room-summary">Scanning…</span></div>
+            <div class="room-list" id="room-list"><div class="empty">Connecting to the room directory…</div></div>
+        </section>
+    </main>
+
+    <main class="arena hidden" id="arena">
+        <aside class="panel sidebar">
+            <div class="side-title"><b id="side-room">Battle Room</b><small id="side-details">Room ----</small></div>
+            <div class="roster" id="roster"></div>
+            
+            <!-- CYBER-COMMS (UNIVERSAL CHAT) -->
+            <div id="cyber-chat" class="chat-container" style="margin: 8px 0; flex: 1; min-height: 150px;"></div>
+
+            <div class="side-buttons"><button id="copy-code">COPY ROOM CODE</button><button class="danger" id="leave">LEAVE MATCH</button></div>
+        </aside>
+        <section class="panel board-shell">
+            <div class="match-head"><h2>CALYPSO BATTLE TABLE</h2><span class="turn-badge" id="turn-badge">WAITING</span></div>
+            <div class="battlefield">
+                <div class="hero enemy" id="enemy-hero">
+                    <div class="portrait">☠</div><div class="hero-info"><div class="hero-name" id="enemy-name">Waiting for rival…</div><div class="meters"><span class="meter hp" id="enemy-hp">♥ --</span><span class="meter me" id="enemy-me">ME --</span><span class="meter ammo" id="enemy-ammo">AMMO --</span></div></div>
+                    <div class="hero-actions"><button id="attack-avatar" disabled>ATTACK AVATAR</button></div>
+                </div>
+                <div class="zone-wrap"><div class="zone-label"><span>Rival battlefield</span><span id="enemy-counts"></span></div><div class="zone" id="enemy-board"></div></div>
+                <div class="lane">PORT ATLANTIS CONTESTED ZONE</div>
+                <div class="zone-wrap"><div class="zone-label"><span>Your battlefield</span><span id="my-counts"></span></div><div class="zone" id="my-board"></div></div>
+                <div class="hero player">
+                    <div class="portrait">⌖</div><div class="hero-info"><div class="hero-name" id="my-name">Avatar</div><div class="meters"><span class="meter hp" id="my-hp">♥ 30</span><span class="meter me" id="my-me">ME 3/3</span><span class="meter ammo" id="my-ammo">AMMO 20</span></div></div>
+                    <div class="hero-actions"><button id="concede" class="danger">CONCEDE</button></div>
+                </div>
+                <div class="zone-wrap hand-zone"><div class="zone-label"><span>Your hand</span><span>Click a card to play it</span></div><div class="zone" id="my-hand"></div></div>
+                <div class="message" id="message">Waiting for both avatars.</div>
+            </div>
+            <div class="controls" id="controls"></div>
+            <div class="log" id="battle-log"></div>
+        </section>
+    </main>
+</div>
+
+    <script src="game.js"></script>
+
+</body>
+</html>

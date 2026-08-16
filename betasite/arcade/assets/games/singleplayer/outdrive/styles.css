@@ -1,0 +1,449 @@
+        :root {
+            --cabinet-red: #d31111;
+            --cabinet-dark-red: #7a0000;
+            --marquee-cyan: #00ffcc;
+            --t-molding: #222222;
+        }
+
+        body {
+            background-color: #0c0f12;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', Courier, monospace;
+            color: #fff;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        /* Arcade Cabinet Wrapper */
+        .arcade-container {
+            position: relative;
+            width: 520px;
+            background: linear-gradient(135deg, var(--cabinet-dark-red), var(--cabinet-red));
+            border-left: 14px solid var(--t-molding);
+            border-right: 14px solid var(--t-molding);
+            border-radius: 20px 20px 10px 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px;
+            user-select: none;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-style: preserve-3d;
+        }
+
+        .arcade-container.lean-in {
+            transform: scale(1.55) translateY(120px) translateZ(150px) rotateX(4deg);
+        }
+
+        /* Marquee / Header */
+        .marquee {
+            width: 100%;
+            height: 95px;
+            background: #0a0a0a;
+            border-bottom: 6px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px 8px 0 0;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.8);
+        }
+        .marquee-art {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 0, 0, 0.1),
+                rgba(255, 0, 0, 0.1) 10px,
+                rgba(0, 0, 0, 0.2) 10px,
+                rgba(0, 0, 0, 0.2) 20px
+            );
+            opacity: 0.8;
+        }
+        .marquee h1 {
+            font-size: 3.2rem;
+            margin: 0;
+            font-family: 'Impact', sans-serif;
+            color: var(--marquee-cyan);
+            text-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc, 4px 4px 0px #000;
+            letter-spacing: 2px;
+            z-index: 2;
+            font-style: italic;
+            transform: skewX(-10deg);
+        }
+
+        /* Screen Bezel */
+        .bezel {
+            width: 90%;
+            background: #111;
+            margin-top: 15px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: inset 0 0 30px #000;
+            box-sizing: border-box;
+            border-bottom: 4px solid #050505;
+        }
+
+        /* CRT Display Wrapper */
+        .screen-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,1), 0 0 10px rgba(0, 255, 204, 0.1);
+            border: 4px solid #1a1a1a;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        /* CRT Effects */
+        .crt-overlay {
+            --crt-opacity: 0.68;
+            --crt-line-size: 4px;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(18, 16, 16, 0) 0%,
+                rgba(18, 16, 16, 0) 58%,
+                rgba(0, 0, 0, 0.23) 58%,
+                rgba(0, 0, 0, 0.23) 100%
+            );
+            background-size: 100% var(--crt-line-size);
+            opacity: var(--crt-opacity);
+            transition: opacity 0.18s ease, background-size 0.18s ease;
+            will-change: opacity, background-size;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .screen-container.crt-disabled .crt-overlay { opacity: 0 !important; }
+        .crt-curve {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.9);
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        /* Dashboard / Control Panel */
+        .control-panel {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(to bottom, #222, #0a0a0a);
+            border-top: 6px solid #000;
+            border-bottom: 6px solid #000;
+            margin-top: 15px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.7);
+            transform-style: preserve-3d;
+        }
+
+        .cp-texture {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(black 15%, transparent 16%) 0 0,
+                radial-gradient(black 15%, transparent 16%) 8px 8px,
+                radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+                radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+            background-color: #1a1a1a;
+            background-size: 16px 16px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Steering Wheel */
+        .steering-base {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            background: radial-gradient(circle, #050505 40%, #000 70%);
+            border-radius: 50%;
+            border: 4px solid #111;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.9), 0 5px 15px rgba(0,0,0,0.8);
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .steering-wheel {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 12px solid #111; 
+            position: relative;
+            box-shadow: 
+                inset 0 0 5px #000, 
+                0 0 5px #000,
+                0 -2px 0 2px var(--marquee-cyan), 
+                0 2px 0 2px var(--marquee-cyan); 
+            transition: transform 0.1s ease-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .wheel-center {
+            width: 35px;
+            height: 35px;
+            background: radial-gradient(circle at 11px 9px, #ff3b3b, #8a0000 68%, #4b0000);
+            border-radius: 50%;
+            border: 2px solid #222;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.35);
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: transform 0.07s ease, filter 0.07s ease, box-shadow 0.07s ease;
+        }
+        .wheel-center:hover { filter: brightness(1.18); }
+        .wheel-center:active, .wheel-center.horn-active {
+            transform: scale(0.88);
+            filter: brightness(1.35);
+            box-shadow: 0 0 10px rgba(255,70,70,0.8), inset 0 2px 6px rgba(0,0,0,0.7);
+        }
+        
+        .wheel-center-logo {
+            font-size: 0.35rem;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            line-height: 1;
+            transform: skewX(-5deg);
+        }
+
+        .spoke {
+            position: absolute;
+            background: linear-gradient(90deg, #aa0000, #ff0000, #aa0000);
+            border: 1px solid #330000;
+            z-index: 2;
+        }
+        .spoke.left { width: 45px; height: 18px; left: -10px; }
+        .spoke.right { width: 45px; height: 18px; right: -10px; }
+        .spoke.bottom { width: 18px; height: 45px; bottom: -10px; }
+
+        /* 5-Speed Gear Shifter */
+        .shifter-box {
+            position: absolute;
+            right: 30px;
+            width: 45px;
+            height: 110px;
+            background: #111;
+            border: 3px solid #333;
+            border-radius: 5px;
+            box-shadow: inset 0 0 10px #000;
+            z-index: 5;
+        }
+        .shifter-slot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 90px;
+            top: 10px;
+            background: #000;
+            border-radius: 4px;
+            box-shadow: inset 0 0 5px #000;
+        }
+        .shifter-knob {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle at 10px 10px, #ff3333, #aa0000);
+            border-radius: 50%;
+            border: 2px solid #000;
+            top: 70px; /* Default Gear 1 */
+            box-shadow: 0 5px 10px rgba(0,0,0,0.8), inset 0 -3px 5px rgba(0,0,0,0.5);
+            transition: top 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 1px 1px 1px #000;
+        }
+        .gear-label {
+            position: absolute;
+            left: -15px;
+            color: #ccc;
+            font-size: 0.5rem;
+            font-weight: bold;
+            font-family: sans-serif;
+        }
+        .gear-label.g5 { top: 10px; }
+        .gear-label.g4 { top: 25px; }
+        .gear-label.g3 { top: 40px; }
+        .gear-label.g2 { top: 55px; }
+        .gear-label.g1 { top: 70px; }
+
+        /* Lean Button */
+        .lean-btn {
+            position: absolute;
+            left: 40px;
+            width: 45px;
+            height: 45px;
+            background: radial-gradient(circle at 12px 12px, #fff, #aaa);
+            border-radius: 50%;
+            border: 4px solid #000;
+            box-shadow: 0 4px 0 #555, 0 6px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: #000;
+            transform: translateZ(20px);
+            transition: transform 0.1s, box-shadow 0.1s;
+            z-index: 15;
+        }
+        .lean-btn:active, .lean-btn.forced-active {
+            transform: translateY(4px) translateZ(20px);
+            box-shadow: 0 0px 0 #555, 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+
+        /* CRT scanline toggle */
+        .crt-btn {
+            position: absolute;
+            left: 101px;
+            width: 48px;
+            height: 30px;
+            border-radius: 6px;
+            border: 3px solid #000;
+            background: linear-gradient(#343a40, #15191d);
+            box-shadow: 0 4px 0 #050505, 0 6px 10px rgba(0,0,0,0.55), inset 0 1px 2px rgba(255,255,255,0.18);
+            color: #aaa;
+            font: bold 0.55rem 'Courier New', monospace;
+            cursor: pointer;
+            z-index: 16;
+            transform: translateZ(18px);
+            transition: transform 0.08s, box-shadow 0.08s, color 0.12s, background 0.12s;
+        }
+        .crt-btn.active {
+            color: #07110e;
+            background: linear-gradient(#77ffe2, #00cfa8);
+            box-shadow: 0 4px 0 #006b58, 0 0 12px rgba(0,255,204,0.48), inset 0 1px 2px rgba(255,255,255,0.55);
+        }
+        .crt-btn:active {
+            transform: translateY(4px) translateZ(18px);
+            box-shadow: 0 0 0 #050505, 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Lower Cabinet & Coin Door */
+        .lower-cabinet {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        
+        .checkered-flag {
+            width: 100%;
+            height: 60px;
+            margin-top: 15px;
+            background-image: 
+                linear-gradient(45deg, #000 25%, transparent 25%), 
+                linear-gradient(-45deg, #000 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #000 75%), 
+                linear-gradient(-45deg, transparent 75%, #000 75%);
+            background-size: 30px 30px;
+            background-position: 0 0, 0 15px, 15px -15px, -15px 0px;
+            background-color: #fff;
+            border-top: 4px solid #111;
+            border-bottom: 4px solid #111;
+            transform: perspective(200px) rotateX(5deg);
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .coin-door {
+            width: 130px;
+            height: 110px;
+            background: #1e1e1e;
+            margin-top: -30px;
+            border: 4px solid #111;
+            border-radius: 5px;
+            box-shadow: inset 0 0 10px #000, 0 10px 20px rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+        }
+        .coin-slot {
+            width: 35px;
+            height: 55px;
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+        .coin-entry {
+            width: 4px;
+            height: 25px;
+            background: #ff5500;
+            position: absolute;
+            top: 10px; left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 5px #ff5500;
+        }
+        .coin-return {
+            width: 20px;
+            height: 15px;
+            background: #222;
+            border: 1px solid #000;
+            position: absolute;
+            bottom: 5px; left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* UI Overlays */
+        .ui-panel {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 20px;
+            border: 2px solid var(--marquee-cyan);
+            border-radius: 10px;
+            width: 85%;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+        .ui-panel h2 { color: var(--cabinet-red); margin: 0 0 10px 0; font-size: 1.6rem; text-shadow: 1px 1px 0 #000;}
+        .ui-panel p { margin: 5px 0; font-size: 0.85rem;}
+        #gameover-panel { padding: 11px 14px; }
+        #gameover-panel h2 { font-size: 1.30rem; margin-bottom: 5px; }
+        #final-score { font-size: 0.73rem !important; line-height: 1.22 !important; margin: 2px 0 !important; }
+        #result-next-hint { font-size: 0.62rem !important; margin-top: 5px !important; }
+        .hidden { display: none; }

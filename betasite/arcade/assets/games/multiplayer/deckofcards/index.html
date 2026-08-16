@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelB8 Card House</title>
+    <!-- Dependencies -->
+    <link rel="stylesheet" href="../chat.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="../multiplayer.js"></script>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="app">
+    <header class="topbar">
+        <div class="brand">PIXELB8 CARD HOUSE<small>REAL DECKS · REAL TABLES · CASUAL MULTIPLAYER</small></div>
+        <div class="connection" id="connection">Connecting to room directory…</div>
+    </header>
+
+    <main id="lobby-view" class="lobby-grid">
+        <section class="panel setup">
+            <h2>Your seat</h2>
+            <div class="field"><label>Display name</label><input id="player-name" maxlength="18" value=""></div>
+            <div class="divider"></div>
+            <h2>Create a table</h2>
+            <div class="field"><label>Game</label>
+                <select id="create-mode">
+                    <option value="freeplay">Free Play — Real Deck Sandbox</option>
+                    <option value="holdem">Texas Hold’em</option>
+                    <option value="blackjack">Multiplayer Blackjack</option>
+                    <option value="fivecard">Five-Card Draw</option>
+                    <option value="war">War</option>
+                </select>
+            </div>
+            <div class="row">
+                <div class="field"><label>Seats</label><select id="max-players"><option>2</option><option>4</option><option selected>6</option><option>8</option></select></div>
+                <div class="field"><label>Private code</label><input id="custom-code" maxlength="6" placeholder="AUTO"></div>
+            </div>
+            <button class="primary" id="create-room">CREATE OPEN TABLE</button>
+            <div class="divider"></div>
+            <h2>Join by code</h2>
+            <div class="row"><input id="join-code" maxlength="6" placeholder="ROOM CODE"><button id="join-code-btn">JOIN</button></div>
+            <p class="hint">Free Play gives the dealer an unrestricted deck: deal face-up or face-down to anyone, move cards to the table, flip cards, shuffle, clear, and start over.</p>
+        </section>
+
+        <section class="panel browser">
+            <div class="browser-head">
+                <div><h2>Open card rooms</h2><div class="hint" id="room-summary">Looking for tables…</div></div>
+                <div class="filters"><select id="room-filter"><option value="all">All games</option><option value="freeplay">Free Play</option><option value="holdem">Hold’em</option><option value="blackjack">Blackjack</option><option value="fivecard">Five-Card Draw</option><option value="war">War</option></select></div>
+            </div>
+            <div class="room-list" id="room-list"><div class="empty">Connecting to the public room directory…</div></div>
+        </section>
+    </main>
+
+    <main id="game-view" class="game-grid hidden">
+        <aside class="panel sidebar">
+            <div class="room-heading"><b id="room-title">Card Table</b><small id="room-details">Room ----</small></div>
+            <div class="roster" id="roster"></div>
+            
+            <!-- CYBER-COMMS (UNIVERSAL CHAT) -->
+            <div id="cyber-chat" class="chat-container" style="margin-bottom: 12px;"></div>
+            
+            <div class="sidebar-actions">
+                <button id="copy-code">COPY ROOM CODE</button>
+                <button class="danger" id="leave-room">LEAVE TABLE</button>
+            </div>
+        </aside>
+        <section class="panel table-shell">
+            <div class="table-head">
+                <h2 id="game-title">FREE PLAY</h2>
+                <span class="badge waiting" id="game-status">WAITING</span>
+                <div class="stats"><span class="stat" id="deck-stat">DECK 52</span><span class="stat" id="pot-stat">POT 0</span></div>
+            </div>
+            <div class="felt">
+                <div class="opponents" id="opponents"></div>
+                <div class="community">
+                    <div class="cards" id="community-cards"></div>
+                    <div class="table-message" id="table-message">Waiting for the host to start.</div>
+                </div>
+                <div class="my-seat">
+                    <div class="seat-name" id="my-seat-name">YOUR HAND</div>
+                    <div class="cards" id="my-hand"></div>
+                    <div class="seat-info" id="my-seat-info"></div>
+                </div>
+            </div>
+            <div class="action-bar" id="action-bar"></div>
+            <div class="toolkit hidden" id="freeplay-tools">
+                <label>DEALER TOOLKIT</label>
+                <button data-tool="shuffle">Shuffle</button>
+                <button data-tool="tableUp">Table ↑</button><button data-tool="tableDown">Table ↓</button>
+                <select id="deal-target"></select>
+                <button data-tool="playerUp">Player ↑</button><button data-tool="playerDown">Player ↓</button>
+                <button data-tool="clear">Clear Table</button><button data-tool="collect">Collect All</button>
+            </div>
+            <div class="mode-rules" id="mode-rules"></div>
+        </section>
+    </main>
+</div>
+
+    <script src="game.js"></script>
+</body>
+</html>

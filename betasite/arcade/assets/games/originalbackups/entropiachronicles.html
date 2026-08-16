@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropia Chronicles — TCG Arena</title>
+    <link rel="stylesheet" href="../../../css/chat.css">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="../../multiplayer.js"></script>
+    <style>
+        :root{
+            --bg:#05080c;--panel:#0d141c;--panel2:#121d27;--line:#253746;--cyan:#30f2d2;
+            --gold:#f1c24e;--red:#ff5d68;--blue:#50a8ff;--green:#68e38f;--text:#eaf2f7;--muted:#8da0ad;
+            --mob:#345d3b;--weapon:#663b32;--tool:#364a72;--location:#6a5730;
+        }
+        *{box-sizing:border-box}
+        body{margin:0;min-height:100vh;background:
+            radial-gradient(circle at 50% -25%,#16423e 0,transparent 40%),
+            linear-gradient(145deg,#040608,#081016 55%,#030507);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+        button,input{font:inherit}button{border:1px solid #3b5263;background:#15232e;color:var(--text);padding:9px 13px;border-radius:7px;cursor:pointer;transition:.15s}
+        button:hover:not(:disabled){border-color:var(--cyan);color:var(--cyan);transform:translateY(-1px)}
+        button:disabled{opacity:.35;cursor:not-allowed}.primary{background:linear-gradient(#159c8c,#08665d);border-color:var(--cyan);font-weight:800}.danger{border-color:#71323b;color:#ff929a}
+        input{background:#04070a;color:var(--cyan);border:1px solid #365263;border-radius:7px;padding:10px}.hidden{display:none!important}
+        .app{width:min(1180px,96vw);margin:auto;padding:17px 0 28px}.topbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+        .brand{font-family:Georgia,serif;color:var(--gold);font-size:1.5rem;font-weight:900;letter-spacing:.06em}.brand small{display:block;font:700 .61rem Inter;color:var(--cyan);letter-spacing:.22em;margin-top:2px}
+        .connection{margin-left:auto;color:var(--muted);font-size:.73rem}.connection:before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#cf9535;margin-right:6px}.connection.online:before{background:var(--green);box-shadow:0 0 8px var(--green)}
+        .panel{background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:13px;box-shadow:0 18px 40px #0009}
+        .lobby{display:grid;grid-template-columns:320px 1fr;gap:13px}.setup,.rooms{padding:16px}.setup{display:flex;flex-direction:column;gap:11px}.setup h2,.rooms h2{font-size:1.02rem;color:var(--gold);margin:0}
+        .field{display:flex;flex-direction:column;gap:5px}.field label{font-size:.68rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.08em}.split{display:flex;gap:7px}.split>*{min-width:0;flex:1}
+        .rule-note{font-size:.72rem;color:var(--muted);line-height:1.5}.divider{height:1px;background:var(--line);margin:2px 0}
+        .rooms-head{display:flex;align-items:center;margin-bottom:11px}.summary{font-size:.71rem;color:var(--muted);margin-left:auto}
+        .room-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}.room{background:#070c11;border:1px solid #243846;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:9px}
+        .room:hover{border-color:#3b756e}.room-top{display:flex;gap:8px;align-items:flex-start}.room-name{font-weight:800}.code{font:700 .7rem monospace;color:var(--cyan);margin-top:2px}
+        .badge{margin-left:auto;padding:3px 7px;border:1px solid #466072;border-radius:99px;font-size:.62rem;font-weight:900;text-transform:uppercase}.badge.waiting{color:var(--green);border-color:#397a4d}.badge.playing{color:var(--gold);border-color:#80672f}
+        .room-meta{font-size:.72rem;color:var(--muted)}.chips{display:flex;flex-wrap:wrap;gap:5px}.chip{padding:4px 7px;border:1px solid #2a4351;background:#101b23;border-radius:99px;font-size:.67rem}.room-actions{display:flex;gap:6px}.room-actions button{flex:1}
+        .empty{text-align:center;color:var(--muted);padding:70px 20px;border:1px dashed #30444f;border-radius:10px;grid-column:1/-1}
+        .arena{display:grid;grid-template-columns:220px 1fr;gap:11px}.sidebar{padding:11px;display:flex;flex-direction:column;min-height:720px}.side-title{padding:5px 4px 11px;border-bottom:1px solid var(--line)}.side-title b{color:var(--gold)}.side-title small{display:block;color:var(--muted);font-size:.68rem;margin-top:4px}
+        .roster{display:flex;flex-direction:column;gap:6px;margin-top:10px}.person{padding:8px;background:#081016;border:1px solid #263d49;border-radius:7px;font-size:.72rem}.person.me{border-color:#8b7332}.person small{display:block;color:var(--muted);margin-top:3px}
+        .side-buttons{margin-top:auto;display:flex;flex-direction:column;gap:6px}.board-shell{padding:11px}.match-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}.match-head h2{font-size:1rem;color:var(--gold);margin:0}.turn-badge{padding:4px 8px;border:1px solid #45606d;border-radius:99px;font-size:.67rem;font-weight:900}.turn-badge.mine{color:var(--cyan);border-color:var(--cyan);box-shadow:0 0 9px #30f2d244}
+        .battlefield{background:linear-gradient(180deg,#07131a,#071015);border:1px solid #29404e;border-radius:12px;overflow:hidden}
+        .hero{display:flex;align-items:center;gap:12px;padding:9px 13px;background:#0c1820;border-bottom:1px solid #253b47}.hero.player{border-top:1px solid #253b47;border-bottom:0}
+        .portrait{width:45px;height:45px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 25%,#4e8c86,#123935);border:2px solid var(--cyan);font-size:1.3rem}.enemy .portrait{background:radial-gradient(circle at 35% 25%,#8b5749,#3a171a);border-color:var(--red)}
+        .hero-info{min-width:130px}.hero-name{font-size:.78rem;font-weight:900}.meters{display:flex;gap:7px;margin-top:4px}.meter{font:bold .68rem monospace}.hp{color:var(--red)}.me{color:var(--cyan)}.ammo{color:var(--gold)}
+        .hero-actions{margin-left:auto}.hero-actions button{font-size:.7rem;padding:6px 9px}
+        .zone-wrap{padding:9px 13px}.zone-label{font-size:.62rem;color:var(--muted);font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;display:flex;justify-content:space-between}
+        .zone{display:flex;align-items:center;justify-content:center;gap:7px;min-height:140px;flex-wrap:wrap}.hand-zone{min-height:160px;background:#050a0e}
+        .lane{height:32px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,transparent,#15333a,transparent);font-size:.68rem;color:#a8c0c7;border-top:1px solid #1b313b;border-bottom:1px solid #1b313b}
+        .card{width:91px;height:130px;border-radius:8px;border:2px solid var(--gold);position:relative;padding:7px 6px 5px;display:flex;flex-direction:column;box-shadow:0 5px 11px #000b;cursor:default;transition:.15s;overflow:hidden;background:#243344}
+        .card.clickable{cursor:pointer}.card.clickable:hover{transform:translateY(-7px);box-shadow:0 9px 15px #000}.card.selected{transform:translateY(-10px);box-shadow:0 0 0 3px var(--cyan),0 9px 15px #000}
+        .card.mob{background:linear-gradient(145deg,#385f40,#152c1d)}.card.weapon{background:linear-gradient(145deg,#694037,#301919)}.card.tool{background:linear-gradient(145deg,#3a5078,#18233c)}
+        .card.exhausted{filter:saturate(.45);transform:rotate(3deg);opacity:.7}.card-title{font-size:.65rem;font-weight:900;color:#fff;line-height:1.05;text-align:center;min-height:26px}.card-art{flex:1;display:grid;place-items:center;font-size:2rem;text-shadow:0 3px 5px #000}.card-type{position:absolute;top:4px;right:5px;font:bold .52rem monospace;color:#d8e3e9}.cost{position:absolute;top:3px;left:4px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:#092b32;border:1px solid var(--cyan);font:bold .65rem monospace;color:var(--cyan)}
+        .card-text{font-size:.53rem;line-height:1.1;color:#d0d9dd;min-height:22px}.stats{display:flex;justify-content:space-between;font:bold .65rem monospace;margin-top:3px}.attack{color:#ffbc67}.defense{color:#81d8ff}
+        .card-back{width:72px;height:103px;border-radius:7px;border:3px solid #a9d9d1;background:repeating-linear-gradient(45deg,#123d4d 0 6px,#1d6570 6px 12px);box-shadow:0 4px 9px #000;margin-left:-38px}.card-back:first-child{margin-left:0}
+        .message{min-height:38px;padding:10px;text-align:center;font-size:.74rem;color:#e8d78e;background:#091117;border-top:1px solid #223946}
+        .controls{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;padding-top:9px}.controls button{min-width:108px}.log{margin-top:8px;padding:8px;border:1px solid #263c47;border-radius:7px;background:#070c10;color:var(--muted);font-size:.66rem;max-height:70px;overflow:auto}
+        @media(max-width:780px){.lobby,.arena{grid-template-columns:1fr}.sidebar{min-height:0}.zone{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap}.card{flex:0 0 84px}.room-list{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div class="app">
+    <header class="topbar">
+        <div class="brand">ENTROPIA CHRONICLES<small>TCG ARENA · CALYPSO CIRCUIT</small></div>
+        <div class="connection" id="connection">Connecting to arena directory…</div>
+    </header>
+
+    <main class="lobby" id="lobby">
+        <section class="panel setup">
+            <h2>Avatar registration</h2>
+            <div class="field"><label>Entropia avatar name</label><input id="avatar-name" maxlength="18" placeholder="AVATAR NAME"></div>
+            <div class="divider"></div>
+            <h2>Host battle</h2>
+            <div class="field"><label>Optional private room code</label><input id="host-code" maxlength="6" placeholder="AUTO PUBLIC CODE"></div>
+            <button class="primary" id="host-room">HOST OPEN MATCH</button>
+            <div class="divider"></div>
+            <h2>Join by code</h2>
+            <div class="split"><input id="join-code" maxlength="6" placeholder="CODE"><button id="join-room">JOIN</button></div>
+            <p class="rule-note">Two-player matches. Each avatar begins at 30 HP with a shuffled starter deck. Summon creatures, fire weapons using ammo, and use tools to heal or resupply.</p>
+        </section>
+        <section class="panel rooms">
+            <div class="rooms-head"><h2>Open Entropia battles</h2><span class="summary" id="room-summary">Scanning…</span></div>
+            <div class="room-list" id="room-list"><div class="empty">Connecting to the room directory…</div></div>
+        </section>
+    </main>
+
+    <main class="arena hidden" id="arena">
+        <aside class="panel sidebar">
+            <div class="side-title"><b id="side-room">Battle Room</b><small id="side-details">Room ----</small></div>
+            <div class="roster" id="roster"></div>
+            
+            <!-- CYBER-COMMS (UNIVERSAL CHAT) -->
+            <div id="cyber-chat" class="chat-container" style="margin: 8px 0; flex: 1; min-height: 150px;"></div>
+
+            <div class="side-buttons"><button id="copy-code">COPY ROOM CODE</button><button class="danger" id="leave">LEAVE MATCH</button></div>
+        </aside>
+        <section class="panel board-shell">
+            <div class="match-head"><h2>CALYPSO BATTLE TABLE</h2><span class="turn-badge" id="turn-badge">WAITING</span></div>
+            <div class="battlefield">
+                <div class="hero enemy" id="enemy-hero">
+                    <div class="portrait">☠</div><div class="hero-info"><div class="hero-name" id="enemy-name">Waiting for rival…</div><div class="meters"><span class="meter hp" id="enemy-hp">♥ --</span><span class="meter me" id="enemy-me">ME --</span><span class="meter ammo" id="enemy-ammo">AMMO --</span></div></div>
+                    <div class="hero-actions"><button id="attack-avatar" disabled>ATTACK AVATAR</button></div>
+                </div>
+                <div class="zone-wrap"><div class="zone-label"><span>Rival battlefield</span><span id="enemy-counts"></span></div><div class="zone" id="enemy-board"></div></div>
+                <div class="lane">PORT ATLANTIS CONTESTED ZONE</div>
+                <div class="zone-wrap"><div class="zone-label"><span>Your battlefield</span><span id="my-counts"></span></div><div class="zone" id="my-board"></div></div>
+                <div class="hero player">
+                    <div class="portrait">⌖</div><div class="hero-info"><div class="hero-name" id="my-name">Avatar</div><div class="meters"><span class="meter hp" id="my-hp">♥ 30</span><span class="meter me" id="my-me">ME 3/3</span><span class="meter ammo" id="my-ammo">AMMO 20</span></div></div>
+                    <div class="hero-actions"><button id="concede" class="danger">CONCEDE</button></div>
+                </div>
+                <div class="zone-wrap hand-zone"><div class="zone-label"><span>Your hand</span><span>Click a card to play it</span></div><div class="zone" id="my-hand"></div></div>
+                <div class="message" id="message">Waiting for both avatars.</div>
+            </div>
+            <div class="controls" id="controls"></div>
+            <div class="log" id="battle-log"></div>
+        </section>
+    </main>
+</div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s),MP=window.ArcadeMultiplayer;
+const CARD_POOL=[
+    {key:'exaro',name:'Exarosaur Young',type:'mob',cost:1,attack:1,health:3,art:'🦎',text:'Steady Calypso creature.'},
+    {key:'bery',name:'Berycled Provider',type:'mob',cost:2,attack:3,health:2,art:'🐦',text:'Fast attacker.'},
+    {key:'atrox',name:'Atrox Mature',type:'mob',cost:5,attack:6,health:5,art:'🦖',text:'Heavy Calypso predator.'},
+    {key:'longu',name:'Longu Alpha',type:'mob',cost:6,attack:7,health:7,art:'🐲',text:'Expensive battlefield terror.'},
+    {key:'feffoid',name:'Feffoid Guard',type:'mob',cost:3,attack:3,health:5,art:'👹',text:'Tough tribal defender.'},
+    {key:'drone',name:'Drone Generation 01',type:'mob',cost:2,attack:2,health:3,art:'🤖',text:'Efficient robot unit.'},
+    {key:'trooper',name:'Warrior Generation 05',type:'mob',cost:4,attack:5,health:4,art:'🦾',text:'Aggressive robot combatant.'},
+    {key:'opalo',name:'Sollomate Opalo',type:'weapon',cost:1,ammo:3,damage:3,art:'🔫',text:'Deal 3 damage to rival avatar.'},
+    {key:'rifle',name:'A-3 Justifier Mk.II',type:'weapon',cost:3,ammo:6,damage:6,art:'🎯',text:'Deal 6 damage to rival avatar.'},
+    {key:'rocket',name:'DetPil V-Rex 2000',type:'weapon',cost:4,ammo:10,damage:4,all:true,art:'🚀',text:'Deal 4 damage to every rival creature.'},
+    {key:'fap',name:'Vivo T1',type:'tool',cost:2,heal:5,art:'➕',text:'Restore 5 avatar HP.'},
+    {key:'chip',name:'Regeneration Chip I',type:'tool',cost:4,heal:9,art:'💠',text:'Restore 9 avatar HP.'},
+    {key:'ammo',name:'Universal Ammo Cache',type:'tool',cost:1,ammoGain:12,art:'📦',text:'Gain 12 ammo.'},
+    {key:'essence',name:'Mind Essence Surge',type:'tool',cost:0,meGain:2,art:'✨',text:'Recover 2 Mind Essence.'}
+];
+const STARTER_KEYS=['exaro','exaro','bery','bery','feffoid','feffoid','drone','drone','atrox','longu','trooper','opalo','opalo','opalo','rifle','rifle','rocket','fap','fap','chip','ammo','ammo','essence','essence'];
+let rooms=[],state=null,myId='',roomCode='',isHost=false,myRole='player',selectedAttacker='',battleLog=[];
+let avatarName=localStorage.getItem('entropiaTcgName')||`Avatar_${Math.floor(Math.random()*900+100)}`;$('#avatar-name').value=avatarName;
+
+MP.init({
+    gameId:'entropiachronicles',playerName:avatarName,
+    onRooms:list=>{rooms=list;renderRooms()},
+    onRoster:list=>{renderRoster(list);if(isHost&&state)syncRoster(list)},
+    onConnected:info=>{myId=info.clientId;roomCode=info.code;isHost=info.isHost;myRole=info.role;enterArena()},
+    onMessage:handleNetwork,
+    onError:error=>{$('#connection').textContent=`Connection error: ${error.message}`}
+});
+setTimeout(()=>{$('#connection').classList.add('online');$('#connection').textContent='Arena room directory online'},900);
+
+$('#host-room').onclick=()=>{rememberName();MP.hostRoom({code:$('#host-code').value,mode:'tcg',maxPlayers:2,name:`${avatarName}'s Entropia Battle`})};
+$('#join-room').onclick=()=>join($('#join-code').value);$('#join-code').onkeydown=e=>{if(e.key==='Enter')join(e.target.value)};
+$('#leave').onclick=()=>{MP.disconnect();location.reload()};$('#copy-code').onclick=async()=>{await navigator.clipboard?.writeText(roomCode);$('#copy-code').textContent='COPIED';setTimeout(()=>$('#copy-code').textContent='COPY ROOM CODE',1000)};
+$('#attack-avatar').onclick=()=>{if(selectedAttacker)sendAction('ATTACK',{attackerId:selectedAttacker,target:'hero'})};
+$('#concede').onclick=()=>sendAction('CONCEDE');
+
+function rememberName(){avatarName=$('#avatar-name').value.trim().slice(0,18)||avatarName;localStorage.setItem('entropiaTcgName',avatarName);MP.setPlayerName(avatarName)}
+function join(code,role='player'){rememberName();code=String(code||'').trim().toUpperCase();if(code)MP.joinRoom(code,role)}
+function renderRooms(){
+    $('#room-summary').textContent=`${rooms.length} visible battle${rooms.length===1?'':'s'}`;$('#room-list').innerHTML='';
+    if(!rooms.length){$('#room-list').innerHTML='<div class="empty">No active battles. Host the first table on Calypso.</div>';return}
+    rooms.forEach(room=>{
+        const full=room.playerCount>=2,el=document.createElement('article');el.className='room';
+        el.innerHTML=`<div class="room-top"><div><div class="room-name">${esc(room.name||'Entropia Battle')}</div><div class="code">ROOM ${room.code}</div></div><span class="badge ${room.status}">${room.status}</span></div>
+        <div class="room-meta">${room.playerCount}/2 avatars · ${room.spectators||0} spectators</div>
+        <div class="chips">${(room.players||[]).map((p,i)=>`<span class="chip">${i===0?'♛ ':''}${esc(p.name)} · ${esc(p.status||room.status)}</span>`).join('')}</div>
+        <div class="room-actions"><button class="primary seat" ${full||room.status==='playing'?'disabled':''}>${full?'FULL':room.status==='playing'?'IN BATTLE':'JOIN BATTLE'}</button><button class="watch">SPECTATE</button></div>`;
+        el.querySelector('.seat').onclick=()=>join(room.code);el.querySelector('.watch').onclick=()=>join(room.code,'spectator');$('#room-list').appendChild(el)
+    })
+}
+function enterArena(){
+    $('#lobby').classList.add('hidden');$('#arena').classList.remove('hidden');$('#side-room').textContent=`Room ${roomCode}`;$('#side-details').textContent=`${isHost?'Host':'Guest'}${myRole==='spectator'?' · Spectator':''}`;
+    if (window.CyberChat) {
+        window.CyberChat.init('cyber-chat', (senderId) => {
+            if (senderId === myId) return 'var(--cyan)';
+            if (state && state.players.some(p => p.id === senderId)) return 'var(--red)';
+            return 'var(--muted)';
+        });
+    }
+    if(isHost){state={status:'waiting',players:[],turnId:'',turn:0,winnerId:'',message:'Waiting for a rival avatar to take the second seat.'};state.players.push(makePlayer(myId,avatarName));broadcast()}
+    else MP.publish('REQUEST_STATE')
+}
+function makePlayer(id,name){return{id,name,hp:30,maxMe:3,me:3,ammo:20,deck:[],hand:[],board:[],discard:[],status:'waiting'}}
+function buildDeck(){return shuffle(STARTER_KEYS.map((key,i)=>({...CARD_POOL.find(c=>c.key===key),uid:`${key}_${i}_${Math.random().toString(36).slice(2,8)}`})))}
+function shuffle(items){for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]]}return items}
+function handleNetwork(msg){
+    if(!msg || !msg.type) return;
+    if (msg.type === 'CHAT') { if (window.CyberChat) window.CyberChat.handleMessage(msg); return; }
+    if(msg.type==='WELCOME'&&!isHost)MP.publish('REQUEST_STATE');
+    if(msg.type==='REQUEST_STATE'&&isHost)broadcast();
+    if(msg.type==='STATE'&&msg.state){state=msg.state;render()}
+    if(msg.type==='ACTION'&&isHost)validateAction(msg.senderId,msg.action,msg.payload||{});
+    if(msg.type==='JOIN'&&isHost)setTimeout(()=>{syncRoster(MP.getRoster());broadcast()},40)
+}
+function syncRoster(roster){
+    const seated=roster.filter(p=>p.role!=='spectator').slice(0,2),ids=new Set(seated.map(p=>p.id)),wasPlaying=state.status==='playing';
+    const departed=state.players.filter(p=>!ids.has(p.id));state.players=state.players.filter(p=>ids.has(p.id));
+    seated.forEach(person=>{if(!state.players.some(p=>p.id===person.id)&&!wasPlaying)state.players.push(makePlayer(person.id,person.name))});
+    if(wasPlaying&&departed.length&&state.players.length===1)finish(state.players[0].id,`${departed[0].name} disconnected. ${state.players[0].name} wins by departure.`);
+    else if(!wasPlaying){state.message=state.players.length===2?'Both avatars are seated. Host may start the match.':'Waiting for a rival avatar.';broadcast(false)}
+}
+function renderRoster(list){$('#roster').innerHTML=list.map(p=>`<div class="person ${p.id===myId?'me':''}"><b>${p.id===MP.getHostId()?'♛ ':''}${esc(p.name)}</b><small>${p.role}${p.id===myId?' · you':''}</small></div>`).join('')}
+function broadcast(renderNow=true){
+    if(!isHost||!state)return;MP.publish('STATE',{state});MP.updateRoom({mode:'tcg',maxPlayers:2,status:state.status,playerStates:Object.fromEntries(state.players.map(p=>[p.id,p.status]))});if(renderNow)render()
+}
+function sendAction(action,payload={}){if(action==='ATTACK')selectedAttacker='';if(isHost)validateAction(myId,action,payload);else MP.publish('ACTION',{action,payload})}
+function addLog(text){battleLog.unshift(text);battleLog=battleLog.slice(0,12)}
+function player(id){return state.players.find(p=>p.id===id)}function opponent(id){return state.players.find(p=>p.id!==id)}
+function draw(p,count=1){while(count--){if(!p.deck.length){if(!p.discard.length)return;p.deck=shuffle(p.discard.splice(0))}const card=p.deck.pop();if(p.hand.length<9)p.hand.push(card);else p.discard.push(card)}}
+
+function validateAction(sender,action,payload){
+    if(!state)return;const p=player(sender);
+    if(action==='START'&&sender===MP.getHostId())return startMatch();
+    if(action==='REMATCH'&&sender===MP.getHostId())return startMatch();
+    if(action==='CONCEDE'&&p&&state.status==='playing')return finish(opponent(sender)?.id,`${p.name} conceded the battle.`);
+    if(!p||state.status!=='playing'||state.turnId!==sender)return;
+    if(action==='PLAY')playCard(p,payload.uid);
+    if(action==='ATTACK')attack(p,payload.attackerId,payload.target,payload.targetId);
+    if(action==='END_TURN')endTurn(p);
+}
+function startMatch(){
+    if(state.players.length!==2){state.message='Two seated avatars are required.';broadcast();return}
+    state.status='playing';state.winnerId='';state.turn++;state.players.forEach(p=>Object.assign(p,{hp:30,maxMe:3,me:3,ammo:20,deck:buildDeck(),hand:[],board:[],discard:[],status:'playing'}));
+    state.players.forEach(p=>draw(p,4));state.turnId=state.players[(state.turn-1)%2].id;state.message=`${player(state.turnId).name} has initiative. Play a card or end the turn.`;battleLog=[];addLog(`Match ${state.turn} begins.`);selectedAttacker='';broadcast()
+}
+function playCard(p,uid){
+    const index=p.hand.findIndex(c=>c.uid===uid);if(index<0)return;const card=p.hand[index],rival=opponent(p.id);
+    if(card.cost>p.me){state.message=`${p.name} needs ${card.cost} Mind Essence.`;broadcast();return}
+    if(card.type==='weapon'&&card.ammo>p.ammo){state.message=`${p.name} needs ${card.ammo} ammo.`;broadcast();return}
+    if(card.type==='mob'&&p.board.length>=5){state.message='Battlefield limit is five creatures.';broadcast();return}
+    p.me-=card.cost;p.hand.splice(index,1);p.discard.push(card);
+    if(card.type==='mob'){p.discard.pop();p.board.push({...card,currentHp:card.health,exhausted:true});state.message=`${p.name} deploys ${card.name}.`;addLog(state.message)}
+    if(card.type==='weapon'){
+        p.ammo-=card.ammo;if(card.all){rival.board.forEach(m=>m.currentHp-=card.damage);removeDead(rival);state.message=`${p.name} fires ${card.name} across the rival board.`}
+        else{rival.hp=Math.max(0,rival.hp-card.damage);state.message=`${p.name} fires ${card.name} for ${card.damage} avatar damage.`}addLog(state.message)
+    }
+    if(card.type==='tool'){
+        if(card.heal)p.hp=Math.min(30,p.hp+card.heal);if(card.ammoGain)p.ammo+=card.ammoGain;if(card.meGain)p.me=Math.min(p.maxMe,p.me+card.meGain);
+        state.message=`${p.name} activates ${card.name}.`;addLog(state.message)
+    }
+    if(rival.hp<=0)return finish(p.id,`${p.name} wins the Entropia battle!`);broadcast()
+}
+function attack(p,attackerId,target,targetId){
+    const attacker=p.board.find(c=>c.uid===attackerId),rival=opponent(p.id);if(!attacker||attacker.exhausted||!rival)return;
+    if(target==='hero'){rival.hp=Math.max(0,rival.hp-attacker.attack);attacker.exhausted=true;state.message=`${attacker.name} strikes ${rival.name} for ${attacker.attack}.`;addLog(state.message)}
+    else{
+        const defender=rival.board.find(c=>c.uid===targetId);if(!defender)return;defender.currentHp-=attacker.attack;attacker.currentHp-=defender.attack;attacker.exhausted=true;
+        state.message=`${attacker.name} clashes with ${defender.name}.`;addLog(state.message);removeDead(p);removeDead(rival)
+    }
+    selectedAttacker='';if(rival.hp<=0)return finish(p.id,`${p.name} wins the Entropia battle!`);broadcast()
+}
+function removeDead(p){p.board=p.board.filter(card=>{if(card.currentHp>0)return true;p.discard.push(card);addLog(`${card.name} is destroyed.`);return false})}
+function endTurn(p){
+    const next=opponent(p.id);if(!next)return;state.turnId=next.id;next.maxMe=Math.min(10,next.maxMe+1);next.me=next.maxMe;next.ammo+=5;next.board.forEach(c=>c.exhausted=false);draw(next,1);
+    state.message=`${next.name}'s turn · ${next.me} ME · drew one card.`;addLog(`${p.name} ends their turn.`);selectedAttacker='';broadcast()
+}
+function finish(winnerId,message){state.status='finished';state.winnerId=winnerId||'';state.turnId='';state.players.forEach(p=>p.status=p.id===winnerId?'winner':'defeated');state.message=message;addLog(message);broadcast()}
+
+function render(){
+    if(!state)return;const me=player(myId),rival=state.players.find(p=>p.id!==myId);renderHero(me,rival);renderBoards(me,rival);renderHand(me);renderControls(me);
+    $('#message').textContent=state.message;$('#battle-log').innerHTML=battleLog.map(line=>`<div>› ${esc(line)}</div>`).join('')||'<div>Battle log ready.</div>';
+    const mine=state.status==='playing'&&state.turnId===myId;$('#turn-badge').textContent=state.status==='finished'?'MATCH OVER':mine?'YOUR TURN':state.status==='playing'?`${player(state.turnId)?.name||'RIVAL'}'S TURN`:'WAITING';$('#turn-badge').classList.toggle('mine',mine)
+}
+function renderHero(me,rival){
+    $('#my-name').textContent=me?.name||`${avatarName} — spectating`;$('#my-hp').textContent=`♥ ${me?.hp??'--'}`;$('#my-me').textContent=`ME ${me?`${me.me}/${me.maxMe}`:'--'}`;$('#my-ammo').textContent=`AMMO ${me?.ammo??'--'}`;
+    $('#enemy-name').textContent=rival?.name||'Waiting for rival…';$('#enemy-hp').textContent=`♥ ${rival?.hp??'--'}`;$('#enemy-me').textContent=`ME ${rival?`${rival.me}/${rival.maxMe}`:'--'}`;$('#enemy-ammo').textContent=`AMMO ${rival?.ammo??'--'}`;
+    $('#attack-avatar').disabled=!(selectedAttacker&&state.turnId===myId&&state.status==='playing');$('#concede').disabled=!me||state.status!=='playing'
+}
+function renderBoards(me,rival){
+    const mine=$('#my-board'),enemy=$('#enemy-board');mine.innerHTML='';enemy.innerHTML='';
+    (me?.board||[]).forEach(card=>mine.appendChild(cardEl(card,{clickable:state.turnId===myId&&!card.exhausted,onClick:()=>{selectedAttacker=selectedAttacker===card.uid?'':card.uid;render()}})));
+    (rival?.board||[]).forEach(card=>enemy.appendChild(cardEl(card,{clickable:!!selectedAttacker&&state.turnId===myId,onClick:()=>sendAction('ATTACK',{attackerId:selectedAttacker,target:'mob',targetId:card.uid})})));
+    if(!me?.board.length)mine.innerHTML='<span class="rule-note">Deploy creatures from your hand.</span>';if(!rival?.board.length)enemy.innerHTML='<span class="rule-note">Rival battlefield empty.</span>';
+    $('#my-counts').textContent=me?`Deck ${me.deck.length} · Discard ${me.discard.length}`:'';$('#enemy-counts').textContent=rival?`Deck ${rival.deck.length} · Hand ${rival.hand.length}`:''
+}
+function renderHand(me){
+    const zone=$('#my-hand');zone.innerHTML='';if(!me){zone.innerHTML='<span class="rule-note">Spectators cannot see either private hand.</span>';return}
+    me.hand.forEach(card=>zone.appendChild(cardEl(card,{clickable:state.turnId===myId&&state.status==='playing',onClick:()=>sendAction('PLAY',{uid:card.uid})})));if(!me.hand.length)zone.innerHTML='<span class="rule-note">Your hand is empty.</span>'
+}
+function renderControls(me){
+    const controls=$('#controls');controls.innerHTML='';
+    if(isHost&&(state.status==='waiting'||state.status==='finished'))addButton(controls,state.status==='finished'?'START REMATCH':'START MATCH','primary',()=>sendAction(state.status==='finished'?'REMATCH':'START'));
+    if(me&&state.status==='playing'&&state.turnId===myId)addButton(controls,'END TURN','primary',()=>sendAction('END_TURN'));
+}
+function addButton(parent,text,cls,fn){const b=document.createElement('button');b.textContent=text;b.className=cls;b.onclick=fn;parent.appendChild(b)}
+function cardEl(card,{clickable=false,onClick=null}={}){
+    const el=document.createElement('div');el.className=`card ${card.type}${card.exhausted?' exhausted':''}${selectedAttacker===card.uid?' selected':''}${clickable?' clickable':''}`;
+    const stats=card.type==='mob'?`<span class="attack">⚔ ${card.attack}</span><span class="defense">♥ ${card.currentHp??card.health}/${card.health}</span>`:card.type==='weapon'?`<span class="attack">DMG ${card.damage}${card.all?' ALL':''}</span><span class="defense">AMMO ${card.ammo}</span>`:`<span class="attack">UTILITY</span><span class="defense">ONE USE</span>`;
+    el.innerHTML=`<span class="cost">${card.cost}</span><span class="card-type">${card.type.toUpperCase()}</span><div class="card-title">${esc(card.name)}</div><div class="card-art">${card.art}</div><div class="card-text">${esc(card.text)}</div><div class="stats">${stats}</div>`;if(clickable)el.onclick=onClick;return el
+}
+function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+</script>
+</body>
+</html>

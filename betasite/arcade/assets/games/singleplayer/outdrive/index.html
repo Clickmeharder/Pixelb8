@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OUT DRIVE — Road to Entropia</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+
+    </style>
+</head>
+<body>
+
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-art"></div>
+            <h1>OUT DRIVE</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container" id="screenContainer">
+                <div class="crt-overlay" id="crtOverlay"></div>
+                <div class="crt-curve"></div>
+                
+                <div id="start-panel" class="ui-panel">
+                    <h2 style="color: var(--marquee-cyan);">INSERT COIN</h2>
+                    <p style="color: #fff; margin-bottom: 12px;">Press ENTER or click the glowing red coin slot</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">STEER: Arrows / A &amp; D</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">GAS / BRAKE: Up / Down or W / S</p>
+                    <p style="color: #ffda55; font-size: 0.68rem;">AUTO SHIFT starts ON • T toggles</p>
+                    <p style="color: #9fffea; font-size: 0.68rem;">SPACE handbrake • E horn • SHIFT+E siren • N nitrous • F fire • F2 CRT</p>
+                </div>
+
+                <div id="gameover-panel" class="ui-panel hidden">
+                    <h2 id="result-title">TIME OUT</h2>
+                    <p id="final-score" style="font-weight: bold; color: #fff; font-size: 1rem; line-height: 1.45;">DISTANCE: 0m</p>
+                    <p id="result-next-hint" style="color: var(--marquee-cyan); font-size: 0.75rem; margin-top: 10px;">Press ENTER or click the coin slot to drive again</p>
+                </div>
+
+                <canvas id="gameCanvas" width="400" height="300"></canvas>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="cp-texture"></div>
+            <div class="lean-btn" id="zoomBtn">LEAN</div>
+            <button class="crt-btn active" id="crtBtn" type="button" title="Toggle CRT scanlines (F2)">CRT ON</button>
+
+            <div class="steering-base">
+                <div class="steering-wheel" id="steeringWheel">
+                    <div class="spoke left"></div>
+                    <div class="spoke right"></div>
+                    <div class="spoke bottom"></div>
+                    <div class="wheel-center" id="hornBtn" role="button" aria-label="Horn" title="Click or press E to honk">
+                        <div class="wheel-center-logo">HORN</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="shifter-box">
+                <div class="gear-label g5">5</div>
+                <div class="gear-label g4">4</div>
+                <div class="gear-label g3">3</div>
+                <div class="gear-label g2">2</div>
+                <div class="gear-label g1">1</div>
+                <div class="shifter-slot"></div>
+                <div class="shifter-knob" id="shifterKnob">1</div>
+            </div>
+        </div>
+
+        <div class="lower-cabinet">
+            <div class="checkered-flag"></div>
+            <div class="coin-door">
+                <div class="coin-slot" id="coinSlotBtn">
+                    <div class="coin-entry"></div>
+                    <div class="coin-return"></div>
+                </div>
+                <div class="coin-slot" style="opacity: 0.6; cursor: default;">
+                    <div class="coin-entry" style="background: #331100; box-shadow: none;"></div>
+                    <div class="coin-return"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+
+/* Root portal uses the same shared shell behavior as Arcade and EU. */
+.app.portal-app{
+  width:100vw;
+  height:100vh;
+  display:grid;
+  grid-template-columns:286px minmax(0,1fr) var(--pixelb8-resizer-width) var(--pixelb8-right-collapsed);
+  overflow:hidden;
+}
+.app.portal-app.sidebar-collapsed{
+  grid-template-columns:64px minmax(0,1fr) var(--pixelb8-resizer-width) var(--pixelb8-right-collapsed);
+}
+.app.portal-app.social-expanded{
+  grid-template-columns:286px minmax(0,1fr) var(--pixelb8-resizer-width) var(--pixelb8-right-expanded);
+}
+.app.portal-app.sidebar-collapsed.social-expanded{
+  grid-template-columns:64px minmax(0,1fr) var(--pixelb8-resizer-width) var(--pixelb8-right-expanded);
+}
+
+.portal-main{height:100vh;overflow:auto;padding:22px}
+.portal-hero{min-height:390px;display:grid;grid-template-columns:1.08fr .92fr;overflow:hidden;border:1px solid var(--pixelb8-border-strong);border-radius:14px;background:linear-gradient(135deg,#171c22,#101318)}
+.portal-hero-copy{padding:46px}.portal-hero h2{margin:10px 0 10px;color:#fff;font-size:2.55rem}.portal-hero p{max-width:680px;color:#b0bac4;line-height:1.6}.portal-actions{display:flex;gap:8px;margin-top:20px}.portal-actions .btn{min-height:40px;padding:8px 13px}.portal-actions .primary{background:#203642;border-color:#3b7188}
+.portal-hero-art{position:relative;background:radial-gradient(circle at 60% 40%,rgba(79,195,247,.13),transparent 45%)}
+.portal-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}.portal-card{padding:16px;border:1px solid var(--pixelb8-border);border-radius:10px;background:var(--pixelb8-surface);cursor:pointer}.portal-card:hover{background:var(--pixelb8-surface-2);border-color:#43505c}.portal-card .tag{color:var(--pixelb8-accent-soft);font-size:.58rem;font-weight:900;letter-spacing:.08em}.portal-card h3{margin:7px 0 6px;color:#fff;font-size:.92rem}.portal-card p{margin:0;color:#8f9aa5;font-size:.68rem;line-height:1.45}
+.portal-lower{display:grid;grid-template-columns:1.4fr .6fr;gap:10px;margin-top:10px}.portal-panel{padding:15px;border:1px solid var(--pixelb8-border);border-radius:10px;background:var(--pixelb8-surface)}.portal-panel h3{margin:0 0 7px;color:#fff}.portal-panel p{margin:0;color:#939ea9;font-size:.7rem;line-height:1.5}
+.portal-nav-btn{width:100%;min-height:40px;display:flex;align-items:center;gap:9px;margin:0 0 4px;padding:7px 9px;border:1px solid transparent;border-radius:7px;background:transparent;color:#c7d0d9;text-align:left}.portal-nav-btn:hover{background:#171c22;color:#fff}
+@media(max-width:1100px){.portal-grid{grid-template-columns:repeat(2,1fr)}.portal-hero{grid-template-columns:1fr}.portal-hero-art{display:none}.portal-lower{grid-template-columns:1fr}}

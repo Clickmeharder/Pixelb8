@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entropia Core — Log Monitor</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08090c;
+      --panel: #11141a;
+      --panel-2: #171b23;
+      --panel-3: #202631;
+      --border: #2b3340;
+      --text: #e7edf4;
+      --muted: #8793a2;
+      --accent: #19f5c6;
+      --accent-soft: rgba(25, 245, 198, 0.12);
+      --warning: #ffbd3d;
+      --danger: #ff5d67;
+      
+      /* Semantic Colors */
+      --c-pm: #ff90ea;
+      --c-system: #e6c36a;
+      --c-trade: #82b7ff;
+      --c-society: #9ee28c;
+      --c-globals: #ffd700;
+      --c-rookie: #7ac1ff;
+      
+      --shadow: 0 16px 45px rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 75% 0%, rgba(25, 245, 198, 0.07), transparent 32rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Tahoma, sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+
+    button {
+      border: 0;
+      color: inherit;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      height: 100%;
+      min-width: 0;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: linear-gradient(180deg, #12161c, #0d1015);
+      border-right: 1px solid var(--border);
+      padding: 18px 12px;
+    }
+
+    .brand {
+      padding: 8px 12px 22px;
+    }
+
+    .brand-name {
+      color: var(--accent);
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-shadow: 0 0 20px rgba(25, 245, 198, 0.25);
+    }
+
+    .brand-subtitle {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-button {
+      width: 100%;
+      padding: 11px 12px;
+      margin-bottom: 5px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      cursor: default;
+      text-align: left;
+    }
+
+    .nav-button.active {
+      background: var(--accent-soft);
+      border-color: rgba(25, 245, 198, 0.25);
+      color: var(--text);
+    }
+
+    .nav-button.locked { opacity: 0.45; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.55;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      padding: 16px;
+      gap: 10px;
+    }
+
+    .toolbar,
+    .filter-panel,
+    .terminal-shell {
+      background: rgba(17, 20, 26, 0.94);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      min-height: 37px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--panel-3);
+      color: var(--text);
+      font-weight: 750;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: #465264;
+      background: #28303d;
+    }
+
+    .btn:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #04100d;
+      border-color: var(--accent);
+    }
+
+    .btn.pm {
+      background: var(--warning);
+      color: #171005;
+      border-color: var(--warning);
+    }
+
+    .btn.danger {
+      color: #ffd8dc;
+      border-color: rgba(255, 93, 103, 0.45);
+      background: rgba(255, 93, 103, 0.12);
+    }
+
+    .btn.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .status-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      min-width: 190px;
+      justify-content: flex-end;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: #5e6875;
+      box-shadow: 0 0 0 3px rgba(94, 104, 117, 0.14);
+    }
+
+    .status-dot.live {
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(25, 245, 198, 0.14), 0 0 12px rgba(25, 245, 198, 0.55);
+    }
+
+    .status-dot.error {
+      background: var(--danger);
+      box-shadow: 0 0 0 3px rgba(255, 93, 103, 0.15);
+    }
+
+    .filter-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(210px, 320px) auto;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      flex-shrink: 0;
+      overflow: visible;
+    }
+
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      overflow-x: visible;
+      scrollbar-width: thin;
+      padding: 1px 0 4px;
+    }
+
+    .tab-group {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+
+    .tab {
+      position: relative;
+      flex: 0 0 auto;
+      padding: 7px 12px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: #222935;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tab-group .tab {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .tab-dropdown-btn {
+      padding: 7px 8px;
+      border: 1px solid transparent;
+      border-left: 0;
+      border-top-right-radius: 999px;
+      border-bottom-right-radius: 999px;
+      background: #222935;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .tab:hover, .tab-dropdown-btn:hover { color: var(--text); }
+
+    .tab.active, .tab-group.has-active .tab, .tab-group.has-active .tab-dropdown-btn {
+      color: var(--accent);
+      border-color: rgba(25, 245, 198, 0.55);
+      background: var(--accent-soft);
+    }
+
+    .tab.has-unread {
+      color: var(--warning);
+      border-color: rgba(255, 189, 61, 0.7);
+      animation: soft-pulse 1.6s ease-in-out infinite;
+    }
+
+    .tab .badge {
+      display: none;
+      min-width: 18px;
+      margin-left: 6px;
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: var(--warning);
+      color: #171005;
+      font-size: 0.67rem;
+      text-align: center;
+    }
+
+    .tab.has-unread .badge { display: inline-block; }
+
+    @keyframes soft-pulse {
+      50% { box-shadow: 0 0 12px rgba(255, 189, 61, 0.28); }
+    }
+
+    /* Dropdown Menus */
+    .dropdown-menu {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      min-width: 280px;
+      background: #161a22;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
+      padding: 12px;
+    }
+
+    .dropdown-menu.open { display: block; }
+
+    .dropdown-header {
+      padding: 6px 4px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+
+    .dropdown-list {
+      max-height: 160px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text);
+      font-size: 0.78rem;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .trade-sub-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .trade-sub-label input[type="checkbox"], .settings-group input[type="checkbox"] {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .trade-delete-btn {
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .trade-delete-btn:hover {
+      background: rgba(255, 93, 103, 0.2);
+      color: var(--danger);
+    }
+
+    .trade-add-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .trade-add-input {
+      flex: 1;
+      height: 30px;
+      padding: 0 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #090b0f;
+      color: var(--text);
+      font-size: 0.78rem;
+      outline: none;
+    }
+
+    .trade-add-input:focus { border-color: rgba(25, 245, 198, 0.65); }
+
+    .trade-add-btn {
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #04100d;
+      font-weight: 750;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    .dropdown-footer {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .dropdown-footer button {
+      background: transparent;
+      color: var(--accent);
+      font-size: 0.72rem;
+      cursor: pointer;
+      padding: 2px 4px;
+    }
+
+    .dropdown-footer button:hover { text-decoration: underline; }
+
+    /* Settings Modal / Customization */
+    .settings-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .settings-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .settings-group label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .settings-group select, .settings-group input[type="color"] {
+      height: 32px;
+      padding: 0 6px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #090b0f;
+      color: var(--text);
+      outline: none;
+      width: 100%;
+    }
+
+    .settings-group input[type="color"] {
+      padding: 2px;
+      cursor: pointer;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--text);
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .search {
+      width: 100%;
+      min-width: 0;
+      height: 36px;
+      padding: 0 11px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      outline: none;
+      background: #090b0f;
+      color: var(--text);
+    }
+
+    .search:focus { border-color: rgba(25, 245, 198, 0.65); }
+
+    .line-limit {
+      height: 36px;
+      padding: 0 8px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: #090b0f;
+      color: var(--text);
+    }
+
+    .terminal-shell {
+      position: relative;
+      display: flex;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .terminal {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      padding: 12px 14px 48px;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.012) 50%, transparent 50%) 0 0 / 100% 4px,
+        #050608;
+      color: #b8c5d1;
+      font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+      font-size: 0.84rem;
+      line-height: 1.48;
+      overscroll-behavior: contain;
+    }
+
+    .empty-state {
+      display: grid;
+      place-items: center;
+      min-height: 100%;
+      color: var(--muted);
+      text-align: center;
+      padding: 30px;
+    }
+
+    .empty-state strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .log-line {
+      display: grid;
+      grid-template-columns: auto auto minmax(0, 1fr);
+      align-items: start;
+      gap: 9px;
+      padding: 4px 5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.035);
+      overflow-wrap: anywhere;
+    }
+
+    .log-line:hover { background: rgba(255, 255, 255, 0.025); }
+    .log-line.hidden { display: none; }
+    .log-line.raw { display: block; white-space: pre-wrap; }
+
+    .log-time { color: #67a661; white-space: nowrap; }
+    .log-channel { color: var(--accent); white-space: nowrap; }
+    
+    /* Semantic Color Classes */
+    .log-message.system { color: var(--c-system); }
+    .log-message.pm { color: var(--c-pm); }
+    .log-message.trade { color: var(--c-trade); }
+    .log-message.society { color: var(--c-society); }
+    .log-message.globals { color: var(--c-globals); }
+    .log-message.rookie { color: var(--c-rookie); }
+
+    .terminal-footer {
+      position: absolute;
+      right: 12px;
+      bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .counter {
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: rgba(17, 20, 26, 0.92);
+      color: var(--muted);
+      font-size: 0.72rem;
+      backdrop-filter: blur(6px);
+    }
+
+    .jump-button {
+      display: none;
+      min-height: 30px;
+      padding: 5px 9px;
+      border: 1px solid rgba(25, 245, 198, 0.5);
+      border-radius: 6px;
+      background: rgba(17, 20, 26, 0.96);
+      color: var(--accent);
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
+    .jump-button.visible { display: block; }
+
+    .browser-warning {
+      display: none;
+      padding: 9px 12px;
+      border: 1px solid rgba(255, 189, 61, 0.45);
+      border-radius: 8px;
+      background: rgba(255, 189, 61, 0.08);
+      color: #ffd784;
+      font-size: 0.82rem;
+    }
+
+    .browser-warning.visible { display: block; }
+
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .filter-panel { grid-template-columns: 1fr auto; }
+      .tabs { grid-column: 1 / -1; }
+      .status-wrap { width: 100%; margin-left: 0; justify-content: flex-start; }
+    }
+
+    @media (max-width: 580px) {
+      .main { padding: 8px; }
+      .toolbar { align-items: stretch; }
+      .btn { flex: 1 1 45%; }
+      .status-wrap { min-width: 0; }
+      .filter-panel { grid-template-columns: 1fr; }
+      .line-limit { width: 100%; }
+      .log-line { grid-template-columns: 1fr; gap: 1px; }
+      .log-time, .log-channel { display: inline; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-name">ENTROPIA CORE</div>
+        <div class="brand-subtitle">Ultimate Log Monitor</div>
+      </div>
+      <button class="nav-button active">Terminal Poller</button>
+      <button class="nav-button locked">Missions — Locked</button>
+      <button class="nav-button locked">Hunting — Locked</button>
+      <button class="nav-button locked">Maps — Locked</button>
+      <button class="nav-button locked">Notes — Locked</button>
+      <div class="sidebar-footer">
+        One polling loop.<br>
+        No overlapping file reads.<br>
+        Safe bounded rendering.
+      </div>
+    </aside>
+
+    <main class="main">
+      <div id="browserWarning" class="browser-warning">
+        This browser does not expose the File System Access API. Open this file in current Chrome, Edge, or Opera GX.
+      </div>
+
+      <section class="toolbar" aria-label="Log controls">
+        <button id="connectChat" class="btn primary">CONNECT CHAT.LOG</button>
+        <button id="connectPm" class="btn pm">CONNECT PM.LOG</button>
+        <button id="pausePolling" class="btn" disabled>PAUSE</button>
+        <button id="toggleRaw" class="btn">FORMATTED VIEW</button>
+        <button id="toggleAutoscroll" class="btn active">AUTO-SCROLL ON</button>
+        <button id="openSettings" class="btn">SETTINGS / COLORS</button>
+        <button id="clearView" class="btn">CLEAR VIEW</button>
+        <button id="forgetFiles" class="btn danger">FORGET FILES</button>
+
+        <div class="status-wrap" role="status" aria-live="polite">
+          <span id="statusDot" class="status-dot"></span>
+          <span id="statusText">Checking saved files…</span>
+        </div>
+      </section>
+
+      <section class="filter-panel" aria-label="Log filters">
+        <div id="channelTabs" class="tabs">
+          <button class="tab active" data-channel="All">All</button>
+          <button class="tab" data-channel="System">System</button>
+          <button class="tab" data-channel="Society">Society</button>
+          
+          <!-- Trade Tab with Dropdown Group -->
+          <div class="tab-group" id="tradeGroup">
+            <button class="tab" data-channel="Trade">Trade</button>
+            <button class="tab-dropdown-btn" id="tradeDropdownToggle" title="Select Trade channels">▼</button>
+          </div>
+
+          <button class="tab" data-channel="Globals">Globals</button>
+          <button class="tab" data-channel="Rookie">Rookie</button>
+          <button id="pmTab" class="tab" data-channel="PM">PM <span class="badge">0</span></button>
+        </div>
+        <input id="searchInput" class="search" type="search" placeholder="Search visible logs…" autocomplete="off">
+        <select id="lineLimit" class="line-limit" title="Maximum rendered lines">
+          <option value="300">300 lines</option>
+          <option value="600" selected>600 lines</option>
+          <option value="1000">1,000 lines</option>
+          <option value="1500">1,500 lines</option>
+        </select>
+      </section>
+
+      <section class="terminal-shell">
+        <div id="terminal" class="terminal" tabindex="0" aria-label="Entropia log output">
+          <div id="emptyState" class="empty-state">
+            <div>
+              <strong>Ready to monitor Entropia logs</strong>
+              Connect Chat.log, PM.log, or both. Only the newest section is loaded so startup stays fast.
+            </div>
+          </div>
+        </div>
+        <div class="terminal-footer">
+          <button id="jumpToLatest" class="jump-button">Jump to latest</button>
+          <span id="lineCounter" class="counter">0 lines</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Global Dropdown Menu for Trade Subchannels -->
+  <div class="dropdown-menu" id="tradeDropdown">
+    <div class="dropdown-header">Active Trade Channels</div>
+    <div id="tradeSubList" class="dropdown-list"></div>
+    <div class="trade-add-row">
+      <input type="text" id="newTradeInput" class="trade-add-input" placeholder="e.g. #arktrade" autocomplete="off">
+      <button id="addTradeBtn" class="trade-add-btn">Add</button>
+    </div>
+    <div class="dropdown-footer">
+      <button id="tradeSelectAll">Select All</button>
+      <button id="tradeClearAll">Clear</button>
+    </div>
+  </div>
+
+  <!-- Settings / Timestamp & Color Customization Menu -->
+  <div class="dropdown-menu" id="settingsDropdown">
+    <div class="dropdown-header">Timestamp & Display Settings</div>
+    
+    <div class="settings-section" style="padding-top: 6px;">
+      <label class="checkbox-row"><input type="checkbox" id="chkShowLogUtc" checked> Show Log UTC Timestamp in Log</label>
+      <label class="checkbox-row"><input type="checkbox" id="chkShowDate"> Show Date (YYYY-MM-DD)</label>
+      <label class="checkbox-row"><input type="checkbox" id="chkShowSystemTime"> Show Local System Time (Scrape Time)</label>
+    </div>
+
+    <div class="dropdown-header" style="margin-top: 4px;">Semantic Colors</div>
+    <div class="settings-grid" style="padding-top: 6px;">
+      <div class="settings-group"><label>System Color</label><input type="color" id="colorSystem" value="#e6c36a"></div>
+      <div class="settings-group"><label>PM Color</label><input type="color" id="colorPm" value="#ff90ea"></div>
+      <div class="settings-group"><label>Trade Color</label><input type="color" id="colorTrade" value="#82b7ff"></div>
+      <div class="settings-group"><label>Society Color</label><input type="color" id="colorSociety" value="#9ee28c"></div>
+      <div class="settings-group"><label>Globals Color</label><input type="color" id="colorGlobals" value="#ffd700"></div>
+      <div class="settings-group"><label>Rookie Color</label><input type="color" id="colorRookie" value="#7ac1ff"></div>
+    </div>
+    <div class="dropdown-footer">
+      <button id="resetColorsBtn">Reset Defaults</button>
+      <button id="closeSettingsBtn" style="color: var(--accent);">Close</button>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    const DB_NAME = 'EntropiaTrackerDB';
+    const DB_VERSION = 3;
+    const HANDLE_STORE = 'handles';
+    const INITIAL_TAIL_BYTES = 128 * 1024;
+    const MAX_READ_BYTES = 256 * 1024;
+    const POLL_MS_VISIBLE = 900;
+    const POLL_MS_HIDDEN = 2200;
+
+    const state = {
+      handles: { chat: null, pm: null },
+      offsets: { chat: 0, pm: 0 },
+      remainders: { chat: '', pm: '' },
+      connected: { chat: false, pm: false },
+      polling: false,
+      paused: false,
+      pollTimer: null,
+      cycleRunning: false,
+      rawView: false,
+      autoScroll: true,
+      activeChannel: 'All',
+      searchText: '',
+      maxLines: 600,
+      unreadPm: 0,
+      lineCount: 0,
+      visibleCount: 0,
+      db: null,
+      tradeSubChannels: new Set(['#calytrade', '#cyrenetrade', '#rocktropiatrade']),
+      
+      // Timestamp & formatting options
+      showLogUtc: true,
+      showDate: false,
+      showSystemTime: false,
+
+      colors: {
+        system: '#e6c36a',
+        pm: '#ff90ea',
+        trade: '#82b7ff',
+        society: '#9ee28c',
+        globals: '#ffd700',
+        rookie: '#7ac1ff'
+      }
+    };
+
+    const elements = {
+      browserWarning: document.getElementById('browserWarning'),
+      connectChat: document.getElementById('connectChat'),
+      connectPm: document.getElementById('connectPm'),
+      pausePolling: document.getElementById('pausePolling'),
+      toggleRaw: document.getElementById('toggleRaw'),
+      toggleAutoscroll: document.getElementById('toggleAutoscroll'),
+      openSettings: document.getElementById('openSettings'),
+      clearView: document.getElementById('clearView'),
+      forgetFiles: document.getElementById('forgetFiles'),
+      statusDot: document.getElementById('statusDot'),
+      statusText: document.getElementById('statusText'),
+      channelTabs: document.getElementById('channelTabs'),
+      tradeGroup: document.getElementById('tradeGroup'),
+      tradeDropdownToggle: document.getElementById('tradeDropdownToggle'),
+      tradeDropdown: document.getElementById('tradeDropdown'),
+      tradeSubList: document.getElementById('tradeSubList'),
+      newTradeInput: document.getElementById('newTradeInput'),
+      addTradeBtn: document.getElementById('addTradeBtn'),
+      tradeSelectAll: document.getElementById('tradeSelectAll'),
+      tradeClearAll: document.getElementById('tradeClearAll'),
+      settingsDropdown: document.getElementById('settingsDropdown'),
+      
+      chkShowLogUtc: document.getElementById('chkShowLogUtc'),
+      chkShowDate: document.getElementById('chkShowDate'),
+      chkShowSystemTime: document.getElementById('chkShowSystemTime'),
+
+      resetColorsBtn: document.getElementById('resetColorsBtn'),
+      closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+      pmTab: document.getElementById('pmTab'),
+      searchInput: document.getElementById('searchInput'),
+      lineLimit: document.getElementById('lineLimit'),
+      terminal: document.getElementById('terminal'),
+      emptyState: document.getElementById('emptyState'),
+      jumpToLatest: document.getElementById('jumpToLatest'),
+      lineCounter: document.getElementById('lineCounter'),
+      
+      colorInputs: {
+        system: document.getElementById('colorSystem'),
+        pm: document.getElementById('colorPm'),
+        trade: document.getElementById('colorTrade'),
+        society: document.getElementById('colorSociety'),
+        globals: document.getElementById('colorGlobals'),
+        rookie: document.getElementById('colorRookie')
+      }
+    };
+
+    const knownChannels = new Map();
+    for (const button of elements.channelTabs.querySelectorAll('.tab')) {
+      knownChannels.set(button.dataset.channel, button);
+    }
+
+    function applyCustomColorsToCss() {
+      const root = document.documentElement;
+      root.style.setProperty('--c-system', state.colors.system);
+      root.style.setProperty('--c-pm', state.colors.pm);
+      root.style.setProperty('--c-trade', state.colors.trade);
+      root.style.setProperty('--c-society', state.colors.society);
+      root.style.setProperty('--c-globals', state.colors.globals);
+      root.style.setProperty('--c-rookie', state.colors.rookie);
+    }
+
+    function renderTradeCheckboxes() {
+      elements.tradeSubList.replaceChildren();
+      for (const sub of state.tradeSubChannels) {
+        const item = document.createElement('div');
+        item.className = 'dropdown-item';
+
+        const label = document.createElement('label');
+        label.className = 'trade-sub-label';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'trade-sub';
+        checkbox.value = sub;
+        checkbox.checked = true;
+
+        checkbox.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            state.tradeSubChannels.add(sub);
+          } else {
+            state.tradeSubChannels.delete(sub);
+          }
+          if (state.activeChannel === 'Trade') applyFilters();
+        });
+
+        label.append(checkbox, document.createTextNode(sub));
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'trade-delete-btn';
+        deleteBtn.textContent = '✕';
+        deleteBtn.title = `Remove ${sub}`;
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.tradeSubChannels.delete(sub);
+          renderTradeCheckboxes();
+          if (state.activeChannel === 'Trade') applyFilters();
+        });
+
+        item.append(label, deleteBtn);
+        elements.tradeSubList.appendChild(item);
+      }
+    }
+
+    renderTradeCheckboxes();
+
+    function setStatus(message, mode = 'idle') {
+      elements.statusText.textContent = message;
+      elements.statusDot.className = 'status-dot';
+      if (mode === 'live') elements.statusDot.classList.add('live');
+      if (mode === 'error') elements.statusDot.classList.add('error');
+    }
+
+    function openDatabase() {
+      if (state.db) return Promise.resolve(state.db);
+
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onerror = () => reject(request.error);
+        request.onblocked = () => reject(new Error('Saved-file database is blocked by another tab.'));
+        request.onupgradeneeded = event => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(HANDLE_STORE)) {
+            db.createObjectStore(HANDLE_STORE);
+          }
+        };
+        request.onsuccess = () => {
+          state.db = request.result;
+          state.db.onversionchange = () => {
+            state.db.close();
+            state.db = null;
+          };
+          resolve(state.db);
+        };
+      });
+    }
+
+    async function readSavedHandle(key) {
+      const db = await openDatabase();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(HANDLE_STORE, 'readonly');
+        const request = tx.objectStore(HANDLE_STORE).get(key);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function writeSavedHandle(key, handle) {
+      const db = await openDatabase();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(HANDLE_STORE, 'readwrite');
+        tx.objectStore(HANDLE_STORE).put(handle, key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function clearSavedHandles() {
+      const db = await openDatabase();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(HANDLE_STORE, 'readwrite');
+        tx.objectStore(HANDLE_STORE).clear();
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function ensureReadPermission(handle, requestIfNeeded) {
+      if (!handle) return false;
+
+      const options = { mode: 'read' };
+      if (typeof handle.queryPermission === 'function') {
+        const current = await handle.queryPermission(options);
+        if (current === 'granted') return true;
+      }
+
+      if (requestIfNeeded && typeof handle.requestPermission === 'function') {
+        return (await handle.requestPermission(options)) === 'granted';
+      }
+
+      return false;
+    }
+
+    function sourceLabel(source) {
+      return source === 'chat' ? 'CHAT.LOG' : 'PM.LOG';
+    }
+
+    function normalizeChannel(value, fallback = 'System') {
+      const clean = String(value || fallback)
+        .replace(/[\u0000-\u001f\u007f]/g, '')
+        .trim()
+        .slice(0, 48);
+      return clean || fallback;
+    }
+
+    function parseTimestampToken(value, fallbackDate, fallbackTime) {
+      const token = String(value || '').trim();
+
+      const full = token.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})(?:[.,]\d+)?$/);
+      if (full) {
+        return { utcDate: full[1], utcTime: full[2] };
+      }
+
+      const timeOnly = token.match(/^(\d{2}:\d{2}:\d{2})(?:[.,]\d+)?$/);
+      if (timeOnly) {
+        return { utcDate: fallbackDate, utcTime: timeOnly[1] };
+      }
+
+      return { utcDate: fallbackDate, utcTime: fallbackTime };
+    }
+
+    function takeLeadingUtcStamp(text, fallbackDate, fallbackTime) {
+      const match = String(text || '').match(
+        /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})(?:[.,]\d+)?\s*(.*)$/
+      );
+
+      if (!match) {
+        return { utcDate: fallbackDate, utcTime: fallbackTime, rest: text };
+      }
+
+      return { utcDate: match[1], utcTime: match[2], rest: match[3] };
+    }
+
+    function classifyChannel(rawChannelName, fullLine = '') {
+      const original = normalizeChannel(rawChannelName, '');
+      const upper = original.toUpperCase();
+      const lower = original.toLowerCase();
+
+      if (
+        upper.includes('FROM:') ||
+        upper.includes('TO :') ||
+        upper.includes('TO:') ||
+        /\[(?:FROM:|TO\s*:)/i.test(fullLine)
+      ) {
+        return 'PM';
+      }
+
+      if (upper === 'GLOBAL' || upper === 'GLOBALS' || upper.includes('GLOBAL')) {
+        return 'Globals';
+      }
+
+      if (upper === 'ROOKIE' || upper === 'ROOKIE CHAT') {
+        return 'Rookie';
+      }
+
+      if (lower.includes('trade')) {
+        if (original && !state.tradeSubChannels.has(original)) {
+          state.tradeSubChannels.add(original);
+          renderTradeCheckboxes();
+        }
+        return 'Trade';
+      }
+
+      if (upper === 'SYSTEM' || upper === 'SYSTEM MESSAGE' || upper === 'SYSTEM MESSAGES') {
+        return 'System';
+      }
+
+      if (upper === 'SOCIETY' || upper === 'SOCIETY CHAT') {
+        return 'Society';
+      }
+
+      // Preserve channels such as Local, Team, Rookie Help, custom #channels, etc.
+      return original || 'System';
+    }
+
+    function parseLine(rawLine, source) {
+      const now = new Date();
+      const fallbackTime24 = now.toLocaleTimeString([], { hour12: false });
+      const fallbackDate = now.toISOString().split('T')[0];
+      const line = String(rawLine || '').replace(/^\uFEFF/, '').replace(/\r$/, '');
+
+      if (source === 'pm') {
+        let utcDate = fallbackDate;
+        let utcTime = fallbackTime24;
+        let message = line;
+
+        // PM.log may use [timestamp] message, a bare native timestamp, or no timestamp.
+        const bracketedPm = line.match(/^\[([^\]]+)]\s*(.*)$/);
+        if (bracketedPm) {
+          const stamp = parseTimestampToken(bracketedPm[1], fallbackDate, fallbackTime24);
+          utcDate = stamp.utcDate;
+          utcTime = stamp.utcTime;
+          message = bracketedPm[2];
+        } else {
+          const stamped = takeLeadingUtcStamp(line, fallbackDate, fallbackTime24);
+          utcDate = stamped.utcDate;
+          utcTime = stamped.utcTime;
+          message = stamped.rest;
+        }
+
+        return {
+          utcDate,
+          utcTime,
+          localTimeCaptured: fallbackTime24,
+          channel: 'PM',
+          message,
+          raw: line
+        };
+      }
+
+      let utcDate = fallbackDate;
+      let utcTime = fallbackTime24;
+      let localTimeCaptured = fallbackTime24;
+      let rawChannelName = '';
+      let message = line;
+
+      // Supported forms:
+      // [HH:MM:SS] [Channel] message
+      // [YYYY-MM-DD HH:MM:SS] [Channel] message
+      // YYYY-MM-DD HH:MM:SS [Channel] message   <-- native Entropia Chat.log
+      // HH:MM:SS [Channel] message
+      // [Channel] message
+      const twoBracket = line.match(/^\[([^\]]+)]\s*\[([^\]]+)]\s*(.*)$/);
+      if (twoBracket) {
+        localTimeCaptured = twoBracket[1].trim() || fallbackTime24;
+        const stamp = parseTimestampToken(twoBracket[1], fallbackDate, fallbackTime24);
+        utcDate = stamp.utcDate;
+        utcTime = stamp.utcTime;
+        rawChannelName = twoBracket[2];
+        message = twoBracket[3];
+
+        // Also support scraper output that places a second UTC stamp after [Channel].
+        const embeddedUtc = takeLeadingUtcStamp(message, utcDate, utcTime);
+        utcDate = embeddedUtc.utcDate;
+        utcTime = embeddedUtc.utcTime;
+        message = embeddedUtc.rest;
+      } else {
+        const nativeDated = line.match(
+          /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})(?:[.,]\d+)?\s*\[([^\]]+)]\s*(.*)$/
+        );
+
+        if (nativeDated) {
+          utcDate = nativeDated[1];
+          utcTime = nativeDated[2];
+          localTimeCaptured = nativeDated[2];
+          rawChannelName = nativeDated[3];
+          message = nativeDated[4];
+        } else {
+          const nativeTimeOnly = line.match(
+            /^(\d{2}:\d{2}:\d{2})(?:[.,]\d+)?\s*\[([^\]]+)]\s*(.*)$/
+          );
+
+          if (nativeTimeOnly) {
+            utcTime = nativeTimeOnly[1];
+            localTimeCaptured = nativeTimeOnly[1];
+            rawChannelName = nativeTimeOnly[2];
+            message = nativeTimeOnly[3];
+          } else {
+            const channelOnly = line.match(/^\[([^\]]+)]\s*(.*)$/);
+            if (channelOnly) {
+              const possibleTimestamp = parseTimestampToken(channelOnly[1], '', '');
+              const looksLikeTimestamp = Boolean(possibleTimestamp.utcDate || possibleTimestamp.utcTime);
+
+              if (!looksLikeTimestamp) {
+                rawChannelName = channelOnly[1];
+                message = channelOnly[2];
+              }
+            }
+          }
+        }
+      }
+
+      if (rawChannelName) {
+        return {
+          utcDate,
+          utcTime,
+          localTimeCaptured,
+          channel: classifyChannel(rawChannelName, line),
+          message,
+          raw: line
+        };
+      }
+
+      // Truly untagged lines remain System; tagged channels no longer land here.
+      const pmLooking = /\[(?:FROM:|TO\s*:)/i.test(line);
+      return {
+        utcDate,
+        utcTime,
+        localTimeCaptured,
+        channel: pmLooking ? 'PM' : 'System',
+        message: line,
+        raw: line
+      };
+    }
+
+    function formatDisplayTime(entry) {
+      let parts = [];
+      
+      if (state.showDate) {
+        parts.push(entry.utcDate);
+      }
+      
+      if (state.showLogUtc) {
+        parts.push(entry.utcTime);
+      }
+
+      if (state.showSystemTime) {
+        parts.push(`(sys: ${entry.localTimeCaptured})`);
+      }
+
+      if (parts.length === 0) {
+        return entry.utcTime;
+      }
+
+      return parts.join(' ');
+    }
+
+    function channelClass(channel) {
+      const value = channel.toLowerCase();
+      if (value === 'system') return 'system';
+      if (value === 'pm') return 'pm';
+      if (value === 'trade') return 'trade';
+      if (value === 'society') return 'society';
+      if (value === 'globals') return 'globals';
+      if (value === 'rookie') return 'rookie';
+      return '';
+    }
+
+    function buildLineElement(entry, source) {
+      const row = document.createElement('div');
+      row.className = 'log-line';
+      row.dataset.source = source;
+      row.dataset.channel = entry.channel;
+      row.dataset.raw = entry.raw;
+      row.dataset.utcDate = entry.utcDate;
+      row.dataset.utcTime = entry.utcTime;
+      row.dataset.localCaptured = entry.localTimeCaptured;
+      row.dataset.message = entry.message;
+      row.dataset.search = `${entry.channel} ${entry.message} ${entry.raw}`.toLowerCase();
+      
+      if (entry.channel === 'Trade') {
+        const lowerRaw = entry.raw.toLowerCase();
+        for (const sub of state.tradeSubChannels) {
+          if (lowerRaw.includes(sub.toLowerCase())) {
+            row.dataset.tradeSub = sub;
+            break;
+          }
+        }
+      }
+
+      renderLineContent(row);
+      return row;
+    }
+
+    function renderLineContent(row) {
+      row.replaceChildren();
+      row.classList.toggle('raw', state.rawView);
+
+      if (state.rawView) {
+        row.textContent = row.dataset.raw || '';
+        return;
+      }
+
+      const displayTimeStr = formatDisplayTime({
+        utcDate: row.dataset.utcDate,
+        utcTime: row.dataset.utcTime,
+        localTimeCaptured: row.dataset.localCaptured
+      });
+
+      const time = document.createElement('span');
+      time.className = 'log-time';
+      time.textContent = `[${displayTimeStr}]`;
+
+      const channel = document.createElement('span');
+      channel.className = 'log-channel';
+      channel.textContent = `[${row.dataset.channel || 'System'}]`;
+
+      const message = document.createElement('span');
+      const semanticClass = channelClass(row.dataset.channel || '');
+      message.className = `log-message${semanticClass ? ` ${semanticClass}` : ''}`;
+      message.textContent = row.dataset.message || '';
+
+      row.append(time, channel, message);
+    }
+
+    function registerChannel(channel) {
+      if (knownChannels.has(channel) || ['All', 'System', 'Society', 'Trade', 'Globals', 'Rookie', 'PM'].includes(channel)) return;
+      if (knownChannels.size >= 50) return;
+
+      const button = document.createElement('button');
+      button.className = 'tab';
+      button.dataset.channel = channel;
+      button.textContent = channel;
+      knownChannels.set(channel, button);
+      elements.channelTabs.appendChild(button);
+    }
+
+    function isNearBottom() {
+      const distance = elements.terminal.scrollHeight - elements.terminal.scrollTop - elements.terminal.clientHeight;
+      return distance < 55;
+    }
+
+    function scrollToLatest() {
+      elements.terminal.scrollTop = elements.terminal.scrollHeight;
+      elements.jumpToLatest.classList.remove('visible');
+    }
+
+    function appendEntries(entries, source, markUnread = true) {
+      if (!entries.length) return;
+
+      const shouldFollow = state.autoScroll && isNearBottom();
+      const fragment = document.createDocumentFragment();
+
+      for (const entry of entries) {
+        registerChannel(entry.channel);
+        fragment.appendChild(buildLineElement(entry, source));
+
+        if (markUnread && entry.channel === 'PM' && state.activeChannel !== 'PM') {
+          state.unreadPm += 1;
+        }
+      }
+
+      elements.terminal.querySelector('.empty-state')?.remove();
+      elements.terminal.appendChild(fragment);
+      enforceLineLimit();
+      updatePmBadge();
+      applyFilters();
+
+      if (shouldFollow) {
+        requestAnimationFrame(scrollToLatest);
+      } else if (state.autoScroll) {
+        elements.jumpToLatest.classList.add('visible');
+      }
+    }
+
+    function processTextChunk(text, source, flushLastLine = false, markUnread = true) {
+      const combined = state.remainders[source] + text;
+      const pieces = combined.split(/\n/);
+
+      if (combined.endsWith('\n')) {
+        pieces.pop();
+        state.remainders[source] = '';
+      } else if (flushLastLine) {
+        state.remainders[source] = '';
+      } else {
+        state.remainders[source] = pieces.pop() || '';
+      }
+
+      const entries = [];
+      for (const piece of pieces) {
+        const cleaned = piece.replace(/\r$/, '');
+        if (!cleaned.trim()) continue;
+        entries.push(parseLine(cleaned, source));
+      }
+      appendEntries(entries, source, markUnread);
+    }
+
+    function removeSourceLines(source) {
+      for (const row of elements.terminal.querySelectorAll(`.log-line[data-source="${source}"]`)) {
+        row.remove();
+      }
+      updateCounts();
+    }
+
+    async function loadInitialTail(source, file) {
+      removeSourceLines(source);
+      state.remainders[source] = '';
+
+      const start = Math.max(0, file.size - INITIAL_TAIL_BYTES);
+      const text = await file.slice(start, file.size).text();
+      let cleanText = text;
+
+      if (start > 0) {
+        const firstBreak = text.indexOf('\n');
+        cleanText = firstBreak >= 0 ? text.slice(firstBreak + 1) : '';
+      }
+
+      processTextChunk(cleanText, source, true, false);
+      state.offsets[source] = file.size;
+    }
+
+    async function connectSource(source) {
+      if (!('showOpenFilePicker' in window)) {
+        elements.browserWarning.classList.add('visible');
+        setStatus('File access is unsupported in this browser.', 'error');
+        return;
+      }
+
+      try {
+        let handle = state.handles[source];
+        let permitted = handle ? await ensureReadPermission(handle, true) : false;
+
+        if (!handle || !permitted) {
+          [handle] = await window.showOpenFilePicker({
+            multiple: false,
+            types: [{
+              description: source === 'chat' ? 'Entropia Chat Log' : 'Entropia PM Log',
+              accept: { 'text/plain': ['.log', '.txt'] }
+            }]
+          });
+          permitted = await ensureReadPermission(handle, true);
+          if (!permitted) throw new Error('Read permission was not granted.');
+          state.handles[source] = handle;
+          await writeSavedHandle(source, handle);
+        }
+
+        const file = await handle.getFile();
+        await loadInitialTail(source, file);
+        state.connected[source] = true;
+        updateConnectionButton(source);
+        startPolling();
+      } catch (error) {
+        if (error?.name === 'AbortError') return;
+        console.error(`${sourceLabel(source)} connection error:`, error);
+        setStatus(`${sourceLabel(source)} failed: ${error.message || error}`, 'error');
+      }
+    }
+
+    function updateConnectionButton(source) {
+      const button = source === 'chat' ? elements.connectChat : elements.connectPm;
+      if (state.connected[source]) {
+        button.textContent = `${sourceLabel(source)} CONNECTED`;
+        button.classList.add('active');
+      } else if (state.handles[source]) {
+        button.textContent = `RESTORE ${sourceLabel(source)}`;
+        button.classList.remove('active');
+      } else {
+        button.textContent = `CONNECT ${sourceLabel(source)}`;
+        button.classList.remove('active');
+      }
+    }
+
+    function updatePollingUi() {
+      const hasConnection = state.connected.chat || state.connected.pm;
+      elements.pausePolling.disabled = !hasConnection;
+      elements.pausePolling.textContent = state.paused ? 'RESUME' : 'PAUSE';
+      elements.pausePolling.classList.toggle('active', state.paused);
+
+      if (!hasConnection) {
+        setStatus(state.handles.chat || state.handles.pm ? 'Saved files found. Click restore.' : 'Awaiting log files…');
+        return;
+      }
+
+      const names = [];
+      if (state.connected.chat) names.push('Chat');
+      if (state.connected.pm) names.push('PM');
+
+      if (state.paused) {
+        setStatus(`${names.join(' + ')} polling paused`);
+      } else {
+        setStatus(`Live: ${names.join(' + ')}`, 'live');
+      }
+    }
+
+    function schedulePoll(delay) {
+      clearTimeout(state.pollTimer);
+      if (!state.polling || state.paused) return;
+      state.pollTimer = setTimeout(runPollCycle, delay);
+    }
+
+    function startPolling() {
+      state.polling = true;
+      state.paused = false;
+      updatePollingUi();
+      schedulePoll(80);
+    }
+
+    async function runPollCycle() {
+      if (!state.polling || state.paused) return;
+      if (state.cycleRunning) {
+        schedulePoll(50);
+        return;
+      }
+
+      state.cycleRunning = true;
+      let hasBacklog = false;
+      try {
+        if (state.connected.chat) hasBacklog = (await pollSource('chat')) || hasBacklog;
+        if (state.connected.pm) hasBacklog = (await pollSource('pm')) || hasBacklog;
+      } catch (error) {
+        console.error('Polling cycle failed:', error);
+        setStatus(`Polling error: ${error.message || error}`, 'error');
+      } finally {
+        state.cycleRunning = false;
+        const delay = hasBacklog ? 20 : (document.hidden ? POLL_MS_HIDDEN : POLL_MS_VISIBLE);
+        schedulePoll(delay);
+      }
+    }
+
+    async function pollSource(source) {
+      const handle = state.handles[source];
+      if (!handle) return;
+
+      const file = await handle.getFile();
+      let offset = state.offsets[source];
+
+      if (file.size < offset) {
+        await loadInitialTail(source, file);
+        return false;
+      }
+
+      if (file.size === offset) return false;
+
+      const end = Math.min(file.size, offset + MAX_READ_BYTES);
+      const text = await file.slice(offset, end).text();
+      state.offsets[source] = end;
+      processTextChunk(text, source, false);
+
+      return end < file.size;
+    }
+
+    function enforceLineLimit() {
+      const rows = elements.terminal.querySelectorAll('.log-line');
+      const excess = rows.length - state.maxLines;
+      for (let i = 0; i < excess; i += 1) rows[i].remove();
+      updateCounts();
+    }
+
+    function applyFilters() {
+      let visible = 0;
+      const query = state.searchText;
+
+      for (const row of elements.terminal.querySelectorAll('.log-line')) {
+        let channelMatch = false;
+
+        if (state.activeChannel === 'All') {
+          channelMatch = true;
+        } else if (state.activeChannel === 'Trade') {
+          if (row.dataset.channel === 'Trade') {
+            const sub = row.dataset.tradeSub;
+            if (!sub || state.tradeSubChannels.has(sub)) {
+              channelMatch = true;
+            }
+          }
+        } else {
+          channelMatch = row.dataset.channel === state.activeChannel;
+        }
+
+        const searchMatch = !query || (row.dataset.search || '').includes(query);
+        const show = channelMatch && searchMatch;
+        row.classList.toggle('hidden', !show);
+        if (show) visible += 1;
+      }
+
+      state.visibleCount = visible;
+      updateCounts();
+    }
+
+    function updateCounts() {
+      state.lineCount = elements.terminal.querySelectorAll('.log-line').length;
+      const suffix = state.activeChannel !== 'All' || state.searchText
+        ? `${state.visibleCount} shown / ${state.lineCount}`
+        : `${state.lineCount} line${state.lineCount === 1 ? '' : 's'}`;
+      elements.lineCounter.textContent = suffix;
+    }
+
+    function updatePmBadge() {
+      const badge = elements.pmTab.querySelector('.badge');
+      badge.textContent = state.unreadPm > 99 ? '99+' : String(state.unreadPm);
+      elements.pmTab.classList.toggle('has-unread', state.unreadPm > 0 && state.activeChannel !== 'PM');
+    }
+
+    function clearRenderedLogs() {
+      elements.terminal.replaceChildren();
+      const empty = document.createElement('div');
+      empty.id = 'emptyState';
+      empty.className = 'empty-state';
+      empty.innerHTML = '<div><strong>View cleared</strong>New lines will appear here as Entropia writes them.</div>';
+      elements.terminal.appendChild(empty);
+      state.lineCount = 0;
+      state.visibleCount = 0;
+      state.unreadPm = 0;
+      updatePmBadge();
+      updateCounts();
+    }
+
+    async function forgetEverything() {
+      clearTimeout(state.pollTimer);
+      state.polling = false;
+      state.paused = false;
+      state.cycleRunning = false;
+      state.handles.chat = null;
+      state.handles.pm = null;
+      state.connected.chat = false;
+      state.connected.pm = false;
+      state.offsets.chat = 0;
+      state.offsets.pm = 0;
+      state.remainders.chat = '';
+      state.remainders.pm = '';
+
+      try {
+        await clearSavedHandles();
+      } catch (error) {
+        console.error('Could not clear saved handles:', error);
+      }
+
+      updateConnectionButton('chat');
+      updateConnectionButton('pm');
+      updatePollingUi();
+      clearRenderedLogs();
+    }
+
+    function debounce(fn, wait) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), wait);
+      };
+    }
+
+    // Dropdown Positioning Logic
+    function toggleDropdown(menuEl, toggleBtnEl, forceOpen) {
+      const isOpen = forceOpen !== undefined ? forceOpen : !menuEl.classList.contains('open');
+      if (isOpen) {
+        const rect = toggleBtnEl.getBoundingClientRect();
+        menuEl.style.top = `${rect.bottom + 6}px`;
+        menuEl.style.left = `${Math.min(rect.left, window.innerWidth - 300)}px`;
+        menuEl.classList.add('open');
+      } else {
+        menuEl.classList.remove('open');
+      }
+    }
+
+    elements.tradeDropdownToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      elements.settingsDropdown.classList.remove('open');
+      toggleDropdown(elements.tradeDropdown, elements.tradeDropdownToggle);
+    });
+
+    elements.openSettings.addEventListener('click', (e) => {
+      e.stopPropagation();
+      elements.tradeDropdown.classList.remove('open');
+      toggleDropdown(elements.settingsDropdown, elements.openSettings);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!elements.tradeGroup.contains(e.target) && !elements.tradeDropdown.contains(e.target)) {
+        elements.tradeDropdown.classList.remove('open');
+      }
+      if (!elements.openSettings.contains(e.target) && !elements.settingsDropdown.contains(e.target)) {
+        elements.settingsDropdown.classList.remove('open');
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      elements.tradeDropdown.classList.remove('open');
+      elements.settingsDropdown.classList.remove('open');
+    });
+
+    elements.connectChat.addEventListener('click', () => connectSource('chat'));
+    elements.connectPm.addEventListener('click', () => connectSource('pm'));
+
+    elements.pausePolling.addEventListener('click', () => {
+      if (!(state.connected.chat || state.connected.pm)) return;
+      state.paused = !state.paused;
+      updatePollingUi();
+      if (!state.paused) schedulePoll(20);
+      else clearTimeout(state.pollTimer);
+    });
+
+    elements.toggleRaw.addEventListener('click', () => {
+      state.rawView = !state.rawView;
+      elements.toggleRaw.textContent = state.rawView ? 'RAW VIEW' : 'FORMATTED VIEW';
+      elements.toggleRaw.classList.toggle('active', state.rawView);
+      for (const row of elements.terminal.querySelectorAll('.log-line')) renderLineContent(row);
+    });
+
+    elements.toggleAutoscroll.addEventListener('click', () => {
+      state.autoScroll = !state.autoScroll;
+      elements.toggleAutoscroll.textContent = `AUTO-SCROLL ${state.autoScroll ? 'ON' : 'OFF'}`;
+      elements.toggleAutoscroll.classList.toggle('active', state.autoScroll);
+      if (state.autoScroll) scrollToLatest();
+    });
+
+    elements.clearView.addEventListener('click', clearRenderedLogs);
+    elements.forgetFiles.addEventListener('click', forgetEverything);
+    elements.jumpToLatest.addEventListener('click', scrollToLatest);
+
+    // Settings listeners
+    elements.chkShowLogUtc.addEventListener('change', (e) => {
+      state.showLogUtc = e.target.checked;
+      for (const row of elements.terminal.querySelectorAll('.log-line')) renderLineContent(row);
+    });
+
+    elements.chkShowDate.addEventListener('change', (e) => {
+      state.showDate = e.target.checked;
+      for (const row of elements.terminal.querySelectorAll('.log-line')) renderLineContent(row);
+    });
+
+    elements.chkShowSystemTime.addEventListener('change', (e) => {
+      state.showSystemTime = e.target.checked;
+      for (const row of elements.terminal.querySelectorAll('.log-line')) renderLineContent(row);
+    });
+
+    Object.keys(elements.colorInputs).forEach(key => {
+      elements.colorInputs[key].addEventListener('input', (e) => {
+        state.colors[key] = e.target.value;
+        applyCustomColorsToCss();
+      });
+    });
+
+    elements.resetColorsBtn.addEventListener('click', () => {
+      state.colors = {
+        system: '#e6c36a',
+        pm: '#ff90ea',
+        trade: '#82b7ff',
+        society: '#9ee28c',
+        globals: '#ffd700',
+        rookie: '#7ac1ff'
+      };
+      Object.keys(elements.colorInputs).forEach(key => {
+        elements.colorInputs[key].value = state.colors[key];
+      });
+      applyCustomColorsToCss();
+    });
+
+    elements.closeSettingsBtn.addEventListener('click', () => {
+      elements.settingsDropdown.classList.remove('open');
+    });
+
+    // Manual Trade Channel Adder
+    function handleAddTradeChannel() {
+      const val = elements.newTradeInput.value.trim();
+      if (!val) return;
+      const formatted = val.startsWith('#') ? val : `#${val}`;
+      state.tradeSubChannels.add(formatted);
+      renderTradeCheckboxes();
+      elements.newTradeInput.value = '';
+      if (state.activeChannel === 'Trade') applyFilters();
+    }
+
+    elements.addTradeBtn.addEventListener('click', handleAddTradeChannel);
+    elements.newTradeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleAddTradeChannel();
+    });
+
+    elements.tradeSelectAll.addEventListener('click', () => {
+      elements.tradeDropdown.querySelectorAll('.trade-sub').forEach(chk => {
+        chk.checked = true;
+        state.tradeSubChannels.add(chk.value);
+      });
+      if (state.activeChannel === 'Trade') applyFilters();
+    });
+
+    elements.tradeClearAll.addEventListener('click', () => {
+      elements.tradeDropdown.querySelectorAll('.trade-sub').forEach(chk => {
+        chk.checked = false;
+        state.tradeSubChannels.delete(chk.value);
+      });
+      if (state.activeChannel === 'Trade') applyFilters();
+    });
+
+    elements.channelTabs.addEventListener('click', event => {
+      const tabButton = event.target.closest('.tab');
+      if (!tabButton) return;
+
+      for (const tab of elements.channelTabs.querySelectorAll('.tab')) tab.classList.remove('active');
+      elements.tradeGroup.classList.remove('has-active');
+
+      tabButton.classList.add('active');
+      if (elements.tradeGroup.contains(tabButton)) {
+        elements.tradeGroup.classList.add('has-active');
+      }
+
+      state.activeChannel = tabButton.dataset.channel || 'All';
+
+      if (state.activeChannel === 'PM') {
+        state.unreadPm = 0;
+        updatePmBadge();
+      }
+
+      applyFilters();
+      if (state.autoScroll) requestAnimationFrame(scrollToLatest);
+    });
+
+    elements.searchInput.addEventListener('input', debounce(event => {
+      state.searchText = event.target.value.trim().toLowerCase();
+      applyFilters();
+    }, 120));
+
+    elements.lineLimit.addEventListener('change', event => {
+      state.maxLines = Number.parseInt(event.target.value, 10) || 600;
+      enforceLineLimit();
+      applyFilters();
+    });
+
+    elements.terminal.addEventListener('scroll', () => {
+      if (isNearBottom()) elements.jumpToLatest.classList.remove('visible');
+    }, { passive: true });
+
+    document.addEventListener('visibilitychange', () => {
+      if (state.polling && !state.paused) schedulePoll(50);
+    });
+
+    window.addEventListener('beforeunload', () => clearTimeout(state.pollTimer));
+
+    async function initialize() {
+      applyCustomColorsToCss();
+
+      if (!('showOpenFilePicker' in window)) {
+        elements.browserWarning.classList.add('visible');
+      }
+
+      try {
+        const [chatHandle, pmHandle] = await Promise.all([
+          readSavedHandle('chat'),
+          readSavedHandle('pm')
+        ]);
+        state.handles.chat = chatHandle;
+        state.handles.pm = pmHandle;
+      } catch (error) {
+        console.error('Saved file check failed:', error);
+        setStatus('Could not read saved file handles.', 'error');
+      }
+
+      updateConnectionButton('chat');
+      updateConnectionButton('pm');
+      updatePollingUi();
+      updateCounts();
+    }
+
+    initialize();
+  </script>
+</body>
+</html>

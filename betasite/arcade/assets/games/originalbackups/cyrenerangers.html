@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYRENE RANGERS — Entropia Universe Arcade</title>
+    <style>
+        :root {
+            --cabinet-magenta: #c711d3;
+            --cabinet-dark-magenta: #60007a;
+            --marquee-cyan: #00ffcc;
+            --t-molding: #222222;
+        }
+
+        body {
+            background-color: #0c0f12;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', Courier, monospace;
+            color: #fff;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        .arcade-container {
+            position: relative;
+            width: 580px;
+            background: linear-gradient(135deg, var(--cabinet-dark-magenta), var(--cabinet-magenta));
+            border-left: 14px solid var(--t-molding);
+            border-right: 14px solid var(--t-molding);
+            border-radius: 20px 20px 10px 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px;
+            user-select: none;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-style: preserve-3d;
+        }
+
+        .arcade-container.lean-in {
+            transform: scale(1.55) translateY(120px) translateZ(150px) rotateX(4deg);
+        }
+
+        .marquee {
+            width: 100%;
+            height: 95px;
+            background: #0a0a0a;
+            border-bottom: 6px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px 8px 0 0;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.8);
+        }
+        .marquee-art {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, rgba(199, 17, 211, 0.1), rgba(199, 17, 211, 0.1) 10px, rgba(0, 0, 0, 0.2) 10px, rgba(0, 0, 0, 0.2) 20px);
+            opacity: 0.8;
+        }
+        .marquee h1 {
+            font-size: 2.7rem;
+            margin: 0;
+            font-family: 'Impact', sans-serif;
+            color: var(--marquee-cyan);
+            text-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc, 4px 4px 0px #000;
+            letter-spacing: 2px;
+            z-index: 2;
+            font-style: italic;
+            transform: skewX(-10deg);
+        }
+
+        .bezel {
+            width: 92%;
+            background: #111;
+            margin-top: 15px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: inset 0 0 30px #000;
+            box-sizing: border-box;
+            border-bottom: 4px solid #050505;
+        }
+
+        .screen-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/10;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,1), 0 0 10px rgba(0, 255, 204, 0.1);
+            border: 4px solid #1a1a1a;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .crt-overlay {
+            --crt-opacity: 0.65;
+            --crt-line-size: 4px;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 0%, rgba(18, 16, 16, 0) 58%, rgba(0, 0, 0, 0.23) 58%, rgba(0, 0, 0, 0.23) 100%);
+            background-size: 100% var(--crt-line-size);
+            opacity: var(--crt-opacity);
+            transition: opacity 0.18s ease, background-size 0.18s ease;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .screen-container.crt-disabled .crt-overlay { opacity: 0 !important; }
+        .crt-curve {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.9);
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        .control-panel {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(to bottom, #222, #0a0a0a);
+            border-top: 6px solid #000;
+            border-bottom: 6px solid #000;
+            margin-top: 15px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.7);
+            transform-style: preserve-3d;
+        }
+
+        .cp-texture {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(black 15%, transparent 16%) 0 0, radial-gradient(black 15%, transparent 16%) 8px 8px, radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px, radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+            background-color: #1a1a1a;
+            background-size: 16px 16px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .joystick-base {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #050505 40%, #000 70%);
+            border-radius: 50%;
+            border: 4px solid #111;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.9), 0 5px 15px rgba(0,0,0,0.8);
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 40px;
+        }
+        
+        .joystick-ball {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 14px 12px, #ff3b3b, #8a0000 68%, #4b0000);
+            border: 2px solid #222;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.8);
+            position: relative;
+            transition: transform 0.05s ease;
+        }
+
+        .action-cluster {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            z-index: 5;
+        }
+        .arcade-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 3px solid #000;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.4);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.65rem;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.08s ease, filter 0.08s ease;
+        }
+        .arcade-btn:active, .arcade-btn.active-press {
+            transform: translateY(3px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.4);
+        }
+        .btn-jump { background: radial-gradient(circle at 12px 10px, #3bf, #0066aa); } 
+        .btn-punch { background: radial-gradient(circle at 12px 10px, #ff3b3b, #990000); } 
+        .btn-special { background: radial-gradient(circle at 12px 10px, #a855f7, #6b21a8); } 
+        .btn-transform { background: radial-gradient(circle at 12px 10px, #ffd700, #b8860b); color: #000; }
+        .btn-bomb { background: radial-gradient(circle at 12px 10px, #4ade80, #166534); } 
+        .btn-grab { background: radial-gradient(circle at 12px 10px, #fb923c, #9a3412); } 
+
+        .lean-btn {
+            position: absolute;
+            left: 20px;
+            width: 45px;
+            height: 45px;
+            background: radial-gradient(circle at 12px 12px, #fff, #aaa);
+            border-radius: 50%;
+            border: 4px solid #000;
+            box-shadow: 0 4px 0 #555, 0 6px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: #000;
+            transform: translateZ(20px);
+            z-index: 15;
+        }
+        .lean-btn:active, .lean-btn.forced-active {
+            transform: translateY(4px) translateZ(20px);
+            box-shadow: 0 0px 0 #555, 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .crt-btn {
+            position: absolute;
+            left: 78px;
+            width: 48px;
+            height: 30px;
+            border-radius: 6px;
+            border: 3px solid #000;
+            background: linear-gradient(#343a40, #15191d);
+            box-shadow: 0 4px 0 #050505, 0 6px 10px rgba(0,0,0,0.55), inset 0 1px 2px rgba(255,255,255,0.18);
+            color: #aaa;
+            font: bold 0.55rem 'Courier New', monospace;
+            cursor: pointer;
+            z-index: 16;
+            transform: translateZ(18px);
+        }
+        .crt-btn.active {
+            color: #07110e;
+            background: linear-gradient(#77ffe2, #00cfa8);
+            box-shadow: 0 4px 0 #006b58, 0 0 12px rgba(0,255,204,0.48), inset 0 1px 2px rgba(255,255,255,0.55);
+        }
+
+        .lower-cabinet {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        
+        .checkered-flag {
+            width: 100%;
+            height: 60px;
+            margin-top: 15px;
+            background-image: linear-gradient(45deg, #000 25%, transparent 25%), linear-gradient(-45deg, #000 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #000 75%), linear-gradient(-45deg, transparent 75%, #000 75%);
+            background-size: 30px 30px;
+            background-position: 0 0, 0 15px, 15px -15px, -15px 0px;
+            background-color: #fff;
+            border-top: 4px solid #111;
+            border-bottom: 4px solid #111;
+            transform: perspective(200px) rotateX(5deg);
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .coin-door {
+            width: 130px;
+            height: 110px;
+            background: #1e1e1e;
+            margin-top: -30px;
+            border: 4px solid #111;
+            border-radius: 5px;
+            box-shadow: inset 0 0 10px #000, 0 10px 20px rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+        }
+        .coin-slot {
+            width: 35px;
+            height: 55px;
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+        .coin-entry {
+            width: 4px;
+            height: 25px;
+            background: #ff5500;
+            position: absolute;
+            top: 10px; left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 5px #ff5500;
+        }
+
+        .ui-panel {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.92);
+            padding: 25px;
+            border: 2px solid var(--marquee-cyan);
+            border-radius: 8px;
+            width: 88%;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+        .ui-panel h2 { color: var(--cabinet-magenta); margin: 0 0 10px 0; font-size: 1.8rem; text-shadow: 1px 1px 0 #000;}
+        .ui-panel p { margin: 5px 0; font-size: 0.82rem;}
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-art"></div>
+            <h1>CYRENE RANGERS</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container" id="screenContainer">
+                <div class="crt-overlay" id="crtOverlay"></div>
+                <div class="crt-curve"></div>
+                
+                <div id="start-panel" class="ui-panel">
+                    <h2 style="color: var(--marquee-cyan);">INSERT COIN</h2>
+                    <p style="color: #fff; margin-bottom: 15px;">Press ENTER or click the coin slot</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">MOVE: Arrows or WASD | DOUBLE-TAP: Dash</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">ATTACK: F | JUMP: SPACE | SPECIAL / WEAPON: C</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">GRAB: G | THROW: Direction + F | JUGGLE: UP + F</p>
+                    <p style="color: #ffd700; font-size: 0.65rem; margin-top: 10px;">CROUCH: DOWN / SHIFT | ALL KEYS REMAPPABLE FROM TITLE</p>
+                </div>
+
+                <div id="gameover-panel" class="ui-panel hidden">
+                    <h2 id="result-title">GAME OVER</h2>
+                    <p id="final-score" style="font-weight: bold; color: #fff; font-size: 1.1rem; line-height: 1.45;">SCORE: 0</p>
+                    <p id="result-next-hint" style="color: var(--marquee-cyan); font-size: 0.75rem; margin-top: 10px;">Press ENTER or click the coin slot to play again</p>
+                </div>
+
+                <canvas id="gameCanvas" width="480" height="270"></canvas>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="cp-texture"></div>
+            <div class="lean-btn" id="zoomBtn">LEAN</div>
+            <button class="crt-btn active" id="crtBtn" type="button" title="Toggle CRT scanlines (F2)">CRT ON</button>
+
+            <div class="joystick-base">
+                <div class="joystick-ball" id="joystickBall"></div>
+            </div>
+
+            <div class="action-cluster">
+                <div style="text-align: center;"><button class="arcade-btn btn-attack" id="btnAttack">F</button><span style="font-size:0.55rem; color:#aaa;">Y (ATK)</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-jump" id="btnJump">SPC</button><span style="font-size:0.55rem; color:#aaa;">B (JMP)</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-bomb" id="btnBomb">B</button><span style="font-size:0.55rem; color:#aaa;">A (BMB)</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-special" id="btnSpecial">C</button><span style="font-size:0.55rem; color:#aaa;">X (SPC)</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-transform" id="btnTransform">T</button><span style="font-size:0.55rem; color:#aaa;">MORPH</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-grab" id="btnGrab">G</button><span style="font-size:0.55rem; color:#aaa;">GRAB</span></div>
+            </div>
+        </div>
+
+        <div class="lower-cabinet">
+            <div class="checkered-flag"></div>
+            <div class="coin-door">
+                <div class="coin-slot" id="coinSlotBtn">
+                    <div class="coin-entry"></div>
+                    <div class="coin-return"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+'use strict';
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const cabinet = document.getElementById('cabinet');
+const screenContainer = document.getElementById('screenContainer');
+const crtOverlay = document.getElementById('crtOverlay');
+const zoomBtn = document.getElementById('zoomBtn');
+const crtBtn = document.getElementById('crtBtn');
+const coinSlot = document.getElementById('coinSlotBtn');
+const startPanel = document.getElementById('start-panel');
+const gameoverPanel = document.getElementById('gameover-panel');
+const resultTitle = document.getElementById('result-title');
+const finalScoreText = document.getElementById('final-score');
+const joystickBall = document.getElementById('joystickBall');
+
+const btnAttack = document.getElementById('btnAttack');
+const btnJump = document.getElementById('btnJump');
+const btnBomb = document.getElementById('btnBomb');
+const btnSpecial = document.getElementById('btnSpecial');
+const btnTransform = document.getElementById('btnTransform');
+const btnGrab = document.getElementById('btnGrab');
+
+const WIDTH = canvas.width;
+const HEIGHT = canvas.height;
+const UI_HEIGHT = 45; 
+const PLAY_AREA_BOTTOM = HEIGHT - UI_HEIGHT;
+const FLOOR_Y = PLAY_AREA_BOTTOM - 20;
+const TAU = Math.PI * 2;
+
+let audioCtx = null, audioMuted = false, crtEnabled = true;
+
+function initAudio() {
+    if (audioCtx) { if (audioCtx.state === 'suspended') audioCtx.resume(); return; }
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    audioCtx = new AudioContextClass();
+}
+
+function playTone(freq, duration, type = 'square', volume = 0.05) {
+    if (!audioCtx || audioMuted) return;
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {}
+}
+
+function toggleLean() {
+    cabinet.classList.toggle('lean-in');
+    playTone(600, 0.05, 'triangle');
+    zoomBtn.classList.add('forced-active');
+    setTimeout(() => zoomBtn.classList.remove('forced-active'), 100);
+}
+zoomBtn.addEventListener('pointerdown', e => { e.preventDefault(); toggleLean(); });
+
+function toggleCrt() {
+    crtEnabled = !crtEnabled;
+    screenContainer.classList.toggle('crt-disabled', !crtEnabled);
+    crtBtn.classList.toggle('active', crtEnabled);
+    crtBtn.textContent = crtEnabled ? 'CRT ON' : 'CRT OFF';
+    playTone(crtEnabled ? 760 : 310, 0.07, 'triangle', 0.035);
+}
+crtBtn.addEventListener('pointerdown', e => { e.preventDefault(); toggleCrt(); });
+
+// ---------------------------------------------
+// INPUT CONTROLLER
+// ---------------------------------------------
+const DEFAULT_BINDINGS = {
+    Up: ['KeyW', 'ArrowUp'], Down: ['KeyS', 'ArrowDown'],
+    Left: ['KeyA', 'ArrowLeft'], Right: ['KeyD', 'ArrowRight'],
+    Crouch: ['ShiftLeft', 'ShiftRight'], Attack: ['KeyF'], Special: ['KeyC'],
+    Jump: ['Space'], Grab: ['KeyG'], Transform: ['KeyT'], Bomb: ['KeyB'],
+    Pause: ['KeyP'], Lean: ['KeyL']
+};
+const bindingActions = Object.keys(DEFAULT_BINDINGS);
+let bindings;
+try {
+    bindings = Object.assign({}, DEFAULT_BINDINGS, JSON.parse(localStorage.getItem('cyreneRangersBindings') || '{}'));
+    bindingActions.forEach(action => { if (!Array.isArray(bindings[action])) bindings[action] = [...DEFAULT_BINDINGS[action]]; });
+} catch { bindings = JSON.parse(JSON.stringify(DEFAULT_BINDINGS)); }
+let bindingSelection = 0, awaitingBinding = false;
+
+function saveBindings() {
+    localStorage.setItem('cyreneRangersBindings', JSON.stringify(bindings));
+}
+function resetBindings() {
+    bindings = JSON.parse(JSON.stringify(DEFAULT_BINDINGS));
+    saveBindings();
+}
+function findBoundAction(code) {
+    return bindingActions.find(action => bindings[action].includes(code));
+}
+function formatKeyCode(code) {
+    return code.replace(/^Key/, '').replace(/^Digit/, '').replace('Arrow', '').replace('Left', ' L').replace('Right', ' R').toUpperCase();
+}
+function assignBinding(action, code) {
+    bindingActions.forEach(other => {
+        if (other !== action) bindings[other] = bindings[other].filter(bound => bound !== code);
+    });
+    bindings[action] = [code];
+    saveBindings();
+}
+
+const keys = { Up: false, Down: false, Left: false, Right: false, Crouch: false };
+const keysPressed = { Attack: false, Special: false, Jump: false, Transform: false, Bomb: false, Grab: false, Pause: false };
+let lastDirKey = '';
+let lastDirTime = 0;
+let isDashing = false;
+let dashRequested = 0, dashRequestedDirection = 1, dashTimer = 0, dashCooldown = 0, dashSerial = 0;
+
+function mapKeyCode(code, isDown) {
+    const action = findBoundAction(code);
+    if (!action) return;
+    const dirPushed = isDown && (action === 'Left' || action === 'Right');
+    if (action in keys) keys[action] = isDown;
+
+    if (dirPushed && gameState === 'PLAYING') {
+        const now = performance.now();
+        const thisDir = action === 'Left' ? 'L' : 'R';
+        if (thisDir === lastDirKey && now - lastDirTime < 250) dashRequested = thisDir === 'L' ? -1 : 1;
+        lastDirKey = thisDir;
+        lastDirTime = now;
+    }
+
+    if (isDown) {
+        if (action === 'Attack') { keysPressed.Attack = true; btnAttack.classList.add('active-press'); }
+        if (action === 'Special') { keysPressed.Special = true; btnSpecial.classList.add('active-press'); }
+        if (action === 'Jump') { keysPressed.Jump = true; btnJump.classList.add('active-press'); }
+        if (action === 'Transform') { keysPressed.Transform = true; btnTransform.classList.add('active-press'); }
+        if (action === 'Bomb') { keysPressed.Bomb = true; btnBomb.classList.add('active-press'); }
+        if (action === 'Grab') { keysPressed.Grab = true; btnGrab.classList.add('active-press'); }
+        if (action === 'Pause') keysPressed.Pause = true;
+        if (action === 'Lean') toggleLean();
+    } else {
+        if (action === 'Attack') btnAttack.classList.remove('active-press');
+        if (action === 'Special') btnSpecial.classList.remove('active-press');
+        if (action === 'Jump') btnJump.classList.remove('active-press');
+        if (action === 'Transform') btnTransform.classList.remove('active-press');
+        if (action === 'Bomb') btnBomb.classList.remove('active-press');
+        if (action === 'Grab') btnGrab.classList.remove('active-press');
+    }
+}
+
+window.addEventListener('keydown', e => {
+    if (gameState === 'HOW_TO_PLAY' && awaitingBinding) {
+        e.preventDefault();
+        assignBinding(bindingActions[bindingSelection], e.code);
+        awaitingBinding = false;
+        playTone(800, 0.08, 'sine');
+        return;
+    }
+    if ((e.key === 'Enter' || e.code === 'Enter' || e.code === 'NumpadEnter') && gameState !== 'PLAYING') {
+        e.preventDefault();
+        if (gameState === 'INSERT_COIN' || gameState === 'GAME_OVER' || gameState === 'VICTORY') activateCoinSlot();
+        else if (!e.repeat) handleMenuAction();
+        return;
+    }
+    if (e.code === 'F2') { e.preventDefault(); toggleCrt(); return; }
+    if (!e.repeat) mapKeyCode(e.code, true);
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
+});
+
+window.addEventListener('keyup', e => mapKeyCode(e.code, false));
+
+btnJump.addEventListener('mousedown', () => keysPressed.Jump = true);
+btnAttack.addEventListener('mousedown', () => keysPressed.Attack = true);
+btnSpecial.addEventListener('mousedown', () => keysPressed.Special = true);
+btnTransform.addEventListener('mousedown', () => keysPressed.Transform = true);
+btnBomb.addEventListener('mousedown', () => keysPressed.Bomb = true);
+btnGrab.addEventListener('mousedown', () => keysPressed.Grab = true);
+
+function activateCoinSlot() {
+    if (gameState !== 'INSERT_COIN' && gameState !== 'GAME_OVER' && gameState !== 'VICTORY') return;
+    initAudio(); playTone(880, 0.1, 'square'); setTimeout(() => playTone(1200, 0.18, 'sine'), 90);
+    startPanel.classList.add('hidden'); gameoverPanel.classList.add('hidden');
+    gameState = 'BOOT'; bootTimer = 0; bootStep = 0;
+}
+coinSlot.addEventListener('click', activateCoinSlot);
+
+// ---------------------------------------------
+// GAME STATE & VARIABLES
+// ---------------------------------------------
+let gameState = 'INSERT_COIN', bootTimer = 0, bootStep = 0, menuSelection = 0, charSelection = 0, currentStage = 1;
+let score = 0, lives = 3, cutsceneTimer = 0, cutsceneStep = 0, cameraX = 0, cameraMaxX = 0;
+let screenShake = 0, bombFlash = 0, goFlashTimer = 0, hitFreezeTimer = 0, isPaused = false, playerInvulnTimer = 0;
+
+const upgradePool = [
+    { name: 'POWER SERVOS', description: '+18% attack damage', color: '#ef4444', apply: () => runUpgrades.damage *= 1.18 },
+    { name: 'REINFORCED ARMOR', description: '+35 maximum life', color: '#22c55e', apply: () => runUpgrades.hp += 35 },
+    { name: 'TURBO ACTUATORS', description: '+12% movement speed', color: '#38bdf8', apply: () => runUpgrades.speed *= 1.12 },
+    { name: 'MORPHIN CAPACITOR', description: '+35% energy gained', color: '#a855f7', apply: () => runUpgrades.energy *= 1.35 },
+    { name: 'LOOTIUS BLESSING', description: 'More supply drops', color: '#facc15', apply: () => runUpgrades.loot += 0.18 },
+    { name: 'ORDNANCE RACK', description: '+1 bomb each level', color: '#fb7185', apply: () => runUpgrades.bombs += 1 }
+];
+let runUpgrades = { damage: 1, hp: 0, speed: 1, energy: 1, loot: 0, bombs: 0 };
+let upgradeChoices = [], upgradeSelection = 0;
+
+function resetRunUpgrades() {
+    runUpgrades = { damage: 1, hp: 0, speed: 1, energy: 1, loot: 0, bombs: 0 };
+}
+
+function prepareUpgradeChoices() {
+    const available = [...upgradePool];
+    upgradeChoices = [];
+    while (upgradeChoices.length < 3) {
+        upgradeChoices.push(available.splice(Math.floor(Math.random() * available.length), 1)[0]);
+    }
+    upgradeSelection = 0;
+    gameState = 'UPGRADE_SELECT';
+    playTone(760, 0.15, 'sine');
+}
+
+const characters = [
+    { name: 'JIMBOBBITYBOO', color: '#3b82f6', civTop: '#2563eb', civBot: '#1e293b', gender: 'male', ranger: 'Blue Ranger', title: 'YouTube Creator', hp: 120, atk: 15, spd: 4.0, weapon: 'Power Lance', intro: 'Jimbobbityboo touches down, cameras rolling...' },
+    { name: 'SIENNA BLAZE', color: '#ffd700', civTop: '#facc15', civBot: '#2563a8', gender: 'female', adult: true, style: 'yellowBabe', ranger: 'Yellow Ranger', title: 'Cyrene Stunt Pilot', hp: 115, atk: 15, spd: 4.7, weapon: 'Solar Whip', intro: 'Sienna Blaze dives into battle, sunshine and trouble...' },
+    { name: 'NEVERDIE JACOBS', color: '#ef4444', civTop: '#dc2626', civBot: '#111827', gender: 'male', ranger: 'Red Ranger', title: 'Virtual Real Estate Baron', hp: 150, atk: 22, spd: 2.8, weapon: 'Heavy Sword', intro: 'Neverdie drops in, defending his investments...' },
+    { name: 'ASTRID VAHL', color: '#ec4899', civTop: '#ec4899', civBot: '#2563eb', gender: 'female', ranger: 'Pink Ranger', title: 'Deep Space Scout', hp: 110, atk: 12, spd: 4.5, weapon: 'Energy Bow', intro: 'Astrid Vahl scans the perimeter, bow drawn...' },
+    { name: 'TYSON BLADE', color: '#1f2937', civTop: '#111827', civBot: '#4b5563', gender: 'male', ranger: 'Black Ranger', title: 'Tactical Tactician', hp: 140, atk: 16, spd: 4.2, weapon: 'Power Axe', intro: 'Tyson Blade enters the hot zone, claws out...' }
+];
+
+const heroIntroScenes = [
+    { location: 'ATLAS RIDGE — LIVE FEED', lines: ['Jimbobbityboo came to record the invasion.', 'Then the Imperium aimed its guns at the refugees.', '"Guess the camera gets an action episode."'] },
+    { location: 'ATLAS FLIGHT DECK — RED ALERT', lines: ['Sienna stole an Imperium interceptor and landed it sideways.', 'The Yellow Ranger core apparently approved of her technique.', '"Try to keep up, boys."'] },
+    { location: 'NEVERDIE COMMAND SHUTTLE', lines: ['The Imperium mistook investment for surrender.', 'NEVERDIE opened the armory and chose the red core.', '"Nobody conquers my planet but me."'] },
+    { location: 'DEEP SPACE LISTENING POST', lines: ['Astrid heard Cyrene’s distress call beyond the rim.', 'She followed it through an Imperium blockade.', '"Scout report: they should have brought more ships."'] },
+    { location: 'TURRELION FORWARD CAMP', lines: ['Tyson had studied every Imperium formation.', 'Now the Black Ranger core gave him the strength to break them.', '"Tactics first. Property damage second."'] }
+];
+
+let selectedCharacter = characters[0];
+let playerX = 80, playerY = FLOOR_Y, playerVy = 0, playerHp = 120, playerMaxHp = 120, playerEnergy = 0;
+let attackCooldown = 0, attackAnimTimer = 0, attackTypeUsed = '';
+let isFacingRight = true, isMorphActive = false, isMechMode = false, walkAnimTimer = 0;
+let comboCount = 0, comboTimer = 0, bombs = 2, mechPower = 0;
+let grappledEnemy = null, grappleTimer = 0;
+
+const stages = [
+    { id: 1, name: 'Atlas Hunting Grounds', themeColor: '#2e1c0c', boss: 'Imperium Ranger Alpha', mobs: ['Fire Pleak', 'Junk Bot'] },
+    { id: 2, name: 'Manathule Swamp', themeColor: '#112918', boss: 'Imperium Ranger Beta', mobs: ['Swamp Lurker', 'Merfolken', 'Empi Wasp'] },
+    { id: 3, name: 'Robot Base ZRQ', themeColor: '#1c1f26', boss: 'Imperium Ranger Gamma', mobs: ['Drillbot', 'Renegade Soldier'] },
+    { id: 4, name: 'Turrelion Desert', themeColor: '#382a18', boss: 'Imperium Ranger Delta', mobs: ['Duster', 'Paneleon', 'Drone Swarm'] },
+    { id: 5, name: 'Island Biome', themeColor: '#183138', boss: 'Big Byrd & Ranger Epsilon', mobs: ['Tide Claw', 'Jelly Slime', 'Sea Wraith'] },
+    { id: 6, name: 'Isle de Zel', themeColor: '#2b121f', boss: 'Imperium Warlord Zorin', mobs: ['Renegade Scout', 'Renegade Pilot'] },
+    { id: 7, name: 'Cyrene Orbit - Mega Mecha Defense', themeColor: '#0b0d14', boss: 'Dreadnought', mobs: ['Hazard Mech'], mech: true },
+    { id: 8, name: 'Amethera - Mega Mecha Siege', themeColor: '#26160b', boss: 'Colossal Cyber Beast', mobs: ['Heavy Duster Mechs'], mech: true },
+    { id: 9, name: 'Crystal Palace - Mecha Fortress', themeColor: '#1a1f33', boss: 'Emperor Guardian Mech', mobs: ['Elite Mechs', 'Hover Drones'], mech: true },
+    { id: 10, name: 'Cyrene Core - Final Mecha War', themeColor: '#330b0b', boss: 'Supreme Imperium Overlord', mobs: ['Imperial Guard Mechs'], mech: true }
+];
+
+const stageWavePatterns = [
+    [2, 3, 3, 4],          // Atlas: short opening stage
+    [3, 4, 5, 4, 5],       // Swamp: increasingly dense swarms
+    [2, 4, 3, 5],          // Z.R.Q.: compact security formations
+    [3, 3, 5, 4, 6],       // Desert: long endurance push
+    [4, 5, 4, 5],          // Island: creature rushes
+    [3, 5, 4, 6, 5, 7],    // Zel: final human-scale gauntlet
+    [2, 3, 3, 4],          // Orbit: fewer, much larger machines
+    [3, 4, 3, 5],
+    [2, 4, 4, 5, 4],
+    [3, 4, 5, 5, 6]
+];
+const stageSetPieces = ['ruin','stump','terminal','rock','palm','crystal','wreck','bunker','console','reactor'];
+const midEventDefs = [
+    { type:'destroy', title:'PLEAK NEST', instruction:'DESTROY 3 FIRE PLEAK NESTS', object:'nest', count:3 },
+    { type:'traverse', title:'BOG CROSSING', instruction:'USE THE PLATFORMS TO CROSS THE BOG' },
+    { type:'hack', title:'FACTORY OVERRIDE', instruction:'PRESS G THREE TIMES AT EACH TERMINAL', object:'hackTerminal', count:2 },
+    { type:'sprint', title:'SANDSTORM', instruction:'OUTRUN THE STORM — KEEP MOVING RIGHT' },
+    { type:'destroy', title:'TIDAL LOCK', instruction:'DESTROY THE TWO TIDE PUMPS', object:'pump', count:2 },
+    { type:'defend', title:'ZEL BEACON', instruction:'DEFEND THE BEACON UNTIL IT TRANSMITS' },
+    { type:'survive', title:'ASTEROID BELT', instruction:'SURVIVE THE ASTEROID FIELD' },
+    { type:'destroy', title:'SIEGE BREAKER', instruction:'DESTROY 3 ARTILLERY BATTERIES', object:'battery', count:3 },
+    { type:'hack', title:'PALACE LOCKDOWN', instruction:'PRESS G THREE TIMES AT EACH SECURITY NODE', object:'securityNode', count:2 },
+    { type:'destroy', title:'CORE OVERLOAD', instruction:'DESTROY 3 REACTOR CONDUITS', object:'conduit', count:3 }
+];
+
+let enemies = [], destructibles = [], platforms = [], projectiles = [], hitSparks = [], floatingTexts = [], lootItems = [], bossObj = null;
+let stageLength = 0, stageWaves = [], activeWave = null;
+let mechHazards = [], mechHazardTimer = 0;
+let midEvent = null, midEventCompleted = false;
+let banner = '', bannerTime = 0;
+
+function getMobStats(name) {
+    let type = 'melee', flying = false, hp = 40 + currentStage * 10;
+    if (name.includes('Pleak') || name.includes('Wasp') || name.includes('Drone') || name.includes('Wraith') || name.includes('Big Byrd')) { type = 'flyer'; flying = true; hp *= 0.8; } 
+    else if (name.includes('Soldier') || name.includes('Duster') || name.includes('Junk Bot') || name.includes('Pilot')) { type = 'ranged'; } 
+    if (name.includes('Mech') || name.includes('Beast') || name.includes('Overlord')) hp *= 2.0;
+    if (stages[currentStage - 1] && stages[currentStage - 1].mech) hp *= 1.5;
+    return { type, flying, hp };
+}
+
+function handleMenuAction() {
+    if (gameState === 'TITLE') {
+        if (menuSelection === 0) { currentStage = 1; score = 0; lives = 3; resetRunUpgrades(); gameState = 'STORY_INTRO'; cutsceneTimer = 0; cutsceneStep = 0; playTone(600, 0.08, 'sine'); } 
+        else if (menuSelection === 1) {
+            currentStage = Math.max(1, Math.min(10, Number(localStorage.getItem('cyreneRangersStage')) || 1));
+            score = 0; lives = 3; resetRunUpgrades(); gameState = 'CHARACTER_SELECT'; playTone(600, 0.08, 'sine');
+        }
+        else if (menuSelection === 2) { currentStage = 1; score = 0; lives = 3; resetRunUpgrades(); gameState = 'CHARACTER_SELECT'; playTone(600, 0.08, 'sine'); } 
+        else if (menuSelection === 3) { gameState = 'HOW_TO_PLAY'; bindingSelection = 0; awaitingBinding = false; playTone(550, 0.05, 'sine'); }
+        else if (menuSelection === 4) { gameState = 'CREDITS'; playTone(550, 0.05, 'sine'); }
+    } else if (gameState === 'HOW_TO_PLAY') {
+        if (bindingSelection < bindingActions.length) awaitingBinding = true;
+        else if (bindingSelection === bindingActions.length) { resetBindings(); playTone(900, 0.1, 'sine'); }
+        else { gameState = 'TITLE'; awaitingBinding = false; }
+    } else if (gameState === 'CREDITS') { gameState = 'TITLE'; playTone(400, 0.05, 'sine'); } 
+    else if (gameState === 'STORY_INTRO') { gameState = 'CHARACTER_SELECT'; playTone(500, 0.05, 'square'); } 
+    else if (gameState === 'CHARACTER_SELECT') { gameState = 'HERO_INTRO'; cutsceneTimer = 0; cutsceneStep = 0; playTone(700, 0.1, 'square'); } 
+    else if (gameState === 'HERO_INTRO') { gameState = 'INTRO_CUTSCENE'; cutsceneTimer = 0; playTone(700, 0.1, 'square'); }
+    else if (gameState === 'INTRO_CUTSCENE') { startStage(currentStage); } 
+    else if (gameState === 'STAGE_CLEAR') {
+        if (currentStage >= 10) { gameState = 'ENDING_CINEMATIC'; cutsceneTimer = 0; cutsceneStep = 0; }
+        else if (currentStage === 6) { gameState = 'MECH_TRANSITION'; cutsceneTimer = 0; cutsceneStep = 0; }
+        else prepareUpgradeChoices();
+    } else if (gameState === 'MECH_TRANSITION') {
+        prepareUpgradeChoices();
+    } else if (gameState === 'ENDING_CINEMATIC') {
+        gameState = 'FINAL_CREDITS'; cutsceneTimer = 0;
+    } else if (gameState === 'FINAL_CREDITS') {
+        gameState = 'VICTORY';
+    } else if (gameState === 'UPGRADE_SELECT') {
+        upgradeChoices[upgradeSelection].apply();
+        currentStage++;
+        gameState = 'INTRO_CUTSCENE';
+        cutsceneTimer = 0;
+        playTone(980, 0.18, 'sine');
+    } else if (gameState === 'GAME_OVER' || gameState === 'VICTORY') {
+        gameState = 'INSERT_COIN'; startPanel.classList.remove('hidden');
+    }
+}
+
+function startStage(stageNum) {
+    isMorphActive = !!stages[stageNum - 1].mech; isMechMode = !!stages[stageNum - 1].mech;
+    playerX = 80; cameraX = 0; cameraMaxX = 0; playerY = FLOOR_Y; playerVy = 0;
+    playerMaxHp = selectedCharacter.hp + runUpgrades.hp + (isMorphActive ? 60 : 0); playerHp = playerMaxHp;
+    bombs = (isMorphActive ? 2 : 1) + runUpgrades.bombs; mechPower = isMechMode ? 35 : 0; comboCount = 0; playerInvulnTimer = 0; grappledEnemy = null;
+    attackCooldown = 0; attackAnimTimer = 0; attackTypeUsed = '';
+    dashRequested = 0; dashTimer = 0; dashCooldown = 0; isDashing = false;
+    
+    enemies = []; projectiles = []; hitSparks = []; floatingTexts = []; lootItems = []; destructibles = []; platforms = []; mechHazards = [];
+    mechHazardTimer = isMechMode ? 150 : 0;
+    const wavePattern = stageWavePatterns[stageNum - 1];
+    stageLength = 1250 + wavePattern.length * 300 + stageNum * 90; stageWaves = [];
+    
+    for (let i = 1; i <= wavePattern.length; i++) {
+        let wx = i * (stageLength / (wavePattern.length + 1));
+        stageWaves.push({ triggerX: wx, cleared: false, active: false, count: wavePattern[i - 1], index: i - 1 });
+        destructibles.push({ x: wx - 120, y: FLOOR_Y, w: 58, h: 48, type: stageSetPieces[stageNum - 1], hp: 28 + stageNum * 3, alive: true });
+        destructibles.push({ x: wx + 80, y: FLOOR_Y, w: 30, h: 30, type: 'crate', hp: 10, alive: true });
+    }
+    const platformCount = isMechMode ? 3 : 5;
+    for (let i = 1; i <= platformCount; i++) {
+        platforms.push({
+            x: i * (stageLength / (platformCount + 1)) + (i % 2 ? 45 : -35),
+            y: FLOOR_Y - (isMechMode ? 72 + (i % 2) * 40 : 58 + (i % 3) * 28),
+            w: isMechMode ? 125 : 78,
+            h: isMechMode ? 12 : 9,
+            style: stageSetPieces[stageNum - 1]
+        });
+    }
+    
+    activeWave = null; bossObj = null; gameState = 'PLAYING'; isPaused = false;
+    midEvent = null; midEventCompleted = false;
+    playTone(440, 0.2, 'square');
+}
+
+function spawnEnemies(count, waveNumber = 0) {
+    const stageData = stages[currentStage - 1];
+    for (let i = 0; i < count; i++) {
+        const mobName = stageData.mobs[Math.floor(Math.random() * stageData.mobs.length)];
+        const stats = getMobStats(mobName);
+        const ambushStage = [2, 5, 6, 9].includes(currentStage);
+        const fromLeft = ambushStage && waveNumber > 0 && i % 3 === 0;
+        const spawnX = fromLeft ? cameraX - 35 - i * 18 : cameraX + WIDTH + 20 + i * (isMechMode ? 58 : 40);
+        enemies.push({
+            x: spawnX, y: stats.flying ? FLOOR_Y - 70 - Math.random() * 40 : FLOOR_Y, vy: 0,
+            name: mobName, type: stats.type, flying: stats.flying, hp: stats.hp, maxHp: stats.hp,
+            hitFlash: 0, stunTimer: 0, state: 'chase', stateTimer: 0, knockdown: false, isThrown: false,
+            armor: isMechMode ? 2 + ((i + waveNumber) % 2) : 0,
+            maxArmor: isMechMode ? 3 : 0
+        });
+    }
+}
+
+function spawnHitSpark(x, y) {
+    for (let i = 0; i < 6; i++) hitSparks.push({ x, y, vx: (Math.random() - 0.5)*8, vy: (Math.random() - 0.5)*8, life: 8 + Math.random()*5, color: ['#ff0', '#fff', '#0ff'][Math.floor(Math.random()*3)] });
+}
+function spawnFloatingText(x, y, text, color) { floatingTexts.push({ x, y, text, color, life: 30, vy: -1.5 }); }
+function spawnLoot(x, y) { lootItems.push({ x, y: y - 20, vy: -6, type: Math.random() > 0.5 ? 'hp' : 'energy', life: 300 }); }
+
+function getFloorForX(x, actorY = FLOOR_Y) {
+    let tFloor = FLOOR_Y;
+    destructibles.forEach(obj => {
+        const top = obj.y - obj.h;
+        if (obj.alive && actorY <= top + 12 && x > obj.x - obj.w/2 - 10 && x < obj.x + obj.w/2 + 10) tFloor = Math.min(tFloor, top);
+    });
+    platforms.forEach(platform => {
+        if (actorY <= platform.y + 12 && x > platform.x - platform.w/2 && x < platform.x + platform.w/2) tFloor = Math.min(tFloor, platform.y);
+    });
+    return tFloor;
+}
+
+function isPlayerCrouching() {
+    return (keys.Crouch || keys.Down) && playerY === getFloorForX(playerX, playerY);
+}
+
+function projectileHitsPlayer(p) {
+    const crouched = isPlayerCrouching();
+    const centerY = playerY - (crouched ? (isMechMode ? 28 : 10) : (isMechMode ? 58 : 30));
+    const halfHeight = crouched ? (isMechMode ? 25 : 13) : (isMechMode ? 58 : 30);
+    const halfWidth = isMechMode ? 42 : 21;
+    return Math.abs(p.x - playerX) < halfWidth + (p.radius || 4) &&
+           Math.abs(p.y - centerY) < halfHeight + (p.radius || 4);
+}
+
+function attemptGrab() {
+    if (grappledEnemy || isMechMode || playerY !== getFloorForX(playerX, playerY)) return;
+    const target = enemies
+        .filter(en => en.hp > 0 && !en.flying && !en.knockdown && Math.abs(en.y - playerY) < 16)
+        .sort((a, b) => Math.abs(a.x - playerX) - Math.abs(b.x - playerX))[0];
+    if (!target || Math.abs(target.x - playerX) > 38) {
+        spawnFloatingText(playerX, playerY - 40, 'NO TARGET', '#999');
+        return;
+    }
+    grappledEnemy = target;
+    grappleTimer = 120;
+    target.stunTimer = 120;
+    isFacingRight = target.x >= playerX;
+    attackTypeUsed = 'Grab';
+    attackAnimTimer = 8;
+    playTone(190, 0.08, 'square', 0.04);
+}
+
+function processDashSlideKick() {
+    enemies.forEach(en => {
+        if (en.hp <= 0 || en.lastDashSerial === dashSerial) return;
+        if (Math.abs(en.x - playerX) < (isMechMode ? 75 : 45) && Math.abs(en.y - playerY) < 42) {
+            en.lastDashSerial = dashSerial;
+            en.hp -= selectedCharacter.atk * 1.35 * runUpgrades.damage;
+            en.vx = dashRequestedDirection * (isMechMode ? 15 : 11);
+            en.vy = -5;
+            en.isThrown = true;
+            en.knockdown = true;
+            en.stunTimer = 45;
+            en.hitFlash = 6;
+            score += 120;
+            spawnHitSpark(en.x, en.y - 20);
+            spawnFloatingText(en.x, en.y - 42, 'SLIDE KICK!', '#00ffcc');
+            screenShake = isMechMode ? 8 : 4;
+            playTone(150, 0.1, 'sawtooth');
+        }
+    });
+    if (bossObj && bossObj.lastDashSerial !== dashSerial &&
+        Math.abs(bossObj.x - playerX) < (isMechMode ? 100 : 55) &&
+        Math.abs(bossObj.y - playerY) < 55) {
+        bossObj.lastDashSerial = dashSerial;
+        bossObj.hp -= selectedCharacter.atk * runUpgrades.damage;
+        bossObj.x += dashRequestedDirection * 12;
+        bossObj.hitFlash = 6;
+        bossObj.state = 'stun';
+        bossObj.stateTimer = 18;
+        spawnHitSpark(bossObj.x, bossObj.y - 30);
+    }
+}
+
+function startMidEvent() {
+    const def = midEventDefs[currentStage - 1];
+    midEvent = { ...def, active:true, progress:0, timer: def.type === 'survive' ? 520 : def.type === 'defend' ? 460 : def.type === 'sprint' ? 480 : 0, startX:playerX };
+    banner = `MIDPOINT: ${def.title}`; bannerTime = 150;
+    if (def.type === 'destroy' || def.type === 'hack') {
+        for (let i = 0; i < def.count; i++) {
+            const objectiveX = cameraX + 145 + (def.count === 1 ? 0 : i * ((WIDTH - 235) / (def.count - 1)));
+            destructibles.push({
+                x: objectiveX, y:FLOOR_Y,
+                w:isMechMode ? 72 : 48, h:isMechMode ? 66 : 46,
+                type:def.object, hp:def.type === 'hack' ? 9999 : 45 + currentStage * 12,
+                alive:true, midObjective:true, hackProgress:0
+            });
+        }
+    } else if (def.type === 'traverse') {
+        midEvent.goalX = playerX + 350;
+        for (let i = 0; i < 5; i++) platforms.push({x:playerX+65+i*70,y:FLOOR_Y-55-(i%2)*42,w:58,h:8,style:'stump',midPlatform:true});
+    } else if (def.type === 'sprint') {
+        midEvent.goalX = playerX + 390;
+    } else if (def.type === 'defend') {
+        destructibles.push({x:playerX+150,y:FLOOR_Y,w:48,h:72,type:'beacon',hp:9999,alive:true,midObjective:true});
+    } else if (def.type === 'survive') {
+        mechHazardTimer = 25;
+    }
+    playTone(320, .3, 'square', .06);
+}
+
+function completeMidEvent() {
+    if (!midEvent || !midEvent.active) return;
+    midEvent.active = false; midEventCompleted = true;
+    score += 1500 + currentStage * 250;
+    playerHp = Math.min(playerMaxHp, playerHp + 25);
+    playerEnergy = Math.min(100, playerEnergy + 20);
+    banner = 'MIDPOINT COMPLETE!'; bannerTime = 150; goFlashTimer = 110;
+    playTone(880,.18,'sine'); setTimeout(()=>playTone(1180,.22,'sine'),120);
+}
+
+function handleMidEventGrab() {
+    if (!midEvent || !midEvent.active || midEvent.type !== 'hack') return false;
+    const target = destructibles.find(obj => obj.midObjective && obj.alive && Math.abs(obj.x-playerX)<48);
+    if (!target) return false;
+    target.hackProgress++;
+    spawnFloatingText(target.x,target.y-target.h,`LINK ${target.hackProgress}/3`,'#00ffcc');
+    playTone(480+target.hackProgress*120,.08,'square',.04);
+    if (target.hackProgress >= 3) { target.alive=false; midEvent.progress++; spawnHitSpark(target.x,target.y-30); }
+    return true;
+}
+
+function updateMidEvent() {
+    if (!midEvent || !midEvent.active) return;
+    if (midEvent.type === 'destroy' || midEvent.type === 'hack') {
+        const remaining = destructibles.filter(obj => obj.midObjective && obj.alive).length;
+        midEvent.progress = midEvent.count - remaining;
+        if (remaining === 0) completeMidEvent();
+    } else if (midEvent.type === 'traverse') {
+        if (playerX >= midEvent.goalX) completeMidEvent();
+    } else if (midEvent.type === 'sprint') {
+        midEvent.timer--; playerX = Math.max(cameraX+25, playerX-0.7);
+        if (playerX >= midEvent.goalX) completeMidEvent();
+        else if (midEvent.timer <= 0) { midEvent.timer=300; playerHp=Math.max(1,playerHp-25); spawnFloatingText(playerX,playerY-50,'THE STORM CAUGHT YOU!','#ff8055'); }
+    } else if (midEvent.type === 'defend') {
+        midEvent.timer--;
+        if (midEvent.timer > 0 && midEvent.timer % 100 === 0) spawnEnemies(2,5);
+        if (midEvent.timer <= 0 && enemies.length === 0) completeMidEvent();
+    } else if (midEvent.type === 'survive') {
+        midEvent.timer--; mechHazardTimer = Math.min(mechHazardTimer, 135);
+        if (midEvent.timer <= 0) completeMidEvent();
+    }
+}
+
+// ---------------------------------------------
+// COMBAT ENGINE
+// ---------------------------------------------
+
+function executeThrow(dir) {
+    attackCooldown = 20; attackAnimTimer = 16;
+    playTone(220, 0.1, 'sawtooth', 0.05);
+    
+    if (dir === 'up') {
+        attackTypeUsed = 'Punch Up';
+        grappledEnemy.vy = -14; 
+        grappledEnemy.vx = 0;
+        grappledEnemy.isThrown = false;
+        grappledEnemy.juggleCount = 0;
+        spawnFloatingText(playerX, playerY - 40, 'UP TOSS!', '#ff0');
+    } else if (dir === 'side') {
+        attackTypeUsed = 'Punch';
+        grappledEnemy.vy = -5;
+        grappledEnemy.vx = isFacingRight ? 12 : -12;
+        grappledEnemy.isThrown = true; // Makes them a bowling ball
+        spawnFloatingText(playerX, playerY - 40, 'HIP TOSS!', '#ff0');
+    } else {
+        attackTypeUsed = 'Punch';
+        grappledEnemy.hp -= selectedCharacter.atk * 1.5 * runUpgrades.damage;
+        grappledEnemy.hitFlash = 6;
+        spawnHitSpark(grappledEnemy.x, grappledEnemy.y - 20);
+        spawnFloatingText(grappledEnemy.x, grappledEnemy.y - 40, 'PUMMEL', '#fff');
+        if (grappledEnemy.hp <= 0) { grappledEnemy.vy = -6; grappledEnemy.knockdown = true; grappledEnemy = null; return; }
+        grappleTimer = 20; // Keep grappling
+        return; 
+    }
+    
+    grappledEnemy.hp -= selectedCharacter.atk * 2.0 * runUpgrades.damage;
+    grappledEnemy.knockdown = true;
+    grappledEnemy.stunTimer = 45;
+    grappledEnemy = null;
+    score += 150;
+}
+
+function executeAttack(moveType, isJump) {
+    attackAnimTimer = 14;
+    let reach = isMechMode ? 120 : 55;
+    let baseDamage = selectedCharacter.atk * runUpgrades.damage;
+    
+    if (isMorphActive && !isMechMode) {
+        if (selectedCharacter.weapon === 'Power Lance') reach = 90;
+        else if (selectedCharacter.weapon === 'Heavy Sword') { reach = 75; baseDamage *= 1.3; attackAnimTimer = 20; attackCooldown = 22; }
+        else if (selectedCharacter.weapon === 'Twin Daggers') { reach = 60; attackAnimTimer = 10; attackCooldown = 12; }
+        else reach = 70;
+    }
+
+    const attackX = isFacingRight ? playerX + reach/2 : playerX - reach/2;
+    let attackType = moveType;
+    let soundFreq = 340;
+    let attackYMin = playerY - 60;
+    let attackYMax = playerY + 15;
+
+    if (isMechMode && isJump) {
+        baseDamage *= 3.2; attackType = 'Mech Stomp'; soundFreq = 90; reach = 145;
+        screenShake = 10; attackYMin -= 65; attackYMax += 35;
+    } else if (isMechMode) {
+        baseDamage *= 2.5; attackType = 'Mech Punch'; soundFreq = 200; screenShake = 2; attackYMin -= 40;
+    } else if (moveType === 'Dash Attack') {
+        baseDamage *= 1.5; soundFreq = 280; reach += 20; playerX += isFacingRight ? 30 : -30;
+    } else if (keys.Down && !isJump) {
+        baseDamage *= 1.3; attackType = 'Low Attack'; soundFreq = 280; attackYMin = playerY - 20; attackYMax = playerY + 25;
+    } else if (keys.Up && !isJump) {
+        baseDamage *= 1.2; attackType = 'Punch Up'; soundFreq = 360; attackYMin -= 70; 
+    } else if (isJump) {
+        baseDamage *= 1.5; attackType = 'Jump Attack'; soundFreq = 260; attackYMin -= 40;
+    } else {
+        comboCount++; comboTimer = 35;
+        if (comboCount > 3) comboCount = 1;
+        if (comboCount === 3) { baseDamage *= 1.6; attackType = 'Combo Finisher'; }
+    }
+
+    attackTypeUsed = attackType;
+    if (attackCooldown === 0) attackCooldown = attackAnimTimer + 2;
+    playTone(soundFreq, 0.08, 'sawtooth', 0.05);
+
+    let didHit = false;
+
+    // Process Hitboxes
+    enemies.forEach(en => {
+        const airborneKnockdown = en.knockdown && en.y < getFloorForX(en.x, en.y) - 8;
+        if (en.hp <= 0 || (en.knockdown && !airborneKnockdown && attackType !== 'Low Attack')) return;
+        if (Math.abs(attackX - en.x) < reach && en.y >= attackYMin && en.y <= attackYMax) {
+            let dealtDamage = baseDamage;
+            if (isMechMode && en.armor > 0) {
+                const armorDamage = attackType === 'Mech Stomp' ? 2 : 1;
+                en.armor = Math.max(0, en.armor - armorDamage);
+                dealtDamage *= attackType === 'Mech Stomp' ? .8 : .35;
+                spawnFloatingText(en.x, en.y - 72, en.armor > 0 ? `ARMOR ${en.armor}` : 'ARMOR BREAK!', '#65e8ff');
+                if (en.armor === 0) { en.stunTimer = 55; screenShake = 9; }
+            }
+            en.hp -= dealtDamage; 
+            en.x += isFacingRight ? (comboCount===3 || moveType==='Dash Attack' ? 40 : 12) : (comboCount===3 || moveType==='Dash Attack' ? -40 : -12); 
+            en.hitFlash = 6;
+            
+            if (en.hp <= 0) { en.vy = -6; en.knockdown = true; } 
+            else if (attackType === 'Punch Up') {
+                en.vy = -10.5;
+                en.knockdown = true;
+                en.stunTimer = 45;
+                en.juggleCount = (en.juggleCount || 0) + 1;
+                spawnFloatingText(en.x, en.y - 48, `${en.juggleCount + 1}x JUGGLE!`, '#00ffcc');
+            }
+            else if (comboCount === 3 || isJump || moveType==='Dash Attack') { en.vy = -5; en.state = 'hit'; en.knockdown = true; en.stunTimer = 40; } 
+            else { en.stunTimer = 18; }
+            
+            score += 120; mechPower = Math.min(100, mechPower + 5);
+            spawnHitSpark(en.x, en.y - 15); spawnFloatingText(en.x, en.y - 40, Math.floor(dealtDamage), '#fff');
+            playTone(150, 0.1, 'sawtooth'); didHit = true;
+        }
+    });
+
+    destructibles.forEach(obj => {
+        if (obj.alive && Math.abs(attackX - obj.x) < reach + obj.w/2 && playerY >= obj.y - obj.h - 10) {
+            obj.hp -= baseDamage;
+            spawnHitSpark(obj.x, obj.y - 15); spawnFloatingText(obj.x, obj.y - 30, Math.floor(baseDamage), '#ff0');
+            playTone(200, 0.1, 'sawtooth');
+            if (obj.hp <= 0) { obj.alive = false; score += 250; spawnLoot(obj.x, obj.y); }
+            didHit = true;
+        }
+    });
+
+    if (bossObj && Math.abs(attackX - bossObj.x) < reach + 40 && bossObj.y >= attackYMin && bossObj.y <= attackYMax + 40) {
+        bossObj.hp -= baseDamage * 1.2; bossObj.x += isFacingRight ? 5 : -5; bossObj.hitFlash = 6;
+        spawnFloatingText(bossObj.x, bossObj.y - 60, Math.floor(baseDamage * 1.2), '#f0f');
+        if (isJump || comboCount === 3 || attackType === 'Mech Punch' || moveType==='Dash Attack') { bossObj.state = 'stun'; bossObj.stateTimer = 25; }
+        score += 350; mechPower = Math.min(100, mechPower + 10);
+        spawnHitSpark(bossObj.x, bossObj.y - 30); screenShake = isMechMode ? 8 : 4; playTone(120, 0.1, 'sawtooth'); didHit = true;
+    }
+
+    // Enemy shots are deliberately destructible. This gives the player a
+    // skill-based defensive answer in addition to jumping and dashing.
+    projectiles.forEach(p => {
+        if (!p.isEnemy || p.life <= 0) return;
+        if (Math.abs(attackX - p.x) < reach && p.y >= attackYMin && p.y <= attackYMax) {
+            p.life = 0;
+            score += 40;
+            spawnHitSpark(p.x, p.y);
+            spawnFloatingText(p.x, p.y - 10, 'DEFLECT!', '#00ffcc');
+            playTone(760, 0.07, 'square', 0.04);
+            didHit = true;
+        }
+    });
+
+    if (didHit) hitFreezeTimer = 5; 
+}
+
+function triggerBomb() {
+    if (bombs <= 0 || gameState !== 'PLAYING' || !isMorphActive) return;
+    if (isMechMode) {
+        bombs--;
+        attackAnimTimer = 24; attackTypeUsed = 'Missile Barrage';
+        const targets = enemies.filter(en => en.hp > 0);
+        if (bossObj && bossObj.hp > 0) targets.push(bossObj);
+        for (let i = 0; i < 6; i++) {
+            const target = targets.length ? targets[i % targets.length] : null;
+            projectiles.push({
+                x: playerX + (isFacingRight ? 28 : -28), y: playerY - 80 + i * 7,
+                vx: isFacingRight ? 4 + i * .2 : -4 - i * .2, vy: -3 + i * .65,
+                life: 180, isEnemy: false, damage: 55 + currentStage * 4,
+                color: '#ffb22e', missile: true, target, radius: 7
+            });
+        }
+        screenShake = 8; playTone(110, 0.38, 'sawtooth', 0.12);
+        spawnFloatingText(playerX, playerY - 110, 'MISSILE BARRAGE!', '#ffd700');
+    } else {
+        bombs--; bombFlash = 25; screenShake = 20; playTone(100, 0.6, 'sawtooth', 0.2); 
+        enemies.forEach(en => {
+            en.hp -= 80 + currentStage * 10; en.x += (en.x > playerX ? 40 : -40);
+            en.vy = -8; en.knockdown = true; en.stunTimer = 60;
+            spawnHitSpark(en.x, en.y); spawnFloatingText(en.x, en.y - 40, 'BOMB!', '#f00');
+        });
+        if (bossObj) {
+            bossObj.hp -= 120 + currentStage * 20; bossObj.state = 'stun'; bossObj.stateTimer = 60;
+            spawnHitSpark(bossObj.x, bossObj.y); spawnFloatingText(bossObj.x, bossObj.y - 60, 'BOMB!', '#f00');
+        }
+        destructibles.forEach(obj => {
+            if (obj.x > cameraX && obj.x < cameraX + WIDTH) { obj.hp -= 100; if(obj.hp <= 0) { obj.alive = false; spawnLoot(obj.x, obj.y); } }
+        });
+    }
+}
+
+function fireMechCannon() {
+    if (!isMechMode || attackCooldown > 0) return;
+    if (mechPower >= 100) {
+        triggerMechSpecial();
+        return;
+    }
+    if (mechPower < 20) {
+        spawnFloatingText(playerX, playerY - 100, 'CANNON CHARGING', '#a855f7');
+        playTone(120, 0.08, 'square', 0.03);
+        return;
+    }
+    mechPower -= 20;
+    attackAnimTimer = 18; attackCooldown = 20; attackTypeUsed = 'Mech Cannon';
+    projectiles.push({
+        x: playerX + (isFacingRight ? 45 : -45), y: playerY - 72,
+        vx: isFacingRight ? 10 : -10, vy: 0, life: 100, isEnemy: false,
+        damage: selectedCharacter.atk * 4.2 * runUpgrades.damage,
+        color: '#00f5ff', radius: 11, pierce: 3, mechShot: true
+    });
+    screenShake = 5; playTone(95, 0.28, 'sawtooth', 0.11);
+}
+
+function triggerMechSpecial() {
+    if (isMechMode && mechPower >= 100) {
+        mechPower = 0; bombFlash = 30; screenShake = 30; attackAnimTimer = 35; attackTypeUsed = 'Mech Special'; playTone(80, 0.8, 'sawtooth', 0.3);
+        enemies.forEach(en => { en.hp = 0; en.vy = -6; en.knockdown = true; spawnHitSpark(en.x, en.y); });
+        if (bossObj) {
+            bossObj.hp -= 400; bossObj.state = 'stun'; bossObj.stateTimer = 80;
+            spawnHitSpark(bossObj.x, bossObj.y); spawnFloatingText(bossObj.x, bossObj.y - 80, 'MEGA BLASTER!', '#0ff');
+        }
+    }
+}
+
+function triggerTransform() {
+    if (gameState === 'PLAYING' && playerEnergy >= 100 && !isMorphActive && currentStage <= 6) {
+        isMorphActive = true; playerEnergy = 0; playerMaxHp += 60; playerHp = playerMaxHp;
+        screenShake = 10; bombFlash = 10; bombs++; playTone(880, 0.3, 'square', 0.08);
+    }
+}
+
+function update(dt) {
+    if (keysPressed.Pause) { isPaused = !isPaused; keysPressed.Pause = false; playTone(600, 0.1, 'sine'); }
+    if (isPaused) return;
+
+    if (hitFreezeTimer > 0) { hitFreezeTimer--; return; }
+    if (screenShake > 0) screenShake--;
+    if (bombFlash > 0) bombFlash--;
+    if (goFlashTimer > 0) goFlashTimer--;
+    if (bannerTime > 0) bannerTime--;
+    if (playerInvulnTimer > 0) playerInvulnTimer--;
+    if (comboTimer > 0) { comboTimer--; if (comboTimer === 0) comboCount = 0; }
+
+    if (gameState === 'BOOT') {
+        bootTimer += dt;
+        if (bootTimer > 1.2) { bootStep++; bootTimer = 0; if (bootStep > 3) gameState = 'TITLE'; else playTone(220 + bootStep * 110, 0.1, 'square'); }
+    } else if (gameState === 'STORY_INTRO') {
+        cutsceneTimer += dt;
+        if (cutsceneTimer > 2.0 && cutsceneStep === 0) { cutsceneStep = 1; playTone(300, 0.1, 'sawtooth'); }
+        if (cutsceneTimer > 4.5 && cutsceneStep === 1) { cutsceneStep = 2; playTone(350, 0.1, 'sawtooth'); }
+        if (cutsceneTimer > 7.0 && cutsceneStep === 2) { cutsceneStep = 3; playTone(450, 0.1, 'sawtooth'); }
+        if (cutsceneTimer > 9.5) { gameState = 'CHARACTER_SELECT'; cutsceneTimer = 0; }
+    } else if (gameState === 'HERO_INTRO') {
+        cutsceneTimer += dt;
+        if (cutsceneTimer > 6.5) { gameState = 'INTRO_CUTSCENE'; cutsceneTimer = 0; }
+    } else if (gameState === 'MECH_TRANSITION') {
+        cutsceneTimer += dt;
+        if (cutsceneTimer > 12.0) prepareUpgradeChoices();
+    } else if (gameState === 'ENDING_CINEMATIC') {
+        cutsceneTimer += dt;
+        if (cutsceneTimer > 13.0) { gameState = 'FINAL_CREDITS'; cutsceneTimer = 0; }
+    } else if (gameState === 'FINAL_CREDITS') {
+        cutsceneTimer += dt;
+        if (cutsceneTimer > 18.0) gameState = 'VICTORY';
+    } else if (gameState === 'TITLE') {
+        if (keys.Up) { menuSelection = (menuSelection - 1 + 5) % 5; keys.Up = false; playTone(500, 0.04, 'sine'); }
+        if (keys.Down) { menuSelection = (menuSelection + 1) % 5; keys.Down = false; playTone(500, 0.04, 'sine'); }
+    } else if (gameState === 'HOW_TO_PLAY') {
+        const optionCount = bindingActions.length + 2;
+        if (!awaitingBinding && keys.Up) { bindingSelection = (bindingSelection - 1 + optionCount) % optionCount; keys.Up = false; playTone(500, 0.04, 'sine'); }
+        if (!awaitingBinding && keys.Down) { bindingSelection = (bindingSelection + 1) % optionCount; keys.Down = false; playTone(500, 0.04, 'sine'); }
+    } else if (gameState === 'CHARACTER_SELECT') {
+        if (keys.Left) { charSelection = (charSelection - 1 + 5) % 5; selectedCharacter = characters[charSelection]; keys.Left = false; playTone(550, 0.04, 'sine'); }
+        if (keys.Right) { charSelection = (charSelection + 1) % 5; selectedCharacter = characters[charSelection]; keys.Right = false; playTone(600, 0.04, 'sine'); }
+    } else if (gameState === 'UPGRADE_SELECT') {
+        if (keys.Left) { upgradeSelection = (upgradeSelection + 2) % 3; keys.Left = false; playTone(550, 0.04, 'sine'); }
+        if (keys.Right) { upgradeSelection = (upgradeSelection + 1) % 3; keys.Right = false; playTone(600, 0.04, 'sine'); }
+    } else if (gameState === 'INTRO_CUTSCENE') {
+        cutsceneTimer += dt;
+        if (cutsceneTimer > 2.5) { startStage(currentStage); }
+    } else if (gameState === 'PLAYING') {
+        
+        const currentFloor = getFloorForX(playerX, playerY);
+        let stickX = 0, isWalking = false;
+
+        // Wave Logic
+        activeWave = stageWaves.find(w => w.active && !w.cleared);
+        if (midEvent && midEvent.active) {
+            if (!['traverse','sprint'].includes(midEvent.type)) cameraMaxX = cameraX;
+        } else if (activeWave) {
+            cameraMaxX = cameraX;
+            if (playerX > cameraMaxX + WIDTH - 20) playerX = cameraMaxX + WIDTH - 20;
+            if (enemies.length === 0) {
+                activeWave.cleared = true; activeWave.active = false;
+                goFlashTimer = 100; playTone(800, 0.15, 'sine');
+            }
+        } else {
+            if (!midEventCompleted && playerX > stageLength * .47 && enemies.length === 0) startMidEvent();
+            else {
+                let nextWave = stageWaves.find(w => !w.active && !w.cleared && playerX > w.triggerX);
+                if (nextWave) { nextWave.active = true; spawnEnemies(nextWave.count, nextWave.index); playTone(300, 0.2, 'sawtooth'); }
+            }
+        }
+        updateMidEvent();
+
+        // Camera Scroll
+        const midLocksCamera = midEvent && midEvent.active && !['traverse','sprint'].includes(midEvent.type);
+        if (!activeWave && !midLocksCamera && playerX > cameraX + WIDTH * 0.55 && cameraX < stageLength) {
+            cameraX = playerX - WIDTH * 0.55;
+            cameraMaxX = cameraX;
+        }
+
+        // Grapple Logic — grabbing is deliberate with G instead of happening
+        // accidentally whenever the player walks through an enemy.
+        if (grappledEnemy) {
+            grappleTimer--;
+            if (grappleTimer <= 0 || grappledEnemy.hp <= 0) grappledEnemy = null;
+            else { grappledEnemy.x = isFacingRight ? playerX + 20 : playerX - 20; grappledEnemy.y = playerY; }
+        }
+
+        // Movement
+        const isCrouching = (keys.Crouch || keys.Down) && playerY === currentFloor;
+        const canMove = !isCrouching && !grappledEnemy && (attackAnimTimer === 0 || playerY < currentFloor);
+        let speed = (isMechMode ? 2.5 : selectedCharacter.spd) * runUpgrades.speed;
+        if (dashCooldown > 0) dashCooldown--;
+    if (dashRequested && dashCooldown === 0 && canMove && playerY === currentFloor) {
+            dashRequestedDirection = dashRequested;
+            dashRequested = 0;
+            dashTimer = isMechMode ? 8 : 11;
+            dashCooldown = 30;
+            dashSerial++;
+            isDashing = true;
+            isFacingRight = dashRequestedDirection > 0;
+            attackTypeUsed = 'Slide Kick';
+            attackAnimTimer = dashTimer;
+            playerInvulnTimer = Math.max(playerInvulnTimer, dashTimer + 2);
+            playTone(260, 0.12, 'sawtooth', 0.04);
+        } else {
+            dashRequested = 0;
+        }
+
+        if (dashTimer > 0) {
+            const dashSpeed = (isMechMode ? 9 : 12) * runUpgrades.speed;
+            const rightBound = (activeWave || midLocksCamera) ? cameraMaxX + WIDTH - 20 : Math.min(cameraMaxX + WIDTH - 20, stageLength + WIDTH);
+            playerX = Math.max(cameraMaxX + 15, Math.min(rightBound, playerX + dashRequestedDirection * dashSpeed));
+            stickX = dashRequestedDirection;
+            isWalking = true;
+            processDashSlideKick();
+            dashTimer--;
+            if (dashTimer <= 0) isDashing = false;
+        } else if (canMove) {
+            if (keys.Left) { playerX = Math.max(cameraMaxX + 15, playerX - speed); stickX = -1; isFacingRight = false; isWalking = true; }
+            if (keys.Right) { 
+                const rightBound = (activeWave || midLocksCamera) ? cameraMaxX + WIDTH - 20 : Math.min(cameraMaxX + WIDTH - 20, stageLength + WIDTH);
+                playerX = Math.min(rightBound, playerX + speed); stickX = 1; isFacingRight = true; isWalking = true; 
+            }
+        }
+
+        if (isWalking && playerY === currentFloor) walkAnimTimer++; else walkAnimTimer = 0;
+        joystickBall.style.transform = `translate(${stickX * 10}px, 0px)`;
+
+        // Jumping
+        playerY += playerVy;
+        if (playerY < currentFloor) {
+            playerVy += 0.8; 
+        } else if (playerVy > 0) {
+            playerY = currentFloor; playerVy = 0;
+            if (attackTypeUsed.includes('Jump') || attackTypeUsed.includes('Drop')) attackAnimTimer = 0; 
+        }
+
+        // Actions
+        if (keysPressed.Jump) {
+            if (grappledEnemy) grappledEnemy = null; // Escape grapple
+            else if (keys.Down && currentFloor < FLOOR_Y) { playerY += 5; playerVy = 2; attackTypeUsed = 'Drop Down'; attackAnimTimer = 10; } 
+            else if (playerY === currentFloor && !keys.Down && attackAnimTimer === 0) { playerVy = -12.5; playTone(480, 0.08, 'sine'); } 
+            keysPressed.Jump = false;
+        }
+
+        if (keysPressed.Grab) {
+            if (!handleMidEventGrab() && !grappledEnemy && attackCooldown === 0) attemptGrab();
+            keysPressed.Grab = false;
+        }
+
+        if (keysPressed.Attack) {
+            if (attackCooldown === 0) {
+                if (grappledEnemy) {
+                    if (keys.Up) executeThrow('up');
+                    else if (keys.Left || keys.Right) executeThrow('side');
+                    else executeThrow('pummel');
+                } else {
+                    executeAttack('Punch', playerY < currentFloor - 5);
+                }
+            }
+            keysPressed.Attack = false;
+        }
+        
+        if (keysPressed.Special) {
+            if (attackCooldown === 0 && !isMechMode) {
+                if (isMorphActive) {
+                    // Unique Ranger special/ranged
+                    if (selectedCharacter.weapon === 'Energy Bow' || selectedCharacter.weapon === 'Power Lance') {
+                        projectiles.push({ x: isFacingRight ? playerX + 20 : playerX - 20, y: playerY - 30, vx: isFacingRight ? 12 : -12, life: 60, isEnemy: false, damage: selectedCharacter.atk * 0.8 * runUpgrades.damage });
+                        attackAnimTimer = 12; attackCooldown = 15; attackTypeUsed = 'Ranged'; playTone(600, 0.1, 'sine');
+                    } else {
+                        executeAttack('Punch', playerY < currentFloor - 5); // Heavy attack
+                    }
+                } else {
+                    executeAttack('Kick', playerY < currentFloor - 5); // Civilian kick fallback
+                }
+            } else if (isMechMode) {
+                fireMechCannon(); 
+            }
+            keysPressed.Special = false;
+        }
+
+        if (keysPressed.Transform) { triggerTransform(); keysPressed.Transform = false; }
+        if (keysPressed.Bomb) { triggerBomb(); keysPressed.Bomb = false; }
+
+        if (attackCooldown > 0) attackCooldown--;
+        if (attackAnimTimer > 0) attackAnimTimer--;
+        updateMechHazards();
+
+        // Projectiles
+        projectiles.forEach(p => { 
+            if (p.missile && p.target && p.target.hp > 0) {
+                const dx = p.target.x - p.x, dy = (p.target.y - 45) - p.y;
+                const length = Math.max(1, Math.hypot(dx, dy));
+                p.vx = p.vx * .88 + dx / length * 1.05;
+                p.vy = p.vy * .88 + dy / length * 1.05;
+            }
+            p.x += p.vx; p.y += p.vy || 0; p.life--; 
+            if(!p.isEnemy) {
+                enemies.forEach(en => {
+                    if (p.hitTargets && p.hitTargets.includes(en)) return;
+                    if (en.hp > 0 && Math.abs(p.x - en.x) < 30 && Math.abs(p.y - en.y) < 40) {
+                        (p.hitTargets ||= []).push(en);
+                        let shotDamage = p.damage;
+                        if (en.armor > 0) {
+                            if (p.mechShot) {
+                                en.armor = 0; en.stunTimer = 65; shotDamage *= 1.15;
+                                spawnFloatingText(en.x,en.y-72,'CANNON BREAK!','#00f5ff');
+                            } else if (p.missile) {
+                                en.armor = Math.max(0,en.armor-1); shotDamage *= .75;
+                                spawnFloatingText(en.x,en.y-72,en.armor?'MISSILE vs ARMOR':'ARMOR BREAK!','#ffd700');
+                            } else shotDamage *= .45;
+                        }
+                        en.hp -= shotDamage; en.hitFlash = 6; en.stunTimer = Math.max(en.stunTimer,15);
+                        if (en.hp <= 0) { en.vy = -6; en.knockdown = true; }
+                        spawnHitSpark(en.x, en.y - 15); playTone(150, 0.1, 'sawtooth');
+                        if (p.pierce && p.pierce > 1) p.pierce--;
+                        else p.life = 0;
+                    }
+                });
+                if (bossObj && Math.abs(p.x - bossObj.x) < 50 && Math.abs(p.y - bossObj.y) < 60) {
+                    bossObj.hp -= p.damage; bossObj.hitFlash = 6; spawnHitSpark(bossObj.x, bossObj.y - 30); p.life = 0; playTone(150, 0.1, 'sawtooth');
+                }
+            } else {
+                if (projectileHitsPlayer(p) && playerInvulnTimer === 0) {
+                    playerHp -= 12; spawnHitSpark(playerX, playerY - 20); playTone(160, 0.1, 'sawtooth'); p.life = 0;
+                    playerInvulnTimer = 45; if (playerHp <= 0) triggerGameOver();
+                }
+            }
+        });
+        projectiles = projectiles.filter(p => p.life > 0);
+
+        // Loot
+        lootItems.forEach(item => {
+            item.life--; item.y += item.vy;
+            let itemFloor = getFloorForX(item.x, item.y);
+            if (item.y < itemFloor) item.vy += 0.5; else { item.y = itemFloor; item.vy = 0; }
+            if (item.life > 0 && Math.abs(playerX - item.x) < 30 && Math.abs(playerY - item.y) < 35) {
+                item.life = 0;
+                if (item.type === 'hp') { playerHp = Math.min(playerMaxHp, playerHp + 30); spawnFloatingText(playerX, playerY - 40, '+HP', '#0f0'); } 
+                else { playerEnergy = Math.min(100, playerEnergy + 25 * runUpgrades.energy); spawnFloatingText(playerX, playerY - 40, '+EN', '#0ff'); }
+                playTone(600, 0.1, 'sine');
+            }
+        });
+        lootItems = lootItems.filter(item => item.life > 0);
+
+        hitSparks.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; }); hitSparks = hitSparks.filter(p => p.life > 0);
+        floatingTexts.forEach(t => { t.y += t.vy; t.life--; }); floatingTexts = floatingTexts.filter(t => t.life > 0);
+
+        // Enemies
+        enemies.forEach(en => { 
+            if(en.hitFlash > 0) en.hitFlash--; 
+            
+            if (en.hp <= 0 && !en.deadTriggered) {
+                en.deadTriggered = true; en.knockdown = true; en.vy = -6;
+                if (Math.random() < 0.08 + runUpgrades.loot) spawnLoot(en.x, en.y);
+            }
+
+            let enFloor = getFloorForX(en.x, en.y);
+            if (en.flying && !en.knockdown && en.hp > 0) {
+                if (en.state === 'chase') enFloor = FLOOR_Y - 70 + Math.sin(performance.now() * 0.002) * 20;
+                else if (en.state === 'swoop') enFloor = FLOOR_Y - 20;
+            }
+
+            en.y += en.vy;
+            if (en.isThrown) {
+                en.x += en.vx; // Fly as a bowling ball
+                // Hit other enemies
+                enemies.forEach(other => {
+                    if (other !== en && other.hp > 0 && Math.abs(en.x - other.x) < 30 && Math.abs(en.y - other.y) < 30) {
+                        other.hp -= 20; other.vy = -5; other.knockdown = true; other.stunTimer = 40; spawnHitSpark(other.x, other.y); playTone(150, 0.1, 'sawtooth');
+                    }
+                });
+            }
+
+            if (en.y < enFloor) {
+                en.vy += (en.flying && en.hp > 0 && !en.isThrown ? 0.2 : 0.6);
+            } else { 
+                if (en.knockdown) { en.knockdown = false; en.isThrown = false; en.vx = 0; playTone(80, 0.1, 'sawtooth'); } 
+                en.y = enFloor; en.vy = 0; 
+                if (en.flying && en.state === 'swoop') en.state = 'chase'; 
+            }
+
+            if(en.stunTimer > 0 || en === grappledEnemy) { if(en.stunTimer > 0) en.stunTimer--; return; }
+            if (en.hp <= 0) return; 
+            
+            const dirX = playerX > en.x ? 1 : -1;
+            const dist = Math.abs(en.x - playerX);
+
+            if (en.type === 'ranged') {
+                if (en.state === 'aim') {
+                    en.stateTimer--;
+                    if (en.stateTimer <= 0) {
+                        const dx = en.aimX - en.x;
+                        const dy = en.aimY - (en.y - 25);
+                        const length = Math.max(1, Math.hypot(dx, dy));
+                        const shotSpeed = isMechMode ? 4.2 : 3.6;
+                        projectiles.push({
+                            x: en.x, y: en.y - 25,
+                            vx: dx / length * shotSpeed, vy: dy / length * shotSpeed,
+                            life: 150, isEnemy: true, damage: 8 + Math.floor(currentStage / 3),
+                            color: '#ff334f'
+                        });
+                        en.state = 'recover'; en.stateTimer = 34;
+                        playTone(520, 0.12, 'sine');
+                    }
+                } else if (en.state === 'recover') {
+                    en.stateTimer--;
+                    if (en.stateTimer <= 0) { en.state = 'chase'; en.stateTimer = 0; }
+                } else {
+                    if (dist < 125) en.x -= dirX * 1.25; 
+                    else if (dist > 230) en.x += dirX * 1.25;
+                    en.stateTimer++;
+                    if (en.stateTimer > 105 && dist < 360) {
+                        en.state = 'aim';
+                        en.stateTimer = 76;
+                        en.aimX = playerX;
+                        en.aimY = playerY - (isMechMode ? 88 : 48);
+                        playTone(170, 0.18, 'triangle', 0.035);
+                    }
+                }
+            } else if (en.flying) {
+                if (dist > 40) en.x += dirX * 1.5;
+                if (dist < 50 && en.state !== 'swoop' && Math.random() < 0.02) { en.state = 'swoop'; en.vy = 4; }
+                if (dist < 40 && Math.abs(en.y - playerY) < 30 && playerInvulnTimer === 0) {
+                    playerHp -= 4; screenShake = 3; playTone(180, 0.1, 'sawtooth'); spawnHitSpark(playerX, playerY - 20);
+                    playerInvulnTimer = 45; if (playerHp <= 0) triggerGameOver();
+                }
+            } else {
+                if (dist > 40) en.x += dirX * (1.0 + Math.random()*0.4);
+                if (dist < 45 && Math.abs(en.y - playerY) < 30 && Math.random() < 0.03 && playerInvulnTimer === 0) {
+                    en.state = 'attack'; en.stateTimer = 15;
+                    playerHp -= 8; screenShake = 3; playTone(180, 0.1, 'sawtooth'); spawnHitSpark(playerX, playerY - 20);
+                    playerInvulnTimer = 45; if (playerHp <= 0) triggerGameOver();
+                } else { en.state = 'chase'; }
+            }
+        });
+        
+        enemies = enemies.filter(en => en.hp > 0 || en.y < getFloorForX(en.x, en.y) - 1);
+
+        // Boss
+        if (enemies.length === 0 && cameraX >= stageLength && stageWaves.every(w => w.cleared) && midEventCompleted && !bossObj) {
+            const stageData = stages[currentStage - 1];
+            const bossHp = (300 + currentStage * 50) * (stageData.mech ? 1.75 : 1);
+            bossObj = { name: stageData.boss, x: cameraX + WIDTH + 60, y: FLOOR_Y, vy: 0, hp: bossHp, maxHp: bossHp, state: 'enter', stateTimer: 0, hitFlash: 0 };
+            playTone(200, 0.6, 'square', 0.1);
+        }
+
+        if (bossObj) {
+            if (bossObj.hitFlash > 0) bossObj.hitFlash--;
+            bossObj.y += bossObj.vy;
+            if (bossObj.y < FLOOR_Y) bossObj.vy += 0.7;
+            else {
+                bossObj.y = FLOOR_Y; bossObj.vy = 0;
+                if (bossObj.state === 'jump') {
+                    screenShake = 15; playTone(100, 0.3, 'sawtooth', 0.2);
+                    if (Math.abs(playerX - bossObj.x) < 80 && playerY === FLOOR_Y && playerInvulnTimer === 0) { 
+                        playerHp -= 25; spawnHitSpark(playerX, playerY); playerInvulnTimer = 45; 
+                        if (playerHp <= 0) triggerGameOver(); 
+                    }
+                    bossObj.state = 'chase';
+                }
+            }
+
+            if (bossObj.state === 'enter') {
+                bossObj.x -= 1.5; if (bossObj.x < cameraX + WIDTH - 60) bossObj.state = 'chase';
+            } else if (bossObj.state === 'stun') {
+                bossObj.stateTimer--; if (bossObj.stateTimer <= 0) bossObj.state = 'chase';
+            } else if (bossObj.state === 'chase') {
+                if (Math.abs(playerX - bossObj.x) > 75) bossObj.x += playerX > bossObj.x ? 1.5 : -1.5;
+                else {
+                    const rand = Math.random();
+                    if (rand < 0.25 && bossObj.y === FLOOR_Y) { bossObj.state = 'jump'; bossObj.vy = -14; }
+                    else if (rand < 0.5) {
+                        bossObj.state = 'shoot'; bossObj.stateTimer = 72;
+                        bossObj.aimX = playerX; bossObj.aimY = playerY - (isMechMode ? 88 : 48);
+                        playTone(140, 0.22, 'triangle', 0.04);
+                    }
+                    else { bossObj.state = 'telegraph'; bossObj.stateTimer = 25; }
+                }
+            } else if (bossObj.state === 'shoot') {
+                bossObj.stateTimer--;
+                if (bossObj.stateTimer === 10) {
+                    const dx = bossObj.aimX - bossObj.x, dy = bossObj.aimY - (bossObj.y - 40);
+                    const length = Math.max(1, Math.hypot(dx, dy));
+                    projectiles.push({ x: bossObj.x, y: bossObj.y - 40, vx: dx / length * 4.8, vy: dy / length * 4.8, life: 140, isEnemy: true, damage: 12, color: '#f0f' });
+                    playTone(600, 0.1, 'sine');
+                }
+                if (bossObj.stateTimer <= 0) bossObj.state = 'chase';
+            } else if (bossObj.state === 'telegraph') {
+                bossObj.stateTimer--;
+                if (bossObj.stateTimer <= 0) {
+                    bossObj.state = 'attack'; bossObj.stateTimer = 15;
+                    if (Math.abs(playerX - bossObj.x) < 90 && Math.abs(playerY - bossObj.y) < 40 && playerInvulnTimer === 0) {
+                        playerHp -= 20; screenShake = 8; playerX += (playerX > bossObj.x ? 30 : -30); spawnHitSpark(playerX, playerY - 20); playTone(120, 0.2, 'sawtooth', 0.1);
+                        playerInvulnTimer = 45; if (playerHp <= 0) triggerGameOver();
+                    }
+                }
+            } else if (bossObj.state === 'attack') {
+                bossObj.stateTimer--; if (bossObj.stateTimer <= 0) bossObj.state = 'chase';
+            }
+
+            if (bossObj.hp <= 0) {
+                localStorage.setItem('cyreneRangersStage', String(Math.min(10, currentStage + 1)));
+                gameState = 'STAGE_CLEAR'; playTone(800, 0.5, 'sine', 0.15); window.setTimeout(() => playTone(1200, 0.8, 'sine', 0.15), 500);
+            }
+        }
+    }
+}
+
+function triggerGameOver() {
+    if (gameState !== 'PLAYING') return;
+    lives--;
+    if (lives > 0) {
+        playerHp = playerMaxHp;
+        playerInvulnTimer = 180;
+        playerX = Math.max(cameraX + 45, playerX - 120);
+        playerY = FLOOR_Y;
+        playerVy = -7;
+        grappledEnemy = null;
+        screenShake = 12;
+        spawnFloatingText(playerX, playerY - 55, `RANGER DOWN — ${lives} LEFT`, '#ffda3a');
+        playTone(180, 0.35, 'sawtooth', 0.1);
+        return;
+    }
+    gameState = 'GAME_OVER';
+    finalScoreText.textContent = `SCORE: ${score}`;
+    gameoverPanel.classList.remove('hidden');
+    playTone(150, 0.8, 'sawtooth', 0.1);
+}
+
+function spawnMechHazard() {
+    if (!isMechMode) return;
+    const type = currentStage === 7 ? 'asteroid' : currentStage === 8 ? 'artillery' : currentStage === 9 ? 'laser' : 'core';
+    const count = currentStage === 10 ? 2 : 1;
+    const warning = type === 'asteroid' ? 95 : type === 'artillery' ? 105 : type === 'laser' ? 100 : 115;
+    for (let i = 0; i < count; i++) {
+        mechHazards.push({
+            type,
+            x: Math.max(cameraX + 38, Math.min(cameraX + WIDTH - 38, playerX + (i - (count - 1) / 2) * 92 + (Math.random() - .5) * 34)),
+            t: warning, warning, life: warning + 24,
+            fired: false
+        });
+    }
+    mechHazardTimer = currentStage === 7 ? 250 : currentStage === 8 ? 220 : currentStage === 9 ? 195 : 175;
+}
+
+function updateMechHazards() {
+    if (!isMechMode) return;
+    mechPower = Math.min(100, mechPower + 0.075);
+    if (--mechHazardTimer <= 0) spawnMechHazard();
+    mechHazards.forEach(h => {
+        h.t--; h.life--;
+        if (h.t <= 0 && !h.fired) {
+            h.fired = true;
+            const radius = h.type === 'core' ? 30 : h.type === 'laser' ? 22 : 38;
+            if (Math.abs(playerX - h.x) < radius && playerInvulnTimer === 0) {
+                playerHp -= h.type === 'core' ? 24 : 16;
+                playerInvulnTimer = 55; screenShake = 14;
+                spawnHitSpark(playerX, playerY - 45);
+                if (playerHp <= 0) triggerGameOver();
+            }
+            screenShake = Math.max(screenShake, 10);
+            playTone(h.type === 'laser' ? 210 : 70, .28, 'sawtooth', .09);
+        }
+    });
+    mechHazards = mechHazards.filter(h => h.life > 0);
+}
+
+// -----------------------------------------------------
+// 16-BIT SNES RENDERING ENGINE 
+// -----------------------------------------------------
+
+function drawPlayerSprite(x, y, isRanger, charObj, actionState, isRight) {
+    ctx.save();
+    
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.beginPath(); ctx.ellipse(x, getFloorForX(x), isMechMode ? 30 : 16, isMechMode ? 10 : 5, 0, 0, TAU); ctx.fill();
+
+    ctx.translate(x, y);
+    if (!isRight) ctx.scale(-1, 1);
+
+    const s = isMechMode ? 2.0 : 1.0;
+    ctx.scale(s, s);
+
+    const isPunch = actionState.includes('Punch') || actionState === 'Ranged' || actionState === 'Mech Cannon' || actionState === 'Missile Barrage';
+    const isThrow = actionState === 'Throw';
+    const isJumpAtt = actionState.includes('Jump');
+    const isPunchUp = actionState === 'Punch Up' || actionState === 'High Kick';
+    const isSlideKick = actionState === 'Slide Kick';
+    
+    const crouchPose = keys.Down || keys.Crouch || actionState === 'crouch';
+    const hOff = crouchPose ? 12 : 32; 
+
+    // Legs
+    ctx.fillStyle = isRanger ? '#fff' : charObj.civBot;
+    if (isMechMode) ctx.fillStyle = '#444';
+
+    if (!isRanger && charObj.gender === 'female') {
+        if (charObj.style === 'yellowBabe') {
+            // Adult Sienna's civilian look: fitted blue denim shorts.
+            ctx.fillStyle = '#1d5f9e'; ctx.fillRect(-12, -16, 24, 11);
+            ctx.fillStyle = '#65a6d8'; ctx.fillRect(-11, -15, 22, 2);
+            ctx.fillStyle = '#ffdfc4'; ctx.fillRect(-9, -5, 7, 7); ctx.fillRect(3, -5, 7, 7);
+            ctx.fillStyle = '#facc15'; ctx.fillRect(-10, 1, 8, 4); ctx.fillRect(3, 1, 8, 4);
+        } else {
+            ctx.fillStyle = charObj.civBot; 
+            ctx.beginPath(); ctx.moveTo(-10, -16); ctx.lineTo(10, -16); ctx.lineTo(14, -6); ctx.lineTo(-14, -6); ctx.fill();
+            ctx.fillStyle = '#ffdfc4'; ctx.fillRect(-6, -6, 4, 6); ctx.fillRect(2, -6, 4, 6);
+            ctx.fillStyle = charObj.color; ctx.fillRect(-8, 0, 6, 4); ctx.fillRect(2, 0, 6, 4);
+        }
+    } else {
+        if (isSlideKick) { ctx.fillRect(-8, -10, 12, 10); ctx.fillRect(2, -11, 28, 9); }
+        else if (crouchPose) { ctx.fillRect(-8, -12, 10, 12); ctx.fillRect(4, -12, 10, 12); } 
+        else if (isJumpAtt) { ctx.fillRect(-6, -16, 8, 16); ctx.fillRect(2, -6, 18, 8); } 
+        else if (playerY < getFloorForX(playerX, playerY) - 5) { ctx.fillRect(-8, -22, 10, 12); ctx.fillRect(4, -18, 8, 10); } 
+        else {
+            const legOffset = (actionState === 'idle' || walkAnimTimer === 0) ? 0 : Math.sin(walkAnimTimer * 0.5) * 4;
+            ctx.fillRect(-8 - legOffset, -16, 8, 16); ctx.fillRect(4 + legOffset, -16, 8, 16);
+        }
+    }
+
+    // Torso
+    if (!isRanger && charObj.style === 'yellowBabe') {
+        // Yellow crop top, visible midriff and a small V neckline kept within
+        // the same chunky 16-bit proportions as the rest of the cast.
+        ctx.fillStyle = '#ffdfc4'; ctx.fillRect(-11, -hOff, 22, 20);
+        ctx.fillStyle = charObj.civTop; ctx.fillRect(-12, -hOff, 24, 12);
+        ctx.fillRect(-11, -hOff + 10, 22, 3);
+        ctx.fillStyle = '#ffdfc4';
+        ctx.beginPath(); ctx.moveTo(-4, -hOff); ctx.lineTo(0, -hOff + 7); ctx.lineTo(4, -hOff); ctx.fill();
+        ctx.fillStyle = '#d9a486'; ctx.fillRect(-1, -hOff + 5, 2, 4);
+    } else {
+        ctx.fillStyle = isRanger ? charObj.color : charObj.civTop;
+        ctx.fillRect(-10, -hOff, 20, 20);
+    }
+
+    if (isRanger && !isMechMode) {
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(0, -hOff+2); ctx.lineTo(8, -hOff+10); ctx.lineTo(0, -hOff+18); ctx.lineTo(-8, -hOff+10); ctx.fill();
+    } else if (isMechMode) { ctx.fillStyle = '#0ff'; ctx.fillRect(-4, -hOff+6, 8, 8); }
+    
+    ctx.fillStyle = '#333'; ctx.fillRect(-10, -hOff + 18, 20, 3);
+
+    ctx.fillStyle = isRanger ? '#fff' : '#ffdfc4';
+    if (isMechMode) ctx.fillStyle = '#666';
+    const armOffset = (actionState === 'idle' || walkAnimTimer === 0 || playerY < getFloorForX(playerX, playerY)-5) ? 0 : Math.sin(walkAnimTimer * 0.5) * 3;
+    if (!isPunch && !isPunchUp) ctx.fillRect(-14 + armOffset, -hOff + 4, 8, 14);
+
+    // Head
+    const headY = -hOff - 18;
+    if (isMechMode) {
+        ctx.fillStyle = charObj.color; ctx.fillRect(-10, headY, 20, 18);
+        ctx.fillStyle = '#ff0'; ctx.fillRect(2, headY+4, 8, 4); 
+    } else if (isRanger) {
+        ctx.fillStyle = charObj.color; ctx.fillRect(-10, headY, 20, 18);
+        ctx.fillStyle = '#111'; ctx.fillRect(-2, headY + 4, 12, 8); 
+        ctx.fillStyle = '#8ef9ff'; ctx.fillRect(0, headY + 5, 4, 3);
+        ctx.fillStyle = '#fff'; ctx.fillRect(-2, headY + 13, 10, 5);
+    } else {
+        ctx.fillStyle = '#ffdfc4'; ctx.fillRect(-9, headY, 18, 16);
+        ctx.fillStyle = charObj.style === 'yellowBabe' ? '#7c3f20' : '#222'; ctx.fillRect(-9, headY, 18, 6);
+        if (charObj.gender === 'female') ctx.fillRect(-9, headY, 6, 20); // Long hair
+        else ctx.fillRect(-9, headY, 4, 16); // Short
+    }
+
+    ctx.fillStyle = isRanger ? '#fff' : '#ffdfc4';
+    if (isMechMode) ctx.fillStyle = '#888';
+    
+    if (isThrow) {
+        ctx.fillRect(8, -hOff - 8, 8, 20); 
+    } else if (isPunchUp) {
+        ctx.fillRect(4, -hOff - 18, 8, 20); 
+        if (isRanger && !isMechMode) { ctx.fillStyle = '#ddd'; ctx.fillRect(2, -hOff - 35, 4, 30); }
+    } else if (isPunch || actionState === 'Low Attack') {
+        ctx.fillRect(8, -hOff + 4, 20, 8); 
+        ctx.fillRect(28, -hOff + 3, 10, 10); 
+        
+        if (isRanger && !isMechMode) {
+            ctx.fillStyle = '#ddd';
+            if (charObj.weapon === 'Power Lance') { ctx.fillRect(20, -hOff + 6, 45, 4); ctx.fillStyle = '#0ff'; ctx.fillRect(65, -hOff+5, 10, 6); }
+            else if (charObj.weapon === 'Heavy Sword') { ctx.fillRect(35, -hOff - 20, 8, 40); ctx.fillStyle = '#f00'; ctx.fillRect(33, -hOff+10, 12, 4); }
+            else if (charObj.weapon === 'Twin Daggers') { ctx.fillRect(35, -hOff - 5, 4, 15); ctx.fillRect(20, -hOff - 5, 4, 15); }
+            else if (charObj.weapon === 'Energy Bow') { ctx.strokeStyle = '#f0f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(35, -hOff+8, 15, -Math.PI/2, Math.PI/2); ctx.stroke(); }
+            else { ctx.fillRect(40, -hOff - 10, 4, 30); ctx.fillStyle = '#fde047'; ctx.fillRect(38, -hOff + 2, 8, 4); }
+        }
+    } else {
+        ctx.fillRect(4 - armOffset, -hOff + 4, 8, 14); 
+    }
+
+    ctx.restore();
+}
+
+function drawEnemy(x, y, name, isRight, hitFlash) {
+    ctx.save();
+    const isBoss = name.includes('Imperium') || name.includes('Overlord') || name.includes('Beast') || name.includes('Dreadnought');
+    const stats = getMobStats(name);
+    const s = isBoss ? (isMechMode ? 2.5 : 1.4) : (isMechMode ? 1.5 : 1.0);
+    
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.beginPath(); ctx.ellipse(x, getFloorForX(x), 16 * s, 5 * s, 0, 0, TAU); ctx.fill();
+
+    ctx.translate(x, y);
+    if (!isRight) ctx.scale(-1, 1);
+    ctx.scale(s, s);
+
+    if (hitFlash > 0) { ctx.globalAlpha = 0.6; ctx.fillStyle = '#fff'; ctx.fillRect(-18, -40, 36, 40); ctx.globalAlpha = 1.0; }
+
+    if (name.includes('Pleak')) {
+        // Fire Pleaks keep their recognizable Cyrene bird silhouette instead
+        // of sharing the generic flying-enemy sprite.
+        const flap = Math.sin(performance.now() * 0.012 + x * 0.04) * 5;
+        ctx.fillStyle = '#7f1d1d';
+        ctx.beginPath(); ctx.moveTo(-10, -18); ctx.lineTo(-34, -34 - flap); ctx.lineTo(-22, -8); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(8, -18); ctx.lineTo(32, -34 + flap); ctx.lineTo(20, -8); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#f97316'; ctx.fillRect(-12, -25, 24, 18);
+        ctx.fillStyle = '#fdba74'; ctx.fillRect(-8, -31, 16, 10);
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath(); ctx.moveTo(8, -28); ctx.lineTo(25, -23); ctx.lineTo(8, -19); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#111827'; ctx.fillRect(3, -28, 4, 4);
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.moveTo(-8, -7); ctx.lineTo(-3, 5); ctx.lineTo(1, -7); ctx.fill();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.moveTo(-4, -5); ctx.lineTo(-1, 2); ctx.lineTo(2, -5); ctx.fill();
+    } else if (stats.flying) {
+        ctx.fillStyle = '#10b981'; ctx.fillRect(-12, -20, 24, 15);
+        ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.5; ctx.fillRect(-20, -30, 15, 10); ctx.fillRect(5, -30, 15, 10);
+        ctx.globalAlpha = 1.0; ctx.fillStyle = '#ef4444'; ctx.fillRect(4, -18, 4, 4);
+    } else {
+        ctx.fillStyle = '#6b7280';
+        if (y < FLOOR_Y) { ctx.fillRect(-12, -22, 10, 12); ctx.fillRect(2, -18, 8, 10); }
+        else { ctx.fillRect(-10, -16, 8, 16); ctx.fillRect(4, -16, 8, 16); }
+
+        ctx.fillStyle = isBoss ? '#9333ea' : (stats.type === 'ranged' ? '#eab308' : '#9ca3af');
+        ctx.fillRect(-14, -36, 28, 20);
+
+        ctx.fillStyle = '#4b5563'; ctx.fillRect(-16, -34, 8, 16);
+        
+        if (isBoss && bossObj && bossObj.state === 'telegraph') { ctx.fillStyle = '#fde047'; ctx.fillRect(10, -44, 10, 16); } 
+        else if (isBoss && bossObj && bossObj.state === 'attack') { ctx.fillStyle = '#d8b4fe'; ctx.fillRect(10, -34, 25, 8); } 
+        else if (stats.type === 'ranged') { ctx.fillRect(10, -34, 18, 6); } 
+        else { ctx.fillRect(8, -34, 14, 8); }
+
+        ctx.fillStyle = '#374151'; ctx.fillRect(-10, -52, 20, 16);
+        ctx.fillStyle = '#ef4444'; ctx.fillRect(4, -48, 6, 4);
+    }
+
+    ctx.restore();
+}
+
+function drawLoot(x, y, type) {
+    ctx.save(); ctx.translate(x, y);
+    if (type === 'hp') {
+        ctx.fillStyle = '#22c55e'; ctx.fillRect(-4, -12, 8, 16); ctx.fillRect(-8, -8, 16, 8);
+        ctx.fillStyle = '#fff'; ctx.fillRect(-2, -10, 4, 12); ctx.fillRect(-6, -6, 12, 4);
+    } else {
+        ctx.fillStyle = '#3b82f6'; ctx.fillRect(-6, -14, 12, 14);
+        ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.moveTo(2, -12); ctx.lineTo(-4, -6); ctx.lineTo(0, -6); ctx.lineTo(-2, -2); ctx.fill();
+    }
+    ctx.restore();
+}
+
+function drawStageSetPiece(x, obj) {
+    ctx.save(); ctx.translate(x, obj.y);
+    const type = obj.type;
+    if (type === 'ruin') {
+        ctx.fillStyle='#65505d';ctx.fillRect(-28,-42,16,42);ctx.fillRect(12,-52,16,52);ctx.fillRect(-28,-52,56,10);
+        ctx.fillStyle='#8ef9ff';ctx.fillRect(-6,-35,12,24);
+    } else if (type === 'stump') {
+        ctx.fillStyle='#4a3025';ctx.fillRect(-18,-34,36,34);ctx.fillStyle='#738c42';ctx.beginPath();ctx.arc(0,-35,28,Math.PI,TAU);ctx.fill();
+    } else if (type === 'terminal') {
+        ctx.fillStyle='#354158';ctx.fillRect(-26,-48,52,48);ctx.fillStyle='#101827';ctx.fillRect(-18,-40,36,22);
+        ctx.fillStyle='#ff465a';ctx.fillRect(-12,-34,7,5);ctx.fillStyle='#42e8ff';ctx.fillRect(2,-34,12,5);
+    } else if (type === 'rock') {
+        ctx.fillStyle='#80482e';ctx.beginPath();ctx.moveTo(-30,0);ctx.lineTo(-22,-35);ctx.lineTo(-3,-50);ctx.lineTo(24,-36);ctx.lineTo(30,0);ctx.fill();
+        ctx.fillStyle='#b66c3d';ctx.fillRect(-8,-39,16,8);
+    } else if (type === 'palm') {
+        ctx.strokeStyle='#6b452f';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(8,-32,0,-60);ctx.stroke();
+        ctx.fillStyle='#32945b';for(let i=0;i<6;i++){ctx.save();ctx.translate(0,-60);ctx.rotate(i*TAU/6);ctx.fillRect(0,-4,32,8);ctx.restore();}
+    } else if (type === 'crystal') {
+        ctx.fillStyle='#d45bff';ctx.beginPath();ctx.moveTo(-25,0);ctx.lineTo(-12,-52);ctx.lineTo(0,-15);ctx.lineTo(12,-62);ctx.lineTo(27,0);ctx.fill();
+        ctx.fillStyle='#f1b7ff';ctx.fillRect(8,-48,5,26);
+    } else if (type === 'wreck') {
+        ctx.fillStyle='#59657b';ctx.fillRect(-30,-32,60,26);ctx.fillStyle='#263047';ctx.fillRect(-18,-45,38,18);
+        ctx.fillStyle='#ff5b48';ctx.beginPath();ctx.moveTo(14,-42);ctx.lineTo(25,-64);ctx.lineTo(30,-40);ctx.fill();
+    } else if (type === 'bunker') {
+        ctx.fillStyle='#3d302e';ctx.fillRect(-31,-42,62,42);ctx.fillStyle='#77271d';ctx.fillRect(-21,-58,42,16);
+        ctx.fillStyle='#ff9b42';ctx.fillRect(-16,-35,32,6);
+    } else if (type === 'console') {
+        ctx.fillStyle='#53627f';ctx.fillRect(-27,-43,54,43);ctx.fillStyle='#11182b';ctx.fillRect(-19,-36,38,25);
+        ctx.fillStyle='#54f4ff';for(let i=0;i<4;i++)ctx.fillRect(-14+i*9,-30,5,12);
+    } else if (type === 'nest') {
+        ctx.fillStyle='#6b3423';ctx.beginPath();ctx.ellipse(0,-12,28,15,0,0,TAU);ctx.fill();
+        ctx.fillStyle='#ff8a32';for(let i=-1;i<=1;i++){ctx.beginPath();ctx.ellipse(i*12,-18,7,10,0,0,TAU);ctx.fill();}
+    } else if (type === 'hackTerminal' || type === 'securityNode') {
+        ctx.fillStyle=type==='securityNode'?'#5b6d96':'#38445d';ctx.fillRect(-24,-50,48,50);ctx.fillStyle='#07111f';ctx.fillRect(-17,-42,34,25);
+        ctx.fillStyle='#00ffcc';ctx.fillRect(-11,-36,22,4);ctx.fillRect(-11,-28,15,3);
+    } else if (type === 'pump') {
+        ctx.fillStyle='#346b75';ctx.fillRect(-25,-44,50,44);ctx.fillStyle='#72e0de';ctx.beginPath();ctx.arc(0,-25,12,0,TAU);ctx.fill();
+        ctx.strokeStyle='#24444f';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(-25,-12);ctx.lineTo(-42,-12);ctx.stroke();
+    } else if (type === 'beacon') {
+        ctx.fillStyle='#4d3c63';ctx.fillRect(-17,-58,34,58);ctx.fillStyle='#ff65dd';ctx.beginPath();ctx.arc(0,-62,15,0,TAU);ctx.fill();
+        ctx.strokeStyle='#ffc0f2';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-62,24+Math.sin(performance.now()*.01)*4,0,TAU);ctx.stroke();
+    } else if (type === 'battery') {
+        ctx.fillStyle='#5e3028';ctx.fillRect(-34,-38,68,38);ctx.fillStyle='#29242a';ctx.fillRect(-20,-58,40,24);ctx.fillRect(10,-69,45,9);
+        ctx.fillStyle='#ff6b35';ctx.fillRect(-8,-52,15,10);
+    } else if (type === 'conduit') {
+        ctx.fillStyle='#5d1726';ctx.fillRect(-25,-58,50,58);ctx.fillStyle='#ff315b';ctx.fillRect(-15,-48,30,38);
+        ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,-29,8+Math.sin(performance.now()*.015)*3,0,TAU);ctx.fill();
+    } else {
+        ctx.fillStyle='#581421';ctx.fillRect(-26,-50,52,50);ctx.fillStyle='#ff365e';ctx.fillRect(-18,-42,36,28);
+        ctx.fillStyle='#ffd166';ctx.beginPath();ctx.arc(0,-28,9,0,TAU);ctx.fill();
+    }
+    ctx.restore();
+}
+
+function drawPlatforms() {
+    const colors = ['#75606a','#355849','#52627c','#a35f32','#d2ab67','#74448a','#7284a8','#784031','#8b9ac1','#81243a'];
+    platforms.forEach(platform => {
+        const x = platform.x - cameraX;
+        if (x < -platform.w || x > WIDTH + platform.w) return;
+        ctx.fillStyle = colors[currentStage - 1];
+        ctx.fillRect(x - platform.w / 2, platform.y, platform.w, platform.h);
+        ctx.fillStyle = currentStage === 6 || currentStage === 10 ? '#ff63dd' : currentStage >= 7 ? '#65e8ff' : '#d8dce7';
+        ctx.fillRect(x - platform.w / 2, platform.y, platform.w, 3);
+        ctx.fillStyle = 'rgba(0,0,0,.35)';
+        for (let brace = -platform.w / 2 + 10; brace < platform.w / 2; brace += 22) ctx.fillRect(x + brace, platform.y + platform.h, 5, 10);
+    });
+}
+
+function drawMechHazards() {
+    mechHazards.forEach(h => {
+        const x = h.x - cameraX;
+        const pulse = Math.floor(Math.max(0, h.t) / 5) % 2 ? .95 : .4;
+        if (!h.fired) {
+            const markerRadius = h.type === 'core' ? 30 : h.type === 'laser' ? 22 : 38;
+            ctx.strokeStyle = h.type === 'laser' ? `rgba(70,240,255,${pulse})` : `rgba(255,70,55,${pulse})`;
+            ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, FLOOR_Y - 5, markerRadius, 0, TAU); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x-markerRadius-6,FLOOR_Y-5);ctx.lineTo(x+markerRadius+6,FLOOR_Y-5);ctx.moveTo(x,FLOOR_Y-markerRadius-11);ctx.lineTo(x,FLOOR_Y+20);ctx.stroke();
+            ctx.fillStyle = '#fff';ctx.font='bold 9px "Courier New", monospace';ctx.textAlign='center';ctx.fillText(`${Math.max(1,Math.ceil(h.t/60))}`,x,FLOOR_Y-9);
+            if (h.type === 'asteroid') {
+                const y = -25 + (h.warning - h.t) * ((FLOOR_Y-15) / h.warning);
+                ctx.fillStyle='#7c6255';ctx.beginPath();ctx.arc(x,y,18,0,TAU);ctx.fill();ctx.fillStyle='#bda18e';ctx.fillRect(x-8,y-8,7,5);
+            } else if (h.type === 'artillery') {
+                ctx.fillStyle=`rgba(255,130,40,${pulse})`;ctx.fillRect(x-3,20,6,FLOOR_Y-25);
+            } else if (h.type === 'laser') {
+                ctx.fillStyle=`rgba(70,240,255,${pulse*.28})`;ctx.fillRect(x-7,0,14,FLOOR_Y);
+            } else {
+                ctx.strokeStyle=`rgba(255,40,90,${pulse})`;for(let r=10;r<=30;r+=10){ctx.beginPath();ctx.arc(x,FLOOR_Y-5,r,0,TAU);ctx.stroke();}
+            }
+        } else {
+            const fade = Math.max(0, h.life / 20);
+            if (h.type === 'laser') {
+                ctx.fillStyle=`rgba(90,245,255,${Math.min(1,fade)})`;ctx.fillRect(x-12,0,24,FLOOR_Y);
+                ctx.fillStyle='#fff';ctx.fillRect(x-4,0,8,FLOOR_Y);
+            } else {
+                ctx.fillStyle=`rgba(${h.type==='core'?'255,35,90':'255,150,45'},${Math.min(1,fade)})`;
+                ctx.beginPath();ctx.arc(x,FLOOR_Y-18,(h.type==='core'?32:39)*(1.3-fade*.2),0,TAU);ctx.fill();
+            }
+        }
+    });
+}
+
+function drawSNESBackground(camX, themeColor) {
+    const stage = currentStage;
+    const now = performance.now() * 0.001;
+    const px = (i, spacing, factor) => i * spacing - ((camX * factor) % spacing);
+    const sky = ctx.createLinearGradient(0, 0, 0, PLAY_AREA_BOTTOM);
+    const palettes = [
+        ['#321746','#e36b45'], ['#071b20','#316044'], ['#0a1020','#34435c'], ['#55230f','#ec9a42'],
+        ['#164869','#7fd1d4'], ['#180b2b','#73306e'], ['#02040c','#111a38'], ['#3b1008','#b34120'],
+        ['#070b17','#26365c'], ['#180208','#650c18']
+    ];
+    sky.addColorStop(0, palettes[stage - 1][0]); sky.addColorStop(1, palettes[stage - 1][1]);
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, WIDTH, PLAY_AREA_BOTTOM);
+
+    if (stage === 1) {
+        // Atlas: vast sunset hunting grounds, crystal arches and broken ruins.
+        ctx.fillStyle = '#fbbf5a'; ctx.beginPath(); ctx.arc(388, 58, 30, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#5c2945';
+        for (let i = -1; i < 7; i++) { const x = px(i, 110, .18); ctx.beginPath(); ctx.moveTo(x, 170); ctx.lineTo(x+58, 58+(i%2)*24); ctx.lineTo(x+125,170); ctx.fill(); }
+        ctx.fillStyle = '#38233a';
+        for (let i = -1; i < 6; i++) { const x=px(i,135,.5); ctx.fillRect(x,122,18,68); ctx.fillRect(x+53,142,14,48); ctx.fillRect(x,122,67,9); ctx.fillStyle='#8d5b59';ctx.fillRect(x+25,130,8,9);ctx.fillStyle='#38233a'; }
+        ctx.fillStyle='#60e6d0'; for(let i=0;i<7;i++){const x=px(i,92,.72);ctx.beginPath();ctx.moveTo(x+20,190);ctx.lineTo(x+27,152);ctx.lineTo(x+35,190);ctx.fill();}
+    } else if (stage === 2) {
+        // Manathule: layered fog, black water and twisted swamp trees.
+        ctx.fillStyle='#102d27';ctx.fillRect(0,145,WIDTH,60);
+        for(let i=-1;i<9;i++){const x=px(i,72,.35);ctx.strokeStyle='#173b31';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(x+35,188);ctx.quadraticCurveTo(x+8,105,x+42,54);ctx.stroke();ctx.fillStyle='#244d38';ctx.beginPath();ctx.arc(x+35,66,32,0,TAU);ctx.fill();}
+        ctx.fillStyle='#183c38';ctx.fillRect(0,184,WIDTH,22);ctx.fillStyle='#72d1bb55';
+        for(let i=0;i<10;i++){const x=px(i,62,.8);ctx.fillRect(x,196+(i%2)*5,36,2);}
+        ctx.fillStyle='#b7e4c755';for(let i=0;i<18;i++)ctx.fillRect((i*47+now*8)%WIDTH,110+(i*19)%75,18,2);
+    } else if (stage === 3) {
+        // Z.R.Q.: a moving robot factory with pistons, pipes and warning lights.
+        ctx.fillStyle='#111827';ctx.fillRect(0,42,WIDTH,160);
+        ctx.strokeStyle='#475569';ctx.lineWidth=9;for(let i=-1;i<7;i++){const x=px(i,105,.2);ctx.beginPath();ctx.moveTo(x,25);ctx.lineTo(x,105);ctx.lineTo(x+54,105);ctx.lineTo(x+54,155);ctx.stroke();}
+        for(let i=-1;i<8;i++){const x=px(i,76,.62);ctx.fillStyle='#273449';ctx.fillRect(x,70,56,120);ctx.fillStyle=(Math.floor(now*3)+i)%2?'#ef4444':'#57151c';ctx.fillRect(x+22,83,12,8);ctx.fillStyle='#111827';ctx.fillRect(x+8,112,40,50);ctx.strokeStyle='#607089';ctx.lineWidth=2;ctx.strokeRect(x+8,112,40,50);}
+        ctx.fillStyle='#f59e0b';for(let i=-1;i<15;i++){const x=px(i,42,1);ctx.fillRect(x,188,21,5);}
+    } else if (stage === 4) {
+        // Turrelion: open dunes, heat haze and enormous stone needles.
+        ctx.fillStyle='#7c321d';for(let i=-1;i<7;i++){const x=px(i,125,.2);ctx.beginPath();ctx.moveTo(x,180);ctx.lineTo(x+62,82-(i%2)*24);ctx.lineTo(x+78,180);ctx.fill();}
+        ctx.fillStyle='#c56f35';for(let i=-1;i<6;i++){const x=px(i,155,.48);ctx.beginPath();ctx.arc(x+70,195,100,Math.PI,TAU);ctx.fill();}
+        ctx.fillStyle='#efaa57';for(let i=-1;i<8;i++){const x=px(i,95,.85);ctx.beginPath();ctx.arc(x+45,210,58,Math.PI,TAU);ctx.fill();}
+        ctx.fillStyle='#ffd89a33';for(let i=0;i<8;i++)ctx.fillRect(0,68+i*17+Math.sin(now*2+i)*3,WIDTH,2);
+    } else if (stage === 5) {
+        // Island biome: ocean, distant volcano, palms and animated surf.
+        ctx.fillStyle='#24445b';ctx.beginPath();ctx.moveTo(110,155);ctx.lineTo(235,42);ctx.lineTo(352,155);ctx.fill();ctx.fillStyle='#ef7b47';ctx.beginPath();ctx.moveTo(212,65);ctx.lineTo(235,42);ctx.lineTo(254,67);ctx.fill();
+        ctx.fillStyle='#3192a8';ctx.fillRect(0,154,WIDTH,48);ctx.strokeStyle='#a7f3ef';ctx.lineWidth=2;for(let i=-1;i<9;i++){const x=px(i,70,.35);ctx.beginPath();ctx.arc(x,165+Math.sin(now*2+i)*4,28,Math.PI,TAU);ctx.stroke();}
+        for(let i=-1;i<7;i++){const x=px(i,105,.72);ctx.strokeStyle='#60452e';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(x+45,195);ctx.quadraticCurveTo(x+52,142,x+38,110);ctx.stroke();ctx.fillStyle='#2f8f52';for(let f=0;f<5;f++){ctx.beginPath();ctx.ellipse(x+38+Math.cos(f*1.25)*25,112+Math.sin(f*1.25)*10,22,6,f*.7,0,TAU);ctx.fill();}}
+    } else if (stage === 6) {
+        // Isle de Zel: violet ruins, levitating monoliths and energy crystals.
+        ctx.fillStyle='#28113d';for(let i=-1;i<7;i++){const x=px(i,120,.22);ctx.fillRect(x,73+(i%2)*28,52,125);ctx.fillStyle='#8b4cb0';ctx.fillRect(x+8,86+(i%2)*28,36,5);ctx.fillStyle='#28113d';}
+        for(let i=-1;i<8;i++){const x=px(i,90,.58),float=Math.sin(now*1.5+i)*8;ctx.fillStyle='#412456';ctx.fillRect(x+18,122+float,45,45);ctx.strokeStyle='#d16cff';ctx.lineWidth=2;ctx.strokeRect(x+18,122+float,45,45);}
+        ctx.fillStyle='#d45bff';for(let i=-1;i<11;i++){const x=px(i,66,.9);ctx.beginPath();ctx.moveTo(x+25,196);ctx.lineTo(x+34,157);ctx.lineTo(x+43,196);ctx.fill();}
+    } else if (stage === 7) {
+        // Cyrene orbit: starfield, planet limb and drifting wreckage.
+        ctx.fillStyle='#fff';for(let i=0;i<70;i++)ctx.fillRect(((i*73-camX*.08)%WIDTH+WIDTH)%WIDTH,(i*41)%155,i%3+1,i%2+1);
+        ctx.fillStyle='#256b9a';ctx.beginPath();ctx.arc(350,238,150,0,TAU);ctx.fill();ctx.fillStyle='#4f9f7c';ctx.beginPath();ctx.arc(310,170,46,0,TAU);ctx.fill();
+        for(let i=-1;i<8;i++){const x=px(i,100,.45);ctx.save();ctx.translate(x,105+(i%3)*25);ctx.rotate((i*.8+now*.15)%TAU);ctx.fillStyle='#4b5563';ctx.fillRect(-22,-5,44,10);ctx.fillStyle='#ef4444';ctx.fillRect(12,-2,6,4);ctx.restore();}
+    } else if (stage === 8) {
+        // Amethera siege: burning canyon and distant giant silhouettes.
+        ctx.fillStyle='#5b1d13';for(let i=-1;i<7;i++){const x=px(i,120,.2);ctx.beginPath();ctx.moveTo(x,190);ctx.lineTo(x+35,65);ctx.lineTo(x+65,190);ctx.fill();}
+        ctx.fillStyle='#1c1718';for(let i=-1;i<6;i++){const x=px(i,145,.48);ctx.fillRect(x+35,75,50,115);ctx.fillRect(x+15,94,20,65);ctx.fillRect(x+85,94,20,65);ctx.fillStyle='#f97316';ctx.fillRect(x+52,98,16,16);ctx.fillStyle='#1c1718';}
+        for(let i=0;i<8;i++){const x=px(i,78,.85);ctx.fillStyle='#ef6c30';ctx.beginPath();ctx.moveTo(x,196);ctx.lineTo(x+11,165+Math.sin(now*5+i)*8);ctx.lineTo(x+22,196);ctx.fill();}
+    } else if (stage === 9) {
+        // Crystal Palace: interior corridor with windows onto deep space.
+        ctx.fillStyle='#11192e';ctx.fillRect(0,0,WIDTH,PLAY_AREA_BOTTOM);ctx.fillStyle='#050817';
+        for(let i=-1;i<6;i++){const x=px(i,110,.35);ctx.fillRect(x+12,35,82,95);ctx.strokeStyle='#8294be';ctx.lineWidth=4;ctx.strokeRect(x+12,35,82,95);ctx.fillStyle='#fff';for(let s=0;s<6;s++)ctx.fillRect(x+20+(s*29)%65,45+(s*17)%70,2,2);ctx.fillStyle='#050817';}
+        ctx.fillStyle='#2e3c60';for(let i=-1;i<9;i++){const x=px(i,72,.8);ctx.fillRect(x,140,58,50);ctx.fillStyle='#42e8ff';ctx.fillRect(x+10,153,38,4);ctx.fillStyle='#2e3c60';}
+        ctx.strokeStyle='#8ca0ca';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(0,25);ctx.lineTo(WIDTH,25);ctx.moveTo(0,190);ctx.lineTo(WIDTH,190);ctx.stroke();
+    } else {
+        // Cyrene core: unstable reactor, pulsing conduits and collapsing sparks.
+        ctx.fillStyle='#26050b';ctx.fillRect(0,0,WIDTH,PLAY_AREA_BOTTOM);
+        ctx.strokeStyle='#7f1d2d';ctx.lineWidth=12;for(let i=-1;i<7;i++){const x=px(i,100,.22);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+30,78);ctx.lineTo(x+30,190);ctx.stroke();}
+        const pulse=.55+Math.sin(now*5)*.35;ctx.fillStyle=`rgba(255,35,70,${pulse})`;ctx.beginPath();ctx.arc(WIDTH/2,95,46+Math.sin(now*4)*8,0,TAU);ctx.fill();ctx.strokeStyle='#ff7890';ctx.lineWidth=5;ctx.beginPath();ctx.arc(WIDTH/2,95,70,0,TAU);ctx.stroke();
+        ctx.fillStyle='#ffcc66';for(let i=0;i<22;i++){const x=((i*67+now*45)%WIDTH),y=(i*31+now*22)%185;ctx.fillRect(x,y,2,5);}
+        ctx.fillStyle='#42101a';for(let i=-1;i<9;i++){const x=px(i,70,.85);ctx.fillRect(x,142,54,53);ctx.fillStyle='#ff365e';ctx.fillRect(x+10,153,34,5);ctx.fillStyle='#42101a';}
+    }
+
+    const groundColors = ['#49352d','#263c32','#303846','#8a542e','#c89a55','#382344','#25304a','#4b271e','#465270','#3d1119'];
+    ctx.fillStyle=groundColors[stage-1];ctx.fillRect(0,PLAY_AREA_BOTTOM-35,WIDTH,35);
+    ctx.fillStyle=stage===5?'#f8dd9b':stage===7?'#7b89a8':'#9ca3af';ctx.fillRect(0,PLAY_AREA_BOTTOM-36,WIDTH,4);
+    const floorX=-(camX%64);ctx.fillStyle='rgba(255,255,255,.14)';
+    for(let i=-1;i<WIDTH/64+2;i++){ctx.fillRect(floorX+i*64,PLAY_AREA_BOTTOM-33,2,33);ctx.fillRect(floorX+i*64,PLAY_AREA_BOTTOM-17,34,2);}
+}
+
+function drawSNESUI() {
+    ctx.fillStyle = '#9ca3af'; ctx.fillRect(0, PLAY_AREA_BOTTOM, WIDTH, UI_HEIGHT);
+    ctx.fillStyle = '#d1d5db'; ctx.fillRect(0, PLAY_AREA_BOTTOM, WIDTH, 3);
+    ctx.fillStyle = '#4b5563'; ctx.fillRect(0, HEIGHT - 3, WIDTH, 3);
+
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(10, PLAY_AREA_BOTTOM + 8, 4, 4); ctx.fillRect(WIDTH - 14, PLAY_AREA_BOTTOM + 8, 4, 4);
+    ctx.fillRect(10, HEIGHT - 12, 4, 4); ctx.fillRect(WIDTH - 14, HEIGHT - 12, 4, 4);
+    ctx.fillStyle = '#4b5563';
+    ctx.fillRect(11, PLAY_AREA_BOTTOM + 9, 2, 2); ctx.fillRect(WIDTH - 13, PLAY_AREA_BOTTOM + 9, 2, 2);
+    ctx.fillRect(11, HEIGHT - 11, 2, 2); ctx.fillRect(WIDTH - 13, HEIGHT - 11, 2, 2);
+
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 16px "Arial Black", Impact, sans-serif'; ctx.textAlign = 'left';
+    ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText('LIFE', 30, PLAY_AREA_BOTTOM + 28); ctx.shadowBlur = 0;
+
+    const barX = 80, barY = PLAY_AREA_BOTTOM + 16, barW = 160, barH = 14;
+    ctx.fillStyle = '#111'; ctx.fillRect(barX, barY, barW, barH);
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(barX-6, barY+7); ctx.lineTo(barX, barY); ctx.lineTo(barX, barY+14); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(barX+barW+6, barY+7); ctx.lineTo(barX+barW, barY); ctx.lineTo(barX+barW, barY+14); ctx.fill();
+    
+    ctx.fillStyle = '#22c55e'; ctx.fillRect(barX + 2, barY + 2, (barW - 4) * Math.max(0, playerHp / playerMaxHp), barH - 4);
+
+    const iconX = barX + barW + 25;
+    ctx.fillStyle = selectedCharacter.color; ctx.beginPath(); ctx.arc(iconX, PLAY_AREA_BOTTOM + 23, 10, 0, Math.PI, true); ctx.fill();
+    ctx.fillStyle = '#222'; ctx.fillRect(iconX-8, PLAY_AREA_BOTTOM + 23, 16, 5);
+    ctx.fillStyle = '#fff'; ctx.fillRect(iconX-3, PLAY_AREA_BOTTOM + 28, 6, 4);
+
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 14px "Arial Black", Impact, sans-serif';
+    ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(`x ${lives}`, iconX + 15, PLAY_AREA_BOTTOM + 30);
+    
+    if (isMechMode) {
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 9px monospace'; ctx.fillText(mechPower >= 100 ? 'MEGA' : 'CANNON', iconX + 55, PLAY_AREA_BOTTOM + 28);
+        ctx.fillStyle = '#111'; ctx.fillRect(iconX + 95, PLAY_AREA_BOTTOM + 18, 60, 10);
+        ctx.fillStyle = mechPower >= 100 ? '#0ff' : '#a855f7'; ctx.fillRect(iconX + 96, PLAY_AREA_BOTTOM + 19, 58 * (mechPower/100), 8);
+        ctx.fillStyle = '#ffd700'; ctx.fillText(`MISSILES x${bombs}`, iconX + 55, PLAY_AREA_BOTTOM + 40);
+    } else {
+        ctx.fillText('BOMB', iconX + 55, PLAY_AREA_BOTTOM + 28);
+        for(let i=0; i < bombs; i++) {
+            ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.arc(iconX + 100 + i*15, PLAY_AREA_BOTTOM + 23, 5, 0, TAU); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.fillRect(iconX + 98 + i*15, PLAY_AREA_BOTTOM + 16, 4, 3);
+        }
+    }
+
+    ctx.textAlign = 'right'; ctx.font = 'bold 12px "Courier New", monospace';
+    ctx.fillStyle = '#ffda3a'; ctx.fillText(`SCORE: ${score}`, WIDTH - 30, PLAY_AREA_BOTTOM + 20);
+    ctx.fillStyle = '#00ffcc'; ctx.fillText(`ENERGY: ${playerEnergy}%`, WIDTH - 30, PLAY_AREA_BOTTOM + 35);
+    ctx.shadowBlur = 0; ctx.textAlign = 'left';
+}
+
+function getDrawList() {
+    let list = [];
+    destructibles.forEach(o => { if (o.alive) list.push({type: 'dest', obj: o}); });
+    lootItems.forEach(o => { list.push({type: 'loot', obj: o}); });
+    enemies.forEach(o => { list.push({type: 'enemy', obj: o}); });
+    if (bossObj) list.push({type: 'boss', obj: bossObj});
+    
+    let pState = 'idle';
+    if (attackAnimTimer > 0) pState = attackTypeUsed;
+    else if ((keys.Crouch || keys.Down) && playerY === getFloorForX(playerX, playerY)) pState = 'crouch';
+    
+    if (playerInvulnTimer === 0 || Math.floor(playerInvulnTimer / 5) % 2 === 0) {
+        list.push({type: 'player', obj: { x: playerX, y: playerY, isRight: isFacingRight, state: pState, charObj: selectedCharacter } });
+    }
+    
+    list.sort((a, b) => a.obj.y - b.obj.y);
+    return list;
+}
+
+function drawCinemaCaption(text, y = 230, color = '#fff') {
+    ctx.fillStyle = 'rgba(0,0,0,0.82)';
+    ctx.fillRect(18, y - 19, WIDTH - 36, 31);
+    ctx.fillStyle = color;
+    ctx.font = '10px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, WIDTH / 2, y);
+}
+
+function drawStarfield(speed = 12) {
+    ctx.fillStyle = '#03050d'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 70; i++) {
+        const x = ((i * 71 - cutsceneTimer * speed * (1 + i % 3)) % WIDTH + WIDTH) % WIDTH;
+        const y = (i * 43) % PLAY_AREA_BOTTOM;
+        ctx.fillRect(x, y, i % 3 + 1, i % 2 + 1);
+    }
+}
+
+function draw() {
+    ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    ctx.save();
+    if (screenShake > 0) ctx.translate((Math.random()-0.5)*screenShake, (Math.random()-0.5)*screenShake);
+    if (bombFlash > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${bombFlash/30})`; ctx.fillRect(0, 0, WIDTH, HEIGHT); }
+
+    if (gameState === 'INSERT_COIN') { ctx.restore(); return; } 
+    else if (gameState === 'BOOT') {
+        const fade = Math.min(1, bootTimer / 1.2);
+        ctx.globalAlpha = fade; ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 20px "Courier New", monospace'; ctx.textAlign = 'center';
+        if (bootStep === 0) ctx.fillText('PIXELB8 GAMES', WIDTH / 2, HEIGHT / 2);
+        else if (bootStep === 1) ctx.fillText('&', WIDTH / 2, HEIGHT / 2);
+        else if (bootStep === 2) ctx.fillText('SECRET UNIVERSAL SERVICES', WIDTH / 2, HEIGHT / 2);
+        else { ctx.fillStyle = '#ff90ea'; ctx.fillText('CYRENE RANGERS // INITIALIZED', WIDTH / 2, HEIGHT / 2); }
+        ctx.globalAlpha = 1;
+    }
+    else if (gameState === 'TITLE') {
+        ctx.fillStyle = '#120418'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = '#c711d3'; ctx.font = 'bold 36px Impact, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('CYRENE RANGERS', WIDTH / 2, 70);
+        ctx.fillStyle = '#00ffcc'; ctx.font = '12px "Courier New", monospace'; ctx.fillText('ENTROPIA UNIVERSE 16-BIT EDITION', WIDTH / 2, 95);
+
+        const options = ['1. START NEW STORY', '2. CONTINUE STORY', '3. ARCADE MODE', '4. HOW TO PLAY / KEYBINDS', '5. CREDITS'];
+        options.forEach((opt, idx) => { ctx.fillStyle = menuSelection === idx ? '#00ffcc' : '#777'; ctx.fillText(opt, WIDTH / 2, 130 + idx * 23); });
+        ctx.fillStyle = '#888'; ctx.font = '10px "Courier New", monospace'; ctx.fillText('PRESS ENTER TO SELECT', WIDTH / 2, HEIGHT - 20);
+    }
+    else if (gameState === 'HOW_TO_PLAY') {
+        ctx.fillStyle = '#070b16'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 19px Impact, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('HOW TO PLAY & KEYBINDS', WIDTH / 2, 25);
+        ctx.fillStyle = '#aab3c7'; ctx.font = '8px "Courier New", monospace';
+        ctx.fillText('ATTACK SHOTS TO DEFLECT • CROUCH UNDER HEAD SHOTS • DOUBLE-TAP TO SLIDE', WIDTH / 2, 42);
+        bindingActions.forEach((action, index) => {
+            const y = 60 + index * 12, selected = bindingSelection === index;
+            ctx.fillStyle = selected ? '#1b3850' : (index % 2 ? '#0b1120' : '#101728'); ctx.fillRect(95, y - 9, 290, 11);
+            ctx.fillStyle = selected ? '#00ffcc' : '#d4d9e7'; ctx.font = `${selected ? 'bold ' : ''}8px "Courier New", monospace`; ctx.textAlign = 'left';
+            ctx.fillText(action.toUpperCase(), 108, y);
+            ctx.textAlign = 'right'; ctx.fillText(bindings[action].map(formatKeyCode).join(' / ') || 'UNBOUND', 372, y);
+        });
+        const resetIndex = bindingActions.length, backIndex = resetIndex + 1;
+        const resetY = 60 + resetIndex * 12, backY = resetY + 12;
+        ctx.textAlign = 'center'; ctx.font = 'bold 8px "Courier New", monospace';
+        ctx.fillStyle = bindingSelection === resetIndex ? '#ffd700' : '#8c96ac'; ctx.fillText('RESET DEFAULTS', WIDTH / 2, resetY);
+        ctx.fillStyle = bindingSelection === backIndex ? '#00ffcc' : '#8c96ac'; ctx.fillText('BACK TO TITLE', WIDTH / 2, backY);
+        ctx.fillStyle = awaitingBinding ? '#ffda3a' : '#68738b';
+        ctx.fillText(awaitingBinding ? `PRESS ANY KEY FOR ${bindingActions[bindingSelection].toUpperCase()}` : 'UP/DOWN TO SELECT • ENTER TO CHANGE', WIDTH / 2, 258);
+    }
+    else if (gameState === 'CREDITS') {
+        ctx.fillStyle = '#090c12'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = '#ffda3a'; ctx.font = 'bold 22px Impact, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('DEVELOPMENT CREDITS', WIDTH / 2, 50);
+
+        ctx.fillStyle = '#fff'; ctx.font = '11px "Courier New", monospace';
+        ctx.fillText('CREATED BY: PIXELB8 & SECRET UNIVERSAL SERVICES', WIDTH / 2, 100);
+        ctx.fillText('GAME DESIGN & ENGINES: FULL-STACK DEV TEAM', WIDTH / 2, 130);
+        ctx.fillText('ENTROPIA UNIVERSE LORE & COMMUNITY', WIDTH / 2, 160);
+        ctx.fillText('SPECIAL THANKS: JIMBOBBITYBOO & NEVERDIE JACOBS', WIDTH / 2, 190);
+
+        ctx.fillStyle = '#00ffcc'; ctx.font = '10px "Courier New", monospace'; ctx.fillText('PRESS ENTER TO RETURN TO TITLE', WIDTH / 2, HEIGHT - 30);
+    }
+    else if (gameState === 'STORY_INTRO') {
+        ctx.fillStyle = '#05070a'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = '#fff';
+        for(let i=0; i<60; i++) ctx.fillRect(((i*47 - cutsceneTimer*20) % WIDTH + WIDTH) % WIDTH, (i*31)%HEIGHT, i%2+1, i%2+1);
+
+        ctx.fillStyle = '#0066aa'; ctx.beginPath(); ctx.arc(WIDTH/2, HEIGHT + 120 - cutsceneTimer*12, 180 + cutsceneTimer*5, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(WIDTH/2 - 40, HEIGHT + 80 - cutsceneTimer*10, 60 + cutsceneTimer*2, 0, TAU); ctx.fill();
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 16px "Courier New", monospace'; ctx.textAlign = 'center';
+        ctx.globalAlpha = Math.min(1, cutsceneTimer * 1.5);
+
+        if (cutsceneStep === 0) ctx.fillText("YEAR 2026...", WIDTH / 2, HEIGHT / 2 - 20);
+        else if (cutsceneStep === 1) ctx.fillText("THE IMPERIUM THREATENS CYRENE.", WIDTH / 2, HEIGHT / 2 - 20);
+        else if (cutsceneStep === 2) { ctx.fillStyle = '#ff4444'; ctx.fillText("WAR HAS CONSUMED THE PLANET.", WIDTH / 2, HEIGHT / 2 - 20); }
+        else { ctx.fillStyle = '#00ffcc'; ctx.fillText("FIVE HEROES MUST ANSWER THE CALL.", WIDTH / 2, HEIGHT / 2 - 20); }
+        ctx.globalAlpha = 1;
+    }
+    else if (gameState === 'HERO_INTRO') {
+        const scene = heroIntroScenes[charSelection];
+        const phase = Math.min(2, Math.floor(cutsceneTimer / 2.05));
+        ctx.fillStyle = '#07101c'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = selectedCharacter.color; ctx.globalAlpha = 0.18;
+        ctx.beginPath(); ctx.arc(WIDTH / 2, 145, 110 + Math.sin(cutsceneTimer * 3) * 8, 0, TAU); ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#111827'; ctx.fillRect(0, PLAY_AREA_BOTTOM - 45, WIDTH, 45);
+        drawPlayerSprite(WIDTH / 2, FLOOR_Y, cutsceneTimer > 4.1, selectedCharacter, cutsceneTimer > 4.1 ? 'Punch Up' : 'idle', true);
+        ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 10px "Courier New", monospace'; ctx.textAlign = 'center';
+        ctx.fillText(scene.location, WIDTH / 2, 24);
+        drawCinemaCaption(scene.lines[phase], 226, phase === 2 ? selectedCharacter.color : '#fff');
+        if (cutsceneTimer > 4.1) {
+            ctx.strokeStyle = selectedCharacter.color; ctx.lineWidth = 3;
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath(); ctx.arc(WIDTH / 2, FLOOR_Y - 38, 30 + i * 11 + cutsceneTimer * 3, 0, TAU); ctx.stroke();
+            }
+        }
+        ctx.fillStyle = '#777'; ctx.font = '8px "Courier New", monospace'; ctx.fillText('ENTER TO SKIP', WIDTH / 2, 260);
+    }
+    else if (gameState === 'CHARACTER_SELECT') {
+        ctx.fillStyle = '#05070a'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = '#1e3a8a'; ctx.fillRect(0, 20, WIDTH, 30);
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 18px Impact, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('PLAYER SELECT', WIDTH / 2, 42);
+
+        ctx.fillStyle = '#4ade80'; ctx.font = 'bold 10px "Courier New", monospace';
+        characters.forEach((char, idx) => { ctx.fillText(char.name.split(' ')[0], 45 + idx * 80 + 35, 65); });
+
+        characters.forEach((char, idx) => {
+            const bx = 45 + idx * 80;
+            const isSel = charSelection === idx;
+            ctx.fillStyle = isSel ? '#1a2238' : '#000'; ctx.fillRect(bx, 75, 70, 70);
+            if (isSel) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(bx, 75, 70, 70); }
+            
+            ctx.fillStyle = char.color; ctx.beginPath(); ctx.arc(bx + 35, 110, 25, 0, Math.PI, true); ctx.fill();
+            ctx.fillRect(bx+10, 110, 50, 30);
+            ctx.fillStyle = '#111'; ctx.fillRect(bx+15, 105, 40, 15);
+            ctx.fillStyle = '#8ef9ff'; ctx.fillRect(bx+20, 110, 10, 4);
+            ctx.fillStyle = '#fff'; ctx.fillRect(bx+25, 135, 20, 10);
+
+            drawPlayerSprite(bx + 35, 200, false, char, 'idle', true);
+        });
+
+        ctx.fillStyle = '#111'; ctx.fillRect(0, 215, WIDTH, 55);
+        ctx.fillStyle = '#fff'; ctx.font = '10px "Courier New", monospace'; ctx.textAlign = 'center';
+        ctx.fillText(`${selectedCharacter.name} - ${selectedCharacter.title}`, WIDTH / 2, 235);
+        ctx.fillStyle = '#aaa'; ctx.font = '9px "Courier New", monospace'; ctx.fillText(`${selectedCharacter.ranger} — ${selectedCharacter.weapon}`, WIDTH / 2, 255);
+    }
+    else if (gameState === 'INTRO_CUTSCENE') {
+        const stageData = stages[currentStage - 1];
+        drawSNESBackground(0, stageData.themeColor);
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, WIDTH, 40); ctx.fillRect(0, PLAY_AREA_BOTTOM - 40, WIDTH, 40);
+        ctx.fillStyle = '#ffd700'; ctx.font = 'bold 20px Impact, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(`STAGE ${currentStage}: ${stageData.name.toUpperCase()}`, WIDTH / 2, 28);
+        if (stageData.mech) {
+            ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 9px "Courier New", monospace';
+            ctx.fillText('MEGA MECHA BATTLE — GUARDIAN SYSTEM DEPLOYED', WIDTH / 2, 38);
+        }
+
+        if (cutsceneTimer < 1.2) {
+            drawPlayerSprite(-20 + cutsceneTimer * 80, FLOOR_Y, false, selectedCharacter, 'idle', true);
+            ctx.fillStyle = '#fff'; ctx.font = '10px "Courier New", monospace';
+            ctx.fillText(selectedCharacter.intro, WIDTH / 2, PLAY_AREA_BOTTOM - 15);
+        } else if (cutsceneTimer < 2.7) {
+            drawPlayerSprite(80, FLOOR_Y, false, selectedCharacter, 'idle', true);
+            drawEnemy(20, FLOOR_Y, stageData.mobs[0], true, 0);
+            drawEnemy(140, FLOOR_Y, stageData.mobs[1] || stageData.mobs[0], false, 0);
+            ctx.fillStyle = '#ff4444'; ctx.font = '10px "Courier New", monospace';
+            ctx.fillText('AMBUSHED BY IMPERIUM FORCES!', WIDTH / 2, PLAY_AREA_BOTTOM - 15);
+        } else {
+            drawPlayerSprite(80, FLOOR_Y, true, selectedCharacter, 'idle', true);
+            ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 12px "Courier New", monospace';
+            ctx.fillText('CYRENE RANGER — TRANSFORM & STRIKE!', WIDTH / 2, PLAY_AREA_BOTTOM - 15);
+        }
+        drawSNESUI();
+    }
+    else if (gameState === 'PLAYING') {
+        const stageData = stages[currentStage - 1];
+        drawSNESBackground(cameraX, stageData.themeColor);
+        drawPlatforms();
+        if (isMechMode) drawMechHazards();
+
+        const drawList = getDrawList();
+
+        drawList.forEach(item => {
+            const dX = item.obj.x - cameraX;
+            if (dX < -80 || dX > WIDTH + 80) return;
+
+            if (item.type === 'dest') {
+                if (item.obj.type === 'car') {
+                    ctx.fillStyle = '#a11e3b'; ctx.fillRect(dX - 40, item.obj.y - 40, 80, 20); ctx.fillRect(dX - 50, item.obj.y - 20, 100, 20);
+                    ctx.fillStyle = '#4a6b8c'; ctx.fillRect(dX - 25, item.obj.y - 35, 20, 15); ctx.fillRect(dX + 5, item.obj.y - 35, 20, 15);
+                    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(dX - 30, item.obj.y, 10, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(dX + 30, item.obj.y, 10, 0, TAU); ctx.fill();
+                    ctx.fillStyle = '#ccc'; ctx.beginPath(); ctx.arc(dX - 30, item.obj.y, 4, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(dX + 30, item.obj.y, 4, 0, TAU); ctx.fill();
+                } else if (item.obj.type === 'crate') {
+                    ctx.fillStyle = '#8b5a2b'; ctx.fillRect(dX - 15, item.obj.y - 30, 30, 30);
+                    ctx.strokeStyle = '#5c3a18'; ctx.lineWidth = 2; ctx.strokeRect(dX - 15, item.obj.y - 30, 30, 30);
+                    ctx.beginPath(); ctx.moveTo(dX-15, item.obj.y-30); ctx.lineTo(dX+15, item.obj.y); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(dX+15, item.obj.y-30); ctx.lineTo(dX-15, item.obj.y); ctx.stroke();
+                } else {
+                    drawStageSetPiece(dX, item.obj);
+                }
+            } else if (item.type === 'loot') {
+                drawLoot(dX, item.obj.y, item.obj.type);
+            } else if (item.type === 'enemy') {
+                if (item.obj.state === 'aim') {
+                    const pulse = Math.floor(item.obj.stateTimer / 5) % 2 ? 0.85 : 0.35;
+                    ctx.strokeStyle = `rgba(255,45,70,${pulse})`;
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(dX, item.obj.y - 25);
+                    ctx.lineTo(item.obj.aimX - cameraX, item.obj.aimY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.beginPath(); ctx.arc(item.obj.aimX-cameraX,item.obj.aimY,9,0,TAU);ctx.stroke();
+                    ctx.fillStyle = '#ff334f';
+                    ctx.font = 'bold 9px "Arial Black"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(isMechMode?'DODGE!':'CROUCH!', item.obj.aimX-cameraX, item.obj.aimY-13);
+                }
+                drawEnemy(dX, item.obj.y, item.obj.name, playerX > item.obj.x, item.obj.hitFlash);
+                if (item.obj.armor > 0) {
+                    ctx.fillStyle='#07111f';ctx.fillRect(dX-13,item.obj.y-66,26,5);
+                    for(let armor=0;armor<item.obj.armor;armor++){ctx.fillStyle='#65e8ff';ctx.fillRect(dX-11+armor*8,item.obj.y-65,6,3);}
+                }
+                if (item.obj.hp > 0 && item.obj.y >= FLOOR_Y - 10) { ctx.fillStyle = '#f00'; ctx.fillRect(dX - 10, item.obj.y - 50, 20 * (item.obj.hp / item.obj.maxHp), 3); }
+            } else if (item.type === 'boss') {
+                if (item.obj.state === 'shoot') {
+                    ctx.strokeStyle = `rgba(240,70,255,${Math.floor(item.obj.stateTimer / 5) % 2 ? .9 : .35})`;
+                    ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.beginPath();
+                    ctx.moveTo(dX, item.obj.y - 40);
+                    ctx.lineTo(item.obj.aimX - cameraX, item.obj.aimY);
+                    ctx.stroke(); ctx.setLineDash([]);
+                    ctx.beginPath();ctx.arc(item.obj.aimX-cameraX,item.obj.aimY,12,0,TAU);ctx.stroke();
+                }
+                drawEnemy(dX, item.obj.y, item.obj.name, playerX > item.obj.x, item.obj.hitFlash);
+                if (item.obj.state === 'telegraph') { ctx.fillStyle = '#fde047'; ctx.font = 'bold 20px "Arial Black"'; ctx.fillText('!', dX - 5, item.obj.y - 65); }
+            } else if (item.type === 'player') {
+                drawPlayerSprite(dX, item.obj.y, isMorphActive, item.obj.charObj, item.obj.state, item.obj.isRight);
+            }
+        });
+
+        if (bossObj) {
+            ctx.fillStyle = '#222'; ctx.fillRect(120, 20, 240, 12);
+            ctx.fillStyle = '#ef4444'; ctx.fillRect(122, 22, (bossObj.hp / bossObj.maxHp) * 236, 8);
+            ctx.fillStyle = '#fff'; ctx.font = '10px "Courier New", monospace'; ctx.textAlign = 'left'; ctx.fillText(bossObj.name, 120, 15);
+        }
+
+        if (goFlashTimer > 0 && Math.floor(goFlashTimer / 10) % 2 === 0) {
+            ctx.fillStyle = '#fde047'; ctx.font = 'bold 24px Impact'; ctx.textAlign = 'right'; ctx.fillText('GO ->', WIDTH - 20, HEIGHT / 2); ctx.textAlign = 'left';
+        }
+
+        projectiles.forEach(p => {
+            ctx.strokeStyle = p.color || (p.isEnemy ? '#ff334f' : '#00ffcc');
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(p.x - cameraX - (p.vx || 0) * 2.2, p.y - (p.vy || 0) * 2.2); ctx.lineTo(p.x - cameraX, p.y); ctx.stroke();
+            ctx.fillStyle = p.color || (p.isEnemy ? '#ff334f' : '#00ffcc');
+            ctx.beginPath(); ctx.arc(p.x - cameraX, p.y, p.radius || 4, 0, TAU); ctx.fill();
+            if (p.missile) { ctx.fillStyle='#fff';ctx.fillRect(p.x-cameraX-(p.vx||0)*1.4-3,p.y-(p.vy||0)*1.4-2,6,4); }
+        });
+        hitSparks.forEach(p => { ctx.fillStyle = p.color; ctx.fillRect(p.x - cameraX, p.y, 4, 4); });
+        floatingTexts.forEach(t => { ctx.fillStyle = t.color; ctx.font = 'bold 12px "Courier New", monospace'; ctx.textAlign = 'center'; ctx.fillText(t.text, t.x - cameraX, t.y); });
+
+        drawSNESUI();
+
+        if (midEvent && midEvent.active) {
+            ctx.fillStyle='rgba(4,7,16,.88)';ctx.fillRect(80,46,320,30);
+            ctx.fillStyle='#ffd700';ctx.font='bold 10px "Courier New", monospace';ctx.textAlign='center';ctx.fillText(midEvent.title,WIDTH/2,58);
+            ctx.fillStyle='#fff';ctx.font='8px "Courier New", monospace';
+            let status=midEvent.instruction;
+            if (midEvent.count) status += `  [${midEvent.progress}/${midEvent.count}]`;
+            if (['sprint','defend','survive'].includes(midEvent.type)) status += `  ${Math.max(0,Math.ceil(midEvent.timer/60))}s`;
+            ctx.fillText(status,WIDTH/2,70);
+        }
+        if (bannerTime > 0 && Math.floor(bannerTime/8)%2===0) {
+            ctx.fillStyle='rgba(0,0,0,.78)';ctx.fillRect(70,100,340,44);
+            ctx.fillStyle=banner.includes('COMPLETE')?'#4ade80':'#ffd700';ctx.font='bold 18px Impact, sans-serif';ctx.textAlign='center';ctx.fillText(banner,WIDTH/2,129);
+        }
+        
+        if (isPaused) {
+            ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 36px Impact, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('PAUSED', WIDTH / 2, HEIGHT / 2);
+        }
+    }
+    else if (gameState === 'STAGE_CLEAR') {
+        ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = '#4ade80'; ctx.font = 'bold 26px Impact, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(`STAGE ${currentStage} CLEAR!`, WIDTH / 2, 100);
+        ctx.fillStyle = '#fff'; ctx.font = '12px "Courier New", monospace'; ctx.fillText('Imperium forces routed.', WIDTH / 2, 140); ctx.fillText('PRESS ENTER TO CONTINUE', WIDTH / 2, 190);
+    }
+    else if (gameState === 'MECH_TRANSITION') {
+        drawStarfield(18);
+        const phase = Math.min(4, Math.floor(cutsceneTimer / 2.35));
+        const lines = [
+            'Zorin falls—but his retreat was only a distraction.',
+            'Above Cyrene, the Imperium dreadnought opens its launch bays.',
+            'Enemy war machines descend. Ranger weapons cannot stop them.',
+            `${selectedCharacter.name}: "Then we fight bigger."`,
+            'GUARDIAN MEGA MECHA — COMBINATION SEQUENCE ENGAGED!'
+        ];
+        ctx.fillStyle = '#2563a8'; ctx.beginPath(); ctx.arc(120, 250, 115, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#58d68d'; ctx.beginPath(); ctx.arc(90, 225, 38, 0, TAU); ctx.fill();
+        for (let i = 0; i < 5; i++) {
+            const sx = 360 + i * 32 - Math.min(150, cutsceneTimer * 18);
+            ctx.fillStyle = i === 4 ? '#ef4444' : '#6b7280';
+            ctx.fillRect(sx, 55 + i * 22, 42 + i * 5, 10);
+            ctx.fillStyle = '#ff4d5a'; ctx.fillRect(sx - 8, 58 + i * 22, 8, 4);
+        }
+        if (phase >= 3) {
+            ctx.fillStyle = selectedCharacter.color;
+            ctx.fillRect(205, 85, 70, 100); ctx.fillRect(180, 105, 25, 65); ctx.fillRect(275, 105, 25, 65);
+            ctx.fillStyle = '#00ffcc'; ctx.fillRect(226, 110, 28, 28);
+            ctx.fillStyle = '#fff'; ctx.fillRect(215, 185, 20, 42); ctx.fillRect(245, 185, 20, 42);
+        }
+        ctx.fillStyle = phase === 4 ? '#ffd700' : '#00ffcc'; ctx.font = 'bold 13px "Courier New", monospace'; ctx.textAlign = 'center';
+        ctx.fillText(phase === 4 ? 'THE MEGA MECHA WAR BEGINS' : 'THE WAR ESCALATES', WIDTH / 2, 30);
+        drawCinemaCaption(lines[phase], 244, phase === 4 ? '#ffd700' : '#fff');
+        ctx.fillStyle = '#777'; ctx.font = '8px "Courier New", monospace'; ctx.fillText('ENTER TO SKIP', WIDTH / 2, 262);
+    }
+    else if (gameState === 'UPGRADE_SELECT') {
+        ctx.fillStyle = '#080b18'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 24px Impact, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('CHOOSE YOUR UPGRADE', WIDTH / 2, 48);
+        ctx.fillStyle = '#aab3c7'; ctx.font = '10px "Courier New", monospace';
+        ctx.fillText(`PREPARE FOR STAGE ${currentStage + 1}${currentStage + 1 >= 7 ? ' — MEGA MECHA DEPLOYMENT' : ''}`, WIDTH / 2, 68);
+
+        upgradeChoices.forEach((upgrade, index) => {
+            const x = 18 + index * 155;
+            const selected = index === upgradeSelection;
+            ctx.fillStyle = selected ? '#1c2842' : '#101522';
+            ctx.fillRect(x, 92, 134, 105);
+            ctx.strokeStyle = selected ? upgrade.color : '#30394f';
+            ctx.lineWidth = selected ? 3 : 1;
+            ctx.strokeRect(x, 92, 134, 105);
+            ctx.fillStyle = upgrade.color;
+            ctx.fillRect(x + 51, 106, 32, 24);
+            ctx.fillStyle = selected ? '#fff' : '#aab3c7';
+            ctx.font = 'bold 10px "Courier New", monospace';
+            ctx.fillText(upgrade.name, x + 67, 149);
+            ctx.font = '8px "Courier New", monospace';
+            const words = upgrade.description.split(' ');
+            ctx.fillText(words.slice(0, 3).join(' '), x + 67, 169);
+            ctx.fillText(words.slice(3).join(' '), x + 67, 181);
+        });
+
+        ctx.fillStyle = '#ffda3a'; ctx.font = '10px "Courier New", monospace';
+        ctx.fillText('LEFT / RIGHT TO CHOOSE — ENTER TO INSTALL', WIDTH / 2, 235);
+        ctx.fillStyle = '#667085'; ctx.font = '8px "Courier New", monospace';
+        ctx.fillText('UPGRADES REMAIN ACTIVE FOR THE REST OF THIS RUN', WIDTH / 2, 253);
+    }
+    else if (gameState === 'ENDING_CINEMATIC') {
+        drawStarfield(30);
+        const phase = Math.min(4, Math.floor(cutsceneTimer / 2.5));
+        const lines = [
+            'The Overlord core tears itself apart.',
+            'The Guardian Mega Mecha carries the Rangers clear of the blast.',
+            'For the first time in months, Cyrene’s sky is quiet.',
+            `${selectedCharacter.name}: "Cyrene is free. Let’s keep it that way."`,
+            'THE IMPERIUM WAR IS OVER... FOR NOW.'
+        ];
+        if (phase === 0) {
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(WIDTH / 2, 120, 25 + cutsceneTimer * 24, 0, TAU); ctx.fill();
+            ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(WIDTH / 2, 120, 18 + cutsceneTimer * 12, 0, TAU); ctx.fill();
+        } else if (phase === 1) {
+            ctx.fillStyle = selectedCharacter.color; ctx.fillRect(190, 80, 82, 110); ctx.fillStyle = '#00ffcc'; ctx.fillRect(220, 105, 25, 28);
+        } else {
+            const sky = ctx.createLinearGradient(0, 0, 0, PLAY_AREA_BOTTOM);
+            sky.addColorStop(0, '#173a68'); sky.addColorStop(1, '#f08c66'); ctx.fillStyle = sky; ctx.fillRect(0, 0, WIDTH, PLAY_AREA_BOTTOM);
+            ctx.fillStyle = '#17213a'; for (let i = 0; i < 9; i++) ctx.fillRect(i * 62, 120 + i % 3 * 20, 54, 100);
+            const mechState = isMechMode;
+            isMechMode = false;
+            drawPlayerSprite(WIDTH / 2, FLOOR_Y, false, selectedCharacter, 'idle', true);
+            isMechMode = mechState;
+        }
+        ctx.fillStyle = '#ffd700'; ctx.font = 'bold 13px "Courier New", monospace'; ctx.textAlign = 'center'; ctx.fillText('FINAL TRANSMISSION', WIDTH / 2, 28);
+        drawCinemaCaption(lines[phase], 240, phase === 4 ? '#ffd700' : '#fff');
+        ctx.fillStyle = '#777'; ctx.font = '8px "Courier New", monospace'; ctx.fillText('ENTER TO CONTINUE', WIDTH / 2, 262);
+    }
+    else if (gameState === 'FINAL_CREDITS') {
+        ctx.fillStyle = '#040711'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        const credits = [
+            'CYRENE RANGERS', 'IMPERIUM BREAKER', '',
+            'CREATED BY', 'PIXELB8 & SECRET UNIVERSAL SERVICES', '',
+            'STARRING', selectedCharacter.name, '',
+            'THE CYRENE RANGERS', 'JIMBOBBITYBOO  •  SIENNA BLAZE', 'NEVERDIE  •  ASTRID VAHL  •  TYSON BLADE', '',
+            'GAME DESIGN', 'PIXELB8 ARCADE WORKS', '',
+            'SPECIAL THANKS', 'THE ENTROPIA UNIVERSE COMMUNITY', '',
+            'NO RANGERS WERE TT’D IN THE MAKING OF THIS GAME', '',
+            'THE END'
+        ];
+        const baseY = 295 - cutsceneTimer * 24;
+        credits.forEach((line, index) => {
+            const y = baseY + index * 25;
+            if (y < -20 || y > HEIGHT + 20) return;
+            const heading = ['CYRENE RANGERS','CREATED BY','STARRING','THE CYRENE RANGERS','GAME DESIGN','SPECIAL THANKS','THE END'].includes(line);
+            ctx.fillStyle = heading ? (line === 'THE END' ? '#ffd700' : '#00ffcc') : '#fff';
+            ctx.font = `${heading ? 'bold ' : ''}${heading ? 14 : 10}px "Courier New", monospace`;
+            ctx.textAlign = 'center'; ctx.fillText(line, WIDTH / 2, y);
+        });
+        ctx.fillStyle = '#555'; ctx.font = '8px "Courier New", monospace'; ctx.fillText('ENTER TO FINISH', WIDTH / 2, 262);
+    }
+    else if (gameState === 'VICTORY') {
+        ctx.fillStyle = '#051c0f'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = '#ffd700'; ctx.font = 'bold 28px Impact, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('VICTORY! CYRENE SAVED!', WIDTH / 2, 100);
+        ctx.fillStyle = '#fff'; ctx.font = '12px "Courier New", monospace'; ctx.fillText(`FINAL SCORE: ${score}`, WIDTH / 2, 140); ctx.fillText('PRESS ENTER TO RESTART', WIDTH / 2, 190);
+    }
+
+    ctx.restore();
+}
+
+let lastTime = performance.now();
+function gameLoop(time) {
+    const dt = Math.min((time - lastTime) / 1000, 0.05);
+    lastTime = time;
+    update(dt);
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+requestAnimationFrame(gameLoop);
+
+</script>
+</body>
+</html>

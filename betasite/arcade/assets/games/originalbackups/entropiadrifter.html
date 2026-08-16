@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENTROPIAN DRIFTER</title>
+    <style>
+        :root {
+            --cabinet-blue: #0f172a;
+            --cabinet-dark-blue: #020617;
+            --marquee-cyan: #00ffcc;
+            --t-molding: #0ea5e9;
+        }
+
+        body {
+            background-color: #0c0f12; margin: 0; padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; font-family: 'Courier New', Courier, monospace;
+            color: #fff; overflow: hidden; perspective: 1000px;
+        }
+
+        .arcade-container {
+            position: relative; width: 680px;
+            background: linear-gradient(135deg, var(--cabinet-dark-blue), var(--cabinet-blue));
+            border-left: 14px solid var(--t-molding); border-right: 14px solid var(--t-molding);
+            border-radius: 20px 20px 10px 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,255,255,0.1);
+            display: flex; flex-direction: column; align-items: center;
+            padding-bottom: 40px; user-select: none;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-style: preserve-3d;
+        }
+
+        .arcade-container.lean-in { transform: scale(1.6) translateY(50px) translateZ(100px); }
+
+        .marquee {
+            width: 100%; height: 90px; background: #050505;
+            border-bottom: 6px solid #000; display: flex; justify-content: center; align-items: center;
+            position: relative; overflow: hidden; border-radius: 8px 8px 0 0;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.8);
+        }
+        .marquee-art {
+            position: absolute; width: 100%; height: 100%;
+            background: repeating-linear-gradient(45deg, rgba(0, 255, 204, 0.05), rgba(0, 255, 204, 0.05) 10px, rgba(0, 0, 0, 0.4) 10px, rgba(0, 0, 0, 0.4) 20px);
+        }
+        .marquee h1 {
+            font-size: 3rem; margin: 0; font-family: 'Impact', sans-serif;
+            color: var(--marquee-cyan); text-shadow: 0 0 15px #0284c7, 0 0 30px #0ea5e9, 4px 4px 0px #000;
+            letter-spacing: 4px; z-index: 2; font-style: italic; transform: skewX(-8deg);
+        }
+
+        .bezel {
+            width: 95%; background: #0a0a0a; margin-top: 15px; padding: 25px;
+            border-radius: 15px; box-shadow: inset 0 0 30px #000; border-bottom: 4px solid #000;
+        }
+
+        .screen-container {
+            position: relative; width: 100%; aspect-ratio: 16/9;
+            background: #000; border-radius: 10px; overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,1), 0 0 10px rgba(0, 255, 204, 0.1);
+            border: 4px solid #111;
+        }
+
+        canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+
+        .crt-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 0%, rgba(18, 16, 16, 0) 58%, rgba(0, 0, 0, 0.25) 58%, rgba(0, 0, 0, 0.25) 100%);
+            background-size: 100% 4px; opacity: 0.6; z-index: 10; pointer-events: none;
+        }
+
+        .hud-bottom {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            padding: 8px 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px;
+            z-index: 9999; pointer-events: none;
+        }
+        .status-bars { display: flex; gap: 10px; width: 40%; pointer-events: auto; }
+        .bar-wrap { flex: 1; background: #111; border: 1px solid #334155; height: 10px; position: relative; border-radius: 2px; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width 0.1s; }
+        
+        .hotbar-wrap { display: flex; justify-content: flex-start; gap: 4px; pointer-events: auto; }
+        .hotbar-slot {
+            width: 32px; height: 32px; background: rgba(15, 23, 42, 0.85); border: 2px solid #334155;
+            border-radius: 4px; display: flex; justify-content: center; align-items: center;
+            font-size: 0.5rem; color: #fff; position: relative; cursor: pointer; text-align: center;
+            touch-action: none; user-select: none; transition: all 0.2s;
+        }
+        .hotbar-slot.active { border-color: #00ffcc; box-shadow: 0 0 10px rgba(0,255,204,0.5); }
+        .hotbar-slot span { position: absolute; top: 2px; left: 3px; font-size: 0.55rem; color: #94a3b8; font-weight: bold; }
+
+        .drag-active .hotbar-slot, .drag-active .equip-slot { border-color: #facc15; box-shadow: 0 0 10px rgba(250, 204, 21, 0.5); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        #drag-ghost {
+            position: fixed; pointer-events: none; z-index: 10000; display: none;
+            background: #0ea5e9; border: 2px solid #fff; border-radius: 4px;
+            color: #fff; padding: 4px 8px; font-size: 12px; font-family: 'Courier New', monospace;
+            box-shadow: 0 0 15px rgba(0,255,204,0.8); font-weight: bold; transform: translate(-50%, -50%);
+        }
+
+        #context-menu {
+            position: fixed; z-index: 10001; background: #020617; border: 1px solid #38bdf8;
+            border-radius: 4px; padding: 4px; display: none; flex-direction: column; gap: 2px;
+            font-family: 'Courier New', monospace; font-size: 0.75rem; box-shadow: 0 4px 10px rgba(0,0,0,0.9);
+        }
+        .ctx-item { padding: 6px 12px; color: #fff; cursor: pointer; text-align: left; transition: background 0.2s; border-radius: 2px;}
+        .ctx-item:hover { background: #0ea5e9; color: #000; font-weight: bold;}
+
+        .control-panel {
+            width: 100%; height: 100px; background: linear-gradient(to bottom, #1e293b, #020617);
+            border-top: 6px solid #000; border-bottom: 6px solid #000; margin-top: 15px;
+            display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 15px rgba(0,0,0,0.8);
+        }
+        
+        .instructions { font-size: 0.8rem; color: #38bdf8; text-align: center; line-height: 1.6; }
+
+        .lean-btn {
+            width: 50px; height: 50px; background: radial-gradient(circle at 15px 15px, #facc15, #ca8a04);
+            border-radius: 50%; border: 4px solid #000; box-shadow: 0 4px 0 #854d0e, 0 6px 10px rgba(0,0,0,0.5);
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+            font-size: 0.75rem; font-weight: bold; color: #000; text-shadow: none; transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .lean-btn:active, .lean-btn.forced-active { transform: translateY(4px); box-shadow: 0 0px 0 #854d0e, 0 2px 5px rgba(0,0,0,0.5); }
+
+        .ui-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 20; display: flex;
+            flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'Courier New', monospace; pointer-events: auto;
+        }
+        .hidden { display: none !important; }
+        
+        .ui-box {
+            background: #0f172a; border: 2px solid #00ffcc; border-radius: 8px;
+            padding: 15px; width: 85%; box-shadow: 0 0 20px rgba(0,255,204,0.2);
+            text-align: center; color: #fff;
+        }
+        .ui-title { color: #00ffcc; margin: 0 0 10px 0; font-size: 1.2rem; text-transform: uppercase; }
+        
+        .cc-layout { display: flex; gap: 20px; text-align: left; }
+        .cc-form { flex: 1; display: grid; grid-template-columns: 100px 1fr; gap: 8px; font-size: 0.75rem; align-items: center; }
+        .cc-form input, .cc-form select { background: #1e293b; color: #fff; border: 1px solid #38bdf8; padding: 4px; font-family: inherit; width: 100%; box-sizing: border-box; }
+        .cc-preview { width: 120px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .preview-canvas { background: #1e293b; border: 2px solid #00ffcc; border-radius: 4px; width: 100px; height: 120px; image-rendering: pixelated; }
+        .confirm-btn { background: #00ffcc; color: #000; border: none; padding: 6px 12px; font-weight: bold; cursor: pointer; width: 100%; font-family: inherit; font-size: 0.75rem;}
+        .confirm-btn:hover { background: #34d399; }
+
+        .planet-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .planet-btn { background: #1e293b; color: #fff; border: 1px solid #38bdf8; padding: 10px; cursor: pointer; font-family: inherit; font-size: 0.75rem; transition: 0.2s; }
+        .planet-btn:hover { background: #38bdf8; color: #000; }
+
+        #inventory-ui { background: transparent; padding-top: 10px; justify-content: flex-start; pointer-events: none; }
+        #inventory-ui .ui-box { pointer-events: auto; width: 92%; height: 75%; display: flex; flex-direction: column; }
+
+        .inv-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.8rem; color: #38bdf8; border-bottom: 1px solid #38bdf8; padding-bottom: 5px; }
+        .inv-item { background: #1e293b; border: 1px solid #475569; padding: 6px; margin: 3px 0; display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; cursor: grab; touch-action: none; user-select: none; }
+        .inv-item:active { cursor: grabbing; border-color: #facc15; }
+        .inv-item:hover { background: #334155; }
+
+        .equip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 5px; }
+        .equip-slot { background: #0a0a0a; border: 1px dashed #475569; height: 32px; border-radius: 3px; display: flex; justify-content: center; align-items: center; font-size: 0.5rem; color: #64748b; position: relative; cursor: pointer; text-align: center;}
+        .equip-slot.filled { border-style: solid; border-color: #0ea5e9; background: rgba(14, 165, 233, 0.2); color: #fff;}
+
+        .map-container { width: 100%; height: 150px; background: #020617; border: 1px solid #38bdf8; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; border-radius: 8px;}
+        #worldMapCanvas { width: 100%; height: 100%; image-rendering: pixelated; cursor: grab; }
+        #worldMapCanvas:active { cursor: grabbing; }
+
+        .tt-cat { font-weight: bold; background: #334155; padding: 4px; font-size: 0.75rem; text-align: left; cursor: pointer; margin-top: 4px;}
+        .term-item { display: flex; justify-content: space-between; padding: 4px; border-bottom: 1px solid #334155; font-size: 0.65rem; align-items: center; background: #1e293b;}
+        .buy-btn { background: #00ffcc; border: none; padding: 2px 5px; font-size: 0.6rem; font-weight: bold; cursor: pointer;}
+        
+        #tp-list { max-height: 200px; overflow-y: auto; padding-right: 5px; }
+
+        #coords-display {
+            position: absolute; top: 10px; right: 15px; color: #38bdf8; font-family: monospace; font-size: 0.75rem; z-index: 5; text-shadow: 1px 1px 0 #000; pointer-events: none;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="drag-ghost">ITEM</div>
+    <div id="context-menu"></div>
+
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-art"></div>
+            <h1>ENTROPIAN DRIFTER</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container">
+                <canvas id="gameCanvas" width="480" height="270"></canvas>
+                <div id="coords-display" class="hidden">X: 0 Y: 0</div>
+                <div class="crt-overlay"></div>
+
+                <div id="start-menu" class="ui-overlay hidden">
+                    <div class="ui-box" style="background: transparent; border: none; box-shadow: none;">
+                        <h1 style="color: var(--marquee-cyan); text-shadow: 0 0 15px #0284c7, 0 0 30px #0ea5e9, 4px 4px 0px #000; font-size: 3.5rem; margin-bottom: 40px; font-family: 'Impact', sans-serif; font-style: italic; transform: skewX(-8deg);">ENTROPIAN DRIFTER</h1>
+                        <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
+                            <button class="confirm-btn" style="width: 250px; font-size: 1.2rem; padding: 12px;" onclick="startGame('new')">NEW GAME</button>
+                            <button class="confirm-btn" style="width: 250px; font-size: 1.2rem; padding: 12px; background: #1e293b; color: #94a3b8; border: 1px solid #475569;" onclick="startGame('continue')">CONTINUE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="char-create" class="ui-overlay hidden">
+                    <div class="ui-box">
+                        <h2 class="ui-title">COLONIST UPLINK</h2>
+                        <div class="cc-layout">
+                            <div class="cc-form">
+                                <label>NAME:</label> <input type="text" id="cc-name" value="Drifter" maxlength="12">
+                                <label>SKIN:</label> <input type="color" id="cc-skin" value="#fed7aa">
+                                <label>SHIRT:</label> <input type="color" id="cc-shirt" value="#94a3b8">
+                                <label>PANTS:</label> <input type="color" id="cc-pants" value="#1e293b">
+                                <label>HAIR C:</label> <input type="color" id="cc-hair" value="#451a03">
+                                <label>HAIR S:</label> 
+                                <select id="cc-style">
+                                    <option value="1">Short</option>
+                                    <option value="2">Spiky</option>
+                                    <option value="3">Long</option>
+                                    <option value="4">Pigtails</option>
+                                </select>
+                                <label>HEIGHT:</label> <input type="range" id="cc-h" min="0.8" max="1.2" step="0.1" value="1.0">
+                                <label>WIDTH:</label>  <input type="range" id="cc-w" min="0.8" max="1.3" step="0.1" value="1.0">
+                            </div>
+                            <div class="cc-preview">
+                                <canvas id="previewCanvas" class="preview-canvas" width="100" height="120"></canvas>
+                                <button class="confirm-btn" id="btn-confirm-char">ACCEPT</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="map-ui" class="ui-overlay hidden">
+                    <div class="ui-box" style="height: 85%; display: flex; flex-direction: column; padding: 10px;">
+                        <h2 class="ui-title" id="map-title" style="margin-bottom: 4px;">PLANETARY MAP</h2>
+                        <div style="display:flex; justify-content:center; gap:6px; margin-bottom:6px;">
+                            <button class="buy-btn" onclick="zoomMapUI(1.5)">+ ZOOM IN</button>
+                            <button class="buy-btn" onclick="zoomMapUI(0.67)">- ZOOM OUT</button>
+                            <button class="buy-btn" onclick="centerMapOnPlayer()">⌖ CENTER PLAYER</button>
+                            <button class="buy-btn" onclick="resetMapUI()">⟲ RESET</button>
+                        </div>
+                        <div class="map-container" style="flex: 1;">
+                            <canvas id="worldMapCanvas"></canvas>
+                        </div>
+                        <p style="color: #38bdf8; font-size: 0.65rem; margin-top: 6px;">Scroll/Drag to navigate | Press M to Close</p>
+                    </div>
+                </div>
+
+                <div id="planet-select" class="ui-overlay hidden">
+                    <div class="ui-box">
+                        <h2 class="ui-title">SHUTTLE DESTINATION</h2>
+                        <div class="planet-grid">
+                            <button class="planet-btn" onclick="travelTo('Calypso')">Planet Calypso</button>
+                            <button class="planet-btn" onclick="travelTo('Rocktropia')">ROCKtropia</button>
+                            <button class="planet-btn" onclick="travelTo('Cyrene')">Planet Cyrene</button>
+                            <button class="planet-btn" onclick="travelTo('Arkadia')">Planet Arkadia</button>
+                            <button class="planet-btn" onclick="travelTo('Monria')">Monria</button>
+                            <button class="planet-btn" onclick="travelTo('Toulan')">Planet Toulan</button>
+                            <button class="planet-btn" onclick="travelTo('NextIsland')" style="grid-column: span 3;">Next Island</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="inventory-ui" class="ui-overlay hidden">
+                    <div class="ui-box">
+                        <div class="inv-header">
+                            <span style="font-weight:bold;">INVENTORY & EQUIPMENT</span>
+                            <span id="inv-ped">PED: 0.00</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex: 1; height: 130px;">
+                            <div style="flex: 1; display: flex; flex-direction: column;">
+                                <span id="inv-ammo" style="font-size: 0.6rem; color: #0ea5e9; text-align: left; margin-bottom: 2px;">AMMO: 0 Cells</span>
+                                <div id="inv-list" style="flex: 1; overflow-y: auto; background: #020617; border: 1px solid #334155;"></div>
+                            </div>
+                            <div id="char-sheet" style="flex: 1; display: flex; flex-direction: column; background: #020617; border: 1px solid #334155; padding: 4px; overflow-y: auto;">
+                                <div style="color: #00ffcc; font-size: 0.65rem; margin-bottom: 4px;">ARMOUR</div>
+                                <div class="equip-grid" id="armour-grid">
+                                    <div class="equip-slot" data-slot="arm_head">Head</div>
+                                    <div class="equip-slot" data-slot="arm_body">Body</div>
+                                    <div class="equip-slot" data-slot="arm_arms">Arms</div>
+                                    <div class="equip-slot" data-slot="arm_gloves">Gloves</div>
+                                    <div class="equip-slot" data-slot="arm_thighs">Thighs</div>
+                                    <div class="equip-slot" data-slot="arm_shins">Shins</div>
+                                    <div class="equip-slot" data-slot="arm_boots">Boots</div>
+                                </div>
+                                <div style="color: #00ffcc; font-size: 0.65rem; margin: 4px 0;">CLOTHING</div>
+                                <div class="equip-grid" id="clothing-grid">
+                                    <div class="equip-slot" data-slot="clo_hat">Hat</div>
+                                    <div class="equip-slot" data-slot="clo_face">Face</div>
+                                    <div class="equip-slot" data-slot="clo_torso">Torso</div>
+                                    <div class="equip-slot" data-slot="clo_arms">Arms</div>
+                                    <div class="equip-slot" data-slot="clo_hands">Hands</div>
+                                    <div class="equip-slot" data-slot="clo_pants">Pants</div>
+                                    <div class="equip-slot" data-slot="clo_shins">Shins</div>
+                                    <div class="equip-slot" data-slot="clo_shoes">Shoes</div>
+                                    <div class="equip-slot" data-slot="clo_lring">L-Ring</div>
+                                    <div class="equip-slot" data-slot="clo_rring">R-Ring</div>
+                                    <div class="equip-slot" data-slot="clo_back">Back</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="color: #38bdf8; font-size: 0.65rem; margin-top: 5px;">R-Click items to equip. Drag weapons to Hotbar.</p>
+                    </div>
+                </div>
+
+                <div id="tt-ui" class="ui-overlay hidden">
+                    <div class="ui-box" style="height: 75%; display: flex; flex-direction: column;">
+                        <h2 class="ui-title">TRADE TERMINAL</h2>
+                        <div class="inv-header"><span id="tt-ped">PED: 0.00</span></div>
+                        <div id="tt-list" style="flex: 1; overflow-y: auto; text-align: left; border: 1px solid #334155;"></div>
+                        <button class="confirm-btn" style="margin-top: 10px;" onclick="closeTerminal()">CLOSE</button>
+                    </div>
+                </div>
+
+                <div id="craft-ui" class="ui-overlay hidden">
+                    <div class="ui-box">
+                        <h2 class="ui-title">MANUFACTURE TERMINAL</h2>
+                        <div id="craft-list" style="text-align: left; min-height: 80px;"></div>
+                        <button class="confirm-btn" style="margin-top: 15px;" onclick="closeTerminal()">CLOSE</button>
+                    </div>
+                </div>
+
+                <div id="tp-ui" class="ui-overlay hidden">
+                    <div class="ui-box">
+                        <h2 class="ui-title">TELEPORTER NETWORK</h2>
+                        <div id="tp-list" class="planet-grid"></div>
+                        <button class="confirm-btn" style="margin-top: 15px;" onclick="closeTerminal()">CLOSE</button>
+                    </div>
+                </div>
+
+                <div class="hud-bottom" id="hud-bottom" style="display: none;">
+                    <div class="status-bars">
+                        <div class="bar-wrap" title="Health"><div class="bar-fill" id="hp-bar" style="background: #ef4444; width: 100%;"></div></div>
+                        <div class="bar-wrap" title="Reload"><div class="bar-fill" id="reload-bar" style="background: #eab308; width: 100%;"></div></div>
+                    </div>
+                    <div class="hotbar-wrap" id="hotbar"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="lean-btn" id="zoomBtn">LEAN<br>L</div>
+            <div class="instructions">
+                <strong>WASD / ARROWS</strong>: Move<br>
+                <strong>SPACE</strong>: Jump
+            </div>
+            <div class="instructions">
+                <strong>L/R CLICK</strong>: Target/Interact<br>
+                <strong>I</strong>: Inv | <strong>M</strong>: Map
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
+        const prevCanvas = document.getElementById('previewCanvas'); const prevCtx = prevCanvas.getContext('2d');
+        const worldMapCanvas = document.getElementById('worldMapCanvas'); const wCtx = worldMapCanvas.getContext('2d');
+        const TAU = Math.PI * 2; const cabinet = document.getElementById('cabinet'); const zoomBtn = document.getElementById('zoomBtn');
+
+        let audioCtx = null;
+        function playTone(freq, type = 'square', duration = 0.1) {
+            try {
+                if (!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new AudioContext();
+                }
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = type; osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
+            } catch(e){}
+        }
+
+        const NexusBridge = {
+            MAP_CONFIG: {},
+            planetNameMap: {
+                "calypso": "Planet Calypso", "arkadia": "Planet Arkadia", "cyrene": "Planet Cyrene",
+                "rocktropia": "ROCKtropia", "toulan": "Planet Toulan", "nextisland": "Next Island", "monria": "Monria"
+            },
+            FALLBACKS: {
+                'Planet Cyrene': {
+                    locations: [
+                        { name: 'A.R.C. Staging HQ', long: 138400, lat: 77200, type: 'outpost', w: 300, h: 200 },
+                        { name: 'Janus Savannah TP', long: 137500, lat: 76500, type: 'teleporter' },
+                        { name: 'Zrik Settlement', long: 138200, lat: 78100, type: 'outpost', w: 250, h: 180 }
+                    ],
+                    mobs: [
+                        { name: 'Paneleon', hp: 120, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 138600, Latitude: 77000}, Data: {radius: 400} } }] },
+                        { name: 'Tide Claw', hp: 150, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 137500, Latitude: 76800}, Data: {radius: 600} } }] },
+                        { name: 'Rhino Beetle', hp: 80, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 138000, Latitude: 78000}, Data: {radius: 500} } }] }
+                    ]
+                },
+                'Planet Calypso': {
+                    locations: [
+                        { name: 'Camp Phoenix', long: 62491, lat: 82577, type: 'outpost', w: 300, h: 200 },
+                        { name: 'Camp Icarus', long: 63219, lat: 74370, type: 'outpost', w: 300, h: 200 },
+                        { name: 'Twin Peaks', long: 80300, lat: 82200, type: 'outpost', w: 350, h: 250 },
+                        { name: 'Port Atlantis', long: 61412, lat: 75216, type: 'teleporter' },
+                        { name: 'Ashi', long: 82232, lat: 78326, type: 'teleporter' },
+                        { name: 'Athena Spaceport', long: 71630, lat: 68183, type: 'teleporter' },
+                        { name: 'Atlantis Archipelago', long: 61501, lat: 68899, type: 'teleporter' },
+                        { name: 'Boreas Outpost', long: 74365, lat: 67336, type: 'teleporter' },
+                        { name: 'Cape Corinth', long: 61757, lat: 87923, type: 'teleporter' },
+                        { name: 'Emerald Lakes Mall', long: 31579, lat: 50205, type: 'teleporter' },
+                        { name: 'Fort Ithaca', long: 68554, lat: 87948, type: 'teleporter' },
+                        { name: 'Fort Medusa', long: 68889, lat: 84389, type: 'teleporter' },
+                        { name: 'Half Moon Cove', long: 63502, lat: 89177, type: 'teleporter' },
+                        { name: 'New Oxford', long: 33738, lat: 47704, type: 'teleporter' }
+                    ],
+                    mobs: [
+                        { name: 'Exarosaur', hp: 110, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 61600, Latitude: 75300}, Data: {radius: 300} } }] },
+                        { name: 'Snablesnot', hp: 60, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 61400, Latitude: 75000}, Data: {radius: 400} } }] }
+                    ]
+                },
+                'Planet Arkadia': {
+                    locations: [
+                        { name: 'Celeste Quarry', long: 30000, lat: 30000, type: 'outpost', w: 300, h: 200 },
+                        { name: 'Aakas TP', long: 31200, lat: 31500, type: 'teleporter' }
+                    ],
+                    mobs: [
+                        { name: 'Carabok', hp: 40, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 30200, Latitude: 30200}, Data: {radius: 300} } }] },
+                        { name: 'Halix', hp: 90, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 31000, Latitude: 31200}, Data: {radius: 500} } }] }
+                    ]
+                },
+                'ROCKtropia': {
+                    locations: [
+                        { name: 'City of Dreams', long: 135000, lat: 85000, type: 'outpost', w: 400, h: 300 },
+                        { name: 'Kong Island TP', long: 136000, lat: 86000, type: 'teleporter' }
+                    ],
+                    mobs: [
+                        { name: 'Street Goons', hp: 100, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 135200, Latitude: 85200}, Data: {radius: 400} } }] },
+                        { name: 'Zombies', hp: 120, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 136200, Latitude: 86200}, Data: {radius: 500} } }] }
+                    ]
+                },
+                'Planet Toulan': {
+                    locations: [{ name: 'Guardian Village', long: 134000, lat: 93000, type: 'outpost', w: 250, h: 200 }],
+                    mobs: [{ name: 'Tabtab', hp: 50, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 134200, Latitude: 93200}, Data: {radius: 400} } }] }]
+                },
+                'Next Island': {
+                    locations: [{ name: 'First Wave Landing', long: 127000, lat: 85000, type: 'outpost', w: 250, h: 200 }],
+                    mobs: [{ name: 'Papoo', hp: 70, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 127200, Latitude: 85200}, Data: {radius: 400} } }] }]
+                },
+                'Monria': {
+                    locations: [{ name: 'Monria Hub', long: 35000, lat: 18000, type: 'outpost', w: 250, h: 200 }],
+                    mobs: [{ name: 'Cultist', hp: 150, Spawns: [{ Properties: { Shape: 'Circle', Coordinates: {Longitude: 35200, Latitude: 18200}, Data: {radius: 300} } }] }]
+                }
+            },
+            init: function() {
+                const wikkiBasemapData = `
+Name;Planetary System;Planet;Left Offset;Bottom Offset;Width;Height;Scale;Order;Max. Zoom
+Ancient Greece;Next Island;Ancient Greece;32768;16384;512;512;16;15;3
+Arctic;Rocktropia;Hunt The THING;32768;16384;1024;1024;8;9;3
+Arkadia Moon;Arkadia;Arkadia Moon;8192;8197;516;516;16;11;3
+Planet Calypso;Calypso;Planet Calypso;16384;24576;4608;4608;16;1;9
+Calypso Gateway;Calypso;Planet Calypso;65536;65536;512;512;16;3;3
+Thule;Calypso;Thule;65536;65536;512;512;16;3;3
+Crystal Palace;Calypso;Crystal Palace;65536;65536;512;512;16;4;3
+foma;Calypso;Asteroid F.O.M.A.;65536;65536;512;512;16;5;3
+Hell;Rocktropia;ROCKtropia;32768;16384;1024;1024;8;8;3
+Secret Island;Rocktropia;ROCKtropia;32768;16399;512;512;16;10;3
+Monria;Monria;Monria;32768;16384;512;512;16;18;3
+Next Island;Next Island;Next Island;122880;81920;1024;1024;16;14;6
+Planet Arkadia;Arkadia;Planet Arkadia;8192;8192;1536;1536;16;12;6
+Arkadia Underground;Arkadia;Planet Arkadia Underground;8182;16384;512;512;16;13;3
+Planet Cyrene;Cyrene;Planet Cyrene;131072;73732;1024;1024;8;17;6
+Planet Toulan;Planet Toulan;Planet Toulan;131072;90143;512;512;16;19;2
+ROCKtropia;Rocktropia;ROCKtropia;131072;81920;1024;2048;8;7;6
+Setesh;Calypso;Setesh;65536;65536;512;512;16;3;3
+                `.trim();
+
+                wikkiBasemapData.split('\n').forEach(line => {
+                    const parts = line.split(';'); if(parts.length<8) return;
+                    this.MAP_CONFIG[parts[0].toLowerCase()] = { 
+                        left: parseFloat(parts[3]), bottom: parseFloat(parts[4]),
+                        width: parseFloat(parts[5]), height: parseFloat(parts[6]), scale: parseFloat(parts[7]) 
+                    };
+                });
+            },
+            getConfigLookup: function(wikiName) {
+                const mapping = {
+                    "Arkadia": "Planet Arkadia", "Cyrene": "Planet Cyrene",
+                    "Toulan": "Planet Toulan", "Hunt The THING": "Arctic",
+                    "Asteroid F.O.M.A.": "foma", "ROCKtropia": "ROCKtropia",
+                    "Calypso": "Planet Calypso"
+                };
+                return mapping[wikiName] || wikiName;
+            },
+            isPlanetMatch: function(itemPlanet, targetPlanet) {
+                if (!itemPlanet || !targetPlanet) return false;
+                const a = itemPlanet.toLowerCase().trim(); const b = targetPlanet.toLowerCase().trim();
+                if (a === b || a === "planet " + b || b === "planet " + a) return true;
+                if ((a.includes("f.o.m.a") || a === "foma") && (b.includes("f.o.m.a") || b === "foma")) return true;
+                return a.includes(b) || b.includes(a);
+            },
+            getConfig: function(planetKey) {
+                let fullName = this.planetNameMap[planetKey.toLowerCase()] || planetKey;
+                let mapped = this.getConfigLookup(fullName).toLowerCase();
+                return this.MAP_CONFIG[mapped] || { left: 0, bottom: 0, width: 5000, height: 5000, scale: 16 };
+            },
+            getDimensions: function(planetKey) {
+                const cfg = this.getConfig(planetKey);
+                return { w: cfg.width * cfg.scale, h: cfg.height * cfg.scale };
+            },
+            gameToLocal: function(planetKey, gameLong, gameLat) {
+                const cfg = this.getConfig(planetKey);
+                let localX = Math.round(gameLong - cfg.left);
+                let localY = Math.round((cfg.height * cfg.scale) - (gameLat - cfg.bottom)); 
+                return { x: localX, y: localY };
+            },
+            localToGame: function(planetKey, localX, localY) {
+                const cfg = this.getConfig(planetKey);
+                let gameLong = Math.round(localX + cfg.left);
+                let gameLat = Math.round(((cfg.height * cfg.scale) - localY) + cfg.bottom);
+                return { long: gameLong, lat: gameLat };
+            }
+        };
+        NexusBridge.init();
+
+        const TT_ITEMS = {
+            'Weapons - Ranged': [
+                { id: 'wpn_lp', name: 'Laser Pistol', type: 'weapon', cost: 2.00 }, { id: 'wpn_lr', name: 'Laser Rifle', type: 'weapon', cost: 4.50 },
+                { id: 'wpn_bp', name: 'BLP Pistol', type: 'weapon', cost: 2.00 }, { id: 'wpn_br', name: 'BLP Rifle', type: 'weapon', cost: 4.50 }
+            ],
+            'Weapons - Melee': [
+                { id: 'wpn_kn', name: 'Combat Knife', type: 'weapon', cost: 1.50 }, { id: 'wpn_sw', name: 'Longsword', type: 'weapon', cost: 3.50 }
+            ],
+            'Armour - Settler': [
+                { id: 'arm_h', name: 'Settler Helmet', type: 'arm_head', cost: 5.00 }, { id: 'arm_b', name: 'Settler Harness', type: 'arm_body', cost: 8.00 },
+                { id: 'arm_a', name: 'Settler Arm Guards', type: 'arm_arms', cost: 4.00 }, { id: 'arm_g', name: 'Settler Gloves', type: 'arm_gloves', cost: 2.50 },
+                { id: 'arm_t', name: 'Settler Thigh Guards', type: 'arm_thighs', cost: 4.50 }, { id: 'arm_s', name: 'Settler Shin Guards', type: 'arm_shins', cost: 4.00 },
+                { id: 'arm_bt', name: 'Settler Boots', type: 'arm_boots', cost: 3.50 }
+            ],
+            'Blueprints': [
+                { id: 'bp_nano', name: 'Nanocube Blueprint', type: 'bp', cost: 0.10 }, { id: 'bp_exp', name: 'Explosive Proj. I BP', type: 'bp', cost: 0.10 }
+            ]
+        };
+
+        const CUTSCENE_TEXT = [
+            "MINDARK SECURE TRANSMISSION...",
+            "Earth, 2026. You were promised a life of glory.",
+            "You sold your car, your house, and your vintage pog collection.",
+            "All to fund your dream of finding the perfect fishing spot...",
+            "...far away from the sweaty Exarosaur circles.",
+            "But the path to your first 'Global' is paved with empty PED cards.",
+            "Your journey begins on the Genesis Ship.",
+            "Try not to die immediately."
+        ];
+        
+        let activeMap = { w: 1600, h: 400, color: '#1e293b', img: new Image() }; 
+        let GLOBAL = { state: 'OFF', prevState: '', tick: 0, camera: { x: 0, y: 0 }, worldZoom: 2.2 };
+        let mapUIState = { zoom: 1, panX: 0, panY: 0, isDragging: false, startX: 0, startY: 0 };
+        let cutsceneData = { lineIndex: 0, charIndex: 0, timer: 0 };
+
+        let player = {
+            name: "Colonist", type: 'player', x: 100, y: 200, z: 0, vz: 0, speed: 1.5,
+            dir: 'right', state: 'idle',
+            skin: '#fed7aa', shirt: '#94a3b8', pants: '#1e293b', hair: '#451a03', hairStyle: 1, scaleW: 1.0, scaleH: 1.0,
+            inventory: [], hotbar: new Array(10).fill(null), equippedIndex: -1,
+            equipment: {}, target: null,
+            ped: 0.00, ammo: 0, hp: 100, maxHp: 100,
+            reloadCooldown: 0, maxReload: 25, actionCooldown: 0,
+            questStep: 0, walkDist: 0, jumps: 0, dummiesKilled: 0
+        };
+
+        let keys = {}; let keyJustPressed = {};
+        
+        function toggleLean() {
+            cabinet.classList.toggle('lean-in'); playTone(400, 'triangle', 0.1);
+            zoomBtn.classList.add('forced-active'); setTimeout(() => zoomBtn.classList.remove('forced-active'), 100);
+        }
+
+        zoomBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); toggleLean(); });
+
+        window.addEventListener('keydown', e => { 
+            if(!keys[e.code]) keyJustPressed[e.code] = true; keys[e.code] = true; 
+            if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault(); 
+            if (e.code === 'KeyL' && keyJustPressed['KeyL']) toggleLean();
+            if (e.key >= '0' && e.key <= '9' && ['THULE','EXPLORE'].includes(GLOBAL.state)) {
+                let slot = parseInt(e.key) - 1; if (slot === -1) slot = 9; 
+                if (player.hotbar[slot]) { player.equippedIndex = slot; playTone(600, 'square', 0.1); renderHotbar(); }
+            }
+        });
+        window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+        let npcs = [], enemies = [], groundLoot = [], envProps = [], walls = [], zones = [], terminals = [], teleporters = [];
+        let hitSparks = []; let dialogueBox = { active: false, text: "", timer: 0 }; let objectiveText = "";
+        let stars = Array.from({length: 80}, () => ({x: Math.random()*canvas.width, y: Math.random()*canvas.height, speed: 0.2+Math.random()*1.5}));
+
+        function setupThule() {
+            walls = [
+                {x:0, y:0, w:1600, h:50}, {x:0, y:350, w:1600, h:50}, {x:0, y:0, w:50, h:400}, {x:1550, y:0, w:50, h:400},
+                {x:400, y:0, w:20, h:150}, {x:400, y:250, w:20, h:150}, {x:800, y:0, w:20, h:150}, {x:800, y:250, w:20, h:150},
+                {x:1200, y:0, w:20, h:150}, {x:1200, y:250, w:20, h:150}
+            ];
+            terminals = [{ id: 'tt', x: 1000, y: 100, color: '#0369a1', label: 'TT' }, { id: 'craft', x: 1100, y: 100, color: '#b45309', label: 'CRAFT' }];
+            zones = []; envProps = []; teleporters = []; player.target = null;
+            npcs = [
+                { id: 'arrival', type: 'npc', x: 200, y: 150, color: '#f472b6', hair: '#fcd34d', hairStyle: 4, name: 'Guide Maya', dialogue: "Welcome to the Genesis Starship. I have a mission for you: 'Learning to Walk'. Walk around and jump 3 times, then talk to me." },
+                { id: 'gunner', type: 'npc', x: 500, y: 150, color: '#4d7c0f', hair: '#111', hairStyle: 1, name: 'Sgt. Hartman', dialogue: "I don't train maggots until Maya clears them! Get back there!" },
+                { id: 'ttlady', type: 'npc', x: 900, y: 200, color: '#0369a1', hair: '#a855f7', hairStyle: 3, name: 'Trade Official', dialogue: "I handle the local economy. Speak to Hartman first." },
+                { id: 'shuttle', type: 'npc', x: 1300, y: 200, color: '#334155', hair: '#94a3b8', hairStyle: 2, name: 'Shuttle Officer', dialogue: "Complete your training before requesting a drop." }
+            ];
+        }
+
+        const ccInputs = ['cc-name', 'cc-skin', 'cc-shirt', 'cc-pants', 'cc-hair', 'cc-style', 'cc-h', 'cc-w'];
+        ccInputs.forEach(id => document.getElementById(id).addEventListener('input', updateCharPreview));
+
+        document.getElementById('btn-confirm-char').addEventListener('click', () => { playTone(800, 'square', 0.2); switchState('REVIVE_ANIM'); });
+
+        function updateCharPreview() {
+            player.name = document.getElementById('cc-name').value || "Colonist";
+            player.skin = document.getElementById('cc-skin').value; player.shirt = document.getElementById('cc-shirt').value;
+            player.pants = document.getElementById('cc-pants').value; player.hair = document.getElementById('cc-hair').value;
+            player.hairStyle = parseInt(document.getElementById('cc-style').value);
+            player.scaleH = parseFloat(document.getElementById('cc-h').value); player.scaleW = parseFloat(document.getElementById('cc-w').value);
+            
+            prevCtx.clearRect(0, 0, prevCanvas.width, prevCanvas.height); prevCtx.save();
+            prevCtx.translate(50, 70); prevCtx.scale(2.5, 2.5); let tempDir = player.dir; player.dir = 'down'; 
+            drawCharacter(player, prevCtx, true); player.dir = tempDir; prevCtx.restore();
+        }
+
+        function pseudoRandom(x, y) { let n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453; return n - Math.floor(n); }
+
+        function parseShapeCoordinates(loc, planetKey) {
+            let props = loc.Properties || loc.properties || {};
+            let shape = props.Shape || props.shape; let shapeData = props.Data || props.data;
+            if (typeof shapeData === 'string') { try { shapeData = JSON.parse(shapeData); } catch(e){} }
+            let w = 300, h = 200;
+            
+            let coords = props.Coordinates || props.coordinates || {};
+            let gLong = Number(loc.long || loc.Longitude || loc.longitude || coords.Longitude || coords.longitude || 0);
+            let gLat = Number(loc.lat || loc.Latitude || loc.latitude || coords.Latitude || coords.latitude || 0);
+            
+            if (shape === 'Rectangle' && shapeData) { w = (shapeData.width || shapeData.Width || 300); h = (shapeData.height || shapeData.Height || 200); } 
+            else if (shape === 'Circle' && shapeData) { w = (shapeData.radius || shapeData.Radius || 150) * 2; h = w; } 
+            else if (shape === 'Polygon' && shapeData?.vertices) {
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                for(let i=0; i<shapeData.vertices.length; i+=2) {
+                    if(shapeData.vertices[i] < minX) minX = shapeData.vertices[i]; if(shapeData.vertices[i] > maxX) maxX = shapeData.vertices[i];
+                    if(shapeData.vertices[i+1] < minY) minY = shapeData.vertices[i+1]; if(shapeData.vertices[i+1] > maxY) maxY = shapeData.vertices[i+1];
+                }
+                w = maxX - minX; h = maxY - minY; gLong = minX + w/2; gLat = minY + h/2;
+            }
+            if (!gLong || !gLat) { let fallback = NexusBridge.localToGame(planetKey, activeMap.w/2, activeMap.h/2); gLong = fallback.long; gLat = fallback.lat; }
+            return { gLong, gLat, w, h };
+        }
+
+        function getRandomPointInSpawn(spawn, planetKey) {
+            let props = spawn.Properties || spawn.properties || {}; let shape = props.Shape || props.shape || 'Circle';
+            let data = props.Data || props.data || { radius: 200 }; if (typeof data === 'string') { try { data = JSON.parse(data); } catch(e) {} }
+
+            let coords = props.Coordinates || props.coordinates || {};
+            let baseLong = Number(spawn.long || spawn.Longitude || spawn.longitude || coords.Longitude || coords.longitude || 0);
+            let baseLat = Number(spawn.lat || spawn.Latitude || spawn.latitude || coords.Latitude || coords.latitude || 0);
+
+            if (shape === 'Polygon' && data.vertices && data.vertices.length >= 6) {
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                for(let i=0; i<data.vertices.length; i+=2) {
+                    if(data.vertices[i] < minX) minX = data.vertices[i]; if(data.vertices[i] > maxX) maxX = data.vertices[i];
+                    if(data.vertices[i+1] < minY) minY = data.vertices[i+1]; if(data.vertices[i+1] > maxY) maxY = data.vertices[i+1];
+                }
+                for(let attempts=0; attempts<15; attempts++) {
+                    let rx = minX + Math.random()*(maxX - minX); let ry = minY + Math.random()*(maxY - minY); let inside = false;
+                    for(let i=0, j=data.vertices.length-2; i<data.vertices.length; j=i, i+=2) {
+                        let xi = data.vertices[i], yi = data.vertices[i+1]; let xj = data.vertices[j], yj = data.vertices[j+1];
+                        let intersect = ((yi > ry) !== (yj > ry)) && (rx < (xj - xi) * (ry - yi) / (yj - yi) + xi); if (intersect) inside = !inside;
+                    }
+                    if (inside) return NexusBridge.gameToLocal(planetKey, rx, ry);
+                }
+            } 
+            let r = data.radius || data.Radius || 200; let angle = Math.random() * TAU; let dist = Math.random() * r;
+            return NexusBridge.gameToLocal(planetKey, baseLong + Math.cos(angle)*dist, baseLat + Math.sin(angle)*dist);
+        }
+
+        window.startGame = function(mode) {
+            playTone(800, 'square', 0.1); document.getElementById('start-menu').classList.add('hidden');
+            if (mode === 'new') switchState('CUTSCENE'); else switchState('PLANET_SELECT'); 
+        };
+
+        function switchState(newState) {
+            document.querySelectorAll('.ui-overlay').forEach(el => el.classList.add('hidden'));
+            if (!['INVENTORY', 'MAP', 'TT', 'CRAFT', 'PLANET_LOADING', 'TP'].includes(GLOBAL.state)) GLOBAL.prevState = GLOBAL.state;
+            GLOBAL.state = newState;
+            
+            if (newState === 'START_MENU') { document.getElementById('start-menu').classList.remove('hidden'); }
+            else if (newState === 'CUTSCENE') { cutsceneData = { lineIndex: 0, charIndex: 0, timer: 0 }; } 
+            else if (newState === 'SHIP_FLYBY') { cutsceneData.timer = 0; playTone(200, 'sawtooth', 2.0); } 
+            else if (newState === 'CHAR_CREATE') { document.getElementById('char-create').classList.remove('hidden'); updateCharPreview(); } 
+            else if (newState === 'REVIVE_ANIM') { cutsceneData.timer = 0; } 
+            else if (newState === 'THULE') {
+                player.x = 100; player.y = 200; player.z = 0; player.questStep = 0; setupThule();
+                activeMap.img.src = ''; objectiveText = "QUEST: Talk to Guide Maya."; document.getElementById('hud-bottom').style.display = 'flex'; renderHotbar();
+            } 
+            else if (newState === 'PLANET_SELECT') { document.getElementById('planet-select').classList.remove('hidden'); }
+            else if (newState === 'SHUTTLE_DROP') { cutsceneData.timer = 0; playTone(150, 'sawtooth', 3.0); }
+            else if (newState === 'PLANET_LOADING') { cutsceneData.timer = 0; }
+        }
+
+        function travelTo(planetName) { playTone(800, 'sine', 0.3); document.getElementById('planet-select').classList.add('hidden'); player.destination = planetName; switchState('SHUTTLE_DROP'); }
+
+        function toggleInventory() {
+            const ui = document.getElementById('inventory-ui');
+            if (ui.classList.contains('hidden')) {
+                GLOBAL.prevState = GLOBAL.state; ui.classList.remove('hidden'); renderInventory(); renderEquipment(); GLOBAL.state = 'INVENTORY';
+            } else {
+                ui.classList.add('hidden'); GLOBAL.state = GLOBAL.prevState; 
+                if (player.questStep === 4 && player.equippedIndex !== -1) {
+                    player.questStep = 5; objectiveText = "QUEST: Talk to Sgt. Hartman.";
+                    npcs[1].dialogue = "Good job! Now for 'Learning to Shoot'. Destroy the 3 targets and bring me the Scrap Metal they drop.";
+                }
+            }
+        }
+
+        function toggleMap() {
+            const ui = document.getElementById('map-ui');
+            if (ui.classList.contains('hidden')) {
+                GLOBAL.prevState = GLOBAL.state; ui.classList.remove('hidden'); GLOBAL.state = 'MAP';
+                document.getElementById('map-title').textContent = GLOBAL.prevState === 'EXPLORE' ? `${player.destination.toUpperCase()} GPS` : `GENESIS STARSHIP SCHEMATIC`;
+                
+                const wCanvas = document.getElementById('worldMapCanvas'); 
+                if(wCanvas) {
+                    const container = wCanvas.parentElement;
+                    if (wCanvas.width !== container.clientWidth) wCanvas.width = container.clientWidth;
+                    if (wCanvas.height !== container.clientHeight) wCanvas.height = container.clientHeight;
+                }
+                centerMapOnPlayer();
+            } else { ui.classList.add('hidden'); GLOBAL.state = GLOBAL.prevState; }
+        }
+
+        window.zoomMapUI = function(factor) {
+            const wCanvas = document.getElementById('worldMapCanvas');
+            let mouseX = wCanvas.width / 2; let mouseY = wCanvas.height / 2;
+
+            let newZoom = Math.min(Math.max(mapUIState.zoom * factor, 0.5), 10);
+            if (newZoom !== mapUIState.zoom) {
+                let baseScale = Math.min(wCanvas.width / activeMap.w, wCanvas.height / activeMap.h);
+                let currentScale = baseScale * mapUIState.zoom;
+                let worldX = (mouseX - mapUIState.panX) / currentScale;
+                let worldY = (mouseY - mapUIState.panY) / currentScale;
+                
+                mapUIState.zoom = newZoom;
+                let nextScale = baseScale * mapUIState.zoom;
+                mapUIState.panX = mouseX - (worldX * nextScale);
+                mapUIState.panY = mouseY - (worldY * nextScale);
+                playTone(500, 'sine', 0.05);
+            }
+        };
+
+        window.centerMapOnPlayer = function() {
+            const wCanvas = document.getElementById('worldMapCanvas');
+            let scale = Math.min(wCanvas.width / activeMap.w, wCanvas.height / activeMap.h);
+            mapUIState.panX = (wCanvas.width / 2) - (player.x * scale * mapUIState.zoom);
+            mapUIState.panY = (wCanvas.height / 2) - (player.y * scale * mapUIState.zoom);
+            playTone(600, 'square', 0.05);
+        };
+
+        window.resetMapUI = function() {
+            mapUIState.zoom = 1;
+            const wCanvas = document.getElementById('worldMapCanvas');
+            let scale = Math.min(wCanvas.width / activeMap.w, wCanvas.height / activeMap.h);
+            mapUIState.panX = (wCanvas.width - (activeMap.w * scale)) / 2;
+            mapUIState.panY = (wCanvas.height - (activeMap.h * scale)) / 2;
+            playTone(400, 'triangle', 0.05);
+        };
+
+        worldMapCanvas.addEventListener('pointerdown', e => {
+            mapUIState.isDragging = true;
+            mapUIState.startX = e.clientX - mapUIState.panX;
+            mapUIState.startY = e.clientY - mapUIState.panY;
+        });
+
+        window.addEventListener('pointermove', e => {
+            if (!mapUIState.isDragging) return;
+            mapUIState.panX = e.clientX - mapUIState.startX;
+            mapUIState.panY = e.clientY - mapUIState.startY;
+        });
+
+        window.addEventListener('pointerup', () => { mapUIState.isDragging = false; });
+
+        worldMapCanvas.addEventListener('wheel', e => {
+            e.preventDefault();
+            const wCanvas = document.getElementById('worldMapCanvas');
+            let rect = wCanvas.getBoundingClientRect();
+            let mouseX = e.clientX - rect.left; let mouseY = e.clientY - rect.top;
+
+            let zoomFactor = e.deltaY < 0 ? 1.2 : 0.8;
+            let newZoom = Math.min(Math.max(mapUIState.zoom * zoomFactor, 0.5), 10);
+            
+            if (newZoom !== mapUIState.zoom) {
+                let baseScale = Math.min(wCanvas.width / activeMap.w, wCanvas.height / activeMap.h);
+                let currentScale = baseScale * mapUIState.zoom;
+                
+                let worldX = (mouseX - mapUIState.panX) / currentScale;
+                let worldY = (mouseY - mapUIState.panY) / currentScale;
+                
+                mapUIState.zoom = newZoom;
+                let nextScale = baseScale * mapUIState.zoom;
+                
+                mapUIState.panX = mouseX - (worldX * nextScale);
+                mapUIState.panY = mouseY - (worldY * nextScale);
+                playTone(500, 'sine', 0.05);
+            }
+        }, { passive: false });
+
+        window.teleportTo = function(x, y) {
+            player.x = x; player.y = y; playTone(900, 'sine', 0.4); player.target = null;
+            for(let i=0; i<20; i++) hitSparks.push({x: player.x + (Math.random()*40-20), y: player.y + (Math.random()*40-20), life: 20});
+            closeTerminal();
+        };
+
+        function screenToWorld(sx, sy) {
+            let worldX = (sx - canvas.width / 2) / GLOBAL.worldZoom + player.x;
+            let worldY = (sy - canvas.height / 2) / GLOBAL.worldZoom + player.y;
+            return {x: worldX, y: worldY};
+        }
+
+        canvas.addEventListener('mousedown', e => {
+            if (GLOBAL.state !== 'EXPLORE' && GLOBAL.state !== 'THULE') return;
+            if (e.button !== 0 && e.button !== 2) return;
+            
+            let rect = canvas.getBoundingClientRect();
+            let mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+            let my = (e.clientY - rect.top) * (canvas.height / rect.height);
+            let worldPos = screenToWorld(mx, my);
+            
+            let entities = [...npcs, ...terminals, ...teleporters, ...enemies];
+            let closest = null; let minDist = 40; 
+            
+            entities.forEach(ent => {
+                let dist = Math.hypot(worldPos.x - ent.x, worldPos.y - ent.y);
+                if (dist < minDist) { minDist = dist; closest = ent; }
+            });
+
+            if (e.button === 0) {
+                player.target = closest;
+                document.getElementById('context-menu').style.display = 'none';
+                if (closest) playTone(800, 'sine', 0.05);
+            } else if (e.button === 2) {
+                e.preventDefault();
+                if (closest) player.target = closest;
+                
+                let menu = document.getElementById('context-menu');
+                if (player.target) {
+                    menu.style.left = e.clientX + 'px';
+                    menu.style.top = e.clientY + 'px';
+                    menu.style.display = 'flex';
+                    let isEnemy = player.target.hp !== undefined;
+                    menu.innerHTML = `
+                        <div class="ctx-item" onclick="executeContextAction('${isEnemy ? 'attack' : 'interact'}')">${isEnemy ? 'Attack' : 'Interact'}</div>
+                        <div class="ctx-item" onclick="executeContextAction('cancel')">Cancel</div>
+                    `;
+                } else {
+                    menu.style.display = 'none';
+                }
+            }
+        });
+
+        canvas.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('click', e => {
+            if (!e.target.classList.contains('ctx-item')) document.getElementById('context-menu').style.display = 'none';
+        });
+
+        window.executeContextAction = function(action) {
+            document.getElementById('context-menu').style.display = 'none';
+            if (!player.target) return;
+            if (action === 'interact') interactWithEntity(player.target);
+            else if (action === 'attack') attackEntity(player.target);
+        };
+
+        function interactWithEntity(ent) {
+            let dist = Math.hypot(player.x - ent.x, player.y - ent.y);
+            if (dist > 50) { objectiveText = "Target too far away to interact."; playTone(150, 'sawtooth', 0.2); return; }
+
+            if (ent.dialogue) {
+                dialogueBox = { active: true, text: ent.name + ": " + ent.dialogue, timer: 0, npcId: ent.id || ent.name };
+                playTone(600, 'sine', 0.1);
+            } else if (ent.label === 'TT' || ent.id === 'tt') {
+                GLOBAL.prevState = GLOBAL.state; GLOBAL.state = 'TT'; window.openTradeTerminal(); playTone(500, 'square', 0.1);
+            } else if (ent.label === 'CRAFT' || ent.id === 'craft') {
+                GLOBAL.prevState = GLOBAL.state; GLOBAL.state = 'CRAFT'; document.getElementById('craft-ui').classList.remove('hidden'); renderCrafting(); playTone(500, 'square', 0.1);
+            } else if (ent.isTeleporter || (ent.name && ent.name.toLowerCase().includes('tp'))) {
+                GLOBAL.prevState = GLOBAL.state; GLOBAL.state = 'TP'; document.getElementById('tp-ui').classList.remove('hidden');
+                let html = '';
+                teleporters.forEach(t => { if(t.name !== ent.name) html += `<button class="planet-btn" onclick="teleportTo(${t.x}, ${t.y})">${t.name}</button>`; });
+                if(html === '') html = '<p style="font-size:0.75rem; color:#94a3b8; grid-column: span 3;">No other teleporters discovered.</p>';
+                document.getElementById('tp-list').innerHTML = html;
+                playTone(700, 'sine', 0.2);
+            }
+        }
+
+        function attackEntity(ent) {
+            let dist = Math.hypot(player.x - ent.x, player.y - ent.y);
+            if (dist > 200) { objectiveText = "Target out of range."; playTone(150, 'sawtooth', 0.2); return; }
+            if (player.equippedIndex === -1 || player.ammo <= 0) { objectiveText = "No weapon or ammo."; playTone(150, 'sawtooth', 0.2); return; }
+            
+            if (player.actionCooldown <= 0 && player.reloadCooldown <= 0) {
+                player.actionCooldown = 10;
+                playTone(700, 'sawtooth', 0.1); player.ammo--; player.reloadCooldown = player.maxReload; document.getElementById('reload-bar').style.width = "0%";
+                ent.hp -= 15; ent.hitTimer = 10; hitSparks.push({x: ent.x, y: ent.y-10, life: 10}); playTone(400, 'square', 0.1);
+                if (ent.hp <= 0) { 
+                    if(ent.type === 'dummy') player.dummiesKilled++; 
+                    if (Math.random() < 0.8) groundLoot.push({ x: ent.x, y: ent.y, id: 'scrap', name: 'Scrap Metal' }); 
+                    player.target = null;
+                }
+            }
+        }
+
+        let dragCtx = { active: false, source: null, id: null, index: -1, startX: 0, startY: 0, item: null };
+        const dragGhost = document.getElementById('drag-ghost');
+
+        window.startDragItem = function(e, source, id, index) {
+            if (e.button !== 0 && e.type !== 'touchstart') return; e.preventDefault();
+            let item = null;
+            if (source === 'inv') item = player.inventory.find(i => i.id === id);
+            else if (source === 'hotbar') item = player.hotbar[index];
+            else if (source === 'equip') item = player.equipment[id];
+
+            if (source === 'hotbar' && !item) { selectHotbar(index); return; }
+            if (!item) return; 
+
+            dragCtx = { active: true, source, id, index, startX: e.clientX, startY: e.clientY, item };
+            dragGhost.style.display = 'block'; dragGhost.textContent = item.name.substring(0,6);
+            dragGhost.style.left = e.clientX + 'px'; dragGhost.style.top = e.clientY + 'px';
+            document.getElementById('hotbar').classList.add('drag-active'); document.getElementById('char-sheet').classList.add('drag-active');
+        };
+
+        window.addEventListener('pointermove', e => {
+            if (!dragCtx.active) return;
+            dragGhost.style.left = e.clientX + 'px'; dragGhost.style.top = e.clientY + 'px';
+        });
+
+        window.addEventListener('pointerup', e => {
+            if (!dragCtx.active) return;
+            dragGhost.style.display = 'none'; document.getElementById('hotbar').classList.remove('drag-active'); document.getElementById('char-sheet').classList.remove('drag-active');
+
+            let dist = Math.hypot(e.clientX - dragCtx.startX, e.clientY - dragCtx.startY);
+            if (dist < 5) { 
+                if (dragCtx.source === 'hotbar') selectHotbar(dragCtx.index);
+            } else { 
+                let dropTarget = null; let isHotbar = false; let isEquip = false;
+                
+                document.querySelectorAll('.hotbar-slot').forEach(slot => {
+                    let r = slot.getBoundingClientRect();
+                    if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) { dropTarget = slot; isHotbar = true; }
+                });
+                
+                if (!dropTarget && GLOBAL.state === 'INVENTORY') {
+                    document.querySelectorAll('.equip-slot').forEach(slot => {
+                        let r = slot.getBoundingClientRect();
+                        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) { dropTarget = slot; isEquip = true; }
+                    });
+                }
+
+                if (isHotbar && dropTarget) {
+                    if (dragCtx.item.type.startsWith('arm_') || dragCtx.item.type.startsWith('clo_')) return; 
+                    let slotIndex = parseInt(dropTarget.dataset.index);
+                    if (dragCtx.source === 'inv') {
+                        player.hotbar[slotIndex] = dragCtx.item; if (player.equippedIndex === -1) player.equippedIndex = slotIndex; playTone(500, 'triangle', 0.1);
+                    } else if (dragCtx.source === 'hotbar') {
+                        let temp = player.hotbar[slotIndex]; player.hotbar[slotIndex] = dragCtx.item; player.hotbar[dragCtx.index] = temp;
+                        if (player.equippedIndex === dragCtx.index) player.equippedIndex = slotIndex; else if (player.equippedIndex === slotIndex) player.equippedIndex = dragCtx.index;
+                        playTone(500, 'triangle', 0.1);
+                    }
+                    renderHotbar();
+                } else if (isEquip && dropTarget) {
+                    let targetSlotId = dropTarget.dataset.slot;
+                    if (dragCtx.item.type === targetSlotId) {
+                        if (dragCtx.source === 'equip') player.equipment[dragCtx.id] = null; 
+                        if (player.equipment[targetSlotId]) addToInventory(player.equipment[targetSlotId].id, player.equipment[targetSlotId].name, player.equipment[targetSlotId].type, 1);
+                        player.equipment[targetSlotId] = dragCtx.item; removeFromInventory(dragCtx.item.id, 1);
+                        playTone(500, 'triangle', 0.1); renderEquipment(); renderInventory();
+                    } else { playTone(150, 'sawtooth', 0.1); } 
+                } else {
+                    if (dragCtx.source === 'hotbar') {
+                        player.hotbar[dragCtx.index] = null; if (player.equippedIndex === dragCtx.index) player.equippedIndex = -1;
+                        playTone(200, 'sawtooth', 0.1); renderHotbar();
+                    } else if (dragCtx.source === 'equip') {
+                        addToInventory(dragCtx.item.id, dragCtx.item.name, dragCtx.item.type, 1); player.equipment[dragCtx.id] = null;
+                        playTone(200, 'sawtooth', 0.1); renderEquipment(); renderInventory();
+                    }
+                }
+            }
+            dragCtx.active = false;
+        });
+
+        window.rightClickEquip = function(e, id) {
+            e.preventDefault();
+            let item = player.inventory.find(i => i.id === id); if (!item) return;
+            if (item.type.startsWith('arm_') || item.type.startsWith('clo_')) {
+                if (player.equipment[item.type]) addToInventory(player.equipment[item.type].id, player.equipment[item.type].name, player.equipment[item.type].type, 1);
+                player.equipment[item.type] = { ...item, qty: 1 }; removeFromInventory(id, 1);
+                playTone(500, 'triangle', 0.1); renderEquipment(); renderInventory();
+            } else if (item.type === 'weapon') {
+                let firstEmpty = player.hotbar.findIndex(s => s === null);
+                if (firstEmpty !== -1) { player.hotbar[firstEmpty] = item; if (player.equippedIndex === -1) player.equippedIndex = firstEmpty; playTone(500, 'triangle', 0.1); renderHotbar(); }
+            }
+        };
+
+        function renderHotbar() {
+            const wrap = document.getElementById('hotbar'); wrap.innerHTML = '';
+            for(let i=0; i<10; i++) {
+                const label = i === 9 ? '0' : i+1; const item = player.hotbar[i]; const isActive = player.equippedIndex === i;
+                const shortName = item ? item.name.substring(0,5) : '';
+                wrap.innerHTML += `<div class="hotbar-slot ${isActive ? 'active' : ''}" data-index="${i}" onpointerdown="startDragItem(event, 'hotbar', '', ${i})"><span>${label}</span>${shortName}</div>`;
+            }
+        }
+
+        function renderEquipment() {
+            document.querySelectorAll('.equip-slot').forEach(slot => {
+                let slotId = slot.dataset.slot; let item = player.equipment[slotId];
+                if (item) { slot.classList.add('filled'); slot.innerHTML = item.name.substring(0,4); slot.onpointerdown = (e) => startDragItem(e, 'equip', slotId, -1); } 
+                else { slot.classList.remove('filled'); slot.innerHTML = slotId.split('_')[1].substring(0,4); slot.onpointerdown = null; }
+            });
+        }
+
+        function renderInventory() {
+            document.getElementById('inv-ped').textContent = `PED: ${player.ped.toFixed(2)}`; document.getElementById('inv-ammo').textContent = `AMMO: ${player.ammo} Cells`;
+            const list = document.getElementById('inv-list');
+            if (player.inventory.length === 0) { list.innerHTML = "<p style='color:#64748b;'>Inventory is empty.</p>"; return; }
+            list.innerHTML = player.inventory.map(item => `<div class="inv-item" onpointerdown="startDragItem(event, 'inv', '${item.id}', -1)" oncontextmenu="rightClickEquip(event, '${item.id}')"><span>${item.name} ${item.qty > 1 ? `(x${item.qty})` : ''}</span></div>`).join('');
+        }
+
+        function addToInventory(id, name, type, qty=1) { let existing = player.inventory.find(i => i.id === id); if (existing) existing.qty += qty; else player.inventory.push({id, name, type, qty}); playTone(800, 'square', 0.1); if (GLOBAL.state === 'INVENTORY') renderInventory(); }
+        function removeFromInventory(id, qty=1) { let item = player.inventory.find(i => i.id === id); if (item) { item.qty -= qty; if (item.qty <= 0) player.inventory = player.inventory.filter(i => i.id !== id); return true; } return false; }
+        function hasItem(id, qty=1) { let item = player.inventory.find(i => i.id === id); return item && item.qty >= qty; }
+
+        window.openTradeTerminal = function() {
+            document.getElementById('tt-ui').classList.remove('hidden'); document.getElementById('tt-ped').textContent = `PED: ${player.ped.toFixed(2)}`;
+            const list = document.getElementById('tt-list'); let html = "";
+            for (const [cat, items] of Object.entries(TT_ITEMS)) {
+                html += `<div class="tt-cat">${cat}</div>`;
+                items.forEach(i => { html += `<div class="term-item"><span>${i.name}</span> <span>${i.cost.toFixed(2)}</span> <button class="buy-btn" onclick="buyItem('${i.id}', '${i.name}', '${i.type}', ${i.cost})">BUY</button></div>`; });
+            }
+            list.innerHTML = html;
+        };
+
+        window.closeTerminal = function() {
+            document.getElementById('tt-ui').classList.add('hidden'); document.getElementById('craft-ui').classList.add('hidden'); document.getElementById('tp-ui').classList.add('hidden'); 
+            GLOBAL.state = GLOBAL.prevState;
+            if (player.questStep === 9) { player.questStep = 10; objectiveText = "QUEST: Talk to Trade Official."; npcs[2].dialogue = "You bought a blueprint! Now for 'Learning to Craft'. Get Scrap Metal, craft a Nanocube, then an Explosive Projectile."; }
+        }
+
+        window.buyItem = function(id, name, type, cost) {
+            if (player.ped >= cost) { player.ped -= cost; addToInventory(id, name, type, 1); document.getElementById('tt-ped').textContent = `PED: ${player.ped.toFixed(2)}`; playTone(900, 'sine', 0.1); } 
+            else playTone(150, 'sawtooth', 0.2);
+        };
+
+        function renderCrafting() {
+            const list = document.getElementById('craft-list'); let html = "";
+            if (hasItem('bp_nano')) html += `<div class="term-item"><span>Nanocube (Req: 1 Scrap)</span> <button class="buy-btn" onclick="craftItem('nano')">CRAFT</button></div>`;
+            if (hasItem('bp_exp')) html += `<div class="term-item"><span>Explosive Proj. (Req: 1 Nanocube)</span> <button class="buy-btn" onclick="craftItem('exp')">CRAFT</button></div>`;
+            if (!html) html = "<p style='font-size:0.75rem; color:#94a3b8;'>No Blueprints owned.</p>"; list.innerHTML = html;
+        }
+
+        window.craftItem = function(type) {
+            if (type === 'nano' && hasItem('scrap', 1)) { removeFromInventory('scrap', 1); addToInventory('nano', 'Nanocube', 'mat', 1); player.craftedNano = true; playTone(600, 'square', 0.2); } 
+            else if (type === 'exp' && hasItem('nano', 1)) { removeFromInventory('nano', 1); addToInventory('exp', 'Explosive Proj I', 'ammo', 1); player.craftedExp = true; playTone(600, 'square', 0.2); } 
+            else { playTone(150, 'sawtooth', 0.2); }
+            if (player.questStep === 11 && player.craftedNano && player.craftedExp) { player.questStep = 12; objectiveText = "QUEST: Talk to Trade Official."; npcs[2].dialogue = "Excellent crafting! You are ready for the universe. The shuttle is waiting east."; }
+        };
+
+        function checkWallCollision(x, y, w, h) { for (let b of walls) { if (x + w > b.x && x - w < b.x + b.w && y + h > b.y && y - h < b.y + b.h) return true; } return false; }
+
+        async function populatePlanetScene(planetKey) {
+            let fullName = NexusBridge.planetNameMap[planetKey.toLowerCase()] || planetKey;
+            let dims = NexusBridge.getDimensions(planetKey);
+            activeMap = { w: dims.w, h: dims.h, color: '#022c22', img: new Image() };
+            if (planetKey === 'Rocktropia') activeMap.color = '#1a1a1a'; else if (planetKey === 'Arkadia') activeMap.color = '#451a03';
+
+            let imgKey = planetKey.toLowerCase().replace(/planet\s*/g, '').replace(/\s+/g, '');
+            if(imgKey === 'rocktropia') imgKey = 'rocktropia';
+            activeMap.img.src = `../images/maps/webp/${imgKey}_map.webp`;
+
+            walls = []; zones = []; npcs = []; enemies = []; groundLoot = []; terminals = []; envProps = []; teleporters = []; player.target = null;
+            walls = [ {x:0, y:0, w:activeMap.w, h:100}, {x:0, y:activeMap.h-100, w:activeMap.w, h:100}, {x:0, y:0, w:100, h:activeMap.h}, {x:activeMap.w-100, y:0, w:100, h:activeMap.h} ];
+
+            let locations = window.cachedLocations || (window.parent && window.parent.cachedLocations) || [];
+            if (locations.length === 0) {
+                let api = window.entropiaNexusApi || (window.parent && window.parent.entropiaNexusApi);
+                if (api && api.fetchMappedCategory) {
+                    try { let res = await api.fetchMappedCategory('locations'); locations = res.items || []; } catch(e){}
+                }
+            }
+
+            let planetLocations = locations.filter(loc => NexusBridge.isPlanetMatch(loc.planet || loc.Planet?.Name || "", planetKey));
+            if (planetLocations.length === 0 && NexusBridge.FALLBACKS[fullName]) planetLocations = NexusBridge.FALLBACKS[fullName].locations;
+
+            if (planetLocations.length > 0) {
+                let validSpawns = planetLocations.filter(l => {
+                    let typeStr = String(l.type || l.Properties?.Type || l.AreaType || '').toLowerCase();
+                    return ['outpost', 'city', 'teleporter', 'camp'].includes(typeStr);
+                });
+                
+                let firstLoc = validSpawns.length > 0 ? validSpawns[0] : planetLocations[0];
+                let shapeInfo = parseShapeCoordinates(firstLoc, planetKey);
+                
+                let startPos = NexusBridge.gameToLocal(planetKey, shapeInfo.gLong, shapeInfo.gLat);
+                player.x = startPos.x; player.y = startPos.y;
+
+                planetLocations.forEach(loc => {
+                    let locType = String(loc.type || loc.Properties?.Type || loc.AreaType || 'waypoint').toLowerCase();
+                    let name = loc.name || loc.Name || loc.Properties?.Name || "Unknown";
+                    let sInfo = parseShapeCoordinates(loc, planetKey);
+
+                    if (sInfo.gLong && sInfo.gLat) {
+                        let pos = NexusBridge.gameToLocal(planetKey, sInfo.gLong, sInfo.gLat);
+                        if (locType === 'teleporter' || name.toLowerCase().includes(' tp') || name.toLowerCase().includes('teleporter')) {
+                            teleporters.push({ x: pos.x, y: pos.y, name: name, isTeleporter: true });
+                        } else if (locType === 'outpost' || locType === 'city' || locType === 'camp' || name.toLowerCase().includes('camp') || name.toLowerCase().includes('fort ') || name.toLowerCase().includes('base')) {
+                            zones.push({ x: pos.x - (sInfo.w/2), y: pos.y - (sInfo.h/2), w: sInfo.w, h: sInfo.h, name: name });
+                            terminals.push({ id: 'tt', x: pos.x - 20, y: pos.y + 20, color: '#0369a1', label: 'TT' });
+                            terminals.push({ id: 'craft', x: pos.x + 20, y: pos.y + 20, color: '#b45309', label: 'CRAFT' });
+                        }
+                    }
+                });
+            } else {
+                player.x = activeMap.w / 2; player.y = activeMap.h / 2;
+                zones.push({ x: player.x - 150, y: player.y - 100, w: 300, h: 200, name: 'Landing Zone' });
+                terminals.push({ id: 'tt', x: player.x - 20, y: player.y + 20, color: '#0369a1', label: 'TT' });
+            }
+
+            if (player.x < 100) player.x = 100; if (player.x > activeMap.w - 100) player.x = activeMap.w - 100;
+            if (player.y < 100) player.y = 100; if (player.y > activeMap.h - 100) player.y = activeMap.h - 100;
+            
+            if (teleporters.length > 0) { player.x = teleporters[0].x; player.y = teleporters[0].y; }
+            else if (zones.length > 0) { player.x = zones[0].x + zones[0].w/2; player.y = zones[0].y + zones[0].h/2; }
+            
+            resetMapUI();
+        }
+
+        function update() {
+            GLOBAL.tick++; const processKeys = {...keyJustPressed}; keyJustPressed = {};
+
+            if (GLOBAL.state === 'OFF') {
+                if (processKeys['Enter']) { playTone(600); GLOBAL.state = 'BOOTING'; cutsceneData.timer = 0; }
+                return;
+            }
+
+            if (GLOBAL.state === 'BOOTING') {
+                cutsceneData.timer++;
+                if (cutsceneData.timer === 1) playTone(300, 'square', 0.1);
+                if (cutsceneData.timer === 120) playTone(400, 'square', 0.1);
+                if (cutsceneData.timer === 240) playTone(200, 'sine', 0.5);
+                if (cutsceneData.timer > 400 || processKeys['Enter'] || processKeys['Space']) {
+                    switchState('START_MENU');
+                }
+                return;
+            }
+
+            if (GLOBAL.state === 'INSERT_COIN') { if (processKeys['Enter']) { playTone(600); switchState('CUTSCENE'); } return; }
+            if (GLOBAL.state === 'CUTSCENE') {
+                cutsceneData.timer++;
+                if (cutsceneData.timer > 2 && cutsceneData.charIndex < CUTSCENE_TEXT[cutsceneData.lineIndex].length) { cutsceneData.charIndex++; cutsceneData.timer = 0; if (cutsceneData.charIndex % 3 === 0) playTone(800 + Math.random()*200, 'triangle', 0.05); } 
+                else if (cutsceneData.timer > 90) { cutsceneData.lineIndex++; cutsceneData.charIndex = 0; cutsceneData.timer = 0; if (cutsceneData.lineIndex >= CUTSCENE_TEXT.length) switchState('SHIP_FLYBY'); }
+                if (processKeys['Enter'] || processKeys['Space']) switchState('SHIP_FLYBY'); return;
+            }
+            if (GLOBAL.state === 'SHIP_FLYBY') { cutsceneData.timer++; if (cutsceneData.timer > 250 || processKeys['Enter'] || processKeys['Space']) switchState('CHAR_CREATE'); return; }
+            if (GLOBAL.state === 'SHUTTLE_DROP') { cutsceneData.timer++; if (cutsceneData.timer > 200 || processKeys['Enter'] || processKeys['Space']) switchState('PLANET_LOADING'); return; }
+            if (GLOBAL.state === 'PLANET_LOADING') {
+                cutsceneData.timer++;
+                if (cutsceneData.timer === 1) objectiveText = "Establishing DB Uplink..."; 
+                if (cutsceneData.timer === 40) objectiveText = "Parsing Planet Topology..."; 
+                if (cutsceneData.timer === 80) objectiveText = "Mapping Teleporters & Outposts...";
+                if (cutsceneData.timer === 120) objectiveText = "Aggregating Local Mobs...";
+                if (cutsceneData.timer > 150) {
+                    populatePlanetScene(player.destination);
+                    GLOBAL.state = 'EXPLORE'; document.getElementById('coords-display').classList.remove('hidden'); objectiveText = `Landed on ${player.destination}. Open World active.`;
+                } return;
+            }
+            if (GLOBAL.state === 'CHAR_CREATE' || GLOBAL.state === 'PLANET_SELECT' || GLOBAL.state === 'START_MENU') return;
+            if (GLOBAL.state === 'REVIVE_ANIM') { cutsceneData.timer++; if (cutsceneData.timer % 10 === 0) playTone(400 + Math.random()*400, 'triangle', 0.05); if (cutsceneData.timer > 180 || processKeys['Enter'] || processKeys['Space']) switchState('THULE'); return; }
+
+            if (['INVENTORY', 'MAP', 'TT', 'CRAFT', 'TP'].includes(GLOBAL.state)) {
+                if (processKeys['KeyI'] && GLOBAL.state === 'INVENTORY') toggleInventory();
+                if (processKeys['KeyM'] && GLOBAL.state === 'MAP') toggleMap(); return;
+            }
+
+            if (dialogueBox.active) {
+                dialogueBox.timer++;
+                if (processKeys['KeyF'] && dialogueBox.timer > 10) {
+                    dialogueBox.active = false; playTone(400, 'triangle');
+                    if (dialogueBox.npcId === 'arrival' && player.questStep === 0) { player.questStep = 1; objectiveText = "QUEST: Use WASD to walk around and Space to jump 3 times."; }
+                    if (dialogueBox.npcId === 'arrival' && player.questStep === 2) { player.questStep = 3; objectiveText = "QUEST: Head East to the Armory and talk to Sgt. Hartman."; npcs[0].dialogue = "Great job! Hartman is waiting for you in the next room."; npcs[1].dialogue = "So Maya thinks you're ready? Take this PewPew and ammo. Drag it to your hotbar (I)."; }
+                    if (dialogueBox.npcId === 'gunner' && player.questStep === 3) { addToInventory('gun_01', 'Omegadon PewPew', 'weapon', 1); player.ammo += 10000; player.questStep = 4; objectiveText = "QUEST: Press I and drag the gun to your hotbar."; playTone(900, 'square', 0.3); }
+                    if (dialogueBox.npcId === 'gunner' && player.questStep === 5) { player.questStep = 6; objectiveText = "QUEST: Shoot 3 target dummies and collect Scrap Metal."; enemies.push({ id: 'd1', x: 650, y: 150, hp: 10, type: 'dummy', hitTimer: 0 }); enemies.push({ id: 'd2', x: 650, y: 200, hp: 10, type: 'dummy', hitTimer: 0 }); enemies.push({ id: 'd3', x: 650, y: 250, hp: 10, type: 'dummy', hitTimer: 0 }); playTone(600, 'triangle', 0.2); }
+                    if (dialogueBox.npcId === 'gunner' && player.questStep === 7) { player.questStep = 8; objectiveText = "QUEST: Head East and talk to the Trade Official."; npcs[1].dialogue = "You're a natural killer. Move to the next room."; npcs[2].dialogue = "Hello! Here is your 2.50 PED welcome grant. Use the Trade Terminal next to me to buy blueprints."; }
+                    if (dialogueBox.npcId === 'ttlady' && player.questStep === 8) { player.ped += 2.50; player.questStep = 9; objectiveText = "QUEST: Open Trade Terminal and buy a blueprint."; playTone(900, 'square', 0.3); }
+                    if (dialogueBox.npcId === 'ttlady' && player.questStep === 10) { player.questStep = 11; objectiveText = "QUEST: Use Craft Terminal. Craft Nanocubes, then Explosive Proj."; }
+                    if (dialogueBox.npcId === 'ttlady' && player.questStep === 12) { player.questStep = 13; objectiveText = "QUEST: Proceed to Shuttle Officer."; npcs[2].dialogue = "Good luck out there!"; npcs[3].dialogue = "Ready for planetary drop? Choose your destination."; }
+                    if (dialogueBox.npcId === 'shuttle' && player.questStep >= 13) switchState('PLANET_SELECT');
+                } return;
+            }
+
+            if (player.actionCooldown > 0) player.actionCooldown--;
+            if (player.reloadCooldown > 0) { player.reloadCooldown--; document.getElementById('reload-bar').style.width = `${((player.maxReload - player.reloadCooldown) / player.maxReload) * 100}%`; }
+            if (processKeys['KeyI']) { toggleInventory(); playTone(400); return; }
+            if (processKeys['KeyM']) { toggleMap(); playTone(400); return; }
+
+            hitSparks.forEach(s => s.life--); hitSparks = hitSparks.filter(s => s.life > 0);
+
+            for (let i = groundLoot.length - 1; i >= 0; i--) {
+                let gl = groundLoot[i];
+                if (Math.hypot(player.x - gl.x, player.y - gl.y) < 20 && player.z === 0) { addToInventory(gl.id, gl.name, 'mat', 1); groundLoot.splice(i, 1); if (player.questStep === 6 && player.dummiesKilled >= 3 && hasItem('scrap', 1)) { player.questStep = 7; objectiveText = "QUEST: Return to Sgt. Hartman."; } }
+            }
+
+            let dx = 0, dy = 0;
+            if (keys['ArrowLeft'] || keys['KeyA']) { dx = -1; player.dir = 'left'; }
+            else if (keys['ArrowRight'] || keys['KeyD']) { dx = 1; player.dir = 'right'; }
+            else if (keys['ArrowUp'] || keys['KeyW']) { dy = -1; player.dir = 'up'; }
+            else if (keys['ArrowDown'] || keys['KeyS']) { dy = 1; player.dir = 'down'; }
+
+            if (dx !== 0 || dy !== 0) {
+                player.state = 'walk'; player.walkDist++;
+                let nx = player.x + dx * player.speed; let ny = player.y + dy * player.speed;
+                if (!checkWallCollision(nx, player.y, 10, 10)) player.x = nx;
+                if (!checkWallCollision(player.x, ny, 10, 10)) player.y = ny;
+                if (player.questStep === 1 && player.walkDist > 100 && player.jumps >= 3) { player.questStep = 2; objectiveText = "QUEST: Talk to Guide Maya."; }
+            } else player.state = 'idle';
+
+            if (processKeys['Space'] && player.z === 0) {
+                player.vz = 6; player.jumps++; playTone(300, 'sine', 0.1);
+                if (player.questStep === 1 && player.walkDist > 100 && player.jumps >= 3) { player.questStep = 2; objectiveText = "QUEST: Talk to Guide Maya."; }
+            }
+            if (player.z > 0 || player.vz !== 0) { player.z += player.vz; player.vz -= 0.4; if (player.z <= 0) { player.z = 0; player.vz = 0; playTone(150, 'square', 0.05); } }
+
+            if (processKeys['KeyF'] && player.actionCooldown <= 0 && player.reloadCooldown <= 0) {
+                let interactables = [];
+                [...npcs, ...terminals, ...teleporters].forEach(obj => {
+                    interactables.push({type: 'friendly', obj, dist: Math.hypot(player.x - obj.x, player.y - obj.y)});
+                });
+                enemies.forEach(obj => interactables.push({type: 'enemy', obj, dist: Math.hypot(player.x - obj.x, player.y - obj.y)}));
+                
+                if (player.target) {
+                    if (player.target.hp !== undefined) attackEntity(player.target); else interactWithEntity(player.target);
+                } else {
+                    let validFriends = interactables.filter(i => i.dist < 40 && i.type === 'friendly');
+                    if (validFriends.length > 0) {
+                        validFriends.sort((a, b) => a.dist - b.dist); interactWithEntity(validFriends[0].obj);
+                    } else {
+                        let validEnemies = interactables.filter(i => i.dist < 200 && i.type === 'enemy');
+                        if (validEnemies.length > 0) {
+                            validEnemies.sort((a,b) => a.dist - b.dist); player.target = validEnemies[0].obj; attackEntity(player.target);
+                        }
+                    }
+                }
+            }
+
+            enemies.forEach(en => { if(en.hitTimer > 0) en.hitTimer--; });
+
+            if (GLOBAL.state === 'EXPLORE') {
+                let realCoords = NexusBridge.localToGame(player.destination, player.x, player.y);
+                document.getElementById('coords-display').textContent = `[${player.destination}, ${realCoords.long}, ${realCoords.lat}]`;
+                
+                if (GLOBAL.tick % 30 === 0) {
+                    envProps = [];
+                    for(let px = Math.floor(player.x/200)*200 - 600; px < player.x + 600; px+=200) {
+                        for(let py = Math.floor(player.y/200)*200 - 600; py < player.y + 600; py+=200) {
+                            let hash = pseudoRandom(px, py); if (hash > 0.7) envProps.push({ x: px + (hash*100), y: py + (hash*100), type: hash > 0.85 ? 'tree' : 'rock' });
+                        }
+                    }
+
+                    if (enemies.length < 40) {
+                        let fullName = NexusBridge.planetNameMap[player.destination.toLowerCase()] || player.destination;
+                        let liveMobs = window.cachedMobs || (window.parent && window.parent.cachedMobs) || []; 
+                        let planetMobs = liveMobs.filter(m => NexusBridge.isPlanetMatch(m.planet||m.Planet?.Name||"", player.destination));
+                        
+                        if (planetMobs.length === 0 && NexusBridge.FALLBACKS[fullName]?.mobs) { planetMobs = NexusBridge.FALLBACKS[fullName].mobs; }
+
+                        if (planetMobs.length > 0) {
+                            let template = planetMobs[Math.floor(Math.random() * planetMobs.length)];
+                            if (template.Spawns && template.Spawns.length > 0) {
+                                let spawnArea = template.Spawns[Math.floor(Math.random() * template.Spawns.length)];
+                                let sPos = getRandomPointInSpawn(spawnArea, player.destination);
+                                
+                                if (Math.hypot(player.x - sPos.x, player.y - sPos.y) < 1500) {
+                                    let inSafeZone = zones.some(z => sPos.x > z.x && sPos.x < z.x+z.w && sPos.y > z.y && sPos.y < z.y+z.h);
+                                    if (!inSafeZone) enemies.push({ id: 'mob_'+GLOBAL.tick, type: 'mob', x: sPos.x, y: sPos.y, hp: template.hp || 100, maxHp: template.hp || 100, name: template.name || template.Name || "Alien", hitTimer: 0 });
+                                }
+                            }
+                        }
+                    }
+                }
+                enemies = enemies.filter(en => Math.hypot(en.x - player.x, en.y - player.y) < 1500); groundLoot = groundLoot.filter(gl => Math.hypot(gl.x - player.x, gl.y - player.y) < 1500);
+            }
+            GLOBAL.camera.x = Math.max(0, Math.min(player.x - canvas.width / (2 * GLOBAL.worldZoom), activeMap.w - canvas.width / (2 * GLOBAL.worldZoom))); 
+            GLOBAL.camera.y = Math.max(0, Math.min(player.y - canvas.height / (2 * GLOBAL.worldZoom), activeMap.h - canvas.height / (2 * GLOBAL.worldZoom)));
+        }
+
+        function drawShadow(x, y, w, h) { ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.ellipse(x, y, w, h, 0, 0, TAU); ctx.fill(); }
+
+        function toScreenX(worldX) { return (worldX - player.x) * GLOBAL.worldZoom + canvas.width / 2; }
+        function toScreenY(worldY) { return (worldY - player.y) * GLOBAL.worldZoom + canvas.height / 2; }
+
+        function drawCharacter(c, context = ctx, isPreview = false) {
+            context.save();
+            if (!isPreview) {
+                const sx = toScreenX(c.x); const sy = toScreenY(c.y);
+                if (sx < -50 || sx > canvas.width+50 || sy < -50 || sy > canvas.height+50) { context.restore(); return; }
+                drawShadow(sx, sy, 14 * (c.scaleW||1), 6 * (c.scaleH||1)); context.translate(sx, sy - (c.z || 0));
+            }
+
+            let walkBob = 0, legL = 0, legR = 0, armL = 0, armR = 0;
+            if (c.state === 'walk') { let cycle = Math.sin(GLOBAL.tick * 0.25); walkBob = Math.abs(cycle) * -2; legL = cycle * 4; legR = -cycle * 4; armL = -cycle * 4; armR = cycle * 4; }
+            context.translate(0, walkBob); context.scale(c.scaleW||1, c.scaleH||1); 
+
+            const shirt = c.shirt || c.color; const skin = c.skin || '#fed7aa'; const pants = c.pants || '#1e293b'; const hair = c.hair || '#451a03';
+
+            ctx.fillStyle = c.equipment?.arm_thighs ? '#475569' : pants; ctx.fillRect(-6, 5, 5, 12 + legL); ctx.fillRect(1, 5, 5, 12 + legR);
+            if (c.equipment?.arm_shins) { ctx.fillStyle = '#94a3b8'; ctx.fillRect(-6, 12+legL, 5, 5); ctx.fillRect(1, 12+legR, 5, 5); }
+            if (c.equipment?.arm_boots) { ctx.fillStyle = '#334155'; ctx.fillRect(-7, 15+legL, 7, 3); ctx.fillRect(0, 15+legR, 7, 3); }
+
+            ctx.fillStyle = c.equipment?.arm_body ? '#64748b' : shirt; ctx.fillRect(-8, -10, 16, 16);
+
+            if (c.dir === 'up' || c.dir === 'down') {
+                ctx.fillStyle = c.equipment?.arm_arms ? '#475569' : shirt; ctx.fillRect(-12, -10 + armL, 4, 12); ctx.fillRect(8, -10 + armR, 4, 12);
+                ctx.fillStyle = c.equipment?.arm_gloves ? '#334155' : skin; ctx.fillRect(-12, 2 + armL, 4, 3); ctx.fillRect(8, 2 + armR, 4, 3);
+            } else if (c.dir === 'right') {
+                ctx.fillStyle = c.equipment?.arm_arms ? '#475569' : shirt; ctx.fillRect(-2 + armR, -10, 6, 12);
+                ctx.fillStyle = c.equipment?.arm_gloves ? '#334155' : skin; ctx.fillRect(-2 + armR, 2, 6, 3);
+                if (c.type === 'player' && c.equippedIndex !== -1) { ctx.fillStyle = '#64748b'; ctx.fillRect(2 + armR, 2, 10, 3); ctx.fillStyle = '#0ea5e9'; ctx.fillRect(10+armR, 3, 2, 1); }
+            } else if (c.dir === 'left') {
+                ctx.fillStyle = c.equipment?.arm_arms ? '#475569' : shirt; ctx.fillRect(-4 + armL, -10, 6, 12);
+                ctx.fillStyle = c.equipment?.arm_gloves ? '#334155' : skin; ctx.fillRect(-4 + armL, 2, 6, 3);
+                if (c.type === 'player' && c.equippedIndex !== -1) { ctx.fillStyle = '#64748b'; ctx.fillRect(-12 + armL, 2, 10, 3); ctx.fillStyle = '#0ea5e9'; ctx.fillRect(-12+armL, 3, 2, 1); }
+            }
+
+            ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(0, -16, 9, 0, TAU); ctx.fill();
+            if (c.equipment?.arm_head) { ctx.fillStyle = '#475569'; ctx.beginPath(); ctx.arc(0, -18, 9, 0, TAU); ctx.fill(); } 
+            else {
+                ctx.fillStyle = hair;
+                if (c.hairStyle === 1) { ctx.beginPath(); ctx.arc(0, -18, 9, Math.PI, 0); ctx.fill(); } 
+                else if (c.hairStyle === 2) { ctx.beginPath(); ctx.moveTo(-9, -16); ctx.lineTo(-5, -28); ctx.lineTo(0, -22); ctx.lineTo(5, -28); ctx.lineTo(9, -16); ctx.fill(); } 
+                else if (c.hairStyle === 3) { ctx.beginPath(); ctx.arc(0, -18, 9, Math.PI, 0); ctx.fill(); if (c.dir !== 'up') { ctx.fillRect(-9, -16, 3, 8); ctx.fillRect(6, -16, 3, 8); } else { ctx.fillRect(-9, -16, 18, 12); } } 
+                else if (c.hairStyle === 4) { ctx.beginPath(); ctx.arc(0, -18, 9, Math.PI, 0); ctx.fill(); if (c.dir !== 'up') { ctx.fillRect(-14, -20, 6, 8); ctx.fillRect(8, -20, 6, 8); } else { ctx.fillRect(-14, -20, 6, 8); ctx.fillRect(8, -20, 6, 8); ctx.fillRect(-9, -16, 18, 8); } }
+            }
+            
+            if (c.dir === 'down' || c.dir === 'right' || c.dir === 'left') {
+                ctx.fillStyle = c.equipment?.arm_head ? '#0ea5e9' : '#fff';
+                if (c.dir === 'down') { ctx.fillRect(-5, -19, 4, 3); ctx.fillRect(1, -19, 4, 3); if(!c.equipment?.arm_head){ ctx.fillStyle = '#000'; ctx.fillRect(-4, -18, 2, 2); ctx.fillRect(2, -18, 2, 2); } } 
+                else if (c.dir === 'right') { ctx.fillRect(3, -19, 4, 3); if(!c.equipment?.arm_head){ ctx.fillStyle = '#000'; ctx.fillRect(4, -18, 2, 2); } } 
+                else if (c.dir === 'left') { ctx.fillRect(-7, -19, 4, 3); if(!c.equipment?.arm_head){ ctx.fillStyle = '#000'; ctx.fillRect(-6, -18, 2, 2); } }
+            }
+
+            if (c.type === 'npc' && !isPreview) { ctx.fillStyle = '#38bdf8'; ctx.font = '9px monospace'; ctx.fillText(c.name, -15, -35); }
+            context.restore();
+        }
+
+        function drawMap() {
+            ctx.fillStyle = activeMap.color; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (activeMap.img && activeMap.img.complete && activeMap.img.naturalWidth > 0) {
+                let imgX = toScreenX(0); let imgY = toScreenY(0);
+                ctx.drawImage(activeMap.img, imgX, imgY, activeMap.w * GLOBAL.worldZoom, activeMap.h * GLOBAL.worldZoom);
+            } else {
+                ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 2;
+                let startX = -toScreenX(0) % 40; let startY = -toScreenY(0) % 40;
+                for(let i=startX; i<=canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+                for(let i=startY; i<=canvas.height; i+=40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }
+            }
+
+            if (GLOBAL.state === 'EXPLORE') {
+                envProps.forEach(p => {
+                    let sx = toScreenX(p.x); let sy = toScreenY(p.y);
+                    if (sx < -40 || sx > canvas.width+40 || sy < -40 || sy > canvas.height+40) return;
+                    if (p.type === 'tree') { drawShadow(sx, sy, 12, 6); ctx.fillStyle = '#064e3b'; ctx.beginPath(); ctx.arc(sx, sy-15, 15, 0, TAU); ctx.fill(); ctx.fillStyle = '#451a03'; ctx.fillRect(sx-3, sy-10, 6, 10); } 
+                    else if (p.type === 'rock') { drawShadow(sx, sy, 8, 4); ctx.fillStyle = '#475569'; ctx.beginPath(); ctx.ellipse(sx, sy-4, 10, 6, 0.2, 0, TAU); ctx.fill(); }
+                });
+            } else if (GLOBAL.state === 'THULE') {
+                ctx.fillStyle = '#ca8a04'; [380, 780, 1180].forEach(wx => ctx.fillRect(toScreenX(wx), toScreenY(0), 40*GLOBAL.worldZoom, 400*GLOBAL.worldZoom));
+            }
+
+            ctx.fillStyle = '#020617';
+            walls.forEach(w => {
+                let sx = toScreenX(w.x), sy = toScreenY(w.y), sw = w.w * GLOBAL.worldZoom, sh = w.h * GLOBAL.worldZoom;
+                if (sx > canvas.width || sx+sw < 0 || sy > canvas.height || sy+sh < 0) return;
+                ctx.fillRect(sx, sy, sw, sh); ctx.strokeStyle = '#38bdf8'; ctx.lineWidth=1; ctx.strokeRect(sx, sy, sw, sh);
+            });
+
+            zones.forEach(z => {
+                let sx = toScreenX(z.x), sy = toScreenY(z.y), sw = z.w * GLOBAL.worldZoom, sh = z.h * GLOBAL.worldZoom;
+                if (sx > canvas.width || sx+sw < 0 || sy > canvas.height || sy+sh < 0) return;
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.4)'; ctx.fillRect(sx, sy, sw, sh); ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)'; ctx.lineWidth=2; ctx.strokeRect(sx, sy, sw, sh);
+            });
+
+            teleporters.forEach(tp => {
+                let sx = toScreenX(tp.x), sy = toScreenY(tp.y);
+                if (sx < -40 || sx > canvas.width+40 || sy < -40 || sy > canvas.height+40) return;
+                drawShadow(sx, sy, 16, 6);
+                ctx.fillStyle = '#00ffff'; ctx.beginPath(); ctx.ellipse(sx, sy, 14, 6, 0, 0, TAU); ctx.fill();
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
+            });
+
+            terminals.forEach(t => {
+                let sx = toScreenX(t.x), sy = toScreenY(t.y);
+                if (sx < -40 || sx > canvas.width+40 || sy < -40 || sy > canvas.height+40) return;
+                ctx.fillStyle = t.color; ctx.fillRect(sx, sy, 40, 30); ctx.fillStyle = '#fff'; ctx.font = "10px monospace"; ctx.fillText(t.label, sx+5, sy-5);
+            });
+
+            enemies.forEach(en => {
+                let sx = toScreenX(en.x), sy = toScreenY(en.y);
+                if (sx < -40 || sx > canvas.width+40 || sy < -40 || sy > canvas.height+40) return;
+                if (en.type === 'dummy') {
+                    ctx.fillStyle = (en.hitTimer > 0) ? '#fff' : '#b45309'; ctx.fillRect(sx-8, sy-20, 16, 20); 
+                    ctx.fillStyle = '#451a03'; ctx.fillRect(sx-2, sy, 4, 10); ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(sx, sy-10, 4, 0, TAU); ctx.fill(); 
+                } else if (en.type === 'mob') {
+                    drawShadow(sx, sy, 18, 8);
+                    ctx.fillStyle = (en.hitTimer > 0) ? '#fff' : '#115e59'; ctx.beginPath(); ctx.ellipse(sx, sy-10, 18, 12, 0, 0, TAU); ctx.fill();
+                    ctx.fillStyle = '#ef4444'; ctx.fillRect(sx-10, sy-30, 20 * (en.hp/en.maxHp), 3);
+                    ctx.fillStyle = '#fff'; ctx.font = "9px monospace"; ctx.fillText(en.name, sx-15, sy-35);
+                }
+            });
+
+            groundLoot.forEach(gl => {
+                let sx = toScreenX(gl.x), sy = toScreenY(gl.y);
+                if (sx < -40 || sx > canvas.width+40 || sy < -40 || sy > canvas.height+40) return;
+                ctx.save(); ctx.translate(sx, sy); ctx.rotate(GLOBAL.tick * 0.05); ctx.fillStyle = '#94a3b8'; ctx.fillRect(-4, -4, 8, 8); ctx.strokeStyle = '#fff'; ctx.strokeRect(-4, -4, 8, 8); ctx.restore();
+            });
+
+            if (player.target && (GLOBAL.state === 'EXPLORE' || GLOBAL.state === 'THULE')) {
+                let sx = toScreenX(player.target.x); let sy = toScreenY(player.target.y);
+                ctx.save(); ctx.translate(sx, sy); ctx.rotate(GLOBAL.tick * 0.05);
+                ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(0, 0, 25, 0, Math.PI/2 - 0.2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(0, 0, 25, Math.PI, Math.PI + Math.PI/2 - 0.2); ctx.stroke();
+                ctx.restore();
+            }
+
+            if (GLOBAL.state === 'THULE') { ctx.fillStyle = '#334155'; ctx.fillRect(toScreenX(1330), toScreenY(160), 20*GLOBAL.worldZoom, 80*GLOBAL.worldZoom); ctx.fillStyle = '#0ea5e9'; ctx.font = "bold 12px monospace"; ctx.fillText("SHUTTLE", toScreenX(1270), toScreenY(150)); }
+        }
+
+        function drawWorldMap() {
+            const wCanvas = document.getElementById('worldMapCanvas'); if(!wCanvas) return; const wCtx = wCanvas.getContext('2d');
+            wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height); 
+
+            let baseScale = Math.min(wCanvas.width / activeMap.w, wCanvas.height / activeMap.h);
+            let currentScale = baseScale * mapUIState.zoom;
+
+            wCtx.save();
+            wCtx.translate(mapUIState.panX, mapUIState.panY);
+
+            if (activeMap.img && activeMap.img.complete && activeMap.img.naturalWidth > 0) {
+                wCtx.drawImage(activeMap.img, 0, 0, activeMap.w * currentScale, activeMap.h * currentScale);
+            } else {
+                wCtx.fillStyle = activeMap.color; wCtx.fillRect(0, 0, activeMap.w * currentScale, activeMap.h * currentScale);
+            }
+
+            zones.forEach(z => {
+                wCtx.fillStyle = 'rgba(15, 23, 42, 0.4)'; wCtx.strokeStyle = '#38bdf8'; wCtx.lineWidth = 1;
+                wCtx.fillRect(z.x * currentScale, z.y * currentScale, Math.max(4, z.w * currentScale), Math.max(4, z.h * currentScale)); 
+                wCtx.strokeRect(z.x * currentScale, z.y * currentScale, Math.max(4, z.w * currentScale), Math.max(4, z.h * currentScale));
+            });
+
+            teleporters.forEach(tp => {
+                let tx = tp.x * currentScale; let ty = tp.y * currentScale;
+                wCtx.fillStyle = '#00ffff'; wCtx.beginPath(); wCtx.arc(tx, ty, 3, 0, TAU); wCtx.fill();
+                if (mapUIState.zoom > 2.0) {
+                    wCtx.fillStyle = '#fff'; wCtx.font = '9px monospace'; wCtx.fillText(tp.name, tx + 6, ty + 3);
+                }
+            });
+            
+            wCtx.fillStyle = '#ef4444';
+            enemies.forEach(e => { wCtx.beginPath(); wCtx.arc(e.x * currentScale, e.y * currentScale, 1.5, 0, TAU); wCtx.fill(); });
+
+            let px = player.x * currentScale; let py = player.y * currentScale;
+            let pulse = Math.sin(GLOBAL.tick * 0.1) * 3 + 6;
+            
+            wCtx.strokeStyle = '#00ffcc'; wCtx.lineWidth = 1.5;
+            wCtx.beginPath(); wCtx.arc(px, py, pulse, 0, TAU); wCtx.stroke(); 
+            
+            wCtx.fillStyle = '#00ffcc'; wCtx.beginPath(); wCtx.arc(px, py, 4, 0, TAU); wCtx.fill(); 
+            wCtx.shadowColor = '#00ffcc'; wCtx.shadowBlur = 10; wCtx.fill(); wCtx.shadowBlur = 0;
+
+            wCtx.fillStyle = '#00ffcc'; wCtx.font = 'bold 9px monospace';
+            wCtx.fillText("📍 YOU ARE HERE", px + 8, py - 6);
+
+            wCtx.restore();
+        }
+
+        function drawSatnav() {
+            ctx.save(); ctx.translate(canvas.width - 40, canvas.height - 70); 
+            ctx.beginPath(); ctx.arc(0, 0, 30, 0, TAU); ctx.fillStyle = 'rgba(2, 6, 23, 0.8)'; ctx.fill(); ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.strokeStyle = 'rgba(0, 255, 204, 0.2)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-30, 0); ctx.lineTo(30, 0); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(0, 30); ctx.stroke();
+            ctx.save(); ctx.rotate(GLOBAL.tick * 0.05); ctx.fillStyle = 'rgba(0, 255, 204, 0.3)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,30,0, Math.PI/4); ctx.fill(); ctx.restore();
+            ctx.fillStyle = '#00ffcc'; ctx.beginPath(); ctx.arc(0, 0, 2, 0, TAU); ctx.fill();
+            
+            const scale = 0.05; 
+            [...npcs, ...terminals, ...teleporters].forEach(ent => { let dx = (ent.x - player.x) * scale; let dy = (ent.y - player.y) * scale; if (Math.hypot(dx, dy) < 28) { ctx.fillStyle = '#3b82f6'; ctx.fillRect(dx-1, dy-1, 3, 3); } });
+            enemies.forEach(ent => { let dx = (ent.x - player.x) * scale; let dy = (ent.y - player.y) * scale; if (Math.hypot(dx, dy) < 28) { ctx.fillStyle = '#ef4444'; ctx.fillRect(dx-1, dy-1, 3, 3); } });
+            ctx.fillStyle = '#facc15'; ctx.font = 'bold 10px monospace'; ctx.fillText('N', -3, -32); ctx.fillStyle = '#fff'; ctx.fillText('S', -3, 38); ctx.restore();
+        }
+
+        function drawShipFlyby() {
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#fff';
+            stars.forEach(s => { s.x -= s.speed * 2; if(s.x < 0) s.x = canvas.width; ctx.fillRect(s.x, s.y, 1, 1); });
+            let progress = cutsceneData.timer / 250; let scale = 1 + (progress * 2); let alpha = progress > 0.8 ? 1 - ((progress - 0.8) * 5) : 1; 
+            ctx.save(); ctx.globalAlpha = Math.max(0, alpha); let cx = canvas.width - (cutsceneData.timer * 3); ctx.translate(cx, canvas.height/2); ctx.scale(scale, scale);
+            ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.moveTo(200, 0); ctx.lineTo(-150, -40); ctx.lineTo(-200, -20); ctx.lineTo(-200, 20); ctx.lineTo(-150, 40); ctx.fill();
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(-180, -10, 100, 20); ctx.fillStyle = '#0ea5e9'; ctx.fillRect(-210, -15, 10, 30); 
+            ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 20px Impact'; ctx.fillText('GENESIS', -100, 7); ctx.restore();
+            if (alpha > 0.1) { ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 12px "Courier New"'; ctx.fillText("INSIDE THE GENESIS STARSHIP...", 10, 20); }
+        }
+
+        function drawShuttleDrop() {
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#fff';
+            stars.forEach(s => { s.y -= s.speed * 4; if(s.y < 0) { s.y = canvas.height; s.x = Math.random()*canvas.width; } ctx.fillRect(s.x, s.y, 1, 1); });
+            let progress = cutsceneData.timer / 200;
+            ctx.fillStyle = activeMap.color; ctx.beginPath(); ctx.arc(canvas.width/2, -100 + (progress*200), 100 + (progress*300), 0, TAU); ctx.fill();
+            ctx.fillStyle = '#94a3b8'; ctx.fillRect(canvas.width/2 - 10, canvas.height/2 + 50 - (progress*150), 20, 30); ctx.fillStyle = '#ef4444'; ctx.fillRect(canvas.width/2 - 5, canvas.height/2 + 80 - (progress*150), 10, 10 + Math.random()*10);
+            ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 12px "Courier New"'; ctx.fillText(`ENTERING ATMOSPHERE: ${player.destination.toUpperCase()}`, 10, 20);
+        }
+
+        function drawBootSequence() {
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            let t = cutsceneData.timer;
+            if (t < 120) {
+                ctx.fillStyle = `rgba(0, 255, 204, ${Math.min(1, Math.sin(t / 120 * Math.PI) * 1.5)})`;
+                ctx.font = 'bold 16px "Courier New"'; ctx.fillText("POWERED BY", canvas.width/2, canvas.height/2 - 15);
+                ctx.font = 'bold 22px "Courier New"'; ctx.fillText("ENTROPIANEXUS", canvas.width/2, canvas.height/2 + 15);
+            } else if (t < 240) {
+                let p = t - 120;
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, Math.sin(p / 120 * Math.PI) * 1.5)})`;
+                ctx.font = 'bold 24px Impact'; ctx.fillText("PIXELB8 GAMES", canvas.width/2, canvas.height/2);
+            } else if (t < 400) {
+                let w = t - 240;
+                ctx.fillStyle = `rgba(150, 150, 150, ${Math.min(1, Math.sin(w / 160 * Math.PI) * 2.0)})`;
+                ctx.font = '10px "Courier New"'; ctx.fillText("WARNING:", canvas.width/2, canvas.height/2 - 20);
+                ctx.fillText("Not affiliated with MindArk PE AB or Entropia Universe.", canvas.width/2, canvas.height/2);
+                ctx.fillText("All game assets and trademarks belong to their respective owners.", canvas.width/2, canvas.height/2 + 15);
+            }
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        }
+
+        function drawPlanetLoading() {
+            ctx.fillStyle = '#020617'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            let p = cutsceneData.timer / 150; ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 14px "Courier New"'; ctx.fillText(objectiveText, 40, canvas.height/2 - 20);
+            ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 4; ctx.strokeRect(40, canvas.height/2 + 10, canvas.width - 80, 20); ctx.fillStyle = '#00ffcc'; ctx.fillRect(42, canvas.height/2 + 12, (canvas.width - 84) * p, 16);
+        }
+
+        function drawReviveAnim() {
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#1e293b'; ctx.fillRect(canvas.width/2 - 60, canvas.height/2 - 80, 120, 160); ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 4; ctx.strokeRect(canvas.width/2 - 60, canvas.height/2 - 80, 120, 160);
+            let progress = cutsceneData.timer / 180;
+            ctx.save(); ctx.globalAlpha = progress; player.x = canvas.width/2; player.y = canvas.height/2 + 60; let tempDir = player.dir; player.dir = 'down';
+            let oldCamX = GLOBAL.camera.x; let oldCamY = GLOBAL.camera.y; GLOBAL.camera.x = 0; GLOBAL.camera.y = 0;
+            drawCharacter(player, ctx, false); GLOBAL.camera.x = oldCamX; GLOBAL.camera.y = oldCamY; player.dir = tempDir; ctx.restore();
+            ctx.strokeStyle = '#00ffcc'; ctx.lineWidth = 2; ctx.beginPath(); for(let i=0; i<160; i+=5) { let wave = Math.sin(i*0.1 - GLOBAL.tick*0.1) * 30; if(i===0) ctx.moveTo(canvas.width/2 + wave, canvas.height/2 - 80 + i); else ctx.lineTo(canvas.width/2 + wave, canvas.height/2 - 80 + i); } ctx.stroke();
+            ctx.strokeStyle = '#f472b6'; ctx.beginPath(); for(let i=0; i<160; i+=5) { let wave = Math.cos(i*0.1 - GLOBAL.tick*0.1) * 30; if(i===0) ctx.moveTo(canvas.width/2 + wave, canvas.height/2 - 80 + i); else ctx.lineTo(canvas.width/2 + wave, canvas.height/2 - 80 + i); } ctx.stroke();
+            ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 12px "Courier New"'; ctx.fillText("RECONSTRUCTING COLONIST DNA...", 20, 30); ctx.fillRect(20, 40, 200 * progress, 10);
+        }
+
+        function drawCutscene() {
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#fff';
+            stars.forEach(s => { s.x -= s.speed; if(s.x < 0) s.x = canvas.width; ctx.fillRect(s.x, s.y, 1, 1); });
+            ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 14px "Courier New"';
+            let lineStr = CUTSCENE_TEXT[cutsceneData.lineIndex]; let typed = lineStr.substring(0, cutsceneData.charIndex);
+            let words = typed.split(' '); let currentLine = ''; let y = canvas.height / 2 - 20; 
+            for(let n = 0; n < words.length; n++) { let testLine = currentLine + words[n] + ' '; if (ctx.measureText(testLine).width > canvas.width - 80 && n > 0) { ctx.fillText(currentLine, 40, y); currentLine = words[n] + ' '; y += 20; } else currentLine = testLine; }
+            ctx.fillText(currentLine, 40, y);
+            ctx.fillStyle = '#38bdf8'; ctx.font = '10px monospace'; if (Math.floor(GLOBAL.tick/30)%2===0) ctx.fillText("PRESS ENTER OR SPACE TO SKIP", canvas.width - 200, canvas.height - 20);
+        }
+
+        function draw() {
+            if (GLOBAL.state === 'OFF') {
+                ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 16px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                if (Math.floor(GLOBAL.tick / 30) % 2 === 0) ctx.fillText("PRESS ENTER TO POWER ON", canvas.width/2, canvas.height/2);
+                ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; return;
+            }
+
+            if (GLOBAL.state === 'BOOTING') { drawBootSequence(); return; }
+            if (['INSERT_COIN', 'CHAR_CREATE', 'PLANET_SELECT', 'START_MENU'].includes(GLOBAL.state)) return; 
+            if (GLOBAL.state === 'CUTSCENE') { drawCutscene(); return; }
+            if (GLOBAL.state === 'SHIP_FLYBY') { drawShipFlyby(); return; }
+            if (GLOBAL.state === 'REVIVE_ANIM') { drawReviveAnim(); return; }
+            if (GLOBAL.state === 'SHUTTLE_DROP') { drawShuttleDrop(); return; }
+            if (GLOBAL.state === 'PLANET_LOADING') { drawPlanetLoading(); return; }
+
+            drawMap();
+
+            let renderList = [player, ...npcs].sort((a,b) => a.y - b.y);
+            renderList.forEach(ent => { if (ent.type === 'player' || ent.type === 'npc') drawCharacter(ent); });
+
+            hitSparks.forEach(sp => { ctx.fillStyle = '#facc15'; ctx.beginPath(); ctx.arc(toScreenX(sp.x), toScreenY(sp.y), sp.life/2, 0, TAU); ctx.fill(); });
+
+            ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0, 0, canvas.width, 25);
+            ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 12px "Courier New"'; ctx.fillText(objectiveText, 10, 17);
+
+            drawSatnav();
+
+            if (GLOBAL.state === 'MAP') { drawWorldMap(); }
+
+            if (dialogueBox.active) {
+                ctx.fillStyle = 'rgba(0,0,0,0.9)'; ctx.fillRect(20, 140, canvas.width-40, 70); ctx.strokeStyle = '#00ffcc'; ctx.lineWidth = 2; ctx.strokeRect(20, 140, canvas.width-40, 70);
+                ctx.fillStyle = '#fff'; ctx.font = '12px "Courier New"';
+                let words = dialogueBox.text.split(' '); let line = '', y = 160;
+                for(let n = 0; n < words.length; n++) { let test = line + words[n] + ' '; if (ctx.measureText(test).width > canvas.width-80 && n > 0) { ctx.fillText(line, 40, y); line = words[n] + ' '; y += 18; } else line = test; }
+                ctx.fillText(line, 40, y);
+                if (Math.floor(GLOBAL.tick/20)%2===0) { ctx.fillStyle='#0ea5e9'; ctx.fillText('▼ [F]', canvas.width-80, 200); }
+            }
+        }
+
+        function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
+        gameLoop();
+    </script>
+</body>
+</html>

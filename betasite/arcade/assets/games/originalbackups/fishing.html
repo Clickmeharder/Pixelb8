@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calypso Coast: Fishing Clash</title>
+    <!-- Load MQTT via CDN -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        :root {
+            --bg: #0c0f12;
+            --panel: #1a1e24;
+            --text: #e0e6ed;
+            --accent: #00ffcc;
+            --danger: #ff4d4d;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+        .container {
+            background: var(--panel);
+            padding: 30px;
+            border-radius: 12px;
+            border: 2px solid #333;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        h1 {
+            color: var(--accent);
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .hidden { display: none !important; }
+        input {
+            background: #000;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 10px;
+            font-size: 1.2rem;
+            font-family: inherit;
+            text-align: center;
+            width: 150px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        button {
+            background: #222;
+            color: var(--text);
+            border: 2px solid #555;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        button:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        button:active:not(:disabled) { transform: scale(0.95); }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #333;
+        }
+        
+        .game-area {
+            margin-top: 20px;
+            padding: 20px;
+            background: #000;
+            border-radius: 8px;
+            position: relative;
+        }
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #444;
+        }
+        #bobber {
+            width: 60px;
+            height: 60px;
+            background: #444;
+            border-radius: 50%;
+            margin: 20px auto;
+            border: 4px solid #222;
+            transition: background 0.1s;
+        }
+        #bobber.fishing { background: #3498db; animation: float 2s infinite ease-in-out; }
+        #bobber.bite { background: #2ecc71; border-color: #fff; transform: scale(1.1); }
+        #bobber.miss { background: var(--danger); }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        #status-msg { margin-top: 15px; height: 20px; color: #aaa; font-size: 0.9rem;}
+    </style>
+</head>
+<body>
+
+    <div class="container" id="lobby-ui">
+        <h1>Fishing Clash</h1>
+        <p>Enter a 4-letter room code to duel.</p>
+        <input type="text" id="room-code" maxlength="4" placeholder="CODE">
+        <br>
+        <button id="btn-join">CONNECT</button>
+        <p id="lobby-msg" style="color: #888; font-size: 0.8rem; margin-top: 15px;"></p>
+    </div>
+
+    <div class="container hidden" id="game-ui">
+        <h1>Calypso Coast</h1>
+        <div class="game-area">
+            <div class="scoreboard">
+                <div>YOU: <span id="my-score">0</span></div>
+                <div>RIVAL: <span id="rival-score">0</span></div>
+            </div>
+            
+            <div id="bobber"></div>
+            
+            <button id="btn-action" disabled>CAST LINE</button>
+            <div id="status-msg">Connecting to waters...</div>
+        </div>
+    </div>
+
+    <script>
+        const PUBLIC_BROKER = 'wss://broker.hivemq.com:8884/mqtt';
+        let client = null;
+        let roomTopic = '';
+        let myId = 'FISHER_' + Math.floor(Math.random() * 9000 + 1000);
+        
+        let opponentPresent = false;
+        let myScore = 0;
+        let rivalScore = 0;
+        let isFishing = false;
+        let hasBite = false;
+        let biteTimer = null;
+        let escapeTimer = null;
+
+        // UI Elements
+        const lobbyUI = document.getElementById('lobby-ui');
+        const gameUI = document.getElementById('game-ui');
+        const roomInput = document.getElementById('room-code');
+        const btnJoin = document.getElementById('btn-join');
+        const lobbyMsg = document.getElementById('lobby-msg');
+        
+        const myScoreEl = document.getElementById('my-score');
+        const rivalScoreEl = document.getElementById('rival-score');
+        const bobber = document.getElementById('bobber');
+        const btnAction = document.getElementById('btn-action');
+        const statusMsg = document.getElementById('status-msg');
+
+        // Connect to MQTT and join room
+        btnJoin.addEventListener('click', () => {
+            const code = roomInput.value.toUpperCase();
+            if (code.length < 2) return;
+            
+            lobbyMsg.textContent = "Connecting to broker...";
+            roomTopic = `pixelb8/fishingclash/${code}`;
+            
+            client = mqtt.connect(PUBLIC_BROKER);
+            
+            client.on('connect', () => {
+                client.subscribe(roomTopic);
+                lobbyUI.classList.add('hidden');
+                gameUI.classList.remove('hidden');
+                
+                btnAction.disabled = true;
+                statusMsg.textContent = `Waiting for an opponent in room ${code}...`;
+                
+                // Announce presence to anyone already in the room
+                client.publish(roomTopic, JSON.stringify({ type: 'JOIN', id: myId, score: myScore }));
+            });
+
+            client.on('message', (topic, message) => {
+                try {
+                    const data = JSON.parse(message.toString());
+                    
+                    // Ignore our own broadcast loops
+                    if (data.id === myId) return; 
+
+                    // If we receive a message from someone else, we have an opponent!
+                    if (!opponentPresent && (data.type === 'JOIN' || data.type === 'SYNC')) {
+                        opponentPresent = true;
+                        btnAction.disabled = false;
+                        statusMsg.textContent = "A rival appeared! Cast your line!";
+                    }
+
+                    if (data.type === 'JOIN') {
+                        // Tell the new arrival that we are already here
+                        client.publish(roomTopic, JSON.stringify({ type: 'SYNC', id: myId, score: myScore }));
+                    }
+
+                    if (data.type === 'SYNC' || data.type === 'SCORE') {
+                        rivalScore = data.score;
+                        rivalScoreEl.textContent = rivalScore;
+                        
+                        if (data.type === 'SCORE') {
+                            statusMsg.textContent = "Rival caught a fish!";
+                            checkWin();
+                        }
+                    }
+                } catch (err) {
+                    console.error("MQTT Parse error", err);
+                }
+            });
+        });
+
+        // Game Logic
+        btnAction.addEventListener('click', () => {
+            if (!opponentPresent) return; // Hard lock just in case
+
+            if (!isFishing && !hasBite) {
+                // Cast Line
+                isFishing = true;
+                btnAction.textContent = "REEL IN";
+                bobber.className = 'fishing';
+                statusMsg.textContent = "Waiting for a bite...";
+                
+                // Random time until fish bites (2 to 6 seconds)
+                const waitTime = Math.random() * 4000 + 2000;
+                biteTimer = setTimeout(triggerBite, waitTime);
+                
+            } else if (isFishing && !hasBite) {
+                // Reeled in too early
+                resetRod("You pulled too early! The fish ran away.", 'miss');
+            } else if (hasBite) {
+                // Caught it!
+                myScore++;
+                myScoreEl.textContent = myScore;
+                client.publish(roomTopic, JSON.stringify({ type: 'SCORE', id: myId, score: myScore }));
+                resetRod("Got one! Nice catch.", 'idle');
+                checkWin();
+            }
+        });
+
+        function triggerBite() {
+            hasBite = true;
+            bobber.className = 'bite';
+            statusMsg.textContent = "BITE! REEL IT IN!";
+            
+            // Player has 800ms to react
+            escapeTimer = setTimeout(() => {
+                if (hasBite) {
+                    resetRod("It got away!", 'miss');
+                }
+            }, 800);
+        }
+
+        function resetRod(msg, bobberClass) {
+            clearTimeout(biteTimer);
+            clearTimeout(escapeTimer);
+            isFishing = false;
+            hasBite = false;
+            btnAction.textContent = "CAST LINE";
+            bobber.className = bobberClass;
+            statusMsg.textContent = msg;
+            
+            if (bobberClass === 'miss') {
+                setTimeout(() => bobber.className = '', 1000);
+            }
+        }
+
+        function checkWin() {
+            if (myScore >= 5) {
+                statusMsg.textContent = "YOU WIN! The waters are yours.";
+                btnAction.disabled = true;
+            } else if (rivalScore >= 5) {
+                statusMsg.textContent = "RIVAL WINS! Better luck next time.";
+                btnAction.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>

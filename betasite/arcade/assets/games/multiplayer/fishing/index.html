@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calypso Coast: Fishing Clash</title>
+    <!-- Dependencies -->
+    <link rel="stylesheet" href="../chat.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="../multiplayer.js"></script>
+    <style>
+
+    </style>
+</head>
+<body>
+
+    <div class="container" id="lobby-ui">
+        <h1>Fishing Clash</h1>
+        <p>Enter a 4-letter room code to duel.</p>
+        <input type="text" id="room-code" maxlength="4" placeholder="CODE">
+        <br>
+        <button id="btn-join">CONNECT</button>
+        <p id="lobby-msg" style="color: #888; font-size: 0.8rem; margin-top: 15px;"></p>
+    </div>
+
+    <div class="container hidden" id="game-ui">
+        <h1>Calypso Coast</h1>
+        <div class="game-area">
+            <div class="scoreboard">
+                <div>YOU: <span id="my-score">0</span></div>
+                <div>RIVAL: <span id="rival-score">0</span></div>
+            </div>
+            
+            <div id="bobber"></div>
+            
+            <button id="btn-action" disabled>CAST LINE</button>
+            <div id="status-msg">Connecting to waters...</div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+    <script>
+
+    </script>
+</body>
+</html>
