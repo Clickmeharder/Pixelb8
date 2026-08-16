@@ -146,6 +146,7 @@
         function assignPlayers(roster) {
             if (!isHost) return;
             p1Id = myId; p2Id = null;
+            myPlayerNum = 1; // Host is always Player 1 / Red locally.
             const guest = roster.find(r => r.id !== myId);
             if (guest) p2Id = guest.id;
             
@@ -489,6 +490,16 @@
             }
         }
 
+        function requestMove(fromR, fromC, toR, toC) {
+            if (isHost) {
+                // The host is authoritative: process its own move immediately.
+                // Do not depend on the broker echoing our MOVE packet back.
+                hostProcessMove(myId, fromR, fromC, toR, toC);
+                return;
+            }
+            MP.publish('MOVE', { fromR, fromC, toR, toC });
+        }
+
         function drawBoard() {
             const boardEl = $('#board');
             boardEl.innerHTML = '';
@@ -504,7 +515,7 @@
                     const moveMatch = validMoves.find(m => m.r === r && m.c === c);
                     if (moveMatch && isMyTurn) {
                         sq.classList.add('highlight');
-                        sq.onclick = () => MP.publish('MOVE', { fromR: selectedRow, fromC: selectedCol, toR: r, toC: c });
+                        sq.onclick = () => requestMove(selectedRow, selectedCol, r, c);
                     }
 
                     const val = boardState[r][c];
