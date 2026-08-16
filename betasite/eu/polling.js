@@ -475,13 +475,6 @@ async function initializeLiveFileHandle(handle,{requestPermission=false,startAtE
   if(liveStatus)liveStatus.textContent=`Live Polling: ${file.name} · every 1s`;
   startLiveHandlePolling();
 
-  showObsSourceDiagnostic({
-    title:'Live chat.log polling connected',
-    message:`${file.name} is connected through a persistent FileSystem handle. Newly appended lines will be checked every second.`,
-    details:`file: ${file.name}\nsize: ${(file.size/(1024*1024)).toFixed(2)} MB\npoll: ${LIVE_HANDLE_POLL_MS} ms\n\n${liveFileHandleEnvironmentSummary()}`,
-    level:'success',
-    nativePicker:false
-  });
 
   return file;
 }
