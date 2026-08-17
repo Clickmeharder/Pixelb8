@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#070b12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>PixelB8 Mobile Gamepad</title>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color-scheme:dark;--bg:#060a10;--panel:#0e1722;--line:#2c4361;--text:#f2f7ff;--muted:#8da5c5;--good:#55e39d;--bad:#ff7180;--accent:#668fc8;--hot:#8d3949}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text)}body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}button,input,select{font:inherit}.app{height:100%;display:grid;grid-template-rows:30px minmax(0,1fr) 38px;gap:4px;padding:4px}.top{display:flex;align-items:center;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:2px 4px}.dot{width:8px;height:8px;border-radius:50%;background:#69444a;flex:none}.connected .dot{background:var(--good);box-shadow:0 0 7px var(--good)}.brand{font-weight:900;font-size:10px;white-space:nowrap}.status{font-size:9px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.room{width:72px;height:23px;background:#07101a;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:2px 4px;font-size:9px}.mini{height:23px;min-width:26px;padding:0 6px;border:1px solid #405c80;border-radius:6px;background:#19283c;color:#fff;font-size:11px;font-weight:800}.gear{font-size:15px;width:28px;padding:0}.play{min-height:0;display:grid;grid-template-columns:43% 57%;gap:4px}.panel{position:relative;overflow:hidden;background:linear-gradient(#0d1723,#08111a);border:1px solid var(--line);border-radius:12px}.stickZone{position:absolute;inset:0;display:grid;place-items:center;touch-action:none}.stickBase{width:min(39vh,170px);height:min(39vh,170px);max-width:88%;max-height:88%;aspect-ratio:1;border-radius:50%;border:2px solid #3e5c82;background:radial-gradient(circle,#18283e 0 20%,#0b1725 21% 58%,#122033 59%);position:relative}.stickKnob{position:absolute;left:50%;top:50%;width:36%;height:36%;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle at 35% 30%,#5d83b5,#223a5b 65%);border:2px solid #78a2d5}.dir{position:absolute;font-size:8px;color:#8199b9;pointer-events:none}.n{top:3px;left:50%;transform:translateX(-50%)}.s{bottom:3px;left:50%;transform:translateX(-50%)}.w{left:4px;top:50%;transform:translateY(-50%)}.e{right:4px;top:50%;transform:translateY(-50%)}
+.controls{height:100%;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(3,1fr);gap:4px;padding:4px}.btn{min-width:0;min-height:0;border:1px solid #3c577a;border-radius:9px;background:linear-gradient(#1b2c44,#111d2e);color:white;font-weight:850;font-size:10px;padding:2px;touch-action:none}.btn small{display:block;font-size:7px;line-height:1;color:#aabbd1;font-weight:500;margin-top:1px}.btn.active,.btn:active{background:linear-gradient(#2b4c77,#16283f);border-color:#7da6dc}.jump{grid-column:4/6;grid-row:1/3;border-radius:45%;font-size:17px;background:radial-gradient(circle at 35% 28%,#3e699d,#182d49 67%)}.enter{grid-column:3/4;grid-row:1/3;font-size:13px}.sit{grid-column:1;grid-row:1}.shift{grid-column:2;grid-row:1}.shift.latched{background:linear-gradient(#7a6330,#3b3018);border-color:#e8c764}.more{grid-column:1/3;grid-row:2}.action{grid-column:1/3;grid-row:3;background:linear-gradient(#6d2d38,#351821)}.use{grid-column:3;grid-row:3}.target{grid-column:4;grid-row:3}.release{grid-column:5;grid-row:3;background:#4a1d25;border-color:#9a414e}.hotbar{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;min-height:0}.hotbar .btn{border-radius:7px;font-size:11px;padding:0;height:100%}.hotbar .shifted{box-shadow:inset 0 0 0 2px #d9b959;color:#ffe88c}
+.overlay{position:fixed;inset:0;background:#03070bd9;z-index:20;display:none;align-items:center;justify-content:center;padding:8px}.overlay.open{display:flex}.sheet{width:min(96vw,720px);max-height:94vh;overflow:auto;touch-action:pan-y;background:#101925;border:1px solid #3b5577;border-radius:13px;padding:10px;box-shadow:0 15px 45px #000b}.sheetHead{display:flex;align-items:center;gap:8px;position:sticky;top:-10px;background:#101925;padding:4px 0 7px;z-index:2}.sheetHead h2{font-size:15px;margin:0;flex:1}.close{width:30px;height:28px}.menuGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.menuBtn{min-height:54px}.bindGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.bindRow{background:#0a121c;border:1px solid #263b56;border-radius:8px;padding:6px}.bindRow label{display:block;color:#aabbd1;font-size:9px;margin-bottom:3px}.bindRow select{width:100%;height:27px;background:#07101a;color:white;border:1px solid #385271;border-radius:6px;font-size:10px}.resetBindings{margin-top:8px;width:100%;height:30px}.chat{position:fixed;z-index:30;left:6px;right:6px;top:35px;display:none;gap:5px;background:#0c1622ed;border:1px solid #466588;border-radius:9px;padding:5px}.chat.open{display:flex}.chat input{flex:1;min-width:0;height:32px;background:#050b12;color:white;border:1px solid #4a678c;border-radius:7px;padding:4px 8px;font-size:13px;user-select:text;-webkit-user-select:text;touch-action:auto}.chat button{height:32px}.chatHint{position:absolute;right:8px;bottom:43px;font-size:8px;color:#91a7c2;pointer-events:none}
+@media (orientation:portrait){body:before{content:'Rotate phone sideways';position:fixed;z-index:99;inset:0;display:grid;place-items:center;background:#05080d;color:white;font-weight:900;font-size:20px}.app{visibility:hidden}}
+@media(max-height:340px){.app{grid-template-rows:27px minmax(0,1fr) 35px}.top{border-radius:6px}.brand{display:none}.controls{gap:3px;padding:3px}.btn{font-size:9px;border-radius:7px}.jump{font-size:15px}.stickBase{width:min(47vh,150px);height:min(47vh,150px)}.menuGrid{grid-template-columns:repeat(4,1fr)}.bindGrid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top" id="top"><span class="dot"></span><span class="brand">PixelB8 Gamepad</span><span id="status" class="status">disconnected</span><input id="room" class="room" placeholder="room"><button id="connect" class="mini">↻</button><button id="settings" class="mini gear" aria-label="Key bindings">⚙</button></header>
+  <main class="play">
+    <section class="panel"><div class="stickZone" id="stickZone"><div class="stickBase" id="stickBase"><span class="dir n" id="dirUp">W</span><span class="dir s" id="dirDown">S</span><span class="dir w" id="dirLeft">A</span><span class="dir e" id="dirRight">D</span><div class="stickKnob" id="stickKnob"></div></div></div></section>
+    <section class="panel"><div class="controls">
+      <button class="btn sit" data-action="sit">SIT<small data-label="sit"></small></button>
+      <button class="btn shift" id="shift">SHIFT<small data-label="modifier"></small></button>
+      <button class="btn enter" id="enter">ENTER<small data-label="enter"></small></button>
+      <button class="btn jump" data-action="jump">JUMP<small data-label="jump"></small></button>
+      <button class="btn more" id="more">☰ MORE</button>
+      <button class="btn action" data-action="action">ACTION<small data-label="action"></small></button>
+      <button class="btn use" data-action="interact">USE<small data-label="interact"></small></button>
+      <button class="btn target" data-action="target">TARGET<small data-label="target"></small></button>
+      <button class="btn release" id="release">⏏<small>ALL UP</small></button>
+    </div></section>
+  </main>
+  <footer class="hotbar" id="hotbar"></footer>
+</div>
+<div class="chat" id="chat"><input id="chatInput" autocomplete="off" autocapitalize="sentences" placeholder="Type game chat…"><button class="mini" id="chatSend">SEND</button></div>
+<div class="overlay" id="moreOverlay"><div class="sheet"><div class="sheetHead"><h2>More controls</h2><button class="mini close" data-close="moreOverlay">✕</button></div><div class="menuGrid" id="moreGrid"></div></div></div>
+<div class="overlay" id="settingsOverlay"><div class="sheet"><div class="sheetHead"><h2>⚙ Gamepad settings & key bindings</h2><button class="mini close" data-close="settingsOverlay">✕</button></div><div class="bindGrid" id="bindGrid"></div><button class="mini resetBindings" id="resetBindings">Reset all bindings to defaults</button></div></div>
+<script>
+const BROKER='wss://broker.emqx.io:8084/mqtt';
+const $=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search);
+let room=params.get('room')||'';
+let secret=params.get('secret')||'';
+const clientId=localStorage.getItem('pixelb8GamepadClientId')||('phone-'+cryptoRandom(12));
+localStorage.setItem('pixelb8GamepadClientId',clientId);
+let deviceName=localStorage.getItem('pixelb8GamepadDeviceName')||('Phone '+clientId.slice(-4).toUpperCase());
+let client=null,desktopOnline=false,desktopArmed=false,heartbeat=null,stickPointer=null,stickKeys=new Set(),shiftLatched=false,chatOpen=false;
+let role='unknown',lastRoleAt=0,kicked=false;
+const held=new Set();
+const KEY_OPTIONS=['NONE','0','1','2','3','4','5','6','7','8','9','Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Z','X','C','V','B','N','M','SPACE','SHIFT','CTRL','TAB','ENTER'];
+const DEFAULT_BINDINGS={moveUp:'W',moveDown:'S',moveLeft:'A',moveRight:'D',jump:'SPACE',sit:'X',modifier:'SHIFT',enter:'ENTER',action:'3',interact:'F',target:'TAB',rotateLeft:'Q',rotateRight:'E',run:'SHIFT',inventory:'I',revive:'T',hotbar1:'1',hotbar2:'2',hotbar3:'3',hotbar4:'4',hotbar5:'5',hotbar6:'6',hotbar7:'7',hotbar8:'8',hotbar9:'9',hotbar0:'0'};
+const LABELS={moveUp:'Joystick Up',moveDown:'Joystick Down',moveLeft:'Joystick Left',moveRight:'Joystick Right',jump:'Jump',sit:'Sit',modifier:'Shift modifier',enter:'Enter / Chat',action:'Action',interact:'Use / Interact',target:'Target',rotateLeft:'Rotate Left',rotateRight:'Rotate Right',run:'Run / Hold',inventory:'Inventory',revive:'Nearest Revive',hotbar1:'Hotbar 1',hotbar2:'Hotbar 2',hotbar3:'Hotbar 3',hotbar4:'Hotbar 4',hotbar5:'Hotbar 5',hotbar6:'Hotbar 6',hotbar7:'Hotbar 7',hotbar8:'Hotbar 8',hotbar9:'Hotbar 9',hotbar0:'Hotbar 0'};
+function cryptoRandom(n){const a=new Uint8Array(n);crypto.getRandomValues(a);return [...a].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function loadBindings(){try{return {...DEFAULT_BINDINGS,...JSON.parse(localStorage.getItem('pixelb8GamepadBindings')||'{}')}}catch{return {...DEFAULT_BINDINGS}}}
+let bindings=loadBindings();
+$('room').value=room;
+$('room').readOnly=true;
+function base(){return `pixelb8/gamepad/${room}`}
+function canControl(){return role==='controller'&&desktopOnline&&desktopArmed&&!kicked}
+function setStatus(text,ok=false){$('status').textContent=text;$('top').classList.toggle('connected',ok)}
+function paintStatus(){
+  if(kicked){setStatus('KICKED · scan a fresh QR',false);return}
+  if(!client?.connected){setStatus('disconnected',false);return}
+  if(!desktopOnline){setStatus('desktop offline',false);return}
+  if(role==='controller')setStatus(desktopArmed?'PRIMARY · READY':'PRIMARY · arm on desktop',desktopArmed);
+  else if(role==='waiting')setStatus('WAITING · another phone has control',false);
+  else setStatus('connected · requesting control…',false);
+}
+function rawPublish(obj){if(!client?.connected||!room||!secret||kicked)return;client.publish(`${base()}/control`,JSON.stringify({...obj,clientId,deviceName,secret,source:'phone-controller',ts:Date.now()}),{qos:0})}
+function publish(obj){if(!canControl())return;rawPublish(obj)}
+function keyFor(action){return bindings[action]&&bindings[action]!=='NONE'?bindings[action]:null}
+function vibe(ms){try{navigator.vibrate?.(ms)}catch{}}
+function downKey(key){if(!key||held.has(key)||!canControl())return;held.add(key);publish({type:'key-down',key});vibe(8)}
+function upKey(key){if(!key||!held.has(key))return;held.delete(key);publish({type:'key-up',key})}
+function tapKey(key){if(!key||!canControl())return;publish({type:'tap',key,duration:55});vibe(15)}
+function tapAction(action){tapKey(keyFor(action))}
+function releaseAll(localOnly=false){held.clear();stickKeys.clear();if(!localOnly&&canControl())publish({type:'release-all'});resetStick();setShift(false)}
+function connect(){
+  room=$('room').value.trim();
+  if(!/^[A-Za-z0-9_-]{6,64}$/.test(room)||!secret){setStatus('open from a valid QR invite');return}
+  try{client?.end(true)}catch{}
+  kicked=false;role='unknown';setStatus('connecting…');
+  client=mqtt.connect(BROKER,{clientId:'pixelb8-'+clientId+'-'+Math.random().toString(16).slice(2,8),clean:true,reconnectPeriod:1500,connectTimeout:10000,keepalive:30});
+  client.on('connect',()=>{
+    client.subscribe([`${base()}/status`,`${base()}/client/${clientId}`]);
+    clearInterval(heartbeat);
+    rawPublish({type:'hello'});
+    heartbeat=setInterval(()=>{
+      rawPublish({type:'heartbeat'});
+      if(role!=='unknown'&&Date.now()-lastRoleAt>3500){role='unknown';releaseAll(true);paintStatus()}
+    },500);
+    paintStatus();
+  });
+  client.on('message',(topic,payload)=>{
+    try{
+      const m=JSON.parse(payload.toString());
+      if(topic===`${base()}/status`&&m.type==='desktop-status'){
+        desktopOnline=!!m.online;desktopArmed=!!m.armed;paintStatus();return;
+      }
+      if(topic===`${base()}/client/${clientId}`){
+        if(m.type==='kicked'){
+          kicked=true;role='kicked';releaseAll(true);paintStatus();try{client.end(true)}catch{};return;
+        }
+        if(m.type==='role'){
+          const previous=role;role=m.role||'waiting';lastRoleAt=Date.now();desktopArmed=!!m.armed;
+          if(previous==='controller'&&role!=='controller')releaseAll(true);
+          paintStatus();return;
+        }
+        if(m.type==='notice')setStatus(m.message||'notice',false);
+      }
+    }catch{}
+  });
+  client.on('reconnect',()=>setStatus('reconnecting…'));
+  client.on('close',()=>{releaseAll(true);paintStatus()});
+  client.on('error',e=>setStatus('MQTT '+e.message));
+}
+$('connect').onclick=connect;
+function renderHotbar(){const bar=$('hotbar');bar.innerHTML='';const names=['1','2','3','4','5','6','7','8','9','0'];for(const n of names){const b=document.createElement('button');b.className='btn';b.textContent=n;b.onclick=()=>{const key=keyFor('hotbar'+n);if(!key||!canControl())return;if(shiftLatched){publish({type:'modified-tap',modifier:keyFor('modifier'),key,duration:55});setShift(false);b.classList.add('shifted');setTimeout(()=>b.classList.remove('shifted'),180)}else tapKey(key)};bar.appendChild(b)}}
+function refreshLabels(){$('dirUp').textContent=keyFor('moveUp')||'–';$('dirDown').textContent=keyFor('moveDown')||'–';$('dirLeft').textContent=keyFor('moveLeft')||'–';$('dirRight').textContent=keyFor('moveRight')||'–';document.querySelectorAll('[data-label]').forEach(el=>el.textContent=keyFor(el.dataset.label)||'OFF');renderHotbar()}
+function setShift(on){shiftLatched=!!on;$('shift').classList.toggle('latched',shiftLatched);$('shift').classList.toggle('active',shiftLatched)}
+$('shift').onclick=()=>{if(!canControl())return;setShift(!shiftLatched);vibe(18)};
+document.querySelectorAll('[data-action]').forEach(el=>{el.addEventListener('pointerdown',e=>{e.preventDefault();if(!canControl())return;tapAction(el.dataset.action);el.classList.add('active')});const clear=()=>el.classList.remove('active');el.addEventListener('pointerup',clear);el.addEventListener('pointercancel',clear)});
+$('release').onclick=()=>releaseAll();
+function openChat(){if(chatOpen||!canControl())return;chatOpen=true;publish({type:'chat-open',key:keyFor('enter')});$('chat').classList.add('open');setTimeout(()=>$('chatInput').focus(),50);vibe(15)}
+function closeChat(send=true){if(!chatOpen)return;const text=$('chatInput').value.trim();if(canControl()){if(send&&text)publish({type:'chat-send',text,enterKey:keyFor('enter')});else publish({type:'tap',key:keyFor('enter'),duration:55})}$('chatInput').value='';$('chat').classList.remove('open');$('chatInput').blur();chatOpen=false}
+$('enter').onclick=()=>chatOpen?closeChat(true):openChat();$('chatSend').onclick=()=>closeChat(true);$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();closeChat(true)}});
+const MORE=[['inventory','INVENTORY'],['revive','REVIVE'],['rotateLeft','ROTATE ↶'],['rotateRight','ROTATE ↷'],['run','RUN'],['interact','USE'],['target','TARGET'],['action','ACTION']];
+function buildMore(){const g=$('moreGrid');g.innerHTML='';for(const [action,name] of MORE){const b=document.createElement('button');b.className='btn menuBtn';b.innerHTML=`${name}<small>${keyFor(action)||'OFF'}</small>`;if(action==='run'||action==='rotateLeft'||action==='rotateRight'){let active=false;b.addEventListener('pointerdown',e=>{e.preventDefault();if(!canControl())return;active=true;downKey(keyFor(action));b.classList.add('active')});const end=()=>{if(active){active=false;upKey(keyFor(action));b.classList.remove('active')}};b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end)}else b.onclick=()=>tapAction(action);g.appendChild(b)}}
+$('more').onclick=()=>{buildMore();$('moreOverlay').classList.add('open')};
+function buildBindings(){
+  const g=$('bindGrid');g.innerHTML='';
+  const nameRow=document.createElement('div');nameRow.className='bindRow';nameRow.style.gridColumn='1/-1';
+  const nameLabel=document.createElement('label');nameLabel.textContent='This device name';
+  const nameInput=document.createElement('input');nameInput.value=deviceName;nameInput.maxLength=48;nameInput.style.width='100%';nameInput.style.height='30px';nameInput.style.background='#07101a';nameInput.style.color='white';nameInput.style.border='1px solid #385271';nameInput.style.borderRadius='6px';
+  nameInput.onchange=()=>{deviceName=(nameInput.value.trim()||('Phone '+clientId.slice(-4).toUpperCase())).slice(0,48);localStorage.setItem('pixelb8GamepadDeviceName',deviceName);rawPublish({type:'hello'})};
+  nameRow.append(nameLabel,nameInput);g.appendChild(nameRow);
+  for(const action of Object.keys(DEFAULT_BINDINGS)){const row=document.createElement('div');row.className='bindRow';const label=document.createElement('label');label.textContent=LABELS[action]||action;const sel=document.createElement('select');for(const k of KEY_OPTIONS){const o=document.createElement('option');o.value=k;o.textContent=k;o.selected=bindings[action]===k;sel.appendChild(o)}sel.onchange=()=>{bindings[action]=sel.value;localStorage.setItem('pixelb8GamepadBindings',JSON.stringify(bindings));refreshLabels();buildMore()};row.append(label,sel);g.appendChild(row)}}
+$('settings').onclick=()=>{buildBindings();$('settingsOverlay').classList.add('open')};
+$('resetBindings').onclick=()=>{bindings={...DEFAULT_BINDINGS};localStorage.setItem('pixelb8GamepadBindings',JSON.stringify(bindings));buildBindings();refreshLabels()};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$((b.dataset.close)).classList.remove('open'));
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('pointerdown',e=>{if(e.target===o)o.classList.remove('open')}));
+const zone=$('stickZone'),baseEl=$('stickBase'),knob=$('stickKnob');function resetStick(){knob.style.transform='translate(-50%,-50%)'}
+function updateStick(e){if(!canControl())return;const r=baseEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,max=r.width*.31,d=Math.hypot(dx,dy);if(d>max){dx=dx/d*max;dy=dy/d*max}knob.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;const nx=dx/max,ny=dy/max,nextActions=[];if(nx<-.25)nextActions.push('moveLeft');if(nx>.25)nextActions.push('moveRight');if(ny<-.25)nextActions.push('moveUp');if(ny>.25)nextActions.push('moveDown');const next=new Set(nextActions.map(keyFor).filter(Boolean));for(const k of stickKeys)if(!next.has(k))upKey(k);for(const k of next)if(!stickKeys.has(k))downKey(k);stickKeys=next}
+zone.addEventListener('pointerdown',e=>{e.preventDefault();if(!canControl())return;stickPointer=e.pointerId;zone.setPointerCapture?.(e.pointerId);updateStick(e)});zone.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)updateStick(e)});function endStick(e){if(stickPointer!==null&&(!e||e.pointerId===stickPointer)){for(const k of stickKeys)upKey(k);stickKeys.clear();stickPointer=null;resetStick()}}zone.addEventListener('pointerup',endStick);zone.addEventListener('pointercancel',endStick);zone.addEventListener('lostpointercapture',endStick);
+window.addEventListener('pagehide',()=>releaseAll());window.addEventListener('blur',()=>{if(!chatOpen)releaseAll()});document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll()});
+refreshLabels();if(room&&secret)connect();else setStatus('scan a valid PixelB8 QR invite');
+</script>
+</body></html>
