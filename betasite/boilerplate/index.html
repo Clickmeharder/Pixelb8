@@ -36,6 +36,9 @@
         <button class="sidebar-nav-btn" data-view="workspace" onclick="switchView('workspace')">
           <span class="sidebar-item-icon">▣</span><span class="sidebar-item-text">Workspace</span>
         </button>
+        <button class="sidebar-nav-btn" data-view="settings" onclick="switchView('settings')">
+          <span class="sidebar-item-icon">⚙</span><span class="sidebar-item-text">Page Settings</span>
+        </button>
       </section>
 
 
@@ -97,34 +100,132 @@
   </aside>
 
   <main class="workspace">
-    <header class="workspace-header"><div><span class="eyebrow">PIXELB8</span><h2 id="pageTitle">Overview</h2></div></header>
-    <section class="view active" id="overviewView"><div class="demo-card"><h3>Overview</h3><p>Replace this with your page content.</p></div></section>
-    <section class="view" id="workspaceView"><div class="demo-card"><h3>Workspace</h3><p>Your main editor, tracker, game, dashboard, or tool can live here.</p></div></section>
-    <section class="view" id="favoritesView"><div class="demo-card"><h3>Favorites</h3><p>Example Library destination.</p></div></section>
-    <section class="view" id="recentView"><div class="demo-card"><h3>Recents</h3><p>Example recent-items destination.</p></div></section>
+    <header class="workspace-header">
+      <div>
+        <span class="eyebrow">PIXELB8 PAGE FOUNDATION</span>
+        <h2 id="pageTitle">Overview</h2>
+      </div>
+      <div class="workspace-header-actions">
+        <button class="btn" type="button">Action</button>
+        <button class="btn primary" type="button">Primary Action</button>
+      </div>
+    </header>
+
+    <div class="workspace-content">
+      <section class="view active" id="overviewView">
+        <div class="demo-card"><h3>Overview</h3><p>Replace this with your page content.</p></div>
+      </section>
+
+      <section class="view" id="workspaceView">
+        <article class="workspace-panel">
+          <div class="workspace-panel-head">
+            <div>
+              <span class="panel-kicker">EXAMPLE VIEW</span>
+              <h3>Workspace</h3>
+              <p>Your main editor, tracker, game, dashboard, canvas, or other tool can live here.</p>
+            </div>
+            <div class="workspace-panel-actions">
+              <button class="btn" type="button">Tool</button>
+              <button class="btn" type="button">Options</button>
+            </div>
+          </div>
+          <div class="workspace-editor-shell" id="workspaceEditorShell">
+            <!-- OPTIONAL INNER LEFT PANEL: tool-specific controls such as Rig / Body / Assets. -->
+            <aside class="workspace-inner-panel workspace-inner-left" id="workspaceInnerLeft">
+              <button class="workspace-inner-collapse" type="button" onclick="toggleInnerPanel('left')" title="Collapse workspace left panel">‹</button>
+              <div class="workspace-inner-panel-head">
+                <span class="panel-kicker">TOOL PANEL</span>
+                <strong>Rig &amp; Body</strong>
+              </div>
+              <div class="workspace-inner-panel-body">
+                <button class="inner-tool-btn active" type="button"><span>骨</span><b>Skeleton</b></button>
+                <button class="inner-tool-btn" type="button"><span>●</span><b>Joints</b></button>
+                <button class="inner-tool-btn" type="button"><span>◇</span><b>Body</b></button>
+                <button class="inner-tool-btn" type="button"><span>✦</span><b>Poses</b></button>
+              </div>
+            </aside>
+
+            <!-- Main replaceable work surface. -->
+            <div class="workspace-surface">
+              <span>NEW PAGE WORKSPACE</span>
+              <small>Replace this surface with your app's actual canvas, viewport, editor, game, or dashboard.</small>
+            </div>
+
+            <!-- OPTIONAL INNER RIGHT PANEL: properties / settings / inspector. -->
+            <aside class="workspace-inner-panel workspace-inner-right" id="workspaceInnerRight">
+              <button class="workspace-inner-collapse" type="button" onclick="toggleInnerPanel('right')" title="Collapse workspace right panel">›</button>
+              <div class="workspace-inner-panel-head">
+                <span class="panel-kicker">INSPECTOR</span>
+                <strong>Properties</strong>
+              </div>
+              <div class="workspace-inner-panel-body">
+                <label class="inner-demo-field"><span>Selection</span><select><option>Character</option><option>Skeleton</option><option>Joint</option></select></label>
+                <label class="inner-demo-field"><span>Scale</span><input type="range" min="50" max="150" value="100"></label>
+                <label class="inner-demo-field"><span>Opacity</span><input type="range" min="0" max="100" value="100"></label>
+              </div>
+            </aside>
+          </div>
+        </article>
+      </section>
+
+      <section class="view" id="settingsView">
+        <article class="demo-card settings-card">
+          <span class="panel-kicker">BOILERPLATE EXAMPLE</span>
+          <h3>Page Settings</h3>
+          <p>These demonstrate how a creator/editor page can let users enable or disable optional internal workspace panels.</p>
+          <label class="settings-toggle-row">
+            <span><b>Show inner left panel</b><small>Useful for tools, assets, rig/body controls, layers, etc.</small></span>
+            <input id="showInnerLeftSetting" type="checkbox" checked onchange="setInnerPanelVisible('left',this.checked)">
+          </label>
+          <label class="settings-toggle-row">
+            <span><b>Show inner right panel</b><small>Useful for properties, inspector controls, options, and settings.</small></span>
+            <input id="showInnerRightSetting" type="checkbox" checked onchange="setInnerPanelVisible('right',this.checked)">
+          </label>
+        </article>
+      </section>
+
+      <section class="view" id="favoritesView"><div class="demo-card"><h3>Favorites</h3><p>Example Library destination.</p></div></section>
+      <section class="view" id="recentView"><div class="demo-card"><h3>Recents</h3><p>Example recent-items destination.</p></div></section>
+    </div>
   </main>
 
   <div class="pixelb8-vertical-resizer" data-pixelb8-right-resizer title="Drag to resize account & chat"><span class="pixelb8-vertical-resizer-grip"></span></div>
   <aside class="pixelb8-right-rail collapsed" data-pixelb8-right-rail>
     <button class="pixelb8-right-rail-toggle" onclick="PixelB8Shell.toggleRightRail()" title="Open account & chat"><span class="pixelb8-right-rail-toggle-icon">‹</span></button>
     <div class="pixelb8-right-rail-inner">
-      <section class="pixelb8-account-hud">
+      <section class="pixelb8-account-section collapsed" data-pixelb8-account-section>
+
+        <div class="pixelb8-account-hud">
         <div class="pixelb8-account-avatar-wrap"><div class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</div><span class="pixelb8-account-presence"></span></div>
         <div class="pixelb8-account-copy"><span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span><strong data-pixelb8-profile-name>Guest</strong><span data-pixelb8-profile-status>Guest account</span></div>
-      </section>
-      <section class="pixelb8-right-section pixelb8-account-actions">
+      
+
+          <button class="pixelb8-account-chevron" type="button" data-pixelb8-account-toggle onclick="PixelB8Shell.toggleAccountSection(this.closest('[data-pixelb8-account-section]'))" aria-expanded="false" title="Account options">›</button>
+
+        </div>
+
+        <div class="pixelb8-account-actions">
         <button class="pixelb8-account-action" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
         <button class="pixelb8-account-action danger" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
+      
+
+        </div>
+
       </section>
-      <section class="pixelb8-right-section pixelb8-chat-section">
-        <div class="pixelb8-right-section-head"><div><span class="pixelb8-account-kicker">PIXELB8 MQTT</span><strong>Global Chat</strong></div><span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span></div>
+      <div class="pixelb8-right-footer">PixelB8 Social</div>
+      <section class="pixelb8-chat-section" data-pixelb8-chat-section>
+        <button class="pixelb8-chat-toggle" type="button" data-pixelb8-chat-toggle onclick="PixelB8Shell.toggleChatSection(this.closest('[data-pixelb8-chat-section]'))" aria-expanded="true" title="Toggle global chat">
+          <span class="pixelb8-right-section-head"><span class="pixelb8-account-kicker">PIXELB8 MQTT</span><strong>Global Chat</strong></span>
+          <span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span>
+          <span class="pixelb8-chat-chevron">‹</span>
+        </button>
         <div class="pixelb8-chat-container">
           <div class="pixelb8-chat-messages" data-pixelb8-chat-messages></div>
           <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker><span onclick="PixelB8Shell.insertEmoji('😀')">😀</span><span onclick="PixelB8Shell.insertEmoji('😂')">😂</span><span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span><span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span><span onclick="PixelB8Shell.insertEmoji('👾')">👾</span><span onclick="PixelB8Shell.insertEmoji('😎')">😎</span><span onclick="PixelB8Shell.insertEmoji('👍')">👍</span><span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span></div>
           <div class="pixelb8-chat-input"><button onclick="PixelB8Shell.toggleEmojiPicker()">☺</button><input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()"><button class="primary" onclick="PixelB8Shell.sendChat()">Send</button></div>
         </div>
       </section>
-      <div class="pixelb8-right-footer">PixelB8 Social</div>
+      
     </div>
   </aside>
 </div>

@@ -15,7 +15,113 @@
 .sidebar-search{height:34px;display:flex;align-items:center;gap:6px;margin:0 0 7px;padding:0 8px;border:1px solid #2b333c;border-radius:7px;background:#0d1014;color:#7d8792}.sidebar-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#e9edf2}
 .app.sidebar-collapsed .sidebar-search{display:none!important}.app.sidebar-collapsed .sidebar-nav-btn{width:48px;min-height:42px;justify-content:center;padding:5px;margin:0 auto 5px}
 
+.workspace{height:100vh;min-width:0;overflow:hidden;background:#0d0f12;display:flex;flex-direction:column}
+.workspace-header{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid #252b32;background:#11151a;flex:0 0 auto}
+.workspace-header h2{margin:3px 0 0;font-size:20px}
+.workspace-header-actions,.workspace-panel-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.workspace-content{min-height:0;flex:1;overflow:auto;padding:18px 20px 22px}
+.view{display:none;height:100%}.view.active{display:block}
+.demo-card{max-width:760px;padding:22px;border:1px solid #2a313a;border-radius:10px;background:#15191f}.demo-card h3{margin-top:0}
 
-.workspace{height:100vh;overflow:auto;padding:22px;background:#0d0f12}.workspace-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.workspace-header h2{margin:4px 0 0}.view{display:none}.view.active{display:block}.demo-card{max-width:760px;padding:22px;border:1px solid #2a313a;border-radius:10px;background:#15191f}.demo-card h3{margin-top:0}
+/* A more realistic default workspace: panel chrome + a large replaceable work surface. */
+.workspace-panel{min-height:100%;display:flex;flex-direction:column;border:1px solid #2a313a;border-radius:10px;background:#15191f;overflow:hidden}
+.workspace-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:18px 20px;border-bottom:1px solid #2a313a;background:#171c22}
+.workspace-panel-head h3{margin:4px 0 6px;font-size:18px}.workspace-panel-head p{max-width:720px;margin:0;color:#98a3ae;line-height:1.45}
+.panel-kicker{display:block;font-size:10px;font-weight:800;letter-spacing:.13em;color:#727f8c}
+.workspace-surface{min-height:420px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin:14px;border:1px dashed #35404a;border-radius:8px;background:#0d1014;color:#8d99a5;text-align:center}
+.workspace-surface span{font-size:13px;font-weight:800;letter-spacing:.12em;color:#c4ccd4}.workspace-surface small{font-size:12px;color:#727d88}
 
-@media(max-width:760px){.app,.app.social-expanded{grid-template-columns:var(--pixelb8-left-collapsed) minmax(0,1fr) 0 0}.pixelb8-vertical-resizer,.pixelb8-right-rail{display:none}}
+@media(max-width:760px){
+  .app,.app.social-expanded{grid-template-columns:var(--pixelb8-left-collapsed) minmax(0,1fr) 0 0}
+  .pixelb8-vertical-resizer,.pixelb8-right-rail{display:none}
+  .workspace-header{align-items:flex-start;flex-direction:column}
+  .workspace-header-actions{width:100%}
+  .workspace-panel-head{flex-direction:column}
+}
+
+/* Optional INTERNAL workspace sidebars — boilerplate-only example.
+   These are tool-local panels, not the global PixelB8 left/right rails. */
+.workspace-editor-shell{
+  min-height:0;
+  flex:1;
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr) 240px;
+  gap:10px;
+  padding:12px;
+  background:#101318;
+}
+.workspace-editor-shell.hide-inner-left{grid-template-columns:minmax(0,1fr) 240px}
+.workspace-editor-shell.hide-inner-right{grid-template-columns:220px minmax(0,1fr)}
+.workspace-editor-shell.hide-inner-left.hide-inner-right{grid-template-columns:minmax(0,1fr)}
+
+.workspace-inner-panel{
+  position:relative;
+  min-width:0;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  border:1px solid #2a313a;
+  border-radius:8px;
+  background:#15191f;
+  transition:width .16s ease,min-width .16s ease;
+}
+.workspace-inner-panel.hidden-by-setting{display:none}
+.workspace-inner-panel.collapsed{width:42px;min-width:42px}
+.workspace-inner-left.collapsed + .workspace-surface{}
+.workspace-editor-shell:has(.workspace-inner-left.collapsed){grid-template-columns:42px minmax(0,1fr) 240px}
+.workspace-editor-shell:has(.workspace-inner-right.collapsed){grid-template-columns:220px minmax(0,1fr) 42px}
+.workspace-editor-shell:has(.workspace-inner-left.collapsed):has(.workspace-inner-right.collapsed){grid-template-columns:42px minmax(0,1fr) 42px}
+.workspace-editor-shell.hide-inner-left:has(.workspace-inner-right.collapsed){grid-template-columns:minmax(0,1fr) 42px}
+.workspace-editor-shell.hide-inner-right:has(.workspace-inner-left.collapsed){grid-template-columns:42px minmax(0,1fr)}
+
+.workspace-inner-collapse{
+  position:absolute;
+  top:8px;
+  right:8px;
+  z-index:2;
+  width:26px;
+  height:26px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:1px solid #343d48;
+  border-radius:6px;
+  background:#1b222a;
+  color:#dce5ee;
+}
+.workspace-inner-right .workspace-inner-collapse{left:8px;right:auto}
+.workspace-inner-panel-head{padding:12px 42px 10px 12px;border-bottom:1px solid #272f37}
+.workspace-inner-right .workspace-inner-panel-head{padding-left:42px;padding-right:12px}
+.workspace-inner-panel-head strong{display:block;margin-top:3px;font-size:.78rem;color:#f0f4f7}
+.workspace-inner-panel-body{min-height:0;overflow:auto;padding:9px}
+.workspace-inner-panel.collapsed .workspace-inner-panel-head,
+.workspace-inner-panel.collapsed .workspace-inner-panel-body{display:none}
+.workspace-inner-panel.collapsed .workspace-inner-collapse{left:7px;right:7px;margin:auto}
+
+.inner-tool-btn{
+  width:100%;min-height:36px;display:flex;align-items:center;gap:8px;margin-bottom:5px;padding:6px 8px;
+  border:1px solid transparent;border-radius:6px;background:transparent;color:#c6cfd7;text-align:left
+}
+.inner-tool-btn:hover{background:#1d242b}.inner-tool-btn.active{background:#202730;border-color:#34414d}
+.inner-tool-btn span{width:22px;height:22px;display:grid;place-items:center;border-radius:5px;background:#242c34;color:#8edcff;font-size:.7rem}
+.inner-tool-btn b{font-size:.7rem}
+.inner-demo-field{display:grid;gap:5px;margin-bottom:12px;color:#9aa5af;font-size:.66rem}
+.inner-demo-field select,.inner-demo-field input[type="range"]{width:100%}
+.inner-demo-field select{height:32px;border:1px solid #303943;border-radius:6px;background:#0f1317;color:#e9edf2;padding:0 7px}
+
+/* Workspace surface now occupies the center column of the editor shell. */
+.workspace-editor-shell .workspace-surface{min-width:0;min-height:420px;height:auto;margin:0}
+
+.settings-card p{color:#98a3ae;line-height:1.5}
+.settings-toggle-row{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid #2a313a
+}
+.settings-toggle-row>span{display:flex;flex-direction:column;gap:3px}.settings-toggle-row b{font-size:.78rem}.settings-toggle-row small{color:#7f8993;font-size:.66rem}
+.settings-toggle-row input{width:18px;height:18px}
+
+@media(max-width:980px){
+  .workspace-editor-shell{grid-template-columns:180px minmax(0,1fr) 190px}
+  .workspace-editor-shell:has(.workspace-inner-left.collapsed){grid-template-columns:42px minmax(0,1fr) 190px}
+  .workspace-editor-shell:has(.workspace-inner-right.collapsed){grid-template-columns:180px minmax(0,1fr) 42px}
+}

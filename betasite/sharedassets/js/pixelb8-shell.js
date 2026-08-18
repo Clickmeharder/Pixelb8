@@ -155,6 +155,43 @@
     shell.classList.toggle('social-expanded',shouldExpand);
   };
 
+  PixelB8Shell.toggleAccountSection=function(target){
+    const section=target
+      ? (typeof target==='string'?document.querySelector(target):target)
+      : document.querySelector('[data-pixelb8-account-section]');
+    if(!section)return false;
+    const collapsed=section.classList.toggle('collapsed');
+    section.querySelector('[data-pixelb8-account-toggle]')?.setAttribute('aria-expanded',String(!collapsed));
+    return !collapsed;
+  };
+
+  PixelB8Shell.toggleChatSection=function(target){
+    const section=target
+      ? (typeof target==='string'?document.querySelector(target):target)
+      : document.querySelector('[data-pixelb8-chat-section]');
+    if(!section)return false;
+    const collapsed=section.classList.toggle('collapsed');
+    section.querySelector('[data-pixelb8-chat-toggle]')?.setAttribute('aria-expanded',String(!collapsed));
+    if(!collapsed){
+      requestAnimationFrame(()=>{
+        const host=section.querySelector('[data-pixelb8-chat-messages]');
+        if(host)host.scrollTop=host.scrollHeight;
+      });
+    }
+    return !collapsed;
+  };
+
+  PixelB8Shell.initRightSections=function(root=document){
+    root.querySelectorAll('[data-pixelb8-account-section]').forEach(section=>{
+      section.classList.add('collapsed');
+      section.querySelector('[data-pixelb8-account-toggle]')?.setAttribute('aria-expanded','false');
+    });
+    root.querySelectorAll('[data-pixelb8-chat-section]').forEach(section=>{
+      section.classList.remove('collapsed');
+      section.querySelector('[data-pixelb8-chat-toggle]')?.setAttribute('aria-expanded','true');
+    });
+  };
+
   PixelB8Shell.openAccountSettings=function(){
     const p=PixelB8Shell.getProfile();
     const back=document.querySelector('[data-pixelb8-account-settings]');
@@ -281,6 +318,7 @@
 
   PixelB8Shell.initRightRail=function(){
     PixelB8Shell.renderProfile();
+    PixelB8Shell.initRightSections(document);
     PixelB8Shell.toggleRightRail(false);
     PixelB8Shell.initChat();
   };

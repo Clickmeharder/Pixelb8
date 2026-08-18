@@ -443,8 +443,8 @@ body::-webkit-scrollbar-thumb:hover,
   width:var(--pixelb8-right-expanded);
   height:100%;
   min-height:0;
-  display:grid;
-  grid-template-rows:auto auto minmax(0,1fr) auto;
+  display:flex;
+  flex-direction:column;
   padding:52px 8px 0;
   overflow:hidden;
   opacity:1;
@@ -456,14 +456,33 @@ body::-webkit-scrollbar-thumb:hover,
   pointer-events:none;
 }
 
+/* Compact account summary + expandable account actions. */
+.pixelb8-account-section{
+  flex:0 0 auto;
+  border-bottom:1px solid #222a32;
+}
 .pixelb8-account-hud{
+  width:100%;
   display:grid;
-  grid-template-columns:48px minmax(0,1fr);
+  grid-template-columns:48px minmax(0,1fr) 24px;
   align-items:center;
   gap:9px;
   padding:10px 8px 12px;
-  border-bottom:1px solid #222a32;
+  border:0;
+  background:transparent;
+  color:inherit;
+  text-align:left;
 }
+.pixelb8-account-hud:hover{background:#151a20}
+.pixelb8-account-chevron{
+  display:grid;
+  place-items:center;
+  color:#77828d;
+  font-size:1rem;
+  transition:transform .16s ease;
+}
+.pixelb8-account-section:not(.collapsed) .pixelb8-account-chevron{transform:rotate(90deg)}
+.pixelb8-account-section.collapsed .pixelb8-account-actions{display:none}
 
 .pixelb8-account-avatar-wrap{
   position:relative;
@@ -496,9 +515,7 @@ body::-webkit-scrollbar-thumb:hover,
   background:var(--pixelb8-success);
 }
 
-.pixelb8-account-copy{
-  min-width:0;
-}
+.pixelb8-account-copy{min-width:0}
 
 .pixelb8-account-kicker{
   display:block;
@@ -525,14 +542,12 @@ body::-webkit-scrollbar-thumb:hover,
   font-size:.61rem;
 }
 
-.pixelb8-right-section{
-  padding:8px 4px;
-  border-bottom:1px solid #222a32;
-}
+.pixelb8-right-section{padding:8px 4px}
 
 .pixelb8-account-actions{
   display:grid;
   gap:5px;
+  padding:0 4px 8px;
 }
 
 .pixelb8-account-action{
@@ -549,32 +564,44 @@ body::-webkit-scrollbar-thumb:hover,
   text-align:left;
 }
 
-.pixelb8-account-action:hover{
-  background:#1d242b;
-  color:#fff;
-}
+.pixelb8-account-action:hover{background:#1d242b;color:#fff}
+.pixelb8-account-action.danger:hover{border-color:#62313a;color:#ff9ba5}
 
-.pixelb8-account-action.danger:hover{
-  border-color:#62313a;
-  color:#ff9ba5;
-}
-
+/* Bottom-docked chat accordion. Open chat consumes every pixel left below account. */
 .pixelb8-chat-section{
+  flex:1 1 auto;
   min-height:0;
-  display:grid;
-  grid-template-rows:auto minmax(0,1fr);
-  gap:7px;
+  display:flex;
+  flex-direction:column;
+  margin-top:auto;
+  padding:0;
   overflow:hidden;
+  border-top:1px solid #222a32;
+  background:#101318;
 }
+.pixelb8-chat-section.collapsed{flex:0 0 auto}
+.pixelb8-chat-toggle{
+  width:100%;
+  min-height:46px;
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto 20px;
+  align-items:center;
+  gap:8px;
+  padding:8px 8px;
+  border:0;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+}
+.pixelb8-chat-toggle:hover{background:#151a20}
+.pixelb8-chat-chevron{color:#77828d;font-size:1rem;transition:transform .16s ease}
+.pixelb8-chat-section:not(.collapsed) .pixelb8-chat-chevron{transform:rotate(-90deg)}
+.pixelb8-chat-section.collapsed .pixelb8-chat-container{display:none}
 
 .pixelb8-right-section-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  padding:1px 4px 0;
+  min-width:0;
 }
-
 .pixelb8-right-section-head strong{
   display:block;
   margin-top:2px;
@@ -591,22 +618,18 @@ body::-webkit-scrollbar-thumb:hover,
   font-weight:900;
   letter-spacing:.04em;
 }
-
-.pixelb8-chat-state.online{
-  border-color:#2e6e4b;
-  color:#70e5a5;
-}
+.pixelb8-chat-state.online{border-color:#2e6e4b;color:#70e5a5}
 
 .pixelb8-chat-container{
   min-height:0;
-  height:100%;
+  flex:1 1 auto;
   display:flex;
   flex-direction:column;
   gap:5px;
   padding:7px;
   position:relative;
   border:1px solid #29323a;
-  border-radius:8px;
+  border-radius:8px 8px 0 0;
   background:#0d1014;
 }
 
@@ -790,3 +813,9 @@ body::-webkit-scrollbar-thumb:hover,
   padding:10px 14px;
   border-top:1px solid var(--pixelb8-border);
 }
+
+/* Account accordion trigger is the compact chevron inside the always-visible summary. */
+.pixelb8-account-chevron{
+  width:24px;height:28px;padding:0;border:0;border-radius:5px;background:transparent;
+}
+.pixelb8-account-chevron:hover{background:#202730;color:#fff}

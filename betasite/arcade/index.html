@@ -237,7 +237,9 @@
       <span class="pixelb8-right-rail-toggle-icon">‹</span>
     </button>
     <div class="pixelb8-right-rail-inner">
-      <section class="pixelb8-account-hud">
+      <section class="pixelb8-account-section collapsed" data-pixelb8-account-section>
+
+        <div class="pixelb8-account-hud">
         <div class="pixelb8-account-avatar-wrap">
           <div class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</div>
           <span class="pixelb8-account-presence"></span>
@@ -247,21 +249,28 @@
           <strong data-pixelb8-profile-name>Guest</strong>
           <span data-pixelb8-profile-status>Guest account</span>
         </div>
-      </section>
+      
 
-      <section class="pixelb8-right-section pixelb8-account-actions">
+          <button class="pixelb8-account-chevron" type="button" data-pixelb8-account-toggle onclick="PixelB8Shell.toggleAccountSection(this.closest('[data-pixelb8-account-section]'))" aria-expanded="false" title="Account options">›</button>
+
+        </div>
+
+        <div class="pixelb8-account-actions">
         <button class="pixelb8-account-action" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
         <button class="pixelb8-account-action danger" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
+      
+
+        </div>
+
       </section>
 
-      <section class="pixelb8-right-section pixelb8-chat-section">
-        <div class="pixelb8-right-section-head">
-          <div>
-            <span class="pixelb8-account-kicker">PIXELB8 MQTT</span>
-            <strong>Global Chat</strong>
-          </div>
+      <div class="pixelb8-right-footer">PixelB8 Social</div>
+      <section class="pixelb8-chat-section" data-pixelb8-chat-section>
+        <button class="pixelb8-chat-toggle" type="button" data-pixelb8-chat-toggle onclick="PixelB8Shell.toggleChatSection(this.closest('[data-pixelb8-chat-section]'))" aria-expanded="true" title="Toggle global chat">
+          <span class="pixelb8-right-section-head"><span class="pixelb8-account-kicker">PIXELB8 MQTT</span><strong>Global Chat</strong></span>
           <span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span>
-        </div>
+          <span class="pixelb8-chat-chevron">‹</span>
+        </button>
         <div class="pixelb8-chat-container">
           <div class="pixelb8-chat-messages" data-pixelb8-chat-messages></div>
           <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker>
@@ -282,7 +291,7 @@
         </div>
       </section>
 
-      <div class="pixelb8-right-footer">PixelB8 Social</div>
+      
     </div>
   </aside>
 
