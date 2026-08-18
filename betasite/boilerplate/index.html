@@ -6,7 +6,7 @@
   <title>PixelB8 App Boilerplate</title>
 
   <!-- LOCAL / PIXELB8 SITE -->
-  <link rel="stylesheet" href="../sharedassets/css/pixelb8-shell.css">
+  <link rel="stylesheet" href="../sharedassets/css/pixelb8-shell.css?v=20260818c">
 
   <!-- STANDALONE / EXTERNAL TESTING
   <link rel="stylesheet" href="https://pixelb8.lol/betasite/sharedassets/css/pixelb8-shell.css">
@@ -130,38 +130,68 @@
             </div>
           </div>
           <div class="workspace-editor-shell" id="workspaceEditorShell">
-            <!-- OPTIONAL INNER LEFT PANEL: tool-specific controls such as Rig / Body / Assets. -->
+            <!-- OPTIONAL INNER LEFT PANEL: use the same PixelB8 rail language for tool-local navigation. -->
             <aside class="workspace-inner-panel workspace-inner-left" id="workspaceInnerLeft">
-              <button class="workspace-inner-collapse" type="button" onclick="toggleInnerPanel('left')" title="Collapse workspace left panel">‹</button>
-              <div class="workspace-inner-panel-head">
-                <span class="panel-kicker">TOOL PANEL</span>
-                <strong>Rig &amp; Body</strong>
+              <div class="workspace-inner-header">
+                <div class="workspace-inner-title">
+                  <span class="workspace-inner-mark">RG</span>
+                  <div class="workspace-inner-copy"><strong>Rig &amp; Body</strong><small>Workspace tools</small></div>
+                </div>
+                <button class="workspace-inner-collapse" type="button" onclick="toggleInnerPanel('left')" title="Collapse workspace left panel">‹</button>
               </div>
-              <div class="workspace-inner-panel-body">
-                <button class="inner-tool-btn active" type="button"><span>骨</span><b>Skeleton</b></button>
-                <button class="inner-tool-btn" type="button"><span>●</span><b>Joints</b></button>
-                <button class="inner-tool-btn" type="button"><span>◇</span><b>Body</b></button>
-                <button class="inner-tool-btn" type="button"><span>✦</span><b>Poses</b></button>
+              <div class="workspace-inner-scroll">
+                <section class="sidebar-section">
+                  <div class="sidebar-section-label">Rigging</div>
+                  <button class="sidebar-nav-btn active" data-workspace-tool="Skeleton" type="button" onclick="setWorkspaceTool(this)">
+                    <span class="sidebar-item-icon">骨</span><span class="sidebar-item-text">Skeleton</span>
+                  </button>
+                  <button class="sidebar-nav-btn" data-workspace-tool="Joints" type="button" onclick="setWorkspaceTool(this)">
+                    <span class="sidebar-item-icon">●</span><span class="sidebar-item-text">Joints</span>
+                  </button>
+                  <button class="sidebar-nav-btn" data-workspace-tool="Body" type="button" onclick="setWorkspaceTool(this)">
+                    <span class="sidebar-item-icon">◇</span><span class="sidebar-item-text">Body</span>
+                  </button>
+                </section>
+                <section class="sidebar-section">
+                  <div class="sidebar-section-label">Pose</div>
+                  <button class="sidebar-nav-btn" data-workspace-tool="Poses" type="button" onclick="setWorkspaceTool(this)">
+                    <span class="sidebar-item-icon">✦</span><span class="sidebar-item-text">Poses</span>
+                  </button>
+                </section>
               </div>
             </aside>
 
             <!-- Main replaceable work surface. -->
             <div class="workspace-surface">
-              <span>NEW PAGE WORKSPACE</span>
-              <small>Replace this surface with your app's actual canvas, viewport, editor, game, or dashboard.</small>
+              <span id="workspaceSurfaceTitle">SKELETON WORKSPACE</span>
+              <small id="workspaceSurfaceHint">Example active tool. Replace this surface with your app's actual canvas, viewport, editor, game, or dashboard.</small>
             </div>
 
             <!-- OPTIONAL INNER RIGHT PANEL: properties / settings / inspector. -->
             <aside class="workspace-inner-panel workspace-inner-right" id="workspaceInnerRight">
-              <button class="workspace-inner-collapse" type="button" onclick="toggleInnerPanel('right')" title="Collapse workspace right panel">›</button>
-              <div class="workspace-inner-panel-head">
-                <span class="panel-kicker">INSPECTOR</span>
-                <strong>Properties</strong>
+              <div class="workspace-inner-header">
+                <button class="workspace-inner-collapse" type="button" onclick="toggleInnerPanel('right')" title="Collapse workspace right panel">›</button>
+                <div class="workspace-inner-title workspace-inner-title-right">
+                  <div class="workspace-inner-copy"><strong>Properties</strong><small>Selection inspector</small></div>
+                  <span class="workspace-inner-mark">PR</span>
+                </div>
               </div>
-              <div class="workspace-inner-panel-body">
-                <label class="inner-demo-field"><span>Selection</span><select><option>Character</option><option>Skeleton</option><option>Joint</option></select></label>
-                <label class="inner-demo-field"><span>Scale</span><input type="range" min="50" max="150" value="100"></label>
-                <label class="inner-demo-field"><span>Opacity</span><input type="range" min="0" max="100" value="100"></label>
+              <div class="workspace-inner-scroll">
+                <section class="sidebar-section">
+                  <div class="sidebar-section-label">Inspector</div>
+                  <button class="sidebar-nav-btn active" data-inspector-panel="transform" type="button" onclick="setInspectorPanel(this)">
+                    <span class="sidebar-item-icon">↔</span><span class="sidebar-item-text">Transform</span>
+                  </button>
+                  <button class="sidebar-nav-btn" data-inspector-panel="display" type="button" onclick="setInspectorPanel(this)">
+                    <span class="sidebar-item-icon">◉</span><span class="sidebar-item-text">Display</span>
+                  </button>
+                </section>
+                <section class="workspace-property-section" id="transformInspector">
+                  <label class="workspace-property-row"><span>Scale</span><input id="demoScale" type="range" min="50" max="150" value="100" oninput="updateDemoProperty('scale',this.value)"><b id="demoScaleValue">100%</b></label>
+                </section>
+                <section class="workspace-property-section hidden" id="displayInspector">
+                  <label class="workspace-property-row"><span>Opacity</span><input id="demoOpacity" type="range" min="0" max="100" value="100" oninput="updateDemoProperty('opacity',this.value)"><b id="demoOpacityValue">100%</b></label>
+                </section>
               </div>
             </aside>
           </div>
@@ -194,35 +224,30 @@
     <button class="pixelb8-right-rail-toggle" onclick="PixelB8Shell.toggleRightRail()" title="Open account & chat"><span class="pixelb8-right-rail-toggle-icon">‹</span></button>
     <div class="pixelb8-right-rail-inner">
       <section class="pixelb8-account-section collapsed" data-pixelb8-account-section>
-
-        <div class="pixelb8-account-hud">
-        <div class="pixelb8-account-avatar-wrap"><div class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</div><span class="pixelb8-account-presence"></span></div>
-        <div class="pixelb8-account-copy"><span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span><strong data-pixelb8-profile-name>Guest</strong><span data-pixelb8-profile-status>Guest account</span></div>
-      
-
-          <button class="pixelb8-account-chevron" type="button" data-pixelb8-account-toggle onclick="PixelB8Shell.toggleAccountSection(this.closest('[data-pixelb8-account-section]'))" aria-expanded="false" title="Account options">›</button>
-
-        </div>
-
+        <button class="pixelb8-account-hud" type="button" data-pixelb8-account-toggle onclick="PixelB8Shell.toggleAccountSection(this.closest('[data-pixelb8-account-section]'))" aria-expanded="false" title="Account options">
+          <span class="pixelb8-account-avatar-wrap"><span class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</span><span class="pixelb8-account-presence"></span></span>
+          <span class="pixelb8-account-copy"><span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span><strong data-pixelb8-profile-name>Guest</strong><span data-pixelb8-profile-status>Guest account</span></span>
+          <span class="pixelb8-account-chevron">›</span>
+        </button>
         <div class="pixelb8-account-actions">
-        <button class="pixelb8-account-action" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
-        <button class="pixelb8-account-action danger" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
-      
-
+          <button class="pixelb8-account-action" type="button" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
+          <button class="pixelb8-account-action danger" type="button" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
         </div>
-
       </section>
+
       <div class="pixelb8-right-footer">PixelB8 Social</div>
+
       <section class="pixelb8-chat-section" data-pixelb8-chat-section>
-        <button class="pixelb8-chat-toggle" type="button" data-pixelb8-chat-toggle onclick="PixelB8Shell.toggleChatSection(this.closest('[data-pixelb8-chat-section]'))" aria-expanded="true" title="Toggle global chat">
-          <span class="pixelb8-right-section-head"><span class="pixelb8-account-kicker">PIXELB8 MQTT</span><strong>Global Chat</strong></span>
+        <button class="pixelb8-chat-toggle" type="button" data-pixelb8-chat-toggle onclick="PixelB8Shell.toggleChatSection(this.closest('[data-pixelb8-chat-section]'))" aria-expanded="true" title="Toggle chat">
+          <span class="pixelb8-chat-icon" aria-hidden="true">💬</span>
+          <span class="pixelb8-chat-label">Chat</span>
           <span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span>
-          <span class="pixelb8-chat-chevron">‹</span>
+          <span class="pixelb8-chat-chevron">›</span>
         </button>
         <div class="pixelb8-chat-container">
           <div class="pixelb8-chat-messages" data-pixelb8-chat-messages></div>
           <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker><span onclick="PixelB8Shell.insertEmoji('😀')">😀</span><span onclick="PixelB8Shell.insertEmoji('😂')">😂</span><span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span><span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span><span onclick="PixelB8Shell.insertEmoji('👾')">👾</span><span onclick="PixelB8Shell.insertEmoji('😎')">😎</span><span onclick="PixelB8Shell.insertEmoji('👍')">👍</span><span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span></div>
-          <div class="pixelb8-chat-input"><button onclick="PixelB8Shell.toggleEmojiPicker()">☺</button><input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()"><button class="primary" onclick="PixelB8Shell.sendChat()">Send</button></div>
+          <div class="pixelb8-chat-input"><button type="button" onclick="PixelB8Shell.toggleEmojiPicker()">☺</button><input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()"><button class="primary" type="button" onclick="PixelB8Shell.sendChat()">Send</button></div>
         </div>
       </section>
       
@@ -241,9 +266,9 @@
 <!-- MQTT library + shared PixelB8 shell must load before this page's app.js. -->
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <!-- LOCAL / PIXELB8 SITE -->
-<script src="../sharedassets/js/pixelb8-shell.js"></script>
+<script src="../sharedassets/js/pixelb8-shell.js?v=20260818d"></script>
 <!-- STANDALONE / EXTERNAL TESTING
-<script src="https://pixelb8.lol/betasite/sharedassets/js/pixelb8-shell.js"></script>
+<script src="https://pixelb8.lol/betasite/sharedassets/js/pixelb8-shell.js?v=20260818d"></script>
 -->
 <script src="app.js"></script>
 </body>

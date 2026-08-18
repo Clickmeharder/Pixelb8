@@ -39,79 +39,60 @@
   .workspace-panel-head{flex-direction:column}
 }
 
-/* Optional INTERNAL workspace sidebars — boilerplate-only example.
-   These are tool-local panels, not the global PixelB8 left/right rails. */
+/* Optional INTERNAL workspace sidebars — boilerplate only.
+   Uses explicit shell state classes so show/hide/collapse is predictable. */
 .workspace-editor-shell{
-  min-height:0;
-  flex:1;
-  display:grid;
-  grid-template-columns:220px minmax(0,1fr) 240px;
-  gap:10px;
-  padding:12px;
-  background:#101318;
+  min-height:420px;flex:1;display:grid;grid-template-columns:220px minmax(0,1fr) 240px;
+  gap:0;padding:0;background:#101318;border-top:1px solid #20262d;overflow:hidden
 }
+.workspace-editor-shell.inner-left-collapsed{grid-template-columns:52px minmax(0,1fr) 240px}
+.workspace-editor-shell.inner-right-collapsed{grid-template-columns:220px minmax(0,1fr) 52px}
+.workspace-editor-shell.inner-left-collapsed.inner-right-collapsed{grid-template-columns:52px minmax(0,1fr) 52px}
 .workspace-editor-shell.hide-inner-left{grid-template-columns:minmax(0,1fr) 240px}
 .workspace-editor-shell.hide-inner-right{grid-template-columns:220px minmax(0,1fr)}
 .workspace-editor-shell.hide-inner-left.hide-inner-right{grid-template-columns:minmax(0,1fr)}
-
+.workspace-editor-shell.hide-inner-left.inner-right-collapsed{grid-template-columns:minmax(0,1fr) 52px}
+.workspace-editor-shell.hide-inner-right.inner-left-collapsed{grid-template-columns:52px minmax(0,1fr)}
 .workspace-inner-panel{
-  position:relative;
-  min-width:0;
-  min-height:0;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  border:1px solid #2a313a;
-  border-radius:8px;
-  background:#15191f;
-  transition:width .16s ease,min-width .16s ease;
+  min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;
+  background:#11151a;color:#c7d0d9
 }
-.workspace-inner-panel.hidden-by-setting{display:none}
-.workspace-inner-panel.collapsed{width:42px;min-width:42px}
-.workspace-inner-left.collapsed + .workspace-surface{}
-.workspace-editor-shell:has(.workspace-inner-left.collapsed){grid-template-columns:42px minmax(0,1fr) 240px}
-.workspace-editor-shell:has(.workspace-inner-right.collapsed){grid-template-columns:220px minmax(0,1fr) 42px}
-.workspace-editor-shell:has(.workspace-inner-left.collapsed):has(.workspace-inner-right.collapsed){grid-template-columns:42px minmax(0,1fr) 42px}
-.workspace-editor-shell.hide-inner-left:has(.workspace-inner-right.collapsed){grid-template-columns:minmax(0,1fr) 42px}
-.workspace-editor-shell.hide-inner-right:has(.workspace-inner-left.collapsed){grid-template-columns:42px minmax(0,1fr)}
-
-.workspace-inner-collapse{
-  position:absolute;
-  top:8px;
-  right:8px;
-  z-index:2;
-  width:26px;
-  height:26px;
-  display:grid;
-  place-items:center;
-  padding:0;
-  border:1px solid #343d48;
-  border-radius:6px;
-  background:#1b222a;
-  color:#dce5ee;
+.workspace-inner-left{border-right:1px solid #252b32}
+.workspace-inner-right{border-left:1px solid #252b32}
+.workspace-inner-panel.hidden-by-setting{display:none!important}
+.workspace-inner-header{
+  min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;
+  border-bottom:1px solid #252b32;background:#11151a
 }
-.workspace-inner-right .workspace-inner-collapse{left:8px;right:auto}
-.workspace-inner-panel-head{padding:12px 42px 10px 12px;border-bottom:1px solid #272f37}
-.workspace-inner-right .workspace-inner-panel-head{padding-left:42px;padding-right:12px}
-.workspace-inner-panel-head strong{display:block;margin-top:3px;font-size:.78rem;color:#f0f4f7}
-.workspace-inner-panel-body{min-height:0;overflow:auto;padding:9px}
-.workspace-inner-panel.collapsed .workspace-inner-panel-head,
-.workspace-inner-panel.collapsed .workspace-inner-panel-body{display:none}
-.workspace-inner-panel.collapsed .workspace-inner-collapse{left:7px;right:7px;margin:auto}
-
-.inner-tool-btn{
-  width:100%;min-height:36px;display:flex;align-items:center;gap:8px;margin-bottom:5px;padding:6px 8px;
-  border:1px solid transparent;border-radius:6px;background:transparent;color:#c6cfd7;text-align:left
-}
-.inner-tool-btn:hover{background:#1d242b}.inner-tool-btn.active{background:#202730;border-color:#34414d}
-.inner-tool-btn span{width:22px;height:22px;display:grid;place-items:center;border-radius:5px;background:#242c34;color:#8edcff;font-size:.7rem}
-.inner-tool-btn b{font-size:.7rem}
-.inner-demo-field{display:grid;gap:5px;margin-bottom:12px;color:#9aa5af;font-size:.66rem}
-.inner-demo-field select,.inner-demo-field input[type="range"]{width:100%}
-.inner-demo-field select{height:32px;border:1px solid #303943;border-radius:6px;background:#0f1317;color:#e9edf2;padding:0 7px}
-
-/* Workspace surface now occupies the center column of the editor shell. */
-.workspace-editor-shell .workspace-surface{min-width:0;min-height:420px;height:auto;margin:0}
+.workspace-inner-title{min-width:0;display:flex;align-items:center;gap:8px}
+.workspace-inner-title-right{margin-left:auto;text-align:right}
+.workspace-inner-mark{width:30px;min-width:30px;height:30px;display:grid;place-items:center;color:#9faab5;font-size:.62rem;font-weight:900}
+.workspace-inner-copy{min-width:0;display:flex;flex-direction:column;gap:1px}
+.workspace-inner-copy strong{font-size:.72rem;color:#e5eaf0;white-space:nowrap}
+.workspace-inner-copy small{font-size:.58rem;color:#6f7b86;white-space:nowrap}
+.workspace-inner-collapse{width:28px;min-width:28px;height:28px;display:grid;place-items:center;padding:0;border:1px solid #303944;border-radius:5px;background:#171c22;color:#dce5ee;font-size:1rem;cursor:pointer}
+.workspace-inner-collapse:hover{background:#202730;color:#fff}
+.workspace-inner-scroll{min-height:0;flex:1;overflow:auto;padding:8px 6px}
+/* Reuse the main PixelB8 nav-row look inside tool-local rails. */
+.workspace-inner-panel .sidebar-nav-btn{width:100%;min-height:40px;display:flex;align-items:center;gap:9px;margin:0 0 4px;padding:7px 9px;border:1px solid transparent;border-radius:7px;background:transparent;color:#c7d0d9;text-align:left}
+.workspace-inner-panel .sidebar-nav-btn:hover{background:#171c22;color:#fff}
+.workspace-inner-panel .sidebar-nav-btn.active{background:#202730;border-color:#34414d;box-shadow:inset 3px 0 0 var(--pixelb8-accent)}
+.workspace-inner-panel.collapsed .workspace-inner-copy,
+.workspace-inner-panel.collapsed .sidebar-section-label,
+.workspace-inner-panel.collapsed .sidebar-item-text,
+.workspace-inner-panel.collapsed .workspace-property-section{display:none!important}
+.workspace-inner-panel.collapsed .workspace-inner-header{justify-content:center;padding:8px 4px;flex-direction:column}
+.workspace-inner-panel.collapsed .workspace-inner-title{display:none}
+.workspace-inner-panel.collapsed .workspace-inner-scroll{padding:8px 2px}
+.workspace-inner-panel.collapsed .sidebar-section{padding:8px 0 10px}
+.workspace-inner-panel.collapsed .sidebar-nav-btn{width:46px;min-height:42px;justify-content:center;padding:5px;margin:0 auto 5px}
+.workspace-inner-panel.collapsed .sidebar-nav-btn .sidebar-item-icon{width:28px;height:28px}
+.workspace-property-section{padding:10px 8px;border-bottom:1px solid #20262d}
+.workspace-property-section.hidden{display:none}
+.workspace-property-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:7px;color:#87939e;font-size:.63rem}
+.workspace-property-row input[type="range"]{grid-column:1/-1;width:100%}
+.workspace-property-row b{color:#cbd4dc;font-size:.62rem;font-weight:700}
+.workspace-editor-shell .workspace-surface{min-width:0;min-height:420px;height:auto;margin:12px}
 
 .settings-card p{color:#98a3ae;line-height:1.5}
 .settings-toggle-row{
@@ -122,6 +103,11 @@
 
 @media(max-width:980px){
   .workspace-editor-shell{grid-template-columns:180px minmax(0,1fr) 190px}
-  .workspace-editor-shell:has(.workspace-inner-left.collapsed){grid-template-columns:42px minmax(0,1fr) 190px}
-  .workspace-editor-shell:has(.workspace-inner-right.collapsed){grid-template-columns:180px minmax(0,1fr) 42px}
+  .workspace-editor-shell.inner-left-collapsed{grid-template-columns:52px minmax(0,1fr) 190px}
+  .workspace-editor-shell.inner-right-collapsed{grid-template-columns:180px minmax(0,1fr) 52px}
+  .workspace-editor-shell.inner-left-collapsed.inner-right-collapsed{grid-template-columns:52px minmax(0,1fr) 52px}
+  .workspace-editor-shell.hide-inner-left{grid-template-columns:minmax(0,1fr) 190px}
+  .workspace-editor-shell.hide-inner-right{grid-template-columns:180px minmax(0,1fr)}
+  .workspace-editor-shell.hide-inner-left.inner-right-collapsed{grid-template-columns:minmax(0,1fr) 52px}
+  .workspace-editor-shell.hide-inner-right.inner-left-collapsed{grid-template-columns:52px minmax(0,1fr)}
 }
