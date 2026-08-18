@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#05070c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>PixelB8 Mobile Gamepad</title>
+<style>
+html,body{margin:0;width:100%;height:100%;background:#05070c;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+#jsFallback{position:fixed;left:8px;right:8px;bottom:8px;z-index:9999;padding:8px 10px;border:1px solid #34506f;border-radius:10px;background:#0d1726;color:#9fb9dc;font-size:11px;text-align:center}
+.js-ready #jsFallback{display:none}
+</style>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+<div class="gamepad">
+  <header class="topbar" id="topbar"><span class="led"></span><span class="logo">PIXELB8 MOBILE GAMEPAD</span><span id="status" class="status">disconnected</span><input id="room" class="room" placeholder="room"><button id="connect" class="iconbtn">↻</button><button id="settings" class="iconbtn">⚙</button></header>
+  <main class="stage">
+    <section class="zone leftZone">
+      <div class="stickArea" id="stickZone"><div class="stickBase" id="stickBase"><span class="dir n" id="dirUp">W</span><span class="dir s" id="dirDown">S</span><span class="dir w" id="dirLeft">A</span><span class="dir e" id="dirRight">D</span><div class="stickKnob" id="stickKnob"></div></div></div>
+      <div class="leftQuick"><button class="btn shift" id="shift">SHIFT<small data-label="modifier"></small></button><button class="btn" id="runHold">RUN<small data-label="run"></small></button></div>
+    </section>
+    <section class="zone centerZone">
+      <div class="centerMain">
+        <button class="btn action" data-action="action">ACTION<small data-label="action"></small></button>
+        <button class="btn" data-action="interact">USE<small data-label="interact"></small></button>
+        <button class="btn" data-action="target">TARGET<small data-label="target"></small></button>
+        <button class="btn" data-action="sit">SIT<small data-label="sit"></small></button>
+        <button class="btn enter" id="enter">ENTER / CHAT<small data-label="enter"></small></button>
+      </div>
+      <div class="centerFoot"><button class="btn release" id="release">ALL UP</button><button class="btn more" id="more">☰ MORE</button></div>
+    </section>
+    <section class="zone rightZone">
+      <div class="rightGrid">
+        <div class="mouseArea" id="mouseZone"><div class="mouseBase" id="mouseBase"><span class="dir n">▲</span><span class="dir s">▼</span><span class="dir w">◄</span><span class="dir e">►</span><div class="mouseKnob" id="mouseKnob"></div></div></div>
+        <div class="mouseRail">
+          <button class="btn jump" data-action="jump">JUMP<small data-label="jump"></small></button>
+          <button class="btn" id="leftClickBtn">LMB</button>
+          <button class="btn" id="rightClickBtn">RMB</button>
+          <button class="btn" id="rightHoldBtn">HOLD R</button>
+        </div>
+        <div class="rightBottom"><button class="btn" id="leftHoldBtn">HOLD L</button><button class="btn" id="tiltBtn">TILT</button><button class="btn" id="centerTiltBtn">CENTER</button></div>
+      </div>
+    </section>
+  </main>
+  <footer class="hotbar" id="hotbar"></footer>
+</div>
+<div class="chat" id="chat"><input id="chatInput" autocomplete="off" autocapitalize="sentences" placeholder="Type game chat…"><button class="iconbtn" id="chatSend">SEND</button></div>
+<div class="overlay" id="moreOverlay"><div class="sheet"><div class="sheetHead"><h2>More controls</h2><button class="iconbtn" data-close="moreOverlay">✕</button></div><div class="menuGrid" id="moreGrid"></div></div></div>
+<div class="overlay" id="settingsOverlay"><div class="sheet"><div class="sheetHead"><h2>⚙ Gamepad settings</h2><button class="iconbtn" data-close="settingsOverlay">✕</button></div><div class="settingsStack"><div class="settingsCard"><h3>Device</h3><div class="bindRow"><label>This device name</label><input id="deviceNameInput" maxlength="48"></div></div><div class="settingsCard"><h3>Mouse / camera</h3><div class="optionRow"><label>Stick sensitivity</label><output id="mouseSensitivityOut"></output></div><input id="mouseSensitivity" type="range" min="4" max="36" step="1"><div class="optionRow"><label>Tilt sensitivity</label><output id="tiltSensitivityOut"></output></div><input id="tiltSensitivity" type="range" min="2" max="30" step="1"><label class="checkRow"><input id="mouseHorizontalOnly" type="checkbox"> Horizontal only</label><label class="checkRow"><input id="mouseInvertX" type="checkbox"> Invert X</label><label class="checkRow"><input id="mouseInvertY" type="checkbox"> Invert Y</label><label class="checkRow"><input id="tiltAutoEnable" type="checkbox"> Remember tilt enabled</label><div id="tiltStatus" class="status" style="margin-top:8px"></div></div><div class="settingsCard"><h3>Key bindings</h3><div class="bindGrid" id="bindGrid"></div><button class="btn" id="resetBindings" style="width:100%;height:34px;margin-top:8px">Reset bindings</button></div></div></div></div>
+<div id="jsFallback">Loading PixelB8 Mobile Gamepad… If this stays visible, make sure <b>mobile-gamepad.js</b> is uploaded in this same folder.</div>
+<script src="mobile-gamepad.js?v=1.4.2" onload="document.documentElement.classList.add('js-ready')" onerror="document.getElementById('jsFallback').innerHTML='⚠ mobile-gamepad.js did not load. Upload it beside this HTML file.'"></script>
+</body>
+</html>
