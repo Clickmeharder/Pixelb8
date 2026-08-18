@@ -780,3 +780,46 @@ body::-webkit-scrollbar-thumb:hover,
 .pixelb8-tool-section.collapsed>.pixelb8-tool-section-header .pixelb8-tool-section-chevron{transform:rotate(-90deg)}
 .pixelb8-tool-section.collapsed>.pixelb8-tool-section-body{display:none}
 
+
+/* Flexible internal tool rails --------------------------------------------
+   Reusable layout utilities for creator/tool sidebars.
+   Pair these with enhanceToolSections() when sections are collapsible. */
+.pixelb8-tool-rail-main{
+  min-height:0;flex:1 1 auto;display:flex;flex-direction:column;
+  overflow-y:auto;overflow-x:hidden;
+}
+.pixelb8-tool-rail-main>.pixelb8-tool-section{flex:0 0 auto}
+
+/* A section that consumes unused rail height. Its generated section body
+   becomes a flex column so a .pixelb8-tool-section-scroll-content child can
+   take the remaining room and scroll without growing the whole sidebar. */
+.pixelb8-tool-section--fill{
+  flex:1 1 var(--pixelb8-tool-fill-basis,240px)!important;
+  min-height:var(--pixelb8-tool-fill-min-height,140px);
+  display:flex;flex-direction:column;
+}
+.pixelb8-tool-section--fill>.pixelb8-tool-section-body{
+  flex:1 1 auto;min-height:0;display:flex;flex-direction:column;
+  max-height:none!important;overflow:hidden!important;
+}
+.pixelb8-tool-section--fill.collapsed{
+  flex:0 0 auto!important;min-height:0;
+}
+
+/* Put this class on the long list/output inside a fill or docked section. */
+.pixelb8-tool-section-scroll-content{
+  flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior:contain;scrollbar-gutter:stable;
+}
+
+/* Bottom-docked collapsible section, similar to the shared chat panel. */
+.pixelb8-tool-section--dock-bottom{
+  flex:0 0 auto;min-height:0;
+  max-height:var(--pixelb8-tool-dock-max-height,min(38vh,340px));
+  display:flex;flex-direction:column;
+}
+.pixelb8-tool-section--dock-bottom>.pixelb8-tool-section-body{
+  flex:1 1 auto;min-height:0;display:flex;flex-direction:column;
+  max-height:none!important;overflow:hidden!important;
+}
+.pixelb8-tool-section--dock-bottom.collapsed{max-height:none}
