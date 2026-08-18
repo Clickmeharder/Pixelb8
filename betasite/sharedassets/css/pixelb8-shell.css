@@ -760,3 +760,23 @@ body::-webkit-scrollbar-thumb:hover,
   width:24px;height:28px;padding:0;border:0;border-radius:5px;background:transparent;
 }
 .pixelb8-account-chevron:hover{background:#202730;color:#fff}
+
+/* Generic collapsible tool sections ---------------------------------------
+   Shared by PixelB8 creator/tool workspaces. Apps provide their own content;
+   --pixelb8-tool-section-max-height may be set per section when needed. */
+.pixelb8-tool-section{overflow:hidden}
+.pixelb8-tool-section>.pixelb8-tool-section-header{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin:0;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer
+}
+.pixelb8-tool-section>.pixelb8-tool-section-header:hover{background:transparent}
+.pixelb8-tool-section-title{min-width:0;display:flex;align-items:center;gap:7px}
+.pixelb8-tool-section-title>h2,.pixelb8-tool-section-title>h3{margin:0!important}
+.pixelb8-tool-section-chevron{display:grid;place-items:center;width:20px;height:20px;flex:0 0 20px;color:#7f8c98;font-size:.86rem;line-height:1;transition:transform .14s ease}
+.pixelb8-tool-section>.pixelb8-tool-section-body{min-height:0;padding-top:7px}
+.pixelb8-tool-section[data-tool-scroll="true"]>.pixelb8-tool-section-body{
+  max-height:var(--pixelb8-tool-section-max-height,320px);overflow-y:auto;overflow-x:hidden;padding-right:4px;scrollbar-gutter:stable
+}
+.pixelb8-tool-section.collapsed>.pixelb8-tool-section-header .pixelb8-tool-section-chevron{transform:rotate(-90deg)}
+.pixelb8-tool-section.collapsed>.pixelb8-tool-section-body{display:none}
+

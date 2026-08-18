@@ -101,6 +101,61 @@
     });
   };
 
+
+
+  api.enhanceToolSections=function(root=document,options={}){
+    const host=typeof root==='string'?document.querySelector(root):root;
+    if(!host)return [];
+    const selector=options.selector||'[data-pixelb8-tool-section]';
+    const storagePrefix=options.storagePrefix||'pixelb8_tool_section';
+    const sections=[...host.querySelectorAll(selector)];
+
+    for(const section of sections){
+      if(section.dataset.pixelb8ToolReady==='1')continue;
+      const heading=section.querySelector(':scope > h2, :scope > h3');
+      if(!heading)continue;
+
+      const key=section.dataset.toolSectionKey||heading.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      const storageKey=`${storagePrefix}_${key}`;
+      const body=document.createElement('div');
+      body.className='pixelb8-tool-section-body';
+      const header=document.createElement('button');
+      header.type='button';
+      header.className='pixelb8-tool-section-header';
+      header.setAttribute('aria-expanded','true');
+      header.title=`Collapse ${heading.textContent.trim()}`;
+      const title=document.createElement('span');
+      title.className='pixelb8-tool-section-title';
+      const chevron=document.createElement('span');
+      chevron.className='pixelb8-tool-section-chevron';
+      chevron.textContent='⌄';
+
+      heading.remove();
+      title.appendChild(heading);
+      header.append(title,chevron);
+      while(section.firstChild)body.appendChild(section.firstChild);
+      section.append(header,body);
+      section.classList.add('pixelb8-tool-section');
+
+      const saved=localStorage.getItem(storageKey);
+      const defaultCollapsed=section.dataset.toolCollapsed==='true';
+      const collapsed=saved===null?defaultCollapsed:saved==='1';
+      section.classList.toggle('collapsed',collapsed);
+      header.setAttribute('aria-expanded',collapsed?'false':'true');
+      header.title=`${collapsed?'Expand':'Collapse'} ${heading.textContent.trim()}`;
+
+      header.addEventListener('click',()=>{
+        const next=section.classList.toggle('collapsed');
+        header.setAttribute('aria-expanded',next?'false':'true');
+        header.title=`${next?'Expand':'Collapse'} ${heading.textContent.trim()}`;
+        localStorage.setItem(storageKey,next?'1':'0');
+        window.dispatchEvent(new Event('resize'));
+      });
+      section.dataset.pixelb8ToolReady='1';
+    }
+    return sections;
+  };
+
   window.PixelB8Shell=api;
 })();
 
