@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DECGuy Arcade Cabinet</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-art"></div>
+            <h1>DECGuy</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container">
+                <div class="crt-overlay"></div>
+                <div class="crt-curve"></div>
+                <div class="crt-flicker"></div>
+
+                <div id="start-panel" class="ui-panel menu-panel">
+                    <h2 class="insert-coin">DECGUY</h2>
+                    <p class="menu-tagline">CHRONICLES OF THE DECAY GRID</p>
+                    <div class="main-mode-menu">
+                        <button type="button" class="menu-action primary" id="story-mode-btn">
+                            <b>STORY</b><span>Play the authored campaign in order</span>
+                        </button>
+                        <button type="button" class="menu-action" id="arcade-mode-btn">
+                            <b>ARCADE</b><span>Choose any story level, custom level or pack</span>
+                        </button>
+                        <button type="button" class="menu-action" id="level-maker-btn">
+                            <b>LEVEL MAKER</b><span>Create, group, import and export levels</span>
+                        </button>
+                    </div>
+                    <p id="menu-hi-score">HI-SCORE: 00000</p>
+                    <p class="controls-help">ARROW KEYS / WASD &nbsp;·&nbsp; L = LEAN</p>
+                </div>
+
+                <div id="story-panel" class="ui-panel menu-panel hidden">
+                    <h2>STORY MODE</h2>
+                    <p id="story-status">Checking campaign data...</p>
+                    <div class="difficulty-picker" aria-label="Story difficulty">
+                        <button type="button" class="difficulty-btn" data-difficulty="easy">EASY</button>
+                        <button type="button" class="difficulty-btn selected" data-difficulty="medium">MEDIUM</button>
+                        <button type="button" class="difficulty-btn" data-difficulty="hard">HARD</button>
+                        <button type="button" class="difficulty-btn" data-difficulty="extreme">EXTREME</button>
+                    </div>
+                    <p id="difficulty-description">4 shields · balanced spectres · generous boss warnings</p>
+                    <button type="button" class="menu-action primary" id="new-story-btn">NEW STORY</button>
+                    <button type="button" class="menu-action" id="continue-story-btn">CONTINUE STORY</button>
+                    <button type="button" class="menu-back" data-menu-back>← MAIN MENU</button>
+                </div>
+
+                <div id="arcade-panel" class="ui-panel menu-panel hidden">
+                    <h2>ARCADE SELECT</h2>
+                    <div class="difficulty-picker" aria-label="Arcade difficulty">
+                        <button type="button" class="difficulty-btn" data-difficulty="easy">EASY</button>
+                        <button type="button" class="difficulty-btn selected" data-difficulty="medium">MEDIUM</button>
+                        <button type="button" class="difficulty-btn" data-difficulty="hard">HARD</button>
+                        <button type="button" class="difficulty-btn" data-difficulty="extreme">EXTREME</button>
+                    </div>
+                    <div id="arcade-level-list" class="arcade-level-list"></div>
+                    <button type="button" class="menu-back" data-menu-back>← MAIN MENU</button>
+                </div>
+
+                <div id="gameover-panel" class="ui-panel hidden">
+                    <h2>SYSTEM FAILURE</h2>
+                    <p id="final-score">SCORE: 0</p>
+                    <p id="hi-score-alert" class="hidden">NEW LOCAL RECORD!</p>
+                    <button type="button" class="menu-action primary" id="retry-run-btn">RETRY</button>
+                    <button type="button" class="menu-back" id="gameover-menu-btn">MAIN MENU</button>
+                </div>
+
+                <div id="complete-panel" class="ui-panel hidden">
+                    <h2 id="complete-title">LEVEL CLEAR</h2>
+                    <p id="next-level-text">PREPARING NEXT LAYER...</p>
+                    <p id="missed-points-text"></p>
+                </div>
+
+                <div id="run-complete-panel" class="ui-panel hidden">
+                    <h2 id="run-complete-title">RUN COMPLETE</h2>
+                    <p id="run-complete-text"></p>
+                    <button type="button" class="menu-action primary" id="complete-menu-btn">RETURN TO MENU</button>
+                </div>
+
+                <canvas id="gameCanvas" width="448" height="496"></canvas>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="cp-art left"></div>
+            <div class="joystick-base">
+                <div class="joystick-shaft" id="joystickShaft">
+                    <div class="joystick-knob"></div>
+                </div>
+            </div>
+            <div class="lean-btn" id="zoomBtn">LEAN (L)</div>
+            <div class="cp-art right"></div>
+        </div>
+
+        <div class="coin-door">
+            <div class="coin-slot" id="coinSlotBtn" title="Start game">
+                <div class="coin-entry"></div>
+                <div class="coin-return"></div>
+            </div>
+            <div class="coin-slot inactive-slot">
+                <div class="coin-entry"></div>
+                <div class="coin-return"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="lvlmaker.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

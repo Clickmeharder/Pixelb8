@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropia: Loot Snatcher</title>
+    <!-- Dependencies -->
+    <link rel="stylesheet" href="../chat.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="../multiplayer.js"></script>
+    
+    <style>
+   </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+
+    <div class="app">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="brand">ENTROPIA LOOT SNATCHER<small>TACTICAL MULTIPLAYER HUNTING ZONE</small></div>
+            <div class="connection" id="connection">Connecting to room directory…</div>
+        </header>
+
+        <!-- LOBBY VIEW -->
+        <main id="lobby-view" class="lobby-grid">
+            <section class="panel setup">
+                <h2>Operator Profile</h2>
+                <div class="field"><label>Display name</label><input id="player-name" maxlength="18" value=""></div>
+                <div class="divider"></div>
+                <h2>Deploy Hunting Instance</h2>
+                <div class="field"><label>Operation Type</label>
+                    <select id="create-mode">
+                        <option value="standard">Standard Global Hunt (2-8 Players)</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <div class="field" style="flex:1;"><label>Squad Size Limit</label>
+                        <select id="max-players"><option>2</option><option>4</option><option selected>6</option><option>8</option></select>
+                    </div>
+                    <div class="field" style="flex:1;"><label>Private Code</label><input id="custom-code" maxlength="6" placeholder="AUTO"></div>
+                </div>
+                <button class="primary" id="create-room">DEPLOY SQUAD LEADER INSTANCE</button>
+                <div class="divider"></div>
+                <h2>Join Squad by Code</h2>
+                <div style="display:flex;gap:8px;"><input id="join-code" maxlength="6" placeholder="ROOM CODE" style="flex:1;"><button id="join-code-btn">JOIN SQUAD</button></div>
+                
+                <!-- HOW TO PLAY INSTRUCTIONS -->
+                <div class="hint" style="margin-top:10px; border-top:1px solid var(--line); padding-top:10px;">
+                    <b style="color:var(--accent);">MISSION BRIEFING:</b><br>
+                    No sweat harvesting or breaking armor here, just pure loot and casting lines. Tap targets before they vanish!<br>
+                    <span style="color:var(--silver);">¢ SILVER PEC</span> = Small PED Gains<br>
+                    <span style="color:var(--gold);">PED GOLD COIN</span> = Medium PED Gains<br>
+                    <span style="color:var(--fishing);">🐟 PRIZED FISH</span> = Massive Global PED<br>
+                    <span style="color:var(--danger);">☠ MUTANT</span> = Armor Decay (PED Loss!)
+                </div>
+            </section>
+
+            <section class="panel browser">
+                <div class="browser-head">
+                    <div><h2>Active Operation Zones</h2><div class="hint" id="room-summary">Scanning frequencies…</div></div>
+                </div>
+                <div class="room-list" id="room-list"><div class="empty">Connecting to the public room directory…</div></div>
+            </section>
+        </main>
+
+        <!-- GAME VIEW -->
+        <main id="game-view" class="game-grid hidden">
+            <aside class="panel sidebar">
+                <div class="room-heading"><b id="room-title">Hunting Zone</b><small id="room-details">Room ----</small></div>
+                <div class="roster" id="roster"></div>
+                
+                <!-- CYBER-COMMS (UNIVERSAL CHAT) -->
+                <div id="cyber-chat" class="chat-container" style="margin-bottom: 12px;"></div>
+
+                <div class="sidebar-actions">
+                    <button id="copy-code">COPY ZONE FREQUENCY</button>
+                    <button class="danger" id="leave-room">ABORT MISSION</button>
+                </div>
+            </aside>
+            <section class="panel arena-shell">
+                <div class="arena-head">
+                    <h2 id="game-title">TACTICAL ARENA</h2>
+                    <span class="badge waiting" id="game-status">WAITING</span>
+                    <div class="stats">
+                        <span class="stat" id="timer-stat">TIME 60s</span>
+                        <span class="stat" id="score-stat" style="color:var(--gold);">MY PED: 0.00</span>
+                    </div>
+                </div>
+                
+                <div class="instructions-marquee hidden" id="game-instructions">
+                    CONTROLS: CLICK SILVER (¢) / GOLD (PED) / FISH (🐟) TO SCORE // AVOID RED MUTANTS (☠)
+                </div>
+
+                <div class="hunting-zone">
+                    <div class="arena-grid-bg"></div>
+                    <div class="radar-sweep"></div>
+                    
+                    <div id="target-layer"></div>
+                    
+                    <div id="cinematic-screen" class="overlay-screen hidden">
+                        <div id="cinematic-container"></div>
+                    </div>
+                    
+                    <div id="game-over-screen" class="overlay-screen hidden">
+                        <div class="title-glitch">OPERATION COMPLETE</div>
+                        <div class="winner-text" id="winner-display"></div>
+                        <div class="final-scores" id="final-scores-display"></div>
+                        <button class="primary hidden" id="return-lobby-btn">RETURN TO BASE</button>
+                    </div>
+                </div>
+                <div style="margin-top:10px; display:flex; gap:10px; align-items:center;" id="action-bar-container">
+                    <button class="primary" id="start-game-btn" disabled>INITIATE DROP SEQUENCE</button>
+                    <span class="hint" id="host-hint">Awaiting Squad Leader Initialization.</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PixelB8 App Boilerplate</title>
+
+  <!-- LOCAL / PIXELB8 SITE -->
+  <link rel="stylesheet" href="../sharedassets/css/pixelb8-shell.css">
+
+  <!-- STANDALONE / EXTERNAL TESTING
+  <link rel="stylesheet" href="https://pixelb8.lol/betasite/sharedassets/css/pixelb8-shell.css">
+  -->
+
+  <!-- Only this page's styles belong here. -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app" id="appShell" data-pixelb8-shell>
+  <aside class="app-sidebar">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand-mark" title="PixelB8 App">
+        <span class="brand-mark-expanded">P8</span><span class="brand-mark-rail">PXLB8</span>
+      </div>
+      <div class="sidebar-brand-copy"><h1>Your App</h1><p>PixelB8 boilerplate</p></div>
+      <button id="sidebarToggleBtn" class="sidebar-collapse-btn" type="button" onclick="toggleSidebar()" title="Collapse sidebar">‹</button>
+    </div>
+
+    <div class="sidebar-scroll">
+      <!-- STATUS: keep useful live/app state at the top. -->
+      <section class="sidebar-section sidebar-status-section">
+        <div class="sidebar-section-label">Status</div>
+        <div class="sidebar-status-row" title="Application status">
+          <span class="sidebar-item-icon status-dot-wrap"><span class="status-dot online"></span></span>
+          <div class="sidebar-status-copy"><span>App</span><b id="appStatus">Ready</b></div>
+        </div>
+        <div class="sidebar-status-row" title="Current workspace">
+          <span class="sidebar-item-icon">◷</span>
+          <div class="sidebar-status-copy"><span>Workspace</span><b id="workspaceStatus">Overview</b></div>
+        </div>
+        <div class="sidebar-status-grid">
+          <div class="sidebar-mini-stat"><span>FAV</span><b id="favoriteCount">2</b></div>
+          <div class="sidebar-mini-stat"><span>REC</span><b id="recentCount">3</b></div>
+        </div>
+      </section>
+
+      <!-- MODE: generic app modes. Rename or delete these. -->
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Mode</div>
+        <button class="sidebar-nav-btn active" data-mode="build" onclick="setMode('build')">
+          <span class="sidebar-item-icon">⚙</span><span class="sidebar-item-text">Build Mode</span>
+        </button>
+        <button class="sidebar-nav-btn" data-mode="preview" onclick="setMode('preview')">
+          <span class="sidebar-item-icon">▶</span><span class="sidebar-item-text">Preview Mode</span>
+        </button>
+      </section>
+
+      <!-- PAGE NAVIGATION: replace with this app's actual views/tools. -->
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">This Page</div>
+        <button class="sidebar-nav-btn active" data-view="overview" onclick="switchView('overview')">
+          <span class="sidebar-item-icon">⌂</span><span class="sidebar-item-text">Overview</span>
+        </button>
+        <button class="sidebar-nav-btn" data-view="workspace" onclick="switchView('workspace')">
+          <span class="sidebar-item-icon">▣</span><span class="sidebar-item-text">Workspace</span>
+        </button>
+      </section>
+
+      <!-- LIBRARY: Arcade-style Favorites + Recents example. -->
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Library</div>
+        <label class="sidebar-search"><span>⌕</span><input type="search" placeholder="Search library…"></label>
+        <button class="sidebar-nav-btn" data-view="favorites" onclick="switchView('favorites')">
+          <span class="sidebar-item-icon">★</span><span class="sidebar-item-text">Favorites</span>
+        </button>
+        <button class="sidebar-nav-btn" data-view="recent" onclick="switchView('recent')">
+          <span class="sidebar-item-icon">◷</span><span class="sidebar-item-text">Recents</span>
+        </button>
+      </section>
+    </div>
+
+    <!-- Always bottom-docked. In compact rail mode this opens VERTICALLY as icon buttons. -->
+    <section class="pixelb8-more-dock pixelb8-more collapsed" id="pixelb8More" data-pixelb8-more>
+      <button class="pixelb8-more-toggle" type="button" onclick="PixelB8Shell.toggleMore('#pixelb8More')" aria-expanded="false" title="More from PixelB8">
+        <span class="sidebar-item-icon">◆</span><span class="sidebar-item-text">More from PixelB8</span><span class="chevron">›</span>
+      </button>
+      <div class="pixelb8-more-body">
+        <button class="sidebar-nav-btn" type="button" onclick="location.href='../home.html'" title="PixelB8 Home"><span class="sidebar-item-icon">⌂</span><span class="sidebar-item-text">PixelB8 Home</span></button>
+        <button class="sidebar-nav-btn" type="button" onclick="location.href='../arcade/index.html'" title="PixelB8 Arcade"><span class="sidebar-item-icon">🕹</span><span class="sidebar-item-text">Arcade</span></button>
+        <button class="sidebar-nav-btn" type="button" onclick="location.href='../eu/index.html'" title="PixelB8 EU"><span class="sidebar-item-icon">EU</span><span class="sidebar-item-text">PixelB8 EU</span></button>
+        <button class="sidebar-nav-btn" type="button" title="Creator Tools"><span class="sidebar-item-icon">🛠</span><span class="sidebar-item-text">Creator Tools</span></button>
+      </div>
+    </section>
+
+    <div class="sidebar-footer"><span class="sidebar-footer-full">PixelB8 · Your App</span><span class="sidebar-footer-rail">PXLB8</span></div>
+  </aside>
+
+  <main class="workspace">
+    <header class="workspace-header"><div><span class="eyebrow">PIXELB8</span><h2 id="pageTitle">Overview</h2></div></header>
+    <section class="view active" id="overviewView"><div class="demo-card"><h3>Overview</h3><p>Replace this with your page content.</p></div></section>
+    <section class="view" id="workspaceView"><div class="demo-card"><h3>Workspace</h3><p>Your main editor, tracker, game, dashboard, or tool can live here.</p></div></section>
+    <section class="view" id="favoritesView"><div class="demo-card"><h3>Favorites</h3><p>Example Library destination.</p></div></section>
+    <section class="view" id="recentView"><div class="demo-card"><h3>Recents</h3><p>Example recent-items destination.</p></div></section>
+  </main>
+
+  <div class="pixelb8-vertical-resizer" data-pixelb8-right-resizer title="Drag to resize account & chat"><span class="pixelb8-vertical-resizer-grip"></span></div>
+  <aside class="pixelb8-right-rail collapsed" data-pixelb8-right-rail>
+    <button class="pixelb8-right-rail-toggle" onclick="PixelB8Shell.toggleRightRail()" title="Open account & chat"><span class="pixelb8-right-rail-toggle-icon">‹</span></button>
+    <div class="pixelb8-right-rail-inner">
+      <section class="pixelb8-account-hud">
+        <div class="pixelb8-account-avatar-wrap"><div class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</div><span class="pixelb8-account-presence"></span></div>
+        <div class="pixelb8-account-copy"><span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span><strong data-pixelb8-profile-name>Guest</strong><span data-pixelb8-profile-status>Guest account</span></div>
+      </section>
+      <section class="pixelb8-right-section pixelb8-account-actions">
+        <button class="pixelb8-account-action" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
+        <button class="pixelb8-account-action danger" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
+      </section>
+      <section class="pixelb8-right-section pixelb8-chat-section">
+        <div class="pixelb8-right-section-head"><div><span class="pixelb8-account-kicker">PIXELB8 MQTT</span><strong>Global Chat</strong></div><span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span></div>
+        <div class="pixelb8-chat-container">
+          <div class="pixelb8-chat-messages" data-pixelb8-chat-messages></div>
+          <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker><span onclick="PixelB8Shell.insertEmoji('😀')">😀</span><span onclick="PixelB8Shell.insertEmoji('😂')">😂</span><span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span><span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span><span onclick="PixelB8Shell.insertEmoji('👾')">👾</span><span onclick="PixelB8Shell.insertEmoji('😎')">😎</span><span onclick="PixelB8Shell.insertEmoji('👍')">👍</span><span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span></div>
+          <div class="pixelb8-chat-input"><button onclick="PixelB8Shell.toggleEmojiPicker()">☺</button><input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()"><button class="primary" onclick="PixelB8Shell.sendChat()">Send</button></div>
+        </div>
+      </section>
+      <div class="pixelb8-right-footer">PixelB8 Social</div>
+    </div>
+  </aside>
+</div>
+
+<div class="pixelb8-account-settings-backdrop hidden" data-pixelb8-account-settings onclick="PixelB8Shell.closeAccountSettings(event)">
+  <section class="pixelb8-account-settings-card" onclick="event.stopPropagation()">
+    <div class="pixelb8-account-settings-head"><div><span class="pixelb8-account-kicker">PIXELB8 PROFILE</span><h3>Account Settings</h3></div><button class="btn" onclick="PixelB8Shell.closeAccountSettings()">×</button></div>
+    <div class="pixelb8-account-settings-body"><label><span>Display Name</span><input maxlength="32" data-pixelb8-account-name-input placeholder="Guest"></label><label><span>Profile Initial</span><input maxlength="2" data-pixelb8-account-initial-input placeholder="G"></label></div>
+    <div class="pixelb8-account-settings-actions"><button class="btn" onclick="PixelB8Shell.closeAccountSettings()">Cancel</button><button class="btn" onclick="PixelB8Shell.saveAccountSettings()">Save Profile</button></div>
+  </section>
+</div>
+
+<!-- MQTT library + shared PixelB8 shell must load before this page's app.js. -->
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<!-- LOCAL / PIXELB8 SITE -->
+<script src="../sharedassets/js/pixelb8-shell.js"></script>
+<!-- STANDALONE / EXTERNAL TESTING
+<script src="https://pixelb8.lol/betasite/sharedassets/js/pixelb8-shell.js"></script>
+-->
+<script src="app.js"></script>
+</body>
+</html>

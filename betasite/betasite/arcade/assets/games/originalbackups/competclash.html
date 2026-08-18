@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropia: Com-Pet Clash RPG</title>
+    <!-- Dependencies -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="multiplayer.js"></script>
+    
+    <style>
+        :root {
+            --bg: #040608;
+            --panel: #0a1114;
+            --panel2: #121d22;
+            --accent: #19f5c6;
+            --accent-dim: rgba(25, 245, 198, 0.2);
+            --danger: #ff5d67;
+            --gold: #f2c14e;
+            --text: #e7edf4;
+            --muted: #6b7a88;
+            --line: #1c2b36;
+            --hp-green: #5ee08a;
+            --exp-blue: #53b7ff;
+            
+            /* Map Colors */
+            --tile-grass: #214f33;
+            --tile-path: #a37c56;
+            --tile-wall: #12281a;
+            --tile-cobble: #474f57;
+            --tile-house: #632d2d;
+            --tile-door: #3d2314;
+            --tile-npc: #000;
+            --tile-rock: #5a5a5a;
+            --tile-garden: #3e271a;
+            --tile-trainer: #911;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Courier New', Courier, monospace; overflow: hidden; }
+        .hidden { display: none !important; }
+
+        .app { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; max-width: 1400px; margin: 0 auto; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 10px; flex-shrink: 0; }
+        .brand { font-size: 1.5rem; color: var(--accent); font-weight: 900; text-shadow: 0 0 10px var(--accent-dim); }
+        .brand small { display: block; font-size: 0.6rem; color: var(--muted); }
+        .hud-stats { display: flex; gap: 15px; font-size: 0.85rem; font-weight: bold; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 8px; border: 1px solid var(--line); align-items: center; flex-wrap: wrap;}
+
+        /* Panels and Menus */
+        .view-panel { flex: 1; background: linear-gradient(145deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        
+        .main-menu { display: flex; flex-direction: column; gap: 20px; padding: 30px; align-items: center; justify-content: center; height: 100%; text-align: center; overflow-y: auto;}
+        .menu-block { background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid var(--line); width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
+        
+        input, select { background: #040708; border: 1px solid #233544; color: var(--text); padding: 10px; border-radius: 6px; font: inherit; outline: none; width: 100%; }
+        input:focus, select:focus { border-color: var(--accent); }
+        button { background: #0a1114; border: 1px solid #233544; color: var(--text); padding: 10px 15px; border-radius: 6px; font: inherit; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+        button.primary { background: linear-gradient(135deg, #109176, #0c5c4a); border-color: var(--accent); color: #fff; }
+        button.danger { border-color: #744; color: #ff9b9b; }
+        
+        /* Pet Management UI */
+        .pet-manager { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; width: 100%; max-height: 250px; overflow-y: auto; margin-top: 10px; }
+        .pet-card { background: #121d22; border: 1px solid #1c2b36; padding: 10px; border-radius: 8px; text-align: left; cursor: pointer; transition: 0.2s; position: relative;}
+        .pet-card:hover { border-color: var(--accent-dim); }
+        .pet-card.active { border-color: var(--accent); box-shadow: inset 0 0 10px var(--accent-dim); }
+        .pet-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1c2b36; padding-bottom: 5px; margin-bottom: 5px; }
+        .bar-bg { width: 100%; height: 8px; background: #000; border-radius: 4px; overflow: hidden; margin-top: 3px; border: 1px solid #111; }
+        .bar-fill.hp { background: var(--hp-green); height: 100%; transition: width 0.3s; }
+        .bar-fill.xp { background: var(--exp-blue); height: 100%; transition: width 0.3s; }
+
+        /* Game Canvas */
+        #game-canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+        
+        /* Overlays */
+        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; flex-direction: column; }
+        
+        /* Mission Tracker */
+        .mission-tracker { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.8); padding: 10px 15px; border: 1px solid var(--gold); border-radius: 8px; color: var(--text); z-index: 80; font-size: 0.85rem; max-width: 300px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); pointer-events: none;}
+        .mission-tracker b { color: var(--gold); display: block; margin-bottom: 4px; font-size: 0.95rem;}
+
+        /* Battle System */
+        .battle-view { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(to bottom, #112233, #050a0f); }
+        .battle-stage { flex: 1; display: flex; flex-direction: column; justify-content: space-between; position: relative; padding: 10px 40px; }
+        .combatant { display: flex; align-items: center; gap: 20px; width: 100%; max-width: 400px; }
+        .combatant.enemy { align-self: flex-end; justify-content: flex-end; }
+        .combatant.player { align-self: flex-start; }
+        .sprite { font-size: 5rem; text-shadow: 0 10px 10px rgba(0,0,0,0.8); animation: hoverFloat 2s infinite alternate; }
+        .sprite.avatar { font-size: 4rem; animation: none; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+        @keyframes hoverFloat { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+        
+        .combat-stats { background: rgba(0,0,0,0.7); border: 2px solid var(--line); border-radius: 8px; padding: 12px; width: 220px; }
+        .combat-name { font-weight: bold; font-size: 1.1rem; display: flex; justify-content: space-between; color: var(--gold); margin-bottom: 5px;}
+        
+        .battle-hud { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; height: 140px; margin-top: 10px; }
+        .battle-log { background: rgba(0,0,0,0.8); border: 2px solid var(--line); border-radius: 8px; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-end; font-size: 0.95rem; line-height: 1.5; }
+        .battle-log div { animation: slideIn 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; margin-bottom: 4px; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .battle-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .battle-actions button { font-size: 1rem; border-width: 2px; text-transform: uppercase;}
+
+        /* Dialog Box */
+        .dialog-box { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 700px; background: rgba(0,0,0,0.95); border: 2px solid var(--gold); border-radius: 8px; padding: 20px; z-index: 150; font-size: 1.1rem; line-height: 1.5; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.8); cursor: pointer; }
+
+        /* Context Menu */
+        .context-menu { position: absolute; background: var(--panel2); border: 1px solid var(--accent); border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); z-index: 200; overflow: hidden; display: flex; flex-direction: column; min-width: 180px; }
+        .context-menu button { background: transparent; border: none; border-radius: 0; text-align: left; padding: 10px 15px; color: #fff; font-weight: normal; }
+        .context-menu button:hover { background: var(--accent-dim); color: var(--accent); }
+        .context-menu .menu-title { padding: 8px 15px; background: rgba(0,0,0,0.5); font-weight: bold; color: var(--gold); font-size: 0.8rem; border-bottom: 1px solid var(--line); text-align: center; }
+
+        /* Floating UI */
+        .floating-menu-btn { position: absolute; top: 15px; right: 15px; z-index: 90; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); box-shadow: 0 0 10px #000; border: 1px solid var(--accent); padding: 10px 20px;}
+        
+        /* Mobile DPAD */
+        .dpad { position: absolute; bottom: 20px; right: 20px; display: grid; grid-template-areas: ". up ." "left down right"; gap: 5px; z-index: 90; }
+        .dpad-btn { width: 50px; height: 50px; background: rgba(0,0,0,0.6); border: 1px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--accent); cursor: pointer; }
+        .dpad-btn:active { background: var(--accent-dim); }
+
+        /* Shop Modal */
+        .shop-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); border: 2px solid var(--gold); border-radius: 12px; padding: 25px; width: 90%; max-width: 400px; z-index: 160; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 20px 50px rgba(0,0,0,0.9); }
+        .shop-modal h2 { margin: 0; color: var(--gold); text-align: center; border-bottom: 1px solid var(--line); padding-bottom: 10px;}
+        .shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border: 1px solid var(--line); }
+
+        @media(max-width: 800px) {
+            .battle-hud { grid-template-columns: 1fr; grid-template-rows: 100px 150px; height: auto; }
+            .sprite { font-size: 3.5rem; }
+            .combatant { max-width: 100%; gap: 10px; }
+            .battle-stage { padding: 10px; }
+            .mission-tracker { top: auto; bottom: 150px; left: 10px; font-size: 0.75rem; }
+            .floating-menu-btn { padding: 8px 12px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+
+    <div class="app">
+        <!-- HEADER -->
+        <header class="topbar">
+            <div class="brand">COM-PET CLASH<small>ENTROPIA VIRTUAL RPG</small></div>
+            <div class="hud-stats hidden" id="hud-stats">
+                <span id="hud-name">Player</span> 
+                <span style="color:var(--gold);">PED: <span id="hud-ped">100</span></span>
+                <span style="color:var(--accent);">Taming: <span id="hud-taming">1</span></span>
+                <span style="color:var(--danger);">Whips: <span id="hud-whips">10</span></span>
+                <span style="color:var(--exp-blue);">Probes: <span id="hud-probes">0</span></span>
+            </div>
+            <div class="connection" id="connection">Local Mode</div>
+        </header>
+
+        <!-- MAIN CONTAINER -->
+        <main class="view-panel">
+            
+            <!-- MAIN MENU -->
+            <div id="main-menu" class="main-menu">
+                <div class="menu-block">
+                    <h2 style="color:var(--gold)">Tamer Profile</h2>
+                    <input id="player-name" maxlength="18" placeholder="Enter Name...">
+                    
+                    <h3 style="margin: 10px 0 0; text-align: left; font-size: 0.9rem; color: var(--accent);">Your Active Pets</h3>
+                    <div id="menu-pet-list" class="pet-manager"></div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <button class="primary" onclick="startGame('single')">PLAY STORY (OFFLINE)</button>
+                        <button class="primary" onclick="startGame('explore')" style="background: linear-gradient(135deg, #106691, #0c3e5c);">MULTIPLAYER EXPLORE</button>
+                    </div>
+                </div>
+
+                <div class="menu-block">
+                    <h2>Join Existing Realm</h2>
+                    <div style="display:flex; gap: 10px;">
+                        <input id="join-code" maxlength="6" placeholder="ROOM CODE">
+                        <button class="primary" onclick="joinGame()">JOIN</button>
+                    </div>
+                    <div id="room-list" style="margin-top:10px; text-align:left; max-height:120px; overflow-y:auto; font-size:0.8rem; display:flex; flex-direction:column; gap:5px;"></div>
+                </div>
+            </div>
+
+            <!-- GAME CANVAS WRAPPER -->
+            <div id="game-view" class="hidden" style="position: absolute; inset: 0;">
+                
+                <div id="mission-tracker" class="mission-tracker">
+                    <b>CURRENT MISSION</b>
+                    <span id="mission-text">Talk to the Guide.</span>
+                </div>
+
+                <canvas id="game-canvas"></canvas>
+                <button class="floating-menu-btn" onclick="openIngameMenu()">INVENTORY / CONSOLE</button>
+                
+                <div class="dpad" id="dpad">
+                    <div class="dpad-btn" style="grid-area: up;" onpointerdown="handleDpad('w', true)" onpointerup="handleDpad('w', false)" onpointerleave="handleDpad('w', false)">W</div>
+                    <div class="dpad-btn" style="grid-area: left;" onpointerdown="handleDpad('a', true)" onpointerup="handleDpad('a', false)" onpointerleave="handleDpad('a', false)">A</div>
+                    <div class="dpad-btn" style="grid-area: down;" onpointerdown="handleDpad('s', true)" onpointerup="handleDpad('s', false)" onpointerleave="handleDpad('s', false)">S</div>
+                    <div class="dpad-btn" style="grid-area: right;" onpointerdown="handleDpad('d', true)" onpointerup="handleDpad('d', false)" onpointerleave="handleDpad('d', false)">D</div>
+                </div>
+            </div>
+
+            <!-- CONTEXT MENU (Right Click) -->
+            <div id="context-menu" class="context-menu hidden">
+                <div class="menu-title" id="cm-title">PlayerName</div>
+                <button onclick="cmdInteract('challenge')">⚔️ Challenge</button>
+                <button onclick="cmdInteract('trade')">🤝 Request Trade</button>
+                <button onclick="cmdInteract('party')">🎉 Invite to Party</button>
+            </div>
+
+            <!-- IN-GAME MENU MODAL -->
+            <div id="ingame-menu" class="overlay hidden" style="justify-content: center; align-items: center; padding: 20px;">
+                <div class="menu-block" style="max-width: 700px; width: 100%;">
+                    <h2 style="color:var(--gold); text-align:center;">MANAGEMENT CONSOLE</h2>
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; border:1px solid var(--line);">
+                            <b>Tamer Stats</b><br>
+                            Taming Lvl: <span id="menu-taming-lvl" style="color:var(--accent);">1</span><br>
+                            PED: <span id="menu-ped" style="color:var(--gold);">100</span><br>
+                            Whips: <span id="menu-whips" style="color:var(--danger);">10</span> | Probes: <span id="menu-probes" style="color:var(--exp-blue);">0</span>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; border:1px solid var(--line);">
+                            <b>Inventory</b><br>
+                            Fruit: <span id="menu-fruit" style="color:#a8e6cf;">0</span><br>
+                            Pet Essence: <span id="menu-essence" style="color:#d4a5a5;">0</span><br>
+                            Rare Essence: <span id="menu-rare-essence" style="color:#ffcc5c;">0</span>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 0; font-size: 0.95rem; color:var(--accent);">My Pets (Select to set Active)</h3>
+                    <div id="ingame-pet-list" class="pet-manager" style="max-height:250px;"></div>
+                    
+                    <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
+                        <button class="primary" id="toggle-avatar-btn" onclick="toggleAvatarMode()" style="flex:1; min-width:200px;">SWITCH TO PET AVATAR</button>
+                        <button onclick="closeIngameMenu()" style="flex:1; min-width:120px;">CLOSE</button>
+                        <button class="danger" onclick="quitToMenu()" style="flex:0.5; min-width:80px;">QUIT</button>
+                    </div>
+                    <p class="hint" style="text-align:center; margin-top:10px;">Pet Avatar = Battle for XP | Tamer Avatar = Capture new pets or Battle Trainers.<br>Use Juicer buttons to convert unwanted pets to Essence.</p>
+                </div>
+            </div>
+
+            <!-- SHOP MODAL -->
+            <div id="shop-modal" class="shop-modal hidden">
+                <h2>OUTPOST DEPOT</h2>
+                <div style="text-align:center; color:var(--gold); font-weight:bold; margin-bottom:10px;">Your PED: <span id="shop-ped-display"></span></div>
+                <div class="shop-item">
+                    <span>Taming Whip</span>
+                    <button class="primary" onclick="buyItem('whip', 10)">Buy (10 PED)</button>
+                </div>
+                <div class="shop-item">
+                    <span>Mining Probe</span>
+                    <button class="primary" onclick="buyItem('probe', 20)">Buy (20 PED)</button>
+                </div>
+                <button onclick="$('#shop-modal').classList.add('hidden'); engine.inDialog = false;" style="margin-top:10px;">Leave Shop</button>
+            </div>
+
+            <!-- DIALOG BOX -->
+            <div id="dialog-box" class="dialog-box hidden">
+                <div id="dialog-text"></div>
+                <div style="text-align: right; font-size: 0.8rem; color: var(--gold); margin-top: 10px;">[Press SPACE or CLICK to continue]</div>
+            </div>
+
+            <!-- BATTLE SCREEN -->
+            <div id="battle-screen" class="overlay hidden">
+                <div class="battle-view">
+                    <div class="battle-stage">
+                        <!-- Enemy -->
+                        <div class="combatant enemy">
+                            <div class="combat-stats">
+                                <div class="combat-name"><span id="e-name">Wild Pet</span><span id="e-lvl" style="color:var(--gold)">Lv 1</span></div>
+                                <div class="bar-bg"><div class="bar-fill hp" id="e-hp-fill" style="width:100%"></div></div>
+                                <div style="text-align:right; font-size:0.7rem; margin-top:3px;" id="e-hp-text">10/10</div>
+                            </div>
+                            <div class="sprite" id="e-sprite">🐗</div>
+                        </div>
+                        
+                        <!-- Player / Avatar -->
+                        <div class="combatant player">
+                            <div class="sprite avatar" id="p-sprite">🧍</div>
+                            <div class="combat-stats">
+                                <div class="combat-name"><span id="p-name">Player</span><span id="p-lvl" style="color:var(--gold)">Lv 1</span></div>
+                                <div class="bar-bg"><div class="bar-fill hp" id="p-hp-fill" style="width:100%"></div></div>
+                                <div style="text-align:right; font-size:0.7rem; margin-top:3px;" id="p-hp-text">10/10</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="battle-hud">
+                        <div class="battle-log" id="b-log"></div>
+                        <div class="battle-actions" id="b-actions">
+                            <button id="btn-act1" onclick="battleAction(1)">Attack</button>
+                            <button id="btn-act2" onclick="battleAction(2)">Special</button>
+                            <button id="btn-act3" onclick="battleAction(3)" style="border-color:var(--gold); color:var(--gold);">Tame</button>
+                            <button id="btn-act4" onclick="battleAction(4)" style="border-color:var(--danger); color:var(--danger);">Flee</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        'use strict';
+        const $ = selector => document.querySelector(selector);
+        const MP = window.ArcadeMultiplayer;
+
+        // --- DATABASE ---
+        const PET_DB = {
+            snable:  { id: 'snable', name: 'Snablesnot', emoji: '🐗', baseHp: 45, baseAtk: 12, def: 5, m1: 'Tackle', m2: 'Slime' },
+            bristle: { id: 'bristle', name: 'Bristlehog', emoji: '🦔', baseHp: 60, baseAtk: 8, def: 10, m1: 'Quill Dart', m2: 'Roll' },
+            chirpy:  { id: 'chirpy', name: 'Chirpy', emoji: '🦅', baseHp: 35, baseAtk: 18, def: 2, m1: 'Peck', m2: 'Dive Bomb' },
+            exarosaur:{ id:'exarosaur',name: 'Exarosaur', emoji: '🦖', baseHp: 80, baseAtk: 15, def: 12, m1: 'Bite', m2: 'Stomp' }
+        };
+
+        const colors = { 
+            'W': 'var(--tile-wall)', 'G': 'var(--tile-grass)', 'P': 'var(--tile-path)', 
+            'C': 'var(--tile-cobble)', 'H': 'var(--tile-house)', 'D': 'var(--tile-door)', 
+            'S': 'var(--tile-door)', 'N': 'var(--tile-cobble)', 'E': 'var(--tile-trainer)', 
+            'R': 'var(--tile-rock)', 'A': 'var(--tile-garden)' 
+        };
+
+        // 35x35 Expanded Map
+        // W=Wall/Tree, G=Grass, P=Path, C=Cobble, H=House, D=Clinic, S=Shop, N=NPC, E=Trainer, R=Rock, A=Garden
+        const MAP_DATA = [
+            "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+            "WGGGGGGGRRRGGGGGGGGGGGGGGGGGGGGGGGW",
+            "WGGGGGGGRRRGGGGGGGGGGGGGGGGGGGGGGGW",
+            "WGGGGGGGGRRGGGGGGGGGGGGGGGGGGGGGGGW",
+            "WGGGGGGGGGGGGGGGGGEGGGGGGGGGGGGGGGW",
+            "WGGGGGGWWWWWWGGGGGGGGGGGGGGGGGGGGGW",
+            "WGGGGGGW    WGGGGGGGGGGGGGGGGGGGGGW",
+            "WGGGGGGW R  WGGGGGGGGGGGGGGGGGGGGGW",
+            "WGGGGGGWWWWWWGGGGGGGGGGGGGGGGGGGGGW",
+            "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+            "WGGGGGGGGGGGGGGGEGGGGGGGGGGGGGGGGGW",
+            "WWWWWWWWWWWWPPPWWWWWWWWWWWWWWWWWWWW",
+            "WCCCCCCCCCCCPPPCCCCCCCCCCCCCCCCCCCW",
+            "WCCCCCCCCCCCPPPCCCCCCCCCCCCCCCCCCCW",
+            "WCCCCCHHHHCCPPPCCCCHHHHCCCCCCCCCCCW",
+            "WCCCCCHHHHCCPPPCCCCHHHHCCCCCCCCCCCW",
+            "WCCCCCHHDHCCNPPCCCCHHSHCCCCCCCCCCCW",
+            "WCCCCCCCCCCCPPPCCCCCCCCCAAACCCCCCCW",
+            "WCCCCCCCCCCCPPPCCCCCCCCCAAACCCCCCCW",
+            "WCCCCCCCCCCCPPPCCCCCCCCCAAACCCCCCCW",
+            "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+        ];
+        const MAP_W = MAP_DATA[0].length;
+        const MAP_H = MAP_DATA.length;
+        const TILE_SIZE = 48;
+
+        const MISSIONS = [
+            "Talk to the Guide in town.",
+            "Enter the wild grass to the North.",
+            "Catch a wild Com-Pet.",
+            "Defeat an Enemy Trainer.",
+            "Mine a rock with a Probe.",
+            "Explore, capture, and upgrade your pets!"
+        ];
+
+        // --- LOCAL STORAGE & PROFILE ---
+        let profile = {
+            name: "Tamer", tamingLvl: 1, avatar: '🧍',
+            whips: 10, ped: 100,
+            inventory: { fruit: 0, probes: 0, essence: 0, rareEssence: 0 },
+            gardenTime: 0,
+            pets: [ generatePet('snable', 1) ],
+            activePetIndex: 0, walkingAsPet: false,
+            mission: 0
+        };
+
+        function generatePet(id, level) {
+            const def = PET_DB[id];
+            const maxHp = Math.floor(def.baseHp + (level * 5));
+            return { id, name: def.name, emoji: def.emoji, level, exp: 0, maxHp, hp: maxHp, atk: def.baseAtk + (level*2), def: def.def + (level), m1: def.m1, m2: def.m2 };
+        }
+
+        function loadProfile() {
+            const saved = localStorage.getItem('pixelb8_compet_save_v4');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                profile = { ...profile, ...parsed };
+                
+                // Migrations
+                if (!profile.inventory) profile.inventory = { fruit: 0, probes: 0, essence: 0, rareEssence: 0 };
+                if (typeof profile.ped === 'undefined') profile.ped = 100;
+                if (typeof profile.mission === 'undefined') profile.mission = 0;
+                
+                profile.pets.forEach(p => {
+                    if (!p.m1) { const def = PET_DB[p.id]; if (def) { p.m1 = def.m1; p.m2 = def.m2; } }
+                });
+            }
+            $('#player-name').value = profile.name;
+            updateProfileUI();
+        }
+
+        function saveProfile() {
+            profile.name = $('#player-name').value.trim() || "Tamer";
+            localStorage.setItem('pixelb8_compet_save_v4', JSON.stringify(profile));
+            updateProfileUI();
+        }
+
+        function updateProfileUI() {
+            $('#hud-name').textContent = profile.name;
+            $('#hud-taming').textContent = profile.tamingLvl;
+            $('#hud-whips').textContent = profile.whips;
+            $('#hud-ped').textContent = profile.ped;
+            $('#hud-probes').textContent = profile.inventory.probes;
+            
+            $('#menu-taming-lvl').textContent = profile.tamingLvl;
+            $('#menu-whips').textContent = profile.whips;
+            $('#menu-ped').textContent = profile.ped;
+            $('#menu-probes').textContent = profile.inventory.probes;
+            $('#menu-fruit').textContent = profile.inventory.fruit;
+            $('#menu-essence').textContent = profile.inventory.essence;
+            $('#menu-rare-essence').textContent = profile.inventory.rareEssence;
+            
+            $('#mission-text').textContent = MISSIONS[Math.min(profile.mission, MISSIONS.length-1)];
+
+            const renderList = (containerId, isIngame) => {
+                const c = $('#'+containerId);
+                c.innerHTML = profile.pets.map((p, i) => {
+                    const isAv = i === profile.activePetIndex;
+                    const xpReq = p.level * 50;
+                    const xpPct = (p.exp / xpReq) * 100;
+                    const hpPct = (p.hp / p.maxHp) * 100;
+                    
+                    let actionsHtml = '';
+                    if (isIngame) {
+                        if (!isAv && profile.pets.length > 1) {
+                            actionsHtml += `<button class="danger" style="padding:4px 8px; font-size:0.7rem; margin-top:8px;" onclick="juicePet(${i}, event)">JUICE</button> `;
+                        }
+                        if (profile.inventory.rareEssence > 0 && p.m2 !== 'Omega Strike') {
+                            actionsHtml += `<button class="primary" style="padding:4px 8px; font-size:0.7rem; margin-top:8px;" onclick="upgradePet(${i}, event)">UPGRADE SKILL</button>`;
+                        }
+                    }
+
+                    return `
+                        <div class="pet-card ${isAv ? 'active' : ''}" onclick="selectPet(${i})">
+                            <div class="pet-header"><b>${p.emoji} ${p.name}</b> <small style="color:var(--gold)">Lv.${p.level}</small></div>
+                            <div style="font-size:0.75rem; color:var(--muted)">ATK: ${p.atk} | DEF: ${p.def}</div>
+                            <div style="font-size:0.7rem; color:var(--muted); margin-top:4px;">HP: ${p.hp}/${p.maxHp}</div>
+                            <div class="bar-bg"><div class="bar-fill hp" style="width:${hpPct}%"></div></div>
+                            <div style="font-size:0.7rem; color:var(--muted); margin-top:4px;">XP: ${p.exp}/${xpReq}</div>
+                            <div class="bar-bg"><div class="bar-fill xp" style="width:${xpPct}%"></div></div>
+                            ${actionsHtml}
+                        </div>`;
+                }).join('');
+            };
+            renderList('menu-pet-list', false);
+            renderList('ingame-pet-list', true);
+            
+            $('#toggle-avatar-btn').textContent = profile.walkingAsPet ? 'SWITCH TO TAMER AVATAR' : 'SWITCH TO PET AVATAR';
+        }
+
+        window.selectPet = function(index) { profile.activePetIndex = index; saveProfile(); if (engine.running) syncMultiplayerData(); };
+        window.toggleAvatarMode = function() { profile.walkingAsPet = !profile.walkingAsPet; saveProfile(); if (engine.running) syncMultiplayerData(); };
+        window.advanceMission = function() { profile.mission++; saveProfile(); }
+
+        window.juicePet = function(index, e) {
+            e.stopPropagation();
+            if(confirm(`Juice this ${profile.pets[index].name} for Essence? It will be permanently destroyed.`)) {
+                profile.pets.splice(index, 1);
+                profile.inventory.essence += 5;
+                if(Math.random() < 0.2) profile.inventory.rareEssence++;
+                if (profile.activePetIndex >= profile.pets.length) profile.activePetIndex = 0;
+                saveProfile();
+                showDialog(["Pet juiced successfully. Gained Essence."]);
+            }
+        };
+
+        window.upgradePet = function(index, e) {
+            e.stopPropagation();
+            if (profile.inventory.rareEssence > 0) {
+                profile.inventory.rareEssence--;
+                profile.pets[index].m2 = 'Omega Strike';
+                profile.pets[index].atk += 10;
+                saveProfile();
+                showDialog([profile.pets[index].name + " learned Omega Strike! Base ATK +10."]);
+            }
+        };
+
+        window.buyItem = function(item, cost) {
+            if (profile.ped >= cost) {
+                profile.ped -= cost;
+                if (item === 'whip') profile.whips++;
+                if (item === 'probe') profile.inventory.probes++;
+                saveProfile();
+                $('#shop-ped-display').textContent = profile.ped;
+            } else {
+                alert("Not enough PED!");
+            }
+        };
+
+        // --- GAME ENGINE ---
+        const canvas = $('#game-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let engine = {
+            running: false, mode: 'single', 
+            x: 14, y: 16, // Start near town center
+            targetX: 14, targetY: 16, moveProgress: 1, speed: 0.25, 
+            otherPlayers: {},
+            inDialog: false, dialogQueue: [],
+            inBattle: false, battleState: null,
+            roomCode: '', keys: { w:false, a:false, s:false, d:false },
+            lastMove: 0
+        };
+
+        function drawMap(camX, camY) {
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const startCol = Math.floor(camX / TILE_SIZE); const endCol = startCol + (canvas.width / TILE_SIZE) + 1;
+            const startRow = Math.floor(camY / TILE_SIZE); const endRow = startRow + (canvas.height / TILE_SIZE) + 1;
+            const offsetX = -camX + startCol * TILE_SIZE; const offsetY = -camY + startRow * TILE_SIZE;
+
+            for (let c = startCol; c <= endCol; c++) {
+                for (let r = startRow; r <= endRow; r++) {
+                    if (c >= 0 && c < MAP_W && r >= 0 && r < MAP_H) {
+                        const tile = MAP_DATA[r][c];
+                        const px = (c - startCol) * TILE_SIZE + offsetX;
+                        const py = (r - startRow) * TILE_SIZE + offsetY;
+                        
+                        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue(colors[tile]?.replace('var(','').replace(')','') || '--tile-path').trim();
+                        ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+                        
+                        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                        if (tile === 'W') { ctx.font = `${TILE_SIZE*0.8}px Arial`; ctx.fillText('🌲', px + TILE_SIZE/2, py + TILE_SIZE/2); }
+                        else if (tile === 'G') { ctx.fillStyle = 'rgba(0,0,0,0.15)'; ctx.fillRect(px + 4, py + 4, 8, 8); ctx.fillRect(px + 24, py + 24, 8, 8); }
+                        else if (tile === 'D') { ctx.font = `${TILE_SIZE*0.6}px Arial`; ctx.fillText('🏥', px + TILE_SIZE/2, py + TILE_SIZE/2); }
+                        else if (tile === 'S') { ctx.font = `${TILE_SIZE*0.6}px Arial`; ctx.fillText('🏪', px + TILE_SIZE/2, py + TILE_SIZE/2); }
+                        else if (tile === 'N') { ctx.font = `${TILE_SIZE*0.8}px Arial`; ctx.fillText('🧙‍♂️', px + TILE_SIZE/2, py + TILE_SIZE/2); }
+                        else if (tile === 'E') { ctx.font = `${TILE_SIZE*0.8}px Arial`; ctx.fillText('🦹', px + TILE_SIZE/2, py + TILE_SIZE/2); }
+                        else if (tile === 'R') { ctx.font = `${TILE_SIZE*0.8}px Arial`; ctx.fillText('🪨', px + TILE_SIZE/2, py + TILE_SIZE/2); }
+                        else if (tile === 'A') { 
+                            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.strokeRect(px+2, py+2, TILE_SIZE-4, TILE_SIZE-4);
+                            if (profile.gardenTime > 0) {
+                                let icon = Date.now() > profile.gardenTime ? '🍎' : '🌱';
+                                ctx.font = `${TILE_SIZE*0.5}px Arial`; ctx.fillText(icon, px + TILE_SIZE/2, py + TILE_SIZE/2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawEntities(camX, camY) {
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            for (let id in engine.otherPlayers) {
+                const p = engine.otherPlayers[id];
+                const px = p.x * TILE_SIZE - camX + TILE_SIZE/2;
+                const py = p.y * TILE_SIZE - camY + TILE_SIZE/2;
+                ctx.font = `${TILE_SIZE*0.8}px Arial`; ctx.fillText(p.avatar, px, py);
+                ctx.font = `12px 'Courier New'`; ctx.fillStyle = "#fff"; ctx.fillText(p.name, px, py - TILE_SIZE*0.7);
+            }
+
+            const curX = engine.x + (engine.targetX - engine.x) * engine.moveProgress;
+            const curY = engine.y + (engine.targetY - engine.y) * engine.moveProgress;
+            const px = curX * TILE_SIZE - camX + TILE_SIZE/2;
+            const py = curY * TILE_SIZE - camY + TILE_SIZE/2;
+            
+            const myAvatar = profile.walkingAsPet && profile.pets[profile.activePetIndex] ? profile.pets[profile.activePetIndex].emoji : profile.avatar;
+            ctx.font = `${TILE_SIZE*0.9}px Arial`;
+            ctx.shadowBlur = 15; ctx.shadowColor = "var(--accent)";
+            ctx.fillText(myAvatar, px, py);
+            ctx.shadowBlur = 0;
+            ctx.font = `bold 12px 'Courier New'`; ctx.fillStyle = "var(--gold)"; ctx.fillText(profile.name, px, py - TILE_SIZE*0.7);
+        }
+
+        function gameLoop() {
+            if (!engine.running) return;
+            requestAnimationFrame(gameLoop);
+            
+            if (canvas.width !== canvas.parentElement.clientWidth || canvas.height !== canvas.parentElement.clientHeight) {
+                canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight;
+            }
+
+            // Smooth Movement processing
+            if (engine.moveProgress < 1) {
+                engine.moveProgress += engine.speed;
+                if (engine.moveProgress >= 1) {
+                    engine.moveProgress = 1; engine.x = engine.targetX; engine.y = engine.targetY;
+                    checkTileEvent();
+                }
+            } 
+            
+            if (engine.moveProgress >= 1 && !engine.inDialog && !engine.inBattle) {
+                processInput();
+            }
+
+            const curX = engine.x + (engine.targetX - engine.x) * engine.moveProgress;
+            const curY = engine.y + (engine.targetY - engine.y) * engine.moveProgress;
+            let camX = (curX * TILE_SIZE + TILE_SIZE/2) - canvas.width/2;
+            let camY = (curY * TILE_SIZE + TILE_SIZE/2) - canvas.height/2;
+
+            drawMap(camX, camY);
+            drawEntities(camX, camY);
+        }
+
+        // --- INPUT & MOVEMENT ---
+        window.addEventListener('keydown', e => { 
+            if(engine.keys.hasOwnProperty(e.key.toLowerCase())) engine.keys[e.key.toLowerCase()] = true; 
+            if(e.code === 'Space') advanceDialog();
+        });
+        window.addEventListener('keyup', e => { if(engine.keys.hasOwnProperty(e.key.toLowerCase())) engine.keys[e.key.toLowerCase()] = false; });
+
+        window.handleDpad = function(k, state) { engine.keys[k] = state; };
+
+        function processInput() {
+            const now = Date.now();
+            if (now - engine.lastMove < 150) return;
+            
+            if (engine.keys.w) tryMove(0, -1);
+            else if (engine.keys.s) tryMove(0, 1);
+            else if (engine.keys.a) tryMove(-1, 0);
+            else if (engine.keys.d) tryMove(1, 0);
+        }
+
+        function tryMove(dx, dy) {
+            engine.lastMove = Date.now();
+            const nx = engine.x + dx; const ny = engine.y + dy;
+            if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+                const t = MAP_DATA[ny][nx];
+                if (['W','H','D','S','N','E','R','A'].includes(t)) {
+                    checkInteraction(nx, ny, t);
+                } else {
+                    engine.targetX = nx; engine.targetY = ny; engine.moveProgress = 0;
+                    syncMultiplayerData();
+                }
+            }
+        }
+
+        function checkInteraction(tx, ty, t) {
+            if (t === 'D') {
+                profile.pets.forEach(p => p.hp = p.maxHp); saveProfile();
+                showDialog(["Clinic: All your pets have been fully restored!"]);
+            } else if (t === 'S') {
+                engine.inDialog = true;
+                $('#shop-ped-display').textContent = profile.ped;
+                $('#shop-modal').classList.remove('hidden');
+            } else if (t === 'N') {
+                if (profile.mission === 0) advanceMission();
+                showDialog([
+                    "Guide: Welcome to Port Atlantis Outpost!",
+                    "Guide: Clinic (Left) heals pets. Depot (Right) sells Whips & Probes.",
+                    "Guide: The wilderness is North. Tamer = Catch, Pet = Battle for XP.",
+                    "Guide: Try planting Fruit in the Garden plots (Brown dirt)."
+                ]);
+            } else if (t === 'E') {
+                if (profile.walkingAsPet) {
+                    showDialog(["Enemy Trainer: Shoo! I only battle human Tamers. Switch your Avatar to fight me!"]);
+                } else {
+                    triggerBattle(true); // Trainer battle
+                }
+            } else if (t === 'R') {
+                if (profile.inventory.probes > 0) {
+                    profile.inventory.probes--;
+                    let loot = Math.random();
+                    if (loot > 0.8) { profile.inventory.rareEssence++; showDialog(["Mining... Success! Found a Rare Pet Essence!"]); }
+                    else { profile.inventory.essence += 2; showDialog(["Mining... Found 2 Pet Essences!"]); }
+                    if (profile.mission === 4) advanceMission();
+                    saveProfile();
+                } else {
+                    showDialog(["This is a mineral deposit. You need a Probe from the Depot to mine it."]);
+                }
+            } else if (t === 'A') {
+                let now = Date.now();
+                if (profile.gardenTime === 0) {
+                    if (profile.inventory.fruit > 0) {
+                        profile.inventory.fruit--; profile.gardenTime = now + 60000; saveProfile();
+                        showDialog(["Planted a fruit! It will grow in 60 seconds."]);
+                    } else { showDialog(["This is an empty garden plot. You need Fruit to plant here."]); }
+                } else if (now >= profile.gardenTime) {
+                    profile.inventory.fruit += 3; profile.gardenTime = 0; saveProfile();
+                    showDialog(["Harvested 3 Fruits!"]);
+                } else {
+                    showDialog([`Fruit is growing... ${Math.ceil((profile.gardenTime - now)/1000)}s remaining.`]);
+                }
+            }
+        }
+
+        function checkTileEvent() {
+            const t = MAP_DATA[engine.y][engine.x];
+            if (t === 'G') {
+                if (profile.mission === 1) advanceMission();
+                if (Math.random() < 0.12) triggerBattle(false);
+                else if (Math.random() < 0.05) { profile.inventory.fruit++; saveProfile(); showDialog(["Found a wild Fruit in the grass!"]); }
+            }
+        }
+
+        // --- STORY / DIALOG ---
+        function showDialog(lines) {
+            engine.dialogQueue = lines;
+            if (engine.dialogQueue.length > 0) {
+                engine.inDialog = true; $('#dialog-box').classList.remove('hidden');
+                $('#dialog-text').innerHTML = engine.dialogQueue.shift().replace(/Guide:|Clinic:|Depot:|System:|Trainer:/g, m => `<b style="color:var(--gold)">${m}</b>`);
+            }
+        }
+        function advanceDialog() { 
+            if(engine.inDialog) {
+                if (engine.dialogQueue.length > 0) $('#dialog-text').innerHTML = engine.dialogQueue.shift().replace(/Guide:|Clinic:|Depot:|System:|Trainer:/g, m => `<b style="color:var(--gold)">${m}</b>`);
+                else { engine.inDialog = false; $('#dialog-box').classList.add('hidden'); }
+            }
+        }
+        $('#dialog-box').onclick = advanceDialog;
+
+        // --- BATTLE SYSTEM ---
+        function triggerBattle(isTrainer) {
+            if (isTrainer && profile.walkingAsPet) return; 
+
+            let firstAlive = profile.pets.findIndex(p => p.hp > 0);
+            if (firstAlive === -1) {
+                showDialog(["System: All your pets have fainted! Visit the Clinic to heal."]);
+                return;
+            }
+
+            engine.inBattle = true;
+            $('#battle-screen').classList.remove('hidden');
+            $('#b-log').innerHTML = '';
+            
+            const keys = Object.keys(PET_DB);
+            const myLvl = profile.pets[profile.activePetIndex]?.level || 1;
+
+            if (isTrainer) {
+                const numPets = Math.floor(Math.random() * 2) + 1; // 1 to 2 pets
+                const enemyTeam = [];
+                for(let i=0; i<numPets; i++) {
+                    const enemyId = keys[Math.floor(Math.random()*keys.length)];
+                    const eLvl = Math.max(1, myLvl + Math.floor(Math.random()*2));
+                    enemyTeam.push(generatePet(enemyId, eLvl));
+                }
+                
+                engine.battleState = {
+                    type: 'trainer',
+                    enemyTeam: enemyTeam,
+                    activeEnemyIndex: 0,
+                    enemy: enemyTeam[0],
+                    isTrainer: true,
+                    activePlayerPetIndex: firstAlive,
+                    player: profile.pets[firstAlive],
+                    turn: 'player'
+                };
+                renderBattleUI();
+                logBattle("An Enemy Trainer challenged you!");
+                logBattle(`Trainer sent out ${enemyTeam[0].name}!`);
+                logBattle(`Go, ${profile.pets[firstAlive].name}!`);
+            } else {
+                const enemyId = keys[Math.floor(Math.random()*keys.length)];
+                const eLvl = Math.max(1, myLvl + Math.floor(Math.random()*3) - 1);
+                const enemy = generatePet(enemyId, eLvl);
+                
+                engine.battleState = {
+                    type: profile.walkingAsPet ? 'pet' : 'avatar',
+                    enemy: enemy, isTrainer: false,
+                    player: profile.walkingAsPet ? profile.pets[profile.activePetIndex] : null,
+                    turn: 'player'
+                };
+                renderBattleUI();
+                logBattle(`A wild ${enemy.name} appeared!`);
+            }
+        }
+
+        function renderBattleUI() {
+            const b = engine.battleState;
+            if (!b) return;
+            
+            $('#e-sprite').textContent = b.isTrainer ? b.enemy.emoji : b.enemy.emoji;
+            $('#e-name').textContent = b.isTrainer ? "Trainer's " + b.enemy.name : b.enemy.name;
+            $('#e-lvl').textContent = `Lv.${b.enemy.level}`;
+            $('#e-hp-fill').style.width = `${(b.enemy.hp / b.enemy.maxHp)*100}%`;
+            $('#e-hp-text').textContent = `${b.enemy.hp}/${b.enemy.maxHp}`;
+
+            if (b.type === 'pet' || b.type === 'trainer') {
+                $('#p-sprite').textContent = b.player.emoji; $('#p-sprite').classList.remove('avatar');
+                $('#p-name').textContent = b.player.name; $('#p-lvl').textContent = `Lv.${b.player.level}`;
+                $('#p-hp-fill').style.width = `${(b.player.hp / b.player.maxHp)*100}%`; $('#p-hp-text').textContent = `${b.player.hp}/${b.player.maxHp}`;
+                
+                $('#btn-act1').textContent = b.player.m1; $('#btn-act2').textContent = b.player.m2;
+                $('#btn-act2').classList.remove('hidden'); 
+                
+                if (b.type === 'trainer') {
+                    $('#btn-act3').classList.remove('hidden');
+                    $('#btn-act3').textContent = 'Swap Pet';
+                } else {
+                    $('#btn-act3').classList.add('hidden'); // Cannot capture in pet mode wild
+                }
+            } else {
+                $('#p-sprite').textContent = profile.avatar; $('#p-sprite').classList.add('avatar');
+                $('#p-name').textContent = profile.name; $('#p-lvl').textContent = `Taming Lv.${profile.tamingLvl}`;
+                $('#p-hp-fill').style.width = `100%`; $('#p-hp-text').textContent = `100/100`; 
+                
+                $('#btn-act1').textContent = `Whip (-1 Whip)`; $('#btn-act2').classList.add('hidden'); 
+                $('#btn-act3').classList.remove('hidden'); $('#btn-act3').textContent = `Tame`;
+                if (b.isTrainer) $('#btn-act3').classList.add('hidden'); 
+            }
+
+            const isMyTurn = b.turn === 'player';
+            ['btn-act1', 'btn-act2', 'btn-act3', 'btn-act4'].forEach(id => { $('#'+id).disabled = !isMyTurn; });
+        }
+
+        function logBattle(msg) { const l = $('#b-log'); l.innerHTML += `<div>${msg}</div>`; l.scrollTop = l.scrollHeight; }
+
+        window.battleAction = function(actionId) {
+            if (!engine.battleState || engine.battleState.turn !== 'player') return;
+            const b = engine.battleState;
+
+            // Flee
+            if (actionId === 4) {
+                if (b.isTrainer) { logBattle("Cannot run from a trainer battle!"); return; }
+                logBattle("Got away safely!"); b.turn = 'none'; setTimeout(endBattle, 1500); return;
+            }
+
+            // Trainer Pet Swap Logic
+            if (b.type === 'trainer' && actionId === 3) {
+                let nextIdx = profile.pets.findIndex((p, i) => p.hp > 0 && i !== b.activePlayerPetIndex);
+                if (nextIdx === -1) {
+                    logBattle("No other healthy pets available!");
+                    return;
+                }
+                b.activePlayerPetIndex = nextIdx;
+                b.player = profile.pets[nextIdx];
+                logBattle(`You swapped to ${b.player.name}!`);
+                
+                b.turn = 'enemy';
+                renderBattleUI();
+                setTimeout(() => triggerEnemyTurn(b), 1500);
+                return;
+            }
+
+            // Avatar Wild Battle
+            if (b.type === 'avatar') {
+                if (actionId === 1) { // Whip
+                    if (profile.whips <= 0) { logBattle("Out of whips! Visit the Depot."); return; }
+                    profile.whips--; saveProfile();
+                    
+                    const dmg = Math.floor(Math.random() * 8) + 5;
+                    b.enemy.hp = Math.max(0, b.enemy.hp - dmg);
+                    logBattle(`You cracked the whip! Did ${dmg} DMG.`);
+                    
+                    if (b.enemy.hp === 0) {
+                        logBattle(`The ${b.enemy.name} fainted. Taming failed.`);
+                        b.turn = 'none'; setTimeout(endBattle, 2000); return;
+                    }
+                } else if (actionId === 3) { // Tame
+                    const hpPct = b.enemy.hp / b.enemy.maxHp;
+                    const chance = (1 - hpPct) * (profile.tamingLvl / b.enemy.level) * 0.8;
+                    
+                    if (Math.random() < chance + 0.15) { 
+                        logBattle(`Gotcha! ${b.enemy.name} was caught!`);
+                        if (profile.mission === 2) advanceMission();
+                        b.enemy.hp = b.enemy.maxHp; profile.pets.push(b.enemy); profile.tamingLvl++;
+                        logBattle(`Taming Level increased to ${profile.tamingLvl}!`);
+                        saveProfile(); b.turn = 'none'; setTimeout(endBattle, 2500); return;
+                    } else { logBattle(`The ${b.enemy.name} broke free!`); }
+                }
+            } else {
+                // Pet Attack (Wild or Trainer)
+                const moveName = actionId === 1 ? b.player.m1 : b.player.m2;
+                const multiplier = actionId === 2 ? 1.5 : 1;
+                const dmg = Math.max(1, Math.floor((b.player.atk * multiplier) - (b.enemy.def/2) + (Math.random()*4)));
+                
+                b.enemy.hp = Math.max(0, b.enemy.hp - dmg);
+                logBattle(`${b.player.name} used ${moveName} for ${dmg} DMG!`);
+
+                if (b.enemy.hp === 0) {
+                    const xpGained = b.enemy.level * (b.isTrainer ? 40 : 25);
+                    b.player.exp += xpGained;
+                    logBattle(`${b.enemy.name} fainted! Gained ${xpGained} XP.`);
+                    
+                    if (b.player.exp >= b.player.level * 50) {
+                        b.player.level++; b.player.exp = 0;
+                        b.player.maxHp += 5; b.player.hp = b.player.maxHp; b.player.atk += 2; b.player.def += 1;
+                        logBattle(`${b.player.name} leveled up to Lv.${b.player.level}!`);
+                    }
+                    
+                    if (b.isTrainer) {
+                        b.activeEnemyIndex++;
+                        if (b.activeEnemyIndex < b.enemyTeam.length) {
+                            b.enemy = b.enemyTeam[b.activeEnemyIndex];
+                            logBattle(`Trainer sent out ${b.enemy.name}!`);
+                            b.turn = 'player';
+                            renderBattleUI();
+                            saveProfile();
+                            return; 
+                        } else {
+                            profile.ped += 50; logBattle("Earned 50 PED for winning!"); 
+                            if (profile.mission === 3) advanceMission();
+                            saveProfile(); b.turn = 'none'; setTimeout(endBattle, 2500); return;
+                        }
+                    } else {
+                        saveProfile(); b.turn = 'none'; setTimeout(endBattle, 2500); return;
+                    }
+                }
+            }
+
+            b.turn = 'enemy';
+            renderBattleUI(); 
+            setTimeout(() => triggerEnemyTurn(b), 1500);
+        };
+
+        function triggerEnemyTurn(b) {
+            if (!engine.battleState) return;
+            const eMove = Math.random() > 0.5 ? b.enemy.m1 : b.enemy.m2;
+            
+            if (b.type === 'avatar') {
+                logBattle(`Wild ${b.enemy.name} glared angrily.`); 
+                b.turn = 'player';
+            } else {
+                const dmg = Math.max(1, Math.floor(b.enemy.atk - (b.player.def/2) + (Math.random()*3)));
+                b.player.hp -= dmg;
+                logBattle(`${b.isTrainer?"Trainer's ":"Wild "}${b.enemy.name} used ${eMove} for ${dmg} DMG.`);
+                
+                if (b.player.hp <= 0) {
+                    b.player.hp = 0; 
+                    logBattle(`${b.player.name} fainted!`);
+                    
+                    if (b.type === 'trainer') {
+                        let nextIdx = profile.pets.findIndex(p => p.hp > 0);
+                        if (nextIdx !== -1) {
+                            b.activePlayerPetIndex = nextIdx;
+                            b.player = profile.pets[nextIdx];
+                            logBattle(`You sent out ${b.player.name}!`);
+                            b.turn = 'player';
+                            renderBattleUI();
+                            saveProfile();
+                            return;
+                        } else {
+                            logBattle(`You have no more pets! You whited out.`);
+                            b.turn = 'none';
+                            saveProfile(); 
+                            setTimeout(() => { 
+                                profile.pets.forEach(p => p.hp = p.maxHp);
+                                engine.x = 14; engine.y = 16; engine.targetX = 14; engine.targetY = 16; 
+                                endBattle(); 
+                            }, 2000);
+                            return;
+                        }
+                    } else {
+                        logBattle(`You whited out.`);
+                        b.turn = 'none';
+                        saveProfile(); 
+                        setTimeout(() => { 
+                            b.player.hp = b.player.maxHp; 
+                            engine.x = 14; engine.y = 16; engine.targetX = 14; engine.targetY = 16; 
+                            endBattle(); 
+                        }, 2000);
+                        return;
+                    }
+                } else { 
+                    b.turn = 'player'; 
+                }
+            }
+            renderBattleUI();
+        }
+
+        function endBattle() {
+            engine.inBattle = false; engine.battleState = null;
+            $('#battle-screen').classList.add('hidden');
+            $('#btn-act2').classList.remove('hidden'); $('#btn-act3').classList.add('hidden');
+            saveProfile();
+        }
+
+        // --- CONTEXT MENU (Multiplayer Interactions) ---
+        let contextTarget = null;
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); if (engine.mode !== 'explore' || engine.inBattle) return;
+            const rect = canvas.getBoundingClientRect();
+            const curX = engine.x + (engine.targetX - engine.x) * engine.moveProgress; const curY = engine.y + (engine.targetY - engine.y) * engine.moveProgress;
+            let camX = (curX * TILE_SIZE + TILE_SIZE/2) - canvas.width/2; let camY = (curY * TILE_SIZE + TILE_SIZE/2) - canvas.height/2;
+
+            const mapClickX = Math.floor(((e.clientX - rect.left) + camX) / TILE_SIZE);
+            const mapClickY = Math.floor(((e.clientY - rect.top) + camY) / TILE_SIZE);
+
+            contextTarget = null;
+            for (let id in engine.otherPlayers) { const p = engine.otherPlayers[id]; if (p.x === mapClickX && p.y === mapClickY) { contextTarget = p; break; } }
+
+            const cm = $('#context-menu');
+            if (contextTarget) { $('#cm-title').textContent = contextTarget.name; cm.style.left = `${e.clientX}px`; cm.style.top = `${e.clientY}px`; cm.classList.remove('hidden'); } 
+            else { cm.classList.add('hidden'); }
+        });
+        window.addEventListener('click', (e) => { if (!e.target.closest('#context-menu')) $('#context-menu').classList.add('hidden'); });
+
+        window.cmdInteract = function(action) {
+            $('#context-menu').classList.add('hidden'); if (!contextTarget) return;
+            if (action === 'challenge') showDialog([`System: Arena PvP coming soon! Cannot challenge ${contextTarget.name}.`]);
+            if (action === 'trade') showDialog([`System: Trade request sent to ${contextTarget.name}!`]);
+            if (action === 'party') showDialog([`System: Party invite sent to ${contextTarget.name}!`]);
+        };
+
+        // --- MENUS & INIT ---
+        window.startGame = function(mode) {
+            saveProfile(); engine.mode = mode;
+            $('#main-menu').classList.add('hidden'); $('#game-view').classList.remove('hidden'); $('#hud-stats').classList.remove('hidden');
+            engine.running = true;
+            
+            if (mode === 'single') { $('#connection').textContent = "Offline Mode"; $('#connection').classList.remove('online'); } 
+            else if (mode === 'explore') {
+                if (!engine.roomCode) { engine.roomCode = 'PUB_' + Math.random().toString(36).substr(2,4).toUpperCase(); MP.hostRoom({ code: engine.roomCode, mode: 'explore', maxPlayers: 10, name: `Public Realm` }); }
+                $('#connection').textContent = `Connected: ${engine.roomCode}`; $('#connection').classList.add('online'); syncMultiplayerData();
+            }
+            gameLoop();
+        };
+
+        window.joinGame = function() { const code = $('#join-code').value.trim(); if(code) { engine.roomCode = code; MP.joinRoom(code); startGame('explore'); } };
+        window.openIngameMenu = function() { $('#ingame-menu').classList.remove('hidden'); updateProfileUI(); };
+        window.closeIngameMenu = function() { $('#ingame-menu').classList.add('hidden'); };
+        window.quitToMenu = function() { 
+            engine.running = false; $('#game-view').classList.add('hidden'); $('#ingame-menu').classList.add('hidden'); $('#hud-stats').classList.add('hidden'); $('#main-menu').classList.remove('hidden'); 
+            if (engine.mode !== 'single') MP.disconnect(); engine.roomCode = '';
+        };
+
+        // --- MULTIPLAYER MQTT SYNC ---
+        function syncMultiplayerData() {
+            if (engine.mode !== 'explore' || !engine.roomCode) return;
+            const myAvatar = profile.walkingAsPet && profile.pets[profile.activePetIndex] ? profile.pets[profile.activePetIndex].emoji : profile.avatar;
+            MP.publish('SYNC_POS', { x: engine.targetX, y: engine.targetY, avatar: myAvatar, name: profile.name });
+        }
+
+        function handleNetworkMessage(msg) {
+            if (!msg || !msg.type || msg.senderId === myId) return;
+            if (msg.type === 'SYNC_POS') engine.otherPlayers[msg.senderId] = { x: msg.x, y: msg.y, avatar: msg.avatar, name: msg.name, lastSeen: Date.now() };
+        }
+        setInterval(() => { const now = Date.now(); for (let id in engine.otherPlayers) { if (now - engine.otherPlayers[id].lastSeen > 8000) delete engine.otherPlayers[id]; } }, 3000);
+
+        function renderRooms() {
+            const rooms = currentRooms; const rl = $('#room-list');
+            if (!rooms.length) { rl.innerHTML = '<span class="hint">No public realms active. Create one to play with others!</span>'; return; }
+            rl.innerHTML = rooms.map(r => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#121d22; padding:5px 10px; border-radius:4px; border:1px solid var(--line);">
+                    <div><b style="color:var(--accent)">${escapeHtml(r.name)}</b> <span style="font-size:0.7rem;color:var(--muted)">[${r.code}]</span></div>
+                    <button style="padding:4px 8px; font-size:0.7rem;" onclick="$('#join-code').value='${r.code}'; joinGame();">JOIN</button>
+                </div>`).join('');
+        }
+
+        function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+        loadProfile();
+    </script>
+</body>
+</html>

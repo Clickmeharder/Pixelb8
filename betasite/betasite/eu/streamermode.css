@@ -1,0 +1,1189 @@
+/* =========================================================
+   STREAMER MODE / OBS HUD
+   ========================================================= */
+.streamer-toggle{
+  border-color:rgba(125,227,255,.5);
+  background:linear-gradient(180deg,#122a42,#0a1726);
+  color:var(--stream-accent2);
+}
+.streamer-toggle.active{
+  background:linear-gradient(180deg,#6fe1ff,#2ab6ea);
+  color:#03131d;
+  box-shadow:0 0 18px rgba(53,194,255,.35);
+}
+
+#streamerHud{
+  --stream-accent:#35c2ff;
+  --stream-accent2:#7de3ff;
+  --stream-panel-bg:5,16,27;
+  --stream-panel-opacity:.80;
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  pointer-events:none;
+  color:#dff8ff;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  text-shadow:0 0 8px rgba(53,194,255,.25);
+}
+
+body.streamer-mode{
+  --accent:var(--stream-accent);
+  --accent2:var(--stream-accent2);
+  background:transparent!important;
+  overflow:hidden!important;
+}
+body.streamer-mode .app{
+  visibility:hidden;
+  pointer-events:none;
+}
+body.streamer-mode #streamerHud{
+  display:block;
+}
+html.streamer-mode{
+  background:transparent!important;
+}
+
+/* HUD layout */
+.streamer-hud-shell{
+  position:absolute;
+  inset:18px;
+  display:grid;
+  grid-template-columns:minmax(250px,330px) 1fr minmax(250px,330px);
+  grid-template-rows:auto 1fr auto;
+  gap:14px;
+}
+
+.hud-panel{
+  position:relative;
+  background:
+    linear-gradient(180deg,rgba(var(--stream-panel-bg),var(--stream-panel-opacity)),rgba(4,12,21,.56)),
+    radial-gradient(circle at 20% 0%,rgba(53,194,255,.10),transparent 48%);
+  border:1px solid rgba(74,203,255,.54);
+  clip-path:polygon(0 10px,10px 0,calc(100% - 22px) 0,100% 22px,100% 100%,14px 100%,0 calc(100% - 14px));
+  box-shadow:
+    inset 0 0 22px rgba(53,194,255,.07),
+    0 0 24px rgba(0,0,0,.28);
+  backdrop-filter:blur(4px);
+}
+.hud-panel::before,
+.hud-panel::after{
+  content:"";
+  position:absolute;
+  height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent);
+  opacity:.8;
+}
+.hud-panel::before{top:5px;left:14px;width:72px}
+.hud-panel::after{bottom:5px;right:14px;width:44px;transform:rotate(180deg)}
+
+.hud-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:9px 12px 7px;
+  color:var(--stream-accent2);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-size:.63rem;
+  font-weight:900;
+  border-bottom:1px solid rgba(53,194,255,.18);
+}
+.hud-title .hud-status{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  font-size:.56rem;
+  color:#91b6c8;
+  letter-spacing:.05em;
+}
+.hud-title .dot{width:7px;height:7px}
+
+.hud-content{padding:10px 12px 12px}
+
+.hud-gauge-row{
+  display:grid;
+  grid-template-columns:repeat(3,92px);
+  gap:12px;
+  align-items:center;
+  justify-content:center;
+}
+
+.hud-gauge{
+  width:92px;
+  height:92px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  position:relative;
+  background:
+    radial-gradient(circle at center,rgba(var(--stream-panel-bg),.94) 0 47%,transparent 48%),
+    conic-gradient(var(--gauge-color,var(--accent)) calc(var(--gauge-pct,0)*1%),rgba(56,110,138,.18) 0);
+  border:1px solid rgba(125,227,255,.38);
+  box-shadow:
+    inset 0 0 15px rgba(53,194,255,.16),
+    0 0 13px rgba(53,194,255,.09);
+}
+.hud-gauge::before{
+  content:"";
+  position:absolute;
+  inset:8px;
+  border-radius:50%;
+  border:1px dashed rgba(125,227,255,.16);
+}
+.hud-gauge-value{
+  position:relative;
+  z-index:2;
+  text-align:center;
+  line-height:1.05;
+  font-family:"SFMono-Regular",Consolas,monospace;
+  font-size:.82rem;
+  font-weight:900;
+}
+.hud-gauge-label{
+  display:block;
+  margin-top:5px;
+  color:#78a1b5;
+  font-size:.51rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-family:Inter,system-ui,sans-serif;
+}
+
+.hud-stat-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+/* Global Telemetry is intentionally free-flowing:
+   resize the panel wide for a single row, narrow for columns,
+   or anything between and the metrics wrap naturally. */
+.hud-panel[data-panel-id="globalTelemetry"] .hud-stat-grid{
+  display:flex;
+  flex-wrap:wrap;
+  align-content:flex-start;
+  align-items:stretch;
+  gap:7px;
+}
+.hud-panel[data-panel-id="globalTelemetry"] .hud-stat{
+  flex:1 1 86px;
+  min-width:86px;
+  max-width:none;
+  text-align:center;
+}
+.hud-panel[data-panel-id="globalTelemetry"] .hud-stat-grid{
+  width:100%;
+}
+.hud-panel[data-panel-id="globalTelemetry"] .hud-stat-label{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  text-align:center;
+  font-size:calc(.46rem * var(--panel-text-scale));
+}
+.hud-panel[data-panel-id="globalTelemetry"] .hud-stat-value{
+  text-align:center;
+  font-size:calc(.80rem * var(--panel-text-scale));
+}
+.hud-panel[data-panel-id="globalTelemetry"] .hud-content{
+  min-width:0;
+}
+
+/* Per-panel typography scaling. JS writes --panel-text-scale. */
+.hud-panel{
+  --panel-text-scale:1;
+}
+.hud-panel .hud-title{
+  font-size:calc(.63rem * var(--panel-text-scale));
+}
+.hud-panel .hud-title .hud-status{
+  font-size:calc(.56rem * var(--panel-text-scale));
+}
+.hud-panel .hud-stat-label{
+  font-size:calc(.52rem * var(--panel-text-scale));
+}
+.hud-panel .hud-stat-value{
+  font-size:calc(.76rem * var(--panel-text-scale));
+}
+.hud-panel .hud-gauge-value{
+  font-size:calc(.82rem * var(--panel-text-scale));
+}
+.hud-panel .hud-gauge-label{
+  font-size:calc(.51rem * var(--panel-text-scale));
+}
+.hud-panel .hud-target-label{
+  font-size:calc(.53rem * var(--panel-text-scale));
+}
+.hud-panel .hud-target-name{
+  font-size:calc(.94rem * var(--panel-text-scale));
+}
+.hud-panel .hud-target-hour{
+  font-size:calc(.72rem * var(--panel-text-scale));
+}
+
+/* Global slim-header display mode.
+   Panels opt in individually through Advanced Options. */
+body.streamer-mode.streamer-slim-headers .hud-panel.slim-header-enabled .hud-title{
+  min-height:10px;
+  height:10px;
+  padding:0 10px;
+  overflow:hidden;
+  border-bottom:1px solid rgba(53,194,255,.12);
+}
+body.streamer-mode.streamer-slim-headers .hud-panel.slim-header-enabled .hud-title{
+  color:transparent;
+  text-shadow:none;
+}
+body.streamer-mode.streamer-slim-headers .hud-panel.slim-header-enabled .hud-title > *{
+  visibility:hidden;
+}
+body.streamer-mode.streamer-slim-headers .hud-panel.slim-header-enabled .hud-title::before{
+  top:3px;
+}
+
+body.streamer-mode.streamer-slim-headers .hud-panel[data-panel-id="recommendedHunt"].slim-header-enabled{
+  min-height:62px;
+}
+body.streamer-mode.streamer-slim-headers .hud-panel[data-panel-id="combatTelemetry"].slim-header-enabled{
+  min-height:72px;
+}
+.hud-stat{
+  min-width:0;
+  padding:7px 8px;
+  border:1px solid rgba(53,194,255,.17);
+  background:rgba(7,23,37,.46);
+}
+.hud-stat-label{
+  color:#7699ab;
+  font-size:.52rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:3px;
+}
+.hud-stat-value{
+  font-family:"SFMono-Regular",Consolas,monospace;
+  font-size:.76rem;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.hud-stat-value.good{color:var(--success)}
+.hud-stat-value.hof{color:var(--hof)}
+.hud-stat-value.warn{color:var(--warning)}
+.hud-stat-value.accent{color:var(--stream-accent2)}
+
+.hud-top-left{grid-column:1;grid-row:1}
+.hud-top-right{grid-column:3;grid-row:1}
+.hud-bottom-left{grid-column:1;grid-row:3}
+.hud-bottom-right{grid-column:3;grid-row:3}
+.hud-center-bottom{
+  grid-column:2;
+  grid-row:3;
+  justify-self:center;
+  width:min(640px,100%);
+}
+
+/* central recommended target banner */
+.hud-target{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:10px;
+}
+.hud-target-icon{
+  width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;
+  border:1px solid rgba(54,209,122,.55);
+  box-shadow:0 0 14px rgba(54,209,122,.14);
+  font-size:1rem;
+}
+.hud-target-main{
+  min-width:0;
+}
+.hud-target-label{
+  color:#6e96a9;
+  font-size:.53rem;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+.hud-target-name{
+  color:var(--success);
+  font-size:.94rem;
+  font-weight:900;
+  text-transform:uppercase;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.hud-target-hour{
+  font:900 .72rem "SFMono-Regular",Consolas,monospace;
+  color:var(--stream-accent2);
+}
+
+/* compact telemetry rail for future data */
+.hud-telemetry{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:6px;
+}
+.hud-telemetry .hud-stat{
+  text-align:center;
+  opacity:.8;
+}
+.hud-placeholder{
+  color:#527487!important;
+}
+
+/* subtle scanner decorations */
+.hud-corner{
+  position:absolute;
+  width:84px;
+  height:84px;
+  opacity:.42;
+}
+.hud-corner.tl{top:0;left:0;border-top:2px solid var(--accent);border-left:2px solid var(--accent)}
+.hud-corner.tr{top:0;right:0;border-top:2px solid var(--accent);border-right:2px solid var(--accent)}
+.hud-corner.bl{bottom:0;left:0;border-bottom:2px solid var(--accent);border-left:2px solid var(--accent)}
+.hud-corner.br{bottom:0;right:0;border-bottom:2px solid var(--accent);border-right:2px solid var(--accent)}
+
+.hud-scanline{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+.hud-scanline::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(125,227,255,.24),transparent);
+  animation:hudScan 8s linear infinite;
+}
+@keyframes hudScan{
+  from{top:0}
+  to{top:100%}
+}
+
+/* Optional compact mode for small OBS browser sources */
+@media(max-width:1000px){
+  .streamer-hud-shell{
+    grid-template-columns:minmax(220px,290px) 1fr minmax(220px,290px);
+  }
+  .hud-gauge-row{
+    grid-template-columns:repeat(3,76px);
+    gap:8px;
+  }
+  .hud-gauge{width:76px;height:76px}
+  .hud-gauge-value{font-size:.69rem}
+}
+
+/* Streamer layout editing */
+body.streamer-mode #streamerHud{
+  pointer-events:auto;
+}
+body.streamer-mode .streamer-hud-shell{
+  display:block;
+  position:absolute;
+  inset:18px;
+}
+body.streamer-mode .hud-panel{
+  position:absolute;
+  margin:0;
+  min-width:220px;
+  min-height:110px;
+  resize:both;
+  overflow:auto;
+  pointer-events:auto;
+}
+body.streamer-mode .hud-panel[data-panel-id="globalTelemetry"]{
+  min-width:150px;
+}
+body.streamer-mode .hud-panel.dragging{
+  opacity:.92;
+  box-shadow:0 0 32px rgba(53,194,255,.28);
+}
+body.streamer-mode .hud-panel .hud-title{
+  cursor:move;
+  user-select:none;
+}
+body.streamer-mode .hud-panel.hidden-by-user{
+  display:none!important;
+}
+
+/* Default panel positions for streamer mode before the user customizes them */
+body.streamer-mode .hud-top-left{
+  left:0; top:0; width:330px;
+}
+body.streamer-mode .hud-top-right{
+  right:0; top:0; width:330px;
+}
+body.streamer-mode .hud-bottom-left{
+  left:0; bottom:0; width:330px;
+}
+body.streamer-mode .hud-bottom-right{
+  right:0; bottom:0; width:330px;
+}
+body.streamer-mode .hud-center-bottom{
+  left:50%; bottom:0;
+  transform:translateX(-50%);
+  width:min(640px,calc(100% - 720px));
+}
+
+/* Custom streamer context menu */
+.streamer-context-menu{
+  display:none;
+  position:fixed;
+  z-index:9000;
+  min-width:190px;
+  background:rgba(var(--stream-panel-bg),.97);
+  border:1px solid rgba(53,194,255,.5);
+  box-shadow:0 12px 30px rgba(0,0,0,.45), inset 0 0 20px rgba(53,194,255,.05);
+  border-radius:8px;
+  padding:5px;
+  backdrop-filter:blur(8px);
+}
+.streamer-context-menu.show{display:block}
+.streamer-context-item{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:var(--text);
+  text-align:left;
+  padding:8px 9px;
+  border-radius:6px;
+  font-size:.72rem;
+  font-weight:700;
+}
+.streamer-context-item:hover{
+  background:rgba(53,194,255,.12);
+  color:var(--stream-accent2);
+}
+.streamer-context-item.danger:hover{
+  background:rgba(255,95,103,.12);
+  color:var(--danger);
+}
+.streamer-context-sep{
+  height:1px;
+  margin:4px 2px;
+  background:rgba(53,194,255,.14);
+}
+
+/* Panel manager */
+.streamer-panel-manager,
+.streamer-advanced-panel{
+  display:none;
+  position:fixed;
+  z-index:8800;
+  top:70px;
+  right:24px;
+  width:320px;
+  max-height:calc(100vh - 100px);
+  overflow:auto;
+  background:
+    linear-gradient(180deg,rgba(6,20,32,.97),rgba(4,12,21,.93)),
+    radial-gradient(circle at 20% 0%,rgba(53,194,255,.10),transparent 48%);
+  border:1px solid rgba(74,203,255,.54);
+  clip-path:polygon(0 10px,10px 0,calc(100% - 22px) 0,100% 22px,100% 100%,14px 100%,0 calc(100% - 14px));
+  box-shadow:
+    inset 0 0 22px rgba(53,194,255,.07),
+    0 0 28px rgba(0,0,0,.42);
+  backdrop-filter:blur(8px);
+  pointer-events:auto;
+}
+.streamer-panel-manager.show,
+.streamer-advanced-panel.show{display:block}
+.streamer-panel-manager-head{
+  cursor:move;
+  user-select:none;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  padding:9px 12px 7px;
+  border-bottom:1px solid rgba(53,194,255,.18);
+  color:var(--stream-accent2);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-size:.63rem;
+  font-weight:900;
+  position:relative;
+}
+.streamer-panel-manager-head::before{
+  content:"";
+  position:absolute;
+  top:5px;
+  left:14px;
+  width:72px;
+  height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent);
+  opacity:.8;
+}
+.streamer-panel-manager-title{
+  color:var(--stream-accent2);
+  font-size:.63rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+.streamer-panel-list{
+  padding:8px;
+}
+.streamer-panel-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:8px;
+  border:1px solid rgba(53,194,255,.12);
+  background:rgba(7,23,37,.5);
+  margin-bottom:6px;
+  border-radius:7px;
+}
+.streamer-panel-row label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:.72rem;
+  font-weight:700;
+  cursor:pointer;
+}
+.streamer-panel-row input{
+  width:16px;
+  height:16px;
+  min-height:auto;
+}
+.streamer-panel-actions{
+  display:flex;
+  gap:6px;
+  padding:8px;
+  border-top:1px solid rgba(53,194,255,.14);
+}
+.streamer-mini-btn{
+  flex:1;
+  border:1px solid var(--border);
+  background:#0b1d2e;
+  color:var(--text);
+  border-radius:6px;
+  padding:7px;
+  font-size:.68rem;
+  font-weight:800;
+}
+.streamer-mini-btn:hover{border-color:var(--accent);color:var(--stream-accent2)}
+
+.streamer-panel-row-main{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  width:100%;
+}
+.streamer-panel-config-btn{
+  border:1px solid rgba(53,194,255,.25);
+  background:rgba(7,23,37,.72);
+  color:var(--stream-accent2);
+  border-radius:6px;
+  padding:5px 7px;
+  font-size:.62rem;
+  font-weight:900;
+}
+.streamer-panel-config-btn:hover{
+  border-color:var(--accent);
+  background:rgba(53,194,255,.12);
+}
+.streamer-option-section{
+  padding:10px 11px;
+  border-bottom:1px solid rgba(53,194,255,.12);
+}
+.streamer-option-section:last-child{border-bottom:0}
+.streamer-option-title{
+  color:var(--stream-accent2);
+  font-size:.62rem;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-weight:900;
+  margin-bottom:7px;
+}
+.streamer-option-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.streamer-option-toggle{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 8px;
+  border:1px solid rgba(53,194,255,.12);
+  background:rgba(7,23,37,.48);
+  border-radius:6px;
+  font-size:.68rem;
+  font-weight:700;
+  color:var(--text);
+}
+.streamer-option-toggle input{
+  width:15px;
+  height:15px;
+  min-height:auto;
+}
+.streamer-option-note{
+  color:var(--muted);
+  font-size:.61rem;
+  line-height:1.4;
+  margin-top:6px;
+}
+.streamer-range-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+  padding:7px 8px;
+  border:1px solid rgba(53,194,255,.12);
+  background:rgba(7,23,37,.48);
+  border-radius:6px;
+}
+.streamer-range-row label{
+  grid-column:1/-1;
+  color:var(--text);
+  font-size:.68rem;
+  font-weight:700;
+}
+.streamer-range-row input[type="range"]{
+  width:100%;
+  min-height:auto;
+  padding:0;
+}
+.streamer-range-value{
+  min-width:44px;
+  text-align:right;
+  color:var(--stream-accent2);
+  font:900 .66rem "SFMono-Regular",Consolas,monospace;
+}
+.hud-metric-hidden{
+  display:none!important;
+}
+
+.streamer-resize-hint{
+  position:absolute;
+  right:4px;
+  bottom:3px;
+  color:rgba(125,227,255,.45);
+  font-size:.55rem;
+  pointer-events:none;
+}
+
+/* Minimal cyber-blue scrollbars for Streamer Mode only */
+body.streamer-mode #streamerHud *,
+body.streamer-mode .streamer-panel-manager,
+body.streamer-mode .streamer-advanced-panel,
+body.streamer-mode .hud-panel{
+  scrollbar-width:thin;
+  scrollbar-color:rgba(53,194,255,.55) rgba(var(--stream-panel-bg),.18);
+}
+
+body.streamer-mode #streamerHud *::-webkit-scrollbar,
+body.streamer-mode .streamer-panel-manager::-webkit-scrollbar,
+body.streamer-mode .streamer-advanced-panel::-webkit-scrollbar,
+body.streamer-mode .hud-panel::-webkit-scrollbar{
+  width:5px;
+  height:5px;
+}
+
+body.streamer-mode #streamerHud *::-webkit-scrollbar-track,
+body.streamer-mode .streamer-panel-manager::-webkit-scrollbar-track,
+body.streamer-mode .streamer-advanced-panel::-webkit-scrollbar-track,
+body.streamer-mode .hud-panel::-webkit-scrollbar-track{
+  background:rgba(4,12,21,.16);
+  border-left:1px solid rgba(53,194,255,.08);
+}
+
+body.streamer-mode #streamerHud *::-webkit-scrollbar-thumb,
+body.streamer-mode .streamer-panel-manager::-webkit-scrollbar-thumb,
+body.streamer-mode .streamer-advanced-panel::-webkit-scrollbar-thumb,
+body.streamer-mode .hud-panel::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,rgba(125,227,255,.78),rgba(35,145,190,.62));
+  border:1px solid rgba(125,227,255,.38);
+  border-radius:999px;
+  box-shadow:0 0 6px rgba(53,194,255,.18);
+}
+
+body.streamer-mode #streamerHud *::-webkit-scrollbar-thumb:hover,
+body.streamer-mode .streamer-panel-manager::-webkit-scrollbar-thumb:hover,
+body.streamer-mode .streamer-advanced-panel::-webkit-scrollbar-thumb:hover,
+body.streamer-mode .hud-panel::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,rgba(160,238,255,.95),rgba(53,194,255,.82));
+}
+
+body.streamer-mode #streamerHud *::-webkit-scrollbar-corner,
+body.streamer-mode .streamer-panel-manager::-webkit-scrollbar-corner,
+body.streamer-mode .streamer-advanced-panel::-webkit-scrollbar-corner,
+body.streamer-mode .hud-panel::-webkit-scrollbar-corner{
+  background:transparent;
+}
+
+/* =========================================================
+   OPTIONAL PARSING / SOURCE HUD PANEL
+   Hidden by default via visibility state in app.js.
+   ========================================================= */
+body.streamer-mode .hud-panel[data-panel-id="parsingSource"]{
+  left:50%;
+  top:22px;
+  width:390px;
+  min-width:310px;
+  min-height:205px;
+  transform:translateX(-50%);
+}
+body.streamer-mode .hud-panel[data-panel-id="parsingSource"].hidden-by-user{
+  display:none!important;
+}
+.streamer-source-content{
+  display:grid;
+  gap:9px;
+}
+.streamer-source-identity{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.streamer-source-field{
+  min-width:0;
+  display:grid;
+  gap:4px;
+}
+.streamer-source-field>span,
+.streamer-source-status span{
+  color:rgba(207,230,242,.72);
+  font-size:calc(.62rem * var(--panel-text-scale,1));
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+body.streamer-mode .streamer-source-field input{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  padding:7px 8px;
+  border:1px solid rgba(113,190,222,.28);
+  border-radius:5px;
+  outline:none;
+  background:rgba(0,0,0,.28);
+  color:#f2fbff;
+  font:700 calc(.74rem * var(--panel-text-scale,1)) Inter,ui-sans-serif,system-ui,sans-serif;
+}
+body.streamer-mode .streamer-source-field input:focus{
+  border-color:var(--stream-accent);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--stream-accent) 16%,transparent);
+}
+.streamer-source-status{
+  display:grid;
+  grid-template-columns:1.4fr .8fr;
+  gap:7px;
+}
+.streamer-source-status>div{
+  min-width:0;
+  padding:7px 8px;
+  border:1px solid rgba(113,190,222,.16);
+  border-radius:5px;
+  background:rgba(0,0,0,.20);
+}
+.streamer-source-status b{
+  display:block;
+  margin-top:3px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#f3fbff;
+  font-size:calc(.72rem * var(--panel-text-scale,1));
+  font-weight:800;
+}
+.streamer-source-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.streamer-source-actions .streamer-mini-btn{
+  min-height:34px;
+  font-size:calc(.70rem * var(--panel-text-scale,1));
+  font-weight:800;
+}
+.streamer-source-actions .source-primary{
+  border-color:color-mix(in srgb,var(--stream-accent) 55%,transparent);
+  color:var(--stream-accent2);
+}
+.streamer-source-note{
+  margin-top:0!important;
+  line-height:1.4;
+}
+@media(max-width:680px){
+  .streamer-source-identity,
+  .streamer-source-status,
+  .streamer-source-actions{
+    grid-template-columns:1fr;
+  }
+}
+
+
+/* =========================================================
+   STREAMER TEAM PANELS
+   Off by default through app visibility preferences.
+   ========================================================= */
+body.streamer-mode .hud-panel[data-panel-id="teamControl"]{
+  left:20px;
+  top:360px;
+  width:430px;
+  min-width:330px;
+  min-height:260px;
+}
+body.streamer-mode .hud-panel[data-panel-id="teamTotals"]{
+  right:20px;
+  top:360px;
+  width:360px;
+  min-width:300px;
+}
+body.streamer-mode .hud-panel[data-panel-id="teamMembers"]{
+  right:20px;
+  bottom:20px;
+  width:390px;
+  min-width:320px;
+  min-height:240px;
+}
+body.streamer-mode .hud-panel[data-panel-id="teamControl"].hidden-by-user,
+body.streamer-mode .hud-panel[data-panel-id="teamTotals"].hidden-by-user,
+body.streamer-mode .hud-panel[data-panel-id="teamMembers"].hidden-by-user{
+  display:none!important;
+}
+
+.streamer-team-control-content{
+  display:grid;
+  gap:9px;
+}
+.streamer-team-control-grid{
+  display:grid;
+  grid-template-columns:1.3fr .8fr .8fr;
+  gap:7px;
+}
+body.streamer-mode .streamer-team-control-grid select{
+  width:100%;
+  min-height:34px;
+  padding:6px 7px;
+  border:1px solid rgba(113,190,222,.28);
+  border-radius:5px;
+  background:rgba(0,0,0,.28);
+  color:#f2fbff;
+  font:700 calc(.72rem * var(--panel-text-scale,1)) Inter,ui-sans-serif,system-ui,sans-serif;
+}
+.streamer-team-actions{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
+.streamer-team-actions .danger-mini{
+  border-color:rgba(255,105,120,.4)!important;
+  color:#ffc2c9!important;
+}
+.streamer-public-room-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:7px;
+  padding-top:3px;
+}
+.streamer-public-room-head>span{
+  color:rgba(207,230,242,.72);
+  font-size:calc(.62rem * var(--panel-text-scale,1));
+  font-weight:800;
+  text-transform:uppercase;
+}
+.stream-public-team-list{
+  min-height:70px;
+  max-height:150px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+.stream-public-room-card{
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:8px;
+  padding:7px 8px;
+  border:1px solid rgba(113,190,222,.18);
+  border-radius:5px;
+  background:rgba(0,0,0,.20);
+  color:#eefaff;
+  cursor:pointer;
+  text-align:left;
+}
+.stream-public-room-card:hover{
+  border-color:var(--stream-accent);
+  background:rgba(0,0,0,.34);
+}
+.stream-public-room-card span{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.stream-public-room-card b{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:calc(.71rem * var(--panel-text-scale,1));
+}
+.stream-public-room-card small{
+  color:rgba(207,230,242,.62);
+  font-size:calc(.57rem * var(--panel-text-scale,1));
+}
+.stream-public-room-card strong{
+  font:800 calc(.72rem * var(--panel-text-scale,1)) "SFMono-Regular",Consolas,monospace;
+}
+.stream-public-room-card code{
+  color:var(--stream-accent2);
+  font:800 calc(.66rem * var(--panel-text-scale,1)) "SFMono-Regular",Consolas,monospace;
+}
+
+.team-total-stat-grid{
+  grid-template-columns:repeat(3,1fr)!important;
+}
+.stream-team-member-cards{
+  max-height:340px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.stream-team-member-card{
+  padding:8px;
+  border:1px solid rgba(113,190,222,.16);
+  border-radius:6px;
+  background:rgba(0,0,0,.22);
+}
+.stream-team-member-head,
+.stream-team-member-head>span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.stream-team-member-head{
+  justify-content:space-between;
+}
+.stream-team-member-head b{
+  color:#f4fbff;
+  font-size:calc(.74rem * var(--panel-text-scale,1));
+}
+.stream-team-member-head small{
+  padding:1px 4px;
+  border-radius:3px;
+  background:rgba(79,195,247,.14);
+  color:var(--stream-accent2);
+  font-size:calc(.50rem * var(--panel-text-scale,1));
+  font-weight:900;
+}
+.stream-team-member-head em{
+  color:rgba(207,230,242,.62);
+  font-size:calc(.56rem * var(--panel-text-scale,1));
+  font-style:normal;
+  text-transform:uppercase;
+}
+.stream-team-member-sub{
+  margin-top:2px;
+  color:rgba(207,230,242,.60);
+  font-size:calc(.58rem * var(--panel-text-scale,1));
+}
+.stream-team-member-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:4px;
+  margin-top:6px;
+}
+.stream-team-member-metrics span{
+  padding:4px 5px;
+  border:1px solid rgba(113,190,222,.12);
+  border-radius:4px;
+  background:rgba(0,0,0,.17);
+}
+.stream-team-member-metrics small{
+  display:block;
+  color:rgba(207,230,242,.56);
+  font-size:calc(.50rem * var(--panel-text-scale,1));
+}
+.stream-team-member-metrics b{
+  display:block;
+  margin-top:1px;
+  color:#fff;
+  font:800 calc(.64rem * var(--panel-text-scale,1)) "SFMono-Regular",Consolas,monospace;
+}
+.stream-team-member-loadout{
+  margin-top:5px;
+  color:rgba(220,238,247,.76);
+  font-size:calc(.58rem * var(--panel-text-scale,1));
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+@media(max-width:680px){
+  .streamer-team-control-grid,
+  .streamer-team-actions{
+    grid-template-columns:1fr;
+  }
+  .team-total-stat-grid{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
+
+
+/* Team performance additions */
+body.streamer-mode .hud-panel[data-panel-id="teamTotals"]{
+  width:390px;
+  min-width:330px;
+}
+.stream-team-performance{
+  display:grid;
+  gap:6px;
+}
+.stream-team-section-label,
+.stream-team-member-row-title{
+  color:rgba(207,230,242,.62);
+  font-size:calc(.56rem * var(--panel-text-scale,1));
+  font-weight:850;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+.stream-team-section-label:not(:first-child){
+  margin-top:2px;
+}
+.stream-member-six{
+  grid-template-columns:repeat(3,1fr)!important;
+}
+.stream-member-four{
+  grid-template-columns:repeat(4,1fr)!important;
+}
+.stream-team-member-row-title{
+  margin-top:6px;
+}
+.stream-team-member-metrics .success{color:#89ffc1!important}
+.stream-team-member-metrics .danger{color:#ff9aa5!important}
+
+
+/* =========================================================
+   V7.8 OBS OVERLAY — PREVENT ACCIDENTAL TEXT HIGHLIGHTING
+   ========================================================= */
+body.streamer-mode #streamerHud,
+body.streamer-mode #streamerHud .hud-panel,
+body.streamer-mode #streamerHud .hud-panel *{
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+/* Do not render browser selection colors over the overlay. */
+body.streamer-mode #streamerHud ::selection{
+  background:transparent;
+  color:inherit;
+}
+body.streamer-mode #streamerHud ::-moz-selection{
+  background:transparent;
+  color:inherit;
+}
+
+/* Interactive configuration fields still need normal editing behavior. */
+body.streamer-mode #streamerHud input,
+body.streamer-mode #streamerHud textarea,
+body.streamer-mode #streamerHud select,
+body.streamer-mode #streamerHud [contenteditable="true"]{
+  -webkit-user-select:text;
+  user-select:text;
+}
+
+
+/* =========================================================
+   V7.9 OBS APPEARANCE — SCAN LINE TOGGLE
+   ========================================================= */
+body.streamer-mode #streamerHud.scanline-disabled .hud-scanline{
+  display:none!important;
+}
+
+
+/* =========================================================
+   V8.5 OBS EQUIPPED LOADOUT PANEL
+   ========================================================= */
+body.streamer-mode .hud-panel[data-panel-id="loadoutPanel"]{
+  left:470px;
+  top:22px;
+  width:360px;
+  min-width:300px;
+  min-height:185px;
+}
+body.streamer-mode .hud-panel[data-panel-id="loadoutPanel"].hidden-by-user{
+  display:none!important;
+}
+.stream-loadout-content{
+  display:grid;
+  gap:8px;
+}
+.stream-loadout-name-block{
+  min-width:0;
+  padding:7px 8px;
+  border:1px solid rgba(113,190,222,.16);
+  border-radius:5px;
+  background:rgba(0,0,0,.20);
+}
+.stream-loadout-kicker{
+  display:block;
+  color:rgba(207,230,242,.55);
+  font-size:calc(.50rem * var(--panel-text-scale,1));
+  font-weight:850;
+  letter-spacing:.08em;
+}
+.stream-loadout-name-block b{
+  display:block;
+  margin-top:2px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#f4fbff;
+  font-size:calc(.80rem * var(--panel-text-scale,1));
+  font-weight:850;
+}
+.stream-loadout-weapon{
+  display:block;
+  margin-top:2px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--stream-accent2);
+  font-size:calc(.63rem * var(--panel-text-scale,1));
+  font-weight:750;
+}
+.stream-loadout-stat-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+@media(max-width:700px){
+  .stream-loadout-stat-grid{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
+
+
+/* =========================================================
+   V8.7 OBS CONTEXT MENU — MATCH HUD PANEL BACKGROUND
+   ========================================================= */
+body.streamer-mode #streamerContextMenu,
+body.streamer-mode .streamer-context-menu{
+  background:rgba(var(--stream-panel-bg,5,16,27),var(--stream-panel-opacity,.80))!important;
+  border:1px solid rgba(113,190,222,.24)!important;
+  box-shadow:0 12px 34px rgba(0,0,0,.42)!important;
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+
+body.streamer-mode .streamer-context-item{
+  background:transparent;
+}
+
+body.streamer-mode .streamer-context-item:hover{
+  background:rgba(255,255,255,.07)!important;
+}

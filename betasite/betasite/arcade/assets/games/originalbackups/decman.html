@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DECGuy Arcade Cabinet</title>
+    <style>
+        :root {
+            --cabinet-green: #526615;
+            --cabinet-dark-green: #2d3b0b;
+            --cabinet-yellow: #cbd631;
+            --t-molding: #ff1a1a;
+        }
+
+        body {
+            background-color: #0c0f12;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', Courier, monospace;
+            color: #fff;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        /* Arcade Cabinet Wrapper */
+        .arcade-container {
+            position: relative;
+            width: 500px;
+            background: linear-gradient(135deg, var(--cabinet-dark-green), var(--cabinet-green));
+            border-left: 12px solid var(--t-molding);
+            border-right: 12px solid var(--t-molding);
+            border-radius: 20px 20px 10px 10px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 30px;
+            user-select: none;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-style: preserve-3d;
+        }
+
+        /* Fullscreen "Lean In" State */
+        .arcade-container.lean-in {
+            transform: scale(1.6) translateY(120px) translateZ(150px) rotateX(5deg);
+        }
+
+        /* Tilt Screen Shake Animation */
+        @keyframes cabinet-shake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(0px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(2px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(2px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .arcade-container.tilt-active {
+            animation: cabinet-shake 0.4s infinite !important;
+        }
+
+        /* Marquee / Header */
+        .marquee {
+            width: 100%;
+            height: 90px;
+            background: #111;
+            border-bottom: 6px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px 8px 0 0;
+        }
+        .marquee-art {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, var(--cabinet-yellow) 10%, transparent 70%);
+            opacity: 0.3;
+        }
+        .marquee h1 {
+            font-size: 3rem;
+            margin: 0;
+            font-family: 'Impact', sans-serif;
+            color: var(--cabinet-yellow);
+            text-shadow: 0 0 10px #ffea00, 3px 3px 0px #000;
+            letter-spacing: 4px;
+            z-index: 2;
+            font-style: italic;
+        }
+
+        /* Screen Bezel */
+        .bezel {
+            width: 90%;
+            background: #151515;
+            margin-top: 15px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: inset 0 0 20px #000;
+            box-sizing: border-box;
+            border-bottom: 4px solid #111;
+        }
+
+        /* CRT Display Wrapper */
+        .screen-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #050505;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,1), 0 0 10px rgba(0, 255, 0, 0.1);
+            border: 4px solid #222;
+        }
+
+        /* Canvas Game Display */
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* CRT Effects */
+        .crt-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .crt-curve {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.9);
+            pointer-events: none;
+            z-index: 11;
+        }
+        .crt-flicker {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(18, 16, 16, 0.02);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 12;
+            animation: flicker 0.15s infinite;
+        }
+        @keyframes flicker {
+            0% { opacity: 0.18; }
+            50% { opacity: 0.22; }
+            100% { opacity: 0.18; }
+        }
+
+        /* Control Panel */
+        .control-panel {
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(to bottom, #1e2604, #0b0e01);
+            border-top: 6px solid #000;
+            border-bottom: 6px solid #000;
+            margin-top: 15px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 10px rgba(0,0,0,0.5);
+            transform-style: preserve-3d;
+        }
+
+        .cp-art {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--cabinet-yellow);
+            opacity: 0.2;
+            filter: blur(5px);
+            pointer-events: none;
+        }
+        .cp-art.left { left: 30px; }
+        .cp-art.right { right: 30px; }
+
+        /* The Joystick */
+        .joystick-base {
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle, #333 40%, #111 70%);
+            border-radius: 50%;
+            position: relative;
+            border: 4px solid #000;
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.6);
+        }
+        .joystick-shaft {
+            width: 14px;
+            height: 14px;
+            background: linear-gradient(to right, #777, #ddd, #555);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.08s ease;
+            z-index: 2;
+        }
+        .joystick-knob {
+            width: 32px;
+            height: 32px;
+            background: radial-gradient(circle at 10px 10px, #ff3333, #aa0000);
+            border-radius: 50%;
+            position: absolute;
+            top: -9px; left: -9px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 -4px 6px rgba(0,0,0,0.4);
+        }
+
+        /* Action Buttons */
+        .lean-btn {
+            position: absolute;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 15px 15px, #33aaff, #0055aa);
+            border-radius: 50%;
+            border: 4px solid #000;
+            box-shadow: 0 4px 0 #002255, 0 6px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+            /* Prevents the 3D plane from intercepting the hit-box during tilt */
+            transform: translateZ(20px);
+            transition: transform 0.1s, box-shadow 0.1s;
+            z-index: 15;
+        }
+        .lean-btn:active, .lean-btn.forced-active {
+            /* Keep it lifted in Z-space while pressing down on Y */
+            transform: translateY(4px) translateZ(20px);
+            box-shadow: 0 0px 0 #002255, 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Coin Door Simulation */
+        .coin-door {
+            width: 130px;
+            height: 110px;
+            background: #1e1e1e;
+            margin-top: 20px;
+            border: 4px solid #111;
+            border-radius: 5px;
+            box-shadow: inset 0 0 10px #000, 0 4px 10px rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        .coin-slot {
+            width: 35px;
+            height: 55px;
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+        .coin-entry {
+            width: 4px;
+            height: 25px;
+            background: #ff5500;
+            position: absolute;
+            top: 10px; left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 5px #ff5500;
+        }
+        .coin-return {
+            width: 20px;
+            height: 15px;
+            background: #222;
+            border: 1px solid #000;
+            position: absolute;
+            bottom: 5px; left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* UI Overlays */
+        .ui-panel {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border: 2px solid var(--cabinet-yellow);
+            border-radius: 10px;
+            width: 75%;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+        .ui-panel h2 { color: #ff3333; margin: 0 0 10px 0; font-size: 1.4rem;}
+        .ui-panel p { margin: 5px 0; font-size: 0.85rem;}
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-art"></div>
+            <h1>DECGuy</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container">
+                <div class="crt-overlay"></div>
+                <div class="crt-curve"></div>
+                <div class="crt-flicker"></div>
+                
+                <div id="start-panel" class="ui-panel">
+                    <h2 style="color: var(--cabinet-yellow); animation: flicker 0.8s infinite;">INSERT COIN</h2>
+                    <p>Click the Glowing Red Coin Slot below to load software system.</p>
+                    <p id="menu-hi-score" style="color: #00ffff; margin-top: 10px;">HI-SCORE: 00000</p>
+                    <p style="color: #55ff55; margin-top:10px; font-size: 0.75rem;">Controls: ARROW KEYS / WASD</p>
+                    <p style="color: #33aaff; font-size: 0.7rem; margin-top: 5px;">Blue CP Button / 'L' = Zoom</p>
+                    <p style="color: #ff3333; font-size: 0.7rem; font-weight: bold; margin-top: 5px;">Tap ENTER 3x to TILT machine!</p>
+                </div>
+
+                <div id="gameover-panel" class="ui-panel hidden">
+                    <h2>SYSTEM FAILURE</h2>
+                    <p id="final-score" style="font-weight: bold; color: #fff;">SCORE: 0</p>
+                    <p id="hi-score-alert" style="color: #ff00ff; font-weight: bold;" class="hidden">NEW LOCAL RECORD!</p>
+                    <p style="color: var(--cabinet-yellow); font-size: 0.75rem; margin-top: 10px;">Click Coin Slot to cycle credits.</p>
+                </div>
+
+                <div id="complete-panel" class="ui-panel hidden">
+                    <h2 id="complete-title" style="color: #55ff55;">LEVEL CLEAR</h2>
+                    <p id="next-level-text">PREPARING LAYER 2...</p>
+                    <p id="missed-points-text" style="color: #ff8800; font-weight: bold; margin-top: 10px; font-size: 0.8rem;"></p>
+                </div>
+
+                <canvas id="gameCanvas" width="448" height="496"></canvas>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="cp-art left"></div>
+            <div class="joystick-base">
+                <div class="joystick-shaft" id="joystickShaft">
+                    <div class="joystick-knob"></div>
+                </div>
+            </div>
+            <div class="lean-btn" id="zoomBtn">LEAN (L)</div>
+            <div class="cp-art right"></div>
+        </div>
+
+        <div class="coin-door">
+            <div class="coin-slot" id="coinSlotBtn">
+                <div class="coin-entry"></div>
+                <div class="coin-return"></div>
+            </div>
+            <div class="coin-slot" style="opacity: 0.6; cursor: default;">
+                <div class="coin-entry" style="background: #331100; box-shadow: none;"></div>
+                <div class="coin-return"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const cabinet = document.getElementById('cabinet');
+        const zoomBtn = document.getElementById('zoomBtn');
+        const joystick = document.getElementById('joystickShaft');
+        const coinSlot = document.getElementById('coinSlotBtn');
+        const startPanel = document.getElementById('start-panel');
+        const gameoverPanel = document.getElementById('gameover-panel');
+        const completePanel = document.getElementById('complete-panel');
+        const completeTitle = document.getElementById('complete-title');
+        const finalScoreText = document.getElementById('final-score');
+        const hiScoreAlert = document.getElementById('hi-score-alert');
+        const menuHiScore = document.getElementById('menu-hi-score');
+        const nextLevelText = document.getElementById('next-level-text');
+        const missedPointsText = document.getElementById('missed-points-text');
+
+        // Audio System
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep(freq, duration, type="square") {
+            if (!audioCtx) return;
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        const TILE_SIZE = 16;
+        const MAP_COLS = 28;
+        const MAP_ROWS = 31;
+
+        const mapData = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+            [1,2,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,2,1],
+            [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1],
+            [1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,0,1,1,1,1,1,3,1,1,3,1,1,1,1,1,0,1,1,1,1,1,1],
+            [3,3,3,3,3,1,0,1,1,1,1,1,3,1,1,3,1,1,1,1,1,0,1,3,3,3,3,3],
+            [3,3,3,3,3,1,0,1,1,3,3,3,3,3,3,3,3,3,3,1,1,0,1,3,3,3,3,3],
+            [3,3,3,3,3,1,0,1,1,3,1,1,1,5,5,1,1,1,3,1,1,0,1,3,3,3,3,3],
+            [1,1,1,1,1,1,0,1,1,3,1,4,4,4,4,4,4,1,3,1,1,0,1,1,1,1,1,1],
+            [3,3,3,3,3,3,0,3,3,3,1,4,4,4,4,4,4,1,3,3,3,0,3,3,3,3,3,3],
+            [1,1,1,1,1,1,0,1,1,3,1,4,4,4,4,4,4,1,3,1,1,0,1,1,1,1,1,1],
+            [3,3,3,3,3,1,0,1,1,3,1,1,1,1,1,1,1,1,3,1,1,0,1,3,3,3,3,3],
+            [3,3,3,3,3,1,0,1,1,3,3,3,3,3,3,3,3,3,3,1,1,0,1,3,3,3,3,3],
+            [3,3,3,3,3,1,0,1,1,3,1,1,1,1,1,1,1,1,3,1,1,0,1,3,3,3,3,3],
+            [1,1,1,1,1,1,0,1,1,3,1,1,1,1,1,1,1,1,3,1,1,0,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+            [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+            [1,2,0,0,1,1,0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,1,1,0,0,2,1],
+            [1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,0,1,1,1],
+            [1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,0,1,1,1],
+            [1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1],
+            [1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        let currentMap = [];
+        let score = 0;
+        let highscore = localStorage.getItem('decman_hi') || 0;
+        let currentLevel = 1;
+        let gameOver = true;
+        let gameRunning = false;
+        let totalPellets = 0;
+        let pelletsEaten = 0;
+        
+        let isChallengeLayer = false;
+        let isBossLayer = false;
+        let layerTimer = 0; 
+        let pointsEarnedThisChallenge = 0;
+
+        let enterKeyTimes = [];
+        let tiltActive = false;
+        let tiltTimer = 0;
+
+        let pedBonus = { x: 14, y: 17, spawned: false, active: false, timer: 0 };
+
+        let decman = {
+            x: 13.5 * TILE_SIZE, y: 23 * TILE_SIZE,
+            dirX: 0, dirY: 0, nextDirX: 0, nextDirY: 0,
+            baseSpeed: 2, speed: 2, freezeTimer: 0,
+            hp: 3 
+        };
+
+        let ghosts = [];
+        const ghostColors = ['#ff0000', '#ffb8ff', '#00ffff', '#ffb852', '#a020f0', '#00ff00'];
+
+        let boss = {
+            x: 13.5 * TILE_SIZE, y: 13 * TILE_SIZE,
+            dirX: 1, dirY: 0, speed: 1.2,
+            hp: 3, maxHp: 3, shield: true,
+            projectiles: [], shootCooldown: 0
+        };
+
+        function loadHighScore() {
+            menuHiScore.innerText = "HI-SCORE: " + String(highscore).padStart(5, '0');
+        }
+        loadHighScore();
+
+        function toggleLeanMode() {
+            cabinet.classList.toggle('lean-in');
+            playBeep(600, 0.05, "triangle");
+            zoomBtn.classList.add('forced-active');
+            setTimeout(() => zoomBtn.classList.remove('forced-active'), 100);
+        }
+        
+        // Changed to pointerdown to ensure it triggers perfectly during CSS 3D transforms
+        zoomBtn.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); 
+            e.stopPropagation();
+            toggleLeanMode();
+        });
+
+        const stopScrollKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space", "Enter"];
+        window.addEventListener('keydown', e => {
+            if (stopScrollKeys.includes(e.key)) e.preventDefault();
+            if (e.key === 'l' || e.key === 'L') toggleLeanMode();
+
+            if (e.key === 'Enter') {
+                let now = Date.now();
+                enterKeyTimes.push(now);
+                enterKeyTimes = enterKeyTimes.filter(t => now - t < 1000);
+                if (enterKeyTimes.length >= 3 && gameRunning && !tiltActive) {
+                    triggerTiltMode();
+                }
+            }
+
+            // Developer Override Cheats
+            if (gameRunning) {
+                if (e.key === 'n' || e.key === 'N') {
+                    playBeep(950, 0.15, "sine");
+                    advanceLevel();
+                }
+                if (e.key === 'b' || e.key === 'B') {
+                    let target = prompt("DEVELOPER WARP MATRIX: Enter Target Layer Number:");
+                    let parsed = parseInt(target);
+                    if (!isNaN(parsed) && parsed > 0) {
+                        currentLevel = parsed - 1; 
+                        playBeep(1150, 0.2, "triangle");
+                        advanceLevel();
+                    }
+                }
+            }
+
+            updateNextDirection(e.key);
+        }, {passive: false});
+
+        function triggerTiltMode() {
+            tiltActive = true;
+            tiltTimer = 180; 
+            cabinet.classList.add('tilt-active');
+            playBeep(80, 0.5, "sawtooth");
+            setTimeout(() => playBeep(90, 0.5, "sawtooth"), 150);
+
+            if (!isChallengeLayer && !isBossLayer) {
+                for (let i = 0; i < 15; i++) {
+                    let rx = Math.floor(Math.random() * MAP_COLS);
+                    let ry = Math.floor(Math.random() * MAP_ROWS);
+                    if (currentMap[ry] && currentMap[ry][rx] === 3) {
+                        currentMap[ry][rx] = 0;
+                        totalPellets++;
+                    }
+                }
+            }
+        }
+
+        function updateNextDirection(key) {
+            if (!gameRunning || decman.freezeTimer > 0) return;
+            let dx = 0, dy = 0;
+            if (key === 'ArrowUp' || key === 'w' || key === 'W') { dy = -1; moveJoystick(0, -20); }
+            if (key === 'ArrowDown' || key === 's' || key === 'S') { dy = 1; moveJoystick(0, 20); }
+            if (key === 'ArrowLeft' || key === 'a' || key === 'A') { dx = -1; moveJoystick(-20, 0); }
+            if (key === 'ArrowRight' || key === 'd' || key === 'D') { dx = 1; moveJoystick(20, 0); }
+            
+            if (dx !== 0 || dy !== 0) {
+                decman.nextDirX = dx;
+                decman.nextDirY = dy;
+            }
+        }
+
+        function moveJoystick(x, y) {
+            joystick.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+            setTimeout(() => { joystick.style.transform = 'translate(-50%, -50%)'; }, 120);
+        }
+
+        coinSlot.addEventListener('click', () => {
+            if (!gameRunning) {
+                playBeep(440, 0.1, "sawtooth");
+                setTimeout(() => playBeep(880, 0.15, "sine"), 80);
+                currentLevel = 1;
+                score = 0;
+                startLevel();
+            }
+        });
+
+        function startLevel() {
+            isChallengeLayer = (currentLevel % 3 === 0 && currentLevel % 5 !== 0);
+            isBossLayer = (currentLevel % 5 === 0);
+            
+            initMap();
+            gameOver = false;
+            gameRunning = true;
+            pedBonus.spawned = false;
+            pedBonus.active = false;
+            tiltActive = false;
+            pointsEarnedThisChallenge = 0;
+            cabinet.classList.remove('tilt-active');
+            missedPointsText.innerText = "";
+
+            decman.x = 13.5 * TILE_SIZE;
+            decman.y = 23 * TILE_SIZE;
+            decman.dirX = 0; decman.dirY = 0;
+            decman.nextDirX = 0; decman.nextDirY = 0;
+            decman.freezeTimer = 0;
+            decman.hp = 3; 
+            decman.speed = decman.baseSpeed + (currentLevel * 0.1);
+
+            if (isBossLayer) {
+                boss.x = 13.5 * TILE_SIZE; boss.y = 11 * TILE_SIZE;
+                boss.hp = 3; boss.shield = true;
+                boss.projectiles = []; boss.shootCooldown = 0;
+                boss.speed = 1.4 + (currentLevel * 0.05);
+                ghosts = [];
+            } else if (isChallengeLayer) {
+                ghosts = [
+                    { x: 2 * TILE_SIZE, y: 2 * TILE_SIZE, dirX: 1, dirY: 0, color: ghostColors[0], inside: false },
+                    { x: 25 * TILE_SIZE, y: 2 * TILE_SIZE, dirX: -1, dirY: 0, color: ghostColors[1], inside: false }
+                ];
+                ghosts.forEach(g => { g.speed = 2.4; });
+            } else {
+                ghosts = [
+                    { x: 13.5 * TILE_SIZE, y: 14 * TILE_SIZE, dirX: 0, dirY: -1, color: '#ff0000', inside: true, releaseTime: 0 },
+                    { x: 12 * TILE_SIZE, y: 14 * TILE_SIZE, dirX: 1, dirY: 0, color: '#ffb8ff', inside: true, releaseTime: 120 },
+                    { x: 14 * TILE_SIZE, y: 14 * TILE_SIZE, dirX: -1, dirY: 0, color: '#00ffff', inside: true, releaseTime: 240 },
+                    { x: 15 * TILE_SIZE, y: 14 * TILE_SIZE, dirX: 1, dirY: 0, color: '#ffb852', inside: true, releaseTime: 360 }
+                ];
+                ghosts.forEach(g => { g.speed = 1.3 + (currentLevel * 0.1); g.tickCount = 0; });
+            }
+
+            startPanel.classList.add('hidden');
+            gameoverPanel.classList.add('hidden');
+            completePanel.classList.add('hidden');
+        }
+
+        function initMap() {
+            totalPellets = 0;
+            pelletsEaten = 0;
+
+            if (isChallengeLayer) {
+                layerTimer = 1800; 
+                generateShiftingMaze();
+            } else if (isBossLayer) {
+                currentMap = JSON.parse(JSON.stringify(mapData));
+                for(let r=10; r<=16; r++) {
+                    for(let c=10; c<=17; c++) {
+                        if(currentMap[r][c] === 1) currentMap[r][c] = 3;
+                    }
+                }
+                for (let r = 0; r < MAP_ROWS; r++) {
+                    for (let c = 0; c < MAP_COLS; c++) {
+                        if (currentMap[r][c] === 0) currentMap[r][c] = 3;
+                    }
+                }
+            } else {
+                currentMap = JSON.parse(JSON.stringify(mapData));
+                for (let r = 0; r < MAP_ROWS; r++) {
+                    for (let c = 0; c < MAP_COLS; c++) {
+                        if (currentMap[r][c] === 0 || currentMap[r][c] === 2) totalPellets++;
+                    }
+                }
+            }
+        }
+
+        function generateShiftingMaze() {
+            currentMap = [];
+            let wallPattern = Math.random() > 0.5;
+            for (let r = 0; r < MAP_ROWS; r++) {
+                let row = [];
+                for (let c = 0; c < MAP_COLS; c++) {
+                    if (r === 0 || r === MAP_ROWS - 1 || c === 0 || c === MAP_COLS - 1) {
+                        row.push(1); 
+                    } else {
+                        if (wallPattern) {
+                            row.push((c % 4 === 0 && r > 2 && r < MAP_ROWS - 3) ? 1 : 3);
+                        } else {
+                            row.push((r % 4 === 0 && c > 2 && c < MAP_COLS - 3) ? 1 : 3);
+                        }
+                    }
+                }
+                currentMap.push(row);
+            }
+        }
+
+        function isCollidingWithWall(x, y, isGhost = false) {
+            let buffer = 3;
+            let points = [
+                {x: x + buffer, y: y + buffer},
+                {x: x + TILE_SIZE - buffer, y: y + buffer},
+                {x: x + buffer, y: y + TILE_SIZE - buffer},
+                {x: x + TILE_SIZE - buffer, y: y + TILE_SIZE - buffer}
+            ];
+            for (let p of points) {
+                let cellX = Math.floor(p.x / TILE_SIZE);
+                let cellY = Math.floor(p.y / TILE_SIZE);
+                if (cellX < 0 || cellX >= MAP_COLS || cellY < 0 || cellY >= MAP_ROWS) continue;
+                let tile = currentMap[cellY][cellX];
+                if (tile === 1) return true;
+                if (tile === 5 && !isGhost) return true; 
+            }
+            return false;
+        }
+
+        function getSmartDirection(entity, targetX, targetY, isGhostUser) {
+            let dirs = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}];
+            
+            let currentGridY = Math.floor((entity.y + TILE_SIZE/2) / TILE_SIZE);
+            let currentGridX = Math.floor((entity.x + TILE_SIZE/2) / TILE_SIZE);
+            if (currentGridY === 14 && (currentGridX <= 5 || currentGridX >= 22)) {
+                let straightDir = dirs.filter(d => d.x === entity.dirX && d.y === 0);
+                if (straightDir.length > 0 && !isCollidingWithWall(entity.x + straightDir[0].x * entity.speed, entity.y + straightDir[0].y * entity.speed, isGhostUser)) {
+                    return straightDir[0];
+                }
+            }
+
+            let forwardDirs = dirs.filter(d => !(d.x === -entity.dirX && d.y === -entity.dirY) || (entity.dirX === 0 && entity.dirY === 0));
+            let validDirs = forwardDirs.filter(d => !isCollidingWithWall(entity.x + d.x * 4, entity.y + d.y * 4, isGhostUser));
+            
+            if (validDirs.length === 0) {
+                validDirs = dirs.filter(d => !isCollidingWithWall(entity.x + d.x * 4, entity.y + d.y * 4, isGhostUser));
+            }
+            if (validDirs.length === 0) return {x: 0, y: 0}; 
+
+            validDirs.sort((a, b) => {
+                let nextAX = entity.x + a.x * TILE_SIZE;
+                let nextAY = entity.y + a.y * TILE_SIZE;
+                let nextBX = entity.x + b.x * TILE_SIZE;
+                let nextBY = entity.y + b.y * TILE_SIZE;
+
+                let distA = Math.abs(nextAX - targetX) + Math.abs(nextAY - targetY);
+                let distB = Math.abs(nextBX - targetX) + Math.abs(nextBY - targetY);
+                return distA - distB; 
+            });
+
+            return Math.random() < 0.75 ? validDirs[0] : validDirs[Math.floor(Math.random() * validDirs.length)];
+        }
+
+        function update() {
+            if (gameOver || !gameRunning) return;
+
+            if (decman.freezeTimer > 0) {
+                decman.freezeTimer--;
+                return;
+            }
+
+            if (tiltActive) {
+                tiltTimer--;
+                if (tiltTimer <= 0) {
+                    tiltActive = false;
+                    cabinet.classList.remove('tilt-active');
+                }
+            }
+
+            if (pedBonus.active) {
+                pedBonus.timer--;
+                if (pedBonus.timer <= 0) {
+                    pedBonus.active = false;
+                    decman.speed = decman.baseSpeed + (currentLevel * 0.1);
+                    if (isBossLayer) boss.shield = true;
+                }
+            }
+
+            // --- CHALLENGE MAZE SHIFT ENGINE ---
+            if (isChallengeLayer) {
+                layerTimer--;
+                
+                if (layerTimer % 120 === 0) {
+                    generateShiftingMaze();
+                    playBeep(220, 0.06, "sawtooth");
+                }
+
+                if (layerTimer > 0 && layerTimer % 300 === 0) {
+                    let rx = Math.random() > 0.5 ? 3 * TILE_SIZE : 24 * TILE_SIZE;
+                    let ry = Math.random() > 0.5 ? 3 * TILE_SIZE : 27 * TILE_SIZE;
+                    let newColor = ghostColors[ghosts.length % ghostColors.length];
+                    ghosts.push({ x: rx, y: ry, dirX: 1, dirY: 0, color: newColor, inside: false, speed: 2.3 });
+                    playBeep(420, 0.2, "sawtooth");
+                    score += 250;
+                    pointsEarnedThisChallenge += 250;
+                }
+
+                if (layerTimer <= 0) {
+                    let maxPossibleWavePoints = 1250; 
+                    let missedPoints = maxPossibleWavePoints - pointsEarnedThisChallenge;
+                    if(missedPoints < 0) missedPoints = 0;
+                    missedPointsText.innerText = `TIME UP! YOU MISSED ${missedPoints} BONUS POINTS!`;
+                    advanceLevel();
+                    return;
+                }
+            }
+
+            // Player Movement Engine
+            if (decman.nextDirX !== 0 || decman.nextDirY !== 0) {
+                let checkX = decman.x; let checkY = decman.y;
+                if (decman.nextDirX !== 0) {
+                    let m = decman.y % TILE_SIZE;
+                    if (m < 8) checkY -= m; else checkY += (TILE_SIZE - m);
+                }
+                if (decman.nextDirY !== 0) {
+                    let m = decman.x % TILE_SIZE;
+                    if (m < 8) checkX -= m; else checkX += (TILE_SIZE - m);
+                }
+                if (!isCollidingWithWall(checkX + decman.nextDirX * decman.speed, checkY + decman.nextDirY * decman.speed, false)) {
+                    decman.x = checkX; decman.y = checkY;
+                    decman.dirX = decman.nextDirX; decman.dirY = decman.nextDirY;
+                }
+            }
+
+            if (!isCollidingWithWall(decman.x + decman.dirX * decman.speed, decman.y + decman.dirY * decman.speed, false)) {
+                decman.x += decman.dirX * decman.speed;
+                decman.y += decman.dirY * decman.speed;
+            }
+
+            if (decman.x < -TILE_SIZE) decman.x = canvas.width;
+            if (decman.x > canvas.width) decman.x = -TILE_SIZE;
+
+            // Tile processing
+            let currentTileX = Math.floor((decman.x + TILE_SIZE/2) / TILE_SIZE);
+            let currentTileY = Math.floor((decman.y + TILE_SIZE/2) / TILE_SIZE);
+
+            if (!isChallengeLayer && currentTileX >= 0 && currentTileX < MAP_COLS && currentTileY >= 0 && currentTileY < MAP_ROWS) {
+                let tileValue = currentMap[currentTileY][currentTileX];
+                if (tileValue === 0 || tileValue === 2) {
+                    currentMap[currentTileY][currentTileX] = 3;
+                    pelletsEaten++;
+                    score += tileValue === 2 ? 100 : 10;
+                    playBeep(tileValue === 2 ? 750 : 550, 0.03, "sine");
+
+                    if (tileValue === 2 && isBossLayer) {
+                        pedBonus.active = true;
+                        pedBonus.timer = 500; 
+                        boss.shield = false;
+                        playBeep(850, 0.2, "triangle");
+                    }
+
+                    if (!isChallengeLayer && pelletsEaten === Math.floor(totalPellets / 2)) {
+                        pedBonus.spawned = true;
+                    }
+
+                    if (!isBossLayer && pelletsEaten >= totalPellets) {
+                        advanceLevel();
+                        return;
+                    }
+                }
+            }
+
+            if (pedBonus.spawned && currentTileX === pedBonus.x && currentTileY === pedBonus.y) {
+                pedBonus.spawned = false;
+                pedBonus.active = true;
+                pedBonus.timer = 400; 
+                decman.speed *= 1.35; 
+                score += 500;
+                playBeep(900, 0.3, "triangle");
+            }
+
+            // --- BOSS LAYER SYSTEM ---
+            if (isBossLayer) {
+                boss.shootCooldown++;
+                if (boss.shootCooldown > 80) {
+                    boss.shootCooldown = 0;
+                    boss.projectiles.push({ x: boss.x + 16, y: boss.y + 16, dirX: decman.x > boss.x ? 1 : -1, dirY: decman.y > boss.y ? 1 : -1 });
+                    playBeep(340, 0.08, "sawtooth");
+                }
+
+                if (Math.random() < 0.05 || isCollidingWithWall(boss.x + boss.dirX * boss.speed, boss.y + boss.dirY * boss.speed, true)) {
+                    if (isCollidingWithWall(boss.x + boss.dirX * boss.speed, boss.y + boss.dirY * boss.speed, true)) {
+                        boss.x = Math.round(boss.x / TILE_SIZE) * TILE_SIZE;
+                        boss.y = Math.round(boss.y / TILE_SIZE) * TILE_SIZE;
+                    }
+                    let nextBDir = getSmartDirection(boss, decman.x, decman.y, true);
+                    boss.dirX = nextBDir.x;
+                    boss.dirY = nextBDir.y;
+                }
+
+                boss.x += boss.dirX * boss.speed;
+                boss.y += boss.dirY * boss.speed;
+
+                if (boss.x < -TILE_SIZE) boss.x = canvas.width;
+                if (boss.x > canvas.width) boss.x = -TILE_SIZE;
+
+                boss.projectiles.forEach((p, pIdx) => {
+                    p.x += p.dirX * 4.0; p.y += p.dirY * 4.0;
+                    if(p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+                        boss.projectiles.splice(pIdx, 1);
+                    }
+                    
+                    if (Math.hypot(p.x - (decman.x+8), p.y - (decman.y+8)) < 12) {
+                        boss.projectiles.splice(pIdx, 1);
+                        decman.hp--; 
+                        decman.freezeTimer = 40; 
+                        playBeep(140, 0.35, "sawtooth");
+                        
+                        if (decman.hp <= 0) {
+                            triggerGameOver();
+                        }
+                    }
+                });
+
+                let bDist = Math.hypot((decman.x + 8) - (boss.x + 16), (decman.y + 8) - (boss.y + 16));
+                if (bDist < 22) {
+                    if (boss.shield) {
+                        triggerGameOver();
+                    } else {
+                        boss.hp--;
+                        boss.shield = true;
+                        pedBonus.active = false;
+                        decman.speed = decman.baseSpeed + (currentLevel * 0.1);
+                        boss.x = 13.5 * TILE_SIZE; boss.y = 11 * TILE_SIZE;
+                        playBeep(950, 0.6, "sine");
+                        if (boss.hp <= 0) {
+                            score += 5000;
+                            advanceLevel();
+                        }
+                    }
+                }
+            }
+
+            // --- GHOST LAYERS SYSTEM ---
+            if (!isBossLayer) {
+                ghosts.forEach(ghost => {
+                    if (!isChallengeLayer) {
+                        ghost.tickCount++;
+                        if (ghost.inside && ghost.tickCount >= ghost.releaseTime) {
+                            ghost.x = 13.5 * TILE_SIZE; ghost.y = 11 * TILE_SIZE; ghost.inside = false;
+                        }
+                    }
+
+                    if (tiltActive) return;
+
+                    if (!ghost.inside) {
+                        if (Math.random() < 0.05 || isCollidingWithWall(ghost.x + ghost.dirX * ghost.speed, ghost.y + ghost.dirY * ghost.speed, true)) {
+                            if (isCollidingWithWall(ghost.x + ghost.dirX * ghost.speed, ghost.y + ghost.dirY * ghost.speed, true)) {
+                                ghost.x = Math.round(ghost.x / TILE_SIZE) * TILE_SIZE;
+                                ghost.y = Math.round(ghost.y / TILE_SIZE) * TILE_SIZE;
+                            }
+                            let nextGDir = getSmartDirection(ghost, decman.x, decman.y, true);
+                            ghost.dirX = nextGDir.x;
+                            ghost.dirY = nextGDir.y;
+                        }
+                        ghost.x += ghost.dirX * ghost.speed;
+                        ghost.y += ghost.dirY * ghost.speed;
+                    } else {
+                        if (ghost.tickCount % 40 === 0) ghost.dirY *= -1;
+                        ghost.y += ghost.dirY * 0.5;
+                    }
+
+                    if (ghost.x < -TILE_SIZE) ghost.x = canvas.width;
+                    if (ghost.x > canvas.width) ghost.x = -TILE_SIZE;
+
+                    let dist = Math.hypot((decman.x + 8) - (ghost.x + 8), (decman.y + 8) - (ghost.y + 8));
+                    if (dist < 12) {
+                        if (!pedBonus.active) {
+                            if (isChallengeLayer) {
+                                let maxPossibleWavePoints = 1250; 
+                                let missedPoints = maxPossibleWavePoints - pointsEarnedThisChallenge;
+                                if(missedPoints < 0) missedPoints = 0;
+                                missedPointsText.innerText = `CAUGHT! YOU MISSED ${missedPoints} BONUS POINTS!`;
+                                gameRunning = false; 
+                                advanceLevel();
+                                return;
+                            } else {
+                                triggerGameOver();
+                            }
+                        } else {
+                            score += 200;
+                            ghost.x = 13.5 * TILE_SIZE; ghost.y = 14 * TILE_SIZE;
+                            ghost.inside = true; ghost.tickCount = 0;
+                            playBeep(240, 0.2, "sawtooth");
+                        }
+                    }
+                });
+            }
+        }
+
+        function advanceLevel() {
+            gameRunning = false;
+            currentLevel++;
+            
+            if (currentLevel % 5 === 0) {
+                completeTitle.innerText = "BOSS MAINFRAME DETECTED";
+                completeTitle.style.color = "#ff3333";
+                nextLevelText.innerText = "INITIALIZING CORE COMBAT STAGE...";
+            } else if (currentLevel % 3 === 0) {
+                completeTitle.innerText = "GLITCH ARENA MATRIX ONLINE";
+                completeTitle.style.color = "#00ffff";
+                nextLevelText.innerText = "SURVIVAL HARVEST MODE LOADING...";
+            } else {
+                completeTitle.innerText = "LAYER DECRYPTED";
+                completeTitle.style.color = "#55ff55";
+                nextLevelText.innerText = `PREPARING LAYER ${currentLevel}...`;
+            }
+
+            completePanel.classList.remove('hidden');
+            playBeep(880, 0.1, "sine");
+            setTimeout(() => playBeep(1100, 0.15, "sine"), 120);
+            setTimeout(() => playBeep(1320, 0.3, "triangle"), 240);
+            setTimeout(() => { startLevel(); }, 3500); 
+        }
+
+        function triggerGameOver() {
+            gameOver = true;
+            gameRunning = false;
+            playBeep(100, 0.6, "sawtooth");
+            cabinet.classList.remove('tilt-active');
+            finalScoreText.innerText = "SCORE: " + score;
+            if (score > highscore) {
+                highscore = score;
+                localStorage.setItem('decman_hi', highscore);
+                hiScoreAlert.classList.remove('hidden');
+            } else {
+                hiScoreAlert.classList.add('hidden');
+            }
+            loadHighScore();
+            gameoverPanel.classList.remove('hidden');
+        }
+
+        function draw() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let wallColor = '#1c4205';
+            if (isChallengeLayer) wallColor = '#220044'; 
+            if (isBossLayer) wallColor = '#441111';
+            if (pedBonus.active) wallColor = `hsl(${(Date.now()/4)%360}, 80%, 35%)`;
+
+            let strokeColor = pedBonus.active ? '#fff' : (isChallengeLayer ? '#bb00ff' : (isBossLayer ? '#ff3333' : '#386b12'));
+
+            if (currentMap && currentMap.length === MAP_ROWS) {
+                for (let r = 0; r < MAP_ROWS; r++) {
+                    for (let c = 0; c < MAP_COLS; c++) {
+                        let val = currentMap[r][c];
+                        if (val === 1) {
+                            ctx.fillStyle = wallColor;
+                            ctx.fillRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            ctx.strokeStyle = strokeColor;
+                            ctx.strokeRect(c * TILE_SIZE + 1, r * TILE_SIZE + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+                        } else if (val === 5) { 
+                            ctx.fillStyle = '#00ffff';
+                            ctx.fillRect(c * TILE_SIZE, r * TILE_SIZE + 6, TILE_SIZE, 4);
+                        } else if (val === 0) {
+                            ctx.fillStyle = '#fff9d6';
+                            ctx.beginPath(); ctx.arc(c * TILE_SIZE + 8, r * TILE_SIZE + 8, 2.5, 0, Math.PI * 2); ctx.fill();
+                        } else if (val === 2) { 
+                            ctx.fillStyle = '#ffd700';
+                            ctx.beginPath();
+                            ctx.moveTo(c * TILE_SIZE + 8, r * TILE_SIZE + 2);
+                            ctx.lineTo(c * TILE_SIZE + 14, r * TILE_SIZE + 8);
+                            ctx.lineTo(c * TILE_SIZE + 8, r * TILE_SIZE + 14);
+                            ctx.lineTo(c * TILE_SIZE + 2, r * TILE_SIZE + 8);
+                            ctx.closePath(); ctx.fill();
+                        }
+                    }
+                }
+            }
+
+            if (pedBonus.spawned) {
+                ctx.fillStyle = '#ff00ff';
+                ctx.fillRect(pedBonus.x * TILE_SIZE + 3, pedBonus.y * TILE_SIZE + 3, 10, 10);
+            }
+
+            // Draw DECman
+            ctx.fillStyle = decman.freezeTimer > 0 ? '#5555ff' : (pedBonus.active ? '#ffffff' : '#cbd631');
+            ctx.beginPath();
+            let baseAngle = 0.2;
+            let mouthSize = decman.freezeTimer > 0 ? 0 : (Math.sin(Date.now() * 0.02) + 1) * 0.23;
+            if (decman.dirX === 1) baseAngle = 0;
+            else if (decman.dirX === -1) baseAngle = Math.PI;
+            else if (decman.dirY === 1) baseAngle = Math.PI * 0.5;
+            else if (decman.dirY === -1) baseAngle = Math.PI * 1.5;
+
+            ctx.arc(decman.x + 8, decman.y + 8, 7, baseAngle + mouthSize, baseAngle + Math.PI * 2 - mouthSize);
+            ctx.lineTo(decman.x + 8, decman.y + 8); ctx.fill();
+
+            // --- DRAW BOSS ---
+            if (isBossLayer) {
+                ctx.fillStyle = boss.shield ? '#ff3333' : '#ffffff';
+                ctx.fillRect(boss.x, boss.y, 32, 32);
+                ctx.strokeStyle = '#000'; ctx.strokeRect(boss.x+2, boss.y+2, 28, 28);
+                
+                ctx.fillStyle = '#000';
+                ctx.fillRect(boss.x + 6, boss.y + 8, 6, 6);
+                ctx.fillRect(boss.x + 20, boss.y + 8, 6, 6);
+                ctx.fillRect(boss.x + 8, boss.y + 22, 16, 4);
+
+                if (boss.shield) {
+                    ctx.strokeStyle = '#ff00ff'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.arc(boss.x+16, boss.y+16, 24 + Math.sin(Date.now()*0.01)*3, 0, Math.PI*2); ctx.stroke();
+                    ctx.lineWidth = 1;
+                }
+                ctx.fillStyle = '#00ffff';
+                boss.projectiles.forEach(p => { ctx.fillRect(p.x-2, p.y-2, 5, 5); });
+            }
+
+            // --- DRAW GHOST LAYERS ---
+            if (!isBossLayer) {
+                ghosts.forEach(ghost => {
+                    ctx.fillStyle = pedBonus.active ? '#0000ff' : ghost.color;
+                    ctx.beginPath();
+                    ctx.arc(ghost.x + 8, ghost.y + 7, 8, Math.PI, 0, false);
+                    ctx.lineTo(ghost.x + 16, ghost.y + 16);
+                    let waves = 3;
+                    for (let i = 0; i <= waves; i++) {
+                        let wx = ghost.x + 16 - (i * (16 / waves));
+                        let wy = ghost.y + 16 - (i % 2 === 0 ? 4 : 0);
+                        ctx.lineTo(wx, wy);
+                    }
+                    ctx.lineTo(ghost.x, ghost.y + 5); ctx.fill();
+                    
+                    ctx.fillStyle = pedBonus.active ? '#ff0000' : '#fff';
+                    ctx.beginPath();
+                    ctx.arc(ghost.x + 4, ghost.y + 6, 2.5, 0, Math.PI*2);
+                    ctx.arc(ghost.x + 12, ghost.y + 6, 2.5, 0, Math.PI*2);
+                    ctx.fill();
+                });
+            }
+
+            // Text Displays
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px "Courier New", monospace';
+            ctx.fillText(`SCORE: ${score}`, 12, 20);
+            ctx.fillText(`HI: ${highscore}`, 340, 20);
+
+            if (isChallengeLayer) {
+                ctx.fillStyle = '#00ffff';
+                ctx.fillText(`SURVIVE: ${Math.ceil(layerTimer/60)}s`, 150, 20);
+            } else if (isBossLayer) {
+                ctx.fillStyle = '#ff3333';
+                ctx.fillText(`BOSS HP: ${boss.hp} | SHIELD SHD: ${decman.hp}`, 115, 20);
+            } else {
+                ctx.fillText(`LAYER: ${currentLevel}`, 160, 20);
+            }
+
+            if (tiltActive && Math.floor(Date.now() / 150) % 2 === 0) {
+                ctx.fillStyle = '#ff0000';
+                ctx.font = 'bold 36px "Courier New", monospace';
+                ctx.fillText("TILT", canvas.width / 2 - 45, canvas.height / 2);
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        initMap();
+        gameLoop();
+    </script>
+</body>
+</html>

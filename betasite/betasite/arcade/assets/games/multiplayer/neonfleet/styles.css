@@ -1,0 +1,279 @@
+        :root {
+            --bg: #040608;
+            --panel: #0a1114;
+            --panel2: #121d22;
+            --accent: #19f5c6;
+            --accent-dim: rgba(25, 245, 198, 0.2);
+            --danger: #ff5d67;
+            --gold: #f2c14e;
+            --text: #e7edf4;
+            --muted: #6b7a88;
+            --line: #1c2b36;
+            
+            --radar-grid: rgba(25, 245, 198, 0.15);
+            --radar-bg: #020a0f;
+            --ship-color: rgba(25, 245, 198, 0.6);
+            --miss-color: #e7edf4;
+            --hit-color: #ff3b30;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Courier New', Courier, monospace; overflow: hidden; }
+        .hidden { display: none !important; }
+
+        .app { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; max-width: 1400px; margin: 0 auto; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 10px; flex-shrink: 0; }
+        .brand { font-size: 1.5rem; color: var(--accent); font-weight: 900; text-shadow: 0 0 10px var(--accent-dim); }
+        .brand small { display: block; font-size: 0.6rem; color: var(--muted); }
+        
+        .connection { margin-left: auto; color: var(--muted); font-size: .78rem; }
+        .connection::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #d99d38; margin-right: 7px; }
+        .connection.online::before { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+        /* Panels and Menus */
+        .view-panel { flex: 1; background: linear-gradient(145deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        
+        .main-menu { display: grid; grid-template-columns: 330px 1fr; gap: 14px; padding: 17px; height: 100%; overflow-y: auto;}
+        .menu-block { background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+        
+        input, select { background: #040708; border: 1px solid #233544; color: var(--text); padding: 10px; border-radius: 6px; font: inherit; outline: none; width: 100%; }
+        input:focus, select:focus { border-color: var(--accent); }
+        button { background: #0a1114; border: 1px solid #233544; color: var(--text); padding: 10px 15px; border-radius: 6px; font: inherit; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+        button:active:not(:disabled) { transform: translateY(1px); }
+        button:disabled { opacity: .38; cursor: not-allowed; }
+        button.primary { background: linear-gradient(135deg, #109176, #0c5c4a); border-color: var(--accent); color: #fff; font-weight: 800; }
+        button.danger { border-color: #744; color: #ff9b9b; }
+
+        h2 { margin: 0 0 10px 0; color: var(--accent); font-size: 1.1rem; letter-spacing: 0.05em; text-transform: uppercase; }
+        .divider { height: 1px; background: var(--line); margin: 5px 0; }
+        .hint { font-size: .75rem; color: var(--muted); line-height: 1.45; }
+
+        .room-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; overflow-y: auto; flex: 1; }
+        .room-card { background: #060a0c; border: 1px solid #1a2833; border-radius: 11px; padding: 13px; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.2s; }
+        .room-card:hover { border-color: var(--accent); }
+        .room-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+        .room-code { color: var(--accent); font: 700 .75rem monospace; }
+        .badge { border: 1px solid #2a4154; border-radius: 99px; padding: 3px 7px; font-size: .65rem; font-weight: 800; text-transform: uppercase; }
+        .badge.waiting { color: var(--accent); border-color: #197e68; }
+        .badge.playing { color: #ffcc68; border-color: #8d6824; }
+        .empty { grid-column: 1/-1; text-align: center; color: var(--muted); padding: 80px 15px; border: 1px dashed #233544; border-radius: 12px; }
+
+        /* Game View */
+        .game-grid { display: grid; grid-template-columns: 240px 1fr; gap: 12px; flex: 1; min-height: 0; padding: 17px; }
+        .sidebar { padding: 12px; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--line); border-radius: 8px; }
+        .roster { display: flex; flex-direction: column; gap: 7px; overflow-y: auto; flex: 1; }
+        .roster-item { padding: 8px; border-radius: 8px; background: #060a0c; border: 1px solid #1a2833; font-size: .76rem; }
+        .roster-item.me { border-color: var(--accent); box-shadow: inset 0 0 10px var(--accent-dim); }
+        .roster-item small { display: block; color: var(--muted); margin-top: 3px; }
+        
+        .board-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: #080c0f; border: 1px solid var(--line); border-radius: 8px; position: relative; overflow-y: auto; padding: 20px;}
+        
+        .status-banner { 
+            background: #121d22; padding: 12px 20px; border: 1px solid var(--line); border-radius: 8px; 
+            margin-bottom: 20px; font-size: 1.3rem; font-weight: bold; text-align: center; 
+            width: 100%; max-width: 800px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+            display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.3s ease; flex-shrink: 0;
+        }
+        .status-banner.cyan { color: var(--accent); border-color: var(--accent-dim); }
+        .status-banner.warning { animation: pulseWarning 1s infinite; color: var(--danger) !important; border-color: var(--danger) !important; }
+        
+        @keyframes pulseWarning {
+            0% { box-shadow: 0 0 5px rgba(255, 93, 103, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(255, 93, 103, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(255, 93, 103, 0.2); }
+        }
+
+        .timer-display { font-family: monospace; font-size: 1.1rem; color: var(--muted); background: rgba(0,0,0,0.5); padding: 4px 10px; border-radius: 6px; }
+        .timer-display.danger { color: var(--danger); font-weight: bold; }
+
+        /* Battleship Grids */
+        .fleet-area {
+            display: flex; gap: 40px; width: 100%; max-width: 900px; justify-content: center; align-items: flex-start;
+        }
+
+        .grid-wrapper {
+            display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 1; max-width: 400px;
+        }
+
+        .grid-title {
+            color: var(--accent); font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em;
+            text-shadow: 0 0 5px var(--accent-dim);
+        }
+
+        .radar-board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: var(--radar-bg);
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 30px rgba(25, 245, 198, 0.1), inset 0 0 50px rgba(25, 245, 198, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Radar sweep animation */
+        .radar-board::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 70%, rgba(25, 245, 198, 0.2) 100%);
+            transform-origin: 0 0;
+            animation: radarSweep 4s linear infinite;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        @keyframes radarSweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .cell {
+            width: 100%; height: 100%;
+            border: 1px solid var(--radar-grid);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .targetable .cell { cursor: crosshair; }
+        .targetable .cell:hover::before {
+            content: ''; position: absolute; inset: 2px;
+            border: 2px solid var(--accent); border-radius: 2px;
+        }
+
+        /* Elements inside cells */
+        .ship-block {
+            background: var(--ship-color);
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            border: 1px solid rgba(0,0,0,0.3);
+        }
+
+        /*
+         * Damaged friendly ship tile:
+         * preserve the full cyan hull and layer impact scorching and cracks
+         * over it instead of replacing it with the circular hit peg.
+         */
+        .cell.ship-hit {
+            border-color: rgba(255, 93, 103, 0.9);
+            box-shadow:
+                inset 0 0 8px rgba(255, 35, 45, 0.75),
+                0 0 7px rgba(255, 59, 48, 0.45);
+        }
+
+        .cell.ship-hit .ship-block {
+            background: var(--ship-color);
+            box-shadow:
+                inset 0 0 10px rgba(0, 0, 0, 0.5),
+                inset 0 0 8px rgba(255, 20, 30, 0.42);
+        }
+
+        /* Burned impact crater. */
+        .cell.ship-hit::before {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            z-index: 4;
+            pointer-events: none;
+            background:
+                radial-gradient(
+                    circle at 50% 50%,
+                    rgba(255, 215, 160, 0.96) 0 5%,
+                    rgba(255, 55, 45, 0.95) 6% 15%,
+                    rgba(84, 4, 13, 0.9) 16% 28%,
+                    rgba(255, 32, 38, 0.42) 29% 42%,
+                    transparent 62%
+                );
+            animation: damageGlow 1.15s ease-in-out infinite alternate;
+        }
+
+        /* Branching fracture lines across the hull. */
+        .cell.ship-hit::after {
+            content: '';
+            position: absolute;
+            inset: 5%;
+            z-index: 5;
+            pointer-events: none;
+            background:
+                linear-gradient(24deg, transparent 46%, #ff6b67 47% 50%, transparent 51%) 50% 50% / 96% 22% no-repeat,
+                linear-gradient(67deg, transparent 46%, #ff3b30 47% 51%, transparent 52%) 38% 48% / 32% 88% no-repeat,
+                linear-gradient(112deg, transparent 46%, #ff8b86 47% 50%, transparent 51%) 58% 48% / 27% 92% no-repeat,
+                linear-gradient(151deg, transparent 46%, #a80716 47% 52%, transparent 53%) 50% 54% / 90% 28% no-repeat;
+            filter:
+                drop-shadow(0 0 1px #fff)
+                drop-shadow(0 0 3px rgba(255, 30, 40, 0.95));
+        }
+
+        @keyframes damageGlow {
+            from { opacity: 0.78; filter: brightness(0.9); }
+            to { opacity: 1; filter: brightness(1.25); }
+        }
+
+        .peg {
+            width: 50%; height: 50%; border-radius: 50%;
+            position: relative; z-index: 5;
+        }
+
+        .peg.miss {
+            background: var(--miss-color);
+            box-shadow: 0 0 5px var(--miss-color);
+        }
+
+        .peg.hit {
+            background: var(--hit-color);
+            width: 70%; height: 70%;
+            box-shadow: 0 0 15px var(--hit-color);
+            animation: pulseHit 1s infinite alternate;
+        }
+
+        @keyframes pulseHit {
+            0% { transform: scale(1); filter: brightness(1); }
+            100% { transform: scale(1.2); filter: brightness(1.3); }
+        }
+
+        /* Placement Controls */
+        .placement-controls {
+            display: flex; gap: 10px; margin-top: 20px; width: 100%; max-width: 400px;
+        }
+
+        /* WINNER SCREEN OVERLAY */
+        .overlay {
+            position: absolute; inset: 0; z-index: 200;
+            background: rgba(4, 6, 8, 0.92); backdrop-filter: blur(8px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+        }
+        
+        .winner-title {
+            font-size: 4.5rem; font-weight: 900; margin: 0;
+            text-shadow: 0 0 30px currentColor; letter-spacing: 0.05em;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            text-align: center; color: var(--accent);
+        }
+        
+        .winner-subtitle {
+            font-size: 1.5rem; color: var(--text); margin: 0 0 10px 0;
+            letter-spacing: 0.1em; text-transform: uppercase; font-weight: bold;
+        }
+
+        .winner-loser-text { color: var(--muted); margin: 0; font-size: 0.95rem; font-style: italic; }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media(max-width: 800px) {
+            .main-menu, .game-grid { grid-template-columns: 1fr; }
+            .sidebar { min-height: 0; }
+            .fleet-area { flex-direction: column; align-items: center; gap: 20px;}
+            .winner-title { font-size: 2.5rem; }
+            .status-banner { font-size: 1.1rem; flex-direction: column; gap: 10px;}
+        }
+ 

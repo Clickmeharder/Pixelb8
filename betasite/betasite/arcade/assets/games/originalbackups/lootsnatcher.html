@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropia: Loot Snatcher</title>
+    <!-- Dependencies -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="multiplayer.js"></script>
+    
+    <style>
+        :root {
+            --bg: #040608;
+            --panel: #0a1114;
+            --panel2: #121d22;
+            --accent: #19f5c6;
+            --accent-dim: rgba(25, 245, 198, 0.2);
+            --danger: #ff5d67;
+            --gold: #f2c14e;
+            --silver: #e0e6ed;
+            --fishing: #53b7ff;
+            --text: #e7edf4;
+            --muted: #6b7a88;
+            --line: #1c2b36;
+            --shadow: rgba(0, 0, 0, 0.55);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            overflow: hidden;
+            background: 
+                radial-gradient(circle at 50% -20%, #0c2027 0, transparent 42%),
+                linear-gradient(135deg, #020405, #081013 55%, #020405);
+        }
+
+        /* CRT / Scanline effect */
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background-size: 100% 4px;
+            opacity: 0.4;
+        }
+
+        .hidden {
+            display: none !important;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .app {
+            width: min(1240px, 96vw);
+            margin: 0 auto;
+            padding: 18px 0 28px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--accent);
+            font-size: 1.55rem;
+            font-weight: 900;
+            letter-spacing: .08em;
+            text-shadow: 0 0 10px var(--accent-dim);
+        }
+
+        .brand small {
+            display: block;
+            font: 600 .65rem Inter, sans-serif;
+            color: var(--muted);
+            letter-spacing: .18em;
+            text-shadow: none;
+        }
+
+        .connection {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: .78rem;
+        }
+
+        .connection::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #d99d38;
+            margin-right: 7px;
+        }
+
+        .connection.online::before {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .panel {
+            background: linear-gradient(145deg, var(--panel2), var(--panel));
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            box-shadow: 0 16px 38px var(--shadow);
+        }
+
+        .lobby-grid {
+            display: grid;
+            grid-template-columns: 330px 1fr;
+            gap: 14px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .setup {
+            padding: 17px;
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+        }
+
+        .setup h2, .browser h2 {
+            margin: 0;
+            color: var(--accent);
+            font-size: 1.05rem;
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 0.05em;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field label {
+            font-size: .72rem;
+            color: var(--muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--line);
+            margin: 2px 0;
+        }
+
+        .hint {
+            font-size: .75rem;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .browser {
+            padding: 17px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .browser-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .room-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 10px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .room-card {
+            background: #060a0c;
+            border: 1px solid #1a2833;
+            border-radius: 11px;
+            padding: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: border-color 0.2s;
+        }
+
+        .room-card:hover {
+            border-color: var(--accent);
+        }
+
+        .room-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .room-name {
+            font-weight: 800;
+        }
+
+        .room-code {
+            color: var(--accent);
+            font: 700 .75rem monospace;
+        }
+
+        .badge {
+            margin-left: auto;
+            border: 1px solid #2a4154;
+            border-radius: 99px;
+            padding: 3px 7px;
+            font-size: .65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .badge.waiting {
+            color: var(--accent);
+            border-color: #197e68;
+        }
+
+        .badge.playing {
+            color: #ffcc68;
+            border-color: #8d6824;
+        }
+
+        .room-meta {
+            font-size: .76rem;
+            color: var(--muted);
+            display: flex;
+            gap: 10px;
+        }
+
+        .room-players {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            min-height: 24px;
+        }
+
+        .person-chip {
+            background: #0f181d;
+            border: 1px solid #1c2b36;
+            border-radius: 99px;
+            padding: 4px 8px;
+            font-size: .7rem;
+        }
+
+        .room-actions {
+            display: flex;
+            gap: 7px;
+            margin-top: auto;
+        }
+
+        .empty {
+            grid-column: 1/-1;
+            text-align: center;
+            color: var(--muted);
+            padding: 80px 15px;
+            border: 1px dashed #233544;
+            border-radius: 12px;
+        }
+
+        input, select {
+            background: #040708;
+            border: 1px solid #233544;
+            color: var(--text);
+            padding: 10px;
+            border-radius: 8px;
+            font: inherit;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+        }
+
+        button {
+            border: 1px solid #233544;
+            background: #0a1114;
+            color: var(--text);
+            padding: 9px 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            font: inherit;
+            transition: all 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: .38;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #109176, #0c5c4a);
+            border-color: var(--accent);
+            color: #fff;
+            font-weight: 800;
+        }
+
+        button.danger {
+            border-color: #744;
+            color: #ff9b9b;
+        }
+
+        /* Game View */
+        .game-grid {
+            display: grid;
+            grid-template-columns: 205px 1fr;
+            gap: 12px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .sidebar {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .room-heading {
+            padding: 6px 4px 13px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .room-heading b {
+            color: var(--accent);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+        }
+
+        .room-heading small {
+            display: block;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .roster {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .roster-item {
+            padding: 8px;
+            border-radius: 8px;
+            background: #060a0c;
+            border: 1px solid #1a2833;
+            font-size: .76rem;
+        }
+
+        .roster-item.me {
+            border-color: var(--accent);
+            box-shadow: inset 0 0 10px var(--accent-dim);
+        }
+
+        .roster-item small {
+            display: block;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .sidebar-actions {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .arena-shell {
+            padding: 12px;
+            background: linear-gradient(145deg, #0b1419, #050a0c);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .arena-head {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 9px;
+        }
+
+        .arena-head h2 {
+            font-size: 1rem;
+            margin: 0;
+            color: var(--accent);
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .arena-head .stats {
+            margin-left: auto;
+            display: flex;
+            gap: 7px;
+        }
+
+        .stat {
+            background: #020405;
+            border: 1px solid #1c2b36;
+            border-radius: 7px;
+            padding: 5px 8px;
+            font: 700 .72rem monospace;
+            color: var(--accent);
+        }
+
+        .instructions-marquee {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 6px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            animation: pulseHint 2s infinite;
+        }
+
+        @keyframes pulseHint {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+        }
+
+        /* Tactical Sci-Fi Arena */
+        .hunting-zone {
+            position: relative;
+            flex: 1;
+            border-radius: 12px;
+            border: 2px solid #143632;
+            background: #020405;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.8), 0 8px 18px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 400px;
+            cursor: crosshair;
+            touch-action: manipulation;
+        }
+
+        .arena-grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(25, 245, 198, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(25, 245, 198, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center center;
+            pointer-events: none;
+        }
+
+        .radar-sweep {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 150%; height: 150%;
+            background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(25,245,198,0.03) 60deg, rgba(25,245,198,0.2) 90deg, transparent 90deg);
+            transform-origin: 50% 50%;
+            animation: radar 4s linear infinite;
+            pointer-events: none;
+            margin-left: -75%; margin-top: -75%;
+            border-radius: 50%;
+        }
+
+        @keyframes radar {
+            to { transform: rotate(360deg); }
+        }
+
+        #target-layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+        }
+
+        /* Screen Overlays */
+        .overlay-screen {
+            position: absolute;
+            inset: 0;
+            background: rgba(4, 6, 8, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: 10px;
+            backdrop-filter: blur(8px);
+        }
+
+        .cinematic-text {
+            font-size: 2.2rem;
+            color: var(--accent);
+            opacity: 0;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            animation: cinematicFade 1.4s ease-in-out forwards;
+            text-shadow: 0 0 15px var(--accent-dim);
+            padding: 0 20px;
+            font-weight: 800;
+        }
+
+        @keyframes cinematicFade {
+            0% { opacity: 0; transform: scale(0.9); }
+            20% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0; transform: scale(1.1); }
+        }
+
+        .title-glitch {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--gold);
+            text-shadow: 0 0 20px rgba(242, 193, 78, 0.5);
+            margin-bottom: 10px;
+            text-align: center;
+            letter-spacing: 0.1em;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .winner-text {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            text-align: center;
+        }
+
+        .final-scores {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            text-align: center;
+            background: rgba(0,0,0,0.5);
+            padding: 15px 30px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+
+        /* Target Entities */
+        .target {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            transform: translate(-50%, -50%) scale(0);
+            cursor: crosshair;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            transition: opacity 0.1s;
+        }
+
+        @keyframes popIn {
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes throb {
+            from { transform: translate(-50%, -50%) scale(1) rotate(-5deg); }
+            to { transform: translate(-50%, -50%) scale(1.15) rotate(5deg); }
+        }
+
+        @keyframes bobbing {
+            from { transform: translate(-50%, -35%) scale(1); }
+            to { transform: translate(-50%, -65%) scale(1); }
+        }
+
+        /* PEC Coins (Silver) */
+        .target.pec {
+            background: radial-gradient(circle at 35% 35%, #ffffff, var(--silver), #707780);
+            box-shadow: 0 0 15px rgba(224, 230, 237, 0.4), inset 0 0 8px rgba(255,255,255,0.8);
+            border: 2px solid #aab3bc;
+            border-radius: 50%;
+            animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .target.pec::after {
+            content: '¢';
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #333;
+        }
+
+        /* PED Coins (Gold) */
+        .target.ped {
+            width: 65px;
+            height: 65px;
+            background: radial-gradient(circle at 35% 35%, #fffde7, var(--gold), #997a00);
+            box-shadow: 0 0 20px rgba(242, 193, 78, 0.6), inset 0 0 12px rgba(255,255,255,0.9);
+            border: 2px solid #ffeba3;
+            border-radius: 50%;
+            animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .target.ped::after {
+            content: 'PED';
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: #4a3600;
+        }
+        
+        /* Mutant Mobs (Hazards) */
+        .target.mob {
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 30% 30%, #ff8888, var(--danger), #880000);
+            box-shadow: 0 0 20px var(--danger), inset 0 0 10px rgba(0,0,0,0.5);
+            border-radius: 12px;
+            animation: 
+                popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                throb 0.4s 0.25s infinite alternate;
+        }
+        .target.mob::after {
+            content: '☠';
+            color: #fff;
+            font-size: 2.2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Rare Fish (High value) */
+        .target.fish {
+            width: 65px;
+            height: 65px;
+            background: radial-gradient(circle at 30% 30%, #fff, var(--fishing), #004477);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 25px var(--fishing);
+            animation: 
+                popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                bobbing 1s 0.25s ease-in-out infinite alternate;
+        }
+        .target.fish::after {
+            content: '🐟';
+            font-size: 2.2rem;
+        }
+
+        /* Floating Combat Text */
+        .floating-text {
+            position: absolute;
+            font-size: 1.4rem;
+            font-weight: 900;
+            pointer-events: none;
+            z-index: 60;
+            animation: floatUp 1s ease-out forwards;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .floating-text.positive { color: var(--gold); text-shadow: 0 2px 5px #000; }
+        .floating-text.negative { color: var(--danger); text-shadow: 0 2px 5px #000; }
+
+        @keyframes floatUp {
+            0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -40px) scale(1.4); opacity: 0; }
+        }
+
+        @media(max-width: 800px) {
+            .lobby-grid, .game-grid { grid-template-columns: 1fr; }
+            .sidebar { min-height: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+
+    <div class="app">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="brand">ENTROPIA LOOT SNATCHER<small>TACTICAL MULTIPLAYER HUNTING ZONE</small></div>
+            <div class="connection" id="connection">Connecting to room directory…</div>
+        </header>
+
+        <!-- LOBBY VIEW -->
+        <main id="lobby-view" class="lobby-grid">
+            <section class="panel setup">
+                <h2>Operator Profile</h2>
+                <div class="field"><label>Display name</label><input id="player-name" maxlength="18" value=""></div>
+                <div class="divider"></div>
+                <h2>Deploy Hunting Instance</h2>
+                <div class="field"><label>Operation Type</label>
+                    <select id="create-mode">
+                        <option value="standard">Standard Global Hunt (2-8 Players)</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <div class="field" style="flex:1;"><label>Squad Size Limit</label>
+                        <select id="max-players"><option>2</option><option>4</option><option selected>6</option><option>8</option></select>
+                    </div>
+                    <div class="field" style="flex:1;"><label>Private Code</label><input id="custom-code" maxlength="6" placeholder="AUTO"></div>
+                </div>
+                <button class="primary" id="create-room">DEPLOY SQUAD LEADER INSTANCE</button>
+                <div class="divider"></div>
+                <h2>Join Squad by Code</h2>
+                <div style="display:flex;gap:8px;"><input id="join-code" maxlength="6" placeholder="ROOM CODE" style="flex:1;"><button id="join-code-btn">JOIN SQUAD</button></div>
+                
+                <!-- HOW TO PLAY INSTRUCTIONS -->
+                <div class="hint" style="margin-top:10px; border-top:1px solid var(--line); padding-top:10px;">
+                    <b style="color:var(--accent);">MISSION BRIEFING:</b><br>
+                    No sweat harvesting or breaking armor here, just pure loot and casting lines. Tap targets before they vanish!<br>
+                    <span style="color:var(--silver);">¢ SILVER PEC</span> = Small PED Gains<br>
+                    <span style="color:var(--gold);">PED GOLD COIN</span> = Medium PED Gains<br>
+                    <span style="color:var(--fishing);">🐟 PRIZED FISH</span> = Massive Global PED<br>
+                    <span style="color:var(--danger);">☠ MUTANT</span> = Armor Decay (PED Loss!)
+                </div>
+            </section>
+
+            <section class="panel browser">
+                <div class="browser-head">
+                    <div><h2>Active Operation Zones</h2><div class="hint" id="room-summary">Scanning frequencies…</div></div>
+                </div>
+                <div class="room-list" id="room-list"><div class="empty">Connecting to the public room directory…</div></div>
+            </section>
+        </main>
+
+        <!-- GAME VIEW -->
+        <main id="game-view" class="game-grid hidden">
+            <aside class="panel sidebar">
+                <div class="room-heading"><b id="room-title">Hunting Zone</b><small id="room-details">Room ----</small></div>
+                <div class="roster" id="roster"></div>
+                <div class="sidebar-actions">
+                    <button id="copy-code">COPY ZONE FREQUENCY</button>
+                    <button class="danger" id="leave-room">ABORT MISSION</button>
+                </div>
+            </aside>
+            <section class="panel arena-shell">
+                <div class="arena-head">
+                    <h2 id="game-title">TACTICAL ARENA</h2>
+                    <span class="badge waiting" id="game-status">WAITING</span>
+                    <div class="stats">
+                        <span class="stat" id="timer-stat">TIME 60s</span>
+                        <span class="stat" id="score-stat" style="color:var(--gold);">MY PED: 0.00</span>
+                    </div>
+                </div>
+                
+                <div class="instructions-marquee hidden" id="game-instructions">
+                    CONTROLS: CLICK SILVER (¢) / GOLD (PED) / FISH (🐟) TO SCORE // AVOID RED MUTANTS (☠)
+                </div>
+
+                <div class="hunting-zone">
+                    <div class="arena-grid-bg"></div>
+                    <div class="radar-sweep"></div>
+                    
+                    <div id="target-layer"></div>
+                    
+                    <div id="cinematic-screen" class="overlay-screen hidden">
+                        <div id="cinematic-container"></div>
+                    </div>
+                    
+                    <div id="game-over-screen" class="overlay-screen hidden">
+                        <div class="title-glitch">OPERATION COMPLETE</div>
+                        <div class="winner-text" id="winner-display"></div>
+                        <div class="final-scores" id="final-scores-display"></div>
+                        <button class="primary hidden" id="return-lobby-btn">RETURN TO BASE</button>
+                    </div>
+                </div>
+                <div style="margin-top:10px; display:flex; gap:10px; align-items:center;" id="action-bar-container">
+                    <button class="primary" id="start-game-btn" disabled>INITIATE DROP SEQUENCE</button>
+                    <span class="hint" id="host-hint">Awaiting Squad Leader Initialization.</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        'use strict';
+        const $ = selector => document.querySelector(selector);
+        const MP = window.ArcadeMultiplayer;
+
+        let currentRooms = [];
+        let roomCode = '';
+        let myId = '';
+        let isHost = false;
+        let myRole = 'player';
+        let gameStatus = 'lobby'; 
+        
+        let displayName = localStorage.getItem('pixelb8LootName') || `Merc_${Math.floor(Math.random() * 9000 + 1000)}`;
+        $('#player-name').value = displayName;
+
+        // Internal scores are tracked in PECs (integer math). Display converts to PED (score / 100).
+        const scores = new Map();
+        const rosterData = new Map();
+        const activeHostTargets = new Map();
+        
+        let hostSpawnInterval;
+        let hostTimerInterval;
+        let timeRemaining = 60;
+
+        function formatPED(pecs) {
+            return (pecs / 100).toFixed(2);
+        }
+
+        MP.init({
+            gameId: 'lootsnatcher',
+            playerName: displayName,
+            onRooms: rooms => { currentRooms = rooms; renderRooms(); },
+            onRoster: roster => { renderRoster(roster); if (isHost && gameStatus === 'playing') syncRosterScores(roster); },
+            onConnected: info => { roomCode = info.code; myId = info.clientId; isHost = info.isHost; myRole = info.role; enterTable(); },
+            onMessage: handleNetworkMessage,
+            onError: err => { $('#connection').textContent = `Connection error: ${err.message}`; }
+        });
+        setTimeout(() => { $('#connection').classList.add('online'); $('#connection').textContent = 'Public room directory online'; }, 1000);
+
+        $('#create-room').onclick = () => {
+            rememberName();
+            const mode = $('#create-mode').value;
+            const code = $('#custom-code').value.trim().toUpperCase();
+            MP.hostRoom({ code, mode, maxPlayers: +$('#max-players').value, name: `${displayName}'s Squad` });
+        };
+
+        $('#join-code-btn').onclick = () => joinRoom($('#join-code').value);
+        $('#join-code').onkeydown = e => { if (e.key === 'Enter') joinRoom(e.target.value); };
+        $('#leave-room').onclick = () => { MP.disconnect(); location.reload(); };
+        $('#copy-code').onclick = async () => { 
+            await navigator.clipboard?.writeText(roomCode); 
+            $('#copy-code').textContent = 'COPIED!'; 
+            setTimeout(() => $('#copy-code').textContent = 'COPY ZONE FREQUENCY', 1200); 
+        };
+
+        $('#start-game-btn').onclick = () => {
+            if (!isHost) return;
+            scores.clear();
+            rosterData.forEach(p => scores.set(p.id, 0));
+            MP.updateRoom({ status: 'playing' });
+            
+            safePublish('SEQUENCE_START', {});
+            setTimeout(hostStartGameLoop, 6500);
+        };
+
+        $('#return-lobby-btn').onclick = () => {
+            if (!isHost) return;
+            MP.updateRoom({ status: 'waiting' });
+            safePublish('LOBBY_RESET', {});
+        };
+
+        function safePublish(type, payload = {}) {
+            MP.publish(type, payload);
+            if (isHost) {
+                handleNetworkMessage({ type, senderId: myId, ...payload });
+            }
+        }
+
+        function rememberName() {
+            displayName = $('#player-name').value.trim().slice(0, 18) || displayName;
+            localStorage.setItem('pixelb8LootName', displayName);
+            MP.setPlayerName(displayName);
+        }
+
+        function joinRoom(code, role = 'player') {
+            rememberName();
+            code = String(code || '').trim().toUpperCase();
+            if (!code) return;
+            MP.joinRoom(code, role);
+        }
+
+        function renderRooms() {
+            const rooms = currentRooms;
+            $('#room-summary').textContent = `${rooms.length} active zone${rooms.length === 1 ? '' : 's'} · updates automatically`;
+            $('#room-list').innerHTML = '';
+            if (!rooms.length) {
+                $('#room-list').innerHTML = '<div class="empty">No active zones found. Deploy a squad to host an operation.</div>';
+                return;
+            }
+            rooms.forEach(room => {
+                const full = room.playerCount >= room.maxPlayers;
+                const card = document.createElement('article');
+                card.className = 'room-card';
+                card.innerHTML = `
+                    <div class="room-top">
+                        <div><div class="room-name">${escapeHtml(room.name || 'Operation Zone')}</div><div class="room-code">ROOM ${room.code}</div></div>
+                        <span class="badge ${room.status}">${room.status}</span>
+                    </div>
+                    <div class="room-meta"><span>Loot Snatcher</span><span>♟ ${room.playerCount}/${room.maxPlayers}</span>${room.spectators ? `<span>◉ ${room.spectators}</span>` : ''}</div>
+                    <div class="room-players">${(room.players || []).map((p, i) => `<span class="person-chip">${i === 0 ? '♛ ' : ''}${escapeHtml(p.name)} · ${escapeHtml(p.status || room.status)}</span>`).join('') || '<span class="hint">Awaiting deployment…</span>'}</div>
+                    <div class="room-actions">
+                        <button class="primary join" ${full || room.status === 'playing' ? 'disabled' : ''}>${full ? 'SQUAD FULL' : room.status === 'playing' ? 'IN PROGRESS' : 'DEPLOY SQUAD'}</button>
+                        <button class="watch">SPECTATE</button>
+                    </div>`;
+                card.querySelector('.join').onclick = () => joinRoom(room.code);
+                card.querySelector('.watch').onclick = () => joinRoom(room.code, 'spectator');
+                $('#room-list').appendChild(card);
+            });
+        }
+
+        function enterTable() {
+            $('#lobby-view').classList.add('hidden');
+            $('#game-view').classList.remove('hidden');
+            $('#room-details').textContent = `Zone ${roomCode} · ${isHost ? 'Squad Leader' : 'Operator'}${myRole === 'spectator' ? ' · Spectating' : ''}`;
+            
+            if (isHost) {
+                $('#start-game-btn').disabled = false;
+                $('#host-hint').textContent = 'You are the Squad Leader. Initiate drop sequence when ready.';
+            } else {
+                $('#start-game-btn').disabled = true;
+                $('#host-hint').textContent = 'Awaiting Squad Leader Initialization.';
+            }
+        }
+
+        function renderRoster(roster) {
+            roster.forEach(p => rosterData.set(p.id, p));
+            $('#roster').innerHTML = roster.map(p => `
+                <div class="roster-item ${p.id === myId ? 'me' : ''}">
+                    <b>${p.id === MP.getHostId() ? '♛ ' : ''}${escapeHtml(p.name)}</b>
+                    <small>${p.role}${p.status ? ` · ${p.status}` : ''}${p.id === myId ? ' · you' : ''}</small>
+                </div>`).join('');
+            
+            const me = roster.find(p => p.id === myId);
+            if (me && scores.has(myId)) {
+                $('#score-stat').textContent = `MY PED: ${formatPED(scores.get(myId))}`;
+            }
+        }
+
+        function syncRosterScores(roster) {
+            roster.forEach(p => {
+                if (!scores.has(p.id)) scores.set(p.id, 0);
+            });
+        }
+
+        function handleNetworkMessage(msg) {
+            if (!msg || !msg.type) return;
+
+            switch(msg.type) {
+                case 'SEQUENCE_START':
+                    if (gameStatus !== 'cinematic' && gameStatus !== 'playing') {
+                        playCinematicSequence();
+                    }
+                    break;
+                case 'SPAWN_TARGET':
+                    spawnTargetClient(msg);
+                    break;
+                case 'DESPAWN_TARGET':
+                    despawnTargetClient(msg.targetId);
+                    break;
+                case 'CLAIM_REQUEST':
+                    if (isHost) resolveClaimHost(msg);
+                    break;
+                case 'CLAIM_RESOLVED':
+                    resolveClaimClient(msg);
+                    break;
+                case 'SYNC_STATE':
+                    syncStateClient(msg);
+                    break;
+                case 'GAME_OVER':
+                    if (gameStatus !== 'finished') showGameOver(msg);
+                    break;
+                case 'LOBBY_RESET':
+                    resetToLobbyClient();
+                    break;
+            }
+        }
+
+        // --- HOST LOGIC ---
+        function hostStartGameLoop() {
+            if (!isHost) return;
+            timeRemaining = 60;
+            activeHostTargets.clear();
+            
+            hostSpawnInterval = setInterval(hostSpawnLogic, 700);
+            hostTimerInterval = setInterval(() => {
+                timeRemaining--;
+                safePublish('SYNC_STATE', { 
+                    timeRemaining, 
+                    scores: Array.from(scores.entries()) 
+                });
+                
+                if (timeRemaining <= 0) hostEndGame();
+            }, 1000);
+        }
+
+        function hostSpawnLogic() {
+            const id = Math.random().toString(36).substr(2, 9);
+            const rand = Math.random();
+            
+            let targetType = 'pec';
+            let value = Math.floor(Math.random() * 5) + 1; // 1-5 PEC
+            
+            if (rand > 0.95) { 
+                targetType = 'fish';
+                value = Math.floor(Math.random() * 400) + 100; // 1 to 5 PED
+            } else if (rand > 0.80) { 
+                targetType = 'mob';
+                value = -(Math.floor(Math.random() * 300) + 200); // Lose 2 to 5 PED
+            } else if (rand > 0.60) {
+                targetType = 'ped';
+                value = Math.floor(Math.random() * 40) + 10; // 10-50 PEC
+            }
+
+            const x = 10 + Math.random() * 80; 
+            const y = 10 + Math.random() * 80;
+            const lifetime = targetType === 'fish' ? 1500 : 2000 + Math.random() * 1500;
+
+            activeHostTargets.set(id, { targetType, value, timer: null });
+            safePublish('SPAWN_TARGET', { targetId: id, targetType, x, y });
+
+            const dTimer = setTimeout(() => {
+                if (activeHostTargets.has(id)) {
+                    activeHostTargets.delete(id);
+                    safePublish('DESPAWN_TARGET', { targetId: id });
+                }
+            }, lifetime);
+            activeHostTargets.get(id).timer = dTimer;
+        }
+
+        function resolveClaimHost(msg) {
+            const id = msg.targetId;
+            if (activeHostTargets.has(id)) {
+                const targetData = activeHostTargets.get(id);
+                clearTimeout(targetData.timer);
+                activeHostTargets.delete(id);
+
+                const currentScore = scores.get(msg.senderId) || 0;
+                scores.set(msg.senderId, currentScore + targetData.value);
+
+                safePublish('CLAIM_RESOLVED', {
+                    targetId: id,
+                    winnerId: msg.senderId,
+                    value: targetData.value,
+                    targetType: targetData.targetType
+                });
+            }
+        }
+
+        function hostEndGame() {
+            clearInterval(hostSpawnInterval);
+            clearInterval(hostTimerInterval);
+            
+            let topScore = -999999;
+            let winnerId = null;
+            scores.forEach((val, id) => {
+                if (val > topScore) { topScore = val; winnerId = id; }
+            });
+
+            MP.updateRoom({ status: 'finished' });
+            safePublish('GAME_OVER', { winnerId, finalScores: Array.from(scores.entries()) });
+        }
+
+        // --- CLIENT SEQUENCE & RENDERING ---
+        function playCinematicSequence() {
+            gameStatus = 'cinematic';
+            const cineScreen = $('#cinematic-screen');
+            const cineContainer = $('#cinematic-container');
+            const instructions = $('#game-instructions');
+            
+            $('#target-layer').innerHTML = ''; 
+            cineScreen.classList.remove('hidden');
+            instructions.classList.remove('hidden'); 
+            cineContainer.innerHTML = '';
+            
+            const lines = [
+                "NO SWEAT HARVESTING REQUIRED.",
+                "NO ARMOR TO BREAK.",
+                "JUST CAST YOUR LINE.",
+                "AND SNATCH THE LOOT."
+            ];
+
+            let delay = 0;
+            lines.forEach(text => {
+                setTimeout(() => {
+                    cineContainer.innerHTML = `<div class="cinematic-text">${text}</div>`;
+                }, delay);
+                delay += 1500; 
+            });
+
+            setTimeout(() => {
+                if (gameStatus !== 'finished') {
+                    gameStatus = 'playing';
+                    cineScreen.classList.add('hidden');
+                    $('#game-status').textContent = 'PLAYING';
+                    $('#game-status').className = 'badge playing';
+                }
+            }, delay + 500);
+        }
+
+        function spawnTargetClient(msg) {
+            if (gameStatus === 'lobby' || gameStatus === 'finished') return;
+            
+            const layer = $('#target-layer');
+            if (layer.querySelector(`.target[data-id="${msg.targetId}"]`)) return;
+
+            const el = document.createElement('div');
+            el.className = `target ${msg.targetType}`;
+            el.dataset.id = msg.targetId;
+            el.style.left = `${msg.x}%`;
+            el.style.top = `${msg.y}%`;
+
+            el.addEventListener('pointerdown', (e) => {
+                if (myRole === 'spectator') return;
+                e.preventDefault();
+                el.style.opacity = '0.3';
+                el.style.transform = 'scale(0.8)';
+                el.style.pointerEvents = 'none';
+                MP.publish('CLAIM_REQUEST', { targetId: msg.targetId });
+            });
+
+            layer.appendChild(el);
+        }
+
+        function despawnTargetClient(id) {
+            const el = document.querySelector(`.target[data-id="${id}"]`);
+            if (el) el.remove();
+        }
+
+        function resolveClaimClient(msg) {
+            const el = document.querySelector(`.target[data-id="${msg.targetId}"]`);
+            if (el) {
+                const layer = $('#target-layer');
+                const rect = el.getBoundingClientRect();
+                const parentRect = layer.getBoundingClientRect();
+                const x = rect.left - parentRect.left + (rect.width / 2);
+                const y = rect.top - parentRect.top;
+                
+                const isMe = msg.winnerId === myId;
+                const floatEl = document.createElement('div');
+                floatEl.className = `floating-text ${msg.value > 0 ? 'positive' : 'negative'}`;
+                floatEl.style.left = `${x}px`;
+                floatEl.style.top = `${y}px`;
+                
+                // Format decimal PED string for floating combat text
+                const formattedVal = formatPED(msg.value);
+                floatEl.textContent = (msg.value > 0 ? '+' : '') + formattedVal + (isMe ? ' PED' : '');
+                
+                if (!isMe) {
+                    floatEl.style.opacity = '0.4';
+                    floatEl.style.fontSize = '0.8rem';
+                }
+
+                layer.appendChild(floatEl);
+                setTimeout(() => floatEl.remove(), 1000);
+                el.remove();
+            }
+        }
+
+        function syncStateClient(msg) {
+            if (gameStatus === 'lobby') {
+                gameStatus = 'playing';
+                $('#cinematic-screen').classList.add('hidden');
+                $('#game-instructions').classList.remove('hidden');
+                $('#game-status').textContent = 'PLAYING';
+                $('#game-status').className = 'badge playing';
+            }
+
+            timeRemaining = msg.timeRemaining;
+            $('#timer-stat').textContent = `TIME ${timeRemaining}s`;
+            scores.clear();
+            msg.scores.forEach(([id, val]) => {
+                scores.set(id, val);
+                if (id === myId) $('#score-stat').textContent = `MY PED: ${formatPED(val)}`;
+            });
+        }
+
+        function showGameOver(msg) {
+            gameStatus = 'finished';
+            $('#game-status').textContent = 'FINISHED';
+            $('#game-status').className = 'badge closed';
+            $('#target-layer').innerHTML = ''; 
+            $('#game-instructions').classList.add('hidden'); 
+
+            const winnerData = rosterData.get(msg.winnerId);
+            const winnerName = winnerData ? winnerData.name : 'UNKNOWN OPERATOR';
+            
+            $('#winner-display').textContent = `MISSION ACCOMPLISHED // WINNER: ${winnerName}`;
+            
+            let finalHtml = '';
+            msg.finalScores.sort((a, b) => b[1] - a[1]).forEach(([id, score], index) => {
+                const p = rosterData.get(id);
+                const name = p ? p.name : id;
+                finalHtml += `<div>#${index+1} <b style="color:var(--accent);">${escapeHtml(name)}</b> — ${formatPED(score)} PED</div>`;
+            });
+            $('#final-scores-display').innerHTML = finalHtml;
+
+            $('#game-over-screen').classList.remove('hidden');
+            if (isHost) {
+                $('#return-lobby-btn').classList.remove('hidden');
+            }
+        }
+
+        function resetToLobbyClient() {
+            gameStatus = 'lobby';
+            scores.clear();
+            $('#target-layer').innerHTML = '';
+            $('#game-over-screen').classList.add('hidden');
+            $('#game-instructions').classList.add('hidden');
+            $('#game-status').textContent = 'WAITING';
+            $('#game-status').className = 'badge waiting';
+            $('#timer-stat').textContent = 'TIME 60s';
+            $('#score-stat').textContent = 'MY PED: 0.00';
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+    </script>
+</body>
+</html>

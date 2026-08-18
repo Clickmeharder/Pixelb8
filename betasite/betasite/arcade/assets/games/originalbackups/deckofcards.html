@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelB8 Card House</title>
+    <!-- Dependencies -->
+    <link rel="stylesheet" href="assets/css/chat.css">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="multiplayer.js"></script>
+    <style>
+        :root{
+            --bg:#070a09;--panel:#101714;--panel2:#16211c;--felt:#0c462a;--felt2:#08321e;
+            --gold:#f2c14e;--gold2:#9d7624;--text:#f5f2e8;--muted:#9ba9a1;--red:#d84848;
+            --blue:#53b7ff;--green:#5ee08a;--line:#2b4136;--shadow:rgba(0,0,0,.55);
+        }
+        *{box-sizing:border-box}
+        body{margin:0;min-height:100vh;background:
+            radial-gradient(circle at 50% -20%,#173d29 0,transparent 42%),
+            linear-gradient(135deg,#050706,#0b100d 55%,#050706);
+            color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+        button,input,select{font:inherit}
+        button{border:1px solid #3c5147;background:#18231e;color:var(--text);padding:9px 13px;border-radius:8px;cursor:pointer}
+        button:hover:not(:disabled){border-color:var(--gold);color:var(--gold);transform:translateY(-1px)}
+        button:disabled{opacity:.38;cursor:not-allowed}
+        button.primary{background:linear-gradient(#d8aa3c,#a2741d);border-color:#ffdf80;color:#111;font-weight:800}
+        button.danger{border-color:#744;color:#ff9b9b}
+        input,select{background:#080c0a;border:1px solid #42564c;color:var(--text);padding:10px;border-radius:8px}
+        .hidden{display:none!important}
+        .app{width:min(1240px,96vw);margin:0 auto;padding:18px 0 28px}
+        .topbar{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+        .brand{font-family:Georgia,serif;color:var(--gold);font-size:1.55rem;font-weight:900;letter-spacing:.06em}
+        .brand small{display:block;font:600 .65rem Inter;color:var(--muted);letter-spacing:.18em}
+        .connection{margin-left:auto;color:var(--muted);font-size:.78rem}
+        .connection::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#d99d38;margin-right:7px}
+        .connection.online::before{background:var(--green);box-shadow:0 0 8px var(--green)}
+        .panel{background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 38px var(--shadow)}
+        .lobby-grid{display:grid;grid-template-columns:330px 1fr;gap:14px}
+        .setup{padding:17px;display:flex;flex-direction:column;gap:13px}
+        .setup h2,.browser h2{margin:0;color:var(--gold);font-size:1.05rem}
+        .field{display:flex;flex-direction:column;gap:6px}
+        .field label{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+        .row{display:flex;gap:8px}.row>*{min-width:0;flex:1}
+        .divider{height:1px;background:var(--line);margin:2px 0}
+        .hint{font-size:.75rem;color:var(--muted);line-height:1.45}
+        .browser{padding:17px;min-height:520px}
+        .browser-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+        .browser-head .filters{margin-left:auto;display:flex;gap:7px}
+        .browser-head select{padding:7px}
+        .room-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+        .room-card{background:#0b110e;border:1px solid #293c32;border-radius:11px;padding:13px;display:flex;flex-direction:column;gap:10px}
+        .room-card:hover{border-color:#79652e}
+        .room-top{display:flex;align-items:flex-start;gap:8px}
+        .room-name{font-weight:800}.room-code{color:var(--gold);font:700 .75rem monospace}
+        .badge{margin-left:auto;border:1px solid #54665d;border-radius:99px;padding:3px 7px;font-size:.65rem;font-weight:800;text-transform:uppercase}
+        .badge.waiting{color:var(--green);border-color:#347e4d}.badge.playing{color:#ffcc68;border-color:#8d6824}
+        .room-meta{font-size:.76rem;color:var(--muted);display:flex;gap:10px}
+        .room-players{display:flex;flex-wrap:wrap;gap:5px;min-height:24px}
+        .person-chip{background:#17231d;border:1px solid #31483c;border-radius:99px;padding:4px 8px;font-size:.7rem}
+        .room-actions{display:flex;gap:7px;margin-top:auto}
+        .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:80px 15px;border:1px dashed #34473e;border-radius:12px}
+        .game-grid{display:grid;grid-template-columns:205px 1fr;gap:12px}
+        .sidebar{padding:12px;min-height:670px}
+        .room-heading{padding:6px 4px 13px;border-bottom:1px solid var(--line)}
+        .room-heading b{color:var(--gold)}.room-heading small{display:block;color:var(--muted);margin-top:4px}
+        .roster{display:flex;flex-direction:column;gap:7px;margin:12px 0}
+        .roster-item{padding:8px;border-radius:8px;background:#0b110e;border:1px solid #283a31;font-size:.76rem}
+        .roster-item.me{border-color:var(--gold2)}.roster-item small{display:block;color:var(--muted);margin-top:3px}
+        .sidebar-actions{margin-top:auto;display:flex;flex-direction:column;gap:7px}
+        .sidebar{display:flex;flex-direction:column}
+        .table-shell{padding:12px;background:linear-gradient(145deg,#15241d,#0c1511)}
+        .table-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+        .table-head h2{font-size:1rem;margin:0;color:var(--gold)}
+        .table-head .stats{margin-left:auto;display:flex;gap:7px}
+        .stat{background:#080c0a;border:1px solid #31463b;border-radius:7px;padding:5px 8px;font:700 .72rem monospace}
+        .felt{position:relative;min-height:530px;border-radius:46% / 18%;border:10px solid #4a2f1f;background:
+            radial-gradient(ellipse at center,#12623a,var(--felt2) 72%);
+            box-shadow:inset 0 0 70px #03170d,0 8px 18px #000;padding:25px 30px;display:flex;flex-direction:column}
+        .opponents{display:flex;justify-content:center;gap:18px;min-height:107px}
+        .seat{text-align:center;min-width:92px;padding:6px;border-radius:9px}
+        .seat.turn{background:rgba(242,193,78,.12);box-shadow:0 0 0 1px var(--gold)}
+        .seat.folded{opacity:.42}.seat-name{font-size:.7rem;font-weight:800;margin-bottom:5px}.seat-info{font-size:.62rem;color:#c5d2cb;margin-top:3px}
+        .mini-hand{display:flex;justify-content:center}.mini-card{width:27px;height:40px;margin-left:-9px;border:1px solid #fff;border-radius:4px;background:repeating-linear-gradient(45deg,#173e68 0 4px,#26598e 4px 8px)}
+        .mini-card:first-child{margin-left:0}
+        .community{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px}
+        .cards{display:flex;justify-content:center;gap:7px;min-height:88px;flex-wrap:wrap}
+        .card{width:57px;height:82px;background:#f9f7ef;color:#161616;border-radius:7px;border:1px solid #bbb;box-shadow:0 5px 10px #0008;position:relative;padding:5px;font-family:Georgia,serif;font-weight:900;font-size:1.05rem;cursor:default}
+        .card.red{color:#c32232}.card .corner{line-height:.88;text-align:center;position:absolute}.card .big-suit{font-size:2rem;position:absolute;inset:0;display:grid;place-items:center}
+        .card.back{background:repeating-linear-gradient(45deg,#173e68 0 5px,#275c94 5px 10px);border:3px solid #e8e8e8}
+        .card.selected{transform:translateY(-12px);box-shadow:0 0 0 3px var(--gold),0 9px 12px #000}
+        .card.clickable{cursor:pointer}.card.clickable:hover{transform:translateY(-5px)}
+        .table-message{font-size:.79rem;color:#e5d79b;background:#06120baf;border:1px solid #3e563f;border-radius:7px;padding:7px 11px;text-align:center}
+        .my-seat{text-align:center;min-height:128px}.my-seat .cards{margin-top:7px}
+        .action-bar{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:10px;min-height:40px}
+        .action-bar button{min-width:88px}
+        .toolkit{margin-top:9px;padding:10px;border:1px solid #3a4e44;border-radius:9px;background:#09100d;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+        .toolkit label{font-size:.7rem;color:var(--muted)}.toolkit select{padding:7px;width:auto}
+        .mode-rules{font-size:.68rem;color:var(--muted);text-align:center;margin-top:8px}
+        @media(max-width:800px){
+            .lobby-grid,.game-grid{grid-template-columns:1fr}.sidebar{min-height:0}.room-list{grid-template-columns:1fr}
+            .felt{border-radius:25px;padding:18px 10px}.card{width:47px;height:70px}.opponents{gap:4px;overflow-x:auto;justify-content:flex-start}
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <header class="topbar">
+        <div class="brand">PIXELB8 CARD HOUSE<small>REAL DECKS · REAL TABLES · CASUAL MULTIPLAYER</small></div>
+        <div class="connection" id="connection">Connecting to room directory…</div>
+    </header>
+
+    <main id="lobby-view" class="lobby-grid">
+        <section class="panel setup">
+            <h2>Your seat</h2>
+            <div class="field"><label>Display name</label><input id="player-name" maxlength="18" value=""></div>
+            <div class="divider"></div>
+            <h2>Create a table</h2>
+            <div class="field"><label>Game</label>
+                <select id="create-mode">
+                    <option value="freeplay">Free Play — Real Deck Sandbox</option>
+                    <option value="holdem">Texas Hold’em</option>
+                    <option value="blackjack">Multiplayer Blackjack</option>
+                    <option value="fivecard">Five-Card Draw</option>
+                    <option value="war">War</option>
+                </select>
+            </div>
+            <div class="row">
+                <div class="field"><label>Seats</label><select id="max-players"><option>2</option><option>4</option><option selected>6</option><option>8</option></select></div>
+                <div class="field"><label>Private code</label><input id="custom-code" maxlength="6" placeholder="AUTO"></div>
+            </div>
+            <button class="primary" id="create-room">CREATE OPEN TABLE</button>
+            <div class="divider"></div>
+            <h2>Join by code</h2>
+            <div class="row"><input id="join-code" maxlength="6" placeholder="ROOM CODE"><button id="join-code-btn">JOIN</button></div>
+            <p class="hint">Free Play gives the dealer an unrestricted deck: deal face-up or face-down to anyone, move cards to the table, flip cards, shuffle, clear, and start over.</p>
+        </section>
+
+        <section class="panel browser">
+            <div class="browser-head">
+                <div><h2>Open card rooms</h2><div class="hint" id="room-summary">Looking for tables…</div></div>
+                <div class="filters"><select id="room-filter"><option value="all">All games</option><option value="freeplay">Free Play</option><option value="holdem">Hold’em</option><option value="blackjack">Blackjack</option><option value="fivecard">Five-Card Draw</option><option value="war">War</option></select></div>
+            </div>
+            <div class="room-list" id="room-list"><div class="empty">Connecting to the public room directory…</div></div>
+        </section>
+    </main>
+
+    <main id="game-view" class="game-grid hidden">
+        <aside class="panel sidebar">
+            <div class="room-heading"><b id="room-title">Card Table</b><small id="room-details">Room ----</small></div>
+            <div class="roster" id="roster"></div>
+            
+            <!-- CYBER-COMMS (UNIVERSAL CHAT) -->
+            <div id="cyber-chat" class="chat-container" style="margin-bottom: 12px;"></div>
+            
+            <div class="sidebar-actions">
+                <button id="copy-code">COPY ROOM CODE</button>
+                <button class="danger" id="leave-room">LEAVE TABLE</button>
+            </div>
+        </aside>
+        <section class="panel table-shell">
+            <div class="table-head">
+                <h2 id="game-title">FREE PLAY</h2>
+                <span class="badge waiting" id="game-status">WAITING</span>
+                <div class="stats"><span class="stat" id="deck-stat">DECK 52</span><span class="stat" id="pot-stat">POT 0</span></div>
+            </div>
+            <div class="felt">
+                <div class="opponents" id="opponents"></div>
+                <div class="community">
+                    <div class="cards" id="community-cards"></div>
+                    <div class="table-message" id="table-message">Waiting for the host to start.</div>
+                </div>
+                <div class="my-seat">
+                    <div class="seat-name" id="my-seat-name">YOUR HAND</div>
+                    <div class="cards" id="my-hand"></div>
+                    <div class="seat-info" id="my-seat-info"></div>
+                </div>
+            </div>
+            <div class="action-bar" id="action-bar"></div>
+            <div class="toolkit hidden" id="freeplay-tools">
+                <label>DEALER TOOLKIT</label>
+                <button data-tool="shuffle">Shuffle</button>
+                <button data-tool="tableUp">Table ↑</button><button data-tool="tableDown">Table ↓</button>
+                <select id="deal-target"></select>
+                <button data-tool="playerUp">Player ↑</button><button data-tool="playerDown">Player ↓</button>
+                <button data-tool="clear">Clear Table</button><button data-tool="collect">Collect All</button>
+            </div>
+            <div class="mode-rules" id="mode-rules"></div>
+        </section>
+    </main>
+</div>
+
+<script>
+'use strict';
+const $=selector=>document.querySelector(selector);
+const MODES={
+    freeplay:{name:'Free Play',rules:'Host-controlled real-deck sandbox. Cards may be dealt, flipped and arranged however your table agrees.'},
+    holdem:{name:'Texas Hold’em',rules:'1,000 chips each · 10/20 blinds · No-limit betting · Simplified all-in pots.'},
+    blackjack:{name:'Multiplayer Blackjack',rules:'25-chip hands · Dealer stands on 17 · Blackjack pays 3:2.'},
+    fivecard:{name:'Five-Card Draw',rules:'25-chip ante · Select up to three cards to replace · Best five-card poker hand wins.'},
+    war:{name:'War',rules:'Each round deals one card per player. Highest rank wins the point.'}
+};
+const SUITS=['♠','♥','♦','♣'],VALUES=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const MP=window.ArcadeMultiplayer;
+let currentRooms=[],roomCode='',myId='',isHost=false,myRole='player',selectedDiscards=new Set(),selectedFreeCard=-1,state=null;
+let displayName=localStorage.getItem('pixelb8CardName')||`PLAYER_${Math.floor(Math.random()*9000+1000)}`;
+$('#player-name').value=displayName;
+
+function makeDeck(decks=1){
+    const cards=[];for(let n=0;n<decks;n++)for(const suit of SUITS)for(const val of VALUES)cards.push({suit,val,id:`${n}${suit}${val}${Math.random().toString(36).slice(2,7)}`});
+    for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}return cards;
+}
+const valueOf=card=>VALUES.indexOf(card.val)+2;
+function totalBlackjack(hand){let total=hand.reduce((n,c)=>n+Math.min(10,valueOf(c)),0),aces=hand.filter(c=>c.val==='A').length;while(aces--&&total+10<=21)total+=10;return total}
+function combinations(items,k){const out=[];(function walk(start,pick){if(pick.length===k){out.push(pick);return}for(let i=start;i<=items.length-(k-pick.length);i++)walk(i+1,pick.concat(items[i]))})(0,[]);return out}
+function fiveScore(cards){
+    const ranks=cards.map(valueOf).sort((a,b)=>b-a),counts={};ranks.forEach(v=>counts[v]=(counts[v]||0)+1);
+    const groups=Object.entries(counts).map(([v,n])=>({v:+v,n})).sort((a,b)=>b.n-a.n||b.v-a.v);
+    const flush=cards.every(c=>c.suit===cards[0].suit),unique=[...new Set(ranks)],wheel=unique.includes(14)&&[5,4,3,2].every(v=>unique.includes(v));
+    let straightHigh=wheel?5:0;for(let i=0;i<=unique.length-5;i++)if(unique[i]-unique[i+4]===4)straightHigh=Math.max(straightHigh,unique[i]);
+    if(flush&&straightHigh)return[8,straightHigh];
+    if(groups[0].n===4)return[7,groups[0].v,groups[1].v];
+    if(groups[0].n===3&&groups[1]?.n===2)return[6,groups[0].v,groups[1].v];
+    if(flush)return[5,...ranks];
+    if(straightHigh)return[4,straightHigh];
+    if(groups[0].n===3)return[3,groups[0].v,...groups.filter(g=>g.n===1).map(g=>g.v)];
+    const pairs=groups.filter(g=>g.n===2).map(g=>g.v).sort((a,b)=>b-a);
+    if(pairs.length>=2)return[2,pairs[0],pairs[1],groups.find(g=>g.n===1).v];
+    if(pairs.length===1)return[1,pairs[0],...groups.filter(g=>g.n===1).map(g=>g.v).sort((a,b)=>b-a)];
+    return[0,...ranks];
+}
+function bestScore(cards){return combinations(cards,5).map(fiveScore).sort(compareScore).at(-1)}
+function compareScore(a,b){for(let i=0;i<Math.max(a.length,b.length);i++){const d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
+const handName=score=>['High Card','Pair','Two Pair','Three of a Kind','Straight','Flush','Full House','Four of a Kind','Straight Flush'][score[0]];
+
+MP.init({
+    gameId:'cardhouse',playerName:displayName,
+    onRooms:rooms=>{currentRooms=rooms;renderRooms()},
+    onRoster:roster=>{renderRoster(roster);if(isHost&&state)syncRoster(roster)},
+    onConnected:info=>{roomCode=info.code;myId=info.clientId;isHost=info.isHost;myRole=info.role;enterTable()},
+    onMessage:handleNetwork,
+    onError:error=>{$('#connection').textContent=`Connection error: ${error.message}`}
+});
+setTimeout(()=>{$('#connection').classList.add('online');$('#connection').textContent='Public room directory online'},1000);
+
+$('#create-room').onclick=()=>{
+    rememberName();const mode=$('#create-mode').value,code=$('#custom-code').value.trim().toUpperCase();
+    MP.hostRoom({code,mode,maxPlayers:+$('#max-players').value,name:`${displayName}'s ${MODES[mode].name}`});
+};
+$('#join-code-btn').onclick=()=>joinRoom($('#join-code').value);
+$('#join-code').onkeydown=e=>{if(e.key==='Enter')joinRoom(e.target.value)};
+$('#room-filter').onchange=renderRooms;
+$('#leave-room').onclick=()=>{MP.disconnect();location.reload()};
+$('#copy-code').onclick=async()=>{await navigator.clipboard?.writeText(roomCode);$('#copy-code').textContent='COPIED!';setTimeout(()=>$('#copy-code').textContent='COPY ROOM CODE',1200)};
+
+function rememberName(){displayName=$('#player-name').value.trim().slice(0,18)||displayName;localStorage.setItem('pixelb8CardName',displayName);MP.setPlayerName(displayName)}
+function joinRoom(code,role='player'){rememberName();code=String(code||'').trim().toUpperCase();if(!code)return;MP.joinRoom(code,role)}
+function renderRooms(){
+    const filter=$('#room-filter').value,rooms=currentRooms.filter(r=>filter==='all'||r.mode===filter);
+    $('#room-summary').textContent=`${rooms.length} visible table${rooms.length===1?'':'s'} · updates automatically`;
+    $('#room-list').innerHTML='';
+    if(!rooms.length){$('#room-list').innerHTML='<div class="empty">No matching rooms are open. Create one and become the dealer.</div>';return}
+    rooms.forEach(room=>{
+        const full=room.playerCount>=room.maxPlayers,card=document.createElement('article');card.className='room-card';
+        card.innerHTML=`<div class="room-top"><div><div class="room-name">${escapeHtml(room.name||'Card Table')}</div><div class="room-code">ROOM ${room.code}</div></div><span class="badge ${room.status}">${room.status}</span></div>
+        <div class="room-meta"><span>${MODES[room.mode]?.name||room.mode}</span><span>♟ ${room.playerCount}/${room.maxPlayers}</span>${room.spectators?`<span>◉ ${room.spectators}</span>`:''}</div>
+        <div class="room-players">${(room.players||[]).map((p,i)=>`<span class="person-chip">${i===0?'♛ ':''}${escapeHtml(p.name)} · ${escapeHtml(p.status||room.status)}</span>`).join('')||'<span class="hint">Host is setting up…</span>'}</div>
+        <div class="room-actions"><button class="primary join" ${full||room.status==='playing'?'disabled':''}>${full?'FULL':room.status==='playing'?'IN PROGRESS':'TAKE SEAT'}</button><button class="watch">SPECTATE</button></div>`;
+        card.querySelector('.join').onclick=()=>joinRoom(room.code);card.querySelector('.watch').onclick=()=>joinRoom(room.code,'spectator');$('#room-list').appendChild(card);
+    });
+}
+function enterTable(){
+    $('#lobby-view').classList.add('hidden');$('#game-view').classList.remove('hidden');$('#room-details').textContent=`Room ${roomCode} · ${isHost?'Host':'Guest'}${myRole==='spectator'?' · Spectating':''}`;
+    
+    // Initialize Universal Cyber Chat
+    if (window.CyberChat) {
+        window.CyberChat.init('cyber-chat', (senderId) => {
+            if (!state || !state.players) return 'var(--muted)';
+            const pIndex = state.players.findIndex(p => p.id === senderId);
+            const colors = ['var(--red)', 'var(--blue)', 'var(--green)', 'var(--gold)', '#e056fd', '#ff9b9b', '#19f5c6', '#ffffff'];
+            return pIndex >= 0 ? colors[pIndex % colors.length] : 'var(--muted)';
+        });
+    }
+
+    if(isHost){const mode=$('#create-mode').value;state=newState(mode,+$('#max-players').value);state.players.push(newPlayer(myId,displayName));MP.updateRoom({mode,maxPlayers:state.maxPlayers,status:'waiting'});broadcast()}
+    else MP.publish('REQUEST_STATE');
+}
+function newPlayer(id,name){return{id,name,chips:1000,bet:0,folded:false,acted:false,allIn:false,status:'waiting',score:0}}
+function newState(mode,maxPlayers){return{mode,maxPlayers,status:'waiting',phase:'waiting',deck:makeDeck(),discard:[],community:[],hands:{},players:[],dealerHand:[],dealerIndex:-1,turnIndex:0,pot:0,currentBet:0,minimumRaise:20,round:0,message:'Waiting for players. The host can start when everyone is seated.'}}
+
+function handleNetwork(msg){
+    if(!msg || !msg.type) return;
+
+    // Route universal chat messages immediately
+    if (msg.type === 'CHAT') {
+        if (window.CyberChat) window.CyberChat.handleMessage(msg);
+        return;
+    }
+
+    if(msg.type==='WELCOME'&&!isHost)MP.publish('REQUEST_STATE');
+    if(msg.type==='REQUEST_STATE'&&isHost)broadcast();
+    if(msg.type==='STATE'&&msg.state){state=msg.state;renderGame()}
+    if(msg.type==='ACTION'&&isHost)handleAction(msg.senderId,msg.action,msg.payload||{});
+    if(msg.type==='JOIN'&&isHost&&state)setTimeout(()=>{syncRoster(MP.getRoster());broadcast()},50);
+}
+
+function syncRoster(roster){
+    if(!isHost||!state)return;const seated=roster.filter(r=>r.role!=='spectator').slice(0,state.maxPlayers),ids=new Set(seated.map(r=>r.id));
+    state.players=state.players.filter(p=>ids.has(p.id));seated.forEach(r=>{if(!state.players.some(p=>p.id===r.id))state.players.push(newPlayer(r.id,r.name))});
+    broadcast(false);
+}
+function broadcast(render=true){if(!isHost||!state)return;MP.publish('STATE',{state});MP.updateRoom({mode:state.mode,maxPlayers:state.maxPlayers,status:state.status,playerStates:Object.fromEntries(state.players.map(p=>[p.id,p.status]))});if(render)renderGame()}
+function sendAction(action,payload={}){if(isHost)handleAction(myId,action,payload);else MP.publish('ACTION',{action,payload})}
+
+function handleAction(sender,action,payload){
+    if(!state)return;const player=state.players.find(p=>p.id===sender);
+    if(action==='START'&&sender===MP.getHostId())startRound();
+    else if(action==='NEXT'&&sender===MP.getHostId())startRound();
+    else if(state.mode==='holdem')holdemAction(player,action,payload);
+    else if(state.mode==='blackjack')blackjackAction(player,action);
+    else if(state.mode==='fivecard')drawAction(player,action,payload);
+    else if(state.mode==='war'&&action==='WAR_NEXT'&&sender===MP.getHostId())startWarRound();
+    else if(state.mode==='freeplay')freeplayAction(sender,action,payload);
+}
+function resetPlayers(){state.players.forEach(p=>Object.assign(p,{bet:0,folded:false,acted:false,allIn:false,status:'playing'}));state.hands={};state.community=[];state.dealerHand=[];state.pot=0;state.currentBet=0;state.deck=makeDeck();state.discard=[];state.round++}
+function take(player,amount){const paid=Math.min(player.chips,amount);player.chips-=paid;if(!player.chips)player.allIn=true;return paid}
+function deal(playerId,n){state.hands[playerId]??=[];while(n--&&state.deck.length)state.hands[playerId].push(state.deck.pop())}
+function startRound(){
+    if(!isHost||state.players.length<1)return;
+    if(['holdem','fivecard','war'].includes(state.mode)&&state.players.length<2){state.message=`${MODES[state.mode].name} needs at least two seated players.`;broadcast();return}
+    resetPlayers();state.status='playing';
+    if(state.mode==='holdem')startHoldem();
+    if(state.mode==='blackjack')startBlackjack();
+    if(state.mode==='fivecard')startFiveCard();
+    if(state.mode==='war')startWarRound();
+    if(state.mode==='freeplay'){state.phase='active';state.message='The deck is live. The host is the dealer.';broadcast()}
+}
+function activePlayers(){return state.players.filter(p=>!p.folded)}
+function currentPlayer(){return state.players[state.turnIndex]}
+function nextActiveIndex(from=state.turnIndex){
+    for(let step=1;step<=state.players.length;step++){const i=(from+step)%state.players.length,p=state.players[i];if(!p.folded&&!p.allIn)return i}return from
+}
+
+function startHoldem(){
+    const n=state.players.length,dealer=(state.dealerIndex+1+n)%n;state.dealerIndex=dealer;
+    state.players.forEach(p=>{deal(p.id,2);p.acted=false});
+    const sb=state.players[(dealer+1)%n],bb=state.players[(dealer+2)%n];sb.bet=take(sb,10);bb.bet=take(bb,20);state.pot=sb.bet+bb.bet;state.currentBet=20;state.minimumRaise=20;
+    state.turnIndex=(dealer+3)%n;state.phase='preflop';state.message=`Blinds 10/20. ${currentPlayer().name} acts first.`;broadcast();
+}
+function holdemAction(p,action,payload){
+    if(!p||state.phase==='showdown'||p.id!==currentPlayer()?.id||p.folded)return;
+    const owed=Math.max(0,state.currentBet-p.bet);
+    if(action==='FOLD'){p.folded=true;p.acted=true}
+    else if(action==='CHECK'){if(owed)return;p.acted=true}
+    else if(action==='CALL'){const paid=take(p,owed);p.bet+=paid;state.pot+=paid;p.acted=true}
+    else if(action==='RAISE'){
+        const desired=Math.max(state.currentBet+state.minimumRaise,Math.min(p.bet+p.chips,+payload.total||0));const paid=take(p,desired-p.bet);p.bet+=paid;state.pot+=paid;
+        if(p.bet>state.currentBet){state.minimumRaise=Math.max(state.minimumRaise,p.bet-state.currentBet);state.currentBet=p.bet;state.players.forEach(x=>{if(!x.folded&&x.id!==p.id)x.acted=false})}p.acted=true;
+    }else if(action==='ALLIN'){const paid=take(p,p.chips);p.bet+=paid;state.pot+=paid;if(p.bet>state.currentBet){state.minimumRaise=Math.max(state.minimumRaise,p.bet-state.currentBet);state.currentBet=p.bet;state.players.forEach(x=>{if(!x.folded&&x.id!==p.id)x.acted=false})}p.acted=true}
+    else return;
+    if(activePlayers().length===1){award([activePlayers()[0]],`${activePlayers()[0].name} wins uncontested.`);return}
+    const settled=activePlayers().every(x=>x.allIn||(x.acted&&x.bet===state.currentBet));
+    if(settled)advanceHoldemStreet();else{state.turnIndex=nextActiveIndex();state.message=`${currentPlayer().name} to act · ${Math.max(0,state.currentBet-currentPlayer().bet)} to call.`;broadcast()}
+}
+function advanceHoldemStreet(){
+    state.players.forEach(p=>{p.bet=0;p.acted=p.allIn});state.currentBet=0;state.minimumRaise=20;
+    if(state.phase==='preflop'){state.deck.pop();state.community.push(state.deck.pop(),state.deck.pop(),state.deck.pop());state.phase='flop'}
+    else if(state.phase==='flop'){state.deck.pop();state.community.push(state.deck.pop());state.phase='turn'}
+    else if(state.phase==='turn'){state.deck.pop();state.community.push(state.deck.pop());state.phase='river'}
+    else{return holdemShowdown()}
+    state.turnIndex=nextActiveIndex(state.dealerIndex);state.message=`${state.phase.toUpperCase()} · ${currentPlayer().name} to act.`;broadcast()
+}
+function holdemShowdown(){
+    state.phase='showdown';const contenders=activePlayers().map(p=>({p,score:bestScore([...state.hands[p.id],...state.community])}));contenders.sort((a,b)=>compareScore(b.score,a.score));
+    const winners=contenders.filter(x=>compareScore(x.score,contenders[0].score)===0).map(x=>x.p);award(winners,`${winners.map(p=>p.name).join(' & ')} win with ${handName(contenders[0].score)}.`)
+}
+function award(winners,message){const share=Math.floor(state.pot/winners.length);winners.forEach(p=>p.chips+=share);state.pot=0;state.phase='showdown';state.status='waiting';state.message=message;state.players.forEach(p=>p.status='waiting');broadcast()}
+
+function startBlackjack(){
+    state.deck=makeDeck(Math.max(1,Math.ceil(state.players.length/4)));state.phase='playing';state.turnIndex=0;state.dealerHand=[state.deck.pop(),state.deck.pop()];
+    state.players.forEach(p=>{p.bet=take(p,25);state.pot+=p.bet;deal(p.id,2);p.status=totalBlackjack(state.hands[p.id])===21?'standing':'playing'});
+    advanceBlackjackTurn(-1);broadcast()
+}
+function advanceBlackjackTurn(from){
+    let found=-1;for(let step=1;step<=state.players.length;step++){const i=(from+step)%state.players.length;if(state.players[i].status==='playing'){found=i;break}}
+    if(found<0)return settleBlackjack();state.turnIndex=found;state.message=`${state.players[found].name}: hit or stand.`;
+}
+function blackjackAction(p,action){
+    if(!p||state.phase!=='playing'||p.id!==currentPlayer()?.id)return;
+    if(action==='HIT'){deal(p.id,1);const total=totalBlackjack(state.hands[p.id]);if(total>=21)p.status=total>21?'bust':'standing'}
+    else if(action==='STAND')p.status='standing';else return;
+    if(p.status==='playing')state.message=`${p.name} has ${totalBlackjack(state.hands[p.id])}.`;else advanceBlackjackTurn(state.turnIndex);broadcast()
+}
+function settleBlackjack(){
+    while(totalBlackjack(state.dealerHand)<17)state.dealerHand.push(state.deck.pop());const dealer=totalBlackjack(state.dealerHand);
+    state.players.forEach(p=>{const total=totalBlackjack(state.hands[p.id]),natural=total===21&&state.hands[p.id].length===2;if(total>21)return;if(natural){p.chips+=Math.floor(p.bet*2.5)}else if(dealer>21||total>dealer)p.chips+=p.bet*2;else if(total===dealer)p.chips+=p.bet});
+    state.phase='showdown';state.status='waiting';state.pot=0;state.message=`Dealer ${dealer>21?'busts with ': 'shows '}${dealer}. Hand complete.`;broadcast()
+}
+
+function startFiveCard(){state.phase='draw';state.players.forEach(p=>{p.bet=take(p,25);state.pot+=p.bet;p.status='drawing';deal(p.id,5)});state.message='Select up to three cards, then draw replacements.';broadcast()}
+function drawAction(p,action,payload){
+    if(!p||state.phase!=='draw'||action!=='DRAW'||p.status!=='drawing')return;const indexes=[...new Set(payload.indexes||[])].filter(i=>i>=0&&i<5).slice(0,3).sort((a,b)=>b-a);
+    indexes.forEach(i=>state.discard.push(state.hands[p.id].splice(i,1)[0]));deal(p.id,indexes.length);p.status='ready';
+    if(state.players.every(x=>x.status==='ready')){const ranked=state.players.map(x=>({p:x,score:fiveScore(state.hands[x.id])})).sort((a,b)=>compareScore(b.score,a.score));const winners=ranked.filter(x=>compareScore(x.score,ranked[0].score)===0).map(x=>x.p);award(winners,`${winners.map(x=>x.name).join(' & ')} win with ${handName(ranked[0].score)}.`)}
+    else{state.message=`Waiting for ${state.players.filter(x=>x.status==='drawing').map(x=>x.name).join(', ')} to draw.`;broadcast()}
+}
+function startWarRound(){if(!state||state.mode!=='war')return;state.status='playing';state.phase='showdown';state.community=[];state.hands={};if(state.deck.length<state.players.length)state.deck=makeDeck();state.players.forEach(p=>deal(p.id,1));const high=Math.max(...state.players.map(p=>valueOf(state.hands[p.id][0]))),winners=state.players.filter(p=>valueOf(state.hands[p.id][0])===high);winners.forEach(p=>p.score++);state.message=`${winners.map(p=>p.name).join(' & ')} take${winners.length===1?'s':''} the round.`;broadcast()}
+
+function freeplayAction(sender,action,payload){
+    const hostOnly=['SHUFFLE','TABLE_UP','TABLE_DOWN','PLAYER_UP','PLAYER_DOWN','CLEAR','COLLECT'];
+    if(hostOnly.includes(action)&&sender!==MP.getHostId())return;
+    if(action==='SHUFFLE'){state.deck=makeDeck();state.community=[];state.hands={};state.message='Fresh shuffled deck.'}
+    if(action==='TABLE_UP'||action==='TABLE_DOWN'){const c=state.deck.pop();if(c){c.faceUp=action==='TABLE_UP';state.community.push(c)}}
+    if(action==='PLAYER_UP'||action==='PLAYER_DOWN'){const target=payload.target,c=state.deck.pop();if(target&&c){c.faceUp=action==='PLAYER_UP';state.hands[target]??=[];state.hands[target].push(c)}}
+    if(action==='CLEAR'){state.community=[];state.message='Table center cleared.'}
+    if(action==='COLLECT'){state.deck=makeDeck();state.community=[];state.hands={};state.message='All cards collected and shuffled.'}
+    if(action==='FLIP_HAND'&&sender===payload.target&&state.hands[sender]?.[payload.index])state.hands[sender][payload.index].faceUp=!state.hands[sender][payload.index].faceUp;
+    if(action==='PLAY_HAND'&&state.hands[sender]?.[payload.index]){
+        const card=state.hands[sender].splice(payload.index,1)[0];card.faceUp=payload.faceUp!==false;state.community.push(card);state.message=`${state.players.find(p=>p.id===sender)?.name||'A player'} plays a card ${card.faceUp?'face-up':'face-down'}.`;
+    }
+    if(action==='RETURN_HAND'&&state.hands[sender]?.[payload.index]){
+        const card=state.hands[sender].splice(payload.index,1)[0];state.deck.unshift(card);state.message='A card returns to the bottom of the deck.';
+    }
+    if(action==='FLIP_TABLE'&&sender===MP.getHostId()&&state.community[payload.index])state.community[payload.index].faceUp=!state.community[payload.index].faceUp;
+    broadcast()
+}
+
+function renderRoster(roster){
+    $('#roster').innerHTML=roster.map(p=>`<div class="roster-item ${p.id===myId?'me':''}"><b>${p.id===MP.getHostId()?'♛ ':''}${escapeHtml(p.name)}</b><small>${p.role}${p.status?` · ${p.status}`:''}${p.id===myId?' · you':''}</small></div>`).join('')
+}
+function renderGame(){
+    if(!state)return;const me=state.players.find(p=>p.id===myId),mode=MODES[state.mode]||MODES.freeplay;
+    $('#room-title').textContent=`${mode.name} Table`;$('#game-title').textContent=mode.name.toUpperCase();$('#game-status').textContent=state.status;$('#game-status').className=`badge ${state.status}`;
+    $('#deck-stat').textContent=`DECK ${state.deck.length}`;$('#pot-stat').textContent=state.mode==='war'?`SCORE ${me?.score||0}`:`POT ${state.pot}`;$('#table-message').textContent=state.message;$('#mode-rules').textContent=mode.rules;
+    renderOpponents();renderCommunity();renderMyHand();renderActions();renderFreeplayTools();
+}
+function renderOpponents(){
+    const players=state.players.filter(p=>p.id!==myId);$('#opponents').innerHTML=players.map(p=>{
+        const cards=state.hands[p.id]||[],reveal=state.phase==='showdown'&&state.mode!=='blackjack'||state.mode==='war';
+        return`<div class="seat ${currentPlayer()?.id===p.id&&state.status==='playing'?'turn':''} ${p.folded?'folded':''}"><div class="seat-name">${escapeHtml(p.name)}</div><div class="mini-hand">${cards.map(c=>reveal?miniFace(c):'<span class="mini-card"></span>').join('')}</div><div class="seat-info">${state.mode==='war'?`${p.score} wins`:`${p.chips} chips${p.bet?` · bet ${p.bet}`:''}${p.status?` · ${p.status}`:''}`}</div></div>`}).join('')
+}
+function miniFace(c){return`<span class="mini-card" style="background:#f7f4e8;color:${['♥','♦'].includes(c.suit)?'#c22':'#111'};font:bold 11px Georgia;display:grid;place-items:center">${c.val}${c.suit}</span>`}
+function renderCommunity(){
+    $('#community-cards').innerHTML='';
+    if(state.mode==='blackjack'){
+        state.dealerHand.forEach((c,i)=>$('#community-cards').appendChild(cardElement(c,state.phase==='playing'&&i===1)));
+        return
+    }
+    state.community.forEach((c,i)=>$('#community-cards').appendChild(cardElement(c,state.mode==='freeplay'&&c.faceUp===false,()=>{if(state.mode==='freeplay'&&isHost)sendAction('FLIP_TABLE',{index:i})})))
+}
+function renderMyHand(){
+    const me=state.players.find(p=>p.id===myId),cards=state.hands[myId]||[];$('#my-hand').innerHTML='';
+    cards.forEach((c,i)=>{const selectable=state.mode==='fivecard'&&state.phase==='draw'&&me?.status==='drawing',freeSelectable=state.mode==='freeplay';const el=cardElement(c,false,()=>{
+        if(selectable){if(selectedDiscards.has(i))selectedDiscards.delete(i);else if(selectedDiscards.size<3)selectedDiscards.add(i);renderMyHand()}
+        else if(freeSelectable){selectedFreeCard=selectedFreeCard===i?-1:i;renderMyHand();renderActions()}
+        else if(state.mode==='freeplay')sendAction('FLIP_HAND',{target:myId,index:i})
+    });if(selectable||freeSelectable){el.classList.add('clickable');if(selectedDiscards.has(i)||selectedFreeCard===i)el.classList.add('selected')}$('#my-hand').appendChild(el)});
+    $('#my-seat-name').textContent=myRole==='spectator'?'SPECTATING':`${displayName} — YOUR HAND`;
+    $('#my-seat-info').textContent=me?`${me.chips} chips${me.bet?` · bet ${me.bet}`:''}${currentPlayer()?.id===myId&&state.status==='playing'?' · YOUR TURN':''}`:'No player seat';
+}
+function cardElement(card,hidden=false,onClick=null){
+    const el=document.createElement('div');el.className=`card ${hidden?'back':(['♥','♦'].includes(card.suit)?'red':'')}`;
+    if(!hidden)el.innerHTML=`<span class="corner">${card.val}<br>${card.suit}</span><span class="big-suit">${card.suit}</span>`;
+    if(onClick){el.classList.add('clickable');el.onclick=onClick}return el
+}
+function renderActions(){
+    const bar=$('#action-bar');bar.innerHTML='';const me=state.players.find(p=>p.id===myId);
+    if(myRole==='spectator')return;
+    if(state.status==='waiting'&&isHost)addButton(bar,state.round?'NEXT HAND':'START GAME','primary',()=>sendAction(state.round?'NEXT':'START'));
+    if(state.mode==='holdem'&&state.status==='playing'&&currentPlayer()?.id===myId){
+        const owed=Math.max(0,state.currentBet-me.bet);if(!owed)addButton(bar,'CHECK','',()=>sendAction('CHECK'));else addButton(bar,`CALL ${Math.min(owed,me.chips)}`,'primary',()=>sendAction('CALL'));
+        addButton(bar,'FOLD','danger',()=>sendAction('FOLD'));
+        [25,50,100].forEach(add=>addButton(bar,`RAISE +${add}`,'',()=>sendAction('RAISE',{total:state.currentBet+add}),me.chips<=owed+add));
+        addButton(bar,`ALL-IN ${me.chips}`,'',()=>sendAction('ALLIN'),!me.chips)
+    }
+    if(state.mode==='blackjack'&&state.phase==='playing'&&currentPlayer()?.id===myId){addButton(bar,'HIT','primary',()=>sendAction('HIT'));addButton(bar,'STAND','',()=>sendAction('STAND'))}
+    if(state.mode==='fivecard'&&state.phase==='draw'&&me?.status==='drawing')addButton(bar,`DRAW ${selectedDiscards.size||0}`,'primary',()=>{sendAction('DRAW',{indexes:[...selectedDiscards]});selectedDiscards.clear()});
+    if(state.mode==='war'&&isHost)addButton(bar,'DEAL NEXT WAR ROUND','primary',()=>sendAction('WAR_NEXT'));
+    if(state.mode==='freeplay'&&selectedFreeCard>=0){
+        addButton(bar,'PLAY FACE-UP','primary',()=>{const index=selectedFreeCard;selectedFreeCard=-1;sendAction('PLAY_HAND',{index,faceUp:true})});
+        addButton(bar,'PLAY FACE-DOWN','',()=>{const index=selectedFreeCard;selectedFreeCard=-1;sendAction('PLAY_HAND',{index,faceUp:false})});
+        addButton(bar,'RETURN TO DECK','',()=>{const index=selectedFreeCard;selectedFreeCard=-1;sendAction('RETURN_HAND',{index})});
+    }
+}
+function addButton(parent,text,cls,fn,disabled=false){const b=document.createElement('button');b.textContent=text;b.className=cls;b.onclick=fn;b.disabled=disabled;parent.appendChild(b)}
+function renderFreeplayTools(){
+    const tools=$('#freeplay-tools');tools.classList.toggle('hidden',state.mode!=='freeplay'||!isHost);if(state.mode!=='freeplay'||!isHost)return;
+    $('#deal-target').innerHTML=state.players.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')
+}
+$('#freeplay-tools').onclick=e=>{
+    const tool=e.target.dataset.tool;if(!tool)return;const map={shuffle:'SHUFFLE',tableUp:'TABLE_UP',tableDown:'TABLE_DOWN',playerUp:'PLAYER_UP',playerDown:'PLAYER_DOWN',clear:'CLEAR',collect:'COLLECT'};
+    sendAction(map[tool],{target:$('#deal-target').value})
+};
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+</script>
+</body>
+</html>

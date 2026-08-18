@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPACE PIRATES — Entropia Universe Arcade</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+
+    </style>
+</head>
+<body>
+
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-grid"></div>
+            <div class="marquee-art"></div>
+            <h1>SPACE PIRATES</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container" id="screenContainer">
+                <div class="crt-overlay" id="crtOverlay"></div>
+                <div class="crt-curve"></div>
+                
+                <div id="start-panel" class="ui-panel">
+                    <h2 style="color: var(--marquee-cyan);">INSERT COIN</h2>
+                    <p style="color: #fff; margin-bottom: 15px;">Press ENTER or click the coin slot</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">THROTTLE: W | HANDBRAKE: S | STEER: A/D</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">GEARS: SHIFT+UP / SHIFT+DOWN | ROLL: SHIFT+A/D or X</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">FIRE: SPACE | BOOST ONLY: SHIFT+SPACE</p>
+                    <p style="color: #ffd700; font-size: 0.65rem; margin-top: 10px;">LEAN: [L] | CRT: F2</p>
+                </div>
+
+                <div id="name-panel" class="ui-panel hidden">
+                    <h2>PILOT ID</h2>
+                    <input type="text" id="playerNameInput" value="COMMANDER" maxlength="12" autocomplete="off" spellcheck="false">
+                    <p style="color: var(--marquee-cyan); font-size: 0.75rem;">Press ENTER to Confirm</p>
+                </div>
+
+                <div id="gameover-panel" class="ui-panel hidden">
+                    <h2 id="result-title">SHIP DESTROYED</h2>
+                    <p id="final-score" style="font-weight: bold; color: #fff; font-size: 1.1rem; line-height: 1.45;">CREDITS: 0</p>
+                    <p id="result-next-hint" style="color: var(--marquee-cyan); font-size: 0.75rem; margin-top: 10px;">Press ENTER or click the coin slot to reboot</p>
+                </div>
+
+                <canvas id="gameCanvas" width="512" height="320"></canvas>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="cp-texture"></div>
+            <div class="lean-btn" id="zoomBtn">LEAN</div>
+            <button class="crt-btn active" id="crtBtn" type="button" title="Toggle CRT scanlines (F2)">CRT ON</button>
+
+            <div class="joystick-base">
+                <div class="joystick-ball" id="joystickBall"></div>
+            </div>
+
+            <div class="action-cluster">
+                <div style="text-align: center;"><button class="arcade-btn btn-shoot" id="btnShoot">SPC</button><span style="font-size:0.55rem; color:#aaa;">SHOOT</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-shift" id="btnShift">SHFT</button><span style="font-size:0.55rem; color:#aaa;">SHIFT</span></div>
+            </div>
+        </div>
+
+        <div class="lower-cabinet">
+            <div class="coin-door">
+                <div class="coin-slot" id="coinSlotBtn">
+                    <div class="coin-entry"></div>
+                </div>
+                <div class="coin-slot" style="opacity: 0.6; cursor: default;">
+                    <div class="coin-entry" style="background: #004433; box-shadow: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+
+    <script>
+
+    </script>
+</body>
+</html>

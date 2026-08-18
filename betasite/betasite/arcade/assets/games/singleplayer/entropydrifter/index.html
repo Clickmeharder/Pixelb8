@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENTROPY DRIFTER</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="drag-ghost">ITEM</div>
+    <div id="context-menu"></div>
+
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-art"></div>
+            <h1>ENTROPIAN DRIFTER</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container">
+                <canvas id="gameCanvas" width="480" height="270"></canvas>
+                <div id="coords-display" class="hidden">X: 0 Y: 0</div>
+                <div class="crt-overlay"></div>
+
+                <div id="start-menu" class="ui-overlay hidden">
+                    <div class="ui-box" style="background: transparent; border: none; box-shadow: none;">
+                        <h1 style="color: var(--marquee-cyan); text-shadow: 0 0 15px #0284c7, 0 0 30px #0ea5e9, 4px 4px 0px #000; font-size: 3.5rem; margin-bottom: 40px; font-family: 'Impact', sans-serif; font-style: italic; transform: skewX(-8deg);">ENTROPIAN DRIFTER</h1>
+                        <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
+                            <button class="confirm-btn" style="width: 250px; font-size: 1.2rem; padding: 12px;" onclick="startGame('new')">NEW GAME</button>
+                            <button class="confirm-btn" style="width: 250px; font-size: 1.2rem; padding: 12px; background: #1e293b; color: #94a3b8; border: 1px solid #475569;" onclick="startGame('continue')">CONTINUE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="char-create" class="ui-overlay hidden">
+                    <div class="ui-box">
+                        <h2 class="ui-title">COLONIST UPLINK</h2>
+                        <div class="cc-layout">
+                            <div class="cc-form">
+                                <label>NAME:</label> <input type="text" id="cc-name" value="Drifter" maxlength="12">
+                                <label>SKIN:</label> <input type="color" id="cc-skin" value="#fed7aa">
+                                <label>SHIRT:</label> <input type="color" id="cc-shirt" value="#94a3b8">
+                                <label>PANTS:</label> <input type="color" id="cc-pants" value="#1e293b">
+                                <label>HAIR C:</label> <input type="color" id="cc-hair" value="#451a03">
+                                <label>HAIR S:</label> 
+                                <select id="cc-style">
+                                    <option value="1">Short</option>
+                                    <option value="2">Spiky</option>
+                                    <option value="3">Long</option>
+                                    <option value="4">Pigtails</option>
+                                </select>
+                                <label>HEIGHT:</label> <input type="range" id="cc-h" min="0.8" max="1.2" step="0.1" value="1.0">
+                                <label>WIDTH:</label>  <input type="range" id="cc-w" min="0.8" max="1.3" step="0.1" value="1.0">
+                            </div>
+                            <div class="cc-preview">
+                                <canvas id="previewCanvas" class="preview-canvas" width="100" height="120"></canvas>
+                                <button class="confirm-btn" id="btn-confirm-char">ACCEPT</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="map-ui" class="ui-overlay hidden">
+                    <div class="ui-box" style="height: 85%; display: flex; flex-direction: column; padding: 10px;">
+                        <h2 class="ui-title" id="map-title" style="margin-bottom: 4px;">PLANETARY MAP</h2>
+                        <div style="display:flex; justify-content:center; gap:6px; margin-bottom:6px;">
+                            <button class="buy-btn" onclick="zoomMapUI(1.5)">+ ZOOM IN</button>
+                            <button class="buy-btn" onclick="zoomMapUI(0.67)">- ZOOM OUT</button>
+                            <button class="buy-btn" onclick="centerMapOnPlayer()">⌖ CENTER PLAYER</button>
+                            <button class="buy-btn" onclick="resetMapUI()">⟲ RESET</button>
+                        </div>
+                        <div class="map-container" style="flex: 1;">
+                            <canvas id="worldMapCanvas"></canvas>
+                        </div>
+                        <p style="color: #38bdf8; font-size: 0.65rem; margin-top: 6px;">Scroll/Drag to navigate | Press M to Close</p>
+                    </div>
+                </div>
+
+                <div id="planet-select" class="ui-overlay hidden">
+                    <div class="ui-box">
+                        <h2 class="ui-title">SHUTTLE DESTINATION</h2>
+                        <div class="planet-grid">
+                            <button class="planet-btn" onclick="travelTo('Calypso')">Planet Calypso</button>
+                            <button class="planet-btn" onclick="travelTo('Rocktropia')">ROCKtropia</button>
+                            <button class="planet-btn" onclick="travelTo('Cyrene')">Planet Cyrene</button>
+                            <button class="planet-btn" onclick="travelTo('Arkadia')">Planet Arkadia</button>
+                            <button class="planet-btn" onclick="travelTo('Monria')">Monria</button>
+                            <button class="planet-btn" onclick="travelTo('Toulan')">Planet Toulan</button>
+                            <button class="planet-btn" onclick="travelTo('NextIsland')" style="grid-column: span 3;">Next Island</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="inventory-ui" class="ui-overlay hidden">
+                    <div class="ui-box">
+                        <div class="inv-header">
+                            <span style="font-weight:bold;">INVENTORY & EQUIPMENT</span>
+                            <span id="inv-ped">PED: 0.00</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex: 1; height: 130px;">
+                            <div style="flex: 1; display: flex; flex-direction: column;">
+                                <span id="inv-ammo" style="font-size: 0.6rem; color: #0ea5e9; text-align: left; margin-bottom: 2px;">AMMO: 0 Cells</span>
+                                <div id="inv-list" style="flex: 1; overflow-y: auto; background: #020617; border: 1px solid #334155;"></div>
+                            </div>
+                            <div id="char-sheet" style="flex: 1; display: flex; flex-direction: column; background: #020617; border: 1px solid #334155; padding: 4px; overflow-y: auto;">
+                                <div style="color: #00ffcc; font-size: 0.65rem; margin-bottom: 4px;">ARMOUR</div>
+                                <div class="equip-grid" id="armour-grid">
+                                    <div class="equip-slot" data-slot="arm_head">Head</div>
+                                    <div class="equip-slot" data-slot="arm_body">Body</div>
+                                    <div class="equip-slot" data-slot="arm_arms">Arms</div>
+                                    <div class="equip-slot" data-slot="arm_gloves">Gloves</div>
+                                    <div class="equip-slot" data-slot="arm_thighs">Thighs</div>
+                                    <div class="equip-slot" data-slot="arm_shins">Shins</div>
+                                    <div class="equip-slot" data-slot="arm_boots">Boots</div>
+                                </div>
+                                <div style="color: #00ffcc; font-size: 0.65rem; margin: 4px 0;">CLOTHING</div>
+                                <div class="equip-grid" id="clothing-grid">
+                                    <div class="equip-slot" data-slot="clo_hat">Hat</div>
+                                    <div class="equip-slot" data-slot="clo_face">Face</div>
+                                    <div class="equip-slot" data-slot="clo_torso">Torso</div>
+                                    <div class="equip-slot" data-slot="clo_arms">Arms</div>
+                                    <div class="equip-slot" data-slot="clo_hands">Hands</div>
+                                    <div class="equip-slot" data-slot="clo_pants">Pants</div>
+                                    <div class="equip-slot" data-slot="clo_shins">Shins</div>
+                                    <div class="equip-slot" data-slot="clo_shoes">Shoes</div>
+                                    <div class="equip-slot" data-slot="clo_lring">L-Ring</div>
+                                    <div class="equip-slot" data-slot="clo_rring">R-Ring</div>
+                                    <div class="equip-slot" data-slot="clo_back">Back</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="color: #38bdf8; font-size: 0.65rem; margin-top: 5px;">R-Click items to equip. Drag weapons to Hotbar.</p>
+                    </div>
+                </div>
+
+                <div id="tt-ui" class="ui-overlay hidden">
+                    <div class="ui-box" style="height: 75%; display: flex; flex-direction: column;">
+                        <h2 class="ui-title">TRADE TERMINAL</h2>
+                        <div class="inv-header"><span id="tt-ped">PED: 0.00</span></div>
+                        <div id="tt-list" style="flex: 1; overflow-y: auto; text-align: left; border: 1px solid #334155;"></div>
+                        <button class="confirm-btn" style="margin-top: 10px;" onclick="closeTerminal()">CLOSE</button>
+                    </div>
+                </div>
+
+                <div id="craft-ui" class="ui-overlay hidden">
+                    <div class="ui-box">
+                        <h2 class="ui-title">MANUFACTURE TERMINAL</h2>
+                        <div id="craft-list" style="text-align: left; min-height: 80px;"></div>
+                        <button class="confirm-btn" style="margin-top: 15px;" onclick="closeTerminal()">CLOSE</button>
+                    </div>
+                </div>
+
+                <div id="tp-ui" class="ui-overlay hidden">
+                    <div class="ui-box">
+                        <h2 class="ui-title">TELEPORTER NETWORK</h2>
+                        <div id="tp-list" class="planet-grid"></div>
+                        <button class="confirm-btn" style="margin-top: 15px;" onclick="closeTerminal()">CLOSE</button>
+                    </div>
+                </div>
+
+                <div class="hud-bottom" id="hud-bottom" style="display: none;">
+                    <div class="status-bars">
+                        <div class="bar-wrap" title="Health"><div class="bar-fill" id="hp-bar" style="background: #ef4444; width: 100%;"></div></div>
+                        <div class="bar-wrap" title="Reload"><div class="bar-fill" id="reload-bar" style="background: #eab308; width: 100%;"></div></div>
+                    </div>
+                    <div class="hotbar-wrap" id="hotbar"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="lean-btn" id="zoomBtn">LEAN<br>L</div>
+            <div class="instructions">
+                <strong>WASD / ARROWS</strong>: Move<br>
+                <strong>SPACE</strong>: Jump
+            </div>
+            <div class="instructions">
+                <strong>L/R CLICK</strong>: Target/Interact<br>
+                <strong>I</strong>: Inv | <strong>M</strong>: Map
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+
+
+    <script>
+
+    </script>
+</body>
+</html>

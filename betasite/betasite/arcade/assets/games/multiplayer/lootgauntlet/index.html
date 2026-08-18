@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOOT GAUNTLET — Entropia Universe Arcade</title>
+    <!-- Dependencies -->
+    <link rel="stylesheet" href="../chat.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="../multiplayer.js"></script>
+
+    <style>
+
+    </style>
+</head>
+<body>
+
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-art"></div>
+            <h1>LOOT GAUNTLET</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container">
+                <div class="crt-overlay"></div>
+                
+                <div id="start-panel">
+                    <h2 style="color: #ffd700; margin:0 0 15px 0;">INSERT COIN</h2>
+                    <p style="color: #fff; font-size: 0.85rem; margin-bottom: 10px;">Your PED Card constantly drains.</p>
+                    <p style="color: #ff5555; font-size: 0.85rem; margin-bottom: 20px;">Survive the dungeons. Grab the loot.</p>
+                    <p style="color: #00ffff; font-size: 0.75rem;">MOVE: Arrows/WASD | SHOOT: SPACE | BOMB: SHIFT</p>
+                </div>
+
+                <canvas id="gameCanvas" width="640" height="480"></canvas>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="cp-texture"></div>
+            <div class="lean-btn" id="zoomBtn">LEAN</div>
+            
+            <div class="joystick-base">
+                <div class="joystick-ball" id="joystickBall"></div>
+            </div>
+            
+            <div class="action-cluster">
+                <div style="text-align: center;"><button class="arcade-btn btn-shoot" id="btnShoot">SPC</button><span style="font-size:0.55rem; color:#aaa;">SHOOT</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-bomb" id="btnBomb">SHFT</button><span style="font-size:0.55rem; color:#aaa;">ME</span></div>
+            </div>
+        </div>
+
+        <div class="lower-cabinet">
+            <div class="coin-door">
+                <div class="coin-slot" id="coinSlotBtn"><div class="coin-entry"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+
+    </script>
+</body>
+</html>

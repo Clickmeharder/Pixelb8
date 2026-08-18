@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entropia Universe Hunt Dashboard</title>
+  <link rel="stylesheet" href="../sharedassets/css/pixelb8-shell.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="streamermode.css">
+</head>
+<body>
+<div class="app" id="appShell" data-pixelb8-shell>
+<aside id="appSidebar" class="app-sidebar">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand-mark" title="PixelB8 EU"><span class="brand-mark-expanded">P8</span><span class="brand-mark-rail">PXLB8</span></div>
+      <div class="brand sidebar-brand-copy">
+        <h1>PixelB8 EU</h1>
+        <p>Entropia hunting telemetry & analytics</p>
+      </div>
+      <button id="sidebarToggleBtn" class="sidebar-collapse-btn" type="button" onclick="toggleAppSidebar()" title="Collapse sidebar" aria-label="Collapse sidebar">‹</button>
+    </div>
+
+    <div class="sidebar-scroll">
+      <section class="sidebar-section sidebar-account">
+        <div class="sidebar-section-label">Account</div>
+        <label class="compact-field sidebar-avatar-field" title="Avatar name">
+          <strong>Avatar</strong>
+          <input type="text" id="avatarNameInput" placeholder="John Doe" oninput="updateAvatarName()">
+        </label>
+        <label class="toggle sidebar-voice-toggle" title="Voice announcer">
+          <input type="checkbox" id="voiceToggle" onchange="toggleVoiceAnnouncer()">
+          <span class="sidebar-item-icon">🔊</span>
+          <span class="sidebar-item-text">Voice Announcer</span>
+        </label>
+      </section>
+
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Data</div>
+        <button class="btn primary sidebar-action" data-rail="📁" type="button" onclick="pickChatLogFile()" title="Select chat.log">
+          <span class="sidebar-item-icon">📁</span><span class="sidebar-item-text">Select chat.log</span>
+        </button>
+        <button id="resumeBtn" class="btn success sidebar-action hidden" data-rail="↻" type="button" onclick="resumeSavedChatLog()" title="Resume chat.log">
+          <span class="sidebar-item-icon">↻</span><span class="sidebar-item-text">Resume Log</span>
+        </button>
+      </section>
+
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Mode</div>
+        <button id="trackerModeBtn" class="btn sidebar-action sidebar-event-action" data-rail="⚙" type="button" onclick="openTrackerOptions()" title="Tracker / event options">
+          <span class="sidebar-event-icons">
+            <span class="sidebar-item-icon">⚙</span>
+            <span class="sidebar-event-graph" aria-hidden="true">📈</span>
+          </span>
+          <span class="sidebar-item-text">Upcoming Legends</span>
+        </button>
+        <button id="streamerModeBtn" class="btn streamer-toggle sidebar-action obs-mode-sidebar-btn" data-rail="OBS" type="button" onclick="toggleStreamerMode()" title="OBS/browser-source HUD. Esc exits.">
+          <span class="sidebar-item-icon">◈</span>
+          <span class="sidebar-item-text obs-mode-expanded-label">OBS Mode</span>
+          <span class="obs-mode-rail-label" aria-hidden="true">OBS</span>
+        </button>
+      </section>
+
+      <section class="sidebar-section sidebar-status-section">
+        <div class="sidebar-section-label">Status</div>
+        <div class="sidebar-status-row" title="Connection status">
+          <span class="sidebar-item-icon status-dot-wrap"><span id="liveIndicator" class="dot"></span></span>
+          <div class="sidebar-status-copy"><span>Connection</span><b id="connectionStatusText">Offline</b></div>
+        </div>
+        <div class="sidebar-status-row" title="Synced game time">
+          <span class="sidebar-item-icon">◷</span>
+          <div class="sidebar-status-copy"><span>Game Time</span><b id="syncGameTimeDisplay" class="accent">Not synced</b></div>
+        </div>
+        <div class="sidebar-status-grid">
+          <div class="sidebar-mini-stat" title="Your globals">
+            <span>G</span><b id="userGlobalCount" class="success">0</b>
+          </div>
+          <div class="sidebar-mini-stat" title="Your HOFs">
+            <span>H</span><b id="userHofCount" class="hof">0</b>
+          </div>
+        </div>
+      </section>
+
+      <nav class="nav sidebar-nav" aria-label="Main navigation">
+        <div class="sidebar-section-label">Navigation</div>
+        <button class="tab-btn active" data-tab="global" onclick="switchTab('global')" title="Global Analytics">
+          <span class="sidebar-nav-icon">G</span><span class="sidebar-item-text">Global Analytics</span>
+        </button>
+        <button class="tab-btn" data-tab="live" onclick="switchTab('live')" title="Live Monitor">
+          <span class="sidebar-nav-icon">L</span><span class="sidebar-item-text">Live Monitor</span>
+        </button>
+        <button class="tab-btn" data-tab="hunt" onclick="switchTab('hunt')" title="Hunt Tracker">
+          <span class="sidebar-nav-icon">H</span><span class="sidebar-item-text">Hunt Tracker</span>
+        </button>
+      </nav>
+
+
+    </div>
+
+      <section class="pixelb8-more-dock pixelb8-links-section collapsed" id="pixelb8MoreSection" data-pixelb8-more>
+        <button class="pixelb8-links-toggle" type="button" onclick="togglePixelb8More()" aria-expanded="false" title="More from PixelB8">
+          <span class="sidebar-item-icon">◆</span>
+          <span class="sidebar-item-text">More from PixelB8</span>
+          <span class="pixelb8-links-chevron">›</span>
+        </button>
+        <div class="pixelb8-links-body">
+          <button class="btn sidebar-action pixelb8-link-btn" type="button" onclick="location.href='../home.html'" title="Return to PixelB8">
+            <span class="sidebar-item-icon">⌂</span><span class="sidebar-item-text">PixelB8 Home</span>
+          </button>
+          <button class="btn sidebar-action pixelb8-link-btn" type="button" onclick="location.href='../arcade/index.html'" title="PixelB8 Arcade">
+            <span class="sidebar-item-icon">🕹</span><span class="sidebar-item-text">Arcade</span>
+          </button>
+          <button class="btn sidebar-action pixelb8-link-btn" type="button" onclick="window.showAppToast?.('PixelB8 Creator Tools link coming soon.','info')" title="PixelB8 Creator Tools">
+            <span class="sidebar-item-icon">🛠</span><span class="sidebar-item-text">Creator Tools</span>
+          </button>
+          <button class="btn sidebar-action pixelb8-link-btn" type="button" onclick="window.showAppToast?.('More PixelB8 tools are coming soon.','info')" title="More PixelB8">
+            <span class="sidebar-item-icon">⋯</span><span class="sidebar-item-text">More PixelB8</span>
+          </button>
+        </div>
+      </section>
+
+    <div class="sidebar-footer">
+      <span class="sidebar-footer-full">PixelB8 · EU Tools</span>
+      <span class="sidebar-footer-rail">PXLB8</span>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <!-- Global Analytics -->
+    <section id="globalTab" class="tab-page">
+      <div class="global-analytics-shell">
+        <div class="global-analytics-subnav">
+          <button id="globalScheduleBtn" class="global-subtab-btn active" onclick="switchGlobalAnalyticsTab('schedule')">Schedule</button>
+          <button id="globalAnalyticsBtn" class="global-subtab-btn" onclick="switchGlobalAnalyticsTab('analytics')">Analytics &amp; Waypoints</button>
+        </div>
+        <div class="global-analytics-body">
+
+    <!-- Schedule -->
+    <section id="scheduleTab" class="global-subtab-page">
+      <div id="fileConnectionCard" class="connection-bar">
+        <div class="connection-info">
+          <div>📡</div>
+          <div class="text">
+            <div class="connection-title">Chat Log Source</div>
+            <div id="fileStatus">No chat.log connected. Cached analytics load instantly; reconnecting only scans bytes added since the last cached position.</div>
+          </div>
+        </div>
+        <div class="connection-actions">
+          <button class="btn primary" onclick="pickChatLogFile()">Select File</button>
+        </div>
+      </div>
+
+      <div class="schedule-layout">
+        <div class="schedule-main">
+          <div class="kpi-grid">
+            <div class="kpi">
+              <div id="sessionWindowLabel" class="kpi-label">6-Hour Window</div>
+              <div id="timerDisplay" class="kpi-value timer-value">Waiting...</div>
+              <div id="timerDetails" class="kpi-sub">Starts on your first event global.</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Active Hour</div>
+              <div id="currentTimeDisplay" class="kpi-value accent">--:00</div>
+              <div class="kpi-sub">UTC / synced log hour</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Loaded Target Globals</div>
+              <div id="loadedGlobalsKpi" class="kpi-value">0</div>
+              <div id="loadedGlobalsSub" class="kpi-sub">No data loaded</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">All-Mob Peak Hour</div>
+              <div id="allMobPeakKpi" class="kpi-value hof">--</div>
+              <div id="allMobPeakSub" class="kpi-sub">Waiting for data</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Event Ends In</div>
+              <div id="eventEndCountdown" class="kpi-value warning">--d --:--:--</div>
+              <div id="eventEndCountdownSub" class="kpi-sub">Aug 17 · 00:00 UTC</div>
+            </div>
+            <div class="kpi">
+              <div id="latestStartLabel" class="kpi-label">Latest 6h Start In</div>
+              <div id="latestStartCountdown" class="kpi-value success">--d --:--:--</div>
+              <div id="latestStartCountdownSub" class="kpi-sub">Deadline: Aug 16 · 18:00 UTC</div>
+            </div>
+          </div>
+
+          <div class="recommend-grid">
+            <div class="recommend primary">
+              <h3>Recommended Hunt Right Now</h3>
+              <div id="recommendedMobBox" class="value success">Load chat.log</div>
+              <div id="recommendationReason" class="reason"></div>
+            </div>
+            <div class="recommend window">
+              <h3>Best 6-Hour Contiguous Window</h3>
+              <div id="bestWindowBox" class="value warning">Calculate from log data</div>
+              <div id="bestWindowReason" class="reason"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <span id="eventScheduleTitleText" class="panel-title">Upcoming Legends · Aug 15–16, 2026</span>
+              <div class="toolbar">
+                <label>Time mode</label>
+                <select id="timeModeSelect" onchange="toggleTimeMode()">
+                  <option value="live" selected>Live / Log</option>
+                  <option value="custom">Simulate</option>
+                </select>
+                <span id="customTimeGroup" class="hidden">
+                  <input type="number" id="simHourInput" min="0" max="23" value="12" onchange="updateScheduleDisplay()">
+                </span>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date / Hour</th>
+                    <th>Top Mob</th>
+                    <th>Globals</th>
+                    <th>Alternative</th>
+                    <th>Activity</th>
+                  </tr>
+                </thead>
+                <tbody id="scheduleTableBody">
+                  <tr><td colspan="5" class="empty">Awaiting chat.log data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <aside class="schedule-side">
+          <div class="panel heatmap-panel">
+            <div class="panel-header">
+              <span class="panel-title">Target 6 · Hourly Density</span>
+              <span id="targetPeakLabel" class="muted" style="font-size:.68rem">No data</span>
+            </div>
+            <div class="panel-body">
+              <div id="heatmapGrid" class="heatmap-grid"></div>
+            </div>
+          </div>
+
+          <div class="panel heatmap-panel">
+            <div class="panel-header">
+              <span class="panel-title" style="color:var(--hof)">All Mobs · Hourly Density</span>
+              <span id="allPeakLabel" class="muted" style="font-size:.68rem">No data</span>
+            </div>
+            <div class="panel-body">
+              <div id="heatmapGridAll" class="heatmap-grid"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Current Hour Breakdown</span>
+              <span id="currentHourMiniLabel" class="accent" style="font-size:.68rem">--:00</span>
+            </div>
+            <div class="panel-body" id="currentHourBreakdown">
+              <div class="empty">Load data to see mob-by-mob activity.</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Analytics -->
+    <section id="analyticsTab" class="global-subtab-page hidden">
+      <div class="analytics-layout">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Historical Analytics</span>
+            <button class="btn" onclick="openTrackerOptions()">⚙ Targets / Window</button>
+            <div class="analytics-top">
+              <div class="analytics-summary">
+                <span class="status-pill">Records <b id="analyticsRecordCount">0</b></span>
+                <span class="status-pill">Total PED <b id="analyticsTotalPed" class="success">0.00</b></span>
+                <span class="status-pill">Largest <b id="analyticsLargestPed" class="warning">0.00</b></span>
+              </div>
+              <select id="timeframeSelect" onchange="updateAnalyticsDisplay()">
+                <option value="last3">Last 90 Days</option>
+                <option value="last6">Last 180 Days</option>
+                <option value="last12">Last 365 Days</option>
+                <option value="all" selected>All Time</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultsContainer" class="analytics-cards">
+          <div class="empty">Connect chat.log to view analytics and waypoints.</div>
+        </div>
+      </div>
+    </section>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Live -->
+    <section id="liveTab" class="tab-page hidden">
+      <div class="live-layout">
+        <div class="live-summary">
+          <div class="kpi">
+            <div class="kpi-label">My Globals</div>
+            <div id="liveMyGlobalCount" class="kpi-value success">0</div>
+            <div id="liveMyGlobalPed" class="kpi-sub">0.00 PED total</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">My HOFs</div>
+            <div id="liveMyHofCount" class="kpi-value hof">0</div>
+            <div id="liveMyHofPed" class="kpi-sub">0.00 PED total</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">My Total Loot</div>
+            <div id="liveMyTotalLoot" class="kpi-value warning">0.00 PED</div>
+            <div class="kpi-sub">Globals + HOFs in event window</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Latest Target</div>
+            <div id="liveLatestMob" class="kpi-value accent">—</div>
+            <div class="kpi-sub">Most recent target-mob event</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-title">Real-Time Session Globals</span>
+              <span class="muted" style="font-size:.68rem;margin-left:8px">Polling connected chat.log once per second</span>
+            </div>
+            <button class="btn" onclick="clearLiveFeed()">Clear Feed</button>
+          </div>
+        </div>
+
+        <div class="live-feed-stack">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Target 6 Globals</span>
+              <div class="live-feed-meta">
+                Event targets only
+                <span class="live-feed-count">G <b id="targetLiveGlobalCount">0</b></span>
+                <span class="live-feed-count">HOF <b id="targetLiveHofCount">0</b></span>
+                <span id="targetLiveFeedValue" class="live-feed-count">0.00 PED</span>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="feed-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Type</th>
+                    <th>Mob</th>
+                    <th>Player</th>
+                    <th>Loot</th>
+                    <th>Raw Entry</th>
+                  </tr>
+                </thead>
+                <tbody id="liveTableBody">
+                  <tr><td colspan="6" class="empty">Live monitor waiting for target-mob globals...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title" style="color:var(--hof)">All Mob Globals</span>
+              <div class="live-feed-meta">
+                Every creature global detected
+                <span class="live-feed-count">G <b id="allMobLiveGlobalCount">0</b></span>
+                <span class="live-feed-count">HOF <b id="allMobLiveHofCount">0</b></span>
+                <span id="allMobLiveFeedValue" class="live-feed-count">0.00 PED</span>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="feed-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Type</th>
+                    <th>Mob</th>
+                    <th>Player</th>
+                    <th>Loot</th>
+                    <th>Raw Entry</th>
+                  </tr>
+                </thead>
+                <tbody id="allMobLiveTableBody">
+                  <tr><td colspan="6" class="empty">Live monitor waiting for creature globals...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hunt Tracker -->
+    <section id="huntTab" class="tab-page hidden">
+      <div class="hunt-tracker-shell">
+        <div class="global-analytics-subnav">
+          <button id="huntLoadoutsBtn" class="global-subtab-btn active" onclick="switchHuntTrackerTab('loadouts')">Loadouts</button>
+          <button id="huntLiveBtn" class="global-subtab-btn" onclick="switchHuntTrackerTab('livehunt')">Live Hunt</button>
+          <button id="huntTeamBtn" class="global-subtab-btn" onclick="switchHuntTrackerTab('team')">Team</button>
+        </div>
+
+        <div class="hunt-tracker-body">
+          <section id="huntLoadoutsTab" class="hunt-subtab-page">
+            <div class="loadout-toolbar panel">
+              <div class="panel-header">
+                <div>
+                  <span class="panel-title">Loadout Library</span>
+                  <span id="equippedLoadoutBadge" class="muted" style="font-size:.67rem;margin-left:8px">No loadout equipped</span>
+                </div>
+                <div class="toolbar">
+                  <button class="btn" onclick="EntropiaLoadouts.newLoadout()">＋ New</button>
+                  <button class="btn" onclick="EntropiaLoadouts.importLoadouts()">Import</button>
+                  <button class="btn" onclick="EntropiaLoadouts.exportLoadouts()">Export</button>
+                  <button class="btn primary" onclick="EntropiaLoadouts.saveCurrent()">Save Loadout</button>
+                </div>
+              </div>
+            </div>
+            <div class="loadout-layout">
+              <div class="loadout-left-stack">
+              <aside class="panel loadout-library-panel">
+                <div class="panel-header">
+                  <span class="panel-title">Saved Loadouts</span>
+                  <span id="savedLoadoutCount" class="muted">0</span>
+                </div>
+                <div id="savedLoadoutList" class="loadout-saved-list">
+                  <div class="empty">No loadouts saved yet.</div>
+                </div>
+              </aside>
+              <aside class="panel hunt-history-panel">
+                <div class="panel-header">
+                  <span class="panel-title">Hunt History</span>
+                  <span id="huntHistoryCount" class="muted">0</span>
+                </div>
+                <div id="huntHistoryList" class="hunt-history-list">
+                  <div class="empty">No saved hunts yet.</div>
+                </div>
+              </aside>
+            </div>
+
+              <div class="loadout-builder-column">
+                <div class="panel">
+                  <div class="panel-header">
+                    <div>
+                      <span class="panel-title">Loadout Builder</span>
+                      <span id="loadoutBuilderState" class="muted">New build</span>
+                    </div>
+                    <div class="builder-header-actions">
+                      <span id="nexusApiState" class="nexus-api-state">Nexus API ready</span>
+                      <div class="builder-view-switch">
+                        <button id="builderCardViewBtn" class="summary-mode-btn active" type="button" onclick="EntropiaLoadouts.setBuilderView('cards')">Card View</button>
+                        <button id="builderTableViewBtn" class="summary-mode-btn" type="button" onclick="EntropiaLoadouts.setBuilderView('table')">Table View</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="panel-body loadout-builder-body">
+                    <input id="loadoutUseSecondaryAmp" type="checkbox" class="hidden" aria-hidden="true">
+                    <div id="builderCardView" class="builder-card-view">
+                      <div id="builderCardGrid" class="builder-card-grid"></div>
+                    </div>
+                    <div id="builderTableView" class="builder-table-view hidden">
+
+                    <div class="loadout-name-row">
+                      <label class="compact-field grow">
+                        <strong>Loadout Name</strong>
+                        <input id="loadoutNameInput" type="text" value="Custom Loadout">
+                      </label>
+                      <label class="compact-field">
+                        <strong>Hit Profession</strong>
+                        <input id="loadoutHitSkill" type="number" min="0" max="200" step=".1" value="100">
+                      </label>
+                      <label class="compact-field">
+                        <strong>Damage Profession</strong>
+                        <input id="loadoutDmgSkill" type="number" min="0" max="200" step=".1" value="100">
+                      </label>
+                    </div>
+
+                    <div class="loadout-section-title">Weapon</div>
+                    <div class="loadout-economy-grid loadout-weapon-grid">
+                      <label class="compact-field wide">
+                        <strong>Name</strong>
+                        <div class="loadout-picker-input">
+                          <input id="weaponName" type="text" placeholder="Weapon name">
+                          <button class="btn nexus-pick-btn" type="button" onclick="EntropiaLoadouts.openItemPicker('weapon')">Search API</button>
+                        </div>
+                      </label>
+                      <label class="compact-field">
+                        <strong>Max Damage</strong>
+                        <input id="weaponMaxDamage" type="number" min="0" step=".01" value="0">
+                      </label>
+                      <label class="compact-field">
+                        <strong>Uses / Min</strong>
+                        <input id="weaponApm" type="number" min="0" step=".01" value="60">
+                      </label>
+                      <label class="compact-field">
+                        <strong>Decay / Use</strong>
+                        <div class="input-suffix"><input id="weaponDecay" type="number" min="0" step=".0001" value="0"><span>PEC</span></div>
+                      </label>
+                      <label class="compact-field">
+                        <strong>Ammo / Use</strong>
+                        <div class="input-suffix"><input id="weaponAmmo" type="number" min="0" step=".0001" value="0"><span>PEC</span></div>
+                      </label>
+                      <label class="compact-field">
+                        <strong>Efficiency</strong>
+                        <div class="input-suffix"><input id="weaponEfficiency" type="number" min="0" max="100" step=".01" value="0"><span>%</span></div>
+                      </label>
+                      <label class="compact-field">
+                        <strong>Market Economics</strong>
+                        <label class="market-toggle"><input id="useMarketMarkup" type="checkbox" onchange="EntropiaLoadouts.toggleMarketMarkup()"><span>Use Market Markup</span></label>
+                      </label>
+                      <label class="compact-field market-mu-field">
+                        <strong>Weapon MU</strong>
+                        <div class="input-suffix"><input id="weaponMu" type="number" min="0" step=".01" value="100" disabled><span>%</span></div>
+                      </label>
+                      <label class="compact-field">
+                        <strong>Ammo MU</strong>
+                        <div class="input-suffix"><input id="ammoMu" type="number" min="0" step=".01" value="100" disabled><span>%</span></div>
+                      </label>
+                    </div>
+
+                    <div class="loadout-section-title">Attachments</div>
+                    <div class="loadout-attachment-table-wrap">
+                      <table class="loadout-attachment-table">
+                        <thead>
+                          <tr>
+                            <th>Slot</th>
+                            <th>Name</th>
+                            <th>Damage</th>
+                            <th>Decay PEC</th>
+                            <th>Ammo PEC</th>
+                            <th>Efficiency %</th>
+                            <th>MU %</th><th>API</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr data-slot="amp"><td>Amplifier</td><td><input data-field="name"></td><td><input data-field="damage" type="number" step=".01"></td><td><input data-field="decay" type="number" step=".0001"></td><td><input data-field="ammo" type="number" step=".0001"></td><td><input data-field="efficiency" type="number" step=".01"></td><td><input data-field="mu" type="number" step=".01" value="100" disabled></td><td><button class="btn nexus-row-btn" type="button" onclick="EntropiaLoadouts.openItemPicker('amp')">Browse</button><button class="btn slot-clear-btn" type="button" onclick="EntropiaLoadouts.clearSlot('amp')">Clear</button></td></tr>
+                    <tr id="secondaryAmpAddRow" class="secondary-amp-add-row">
+                      <td colspan="8"><button class="btn secondary-amp-add-btn" type="button" onclick="EntropiaLoadouts.enableSecondaryAmp()">＋ Secondary Amp</button></td>
+                    </tr>
+                          <tr data-slot="amp2" class="secondary-amp-table-row"><td>Mayhem Amp</td><td><input data-field="name"></td><td><input data-field="damage" type="number" step=".01"></td><td><input data-field="decay" type="number" step=".0001"></td><td><input data-field="ammo" type="number" step=".0001"></td><td><input data-field="efficiency" type="number" step=".01"></td><td><input data-field="mu" type="number" step=".01" value="100" disabled></td><td><button class="btn nexus-row-btn" type="button" onclick="EntropiaLoadouts.openItemPicker('amp2')">Browse</button><button class="btn slot-clear-btn" type="button" onclick="EntropiaLoadouts.clearSlot('amp2')">Clear</button><button class="btn slot-remove-btn" type="button" onclick="EntropiaLoadouts.removeSecondaryAmp()">Remove Slot</button></td></tr>
+                          <tr data-slot="absorber"><td>Absorber</td><td><input data-field="name"></td><td><input data-field="damage" type="number" step=".01"></td><td><input data-field="decay" type="number" step=".0001"></td><td><input data-field="ammo" type="number" step=".0001"></td><td><input data-field="efficiency" type="number" step=".01"></td><td><input data-field="mu" type="number" step=".01" value="100" disabled></td><td><button class="btn nexus-row-btn" type="button" onclick="EntropiaLoadouts.openItemPicker('absorber')">Browse</button><button class="btn slot-clear-btn" type="button" onclick="EntropiaLoadouts.clearSlot('absorber')">Clear</button></td></tr>
+                          <tr data-slot="scope"><td>Scope</td><td><input data-field="name"></td><td><input data-field="damage" type="number" step=".01"></td><td><input data-field="decay" type="number" step=".0001"></td><td><input data-field="ammo" type="number" step=".0001"></td><td><input data-field="efficiency" type="number" step=".01"></td><td><input data-field="mu" type="number" step=".01" value="100" disabled></td><td><button class="btn nexus-row-btn" type="button" onclick="EntropiaLoadouts.openItemPicker('scope')">Browse</button><button class="btn slot-clear-btn" type="button" onclick="EntropiaLoadouts.clearSlot('scope')">Clear</button></td></tr>
+                          <tr data-slot="sight1"><td>Sight 1</td><td><input data-field="name"></td><td><input data-field="damage" type="number" step=".01"></td><td><input data-field="decay" type="number" step=".0001"></td><td><input data-field="ammo" type="number" step=".0001"></td><td><input data-field="efficiency" type="number" step=".01"></td><td><input data-field="mu" type="number" step=".01" value="100" disabled></td><td><button class="btn nexus-row-btn" type="button" onclick="EntropiaLoadouts.openItemPicker('sight1')">Browse</button><button class="btn slot-clear-btn" type="button" onclick="EntropiaLoadouts.clearSlot('sight1')">Clear</button></td></tr>
+                          <tr data-slot="sight2"><td>Sight 2</td><td><input data-field="name"></td><td><input data-field="damage" type="number" step=".01"></td><td><input data-field="decay" type="number" step=".0001"></td><td><input data-field="ammo" type="number" step=".0001"></td><td><input data-field="efficiency" type="number" step=".01"></td><td><input data-field="mu" type="number" step=".01" value="100" disabled></td><td><button class="btn nexus-row-btn" type="button" onclick="EntropiaLoadouts.openItemPicker('sight2')">Browse</button><button class="btn slot-clear-btn" type="button" onclick="EntropiaLoadouts.clearSlot('sight2')">Clear</button></td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div class="loadout-section-title loadout-section-title-row"><span>Enhancers</span><button class="btn nexus-row-btn" type="button" onclick="EntropiaLoadouts.openItemPicker('enhancer')">Browse Enhancers</button></div>
+                    <div id="loadoutEnhancerGrid" class="loadout-enhancer-grid"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="panel loadout-stats-panel loadout-summary-panel">
+                <div class="panel-header loadout-summary-header">
+                  <div>
+                    <span class="panel-title">Loadout Summary</span>
+                    <span id="summaryModeLabel" class="muted" style="font-size:.60rem">Builder</span>
+                  </div>
+                  <div class="summary-mode-switch">
+                    <button id="summaryCurrentBtn" class="summary-mode-btn" onclick="EntropiaLoadouts.setSummaryMode('equipped')">Equipped</button>
+                    <button id="summaryBuilderBtn" class="summary-mode-btn active" onclick="EntropiaLoadouts.setSummaryMode('builder')">Builder</button>
+                  </div>
+                </div>
+                <div class="panel-body loadout-summary-body">
+                  <div id="sharedLoadoutSummary" class="shared-loadout-summary">
+                    <div class="empty">Select a weapon to start a build.</div>
+                  </div>
+                  <div class="summary-divider"></div>
+                  <div class="loadout-stat-grid compact-summary-stats">
+                    <div class="loadout-stat"><span>Cost / Shot</span><b id="loadoutStatCost">0.0000 PED</b></div>
+                    <div class="loadout-stat"><span>DPP</span><b id="loadoutStatDpp" class="success">0.00</b></div>
+                    <div class="loadout-stat"><span>DPS</span><b id="loadoutStatDps" class="accent">0.0</b></div>
+                    <div class="loadout-stat"><span>Efficiency</span><b id="loadoutStatEfficiency">0.00%</b></div>
+                    <div class="loadout-stat"><span>Min Damage</span><b id="loadoutStatMinDamage">0.00</b></div>
+                    <div class="loadout-stat"><span>Max Damage</span><b id="loadoutStatMaxDamage">0.00</b></div>
+                    <div class="loadout-stat"><span>Attacks / Min</span><b id="loadoutStatApm">0.00</b></div>
+                    <div class="loadout-stat"><span>Ammo / Shot</span><b id="loadoutStatAmmo">0.0000 PEC</b></div>
+                    <div class="loadout-stat"><span>Decay / Shot</span><b id="loadoutStatDecay">0.0000 PEC</b></div>
+                    <div class="loadout-stat"><span>Range</span><b id="loadoutStatRange">0.0 m</b></div>
+                    <div class="loadout-stat"><span>Hit Rate</span><b id="loadoutStatHitRate">0.00%</b></div>
+                  </div>
+                  <div class="summary-actions">
+                    <button id="summaryEquipBuilderBtn" class="btn success" onclick="EntropiaLoadouts.equipBuilder()">Equip Builder</button>
+                    <button id="summaryEditEquippedBtn" class="btn hidden" onclick="EntropiaLoadouts.loadEquippedIntoBuilder()">Edit Equipped Copy</button>
+                  </div>
+                  <div class="loadout-estimate-note">Builder values are theoretical. Equipped values are the loadout currently used by Live Hunt.</div>
+                </div>
+              </aside>
+            </div>
+          </section>
+
+          <section id="huntTeamTab" class="hunt-subtab-page hidden">
+            <div class="team-tracker-layout">
+              <section class="panel team-control-panel">
+                <div class="panel-header">
+                  <div>
+                    <span class="panel-title">Team Tracking</span>
+                    <span id="teamDetectedState" class="muted">No team activity detected</span>
+                  </div>
+                  <div class="team-connection-badges">
+                    <span id="teamLogBadge" class="team-badge">LOG UNKNOWN</span>
+                    <span id="teamRoomBadge" class="team-badge">ROOM OFFLINE</span>
+                  </div>
+                </div>
+                <div class="panel-body team-control-body">
+                  <label class="compact-field grow">
+                    <strong>Team Name</strong>
+                    <input id="teamNameInput" type="text" maxlength="48" placeholder="e.g. Saturday Mayhem">
+                  </label>
+                  <label class="compact-field">
+                    <strong>Room Visibility</strong>
+                    <select id="teamPrivacySelect">
+                      <option value="private">Private · code required</option>
+                      <option value="public">Public · listed</option>
+                    </select>
+                  </label>
+                  <button class="btn primary" type="button" onclick="EntropiaTeamTracker.createOrUpdateRoom()">Create / Update Room</button>
+                  <label class="compact-field team-code-field">
+                    <strong>Join / Share Code</strong>
+                    <input id="teamRoomCodeInput" type="text" maxlength="8" placeholder="ABC123">
+                  </label>
+                  <button class="btn" type="button" onclick="EntropiaTeamTracker.joinRoomFromInput()">Join Code</button>
+                  <button class="btn" type="button" onclick="EntropiaTeamTracker.copyRoomCode()">Copy Code</button>
+                  <button class="btn slot-clear-btn" type="button" onclick="EntropiaTeamTracker.leaveRoom()">Leave Room</button>
+                </div>
+                <div class="team-control-note">
+                  Private rooms are unlisted and require the room code, but the public test broker is not end-to-end encrypted. Do not use the room for secrets.
+                </div>
+              </section>
+
+              <div class="team-kpi-grid team-performance-kpis">
+                <div class="kpi"><div class="kpi-label">Connected Peers</div><div id="teamOnlineCount" class="kpi-value accent">0</div><div class="kpi-sub">Dashboard room clients</div></div>
+                <div class="kpi"><div class="kpi-label">Team Cost</div><div id="teamSharedCost" class="kpi-value warning">0.00 PED</div><div class="kpi-sub">Reported hunt cost</div></div>
+                <div class="kpi"><div class="kpi-label">Team Loot</div><div id="teamSharedLoot" class="kpi-value success">0.00 PED</div><div class="kpi-sub">Reported hunt loot</div></div>
+                <div class="kpi"><div class="kpi-label">Team Profit / Loss</div><div id="teamSharedProfit" class="kpi-value">0.00 PED</div><div id="teamSharedReturn" class="kpi-sub">Return 0.00%</div></div>
+                <div class="kpi"><div class="kpi-label">Actual Team DPP</div><div id="teamActualDpp" class="kpi-value">0.00</div><div class="kpi-sub">Total damage / total PEC</div></div>
+                <div class="kpi"><div class="kpi-label">Combined Actual DPS</div><div id="teamActualDps" class="kpi-value accent">0.0</div><div id="teamAverageActualDps" class="kpi-sub">Avg member 0.0</div></div>
+                <div class="kpi"><div class="kpi-label">Estimated Team DPS</div><div id="teamEstimatedDps" class="kpi-value">0.0</div><div id="teamAverageEstimatedDps" class="kpi-sub">Avg member 0.0</div></div>
+                <div class="kpi"><div class="kpi-label">Avg Loadout Efficiency</div><div id="teamAverageEfficiency" class="kpi-value">0.0%</div><div id="teamAverageLoadoutDpp" class="kpi-sub">Avg DPP 0.00</div></div>
+              </div>
+
+              <section class="panel team-performance-panel">
+                <div class="panel-header">
+                  <div>
+                    <span class="panel-title">Team Performance</span>
+                    <span class="muted">Estimated loadouts vs actual hunt telemetry</span>
+                  </div>
+                  <span id="teamPerformanceCoverage" class="muted">0 members reporting</span>
+                </div>
+                <div class="panel-body team-performance-grid">
+                  <div class="team-performance-group">
+                    <div class="team-performance-heading">Loadout Estimate</div>
+                    <div class="team-performance-stat"><span>Combined DPS</span><b id="teamPerfEstimatedCombinedDps">0.0</b></div>
+                    <div class="team-performance-stat"><span>Average DPS</span><b id="teamPerfEstimatedAvgDps">0.0</b></div>
+                    <div class="team-performance-stat"><span>Average DPP</span><b id="teamPerfEstimatedAvgDpp">0.00</b></div>
+                    <div class="team-performance-stat"><span>Average Efficiency</span><b id="teamPerfEstimatedAvgEfficiency">0.0%</b></div>
+                    <div class="team-performance-stat"><span>Average Cost / Shot</span><b id="teamPerfEstimatedAvgCostShot">0.0000 PED</b></div>
+                  </div>
+                  <div class="team-performance-group">
+                    <div class="team-performance-heading">Actual Hunt</div>
+                    <div class="team-performance-stat"><span>Combined DPS</span><b id="teamPerfActualCombinedDps">0.0</b></div>
+                    <div class="team-performance-stat"><span>Average DPS</span><b id="teamPerfActualAvgDps">0.0</b></div>
+                    <div class="team-performance-stat"><span>Actual Team DPP</span><b id="teamPerfActualDpp">0.00</b></div>
+                    <div class="team-performance-stat"><span>Accuracy</span><b id="teamPerfAccuracy">0.0%</b></div>
+                    <div class="team-performance-stat"><span>Total Damage</span><b id="teamPerfDamage">0</b></div>
+                  </div>
+                  <div class="team-performance-group">
+                    <div class="team-performance-heading">Economy</div>
+                    <div class="team-performance-stat"><span>Total Cost</span><b id="teamPerfCost">0.00 PED</b></div>
+                    <div class="team-performance-stat"><span>Total Loot</span><b id="teamPerfLoot">0.00 PED</b></div>
+                    <div class="team-performance-stat"><span>Profit / Loss</span><b id="teamPerfProfit">0.00 PED</b></div>
+                    <div class="team-performance-stat"><span>Return</span><b id="teamPerfReturn">0.0%</b></div>
+                    <div class="team-performance-stat"><span>Total Shots</span><b id="teamPerfShots">0</b></div>
+                  </div>
+                </div>
+              </section>
+
+              <div class="team-main-grid">
+                <section class="panel team-roster-panel">
+                  <div class="panel-header">
+                    <span class="panel-title">Detected Team Roster</span>
+                    <span class="muted">chat.log inference</span>
+                  </div>
+                  <div id="teamDetectedRoster" class="team-roster-list">
+                    <div class="empty">No team members detected yet.</div>
+                  </div>
+                </section>
+
+                <section class="panel team-public-panel">
+                  <div class="panel-header">
+                    <div>
+                      <span class="panel-title">Public Teams</span>
+                      <span id="teamPublicRoomCount" class="muted">0 available</span>
+                    </div>
+                    <button class="btn" type="button" onclick="EntropiaTeamTracker.refreshPublicRooms()">↻ Refresh</button>
+                  </div>
+                  <div id="teamPublicRoomList" class="team-public-room-list">
+                    <div class="empty">No public team rooms discovered.</div>
+                  </div>
+                </section>
+
+                <section class="panel team-online-panel">
+                  <div class="panel-header">
+                    <span class="panel-title">Connected Room</span>
+                    <span id="teamRoomNameLabel" class="muted">No room</span>
+                  </div>
+                  <div id="teamOnlineRoster" class="team-roster-list">
+                    <div class="empty">Create or join a room to share live telemetry.</div>
+                  </div>
+                </section>
+
+                <section class="panel team-loot-panel">
+                  <div class="panel-header">
+                    <span class="panel-title">Team Channel Loot</span>
+                    <span class="muted">Quantity only · no TT value in these lines</span>
+                  </div>
+                  <div class="team-table-wrap">
+                    <table class="hunt-feed-table">
+                      <thead><tr><th>Time</th><th>Player</th><th>Item</th><th>Qty</th></tr></thead>
+                      <tbody id="teamLootBody"><tr><td colspan="4" class="empty">No Team loot lines yet.</td></tr></tbody>
+                    </table>
+                  </div>
+                </section>
+
+                <section class="panel team-events-panel">
+                  <div class="panel-header">
+                    <span class="panel-title">Team Events</span>
+                    <span id="teamEventCount" class="muted">0</span>
+                  </div>
+                  <div class="team-table-wrap">
+                    <table class="hunt-feed-table">
+                      <thead><tr><th>Time</th><th>Event</th><th>Player</th><th>Details</th></tr></thead>
+                      <tbody id="teamEventBody"><tr><td colspan="4" class="empty">Waiting for Team activity.</td></tr></tbody>
+                    </table>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </section>
+
+          <section id="huntLiveTab" class="hunt-subtab-page hidden">
+            <div class="hunt-live-layout">
+              <div class="panel hunt-session-toolbar">
+                <div class="panel-header">
+                  <div>
+                    <span class="panel-title">Live Hunt Telemetry</span>
+                    <span id="liveHuntEquippedLabel" class="muted" style="font-size:.67rem;margin-left:8px">No equipped loadout</span>
+                  </div>
+                  <div class="toolbar">
+                    <span id="huntSessionStatus" class="hunt-status idle">IDLE</span>
+                    <button id="huntStartBtn" class="btn success" onclick="EntropiaHuntTracker.start()">▶ Start Hunt</button>
+                    <button id="huntPauseBtn" class="btn" onclick="EntropiaHuntTracker.togglePause()" disabled>Ⅱ Pause</button>
+                    <button id="huntStopBtn" class="btn" onclick="EntropiaHuntTracker.stop()" disabled>■ Stop</button>
+                    <button class="btn" onclick="EntropiaHuntTracker.reset()">↺ Reset</button>
+                    <button class="btn" onclick="EntropiaHuntTracker.exportSession()">Export</button>
+                  </div>
+                </div>
+              </div>
+
+              <section class="panel hunt-session-panel">
+                <div class="panel-header">
+                  <div>
+                    <span class="panel-title">Hunt Session</span>
+                    <span id="huntSessionSavedState" class="muted">Not started</span>
+                  </div>
+                  <div class="toolbar">
+                    <button id="huntSaveBtn" class="btn primary" onclick="EntropiaHuntTracker.saveCompletedSession()" disabled>Save Hunt</button>
+                  </div>
+                </div>
+                <div class="panel-body hunt-session-body">
+                  <div class="hunt-session-fields">
+                    <label class="compact-field grow">
+                      <strong>Hunt Name</strong>
+                      <input id="huntNameInput" type="text" maxlength="64" placeholder="e.g. Evening Proteron Hunt">
+                    </label>
+                    <label class="compact-field">
+                      <strong>Target / Mob</strong>
+                      <input id="huntTargetInput" type="text" maxlength="64" placeholder="Optional">
+                    </label>
+                    <div class="hunt-session-info">
+                      <span>Loadout</span><b id="huntSessionLoadout">No loadout</b>
+                    </div>
+                    <div class="hunt-session-info">
+                      <span>Started</span><b id="huntSessionStarted">—</b>
+                    </div>
+                    <div class="hunt-session-info">
+                      <span>Ended</span><b id="huntSessionEnded">—</b>
+                    </div>
+                    <div class="hunt-session-info">
+                      <span>Elapsed</span><b id="huntSessionElapsed">00:00:00</b>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <div class="hunt-kpi-grid">
+                <div class="kpi">
+                  <div class="kpi-label">Actual Cost</div>
+                  <div id="huntMetricCost" class="kpi-value warning">0.00 PED</div>
+                  <div id="huntMetricCostSub" class="kpi-sub">0 shots · loadout cost</div>
+                </div>
+                <div class="kpi">
+                  <div class="kpi-label">Loot</div>
+                  <div id="huntMetricLoot" class="kpi-value success">0.00 PED</div>
+                  <div id="huntMetricLootSub" class="kpi-sub">0 loot drops</div>
+                </div>
+                <div class="kpi">
+                  <div class="kpi-label">Profit / Loss</div>
+                  <div id="huntMetricProfit" class="kpi-value">0.00 PED</div>
+                  <div id="huntMetricReturn" class="kpi-sub">Return 0.00%</div>
+                </div>
+                <div class="kpi">
+                  <div class="kpi-label">Damage Dealt</div>
+                  <div id="huntMetricDamage" class="kpi-value accent">0.0</div>
+                  <div id="huntMetricAccuracy" class="kpi-sub">Accuracy 0.0%</div>
+                </div>
+                <div class="kpi">
+                  <div class="kpi-label">Live DPP</div>
+                  <div id="huntMetricDpp" class="kpi-value">0.00</div>
+                  <div class="kpi-sub">Observed damage / PEC spent</div>
+                </div>
+                <div class="kpi">
+                  <div class="kpi-label">Live DPS</div>
+                  <div id="huntMetricDps" class="kpi-value accent">0.0</div>
+                  <div id="huntMetricDuration" class="kpi-sub">00:00:00 combat</div>
+                </div>
+              </div>
+
+              <div class="hunt-live-main">
+                <section class="panel hunt-combat-panel">
+                  <div class="panel-header">
+                    <span class="panel-title">Combat Breakdown</span>
+                    <span id="huntCurrentWeapon" class="muted">No weapon</span>
+                  </div>
+                  <div class="panel-body">
+                    <div class="hunt-metric-grid">
+                      <div class="hunt-metric"><span>Total Shots</span><b id="huntShots">0</b></div>
+                      <div class="hunt-metric"><span>Hits</span><b id="huntHits" class="success">0</b></div>
+                      <div class="hunt-metric"><span>Crits</span><b id="huntCrits" class="hof">0</b></div>
+                      <div class="hunt-metric"><span>Misses</span><b id="huntMisses">0</b></div>
+                      <div class="hunt-metric"><span>Evades</span><b id="huntEvades">0</b></div>
+                      <div class="hunt-metric"><span>Dodges</span><b id="huntDodges">0</b></div>
+                      <div class="hunt-metric"><span>Damage Taken</span><b id="huntDamageTaken">0.0</b></div>
+                      <div class="hunt-metric"><span>Healing</span><b id="huntHealing">0.0</b></div>
+                      <div class="hunt-metric"><span>Deaths</span><b id="huntDeaths">0</b></div>
+                      <div class="hunt-metric"><span>Enhancers Broken</span><b id="huntEnhancers">0</b></div>
+                      <div class="hunt-metric"><span>Globals</span><b id="huntGlobals" class="success">0</b></div>
+                      <div class="hunt-metric"><span>HOFs</span><b id="huntHofs" class="hof">0</b></div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="panel hunt-economy-panel">
+                  <div class="panel-header">
+                    <span class="panel-title">Economy</span>
+                    <span id="huntEconomyMode" class="muted">Equipped loadout</span>
+                  </div>
+                  <div class="panel-body">
+                    <div class="hunt-economy-summary">
+                      <div class="hunt-metric"><span>Cost / Shot</span><b id="huntCostPerShot">0.0000 PED</b></div>
+                      <div class="hunt-metric"><span>Ammo Cost</span><b id="huntAmmoCost">0.00 PED</b></div>
+                      <div class="hunt-metric"><span>Decay Cost</span><b id="huntDecayCost">0.00 PED</b></div>
+                      <div class="hunt-metric"><span>Average Loot</span><b id="huntAvgLoot">0.00 PED</b></div>
+                      <div class="hunt-metric"><span>Cost / Minute</span><b id="huntCostPerMinute">0.00 PED</b></div>
+                      <div class="hunt-metric"><span>Loot / Minute</span><b id="huntLootPerMinute">0.00 PED</b></div>
+                    </div>
+                    <details class="hunt-cost-breakdown">
+                      <summary>Cost / Loadout Breakdown</summary>
+                      <div id="huntCostBreakdown" class="hunt-cost-breakdown-grid">
+                        <div class="empty">Start a hunt to build a cost breakdown.</div>
+                      </div>
+                    </details>
+                    <div class="hunt-cost-controls">
+                      <section class="hunt-cost-control-card">
+                        <div class="hunt-cost-control-head">
+                          <div>
+                            <strong>Cost Source</strong>
+                            <span>Choose how weapon cost is calculated for new shots.</span>
+                          </div>
+                        </div>
+                        <div class="hunt-cost-source-row">
+                          <button id="huntUseLoadoutCostBtn" class="btn cost-source-btn active" type="button" onclick="EntropiaHuntTracker.clearManualCost()">Use Equipped Loadout</button>
+                          <div class="hunt-manual-shot-control">
+                            <label class="compact-field">
+                              <strong>Manual Cost / Shot Override</strong>
+                              <div class="input-suffix">
+                                <input id="huntManualCostInput" type="number" min="0" step=".0001" placeholder="e.g. 0.0250">
+                                <span>PED</span>
+                              </div>
+                            </label>
+                            <button id="huntApplyManualCostBtn" class="btn" type="button" onclick="EntropiaHuntTracker.applyManualCost()">Use Manual Cost</button>
+                          </div>
+                        </div>
+                        <div id="huntCostSourceHint" class="hunt-cost-control-note">Using equipped loadout economics.</div>
+                      </section>
+
+                      <section class="hunt-cost-control-card">
+                        <div class="hunt-cost-control-head">
+                          <div>
+                            <strong>Additional Hunt Costs</strong>
+                            <span>Add one-off expenses without changing cost per shot.</span>
+                          </div>
+                        </div>
+                        <div class="hunt-additional-cost-entry">
+                          <label class="compact-field grow">
+                            <strong>Cost Label</strong>
+                            <input id="huntAdditionalCostLabel" type="text" maxlength="40" placeholder="e.g. Pills / Keys / Travel">
+                          </label>
+                          <label class="compact-field">
+                            <strong>Amount</strong>
+                            <div class="input-suffix">
+                              <input id="huntAdditionalCost" type="number" min="0" step="0.01" placeholder="0.00">
+                              <span>PED</span>
+                            </div>
+                          </label>
+                          <button class="btn primary" type="button" onclick="EntropiaHuntTracker.addAdditionalCost()">Add Cost</button>
+                        </div>
+                        <div id="huntAdditionalCostList" class="hunt-additional-cost-list">
+                          <div class="empty">No additional costs added.</div>
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="panel hunt-feed-panel hunt-activity-panel">
+                  <div class="panel-header hunt-activity-header">
+                    <div class="hunt-activity-tabs">
+                      <button id="huntActivityFeedBtn" class="hunt-activity-tab active" type="button" onclick="EntropiaHuntTracker.setActivityView('feed')">Event Feed</button>
+                      <button id="huntActivityLootBtn" class="hunt-activity-tab" type="button" onclick="EntropiaHuntTracker.setActivityView('loot')">Loot Breakdown</button>
+                    </div>
+                    <span id="huntFeedCount" class="muted">0 events</span>
+                  </div>
+                  <div class="hunt-activity-content">
+                    <div id="huntActivityFeedView" class="hunt-activity-view">
+                      <div class="hunt-feed-wrap">
+                    <table class="hunt-feed-table">
+                      <thead>
+                        <tr><th>Time</th><th>Event</th><th>Value</th><th>Details</th></tr>
+                      </thead>
+                      <tbody id="huntEventFeed">
+                        <tr><td colspan="4" class="empty">Start a hunt to begin tracking live combat.</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                    </div>
+                    <div id="huntActivityLootView" class="hunt-activity-view hidden">
+                      <div class="panel-body hunt-loot-body">
+                    <div class="hunt-loot-mini-grid">
+                      <div class="hunt-metric"><span>Largest Drop</span><b id="huntLargestLoot" class="success">0.00 PED</b></div>
+                      <div class="hunt-metric"><span>Unique Items</span><b id="huntUniqueLootItems">0</b></div>
+                      <div class="hunt-metric"><span>Loot Drops</span><b id="huntLootDropCount">0</b></div>
+                      <div class="hunt-metric"><span>Item Lines</span><b id="huntLootLineCount">0</b></div>
+                      <div class="hunt-metric hunt-conversion-stat"><span>Universal Ammo</span><b id="huntUniversalAmmo" class="accent">0.00 PED</b></div>
+                      <div class="hunt-metric hunt-conversion-stat"><span>Shrapnel Converted</span><b id="huntShrapnelConverted">0.00 PED</b></div>
+                    </div>
+
+                    <div class="hunt-loot-tabs">
+                      <span class="hunt-loot-section-title">Item Totals</span>
+                    </div>
+                    <div class="hunt-loot-table-wrap">
+                      <table class="hunt-feed-table hunt-loot-table">
+                        <thead><tr><th>Item</th><th>Qty</th><th>TT Value</th><th>Lines</th></tr></thead>
+                        <tbody id="huntLootItemBody">
+                          <tr><td colspan="4" class="empty">No loot recorded yet.</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <details class="hunt-recent-drops">
+                      <summary>Recent Loot Drops</summary>
+                      <div class="hunt-loot-table-wrap recent">
+                        <table class="hunt-feed-table hunt-loot-table">
+                          <thead><tr><th>Time</th><th>TT Value</th><th>Lines</th><th>Mob</th></tr></thead>
+                          <tbody id="huntLootDropBody">
+                            <tr><td colspan="4" class="empty">No loot drops recorded yet.</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </details>
+                    <div class="hunt-loot-attribution-note">Mob stays Unknown unless a personal Global/HOF explicitly names it. Universal Ammo conversions are tracked separately and excluded from loot/return. Location-based inference will be added with the map system later.</div>
+                  </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="pixelb8-vertical-resizer" data-pixelb8-right-resizer title="Drag to resize account & chat">
+    <span class="pixelb8-vertical-resizer-grip"></span>
+  </div>
+  <aside class="pixelb8-right-rail collapsed" data-pixelb8-right-rail>
+    <button class="pixelb8-right-rail-toggle" onclick="PixelB8Shell.toggleRightRail()" title="Open account & chat">
+      <span class="pixelb8-right-rail-toggle-icon">‹</span>
+    </button>
+    <div class="pixelb8-right-rail-inner">
+      <section class="pixelb8-account-hud">
+        <div class="pixelb8-account-avatar-wrap">
+          <div class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</div>
+          <span class="pixelb8-account-presence"></span>
+        </div>
+        <div class="pixelb8-account-copy">
+          <span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span>
+          <strong data-pixelb8-profile-name>Guest</strong>
+          <span data-pixelb8-profile-status>Guest account</span>
+        </div>
+      </section>
+
+      <section class="pixelb8-right-section pixelb8-account-actions">
+        <button class="pixelb8-account-action" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
+        <button class="pixelb8-account-action danger" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
+      </section>
+
+      <section class="pixelb8-right-section pixelb8-chat-section">
+        <div class="pixelb8-right-section-head">
+          <div>
+            <span class="pixelb8-account-kicker">PIXELB8 MQTT</span>
+            <strong>Global Chat</strong>
+          </div>
+          <span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span>
+        </div>
+        <div class="pixelb8-chat-container">
+          <div class="pixelb8-chat-messages" data-pixelb8-chat-messages></div>
+          <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker>
+            <span onclick="PixelB8Shell.insertEmoji('😀')">😀</span>
+            <span onclick="PixelB8Shell.insertEmoji('😂')">😂</span>
+            <span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span>
+            <span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span>
+            <span onclick="PixelB8Shell.insertEmoji('👾')">👾</span>
+            <span onclick="PixelB8Shell.insertEmoji('😎')">😎</span>
+            <span onclick="PixelB8Shell.insertEmoji('👍')">👍</span>
+            <span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span>
+          </div>
+          <div class="pixelb8-chat-input">
+            <button onclick="PixelB8Shell.toggleEmojiPicker()">☺</button>
+            <input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()">
+            <button class="primary" onclick="PixelB8Shell.sendChat()">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="pixelb8-right-footer">PixelB8 Social</div>
+    </div>
+  </aside>
+
+</div>
+
+<div class="pixelb8-account-settings-backdrop hidden" data-pixelb8-account-settings onclick="PixelB8Shell.closeAccountSettings(event)">
+  <section class="pixelb8-account-settings-card" onclick="event.stopPropagation()">
+    <div class="pixelb8-account-settings-head">
+      <div><span class="pixelb8-account-kicker">PIXELB8 PROFILE</span><h3>Account Settings</h3></div>
+      <button class="btn" onclick="PixelB8Shell.closeAccountSettings()">×</button>
+    </div>
+    <div class="pixelb8-account-settings-body">
+      <label><span>Display Name</span><input maxlength="32" data-pixelb8-account-name-input placeholder="Guest"></label>
+      <label><span>Profile Initial</span><input maxlength="2" data-pixelb8-account-initial-input placeholder="G"></label>
+    </div>
+    <div class="pixelb8-account-settings-actions">
+      <button class="btn" onclick="PixelB8Shell.closeAccountSettings()">Cancel</button>
+      <button class="btn" onclick="PixelB8Shell.saveAccountSettings()">Save Profile</button>
+    </div>
+  </section>
+</div>
+
+
+<div id="toast">Waypoint copied.</div>
+
+
+<div id="trackerOptionsBackdrop" class="tracker-options-backdrop hidden" onclick="closeTrackerOptions(event)">
+  <section class="tracker-options-panel" onclick="event.stopPropagation()">
+    <div class="tracker-options-header">
+      <div>
+        <div class="tracker-options-kicker">TRACKER CONFIGURATION</div>
+        <h2 id="trackerOptionsHeading">Upcoming Legends</h2>
+      </div>
+      <button class="btn" onclick="closeTrackerOptions()">×</button>
+    </div>
+
+    <div class="tracker-options-body">
+      <div class="tracker-options-section">
+        <div class="tracker-options-title">Operating Mode</div>
+        <div class="tracker-options-grid">
+          <label class="compact-field">
+            <strong>Mode</strong>
+            <select id="trackerModeSelect" onchange="previewTrackerModeOptions()">
+              <option value="auto">Auto</option>
+              <option value="event">Event</option>
+              <option value="casual">Casual</option>
+            </select>
+          </label>
+          <div class="tracker-option-info">
+            <b id="effectiveModePreview">EVENT</b>
+            <span id="modePreviewReason">Auto uses Event Mode during Upcoming Legends and Casual Mode afterward.</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="eventOptionsSection" class="tracker-options-section">
+        <div class="tracker-options-title">Event Profile</div>
+        <div class="tracker-options-grid three">
+          <label class="compact-field">
+            <strong>Event Name</strong>
+            <input id="eventNameInput" type="text" value="Upcoming Legends">
+          </label>
+          <label class="compact-field">
+            <strong>Starts (UTC)</strong>
+            <input id="eventStartInput" type="datetime-local" value="2026-08-15T00:00">
+          </label>
+          <label class="compact-field">
+            <strong>Ends (UTC)</strong>
+            <input id="eventEndInput" type="datetime-local" value="2026-08-17T00:00">
+          </label>
+          <label class="compact-field">
+            <strong>Session Limit</strong>
+            <div class="input-suffix">
+              <input id="sessionHoursInput" type="number" min="0.25" max="48" step="0.25" value="6">
+              <span>hours</span>
+            </div>
+          </label>
+        </div>
+        <div class="tracker-options-help">These are editable defaults. Future events can reuse the same tracker without code changes.</div>
+      </div>
+
+      <div class="tracker-options-section">
+        <div class="tracker-options-title">Analytics Targets · 1–6 Mobs</div>
+        <div id="targetInputsGrid" class="target-input-grid">
+          <input class="target-mob-input" data-target-index="0" value="Armax Bull">
+          <input class="target-mob-input" data-target-index="1" value="Atrax">
+          <input class="target-mob-input" data-target-index="2" value="Caperon">
+          <input class="target-mob-input" data-target-index="3" value="Neconu">
+          <input class="target-mob-input" data-target-index="4" value="Hispidus">
+          <input class="target-mob-input" data-target-index="5" value="Estophyl">
+        </div>
+        <div class="tracker-options-help">Casual Mode can analyze any 1–6 mobs. Leave unused target boxes blank.</div>
+      </div>
+
+      <div class="tracker-options-section">
+        <div class="tracker-options-title">History / File Read Limit</div>
+        <div class="tracker-options-grid">
+          <label class="compact-field">
+            <strong>Analyze Back</strong>
+            <select id="analysisLookbackSelect" onchange="toggleCustomLookback()">
+              <option value="1">Last 24 hours</option>
+              <option value="3">Last 3 days</option>
+              <option value="7">Last 7 days</option>
+              <option value="14">Last 14 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="60">Last 60 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="custom">Custom days</option>
+              <option value="all">All history</option>
+            </select>
+          </label>
+          <label id="customLookbackField" class="compact-field hidden">
+            <strong>Custom Days</strong>
+            <div class="input-suffix">
+              <input id="customLookbackDaysInput" type="number" min="1" max="3650" step="1" value="30">
+              <span>days</span>
+            </div>
+          </label>
+        </div>
+        <div class="tracker-options-help">
+          This limits the initial chat.log read itself, not just the charts. Large logs can load much faster when you only need recent history.
+        </div>
+      </div>
+
+      <div class="tracker-options-section">
+        <div class="tracker-options-title">Optional Exact Analytics Window</div>
+        <div class="tracker-options-grid">
+          <label class="compact-field">
+            <strong>From (UTC)</strong>
+            <input id="analysisStartInput" type="datetime-local">
+          </label>
+          <label class="compact-field">
+            <strong>To (UTC)</strong>
+            <input id="analysisEndInput" type="datetime-local">
+          </label>
+        </div>
+        <div class="tracker-options-help">
+          Optional fine control inside the loaded history. A From date can further narrow the Analyze Back range; it will never make the app read older data than the selected history limit.
+        </div>
+      </div>
+    </div>
+
+    <div class="tracker-options-footer">
+      <button class="btn" onclick="resetTrackerOptions()">Reset Upcoming Legends</button>
+      <button class="btn primary" onclick="saveTrackerOptions(true)">Apply & Analyze</button>
+    </div>
+  </section>
+</div>
+
+
+<div id="nexusItemPickerBackdrop" class="nexus-picker-backdrop hidden" onclick="EntropiaLoadouts.closeItemPicker(event)">
+  <section class="nexus-picker-panel" onclick="event.stopPropagation()">
+    <div class="nexus-picker-header">
+      <div><div class="tracker-options-kicker">ENTROPIA NEXUS DATABASE</div><h2 id="nexusPickerTitle">Select Item</h2></div>
+      <div class="toolbar"><button id="nexusRefreshBtn" class="btn" type="button" onclick="EntropiaLoadouts.refreshPickerData()">↻ Refresh</button><button class="btn" type="button" onclick="EntropiaLoadouts.closeItemPicker()">×</button></div>
+    </div>
+    <div class="nexus-picker-controls">
+      <input id="nexusPickerSearch" type="search" placeholder="Search item name…" autocomplete="off">
+      <span id="nexusPickerStatus" class="muted">Choose an item.</span>
+    </div>
+    <div class="nexus-picker-layout">
+      <div id="nexusPickerResults" class="nexus-picker-results"><div class="empty">Loading Nexus data…</div></div>
+      <aside id="nexusPickerDetails" class="nexus-picker-details"><div class="empty">Select an item to preview its stats.</div></aside>
+    </div>
+  </section>
+</div>
+
+<input id="obsChatLogInput" class="visually-hidden-file-input" type="file" accept=".log" onchange="handleFallbackChatLogInput(event)" oncancel="handleFallbackChatLogCancel()">
+
+<!-- Streamer / OBS HUD -->
+<div id="streamerHud" aria-hidden="true">
+  <div class="hud-corner tl"></div>
+  <div class="hud-corner tr"></div>
+  <div class="hud-corner bl"></div>
+  <div class="hud-corner br"></div>
+  <div class="hud-scanline"></div>
+
+  <div class="streamer-hud-shell">
+    <!-- Event clocks -->
+    <section class="hud-panel hud-top-left" data-panel-id="eventClock" data-panel-name="Event Clock">
+      <div class="hud-title">
+        Event Clock
+        <span class="hud-status"><span id="streamHudLiveDot" class="dot"></span><span id="streamHudLiveText">OFFLINE</span></span>
+      </div>
+      <div class="hud-content">
+        <div class="hud-stat-grid">
+          <div class="hud-stat">
+            <div class="hud-stat-label">Event Ends In</div>
+            <div id="streamEventCountdown" class="hud-stat-value warn">--d --:--:--</div>
+          </div>
+          <div class="hud-stat">
+            <div class="hud-stat-label">Latest 6h Start</div>
+            <div id="streamSafeStartCountdown" class="hud-stat-value good">--d --:--:--</div>
+          </div>
+          <div class="hud-stat">
+            <div class="hud-stat-label">Game Time</div>
+            <div id="streamGameTime" class="hud-stat-value accent">NOT SYNCED</div>
+          </div>
+          <div class="hud-stat">
+            <div class="hud-stat-label">6h Session</div>
+            <div id="streamSessionTimer" class="hud-stat-value good">WAITING</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Personal event stats -->
+    <section class="hud-panel hud-top-right" data-panel-id="pilotStats" data-panel-name="Pilot Event Stats">
+      <div class="hud-title">Pilot Event Stats <span class="hud-status">LIVE CACHE</span></div>
+      <div class="hud-content">
+        <div class="hud-gauge-row">
+          <div id="streamGlobalGauge" class="hud-gauge" style="--gauge-color:var(--success);--gauge-pct:0">
+            <div class="hud-gauge-value"><span id="streamMyGlobals">0</span><span class="hud-gauge-label">Globals</span></div>
+          </div>
+          <div id="streamHofGauge" class="hud-gauge" style="--gauge-color:var(--hof);--gauge-pct:0">
+            <div class="hud-gauge-value"><span id="streamMyHofs">0</span><span class="hud-gauge-label">HOFs</span></div>
+          </div>
+          <div id="streamLootGauge" class="hud-gauge" style="--gauge-color:var(--warning);--gauge-pct:0">
+            <div class="hud-gauge-value"><span id="streamMyLoot">0</span><span class="hud-gauge-label">PED Loot</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live global feeds -->
+    <section class="hud-panel hud-bottom-left" data-panel-id="globalTelemetry" data-panel-name="Global Telemetry">
+      <div class="hud-title">Global Telemetry <span class="hud-status">CHAT.LOG</span></div>
+      <div class="hud-content">
+        <div class="hud-stat-grid">
+          <div class="hud-stat" data-metric="targetGlobals">
+            <div class="hud-stat-label">Target Globals</div>
+            <div id="streamTargetGlobals" class="hud-stat-value good">0</div>
+          </div>
+          <div class="hud-stat" data-metric="targetHofs">
+            <div class="hud-stat-label">Target HOFs</div>
+            <div id="streamTargetHofs" class="hud-stat-value hof">0</div>
+          </div>
+          <div class="hud-stat" data-metric="targetValue">
+            <div class="hud-stat-label">Target Value</div>
+            <div id="streamTargetValue" class="hud-stat-value accent">0.00 PED</div>
+          </div>
+          <div class="hud-stat" data-metric="allValue">
+            <div class="hud-stat-label">All-Mob Value</div>
+            <div id="streamAllMobValue" class="hud-stat-value warn">0.00 PED</div>
+          </div>
+          <div class="hud-stat" data-metric="allGlobals">
+            <div class="hud-stat-label">All Globals</div>
+            <div id="streamAllGlobals" class="hud-stat-value good">0</div>
+          </div>
+          <div class="hud-stat" data-metric="allHofs">
+            <div class="hud-stat-label">All HOFs</div>
+            <div id="streamAllHofs" class="hud-stat-value hof">0</div>
+          </div>
+          <div class="hud-stat" data-metric="personalGlobals">
+            <div class="hud-stat-label">My Globals</div>
+            <div id="streamPersonalGlobals" class="hud-stat-value good">0</div>
+          </div>
+          <div class="hud-stat" data-metric="personalHofs">
+            <div class="hud-stat-label">My HOFs</div>
+            <div id="streamPersonalHofs" class="hud-stat-value hof">0</div>
+          </div>
+          <div class="hud-stat" data-metric="personalValue">
+            <div class="hud-stat-label">My Loot</div>
+            <div id="streamPersonalValue" class="hud-stat-value warn">0.00 PED</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Future combat telemetry slots -->
+    <section class="hud-panel hud-bottom-right" data-panel-id="combatTelemetry" data-panel-name="Combat Telemetry">
+      <div class="hud-title">Combat Telemetry <span class="hud-status">FUTURE INPUTS</span></div>
+      <div class="hud-content">
+        <div class="hud-telemetry">
+          <div class="hud-stat" data-metric="dps"><div class="hud-stat-label">DPS</div><div class="hud-stat-value hud-placeholder">--</div></div>
+          <div class="hud-stat" data-metric="damage"><div class="hud-stat-label">Damage</div><div class="hud-stat-value hud-placeholder">--</div></div>
+          <div class="hud-stat" data-metric="cost"><div class="hud-stat-label">Cost</div><div class="hud-stat-value hud-placeholder">--</div></div>
+          <div class="hud-stat" data-metric="profit"><div class="hud-stat-label">Profit</div><div class="hud-stat-value hud-placeholder">--</div></div>
+          <div class="hud-stat" data-metric="efficiency"><div class="hud-stat-label">Return</div><div class="hud-stat-value hud-placeholder">--</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Optional OBS parsing/source controls. Hidden by default. -->
+    <section class="hud-panel hud-parsing-source" data-panel-id="parsingSource" data-panel-name="Parsing / Source">
+      <div class="hud-title">
+        Parsing / Source
+        <span class="hud-status"><span id="streamParserDot" class="dot"></span><span id="streamParserState">OFFLINE</span></span>
+      </div>
+      <div class="hud-content streamer-source-content">
+        <div class="streamer-source-identity">
+          <label class="streamer-source-field">
+            <span>Avatar Name</span>
+            <input id="streamAvatarNameInput" type="text" maxlength="64" placeholder="Entropia avatar">
+          </label>
+          <label class="streamer-source-field">
+            <span>Streamer Name</span>
+            <input id="streamerNameInput" type="text" maxlength="64" placeholder="Channel / display name">
+          </label>
+        </div>
+
+        <div class="streamer-source-status">
+          <div>
+            <span>Source</span>
+            <b id="streamParserSource">No chat.log connected</b>
+          </div>
+          <div>
+            <span>Streamer</span>
+            <b id="streamerNamePreview">—</b>
+          </div>
+        </div>
+
+        <div class="streamer-source-actions">
+          <button class="streamer-mini-btn source-primary" type="button" onclick="pickChatLogFile()">📁 Select chat.log</button>
+          <button id="streamParserResumeBtn" class="streamer-mini-btn source-primary" type="button" onclick="resumeSavedChatLog()">⟳ Reconnect Live chat.log</button>
+          <button class="streamer-mini-btn" type="button" onclick="showObsSourceDiagnostic({title:'OBS Source Diagnostics',message:'Current OBS/CEF environment and live FileSystem picker capabilities.',details:liveFileHandleEnvironmentSummary(),level:'warning',nativePicker:true})">⚠ Diagnostics</button>
+        </div>
+
+        <div class="streamer-option-note streamer-source-note">
+          OBS live mode uses a persistent FileSystem handle when available. Select chat.log once, grant read permission, and the tracker calls getFile() every second to read only newly appended bytes.
+        </div>
+      </div>
+    </section>
+
+    <!-- Optional Team Controls panel -->
+    <section class="hud-panel hud-team-control" data-panel-id="teamControl" data-panel-name="Team Control">
+      <div class="hud-title">
+        Team Control
+        <span class="hud-status"><span id="streamTeamRoomDot" class="dot"></span><span id="streamTeamRoomState">OFFLINE</span></span>
+      </div>
+      <div class="hud-content streamer-team-control-content">
+        <div class="streamer-team-control-grid">
+          <label class="streamer-source-field">
+            <span>Team Name</span>
+            <input id="streamTeamNameInput" type="text" maxlength="48" placeholder="Team name">
+          </label>
+          <label class="streamer-source-field">
+            <span>Visibility</span>
+            <select id="streamTeamPrivacySelect">
+              <option value="private">Private</option>
+              <option value="public">Public</option>
+            </select>
+          </label>
+          <label class="streamer-source-field">
+            <span>Room Code</span>
+            <input id="streamTeamRoomCodeInput" type="text" maxlength="8" placeholder="ABC123">
+          </label>
+        </div>
+
+        <div class="streamer-team-actions">
+          <button class="streamer-mini-btn source-primary" type="button" onclick="EntropiaTeamTracker.createOrUpdateRoomFromStreamer()">Create / Update</button>
+          <button class="streamer-mini-btn" type="button" onclick="EntropiaTeamTracker.joinRoomFromStreamer()">Join Code</button>
+          <button class="streamer-mini-btn" type="button" onclick="EntropiaTeamTracker.copyRoomCode()">Copy Code</button>
+          <button class="streamer-mini-btn danger-mini" type="button" onclick="EntropiaTeamTracker.leaveRoom()">Leave</button>
+        </div>
+
+        <div class="streamer-public-room-head">
+          <span>Public Teams</span>
+          <button class="streamer-mini-btn" type="button" onclick="EntropiaTeamTracker.refreshPublicRooms()">Refresh</button>
+        </div>
+        <div id="streamPublicTeamList" class="stream-public-team-list">
+          <div class="hud-placeholder">No public rooms discovered.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Optional Team Totals panel -->
+    <section class="hud-panel hud-team-totals" data-panel-id="teamTotals" data-panel-name="Team Totals">
+      <div class="hud-title">
+        Team Performance
+        <span class="hud-status"><span id="streamTeamTotalsDot" class="dot"></span><span id="streamTeamTotalsCount">0 ONLINE</span></span>
+      </div>
+      <div class="hud-content stream-team-performance">
+        <div class="stream-team-section-label">Actual Hunt</div>
+        <div class="hud-stat-grid team-total-stat-grid">
+          <div class="hud-stat"><span class="hud-stat-label">Cost</span><span id="streamTeamCost" class="hud-stat-value">0.00 PED</span></div>
+          <div class="hud-stat"><span class="hud-stat-label">Loot</span><span id="streamTeamLoot" class="hud-stat-value">0.00 PED</span></div>
+          <div class="hud-stat"><span class="hud-stat-label">Profit</span><span id="streamTeamProfit" class="hud-stat-value">0.00 PED</span></div>
+          <div class="hud-stat"><span class="hud-stat-label">Return</span><span id="streamTeamReturn" class="hud-stat-value">0.0%</span></div>
+          <div class="hud-stat"><span class="hud-stat-label">Team DPS</span><span id="streamTeamActualDps" class="hud-stat-value">0.0</span></div>
+          <div class="hud-stat"><span class="hud-stat-label">Team DPP</span><span id="streamTeamActualDpp" class="hud-stat-value">0.00</span></div>
+        </div>
+        <div class="stream-team-section-label">Loadout Estimate</div>
+        <div class="hud-stat-grid team-total-stat-grid">
+          <div class="hud-stat"><span class="hud-stat-label">Est. DPS</span><span id="streamTeamEstimatedDps" class="hud-stat-value">0.0</span></div>
+          <div class="hud-stat"><span class="hud-stat-label">Avg DPS</span><span id="streamTeamAverageEstimatedDps" class="hud-stat-value">0.0</span></div>
+          <div class="hud-stat"><span class="hud-stat-label">Avg DPP</span><span id="streamTeamAverageEstimatedDpp" class="hud-stat-value">0.00</span></div>
+          <div class="hud-stat"><span class="hud-stat-label">Avg Efficiency</span><span id="streamTeamAverageEfficiency" class="hud-stat-value">0.0%</span></div>
+          <div class="hud-stat"><span class="hud-stat-label">Accuracy</span><span id="streamTeamAccuracy" class="hud-stat-value">0.0%</span></div>
+          <div class="hud-stat"><span class="hud-stat-label">Damage</span><span id="streamTeamDamage" class="hud-stat-value">0</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Optional Team Members panel -->
+    <section class="hud-panel hud-team-members" data-panel-id="teamMembers" data-panel-name="Team Members">
+      <div class="hud-title">
+        Team Members
+        <span id="streamTeamMemberCount" class="hud-status">0</span>
+      </div>
+      <div id="streamTeamMemberCards" class="hud-content stream-team-member-cards">
+        <div class="hud-placeholder">No connected teammates.</div>
+      </div>
+    </section>
+
+    <!-- Optional Equipped Loadout panel -->
+    <section class="hud-panel hud-loadout" data-panel-id="loadoutPanel" data-panel-name="Equipped Loadout">
+      <div class="hud-title">
+        Equipped Loadout
+        <span id="streamLoadoutState" class="hud-status">NONE</span>
+      </div>
+      <div class="hud-content stream-loadout-content">
+        <div class="stream-loadout-name-block">
+          <span class="stream-loadout-kicker">LOADOUT</span>
+          <b id="streamLoadoutName" data-metric="name">No loadout equipped</b>
+          <span id="streamLoadoutWeapon" class="stream-loadout-weapon" data-metric="weapon">—</span>
+        </div>
+
+        <div class="hud-stat-grid stream-loadout-stat-grid">
+          <div class="hud-stat" data-metric="efficiency">
+            <span class="hud-stat-label">Efficiency</span>
+            <span id="streamLoadoutEfficiency" class="hud-stat-value">0.0%</span>
+          </div>
+          <div class="hud-stat" data-metric="dpp">
+            <span class="hud-stat-label">DPP</span>
+            <span id="streamLoadoutDpp" class="hud-stat-value">0.00</span>
+          </div>
+          <div class="hud-stat" data-metric="dps">
+            <span class="hud-stat-label">DPS</span>
+            <span id="streamLoadoutDps" class="hud-stat-value">0.0</span>
+          </div>
+          <div class="hud-stat" data-metric="cost">
+            <span class="hud-stat-label">Cost / Shot</span>
+            <span id="streamLoadoutCost" class="hud-stat-value">0.0000 PED</span>
+          </div>
+          <div class="hud-stat" data-metric="damage">
+            <span class="hud-stat-label">Eff. Damage</span>
+            <span id="streamLoadoutDamage" class="hud-stat-value">0.0</span>
+          </div>
+          <div class="hud-stat" data-metric="apm">
+            <span class="hud-stat-label">APM</span>
+            <span id="streamLoadoutApm" class="hud-stat-value">0.0</span>
+          </div>
+          <div class="hud-stat" data-metric="range">
+            <span class="hud-stat-label">Range</span>
+            <span id="streamLoadoutRange" class="hud-stat-value">0.0 m</span>
+          </div>
+          <div class="hud-stat" data-metric="maxDamage">
+            <span class="hud-stat-label">Max Damage</span>
+            <span id="streamLoadoutMaxDamage" class="hud-stat-value">0.0</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommended target -->
+    <section class="hud-panel hud-center-bottom" data-panel-id="recommendedHunt" data-panel-name="Recommended Hunt">
+      <div class="hud-title">
+        Recommended Hunt
+        <span class="hud-status">TARGETING</span>
+      </div>
+      <div class="hud-content hud-target">
+        <div class="hud-target-icon">◎</div>
+        <div class="hud-target-main">
+          <div class="hud-target-label">Recommended Hunt</div>
+          <div id="streamRecommendedMob" class="hud-target-name">WAITING FOR DATA</div>
+        </div>
+        <div id="streamActiveHour" class="hud-target-hour">--:00</div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Streamer custom context menu -->
+<div id="streamerContextMenu" class="streamer-context-menu">
+  <button class="streamer-context-item" data-action="panels">☷ Panel Menu</button>
+  <button id="streamerAdvancedItem" class="streamer-context-item hidden" data-action="advanced-panel">⚙ Advanced Panel Options</button>
+  <button class="streamer-context-item" data-action="appearance">◈ OBS Appearance</button>
+  <button id="streamerSlimHeadersItem" class="streamer-context-item" data-action="toggle-slim-headers">▰ Enable Slim Headers</button>
+  <div class="streamer-context-sep"></div>
+  <button id="streamerHidePanelItem" class="streamer-context-item danger hidden" data-action="hide-panel">⊘ Hide This Panel</button>
+  <button class="streamer-context-item" data-action="reset-layout">↺ Reset Streamer Layout</button>
+  <button class="streamer-context-item danger" data-action="exit-streamer">× Exit Streamer Mode</button>
+</div>
+
+<!-- Streamer panel visibility manager -->
+<div id="streamerPanelManager" class="streamer-panel-manager">
+  <div class="streamer-panel-manager-head" data-floating-drag-handle="panelManager">
+    <span class="streamer-panel-manager-title">Streamer Panels</span>
+    <button class="streamer-mini-btn" style="flex:0 0 auto;padding:5px 8px" onclick="closeStreamerPanelManager()">×</button>
+  </div>
+  <div id="streamerPanelList" class="streamer-panel-list"></div>
+  <div class="streamer-panel-actions">
+    <button class="streamer-mini-btn" onclick="showAllStreamerPanels()">Show All</button>
+    <button class="streamer-mini-btn" onclick="resetStreamerLayout()">Reset Layout</button>
+  </div>
+</div>
+
+<!-- Streamer appearance -->
+<div id="streamerAppearancePanel" class="streamer-advanced-panel" style="right:360px">
+  <div class="streamer-panel-manager-head" data-floating-drag-handle="appearance">
+    <span class="streamer-panel-manager-title">OBS Appearance</span>
+    <button class="streamer-mini-btn" style="flex:0 0 auto;padding:5px 8px" onclick="closeStreamerAppearancePanel()">×</button>
+  </div>
+  <div class="streamer-option-section">
+    <div class="streamer-option-title">Global HUD Theme</div>
+    <div class="streamer-option-grid">
+      <label class="streamer-option-toggle" style="display:grid">
+        <span>Accent</span>
+        <input id="streamAccentColor" type="color" value="#35c2ff" oninput="updateStreamerThemeFromControls()">
+      </label>
+      <label class="streamer-option-toggle" style="display:grid">
+        <span>Panel BG</span>
+        <input id="streamBgColor" type="color" value="#05101b" oninput="updateStreamerThemeFromControls()">
+      </label>
+    </div>
+    <div class="streamer-range-row" style="margin-top:7px">
+      <label>Panel Opacity</label>
+      <input id="streamBgOpacity" type="range" min="10" max="100" step="5" value="80" oninput="updateStreamerThemeFromControls()">
+      <div id="streamBgOpacityValue" class="streamer-range-value">80%</div>
+    </div>
+    <label class="streamer-option-toggle streamer-scanline-toggle" style="margin-top:8px">
+      <input id="streamScanlineToggle" type="checkbox" checked onchange="updateStreamerThemeFromControls()">
+      <span>Scan Line</span>
+    </label>
+    <div class="streamer-option-note">Applies to all OBS Mode panels and overlay settings windows.</div>
+  </div>
+  <div class="streamer-panel-actions">
+    <button class="streamer-mini-btn" onclick="resetStreamerTheme()">Reset Default</button>
+  </div>
+</div>
+
+<!-- Streamer advanced panel options -->
+<div id="streamerAdvancedPanel" class="streamer-advanced-panel">
+  <div class="streamer-panel-manager-head" data-floating-drag-handle="advanced">
+    <span id="streamerAdvancedTitle" class="streamer-panel-manager-title">Advanced Panel Options</span>
+    <button class="streamer-mini-btn" style="flex:0 0 auto;padding:5px 8px" onclick="closeStreamerAdvancedPanel()">×</button>
+  </div>
+  <div id="streamerAdvancedBody"></div>
+</div>
+
+<div id="obsSourceDiagnostic" class="obs-source-diagnostic hidden" role="status" aria-live="polite">
+  <div class="obs-source-diagnostic-head">
+    <div>
+      <span class="obs-source-diagnostic-kicker">OBS SOURCE DIAGNOSTICS</span>
+      <strong id="obsDiagnosticTitle">chat.log connection</strong>
+    </div>
+    <button class="streamer-mini-btn" type="button" onclick="closeObsSourceDiagnostic()">×</button>
+  </div>
+  <div id="obsDiagnosticMessage" class="obs-source-diagnostic-message"></div>
+  <div id="obsDiagnosticDetails" class="obs-source-diagnostic-details"></div>
+
+  <div id="obsDiagnosticNativePicker" class="obs-source-native-picker hidden">
+    <label for="obsChatLogInput">Choose chat.log directly</label>
+    <p>Snapshot fallback only. For live one-second polling, use the PixelB8 OBS Bridge.</p>
+    <input id="obsChatLogDirectInput" type="file" accept=".log" onchange="handleObsDirectChatLogInput(event)">
+  </div>
+
+  <div class="obs-source-diagnostic-actions">
+    <button id="obsDiagnosticRetryBtn" class="streamer-mini-btn source-primary" type="button" onclick="retryObsChatLogPicker()">Retry Picker</button>
+    <button class="streamer-mini-btn" type="button" onclick="toggleObsNativePicker(true)">Native File Control</button>
+  </div>
+</div>
+
+  <script src="analyze.js"></script>
+  <script src="polling.js"></script>
+  <script src="nexus-api.js"></script>
+  <script src="loadouts.js"></script>
+  <script src="hunt-tracker.js"></script>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="team-tracker.js"></script>
+  <script src="../sharedassets/js/pixelb8-shell.js"></script>
+  <script src="app.js"></script>
+  <div id="appConfirmBackdrop" class="app-confirm-backdrop hidden">
+  <section class="app-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="appConfirmTitle">
+    <div class="app-confirm-title" id="appConfirmTitle">Confirm</div>
+    <div class="app-confirm-message" id="appConfirmMessage"></div>
+    <div class="app-confirm-actions">
+      <button id="appConfirmCancel" class="btn">Cancel</button>
+      <button id="appConfirmAccept" class="btn danger-btn">Confirm</button>
+    </div>
+  </section>
+</div>
+
+<div id="huntHistoryBackdrop" class="hunt-history-backdrop hidden" onclick="EntropiaHuntTracker.closeHistoryDetails(event)">
+  <section class="hunt-history-dialog" onclick="event.stopPropagation()">
+    <div class="panel-header">
+      <div>
+        <span class="panel-title" id="huntHistoryDetailTitle">Hunt Details</span>
+        <span class="muted" id="huntHistoryDetailDate"></span>
+      </div>
+      <button class="btn" onclick="EntropiaHuntTracker.closeHistoryDetails()">×</button>
+    </div>
+    <div id="huntHistoryDetailBody" class="hunt-history-detail-body"></div>
+  </section>
+</div>
+
+<div id="appToastHost" class="app-toast-host" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

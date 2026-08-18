@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropia: Com-Pet Clash RPG</title>
+    <!-- Dependencies -->
+    <link rel="stylesheet" href="../chat.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="../multiplayer.js"></script>
+    
+    <style>
+
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+
+    <div class="app">
+        <!-- HEADER -->
+        <header class="topbar">
+            <div class="brand">COM-PET CLASH<small>ENTROPIA VIRTUAL RPG</small></div>
+            <div class="hud-stats hidden" id="hud-stats">
+                <span id="hud-name">Player</span> 
+                <span style="color:var(--gold);">PED: <span id="hud-ped">100</span></span>
+                <span style="color:var(--accent);">Taming: <span id="hud-taming">1</span></span>
+                <span style="color:var(--danger);">Whips: <span id="hud-whips">10</span></span>
+                <span style="color:var(--exp-blue);">Probes: <span id="hud-probes">0</span></span>
+            </div>
+            <div class="connection" id="connection">Local Mode</div>
+        </header>
+
+        <!-- MAIN CONTAINER -->
+        <main class="view-panel">
+            
+            <!-- MAIN MENU -->
+            <div id="main-menu" class="main-menu">
+                <div class="menu-block">
+                    <h2 style="color:var(--gold)">Tamer Profile</h2>
+                    <input id="player-name" maxlength="18" placeholder="Enter Name...">
+                    
+                    <h3 style="margin: 10px 0 0; text-align: left; font-size: 0.9rem; color: var(--accent);">Your Active Pets</h3>
+                    <div id="menu-pet-list" class="pet-manager"></div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <button class="primary" onclick="startGame('single')">PLAY STORY (OFFLINE)</button>
+                        <button class="primary" onclick="startGame('explore')" style="background: linear-gradient(135deg, #106691, #0c3e5c);">MULTIPLAYER EXPLORE</button>
+                    </div>
+                </div>
+
+                <div class="menu-block">
+                    <h2>Join Existing Realm</h2>
+                    <div style="display:flex; gap: 10px;">
+                        <input id="join-code" maxlength="6" placeholder="ROOM CODE">
+                        <button class="primary" onclick="joinGame()">JOIN</button>
+                    </div>
+                    <div id="room-list" style="margin-top:10px; text-align:left; max-height:120px; overflow-y:auto; font-size:0.8rem; display:flex; flex-direction:column; gap:5px;"></div>
+                </div>
+            </div>
+
+            <!-- GAME CANVAS WRAPPER -->
+            <div id="game-view" class="hidden" style="position: absolute; inset: 0;">
+                
+                <div id="mission-tracker" class="mission-tracker">
+                    <b>CURRENT MISSION</b>
+                    <span id="mission-text">Talk to the Guide.</span>
+                </div>
+
+                <canvas id="game-canvas"></canvas>
+                <button class="floating-menu-btn" onclick="openIngameMenu()">INVENTORY / CONSOLE</button>
+                
+                <div class="dpad" id="dpad">
+                    <div class="dpad-btn" style="grid-area: up;" onpointerdown="handleDpad('w', true)" onpointerup="handleDpad('w', false)" onpointerleave="handleDpad('w', false)">W</div>
+                    <div class="dpad-btn" style="grid-area: left;" onpointerdown="handleDpad('a', true)" onpointerup="handleDpad('a', false)" onpointerleave="handleDpad('a', false)">A</div>
+                    <div class="dpad-btn" style="grid-area: down;" onpointerdown="handleDpad('s', true)" onpointerup="handleDpad('s', false)" onpointerleave="handleDpad('s', false)">S</div>
+                    <div class="dpad-btn" style="grid-area: right;" onpointerdown="handleDpad('d', true)" onpointerup="handleDpad('d', false)" onpointerleave="handleDpad('d', false)">D</div>
+                </div>
+            </div>
+
+            <!-- CONTEXT MENU (Right Click) -->
+            <div id="context-menu" class="context-menu hidden">
+                <div class="menu-title" id="cm-title">PlayerName</div>
+                <button onclick="cmdInteract('challenge')">⚔️ Challenge</button>
+                <button onclick="cmdInteract('trade')">🤝 Request Trade</button>
+                <button onclick="cmdInteract('party')">🎉 Invite to Party</button>
+            </div>
+
+            <!-- IN-GAME MENU MODAL -->
+            <div id="ingame-menu" class="overlay hidden" style="justify-content: center; align-items: center; padding: 20px;">
+                <div class="menu-block" style="max-width: 700px; width: 100%;">
+                    <h2 style="color:var(--gold); text-align:center;">MANAGEMENT CONSOLE</h2>
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; border:1px solid var(--line);">
+                            <b>Tamer Stats</b><br>
+                            Taming Lvl: <span id="menu-taming-lvl" style="color:var(--accent);">1</span><br>
+                            PED: <span id="menu-ped" style="color:var(--gold);">100</span><br>
+                            Whips: <span id="menu-whips" style="color:var(--danger);">10</span> | Probes: <span id="menu-probes" style="color:var(--exp-blue);">0</span>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; border:1px solid var(--line);">
+                            <b>Inventory</b><br>
+                            Fruit: <span id="menu-fruit" style="color:#a8e6cf;">0</span><br>
+                            Pet Essence: <span id="menu-essence" style="color:#d4a5a5;">0</span><br>
+                            Rare Essence: <span id="menu-rare-essence" style="color:#ffcc5c;">0</span>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 0; font-size: 0.95rem; color:var(--accent);">My Pets (Select to set Active)</h3>
+                    <div id="ingame-pet-list" class="pet-manager" style="max-height:250px;"></div>
+                    
+                    <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
+                        <button class="primary" id="toggle-avatar-btn" onclick="toggleAvatarMode()" style="flex:1; min-width:200px;">SWITCH TO PET AVATAR</button>
+                        <button onclick="closeIngameMenu()" style="flex:1; min-width:120px;">CLOSE</button>
+                        <button class="danger" onclick="quitToMenu()" style="flex:0.5; min-width:80px;">QUIT</button>
+                    </div>
+                    <p class="hint" style="text-align:center; margin-top:10px;">Pet Avatar = Battle for XP | Tamer Avatar = Capture new pets or Battle Trainers.<br>Use Juicer buttons to convert unwanted pets to Essence.</p>
+                </div>
+            </div>
+
+            <!-- SHOP MODAL -->
+            <div id="shop-modal" class="shop-modal hidden">
+                <h2>OUTPOST DEPOT</h2>
+                <div style="text-align:center; color:var(--gold); font-weight:bold; margin-bottom:10px;">Your PED: <span id="shop-ped-display"></span></div>
+                <div class="shop-item">
+                    <span>Taming Whip</span>
+                    <button class="primary" onclick="buyItem('whip', 10)">Buy (10 PED)</button>
+                </div>
+                <div class="shop-item">
+                    <span>Mining Probe</span>
+                    <button class="primary" onclick="buyItem('probe', 20)">Buy (20 PED)</button>
+                </div>
+                <button onclick="$('#shop-modal').classList.add('hidden'); engine.inDialog = false;" style="margin-top:10px;">Leave Shop</button>
+            </div>
+
+            <!-- DIALOG BOX -->
+            <div id="dialog-box" class="dialog-box hidden">
+                <div id="dialog-text"></div>
+                <div style="text-align: right; font-size: 0.8rem; color: var(--gold); margin-top: 10px;">[Press SPACE or CLICK to continue]</div>
+            </div>
+
+            <!-- BATTLE SCREEN -->
+            <div id="battle-screen" class="overlay hidden">
+                <div class="battle-view">
+                    <div class="battle-stage">
+                        <!-- Enemy -->
+                        <div class="combatant enemy">
+                            <div class="combat-stats">
+                                <div class="combat-name"><span id="e-name">Wild Pet</span><span id="e-lvl" style="color:var(--gold)">Lv 1</span></div>
+                                <div class="bar-bg"><div class="bar-fill hp" id="e-hp-fill" style="width:100%"></div></div>
+                                <div style="text-align:right; font-size:0.7rem; margin-top:3px;" id="e-hp-text">10/10</div>
+                            </div>
+                            <div class="sprite" id="e-sprite">🐗</div>
+                        </div>
+                        
+                        <!-- Player / Avatar -->
+                        <div class="combatant player">
+                            <div class="sprite avatar" id="p-sprite">🧍</div>
+                            <div class="combat-stats">
+                                <div class="combat-name"><span id="p-name">Player</span><span id="p-lvl" style="color:var(--gold)">Lv 1</span></div>
+                                <div class="bar-bg"><div class="bar-fill hp" id="p-hp-fill" style="width:100%"></div></div>
+                                <div style="text-align:right; font-size:0.7rem; margin-top:3px;" id="p-hp-text">10/10</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="battle-hud">
+                        <div class="battle-log" id="b-log"></div>
+                        <div class="battle-actions" id="b-actions">
+                            <button id="btn-act1" onclick="battleAction(1)">Attack</button>
+                            <button id="btn-act2" onclick="battleAction(2)">Special</button>
+                            <button id="btn-act3" onclick="battleAction(3)" style="border-color:var(--gold); color:var(--gold);">Tame</button>
+                            <button id="btn-act4" onclick="battleAction(4)" style="border-color:var(--danger); color:var(--danger);">Flee</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+
+    </script>
+</body>
+</html>

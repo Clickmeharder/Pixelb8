@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEISURE SUIT LOOTER — Entropia Universe Arcade</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+
+    </style>
+</head>
+<body>
+
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-grid"></div>
+            <div class="marquee-art"></div>
+            <h1>LEISURE SUIT LOOTER</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container">
+                <div class="crt-overlay"></div>
+                
+                <div id="start-panel">
+                    <h2 style="color: #ff0077; margin:0 0 15px 0;">INSERT COIN</h2>
+                    <p style="color: #fff; font-size: 0.85rem; margin-bottom: 20px;">Use the mouse to point, click, and tip.</p>
+                    <p style="color: #00ffff; font-size: 0.75rem;">Press [ L ] to lean in. Click the coin slot to begin.</p>
+                </div>
+
+                <div class="ui-layer hidden" id="uiActions">
+                    <!-- Buttons injected via JS -->
+                </div>
+
+                <canvas id="gameCanvas" width="640" height="480"></canvas>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="cp-texture"></div>
+            <div class="lean-btn" id="zoomBtn">LEAN</div>
+            
+            <div class="trackball"></div>
+            
+            <div style="display: flex; gap: 20px; z-index: 5;">
+                <div class="arcade-btn"></div>
+                <div class="arcade-btn" style="background: radial-gradient(circle at 15px 15px, #00ffff, #0066aa);"></div>
+            </div>
+        </div>
+
+        <div class="lower-cabinet">
+            <div class="coin-door">
+                <div class="coin-slot" id="coinSlotBtn"><div class="coin-entry"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+
+
+    <script>
+
+    </script>
+</body>
+</html>

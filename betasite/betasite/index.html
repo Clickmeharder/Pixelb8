@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PixelB8</title>
+  <link rel="stylesheet" href="sharedassets/css/landing.css">
+</head>
+<body>
+  <main class="landing">
+    <div class="pixel-field"></div>
+    <div class="retro-grid"></div>
+    <div class="crt"></div>
+    <div class="vignette"></div>
+
+    <section class="boot-card" aria-label="PixelB8 entrance">
+      <div class="boot-sequence">
+        <div class="boot-mini">PixelB8 Network Interface</div>
+        <div class="pixel-logo">PIXELB8</div>
+        <div class="logo-sub">Games · Tools · Worlds</div>
+
+        <div class="boot-log" aria-hidden="true">
+          <div class="boot-line">&gt; INITIALIZING PIXELB8 SHELL <span class="boot-ok">[OK]</span></div>
+          <div class="boot-line">&gt; ARCADE NETWORK <span class="boot-ok">[READY]</span></div>
+          <div class="boot-line">&gt; CREATOR SYSTEMS <span class="boot-accent">[STANDBY]</span></div>
+          <div class="boot-line">&gt; AFTER HOURS WORLD <span class="boot-accent">[IN DEVELOPMENT]</span></div>
+        </div>
+
+        <div class="enter-zone">
+          <button id="enterBtn" class="enter-btn" type="button">Enter PixelB8</button>
+          <label class="auto-enter" title="Play this intro, then automatically continue to the PixelB8 home page on future visits.">
+            <input id="autoEnterToggle" type="checkbox" onchange="saveAutoEnter()">
+            <span class="auto-dot"></span>
+            <span>Auto Enter</span>
+          </label>
+          <div id="autoCountdown" class="auto-countdown"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="corner-label">PRESS ENTER OR SELECT ENTER PIXELB8</div>
+    <div class="corner-version">P8 / BOOT 01</div>
+  </main>
+
+  <script src="sharedassets/js/landing.js"></script>
+</body>
+</html>

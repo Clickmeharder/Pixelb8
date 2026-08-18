@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PixelB8</title>
+<link rel="stylesheet" href="sharedassets/css/pixelb8-shell.css">
+<link rel="stylesheet" href="sharedassets/css/home.css">
+</head>
+<body>
+<div class="app portal-app" id="appShell" data-pixelb8-shell>
+  <aside class="app-sidebar">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand-mark"><span class="brand-mark-expanded">P8</span><span class="brand-mark-rail">PXLB8</span></div>
+      <div class="sidebar-brand-copy"><h1>PixelB8</h1><p>Games · tools · worlds</p></div>
+      <button id="portalSidebarToggle" class="sidebar-collapse-btn" onclick="portalToggleSidebar()">‹</button>
+    </div>
+    <div class="sidebar-scroll">
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">PixelB8</div>
+        <button class="portal-nav-btn" onclick="go('home.html')"><span class="sidebar-item-icon">⌂</span><span class="sidebar-item-text">Home</span></button>
+        <button class="portal-nav-btn" onclick="go('arcade/index.html')"><span class="sidebar-item-icon">🕹</span><span class="sidebar-item-text">Arcade</span></button>
+        <button class="portal-nav-btn" onclick="go('eu/index.html')"><span class="sidebar-item-icon">EU</span><span class="sidebar-item-text">EU Tracker</span></button>
+        <button class="portal-nav-btn" onclick="alert('Creator Tools coming soon')"><span class="sidebar-item-icon">🛠</span><span class="sidebar-item-text">Creator Tools</span></button>
+      </section>
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Worlds</div>
+        <button class="portal-nav-btn"><span class="sidebar-item-icon">AH</span><span class="sidebar-item-text">After Hours · Coming Soon</span></button>
+      </section>
+    </div>
+    <div class="sidebar-footer"><span class="sidebar-footer-full">PixelB8 Network</span><span class="sidebar-footer-rail">PXLB8</span></div>
+  </aside>
+
+  <main class="portal-main">
+    <section class="portal-hero">
+      <div class="portal-hero-copy">
+        <span class="eyebrow">WELCOME TO PIXELB8</span>
+        <h2>Play. Build. Track. Explore.</h2>
+        <p>PixelB8 is a growing collection of browser games, creator tools, multiplayer experiments and connected utilities built around one shared account and social layer.</p>
+        <div class="portal-actions">
+          <button class="btn primary" onclick="go('arcade/index.html')">Enter Arcade</button>
+          <button class="btn" onclick="go('eu/index.html')">Open EU Tracker</button>
+        </div>
+      </div>
+      <div class="portal-hero-art"></div>
+    </section>
+
+    <section class="portal-grid">
+      <article class="portal-card" onclick="go('arcade/index.html')"><span class="tag">PLAY</span><h3>PixelB8 Arcade</h3><p>Single-player cabinets, multiplayer rooms, card games and weird little experiments.</p></article>
+      <article class="portal-card" onclick="go('eu/index.html')"><span class="tag">TRACK</span><h3>PixelB8 EU</h3><p>Entropia hunting analytics, loadouts, team tracking and OBS overlays.</p></article>
+      <article class="portal-card" onclick="alert('Creator Tools coming soon')"><span class="tag">CREATE</span><h3>Creator Tools</h3><p>Sprite, animation and asset-building tools for browser games and PixelB8 worlds.</p></article>
+      <article class="portal-card"><span class="tag">FLAGSHIP · COMING SOON</span><h3>PixelB8: After Hours</h3><p>Our neon cyberpunk side-scrolling RPG / beat ’em up and the flagship PixelB8 world.</p></article>
+    </section>
+
+    <section class="portal-lower">
+      <article class="portal-panel"><h3>One connected PixelB8 shell</h3><p>The same account rail, MQTT chat, navigation language and graphite interface can follow users across Arcade, EU, creator tools and future pages.</p></article>
+      <article class="portal-panel"><h3>What’s live now</h3><p>Arcade and EU Tracker are the first two full products in this shared foundation. More sections can plug into the same shell later.</p></article>
+    </section>
+  </main>
+
+  <div class="pixelb8-vertical-resizer" data-pixelb8-right-resizer title="Drag to resize account & chat">
+    <span class="pixelb8-vertical-resizer-grip"></span>
+  </div>
+  <aside class="pixelb8-right-rail collapsed" data-pixelb8-right-rail>
+    <button class="pixelb8-right-rail-toggle" onclick="PixelB8Shell.toggleRightRail()" title="Open account & chat">
+      <span class="pixelb8-right-rail-toggle-icon">‹</span>
+    </button>
+    <div class="pixelb8-right-rail-inner">
+      <section class="pixelb8-account-hud">
+        <div class="pixelb8-account-avatar-wrap">
+          <div class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</div>
+          <span class="pixelb8-account-presence"></span>
+        </div>
+        <div class="pixelb8-account-copy">
+          <span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span>
+          <strong data-pixelb8-profile-name>Guest</strong>
+          <span data-pixelb8-profile-status>Guest account</span>
+        </div>
+      </section>
+
+      <section class="pixelb8-right-section pixelb8-account-actions">
+        <button class="pixelb8-account-action" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
+        <button class="pixelb8-account-action danger" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
+      </section>
+
+      <section class="pixelb8-right-section pixelb8-chat-section">
+        <div class="pixelb8-right-section-head">
+          <div>
+            <span class="pixelb8-account-kicker">PIXELB8 MQTT</span>
+            <strong>Global Chat</strong>
+          </div>
+          <span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span>
+        </div>
+        <div class="pixelb8-chat-container">
+          <div class="pixelb8-chat-messages" data-pixelb8-chat-messages></div>
+          <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker>
+            <span onclick="PixelB8Shell.insertEmoji('😀')">😀</span>
+            <span onclick="PixelB8Shell.insertEmoji('😂')">😂</span>
+            <span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span>
+            <span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span>
+            <span onclick="PixelB8Shell.insertEmoji('👾')">👾</span>
+            <span onclick="PixelB8Shell.insertEmoji('😎')">😎</span>
+            <span onclick="PixelB8Shell.insertEmoji('👍')">👍</span>
+            <span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span>
+          </div>
+          <div class="pixelb8-chat-input">
+            <button onclick="PixelB8Shell.toggleEmojiPicker()">☺</button>
+            <input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()">
+            <button class="primary" onclick="PixelB8Shell.sendChat()">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="pixelb8-right-footer">PixelB8 Social</div>
+    </div>
+  </aside>
+
+</div>
+
+<div class="pixelb8-account-settings-backdrop hidden" data-pixelb8-account-settings onclick="PixelB8Shell.closeAccountSettings(event)">
+  <section class="pixelb8-account-settings-card" onclick="event.stopPropagation()">
+    <div class="pixelb8-account-settings-head">
+      <div><span class="pixelb8-account-kicker">PIXELB8 PROFILE</span><h3>Account Settings</h3></div>
+      <button class="btn" onclick="PixelB8Shell.closeAccountSettings()">×</button>
+    </div>
+    <div class="pixelb8-account-settings-body">
+      <label><span>Display Name</span><input maxlength="32" data-pixelb8-account-name-input placeholder="Guest"></label>
+      <label><span>Profile Initial</span><input maxlength="2" data-pixelb8-account-initial-input placeholder="G"></label>
+    </div>
+    <div class="pixelb8-account-settings-actions">
+      <button class="btn" onclick="PixelB8Shell.closeAccountSettings()">Cancel</button>
+      <button class="btn" onclick="PixelB8Shell.saveAccountSettings()">Save Profile</button>
+    </div>
+  </section>
+</div>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="sharedassets/js/pixelb8-shell.js"></script>
+<script src="sharedassets/js/home.js"></script>
+</body>
+</html>

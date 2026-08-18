@@ -1,0 +1,11 @@
+/* assets/css/chat.css */
+.chat-container { flex: 1; min-height: 140px; max-height: 250px; display: flex; flex-direction: column; gap: 5px; background: #060a0c; border: 1px solid var(--line, #1c2b36); border-radius: 8px; padding: 8px; position: relative; }
+.chat-messages { flex: 1; overflow-y: auto; font-size: 0.75rem; color: var(--text, #e7edf4); padding-right: 5px; scrollbar-width: thin; scrollbar-color: var(--accent, #19f5c6) #060a0c; display: flex; flex-direction: column; gap: 4px; word-wrap: break-word; }
+.chat-input-row { display: flex; gap: 5px; margin-top: auto; }
+.chat-input-row input { padding: 5px; font-size: 0.75rem; flex: 1; border-radius: 4px; background: #040708; border: 1px solid #233544; color: var(--text, #e7edf4); outline: none;width:100%; }
+.chat-input-row button { padding: 5px 8px; font-size: 0.75rem; background: #0a1114; border: 1px solid #233544; color: var(--text, #e7edf4); border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+.chat-input-row button:hover { border-color: var(--accent, #19f5c6); color: var(--accent, #19f5c6); }
+.chat-input-row button.primary { background: linear-gradient(135deg, #109176, #0c5c4a); border-color: var(--accent, #19f5c6); color: #fff; }
+.emoji-picker { position: absolute; bottom: 45px; left: 5px; background: #0a1114; border: 1px solid var(--accent, #19f5c6); padding: 8px; border-radius: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+.emoji-picker span { cursor: pointer; font-size: 1.2rem; text-align: center; transition: transform 0.1s; }
+.emoji-picker span:hover { transform: scale(1.25); }

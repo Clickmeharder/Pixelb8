@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PixelB8 Arcade</title>
+  <link rel="stylesheet" href="../sharedassets/css/pixelb8-shell.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app" id="appShell" data-pixelb8-shell>
+  <aside class="app-sidebar">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand-mark" title="PixelB8 Arcade">
+        <span class="brand-mark-expanded">P8</span>
+        <span class="brand-mark-rail">PXLB8</span>
+      </div>
+      <div class="sidebar-brand-copy">
+        <h1>PixelB8 Arcade</h1>
+        <p>Games · rooms · weird stuff</p>
+      </div>
+      <button id="sidebarToggleBtn" class="sidebar-collapse-btn" onclick="toggleSidebar()" title="Collapse sidebar">‹</button>
+    </div>
+
+    <div class="sidebar-scroll">
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Arcade</div>
+        <button class="sidebar-nav-btn active" data-view="home" onclick="switchView('home')">
+          <span class="sidebar-item-icon">⌂</span><span class="sidebar-item-text">Arcade Home</span>
+        </button>
+        <button class="sidebar-nav-btn" data-view="single" onclick="switchView('single')">
+          <span class="sidebar-item-icon">▣</span><span class="sidebar-item-text">Single Player</span>
+        </button>
+        <button class="sidebar-nav-btn" data-view="multi" onclick="switchView('multi')">
+          <span class="sidebar-item-icon">◎</span><span class="sidebar-item-text">Multiplayer</span>
+        </button>
+        <button class="sidebar-nav-btn" data-view="rooms" onclick="switchView('rooms')">
+          <span class="sidebar-item-icon">●</span><span class="sidebar-item-text">Live Rooms</span>
+          <span id="railRoomCount" class="rail-count"></span>
+        </button>
+      </section>
+
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Library</div>
+        <label class="sidebar-search">
+          <span>⌕</span>
+          <input id="sidebarSearch" type="search" placeholder="Find a game…" oninput="renderLibraryViews()">
+        </label>
+        <button class="sidebar-nav-btn" data-view="favorites" onclick="switchView('favorites')">
+          <span class="sidebar-item-icon">★</span><span class="sidebar-item-text">Favorites</span>
+        </button>
+        <button class="sidebar-nav-btn" data-view="recent" onclick="switchView('recent')">
+          <span class="sidebar-item-icon">◷</span><span class="sidebar-item-text">Recently Played</span>
+        </button>
+      </section>
+
+
+    </div>
+
+      <section class="pixelb8-more-dock pixelb8-more collapsed" id="pixelb8More" data-pixelb8-more>
+        <button class="pixelb8-more-toggle" onclick="toggleMore()" aria-expanded="false">
+          <span class="sidebar-item-icon">◆</span>
+          <span class="sidebar-item-text">More from PixelB8</span>
+          <span class="chevron">›</span>
+        </button>
+        <div class="pixelb8-more-body">
+          <button class="sidebar-nav-btn" onclick="location.href='../home.html'">
+            <span class="sidebar-item-icon">⌂</span><span class="sidebar-item-text">PixelB8 Home</span>
+          </button>
+          <button class="sidebar-nav-btn" onclick="notify('Creator Tools link placeholder.')">
+            <span class="sidebar-item-icon">🛠</span><span class="sidebar-item-text">Creator Tools</span>
+          </button>
+          <button class="sidebar-nav-btn" onclick="location.href='../eu/index.html'">
+            <span class="sidebar-item-icon">EU</span><span class="sidebar-item-text">PixelB8 EU</span>
+          </button>
+        </div>
+      </section>
+
+    <div class="sidebar-footer">
+      <span class="sidebar-footer-full">PixelB8 · Arcade</span>
+      <span class="sidebar-footer-rail">PXLB8</span>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <header class="workspace-header">
+      <div>
+        <span class="eyebrow">PIXELB8</span>
+        <h2 id="pageTitle">Arcade</h2>
+      </div>
+      <div class="header-actions">
+        <div class="directory-state">
+          <span id="directoryDot" class="status-dot"></span>
+          <span id="directoryText">Connecting to arcade rooms…</span>
+        </div>
+        <button class="btn" onclick="switchView('rooms')">Live Rooms <span id="headerRoomCount">0</span></button>
+      </div>
+    </header>
+
+    <section id="homeView" class="view active">
+      <section class="flagship-card">
+        <div class="flagship-copy">
+          <span class="coming-badge">FLAGSHIP · COMING SOON</span>
+          <h3>PixelB8: After Hours</h3>
+          <p>Our big neon cyberpunk side-scrolling RPG / beat ’em up is still in development. Explore the city, fight, customize characters, discover districts and survive after closing time.</p>
+          <div class="flagship-actions">
+            <button class="btn primary" onclick="notify('PixelB8: After Hours is still in development.')">Coming Soon</button>
+            <button class="btn" onclick="notify('After Hours project page placeholder.')">Project Page</button>
+          </div>
+        </div>
+        <div class="flagship-scene" aria-hidden="true">
+          <div class="city-silhouette">
+            <span class="building one"></span>
+            <span class="building two"></span>
+            <span class="building three"></span>
+            <span class="neon-sign">PIXELB8</span>
+            <span class="street"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="live-strip">
+        <div>
+          <span id="homeDirectoryDot" class="status-dot"></span>
+          <div>
+            <b>Live Multiplayer Rooms</b>
+            <span id="homeDirectoryText">Connecting…</span>
+          </div>
+        </div>
+        <div id="homeRoomSummary" class="home-room-summary">No rooms discovered yet.</div>
+        <button class="btn" onclick="switchView('rooms')">Browse Rooms</button>
+      </section>
+
+      <section class="arcade-columns">
+        <section class="panel">
+          <div class="panel-header">
+            <div><span class="eyebrow">CABINETS</span><h3>Single Player</h3></div>
+            <button class="text-btn" onclick="switchView('single')">View all →</button>
+          </div>
+          <div id="homeSingleGrid" class="game-grid compact"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-header">
+            <div><span class="eyebrow">TABLES</span><h3>Multiplayer</h3></div>
+            <button class="text-btn" onclick="switchView('multi')">View all →</button>
+          </div>
+          <div id="homeMultiGrid" class="game-grid compact"></div>
+        </section>
+      </section>
+
+      <section class="bottom-panels">
+        <section class="panel">
+          <div class="panel-header"><h3>Recently Played</h3><span class="muted">This browser</span></div>
+          <div id="homeRecentList" class="simple-list"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-header"><h3>Arcade Foundation</h3><span class="muted">Legacy games preserved</span></div>
+          <div class="foundation-copy">
+            <b>Original PixelB8 arcade games, separated from the EU tracker.</b>
+            <p>The shared MQTT multiplayer transport and legacy game files are packaged inside this standalone arcade.</p>
+          </div>
+        </section>
+      </section>
+    </section>
+
+    <section id="singleView" class="view">
+      <div class="section-header">
+        <div><span class="eyebrow">PIXELB8 CABINETS</span><h3>Single Player</h3></div>
+        <span class="muted" id="singleCount"></span>
+      </div>
+      <div id="singleGrid" class="game-grid"></div>
+    </section>
+
+    <section id="multiView" class="view">
+      <div class="section-header">
+        <div><span class="eyebrow">PIXELB8 TABLES</span><h3>Multiplayer</h3></div>
+        <span class="muted" id="multiCount"></span>
+      </div>
+      <div id="multiGrid" class="game-grid"></div>
+    </section>
+
+    <section id="roomsView" class="view">
+      <div class="section-header">
+        <div><span class="eyebrow">MQTT ROOM DIRECTORY</span><h3>Live Multiplayer Rooms</h3></div>
+        <button class="btn" onclick="refreshDirectory()">↻ Refresh</button>
+      </div>
+      <div id="roomGrid" class="room-grid">
+        <div class="empty-state">Connecting to the PixelB8 room directory…</div>
+      </div>
+    </section>
+
+    <section id="favoritesView" class="view">
+      <div class="section-header"><div><span class="eyebrow">YOUR ARCADE</span><h3>Favorites</h3></div></div>
+      <div id="favoritesGrid" class="game-grid"></div>
+    </section>
+
+    <section id="recentView" class="view">
+      <div class="section-header"><div><span class="eyebrow">YOUR ARCADE</span><h3>Recently Played</h3></div></div>
+      <div id="recentGrid" class="game-grid"></div>
+    </section>
+
+    <section id="cabinetView" class="view cabinet-view">
+      <div class="cabinet-toolbar">
+        <div>
+          <span class="eyebrow">NOW PLAYING</span>
+          <h3 id="cabinetTitle">Game</h3>
+        </div>
+        <div class="cabinet-actions">
+          <button class="btn" onclick="openCabinetNewTab()">Open New Tab</button>
+          <button class="btn" onclick="closeCabinet()">← Back to Arcade</button>
+        </div>
+      </div>
+      <div class="cabinet-frame-shell">
+        <iframe id="cabinetFrame" title="PixelB8 arcade cabinet" allow="clipboard-write; fullscreen" sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-pointer-lock"></iframe>
+      </div>
+    </section>
+  </main>
+
+
+  <div class="pixelb8-vertical-resizer" data-pixelb8-right-resizer title="Drag to resize account & chat">
+    <span class="pixelb8-vertical-resizer-grip"></span>
+  </div>
+  <aside class="pixelb8-right-rail collapsed" data-pixelb8-right-rail>
+    <button class="pixelb8-right-rail-toggle" onclick="PixelB8Shell.toggleRightRail()" title="Open account & chat">
+      <span class="pixelb8-right-rail-toggle-icon">‹</span>
+    </button>
+    <div class="pixelb8-right-rail-inner">
+      <section class="pixelb8-account-hud">
+        <div class="pixelb8-account-avatar-wrap">
+          <div class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</div>
+          <span class="pixelb8-account-presence"></span>
+        </div>
+        <div class="pixelb8-account-copy">
+          <span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span>
+          <strong data-pixelb8-profile-name>Guest</strong>
+          <span data-pixelb8-profile-status>Guest account</span>
+        </div>
+      </section>
+
+      <section class="pixelb8-right-section pixelb8-account-actions">
+        <button class="pixelb8-account-action" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
+        <button class="pixelb8-account-action danger" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
+      </section>
+
+      <section class="pixelb8-right-section pixelb8-chat-section">
+        <div class="pixelb8-right-section-head">
+          <div>
+            <span class="pixelb8-account-kicker">PIXELB8 MQTT</span>
+            <strong>Global Chat</strong>
+          </div>
+          <span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span>
+        </div>
+        <div class="pixelb8-chat-container">
+          <div class="pixelb8-chat-messages" data-pixelb8-chat-messages></div>
+          <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker>
+            <span onclick="PixelB8Shell.insertEmoji('😀')">😀</span>
+            <span onclick="PixelB8Shell.insertEmoji('😂')">😂</span>
+            <span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span>
+            <span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span>
+            <span onclick="PixelB8Shell.insertEmoji('👾')">👾</span>
+            <span onclick="PixelB8Shell.insertEmoji('😎')">😎</span>
+            <span onclick="PixelB8Shell.insertEmoji('👍')">👍</span>
+            <span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span>
+          </div>
+          <div class="pixelb8-chat-input">
+            <button onclick="PixelB8Shell.toggleEmojiPicker()">☺</button>
+            <input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()">
+            <button class="primary" onclick="PixelB8Shell.sendChat()">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="pixelb8-right-footer">PixelB8 Social</div>
+    </div>
+  </aside>
+
+</div>
+
+
+<div class="pixelb8-account-settings-backdrop hidden" data-pixelb8-account-settings onclick="PixelB8Shell.closeAccountSettings(event)">
+  <section class="pixelb8-account-settings-card" onclick="event.stopPropagation()">
+    <div class="pixelb8-account-settings-head">
+      <div><span class="pixelb8-account-kicker">PIXELB8 PROFILE</span><h3>Account Settings</h3></div>
+      <button class="btn" onclick="PixelB8Shell.closeAccountSettings()">×</button>
+    </div>
+    <div class="pixelb8-account-settings-body">
+      <label><span>Display Name</span><input maxlength="32" data-pixelb8-account-name-input placeholder="Guest"></label>
+      <label><span>Profile Initial</span><input maxlength="2" data-pixelb8-account-initial-input placeholder="G"></label>
+    </div>
+    <div class="pixelb8-account-settings-actions">
+      <button class="btn" onclick="PixelB8Shell.closeAccountSettings()">Cancel</button>
+      <button class="btn" onclick="PixelB8Shell.saveAccountSettings()">Save Profile</button>
+    </div>
+  </section>
+</div>
+
+<div id="toastHost" class="toast-host"></div>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="../sharedassets/js/pixelb8-shell.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEISURE SUIT LOOTER — Entropia Universe Arcade</title>
+    <style>
+        :root {
+            --cabinet-primary: #1a002a;
+            --cabinet-dark: #0d0015;
+            --marquee-cyan: #00ffff;
+            --marquee-pink: #ff0077;
+            --t-molding: #ff00ff;
+        }
+
+        body {
+            background-color: #0c0f12;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', Courier, monospace;
+            color: #fff;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        .arcade-container {
+            position: relative;
+            width: 640px;
+            background: linear-gradient(135deg, var(--cabinet-dark), var(--cabinet-primary));
+            border-left: 14px solid var(--t-molding);
+            border-right: 14px solid var(--t-molding);
+            border-radius: 20px 20px 10px 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 30px;
+            user-select: none;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-style: preserve-3d;
+        }
+
+        .arcade-container.lean-in {
+            transform: scale(1.55) translateY(120px) translateZ(150px) rotateX(4deg);
+        }
+
+        .marquee {
+            width: 100%;
+            height: 95px;
+            background: #050011;
+            border-bottom: 6px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px 8px 0 0;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.8);
+        }
+        
+        .marquee-art {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, rgba(255, 0, 119, 0.1), rgba(255, 0, 119, 0.1) 10px, rgba(0, 0, 0, 0.2) 10px, rgba(0, 0, 0, 0.2) 20px);
+        }
+
+        .marquee h1 {
+            font-size: 2.2rem;
+            margin: 0;
+            font-family: 'Impact', sans-serif;
+            color: var(--marquee-pink);
+            text-shadow: 0 0 15px var(--marquee-pink), 3px 3px 0px var(--marquee-cyan);
+            letter-spacing: 3px;
+            z-index: 2;
+        }
+
+        .bezel {
+            width: 92%;
+            background: #0a0011;
+            margin-top: 15px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: inset 0 0 30px #000;
+            box-sizing: border-box;
+            border-bottom: 4px solid #050505;
+            transform-style: preserve-3d;
+        }
+
+        .screen-container {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,1), 0 0 10px rgba(255, 0, 119, 0.2);
+            border: 4px solid #1a1a1a;
+            transform-style: preserve-3d;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .crt-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 0%, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2) 100%);
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .ui-layer {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            padding: 12px 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            background: rgba(10, 0, 20, 0.9);
+            border-top: 2px solid var(--marquee-pink);
+            z-index: 50;
+            transform: translateZ(50px);
+            pointer-events: auto;
+        }
+
+        .adv-btn {
+            background: #220033;
+            border: 2px solid var(--marquee-pink);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 0.9rem;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.1s;
+        }
+        .adv-btn:hover { background: var(--marquee-pink); color: #000; box-shadow: 0 0 10px var(--marquee-pink); }
+        .adv-btn:active { transform: translateY(2px); }
+        .adv-btn:disabled { background: #111; border-color: #333; color: #555; cursor: not-allowed; box-shadow: none; }
+
+        .control-panel {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(to bottom, #220033, #0a0011);
+            border-top: 6px solid #000;
+            margin-top: 15px;
+            position: relative;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.7);
+        }
+
+        .trackball {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 20px 20px, #fff, #aaa 60%, #444);
+            border: 4px solid #111;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.8);
+        }
+
+        .arcade-btn {
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            border: 3px solid #000;
+            background: radial-gradient(circle at 15px 15px, var(--marquee-pink), #880044);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.4);
+            cursor: pointer;
+        }
+        .arcade-btn:active { transform: translateY(3px); box-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+
+        .lean-btn {
+            position: absolute; left: 20px; top: 20px;
+            width: 40px; height: 40px;
+            background: radial-gradient(circle at 12px 12px, #fff, #aaa);
+            border-radius: 50%; border: 4px solid #000;
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+            font-size: 0.6rem; font-weight: bold; color: #000;
+        }
+
+        .coin-door {
+            width: 130px; height: 90px;
+            background: #1e1e1e; margin-top: 15px;
+            border: 4px solid #111; border-radius: 5px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: inset 0 0 10px #000;
+        }
+        .coin-slot {
+            width: 30px; height: 50px; background: #111; border: 2px solid #333; border-radius: 3px; position: relative; cursor: pointer;
+        }
+        .coin-entry {
+            width: 4px; height: 20px; background: var(--marquee-pink); position: absolute; top: 10px; left: 50%; transform: translateX(-50%); box-shadow: 0 0 8px var(--marquee-pink);
+        }
+
+        #start-panel {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center; background: rgba(0, 0, 0, 0.95); padding: 30px; border: 2px solid var(--marquee-pink); border-radius: 8px; z-index: 30; width: 80%;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-grid"></div>
+            <div class="marquee-art"></div>
+            <h1>LEISURE SUIT LOOTER</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container">
+                <div class="crt-overlay"></div>
+                
+                <div id="start-panel">
+                    <h2 style="color: #ff0077; margin:0 0 15px 0;">INSERT COIN</h2>
+                    <p style="color: #fff; font-size: 0.85rem; margin-bottom: 20px;">Use the mouse to point, click, and tip.</p>
+                    <p style="color: #00ffff; font-size: 0.75rem;">Press [ L ] to lean in. Click the coin slot to begin.</p>
+                </div>
+
+                <div class="ui-layer hidden" id="uiActions">
+                    <!-- Buttons injected via JS -->
+                </div>
+
+                <canvas id="gameCanvas" width="640" height="480"></canvas>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="cp-texture"></div>
+            <div class="lean-btn" id="zoomBtn">LEAN</div>
+            
+            <div class="trackball"></div>
+            
+            <div style="display: flex; gap: 20px; z-index: 5;">
+                <div class="arcade-btn"></div>
+                <div class="arcade-btn" style="background: radial-gradient(circle at 15px 15px, #00ffff, #0066aa);"></div>
+            </div>
+        </div>
+
+        <div class="lower-cabinet">
+            <div class="coin-door">
+                <div class="coin-slot" id="coinSlotBtn"><div class="coin-entry"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+'use strict';
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const cabinet = document.getElementById('cabinet');
+const zoomBtn = document.getElementById('zoomBtn');
+const coinSlot = document.getElementById('coinSlotBtn');
+const startPanel = document.getElementById('start-panel');
+const uiActions = document.getElementById('uiActions');
+
+const WIDTH = canvas.width;
+const HEIGHT = canvas.height;
+const TAU = Math.PI * 2;
+
+let audioCtx = null, audioMuted = false;
+
+function initAudio() {
+    if (audioCtx) { if (audioCtx.state === 'suspended') audioCtx.resume(); return; }
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    audioCtx = new AudioContextClass();
+}
+
+function playTone(freq, duration, type = 'square', volume = 0.05) {
+    if (!audioCtx || audioMuted) return;
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {}
+}
+
+function toggleLean() {
+    cabinet.classList.toggle('lean-in');
+    playTone(600, 0.05, 'triangle');
+}
+zoomBtn.addEventListener('pointerdown', e => { e.preventDefault(); toggleLean(); });
+
+window.addEventListener('keydown', e => {
+    if (e.code === 'KeyL') toggleLean();
+});
+
+// Game State
+let gameState = 'INSERT_COIN';
+let animTime = 0;
+let messageLog = "Welcome to Club NEVERDIE. The neon is blinding.";
+
+// Player Stats
+let ped = 1000; // Updated to 1000 starting PED
+let charm = 0;
+
+// Dancer Stats
+let selectedDancer = 0; // 0 = Amber, 1 = Roxy
+let tipJar = [0, 0];
+let amberPhase = 1; // 1: Dress, 2: Corset, 3: Micro-Lingerie
+
+// Casino Stats
+let diceResult = 0, diceRolling = false, rollTimer = 0;
+let slots = [0, 0, 0], slotsSpinning = false, slotsTimer = 0;
+
+// Texas Hold'em
+let deck = [], myHole = [], commCards = [], aiHoles = [[], [], []];
+let holdemState = 'idle'; // idle, flop, turn, river, over
+let pot = 0;
+const suits = ['♥', '♦', '♣', '♠'];
+const cardNames = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+
+function createDeck() {
+    let d = [];
+    for(let s=0; s<4; s++) {
+        for(let v=2; v<=14; v++) d.push({ v: v, s: s, str: cardNames[v-2] + suits[s], color: (s < 2) ? '#f00' : '#000' });
+    }
+    return d.sort(() => Math.random() - 0.5);
+}
+
+function evaluateHoldem(hole, comm) {
+    let all = [...hole, ...comm];
+    all.sort((a,b) => b.v - a.v);
+    
+    let counts = {}, suitCounts = {0:0, 1:0, 2:0, 3:0};
+    all.forEach(c => { counts[c.v] = (counts[c.v] || 0) + 1; suitCounts[c.s]++; });
+    
+    let isFlush = Object.values(suitCounts).some(s => s >= 5);
+    let pairs = 0, threes = 0, fours = 0;
+    Object.values(counts).forEach(v => { if (v === 2) pairs++; if (v === 3) threes++; if (v === 4) fours++; });
+    
+    let uniqueVals = [...new Set(all.map(c=>c.v))];
+    let isStraight = false;
+    for(let i=0; i<=uniqueVals.length - 5; i++) { if (uniqueVals[i] - uniqueVals[i+4] === 4) { isStraight = true; break; } }
+    if (!isStraight && counts[14] && counts[5] && counts[4] && counts[3] && counts[2]) isStraight = true;
+
+    if (isStraight && isFlush) return { rank: 8, name: "Straight Flush" };
+    if (fours) return { rank: 7, name: "Four of a Kind" };
+    if (threes && (pairs || threes > 1)) return { rank: 6, name: "Full House" };
+    if (isFlush) return { rank: 5, name: "Flush" };
+    if (isStraight) return { rank: 4, name: "Straight" };
+    if (threes) return { rank: 3, name: "Three of a Kind" };
+    if (pairs >= 2) return { rank: 2, name: "Two Pair" };
+    if (pairs === 1) return { rank: 1, name: "Pair" };
+    return { rank: 0, name: "High Card" };
+}
+
+function processPokerBet() {
+    if (ped >= 25) {
+        ped -= 25;
+        pot += 25 + (Math.floor(Math.random()*3 + 1) * 25); // You + 1 to 3 callers
+        playTone(500, 0.1, 'square');
+        
+        if (holdemState === 'flop') {
+            commCards.push(deck.pop()); holdemState = 'turn'; messageLog = "Turn dealt. Action is on you.";
+        } else if (holdemState === 'turn') {
+            commCards.push(deck.pop()); holdemState = 'river'; messageLog = "River dealt. Final bets.";
+        } else if (holdemState === 'river') {
+            holdemState = 'over';
+            let myEval = evaluateHoldem(myHole, commCards);
+            let bestAi = -1;
+            for(let i=0; i<3; i++) { let aiEval = evaluateHoldem(aiHoles[i], commCards); if (aiEval.rank > bestAi) bestAi = aiEval.rank; }
+            
+            if (myEval.rank >= bestAi && myEval.rank > 0) { // Tie goes to player
+                ped += pot; messageLog = `You win with ${myEval.name}! Collected ${pot} PED.`;
+                playTone(1000, 0.4, 'sine'); setTimeout(()=>playTone(1200, 0.5, 'sine'), 200);
+            } else {
+                messageLog = `AI wins. You had ${myEval.name}.`; playTone(200, 0.4, 'sawtooth');
+            }
+        }
+        updateUI();
+    } else {
+        messageLog = "You don't have enough PED to call."; updateUI();
+    }
+}
+
+function updateUI() {
+    uiActions.innerHTML = '';
+    
+    if (gameState === 'BAR') {
+        createBtn('Buy Drink (10 PED)', () => {
+            if (ped >= 10) { ped -= 10; charm += 5; messageLog = "You sip a neon cocktail. Charm increased."; playTone(800, 0.1, 'sine'); }
+            else { messageLog = "Bartender: 'No PED, no pour.'"; playTone(200, 0.2, 'sawtooth'); }
+            updateUI();
+        });
+        createBtn('Enter Casino', () => { gameState = 'CASINO'; messageLog = "Bright lights and dashed hopes."; playTone(400, 0.1, 'square'); updateUI(); });
+        createBtn('Main Stage', () => { gameState = 'STAGE_MENU'; messageLog = "The bass vibrates through the floor."; playTone(600, 0.2, 'sine'); updateUI(); });
+    } 
+    else if (gameState === 'CASINO') {
+        createBtn('Dice Table', () => { gameState = 'DICE'; messageLog = "High-Roller Dice. 50 PED per roll."; updateUI(); });
+        createBtn('Slot Machines', () => { gameState = 'SLOTS'; messageLog = "Super Nova Slots. 20 PED per spin."; updateUI(); });
+        createBtn('Texas Hold\'em', () => { gameState = 'POKER'; holdemState = 'idle'; messageLog = "Texas Hold'em. 25 PED Ante."; updateUI(); });
+        createBtn('Back to Bar', () => { gameState = 'BAR'; messageLog = "Back at the sticky bar counter."; updateUI(); });
+    }
+    else if (gameState === 'DICE') {
+        createBtn('Roll Dice (50 PED)', () => {
+            if (ped >= 50 && !diceRolling) {
+                ped -= 50; diceRolling = true; rollTimer = 60; playTone(500, 0.5, 'noise');
+                messageLog = "Rolling..."; updateUI();
+            } else if (ped < 50) { messageLog = "Too broke for this table."; updateUI(); }
+        }, diceRolling);
+        createBtn('Leave Table', () => { if(!diceRolling){ gameState = 'CASINO'; messageLog = "Back to the floor."; playTone(300, 0.1, 'square'); updateUI(); } });
+    }
+    else if (gameState === 'SLOTS') {
+        createBtn('Spin (20 PED)', () => {
+            if (ped >= 20 && !slotsSpinning) {
+                ped -= 20; slotsSpinning = true; slotsTimer = 60; messageLog = "Spinning..."; playTone(600, 0.5, 'square'); updateUI();
+            } else if (ped < 20) { messageLog = "You're out of PED!"; updateUI(); }
+        }, slotsSpinning);
+        createBtn('Leave Machine', () => { if(!slotsSpinning){ gameState = 'CASINO'; messageLog = "Back to the floor."; updateUI(); } });
+    }
+    else if (gameState === 'POKER') {
+        if (holdemState === 'idle' || holdemState === 'over') {
+            createBtn('Ante & Deal (25 PED)', () => {
+                if (ped >= 25) {
+                    ped -= 25; holdemState = 'flop';
+                    pot = 100; // You + 3 AI
+                    deck = createDeck();
+                    myHole = [deck.pop(), deck.pop()];
+                    aiHoles = [[deck.pop(), deck.pop()], [deck.pop(), deck.pop()], [deck.pop(), deck.pop()]];
+                    commCards = [deck.pop(), deck.pop(), deck.pop()];
+                    messageLog = `Flop dealt. Pot is ${pot} PED. Your move.`; playTone(500, 0.1, 'sine'); updateUI();
+                } else { messageLog = "Need 25 PED to ante."; updateUI(); }
+            });
+            createBtn('Leave Table', () => { gameState = 'CASINO'; messageLog = "Back to the floor."; updateUI(); });
+        } else {
+            createBtn('Call / Bet (25 PED)', processPokerBet);
+            createBtn('Fold', () => { holdemState = 'over'; messageLog = "You folded."; playTone(300, 0.1, 'sawtooth'); updateUI(); });
+        }
+    }
+    else if (gameState === 'STAGE_MENU') {
+        createBtn('Watch Amber', () => { selectedDancer = 0; gameState = 'STAGE'; messageLog = "Amber takes the stage."; playTone(800, 0.2, 'sine'); updateUI(); });
+        createBtn('Watch Roxy', () => { selectedDancer = 1; gameState = 'STAGE'; messageLog = "Roxy takes the stage."; playTone(800, 0.2, 'sine'); updateUI(); });
+        createBtn('Back to Bar', () => { gameState = 'BAR'; messageLog = "You step away from the loud bass."; playTone(300, 0.1, 'square'); updateUI(); });
+    }
+    else if (gameState === 'STAGE') {
+        let name = selectedDancer === 0 ? "Amber" : "Roxy";
+        createBtn(`Tip ${name} (25 PED)`, () => {
+            if (ped >= 25) {
+                ped -= 25; tipJar[selectedDancer] += 25; checkDancerPhase();
+                playTone(900, 0.1, 'square'); setTimeout(() => playTone(1200, 0.2, 'sine'), 100);
+            } else { messageLog = `${name} frowns. 'You're out of PED, honey.'`; playTone(200, 0.2, 'sawtooth'); }
+            updateUI();
+        });
+        createBtn('Flirt', () => {
+            if (charm >= 20) { messageLog = `${name} winks. 'You've got a way with words.'`; tipJar[selectedDancer] += 5; checkDancerPhase(); playTone(800, 0.2, 'sine'); }
+            else { messageLog = `${name} rolls her eyes. 'Buy a drink first, slick.'`; playTone(200, 0.2, 'sawtooth'); }
+            updateUI();
+        });
+        createBtn('Back', () => { gameState = 'STAGE_MENU'; messageLog = "Back to the floor."; playTone(300, 0.1, 'square'); updateUI(); });
+    }
+}
+
+function createBtn(text, onClick, disabled = false) {
+    const btn = document.createElement('button');
+    btn.className = 'adv-btn'; btn.innerText = text;
+    if (disabled) btn.disabled = true;
+    else btn.onclick = onClick;
+    uiActions.appendChild(btn);
+}
+
+function checkDancerPhase() {
+    let name = selectedDancer === 0 ? "Amber" : "Roxy";
+    let tips = tipJar[selectedDancer];
+
+    if (tips >= 250 && amberPhase < 3) {
+        amberPhase = 3; messageLog = `${name} drops the corset! The crowd goes wild!`;
+        playTone(600, 0.1, 'square'); setTimeout(()=>playTone(800, 0.1, 'square'), 100); setTimeout(()=>playTone(1000, 0.3, 'sine'), 200);
+    } else if (tips >= 100 && amberPhase < 2) {
+        amberPhase = 2; messageLog = `${name} tosses her top aside! Things are heating up.`;
+        playTone(600, 0.2, 'sine');
+    } else {
+        const responses = [`${name} turns and winks at you.`, `${name} does a sultry spin.`, "'Thanks for the tips, boys!'", `${name} shakes it.`];
+        messageLog = responses[Math.floor(Math.random() * responses.length)];
+    }
+}
+
+coinSlot.addEventListener('click', () => {
+    if (gameState === 'INSERT_COIN') {
+        initAudio(); playTone(880, 0.1, 'square'); setTimeout(() => playTone(1200, 0.2, 'sine'), 100);
+        startPanel.classList.add('hidden'); uiActions.classList.remove('hidden');
+        gameState = 'BAR'; ped = 1000; charm = 0; tipJar = [0,0]; amberPhase = 1; 
+        diceResult = 0; slots = [0,0,0]; holdemState = 'idle';
+        updateUI();
+    }
+});
+
+// --------------------------------------------------------
+// FK VECTOR RENDERING ENGINE (Flawless Connections & New Moves)
+// --------------------------------------------------------
+
+function drawDancer(x, y, scale, time) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+
+    const t = time;
+    
+    // Dynamic Move Director for Phase 3
+    let moveCycle = 0;
+    if (amberPhase === 3) {
+        moveCycle = Math.floor(t / 8) % 4; // Cycle moves every 8 seconds
+    }
+
+    // Core Animation Rig Variables
+    let hipsX = 0, hipsY = 0;
+    let torsoAngle = 0, torsoOffset = -22;
+    let chestBounce = 0;
+    let legLAngle = 0, legRAngle = 0;
+    let isBack = false;
+
+    // Colors
+    let skin = '#f1c27d', skinShadow = '#d4a362', hair = '#ffcc00', hairDark = '#ccaa00', outfit = '#ff0055', lingerie = '#00ffff';
+    if (selectedDancer === 1) { skin = '#e0ac69'; skinShadow = '#c48f4b'; hair = '#cc0000'; hairDark = '#880000'; outfit = '#5500ff'; lingerie = '#00ff00'; }
+    const corset = '#111';
+
+    // Move Implementations
+    if (moveCycle === 0 || amberPhase < 3) {
+        // Standard Front Sway
+        hipsX = Math.sin(t * 1.5) * 15;
+        hipsY = Math.abs(Math.cos(t * 3)) * 5;
+        torsoAngle = -Math.sin(t * 1.5) * 0.1; // Counter lean
+        chestBounce = Math.sin(t * 6) * (amberPhase===3?2.5:1.5);
+    } 
+    else if (moveCycle === 1) {
+        // The Dynamic Twerk
+        isBack = true;
+        const twerkSpeed = 10 + Math.sin(t * 0.5) * 10; // Ramps 0 to 20
+        hipsY = 30 + Math.abs(Math.sin(t * twerkSpeed)) * 12; // Crouched + bounce
+        torsoAngle = 0.2; // Leaning forward slightly
+        legLAngle = 0.3; legRAngle = -0.3; // Legs spread
+    }
+    else if (moveCycle === 2) {
+        // Pole Grind
+        isBack = Math.sin(t) > 0; // Turn around slowly
+        hipsX = -60 + Math.sin(t * 4) * 8; // Offset to pole, grinding into it
+        hipsY = 10 + Math.sin(t * 2) * 15; // Up and down grind
+        torsoAngle = 0.2; // Leaning back from pole
+        chestBounce = Math.sin(t * 8) * 3;
+    }
+    else if (moveCycle === 3) {
+        // Pole Slide
+        isBack = false;
+        hipsX = -80; // Directly on pole
+        hipsY = -60 + ((t * 25) % 150); // High up, sliding down
+        legLAngle = -0.6; legRAngle = 0.6; // Legs wrapped around pole
+        torsoAngle = 0;
+        chestBounce = Math.sin(t * 15) * 2; // Rattle as sliding
+    }
+
+    // DRAW THE POLE (if Phase 3)
+    if (amberPhase === 3) {
+        ctx.fillStyle = '#999'; ctx.fillRect(-85, -150, 10, 300);
+        ctx.fillStyle = '#fff'; ctx.fillRect(-83, -150, 3, 300); // Highlight
+    }
+
+    // --- RENDER HIERARCHY ---
+
+    // 1. LEGS (Anchor to Hips)
+    ctx.fillStyle = skinShadow;
+    ctx.save(); ctx.translate(hipsX, hipsY);
+    ctx.rotate(legLAngle); ctx.beginPath(); ctx.ellipse(-14, 40, 12, 45, 0.1, 0, TAU); ctx.fill(); // L Thigh
+    ctx.restore();
+    ctx.save(); ctx.translate(hipsX, hipsY);
+    ctx.rotate(legRAngle); ctx.beginPath(); ctx.ellipse(14, 40, 12, 45, -0.1, 0, TAU); ctx.fill(); // R Thigh
+    ctx.restore();
+
+    // Garters
+    if (amberPhase === 2) {
+        ctx.strokeStyle = corset; ctx.lineWidth = 4;
+        ctx.save(); ctx.translate(hipsX, hipsY); ctx.beginPath(); ctx.moveTo(-26, 35); ctx.lineTo(-2, 40); ctx.stroke(); ctx.restore();
+        ctx.save(); ctx.translate(hipsX, hipsY); ctx.beginPath(); ctx.moveTo(26, 35); ctx.lineTo(2, 40); ctx.stroke(); ctx.restore();
+    }
+
+    // 2. HIPS (Root)
+    ctx.save(); ctx.translate(hipsX, hipsY);
+    if (isBack) {
+        // Twerking Booty
+        ctx.fillStyle = skin;
+        const bw = (moveCycle === 1) ? 22 : 18; // Bigger if twerking
+        ctx.beginPath(); ctx.ellipse(-12, 0, bw, 20, -0.2, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(12, 0, bw, 20, 0.2, 0, TAU); ctx.fill();
+        // Thong
+        ctx.strokeStyle = lingerie; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0,-15); ctx.lineTo(0,10); ctx.stroke(); // crack string
+        ctx.beginPath(); ctx.moveTo(-22,-15); ctx.lineTo(0,0); ctx.stroke(); // hip strings
+        ctx.beginPath(); ctx.moveTo(22,-15); ctx.lineTo(0,0); ctx.stroke();
+    } else {
+        if (amberPhase < 3) {
+            ctx.fillStyle = amberPhase === 1 ? outfit : corset;
+            ctx.beginPath(); ctx.ellipse(0, 0, 28, 22, 0, 0, TAU); ctx.fill();
+        } else {
+            ctx.fillStyle = skin;
+            ctx.beginPath(); ctx.ellipse(0, 0, 26, 20, 0, 0, TAU); ctx.fill();
+            ctx.fillStyle = lingerie;
+            ctx.beginPath(); ctx.moveTo(-22, -5); ctx.lineTo(22, -5); ctx.lineTo(0, 15); ctx.fill();
+            ctx.strokeStyle = lingerie; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(-22, -5); ctx.quadraticCurveTo(-28, -15, -15, -20); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(22, -5); ctx.quadraticCurveTo(28, -15, 15, -20); ctx.stroke();
+        }
+    }
+
+    // 3. TORSO (Rotates from Hips)
+    ctx.translate(0, torsoOffset); 
+    ctx.rotate(torsoAngle);
+
+    if (isBack) {
+        if (amberPhase === 1) {
+            ctx.fillStyle = outfit; ctx.beginPath(); ctx.moveTo(-18, -20); ctx.lineTo(18, -20); ctx.quadraticCurveTo(14, 0, 22, 25); ctx.lineTo(-22, 25); ctx.quadraticCurveTo(-14, 0, -18, -20); ctx.fill();
+        } else if (amberPhase === 2) {
+            ctx.fillStyle = skin; ctx.fillRect(-15, -25, 30, 45); 
+            ctx.fillStyle = corset; ctx.beginPath(); ctx.moveTo(-16, -10); ctx.lineTo(16, -10); ctx.quadraticCurveTo(12, 0, 20, 25); ctx.lineTo(-20, 25); ctx.quadraticCurveTo(-12, 0, -16, -10); ctx.fill();
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-5, 0); ctx.lineTo(5, 5); ctx.lineTo(-5, 10); ctx.lineTo(5, 15); ctx.stroke();
+        } else {
+            ctx.fillStyle = skin; ctx.beginPath(); ctx.moveTo(-15, -15); ctx.lineTo(15, -15); ctx.quadraticCurveTo(10, 0, 18, 25); ctx.lineTo(-18, 25); ctx.quadraticCurveTo(-10, 0, -15, -15); ctx.fill();
+            ctx.strokeStyle = skinShadow; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(0, 20); ctx.stroke(); // Spine
+            ctx.strokeStyle = lingerie; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-15, -10); ctx.lineTo(15, -10); ctx.stroke(); // Bra strap
+        }
+    } else {
+        if (amberPhase === 1) {
+            ctx.fillStyle = outfit; ctx.beginPath(); ctx.moveTo(-18, -20); ctx.lineTo(18, -20); ctx.quadraticCurveTo(14, 0, 22, 25); ctx.lineTo(-22, 25); ctx.quadraticCurveTo(-14, 0, -18, -20); ctx.fill();
+        } else if (amberPhase === 2) {
+            ctx.fillStyle = skin; ctx.fillRect(-15, -25, 30, 45); 
+            ctx.fillStyle = corset; ctx.beginPath(); ctx.moveTo(-16, -10); ctx.lineTo(16, -10); ctx.quadraticCurveTo(12, 0, 20, 25); ctx.lineTo(-20, 25); ctx.quadraticCurveTo(-12, 0, -16, -10); ctx.fill();
+        } else {
+            ctx.fillStyle = skin; ctx.beginPath(); ctx.moveTo(-15, -15); ctx.lineTo(15, -15); ctx.quadraticCurveTo(10, 0, 18, 25); ctx.lineTo(-18, 25); ctx.quadraticCurveTo(-10, 0, -15, -15); ctx.fill();
+            ctx.fillStyle = skinShadow; ctx.beginPath(); ctx.arc(0, 15, 2, 0, TAU); ctx.fill(); // Belly button
+        }
+
+        // Breasts (Anchored to Torso)
+        if (amberPhase === 1) {
+            ctx.fillStyle = outfit;
+            ctx.beginPath(); ctx.ellipse(-9, -12 + chestBounce, 14, 16, -0.2, 0, TAU); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(9, -12 + chestBounce, 14, 16, 0.2, 0, TAU); ctx.fill();
+            ctx.strokeStyle = skinShadow; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -25); ctx.lineTo(0, -7 + chestBounce); ctx.stroke(); // Deep V
+        } else {
+            ctx.fillStyle = skin;
+            ctx.beginPath(); ctx.ellipse(-10, -14 + chestBounce, 15, 17, -0.2, 0, TAU); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(10, -14 + chestBounce, 15, 17, 0.2, 0, TAU); ctx.fill();
+            
+            ctx.strokeStyle = skinShadow; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(0, -18 + chestBounce); ctx.quadraticCurveTo(0, -3 + chestBounce, -3, 2 + chestBounce); ctx.stroke();
+
+            if (amberPhase === 2) {
+                ctx.fillStyle = corset;
+                ctx.beginPath(); ctx.arc(-10, -8 + chestBounce, 15, 0, Math.PI); ctx.fill();
+                ctx.beginPath(); ctx.arc(10, -8 + chestBounce, 15, 0, Math.PI); ctx.fill();
+            } else if (amberPhase === 3) {
+                ctx.fillStyle = lingerie;
+                ctx.beginPath(); ctx.ellipse(-10, -12 + chestBounce, 7, 7, -0.2, 0, TAU); ctx.fill();
+                ctx.beginPath(); ctx.ellipse(10, -12 + chestBounce, 7, 7, 0.2, 0, TAU); ctx.fill();
+                ctx.strokeStyle = lingerie; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(-10, -18+chestBounce); ctx.lineTo(-14, -30); ctx.stroke(); 
+                ctx.beginPath(); ctx.moveTo(10, -18+chestBounce); ctx.lineTo(14, -30); ctx.stroke();
+            }
+        }
+    }
+
+    // ARMS (From shoulders)
+    ctx.fillStyle = skin; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.strokeStyle = skin;
+    if (moveCycle === 2) {
+        // Grind: Reaching for pole
+        ctx.beginPath(); ctx.moveTo(-18, -20); ctx.lineTo(-40, -10); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(18, -20); ctx.lineTo(40, -10); ctx.stroke();
+    } else if (moveCycle === 3) {
+        // Slide: Holding pole up high
+        ctx.beginPath(); ctx.moveTo(-18, -20); ctx.lineTo(-10, -60); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(18, -20); ctx.lineTo(-5, -50); ctx.stroke();
+    } else if (isBack) {
+        ctx.beginPath(); ctx.moveTo(-18, -20); ctx.quadraticCurveTo(-35, 5, -20, 25); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(18, -20); ctx.quadraticCurveTo(35, 5, 20, 25); ctx.stroke();
+    } else {
+        const armWave = Math.sin(t*1.5)*15;
+        ctx.beginPath(); ctx.moveTo(-18, -20); ctx.quadraticCurveTo(-35, 5 + armWave, -20, 25); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(18, -20); ctx.quadraticCurveTo(35 + armWave, -15 - armWave, 22, -40 - armWave); ctx.stroke();
+    }
+
+    // 4. HEAD (Top of Torso)
+    ctx.translate(0, -35);
+    ctx.rotate(-torsoAngle); // Head stays straight
+
+    if (isBack) {
+        ctx.fillStyle = hairDark; ctx.beginPath(); ctx.ellipse(0, -10, 22, 30, 0, 0, TAU); ctx.fill();
+        ctx.fillStyle = hair; ctx.beginPath(); ctx.ellipse(0, -20, 16, 20, 0, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(-16, -20); ctx.quadraticCurveTo(-10, 15, 0, 25); ctx.quadraticCurveTo(10, 15, 16, -20); ctx.fill();
+    } else {
+        ctx.fillStyle = hairDark; ctx.beginPath(); ctx.ellipse(0, -10, 22, 30, 0, 0, TAU); ctx.fill();
+        ctx.fillStyle = skin; ctx.beginPath(); ctx.ellipse(0, -20, 14, 18, 0, 0, TAU); ctx.fill();
+        
+        ctx.fillStyle = '#fff'; ctx.fillRect(-7, -22, 5, 3); ctx.fillRect(2, -22, 5, 3); 
+        ctx.fillStyle = '#000'; ctx.fillRect(-6, -22, 2, 2); ctx.fillRect(3, -22, 2, 2); 
+        ctx.fillStyle = outfit; ctx.beginPath(); ctx.ellipse(0, -12, 6, 4, 0, 0, TAU); ctx.fill(); 
+
+        ctx.fillStyle = hair;
+        ctx.beginPath(); ctx.moveTo(0, -38); ctx.quadraticCurveTo(-20, -32, -20, -15); ctx.quadraticCurveTo(-8, -25, 0, -38); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(0, -38); ctx.quadraticCurveTo(22, -32, 20, -5); ctx.quadraticCurveTo(8, -25, 0, -38); ctx.fill();
+    }
+    
+    ctx.restore(); // Ends Hips save
+    ctx.restore(); // Ends Master save
+}
+
+// --------------------------------------------------------
+// RENDERERS
+// --------------------------------------------------------
+
+function drawHUD() {
+    ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, 0, WIDTH, 35);
+    ctx.fillStyle = '#00ffff'; ctx.font = 'bold 16px "Courier New", monospace'; ctx.textAlign = 'left'; ctx.fillText(`PED: ${ped}`, 15, 23);
+    ctx.fillStyle = '#ff0077'; ctx.textAlign = 'right'; ctx.fillText(`CHARM: ${charm}`, WIDTH - 15, 23);
+
+    // Dialogue moved to TOP so it doesn't block the dancer
+    ctx.fillStyle = 'rgba(20, 0, 30, 0.9)'; ctx.fillRect(10, 45, WIDTH - 20, 40);
+    ctx.strokeStyle = '#ff0077'; ctx.strokeRect(10, 45, WIDTH - 20, 40);
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = 'bold 14px "Courier New", monospace'; ctx.fillText(messageLog, WIDTH / 2, 70);
+}
+
+function drawBar() {
+    ctx.fillStyle = '#110022'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, 150); ctx.lineTo(WIDTH, 150); ctx.stroke();
+    ctx.strokeStyle = '#ff0077'; ctx.beginPath(); ctx.moveTo(0, 160); ctx.lineTo(WIDTH, 160); ctx.stroke();
+
+    ctx.fillStyle = '#331122'; ctx.fillRect(0, 250, WIDTH, HEIGHT - 250);
+    ctx.fillStyle = '#442233'; ctx.fillRect(0, 250, WIDTH, 20);
+
+    ctx.fillStyle = '#0f0'; ctx.fillRect(100, 100, 15, 50); ctx.fillStyle = '#f00'; ctx.fillRect(130, 120, 12, 30); ctx.fillStyle = '#00f'; ctx.fillRect(160, 90, 18, 60);
+    drawHUD();
+}
+
+function drawCasino() {
+    ctx.fillStyle = '#220011'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillStyle = '#ff0077'; ctx.font = 'bold 42px Impact'; ctx.textAlign = 'center'; ctx.fillText('CASINO FLOOR', WIDTH/2, 160);
+    ctx.fillStyle = '#00ffff'; ctx.font = '16px monospace'; ctx.fillText('Pick your poison.', WIDTH/2, 200);
+    
+    ctx.strokeStyle = 'rgba(255, 0, 119, 0.3)'; ctx.lineWidth = 5;
+    for(let i=0; i<5; i++) { ctx.beginPath(); ctx.arc(WIDTH/2, 180, 100 + i*40, 0, Math.PI, true); ctx.stroke(); }
+    drawHUD();
+}
+
+function drawDice() {
+    ctx.fillStyle = '#051105'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillStyle = '#005522'; ctx.beginPath(); ctx.ellipse(WIDTH/2, 280, 250, 100, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = '#003311'; ctx.lineWidth = 10; ctx.stroke();
+
+    if (diceRolling) {
+        ctx.fillStyle = '#fff'; ctx.save(); ctx.translate(WIDTH/2, 250); ctx.rotate(animTime * 10); ctx.fillRect(-20, -20, 40, 40); ctx.restore();
+    } else if (diceResult > 0) {
+        ctx.fillStyle = '#fff'; ctx.fillRect(WIDTH/2 - 25, 230, 50, 50); ctx.fillStyle = '#000'; ctx.font = 'bold 30px Arial'; ctx.textAlign = 'center'; ctx.fillText(diceResult, WIDTH/2, 265);
+    }
+    drawHUD();
+}
+
+function drawSlots() {
+    ctx.fillStyle = '#110022'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillStyle = '#ff0077'; ctx.font = 'bold 40px Impact'; ctx.textAlign = 'center'; ctx.fillText('SUPER NOVA SLOTS', WIDTH/2, 130);
+    ctx.fillStyle = '#333'; ctx.fillRect(WIDTH/2 - 160, 180, 320, 120); ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 4; ctx.strokeRect(WIDTH/2 - 160, 180, 320, 120);
+
+    const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+    for(let i=0; i<3; i++) {
+        ctx.fillStyle = '#fff'; ctx.fillRect(WIDTH/2 - 130 + i*90, 200, 80, 80);
+        ctx.fillStyle = '#000'; ctx.font = '50px Arial'; ctx.textAlign = 'center'; ctx.fillText(symbols[slots[i]], WIDTH/2 - 90 + i*90, 260);
+    }
+    drawHUD();
+}
+
+function drawPoker() {
+    ctx.fillStyle = '#002211'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillStyle = '#00ff00'; ctx.font = 'bold 30px Impact'; ctx.textAlign = 'center'; ctx.fillText('TEXAS HOLD\'EM', WIDTH/2, 110);
+    
+    if (holdemState === 'idle') {
+        ctx.fillStyle = '#00ffff'; ctx.font = '16px monospace'; ctx.fillText('Press Ante & Deal to begin.', WIDTH/2, 240);
+    } else {
+        ctx.fillStyle = '#fff'; ctx.font = '14px monospace'; ctx.fillText('COMMUNITY CARDS', WIDTH/2, 140);
+        for(let i=0; i<commCards.length; i++) {
+            ctx.fillStyle = '#fff'; ctx.fillRect(WIDTH/2 - 140 + i*60, 150, 40, 60); ctx.strokeStyle = '#000'; ctx.strokeRect(WIDTH/2 - 140 + i*60, 150, 40, 60);
+            ctx.fillStyle = commCards[i].color; ctx.font = 'bold 18px Arial'; ctx.textAlign = 'center'; ctx.fillText(commCards[i].str, WIDTH/2 - 120 + i*60, 185);
+        }
+        
+        ctx.fillStyle = '#fff'; ctx.font = '14px monospace'; ctx.fillText('YOUR HAND', WIDTH/2, 250);
+        for(let i=0; i<myHole.length; i++) {
+            ctx.fillStyle = '#fff'; ctx.fillRect(WIDTH/2 - 50 + i*60, 260, 40, 60); ctx.strokeStyle = '#000'; ctx.strokeRect(WIDTH/2 - 50 + i*60, 260, 40, 60);
+            ctx.fillStyle = myHole[i].color; ctx.font = 'bold 18px Arial'; ctx.textAlign = 'center'; ctx.fillText(myHole[i].str, WIDTH/2 - 30 + i*60, 295);
+        }
+
+        ctx.fillStyle = '#fff'; ctx.font = '12px monospace'; ctx.fillText('AI RIVALS', WIDTH/2, 350);
+        for(let j=0; j<3; j++) {
+            for(let i=0; i<2; i++) {
+                if (holdemState !== 'over') { ctx.fillStyle = '#f00'; ctx.fillRect(WIDTH/2 - 150 + j*120 + i*30, 360, 25, 40); }
+                else {
+                    ctx.fillStyle = '#fff'; ctx.fillRect(WIDTH/2 - 150 + j*120 + i*30, 360, 25, 40);
+                    ctx.fillStyle = aiHoles[j][i].color; ctx.font = 'bold 14px Arial'; ctx.fillText(aiHoles[j][i].str, WIDTH/2 - 137 + j*120 + i*30, 385);
+                }
+            }
+        }
+    }
+    drawHUD();
+}
+
+function drawStage() {
+    ctx.fillStyle = '#050011'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    
+    const spotX1 = WIDTH/2 + Math.sin(animTime)*150;
+    const spotX2 = WIDTH/2 + Math.cos(animTime*0.8)*150;
+    
+    ctx.fillStyle = 'rgba(0, 255, 255, 0.1)'; ctx.beginPath(); ctx.moveTo(100, -50); ctx.lineTo(spotX1-60, 400); ctx.lineTo(spotX1+60, 400); ctx.fill();
+    ctx.fillStyle = 'rgba(255, 0, 255, 0.1)'; ctx.beginPath(); ctx.moveTo(WIDTH-100, -50); ctx.lineTo(spotX2-60, 400); ctx.lineTo(spotX2+60, 400); ctx.fill();
+
+    ctx.fillStyle = '#220033'; ctx.beginPath(); ctx.ellipse(WIDTH/2, 350, 240, 70, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 4; ctx.stroke();
+
+    // Move dancer up so the bottom UI actions don't cover her legs!
+    drawDancer(WIDTH/2, 200, 1.9, animTime);
+
+    drawHUD();
+}
+
+function updateGame(dt) {
+    animTime += dt;
+
+    if (gameState === 'DICE') {
+        if (diceRolling) {
+            rollTimer--;
+            if (rollTimer <= 0) {
+                diceRolling = false;
+                diceResult = Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1; 
+                if (diceResult >= 8) {
+                    const win = 40 + (charm * 2); ped += win; messageLog = `You rolled a ${diceResult}! You win ${win} PED!`;
+                    playTone(800, 0.1, 'square'); setTimeout(()=>playTone(1200, 0.3, 'sine'), 100);
+                } else { messageLog = `You rolled a ${diceResult}. The house wins.`; playTone(200, 0.3, 'sawtooth'); }
+                updateUI();
+            }
+        }
+    }
+    else if (gameState === 'SLOTS') {
+        if (slotsSpinning) {
+            slotsTimer--;
+            slots[0] = Math.floor(Math.random() * 5); slots[1] = Math.floor(Math.random() * 5); slots[2] = Math.floor(Math.random() * 5);
+            if (slotsTimer <= 0) {
+                slotsSpinning = false;
+                if (slots[0] === slots[1] && slots[1] === slots[2]) { ped += 100; messageLog = "JACKPOT! +100 PED"; playTone(1200, 0.5, 'sine'); } 
+                else if (slots[0] === slots[1] || slots[1] === slots[2] || slots[0] === slots[2]) { ped += 20; messageLog = "Match! +20 PED"; playTone(800, 0.2, 'sine'); } 
+                else { messageLog = "No luck this time."; playTone(200, 0.3, 'sawtooth'); }
+                updateUI();
+            }
+        }
+    }
+}
+
+let lastTime = performance.now();
+function gameLoop(time) {
+    const dt = Math.min((time - lastTime) / 1000, 0.05);
+    lastTime = time;
+
+    if (gameState !== 'INSERT_COIN') {
+        updateGame(dt);
+        if (gameState === 'BAR') drawBar();
+        else if (gameState === 'CASINO') drawCasino();
+        else if (gameState === 'DICE') drawDice();
+        else if (gameState === 'SLOTS') drawSlots();
+        else if (gameState === 'POKER') drawPoker();
+        else if (gameState === 'STAGE' || gameState === 'STAGE_MENU') drawStage();
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>

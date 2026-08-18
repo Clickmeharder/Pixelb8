@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYRENE RANGERS — Entropia Universe Arcade</title>
+   <link rel="stylesheet" href="styles.css">
+
+    <style>
+
+    </style>
+</head>
+<body>
+
+    <div class="arcade-container" id="cabinet">
+        <div class="marquee">
+            <div class="marquee-art"></div>
+            <h1>CYRENE RANGERS</h1>
+        </div>
+
+        <div class="bezel">
+            <div class="screen-container" id="screenContainer">
+                <div class="crt-overlay" id="crtOverlay"></div>
+                <div class="crt-curve"></div>
+                
+                <div id="start-panel" class="ui-panel">
+                    <h2 style="color: var(--marquee-cyan);">INSERT COIN</h2>
+                    <p style="color: #fff; margin-bottom: 15px;">Press ENTER or click the coin slot</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">MOVE: Arrows or WASD | DOUBLE-TAP: Dash</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">ATTACK: F | JUMP: SPACE | SPECIAL / WEAPON: C</p>
+                    <p style="color: #ff7777; font-size: 0.72rem;">GRAB: G | THROW: Direction + F | JUGGLE: UP + F</p>
+                    <p style="color: #ffd700; font-size: 0.65rem; margin-top: 10px;">CROUCH: DOWN / SHIFT | ALL KEYS REMAPPABLE FROM TITLE</p>
+                </div>
+
+                <div id="gameover-panel" class="ui-panel hidden">
+                    <h2 id="result-title">GAME OVER</h2>
+                    <p id="final-score" style="font-weight: bold; color: #fff; font-size: 1.1rem; line-height: 1.45;">SCORE: 0</p>
+                    <p id="result-next-hint" style="color: var(--marquee-cyan); font-size: 0.75rem; margin-top: 10px;">Press ENTER or click the coin slot to play again</p>
+                </div>
+
+                <canvas id="gameCanvas" width="480" height="270"></canvas>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="cp-texture"></div>
+            <div class="lean-btn" id="zoomBtn">LEAN</div>
+            <button class="crt-btn active" id="crtBtn" type="button" title="Toggle CRT scanlines (F2)">CRT ON</button>
+
+            <div class="joystick-base">
+                <div class="joystick-ball" id="joystickBall"></div>
+            </div>
+
+            <div class="action-cluster">
+                <div style="text-align: center;"><button class="arcade-btn btn-attack" id="btnAttack">F</button><span style="font-size:0.55rem; color:#aaa;">Y (ATK)</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-jump" id="btnJump">SPC</button><span style="font-size:0.55rem; color:#aaa;">B (JMP)</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-bomb" id="btnBomb">B</button><span style="font-size:0.55rem; color:#aaa;">A (BMB)</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-special" id="btnSpecial">C</button><span style="font-size:0.55rem; color:#aaa;">X (SPC)</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-transform" id="btnTransform">T</button><span style="font-size:0.55rem; color:#aaa;">MORPH</span></div>
+                <div style="text-align: center;"><button class="arcade-btn btn-grab" id="btnGrab">G</button><span style="font-size:0.55rem; color:#aaa;">GRAB</span></div>
+            </div>
+        </div>
+
+        <div class="lower-cabinet">
+            <div class="checkered-flag"></div>
+            <div class="coin-door">
+                <div class="coin-slot" id="coinSlotBtn">
+                    <div class="coin-entry"></div>
+                    <div class="coin-return"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

@@ -260,9 +260,21 @@
   </section>
 </div>
 
-<!-- MQTT library + shared PixelB8 shell must load before this page's app.js. -->
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-<script src="../sharedassets/js/pixelb8-shell.js"></script>
-<script src="app.js"></script>
+<!-- page markup -->
+
+  <!-- MQTT library + shared PixelB8 shell must load before this page's app.js. -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+  <!-- LOCAL / PIXELB8 SITE -->
+  <!-- <script src="../sharedassets/js/pixelb8-shell.js"></script> -->
+
+  <!-- STANDALONE / EXTERNAL TESTING -->
+  <script src="https://pixelb8.lol/betasite/sharedassets/js/pixelb8-shell.js"></script>
+
+  <!-- Only this page's JavaScript belongs here. -->
+  <script src="app.js"></script>
+
+
+  
 </body>
 </html>
