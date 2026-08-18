@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>New PixelB8 Page</title>
+
+  <!-- Shared PixelB8 foundation. Keep this on every PixelB8 page. -->
+  <link rel="stylesheet" href="../sharedassets/css/pixelb8-shell.css">
+
+  <!-- Only this page's styles belong here. -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app boilerplate-app" id="appShell" data-pixelb8-shell>
+
+  <!-- ======================================================
+       LEFT PIXELB8 RAIL
+       Copy / rename buttons here for each new page.
+       ====================================================== -->
+  <aside class="app-sidebar">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand-mark">
+        <span class="brand-mark-expanded">P8</span>
+        <span class="brand-mark-rail">PXLB8</span>
+      </div>
+      <div class="sidebar-brand-copy">
+        <h1>PixelB8</h1>
+        <p>New Page</p>
+      </div>
+      <button id="sidebarToggle" class="sidebar-collapse-btn" type="button" onclick="Boilerplate.toggleSidebar()" title="Collapse left panel">‹</button>
+    </div>
+
+    <div class="sidebar-scroll">
+      <!-- PAGE-SPECIFIC BUTTONS: this is normally the main area you edit. -->
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">This Page</div>
+
+        <button class="boilerplate-nav-btn active" data-view-button="overview" type="button" onclick="Boilerplate.showView('overview')" title="Overview">
+          <span class="sidebar-item-icon">⌂</span>
+          <span class="sidebar-item-text">Overview</span>
+        </button>
+
+        <button class="boilerplate-nav-btn" data-view-button="workspace" type="button" onclick="Boilerplate.showView('workspace')" title="Workspace">
+          <span class="sidebar-item-icon">◆</span>
+          <span class="sidebar-item-text">Workspace</span>
+        </button>
+
+        <button class="boilerplate-nav-btn" data-view-button="settings" type="button" onclick="Boilerplate.showView('settings')" title="Page Settings">
+          <span class="sidebar-item-icon">⚙</span>
+          <span class="sidebar-item-text">Page Settings</span>
+        </button>
+      </section>
+
+      <!-- Shared site navigation can stay on every new page. -->
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">PixelB8</div>
+
+        <button class="boilerplate-nav-btn" type="button" onclick="Boilerplate.go('../home.html')" title="PixelB8 Home">
+          <span class="sidebar-item-icon">P8</span>
+          <span class="sidebar-item-text">PixelB8 Home</span>
+        </button>
+
+        <button class="boilerplate-nav-btn" type="button" onclick="Boilerplate.go('../arcade/index.html')" title="Arcade">
+          <span class="sidebar-item-icon">🕹</span>
+          <span class="sidebar-item-text">Arcade</span>
+        </button>
+
+        <button class="boilerplate-nav-btn" type="button" onclick="Boilerplate.go('../eu/index.html')" title="EU Tracker">
+          <span class="sidebar-item-icon">EU</span>
+          <span class="sidebar-item-text">EU Tracker</span>
+        </button>
+      </section>
+
+      <!-- Optional extra section. Delete it if a page does not need it. -->
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Actions</div>
+        <button class="boilerplate-nav-btn" type="button" onclick="Boilerplate.demoAction()" title="Example action button">
+          <span class="sidebar-item-icon">＋</span>
+          <span class="sidebar-item-text">Example Action</span>
+        </button>
+      </section>
+    </div>
+
+    <div class="sidebar-footer">
+      <span class="sidebar-footer-full">PixelB8 · Page Template</span>
+      <span class="sidebar-footer-rail">PXLB8</span>
+    </div>
+  </aside>
+
+  <!-- ======================================================
+       CENTER PAGE WORKSPACE
+       Replace these demo views with the new page's UI.
+       ====================================================== -->
+  <main class="boilerplate-main">
+    <header class="page-toolbar">
+      <div>
+        <span class="eyebrow">PIXELB8 PAGE FOUNDATION</span>
+        <h2 id="pageTitle">New PixelB8 Page</h2>
+      </div>
+      <div class="page-toolbar-actions">
+        <button class="btn" type="button" onclick="Boilerplate.demoAction()">Action</button>
+        <button class="btn primary" type="button" onclick="Boilerplate.demoPrimaryAction()">Primary Action</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <section class="page-view active" data-view="overview">
+        <div class="starter-hero">
+          <span class="eyebrow">START HERE</span>
+          <h3>Reusable PixelB8 boilerplate</h3>
+          <p>This center area is intentionally simple. Replace it with the actual content for your new tool, game, tracker, editor, or site page while keeping the shared rails around it.</p>
+        </div>
+
+        <div class="starter-grid">
+          <article class="starter-panel">
+            <span class="panel-kicker">LEFT RAIL</span>
+            <h3>Navigation is ready</h3>
+            <p>Rename, add, or remove the example buttons in <code>index.html</code>. The collapsed rail state is remembered automatically.</p>
+          </article>
+
+          <article class="starter-panel">
+            <span class="panel-kicker">CENTER</span>
+            <h3>Your page goes here</h3>
+            <p>Keep page-specific markup, JavaScript, and CSS inside this folder so the shared PixelB8 shell stays clean.</p>
+          </article>
+
+          <article class="starter-panel">
+            <span class="panel-kicker">RIGHT RAIL</span>
+            <h3>Account + global chat</h3>
+            <p>The existing PixelB8 account controls, MQTT global chat, emoji picker, collapse button, and width resizer are already connected.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="page-view" data-view="workspace">
+        <article class="starter-panel large-panel">
+          <span class="panel-kicker">EXAMPLE VIEW</span>
+          <h3>Workspace</h3>
+          <p>This demonstrates switching center content from the left rail without reloading the page. You can replace this with tabs, an editor, dashboard, game viewport, lists, or anything else.</p>
+          <div class="placeholder-workspace">NEW PAGE WORKSPACE</div>
+        </article>
+      </section>
+
+      <section class="page-view" data-view="settings">
+        <article class="starter-panel settings-panel">
+          <span class="panel-kicker">EXAMPLE VIEW</span>
+          <h3>Page Settings</h3>
+          <label class="demo-field">
+            <span>Example text setting</span>
+            <input type="text" placeholder="Page-specific setting">
+          </label>
+          <label class="demo-check">
+            <input type="checkbox">
+            <span>Example toggle</span>
+          </label>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <!-- Shared draggable divider for Account / Chat. -->
+  <div class="pixelb8-vertical-resizer" data-pixelb8-right-resizer title="Drag to resize account & chat">
+    <span class="pixelb8-vertical-resizer-grip"></span>
+  </div>
+
+  <!-- ======================================================
+       SHARED RIGHT ACCOUNT + CHAT RAIL
+       Usually do not edit this section.
+       ====================================================== -->
+  <aside class="pixelb8-right-rail collapsed" data-pixelb8-right-rail>
+    <button class="pixelb8-right-rail-toggle" type="button" onclick="PixelB8Shell.toggleRightRail()" title="Open account & chat">
+      <span class="pixelb8-right-rail-toggle-icon">‹</span>
+    </button>
+
+    <div class="pixelb8-right-rail-inner">
+      <section class="pixelb8-account-hud">
+        <div class="pixelb8-account-avatar-wrap">
+          <div class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</div>
+          <span class="pixelb8-account-presence"></span>
+        </div>
+        <div class="pixelb8-account-copy">
+          <span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span>
+          <strong data-pixelb8-profile-name>Guest</strong>
+          <span data-pixelb8-profile-status>Guest account</span>
+        </div>
+      </section>
+
+      <section class="pixelb8-right-section pixelb8-account-actions">
+        <button class="pixelb8-account-action" type="button" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
+        <button class="pixelb8-account-action danger" type="button" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
+      </section>
+
+      <section class="pixelb8-right-section pixelb8-chat-section">
+        <div class="pixelb8-right-section-head">
+          <div>
+            <span class="pixelb8-account-kicker">PIXELB8 MQTT</span>
+            <strong>Global Chat</strong>
+          </div>
+          <span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span>
+        </div>
+
+        <div class="pixelb8-chat-container">
+          <div class="pixelb8-chat-messages" data-pixelb8-chat-messages></div>
+
+          <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker>
+            <span onclick="PixelB8Shell.insertEmoji('😀')">😀</span>
+            <span onclick="PixelB8Shell.insertEmoji('😂')">😂</span>
+            <span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span>
+            <span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span>
+            <span onclick="PixelB8Shell.insertEmoji('👾')">👾</span>
+            <span onclick="PixelB8Shell.insertEmoji('😎')">😎</span>
+            <span onclick="PixelB8Shell.insertEmoji('👍')">👍</span>
+            <span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span>
+          </div>
+
+          <div class="pixelb8-chat-input">
+            <button type="button" onclick="PixelB8Shell.toggleEmojiPicker()">☺</button>
+            <input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()">
+            <button class="primary" type="button" onclick="PixelB8Shell.sendChat()">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="pixelb8-right-footer">PixelB8 Social</div>
+    </div>
+  </aside>
+</div>
+
+<!-- Shared account settings modal. Usually do not edit. -->
+<div class="pixelb8-account-settings-backdrop hidden" data-pixelb8-account-settings onclick="PixelB8Shell.closeAccountSettings(event)">
+  <section class="pixelb8-account-settings-card" onclick="event.stopPropagation()">
+    <div class="pixelb8-account-settings-head">
+      <div>
+        <span class="pixelb8-account-kicker">PIXELB8 PROFILE</span>
+        <h3>Account Settings</h3>
+      </div>
+      <button class="btn" type="button" onclick="PixelB8Shell.closeAccountSettings()">×</button>
+    </div>
+
+    <div class="pixelb8-account-settings-body">
+      <label>
+        <span>Display Name</span>
+        <input maxlength="32" data-pixelb8-account-name-input placeholder="Guest">
+      </label>
+      <label>
+        <span>Profile Initial</span>
+        <input maxlength="2" data-pixelb8-account-initial-input placeholder="G">
+      </label>
+    </div>
+
+    <div class="pixelb8-account-settings-actions">
+      <button class="btn" type="button" onclick="PixelB8Shell.closeAccountSettings()">Cancel</button>
+      <button class="btn" type="button" onclick="PixelB8Shell.saveAccountSettings()">Save Profile</button>
+    </div>
+  </section>
+</div>
+
+<!-- MQTT library + shared PixelB8 shell must load before this page's app.js. -->
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="../sharedassets/js/pixelb8-shell.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

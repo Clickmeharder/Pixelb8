@@ -1,0 +1,224 @@
+/* ==========================================================
+   PIXELB8 NEW PAGE BOILERPLATE
+   Keep ONLY page-specific styles in this file.
+   Shared rails/chat/account styles live in pixelb8-shell.css.
+   ========================================================== */
+
+:root{
+  --boilerplate-left-expanded:286px;
+  --boilerplate-left-collapsed:64px;
+}
+
+/* Four columns:
+   left navigation | page | draggable divider | account/chat rail */
+.app.boilerplate-app{
+  width:100vw;
+  height:100vh;
+  display:grid;
+  grid-template-columns:var(--boilerplate-left-expanded) minmax(0,1fr) var(--pixelb8-resizer-width) var(--pixelb8-right-collapsed);
+  overflow:hidden;
+  transition:grid-template-columns .16s ease;
+}
+
+.app.boilerplate-app.sidebar-collapsed{
+  grid-template-columns:var(--boilerplate-left-collapsed) minmax(0,1fr) var(--pixelb8-resizer-width) var(--pixelb8-right-collapsed);
+}
+
+.app.boilerplate-app.social-expanded{
+  grid-template-columns:var(--boilerplate-left-expanded) minmax(0,1fr) var(--pixelb8-resizer-width) var(--pixelb8-right-expanded);
+}
+
+.app.boilerplate-app.sidebar-collapsed.social-expanded{
+  grid-template-columns:var(--boilerplate-left-collapsed) minmax(0,1fr) var(--pixelb8-resizer-width) var(--pixelb8-right-expanded);
+}
+
+/* Left-side page buttons. */
+.boilerplate-nav-btn{
+  width:100%;
+  min-height:40px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:0 0 4px;
+  padding:7px 9px;
+  border:1px solid transparent;
+  border-radius:7px;
+  background:transparent;
+  color:#c7d0d9;
+  text-align:left;
+}
+
+.boilerplate-nav-btn:hover{
+  background:#171c22;
+  color:#fff;
+}
+
+.boilerplate-nav-btn.active{
+  border-color:#334a57;
+  background:#17252d;
+  color:#eefaff;
+}
+
+.app.sidebar-collapsed .boilerplate-nav-btn{
+  width:48px;
+  min-height:42px;
+  justify-content:center;
+  padding:5px;
+  margin:0 auto 5px;
+}
+
+.app.sidebar-collapsed .sidebar-footer-full{display:none}
+.app.sidebar-collapsed .sidebar-footer-rail{display:inline}
+
+/* Center workspace. */
+.boilerplate-main{
+  min-width:0;
+  height:100vh;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  overflow:hidden;
+  background:var(--pixelb8-bg);
+}
+
+.page-toolbar{
+  min-height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:13px 18px;
+  border-bottom:1px solid var(--pixelb8-border);
+  background:#101318;
+}
+
+.page-toolbar h2{
+  margin:4px 0 0;
+  color:var(--pixelb8-text-strong);
+  font-size:1.05rem;
+}
+
+.page-toolbar-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.page-toolbar-actions .btn{
+  min-height:34px;
+  padding:6px 10px;
+}
+
+.page-toolbar-actions .btn.primary{
+  border-color:#3b6879;
+  background:#1e3b47;
+}
+
+.page-content{
+  min-height:0;
+  overflow:auto;
+  padding:18px;
+}
+
+.page-view{display:none}
+.page-view.active{display:block}
+
+.starter-hero,
+.starter-panel{
+  border:1px solid var(--pixelb8-border);
+  border-radius:10px;
+  background:var(--pixelb8-surface);
+}
+
+.starter-hero{
+  padding:26px;
+  background:linear-gradient(135deg,#171d24,#111419);
+}
+
+.starter-hero h3{
+  margin:7px 0 8px;
+  color:#fff;
+  font-size:1.35rem;
+}
+
+.starter-hero p,
+.starter-panel p{
+  margin:0;
+  max-width:800px;
+  color:#9da8b2;
+  font-size:.75rem;
+  line-height:1.55;
+}
+
+.starter-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+
+.starter-panel{padding:16px}
+.starter-panel h3{margin:6px 0 7px;color:#f4f7fa;font-size:.92rem}
+.panel-kicker{color:var(--pixelb8-accent-soft);font-size:.56rem;font-weight:900;letter-spacing:.08em}
+.starter-panel code{color:#b7e8ff}
+
+.large-panel{min-height:calc(100vh - 126px)}
+.placeholder-workspace{
+  min-height:360px;
+  display:grid;
+  place-items:center;
+  margin-top:14px;
+  border:1px dashed #35414c;
+  border-radius:8px;
+  background:#0f1216;
+  color:#596773;
+  font-size:.7rem;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+
+.settings-panel{max-width:700px}
+.demo-field{display:grid;gap:6px;margin-top:16px;color:#a8b2bc;font-size:.68rem;font-weight:800}
+.demo-field input{
+  width:100%;
+  height:38px;
+  padding:7px 9px;
+  border:1px solid var(--pixelb8-border-strong);
+  border-radius:6px;
+  outline:0;
+  background:var(--pixelb8-input);
+  color:#fff;
+}
+.demo-check{display:flex;align-items:center;gap:8px;margin-top:12px;color:#b5c0ca;font-size:.72rem}
+
+/* Small-screen fallback: keep the familiar PixelB8 rail and cap chat width. */
+@media(max-width:900px){
+  .app.boilerplate-app,
+  .app.boilerplate-app.sidebar-collapsed{
+    grid-template-columns:64px minmax(0,1fr) var(--pixelb8-resizer-width) var(--pixelb8-right-collapsed);
+  }
+
+  .app.boilerplate-app.social-expanded,
+  .app.boilerplate-app.sidebar-collapsed.social-expanded{
+    grid-template-columns:64px minmax(0,1fr) var(--pixelb8-resizer-width) min(var(--pixelb8-right-expanded),230px);
+  }
+
+  .app.boilerplate-app:not(.sidebar-collapsed){
+    /* Force rail presentation on narrow screens without changing saved desktop state. */
+  }
+
+  .sidebar-brand-copy,
+  .sidebar-section-label,
+  .sidebar-item-text{display:none!important}
+  .sidebar-brand-row{grid-template-columns:1fr;justify-items:center;padding:8px 5px;position:relative}
+  .sidebar-brand-mark{width:48px;height:30px}
+  .brand-mark-expanded{display:none}
+  .brand-mark-rail{display:block}
+  .sidebar-collapse-btn{display:none}
+  .boilerplate-nav-btn{width:48px;min-height:42px;justify-content:center;padding:5px;margin:0 auto 5px}
+  .sidebar-footer-full{display:none}
+  .sidebar-footer-rail{display:inline}
+
+  .starter-grid{grid-template-columns:1fr}
+  .page-toolbar{align-items:flex-start;flex-direction:column}
+  .page-toolbar-actions{width:100%;flex-wrap:wrap}
+}

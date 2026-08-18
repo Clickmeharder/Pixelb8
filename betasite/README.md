@@ -93,3 +93,7 @@ same architecture used by the older working tracker:
 
 `input[type=file]` remains only as a diagnostic snapshot fallback when
 `showOpenFilePicker()` truly is unavailable.
+
+## Reusable new-page boilerplate
+
+`/boilerplate/` is a copy-ready starter for new PixelB8 pages. It already includes the shared collapsible left rail, center workspace, draggable right divider, account/profile controls, and MQTT global chat. Copy the folder, rename it, then replace the example left-nav buttons and center content while keeping shared shell behavior centralized in `/sharedassets`.
