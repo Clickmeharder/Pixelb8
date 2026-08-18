@@ -456,24 +456,27 @@ body::-webkit-scrollbar-thumb:hover,
   pointer-events:none;
 }
 
-/* Compact account summary + expandable account actions. */
+/* Compact right-rail accordions. Account card is its own header; Chat mirrors More from PixelB8. */
 .pixelb8-account-section{
   flex:0 0 auto;
   border-bottom:1px solid #222a32;
+  background:#101318;
 }
 .pixelb8-account-hud{
   width:100%;
   display:grid;
-  grid-template-columns:48px minmax(0,1fr) 24px;
+  grid-template-columns:48px minmax(0,1fr) 20px;
   align-items:center;
   gap:9px;
   padding:10px 8px 12px;
   border:0;
+  border-radius:0;
   background:transparent;
   color:inherit;
   text-align:left;
+  cursor:pointer;
 }
-.pixelb8-account-hud:hover{background:#151a20}
+.pixelb8-account-hud:hover{background:#171c22}
 .pixelb8-account-chevron{
   display:grid;
   place-items:center;
@@ -484,120 +487,58 @@ body::-webkit-scrollbar-thumb:hover,
 .pixelb8-account-section:not(.collapsed) .pixelb8-account-chevron{transform:rotate(90deg)}
 .pixelb8-account-section.collapsed .pixelb8-account-actions{display:none}
 
-.pixelb8-account-avatar-wrap{
-  position:relative;
-  width:46px;
-  height:46px;
-}
-
-.pixelb8-account-avatar{
-  width:46px;
-  height:46px;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-  border:1px solid #3b4854;
-  border-radius:50%;
-  background:linear-gradient(135deg,#25313b,#151b21);
-  color:#e9f7ff;
-  font-weight:950;
-  letter-spacing:.03em;
-}
-
-.pixelb8-account-presence{
-  position:absolute;
-  right:1px;
-  bottom:1px;
-  width:10px;
-  height:10px;
-  border:2px solid #101318;
-  border-radius:50%;
-  background:var(--pixelb8-success);
-}
-
-.pixelb8-account-copy{min-width:0}
-
-.pixelb8-account-kicker{
-  display:block;
-  color:#788591;
-  font-size:.52rem;
-  font-weight:900;
-  letter-spacing:.09em;
-}
-
-.pixelb8-account-copy strong{
-  display:block;
-  margin-top:2px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:#f5f8fa;
-  font-size:.78rem;
-}
-
-.pixelb8-account-copy>span:last-child{
-  display:block;
-  margin-top:2px;
-  color:#8d98a3;
-  font-size:.61rem;
-}
-
+.pixelb8-account-avatar-wrap{position:relative;width:46px;height:46px;display:block}
+.pixelb8-account-avatar{width:46px;height:46px;display:grid;place-items:center;overflow:hidden;border:1px solid #3b4854;border-radius:50%;background:linear-gradient(135deg,#25313b,#151b21);color:#e9f7ff;font-weight:950;letter-spacing:.03em}
+.pixelb8-account-presence{position:absolute;right:1px;bottom:1px;width:10px;height:10px;border:2px solid #101318;border-radius:50%;background:var(--pixelb8-success)}
+.pixelb8-account-copy{min-width:0;display:block}
+.pixelb8-account-kicker{display:block;color:#788591;font-size:.52rem;font-weight:900;letter-spacing:.09em}
+.pixelb8-account-copy strong{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f5f8fa;font-size:.78rem}
+.pixelb8-account-copy>span:last-child{display:block;margin-top:2px;color:#8d98a3;font-size:.61rem}
 .pixelb8-right-section{padding:8px 4px}
-
-.pixelb8-account-actions{
-  display:grid;
-  gap:5px;
-  padding:0 4px 8px;
-}
-
-.pixelb8-account-action{
-  width:100%;
-  min-height:34px;
-  display:flex;
-  align-items:center;
-  gap:7px;
-  padding:6px 8px;
-  border:1px solid #2b343d;
-  border-radius:6px;
-  background:#151a20;
-  color:#cbd4dd;
-  text-align:left;
-}
-
+.pixelb8-account-actions{display:grid;gap:5px;padding:0 8px 8px}
+.pixelb8-account-action{width:100%;min-height:34px;display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #2b343d;border-radius:6px;background:#151a20;color:#cbd4dd;text-align:left}
 .pixelb8-account-action:hover{background:#1d242b;color:#fff}
+.pixelb8-account-action.danger{color:#ff6978}
+.pixelb8-account-action.danger b{color:inherit}
 .pixelb8-account-action.danger:hover{border-color:#62313a;color:#ff9ba5}
 
-/* Bottom-docked chat accordion. Open chat consumes every pixel left below account. */
+/* Chat is bottom-docked. Its header intentionally follows the left rail's More from PixelB8 accordion pattern. */
 .pixelb8-chat-section{
   flex:1 1 auto;
   min-height:0;
   display:flex;
   flex-direction:column;
   margin-top:auto;
-  padding:0;
   overflow:hidden;
-  border-top:1px solid #222a32;
+  border-top:1px solid #20262d;
   background:#101318;
 }
 .pixelb8-chat-section.collapsed{flex:0 0 auto}
 .pixelb8-chat-toggle{
   width:100%;
-  min-height:46px;
+  min-height:44px;
   flex:0 0 auto;
   display:grid;
   grid-template-columns:minmax(0,1fr) auto 20px;
   align-items:center;
   gap:8px;
-  padding:8px 8px;
-  border:0;
+  padding:7px 9px;
+  border:1px solid transparent;
+  border-radius:7px;
   background:transparent;
-  color:inherit;
+  color:#c7d0d9;
   text-align:left;
+  cursor:pointer;
 }
-.pixelb8-chat-toggle:hover{background:#151a20}
+.pixelb8-chat-toggle:hover{background:#171c22;color:#fff}
+.pixelb8-chat-label{font-size:.68rem;font-weight:800;letter-spacing:.01em}
 .pixelb8-chat-chevron{color:#77828d;font-size:1rem;transition:transform .16s ease}
-.pixelb8-chat-section:not(.collapsed) .pixelb8-chat-chevron{transform:rotate(-90deg)}
+.pixelb8-chat-section:not(.collapsed) .pixelb8-chat-chevron{transform:rotate(90deg)}
 .pixelb8-chat-section.collapsed .pixelb8-chat-container{display:none}
+.pixelb8-chat-state{padding:2px 5px;border:1px solid #3a444d;border-radius:999px;color:#818c96;font-size:.48rem;font-weight:900;letter-spacing:.04em}
+.pixelb8-chat-state.online{border-color:#2e6e4b;color:#70e5a5}
+
+.pixelb8-chat-container{display:none}
 
 .pixelb8-right-section-head{
   min-width:0;

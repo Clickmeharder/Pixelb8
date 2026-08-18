@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Entropia Universe Hunt Dashboard</title>
-  <link rel="stylesheet" href="../sharedassets/css/pixelb8-shell.css">
+  <link rel="stylesheet" href="../sharedassets/css/pixelb8-shell.css?v=20260818c">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="streamermode.css">
 </head>
@@ -1007,58 +1007,31 @@
     </button>
     <div class="pixelb8-right-rail-inner">
       <section class="pixelb8-account-section collapsed" data-pixelb8-account-section>
-
-        <div class="pixelb8-account-hud">
-        <div class="pixelb8-account-avatar-wrap">
-          <div class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</div>
-          <span class="pixelb8-account-presence"></span>
-        </div>
-        <div class="pixelb8-account-copy">
-          <span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span>
-          <strong data-pixelb8-profile-name>Guest</strong>
-          <span data-pixelb8-profile-status>Guest account</span>
-        </div>
-      
-
-          <button class="pixelb8-account-chevron" type="button" data-pixelb8-account-toggle onclick="PixelB8Shell.toggleAccountSection(this.closest('[data-pixelb8-account-section]'))" aria-expanded="false" title="Account options">›</button>
-
-        </div>
-
+        <button class="pixelb8-account-hud" type="button" data-pixelb8-account-toggle onclick="PixelB8Shell.toggleAccountSection(this.closest('[data-pixelb8-account-section]'))" aria-expanded="false" title="Account options">
+          <span class="pixelb8-account-avatar-wrap"><span class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</span><span class="pixelb8-account-presence"></span></span>
+          <span class="pixelb8-account-copy"><span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span><strong data-pixelb8-profile-name>Guest</strong><span data-pixelb8-profile-status>Guest account</span></span>
+          <span class="pixelb8-account-chevron">›</span>
+        </button>
         <div class="pixelb8-account-actions">
-        <button class="pixelb8-account-action" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
-        <button class="pixelb8-account-action danger" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
-      
-
+          <button class="pixelb8-account-action" type="button" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
+          <button class="pixelb8-account-action danger" type="button" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
         </div>
-
       </section>
 
-      <div class="pixelb8-right-footer">PixelB8 Social</div>
       <section class="pixelb8-chat-section" data-pixelb8-chat-section>
-        <button class="pixelb8-chat-toggle" type="button" data-pixelb8-chat-toggle onclick="PixelB8Shell.toggleChatSection(this.closest('[data-pixelb8-chat-section]'))" aria-expanded="true" title="Toggle global chat">
-          <span class="pixelb8-right-section-head"><span class="pixelb8-account-kicker">PIXELB8 MQTT</span><strong>Global Chat</strong></span>
+        <button class="pixelb8-chat-toggle" type="button" data-pixelb8-chat-toggle onclick="PixelB8Shell.toggleChatSection(this.closest('[data-pixelb8-chat-section]'))" aria-expanded="true" title="Toggle chat">
+          <span class="pixelb8-chat-label">Chat</span>
           <span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span>
-          <span class="pixelb8-chat-chevron">‹</span>
+          <span class="pixelb8-chat-chevron">›</span>
         </button>
         <div class="pixelb8-chat-container">
           <div class="pixelb8-chat-messages" data-pixelb8-chat-messages></div>
-          <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker>
-            <span onclick="PixelB8Shell.insertEmoji('😀')">😀</span>
-            <span onclick="PixelB8Shell.insertEmoji('😂')">😂</span>
-            <span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span>
-            <span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span>
-            <span onclick="PixelB8Shell.insertEmoji('👾')">👾</span>
-            <span onclick="PixelB8Shell.insertEmoji('😎')">😎</span>
-            <span onclick="PixelB8Shell.insertEmoji('👍')">👍</span>
-            <span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span>
-          </div>
-          <div class="pixelb8-chat-input">
-            <button onclick="PixelB8Shell.toggleEmojiPicker()">☺</button>
-            <input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()">
-            <button class="primary" onclick="PixelB8Shell.sendChat()">Send</button>
-          </div>
+          <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker><span onclick="PixelB8Shell.insertEmoji('😀')">😀</span><span onclick="PixelB8Shell.insertEmoji('😂')">😂</span><span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span><span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span><span onclick="PixelB8Shell.insertEmoji('👾')">👾</span><span onclick="PixelB8Shell.insertEmoji('😎')">😎</span><span onclick="PixelB8Shell.insertEmoji('👍')">👍</span><span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span></div>
+          <div class="pixelb8-chat-input"><button type="button" onclick="PixelB8Shell.toggleEmojiPicker()">☺</button><input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()"><button class="primary" type="button" onclick="PixelB8Shell.sendChat()">Send</button></div>
         </div>
       </section>
+
+      <div class="pixelb8-right-footer">PixelB8 Social</div>
 
       
     </div>
@@ -1632,7 +1605,7 @@
   <script src="hunt-tracker.js"></script>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="team-tracker.js"></script>
-  <script src="../sharedassets/js/pixelb8-shell.js"></script>
+  <script src="../sharedassets/js/pixelb8-shell.js?v=20260818d"></script>
   <script src="app.js"></script>
   <div id="appConfirmBackdrop" class="app-confirm-backdrop hidden">
   <section class="app-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="appConfirmTitle">
