@@ -147,6 +147,20 @@ button{cursor:pointer}
   white-space:nowrap;
 }
 
+/* Shared compact sidebar status blocks */
+.sidebar-status-row{display:flex;align-items:center;gap:8px;min-height:38px;padding:6px 8px}
+.sidebar-status-copy{min-width:0;display:flex;flex-direction:column}
+.sidebar-status-copy span{font-size:.62rem;color:#7d8792}
+.sidebar-status-copy b{font-size:.72rem;color:#e9edf2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status-dot-wrap{display:grid;place-items:center}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#7d8792}
+.status-dot.online{background:var(--pixelb8-success);box-shadow:0 0 8px rgba(57,217,138,.5)}
+.sidebar-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px 8px}
+.sidebar-mini-stat{display:flex;align-items:center;justify-content:space-between;padding:6px;border:1px solid #2a313a;border-radius:6px;background:#15191f;font-size:.62rem}
+.sidebar-mini-stat span{color:#7d8792}.sidebar-mini-stat b{color:#8edcff}
+.app.sidebar-collapsed .sidebar-status-copy,.app.sidebar-collapsed .sidebar-status-grid{display:none}
+.app.sidebar-collapsed .sidebar-status-row{justify-content:center;padding:4px}
+
 .sidebar-footer{
   min-height:35px;
   display:flex;

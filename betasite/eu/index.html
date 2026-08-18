@@ -21,44 +21,18 @@
     </div>
 
     <div class="sidebar-scroll">
-      <section class="sidebar-section sidebar-account">
-        <div class="sidebar-section-label">Account</div>
-        <label class="compact-field sidebar-avatar-field" title="Avatar name">
-          <strong>Avatar</strong>
-          <input type="text" id="avatarNameInput" placeholder="John Doe" oninput="updateAvatarName()">
-        </label>
-        <label class="toggle sidebar-voice-toggle" title="Voice announcer">
-          <input type="checkbox" id="voiceToggle" onchange="toggleVoiceAnnouncer()">
-          <span class="sidebar-item-icon">🔊</span>
-          <span class="sidebar-item-text">Voice Announcer</span>
-        </label>
-      </section>
-
-      <section class="sidebar-section">
-        <div class="sidebar-section-label">Data</div>
-        <button class="btn primary sidebar-action" data-rail="📁" type="button" onclick="pickChatLogFile()" title="Select chat.log">
-          <span class="sidebar-item-icon">📁</span><span class="sidebar-item-text">Select chat.log</span>
+      <nav class="nav sidebar-nav" aria-label="Main navigation">
+        <div class="sidebar-section-label">Navigation</div>
+        <button class="tab-btn active" data-tab="global" onclick="switchTab('global')" title="Global Analytics">
+          <span class="sidebar-nav-icon">G</span><span class="sidebar-item-text">Global Analytics</span>
         </button>
-        <button id="resumeBtn" class="btn success sidebar-action hidden" data-rail="↻" type="button" onclick="resumeSavedChatLog()" title="Resume chat.log">
-          <span class="sidebar-item-icon">↻</span><span class="sidebar-item-text">Resume Log</span>
+        <button class="tab-btn" data-tab="live" onclick="switchTab('live')" title="Live Monitor">
+          <span class="sidebar-nav-icon">L</span><span class="sidebar-item-text">Live Monitor</span>
         </button>
-      </section>
-
-      <section class="sidebar-section">
-        <div class="sidebar-section-label">Mode</div>
-        <button id="trackerModeBtn" class="btn sidebar-action sidebar-event-action" data-rail="⚙" type="button" onclick="openTrackerOptions()" title="Tracker / event options">
-          <span class="sidebar-event-icons">
-            <span class="sidebar-item-icon">⚙</span>
-            <span class="sidebar-event-graph" aria-hidden="true">📈</span>
-          </span>
-          <span class="sidebar-item-text">Upcoming Legends</span>
+        <button class="tab-btn" data-tab="hunt" onclick="switchTab('hunt')" title="Hunt Tracker">
+          <span class="sidebar-nav-icon">H</span><span class="sidebar-item-text">Hunt Tracker</span>
         </button>
-        <button id="streamerModeBtn" class="btn streamer-toggle sidebar-action obs-mode-sidebar-btn" data-rail="OBS" type="button" onclick="toggleStreamerMode()" title="OBS/browser-source HUD. Esc exits.">
-          <span class="sidebar-item-icon">◈</span>
-          <span class="sidebar-item-text obs-mode-expanded-label">OBS Mode</span>
-          <span class="obs-mode-rail-label" aria-hidden="true">OBS</span>
-        </button>
-      </section>
+      </nav>
 
       <section class="sidebar-section sidebar-status-section">
         <div class="sidebar-section-label">Status</div>
@@ -80,19 +54,44 @@
         </div>
       </section>
 
-      <nav class="nav sidebar-nav" aria-label="Main navigation">
-        <div class="sidebar-section-label">Navigation</div>
-        <button class="tab-btn active" data-tab="global" onclick="switchTab('global')" title="Global Analytics">
-          <span class="sidebar-nav-icon">G</span><span class="sidebar-item-text">Global Analytics</span>
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Mode</div>
+        <button id="trackerModeBtn" class="btn sidebar-action sidebar-event-action" data-rail="⚙" type="button" onclick="openTrackerOptions()" title="Tracker / event options">
+          <span class="sidebar-event-icons">
+            <span class="sidebar-item-icon">⚙</span>
+            <span class="sidebar-event-graph" aria-hidden="true">📈</span>
+          </span>
+          <span class="sidebar-item-text">Upcoming Legends</span>
         </button>
-        <button class="tab-btn" data-tab="live" onclick="switchTab('live')" title="Live Monitor">
-          <span class="sidebar-nav-icon">L</span><span class="sidebar-item-text">Live Monitor</span>
+        <button id="streamerModeBtn" class="btn streamer-toggle sidebar-action obs-mode-sidebar-btn" data-rail="OBS" type="button" onclick="toggleStreamerMode()" title="OBS/browser-source HUD. Esc exits.">
+          <span class="sidebar-item-icon">◈</span>
+          <span class="sidebar-item-text obs-mode-expanded-label">OBS Mode</span>
+          <span class="obs-mode-rail-label" aria-hidden="true">OBS</span>
         </button>
-        <button class="tab-btn" data-tab="hunt" onclick="switchTab('hunt')" title="Hunt Tracker">
-          <span class="sidebar-nav-icon">H</span><span class="sidebar-item-text">Hunt Tracker</span>
-        </button>
-      </nav>
+      </section>
 
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Data</div>
+        <button class="btn primary sidebar-action" data-rail="📁" type="button" onclick="pickChatLogFile()" title="Select chat.log">
+          <span class="sidebar-item-icon">📁</span><span class="sidebar-item-text">Select chat.log</span>
+        </button>
+        <button id="resumeBtn" class="btn success sidebar-action hidden" data-rail="↻" type="button" onclick="resumeSavedChatLog()" title="Resume chat.log">
+          <span class="sidebar-item-icon">↻</span><span class="sidebar-item-text">Resume Log</span>
+        </button>
+      </section>
+
+      <section class="sidebar-section sidebar-account">
+        <div class="sidebar-section-label">Account</div>
+        <label class="compact-field sidebar-avatar-field" title="Avatar name">
+          <strong>Avatar</strong>
+          <input type="text" id="avatarNameInput" placeholder="John Doe" oninput="updateAvatarName()">
+        </label>
+        <label class="toggle sidebar-voice-toggle" title="Voice announcer">
+          <input type="checkbox" id="voiceToggle" onchange="toggleVoiceAnnouncer()">
+          <span class="sidebar-item-icon">🔊</span>
+          <span class="sidebar-item-text">Voice Announcer</span>
+        </label>
+      </section>
 
     </div>
 

@@ -214,9 +214,11 @@ function pruneRooms(){
 }
 function setDirectoryState(online,text){
   directoryOnline=online;
-  ['directoryDot','homeDirectoryDot'].forEach(id=>byId(id)?.classList.toggle('online',online));
+  ['directoryDot','homeDirectoryDot','arcadeStatusDot'].forEach(id=>byId(id)?.classList.toggle('online',online));
   byId('directoryText').textContent=text;
   byId('homeDirectoryText').textContent=text;
+  const railStatus=byId('arcadeStatusText');
+  if(railStatus) railStatus.textContent=online?'Online':'Offline';
 }
 function renderRooms(){
   const list=[...rooms.values()].sort((a,b)=>{
@@ -225,6 +227,8 @@ function renderRooms(){
   });
   const live=list.filter(r=>!isArchived(r));
   byId('headerRoomCount').textContent=live.length;
+  if(byId('arcadeStatusRooms')) byId('arcadeStatusRooms').textContent=live.length;
+  if(byId('arcadeStatusGames')) byId('arcadeStatusGames').textContent=GAMES.length;
   const rail=byId('railRoomCount');
   rail.textContent=live.length;
   rail.classList.toggle('visible',live.length>0);
