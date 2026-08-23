@@ -109,6 +109,8 @@ const clientId = localStorage.getItem('pixelb8GamepadClientId') || ('phone-' + c
 localStorage.setItem('pixelb8GamepadClientId', clientId);
 let deviceName = localStorage.getItem('pixelb8GamepadDeviceName') || ('Phone ' + clientId.slice(-4).toUpperCase());
 let client = null, desktopOnline = false, desktopArmed = false, heartbeat = null;
+let lanSocket=null,lanReconnectTimer=null,lanFailures=0;
+const lanRequested=params.get('lan')==='1' || /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
 let rtcPeer=null,rtcChannel=null,rtcRetryTimer=null,rtcIceQueue=[];
 const RTC_CONFIG={iceServers:[{urls:'stun:stun.l.google.com:19302'}]};
 let stickPointer = null, stickKeys = new Set(), shiftLatched = false, chatOpen = false;
@@ -152,9 +154,11 @@ function cryptoRandom(n){const a=new Uint8Array(n);crypto.getRandomValues(a);ret
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
 function base(){return `pixelb8/gamepad/${room}`}
 function setStatus(text,connected=false){$('status').textContent=text;$('topbar').classList.toggle('connected',!!connected)}
-function canControl(){return client?.connected&&desktopOnline&&desktopArmed&&role==='controller'&&!kicked}
+function lanReady(){return lanSocket?.readyState===WebSocket.OPEN}
+function signalingReady(){return lanReady()||!!client?.connected}
+function canControl(){return signalingReady()&&desktopOnline&&desktopArmed&&role==='controller'&&!kicked}
 function showControlToast(message){let t=$('controlToast');if(!t){t=document.createElement('div');t.id='controlToast';t.className='controlToast';document.body.appendChild(t)}t.textContent=message;clearTimeout(toastTimer);requestAnimationFrame(()=>t.classList.add('show'));toastTimer=setTimeout(()=>t.classList.remove('show'),1500)}
-function requireControl(){if(canControl())return true;if(kicked)showControlToast('CONTROLLER ACCESS REMOVED');else if(!client?.connected)showControlToast('NOT CONNECTED TO DESKTOP');else if(!desktopOnline)showControlToast('DESKTOP APP IS OFFLINE');else if(!desktopArmed)showControlToast('DISARMED — arm Gamepad on your desktop');else if(role!=='controller')showControlToast('WAITING FOR CONTROLLER ACCESS');else showControlToast('CONTROLLER NOT READY');vibe(18);return false}
+function requireControl(){if(canControl())return true;if(kicked)showControlToast('CONTROLLER ACCESS REMOVED');else if(!signalingReady())showControlToast('NOT CONNECTED TO DESKTOP');else if(!desktopOnline)showControlToast('DESKTOP APP IS OFFLINE');else if(!desktopArmed)showControlToast('DISARMED — arm Gamepad on your desktop');else if(role!=='controller')showControlToast('WAITING FOR CONTROLLER ACCESS');else showControlToast('CONTROLLER NOT READY');vibe(18);return false}
 function applyLayout(name,save=true){if(!['compact','balanced','wide'].includes(name))name='balanced';layoutPreset=name;document.body.classList.remove('layout-compact','layout-balanced','layout-wide');document.body.classList.add('layout-'+name);if(save)localStorage.setItem('pixelb8GamepadLayoutSize',name);document.querySelectorAll('.layoutChoice').forEach(b=>b.classList.toggle('selected',b.dataset.layout===name));setTimeout(()=>{resetStick();resetMouse()},0)}
 function applyLayoutStyle(name,save=true){if(!['classic','southpaw','arcade','twinstick'].includes(name))name='classic';layoutStyle=name;document.body.classList.remove('style-classic','style-southpaw','style-arcade','style-twinstick');document.body.classList.add('style-'+name);if(save)localStorage.setItem('pixelb8GamepadLayoutStyle',name);document.querySelectorAll('.styleChoice').forEach(b=>b.classList.toggle('selected',b.dataset.style===name));setTimeout(()=>{resetStick();resetMouse()},0)}
 function vibe(ms){try{navigator.vibrate?.(ms)}catch{}}
@@ -163,10 +167,10 @@ function saveBindings(){localStorage.setItem('pixelb8GamepadBindings',JSON.strin
 function loadMouseSettings(){try{const s=JSON.parse(localStorage.getItem('pixelb8GamepadMouseSettings')||'{}');return {sensitivity:clamp(Number(s.sensitivity)||18,4,36),tiltSensitivity:clamp(Number(s.tiltSensitivity)||12,2,30),horizontalOnly:!!s.horizontalOnly,invertX:!!s.invertX,invertY:!!s.invertY,tiltAutoEnable:!!s.tiltAutoEnable}}catch{return {sensitivity:18,tiltSensitivity:12,horizontalOnly:false,invertX:false,invertY:false,tiltAutoEnable:false}}}
 function saveMouseSettings(){localStorage.setItem('pixelb8GamepadMouseSettings',JSON.stringify(mouseSettings))}
 function envelope(obj){return {...obj,clientId,deviceName,secret,source:'phone-controller',ts:Date.now()}}
-function rawPublish(obj){if(!client?.connected||!room||!secret||kicked)return;client.publish(`${base()}/control`,JSON.stringify(envelope(obj)),{qos:0})}
+function rawPublish(obj){if(!room||!secret||kicked)return;const msg=JSON.stringify(envelope(obj));if(lanReady()){try{lanSocket.send(msg);return}catch{}}if(client?.connected)client.publish(`${base()}/control`,msg,{qos:0})}
 function signalDesktop(obj){if(!client?.connected||!room||!secret||kicked)return;client.publish(`${base()}/signal/desktop`,JSON.stringify(envelope(obj)),{qos:0})}
 function rtcReady(){return rtcChannel?.readyState==='open'}
-function publish(obj){if(!canControl())return;if(rtcReady()){try{rtcChannel.send(JSON.stringify(envelope(obj)));return}catch{}}rawPublish(obj)}
+function publish(obj){if(!canControl())return;if(lanReady()){try{lanSocket.send(JSON.stringify(envelope(obj)));return}catch{}}if(rtcReady()){try{rtcChannel.send(JSON.stringify(envelope(obj)));return}catch{}}rawPublish(obj)}
 function keyFor(action){return bindings[action]&&bindings[action]!=='NONE'?bindings[action]:null}
 function displayForKey(key){return KEY_DISPLAY[key]||key||'Off'}
 function downKey(key){if(!key||heldKeys.has(key)||!canControl())return;heldKeys.add(key);publish({type:'key-down',key})}
@@ -200,8 +204,9 @@ function setupInjectedUI(){
 
 
 function updateTransportStatus(){
-  if(rtcReady())setStatus(desktopArmed?'PRIMARY · DIRECT WEBRTC':'DIRECT WEBRTC · desktop not armed',true);
-  else if(role==='controller')setStatus(desktopArmed?'PRIMARY · MQTT FALLBACK':'primary · MQTT fallback · desktop not armed',true);
+  if(lanReady())setStatus(desktopArmed?'PRIMARY · LOCAL':'LOCAL · desktop not armed',true);
+  else if(rtcReady())setStatus(desktopArmed?'PRIMARY · DIRECT':'DIRECT · desktop not armed',true);
+  else if(role==='controller')setStatus(desktopArmed?'PRIMARY · REMOTE':'REMOTE · desktop not armed',true);
 }
 function closeRtc(){
   clearTimeout(rtcRetryTimer);rtcRetryTimer=null;rtcIceQueue=[];
@@ -235,13 +240,43 @@ async function handleRtcSignal(msg){
   }catch{}
 }
 
+function handleDesktopMessage(msg){
+  try{
+    if(msg.type==='desktop-status'){desktopOnline=!!msg.online;desktopArmed=!!msg.armed;if(!desktopOnline)role='unknown'}
+    if(msg.type==='role'){role=msg.role||'waiting';desktopArmed=!!msg.armed;desktopOnline=true;if(role==='controller')updateTransportStatus();else setStatus('connected · waiting for control',true)}
+    if(msg.type==='kicked'){kicked=true;role='kicked';desktopOnline=false;desktopArmed=false;releaseAll(true);closeRtc();setStatus(msg.reason||'controller access removed')}
+    if(msg.type==='notice'){setStatus(msg.message||'desktop notice',true)}
+  }catch{}
+}
+function scheduleLanReconnect(){clearTimeout(lanReconnectTimer);if(!lanRequested||kicked)return;lanReconnectTimer=setTimeout(()=>connectLan(true),Math.min(5000,700+lanFailures*500))}
+function connectLan(isRetry=false){
+  if(!lanRequested||!room||!secret)return false;
+  try{lanSocket?.close()}catch{}
+  const proto=location.protocol==='https:'?'wss:':'ws:';
+  const url=`${proto}//${location.host}/ws`;
+  setStatus(isRetry?'reconnecting locally…':'connecting locally…');
+  try{lanSocket=new WebSocket(url)}catch{lanFailures++;scheduleLanReconnect();return false}
+  lanSocket.onopen=()=>{lanFailures=0;kicked=false;desktopOnline=true;rawPublish({type:'hello'});setStatus('connected · local',true);clearInterval(heartbeat);heartbeat=setInterval(()=>rawPublish({type:'heartbeat'}),1000)};
+  lanSocket.onmessage=e=>{try{handleDesktopMessage(JSON.parse(String(e.data)))}catch{}};
+  lanSocket.onerror=()=>{};
+  lanSocket.onclose=()=>{if(kicked)return;desktopOnline=false;desktopArmed=false;role='unknown';releaseAll(true);setStatus('reconnecting local link…');lanFailures++;scheduleLanReconnect();if(lanFailures>=2)connectMqttFallback()};
+  return true;
+}
+function connectMqttFallback(){
+  if(client?.connected||typeof mqtt==='undefined')return;
+  try{client?.end(true)}catch{}
+  setStatus(lanRequested?'local unavailable · trying remote…':'connecting…');
+  try{client=mqtt.connect('wss://broker.emqx.io:8084/mqtt',{clientId:`pixelb8-gamepad-${cryptoRandom(10)}`,clean:true,reconnectPeriod:2000,connectTimeout:10000})}catch{return}
+  client.on('connect',()=>{client.subscribe(`${base()}/status`);client.subscribe(`${base()}/client/${clientId}`);client.subscribe(`${base()}/signal/client/${clientId}`);rawPublish({type:'hello'});desktopOnline=true;setStatus(lanReady()?'connected · local':'paired · remote',true);clearInterval(heartbeat);heartbeat=setInterval(()=>rawPublish({type:'heartbeat'}),1000);if(!lanReady())startRtc()});
+  client.on('message',(topic,payload)=>{try{const msg=JSON.parse(String(payload));if(topic===`${base()}/signal/client/${clientId}`){handleRtcSignal(msg);return}handleDesktopMessage(msg)}catch{}});
+  client.on('reconnect',()=>{if(!lanReady())setStatus('reconnecting remote link…')});
+  client.on('error',()=>{if(!lanReady())setStatus('remote link unavailable')});
+  client.on('close',()=>{if(!lanReady()){desktopOnline=false;desktopArmed=false;role='unknown';closeRtc();setStatus('reconnecting…')}});
+}
 function connect(){
-  if(client){try{client.end(true)}catch{}}
-  const roomField=$('roomSetting');if(roomField){const nextRoom=roomField.value.trim();if(nextRoom)room=nextRoom;roomField.value=room}kicked=false;setStatus('connecting…');
-  client=mqtt.connect('wss://broker.emqx.io:8084/mqtt',{clientId:`pixelb8-gamepad-${cryptoRandom(10)}`,clean:true,reconnectPeriod:2000,connectTimeout:10000});
-  client.on('connect',()=>{client.subscribe(`${base()}/status`);client.subscribe(`${base()}/client/${clientId}`);client.subscribe(`${base()}/signal/client/${clientId}`);rawPublish({type:'hello'});desktopOnline=true;setStatus('paired · establishing direct link…',true);clearInterval(heartbeat);heartbeat=setInterval(()=>rawPublish({type:'heartbeat'}),1000);startRtc()});
-  client.on('message',(topic,payload)=>{try{const msg=JSON.parse(String(payload));if(topic===`${base()}/signal/client/${clientId}`){handleRtcSignal(msg);return}if(msg.type==='desktop-status'){desktopOnline=!!msg.online;desktopArmed=!!msg.armed;if(!desktopOnline)role='unknown'}if(msg.type==='role'){role=msg.role||'waiting';desktopArmed=!!msg.armed;desktopOnline=true;if(role==='controller')updateTransportStatus();else setStatus('connected · waiting for control',true)}if(msg.type==='kicked'){kicked=true;role='kicked';desktopOnline=false;desktopArmed=false;releaseAll(true);closeRtc();setStatus(msg.reason||'kicked from room')}if(msg.type==='notice'){setStatus(msg.message||'desktop notice',true)}}catch{}});
-  client.on('reconnect',()=>setStatus('reconnecting signaling…'));client.on('error',err=>setStatus('signaling error: '+err.message));client.on('close',()=>{desktopOnline=false;desktopArmed=false;role='unknown';closeRtc();setStatus('disconnected')});
+  const roomField=$('roomSetting');if(roomField){const nextRoom=roomField.value.trim();if(nextRoom)room=nextRoom;roomField.value=room}
+  kicked=false;releaseAll(true);closeRtc();
+  if(lanRequested){connectLan(false);setTimeout(()=>{if(!lanReady())connectMqttFallback()},1800)}else connectMqttFallback();
 }
 $('connect').onclick=connect;
 
@@ -283,7 +318,7 @@ function updateTiltStatus(extra=''){let t=!tiltSupported?'Tilt unsupported on th
 function updateFreelookButton(){const b=$('cameraCenterBtn');if(!b)return;b.classList.toggle('latched',cameraFreelookEnabled);const small=b.querySelector('small');if(small)small.textContent=cameraFreelookEnabled?'FREELOOK ON':'hold: FREELOOK'}
 (function bindCameraCenter(){const b=$('cameraCenterBtn');let timer=null,longTriggered=false,pointerId=null;const toggle=()=>{longTriggered=true;cameraFreelookEnabled=!cameraFreelookEnabled;localStorage.setItem('pixelb8GamepadFreelook',cameraFreelookEnabled?'1':'0');if(!cameraFreelookEnabled)setMiddleMouse(false);updateFreelookButton();showControlToast(cameraFreelookEnabled?'CAMERA FREELOOK ON':'CAMERA FREELOOK OFF');vibe(18)};b.addEventListener('pointerdown',e=>{e.preventDefault();if(!requireControl())return;pointerId=e.pointerId;longTriggered=false;b.setPointerCapture?.(e.pointerId);b.classList.add('active');timer=setTimeout(toggle,520)});const end=e=>{if(pointerId===null||e.pointerId!==pointerId)return;clearTimeout(timer);timer=null;b.classList.remove('active');if(!longTriggered&&canControl()){publish({type:'mouse-middle-tap'});vibe(10)}pointerId=null};b.addEventListener('pointerup',end);b.addEventListener('pointercancel',e=>{clearTimeout(timer);timer=null;b.classList.remove('active');pointerId=null});b.addEventListener('lostpointercapture',e=>{if(pointerId!==null){clearTimeout(timer);timer=null;b.classList.remove('active');pointerId=null}})})();
 
-window.addEventListener('pagehide',()=>releaseAll());window.addEventListener('blur',()=>{if(!chatOpen)releaseAll()});document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll()});
+window.addEventListener('pagehide',()=>releaseAll());window.addEventListener('pageshow',()=>{if(room&&secret&&!signalingReady())connect()});window.addEventListener('online',()=>{if(room&&secret&&!signalingReady())connect()});window.addEventListener('blur',()=>{if(!chatOpen)releaseAll()});document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll();else if(room&&secret&&!signalingReady())connect()});
 
 setupInjectedUI();
 applyLayoutStyle(layoutStyle,false);
