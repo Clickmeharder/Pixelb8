@@ -76,6 +76,25 @@ body.layout-wide .stage{grid-template-columns:minmax(275px,36%) minmax(205px,25%
 #moreOverlay{display:none!important}
 @media (orientation:portrait){body:before{content:'Rotate phone sideways';position:fixed;z-index:99;inset:0;display:grid;place-items:center;background:#05080d;color:white;font-weight:900;font-size:20px}.gamepad{visibility:hidden}}
 @media (max-height:380px){.gamepad{grid-template-rows:30px auto minmax(0,1fr) 40px}.moreBar.open{max-height:52px}.moreChip{height:38px}.hotbar .btn{font-size:10px}}
+/* Tiny landscape phones (including iPhone 4S): make Settings a true narrow-screen page. */
+@media (max-width:600px), (max-height:340px){
+  .overlay{padding:0;align-items:stretch;justify-content:stretch}
+  .sheet{width:100vw;max-width:none;height:100vh;max-height:none;border-radius:0;border-left:0;border-right:0;padding:8px;overflow-x:hidden;overflow-y:auto}
+  .sheetHead{top:-8px;margin:0 -1px;padding:6px 1px 8px}.sheetHead h2{font-size:14px}
+  .settingsStack,.settingsCard,.bindRow,.optionRow{min-width:0;max-width:100%}
+  .settingsCard{padding:7px}.settingsCard h3{font-size:12px;margin-bottom:7px}
+  .stylePicker{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.styleChoice{height:42px;font-size:10px}
+  .layoutPicker{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.layoutChoice{height:42px;font-size:9px;padding:3px}
+  .styleChoice small,.layoutChoice small{font-size:7px}
+  .bindGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+  .bindRow{padding:5px}.bindRow label{font-size:9px}.bindRow select,.bindRow input{min-width:0;width:100%;font-size:11px}
+  .optionRow{grid-template-columns:minmax(0,1fr) auto}.checkRow{font-size:10px;line-height:1.25}
+  .settingsCard .status{white-space:normal;overflow:visible;text-overflow:clip;font-size:9px;line-height:1.35}
+}
+@media (max-width:420px){
+  .layoutPicker{grid-template-columns:1fr}.layoutChoice{height:38px}
+  .bindGrid{grid-template-columns:1fr}
+}
 `;
 
 const $ = id => document.getElementById(id);
@@ -218,7 +237,7 @@ async function handleRtcSignal(msg){
 
 function connect(){
   if(client){try{client.end(true)}catch{}}
-  room=$('room').value.trim()||room;$('room').value=room;kicked=false;setStatus('connecting…');
+  const roomField=$('roomSetting');if(roomField){const nextRoom=roomField.value.trim();if(nextRoom)room=nextRoom;roomField.value=room}kicked=false;setStatus('connecting…');
   client=mqtt.connect('wss://broker.emqx.io:8084/mqtt',{clientId:`pixelb8-gamepad-${cryptoRandom(10)}`,clean:true,reconnectPeriod:2000,connectTimeout:10000});
   client.on('connect',()=>{client.subscribe(`${base()}/status`);client.subscribe(`${base()}/client/${clientId}`);client.subscribe(`${base()}/signal/client/${clientId}`);rawPublish({type:'hello'});desktopOnline=true;setStatus('paired · establishing direct link…',true);clearInterval(heartbeat);heartbeat=setInterval(()=>rawPublish({type:'heartbeat'}),1000);startRtc()});
   client.on('message',(topic,payload)=>{try{const msg=JSON.parse(String(payload));if(topic===`${base()}/signal/client/${clientId}`){handleRtcSignal(msg);return}if(msg.type==='desktop-status'){desktopOnline=!!msg.online;desktopArmed=!!msg.armed;if(!desktopOnline)role='unknown'}if(msg.type==='role'){role=msg.role||'waiting';desktopArmed=!!msg.armed;desktopOnline=true;if(role==='controller')updateTransportStatus();else setStatus('connected · waiting for control',true)}if(msg.type==='kicked'){kicked=true;role='kicked';desktopOnline=false;desktopArmed=false;releaseAll(true);closeRtc();setStatus(msg.reason||'kicked from room')}if(msg.type==='notice'){setStatus(msg.message||'desktop notice',true)}}catch{}});
@@ -242,8 +261,9 @@ $('enter').onclick=()=>chatOpen?closeChat(true):pressEnter();$('keyboardBtn').on
 function buildMoreBar(){const bar=$('moreBar');if(!bar)return;bar.innerHTML='';for(const [action,label] of TOP_MORE){const b=document.createElement('button');b.className='btn moreChip';b.innerHTML=`${label}<small>${displayForKey(keyFor(action))}</small>`;b.onclick=()=>{if(requireControl())tapAction(action)};bar.appendChild(b)}}
 $('more').onclick=()=>{moreBarOpen=!moreBarOpen;$('moreBar').classList.toggle('open',moreBarOpen);$('more').classList.toggle('latched',moreBarOpen);$('more').textContent=moreBarOpen?'✕ MORE':'☰ MORE'};
 
-function buildSettings(){$('deviceNameInput').value=deviceName;$('keyboardOnEnter').checked=keyboardOnEnter;$('keyboardOnEnter').onchange=e=>{keyboardOnEnter=!!e.target.checked;localStorage.setItem('pixelb8GamepadKeyboardOnEnter',keyboardOnEnter?'1':'0');showControlToast(keyboardOnEnter?'ENTER OPENS KEYBOARD':'ENTER SENDS ENTER ONLY')};document.querySelectorAll('.layoutChoice').forEach(b=>b.classList.toggle('selected',b.dataset.layout===layoutPreset));document.querySelectorAll('.styleChoice').forEach(b=>b.classList.toggle('selected',b.dataset.style===layoutStyle));const g=$('bindGrid');g.innerHTML='';for(const action of Object.keys(DEFAULT_BINDINGS)){const row=document.createElement('div');row.className='bindRow';const label=document.createElement('label');label.textContent=LABELS[action]||action;const sel=document.createElement('select');for(const k of KEY_OPTIONS){const o=document.createElement('option');o.value=k;o.textContent=KEY_DISPLAY[k]||k;o.selected=bindings[action]===k;sel.appendChild(o)}sel.onchange=()=>{bindings[action]=sel.value;saveBindings();refreshLabels()};row.append(label,sel);g.appendChild(row)}$('mouseSensitivity').value=mouseSettings.sensitivity;$('mouseSensitivityOut').textContent=mouseSettings.sensitivity;$('tiltSensitivity').value=mouseSettings.tiltSensitivity;$('tiltSensitivityOut').textContent=mouseSettings.tiltSensitivity;$('mouseHorizontalOnly').checked=mouseSettings.horizontalOnly;$('mouseInvertX').checked=mouseSettings.invertX;$('mouseInvertY').checked=mouseSettings.invertY;$('tiltAutoEnable').checked=mouseSettings.tiltAutoEnable;updateTiltStatus()}
+function buildSettings(){$('deviceNameInput').value=deviceName;$('roomSetting').value=room;$('keyboardOnEnter').checked=keyboardOnEnter;$('keyboardOnEnter').onchange=e=>{keyboardOnEnter=!!e.target.checked;localStorage.setItem('pixelb8GamepadKeyboardOnEnter',keyboardOnEnter?'1':'0');showControlToast(keyboardOnEnter?'ENTER OPENS KEYBOARD':'ENTER SENDS ENTER ONLY')};document.querySelectorAll('.layoutChoice').forEach(b=>b.classList.toggle('selected',b.dataset.layout===layoutPreset));document.querySelectorAll('.styleChoice').forEach(b=>b.classList.toggle('selected',b.dataset.style===layoutStyle));const g=$('bindGrid');g.innerHTML='';for(const action of Object.keys(DEFAULT_BINDINGS)){const row=document.createElement('div');row.className='bindRow';const label=document.createElement('label');label.textContent=LABELS[action]||action;const sel=document.createElement('select');for(const k of KEY_OPTIONS){const o=document.createElement('option');o.value=k;o.textContent=KEY_DISPLAY[k]||k;o.selected=bindings[action]===k;sel.appendChild(o)}sel.onchange=()=>{bindings[action]=sel.value;saveBindings();refreshLabels()};row.append(label,sel);g.appendChild(row)}$('mouseSensitivity').value=mouseSettings.sensitivity;$('mouseSensitivityOut').textContent=mouseSettings.sensitivity;$('tiltSensitivity').value=mouseSettings.tiltSensitivity;$('tiltSensitivityOut').textContent=mouseSettings.tiltSensitivity;$('mouseHorizontalOnly').checked=mouseSettings.horizontalOnly;$('mouseInvertX').checked=mouseSettings.invertX;$('mouseInvertY').checked=mouseSettings.invertY;$('tiltAutoEnable').checked=mouseSettings.tiltAutoEnable;updateTiltStatus()}
 $('deviceNameInput').addEventListener('change',()=>{deviceName=($('deviceNameInput').value.trim()||('Phone '+clientId.slice(-4).toUpperCase())).slice(0,48);localStorage.setItem('pixelb8GamepadDeviceName',deviceName);rawPublish({type:'hello'})});
+$('roomSetting').addEventListener('change',()=>{const next=$('roomSetting').value.trim();if(next)room=next;$('roomSetting').value=room;showControlToast('ROOM SAVED — TAP ↻ TO RECONNECT')});
 $('mouseSensitivity').addEventListener('input',()=>{mouseSettings.sensitivity=clamp(Number($('mouseSensitivity').value)||18,4,36);$('mouseSensitivityOut').textContent=mouseSettings.sensitivity;saveMouseSettings()});$('tiltSensitivity').addEventListener('input',()=>{mouseSettings.tiltSensitivity=clamp(Number($('tiltSensitivity').value)||12,2,30);$('tiltSensitivityOut').textContent=mouseSettings.tiltSensitivity;saveMouseSettings()});$('mouseHorizontalOnly').onchange=()=>{mouseSettings.horizontalOnly=$('mouseHorizontalOnly').checked;saveMouseSettings()};$('mouseInvertX').onchange=()=>{mouseSettings.invertX=$('mouseInvertX').checked;saveMouseSettings()};$('mouseInvertY').onchange=()=>{mouseSettings.invertY=$('mouseInvertY').checked;saveMouseSettings()};$('tiltAutoEnable').onchange=()=>{mouseSettings.tiltAutoEnable=$('tiltAutoEnable').checked;saveMouseSettings()};
 document.querySelectorAll('.layoutChoice').forEach(b=>b.onclick=()=>applyLayout(b.dataset.layout));document.querySelectorAll('.styleChoice').forEach(b=>b.onclick=()=>applyLayoutStyle(b.dataset.style));$('settings').onclick=()=>{buildSettings();$('settingsOverlay').classList.add('open')};$('resetBindings').onclick=()=>{bindings={...DEFAULT_BINDINGS};saveBindings();buildSettings();refreshLabels()};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$((b.dataset.close)).classList.remove('open'));document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('pointerdown',e=>{if(e.target===o)o.classList.remove('open')}));
 
@@ -270,5 +290,5 @@ applyLayoutStyle(layoutStyle,false);
 applyLayout(layoutPreset,false);
 bindHoldControl($('rotLeftDock'),'rotateLeft');
 bindHoldControl($('rotRightDock'),'rotateRight');
-$('room').value=room;refreshLabels();buildMoreBar();updateTiltStatus();updateFreelookButton();if(mouseSettings.tiltAutoEnable&&localStorage.getItem('pixelb8GamepadTiltEnabled')==='1')setTimeout(()=>enableTilt(),250);if(room&&secret)connect();else setStatus('scan a valid PixelB8 QR invite');
+refreshLabels();buildMoreBar();updateTiltStatus();updateFreelookButton();if(mouseSettings.tiltAutoEnable&&localStorage.getItem('pixelb8GamepadTiltEnabled')==='1')setTimeout(()=>enableTilt(),250);if(room&&secret)connect();else setStatus('scan a valid PixelB8 QR invite');
 })();
