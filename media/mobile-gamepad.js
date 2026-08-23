@@ -251,15 +251,38 @@ function handleDesktopMessage(msg){
 function scheduleLanReconnect(){clearTimeout(lanReconnectTimer);if(!lanRequested||kicked)return;lanReconnectTimer=setTimeout(()=>connectLan(true),Math.min(5000,700+lanFailures*500))}
 function connectLan(isRetry=false){
   if(!lanRequested||!room||!secret)return false;
-  try{lanSocket?.close()}catch{}
+  const previous=lanSocket;
   const proto=location.protocol==='https:'?'wss:':'ws:';
   const url=`${proto}//${location.host}/ws`;
-  setStatus(isRetry?'reconnecting locally…':'connecting locally…');
-  try{lanSocket=new WebSocket(url)}catch{lanFailures++;scheduleLanReconnect();return false}
-  lanSocket.onopen=()=>{lanFailures=0;kicked=false;desktopOnline=true;rawPublish({type:'hello'});setStatus('connected · local',true);clearInterval(heartbeat);heartbeat=setInterval(()=>rawPublish({type:'heartbeat'}),1000)};
-  lanSocket.onmessage=e=>{try{handleDesktopMessage(JSON.parse(String(e.data)))}catch{}};
-  lanSocket.onerror=()=>{};
-  lanSocket.onclose=()=>{if(kicked)return;desktopOnline=false;desktopArmed=false;role='unknown';releaseAll(true);setStatus('reconnecting local link…');lanFailures++;scheduleLanReconnect();if(lanFailures>=2)connectMqttFallback()};
+  if(!signalingReady())setStatus(isRetry?'reconnecting locally…':'connecting locally…');
+  let socket;
+  try{socket=new WebSocket(url);lanSocket=socket}catch{lanFailures++;scheduleLanReconnect();return false}
+  if(previous&&previous!==socket){try{previous.close()}catch{}}
+  socket.onopen=()=>{
+    if(lanSocket!==socket)return;
+    lanFailures=0;kicked=false;desktopOnline=true;rawPublish({type:'hello'});updateTransportStatus();
+    clearInterval(heartbeat);heartbeat=setInterval(()=>rawPublish({type:'heartbeat'}),1000);
+  };
+  socket.onmessage=e=>{if(lanSocket!==socket)return;try{handleDesktopMessage(JSON.parse(String(e.data)))}catch{}};
+  socket.onerror=()=>{};
+  socket.onclose=()=>{
+    // Ignore close callbacks from an older socket that was intentionally replaced.
+    if(lanSocket!==socket||kicked)return;
+    lanSocket=null;
+    releaseAll(true);
+    lanFailures++;
+    scheduleLanReconnect();
+    const fallbackAlive=rtcReady()||!!client?.connected;
+    if(fallbackAlive){
+      desktopOnline=true;
+      updateTransportStatus();
+    }else{
+      // Do not erase the known desktop armed/role state during a brief LAN retry.
+      // Only show reconnecting when there is genuinely no usable transport.
+      setStatus('reconnecting…');
+    }
+    if(lanFailures>=2)connectMqttFallback();
+  };
   return true;
 }
 function connectMqttFallback(){
@@ -269,9 +292,9 @@ function connectMqttFallback(){
   try{client=mqtt.connect('wss://broker.emqx.io:8084/mqtt',{clientId:`pixelb8-gamepad-${cryptoRandom(10)}`,clean:true,reconnectPeriod:2000,connectTimeout:10000})}catch{return}
   client.on('connect',()=>{client.subscribe(`${base()}/status`);client.subscribe(`${base()}/client/${clientId}`);client.subscribe(`${base()}/signal/client/${clientId}`);rawPublish({type:'hello'});desktopOnline=true;setStatus(lanReady()?'connected · local':'paired · remote',true);clearInterval(heartbeat);heartbeat=setInterval(()=>rawPublish({type:'heartbeat'}),1000);if(!lanReady())startRtc()});
   client.on('message',(topic,payload)=>{try{const msg=JSON.parse(String(payload));if(topic===`${base()}/signal/client/${clientId}`){handleRtcSignal(msg);return}handleDesktopMessage(msg)}catch{}});
-  client.on('reconnect',()=>{if(!lanReady())setStatus('reconnecting remote link…')});
-  client.on('error',()=>{if(!lanReady())setStatus('remote link unavailable')});
-  client.on('close',()=>{if(!lanReady()){desktopOnline=false;desktopArmed=false;role='unknown';closeRtc();setStatus('reconnecting…')}});
+  client.on('reconnect',()=>{if(!lanReady()&&!rtcReady())setStatus('reconnecting remote link…')});
+  client.on('error',()=>{if(!lanReady()&&!rtcReady())setStatus('remote link unavailable')});
+  client.on('close',()=>{if(!lanReady()&&!rtcReady()){desktopOnline=false;role='unknown';closeRtc();setStatus('reconnecting…')}});
 }
 function connect(){
   const roomField=$('roomSetting');if(roomField){const nextRoom=roomField.value.trim();if(nextRoom)room=nextRoom;roomField.value=room}
