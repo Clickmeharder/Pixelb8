@@ -50,7 +50,7 @@ button,input,select{font:inherit}
 .rightGrid{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 82px;grid-template-rows:minmax(0,1fr) 58px;gap:6px}
 .mouseArea{overflow:visible}.mouseBase{position:relative;width:min(42vh,198px);height:min(42vh,198px);max-width:94%;max-height:94%;aspect-ratio:1;border-radius:50%;border:2px solid rgba(102,225,255,.48);background:
  radial-gradient(circle at 50% 50%,rgba(17,79,99,.58) 0 17%,rgba(6,14,25,.98) 18% 60%,rgba(15,47,62,.92) 61% 100%);box-shadow:0 0 0 5px rgba(62,194,255,.06),0 12px 30px rgba(0,0,0,.28),inset 0 0 42px rgba(63,214,255,.15)}
-.rotateDock{position:absolute;top:5px;left:4%;right:4%;display:flex;justify-content:space-between;align-items:center;z-index:3;pointer-events:none}.rotateDock .btn{width:72px;height:34px;border-radius:13px;font-size:11px;background:linear-gradient(160deg,#19233f,#10172b);border-color:rgba(116,141,255,.42);pointer-events:auto}
+.rotateDock{position:absolute;top:5px;left:4%;right:4%;display:flex;justify-content:space-between;align-items:center;z-index:3;pointer-events:none}.rotateDock .btn{width:72px;height:34px;border-radius:13px;font-size:11px;background:linear-gradient(160deg,#19233f,#10172b);border-color:rgba(116,141,255,.42);pointer-events:auto}body.game-screen-on.mode-gamepad .rotateDock .btn{width:52px;height:28px;border-radius:10px;font-size:8px} .remoteFullscreen.mode-gamepad .rotateDock .btn{width:44px;height:22px;border-radius:8px;font-size:7px}
 .mouseRail{display:grid;grid-template-rows:1.2fr 1fr auto;gap:6px}.jump{background:radial-gradient(circle at 35% 28%,#7a93e3,#2d4276 68%);font-size:12px;border-color:rgba(138,160,255,.58);box-shadow:0 0 18px rgba(108,137,255,.10)}
 .rightBottom{display:grid;grid-template-columns:.8fr 1.2fr;gap:6px}.rightBottom .btn{font-size:10px}.freelookBtn.latched{border-color:#66dcff!important;color:#dff9ff!important;background:linear-gradient(150deg,#1c5365,#102d38)!important;box-shadow:0 0 16px rgba(102,220,255,.16)!important}
 
@@ -111,39 +111,39 @@ body.mode-desktop .desktopStage{display:grid}
 .gameMirror{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#020407}
 .gameMirrorTop{position:absolute;z-index:8;top:7px;right:7px;display:flex;align-items:center;gap:5px;padding:4px 5px;border:1px solid rgba(111,200,238,.28);border-radius:10px;background:rgba(4,10,17,.58);backdrop-filter:blur(8px);pointer-events:auto}
 .gameMirrorLabel{font-size:8px;font-weight:900;letter-spacing:.12em;color:#b9eaff}
-.gameScreenDock{display:none;min-width:0;min-height:0;align-items:center;justify-content:stretch;gap:4px;position:relative;z-index:9}.gameScreenDock select{width:100%;min-width:0;height:25px;padding:1px 3px;border:1px solid rgba(111,200,238,.40);border-radius:7px;background:rgba(7,16,26,.88);color:#fff;font-size:8px;font-weight:800}.gameScreenDock .iconbtn{height:25px;min-width:27px;padding:0}
+.gameScreenDock{display:none;min-width:0;min-height:0;align-items:center;justify-content:stretch;gap:4px;position:relative;z-index:9}.gameScreenDock select{width:100%;min-width:0;height:25px;padding:1px 3px;border:1px solid rgba(111,200,238,.40);border-radius:7px;background:rgba(7,16,26,.88);color:#fff;font-size:8px;font-weight:800}.gameScreenDock .iconbtn{height:25px;min-width:27px;padding:0}body.game-screen-on.mode-gamepad .gameScreenDock select{height:21px;font-size:7px;border-radius:6px}.game-screen-on.mode-gamepad .gameScreenDock .iconbtn,.remoteFullscreen.mode-gamepad .gameScreenDock .iconbtn{height:21px;min-width:24px;font-size:11px}.remoteFullscreen.mode-gamepad .gameScreenDock select{height:19px;font-size:6px;border-radius:5px}
 body.game-screen-on.mode-gamepad .gameMirrorLayer{display:block;pointer-events:auto}
-body.game-screen-on.mode-gamepad .stage{position:relative;z-index:3;grid-template-columns:minmax(150px,27%) minmax(104px,17%) minmax(150px,27%);justify-content:space-between;align-items:end;background:transparent;pointer-events:none}
+body.game-screen-on.mode-gamepad .stage{position:relative;z-index:3;grid-template-columns:minmax(124px,24%) minmax(88px,15%) minmax(124px,24%);justify-content:space-between;align-items:end;background:transparent;pointer-events:none}
 body.game-screen-on.mode-gamepad .zone{pointer-events:auto;background:rgba(7,13,22,.34);backdrop-filter:blur(4px);border-color:rgba(126,188,231,.23);box-shadow:0 7px 18px rgba(0,0,0,.12);border-radius:15px}
-body.game-screen-on.mode-gamepad .leftZone,body.game-screen-on.mode-gamepad .rightZone{height:min(68vh,220px);padding:5px;gap:4px}
-body.game-screen-on.mode-gamepad .stickBase,body.game-screen-on.mode-gamepad .mouseBase{width:min(34vh,145px);height:min(34vh,145px);max-width:88%;max-height:88%}
-body.game-screen-on.mode-gamepad .leftZone{grid-template-rows:minmax(0,1fr) 38px}
-body.game-screen-on.mode-gamepad .leftQuick{gap:4px}.game-screen-on.mode-gamepad .leftQuick .btn{font-size:8px;border-radius:10px}.game-screen-on.mode-gamepad .leftQuick .btn small{font-size:6px}
-body.game-screen-on.mode-gamepad .leftZone>.miniHold{bottom:48px;height:21px;min-width:43px;font-size:6px}
-body.game-screen-on.mode-gamepad .rightGrid{grid-template-columns:minmax(0,1fr) 68px;grid-template-rows:minmax(0,1fr) 46px;gap:4px}
-body.game-screen-on.mode-gamepad .mouseRail{gap:4px}.game-screen-on.mode-gamepad .mouseRail .btn{font-size:8px;border-radius:10px}.game-screen-on.mode-gamepad .railHold{height:22px;font-size:6px}
-body.game-screen-on.mode-gamepad .rightBottom{gap:4px}.game-screen-on.mode-gamepad .rightBottom .btn{font-size:8px;border-radius:10px}.game-screen-on.mode-gamepad .rightBottom .btn small{font-size:6px}
-body.game-screen-on.mode-gamepad .gameScreenDock{display:grid;grid-template-columns:minmax(0,1fr) 27px 27px;gap:3px}
-body.game-screen-on.mode-gamepad .centerZone{align-self:end;height:auto;max-height:none;padding:4px;gap:3px;background:rgba(7,13,22,.28);grid-template-rows:auto auto}
-body.game-screen-on.mode-gamepad .centerMain{grid-template-columns:repeat(2,1fr);grid-template-rows:34px;gap:3px}
-body.game-screen-on.mode-gamepad .centerFoot{height:31px;gap:3px}
-body.game-screen-on.mode-gamepad .centerMain .btn,body.game-screen-on.mode-gamepad .centerFoot .btn{font-size:8px;border-radius:9px;padding:1px}.game-screen-on.mode-gamepad .centerMain .btn small{font-size:6px;margin-top:1px}
+body.game-screen-on.mode-gamepad .leftZone,body.game-screen-on.mode-gamepad .rightZone{height:min(58vh,186px);padding:4px;gap:3px}
+body.game-screen-on.mode-gamepad .stickBase,body.game-screen-on.mode-gamepad .mouseBase{width:min(27vh,112px)!important;height:min(27vh,112px)!important;max-width:82%;max-height:82%;min-width:86px;min-height:86px}
+body.game-screen-on.mode-gamepad .leftZone{grid-template-rows:minmax(0,1fr) 34px}
+body.game-screen-on.mode-gamepad .leftQuick{gap:3px}.game-screen-on.mode-gamepad .leftQuick .btn{font-size:7px;border-radius:9px;padding:1px 2px}.game-screen-on.mode-gamepad .leftQuick .btn small{font-size:5px;margin-top:1px}
+body.game-screen-on.mode-gamepad .leftZone>.miniHold{bottom:40px;height:18px;min-width:38px;font-size:5px;padding:0 4px}
+body.game-screen-on.mode-gamepad .rightGrid{grid-template-columns:minmax(0,1fr) 58px;grid-template-rows:minmax(0,1fr) 40px;gap:3px}
+body.game-screen-on.mode-gamepad .mouseRail{gap:3px}.game-screen-on.mode-gamepad .mouseRail .btn{font-size:7px;border-radius:9px;padding:1px 2px}.game-screen-on.mode-gamepad .mouseRail .btn small{font-size:5px;margin-top:1px}.game-screen-on.mode-gamepad .railHold{height:19px;font-size:5px;padding:0 4px}
+body.game-screen-on.mode-gamepad .rightBottom{gap:3px}.game-screen-on.mode-gamepad .rightBottom .btn{font-size:7px;border-radius:9px;padding:1px 2px}.game-screen-on.mode-gamepad .rightBottom .btn small{font-size:5px;margin-top:1px}
+body.game-screen-on.mode-gamepad .gameScreenDock{display:grid;grid-template-columns:minmax(0,1fr) 24px 24px;gap:2px}
+body.game-screen-on.mode-gamepad .centerZone{align-self:end;height:auto;max-height:none;padding:3px;gap:2px;background:rgba(7,13,22,.24);grid-template-rows:auto auto;opacity:.9}
+body.game-screen-on.mode-gamepad .centerMain{grid-template-columns:repeat(2,1fr);grid-template-rows:30px;gap:2px}
+body.game-screen-on.mode-gamepad .centerFoot{height:27px;gap:2px}
+body.game-screen-on.mode-gamepad .centerMain .btn,body.game-screen-on.mode-gamepad .centerFoot .btn{font-size:7px;border-radius:8px;padding:1px}.game-screen-on.mode-gamepad .centerMain .btn small{font-size:5px;margin-top:1px}
 body.game-screen-on.mode-gamepad .centerMain [data-action="target"],body.game-screen-on.mode-gamepad .centerMain [data-action="sit"],body.game-screen-on.mode-gamepad .centerMain #enter{display:none}
 body.game-screen-on.mode-gamepad .leftQuick #shift,body.game-screen-on.mode-gamepad .leftQuick #runHold{opacity:.72}
 body.game-screen-on.mode-gamepad .hotbar{position:relative;z-index:4;background:rgba(5,8,13,.40);backdrop-filter:blur(4px);border-radius:10px}
 body.game-screen-on.mode-gamepad .moreBar{position:relative;z-index:12;background:rgba(8,14,24,.66)}
 .remoteFullscreen .gameMirrorLayer,.remoteFullscreen .desktopTouchpad{position:fixed!important;z-index:90!important;inset:0!important;width:100vw!important;height:100vh!important;border-radius:0!important;border:0!important;background:#000!important}
 .remoteFullscreen .gameMirrorTop,.remoteFullscreen .mirrorBar{top:calc(env(safe-area-inset-top) + 8px);right:calc(env(safe-area-inset-right) + 8px);left:auto;width:auto;opacity:.72}
-.remoteFullscreen.mode-gamepad .stage{position:fixed!important;z-index:95!important;inset:0!important;padding:calc(env(safe-area-inset-top) + 45px) 8px calc(env(safe-area-inset-bottom) + 8px)!important;grid-template-columns:minmax(140px,28%) minmax(96px,18%) minmax(140px,28%)!important;justify-content:space-between!important;align-items:end!important;pointer-events:none}
+.remoteFullscreen.mode-gamepad .stage{position:fixed!important;z-index:95!important;inset:0!important;padding:calc(env(safe-area-inset-top) + 45px) 8px calc(env(safe-area-inset-bottom) + 8px)!important;grid-template-columns:minmax(112px,24%) minmax(80px,14%) minmax(112px,24%)!important;justify-content:space-between!important;align-items:end!important;pointer-events:none}
 .remoteFullscreen.mode-gamepad .leftZone{grid-column:1!important;justify-self:start!important}
-.remoteFullscreen.mode-gamepad .centerZone{display:grid!important;grid-column:2!important;justify-self:center!important;align-self:end!important;width:min(15vw,110px)!important;height:auto!important;padding:3px!important;gap:2px!important;background:rgba(5,10,17,.15)!important;border-color:rgba(137,212,244,.13)!important;opacity:.84}
+.remoteFullscreen.mode-gamepad .centerZone{display:grid!important;grid-column:2!important;justify-self:center!important;align-self:end!important;width:min(12vw,88px)!important;height:auto!important;padding:2px!important;gap:2px!important;background:rgba(5,10,17,.12)!important;border-color:rgba(137,212,244,.12)!important;opacity:.78}
 .remoteFullscreen.mode-gamepad .rightZone{grid-column:3!important;justify-self:end!important}
-.remoteFullscreen.mode-gamepad .leftZone,.remoteFullscreen.mode-gamepad .rightZone{align-self:end;height:min(42vh,178px);padding:4px!important;gap:3px!important;background:rgba(5,10,17,.15);border-color:rgba(137,212,244,.13);backdrop-filter:blur(3px);opacity:.82}
-.remoteFullscreen.mode-gamepad .stickBase,.remoteFullscreen.mode-gamepad .mouseBase{width:min(27vh,118px);height:min(27vh,118px)}
+.remoteFullscreen.mode-gamepad .leftZone,.remoteFullscreen.mode-gamepad .rightZone{align-self:end;height:min(34vh,142px);padding:3px!important;gap:2px!important;background:rgba(5,10,17,.12);border-color:rgba(137,212,244,.12);backdrop-filter:blur(3px);opacity:.76}
+.remoteFullscreen.mode-gamepad .stickBase,.remoteFullscreen.mode-gamepad .mouseBase{width:min(21vh,92px)!important;height:min(21vh,92px)!important;min-width:72px;min-height:72px}
 .remoteFullscreen.mode-gamepad .gameScreenDock{display:grid!important}
-.remoteFullscreen.mode-gamepad .centerMain{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:27px!important;gap:2px!important}
-.remoteFullscreen.mode-gamepad .centerFoot{height:26px!important;gap:2px!important}
-.remoteFullscreen.mode-gamepad .centerMain .btn,.remoteFullscreen.mode-gamepad .centerFoot .btn{font-size:6px!important;border-radius:7px!important;padding:1px!important;opacity:.88}
+.remoteFullscreen.mode-gamepad .centerMain{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:22px!important;gap:2px!important}
+.remoteFullscreen.mode-gamepad .centerFoot{height:22px!important;gap:2px!important}
+.remoteFullscreen.mode-gamepad .centerMain .btn,.remoteFullscreen.mode-gamepad .centerFoot .btn{font-size:5px!important;border-radius:6px!important;padding:1px!important;opacity:.84}.remoteFullscreen.mode-gamepad .centerMain .btn small{font-size:4px!important;margin-top:0}
 .remoteFullscreen.mode-gamepad .hotbar,.remoteFullscreen.mode-gamepad .topbar{display:none!important}
 .remoteFullscreen.mode-gamepad .moreBar{position:fixed!important;z-index:110!important;left:18%!important;right:18%!important;bottom:calc(env(safe-area-inset-bottom) + 8px)!important;margin:0!important;background:rgba(6,12,20,.82)!important;backdrop-filter:blur(12px)!important}
 .remoteFullscreen.mode-gamepad .moreBar.open{max-height:64px!important}
@@ -172,7 +172,29 @@ body.game-screen-on.mode-gamepad .moreBar{position:relative;z-index:12;backgroun
 .remoteFullscreen.mode-desktop .desktopMouseButtons{display:grid!important;position:fixed!important;z-index:98!important;right:calc(env(safe-area-inset-right) + 6px)!important;bottom:calc(env(safe-area-inset-bottom) + 6px)!important;width:min(25vw,170px)!important;grid-template-columns:1fr .8fr 1fr!important;gap:3px!important;padding:3px!important;border:1px solid rgba(137,212,244,.14)!important;border-radius:10px!important;background:rgba(5,10,17,.24)!important;backdrop-filter:blur(4px)!important;pointer-events:auto!important;opacity:.84}
 .remoteFullscreen.mode-desktop .desktopMouseButtons .btn{min-height:27px!important;font-size:6px!important;border-radius:7px!important;padding:1px!important}
 .remoteFullscreen.mode-desktop .desktopMouseButtons .btn small{font-size:5px!important}
-@media(max-width:650px),(max-height:340px){body.game-screen-on.mode-gamepad .stage{grid-template-columns:minmax(132px,30%) minmax(88px,16%) minmax(132px,30%)}body.game-screen-on.mode-gamepad .leftZone,body.game-screen-on.mode-gamepad .rightZone{height:min(64vh,188px)}body.game-screen-on.mode-gamepad .stickBase,body.game-screen-on.mode-gamepad .mouseBase{width:min(31vh,128px);height:min(31vh,128px)}body.game-screen-on.mode-gamepad .rightGrid{grid-template-columns:minmax(0,1fr) 61px;grid-template-rows:minmax(0,1fr) 42px}.gameMirrorLayer{inset:44px 5px 48px}.gameMirrorTop{top:5px;right:5px}.gameMirrorLabel{display:none}}
+@media(max-width:650px),(max-height:340px){body.game-screen-on.mode-gamepad .stage{grid-template-columns:minmax(112px,27%) minmax(80px,15%) minmax(112px,27%)}body.game-screen-on.mode-gamepad .leftZone,body.game-screen-on.mode-gamepad .rightZone{height:min(54vh,160px)}body.game-screen-on.mode-gamepad .stickBase,body.game-screen-on.mode-gamepad .mouseBase{width:min(24vh,98px)!important;height:min(24vh,98px)!important;min-width:78px;min-height:78px}body.game-screen-on.mode-gamepad .rightGrid{grid-template-columns:minmax(0,1fr) 54px;grid-template-rows:minmax(0,1fr) 38px;gap:3px}.gameMirrorLayer{inset:44px 5px 48px}.gameMirrorTop{top:5px;right:5px}.gameMirrorLabel{display:none}}
+
+/* Touch Layout Studio */
+body.touch-layout-custom .stage{position:relative;overflow:visible}
+body.touch-layout-custom.mode-gamepad .zone{overflow:visible;background:transparent;border-color:transparent;box-shadow:none;backdrop-filter:none}
+body.touch-layout-custom.mode-gamepad .zone:after{display:none}
+body.touch-layout-custom.mode-gamepad .centerZone{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+body.touch-layout-custom.mode-gamepad .leftQuick,body.touch-layout-custom.mode-gamepad .rightBottom,body.touch-layout-custom.mode-gamepad .mouseRail,body.touch-layout-custom.mode-gamepad .centerMain,body.touch-layout-custom.mode-gamepad .centerFoot{position:relative;z-index:4}
+.touchLayoutCard .btn{width:100%;height:36px}
+.touchLayoutEditor{position:fixed;inset:0;z-index:300;display:none;background:rgba(2,5,10,.28);touch-action:none}
+.touchLayoutEditor.open{display:block}
+.touchLayoutEditor .tleTop{position:absolute;left:7px;right:7px;top:calc(env(safe-area-inset-top) + 7px);display:flex;align-items:center;gap:5px;padding:5px;border:1px solid rgba(112,188,236,.35);border-radius:12px;background:rgba(6,13,23,.90);backdrop-filter:blur(14px);pointer-events:auto}
+.touchLayoutEditor .tleTitle{font-size:9px;font-weight:950;letter-spacing:.08em;color:#dff8ff;white-space:nowrap}
+.touchLayoutEditor .tleContext{display:flex;gap:3px;flex:1}.touchLayoutEditor .tleContext button{height:27px;min-width:0;flex:1;font-size:7px;border-radius:8px}
+.touchLayoutEditor .tleDone{height:27px;min-width:45px}
+.touchLayoutEditor .tlePanel{position:absolute;z-index:2;left:50%;bottom:calc(env(safe-area-inset-bottom) + 6px);transform:translateX(-50%);width:min(94vw,620px);padding:6px;border:1px solid rgba(112,188,236,.35);border-radius:13px;background:rgba(6,13,23,.91);backdrop-filter:blur(14px);pointer-events:auto;display:grid;gap:5px}
+.touchLayoutEditor .tleRow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center}.touchLayoutEditor .tleRow label{font-size:7px;color:#a9bdd5;white-space:nowrap}.touchLayoutEditor select{height:28px;min-width:0;border:1px solid #385271;border-radius:7px;background:#07101a;color:#fff;font-size:8px;padding:2px 5px}.touchLayoutEditor input[type=range]{width:100%;min-width:0}.touchLayoutEditor output{font:700 7px Consolas,monospace;color:#dff7ff;min-width:35px;text-align:right}.touchLayoutEditor .tleTools{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.touchLayoutEditor .tleTools .btn{height:27px;font-size:7px;border-radius:8px}.touchLayoutEditor .tleColor{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.touchLayoutEditor .tleColor .tleMini{display:grid;grid-template-columns:auto 1fr;gap:3px;align-items:center}.touchLayoutEditor .tleMini span{font-size:6px;color:#9fb5cf}.touchLayoutEditor .tleHint{font-size:6px;color:#8198b4;text-align:center;line-height:1.3}.touchLayoutEditor .tleEnabled{display:flex;align-items:center;gap:4px;font-size:7px;color:#dce9fa}.touchLayoutEditor .tleContext .active{border-color:#75e4ff;background:linear-gradient(150deg,#244a60,#122b39)}
+body.layout-editing .stage,body.layout-editing .hotbar{outline:1px dashed rgba(102,220,255,.18);outline-offset:-2px}
+body.layout-editing [data-touch-control]{outline:1px dashed rgba(102,220,255,.28)!important;outline-offset:2px!important}
+body.layout-editing [data-touch-selected=true]{outline:2px solid rgba(255,215,113,.88)!important;outline-offset:3px!important;filter:drop-shadow(0 0 7px rgba(255,215,113,.22))}
+.customDpad{position:absolute;z-index:16;width:118px;height:118px;display:none;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3px;left:42%;bottom:14%;pointer-events:auto}.customDpad button{border-radius:10px;font-size:12px}.customDpad .up{grid-column:2}.customDpad .left{grid-column:1;grid-row:2}.customDpad .down{grid-column:2;grid-row:3}.customDpad .right{grid-column:3;grid-row:2}.customDpad .padCore{grid-column:2;grid-row:2;border-radius:50%;border:1px solid rgba(110,153,209,.24);background:rgba(8,16,27,.46);pointer-events:none}
+body.touch-layout-custom .touchTint{background:rgba(var(--touch-r,18),var(--touch-g,38),var(--touch-b,58),var(--touch-a,.72))!important}
+@media(max-height:360px){.touchLayoutEditor .tlePanel{width:min(96vw,690px);grid-template-columns:1.1fr 1fr;gap:4px}.touchLayoutEditor .tleTools{grid-column:1/-1}.touchLayoutEditor .tleHint{display:none}}
 
 `;
 
@@ -212,6 +234,23 @@ let mirrorMode=localStorage.getItem('pixelb8DesktopMirrorMode')||'off';
 if(!['off','low','30','60','auto'].includes(mirrorMode))mirrorMode='off';
 let mirrorAudioEnabled=localStorage.getItem('pixelb8ScreenAudio')!=='0';
 
+const TOUCH_LAYOUT_KEY='pixelb8GamepadTouchLayoutsV1';
+const TOUCH_CONTEXTS=['normal','screen','fullscreen'];
+const TOUCH_CONTROLS={
+  wasdStick:{label:'WASD joystick',selector:'#stickZone'},rotateLeft:{label:'Q / rotate left',selector:'#rotLeftDock'},rotateRight:{label:'E / rotate right',selector:'#rotRightDock'},
+  lmb:{label:'LMB',selector:'#leftClickBtn'},shift:{label:'Shift',selector:'#shift'},run:{label:'Run / Walk',selector:'#runHold'},holdL:{label:'Hold L',selector:'#leftHoldBtn'},
+  mouseStick:{label:'Mouse / camera joystick',selector:'#mouseZone'},jump:{label:'Jump',selector:'[data-action="jump"]'},rmb:{label:'RMB',selector:'#rightClickBtn'},holdR:{label:'Hold R',selector:'#rightHoldBtn'},tilt:{label:'Tilt',selector:'#tiltBtn'},center:{label:'Center / freelook',selector:'#cameraCenterBtn'},screenDock:{label:'Screen / FPS / audio',selector:'.gameScreenDock'},
+  action:{label:'Action',selector:'[data-action="action"]'},use:{label:'Use',selector:'[data-action="interact"]'},allUp:{label:'All Up',selector:'#release'},more:{label:'More',selector:'#more'},hotbar:{label:'1–0 hotbar',selector:'#hotbar'},
+  moveDpad:{label:'Movement D-pad',selector:'#customMoveDpad',optional:true},arrowPad:{label:'Arrow-key pad',selector:'#customArrowPad',optional:true}
+};
+function blankTouchControl(enabled=true){return{x:0,y:0,scale:1,opacity:1,enabled,r:18,g:38,b:58,a:0}}
+function defaultTouchLayouts(){const out={};for(const ctx of TOUCH_CONTEXTS){out[ctx]={};for(const [id,def] of Object.entries(TOUCH_CONTROLS))out[ctx][id]=blankTouchControl(!def.optional)}return out}
+function loadTouchLayouts(){try{const raw=JSON.parse(localStorage.getItem(TOUCH_LAYOUT_KEY)||'null'),base=defaultTouchLayouts();if(raw&&typeof raw==='object')for(const ctx of TOUCH_CONTEXTS)for(const id of Object.keys(TOUCH_CONTROLS))base[ctx][id]={...base[ctx][id],...(raw?.[ctx]?.[id]||{})};return base}catch{return defaultTouchLayouts()}}
+let touchLayouts=loadTouchLayouts(),touchLayoutEditing=false,touchEditContext='normal',touchSelected='wasdStick';
+function saveTouchLayouts(){localStorage.setItem(TOUCH_LAYOUT_KEY,JSON.stringify(touchLayouts));if(isCustomProfileId?.(activeProfile))saveActiveCustom?.()}
+function currentTouchContext(){return document.body.classList.contains('remoteFullscreen')?'fullscreen':(document.body.classList.contains('game-screen-on')?'screen':'normal')}
+
+
 const KEY_OPTIONS = [
   'NONE','0','1','2','3','4','5','6','7','8','9',
   'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -244,7 +283,7 @@ const CUSTOM_PROFILE_KEY='pixelb8GamepadCustomProfile';
 const CUSTOM_PROFILES_KEY='pixelb8GamepadCustomProfiles';
 let bindings = loadBindings(), mouseSettings = loadMouseSettings();
 function sameBindings(a,b){return Object.keys(DEFAULT_BINDINGS).every(k=>(a?.[k]||'NONE')===(b?.[k]||'NONE'))}
-function profileSnapshot(){return {bindings:{...bindings},layoutStyle,mouseSettings:{...mouseSettings}}}
+function profileSnapshot(){return {bindings:{...bindings},layoutStyle,mouseSettings:{...mouseSettings},touchLayouts:JSON.parse(JSON.stringify(touchLayouts))}}
 function loadCustomProfiles(){try{const value=JSON.parse(localStorage.getItem(CUSTOM_PROFILES_KEY)||'[]');return Array.isArray(value)?value.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&p.snapshot):[]}catch{return []}}
 function saveCustomProfiles(){localStorage.setItem(CUSTOM_PROFILES_KEY,JSON.stringify(customProfiles))}
 function isCustomProfileId(id){return typeof id==='string'&&id.startsWith('custom:')}
@@ -307,7 +346,7 @@ function markCustomProfile(){
 function applyProfile(id){
   releaseAll();
   const custom=customProfile(id),p=PROFILE_DEFS[id];if(!custom&&!p)return;
-  if(custom){const saved=custom.snapshot||{};if(saved.bindings)bindings={...DEFAULT_BINDINGS,...saved.bindings};if(saved.layoutStyle)applyLayoutStyle(saved.layoutStyle,true);if(saved.mouseSettings)mouseSettings={...loadMouseSettings(),...saved.mouseSettings}}
+  if(custom){const saved=custom.snapshot||{};if(saved.bindings)bindings={...DEFAULT_BINDINGS,...saved.bindings};if(saved.layoutStyle)applyLayoutStyle(saved.layoutStyle,true);if(saved.mouseSettings)mouseSettings={...loadMouseSettings(),...saved.mouseSettings};if(saved.touchLayouts){const base=defaultTouchLayouts();for(const ctx of TOUCH_CONTEXTS)for(const id of Object.keys(TOUCH_CONTROLS))base[ctx][id]={...base[ctx][id],...(saved.touchLayouts?.[ctx]?.[id]||{})};touchLayouts=base;saveTouchLayouts();applyTouchLayout()}}
   else{bindings={...DEFAULT_BINDINGS,...p.bindings};applyLayoutStyle(p.layoutStyle||'classic',true);mouseSettings={sensitivity:18,touchpadSensitivity:1.35,tiltSensitivity:12,horizontalOnly:false,invertX:false,invertY:false,tiltAutoEnable:false}}
   saveBindings();saveMouseSettings();activeProfile=id;localStorage.setItem(PROFILE_KEY,id);buildSettings();refreshLabels();announceProfile();showControlToast(`${currentProfile().name.toUpperCase()} PROFILE LOADED`);
 }
@@ -369,7 +408,32 @@ function setupInjectedUI(){
     dock.innerHTML = `<button class="btn" id="rotLeftDock" data-main-key="rotateLeft"></button><button class="btn" id="rotRightDock" data-main-key="rotateRight"></button>`;
     stickZone.appendChild(dock);
   }
+  if(gamepad && !$('customMoveDpad')){
+    const stage=document.querySelector('.stage');
+    const mk=(id,label,keys)=>{const d=document.createElement('div');d.id=id;d.className='customDpad';d.setAttribute('aria-label',label);d.innerHTML=`<button class="btn up" data-pad="${keys[0]}">▲</button><button class="btn left" data-pad="${keys[1]}">◀</button><span class="padCore"></span><button class="btn right" data-pad="${keys[2]}">▶</button><button class="btn down" data-pad="${keys[3]}">▼</button>`;stage.appendChild(d);return d};
+    mk('customMoveDpad','Movement D-pad',['moveUp','moveLeft','moveRight','moveDown']);
+    mk('customArrowPad','Arrow-key pad',['UP','LEFT','RIGHT','DOWN']);
+  }
+  if(!$('touchLayoutEditor')){
+    const editor=document.createElement('div');editor.id='touchLayoutEditor';editor.className='touchLayoutEditor';editor.innerHTML=`<div class="tleTop"><span class="tleTitle">TOUCH LAYOUT</span><div class="tleContext"><button class="btn" data-tle-context="normal">GAMEPAD</button><button class="btn" data-tle-context="screen">LIVE</button><button class="btn" data-tle-context="fullscreen">FULL</button></div><button class="btn tleDone" id="tleDone">DONE</button></div><div class="tlePanel"><div class="tleRow"><label>Control</label><select id="tleControl"></select><label class="tleEnabled"><input id="tleEnabled" type="checkbox"> ON</label></div><div class="tleRow"><label>Size</label><input id="tleScale" type="range" min="0.35" max="2" step="0.05"><output id="tleScaleOut"></output></div><div class="tleRow"><label>Opacity</label><input id="tleOpacity" type="range" min="0.08" max="1" step="0.02"><output id="tleOpacityOut"></output></div><div class="tleColor"><div class="tleMini"><span>R</span><input id="tleR" type="range" min="0" max="255"></div><div class="tleMini"><span>G</span><input id="tleG" type="range" min="0" max="255"></div><div class="tleMini"><span>B</span><input id="tleB" type="range" min="0" max="255"></div><div class="tleMini"><span>A</span><input id="tleA" type="range" min="0" max="1" step="0.05"></div></div><div class="tleTools"><button class="btn" id="tleResetControl">RESET CONTROL</button><button class="btn" id="tleResetView">RESET VIEW</button><button class="btn" id="tleCopyScreen">COPY VIEW</button><button class="btn" id="tleCenter">CENTER</button></div><div class="tleHint">Drag any outlined control directly. Size, opacity and RGBA are saved separately for Gamepad, Live Screen and Fullscreen.</div></div>`;document.body.appendChild(editor);
+    const settingsStack=document.querySelector('#settingsOverlay .settingsStack');if(settingsStack){const card=document.createElement('div');card.className='settingsCard touchLayoutCard';card.innerHTML='<h3>Touch layout studio</h3><button class="btn" id="editTouchLayout">EDIT TOUCH LAYOUT</button><div class="status" style="margin-top:7px">Move, resize, recolor, fade, hide or enable controls independently for Gamepad, Live Screen and Fullscreen. Includes optional movement D-pad and arrow-key pad.</div>';const layoutCard=[...settingsStack.children].find(x=>x.querySelector?.('#stylePicker'));layoutCard?.after(card)}
+  }
 }
+
+
+function touchElement(id){const def=TOUCH_CONTROLS[id];return def?document.querySelector(def.selector):null}
+function markTouchElements(){for(const [id] of Object.entries(TOUCH_CONTROLS)){const el=touchElement(id);if(el)el.dataset.touchControl=id}}
+function touchCfg(ctx,id){return touchLayouts[ctx]?.[id]||(touchLayouts[ctx][id]=blankTouchControl(!TOUCH_CONTROLS[id]?.optional))}
+function touchTintNodes(id,el){if(id==='wasdStick')return [$('stickBase')].filter(Boolean);if(id==='mouseStick')return [$('mouseBase')].filter(Boolean);if(id==='moveDpad'||id==='arrowPad')return [...el.querySelectorAll('button')];if(id==='screenDock'||id==='hotbar')return [...el.querySelectorAll('button,select')];return [el]}
+function applyTouchControl(id,ctx=currentTouchContext()){const el=touchElement(id);if(!el)return;const c=touchCfg(ctx,id);el.style.transform=`translate(${Number(c.x||0)}vw,${Number(c.y||0)}vh) scale(${Number(c.scale||1)})`;el.style.transformOrigin='center';el.style.opacity=String(clamp(Number(c.opacity??1),.08,1));const optional=!!TOUCH_CONTROLS[id]?.optional;if(optional)el.style.display=c.enabled?'grid':'none';else el.style.visibility=c.enabled?'visible':'hidden';for(const n of touchTintNodes(id,el)){n.style.setProperty('--touch-r',Math.round(c.r));n.style.setProperty('--touch-g',Math.round(c.g));n.style.setProperty('--touch-b',Math.round(c.b));n.style.setProperty('--touch-a',Number(c.a||0));n.classList.toggle('touchTint',Number(c.a||0)>0.001)}}
+function applyTouchLayout(){document.body.classList.add('touch-layout-custom');markTouchElements();const ctx=currentTouchContext();for(const id of Object.keys(TOUCH_CONTROLS))applyTouchControl(id,ctx);if(touchLayoutEditing)refreshTouchEditor()}
+function setTouchSelected(id){if(!TOUCH_CONTROLS[id])return;touchSelected=id;document.querySelectorAll('[data-touch-selected]').forEach(el=>delete el.dataset.touchSelected);const el=touchElement(id);if(el)el.dataset.touchSelected='true';const s=$('tleControl');if(s)s.value=id;refreshTouchEditor()}
+function refreshTouchEditor(){if(!$('touchLayoutEditor'))return;document.querySelectorAll('[data-tle-context]').forEach(b=>b.classList.toggle('active',b.dataset.tleContext===touchEditContext));const c=touchCfg(touchEditContext,touchSelected);if($('tleEnabled'))$('tleEnabled').checked=!!c.enabled;if($('tleScale'))$('tleScale').value=c.scale;if($('tleScaleOut'))$('tleScaleOut').textContent=`${Math.round(c.scale*100)}%`;if($('tleOpacity'))$('tleOpacity').value=c.opacity;if($('tleOpacityOut'))$('tleOpacityOut').textContent=`${Math.round(c.opacity*100)}%`;for(const k of ['R','G','B'])if($('tle'+k))$('tle'+k).value=c[k.toLowerCase()];if($('tleA'))$('tleA').value=c.a}
+function openTouchEditor(){if(controlMode!=='gamepad')setControlMode('gamepad',true);$('settingsOverlay')?.classList.remove('open');touchEditContext=currentTouchContext();touchLayoutEditing=true;document.body.classList.add('layout-editing');$('touchLayoutEditor')?.classList.add('open');const select=$('tleControl');if(select&&!select.options.length){for(const [id,d] of Object.entries(TOUCH_CONTROLS)){const o=document.createElement('option');o.value=id;o.textContent=d.label;select.appendChild(o)}}setTouchSelected(touchSelected);applyTouchLayout()}
+function closeTouchEditor(){touchLayoutEditing=false;document.body.classList.remove('layout-editing');$('touchLayoutEditor')?.classList.remove('open');document.querySelectorAll('[data-touch-selected]').forEach(el=>delete el.dataset.touchSelected);saveTouchLayouts();applyTouchLayout()}
+function resetTouchView(ctx){touchLayouts[ctx]=defaultTouchLayouts()[ctx];saveTouchLayouts();applyTouchLayout();refreshTouchEditor()}
+function bindTouchLayoutEditor(){const editor=$('touchLayoutEditor');if(!editor)return;$('tleDone').onclick=closeTouchEditor;$('tleControl').onchange=()=>setTouchSelected($('tleControl').value);document.querySelectorAll('[data-tle-context]').forEach(b=>b.onclick=()=>{touchEditContext=b.dataset.tleContext;for(const id of Object.keys(TOUCH_CONTROLS))applyTouchControl(id,touchEditContext);setTouchSelected(touchSelected);refreshTouchEditor()});$('tleEnabled').onchange=()=>{touchCfg(touchEditContext,touchSelected).enabled=$('tleEnabled').checked;saveTouchLayouts();applyTouchControl(touchSelected,touchEditContext)};$('tleScale').oninput=()=>{touchCfg(touchEditContext,touchSelected).scale=Number($('tleScale').value);$('tleScaleOut').textContent=`${Math.round(Number($('tleScale').value)*100)}%`;saveTouchLayouts();applyTouchControl(touchSelected,touchEditContext)};$('tleOpacity').oninput=()=>{touchCfg(touchEditContext,touchSelected).opacity=Number($('tleOpacity').value);$('tleOpacityOut').textContent=`${Math.round(Number($('tleOpacity').value)*100)}%`;saveTouchLayouts();applyTouchControl(touchSelected,touchEditContext)};for(const k of ['R','G','B'])$('tle'+k).oninput=()=>{const c=touchCfg(touchEditContext,touchSelected);c[k.toLowerCase()]=Number($('tle'+k).value);c.a=Math.max(Number(c.a||0),.08);$('tleA').value=c.a;saveTouchLayouts();applyTouchControl(touchSelected,touchEditContext)};$('tleA').oninput=()=>{touchCfg(touchEditContext,touchSelected).a=Number($('tleA').value);saveTouchLayouts();applyTouchControl(touchSelected,touchEditContext)};$('tleResetControl').onclick=()=>{touchLayouts[touchEditContext][touchSelected]=blankTouchControl(!TOUCH_CONTROLS[touchSelected]?.optional);saveTouchLayouts();applyTouchControl(touchSelected,touchEditContext);refreshTouchEditor()};$('tleResetView').onclick=()=>resetTouchView(touchEditContext);$('tleCenter').onclick=()=>{const c=touchCfg(touchEditContext,touchSelected);c.x=0;c.y=0;saveTouchLayouts();applyTouchControl(touchSelected,touchEditContext)};$('tleCopyScreen').onclick=()=>{const src=JSON.parse(JSON.stringify(touchLayouts[touchEditContext]));for(const ctx of TOUCH_CONTEXTS)if(ctx!==touchEditContext)touchLayouts[ctx]=JSON.parse(JSON.stringify(src));saveTouchLayouts();showControlToast('LAYOUT COPIED TO ALL VIEWS')};$('editTouchLayout')?.addEventListener('click',openTouchEditor);let drag=null;const resolve=e=>{let n=e.target;while(n&&n!==document.body){const id=n.dataset?.touchControl;if(id)return{id,el:n};n=n.parentElement}return null};document.addEventListener('pointerdown',e=>{if(!touchLayoutEditing||e.target.closest?.('.touchLayoutEditor .tleTop,.touchLayoutEditor .tlePanel'))return;const hit=resolve(e);if(!hit)return;e.preventDefault();e.stopImmediatePropagation();setTouchSelected(hit.id);const c=touchCfg(touchEditContext,hit.id);drag={id:hit.id,pointer:e.pointerId,startX:e.clientX,startY:e.clientY,x:Number(c.x||0),y:Number(c.y||0)}},{capture:true});document.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.pointer)return;e.preventDefault();e.stopImmediatePropagation();const c=touchCfg(touchEditContext,drag.id);c.x=clamp(drag.x+(e.clientX-drag.startX)/innerWidth*100,-80,80);c.y=clamp(drag.y+(e.clientY-drag.startY)/innerHeight*100,-80,80);applyTouchControl(drag.id,touchEditContext)},{capture:true});const end=e=>{if(!drag||e.pointerId!==drag.pointer)return;e.preventDefault();e.stopImmediatePropagation();drag=null;saveTouchLayouts()};document.addEventListener('pointerup',end,{capture:true});document.addEventListener('pointercancel',end,{capture:true})}
+function bindOptionalPads(){document.querySelectorAll('#customMoveDpad [data-pad]').forEach(b=>bindHoldControl(b,b.dataset.pad));document.querySelectorAll('#customArrowPad [data-pad]').forEach(b=>{let active=false;const key=b.dataset.pad;b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(!requireControl())return;active=true;b.setPointerCapture?.(e.pointerId);downKey(key);b.classList.add('active')});const end=e=>{e.preventDefault?.();e.stopPropagation?.();if(active){active=false;upKey(key);b.classList.remove('active')}};b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);b.addEventListener('lostpointercapture',end)})}
 
 
 function updateTransportStatus(){
@@ -427,6 +491,12 @@ function handleDesktopMessage(msg){
     if(msg.type==='role'){role=msg.role||'waiting';desktopArmed=!!msg.armed;desktopOnline=true;if(role==='controller')updateTransportStatus();else setStatus('connected · waiting for control',true)}
     if(msg.type==='kicked'){kicked=true;role='kicked';desktopOnline=false;desktopArmed=false;releaseAll(true);closeRtc();setStatus(msg.reason||'controller access removed')}
     if(msg.type==='notice'){setStatus(msg.message||'desktop notice',true)}
+    if(msg.type==='compatibility'){
+      const blocked=!!msg.blocked;
+      document.body.classList.toggle('input-protected',blocked);
+      if(blocked){setStatus('VANGUARD · INPUT BLOCKED',true);showControlToast('VALORANT: SOFTWARE INPUT BLOCKED');}
+      else setStatus(role==='controller'?(desktopArmed?'PRIMARY · ARMED':'PRIMARY · DISARMED'):'WAITING');
+    }
   }catch{}
 }
 function scheduleLanReconnect(){clearTimeout(lanReconnectTimer);if(!lanRequested||kicked)return;lanReconnectTimer=setTimeout(()=>connectLan(true),Math.min(5000,700+lanFailures*500))}
@@ -608,5 +678,7 @@ applyLayoutStyle(layoutStyle,false);
 applyLayout(layoutPreset,false);
 bindHoldControl($('rotLeftDock'),'rotateLeft');
 bindHoldControl($('rotRightDock'),'rotateRight');
+bindOptionalPads();bindTouchLayoutEditor();applyTouchLayout();
+new MutationObserver(()=>applyTouchLayout()).observe(document.body,{attributes:true,attributeFilter:['class']});
 refreshLabels();buildMoreBar();updateTiltStatus();updateFreelookButton();if(mouseSettings.tiltAutoEnable&&localStorage.getItem('pixelb8GamepadTiltEnabled')==='1')setTimeout(()=>enableTilt(),250);if(room&&secret)connect();else setStatus('scan a valid PixelB8 QR invite');
 })();
