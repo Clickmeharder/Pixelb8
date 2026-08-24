@@ -106,6 +106,33 @@ body.mode-desktop .desktopStage{display:grid}
   .layoutPicker{grid-template-columns:1fr}.layoutChoice{height:38px}
   .bindGrid{grid-template-columns:1fr}
 }
+/* Remote-view / mobile-MMO presentation */
+.gameMirrorLayer{display:none;position:fixed;z-index:0;inset:44px 5px 51px;border:1px solid rgba(102,225,255,.26);border-radius:20px;overflow:hidden;background:#020407;pointer-events:none}
+.gameMirror{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#020407}
+.gameMirrorTop{position:absolute;z-index:8;top:7px;right:7px;display:flex;align-items:center;gap:5px;padding:4px 5px;border:1px solid rgba(111,200,238,.28);border-radius:10px;background:rgba(4,10,17,.58);backdrop-filter:blur(8px);pointer-events:auto}
+.gameMirrorLabel{font-size:8px;font-weight:900;letter-spacing:.12em;color:#b9eaff}.gameMirrorTop select{height:27px;max-width:92px;background:rgba(7,16,26,.86);color:#fff;border:1px solid #385271;border-radius:7px;font-size:9px;padding:2px 4px}
+body.game-screen-on .gameMirrorLayer{display:block;pointer-events:auto}
+body.game-screen-on.mode-gamepad .stage{position:relative;z-index:3;grid-template-columns:minmax(190px,34%) minmax(120px,19%) minmax(190px,34%);justify-content:space-between;background:transparent;pointer-events:none}
+body.game-screen-on.mode-gamepad .zone{pointer-events:auto;background:rgba(7,13,22,.42);backdrop-filter:blur(5px);border-color:rgba(126,188,231,.27);box-shadow:0 9px 24px rgba(0,0,0,.14)}
+body.game-screen-on.mode-gamepad .centerZone{align-self:end;max-height:150px;background:rgba(7,13,22,.34)}
+body.game-screen-on.mode-gamepad .centerMain{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr)}
+body.game-screen-on.mode-gamepad .centerMain [data-action="target"],body.game-screen-on.mode-gamepad .centerMain [data-action="sit"],body.game-screen-on.mode-gamepad .centerMain #enter{display:none}
+body.game-screen-on.mode-gamepad .leftQuick #shift,body.game-screen-on.mode-gamepad .leftQuick #runHold{opacity:.72}
+body.game-screen-on.mode-gamepad .hotbar{position:relative;z-index:4;background:rgba(5,8,13,.46);backdrop-filter:blur(5px);border-radius:12px}
+body.game-screen-on.mode-gamepad .moreBar{position:relative;z-index:12;background:rgba(8,14,24,.70)}
+.remoteFullscreen .gameMirrorLayer,.remoteFullscreen .desktopTouchpad{position:fixed!important;z-index:90!important;inset:0!important;width:100vw!important;height:100vh!important;border-radius:0!important;border:0!important;background:#000!important}
+.remoteFullscreen .gameMirrorTop,.remoteFullscreen .mirrorBar{top:calc(env(safe-area-inset-top) + 8px);right:calc(env(safe-area-inset-right) + 8px);left:auto;width:auto;opacity:.72}
+.remoteFullscreen.mode-gamepad .stage{position:fixed!important;z-index:95!important;inset:0!important;padding:calc(env(safe-area-inset-top) + 45px) 8px calc(env(safe-area-inset-bottom) + 8px)!important;grid-template-columns:minmax(150px,30%) 1fr minmax(150px,30%)!important;pointer-events:none}
+.remoteFullscreen.mode-gamepad .leftZone,.remoteFullscreen.mode-gamepad .rightZone{align-self:end;height:min(54vh,270px);background:rgba(5,10,17,.25);border-color:rgba(137,212,244,.18)}
+.remoteFullscreen.mode-gamepad .centerZone{display:none}
+.remoteFullscreen.mode-gamepad .hotbar,.remoteFullscreen.mode-gamepad .topbar,.remoteFullscreen.mode-gamepad .moreBar{display:none!important}
+.remoteFullscreen.mode-desktop .desktopKeys,.remoteFullscreen.mode-desktop .desktopMouseButtons{display:none!important}
+.remoteFullscreen.mode-desktop .desktopTouchpad{display:block!important}
+.remoteFullscreen.mode-desktop .desktopMirror{display:block!important}
+.remoteFullscreen.mode-desktop .mirrorBar{z-index:96}
+.remoteFullscreen.mode-desktop .desktopTouchpad:after{display:none}
+@media(max-width:650px),(max-height:340px){body.game-screen-on.mode-gamepad .stage{grid-template-columns:minmax(150px,35%) minmax(90px,16%) minmax(150px,35%)}.gameMirrorLayer{inset:44px 5px 48px}.gameMirrorTop{top:5px;right:5px}.gameMirrorLabel{display:none}}
+
 `;
 
 const $ = id => document.getElementById(id);
@@ -270,7 +297,8 @@ function setControlMode(mode,save=true){
   document.body.classList.toggle('mode-gamepad',controlMode!=='desktop');
   const b=$('modeBtn');if(b){b.textContent=controlMode==='desktop'?'🎮':'🖥';b.title=controlMode==='desktop'?'Switch to Gamepad mode':'Switch to Desktop mode';b.classList.toggle('active',controlMode==='desktop')}
   if(save)localStorage.setItem('pixelb8GamepadControlMode',controlMode);
-  if(controlMode==='desktop'&&mirrorMode!=='off'&&signalingReady()&&!rtcReady())setTimeout(()=>startRtc(),120);
+  if(mirrorMode!=='off'&&signalingReady()&&!rtcReady())setTimeout(()=>startRtc(),120);
+  updateRemoteViewUi();
   releaseDesktopModifiers();
   if(desktopDragHeld)setDesktopDrag(false);
   if(save)showControlToast(controlMode==='desktop'?'DESKTOP MODE':'GAMEPAD MODE');
@@ -310,7 +338,7 @@ function updateTransportStatus(){
 function closeRtc(){
   clearTimeout(rtcRetryTimer);rtcRetryTimer=null;rtcIceQueue=[];
   try{rtcChannel?.close()}catch{}try{rtcPeer?.close()}catch{}
-  rtcChannel=null;rtcPeer=null;const v=$('desktopMirror');if(v)v.srcObject=null;$('desktopTouchpad')?.classList.remove('mirroring');
+  rtcChannel=null;rtcPeer=null;for(const id of ['desktopMirror','gameMirror']){const v=$(id);if(v)v.srcObject=null}$('desktopTouchpad')?.classList.remove('mirroring');document.body.classList.remove('game-screen-on');
 }
 function scheduleRtcRetry(){clearTimeout(rtcRetryTimer);if(!signalingReady()||kicked)return;rtcRetryTimer=setTimeout(()=>startRtc(),2500)}
 async function startRtc(){
@@ -320,7 +348,7 @@ async function startRtc(){
     const pc=new RTCPeerConnection(RTC_CONFIG);rtcPeer=pc;
     const channel=pc.createDataChannel('pixelb8-controls',{ordered:true});rtcChannel=channel;
     pc.addTransceiver('video',{direction:'recvonly'});
-    pc.ontrack=e=>{if(e.track?.kind==='video'){const v=$('desktopMirror');if(v){v.srcObject=e.streams?.[0]||new MediaStream([e.track]);v.play().catch(()=>{});$('desktopTouchpad')?.classList.add('mirroring');const ms=$('mirrorStatus');if(ms)ms.textContent=mirrorMode==='auto'?'auto':(mirrorMode==='low'?'8 fps':`${mirrorMode} fps`)}}};
+    pc.ontrack=e=>{if(e.track?.kind==='video'){const stream=e.streams?.[0]||new MediaStream([e.track]);for(const id of ['desktopMirror','gameMirror']){const v=$(id);if(v){v.srcObject=stream;v.play().catch(()=>{})}}$('desktopTouchpad')?.classList.add('mirroring');document.body.classList.toggle('game-screen-on',mirrorMode!=='off');const label=mirrorMode==='auto'?'auto':(mirrorMode==='low'?'8 fps':`${mirrorMode} fps`);const ms=$('mirrorStatus');if(ms)ms.textContent=label;updateRemoteViewUi()}};
     channel.onopen=()=>{updateTransportStatus();vibe(18)};
     channel.onclose=()=>{updateTransportStatus();scheduleRtcRetry()};
     channel.onerror=()=>updateTransportStatus();
@@ -419,33 +447,50 @@ function pressEnter(){if(!requireControl())return;if(keyboardOnEnter)openChat();
 $('enter').onclick=()=>chatOpen?closeChat(true):pressEnter();$('keyboardBtn').onclick=()=>chatOpen?$('chatInput').focus():openChat();$('modeBtn').onclick=()=>setControlMode(controlMode==='desktop'?'gamepad':'desktop');$('chatSend').onclick=()=>closeChat(true);$('chatClose').onclick=dismissPhoneChat;$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();closeChat(true)}else if(e.key==='Escape'){e.preventDefault();dismissPhoneChat()}});
 
 
+function updateRemoteViewUi(){
+  const on=mirrorMode!=='off';
+  document.body.classList.toggle('game-screen-on',on);
+  for(const id of ['mirrorFps','gameMirrorFps']){const sel=$(id);if(sel)sel.value=mirrorMode}
+  const sb=$('screenBtn');if(sb){sb.classList.toggle('active',on);sb.textContent=on?'▣':'▢';sb.title=on?'Turn live screen off':'Turn live screen on'}
+}
 function setMirrorMode(mode,save=true){
   if(!['off','low','30','60','auto'].includes(mode))mode='off';
   mirrorMode=mode;if(save)localStorage.setItem('pixelb8DesktopMirrorMode',mode);
-  const sel=$('mirrorFps');if(sel)sel.value=mode;
   const status=$('mirrorStatus');if(status)status.textContent=mode==='off'?'off':'connecting…';
+  updateRemoteViewUi();
   if(mode==='off'){
-    const v=$('desktopMirror');if(v){v.srcObject=null}$('desktopTouchpad')?.classList.remove('mirroring');
+    for(const id of ['desktopMirror','gameMirror']){const v=$(id);if(v)v.srcObject=null}$('desktopTouchpad')?.classList.remove('mirroring');
+    document.body.classList.remove('remoteFullscreen');
     if(rtcReady()||rtcPeer){closeRtc();if(signalingReady())setTimeout(()=>startRtc(),120)}
   }else if(signalingReady()){
     closeRtc();setTimeout(()=>startRtc(),120);
   }
 }
-const mirrorSelect=$('mirrorFps');if(mirrorSelect){mirrorSelect.value=mirrorMode;['pointerdown','pointerup','click'].forEach(type=>mirrorSelect.addEventListener(type,e=>e.stopPropagation()));mirrorSelect.onchange=()=>setMirrorMode(mirrorSelect.value)}
+function toggleRemoteFullscreen(){if(mirrorMode==='off'){setMirrorMode('30');return}document.body.classList.toggle('remoteFullscreen');showControlToast(document.body.classList.contains('remoteFullscreen')?'FULLSCREEN REMOTE VIEW':'REMOTE VIEW RESTORED')}
+function bindMirrorSelect(id){const sel=$(id);if(!sel)return;sel.value=mirrorMode;['pointerdown','pointerup','click'].forEach(type=>sel.addEventListener(type,e=>e.stopPropagation()));sel.onchange=()=>setMirrorMode(sel.value)}
+bindMirrorSelect('mirrorFps');bindMirrorSelect('gameMirrorFps');
+$('screenBtn')?.addEventListener('click',()=>setMirrorMode(mirrorMode==='off'?'30':'off'));
+$('desktopMirrorFullscreen')?.addEventListener('click',e=>{e.stopPropagation();toggleRemoteFullscreen()});
+$('gameMirrorFullscreen')?.addEventListener('click',e=>{e.stopPropagation();toggleRemoteFullscreen()});
+$('gameMirrorMore')?.addEventListener('click',e=>{e.stopPropagation();moreBarOpen=!moreBarOpen;$('moreBar')?.classList.toggle('open',moreBarOpen)});
 
 document.querySelectorAll('.desktopKey[data-key]').forEach(b=>b.onclick=()=>desktopTap(b.dataset.key));
 document.querySelectorAll('.desktopKey[data-combo]').forEach(b=>b.onclick=()=>{const [m,k]=b.dataset.combo.split(',');desktopCombo(m,k)});
 document.querySelectorAll('.desktopModifier').forEach(b=>b.onclick=()=>setDesktopModifier(b.dataset.modifier,!desktopModifierHeld.has(b.dataset.modifier)));
 $('desktopLmb').onclick=()=>{if(requireControl())tapMouse('left')};$('desktopRmb').onclick=()=>{if(requireControl())tapMouse('right')};$('desktopDrag').onclick=()=>setDesktopDrag(!desktopDragHeld);$('desktopRelease').onclick=()=>{releaseDesktopModifiers();setDesktopDrag(false);releaseAll()};
+function mirrorPoint(video,e){if(!video||!video.videoWidth||!video.videoHeight)return null;const r=video.getBoundingClientRect(),vr=video.videoWidth/video.videoHeight,rr=r.width/r.height;let w=r.width,h=r.height,left=r.left,top=r.top;if(rr>vr){w=r.height*vr;left=r.left+(r.width-w)/2}else{h=r.width/vr;top=r.top+(r.height-h)/2}const x=(e.clientX-left)/w,y=(e.clientY-top)/h;if(x<0||x>1||y<0||y>1)return null;return{x:Math.max(0,Math.min(1,x)),y:Math.max(0,Math.min(1,y))}}
+function moveCursorToMirror(video,e){const p=mirrorPoint(video,e);if(p&&canControl())publish({type:'mouse-absolute',x:p.x,y:p.y})}
 (function bindDesktopTouchpad(){
   const pad=$('desktopTouchpad');if(!pad)return;const pts=new Map();let gestureStart=0,maxPointers=0,totalMove=0,lastCenter=null;
   const center=()=>{const a=[...pts.values()];if(!a.length)return null;return{x:a.reduce((n,p)=>n+p.x,0)/a.length,y:a.reduce((n,p)=>n+p.y,0)/a.length}};
   const isInteractiveTarget=e=>!!e.target?.closest?.('select,button,input,label,.mirrorBar');
-  pad.addEventListener('pointerdown',e=>{if(isInteractiveTarget(e))return;e.preventDefault();if(!requireControl())return;pad.setPointerCapture?.(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pts.size===1){gestureStart=performance.now();maxPointers=1;totalMove=0}maxPointers=Math.max(maxPointers,pts.size);lastCenter=center();vibe(5)});
+  pad.addEventListener('pointerdown',e=>{if(isInteractiveTarget(e))return;e.preventDefault();if(!requireControl())return;if(mirrorMode!=='off')moveCursorToMirror($('desktopMirror'),e);pad.setPointerCapture?.(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pts.size===1){gestureStart=performance.now();maxPointers=1;totalMove=0}maxPointers=Math.max(maxPointers,pts.size);lastCenter=center();vibe(5)});
   pad.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;e.preventDefault();const prev=pts.get(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});const c=center();if(!c||!lastCenter){lastCenter=c;return}const dx=c.x-lastCenter.x,dy=c.y-lastCenter.y;lastCenter=c;totalMove+=Math.abs(dx)+Math.abs(dy);if(pts.size>=2){if(Math.abs(dy)>=1)publish({type:'mouse-wheel',delta:Math.round(-dy*8)})}else{const scale=1.35;const mx=Math.round((e.clientX-prev.x)*scale),my=Math.round((e.clientY-prev.y)*scale);if(mx||my)publish({type:'mouse-move',dx:mx,dy:my})}});
   const end=e=>{if(!pts.has(e.pointerId))return;e.preventDefault();pts.delete(e.pointerId);const elapsed=performance.now()-gestureStart;if(pts.size===0){if(elapsed<260&&totalMove<18){if(maxPointers>=2)tapMouse('right');else tapMouse('left')}lastCenter=null}else lastCenter=center()};
   pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end);pad.addEventListener('lostpointercapture',end);
 })();
+
+(function bindGameMirrorPointer(){const layer=$('gameMirrorLayer');if(!layer)return;layer.addEventListener('pointerdown',e=>{if(e.target?.closest?.('.gameMirrorTop'))return;if(controlMode!=='gamepad'||mirrorMode==='off'||!requireControl())return;moveCursorToMirror($('gameMirror'),e)});})();
 
 function buildMoreBar(){const bar=$('moreBar');if(!bar)return;bar.innerHTML='';for(const [action,label] of TOP_MORE){const b=document.createElement('button');b.className='btn moreChip';b.innerHTML=`${captionFor(action,label)}<small>${displayForKey(keyFor(action))}</small>`;b.classList.toggle('disabled',!keyFor(action));b.onclick=()=>{if(keyFor(action)&&requireControl())tapAction(action)};bar.appendChild(b)}}
 $('more').onclick=()=>{moreBarOpen=!moreBarOpen;$('moreBar').classList.toggle('open',moreBarOpen);$('more').classList.toggle('latched',moreBarOpen);$('more').textContent=moreBarOpen?'✕ MORE':'☰ MORE'};
@@ -483,7 +528,7 @@ function updateFreelookButton(){const b=$('cameraCenterBtn');if(!b)return;b.clas
 window.addEventListener('pagehide',()=>releaseAll());window.addEventListener('pageshow',()=>{if(room&&secret&&!signalingReady())connect()});window.addEventListener('online',()=>{if(room&&secret&&!signalingReady())connect()});window.addEventListener('blur',()=>{if(!chatOpen)releaseAll()});document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll();else if(room&&secret&&!signalingReady())connect()});
 
 setupInjectedUI();
-setControlMode(controlMode,false);
+setControlMode(controlMode,false);updateRemoteViewUi();
 applyLayoutStyle(layoutStyle,false);
 applyLayout(layoutPreset,false);
 bindHoldControl($('rotLeftDock'),'rotateLeft');
