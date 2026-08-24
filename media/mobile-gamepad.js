@@ -72,16 +72,26 @@ body.layout-wide .stage{grid-template-columns:minmax(275px,36%) minmax(205px,25%
 .hotbar{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;padding:1px 0}.hotbar .btn{border-radius:11px;font-size:11px;background:linear-gradient(180deg,#1b2940,#111b2a)}.hotbar .shifted{box-shadow:inset 0 0 0 2px #d9b959,0 0 12px rgba(217,185,89,.14);color:#ffe88c}
 .chat{position:fixed;z-index:30;left:8px;right:8px;top:38px;display:none;gap:5px;background:rgba(12,22,34,.96);border:1px solid var(--lineStrong);border-radius:12px;padding:6px;box-shadow:0 14px 32px rgba(0,0,0,.24)}.chat.open{display:flex}.chatClose{min-width:36px;background:linear-gradient(#40212a,#251219);border-color:rgba(255,112,130,.48)}.chat input{flex:1;min-width:0;height:36px;background:#050b12;color:white;border:1px solid #4a678c;border-radius:9px;padding:4px 10px;font-size:13px;user-select:text;-webkit-user-select:text;touch-action:auto}
 .overlay{position:fixed;inset:0;background:#03070bd9;z-index:40;display:none;align-items:center;justify-content:center;padding:8px}.overlay.open{display:flex}.sheet{width:min(96vw,860px);max-height:94vh;overflow:auto;touch-action:pan-y;background:#101925;border:1px solid #3b5577;border-radius:14px;padding:10px;box-shadow:0 15px 45px #000b}.sheetHead{display:flex;align-items:center;gap:8px;position:sticky;top:-10px;background:#101925;padding:4px 0 7px;z-index:2}.sheetHead h2{font-size:15px;margin:0;flex:1}
-.settingsStack{display:grid;gap:10px}.settingsCard{background:#0a121c;border:1px solid #263b56;border-radius:10px;padding:8px}.settingsCard h3{margin:0 0 8px;font-size:12px;color:#d7e3f5}.profileRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}.profileRow select{min-width:0;height:34px;background:#07101a;color:#fff;border:1px solid #385271;border-radius:8px;padding:4px 8px;font-size:11px}.profileSave{height:34px;padding:0 10px}.profileStatus{margin-top:7px;color:#93aac7;font-size:9px;line-height:1.35}.profileStatus b{color:#dff8ff}.bindGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.bindRow{background:#0c1521;border:1px solid #263b56;border-radius:8px;padding:6px}.bindRow label{display:block;color:#aabbd1;font-size:9px;margin-bottom:4px}.bindRow select,.bindRow input{width:100%;height:30px;background:#07101a;color:white;border:1px solid #385271;border-radius:6px;font-size:10px;padding:4px 6px}.optionRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:6px}.optionRow output{font-family:Consolas,monospace;font-size:11px;color:#dce9fa}.checkRow{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:#dce9fa}
+.settingsStack{display:grid;gap:10px}.settingsCard{background:#0a121c;border:1px solid #263b56;border-radius:10px;padding:8px}.settingsCard h3{margin:0 0 8px;font-size:12px;color:#d7e3f5}.profileRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}.profileRow select{min-width:0;height:34px;background:#07101a;color:#fff;border:1px solid #385271;border-radius:8px;padding:4px 8px;font-size:11px}.profileSave{height:34px;padding:0 10px}.profileManage{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}.profileManage .btn{height:30px;font-size:9px}.profileManage .danger{border-color:#653744;color:#ffabb7}.profileManage .btn:disabled{opacity:.35;cursor:default}.profileStatus{margin-top:7px;color:#93aac7;font-size:9px;line-height:1.35}.profileStatus b{color:#dff8ff}.bindGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.bindRow{background:#0c1521;border:1px solid #263b56;border-radius:8px;padding:6px}.bindRow label{display:block;color:#aabbd1;font-size:9px;margin-bottom:4px}.bindRow select,.bindRow input{width:100%;height:30px;background:#07101a;color:white;border:1px solid #385271;border-radius:6px;font-size:10px;padding:4px 6px}.optionRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:6px}.optionRow output{font-family:Consolas,monospace;font-size:11px;color:#dce9fa}.checkRow{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:#dce9fa}
 #moreOverlay{display:none!important}
 @media (orientation:portrait){body:before{content:'Rotate phone sideways';position:fixed;z-index:99;inset:0;display:grid;place-items:center;background:#05080d;color:white;font-weight:900;font-size:20px}.gamepad{visibility:hidden}}
 @media (max-height:380px){.gamepad{grid-template-rows:30px auto minmax(0,1fr) 40px}.moreBar.open{max-height:52px}.moreChip{height:38px}.hotbar .btn{font-size:10px}}
+
+.modeBtn{font-size:13px}.modeBtn.active{border-color:rgba(103,236,173,.72);background:linear-gradient(150deg,#214b3c,#10281f);box-shadow:0 0 14px rgba(103,236,173,.12)}
+.desktopStage{display:none;grid-row:3/5;min-height:0;grid-template-columns:minmax(0,1.65fr) minmax(230px,.8fr);gap:6px}
+body.mode-desktop .stage,body.mode-desktop .hotbar{display:none}
+body.mode-desktop .desktopStage{display:grid}
+.desktopTouchCard,.desktopKeys{min-width:0;min-height:0;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,rgba(17,30,48,.92),rgba(7,13,22,.92));box-shadow:inset 0 1px rgba(255,255,255,.04),0 14px 34px rgba(0,0,0,.22);padding:7px}
+.desktopTouchCard{display:grid;grid-template-rows:minmax(0,1fr) 48px;gap:6px}.desktopTouchpad{position:relative;min-height:0;border:1px solid rgba(102,225,255,.38);border-radius:17px;overflow:hidden;touch-action:none;background:radial-gradient(circle at 50% 35%,rgba(27,81,104,.22),transparent 42%),linear-gradient(145deg,#08131f,#07101a);box-shadow:inset 0 0 34px rgba(71,190,235,.05)}
+.desktopTouchpad:after{content:'';position:absolute;inset:12px;border:1px dashed rgba(120,181,223,.12);border-radius:12px;pointer-events:none}.touchpadHint{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#718aa8;pointer-events:none}.touchpadHint b{font-size:15px;letter-spacing:.15em;color:#a8c4df}.touchpadHint span{margin-top:6px;font-size:9px}
+.desktopMouseButtons{display:grid;grid-template-columns:1fr .8fr 1fr;gap:6px}.desktopMouseButtons .btn{font-size:11px}.desktopKeys{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:6px}.desktopKeyGroup{display:grid;gap:6px}.desktopSystemKeys{grid-template-columns:1.4fr repeat(4,1fr)}.desktopModifiers{grid-template-columns:repeat(4,1fr)}.desktopKey{min-height:42px}.desktopKey.accent{border-color:rgba(103,236,173,.55);background:linear-gradient(150deg,#205246,#102920)}.desktopModifier.latched{border-color:#ffd879!important;background:linear-gradient(150deg,#7b6328,#3f3217)!important;color:#fff2b8!important}.desktopArrowPad{align-self:center;justify-self:center;width:min(190px,100%);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,50px);gap:6px}.desktopArrowPad .btn{font-size:17px}.desktopAllUp{min-height:42px}
+@media (max-width:650px),(max-height:340px){.desktopStage{grid-template-columns:minmax(0,1.55fr) minmax(180px,.9fr);gap:4px}.desktopTouchCard,.desktopKeys{padding:5px;border-radius:14px}.desktopTouchCard{grid-template-rows:minmax(0,1fr) 42px}.desktopSystemKeys{grid-template-columns:1.35fr repeat(4,1fr);gap:4px}.desktopModifiers{gap:4px}.desktopKey{min-height:34px;font-size:8px}.desktopArrowPad{grid-template-rows:repeat(2,38px);gap:4px}.desktopMouseButtons{gap:4px}.touchpadHint b{font-size:12px}.touchpadHint span{font-size:7px}}
 /* Tiny landscape phones (including iPhone 4S): make Settings a true narrow-screen page. */
 @media (max-width:600px), (max-height:340px){
   .overlay{padding:0;align-items:stretch;justify-content:stretch}
   .sheet{width:100vw;max-width:none;height:100vh;max-height:none;border-radius:0;border-left:0;border-right:0;padding:8px;overflow-x:hidden;overflow-y:auto}
   .sheetHead{top:-8px;margin:0 -1px;padding:6px 1px 8px}.sheetHead h2{font-size:14px}
-  .settingsStack,.settingsCard,.bindRow,.optionRow,.profileRow{min-width:0;max-width:100%}
+  .settingsStack,.settingsCard,.bindRow,.optionRow,.profileRow,.profileManage{min-width:0;max-width:100%}
   .profileRow{grid-template-columns:minmax(0,1fr) auto}.profileRow select{font-size:11px}.profileSave{padding:0 8px;font-size:9px}
   .settingsCard{padding:7px}.settingsCard h3{font-size:12px;margin-bottom:7px}
   .stylePicker{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.styleChoice{height:42px;font-size:10px}
@@ -129,18 +139,19 @@ let layoutStyle=localStorage.getItem('pixelb8GamepadLayoutStyle') || 'classic';
 const keyboardOnEnterParam=params.get('keyboardOnEnter');
 let keyboardOnEnter=keyboardOnEnterParam!==null ? keyboardOnEnterParam==='1' : localStorage.getItem('pixelb8GamepadKeyboardOnEnter')==='1';
 if(keyboardOnEnterParam!==null)localStorage.setItem('pixelb8GamepadKeyboardOnEnter',keyboardOnEnter?'1':'0');
+let controlMode=localStorage.getItem('pixelb8GamepadControlMode')==='desktop'?'desktop':'gamepad';
 
 const KEY_OPTIONS = [
   'NONE','0','1','2','3','4','5','6','7','8','9',
   'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-  'SPACE','ENTER','TAB','ESC','BACKSPACE','CAPSLOCK','SHIFT','CTRL','ALT',
+  'SPACE','ENTER','TAB','ESC','BACKSPACE','CAPSLOCK','SHIFT','CTRL','ALT','WIN',
   'UP','DOWN','LEFT','RIGHT','HOME','END','PAGEUP','PAGEDOWN','INSERT','DELETE',
   'F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12',
   'GRAVE','MINUS','EQUALS','LBRACKET','RBRACKET','BACKSLASH','SEMICOLON','APOSTROPHE','COMMA','PERIOD','SLASH',
   'NUM0','NUM1','NUM2','NUM3','NUM4','NUM5','NUM6','NUM7','NUM8','NUM9','NUMPLUS','NUMMINUS','NUMMULTIPLY','NUMDIVIDE','NUMDECIMAL','NUMENTER'
 ];
 const KEY_DISPLAY = {
-  NONE:'Off',SPACE:'Space',ENTER:'Enter',TAB:'Tab',ESC:'Esc',BACKSPACE:'Backspace',CAPSLOCK:'Caps Lock',SHIFT:'Shift',CTRL:'Ctrl',ALT:'Alt',
+  NONE:'Off',SPACE:'Space',ENTER:'Enter',TAB:'Tab',ESC:'Esc',BACKSPACE:'Backspace',CAPSLOCK:'Caps Lock',SHIFT:'Shift',CTRL:'Ctrl',ALT:'Alt',WIN:'Win',
   UP:'↑ Up',DOWN:'↓ Down',LEFT:'← Left',RIGHT:'→ Right',HOME:'Home',END:'End',PAGEUP:'Page Up',PAGEDOWN:'Page Down',INSERT:'Insert',DELETE:'Delete',
   GRAVE:'` / ~',MINUS:'- / _',EQUALS:'= / +',LBRACKET:'[ / {',RBRACKET:'] / }',BACKSLASH:'\\ / |',SEMICOLON:'; / :',APOSTROPHE:"' / \"",COMMA:', / <',PERIOD:'. / >',SLASH:'/ / ?',
   NUM0:'Numpad 0',NUM1:'Numpad 1',NUM2:'Numpad 2',NUM3:'Numpad 3',NUM4:'Numpad 4',NUM5:'Numpad 5',NUM6:'Numpad 6',NUM7:'Numpad 7',NUM8:'Numpad 8',NUM9:'Numpad 9',NUMPLUS:'Numpad +',NUMMINUS:'Numpad -',NUMMULTIPLY:'Numpad *',NUMDIVIDE:'Numpad /',NUMDECIMAL:'Numpad .',NUMENTER:'Numpad Enter'
@@ -159,10 +170,23 @@ const PROFILE_DEFS = {
 };
 const PROFILE_KEY='pixelb8GamepadProfile';
 const CUSTOM_PROFILE_KEY='pixelb8GamepadCustomProfile';
+const CUSTOM_PROFILES_KEY='pixelb8GamepadCustomProfiles';
 let bindings = loadBindings(), mouseSettings = loadMouseSettings();
 function sameBindings(a,b){return Object.keys(DEFAULT_BINDINGS).every(k=>(a?.[k]||'NONE')===(b?.[k]||'NONE'))}
+function profileSnapshot(){return {bindings:{...bindings},layoutStyle,mouseSettings:{...mouseSettings}}}
+function loadCustomProfiles(){try{const value=JSON.parse(localStorage.getItem(CUSTOM_PROFILES_KEY)||'[]');return Array.isArray(value)?value.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&p.snapshot):[]}catch{return []}}
+function saveCustomProfiles(){localStorage.setItem(CUSTOM_PROFILES_KEY,JSON.stringify(customProfiles))}
+function isCustomProfileId(id){return typeof id==='string'&&id.startsWith('custom:')}
+function customProfile(id){return customProfiles.find(p=>p.id===id)||null}
+function uniqueCustomName(base,excludeId=null){let name=(base||'Custom').trim().slice(0,32)||'Custom';const used=n=>customProfiles.some(p=>p.id!==excludeId&&p.name.toLowerCase()===n.toLowerCase());if(!used(name))return name;let n=2;while(used(`${name} ${n}`))n++;return `${name} ${n}`.slice(0,32)}
+function createCustomProfile(name,snapshot=profileSnapshot(),baseProfileId=null){const inheritedBase=baseProfileId||(isCustomProfileId(activeProfile)?customProfile(activeProfile)?.baseProfileId:activeProfile);const item={id:`custom:${cryptoRandom(8)}`,name:uniqueCustomName(name),baseProfileId:PROFILE_DEFS[inheritedBase]&&inheritedBase!=='custom'?inheritedBase:null,snapshot:JSON.parse(JSON.stringify(snapshot))};customProfiles.push(item);saveCustomProfiles();return item}
+let customProfiles=loadCustomProfiles();
+if(!customProfiles.length){try{const legacy=JSON.parse(localStorage.getItem(CUSTOM_PROFILE_KEY)||'null');if(legacy?.bindings)customProfiles.push({id:`custom:${cryptoRandom(8)}`,name:'Custom',baseProfileId:null,snapshot:legacy})}catch{}if(customProfiles.length)saveCustomProfiles()}
 let activeProfile=localStorage.getItem(PROFILE_KEY) || (sameBindings(bindings,DEFAULT_BINDINGS)?'entropia':'custom');
-if(!PROFILE_DEFS[activeProfile])activeProfile='custom';
+if(activeProfile==='custom'){
+  let first=customProfiles[0];if(!first)first=createCustomProfile('Custom',profileSnapshot());activeProfile=first.id;
+}
+if(!PROFILE_DEFS[activeProfile]&&!customProfile(activeProfile))activeProfile=sameBindings(bindings,DEFAULT_BINDINGS)?'entropia':(customProfiles[0]?.id||createCustomProfile('Custom',profileSnapshot()).id);
 localStorage.setItem(PROFILE_KEY,activeProfile);
 
 
@@ -182,41 +206,46 @@ function loadBindings(){try{const saved=JSON.parse(localStorage.getItem('pixelb8
 function saveBindings(){localStorage.setItem('pixelb8GamepadBindings',JSON.stringify(bindings))}
 function loadMouseSettings(){try{const s=JSON.parse(localStorage.getItem('pixelb8GamepadMouseSettings')||'{}');return {sensitivity:clamp(Number(s.sensitivity)||18,4,36),tiltSensitivity:clamp(Number(s.tiltSensitivity)||12,2,30),horizontalOnly:!!s.horizontalOnly,invertX:!!s.invertX,invertY:!!s.invertY,tiltAutoEnable:!!s.tiltAutoEnable}}catch{return {sensitivity:18,tiltSensitivity:12,horizontalOnly:false,invertX:false,invertY:false,tiltAutoEnable:false}}}
 function saveMouseSettings(){localStorage.setItem('pixelb8GamepadMouseSettings',JSON.stringify(mouseSettings))}
-function profileSnapshot(){return {bindings:{...bindings},layoutStyle,mouseSettings:{...mouseSettings}}}
-function saveCustomProfile(){localStorage.setItem(CUSTOM_PROFILE_KEY,JSON.stringify(profileSnapshot()))}
-function loadCustomProfile(){try{return JSON.parse(localStorage.getItem(CUSTOM_PROFILE_KEY)||'null')}catch{return null}}
-if(activeProfile==='custom'&&!localStorage.getItem(CUSTOM_PROFILE_KEY))localStorage.setItem(CUSTOM_PROFILE_KEY,JSON.stringify({bindings:{...bindings},layoutStyle,mouseSettings:{...mouseSettings}}));
-function currentProfile(){return PROFILE_DEFS[activeProfile]||PROFILE_DEFS.custom}
+function currentProfile(){
+  if(isCustomProfileId(activeProfile)){const c=customProfile(activeProfile),base=PROFILE_DEFS[c?.baseProfileId]||PROFILE_DEFS.custom;return {...base,name:c?.name||'Custom',description:c?.baseProfileId?`Custom copy of ${base.name}.`:'Saved custom controller profile.'}}
+  return PROFILE_DEFS[activeProfile]||PROFILE_DEFS.custom
+}
 function captionFor(action,fallback){return currentProfile().captions?.[action]||fallback}
 function bindingLabelFor(action){return currentProfile().bindingLabels?.[action]||LABELS[action]||action}
 function setButtonCaption(el,text){if(!el)return;const node=[...el.childNodes].find(n=>n.nodeType===Node.TEXT_NODE);if(node)node.nodeValue=text;else el.prepend(document.createTextNode(text))}
-function updateProfileUi(){
-  const select=$('profileSelect'),status=$('profileStatus');
-  if(select)select.value=activeProfile;
-  if(status){const p=PROFILE_DEFS[activeProfile]||PROFILE_DEFS.custom;status.innerHTML=`<b>${p.name}</b> · ${p.description}`}
+function populateProfileSelect(){
+  const select=$('profileSelect');if(!select)return;
+  select.innerHTML='';
+  const built=document.createElement('optgroup');built.label='Presets';
+  for(const [id,p] of Object.entries(PROFILE_DEFS)){if(id==='custom')continue;const o=document.createElement('option');o.value=id;o.textContent=p.name;o.selected=id===activeProfile;built.appendChild(o)}
+  select.appendChild(built);
+  if(customProfiles.length){const custom=document.createElement('optgroup');custom.label='My profiles';for(const p of customProfiles){const o=document.createElement('option');o.value=p.id;o.textContent=p.name;o.selected=p.id===activeProfile;custom.appendChild(o)}select.appendChild(custom)}
+  select.value=activeProfile;select.onchange=()=>applyProfile(select.value);
 }
+function updateProfileUi(){
+  const select=$('profileSelect'),status=$('profileStatus');if(select)select.value=activeProfile;
+  const p=currentProfile();if(status)status.innerHTML=`<b>${p.name}</b> · ${p.description}`;
+  const custom=isCustomProfileId(activeProfile);const rename=$('renameProfile'),del=$('deleteProfile'),save=$('saveCustomProfile');if(rename)rename.disabled=!custom;if(del)del.disabled=!custom;if(save)save.textContent=custom?'SAVE CHANGES':'SAVE COPY';
+}
+function announceProfile(){try{rawPublish({type:'hello'})}catch{}}
+function saveActiveCustom(){const p=customProfile(activeProfile);if(!p)return false;p.snapshot=profileSnapshot();saveCustomProfiles();return true}
 function markCustomProfile(){
-  activeProfile='custom';localStorage.setItem(PROFILE_KEY,activeProfile);saveCustomProfile();updateProfileUi();
+  if(!isCustomProfileId(activeProfile)){const baseName=`${currentProfile().name} Custom`;const item=createCustomProfile(baseName,profileSnapshot());activeProfile=item.id;localStorage.setItem(PROFILE_KEY,activeProfile);populateProfileSelect()}else saveActiveCustom();
+  updateProfileUi();announceProfile();
 }
 function applyProfile(id){
-  const p=PROFILE_DEFS[id];if(!p)return;
   releaseAll();
-  if(id==='custom'){
-    const saved=loadCustomProfile();
-    if(saved?.bindings)bindings={...DEFAULT_BINDINGS,...saved.bindings};
-    if(saved?.layoutStyle)applyLayoutStyle(saved.layoutStyle,true);
-    if(saved?.mouseSettings)mouseSettings={...loadMouseSettings(),...saved.mouseSettings};
-  }else{
-    bindings={...DEFAULT_BINDINGS,...p.bindings};
-    applyLayoutStyle(p.layoutStyle||'classic',true);
-    mouseSettings={sensitivity:18,tiltSensitivity:12,horizontalOnly:false,invertX:false,invertY:false,tiltAutoEnable:false};
-  }
-  saveBindings();saveMouseSettings();activeProfile=id;localStorage.setItem(PROFILE_KEY,id);
-  if(id==='custom')saveCustomProfile();
-  buildSettings();refreshLabels();showControlToast(`${p.name.toUpperCase()} PROFILE LOADED`);
+  const custom=customProfile(id),p=PROFILE_DEFS[id];if(!custom&&!p)return;
+  if(custom){const saved=custom.snapshot||{};if(saved.bindings)bindings={...DEFAULT_BINDINGS,...saved.bindings};if(saved.layoutStyle)applyLayoutStyle(saved.layoutStyle,true);if(saved.mouseSettings)mouseSettings={...loadMouseSettings(),...saved.mouseSettings}}
+  else{bindings={...DEFAULT_BINDINGS,...p.bindings};applyLayoutStyle(p.layoutStyle||'classic',true);mouseSettings={sensitivity:18,tiltSensitivity:12,horizontalOnly:false,invertX:false,invertY:false,tiltAutoEnable:false}}
+  saveBindings();saveMouseSettings();activeProfile=id;localStorage.setItem(PROFILE_KEY,id);buildSettings();refreshLabels();announceProfile();showControlToast(`${currentProfile().name.toUpperCase()} PROFILE LOADED`);
 }
+function duplicateProfile(){const item=createCustomProfile(`${currentProfile().name} Copy`,profileSnapshot());activeProfile=item.id;localStorage.setItem(PROFILE_KEY,activeProfile);buildSettings();announceProfile();showControlToast('PROFILE DUPLICATED')}
+function saveProfileFromUi(){if(isCustomProfileId(activeProfile)){saveActiveCustom();showControlToast('PROFILE SAVED')}else{const item=createCustomProfile(`${currentProfile().name} Custom`,profileSnapshot());activeProfile=item.id;localStorage.setItem(PROFILE_KEY,activeProfile);buildSettings();announceProfile();showControlToast('CUSTOM COPY SAVED')}}
+function renameProfile(){const item=customProfile(activeProfile);if(!item)return;const next=prompt('Rename controller profile',item.name);if(next===null)return;const clean=next.trim().slice(0,32);if(!clean)return;item.name=uniqueCustomName(clean,item.id);saveCustomProfiles();populateProfileSelect();updateProfileUi();announceProfile();showControlToast('PROFILE RENAMED')}
+function deleteProfile(){const item=customProfile(activeProfile);if(!item)return;if(!confirm(`Delete profile “${item.name}”?`))return;customProfiles=customProfiles.filter(p=>p.id!==item.id);saveCustomProfiles();applyProfile('entropia');showControlToast('PROFILE DELETED')}
 
-function envelope(obj){return {...obj,clientId,deviceName,secret,source:'phone-controller',ts:Date.now()}}
+function envelope(obj){const p=currentProfile();return {...obj,clientId,deviceName,profileId:activeProfile,profileName:p.name,secret,source:'phone-controller',ts:Date.now()}}
 function rawPublish(obj){if(!room||!secret||kicked)return;const msg=JSON.stringify(envelope(obj));if(lanReady()){try{lanSocket.send(msg);return}catch{}}if(client?.connected)client.publish(`${base()}/control`,msg,{qos:0})}
 function signalDesktop(obj){if(!client?.connected||!room||!secret||kicked)return;client.publish(`${base()}/signal/desktop`,JSON.stringify(envelope(obj)),{qos:0})}
 function rtcReady(){return rtcChannel?.readyState==='open'}
@@ -229,8 +258,25 @@ function tapKey(key){if(!key||!canControl())return;publish({type:'tap',key,durat
 function tapAction(action){const key=keyFor(action);if(key)tapKey(key)}
 function tapMouse(which){if(!canControl())return;const downType=which==='left'?'mouse-left-down':'mouse-right-down';const upType=which==='left'?'mouse-left-up':'mouse-right-up';publish({type:downType});setTimeout(()=>publish({type:upType}),45);vibe(8)}
 function setMouseHold(which,on){if(which==='left'){if(leftMouseHeld===!!on)return;leftMouseHeld=!!on;$('leftHoldBtn').classList.toggle('latched',leftMouseHeld);if(canControl())publish({type:leftMouseHeld?'mouse-left-down':'mouse-left-up'})}else{if(rightMouseHeld===!!on)return;rightMouseHeld=!!on;$('rightHoldBtn').classList.toggle('latched',rightMouseHeld);if(canControl())publish({type:rightMouseHeld?'mouse-right-down':'mouse-right-up'})}}
-function releaseAll(localOnly=false){for(const k of [...heldKeys])upKey(k);heldKeys.clear();stickKeys.clear();setMouseHold('left',false);setMouseHold('right',false);middleMouseHeld=false;if(!localOnly&&canControl())publish({type:'release-all'});resetStick();resetMouse();setShift(false)}
+function releaseAll(localOnly=false){for(const k of [...heldKeys])upKey(k);heldKeys.clear();stickKeys.clear();leftMouseHeld=false;rightMouseHeld=false;middleMouseHeld=false;desktopDragHeld=false;desktopModifierHeld.clear();$('leftHoldBtn')?.classList.remove('latched');$('rightHoldBtn')?.classList.remove('latched');$('desktopDrag')?.classList.remove('latched');document.querySelectorAll('.desktopModifier').forEach(b=>b.classList.remove('latched'));if(!localOnly&&canControl())publish({type:'release-all'});resetStick();resetMouse();setShift(false)}
 
+let desktopDragHeld=false;
+const desktopModifierHeld=new Set();
+function setControlMode(mode,save=true){
+  controlMode=mode==='desktop'?'desktop':'gamepad';
+  document.body.classList.toggle('mode-desktop',controlMode==='desktop');
+  document.body.classList.toggle('mode-gamepad',controlMode!=='desktop');
+  const b=$('modeBtn');if(b){b.textContent=controlMode==='desktop'?'🎮':'🖥';b.title=controlMode==='desktop'?'Switch to Gamepad mode':'Switch to Desktop mode';b.classList.toggle('active',controlMode==='desktop')}
+  if(save)localStorage.setItem('pixelb8GamepadControlMode',controlMode);
+  releaseDesktopModifiers();
+  if(desktopDragHeld)setDesktopDrag(false);
+  if(save)showControlToast(controlMode==='desktop'?'DESKTOP MODE':'GAMEPAD MODE');
+}
+function desktopTap(key){if(requireControl())tapKey(key)}
+function desktopCombo(modifier,key){if(!requireControl())return;publish({type:'modified-tap',modifier,key,duration:55});vibe(12)}
+function setDesktopModifier(key,on){if(!requireControl()&&on)return;if(on){if(desktopModifierHeld.has(key))return;desktopModifierHeld.add(key);downKey(key)}else{desktopModifierHeld.delete(key);upKey(key)}document.querySelectorAll(`[data-modifier="${key}"]`).forEach(b=>b.classList.toggle('latched',on))}
+function releaseDesktopModifiers(){for(const key of [...desktopModifierHeld]){desktopModifierHeld.delete(key);upKey(key)}document.querySelectorAll('.desktopModifier').forEach(b=>b.classList.remove('latched'))}
+function setDesktopDrag(on){if(desktopDragHeld===!!on)return;if(on&&!requireControl())return;desktopDragHeld=!!on;const b=$('desktopDrag');if(b)b.classList.toggle('latched',desktopDragHeld);if(canControl())publish({type:desktopDragHeld?'mouse-left-down':'mouse-left-up'})}
 function setupInjectedUI(){
   const gamepad = document.querySelector('.gamepad');
   const topbar = $('topbar');
@@ -360,19 +406,32 @@ $('shift').onclick=()=>{if(!requireControl())return;setShift(!shiftLatched);vibe
 (function setupRunHold(){const b=$('runHold');let active=false;b.addEventListener('pointerdown',e=>{e.preventDefault();if(!requireControl())return;active=true;downKey(keyFor('run'));b.classList.add('active')});const end=()=>{if(active){active=false;upKey(keyFor('run'));b.classList.remove('active')}};b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);b.addEventListener('lostpointercapture',end)})();
 document.querySelectorAll('[data-action]').forEach(el=>{el.addEventListener('pointerdown',e=>{e.preventDefault();if(!requireControl())return;tapAction(el.dataset.action);el.classList.add('active')});const end=()=>el.classList.remove('active');el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end)});
 $('release').onclick=()=>releaseAll();
-function openChat(){if(chatOpen)return;if(!requireControl())return;chatOpen=true;publish({type:'chat-open',key:keyFor('enter')});$('chat').classList.add('open');setTimeout(()=>$('chatInput').focus(),50)}
-function closeChat(send=true){if(!chatOpen)return;const text=$('chatInput').value.trim();if(canControl()){if(send&&text)publish({type:'chat-send',text,enterKey:keyFor('enter')});else publish({type:'tap',key:keyFor('enter'),duration:55})}$('chatInput').value='';$('chat').classList.remove('open');$('chatInput').blur();chatOpen=false}
+function openChat(){if(chatOpen)return;if(!requireControl())return;chatOpen=true;if(controlMode!=='desktop')publish({type:'chat-open',key:keyFor('enter')});$('chatInput').placeholder=controlMode==='desktop'?'Type on desktop…':'Type game chat…';$('chatSend').textContent=controlMode==='desktop'?'TYPE':'SEND';$('chat').classList.add('open');setTimeout(()=>$('chatInput').focus(),50)}
+function closeChat(send=true){if(!chatOpen)return;const text=$('chatInput').value.trim();if(canControl()){if(controlMode==='desktop'){if(send&&text)publish({type:'text-send',text})}else{if(send&&text)publish({type:'chat-send',text,enterKey:keyFor('enter')});else publish({type:'tap',key:keyFor('enter'),duration:55})}}$('chatInput').value='';$('chat').classList.remove('open');$('chatInput').blur();chatOpen=false}
 function dismissPhoneChat(){if(!chatOpen)return;$('chatInput').value='';$('chat').classList.remove('open');$('chatInput').blur();chatOpen=false;showControlToast('PHONE CHAT CLOSED — no key sent')}
 function pressEnter(){if(!requireControl())return;if(keyboardOnEnter)openChat();else publish({type:'tap',key:keyFor('enter'),duration:55})}
-$('enter').onclick=()=>chatOpen?closeChat(true):pressEnter();$('keyboardBtn').onclick=()=>chatOpen?$('chatInput').focus():openChat();$('chatSend').onclick=()=>closeChat(true);$('chatClose').onclick=dismissPhoneChat;$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();closeChat(true)}else if(e.key==='Escape'){e.preventDefault();dismissPhoneChat()}});
+$('enter').onclick=()=>chatOpen?closeChat(true):pressEnter();$('keyboardBtn').onclick=()=>chatOpen?$('chatInput').focus():openChat();$('modeBtn').onclick=()=>setControlMode(controlMode==='desktop'?'gamepad':'desktop');$('chatSend').onclick=()=>closeChat(true);$('chatClose').onclick=dismissPhoneChat;$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();closeChat(true)}else if(e.key==='Escape'){e.preventDefault();dismissPhoneChat()}});
+
+document.querySelectorAll('.desktopKey[data-key]').forEach(b=>b.onclick=()=>desktopTap(b.dataset.key));
+document.querySelectorAll('.desktopKey[data-combo]').forEach(b=>b.onclick=()=>{const [m,k]=b.dataset.combo.split(',');desktopCombo(m,k)});
+document.querySelectorAll('.desktopModifier').forEach(b=>b.onclick=()=>setDesktopModifier(b.dataset.modifier,!desktopModifierHeld.has(b.dataset.modifier)));
+$('desktopLmb').onclick=()=>{if(requireControl())tapMouse('left')};$('desktopRmb').onclick=()=>{if(requireControl())tapMouse('right')};$('desktopDrag').onclick=()=>setDesktopDrag(!desktopDragHeld);$('desktopRelease').onclick=()=>{releaseDesktopModifiers();setDesktopDrag(false);releaseAll()};
+(function bindDesktopTouchpad(){
+  const pad=$('desktopTouchpad');if(!pad)return;const pts=new Map();let gestureStart=0,maxPointers=0,totalMove=0,lastCenter=null;
+  const center=()=>{const a=[...pts.values()];if(!a.length)return null;return{x:a.reduce((n,p)=>n+p.x,0)/a.length,y:a.reduce((n,p)=>n+p.y,0)/a.length}};
+  pad.addEventListener('pointerdown',e=>{e.preventDefault();if(!requireControl())return;pad.setPointerCapture?.(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pts.size===1){gestureStart=performance.now();maxPointers=1;totalMove=0}maxPointers=Math.max(maxPointers,pts.size);lastCenter=center();vibe(5)});
+  pad.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;e.preventDefault();const prev=pts.get(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});const c=center();if(!c||!lastCenter){lastCenter=c;return}const dx=c.x-lastCenter.x,dy=c.y-lastCenter.y;lastCenter=c;totalMove+=Math.abs(dx)+Math.abs(dy);if(pts.size>=2){if(Math.abs(dy)>=1)publish({type:'mouse-wheel',delta:Math.round(-dy*8)})}else{const scale=1.35;const mx=Math.round((e.clientX-prev.x)*scale),my=Math.round((e.clientY-prev.y)*scale);if(mx||my)publish({type:'mouse-move',dx:mx,dy:my})}});
+  const end=e=>{if(!pts.has(e.pointerId))return;e.preventDefault();pts.delete(e.pointerId);const elapsed=performance.now()-gestureStart;if(pts.size===0){if(elapsed<260&&totalMove<18){if(maxPointers>=2)tapMouse('right');else tapMouse('left')}lastCenter=null}else lastCenter=center()};
+  pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end);pad.addEventListener('lostpointercapture',end);
+})();
 
 function buildMoreBar(){const bar=$('moreBar');if(!bar)return;bar.innerHTML='';for(const [action,label] of TOP_MORE){const b=document.createElement('button');b.className='btn moreChip';b.innerHTML=`${captionFor(action,label)}<small>${displayForKey(keyFor(action))}</small>`;b.classList.toggle('disabled',!keyFor(action));b.onclick=()=>{if(keyFor(action)&&requireControl())tapAction(action)};bar.appendChild(b)}}
 $('more').onclick=()=>{moreBarOpen=!moreBarOpen;$('moreBar').classList.toggle('open',moreBarOpen);$('more').classList.toggle('latched',moreBarOpen);$('more').textContent=moreBarOpen?'✕ MORE':'☰ MORE'};
 
 function buildSettings(){
   $('deviceNameInput').value=deviceName;$('roomSetting').value=room;
-  const ps=$('profileSelect');if(ps){ps.innerHTML='';for(const [id,p] of Object.entries(PROFILE_DEFS)){const o=document.createElement('option');o.value=id;o.textContent=p.name;o.selected=id===activeProfile;ps.appendChild(o)}ps.onchange=()=>applyProfile(ps.value)}
-  $('saveCustomProfile').onclick=()=>{activeProfile='custom';localStorage.setItem(PROFILE_KEY,'custom');saveCustomProfile();updateProfileUi();showControlToast('CUSTOM PROFILE SAVED')};updateProfileUi();
+  populateProfileSelect();
+  $('saveCustomProfile').onclick=saveProfileFromUi;$('duplicateProfile').onclick=duplicateProfile;$('renameProfile').onclick=renameProfile;$('deleteProfile').onclick=deleteProfile;updateProfileUi();
   $('keyboardOnEnter').checked=keyboardOnEnter;$('keyboardOnEnter').onchange=e=>{keyboardOnEnter=!!e.target.checked;localStorage.setItem('pixelb8GamepadKeyboardOnEnter',keyboardOnEnter?'1':'0');showControlToast(keyboardOnEnter?'ENTER OPENS KEYBOARD':'ENTER SENDS ENTER ONLY')};
   document.querySelectorAll('.layoutChoice').forEach(b=>b.classList.toggle('selected',b.dataset.layout===layoutPreset));document.querySelectorAll('.styleChoice').forEach(b=>b.classList.toggle('selected',b.dataset.style===layoutStyle));
   const g=$('bindGrid');g.innerHTML='';for(const action of Object.keys(DEFAULT_BINDINGS)){const row=document.createElement('div');row.className='bindRow';const label=document.createElement('label');label.textContent=bindingLabelFor(action);const sel=document.createElement('select');for(const k of KEY_OPTIONS){const o=document.createElement('option');o.value=k;o.textContent=KEY_DISPLAY[k]||k;o.selected=bindings[action]===k;sel.appendChild(o)}sel.onchange=()=>{bindings[action]=sel.value;saveBindings();markCustomProfile();refreshLabels()};row.append(label,sel);g.appendChild(row)}
@@ -381,7 +440,7 @@ function buildSettings(){
 $('deviceNameInput').addEventListener('change',()=>{deviceName=($('deviceNameInput').value.trim()||('Phone '+clientId.slice(-4).toUpperCase())).slice(0,48);localStorage.setItem('pixelb8GamepadDeviceName',deviceName);rawPublish({type:'hello'})});
 $('roomSetting').addEventListener('change',()=>{const next=$('roomSetting').value.trim();if(next)room=next;$('roomSetting').value=room;showControlToast('ROOM SAVED — TAP ↻ TO RECONNECT')});
 $('mouseSensitivity').addEventListener('input',()=>{mouseSettings.sensitivity=clamp(Number($('mouseSensitivity').value)||18,4,36);$('mouseSensitivityOut').textContent=mouseSettings.sensitivity;saveMouseSettings();markCustomProfile()});$('tiltSensitivity').addEventListener('input',()=>{mouseSettings.tiltSensitivity=clamp(Number($('tiltSensitivity').value)||12,2,30);$('tiltSensitivityOut').textContent=mouseSettings.tiltSensitivity;saveMouseSettings();markCustomProfile()});$('mouseHorizontalOnly').onchange=()=>{mouseSettings.horizontalOnly=$('mouseHorizontalOnly').checked;saveMouseSettings();markCustomProfile()};$('mouseInvertX').onchange=()=>{mouseSettings.invertX=$('mouseInvertX').checked;saveMouseSettings();markCustomProfile()};$('mouseInvertY').onchange=()=>{mouseSettings.invertY=$('mouseInvertY').checked;saveMouseSettings();markCustomProfile()};$('tiltAutoEnable').onchange=()=>{mouseSettings.tiltAutoEnable=$('tiltAutoEnable').checked;saveMouseSettings();markCustomProfile()};
-document.querySelectorAll('.layoutChoice').forEach(b=>b.onclick=()=>applyLayout(b.dataset.layout));document.querySelectorAll('.styleChoice').forEach(b=>b.onclick=()=>{applyLayoutStyle(b.dataset.style);markCustomProfile()});$('settings').onclick=()=>{buildSettings();$('settingsOverlay').classList.add('open')};$('resetBindings').onclick=()=>{const p=PROFILE_DEFS[activeProfile];bindings={...DEFAULT_BINDINGS,...(p?.bindings||{})};saveBindings();if(activeProfile==='custom')markCustomProfile();buildSettings();refreshLabels();showControlToast('BINDINGS RESET')};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$((b.dataset.close)).classList.remove('open'));document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('pointerdown',e=>{if(e.target===o)o.classList.remove('open')}));
+document.querySelectorAll('.layoutChoice').forEach(b=>b.onclick=()=>applyLayout(b.dataset.layout));document.querySelectorAll('.styleChoice').forEach(b=>b.onclick=()=>{applyLayoutStyle(b.dataset.style);markCustomProfile()});$('settings').onclick=()=>{buildSettings();$('settingsOverlay').classList.add('open')};$('resetBindings').onclick=()=>{const p=PROFILE_DEFS[activeProfile];const c=customProfile(activeProfile);bindings={...DEFAULT_BINDINGS,...(p?.bindings||c?.snapshot?.bindings||{})};saveBindings();if(isCustomProfileId(activeProfile))saveActiveCustom();buildSettings();refreshLabels();showControlToast('BINDINGS RESET')};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$((b.dataset.close)).classList.remove('open'));document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('pointerdown',e=>{if(e.target===o)o.classList.remove('open')}));
 
 function bindHoldControl(el, action){let active=false;const block=e=>{e.preventDefault();e.stopPropagation()};el.addEventListener('pointerdown',e=>{block(e);if(!requireControl())return;active=true;el.setPointerCapture?.(e.pointerId);downKey(keyFor(action));el.classList.add('active')});const end=e=>{if(e){e.preventDefault?.();e.stopPropagation?.()}if(active){active=false;upKey(keyFor(action));el.classList.remove('active')}};el.addEventListener('pointermove',e=>e.stopPropagation());el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);el.addEventListener('lostpointercapture',end);el.addEventListener('click',e=>{e.preventDefault();e.stopPropagation()})}
 
@@ -402,6 +461,7 @@ function updateFreelookButton(){const b=$('cameraCenterBtn');if(!b)return;b.clas
 window.addEventListener('pagehide',()=>releaseAll());window.addEventListener('pageshow',()=>{if(room&&secret&&!signalingReady())connect()});window.addEventListener('online',()=>{if(room&&secret&&!signalingReady())connect()});window.addEventListener('blur',()=>{if(!chatOpen)releaseAll()});document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll();else if(room&&secret&&!signalingReady())connect()});
 
 setupInjectedUI();
+setControlMode(controlMode,false);
 applyLayoutStyle(layoutStyle,false);
 applyLayout(layoutPreset,false);
 bindHoldControl($('rotLeftDock'),'rotateLeft');
