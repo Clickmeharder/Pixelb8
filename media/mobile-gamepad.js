@@ -491,12 +491,6 @@ function handleDesktopMessage(msg){
     if(msg.type==='role'){role=msg.role||'waiting';desktopArmed=!!msg.armed;desktopOnline=true;if(role==='controller')updateTransportStatus();else setStatus('connected · waiting for control',true)}
     if(msg.type==='kicked'){kicked=true;role='kicked';desktopOnline=false;desktopArmed=false;releaseAll(true);closeRtc();setStatus(msg.reason||'controller access removed')}
     if(msg.type==='notice'){setStatus(msg.message||'desktop notice',true)}
-    if(msg.type==='compatibility'){
-      const blocked=!!msg.blocked;
-      document.body.classList.toggle('input-protected',blocked);
-      if(blocked){setStatus('VANGUARD · INPUT BLOCKED',true);showControlToast('VALORANT: SOFTWARE INPUT BLOCKED');}
-      else setStatus(role==='controller'?(desktopArmed?'PRIMARY · ARMED':'PRIMARY · DISARMED'):'WAITING');
-    }
   }catch{}
 }
 function scheduleLanReconnect(){clearTimeout(lanReconnectTimer);if(!lanRequested||kicked)return;lanReconnectTimer=setTimeout(()=>connectLan(true),Math.min(5000,700+lanFailures*500))}
