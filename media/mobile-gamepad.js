@@ -112,7 +112,7 @@ body.mode-desktop .desktopStage{display:grid}
 .gameMirrorTop{position:absolute;z-index:8;top:7px;right:7px;display:flex;align-items:center;gap:5px;padding:4px 5px;border:1px solid rgba(111,200,238,.28);border-radius:10px;background:rgba(4,10,17,.58);backdrop-filter:blur(8px);pointer-events:auto}
 .gameMirrorLabel{font-size:8px;font-weight:900;letter-spacing:.12em;color:#b9eaff}
 .gameScreenDock{display:none;min-width:0;min-height:0;align-items:center;justify-content:stretch;gap:4px;position:relative;z-index:9}.gameScreenDock select{width:100%;min-width:0;height:25px;padding:1px 3px;border:1px solid rgba(111,200,238,.40);border-radius:7px;background:rgba(7,16,26,.88);color:#fff;font-size:8px;font-weight:800}.gameScreenDock .iconbtn{height:25px;min-width:27px;padding:0}
-body.game-screen-on .gameMirrorLayer{display:block;pointer-events:auto}
+body.game-screen-on.mode-gamepad .gameMirrorLayer{display:block;pointer-events:auto}
 body.game-screen-on.mode-gamepad .stage{position:relative;z-index:3;grid-template-columns:minmax(150px,27%) minmax(104px,17%) minmax(150px,27%);justify-content:space-between;align-items:end;background:transparent;pointer-events:none}
 body.game-screen-on.mode-gamepad .zone{pointer-events:auto;background:rgba(7,13,22,.34);backdrop-filter:blur(4px);border-color:rgba(126,188,231,.23);box-shadow:0 7px 18px rgba(0,0,0,.12);border-radius:15px}
 body.game-screen-on.mode-gamepad .leftZone,body.game-screen-on.mode-gamepad .rightZone{height:min(68vh,220px);padding:5px;gap:4px}
@@ -134,17 +134,37 @@ body.game-screen-on.mode-gamepad .hotbar{position:relative;z-index:4;background:
 body.game-screen-on.mode-gamepad .moreBar{position:relative;z-index:12;background:rgba(8,14,24,.66)}
 .remoteFullscreen .gameMirrorLayer,.remoteFullscreen .desktopTouchpad{position:fixed!important;z-index:90!important;inset:0!important;width:100vw!important;height:100vh!important;border-radius:0!important;border:0!important;background:#000!important}
 .remoteFullscreen .gameMirrorTop,.remoteFullscreen .mirrorBar{top:calc(env(safe-area-inset-top) + 8px);right:calc(env(safe-area-inset-right) + 8px);left:auto;width:auto;opacity:.72}
-.remoteFullscreen.mode-gamepad .stage{position:fixed!important;z-index:95!important;inset:0!important;padding:calc(env(safe-area-inset-top) + 45px) 8px calc(env(safe-area-inset-bottom) + 8px)!important;grid-template-columns:minmax(150px,30%) 1fr minmax(150px,30%)!important;pointer-events:none}
+.remoteFullscreen.mode-gamepad .stage{position:fixed!important;z-index:95!important;inset:0!important;padding:calc(env(safe-area-inset-top) + 45px) 8px calc(env(safe-area-inset-bottom) + 8px)!important;grid-template-columns:minmax(140px,28%) minmax(96px,18%) minmax(140px,28%)!important;justify-content:space-between!important;align-items:end!important;pointer-events:none}
+.remoteFullscreen.mode-gamepad .leftZone{grid-column:1!important;justify-self:start!important}
+.remoteFullscreen.mode-gamepad .centerZone{display:grid!important;grid-column:2!important;justify-self:center!important;align-self:end!important;width:min(18vw,132px)!important;height:auto!important;padding:4px!important;gap:3px!important;background:rgba(5,10,17,.24)!important;border-color:rgba(137,212,244,.18)!important}
+.remoteFullscreen.mode-gamepad .rightZone{grid-column:3!important;justify-self:end!important}
 .remoteFullscreen.mode-gamepad .leftZone,.remoteFullscreen.mode-gamepad .rightZone{align-self:end;height:min(48vh,205px);background:rgba(5,10,17,.23);border-color:rgba(137,212,244,.18)}
 .remoteFullscreen.mode-gamepad .stickBase,.remoteFullscreen.mode-gamepad .mouseBase{width:min(31vh,140px);height:min(31vh,140px)}
 .remoteFullscreen.mode-gamepad .gameScreenDock{display:grid!important}
-.remoteFullscreen.mode-gamepad .centerZone{display:none}
-.remoteFullscreen.mode-gamepad .hotbar,.remoteFullscreen.mode-gamepad .topbar,.remoteFullscreen.mode-gamepad .moreBar{display:none!important}
-.remoteFullscreen.mode-desktop .desktopKeys,.remoteFullscreen.mode-desktop .desktopMouseButtons{display:none!important}
-.remoteFullscreen.mode-desktop .desktopTouchpad{display:block!important}
+.remoteFullscreen.mode-gamepad .centerMain{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:31px!important;gap:3px!important}
+.remoteFullscreen.mode-gamepad .centerFoot{height:29px!important;gap:3px!important}
+.remoteFullscreen.mode-gamepad .centerMain .btn,.remoteFullscreen.mode-gamepad .centerFoot .btn{font-size:7px!important;border-radius:8px!important;padding:1px!important}
+.remoteFullscreen.mode-gamepad .hotbar,.remoteFullscreen.mode-gamepad .topbar{display:none!important}
+.remoteFullscreen.mode-gamepad .moreBar{position:fixed!important;z-index:110!important;left:18%!important;right:18%!important;bottom:calc(env(safe-area-inset-bottom) + 8px)!important;margin:0!important;background:rgba(6,12,20,.82)!important;backdrop-filter:blur(12px)!important}
+.remoteFullscreen.mode-gamepad .moreBar.open{max-height:64px!important}
+.remoteFullscreen.mode-desktop .desktopStage{display:block!important;position:fixed!important;z-index:91!important;inset:0!important;pointer-events:none!important}
+.remoteFullscreen.mode-desktop .desktopTouchCard{position:static!important;border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important}
+.remoteFullscreen.mode-desktop .desktopTouchpad{display:block!important;pointer-events:auto!important}
 .remoteFullscreen.mode-desktop .desktopMirror{display:block!important}
-.remoteFullscreen.mode-desktop .mirrorBar{z-index:96}
+.remoteFullscreen.mode-desktop .mirrorBar{z-index:99;opacity:.72}
 .remoteFullscreen.mode-desktop .desktopTouchpad:after{display:none}
+.remoteFullscreen.mode-desktop .desktopKeys{display:grid!important;position:fixed!important;z-index:98!important;left:calc(env(safe-area-inset-left) + 8px)!important;top:calc(env(safe-area-inset-top) + 48px)!important;bottom:calc(env(safe-area-inset-bottom) + 8px)!important;width:min(34vw,225px)!important;padding:5px!important;gap:4px!important;border-radius:14px!important;background:rgba(5,10,17,.42)!important;backdrop-filter:blur(5px)!important;border-color:rgba(137,212,244,.20)!important;pointer-events:auto!important}
+.remoteFullscreen.mode-desktop .desktopSystemKeys{grid-template-columns:1.35fr repeat(2,1fr)!important;gap:4px!important}
+.remoteFullscreen.mode-desktop .desktopSystemKeys .desktopKey{min-height:30px!important;font-size:7px!important;border-radius:8px!important;padding:2px!important}
+.remoteFullscreen.mode-desktop .desktopSystemKeys .desktopKey small{font-size:5px!important}
+.remoteFullscreen.mode-desktop .desktopModifiers{grid-template-columns:repeat(4,1fr)!important;gap:3px!important}
+.remoteFullscreen.mode-desktop .desktopModifiers .desktopModifier{min-height:28px!important;font-size:7px!important;border-radius:8px!important;padding:1px!important}
+.remoteFullscreen.mode-desktop .desktopArrowPad{width:min(120px,100%)!important;grid-template-rows:repeat(2,32px)!important;gap:3px!important}
+.remoteFullscreen.mode-desktop .desktopArrowPad .btn{font-size:12px!important;border-radius:8px!important}
+.remoteFullscreen.mode-desktop .desktopAllUp{min-height:30px!important;font-size:7px!important;border-radius:8px!important;padding:2px!important}
+.remoteFullscreen.mode-desktop .desktopMouseButtons{display:grid!important;position:fixed!important;z-index:98!important;right:calc(env(safe-area-inset-right) + 8px)!important;bottom:calc(env(safe-area-inset-bottom) + 8px)!important;width:min(31vw,210px)!important;grid-template-columns:1fr .8fr 1fr!important;gap:4px!important;padding:4px!important;border:1px solid rgba(137,212,244,.20)!important;border-radius:12px!important;background:rgba(5,10,17,.42)!important;backdrop-filter:blur(5px)!important;pointer-events:auto!important}
+.remoteFullscreen.mode-desktop .desktopMouseButtons .btn{min-height:32px!important;font-size:7px!important;border-radius:8px!important;padding:2px!important}
+.remoteFullscreen.mode-desktop .desktopMouseButtons .btn small{font-size:5px!important}
 @media(max-width:650px),(max-height:340px){body.game-screen-on.mode-gamepad .stage{grid-template-columns:minmax(132px,30%) minmax(88px,16%) minmax(132px,30%)}body.game-screen-on.mode-gamepad .leftZone,body.game-screen-on.mode-gamepad .rightZone{height:min(64vh,188px)}body.game-screen-on.mode-gamepad .stickBase,body.game-screen-on.mode-gamepad .mouseBase{width:min(31vh,128px);height:min(31vh,128px)}body.game-screen-on.mode-gamepad .rightGrid{grid-template-columns:minmax(0,1fr) 61px;grid-template-rows:minmax(0,1fr) 42px}.gameMirrorLayer{inset:44px 5px 48px}.gameMirrorTop{top:5px;right:5px}.gameMirrorLabel{display:none}}
 
 `;
@@ -486,7 +506,8 @@ bindMirrorSelect('mirrorFps');bindMirrorSelect('gameMirrorFps');
 $('screenBtn')?.addEventListener('click',()=>setMirrorMode(mirrorMode==='off'?'30':'off'));
 $('desktopMirrorFullscreen')?.addEventListener('click',e=>{e.stopPropagation();toggleRemoteFullscreen()});
 $('gameMirrorFullscreen')?.addEventListener('click',e=>{e.stopPropagation();toggleRemoteFullscreen()});
-$('gameMirrorMore')?.addEventListener('click',e=>{e.stopPropagation();moreBarOpen=!moreBarOpen;$('moreBar')?.classList.toggle('open',moreBarOpen)});
+function setMoreBarOpen(open){moreBarOpen=!!open;$('moreBar')?.classList.toggle('open',moreBarOpen);const b=$('more');if(b){b.classList.toggle('latched',moreBarOpen);b.textContent=moreBarOpen?'✕ MORE':'☰ MORE'}const h=$('gameMirrorMore');if(h){h.classList.toggle('latched',moreBarOpen);h.textContent=moreBarOpen?'✕':'☰'}}
+$('gameMirrorMore')?.addEventListener('click',e=>{e.stopPropagation();setMoreBarOpen(!moreBarOpen)});
 
 document.querySelectorAll('.desktopKey[data-key]').forEach(b=>b.onclick=()=>desktopTap(b.dataset.key));
 document.querySelectorAll('.desktopKey[data-combo]').forEach(b=>b.onclick=()=>{const [m,k]=b.dataset.combo.split(',');desktopCombo(m,k)});
@@ -507,7 +528,7 @@ function moveCursorToMirror(video,e){const p=mirrorPoint(video,e);if(p&&canContr
 (function bindGameMirrorPointer(){const layer=$('gameMirrorLayer');if(!layer)return;layer.addEventListener('pointerdown',e=>{if(e.target?.closest?.('.gameMirrorTop'))return;if(controlMode!=='gamepad'||mirrorMode==='off'||!requireControl())return;moveCursorToMirror($('gameMirror'),e)});})();
 
 function buildMoreBar(){const bar=$('moreBar');if(!bar)return;bar.innerHTML='';for(const [action,label] of TOP_MORE){const b=document.createElement('button');b.className='btn moreChip';b.innerHTML=`${captionFor(action,label)}<small>${displayForKey(keyFor(action))}</small>`;b.classList.toggle('disabled',!keyFor(action));b.onclick=()=>{if(keyFor(action)&&requireControl())tapAction(action)};bar.appendChild(b)}}
-$('more').onclick=()=>{moreBarOpen=!moreBarOpen;$('moreBar').classList.toggle('open',moreBarOpen);$('more').classList.toggle('latched',moreBarOpen);$('more').textContent=moreBarOpen?'✕ MORE':'☰ MORE'};
+$('more').onclick=()=>setMoreBarOpen(!moreBarOpen);
 
 function buildSettings(){
   $('deviceNameInput').value=deviceName;$('roomSetting').value=room;
