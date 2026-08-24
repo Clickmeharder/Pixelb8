@@ -78,14 +78,14 @@ body.layout-wide .stage{grid-template-columns:minmax(275px,36%) minmax(205px,25%
 @media (max-height:380px){.gamepad{grid-template-rows:30px auto minmax(0,1fr) 40px}.moreBar.open{max-height:52px}.moreChip{height:38px}.hotbar .btn{font-size:10px}}
 
 .modeBtn{font-size:13px}.modeBtn.active{border-color:rgba(103,236,173,.72);background:linear-gradient(150deg,#214b3c,#10281f);box-shadow:0 0 14px rgba(103,236,173,.12)}
-.desktopStage{display:none;grid-row:3/5;min-height:0;grid-template-columns:minmax(0,1.65fr) minmax(230px,.8fr);gap:6px}
+.desktopStage{display:none;grid-row:3/5;min-height:0;grid-template-columns:minmax(230px,.82fr) minmax(0,1.7fr);gap:6px}
 body.mode-desktop .stage,body.mode-desktop .hotbar{display:none}
 body.mode-desktop .desktopStage{display:grid}
 .desktopTouchCard,.desktopKeys{min-width:0;min-height:0;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,rgba(17,30,48,.92),rgba(7,13,22,.92));box-shadow:inset 0 1px rgba(255,255,255,.04),0 14px 34px rgba(0,0,0,.22);padding:7px}
-.desktopTouchCard{display:grid;grid-template-rows:minmax(0,1fr) 48px;gap:6px}.desktopTouchpad{position:relative;min-height:0;border:1px solid rgba(102,225,255,.38);border-radius:17px;overflow:hidden;touch-action:none;background:radial-gradient(circle at 50% 35%,rgba(27,81,104,.22),transparent 42%),linear-gradient(145deg,#08131f,#07101a);box-shadow:inset 0 0 34px rgba(71,190,235,.05)}
+.desktopTouchCard{display:grid;grid-template-rows:minmax(0,1fr) 48px;gap:6px;order:2}.desktopTouchpad{position:relative;min-height:0;border:1px solid rgba(102,225,255,.38);border-radius:17px;overflow:hidden;touch-action:none;background:radial-gradient(circle at 50% 35%,rgba(27,81,104,.22),transparent 42%),linear-gradient(145deg,#08131f,#07101a);box-shadow:inset 0 0 34px rgba(71,190,235,.05)}
 .desktopTouchpad:after{content:'';position:absolute;inset:12px;border:1px dashed rgba(120,181,223,.12);border-radius:12px;pointer-events:none}.touchpadHint{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#718aa8;pointer-events:none}.touchpadHint b{font-size:15px;letter-spacing:.15em;color:#a8c4df}.touchpadHint span{margin-top:6px;font-size:9px}
-.desktopMouseButtons{display:grid;grid-template-columns:1fr .8fr 1fr;gap:6px}.desktopMouseButtons .btn{font-size:11px}.desktopKeys{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:6px}.desktopKeyGroup{display:grid;gap:6px}.desktopSystemKeys{grid-template-columns:1.4fr repeat(4,1fr)}.desktopModifiers{grid-template-columns:repeat(4,1fr)}.desktopKey{min-height:42px}.desktopKey.accent{border-color:rgba(103,236,173,.55);background:linear-gradient(150deg,#205246,#102920)}.desktopModifier.latched{border-color:#ffd879!important;background:linear-gradient(150deg,#7b6328,#3f3217)!important;color:#fff2b8!important}.desktopArrowPad{align-self:center;justify-self:center;width:min(190px,100%);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,50px);gap:6px}.desktopArrowPad .btn{font-size:17px}.desktopAllUp{min-height:42px}
-@media (max-width:650px),(max-height:340px){.desktopStage{grid-template-columns:minmax(0,1.55fr) minmax(180px,.9fr);gap:4px}.desktopTouchCard,.desktopKeys{padding:5px;border-radius:14px}.desktopTouchCard{grid-template-rows:minmax(0,1fr) 42px}.desktopSystemKeys{grid-template-columns:1.35fr repeat(4,1fr);gap:4px}.desktopModifiers{gap:4px}.desktopKey{min-height:34px;font-size:8px}.desktopArrowPad{grid-template-rows:repeat(2,38px);gap:4px}.desktopMouseButtons{gap:4px}.touchpadHint b{font-size:12px}.touchpadHint span{font-size:7px}}
+.desktopMirror{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#020407;pointer-events:none;display:none}.desktopTouchpad.mirroring .desktopMirror{display:block}.desktopTouchpad.mirroring .touchpadHint{opacity:0}.mirrorBar{position:absolute;z-index:4;left:7px;right:7px;top:7px;display:grid;grid-template-columns:auto minmax(90px,140px) auto;gap:5px;align-items:center;padding:5px 7px;border:1px solid rgba(111,200,238,.28);border-radius:10px;background:rgba(4,10,17,.78);backdrop-filter:blur(8px);pointer-events:auto}.mirrorBar label{font-size:8px;font-weight:900;letter-spacing:.12em;color:#92b6d4}.mirrorBar select{height:27px;min-width:0;background:#07101a;color:#eef8ff;border:1px solid #385271;border-radius:7px;font-size:9px;padding:2px 5px}.mirrorBar span{font-size:8px;color:#82a2bd;white-space:nowrap}.desktopMouseButtons{display:grid;grid-template-columns:1fr .8fr 1fr;gap:6px}.desktopMouseButtons .btn{font-size:11px}.desktopKeys{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:6px;order:1}.desktopKeyGroup{display:grid;gap:6px}.desktopSystemKeys{grid-template-columns:1.4fr repeat(4,1fr)}.desktopModifiers{grid-template-columns:repeat(4,1fr)}.desktopKey{min-height:42px}.desktopKey.accent{border-color:rgba(103,236,173,.55);background:linear-gradient(150deg,#205246,#102920)}.desktopModifier.latched{border-color:#ffd879!important;background:linear-gradient(150deg,#7b6328,#3f3217)!important;color:#fff2b8!important}.desktopArrowPad{align-self:center;justify-self:center;width:min(190px,100%);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,50px);gap:6px}.desktopArrowPad .btn{font-size:17px}.desktopAllUp{min-height:42px}
+@media (max-width:650px),(max-height:340px){.desktopStage{grid-template-columns:minmax(178px,.9fr) minmax(0,1.6fr);gap:4px}.desktopTouchCard,.desktopKeys{padding:5px;border-radius:14px}.desktopTouchCard{grid-template-rows:minmax(0,1fr) 42px}.desktopSystemKeys{grid-template-columns:1.35fr repeat(4,1fr);gap:4px}.desktopModifiers{gap:4px}.desktopKey{min-height:34px;font-size:8px}.desktopArrowPad{grid-template-rows:repeat(2,38px);gap:4px}.desktopMouseButtons{gap:4px}.touchpadHint b{font-size:12px}.touchpadHint span{font-size:7px}}
 /* Tiny landscape phones (including iPhone 4S): make Settings a true narrow-screen page. */
 @media (max-width:600px), (max-height:340px){
   .overlay{padding:0;align-items:stretch;justify-content:stretch}
@@ -140,6 +140,8 @@ const keyboardOnEnterParam=params.get('keyboardOnEnter');
 let keyboardOnEnter=keyboardOnEnterParam!==null ? keyboardOnEnterParam==='1' : localStorage.getItem('pixelb8GamepadKeyboardOnEnter')==='1';
 if(keyboardOnEnterParam!==null)localStorage.setItem('pixelb8GamepadKeyboardOnEnter',keyboardOnEnter?'1':'0');
 let controlMode=localStorage.getItem('pixelb8GamepadControlMode')==='desktop'?'desktop':'gamepad';
+let mirrorMode=localStorage.getItem('pixelb8DesktopMirrorMode')||'off';
+if(!['off','low','30','60','auto'].includes(mirrorMode))mirrorMode='off';
 
 const KEY_OPTIONS = [
   'NONE','0','1','2','3','4','5','6','7','8','9',
@@ -247,7 +249,7 @@ function deleteProfile(){const item=customProfile(activeProfile);if(!item)return
 
 function envelope(obj){const p=currentProfile();return {...obj,clientId,deviceName,profileId:activeProfile,profileName:p.name,secret,source:'phone-controller',ts:Date.now()}}
 function rawPublish(obj){if(!room||!secret||kicked)return;const msg=JSON.stringify(envelope(obj));if(lanReady()){try{lanSocket.send(msg);return}catch{}}if(client?.connected)client.publish(`${base()}/control`,msg,{qos:0})}
-function signalDesktop(obj){if(!client?.connected||!room||!secret||kicked)return;client.publish(`${base()}/signal/desktop`,JSON.stringify(envelope(obj)),{qos:0})}
+function signalDesktop(obj){if(!room||!secret||kicked)return;const msg=JSON.stringify(envelope(obj));if(lanReady()){try{lanSocket.send(msg);return}catch{}}if(client?.connected)client.publish(`${base()}/signal/desktop`,msg,{qos:0})}
 function rtcReady(){return rtcChannel?.readyState==='open'}
 function publish(obj){if(!canControl())return;if(lanReady()){try{lanSocket.send(JSON.stringify(envelope(obj)));return}catch{}}if(rtcReady()){try{rtcChannel.send(JSON.stringify(envelope(obj)));return}catch{}}rawPublish(obj)}
 function keyFor(action){return bindings[action]&&bindings[action]!=='NONE'?bindings[action]:null}
@@ -268,6 +270,7 @@ function setControlMode(mode,save=true){
   document.body.classList.toggle('mode-gamepad',controlMode!=='desktop');
   const b=$('modeBtn');if(b){b.textContent=controlMode==='desktop'?'🎮':'🖥';b.title=controlMode==='desktop'?'Switch to Gamepad mode':'Switch to Desktop mode';b.classList.toggle('active',controlMode==='desktop')}
   if(save)localStorage.setItem('pixelb8GamepadControlMode',controlMode);
+  if(controlMode==='desktop'&&mirrorMode!=='off'&&signalingReady()&&!rtcReady())setTimeout(()=>startRtc(),120);
   releaseDesktopModifiers();
   if(desktopDragHeld)setDesktopDrag(false);
   if(save)showControlToast(controlMode==='desktop'?'DESKTOP MODE':'GAMEPAD MODE');
@@ -307,22 +310,24 @@ function updateTransportStatus(){
 function closeRtc(){
   clearTimeout(rtcRetryTimer);rtcRetryTimer=null;rtcIceQueue=[];
   try{rtcChannel?.close()}catch{}try{rtcPeer?.close()}catch{}
-  rtcChannel=null;rtcPeer=null;
+  rtcChannel=null;rtcPeer=null;const v=$('desktopMirror');if(v)v.srcObject=null;$('desktopTouchpad')?.classList.remove('mirroring');
 }
-function scheduleRtcRetry(){clearTimeout(rtcRetryTimer);if(!client?.connected||kicked)return;rtcRetryTimer=setTimeout(()=>startRtc(),2500)}
+function scheduleRtcRetry(){clearTimeout(rtcRetryTimer);if(!signalingReady()||kicked)return;rtcRetryTimer=setTimeout(()=>startRtc(),2500)}
 async function startRtc(){
-  if(!client?.connected||!room||!secret||kicked)return;
+  if(!signalingReady()||!room||!secret||kicked)return;
   closeRtc();
   try{
     const pc=new RTCPeerConnection(RTC_CONFIG);rtcPeer=pc;
     const channel=pc.createDataChannel('pixelb8-controls',{ordered:true});rtcChannel=channel;
+    pc.addTransceiver('video',{direction:'recvonly'});
+    pc.ontrack=e=>{if(e.track?.kind==='video'){const v=$('desktopMirror');if(v){v.srcObject=e.streams?.[0]||new MediaStream([e.track]);v.play().catch(()=>{});$('desktopTouchpad')?.classList.add('mirroring');const ms=$('mirrorStatus');if(ms)ms.textContent=mirrorMode==='auto'?'auto':(mirrorMode==='low'?'8 fps':`${mirrorMode} fps`)}}};
     channel.onopen=()=>{updateTransportStatus();vibe(18)};
     channel.onclose=()=>{updateTransportStatus();scheduleRtcRetry()};
     channel.onerror=()=>updateTransportStatus();
     pc.onicecandidate=e=>{if(e.candidate)signalDesktop({type:'rtc-ice',candidate:e.candidate})};
     pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState))scheduleRtcRetry()};
     const offer=await pc.createOffer();await pc.setLocalDescription(offer);
-    signalDesktop({type:'rtc-offer',sdp:pc.localDescription.sdp});
+    signalDesktop({type:'rtc-offer',sdp:pc.localDescription.sdp,mirrorMode});
   }catch{scheduleRtcRetry()}
 }
 async function handleRtcSignal(msg){
@@ -338,6 +343,7 @@ async function handleRtcSignal(msg){
 
 function handleDesktopMessage(msg){
   try{
+    if((msg.type==='rtc-answer'||msg.type==='rtc-ice')){handleRtcSignal(msg);return}
     if(msg.type==='desktop-status'){desktopOnline=!!msg.online;desktopArmed=!!msg.armed;if(!desktopOnline)role='unknown'}
     if(msg.type==='role'){role=msg.role||'waiting';desktopArmed=!!msg.armed;desktopOnline=true;if(role==='controller')updateTransportStatus();else setStatus('connected · waiting for control',true)}
     if(msg.type==='kicked'){kicked=true;role='kicked';desktopOnline=false;desktopArmed=false;releaseAll(true);closeRtc();setStatus(msg.reason||'controller access removed')}
@@ -356,7 +362,7 @@ function connectLan(isRetry=false){
   if(previous&&previous!==socket){try{previous.close()}catch{}}
   socket.onopen=()=>{
     if(lanSocket!==socket)return;
-    lanFailures=0;kicked=false;desktopOnline=true;rawPublish({type:'hello'});updateTransportStatus();
+    lanFailures=0;kicked=false;desktopOnline=true;rawPublish({type:'hello'});updateTransportStatus();if(mirrorMode!=='off')setTimeout(()=>startRtc(),120);
     clearInterval(heartbeat);heartbeat=setInterval(()=>rawPublish({type:'heartbeat'}),1000);
   };
   socket.onmessage=e=>{if(lanSocket!==socket)return;try{handleDesktopMessage(JSON.parse(String(e.data)))}catch{}};
@@ -412,6 +418,21 @@ function dismissPhoneChat(){if(!chatOpen)return;$('chatInput').value='';$('chat'
 function pressEnter(){if(!requireControl())return;if(keyboardOnEnter)openChat();else publish({type:'tap',key:keyFor('enter'),duration:55})}
 $('enter').onclick=()=>chatOpen?closeChat(true):pressEnter();$('keyboardBtn').onclick=()=>chatOpen?$('chatInput').focus():openChat();$('modeBtn').onclick=()=>setControlMode(controlMode==='desktop'?'gamepad':'desktop');$('chatSend').onclick=()=>closeChat(true);$('chatClose').onclick=dismissPhoneChat;$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();closeChat(true)}else if(e.key==='Escape'){e.preventDefault();dismissPhoneChat()}});
 
+
+function setMirrorMode(mode,save=true){
+  if(!['off','low','30','60','auto'].includes(mode))mode='off';
+  mirrorMode=mode;if(save)localStorage.setItem('pixelb8DesktopMirrorMode',mode);
+  const sel=$('mirrorFps');if(sel)sel.value=mode;
+  const status=$('mirrorStatus');if(status)status.textContent=mode==='off'?'off':'connecting…';
+  if(mode==='off'){
+    const v=$('desktopMirror');if(v){v.srcObject=null}$('desktopTouchpad')?.classList.remove('mirroring');
+    if(rtcReady()||rtcPeer){closeRtc();if(signalingReady())setTimeout(()=>startRtc(),120)}
+  }else if(signalingReady()){
+    closeRtc();setTimeout(()=>startRtc(),120);
+  }
+}
+const mirrorSelect=$('mirrorFps');if(mirrorSelect){mirrorSelect.value=mirrorMode;['pointerdown','pointerup','click'].forEach(type=>mirrorSelect.addEventListener(type,e=>e.stopPropagation()));mirrorSelect.onchange=()=>setMirrorMode(mirrorSelect.value)}
+
 document.querySelectorAll('.desktopKey[data-key]').forEach(b=>b.onclick=()=>desktopTap(b.dataset.key));
 document.querySelectorAll('.desktopKey[data-combo]').forEach(b=>b.onclick=()=>{const [m,k]=b.dataset.combo.split(',');desktopCombo(m,k)});
 document.querySelectorAll('.desktopModifier').forEach(b=>b.onclick=()=>setDesktopModifier(b.dataset.modifier,!desktopModifierHeld.has(b.dataset.modifier)));
@@ -419,7 +440,8 @@ $('desktopLmb').onclick=()=>{if(requireControl())tapMouse('left')};$('desktopRmb
 (function bindDesktopTouchpad(){
   const pad=$('desktopTouchpad');if(!pad)return;const pts=new Map();let gestureStart=0,maxPointers=0,totalMove=0,lastCenter=null;
   const center=()=>{const a=[...pts.values()];if(!a.length)return null;return{x:a.reduce((n,p)=>n+p.x,0)/a.length,y:a.reduce((n,p)=>n+p.y,0)/a.length}};
-  pad.addEventListener('pointerdown',e=>{e.preventDefault();if(!requireControl())return;pad.setPointerCapture?.(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pts.size===1){gestureStart=performance.now();maxPointers=1;totalMove=0}maxPointers=Math.max(maxPointers,pts.size);lastCenter=center();vibe(5)});
+  const isInteractiveTarget=e=>!!e.target?.closest?.('select,button,input,label,.mirrorBar');
+  pad.addEventListener('pointerdown',e=>{if(isInteractiveTarget(e))return;e.preventDefault();if(!requireControl())return;pad.setPointerCapture?.(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pts.size===1){gestureStart=performance.now();maxPointers=1;totalMove=0}maxPointers=Math.max(maxPointers,pts.size);lastCenter=center();vibe(5)});
   pad.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;e.preventDefault();const prev=pts.get(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});const c=center();if(!c||!lastCenter){lastCenter=c;return}const dx=c.x-lastCenter.x,dy=c.y-lastCenter.y;lastCenter=c;totalMove+=Math.abs(dx)+Math.abs(dy);if(pts.size>=2){if(Math.abs(dy)>=1)publish({type:'mouse-wheel',delta:Math.round(-dy*8)})}else{const scale=1.35;const mx=Math.round((e.clientX-prev.x)*scale),my=Math.round((e.clientY-prev.y)*scale);if(mx||my)publish({type:'mouse-move',dx:mx,dy:my})}});
   const end=e=>{if(!pts.has(e.pointerId))return;e.preventDefault();pts.delete(e.pointerId);const elapsed=performance.now()-gestureStart;if(pts.size===0){if(elapsed<260&&totalMove<18){if(maxPointers>=2)tapMouse('right');else tapMouse('left')}lastCenter=null}else lastCenter=center()};
   pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end);pad.addEventListener('lostpointercapture',end);
