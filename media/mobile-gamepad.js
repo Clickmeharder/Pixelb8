@@ -110,20 +110,34 @@ body.mode-desktop .desktopStage{display:grid}
 .gameMirrorLayer{display:none;position:fixed;z-index:0;inset:44px 5px 51px;border:1px solid rgba(102,225,255,.26);border-radius:20px;overflow:hidden;background:#020407;pointer-events:none}
 .gameMirror{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#020407}
 .gameMirrorTop{position:absolute;z-index:8;top:7px;right:7px;display:flex;align-items:center;gap:5px;padding:4px 5px;border:1px solid rgba(111,200,238,.28);border-radius:10px;background:rgba(4,10,17,.58);backdrop-filter:blur(8px);pointer-events:auto}
-.gameMirrorLabel{font-size:8px;font-weight:900;letter-spacing:.12em;color:#b9eaff}.gameMirrorTop select{height:27px;max-width:92px;background:rgba(7,16,26,.86);color:#fff;border:1px solid #385271;border-radius:7px;font-size:9px;padding:2px 4px}
+.gameMirrorLabel{font-size:8px;font-weight:900;letter-spacing:.12em;color:#b9eaff}
+.gameScreenDock{display:none;min-width:0;min-height:0;align-items:center;justify-content:stretch;gap:4px;position:relative;z-index:9}.gameScreenDock select{width:100%;min-width:0;height:25px;padding:1px 3px;border:1px solid rgba(111,200,238,.40);border-radius:7px;background:rgba(7,16,26,.88);color:#fff;font-size:8px;font-weight:800}.gameScreenDock .iconbtn{height:25px;min-width:27px;padding:0}
 body.game-screen-on .gameMirrorLayer{display:block;pointer-events:auto}
-body.game-screen-on.mode-gamepad .stage{position:relative;z-index:3;grid-template-columns:minmax(190px,34%) minmax(120px,19%) minmax(190px,34%);justify-content:space-between;background:transparent;pointer-events:none}
-body.game-screen-on.mode-gamepad .zone{pointer-events:auto;background:rgba(7,13,22,.42);backdrop-filter:blur(5px);border-color:rgba(126,188,231,.27);box-shadow:0 9px 24px rgba(0,0,0,.14)}
-body.game-screen-on.mode-gamepad .centerZone{align-self:end;max-height:150px;background:rgba(7,13,22,.34)}
-body.game-screen-on.mode-gamepad .centerMain{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr)}
+body.game-screen-on.mode-gamepad .stage{position:relative;z-index:3;grid-template-columns:minmax(150px,27%) minmax(104px,17%) minmax(150px,27%);justify-content:space-between;align-items:end;background:transparent;pointer-events:none}
+body.game-screen-on.mode-gamepad .zone{pointer-events:auto;background:rgba(7,13,22,.34);backdrop-filter:blur(4px);border-color:rgba(126,188,231,.23);box-shadow:0 7px 18px rgba(0,0,0,.12);border-radius:15px}
+body.game-screen-on.mode-gamepad .leftZone,body.game-screen-on.mode-gamepad .rightZone{height:min(68vh,220px);padding:5px;gap:4px}
+body.game-screen-on.mode-gamepad .stickBase,body.game-screen-on.mode-gamepad .mouseBase{width:min(34vh,145px);height:min(34vh,145px);max-width:88%;max-height:88%}
+body.game-screen-on.mode-gamepad .leftZone{grid-template-rows:minmax(0,1fr) 38px}
+body.game-screen-on.mode-gamepad .leftQuick{gap:4px}.game-screen-on.mode-gamepad .leftQuick .btn{font-size:8px;border-radius:10px}.game-screen-on.mode-gamepad .leftQuick .btn small{font-size:6px}
+body.game-screen-on.mode-gamepad .leftZone>.miniHold{bottom:48px;height:21px;min-width:43px;font-size:6px}
+body.game-screen-on.mode-gamepad .rightGrid{grid-template-columns:minmax(0,1fr) 68px;grid-template-rows:minmax(0,1fr) 46px;gap:4px}
+body.game-screen-on.mode-gamepad .mouseRail{gap:4px}.game-screen-on.mode-gamepad .mouseRail .btn{font-size:8px;border-radius:10px}.game-screen-on.mode-gamepad .railHold{height:22px;font-size:6px}
+body.game-screen-on.mode-gamepad .rightBottom{gap:4px}.game-screen-on.mode-gamepad .rightBottom .btn{font-size:8px;border-radius:10px}.game-screen-on.mode-gamepad .rightBottom .btn small{font-size:6px}
+body.game-screen-on.mode-gamepad .gameScreenDock{display:grid;grid-template-columns:minmax(0,1fr) 27px;gap:3px}
+body.game-screen-on.mode-gamepad .centerZone{align-self:end;height:auto;max-height:none;padding:4px;gap:3px;background:rgba(7,13,22,.28);grid-template-rows:auto auto}
+body.game-screen-on.mode-gamepad .centerMain{grid-template-columns:repeat(2,1fr);grid-template-rows:34px;gap:3px}
+body.game-screen-on.mode-gamepad .centerFoot{height:31px;gap:3px}
+body.game-screen-on.mode-gamepad .centerMain .btn,body.game-screen-on.mode-gamepad .centerFoot .btn{font-size:8px;border-radius:9px;padding:1px}.game-screen-on.mode-gamepad .centerMain .btn small{font-size:6px;margin-top:1px}
 body.game-screen-on.mode-gamepad .centerMain [data-action="target"],body.game-screen-on.mode-gamepad .centerMain [data-action="sit"],body.game-screen-on.mode-gamepad .centerMain #enter{display:none}
 body.game-screen-on.mode-gamepad .leftQuick #shift,body.game-screen-on.mode-gamepad .leftQuick #runHold{opacity:.72}
-body.game-screen-on.mode-gamepad .hotbar{position:relative;z-index:4;background:rgba(5,8,13,.46);backdrop-filter:blur(5px);border-radius:12px}
-body.game-screen-on.mode-gamepad .moreBar{position:relative;z-index:12;background:rgba(8,14,24,.70)}
+body.game-screen-on.mode-gamepad .hotbar{position:relative;z-index:4;background:rgba(5,8,13,.40);backdrop-filter:blur(4px);border-radius:10px}
+body.game-screen-on.mode-gamepad .moreBar{position:relative;z-index:12;background:rgba(8,14,24,.66)}
 .remoteFullscreen .gameMirrorLayer,.remoteFullscreen .desktopTouchpad{position:fixed!important;z-index:90!important;inset:0!important;width:100vw!important;height:100vh!important;border-radius:0!important;border:0!important;background:#000!important}
 .remoteFullscreen .gameMirrorTop,.remoteFullscreen .mirrorBar{top:calc(env(safe-area-inset-top) + 8px);right:calc(env(safe-area-inset-right) + 8px);left:auto;width:auto;opacity:.72}
 .remoteFullscreen.mode-gamepad .stage{position:fixed!important;z-index:95!important;inset:0!important;padding:calc(env(safe-area-inset-top) + 45px) 8px calc(env(safe-area-inset-bottom) + 8px)!important;grid-template-columns:minmax(150px,30%) 1fr minmax(150px,30%)!important;pointer-events:none}
-.remoteFullscreen.mode-gamepad .leftZone,.remoteFullscreen.mode-gamepad .rightZone{align-self:end;height:min(54vh,270px);background:rgba(5,10,17,.25);border-color:rgba(137,212,244,.18)}
+.remoteFullscreen.mode-gamepad .leftZone,.remoteFullscreen.mode-gamepad .rightZone{align-self:end;height:min(48vh,205px);background:rgba(5,10,17,.23);border-color:rgba(137,212,244,.18)}
+.remoteFullscreen.mode-gamepad .stickBase,.remoteFullscreen.mode-gamepad .mouseBase{width:min(31vh,140px);height:min(31vh,140px)}
+.remoteFullscreen.mode-gamepad .gameScreenDock{display:grid!important}
 .remoteFullscreen.mode-gamepad .centerZone{display:none}
 .remoteFullscreen.mode-gamepad .hotbar,.remoteFullscreen.mode-gamepad .topbar,.remoteFullscreen.mode-gamepad .moreBar{display:none!important}
 .remoteFullscreen.mode-desktop .desktopKeys,.remoteFullscreen.mode-desktop .desktopMouseButtons{display:none!important}
@@ -131,7 +145,7 @@ body.game-screen-on.mode-gamepad .moreBar{position:relative;z-index:12;backgroun
 .remoteFullscreen.mode-desktop .desktopMirror{display:block!important}
 .remoteFullscreen.mode-desktop .mirrorBar{z-index:96}
 .remoteFullscreen.mode-desktop .desktopTouchpad:after{display:none}
-@media(max-width:650px),(max-height:340px){body.game-screen-on.mode-gamepad .stage{grid-template-columns:minmax(150px,35%) minmax(90px,16%) minmax(150px,35%)}.gameMirrorLayer{inset:44px 5px 48px}.gameMirrorTop{top:5px;right:5px}.gameMirrorLabel{display:none}}
+@media(max-width:650px),(max-height:340px){body.game-screen-on.mode-gamepad .stage{grid-template-columns:minmax(132px,30%) minmax(88px,16%) minmax(132px,30%)}body.game-screen-on.mode-gamepad .leftZone,body.game-screen-on.mode-gamepad .rightZone{height:min(64vh,188px)}body.game-screen-on.mode-gamepad .stickBase,body.game-screen-on.mode-gamepad .mouseBase{width:min(31vh,128px);height:min(31vh,128px)}body.game-screen-on.mode-gamepad .rightGrid{grid-template-columns:minmax(0,1fr) 61px;grid-template-rows:minmax(0,1fr) 42px}.gameMirrorLayer{inset:44px 5px 48px}.gameMirrorTop{top:5px;right:5px}.gameMirrorLabel{display:none}}
 
 `;
 

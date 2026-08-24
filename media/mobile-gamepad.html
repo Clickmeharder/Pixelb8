@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#05070c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>PixelB8 Gamepad 2.9.0</title>
+<title>PixelB8 Gamepad 2.9.1</title>
 <style>
 html,body{margin:0;width:100%;height:100%;background:#05070c;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
 #jsFallback{position:fixed;left:8px;right:8px;bottom:8px;z-index:9999;padding:8px 10px;border:1px solid #34506f;border-radius:10px;background:#0d1726;color:#9fb9dc;font-size:11px;text-align:center}
@@ -15,16 +15,12 @@ html,body{margin:0;width:100%;height:100%;background:#05070c;color:#fff;font-fam
 </head>
 <body>
 <div class="gamepad">
-  <header class="topbar" id="topbar"><span class="led"></span><span class="logo">PIXELB8 GAMEPAD 2.9.0</span><span id="status" class="status">disconnected</span><button id="modeBtn" class="iconbtn modeBtn" title="Switch to Desktop mode" aria-label="Switch controller mode">🖥</button><button id="screenBtn" class="iconbtn" title="Toggle live screen" aria-label="Toggle live screen">▣</button><button id="keyboardBtn" class="iconbtn" title="Open keyboard / chat" aria-label="Open keyboard / chat">⌨</button><button id="connect" class="iconbtn" title="Refresh / reconnect" aria-label="Refresh / reconnect">↻</button><button id="settings" class="iconbtn">⚙</button></header>
+  <header class="topbar" id="topbar"><span class="led"></span><span class="logo">PIXELB8 GAMEPAD 2.9.1</span><span id="status" class="status">disconnected</span><button id="modeBtn" class="iconbtn modeBtn" title="Switch to Desktop mode" aria-label="Switch controller mode">🖥</button><button id="screenBtn" class="iconbtn" title="Toggle live screen" aria-label="Toggle live screen">▣</button><button id="keyboardBtn" class="iconbtn" title="Open keyboard / chat" aria-label="Open keyboard / chat">⌨</button><button id="connect" class="iconbtn" title="Refresh / reconnect" aria-label="Refresh / reconnect">↻</button><button id="settings" class="iconbtn">⚙</button></header>
 
   <section class="gameMirrorLayer" id="gameMirrorLayer" aria-label="Live game screen">
     <video id="gameMirror" class="gameMirror" autoplay playsinline muted></video>
     <div class="gameMirrorTop">
       <span class="gameMirrorLabel">LIVE SCREEN</span>
-      <select id="gameMirrorFps" aria-label="Game screen mirror frame rate">
-        <option value="off">Off</option><option value="low">8 FPS</option><option value="30">30 FPS</option><option value="60">60 FPS</option><option value="auto">Auto</option>
-      </select>
-      <button id="gameMirrorFullscreen" class="iconbtn" title="Fullscreen remote view">⛶</button>
       <button id="gameMirrorMore" class="iconbtn" title="More game controls">☰</button>
     </div>
   </section>
@@ -55,6 +51,12 @@ html,body{margin:0;width:100%;height:100%;background:#05070c;color:#fff;font-fam
           <button class="miniHold railHold" id="rightHoldBtn">HOLD R</button>
         </div>
         <div class="rightBottom"><button class="btn" id="tiltBtn">TILT</button><button class="btn freelookBtn" id="cameraCenterBtn">CENTER<small>hold: FREELOOK</small></button></div>
+        <div class="gameScreenDock" aria-label="Live screen controls">
+          <select id="gameMirrorFps" aria-label="Game screen mirror frame rate">
+            <option value="off">OFF</option><option value="low">8</option><option value="30">30</option><option value="60">60</option><option value="auto">AUTO</option>
+          </select>
+          <button id="gameMirrorFullscreen" class="iconbtn" title="Fullscreen remote view" aria-label="Fullscreen remote view">⛶</button>
+        </div>
       </div>
     </section>
   </main>
