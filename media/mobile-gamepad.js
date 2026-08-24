@@ -84,7 +84,7 @@ body.mode-desktop .desktopStage{display:grid}
 .desktopTouchCard,.desktopKeys{min-width:0;min-height:0;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,rgba(17,30,48,.92),rgba(7,13,22,.92));box-shadow:inset 0 1px rgba(255,255,255,.04),0 14px 34px rgba(0,0,0,.22);padding:7px}
 .desktopTouchCard{display:grid;grid-template-rows:minmax(0,1fr) 48px;gap:6px;order:2}.desktopTouchpad{position:relative;min-height:0;border:1px solid rgba(102,225,255,.38);border-radius:17px;overflow:hidden;touch-action:none;background:radial-gradient(circle at 50% 35%,rgba(27,81,104,.22),transparent 42%),linear-gradient(145deg,#08131f,#07101a);box-shadow:inset 0 0 34px rgba(71,190,235,.05)}
 .desktopTouchpad:after{content:'';position:absolute;inset:12px;border:1px dashed rgba(120,181,223,.12);border-radius:12px;pointer-events:none}.touchpadHint{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#718aa8;pointer-events:none}.touchpadHint b{font-size:15px;letter-spacing:.15em;color:#a8c4df}.touchpadHint span{margin-top:6px;font-size:9px}
-.desktopMirror{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#020407;pointer-events:none;display:none}.desktopTouchpad.mirroring .desktopMirror{display:block}.desktopTouchpad.mirroring .touchpadHint{opacity:0}.mirrorBar{position:absolute;z-index:4;left:7px;right:auto;top:7px;display:grid;grid-template-columns:auto minmax(70px,104px) auto 27px;gap:4px;align-items:center;max-width:calc(100% - 14px);padding:4px 5px;border:1px solid rgba(111,200,238,.28);border-radius:9px;background:rgba(4,10,17,.72);backdrop-filter:blur(8px);pointer-events:auto}.mirrorBar label{font-size:7px;font-weight:900;letter-spacing:.10em;color:#92b6d4;white-space:nowrap}.mirrorBar select{height:25px;min-width:0;max-width:104px;background:#07101a;color:#eef8ff;border:1px solid #385271;border-radius:7px;font-size:8px;padding:1px 3px}.mirrorBar span{font-size:7px;color:#82a2bd;white-space:nowrap}.mirrorBar .mirrorFullscreen{width:27px!important;min-width:27px!important;height:25px!important;padding:0!important;font-size:12px!important}.desktopMouseButtons{display:grid;grid-template-columns:1fr .8fr 1fr;gap:6px}.desktopMouseButtons .btn{font-size:11px}.desktopKeys{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:6px;order:1}.desktopKeysToolbar{display:none;grid-template-columns:1fr 1fr;gap:3px}.desktopKeysToolbar .iconbtn{height:26px;min-width:0;padding:0;font-size:11px}.desktopUpperControls{display:grid;gap:6px}.desktopKeyGroup{display:grid;gap:6px}.desktopSystemKeys{grid-template-columns:1.4fr repeat(4,1fr)}.desktopModifiers{grid-template-columns:repeat(4,1fr)}.desktopKey{min-height:42px}.desktopKey.accent{border-color:rgba(103,236,173,.55);background:linear-gradient(150deg,#205246,#102920)}.desktopModifier.latched{border-color:#ffd879!important;background:linear-gradient(150deg,#7b6328,#3f3217)!important;color:#fff2b8!important}.desktopArrowPad{align-self:center;justify-self:center;width:min(190px,100%);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,50px);gap:6px}.desktopArrowPad .btn{font-size:17px}.desktopAllUp{min-height:42px}
+.desktopMirror{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#020407;pointer-events:none;display:none}.desktopTouchpad.mirroring .desktopMirror{display:block}.desktopTouchpad.mirroring .touchpadHint{opacity:0}.mirrorBar{position:absolute;z-index:4;left:7px;right:auto;top:7px;display:grid;grid-template-columns:auto minmax(70px,104px) auto 27px 27px;gap:4px;align-items:center;max-width:calc(100% - 14px);padding:4px 5px;border:1px solid rgba(111,200,238,.28);border-radius:9px;background:rgba(4,10,17,.72);backdrop-filter:blur(8px);pointer-events:auto}.mirrorBar label{font-size:7px;font-weight:900;letter-spacing:.10em;color:#92b6d4;white-space:nowrap}.mirrorBar select{height:25px;min-width:0;max-width:104px;background:#07101a;color:#eef8ff;border:1px solid #385271;border-radius:7px;font-size:8px;padding:1px 3px}.mirrorBar span{font-size:7px;color:#82a2bd;white-space:nowrap}.mirrorBar .mirrorFullscreen,.mirrorBar .mirrorAudio{width:27px!important;min-width:27px!important;height:25px!important;padding:0!important;font-size:12px!important}.mirrorAudio.active{border-color:rgba(103,236,173,.7)!important;background:linear-gradient(#245443,#102a21)!important}.desktopMouseButtons{display:grid;grid-template-columns:1fr .8fr 1fr;gap:6px}.desktopMouseButtons .btn{font-size:11px}.desktopKeys{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:6px;order:1}.desktopKeysToolbar{display:none;grid-template-columns:1fr 1fr;gap:3px}.desktopKeysToolbar .iconbtn{height:26px;min-width:0;padding:0;font-size:11px}.desktopUpperControls{display:grid;gap:6px}.desktopKeyGroup{display:grid;gap:6px}.desktopSystemKeys{grid-template-columns:1.4fr repeat(4,1fr)}.desktopModifiers{grid-template-columns:repeat(4,1fr)}.desktopKey{min-height:42px}.desktopKey.accent{border-color:rgba(103,236,173,.55);background:linear-gradient(150deg,#205246,#102920)}.desktopModifier.latched{border-color:#ffd879!important;background:linear-gradient(150deg,#7b6328,#3f3217)!important;color:#fff2b8!important}.desktopArrowPad{align-self:center;justify-self:center;width:min(190px,100%);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,50px);gap:6px}.desktopArrowPad .btn{font-size:17px}.desktopAllUp{min-height:42px}
 @media (max-width:650px),(max-height:340px){.desktopStage{grid-template-columns:minmax(178px,.9fr) minmax(0,1.6fr);gap:4px}.desktopTouchCard,.desktopKeys{padding:5px;border-radius:14px}.desktopTouchCard{grid-template-rows:minmax(0,1fr) 42px}.desktopSystemKeys{grid-template-columns:1.35fr repeat(4,1fr);gap:4px}.desktopModifiers{gap:4px}.desktopKey{min-height:34px;font-size:8px}.desktopArrowPad{grid-template-rows:repeat(2,38px);gap:4px}.desktopMouseButtons{gap:4px}.touchpadHint b{font-size:12px}.touchpadHint span{font-size:7px}}
 /* Tiny landscape phones (including iPhone 4S): make Settings a true narrow-screen page. */
 @media (max-width:600px), (max-height:340px){
@@ -123,7 +123,7 @@ body.game-screen-on.mode-gamepad .leftZone>.miniHold{bottom:48px;height:21px;min
 body.game-screen-on.mode-gamepad .rightGrid{grid-template-columns:minmax(0,1fr) 68px;grid-template-rows:minmax(0,1fr) 46px;gap:4px}
 body.game-screen-on.mode-gamepad .mouseRail{gap:4px}.game-screen-on.mode-gamepad .mouseRail .btn{font-size:8px;border-radius:10px}.game-screen-on.mode-gamepad .railHold{height:22px;font-size:6px}
 body.game-screen-on.mode-gamepad .rightBottom{gap:4px}.game-screen-on.mode-gamepad .rightBottom .btn{font-size:8px;border-radius:10px}.game-screen-on.mode-gamepad .rightBottom .btn small{font-size:6px}
-body.game-screen-on.mode-gamepad .gameScreenDock{display:grid;grid-template-columns:minmax(0,1fr) 27px;gap:3px}
+body.game-screen-on.mode-gamepad .gameScreenDock{display:grid;grid-template-columns:minmax(0,1fr) 27px 27px;gap:3px}
 body.game-screen-on.mode-gamepad .centerZone{align-self:end;height:auto;max-height:none;padding:4px;gap:3px;background:rgba(7,13,22,.28);grid-template-rows:auto auto}
 body.game-screen-on.mode-gamepad .centerMain{grid-template-columns:repeat(2,1fr);grid-template-rows:34px;gap:3px}
 body.game-screen-on.mode-gamepad .centerFoot{height:31px;gap:3px}
@@ -151,7 +151,7 @@ body.game-screen-on.mode-gamepad .moreBar{position:relative;z-index:12;backgroun
 .remoteFullscreen.mode-desktop .desktopTouchCard{position:static!important;border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important}
 .remoteFullscreen.mode-desktop .desktopTouchpad{display:block!important;pointer-events:auto!important}
 .remoteFullscreen.mode-desktop .desktopMirror{display:block!important}
-.remoteFullscreen.mode-desktop .mirrorBar{z-index:99;opacity:.68;grid-template-columns:auto minmax(62px,88px) auto 25px!important;padding:3px 4px!important;gap:3px!important}.remoteFullscreen.mode-desktop .mirrorBar select{max-width:88px;height:23px;font-size:7px}.remoteFullscreen.mode-desktop .mirrorBar .mirrorFullscreen{width:25px!important;min-width:25px!important;height:23px!important}
+.remoteFullscreen.mode-desktop .mirrorBar{z-index:99;opacity:.68;grid-template-columns:auto minmax(62px,88px) auto 25px 25px!important;padding:3px 4px!important;gap:3px!important}.remoteFullscreen.mode-desktop .mirrorBar select{max-width:88px;height:23px;font-size:7px}.remoteFullscreen.mode-desktop .mirrorBar .mirrorFullscreen,.remoteFullscreen.mode-desktop .mirrorBar .mirrorAudio{width:25px!important;min-width:25px!important;height:23px!important;padding:0!important}
 .remoteFullscreen.mode-desktop .desktopTouchpad:after{display:none}
 .remoteFullscreen.mode-desktop .desktopKeys{display:grid!important;position:fixed!important;z-index:98!important;left:calc(env(safe-area-inset-left) + 6px)!important;top:auto!important;bottom:calc(env(safe-area-inset-bottom) + 6px)!important;width:min(28vw,176px)!important;padding:4px!important;gap:3px!important;border-radius:12px!important;background:rgba(5,10,17,.25)!important;backdrop-filter:blur(4px)!important;border-color:rgba(137,212,244,.14)!important;pointer-events:auto!important;opacity:.86}
 .remoteFullscreen.mode-desktop .desktopKeysToolbar{display:grid!important}
@@ -210,6 +210,7 @@ if(keyboardOnEnterParam!==null)localStorage.setItem('pixelb8GamepadKeyboardOnEnt
 let controlMode=localStorage.getItem('pixelb8GamepadControlMode')==='desktop'?'desktop':'gamepad';
 let mirrorMode=localStorage.getItem('pixelb8DesktopMirrorMode')||'off';
 if(!['off','low','30','60','auto'].includes(mirrorMode))mirrorMode='off';
+let mirrorAudioEnabled=localStorage.getItem('pixelb8ScreenAudio')!=='0';
 
 const KEY_OPTIONS = [
   'NONE','0','1','2','3','4','5','6','7','8','9',
@@ -379,7 +380,7 @@ function updateTransportStatus(){
 function closeRtc(){
   clearTimeout(rtcRetryTimer);rtcRetryTimer=null;rtcIceQueue=[];
   try{rtcChannel?.close()}catch{}try{rtcPeer?.close()}catch{}
-  rtcChannel=null;rtcPeer=null;for(const id of ['desktopMirror','gameMirror']){const v=$(id);if(v)v.srcObject=null}$('desktopTouchpad')?.classList.remove('mirroring');document.body.classList.remove('game-screen-on');
+  rtcChannel=null;rtcPeer=null;for(const id of ['desktopMirror','gameMirror']){const v=$(id);if(v)v.srcObject=null}const ra=$('remoteAudio');if(ra)ra.srcObject=null;$('desktopTouchpad')?.classList.remove('mirroring');document.body.classList.remove('game-screen-on');
 }
 function scheduleRtcRetry(){clearTimeout(rtcRetryTimer);if(!signalingReady()||kicked)return;rtcRetryTimer=setTimeout(()=>startRtc(),2500)}
 async function startRtc(){
@@ -389,14 +390,23 @@ async function startRtc(){
     const pc=new RTCPeerConnection(RTC_CONFIG);rtcPeer=pc;
     const channel=pc.createDataChannel('pixelb8-controls',{ordered:true});rtcChannel=channel;
     pc.addTransceiver('video',{direction:'recvonly'});
-    pc.ontrack=e=>{if(e.track?.kind==='video'){const stream=e.streams?.[0]||new MediaStream([e.track]);for(const id of ['desktopMirror','gameMirror']){const v=$(id);if(v){v.srcObject=stream;v.play().catch(()=>{})}}$('desktopTouchpad')?.classList.add('mirroring');document.body.classList.toggle('game-screen-on',mirrorMode!=='off');const label=mirrorMode==='auto'?'auto':(mirrorMode==='low'?'8 fps':`${mirrorMode} fps`);const ms=$('mirrorStatus');if(ms)ms.textContent=label;updateRemoteViewUi()}};
+    pc.addTransceiver('audio',{direction:'recvonly'});
+    pc.ontrack=e=>{
+      if(e.track?.kind==='video'){
+        const stream=new MediaStream([e.track]);
+        for(const id of ['desktopMirror','gameMirror']){const v=$(id);if(v){v.srcObject=stream;v.play().catch(()=>{})}}
+        $('desktopTouchpad')?.classList.add('mirroring');document.body.classList.toggle('game-screen-on',mirrorMode!=='off');const label=mirrorMode==='auto'?'auto':(mirrorMode==='low'?'8 fps':`${mirrorMode} fps`);const ms=$('mirrorStatus');if(ms)ms.textContent=label;updateRemoteViewUi();
+      }else if(e.track?.kind==='audio'){
+        const ra=$('remoteAudio');if(ra){ra.srcObject=new MediaStream([e.track]);ra.muted=!mirrorAudioEnabled;if(mirrorAudioEnabled)ra.play().catch(()=>showControlToast('TAP 🔊 TO START AUDIO'))}
+      }
+    };
     channel.onopen=()=>{updateTransportStatus();vibe(18)};
     channel.onclose=()=>{updateTransportStatus();scheduleRtcRetry()};
     channel.onerror=()=>updateTransportStatus();
     pc.onicecandidate=e=>{if(e.candidate)signalDesktop({type:'rtc-ice',candidate:e.candidate})};
     pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState))scheduleRtcRetry()};
     const offer=await pc.createOffer();await pc.setLocalDescription(offer);
-    signalDesktop({type:'rtc-offer',sdp:pc.localDescription.sdp,mirrorMode});
+    signalDesktop({type:'rtc-offer',sdp:pc.localDescription.sdp,mirrorMode,mirrorAudio:mirrorAudioEnabled});
   }catch{scheduleRtcRetry()}
 }
 async function handleRtcSignal(msg){
@@ -488,11 +498,16 @@ function pressEnter(){if(!requireControl())return;if(keyboardOnEnter)openChat();
 $('enter').onclick=()=>chatOpen?closeChat(true):pressEnter();$('keyboardBtn').onclick=()=>chatOpen?$('chatInput').focus():openChat();$('modeBtn').onclick=()=>setControlMode(controlMode==='desktop'?'gamepad':'desktop');$('chatSend').onclick=()=>closeChat(true);$('chatClose').onclick=dismissPhoneChat;$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();closeChat(true)}else if(e.key==='Escape'){e.preventDefault();dismissPhoneChat()}});
 
 
+function updateMirrorAudioUi(){
+  for(const id of ['desktopMirrorAudio','gameMirrorAudio']){const b=$(id);if(!b)continue;b.textContent=mirrorAudioEnabled?'🔊':'🔇';b.classList.toggle('active',mirrorAudioEnabled);b.title=mirrorAudioEnabled?'Mute screen audio':'Enable screen audio'}
+  const ra=$('remoteAudio');if(ra)ra.muted=!mirrorAudioEnabled;
+}
 function updateRemoteViewUi(){
   const on=mirrorMode!=='off';
   document.body.classList.toggle('game-screen-on',on);
   for(const id of ['mirrorFps','gameMirrorFps']){const sel=$(id);if(sel)sel.value=mirrorMode}
   const sb=$('screenBtn');if(sb){sb.classList.toggle('active',on);sb.textContent=on?'▣':'▢';sb.title=on?'Turn live screen off':'Turn live screen on'}
+  updateMirrorAudioUi();
 }
 function setMirrorMode(mode,save=true){
   if(!['off','low','30','60','auto'].includes(mode))mode='off';
@@ -513,6 +528,13 @@ bindMirrorSelect('mirrorFps');bindMirrorSelect('gameMirrorFps');
 $('screenBtn')?.addEventListener('click',()=>setMirrorMode(mirrorMode==='off'?'30':'off'));
 $('desktopMirrorFullscreen')?.addEventListener('click',e=>{e.stopPropagation();toggleRemoteFullscreen()});
 $('gameMirrorFullscreen')?.addEventListener('click',e=>{e.stopPropagation();toggleRemoteFullscreen()});
+function setMirrorAudioEnabled(on,save=true){
+  mirrorAudioEnabled=!!on;if(save)localStorage.setItem('pixelb8ScreenAudio',mirrorAudioEnabled?'1':'0');updateMirrorAudioUi();
+  const ra=$('remoteAudio');if(ra&&mirrorAudioEnabled)ra.play().catch(()=>{});
+  if(mirrorMode!=='off'&&signalingReady()){closeRtc();setTimeout(()=>startRtc(),120)}
+}
+for(const id of ['desktopMirrorAudio','gameMirrorAudio']){$(id)?.addEventListener('click',e=>{e.stopPropagation();setMirrorAudioEnabled(!mirrorAudioEnabled)})}
+updateMirrorAudioUi();
 function setMoreBarOpen(open){moreBarOpen=!!open;$('moreBar')?.classList.toggle('open',moreBarOpen);const b=$('more');if(b){b.classList.toggle('latched',moreBarOpen);b.textContent=moreBarOpen?'✕ MORE':'☰ MORE'}const h=$('gameMirrorMore');if(h){h.classList.toggle('latched',moreBarOpen);h.textContent=moreBarOpen?'✕':'☰'}}
 $('gameMirrorMore')?.addEventListener('click',e=>{e.stopPropagation();setMoreBarOpen(!moreBarOpen)});
 
