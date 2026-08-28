@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self'; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; connect-src 'self' wss://broker.emqx.io:8084; frame-src https://clips.twitch.tv https://player.twitch.tv; font-src 'self' https: data:; object-src 'none'; base-uri 'self';">
+  <title>PixelB8 Companion Overlay</title>
+  <link rel="stylesheet" href="./overlay-source.css">
+  <link rel="stylesheet" href="./hosted-overlay.css">
+</head>
+<body>
+  <div id="stage"></div>
+  <div id="connectionBadge" hidden>Connecting…</div>
+  <button id="previewBgToggle" type="button" aria-label="Change preview background" title="Preview background: dark / checker / transparent">BG</button>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="./overlay-source.js"></script>
+</body>
+</html>

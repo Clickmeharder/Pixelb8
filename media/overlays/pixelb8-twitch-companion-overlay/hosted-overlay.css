@@ -1,0 +1,5 @@
+/* Hosted-only diagnostics. Hidden during normal OBS/browser-source use. */
+#connectionBadge{position:fixed;z-index:2147483646;left:14px;top:14px;padding:8px 11px;border-radius:999px;background:rgba(5,12,18,.86);border:1px solid rgba(113,220,255,.5);color:#e8fbff;font:700 11px/1 Inter,Segoe UI,Arial,sans-serif;letter-spacing:.06em;pointer-events:none;backdrop-filter:blur(6px)}
+#connectionBadge[data-kind="ok"]{border-color:rgba(100,255,170,.55)}
+#connectionBadge[data-kind="error"]{border-color:rgba(255,110,130,.7)}
+body:not(.preview-mode) #connectionBadge{display:none!important}
