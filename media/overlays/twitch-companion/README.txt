@@ -58,3 +58,14 @@ Clip playback note (0.19.20): Twitch requires the visible clip player to be at l
 - Clip-enabled shoutout geometry must be at least 640x360; larger is recommended for side info.
 
 0.19.26: Twitch clip iframe is now the sole element in its 640x360 playback cell to satisfy Twitch style-visibility rules.
+
+0.19.27 Jukebox audio routing:
+- Companion can route Jukebox audio to Browser Source only, Companion only, or Both.
+- Hosted Browser Source creates a persistent YouTube playback engine and follows Jukebox play/pause/track/volume state.
+- Hosted CSP now permits YouTube embed frames.
+
+
+0.19.28:
+- Prefer controllable Twitch VOD playback for shoutout clips when Get Clips provides video_id + vod_offset.
+- Explicitly apply mute/volume/autoplay via the Twitch Player API.
+- Fall back to the standard Clip iframe when the source VOD is unavailable.
