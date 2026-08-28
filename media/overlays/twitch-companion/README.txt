@@ -39,3 +39,6 @@ Twitch clip embeds require an HTTPS parent page. When this page is hosted on
 pixelb8.lol, the renderer can use parent=pixelb8.lol and attempt actual clip playback.
 The local HTTP overlay remains useful as a no-cloud fallback but cannot reliably
 play arbitrary Twitch clip embeds.
+
+
+Clip playback note (0.19.20): Twitch requires the visible clip player to be at least 400x300. PixelB8 Companion now expands clip-enabled Shoutouts to 820x360 by default.
