@@ -52,7 +52,9 @@ Clip playback note (0.19.20): Twitch requires the visible clip player to be at l
 0.19.24: Keeps an active Twitch shoutout clip iframe mounted across unrelated live-state updates (for example Jukebox progress/chat state) instead of recreating the Twitch player. The live hosted page also no longer scales the 1920x1080 stage with CSS; scaling is preview-only so Twitch's visible-size check sees the real clip dimensions.
 
 
-0.19.25 clip autoplay fix:
+0.19.26 clip autoplay fix:
 - Hosted Twitch Clip iframe is a fixed, unobscured 640x360 playback surface.
 - The player is never CSS-scaled, faded, filtered, or overlaid by PixelB8 UI.
 - Clip-enabled shoutout geometry must be at least 640x360; larger is recommended for side info.
+
+0.19.26: Twitch clip iframe is now the sole element in its 640x360 playback cell to satisfy Twitch style-visibility rules.
