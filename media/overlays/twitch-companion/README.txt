@@ -69,3 +69,5 @@ Clip playback note (0.19.20): Twitch requires the visible clip player to be at l
 - Prefer controllable Twitch VOD playback for shoutout clips when Get Clips provides video_id + vod_offset.
 - Explicitly apply mute/volume/autoplay via the Twitch Player API.
 - Fall back to the standard Clip iframe when the source VOD is unavailable.
+
+0.19.29: Twitch shoutout VOD playback now initializes internally muted for reliable autoplay, then applies the user's actual Mute clip setting after Twitch reports PLAYING. This avoids Chromium/Twitch locking an autoplay attempt into a muted state when the player is initialized unmuted.
