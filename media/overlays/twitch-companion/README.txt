@@ -71,3 +71,8 @@ Clip playback note (0.19.20): Twitch requires the visible clip player to be at l
 - Fall back to the standard Clip iframe when the source VOD is unavailable.
 
 0.19.29: Twitch shoutout VOD playback now initializes internally muted for reliable autoplay, then applies the user's actual Mute clip setting after Twitch reports PLAYING. This avoids Chromium/Twitch locking an autoplay attempt into a muted state when the player is initialized unmuted.
+
+0.19.30
+- Fixed shoutout VOD audio in OBS: no longer force-mutes the Twitch player before autoplay.
+- The player now initializes and starts with the configured Mute clip value directly.
+- OBS Browser Source already disables the Chromium user-gesture autoplay requirement, so forced-muted startup was counterproductive there.
