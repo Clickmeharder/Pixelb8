@@ -48,3 +48,5 @@ Clip playback note (0.19.20): Twitch requires the visible clip player to be at l
 0.19.22: CSP now explicitly allows blob: Web Workers used by mqtt.js. For reliable normal-browser clip autoplay, keep Mute clip enabled; unmuted autoplay may be blocked by browser policy.
 
 0.19.23: Fixes Twitch shoutout clips being destroyed/recreated every 350ms while runtime shoutout state is active. Runtime expiry still refreshes, but the active clip iframe remains mounted so playback can start and continue.
+
+0.19.24: Keeps an active Twitch shoutout clip iframe mounted across unrelated live-state updates (for example Jukebox progress/chat state) instead of recreating the Twitch player. The live hosted page also no longer scales the 1920x1080 stage with CSS; scaling is preview-only so Twitch's visible-size check sees the real clip dimensions.
