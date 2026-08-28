@@ -42,3 +42,5 @@ play arbitrary Twitch clip embeds.
 
 
 Clip playback note (0.19.20): Twitch requires the visible clip player to be at least 400x300. PixelB8 Companion now expands clip-enabled Shoutouts to 820x360 by default.
+
+0.19.21: CSP permits the renderer's dynamic inline styles. Real Twitch clip playback is intended for the top-level HTTPS/OBS page; Companion's embedded preview intentionally uses its local preview to avoid Twitch ancestor-chain blocking in Electron.
