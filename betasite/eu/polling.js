@@ -314,6 +314,99 @@ async function resumeSavedChatLog(){
 
 
 
+
+
+/* =========================================================
+   PIXELB8 COMPANION EU BRIDGE
+   Auto-detects Companion on localhost before falling back to
+   browser FileSystemFileHandle polling. The existing parser stays unchanged.
+   ========================================================= */
+const COMPANION_BRIDGE_PORTS=Array.from({length:12},(_,i)=>8787+i);
+const COMPANION_BRIDGE_POLL_MS=1000;
+let companionBridgeBase='';
+let companionBridgeOffset=null;
+let companionBridgeBusy=false;
+let companionBridgeFailures=0;
+
+async function companionBridgeFetch(url,timeout=900){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeout);
+  try{return await fetch(url,{cache:'no-store',mode:'cors',signal:controller.signal,headers:{Accept:'application/json'}})}finally{clearTimeout(timer)}
+}
+async function findPixelB8CompanionBridge(){
+  for(const port of COMPANION_BRIDGE_PORTS){
+    const base=`http://127.0.0.1:${port}/api/eu`;
+    try{
+      const r=await companionBridgeFetch(`${base}/status`,450);
+      if(!r.ok)continue;
+      const data=await r.json();
+      if(data?.service==='pixelb8-companion-eu-bridge')return {base,status:data};
+    }catch{}
+  }
+  return null;
+}
+function stopCompanionBridgePolling(){
+  if(liveInterval){clearInterval(liveInterval);liveInterval=null;}
+  companionBridgeBusy=false;
+  companionBridgeFailures=0;
+  companionBridgeBase='';
+  companionBridgeOffset=null;
+}
+async function pollCompanionBridgeOnce(){
+  if(!companionBridgeBase||companionBridgeBusy)return;
+  companionBridgeBusy=true;
+  try{
+    const q=companionBridgeOffset==null?'':`?offset=${encodeURIComponent(companionBridgeOffset)}`;
+    const r=await companionBridgeFetch(`${companionBridgeBase}/tail${q}`,1500);
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok||data?.ok===false)throw new Error(data?.error||`Companion bridge returned ${r.status}`);
+    companionBridgeFailures=0;
+    if(data.reset===true){
+      // chat.log rotated/truncated. The bridge starts at the new file beginning.
+      window.showAppToast?.('Entropia chat.log rotated. Companion bridge resynchronized.','warning',2600);
+    }
+    if(typeof data.text==='string'&&data.text.length)processNewLiveLines(data.text);
+    companionBridgeOffset=Number(data.nextOffset)||0;
+    cachedFileSize=companionBridgeOffset;
+    cachedFileLastModified=Number(data.lastModified)||cachedFileLastModified;
+    if(data.text){saveParsedDataToIDB(globalParsedData,allMobHourlyStats,{name:data.fileName||'chat.log',size:cachedFileSize,lastModified:cachedFileLastModified});}
+    const status=document.getElementById('fileStatus');
+    if(status)status.textContent=`PixelB8 Companion · ${data.fileName||'chat.log'} · live 1s polling`;
+    const source=document.getElementById('streamParserFile');if(source)source.textContent=`Source: ${data.fileName||'chat.log'} · PixelB8 Companion`;
+    const liveStatus=document.getElementById('streamObsBridgeStatus');if(liveStatus)liveStatus.textContent=`PixelB8 Companion: ${data.fileName||'chat.log'} · 1s`;
+    setConnectionStatus('Companion Live',true);
+  }catch(err){
+    companionBridgeFailures++;
+    if(companionBridgeFailures>=4){
+      console.warn('PixelB8 Companion bridge polling lost:',err);
+      if(liveInterval){clearInterval(liveInterval);liveInterval=null;}
+      setConnectionStatus('Companion offline',false);
+      const el=document.getElementById('streamObsBridgeStatus');if(el)el.textContent='PixelB8 Companion bridge disconnected';
+    }
+  }finally{companionBridgeBusy=false;}
+}
+async function startPixelB8CompanionBridge(){
+  const found=await findPixelB8CompanionBridge();
+  if(!found||found.status?.enabled!==true||found.status?.available!==true)return false;
+  stopLiveHandlePolling();
+  companionBridgeBase=found.base;
+  const size=Number(found.status.size)||0;
+  // Reuse a compatible cached byte position; otherwise start at the current end,
+  // matching the existing live-handle behavior and avoiding a surprise full-log scan.
+  companionBridgeOffset=(cachedFileSize>0&&cachedFileSize<=size)?cachedFileSize:size;
+  cachedFileSize=companionBridgeOffset;
+  cachedFileLastModified=Number(found.status.lastModified)||cachedFileLastModified;
+  setConnectionStatus('Companion Live',true);
+  const status=document.getElementById('fileStatus');if(status)status.textContent=`PixelB8 Companion connected · ${found.status.fileName||'chat.log'} · polling every 1s`;
+  const source=document.getElementById('streamParserFile');if(source)source.textContent=`Source: ${found.status.fileName||'chat.log'} · PixelB8 Companion`;
+  const liveStatus=document.getElementById('streamObsBridgeStatus');if(liveStatus)liveStatus.textContent=`PixelB8 Companion: ${found.status.fileName||'chat.log'} · 1s`;
+  if(liveInterval)clearInterval(liveInterval);
+  liveInterval=setInterval(pollCompanionBridgeOnce,COMPANION_BRIDGE_POLL_MS);
+  await pollCompanionBridgeOnce();
+  return true;
+}
+
+
 /* =========================================================
    OBS / BROWSER LIVE FILESYSTEM HANDLE POLLING
    Uses showOpenFilePicker() -> FileSystemFileHandle -> getFile()
@@ -837,6 +930,9 @@ function clearLiveFeed(){
 
 document.addEventListener('DOMContentLoaded',()=>{
   setTimeout(async()=>{
+    // Companion is the preferred live source. If it is not running/enabled,
+    // keep the existing browser FileSystem handle path as a zero-install fallback.
+    try{if(await startPixelB8CompanionBridge())return;}catch(err){console.warn('PixelB8 Companion bridge unavailable:',err);}
     if(!supportsLiveFileHandle())return;
 
     try{

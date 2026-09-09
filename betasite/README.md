@@ -93,3 +93,10 @@ same architecture used by the older working tracker:
 
 `input[type=file]` remains only as a diagnostic snapshot fallback when
 `showOpenFilePicker()` truly is unavailable.
+
+
+## PixelB8 Companion live chat.log bridge
+
+The current preferred live source is PixelB8 Companion. In Companion open **Connect → PixelB8 Website · EU Tracker**, choose Entropia Universe `chat.log`, and enable the bridge. The EU Tracker automatically scans Companion's local ports (8787–8798), checks `/api/eu/status`, and polls `/api/eu/tail` once per second. Only newly appended bytes are sent into the existing `processNewLiveLines()` parser.
+
+If Companion is unavailable, the existing FileSystemFileHandle live polling and manual snapshot fallback remain available.

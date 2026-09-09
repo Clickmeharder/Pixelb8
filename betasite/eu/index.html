@@ -1353,7 +1353,7 @@
         </div>
 
         <div class="streamer-option-note streamer-source-note">
-          OBS live mode uses a persistent FileSystem handle when available. Select chat.log once, grant read permission, and the tracker calls getFile() every second to read only newly appended bytes.
+          Live mode prefers PixelB8 Companion when available. Otherwise it falls back to a persistent browser FileSystem handle and reads only newly appended bytes every second.
         </div>
       </div>
     </section>
@@ -1588,7 +1588,7 @@
 
   <div id="obsDiagnosticNativePicker" class="obs-source-native-picker hidden">
     <label for="obsChatLogInput">Choose chat.log directly</label>
-    <p>Snapshot fallback only. For live one-second polling, use the PixelB8 OBS Bridge.</p>
+    <p>Snapshot fallback only. For live one-second polling, run PixelB8 Companion with the EU Tracking Bridge enabled.</p>
     <input id="obsChatLogDirectInput" type="file" accept=".log" onchange="handleObsDirectChatLogInput(event)">
   </div>
 
