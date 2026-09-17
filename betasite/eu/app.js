@@ -2002,36 +2002,52 @@ function renderAnalyticsCards(rows){
   container.innerHTML='';
   if(!rows.length){container.innerHTML='<div class="empty">No creature globals match the current search/time range.</div>';return;}
 
-  for(const {mob,data} of rows){
+  const body=rows.map(({mob,data})=>{
     const avg=data.count?data.totalPed/data.count:0;
     let peakH=0,maxH=-1;
     data.hours.forEach((v,h)=>{if(v>maxH){maxH=v;peakH=h}});
-    const peak=maxH>0?`${String(peakH).padStart(2,'0')}:00–${String((peakH+1)%24).padStart(2,'0')}:00`:'No data';
-    const hofRate=data.count?data.hofs/data.count*100:0;
+    const peak=maxH>0?`${String(peakH).padStart(2,'0')}:00–${String((peakH+1)%24).padStart(2,'0')}:00`:'—';
     const lastSeen=data.lastSeen?formatDateTimeUTCish(data.lastSeen):'—';
     const uniquePlayers=data.players?.size||0;
+    const waypoints=mobWaypoints[mob.toLowerCase()]||[];
+    const wp=waypoints[0]||'';
+    const wpButton=wp
+      ?`<button class="btn analytics-waypoint-copy" type="button" data-waypoint="${encodeURIComponent(wp)}" title="${escapeHtml(wp)}">${escapeHtml(wp)}</button>`
+      :'<span class="muted">—</span>';
+    return `<tr>
+      <td><span class="analytics-mob-name">${escapeHtml(mob)}</span></td>
+      <td class="analytics-number"><b>${data.count}</b></td>
+      <td class="analytics-number success">${data.totalPed.toFixed(2)}</td>
+      <td class="analytics-number">${avg.toFixed(2)}</td>
+      <td class="analytics-number warning">${data.maxPed.toFixed(2)}</td>
+      <td class="analytics-number hof">${data.hofs}</td>
+      <td class="analytics-number">${uniquePlayers}</td>
+      <td class="analytics-last-seen">${lastSeen}</td>
+      <td class="analytics-number">${peak}</td>
+      <td>${wpButton}</td>
+    </tr>`;
+  }).join('');
 
-    const wpHtml=(mobWaypoints[mob.toLowerCase()]||[]).map(wp=>{
-      const escaped=wp.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return `<div class="wp-item" onclick="copyWaypoint('${escaped}')" title="${escapeHtml(wp)}"><span class="wp-text">${escapeHtml(wp)}</span><span class="copy-hint">COPY</span></div>`;
-    }).join('');
-
-    const card=document.createElement('div');
-    card.className='mob-card';
-    card.innerHTML=`
-      <div class="mob-card-head"><strong>${escapeHtml(mob)}</strong><span class="badge">${data.count} globals</span></div>
-      <div class="stat-grid">
-        <div class="stat"><div class="label">Largest</div><div class="value success">${data.maxPed.toFixed(2)} PED</div></div>
-        <div class="stat"><div class="label">Average</div><div class="value">${avg.toFixed(2)} PED</div></div>
-        <div class="stat"><div class="label">Total PED</div><div class="value">${data.totalPed.toFixed(2)} PED</div></div>
-        <div class="stat"><div class="label">HOFs</div><div class="value hof">${data.hofs} · ${hofRate.toFixed(1)}%</div></div>
-        <div class="stat"><div class="label">Active Players</div><div class="value">${uniquePlayers}</div></div>
-        <div class="stat"><div class="label">Last Seen</div><div class="value">${lastSeen}</div></div>
-        <div class="stat"><div class="label">Peak Hour</div><div class="value warning">${peak}</div></div>
-      </div>
-      ${wpHtml?`<div class="section-label">Known waypoints · click to copy</div>${wpHtml}`:''}`;
-    container.appendChild(card);
-  }
+  container.innerHTML=`<div class="analytics-table-wrap">
+    <table class="analytics-table">
+      <thead><tr>
+        <th>Mob</th>
+        <th>Globals</th>
+        <th>Total PED</th>
+        <th>Average</th>
+        <th>Largest</th>
+        <th>HOFs</th>
+        <th>Players</th>
+        <th>Last Seen</th>
+        <th>Peak Hour</th>
+        <th>Waypoint</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>
+  </div>`;
+  container.querySelectorAll('.analytics-waypoint-copy').forEach(btn=>{
+    btn.addEventListener('click',()=>copyWaypoint(decodeURIComponent(btn.dataset.waypoint||'')));
+  });
 }
 
 function copyWaypoint(wpText){

@@ -454,10 +454,68 @@ tbody tr:hover{background:rgba(53,194,255,.045)}
 .analytics-cards{
   min-height:0;
   overflow:auto;
-  display:grid;
-  grid-template-columns:repeat(2,minmax(360px,1fr));
-  gap:8px;
+  display:block;
   padding-right:2px;
+}
+.analytics-table-wrap{
+  min-width:100%;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:linear-gradient(180deg,#102139,#091624);
+}
+.analytics-table{
+  width:100%;
+  min-width:1120px;
+  border-collapse:separate;
+  border-spacing:0;
+  table-layout:auto;
+}
+.analytics-table th,
+.analytics-table td{
+  padding:9px 11px;
+  border-bottom:1px solid rgba(89,137,188,.22);
+  text-align:right;
+  white-space:nowrap;
+  vertical-align:middle;
+}
+.analytics-table th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:#0d1c2f;
+  color:var(--muted);
+  font-size:.66rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  box-shadow:0 1px 0 var(--border);
+}
+.analytics-table th:first-child,
+.analytics-table td:first-child{
+  text-align:left;
+  position:sticky;
+  left:0;
+}
+.analytics-table th:first-child{z-index:3;background:#0d1c2f}
+.analytics-table td:first-child{
+  z-index:1;
+  background:#102139;
+}
+.analytics-table tbody tr:hover td{background:#132944}
+.analytics-table tbody tr:hover td:first-child{background:#132944}
+.analytics-table tbody tr:last-child td{border-bottom:0}
+.analytics-mob-name{
+  color:var(--accent);
+  font-weight:800;
+  letter-spacing:.02em;
+}
+.analytics-number{font-variant-numeric:tabular-nums}
+.analytics-last-seen{color:var(--muted)}
+.analytics-waypoint-copy{
+  max-width:210px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 .mob-card{
   border:1px solid var(--border);
@@ -641,7 +699,6 @@ tbody tr:hover{background:rgba(53,194,255,.045)}
   .schedule-layout{grid-template-columns:1fr}
   .schedule-side{grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr)}
   .schedule-side .heatmap-panel:last-child{grid-column:1/-1}
-  .analytics-cards{grid-template-columns:repeat(2,minmax(260px,1fr))}
   body{overflow:auto}
   .app{height:auto;min-height:100vh}
   .workspace{overflow:visible}
@@ -654,7 +711,6 @@ tbody tr:hover{background:rgba(53,194,255,.045)}
   .kpi-grid{grid-template-columns:repeat(3,1fr)}
   .live-summary{grid-template-columns:1fr 1fr}
   .recommend-grid,.schedule-side{grid-template-columns:1fr}
-  .analytics-cards{grid-template-columns:1fr}
   .kpi-grid{grid-template-columns:1fr 1fr}
   .heatmap-grid{grid-template-columns:repeat(4,1fr)}
 }
