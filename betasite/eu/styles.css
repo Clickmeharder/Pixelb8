@@ -4698,3 +4698,41 @@ body.streamer-mode .obs-source-diagnostic{
 .mob-card{min-width:0}
 .mob-card .stat-grid{grid-template-columns:repeat(2,minmax(135px,1fr))}
 @media (max-width:520px){.mob-card .stat-grid{grid-template-columns:1fr}}
+
+
+/* Player-first Activity + captured history */
+.activity-session-layout,
+.history-layout{
+  height:100%;
+  min-height:0;
+  display:grid;
+  grid-template-rows:auto auto minmax(0,1fr);
+  gap:10px;
+}
+.history-layout{grid-template-rows:auto minmax(0,1fr)}
+.activity-session-head,.history-toolbar-panel{min-height:0}
+.activity-session-copy{font-size:.68rem;margin-top:3px;max-width:760px;line-height:1.45}
+.activity-freshness-row{display:flex;gap:8px;flex-wrap:wrap;padding:0 10px 10px}
+.activity-freshness{
+  border:1px solid var(--border);background:#091625;border-radius:999px;
+  padding:5px 8px;font-size:.64rem;color:var(--muted);white-space:nowrap
+}
+.activity-session-kpis{margin:0}
+.activity-recent-panel,.history-results-panel{min-height:0;display:flex;flex-direction:column}
+.activity-ledger-wrap{min-height:0;overflow:auto;flex:1}
+.activity-ledger-table{width:100%;border-collapse:separate;border-spacing:0;min-width:760px}
+.activity-ledger-table th,.activity-ledger-table td{padding:9px 11px;border-bottom:1px solid rgba(89,137,188,.22);white-space:nowrap;text-align:left}
+.activity-ledger-table th{position:sticky;top:0;z-index:2;background:#0d1c2f;color:var(--muted);font-size:.65rem;text-transform:uppercase;letter-spacing:.07em}
+.activity-ledger-table tbody tr:hover td{background:#132944}
+.activity-ledger-table th:nth-child(4),.activity-ledger-table td:nth-child(4){text-align:right}
+.history-toolbar{display:flex;gap:8px;align-items:center;padding:0 10px 10px;flex-wrap:wrap}
+.history-toolbar .activity-search{flex:1 1 280px;min-width:180px}
+.history-type{display:inline-flex;border:1px solid var(--border);border-radius:999px;padding:3px 7px;font-size:.62rem;font-weight:800;text-transform:uppercase;background:#0a1726}
+.history-type.hof{border-color:rgba(255,87,175,.5)}
+.hot-strip-shell{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;min-width:0}
+.hot-strip-label{font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.hot-mobs-strip{min-width:0}
+@media (max-width:900px){
+  .hot-strip-shell{grid-template-columns:1fr}
+  .activity-freshness-row{gap:5px}
+}

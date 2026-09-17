@@ -240,91 +240,55 @@ function renderCurrentHourBreakdown(hourData,currentH){
 }
 
 function updateScheduleDisplay(){
-  const currentH=getActiveTargetHour();
-  const currentTimeDisplay=document.getElementById('currentTimeDisplay');
-  const currentHourMiniLabel=document.getElementById('currentHourMiniLabel');
-  if(currentTimeDisplay)currentTimeDisplay.textContent=`${String(currentH).padStart(2,'0')}:00`;
-  if(currentHourMiniLabel)currentHourMiniLabel.textContent=`${String(currentH).padStart(2,'0')}:00`;
-
-  const records=(globalParsedData||[]).filter(trackerRecordWithinAnalysisWindow);
-  if(!records.length){
-    const recommended=document.getElementById('recommendedMobBox');
-    const reason=document.getElementById('recommendationReason');
-    const best=document.getElementById('bestWindowBox');
-    const bestReason=document.getElementById('bestWindowReason');
-    if(recommended)recommended.textContent='No creature activity in this window';
-    if(reason)reason.textContent='Live source can be connected even when there are no globals inside the current analysis window.';
-    if(best)best.textContent='No activity window yet';
-    if(bestReason)bestReason.textContent='';
-    document.getElementById('loadedGlobalsKpi').textContent='0';
-    document.getElementById('loadedGlobalsSub').textContent='No creature globals in current window';
-    document.getElementById('allMobPeakKpi').textContent='--';
-    document.getElementById('allMobPeakSub').textContent='Waiting for creature globals';
-    const empty=Array.from({length:24},()=>({total:0,ped:0,hofs:0,mobs:{}}));
-    renderHeatmaps(empty,currentH);
-    renderCurrentHourBreakdown(empty[currentH],currentH);
-    const tbody=document.getElementById('scheduleTableBody');
-    if(tbody)tbody.innerHTML='<tr><td colspan="5" class="empty">No creature globals in the current analysis window.</td></tr>';
-    return;
-  }
-
-  const hourlyStats=Array.from({length:24},()=>({total:0,ped:0,hofs:0,mobs:{}}));
-  let totalPed=0;
-  for(const rec of records){
-    if(!rec.date||isNaN(rec.date))continue;
-    const h=Number.isFinite(Number(rec.hour))?Number(rec.hour):rec.date.getUTCHours();
-    const bucket=hourlyStats[Math.max(0,Math.min(23,h))];
-    const mob=String(rec.mob||'Unknown').trim()||'Unknown';
-    bucket.mobs[mob]=(bucket.mobs[mob]||0)+1;
-    bucket.total++;
-    bucket.ped+=Number(rec.ped)||0;
-    if(rec.isHof)bucket.hofs++;
-    totalPed+=Number(rec.ped)||0;
-  }
-
-  document.getElementById('loadedGlobalsKpi').textContent=records.length.toLocaleString();
-  document.getElementById('loadedGlobalsSub').textContent=`All detected mobs · ${totalPed.toFixed(0)} PED`;
-
-  let allPeakHour=0,allPeakCount=-1;
-  hourlyStats.forEach((bucket,h)=>{
-    if(bucket.total>allPeakCount){allPeakCount=bucket.total;allPeakHour=h}
+  const body=document.getElementById('scheduleTableBody');
+  const start=typeof activitySessionStartedAt!=='undefined'?activitySessionStartedAt:new Date();
+  const records=(globalParsedData||[]).filter(rec=>{
+    const d=typeof getCapturedRecordDate==='function'?getCapturedRecordDate(rec):(rec.date instanceof Date?rec.date:new Date(rec.date));
+    return d&&!Number.isNaN(d.getTime())&&d>=start;
+  }).sort((a,b)=>{
+    const ad=typeof getCapturedRecordDate==='function'?getCapturedRecordDate(a):a.date;
+    const bd=typeof getCapturedRecordDate==='function'?getCapturedRecordDate(b):b.date;
+    return (bd?.getTime?.()||0)-(ad?.getTime?.()||0);
   });
-  document.getElementById('allMobPeakKpi').textContent=`${String(allPeakHour).padStart(2,'0')}:00`;
-  document.getElementById('allMobPeakSub').textContent=`${allPeakCount} creature globals`;
 
-  let bestWindowStart=0,maxWindowGlobals=-1;
-  for(let start=0;start<24;start++){
-    let sum=0;
-    for(let i=0;i<6;i++)sum+=hourlyStats[(start+i)%24].total;
-    if(sum>maxWindowGlobals){maxWindowGlobals=sum;bestWindowStart=start}
-  }
-  const bestWindowEnd=(bestWindowStart+6)%24;
-  document.getElementById('bestWindowBox').textContent=
-    `${String(bestWindowStart).padStart(2,'0')}:00 → ${String(bestWindowEnd).padStart(2,'0')}:00 UTC · ${maxWindowGlobals} globals`;
-  document.getElementById('bestWindowReason').textContent=
-    'Highest historical creature-global density across any contiguous six-hour block in the current analysis window.';
+  if(typeof updateCapturedFreshnessUI==='function')updateCapturedFreshnessUI();
+  const source=typeof currentSourceLabel==='function'?currentSourceLabel():'Live source';
+  const status=document.getElementById('activitySessionStatus');
+  if(status)status.textContent=/Live/i.test(source)?source:'Waiting for live data';
 
-  const current=hourlyStats[currentH];
-  const sorted=Object.entries(current.mobs)
-    .map(([mob,count])=>({mob,count}))
-    .sort((a,b)=>b.count-a.count||a.mob.localeCompare(b.mob));
-  const best=sorted[0],second=sorted[1];
+  const globals=records.length;
+  const hofs=records.filter(r=>r.isHof);
+  const ped=records.reduce((sum,r)=>sum+(Number(r.ped)||0),0);
+  const hofPed=hofs.reduce((sum,r)=>sum+(Number(r.ped)||0),0);
+  const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+  set('sessionGlobalCount',globals.toLocaleString());
+  set('sessionGlobalSub',globals?`${new Set(records.map(r=>r.mob).filter(Boolean)).size} mobs observed this session`:'No globals captured this session');
+  set('sessionHofCount',hofs.length.toLocaleString());
+  set('sessionHofSub',`${hofPed.toFixed(2)} PED in HOFs`);
+  set('sessionGlobalPed',ped.toFixed(2));
+  set('sessionRecordCount',`${globals.toLocaleString()} ${globals===1?'record':'records'}`);
 
-  if(best?.count>0){
-    const share=current.total?Math.round(best.count/current.total*100):0;
-    document.getElementById('recommendedMobBox').innerHTML=
-      `🔥 ${escapeHtml(best.mob.toUpperCase())} <span class="muted" style="font-size:.72rem">· ${best.count} globals · ${share}% share</span>`;
-    document.getElementById('recommendationReason').textContent=
-      `${second?`Runner-up: ${second.mob} (${second.count}). `:''}Current-hour creature total: ${current.total}.`;
+  const latest=records[0];
+  if(latest){
+    const d=typeof getCapturedRecordDate==='function'?getCapturedRecordDate(latest):latest.date;
+    set('sessionLatestTime',d?formatDateTimeUTCish(d):'—');
+    set('sessionLatestMob',`${latest.mob||'Unknown'} · ${latest.player||'Unknown'} · ${(Number(latest.ped)||0).toFixed(2)} PED${latest.isHof?' HOF':''}`);
   }else{
-    document.getElementById('recommendedMobBox').textContent=`No clear activity at ${String(currentH).padStart(2,'0')}:00 UTC`;
-    document.getElementById('recommendationReason').textContent='No creature globals were recorded in this UTC hour inside the current analysis window.';
+    set('sessionLatestTime','—');
+    set('sessionLatestMob',/Live/i.test(source)?'Live source connected · waiting for a new global/HOF':'No active live session');
   }
 
-  renderHeatmaps(hourlyStats,currentH);
-  renderCurrentHourBreakdown(current,currentH);
-  renderScheduleTable(hourlyStats,currentH);
-  syncStreamerHud();
+  if(body){
+    if(!records.length){
+      body.innerHTML=`<tr><td colspan="5" class="empty">${/Live/i.test(source)?'Live source connected. No globals/HOFs captured during this session yet.':'No active live source. History and Analytics remain available from previously captured data.'}</td></tr>`;
+    }else{
+      body.innerHTML=records.slice(0,150).map(rec=>{
+        const d=typeof getCapturedRecordDate==='function'?getCapturedRecordDate(rec):rec.date;
+        return `<tr><td>${escapeHtml(formatDateTimeUTCish(d))}</td><td>${escapeHtml(rec.player||'Unknown')}</td><td><b class="analytics-mob-name">${escapeHtml(rec.mob||'Unknown')}</b></td><td class="analytics-number ${rec.isHof?'hof':'success'}">${(Number(rec.ped)||0).toFixed(2)}</td><td>${rec.isHof?'<span class="history-type hof">HOF</span>':'<span class="history-type">Global</span>'}</td></tr>`;
+      }).join('');
+    }
+  }
+  syncStreamerHud?.();
 }
 
 

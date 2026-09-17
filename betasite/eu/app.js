@@ -54,6 +54,7 @@ let db=null;
 let voiceAnnouncerEnabled=false;
 let latestSyncedGameTime=null;
 let lastTimeSyncTimestamp=0;
+const activitySessionStartedAt=new Date();
 
 let liveSessionGlobals=0;
 let liveSessionHofs=0;
@@ -373,14 +374,14 @@ function applyTrackerOptions(){
   if(subtitle){
     subtitle.textContent=trackerEffectiveMode==='event'
       ?`${trackerOptions.eventName||'Event'} · live telemetry · event analytics · streamer HUD`
-      :'Solo & team hunting · live telemetry · watchlist activity · streamer HUD';
+      :'Solo & team hunting · live telemetry · captured history · streamer HUD';
   }
 
   const scheduleTitle=document.getElementById('eventScheduleTitleText');
   if(scheduleTitle){
     scheduleTitle.textContent=trackerEffectiveMode==='event'
       ?`${trackerOptions.eventName||'Event'} · Event Schedule`
-      :'Watchlist Activity';
+      :'Current Session Activity';
   }
 
   const sessionLabel=document.getElementById('sessionWindowLabel');
@@ -1693,14 +1694,17 @@ function switchHuntTrackerTab(tabName){
 }
 
 function switchGlobalAnalyticsTab(tabName){
-  const scheduleActive=tabName==='schedule';
-  document.getElementById('scheduleTab')?.classList.toggle('hidden',!scheduleActive);
-  document.getElementById('analyticsTab')?.classList.toggle('hidden',scheduleActive);
+  const active=tabName==='history'?'history':(tabName==='analytics'?'analytics':'schedule');
+  document.getElementById('scheduleTab')?.classList.toggle('hidden',active!=='schedule');
+  document.getElementById('historyTab')?.classList.toggle('hidden',active!=='history');
+  document.getElementById('analyticsTab')?.classList.toggle('hidden',active!=='analytics');
 
-  document.getElementById('globalScheduleBtn')?.classList.toggle('active',scheduleActive);
-  document.getElementById('globalAnalyticsBtn')?.classList.toggle('active',!scheduleActive);
+  document.getElementById('globalScheduleBtn')?.classList.toggle('active',active==='schedule');
+  document.getElementById('globalHistoryBtn')?.classList.toggle('active',active==='history');
+  document.getElementById('globalAnalyticsBtn')?.classList.toggle('active',active==='analytics');
 
-  if(scheduleActive)updateScheduleDisplay();
+  if(active==='schedule')updateScheduleDisplay();
+  else if(active==='history')renderCapturedHistory();
   else updateAnalyticsDisplay();
 }
 
@@ -1933,7 +1937,86 @@ function makeHeatCell(hour,count,max,mode,isCurrent){
 }
 
 
+function getCapturedRecordDate(rec){
+  const raw=rec?.date||rec?.timestamp||rec?.time;
+  const d=raw instanceof Date?raw:(raw?new Date(raw):null);
+  return d&&!Number.isNaN(d.getTime())?d:null;
+}
+
+function describeCaptureAge(date){
+  if(!date)return 'No captured data';
+  const diff=Math.max(0,Date.now()-date.getTime());
+  const mins=Math.floor(diff/60000);
+  if(mins<1)return 'just now';
+  if(mins<60)return `${mins}m ago`;
+  const hours=Math.floor(mins/60);
+  if(hours<24)return `${hours}h ago`;
+  const days=Math.floor(hours/24);
+  return `${days}d ago`;
+}
+
+function latestCapturedRecord(){
+  let latest=null;
+  for(const rec of globalParsedData||[]){
+    const d=getCapturedRecordDate(rec);
+    if(d&&(!latest||d>latest.date))latest={rec,date:d};
+  }
+  return latest;
+}
+
+function currentSourceLabel(){
+  const text=document.getElementById('fileStatus')?.textContent?.trim()||'';
+  if(/Companion Live/i.test(text))return 'PixelB8 Companion Live';
+  if(/Browser Fallback|Browser Live/i.test(text))return 'Browser Fallback Live';
+  if(/cached/i.test(text))return 'Cached / Offline';
+  if(/connect|checking/i.test(text))return 'Connecting / checking source';
+  return text||'No live source';
+}
+
+function updateCapturedFreshnessUI(){
+  const latest=latestCapturedRecord();
+  const lastText=latest?`${formatDateTimeUTCish(latest.date)} · ${describeCaptureAge(latest.date)}`:'—';
+  const source=currentSourceLabel();
+  const a=document.getElementById('activitySourceFreshness');if(a)a.textContent=`Source: ${source}`;
+  const b=document.getElementById('activityLastCaptured');if(b)b.textContent=`Last captured: ${lastText}`;
+  const c=document.getElementById('activitySessionSince');if(c)c.textContent=`Session started: ${formatDateTimeUTCish(activitySessionStartedAt)}`;
+  const h=document.getElementById('historyLastCaptured');if(h)h.textContent=`Last captured: ${lastText}`;
+  const badge=document.getElementById('historyFreshnessBadge');
+  if(badge)badge.textContent=latest?`Captured ${describeCaptureAge(latest.date)}`:'No captured data';
+}
+
+function capturedRangeCutoff(value){
+  const now=Date.now();
+  if(value==='last24')return new Date(now-24*60*60*1000);
+  if(value==='last7')return new Date(now-7*24*60*60*1000);
+  if(value==='last30')return new Date(now-30*24*60*60*1000);
+  if(value==='last90')return new Date(now-90*24*60*60*1000);
+  return new Date(0);
+}
+
+function renderCapturedHistory(){
+  updateCapturedFreshnessUI();
+  const body=document.getElementById('capturedHistoryBody');if(!body)return;
+  const query=String(document.getElementById('historySearchInput')?.value||'').trim().toLowerCase();
+  const type=document.getElementById('historyTypeSelect')?.value||'all';
+  const cutoff=capturedRangeCutoff(document.getElementById('historyRangeSelect')?.value||'last30');
+  const rows=(globalParsedData||[]).filter(rec=>{
+    const d=getCapturedRecordDate(rec);if(!d||d<cutoff)return false;
+    if(type==='hof'&&!rec.isHof)return false;
+    if(type==='global'&&rec.isHof)return false;
+    const mob=String(rec.mob||'');const player=String(rec.player||'');
+    return !query||mob.toLowerCase().includes(query)||player.toLowerCase().includes(query);
+  }).sort((a,b)=>(getCapturedRecordDate(b)?.getTime()||0)-(getCapturedRecordDate(a)?.getTime()||0));
+  const count=document.getElementById('historyResultCount');if(count)count.textContent=`${rows.length.toLocaleString()} records shown`;
+  if(!rows.length){body.innerHTML='<tr><td colspan="5" class="empty">No captured globals/HOFs match this view.</td></tr>';return;}
+  body.innerHTML=rows.slice(0,1000).map(rec=>{
+    const d=getCapturedRecordDate(rec);
+    return `<tr><td>${escapeHtml(formatDateTimeUTCish(d))}</td><td>${escapeHtml(rec.player||'Unknown')}</td><td><b class="analytics-mob-name">${escapeHtml(rec.mob||'Unknown')}</b></td><td class="analytics-number ${rec.isHof?'hof':'success'}">${(Number(rec.ped)||0).toFixed(2)}</td><td>${rec.isHof?'<span class="history-type hof">HOF</span>':'<span class="history-type">Global</span>'}</td></tr>`;
+  }).join('');
+}
+
 function updateAnalyticsDisplay(){
+  updateCapturedFreshnessUI();
   const timeframe=document.getElementById('timeframeSelect')?.value||'last30';
   // Recency windows are always relative to the real current clock.
   // The last Entropia/log timestamp may be days or months old while the game is closed.
@@ -1981,7 +2064,7 @@ function updateAnalyticsDisplay(){
     if(sort==='largest')return b.data.maxPed-a.data.maxPed;
     if(sort==='hofs')return b.data.hofs-a.data.hofs || b.data.count-a.data.count;
     if(sort==='name')return a.mob.localeCompare(b.mob);
-    // "What's Hot" favors frequency, then recent PED activity.
+    // Most Observed: frequency first, then captured PED volume.
     return b.data.count-a.data.count || b.data.totalPed-a.data.totalPed;
   });
 

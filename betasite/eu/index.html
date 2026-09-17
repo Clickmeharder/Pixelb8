@@ -137,18 +137,19 @@
       <div class="global-analytics-shell">
         <div class="global-analytics-subnav">
           <button id="globalScheduleBtn" class="global-subtab-btn active" onclick="switchGlobalAnalyticsTab('schedule')">Activity</button>
+          <button id="globalHistoryBtn" class="global-subtab-btn" onclick="switchGlobalAnalyticsTab('history')">History</button>
           <button id="globalAnalyticsBtn" class="global-subtab-btn" onclick="switchGlobalAnalyticsTab('analytics')">Explore &amp; Analytics</button>
         </div>
         <div class="global-analytics-body">
 
-    <!-- Schedule -->
+    <!-- Current Session Activity -->
     <section id="scheduleTab" class="global-subtab-page">
       <div id="fileConnectionCard" class="connection-bar">
         <div class="connection-info">
           <div>📡</div>
           <div class="text">
-            <div class="connection-title">Chat Log Source</div>
-            <div id="fileStatus">No chat.log connected. Cached analytics load instantly; reconnecting only scans bytes added since the last cached position.</div>
+            <div class="connection-title">Live Tracking Source</div>
+            <div id="fileStatus">No chat.log connected. Cached history remains available in History and Explore &amp; Analytics.</div>
           </div>
         </div>
         <div class="connection-actions">
@@ -156,108 +157,102 @@
         </div>
       </div>
 
-      <div class="schedule-layout">
-        <div class="schedule-main">
-          <div class="kpi-grid">
-            <div class="kpi">
-              <div id="sessionWindowLabel" class="kpi-label">Analysis Window</div>
-              <div id="timerDisplay" class="kpi-value timer-value">Waiting...</div>
-              <div id="timerDetails" class="kpi-sub">Activity summary for your current analysis window.</div>
+      <div class="activity-session-layout">
+        <div class="activity-session-head panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-title">Current Session Activity</span>
+              <div class="muted activity-session-copy">Only activity received during this browser session appears here. Historical observations stay in History and Analytics.</div>
             </div>
-            <div class="kpi">
-              <div class="kpi-label">Active Hour</div>
-              <div id="currentTimeDisplay" class="kpi-value accent">--:00</div>
-              <div class="kpi-sub">UTC / synced log hour</div>
-            </div>
-            <div class="kpi">
-              <div class="kpi-label">Loaded Creature Globals</div>
-              <div id="loadedGlobalsKpi" class="kpi-value">0</div>
-              <div id="loadedGlobalsSub" class="kpi-sub">No creature globals loaded</div>
-            </div>
-            <div class="kpi">
-              <div class="kpi-label">All-Mob Peak Hour</div>
-              <div id="allMobPeakKpi" class="kpi-value hof">--</div>
-              <div id="allMobPeakSub" class="kpi-sub">Waiting for data</div>
-            </div>
-            <div class="kpi player-legacy-event-only">
-              <div class="kpi-label">Legacy Event End</div>
-              <div id="eventEndCountdown" class="kpi-value warning">--d --:--:--</div>
-              <div id="eventEndCountdownSub" class="kpi-sub">Aug 17 · 00:00 UTC</div>
-            </div>
-            <div class="kpi player-legacy-event-only">
-              <div id="latestStartLabel" class="kpi-label">Legacy Session Deadline</div>
-              <div id="latestStartCountdown" class="kpi-value success">--d --:--:--</div>
-              <div id="latestStartCountdownSub" class="kpi-sub">Deadline: Aug 16 · 18:00 UTC</div>
-            </div>
+            <span id="activitySessionStatus" class="status-pill">Waiting for live data</span>
           </div>
-
-          <div class="recommend-grid">
-            <div class="recommend primary">
-              <h3>Hot Mob This UTC Hour</h3>
-              <div id="recommendedMobBox" class="value success">Load chat.log</div>
-              <div id="recommendationReason" class="reason"></div>
-            </div>
-            <div class="recommend window">
-              <h3>Best 6-Hour Activity Window</h3>
-              <div id="bestWindowBox" class="value warning">Calculate from log data</div>
-              <div id="bestWindowReason" class="reason"></div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-header">
-              <span id="eventScheduleTitleText" class="panel-title">Creature Activity by UTC Hour</span>
-              <div class="toolbar">
-                <label>Time mode</label>
-                <select id="timeModeSelect" onchange="toggleTimeMode()">
-                  <option value="live" selected>Live / Log</option>
-                  <option value="custom">Simulate</option>
-                </select>
-                <span id="customTimeGroup" class="hidden">
-                  <input type="number" id="simHourInput" min="0" max="23" value="12" onchange="updateScheduleDisplay()">
-                </span>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>UTC Hour</th>
-                    <th>Top Mob</th>
-                    <th>Globals</th>
-                    <th>Alternative</th>
-                    <th>Activity</th>
-                  </tr>
-                </thead>
-                <tbody id="scheduleTableBody">
-                  <tr><td colspan="5" class="empty">Awaiting chat.log data...</td></tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="activity-freshness-row">
+            <span id="activitySourceFreshness" class="activity-freshness">Source: checking…</span>
+            <span id="activityLastCaptured" class="activity-freshness">Last captured: —</span>
+            <span id="activitySessionSince" class="activity-freshness">Session started: —</span>
           </div>
         </div>
 
-        <aside class="schedule-side">
-          <div class="panel heatmap-panel">
-            <div class="panel-header">
-              <span class="panel-title" style="color:var(--hof)">All Mobs · Hourly Density</span>
-              <span id="allPeakLabel" class="muted" style="font-size:.68rem">No data</span>
-            </div>
-            <div class="panel-body">
-              <div id="heatmapGridAll" class="heatmap-grid"></div>
-            </div>
+        <div class="kpi-grid activity-session-kpis">
+          <div class="kpi">
+            <div class="kpi-label">Session Globals</div>
+            <div id="sessionGlobalCount" class="kpi-value success">0</div>
+            <div id="sessionGlobalSub" class="kpi-sub">No globals captured this session</div>
           </div>
+          <div class="kpi">
+            <div class="kpi-label">Session HOFs</div>
+            <div id="sessionHofCount" class="kpi-value hof">0</div>
+            <div id="sessionHofSub" class="kpi-sub">0.00 PED in HOFs</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Session Global PED</div>
+            <div id="sessionGlobalPed" class="kpi-value warning">0.00</div>
+            <div class="kpi-sub">Captured global/HOF value</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Latest Captured</div>
+            <div id="sessionLatestTime" class="kpi-value accent">—</div>
+            <div id="sessionLatestMob" class="kpi-sub">Waiting for current activity</div>
+          </div>
+        </div>
 
-          <div class="panel">
-            <div class="panel-header">
-              <span class="panel-title">Current Hour Breakdown</span>
-              <span id="currentHourMiniLabel" class="accent" style="font-size:.68rem">--:00</span>
+        <div class="panel activity-recent-panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-title">Recent Session Globals &amp; HOFs</span>
+              <div class="muted activity-session-copy">Newest captured activity first. This is not a recommendation feed.</div>
             </div>
-            <div class="panel-body" id="currentHourBreakdown">
-              <div class="empty">Load data to see mob-by-mob activity.</div>
-            </div>
+            <span id="sessionRecordCount" class="muted">0 records</span>
           </div>
-        </aside>
+          <div class="activity-ledger-wrap">
+            <table class="activity-ledger-table">
+              <thead><tr><th>Time</th><th>Player</th><th>Mob</th><th>PED</th><th>Type</th></tr></thead>
+              <tbody id="scheduleTableBody"><tr><td colspan="5" class="empty">No current-session globals captured yet.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Captured History -->
+    <section id="historyTab" class="global-subtab-page hidden">
+      <div class="history-layout">
+        <div class="panel history-toolbar-panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-title">Captured Global History</span>
+              <div class="muted activity-session-copy">A chronological ledger of creature globals/HOFs that your local logs have actually observed.</div>
+            </div>
+            <span id="historyFreshnessBadge" class="status-pill">No captured data</span>
+          </div>
+          <div class="history-toolbar">
+            <input id="historySearchInput" class="activity-search" type="search" placeholder="Search mob or player…" oninput="renderCapturedHistory()">
+            <select id="historyTypeSelect" onchange="renderCapturedHistory()">
+              <option value="all">Globals + HOFs</option>
+              <option value="hof">HOFs only</option>
+              <option value="global">Globals only</option>
+            </select>
+            <select id="historyRangeSelect" onchange="renderCapturedHistory()">
+              <option value="last24">Last 24 Hours</option>
+              <option value="last7">Last 7 Days</option>
+              <option value="last30" selected>Last 30 Days</option>
+              <option value="last90">Last 90 Days</option>
+              <option value="all">All Captured</option>
+            </select>
+          </div>
+          <div class="activity-freshness-row">
+            <span id="historyLastCaptured" class="activity-freshness">Last captured: —</span>
+            <span id="historyResultCount" class="activity-freshness">0 records shown</span>
+          </div>
+        </div>
+        <div class="panel history-results-panel">
+          <div class="activity-ledger-wrap history-ledger-wrap">
+            <table class="activity-ledger-table history-ledger-table">
+              <thead><tr><th>Date / Time</th><th>Player</th><th>Mob</th><th>PED</th><th>Type</th></tr></thead>
+              <tbody id="capturedHistoryBody"><tr><td colspan="5" class="empty">No captured creature-global history yet.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -266,7 +261,7 @@
       <div class="analytics-layout">
         <div class="panel">
           <div class="panel-header">
-            <span class="panel-title">Historical Analytics</span>
+            <span class="panel-title">Analytics · Your Captured Data</span>
             <button class="btn" onclick="openTrackerOptions()">⚙ Analytics Options</button>
             <div class="analytics-top">
               <div class="analytics-summary">
@@ -276,7 +271,7 @@
               </div>
               <input id="activitySearchInput" class="activity-search" type="search" placeholder="Search mob or player…" oninput="updateAnalyticsDisplay()">
               <select id="activitySortSelect" onchange="updateAnalyticsDisplay()">
-                <option value="hot" selected>Sort: What's Hot</option>
+                <option value="hot" selected>Sort: Most Observed</option>
                 <option value="recent">Sort: Most Recent</option>
                 <option value="ped">Sort: Total PED</option>
                 <option value="largest">Sort: Largest Global</option>
@@ -294,10 +289,10 @@
           </div>
         </div>
 
-        <div id="hotMobsStrip" class="hot-mobs-strip">
-          <div class="empty">Connect chat.log to see recent activity.</div>
-        </div>
-        <div class="analytics-note">All detected creature globals are included. Search or sort any mob/player directly; no target list is required. Planet filtering will appear once planet/location can be inferred reliably from the available game data.</div>
+        <div class="hot-strip-shell"><div class="hot-strip-label">Most Observed in This View</div><div id="hotMobsStrip" class="hot-mobs-strip">
+          <div class="empty">Captured-data summary will appear here.</div>
+        </div></div>
+        <div class="analytics-note">These analytics describe only the globals/HOFs captured by your local chat.log history. They are not an Entropia-wide live trend feed. Search or sort any observed mob/player directly.</div>
         <div id="resultsContainer" class="analytics-cards">
           <div class="empty">Connect chat.log to view creature activity.</div>
         </div>

@@ -378,6 +378,7 @@ function setLiveSourceDetails(kind,detail=''){
     if(bridge)bridge.textContent='Companion: not connected';
     setConnectionStatus('No Source',false);
   }
+  try{ updateCapturedFreshnessUI?.(); updateScheduleDisplay?.(); }catch{}
 }
 async function pollCompanionBridgeOnce(){
   if(!companionBridgeBase||companionBridgeBusy)return;
@@ -898,6 +899,7 @@ function processNewLiveLines(text){
   updateLiveSummary();
   updateScheduleDisplay();
   updateAnalyticsDisplay();
+  try{ renderCapturedHistory?.(); }catch{}
 }
 
 function saveParsedDataToIDB(records,allMobStats,fileMeta=null){
