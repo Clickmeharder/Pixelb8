@@ -2093,8 +2093,9 @@ function updateAnalyticsDisplay(){
 function renderHotMobs(rows){
   const el=document.getElementById('hotMobsStrip');if(!el)return;
   if(!rows.length){el.innerHTML='<div class="empty">No creature globals match this view yet.</div>';return;}
-  el.innerHTML=rows.map(({mob,data},i)=>`<button class="hot-mob-chip" type="button" onclick="document.getElementById('activitySearchInput').value='${escapeHtml(mob).replace(/'/g,'&#39;')}';updateAnalyticsDisplay()">
-    <span class="hot-rank">#${i+1}</span><b>${escapeHtml(mob)}</b><span>${data.count} globals</span><span>${data.totalPed.toFixed(0)} PED</span>${data.hofs?`<span class="hof">${data.hofs} HOF</span>`:''}
+  el.innerHTML=rows.map(({mob,data},i)=>`<button class="hot-mob-chip" type="button" title="${escapeHtml(mob)}" onclick="document.getElementById('activitySearchInput').value='${escapeHtml(mob).replace(/'/g,'&#39;')}';updateAnalyticsDisplay()">
+    <span class="hot-rank">#${i+1}</span><b class="hot-name">${escapeHtml(mob)}</b>
+    <span class="hot-stats"><span class="hof">${data.hofs} HOF${data.hofs===1?'':'s'}</span><span>${data.count} Global${data.count===1?'':'s'}</span><span>${data.totalPed.toFixed(0)} PED</span></span>
   </button>`).join('');
 }
 
