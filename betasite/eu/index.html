@@ -136,86 +136,13 @@
     <section id="globalTab" class="tab-page">
       <div class="global-analytics-shell">
         <div class="global-analytics-subnav">
-          <button id="globalScheduleBtn" class="global-subtab-btn active" onclick="switchGlobalAnalyticsTab('schedule')">Activity</button>
-          <button id="globalHistoryBtn" class="global-subtab-btn" onclick="switchGlobalAnalyticsTab('history')">History</button>
+          <button id="globalHistoryBtn" class="global-subtab-btn active" onclick="switchGlobalAnalyticsTab('history')">History</button>
           <button id="globalAnalyticsBtn" class="global-subtab-btn" onclick="switchGlobalAnalyticsTab('analytics')">Explore &amp; Analytics</button>
         </div>
         <div class="global-analytics-body">
 
-    <!-- Current Session Activity -->
-    <section id="scheduleTab" class="global-subtab-page">
-      <div id="fileConnectionCard" class="connection-bar">
-        <div class="connection-info">
-          <div>📡</div>
-          <div class="text">
-            <div class="connection-title">Live Tracking Source</div>
-            <div id="fileStatus">No chat.log connected. Cached history remains available in History and Explore &amp; Analytics.</div>
-          </div>
-        </div>
-        <div class="connection-actions">
-          <button class="btn primary" onclick="pickChatLogFile()">Select File</button>
-        </div>
-      </div>
-
-      <div class="activity-session-layout">
-        <div class="activity-session-head panel">
-          <div class="panel-header">
-            <div>
-              <span class="panel-title">Current Session Activity</span>
-              <div class="muted activity-session-copy">Only activity received during this browser session appears here. Historical observations stay in History and Analytics.</div>
-            </div>
-            <span id="activitySessionStatus" class="status-pill">Waiting for live data</span>
-          </div>
-          <div class="activity-freshness-row">
-            <span id="activitySourceFreshness" class="activity-freshness">Source: checking…</span>
-            <span id="activityLastCaptured" class="activity-freshness">Last captured: —</span>
-            <span id="activitySessionSince" class="activity-freshness">Session started: —</span>
-          </div>
-        </div>
-
-        <div class="kpi-grid activity-session-kpis">
-          <div class="kpi">
-            <div class="kpi-label">Session Globals</div>
-            <div id="sessionGlobalCount" class="kpi-value success">0</div>
-            <div id="sessionGlobalSub" class="kpi-sub">No globals captured this session</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Session HOFs</div>
-            <div id="sessionHofCount" class="kpi-value hof">0</div>
-            <div id="sessionHofSub" class="kpi-sub">0.00 PED in HOFs</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Session Global PED</div>
-            <div id="sessionGlobalPed" class="kpi-value warning">0.00</div>
-            <div class="kpi-sub">Captured global/HOF value</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Latest Captured</div>
-            <div id="sessionLatestTime" class="kpi-value accent">—</div>
-            <div id="sessionLatestMob" class="kpi-sub">Waiting for current activity</div>
-          </div>
-        </div>
-
-        <div class="panel activity-recent-panel">
-          <div class="panel-header">
-            <div>
-              <span class="panel-title">Recent Session Globals &amp; HOFs</span>
-              <div class="muted activity-session-copy">Newest captured activity first. This is not a recommendation feed.</div>
-            </div>
-            <span id="sessionRecordCount" class="muted">0 records</span>
-          </div>
-          <div class="activity-ledger-wrap">
-            <table class="activity-ledger-table">
-              <thead><tr><th>Time</th><th>Player</th><th>Mob</th><th>PED</th><th>Type</th></tr></thead>
-              <tbody id="scheduleTableBody"><tr><td colspan="5" class="empty">No current-session globals captured yet.</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Captured History -->
-    <section id="historyTab" class="global-subtab-page hidden">
+    <section id="historyTab" class="global-subtab-page">
       <div class="history-layout">
         <div class="panel history-toolbar-panel">
           <div class="panel-header">
@@ -306,6 +233,20 @@
     <!-- Live -->
     <section id="liveTab" class="tab-page hidden">
       <div class="live-layout">
+        <div class="panel live-source-panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-title">Live Monitor</span>
+              <span class="muted" style="font-size:.68rem;margin-left:8px">Current-session data from your active chat.log source</span>
+            </div>
+            <div class="live-monitor-actions">
+              <span id="liveMonitorSource" class="status-pill">Checking source…</span>
+              <span id="liveMonitorLastActivity" class="muted">Last captured: —</span>
+              <button class="btn" onclick="clearLiveFeed()">Clear Feed</button>
+            </div>
+          </div>
+        </div>
+
         <div class="live-summary">
           <div class="kpi">
             <div class="kpi-label">My Globals</div>
@@ -320,82 +261,37 @@
           <div class="kpi">
             <div class="kpi-label">My Global Loot</div>
             <div id="liveMyTotalLoot" class="kpi-value warning">0.00 PED</div>
-            <div class="kpi-sub">Globals + HOFs in current analysis window</div>
+            <div class="kpi-sub">Globals + HOFs in the current analysis window</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label">Latest Watchlist Mob</div>
-            <div id="liveLatestMob" class="kpi-value accent">—</div>
-            <div class="kpi-sub">Most recent watchlist global</div>
+            <div class="kpi-label">Recent Activity</div>
+            <div id="liveRecentCount" class="kpi-value accent">0</div>
+            <div id="liveRecentSub" class="kpi-sub">No creature globals captured this session</div>
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel live-recent-panel">
           <div class="panel-header">
             <div>
-              <span class="panel-title">Live Entropia Activity</span>
-              <span class="muted" style="font-size:.68rem;margin-left:8px">Companion keeps ingesting even if this page sleeps</span>
+              <span class="panel-title">Recent Globals &amp; HOFs</span>
+              <span class="muted" style="font-size:.68rem;margin-left:8px">One live feed · filter it to yourself, your detected team, or everyone observed</span>
             </div>
-            <button class="btn" onclick="clearLiveFeed()">Clear Feed</button>
-          </div>
-        </div>
-
-        <div class="live-feed-stack">
-          <div class="panel">
-            <div class="panel-header">
-              <span class="panel-title">Watchlist Globals</span>
-              <div class="live-feed-meta">
-                Your optional mob watchlist
-                <span class="live-feed-count">G <b id="targetLiveGlobalCount">0</b></span>
-                <span class="live-feed-count">HOF <b id="targetLiveHofCount">0</b></span>
-                <span id="targetLiveFeedValue" class="live-feed-count">0.00 PED</span>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table class="feed-table">
-                <thead>
-                  <tr>
-                    <th>Timestamp</th>
-                    <th>Type</th>
-                    <th>Mob</th>
-                    <th>Player</th>
-                    <th>Loot</th>
-                    <th>Raw Entry</th>
-                  </tr>
-                </thead>
-                <tbody id="liveTableBody">
-                  <tr><td colspan="6" class="empty">Live monitor waiting for watchlist globals...</td></tr>
-                </tbody>
-              </table>
+            <div class="live-feed-filter" role="group" aria-label="Recent activity filter">
+              <button id="liveFilterMine" class="btn live-filter-btn" type="button" onclick="setLiveActivityFilter('mine')">Mine</button>
+              <button id="liveFilterTeam" class="btn live-filter-btn" type="button" onclick="setLiveActivityFilter('team')">Team</button>
+              <button id="liveFilterAll" class="btn live-filter-btn active" type="button" onclick="setLiveActivityFilter('all')">All</button>
             </div>
           </div>
-
-          <div class="panel">
-            <div class="panel-header">
-              <span class="panel-title" style="color:var(--hof)">All Mob Globals</span>
-              <div class="live-feed-meta">
-                Every creature global detected
-                <span class="live-feed-count">G <b id="allMobLiveGlobalCount">0</b></span>
-                <span class="live-feed-count">HOF <b id="allMobLiveHofCount">0</b></span>
-                <span id="allMobLiveFeedValue" class="live-feed-count">0.00 PED</span>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table class="feed-table">
-                <thead>
-                  <tr>
-                    <th>Timestamp</th>
-                    <th>Type</th>
-                    <th>Mob</th>
-                    <th>Player</th>
-                    <th>Loot</th>
-                    <th>Raw Entry</th>
-                  </tr>
-                </thead>
-                <tbody id="allMobLiveTableBody">
-                  <tr><td colspan="6" class="empty">Live monitor waiting for creature globals...</td></tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="live-feed-meta merged-live-meta">
+            <span>G <b id="allMobLiveGlobalCount">0</b></span>
+            <span>HOF <b id="allMobLiveHofCount">0</b></span>
+            <span id="allMobLiveFeedValue">0.00 PED</span>
+          </div>
+          <div class="table-wrap">
+            <table class="feed-table">
+              <thead><tr><th>Timestamp</th><th>Type</th><th>Mob</th><th>Player</th><th>Loot</th><th>Raw Entry</th></tr></thead>
+              <tbody id="allMobLiveTableBody"><tr><td colspan="6" class="empty">Live monitor waiting for creature globals…</td></tr></tbody>
+            </table>
           </div>
         </div>
       </div>

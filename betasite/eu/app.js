@@ -64,6 +64,7 @@ let liveAllMobGlobals=0;
 let liveAllMobHofs=0;
 let liveTargetFeedPed=0;
 let liveAllMobFeedPed=0;
+let liveActivityFilter='all';
 
 let userEventGlobalPed=0;
 let userEventHofPed=0;
@@ -1662,9 +1663,7 @@ function switchTab(tabName){
   document.getElementById('huntTab')?.classList.toggle('hidden',tabName!=='hunt');
 
   if(tabName==='global'){
-    const active=document.querySelector('.global-subtab-btn.active')?.id==='globalAnalyticsBtn'
-      ?'analytics'
-      :'schedule';
+    const active=document.querySelector('.global-subtab-btn.active')?.id==='globalAnalyticsBtn'?'analytics':'history';
     switchGlobalAnalyticsTab(active);
   }
 
@@ -1694,18 +1693,12 @@ function switchHuntTrackerTab(tabName){
 }
 
 function switchGlobalAnalyticsTab(tabName){
-  const active=tabName==='history'?'history':(tabName==='analytics'?'analytics':'schedule');
-  document.getElementById('scheduleTab')?.classList.toggle('hidden',active!=='schedule');
+  const active=tabName==='analytics'?'analytics':'history';
   document.getElementById('historyTab')?.classList.toggle('hidden',active!=='history');
   document.getElementById('analyticsTab')?.classList.toggle('hidden',active!=='analytics');
-
-  document.getElementById('globalScheduleBtn')?.classList.toggle('active',active==='schedule');
   document.getElementById('globalHistoryBtn')?.classList.toggle('active',active==='history');
   document.getElementById('globalAnalyticsBtn')?.classList.toggle('active',active==='analytics');
-
-  if(active==='schedule')updateScheduleDisplay();
-  else if(active==='history')renderCapturedHistory();
-  else updateAnalyticsDisplay();
+  if(active==='history')renderCapturedHistory(); else updateAnalyticsDisplay();
 }
 
 function updateAvatarName(){
@@ -1821,23 +1814,47 @@ async function processFileHandle(handle){
 }
 
 function updateLiveSummary(){
-  document.getElementById('liveLatestMob').textContent=liveLatestMob.toUpperCase();
-
-  // Feed header summaries: normal Globals, HOFs, and combined PED.
-  document.getElementById('targetLiveGlobalCount').textContent=Math.max(0,liveSessionGlobals-liveSessionHofs);
-  document.getElementById('targetLiveHofCount').textContent=liveSessionHofs;
-  document.getElementById('targetLiveFeedValue').textContent=`${liveTargetFeedPed.toFixed(2)} PED`;
-
-  document.getElementById('allMobLiveGlobalCount').textContent=Math.max(0,liveAllMobGlobals-liveAllMobHofs);
-  document.getElementById('allMobLiveHofCount').textContent=liveAllMobHofs;
-  document.getElementById('allMobLiveFeedValue').textContent=`${liveAllMobFeedPed.toFixed(2)} PED`;
-
-  // Counts/PED in the KPI row are event totals for the configured avatar,
-  // not merely totals since this browser tab was opened.
+  const g=document.getElementById('allMobLiveGlobalCount');if(g)g.textContent=Math.max(0,liveAllMobGlobals-liveAllMobHofs);
+  const h=document.getElementById('allMobLiveHofCount');if(h)h.textContent=liveAllMobHofs;
+  const p=document.getElementById('allMobLiveFeedValue');if(p)p.textContent=`${liveAllMobFeedPed.toFixed(2)} PED`;
   evaluateUserGlobals();
+  updateLiveMonitorStatus();
+  applyLiveActivityFilter();
   syncStreamerHud();
 }
 
+function updateLiveMonitorStatus(){
+  const source=document.getElementById('liveMonitorSource');
+  const last=document.getElementById('liveMonitorLastActivity');
+  const latest=latestCapturedRecord?.();
+  if(source)source.textContent=currentSourceLabel?.()||'No live source';
+  if(last)last.textContent=`Last captured: ${latest?`${formatDateTimeUTCish(latest.date)} · ${describeCaptureAge(latest.date)}`:'—'}`;
+}
+
+function setLiveActivityFilter(filter){
+  liveActivityFilter=['mine','team','all'].includes(filter)?filter:'all';
+  applyLiveActivityFilter();
+}
+
+function getLiveTeamNames(){
+  try{return new Set((window.EntropiaTeamTracker?.getMemberNames?.()||[]).map(v=>String(v||'').trim().toLowerCase()).filter(Boolean));}
+  catch{return new Set();}
+}
+
+function applyLiveActivityFilter(){
+  ['mine','team','all'].forEach(k=>document.getElementById(`liveFilter${k[0].toUpperCase()+k.slice(1)}`)?.classList.toggle('active',liveActivityFilter===k));
+  const body=document.getElementById('allMobLiveTableBody');if(!body)return;
+  const self=String(window.userAvatarName||userAvatarName||'').trim().toLowerCase();
+  const team=getLiveTeamNames();if(self)team.add(self);
+  let visible=0;
+  [...body.querySelectorAll('tr[data-player]')].forEach(row=>{
+    const player=String(row.dataset.player||'').trim().toLowerCase();
+    const show=liveActivityFilter==='all'||(liveActivityFilter==='mine'&&!!self&&player===self)||(liveActivityFilter==='team'&&team.has(player));
+    row.hidden=!show;if(show)visible++;
+  });
+  const count=document.getElementById('liveRecentCount');if(count)count.textContent=String(visible);
+  const sub=document.getElementById('liveRecentSub');if(sub)sub.textContent=visible?`${visible} ${liveActivityFilter==='all'?'observed':liveActivityFilter} record${visible===1?'':'s'} in this live feed`:`No ${liveActivityFilter==='all'?'creature':liveActivityFilter} globals captured this session`;
+}
 
 function updateUserEventLiveSummary(globalCount,hofCount){
   const globalCountEl=document.getElementById('liveMyGlobalCount');
@@ -1981,6 +1998,7 @@ function updateCapturedFreshnessUI(){
   const b=document.getElementById('activityLastCaptured');if(b)b.textContent=`Last captured: ${lastText}`;
   const c=document.getElementById('activitySessionSince');if(c)c.textContent=`Session started: ${formatDateTimeUTCish(activitySessionStartedAt)}`;
   const h=document.getElementById('historyLastCaptured');if(h)h.textContent=`Last captured: ${lastText}`;
+  updateLiveMonitorStatus?.();
   const badge=document.getElementById('historyFreshnessBadge');
   if(badge)badge.textContent=latest?`Captured ${describeCaptureAge(latest.date)}`:'No captured data';
 }

@@ -931,6 +931,7 @@ window.EntropiaTeamTracker=(()=>{
     processLine,render,updateIdentity,
     createOrUpdateRoom,createOrUpdateRoomFromStreamer,
     joinRoomFromInput,joinRoomFromStreamer,joinPublicRoom,
-    leaveRoom,copyRoomCode,refreshPublicRooms
+    leaveRoom,copyRoomCode,refreshPublicRooms,
+    getMemberNames:()=>Object.values(state.members||{}).map(m=>m?.avatarName||m?.name||'').filter(Boolean)
   };
 })();

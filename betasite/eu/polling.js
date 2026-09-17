@@ -378,7 +378,7 @@ function setLiveSourceDetails(kind,detail=''){
     if(bridge)bridge.textContent='Companion: not connected';
     setConnectionStatus('No Source',false);
   }
-  try{ updateCapturedFreshnessUI?.(); updateScheduleDisplay?.(); }catch{}
+  try{ updateCapturedFreshnessUI?.(); updateLiveMonitorStatus?.(); }catch{}
 }
 async function pollCompanionBridgeOnce(){
   if(!companionBridgeBase||companionBridgeBusy)return;
@@ -745,10 +745,8 @@ async function processFileHandleIncremental(handle){
 
 function startLivePolling(handle,initialSize){
   setLiveSourceDetails('browser',`${handle?.name||'chat.log'} · direct browser file access`);
-  const tbody=document.getElementById('liveTableBody');
   const allMobTbody=document.getElementById('allMobLiveTableBody');
-  tbody.innerHTML='<tr><td colspan="6" class="empty success">Live monitoring active. Waiting for target-mob globals…</td></tr>';
-  allMobTbody.innerHTML='<tr><td colspan="6" class="empty success">Live monitoring active. Waiting for creature globals…</td></tr>';
+  if(allMobTbody)allMobTbody.innerHTML='<tr><td colspan="6" class="empty success">Live monitoring active. Waiting for creature globals…</td></tr>';
 
   let lastSize=initialSize;
   if(liveInterval)clearInterval(liveInterval);
@@ -835,9 +833,10 @@ function processNewLiveLines(text){
       liveAllMobFeedPed+=pedNum||0;
       if(isHof)liveAllMobHofs++;
 
-      if(allMobTbody.querySelector('.empty'))allMobTbody.innerHTML='';
+      if(allMobTbody?.querySelector('.empty'))allMobTbody.innerHTML='';
 
       const allRow=document.createElement('tr');
+      allRow.dataset.player=String(allPlayer||'').trim().toLowerCase();
       allRow.innerHTML=`
         <td>${escapeHtml(timeStr)}</td>
         <td class="${isHof?'hof':'success'}" style="font-weight:900">${isHof?'HOF':'Global'}</td>
@@ -845,7 +844,7 @@ function processNewLiveLines(text){
         <td>${escapeHtml(allPlayer)}</td>
         <td class="${isHof?'hof':'success'}" style="font-weight:800">${escapeHtml(pedVal)}</td>
         <td title="${escapeHtml(line)}">${escapeHtml(line)}</td>`;
-      allMobTbody.prepend(allRow);
+      allMobTbody?.prepend(allRow);
     }
 
     // ---------- WATCHLIST SUBSET ----------
@@ -879,7 +878,7 @@ function processNewLiveLines(text){
     liveLargestLoot=Math.max(liveLargestLoot,pedNum||0);
     liveLatestMob=targetMob;
 
-    if(tbody.querySelector('.empty'))tbody.innerHTML='';
+    if(tbody?.querySelector('.empty'))tbody.innerHTML='';
 
     const row=document.createElement('tr');
     row.innerHTML=`
@@ -889,15 +888,15 @@ function processNewLiveLines(text){
       <td>${escapeHtml(player)}</td>
       <td class="${isHof?'hof':'success'}" style="font-weight:800">${escapeHtml(pedVal)}</td>
       <td title="${escapeHtml(line)}">${escapeHtml(line)}</td>`;
-    tbody.prepend(row);
+    tbody?.prepend(row);
   }
 
   // Keep both live tables bounded so an all-day session stays responsive.
-  while(tbody.rows.length>300)tbody.deleteRow(tbody.rows.length-1);
-  while(allMobTbody.rows.length>300)allMobTbody.deleteRow(allMobTbody.rows.length-1);
+  if(tbody)while(tbody.rows.length>300)tbody.deleteRow(tbody.rows.length-1);
+  if(allMobTbody)while(allMobTbody.rows.length>300)allMobTbody.deleteRow(allMobTbody.rows.length-1);
 
   updateLiveSummary();
-  updateScheduleDisplay();
+  updateLiveMonitorStatus?.();
   updateAnalyticsDisplay();
   try{ renderCapturedHistory?.(); }catch{}
 }
@@ -953,19 +952,10 @@ async function loadParsedDataFromIDB(){
 }
 
 function clearLiveFeed(){
-  document.getElementById('liveTableBody').innerHTML=
-    '<tr><td colspan="6" class="empty">Target feed cleared. Live monitoring continues…</td></tr>';
-  document.getElementById('allMobLiveTableBody').innerHTML=
-    '<tr><td colspan="6" class="empty">All-mob feed cleared. Live monitoring continues…</td></tr>';
-
-  liveSessionGlobals=0;
-  liveSessionHofs=0;
-  liveLargestLoot=0;
-  liveLatestMob='—';
-  liveAllMobGlobals=0;
-  liveAllMobHofs=0;
-  liveTargetFeedPed=0;
-  liveAllMobFeedPed=0;
+  const all=document.getElementById('allMobLiveTableBody');
+  if(all)all.innerHTML='<tr><td colspan="6" class="empty">Live feed cleared. Monitoring continues…</td></tr>';
+  liveSessionGlobals=0;liveSessionHofs=0;liveLargestLoot=0;liveLatestMob='—';liveTargetFeedPed=0;
+  liveAllMobGlobals=0;liveAllMobHofs=0;liveAllMobFeedPed=0;
   updateLiveSummary();
 }
 
