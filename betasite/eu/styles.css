@@ -4866,3 +4866,25 @@ body.streamer-mode .obs-source-diagnostic{
     align-content:start;
   }
 }
+
+/* =========================================================
+   TEAM TRACKER COMPACT LOOT / EVENTS ROW
+   Keep these table panels to a useful height in short/narrow
+   Hunt layouts. Their table wrappers own internal scrolling.
+   ========================================================= */
+@media (max-height:900px), (max-width:1250px){
+  #huntTeamTab .team-loot-panel,
+  #huntTeamTab .team-events-panel{
+    height:auto!important;
+    min-height:0!important;
+    max-height:clamp(200px,42vh,380px);
+    align-self:start;
+  }
+
+  #huntTeamTab .team-loot-panel .team-table-wrap,
+  #huntTeamTab .team-events-panel .team-table-wrap{
+    min-height:0;
+    overflow-y:auto;
+    overflow-x:auto;
+  }
+}
