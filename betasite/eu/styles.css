@@ -4852,3 +4852,17 @@ body.streamer-mode .obs-source-diagnostic{
     align-self:start;
   }
 }
+
+/* =========================================================
+   TEAM TRACKER RESPONSIVE GRID TRACK FIX
+   Compact roster/online panels must also collapse their grid row;
+   otherwise the old 1fr tracks leave a large empty gap before
+   Loot / Events / Public Teams.
+   ========================================================= */
+@media (max-height:900px), (max-width:1250px){
+  #huntTeamTab .team-main-grid{
+    grid-template-rows:auto auto;
+    grid-auto-rows:auto;
+    align-content:start;
+  }
+}
