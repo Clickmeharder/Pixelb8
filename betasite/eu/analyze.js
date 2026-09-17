@@ -149,101 +149,83 @@ function evaluateUserGlobals(){
 
 function renderScheduleTable(hourlyStats,currentH){
   const tbody=document.getElementById('scheduleTableBody');
+  if(!tbody)return;
   tbody.innerHTML='';
+  const maxPerHour=Math.max(1,...hourlyStats.map(x=>x.total));
 
-  // Use synced Entropia/log time when available. The schedule is an event-UTC
-  // schedule, so only the exact matching event date + hour gets highlighted.
-  const activeNow=new Date();
-
-  // Entropia/log timestamps are treated as the active event clock in this UI.
-  // ISO strings are preferred when we have a real UTC Date; local getters are
-  // retained for parsed log dates because those were created from log clock text.
-  const activeYear=activeNow.getFullYear();
-  const activeMonth=activeNow.getMonth();
-  const activeDate=activeNow.getDate();
-
-  const days=[
-    {label:'Aug 15',last:false,year:2026,month:7,date:15},
-    {label:'Aug 16',last:true,year:2026,month:7,date:16}
-  ];
-
-  for(const day of days){
-    for(let h=0;h<24;h++){
-      const hourStat=hourlyStats[h];
-      const mobs=targetMobs.map(m=>({mob:m,count:hourStat[m]})).sort((a,b)=>b.count-a.count);
-      const top=mobs[0],alt=mobs[1];
-      const maxPerHour=Math.max(...Array.from({length:24},(_,hh)=>hourlyStats[hh].total),1);
-      const activity=Math.round(hourStat.total/maxPerHour*100);
-      const tr=document.createElement('tr');
-      const isExactCurrentRow=
-        day.year===activeYear &&
-        day.month===activeMonth &&
-        day.date===activeDate &&
-        h===currentH;
-      if(isExactCurrentRow)tr.classList.add('current-row');
-      tr.innerHTML=`
-        <td class="${day.last?'last-day':''}">
-          <b>${day.label}</b> · ${String(h).padStart(2,'0')}:00–${String((h+1)%24).padStart(2,'0')}:00
-        </td>
-        <td class="mob-name">${top.count>0?escapeHtml(top.mob)+' · '+top.count:'Low activity'}</td>
-        <td>${hourStat.total}</td>
-        <td class="muted">${alt.count>0?escapeHtml(alt.mob)+' · '+alt.count:'—'}</td>
-        <td>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:70px;height:6px;border-radius:99px;background:#081522;border:1px solid var(--border);overflow:hidden">
-              <div style="height:100%;width:${activity}%;background:var(--accent)"></div>
-            </div>
-            <span class="muted">${activity}%</span>
+  for(let h=0;h<24;h++){
+    const hourStat=hourlyStats[h];
+    const mobs=Object.entries(hourStat.mobs||{})
+      .map(([mob,count])=>({mob,count}))
+      .sort((a,b)=>b.count-a.count||a.mob.localeCompare(b.mob));
+    const top=mobs[0]||{mob:'—',count:0};
+    const alt=mobs[1]||{mob:'—',count:0};
+    const activity=Math.round((hourStat.total/maxPerHour)*100);
+    const tr=document.createElement('tr');
+    if(h===currentH)tr.classList.add('current-row');
+    tr.innerHTML=`
+      <td><b>${String(h).padStart(2,'0')}:00–${String((h+1)%24).padStart(2,'0')}:00</b></td>
+      <td class="mob-name">${top.count?escapeHtml(top.mob)+' · '+top.count:'Low activity'}</td>
+      <td>${hourStat.total}</td>
+      <td class="muted">${alt.count?escapeHtml(alt.mob)+' · '+alt.count:'—'}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:70px;height:6px;border-radius:99px;background:#081522;border:1px solid var(--border);overflow:hidden">
+            <div style="height:100%;width:${activity}%;background:var(--accent)"></div>
           </div>
-        </td>`;
-      tbody.appendChild(tr);
-    }
+          <span class="muted">${activity}%</span>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
   }
 
   const currentRow=tbody.querySelector('.current-row');
-  if(currentRow){
-    requestAnimationFrame(()=>currentRow.scrollIntoView({block:'center'}));
-  }
+  if(currentRow)requestAnimationFrame(()=>currentRow.scrollIntoView({block:'nearest'}));
 }
 
 function renderHeatmaps(hourlyStats,currentH){
   const targetGrid=document.getElementById('heatmapGrid');
   const allGrid=document.getElementById('heatmapGridAll');
-  targetGrid.innerHTML='';
-  allGrid.innerHTML='';
+  if(targetGrid)targetGrid.innerHTML='';
+  if(allGrid)allGrid.innerHTML='';
 
-  const maxTarget=Math.max(1,...Array.from({length:24},(_,h)=>hourlyStats[h].total));
-  const maxAll=Math.max(1,...allMobHourlyStats);
-
-  let targetPeak=0,targetPeakCount=-1;
+  const totals=hourlyStats.map(x=>Number(x?.total)||0);
+  const maxAll=Math.max(1,...totals);
   let allPeak=0,allPeakCount=-1;
 
   for(let h=0;h<24;h++){
-    const tc=hourlyStats[h].total;
-    if(tc>targetPeakCount){targetPeakCount=tc;targetPeak=h}
-    targetGrid.appendChild(makeHeatCell(h,tc,maxTarget,'target',h===currentH));
-
-    const ac=allMobHourlyStats[h]||0;
-    if(ac>allPeakCount){allPeakCount=ac;allPeak=h}
-    allGrid.appendChild(makeHeatCell(h,ac,maxAll,'all',h===currentH));
+    const count=totals[h]||0;
+    if(count>allPeakCount){allPeakCount=count;allPeak=h}
+    if(allGrid)allGrid.appendChild(makeHeatCell(h,count,maxAll,'all',h===currentH));
+    // Keep legacy target heatmap safe if an older layout still contains it.
+    if(targetGrid)targetGrid.appendChild(makeHeatCell(h,count,maxAll,'all',h===currentH));
   }
 
-  document.getElementById('targetPeakLabel').textContent=
-    targetPeakCount>0?`Peak ${String(targetPeak).padStart(2,'0')}:00 · ${targetPeakCount}`:'No data';
-  document.getElementById('allPeakLabel').textContent=
-    allPeakCount>0?`Peak ${String(allPeak).padStart(2,'0')}:00 · ${allPeakCount}`:'No data';
+  const targetPeakLabel=document.getElementById('targetPeakLabel');
+  if(targetPeakLabel)targetPeakLabel.textContent=allPeakCount>0?`Peak ${String(allPeak).padStart(2,'0')}:00 · ${allPeakCount}`:'No data';
+  const allPeakLabel=document.getElementById('allPeakLabel');
+  if(allPeakLabel)allPeakLabel.textContent=allPeakCount>0?`Peak ${String(allPeak).padStart(2,'0')}:00 · ${allPeakCount}`:'No data';
 }
 
 function renderCurrentHourBreakdown(hourData,currentH){
   const box=document.getElementById('currentHourBreakdown');
-  const sorted=targetMobs.map(m=>({mob:m,count:hourData[m]||0})).sort((a,b)=>b.count-a.count);
+  if(!box)return;
+  const sorted=Object.entries(hourData?.mobs||{})
+    .map(([mob,count])=>({mob,count}))
+    .sort((a,b)=>b.count-a.count||a.mob.localeCompare(b.mob))
+    .slice(0,10);
   const max=Math.max(1,...sorted.map(x=>x.count));
+
+  if(!sorted.length){
+    box.innerHTML=`<div class="empty">No creature globals recorded for ${String(currentH).padStart(2,'0')}:00 UTC in the current analysis window.</div>`;
+    return;
+  }
 
   box.innerHTML=sorted.map(x=>{
     const pct=Math.round((x.count/max)*100);
     return `
-      <div style="display:grid;grid-template-columns:96px 1fr 32px;gap:7px;align-items:center;margin-bottom:7px">
-        <div style="font-size:.67rem;text-transform:uppercase;color:var(--text);overflow:hidden;text-overflow:ellipsis">${escapeHtml(x.mob)}</div>
+      <div style="display:grid;grid-template-columns:minmax(110px,1.2fr) 1fr 32px;gap:7px;align-items:center;margin-bottom:7px">
+        <div style="font-size:.67rem;text-transform:uppercase;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(x.mob)}">${escapeHtml(x.mob)}</div>
         <div style="height:7px;background:#081522;border-radius:99px;overflow:hidden;border:1px solid var(--border)">
           <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),var(--success))"></div>
         </div>
@@ -259,77 +241,84 @@ function renderCurrentHourBreakdown(hourData,currentH){
 
 function updateScheduleDisplay(){
   const currentH=getActiveTargetHour();
-  document.getElementById('currentTimeDisplay').textContent=`${String(currentH).padStart(2,'0')}:00`;
-  document.getElementById('currentHourMiniLabel').textContent=`${String(currentH).padStart(2,'0')}:00`;
+  const currentTimeDisplay=document.getElementById('currentTimeDisplay');
+  const currentHourMiniLabel=document.getElementById('currentHourMiniLabel');
+  if(currentTimeDisplay)currentTimeDisplay.textContent=`${String(currentH).padStart(2,'0')}:00`;
+  if(currentHourMiniLabel)currentHourMiniLabel.textContent=`${String(currentH).padStart(2,'0')}:00`;
 
-  if(!globalParsedData||!globalParsedData.length){
-    document.getElementById('recommendedMobBox').textContent='No log data loaded';
-    document.getElementById('recommendationReason').textContent='Connect chat.log to calculate the strongest target for the active hour.';
-    document.getElementById('bestWindowBox').textContent='No log data loaded';
-    document.getElementById('bestWindowReason').textContent='';
+  const records=(globalParsedData||[]).filter(trackerRecordWithinAnalysisWindow);
+  if(!records.length){
+    const recommended=document.getElementById('recommendedMobBox');
+    const reason=document.getElementById('recommendationReason');
+    const best=document.getElementById('bestWindowBox');
+    const bestReason=document.getElementById('bestWindowReason');
+    if(recommended)recommended.textContent='No creature activity in this window';
+    if(reason)reason.textContent='Live source can be connected even when there are no globals inside the current analysis window.';
+    if(best)best.textContent='No activity window yet';
+    if(bestReason)bestReason.textContent='';
     document.getElementById('loadedGlobalsKpi').textContent='0';
-    document.getElementById('loadedGlobalsSub').textContent='No target-mob records';
+    document.getElementById('loadedGlobalsSub').textContent='No creature globals in current window';
     document.getElementById('allMobPeakKpi').textContent='--';
-    document.getElementById('allMobPeakSub').textContent='Waiting for data';
-    renderHeatmaps(emptyHourlyStats(),currentH);
-    renderCurrentHourBreakdown(emptyHourlyStats()[currentH],currentH);
+    document.getElementById('allMobPeakSub').textContent='Waiting for creature globals';
+    const empty=Array.from({length:24},()=>({total:0,ped:0,hofs:0,mobs:{}}));
+    renderHeatmaps(empty,currentH);
+    renderCurrentHourBreakdown(empty[currentH],currentH);
+    const tbody=document.getElementById('scheduleTableBody');
+    if(tbody)tbody.innerHTML='<tr><td colspan="5" class="empty">No creature globals in the current analysis window.</td></tr>';
     return;
   }
 
-  const hourlyStats=emptyHourlyStats();
-  let totalTargetPed=0;
-  for(const rec of globalParsedData){
-    if(rec.date&&!isNaN(rec.date)){
-      const h=rec.hour;
-      if(hourlyStats[h]?.[rec.mob]!==undefined){
-        hourlyStats[h][rec.mob]++;
-        hourlyStats[h].total++;
-        hourlyStats[h].ped+=rec.ped||0;
-        if(rec.isHof)hourlyStats[h].hofs++;
-        totalTargetPed+=rec.ped||0;
-      }
-    }
+  const hourlyStats=Array.from({length:24},()=>({total:0,ped:0,hofs:0,mobs:{}}));
+  let totalPed=0;
+  for(const rec of records){
+    if(!rec.date||isNaN(rec.date))continue;
+    const h=Number.isFinite(Number(rec.hour))?Number(rec.hour):rec.date.getUTCHours();
+    const bucket=hourlyStats[Math.max(0,Math.min(23,h))];
+    const mob=String(rec.mob||'Unknown').trim()||'Unknown';
+    bucket.mobs[mob]=(bucket.mobs[mob]||0)+1;
+    bucket.total++;
+    bucket.ped+=Number(rec.ped)||0;
+    if(rec.isHof)bucket.hofs++;
+    totalPed+=Number(rec.ped)||0;
   }
 
-  const watchRecords=globalParsedData.filter(trackerSelectedTarget);
-  document.getElementById('loadedGlobalsKpi').textContent=globalParsedData.length.toLocaleString();
-  document.getElementById('loadedGlobalsSub').textContent=`${watchRecords.length.toLocaleString()} watchlist · ${totalTargetPed.toFixed(0)} PED`;
+  document.getElementById('loadedGlobalsKpi').textContent=records.length.toLocaleString();
+  document.getElementById('loadedGlobalsSub').textContent=`All detected mobs · ${totalPed.toFixed(0)} PED`;
 
   let allPeakHour=0,allPeakCount=-1;
-  allMobHourlyStats.forEach((count,h)=>{
-    if(count>allPeakCount){allPeakCount=count;allPeakHour=h}
+  hourlyStats.forEach((bucket,h)=>{
+    if(bucket.total>allPeakCount){allPeakCount=bucket.total;allPeakHour=h}
   });
   document.getElementById('allMobPeakKpi').textContent=`${String(allPeakHour).padStart(2,'0')}:00`;
-  document.getElementById('allMobPeakSub').textContent=`${allPeakCount} all-mob globals`;
+  document.getElementById('allMobPeakSub').textContent=`${allPeakCount} creature globals`;
 
   let bestWindowStart=0,maxWindowGlobals=-1;
   for(let start=0;start<24;start++){
     let sum=0;
     for(let i=0;i<6;i++)sum+=hourlyStats[(start+i)%24].total;
-    if(sum>maxWindowGlobals){
-      maxWindowGlobals=sum;
-      bestWindowStart=start;
-    }
+    if(sum>maxWindowGlobals){maxWindowGlobals=sum;bestWindowStart=start}
   }
   const bestWindowEnd=(bestWindowStart+6)%24;
   document.getElementById('bestWindowBox').textContent=
     `${String(bestWindowStart).padStart(2,'0')}:00 → ${String(bestWindowEnd).padStart(2,'0')}:00 UTC · ${maxWindowGlobals} globals`;
   document.getElementById('bestWindowReason').textContent=
-    'Highest historical target-mob global density across any contiguous six-hour block.';
+    'Highest historical creature-global density across any contiguous six-hour block in the current analysis window.';
 
   const current=hourlyStats[currentH];
-  const sorted=targetMobs.map(m=>({mob:m,count:current[m]})).sort((a,b)=>b.count-a.count);
+  const sorted=Object.entries(current.mobs)
+    .map(([mob,count])=>({mob,count}))
+    .sort((a,b)=>b.count-a.count||a.mob.localeCompare(b.mob));
   const best=sorted[0],second=sorted[1];
 
-  if(best.count>0){
+  if(best?.count>0){
     const share=current.total?Math.round(best.count/current.total*100):0;
     document.getElementById('recommendedMobBox').innerHTML=
-      `🎯 ${best.mob.toUpperCase()} <span class="muted" style="font-size:.72rem">· ${best.count} globals · ${share}% share</span>`;
+      `🔥 ${escapeHtml(best.mob.toUpperCase())} <span class="muted" style="font-size:.72rem">· ${best.count} globals · ${share}% share</span>`;
     document.getElementById('recommendationReason').textContent=
-      `Runner-up: ${second.mob} (${second.count}). Current-hour target total: ${current.total}.`;
+      `${second?`Runner-up: ${second.mob} (${second.count}). `:''}Current-hour creature total: ${current.total}.`;
   }else{
-    document.getElementById('recommendedMobBox').textContent=`No clear peak at ${String(currentH).padStart(2,'0')}:00`;
-    document.getElementById('recommendationReason').textContent='No target-mob globals were recorded in this exact historical hour.';
+    document.getElementById('recommendedMobBox').textContent=`No clear activity at ${String(currentH).padStart(2,'0')}:00 UTC`;
+    document.getElementById('recommendationReason').textContent='No creature globals were recorded in this UTC hour inside the current analysis window.';
   }
 
   renderHeatmaps(hourlyStats,currentH);
