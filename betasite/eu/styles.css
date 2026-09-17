@@ -4790,21 +4790,13 @@ body.streamer-mode .obs-source-diagnostic{
 @media(max-width:900px){.live-monitor-actions{justify-content:flex-start}.live-feed-filter{width:100%;overflow-x:auto}.live-filter-btn{flex:0 0 auto}}
 
 /* =========================================================
-   SMALL-WINDOW WORKSPACE SCROLLING
-   Hunt + Team should remain usable when the viewport is short.
+   SHORT-WINDOW SCROLLING — HUNT + TEAM ONLY
+   Keep these two tracker workspaces scrollable without changing
+   Live Monitor, Global Analytics, or any surrounding page layout.
    ========================================================= */
 .hunt-live-layout,
 .team-tracker-layout{
   overflow-x:hidden!important;
   overflow-y:auto!important;
-  overscroll-behavior:contain;
-  scrollbar-gutter:stable;
-}
-
-@media (max-height:820px){
-  .hunt-live-layout,
-  .team-tracker-layout{
-    grid-template-rows:auto auto auto auto!important;
-    align-content:start;
-  }
+  overscroll-behavior-y:contain;
 }
