@@ -437,7 +437,7 @@ tbody tr:hover{background:rgba(53,194,255,.045)}
   height:100%;
   min-height:0;
   display:grid;
-  grid-template-rows:auto minmax(0,1fr);
+  grid-template-rows:auto auto auto minmax(0,1fr);
   gap:8px;
 }
 .analytics-top{
@@ -4669,8 +4669,18 @@ body.streamer-mode .obs-source-diagnostic{
 
 /* Player-first activity explorer */
 .activity-search{min-width:190px;max-width:280px}
-.hot-mobs-strip{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:thin}
-.hot-mob-chip{display:grid;grid-template-columns:auto auto;gap:2px 9px;align-items:center;min-width:170px;padding:9px 11px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text);text-align:left;cursor:pointer}
+.hot-mobs-strip{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:8px;
+  height:auto;
+  min-height:0;
+  max-height:none;
+  overflow:visible;
+  padding:2px 0 4px;
+}
+.hot-mobs-strip .empty{grid-column:1/-1}
+.hot-mob-chip{display:grid;grid-template-columns:auto 1fr;gap:2px 9px;align-items:center;min-width:0;padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--panel);color:var(--text);text-align:left;cursor:pointer}
 .hot-mob-chip:hover{border-color:var(--accent)}
 .hot-mob-chip>span{font-size:.65rem;color:var(--muted)}
 .hot-mob-chip .hot-rank{color:var(--accent);font-weight:900}
