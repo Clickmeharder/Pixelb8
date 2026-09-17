@@ -55,7 +55,7 @@ function parseChatLog(content){
   for(let i=lines.length-1;i>=0;i--){
     const tm=lines[i].match(timestampRegex);
     if(tm){
-      const parsed=new Date(tm[1].replace(/[\./]/g,'-')+'T'+tm[2]);
+      const parsed=new Date(tm[1].replace(/[\./]/g,'-')+'T'+tm[2]+'Z');
       if(!isNaN(parsed)){
         latestSyncedGameTime=parsed;
         document.getElementById('syncGameTimeDisplay').textContent=`${tm[1]} ${tm[2]}`;
@@ -67,12 +67,13 @@ function parseChatLog(content){
   for(const line of lines){
     const lower=line.toLowerCase();
     const tm=line.match(timestampRegex);
-    const logDate=tm?new Date(tm[1].replace(/[\./]/g,'-')+'T'+tm[2]):null;
+    const logDate=tm?new Date(tm[1].replace(/[\./]/g,'-')+'T'+tm[2]+'Z'):null;
 
     if(lower.includes('entropia universe time:')){
       const idx=lower.indexOf('entropia universe time:');
       const rawTime=line.slice(idx+'entropia universe time:'.length).trim();
-      const parsedTime=new Date(rawTime.replace(/[\./]/g,'-'));
+      const normalized=rawTime.replace(/[\./]/g,'-').replace(' ','T');
+      const parsedTime=new Date(/Z$|[+-]\d\d:?\d\d$/.test(normalized)?normalized:normalized+'Z');
       if(!isNaN(parsedTime)){
         latestSyncedGameTime=parsedTime;
         document.getElementById('syncGameTimeDisplay').textContent=rawTime;
@@ -152,7 +153,7 @@ function renderScheduleTable(hourlyStats,currentH){
 
   // Use synced Entropia/log time when available. The schedule is an event-UTC
   // schedule, so only the exact matching event date + hour gets highlighted.
-  const activeNow=latestSyncedGameTime||new Date();
+  const activeNow=new Date();
 
   // Entropia/log timestamps are treated as the active event clock in this UI.
   // ISO strings are preferred when we have a real UTC Date; local getters are
@@ -341,7 +342,7 @@ function updateScheduleDisplay(){
 function trackerRecordWithinAnalysisWindow(record){
   const explicitStart=trackerOptions?.analysisStartUtc ? utcInputToDate(trackerOptions.analysisStartUtc) : null;
   const end=trackerOptions?.analysisEndUtc ? utcInputToDate(trackerOptions.analysisEndUtc) : null;
-  const reference=latestSyncedGameTime||new Date();
+  const reference=new Date();
   const lookbackStart=getAnalysisReadCutoff(reference);
   const start=explicitStart && lookbackStart
     ?(explicitStart>lookbackStart?explicitStart:lookbackStart)

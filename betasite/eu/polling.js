@@ -1,7 +1,7 @@
 function parseLogTimestampFromLine(line){
   const tm=line.match(/^(\d{4}[-./]\d{1,2}[-./]\d{1,2})\s+(\d{2}:\d{2}:\d{2})/);
   if(!tm)return null;
-  const d=new Date(tm[1].replace(/[\./]/g,'-')+'T'+tm[2]);
+  const d=new Date(tm[1].replace(/[\./]/g,'-')+'T'+tm[2]+'Z');
   return Number.isNaN(d.getTime())?null:d;
 }
 
@@ -26,10 +26,9 @@ function trimLogTextToCutoff(text,cutoff,startedMidFile){
 }
 
 async function readLogForConfiguredLookback(file){
-  const referenceMs=(file.lastModified&&file.lastModified<Date.now()+86400000)
-    ?Math.max(file.lastModified,Date.now()-3650*86400000)
-    :Date.now();
-  const cutoff=getAnalysisReadCutoff(new Date(referenceMs));
+  // Analyze Back is relative to actual now. A months-old chat.log must not make
+  // its own last-modified date become "today".
+  const cutoff=getAnalysisReadCutoff(new Date());
 
   if(!cutoff){
     const text=await file.text();
@@ -789,14 +788,15 @@ function processNewLiveLines(text){
     if(!line.trim())continue;
     const lower=line.toLowerCase();
     const tm=line.match(timestampRegex);
-    const logDate=tm?new Date(tm[1].replace(/[\./]/g,'-')+'T'+tm[2]):new Date();
+    const logDate=tm?new Date(tm[1].replace(/[\./]/g,'-')+'T'+tm[2]+'Z'):new Date();
     const timeStr=tm?`${tm[1]} ${tm[2]}`:logDate.toLocaleTimeString();
 
     if(lower.includes('entropia universe time:')||(tm&&(nowMs-lastTimeSyncTimestamp>300000))){
       if(lower.includes('entropia universe time:')){
         const idx=lower.indexOf('entropia universe time:');
         const clean=line.slice(idx+'entropia universe time:'.length).trim();
-        const parsed=new Date(clean.replace(/[\./]/g,'-'));
+        const normalized=clean.replace(/[\./]/g,'-').replace(' ','T');
+        const parsed=new Date(/Z$|[+-]\d\d:?\d\d$/.test(normalized)?normalized:normalized+'Z');
         if(!isNaN(parsed)){
           latestSyncedGameTime=parsed;
           document.getElementById('syncGameTimeDisplay').textContent=clean;

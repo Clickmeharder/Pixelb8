@@ -455,7 +455,7 @@ tbody tr:hover{background:rgba(53,194,255,.045)}
   min-height:0;
   overflow:auto;
   display:grid;
-  grid-template-columns:repeat(3,minmax(280px,1fr));
+  grid-template-columns:repeat(2,minmax(360px,1fr));
   gap:8px;
   padding-right:2px;
 }
@@ -4619,3 +4619,9 @@ body.streamer-mode .obs-source-diagnostic{
 .hot-mob-chip>span{font-size:.65rem;color:var(--muted)}
 .hot-mob-chip .hot-rank{color:var(--accent);font-weight:900}
 .analytics-note{font-size:.69rem;color:var(--muted);padding:2px 2px 10px}
+
+/* Player-first analytics: keep each mob card readable instead of packing 3+ narrow cards. */
+@media (max-width:1050px){.analytics-cards{grid-template-columns:1fr}}
+.mob-card{min-width:0}
+.mob-card .stat-grid{grid-template-columns:repeat(2,minmax(135px,1fr))}
+@media (max-width:520px){.mob-card .stat-grid{grid-template-columns:1fr}}

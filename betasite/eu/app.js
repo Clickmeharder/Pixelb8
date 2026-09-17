@@ -171,7 +171,19 @@ async function loadFileHandleFromIDB(){
   });
 }
 
+function updateRealClockDisplays(){
+  const now=new Date();
+  const local=document.getElementById('currentLocalTimeDisplay');
+  const utc=document.getElementById('currentUtcTimeDisplay');
+  if(local)local.textContent=now.toLocaleString(undefined,{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  if(utc)utc.textContent=now.toLocaleString(undefined,{timeZone:'UTC',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})+' UTC';
+}
+let realClockTimer=null;
+
 window.addEventListener('DOMContentLoaded',async()=>{
+  updateRealClockDisplays();
+  if(realClockTimer)clearInterval(realClockTimer);
+  realClockTimer=setInterval(updateRealClockDisplays,1000);
   const savedName=localStorage.getItem('entropia_avatar_name');
   if(savedName){
     userAvatarName=savedName.toLowerCase();
@@ -267,17 +279,13 @@ function getAnalysisReadCutoff(referenceDate=new Date()){
 }
 
 function getAnalysisCacheSignature(){
-  const targets=(trackerOptions?.targets||[])
-    .map(v=>String(v||'').trim().toLowerCase())
-    .filter(Boolean)
-    .slice(0,6)
-    .sort();
-
+  // v3: analytics are all-creature and recency is based on the real clock,
+  // not the last game timestamp or a target/watchlist list.
   return JSON.stringify({
+    version:3,
     lookback:trackerOptions?.analysisLookback??'30',
     customDays:Number(trackerOptions?.customLookbackDays)||30,
-    analysisStartUtc:trackerOptions?.analysisStartUtc||'',
-    targets
+    analysisStartUtc:trackerOptions?.analysisStartUtc||''
   });
 }
 
@@ -401,8 +409,6 @@ function openTrackerOptions(){
   document.getElementById('analysisStartInput').value=trackerOptions.analysisStartUtc||'';
   document.getElementById('analysisEndInput').value=trackerOptions.analysisEndUtc||'';
 
-  const targetInputs=[...document.querySelectorAll('.target-mob-input')];
-  targetInputs.forEach((el,i)=>el.value=trackerOptions.targets?.[i]||'');
 
   previewTrackerModeOptions();
   backdrop.classList.remove('hidden');
@@ -447,23 +453,15 @@ function previewTrackerModeOptions(){
 }
 
 function saveTrackerOptions(runAnalysis=false){
-  const targets=[...document.querySelectorAll('.target-mob-input')]
-    .map(el=>el.value.trim())
-    .filter(Boolean)
-    .slice(0,6);
-
-  if(!targets.length){
-    showToast?.('Add at least one watchlist mob.');
-    return;
-  }
-
   trackerOptions={
     mode:document.getElementById('trackerModeSelect')?.value||'auto',
     eventName:(document.getElementById('eventNameInput')?.value||'Upcoming Legends').trim(),
     eventStartUtc:document.getElementById('eventStartInput')?.value||'',
     eventEndUtc:document.getElementById('eventEndInput')?.value||'',
     sessionHours:Math.max(.25,Number(document.getElementById('sessionHoursInput')?.value)||6),
-    targets:targets.map(v=>v.toLowerCase()),
+    // Legacy event targets are preserved for backwards compatibility only.
+    // Explore/Analytics now collects and searches all detected creatures.
+    targets:Array.isArray(trackerOptions.targets)?trackerOptions.targets:[...defaultTrackerOptions.targets],
     analysisLookback:document.getElementById('analysisLookbackSelect')?.value||'30',
     customLookbackDays:Math.max(1,Math.min(3650,Number(document.getElementById('customLookbackDaysInput')?.value)||30)),
     analysisStartUtc:document.getElementById('analysisStartInput')?.value||'',
@@ -477,7 +475,7 @@ function saveTrackerOptions(runAnalysis=false){
   if(runAnalysis){
     if(fileHandle){
       processFileHandle(fileHandle);
-      showToast?.(`Rebuilding ${describeAnalysisLookback()} for ${targetMobs.length} watchlist mob${targetMobs.length===1?'':'s'}…`);
+      showToast?.(`Rebuilding all-creature analytics for ${describeAnalysisLookback()}…`);
     }else{
       updateScheduleDisplay?.();
       updateAnalyticsDisplay?.();
@@ -1856,7 +1854,7 @@ function startTimerCountdown(){
   const expiry=new Date(firstUserGlobalTime.getTime()+6*60*60*1000);
 
   function tick(){
-    const now=latestSyncedGameTime||new Date();
+    const now=new Date();
     const diff=expiry-now;
     const display=document.getElementById('timerDisplay');
     const details=document.getElementById('timerDetails');
@@ -1897,7 +1895,7 @@ function getActiveTargetHour(){
   if(document.getElementById('timeModeSelect').value==='custom'){
     return Math.max(0,Math.min(23,parseInt(document.getElementById('simHourInput').value,10)||0));
   }
-  return latestSyncedGameTime?latestSyncedGameTime.getHours():new Date().getUTCHours();
+  return new Date().getUTCHours();
 }
 
 
@@ -1937,7 +1935,9 @@ function makeHeatCell(hour,count,max,mode,isCurrent){
 
 function updateAnalyticsDisplay(){
   const timeframe=document.getElementById('timeframeSelect')?.value||'last30';
-  const now=latestSyncedGameTime||new Date();
+  // Recency windows are always relative to the real current clock.
+  // The last Entropia/log timestamp may be days or months old while the game is closed.
+  const now=new Date();
   let cutoff=new Date(0);
   if(timeframe==='last24')cutoff=new Date(now.getTime()-24*60*60*1000);
   else if(timeframe==='last7')cutoff=new Date(now.getTime()-7*24*60*60*1000);

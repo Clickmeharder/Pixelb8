@@ -40,9 +40,17 @@
           <span class="sidebar-item-icon status-dot-wrap"><span id="liveIndicator" class="dot"></span></span>
           <div class="sidebar-status-copy"><span>Connection</span><b id="connectionStatusText">Offline</b></div>
         </div>
-        <div class="sidebar-status-row" title="Synced game time">
+        <div class="sidebar-status-row" title="Current time on this device">
           <span class="sidebar-item-icon">◷</span>
-          <div class="sidebar-status-copy"><span>Game Time</span><b id="syncGameTimeDisplay" class="accent">Not synced</b></div>
+          <div class="sidebar-status-copy"><span>Local Now</span><b id="currentLocalTimeDisplay" class="accent">--</b></div>
+        </div>
+        <div class="sidebar-status-row" title="Current UTC / Entropia reference clock">
+          <span class="sidebar-item-icon">UTC</span>
+          <div class="sidebar-status-copy"><span>UTC Now</span><b id="currentUtcTimeDisplay">--</b></div>
+        </div>
+        <div class="sidebar-status-row" title="Most recent timestamp actually seen in chat.log">
+          <span class="sidebar-item-icon">↻</span>
+          <div class="sidebar-status-copy"><span>Last Game Sync</span><b id="syncGameTimeDisplay" class="muted">Not synced</b></div>
         </div>
         <div class="sidebar-status-grid">
           <div class="sidebar-mini-stat" title="Your globals">
@@ -299,7 +307,7 @@
         <div id="hotMobsStrip" class="hot-mobs-strip">
           <div class="empty">Connect chat.log to see recent activity.</div>
         </div>
-        <div class="analytics-note">All detected creature globals are included. Your Watchlist only focuses recommendations and hunt planning. Planet filtering will appear once planet/location can be inferred reliably from the available game data.</div>
+        <div class="analytics-note">All detected creature globals are included. Search or sort any mob/player directly; no target list is required. Planet filtering will appear once planet/location can be inferred reliably from the available game data.</div>
         <div id="resultsContainer" class="analytics-cards">
           <div class="empty">Connect chat.log to view creature activity.</div>
         </div>
@@ -1126,19 +1134,6 @@
           </label>
         </div>
         <div class="tracker-options-help">These are editable defaults. Future events can reuse the same tracker without code changes.</div>
-      </div>
-
-      <div class="tracker-options-section">
-        <div class="tracker-options-title">Mob Watchlist · 1–6 Mobs</div>
-        <div id="targetInputsGrid" class="target-input-grid">
-          <input class="target-mob-input" data-target-index="0" value="Armax Bull">
-          <input class="target-mob-input" data-target-index="1" value="Atrax">
-          <input class="target-mob-input" data-target-index="2" value="Caperon">
-          <input class="target-mob-input" data-target-index="3" value="Neconu">
-          <input class="target-mob-input" data-target-index="4" value="Hispidus">
-          <input class="target-mob-input" data-target-index="5" value="Estophyl">
-        </div>
-        <div class="tracker-options-help">Optional focus list for hunts and activity recommendations. All creature globals are still collected for analytics.</div>
       </div>
 
       <div class="tracker-options-section">
