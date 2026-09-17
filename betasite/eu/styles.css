@@ -4832,3 +4832,23 @@ body.streamer-mode .obs-source-diagnostic{
     overflow:visible!important;
   }
 }
+
+/* =========================================================
+   TEAM TRACKER COMPACT ROSTER / ONLINE PANELS
+   When the Hunt subtab is in its scrollable responsive state,
+   do not let these two list panels stretch to oversized grid tracks.
+   Their own list bodies already scroll internally.
+   ========================================================= */
+@media (max-height:900px), (max-width:1250px){
+  #huntTeamTab .team-main-grid{
+    align-items:start;
+  }
+
+  #huntTeamTab .team-roster-panel,
+  #huntTeamTab .team-online-panel{
+    height:auto!important;
+    min-height:0!important;
+    max-height:clamp(180px,38vh,360px);
+    align-self:start;
+  }
+}
