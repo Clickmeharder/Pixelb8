@@ -100,3 +100,10 @@ same architecture used by the older working tracker:
 The current preferred live source is PixelB8 Companion. In Companion open **Connect → PixelB8 Website · EU Tracker**, choose Entropia Universe `chat.log`, and enable the bridge. The EU Tracker automatically scans Companion's local ports (8787–8798), checks `/api/eu/status`, and polls `/api/eu/tail` once per second. Only newly appended bytes are sent into the existing `processNewLiveLines()` parser.
 
 If Companion is unavailable, the existing FileSystemFileHandle live polling and manual snapshot fallback remain available.
+
+
+## PixelB8 Companion EU ingestion (player-first foundation)
+- Companion owns the continuous `chat.log` watcher and keeps a rolling in-memory backlog.
+- The EU page consumes `/api/eu/changes?since=<sequence>` and catches up after browser throttling/sleep.
+- Browser FileSystem access is retained only as an explicit fallback.
+- Creature globals/HOFs are ingested independently of the optional mob Watchlist. The Watchlist is a filter/recommendation aid, not an ingestion rule.

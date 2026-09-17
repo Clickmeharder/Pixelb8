@@ -83,20 +83,13 @@ function parseChatLog(content){
     if(isGlobalLine&&logDate&&!isNaN(logDate))allMobHourlyStats[logDate.getHours()]++;
 
     if(!isGlobalLine)continue;
-    for(const mob of targetMobs){
-      if(lower.includes(mob)){
-        const pedMatch=line.match(pedRegex);
-        const pedVal=pedMatch?parseFloat(pedMatch[1].replace(/,/g,'')):0;
-        const isHof=lower.includes('hall of fame')||lower.includes('hof');
-        const player=parsePlayerName(line,mob);
-        records.push({
-          mob,date:logDate,ped:pedVal,isHof,
-          hour:logDate?logDate.getHours():0,
-          player,raw:line
-        });
-        break;
-      }
-    }
+    const mob=parseGlobalMobName(line);
+    if(!mob)continue;
+    const pedMatch=line.match(pedRegex);
+    const pedVal=pedMatch?parseFloat(pedMatch[1].replace(/,/g,'')):0;
+    const isHof=lower.includes('hall of fame')||lower.includes('hof');
+    const player=parsePlayerName(line,mob);
+    records.push({mob,date:logDate,ped:pedVal,isHof,hour:logDate?logDate.getHours():0,player,raw:line});
   }
 
   globalParsedData=records;
@@ -297,8 +290,9 @@ function updateScheduleDisplay(){
     }
   }
 
+  const watchRecords=globalParsedData.filter(trackerSelectedTarget);
   document.getElementById('loadedGlobalsKpi').textContent=globalParsedData.length.toLocaleString();
-  document.getElementById('loadedGlobalsSub').textContent=`${totalTargetPed.toFixed(0)} PED across target records`;
+  document.getElementById('loadedGlobalsSub').textContent=`${watchRecords.length.toLocaleString()} watchlist · ${totalTargetPed.toFixed(0)} PED`;
 
   let allPeakHour=0,allPeakCount=-1;
   allMobHourlyStats.forEach((count,h)=>{

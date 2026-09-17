@@ -1,6 +1,6 @@
 const trackerOptionsStorageKey='entropia_tracker_options_v1';
 const defaultTrackerOptions={
-  mode:'auto',
+  mode:'casual',
   eventName:'Upcoming Legends',
   eventStartUtc:'2026-08-15T00:00',
   eventEndUtc:'2026-08-17T00:00',
@@ -12,7 +12,7 @@ const defaultTrackerOptions={
   analysisEndUtc:''
 };
 let trackerOptions={...defaultTrackerOptions,targets:[...defaultTrackerOptions.targets]};
-let trackerEffectiveMode='event';
+let trackerEffectiveMode='casual';
 let targetMobs=['armax bull','atrax','caperon','neconu','hispidus','estophyl'];
 
 const mobWaypoints={
@@ -304,10 +304,14 @@ function loadTrackerOptions(){
   trackerOptions={
     ...defaultTrackerOptions,
     ...saved,
+    // Player-first migration: older builds defaulted to Auto/Event. Keep event
+    // fields for compatibility, but migrate the normal experience to Casual.
+    mode:(saved.mode==='casual')?'casual':defaultTrackerOptions.mode,
     targets:Array.isArray(saved.targets)&&saved.targets.length
       ?saved.targets.slice(0,6)
       :[...defaultTrackerOptions.targets]
   };
+  localStorage.setItem(trackerOptionsStorageKey,JSON.stringify(trackerOptions));
   applyTrackerOptions();
 }
 
@@ -352,7 +356,7 @@ function applyTrackerOptions(){
     if(label){
       label.textContent=trackerEffectiveMode==='event'
         ?(trackerOptions.eventName||'Event')
-        :'Casual Mode';
+        :'Player Mode';
     }
     modeBtn.title=`Tracker configuration · ${trackerEffectiveMode==='event'?(trackerOptions.eventName||'Event'):'Casual Mode'} · ${describeAnalysisLookback()}`;
   }
@@ -361,14 +365,14 @@ function applyTrackerOptions(){
   if(subtitle){
     subtitle.textContent=trackerEffectiveMode==='event'
       ?`${trackerOptions.eventName||'Event'} · live telemetry · event analytics · streamer HUD`
-      :'Casual hunting · live telemetry · custom target analytics · streamer HUD';
+      :'Solo & team hunting · live telemetry · watchlist activity · streamer HUD';
   }
 
   const scheduleTitle=document.getElementById('eventScheduleTitleText');
   if(scheduleTitle){
     scheduleTitle.textContent=trackerEffectiveMode==='event'
       ?`${trackerOptions.eventName||'Event'} · Event Schedule`
-      :'Custom Target Analytics';
+      :'Watchlist Activity';
   }
 
   const sessionLabel=document.getElementById('sessionWindowLabel');
@@ -449,7 +453,7 @@ function saveTrackerOptions(runAnalysis=false){
     .slice(0,6);
 
   if(!targets.length){
-    showToast?.('Choose at least one target mob.');
+    showToast?.('Add at least one watchlist mob.');
     return;
   }
 
@@ -473,7 +477,7 @@ function saveTrackerOptions(runAnalysis=false){
   if(runAnalysis){
     if(fileHandle){
       processFileHandle(fileHandle);
-      showToast?.(`Rebuilding ${describeAnalysisLookback()} for ${targetMobs.length} target${targetMobs.length===1?'':'s'}…`);
+      showToast?.(`Rebuilding ${describeAnalysisLookback()} for ${targetMobs.length} watchlist mob${targetMobs.length===1?'':'s'}…`);
     }else{
       updateScheduleDisplay?.();
       updateAnalyticsDisplay?.();
@@ -1753,8 +1757,8 @@ async function processSelectedChatLogFile(file,{obs=false}={}){
   document.getElementById('fileStatus').textContent=obs
     ?`OBS access granted · ${file.name} · read ${readMb} MB of ${totalMb} MB.`
     :(recent.cutoff
-      ?`Analyzed ${describeAnalysisLookback()} · read ${readMb} MB of ${totalMb} MB · ${globalParsedData.length.toLocaleString()} target records`
-      :`Analyzed all history · ${totalMb} MB · ${globalParsedData.length.toLocaleString()} target records`);
+      ?`Analyzed ${describeAnalysisLookback()} · read ${readMb} MB of ${totalMb} MB · ${globalParsedData.length.toLocaleString()} creature globals`
+      :`Analyzed all history · ${totalMb} MB · ${globalParsedData.length.toLocaleString()} creature globals`);
 
   document.getElementById('fileConnectionCard')?.classList.add('hidden');
 
@@ -1807,8 +1811,8 @@ async function processFileHandle(handle){
   const totalMb=(file.size/(1024*1024)).toFixed(2);
   document.getElementById('fileStatus').textContent=
     recent.cutoff
-      ?`Analyzed ${describeAnalysisLookback()} · read ${readMb} MB of ${totalMb} MB · ${globalParsedData.length.toLocaleString()} target records`
-      :`Analyzed all history · ${totalMb} MB · ${globalParsedData.length.toLocaleString()} target records`;
+      ?`Analyzed ${describeAnalysisLookback()} · read ${readMb} MB of ${totalMb} MB · ${globalParsedData.length.toLocaleString()} creature globals`
+      :`Analyzed all history · ${totalMb} MB · ${globalParsedData.length.toLocaleString()} creature globals`;
 
   document.getElementById('fileConnectionCard').classList.add('hidden');
   startLivePolling(handle,file.size);
@@ -1932,86 +1936,100 @@ function makeHeatCell(hour,count,max,mode,isCurrent){
 
 
 function updateAnalyticsDisplay(){
-  const timeframe=document.getElementById('timeframeSelect').value;
+  const timeframe=document.getElementById('timeframeSelect')?.value||'last30';
   const now=latestSyncedGameTime||new Date();
   let cutoff=new Date(0);
-
-  if(timeframe==='last3'){cutoff=new Date(now);cutoff.setMonth(now.getMonth()-3)}
-  else if(timeframe==='last6'){cutoff=new Date(now);cutoff.setMonth(now.getMonth()-6)}
-  else if(timeframe==='last12'){cutoff=new Date(now);cutoff.setFullYear(now.getFullYear()-1)}
+  if(timeframe==='last24')cutoff=new Date(now.getTime()-24*60*60*1000);
+  else if(timeframe==='last7')cutoff=new Date(now.getTime()-7*24*60*60*1000);
+  else if(timeframe==='last30')cutoff=new Date(now.getTime()-30*24*60*60*1000);
+  else if(timeframe==='last90')cutoff=new Date(now.getTime()-90*24*60*60*1000);
 
   const stats={};
-  targetMobs.forEach(m=>{
-    stats[m]={count:0,maxPed:0,totalPed:0,hours:new Array(24).fill(0),hofs:0,lastSeen:null};
-  });
-
   let recordCount=0,totalPed=0,largest=0;
+  const query=String(document.getElementById('activitySearchInput')?.value||'').trim().toLowerCase();
 
   if(globalParsedData){
     for(const rec of globalParsedData){
-      if(rec.date&&!isNaN(rec.date)&&rec.date<cutoff)continue;
-      const s=stats[rec.mob];
-      if(!s)continue;
-      s.count++;
-      s.totalPed+=rec.ped||0;
-      s.maxPed=Math.max(s.maxPed,rec.ped||0);
-      s.hours[rec.hour]++;
-      if(rec.isHof)s.hofs++;
-      if(rec.date&&(!s.lastSeen||rec.date>s.lastSeen))s.lastSeen=rec.date;
-      recordCount++;
-      totalPed+=rec.ped||0;
-      largest=Math.max(largest,rec.ped||0);
+      const when=rec.date instanceof Date?rec.date:(rec.date?new Date(rec.date):null);
+      if(when&&!isNaN(when)&&when<cutoff)continue;
+      const mob=String(rec.mob||'Unknown').trim()||'Unknown';
+      const player=String(rec.player||'Unknown');
+      if(query && !mob.toLowerCase().includes(query) && !player.toLowerCase().includes(query))continue;
+      if(!stats[mob])stats[mob]={count:0,maxPed:0,totalPed:0,hours:new Array(24).fill(0),hofs:0,lastSeen:null,players:new Set()};
+      const st=stats[mob];
+      st.count++;
+      st.totalPed+=Number(rec.ped)||0;
+      st.maxPed=Math.max(st.maxPed,Number(rec.ped)||0);
+      const hour=Number.isFinite(Number(rec.hour))?Number(rec.hour):(when?when.getHours():0);
+      if(hour>=0&&hour<24)st.hours[hour]++;
+      if(rec.isHof)st.hofs++;
+      if(player)st.players.add(player);
+      if(when&&(!st.lastSeen||when>st.lastSeen))st.lastSeen=when;
+      recordCount++;totalPed+=Number(rec.ped)||0;largest=Math.max(largest,Number(rec.ped)||0);
     }
   }
 
   document.getElementById('analyticsRecordCount').textContent=recordCount.toLocaleString();
   document.getElementById('analyticsTotalPed').textContent=totalPed.toFixed(2);
   document.getElementById('analyticsLargestPed').textContent=largest.toFixed(2);
-  renderAnalyticsCards(stats);
+
+  const rows=Object.entries(stats).map(([mob,data])=>({mob,data}));
+  const sort=document.getElementById('activitySortSelect')?.value||'hot';
+  rows.sort((a,b)=>{
+    if(sort==='recent')return (b.data.lastSeen?.getTime?.()||0)-(a.data.lastSeen?.getTime?.()||0);
+    if(sort==='ped')return b.data.totalPed-a.data.totalPed;
+    if(sort==='largest')return b.data.maxPed-a.data.maxPed;
+    if(sort==='hofs')return b.data.hofs-a.data.hofs || b.data.count-a.data.count;
+    if(sort==='name')return a.mob.localeCompare(b.mob);
+    // "What's Hot" favors frequency, then recent PED activity.
+    return b.data.count-a.data.count || b.data.totalPed-a.data.totalPed;
+  });
+
+  renderHotMobs(rows.slice(0,8));
+  renderAnalyticsCards(rows.slice(0,120));
 }
 
-function renderAnalyticsCards(stats){
+function renderHotMobs(rows){
+  const el=document.getElementById('hotMobsStrip');if(!el)return;
+  if(!rows.length){el.innerHTML='<div class="empty">No creature globals match this view yet.</div>';return;}
+  el.innerHTML=rows.map(({mob,data},i)=>`<button class="hot-mob-chip" type="button" onclick="document.getElementById('activitySearchInput').value='${escapeHtml(mob).replace(/'/g,'&#39;')}';updateAnalyticsDisplay()">
+    <span class="hot-rank">#${i+1}</span><b>${escapeHtml(mob)}</b><span>${data.count} globals</span><span>${data.totalPed.toFixed(0)} PED</span>${data.hofs?`<span class="hof">${data.hofs} HOF</span>`:''}
+  </button>`).join('');
+}
+
+function renderAnalyticsCards(rows){
   const container=document.getElementById('resultsContainer');
   container.innerHTML='';
+  if(!rows.length){container.innerHTML='<div class="empty">No creature globals match the current search/time range.</div>';return;}
 
-  const sorted=targetMobs.map(mob=>{
-    const data=stats?.[mob]||{count:0,maxPed:0,totalPed:0,hours:new Array(24).fill(0),hofs:0,lastSeen:null};
-    return {mob,data};
-  }).sort((a,b)=>b.data.count-a.data.count);
-
-  for(const {mob,data} of sorted){
+  for(const {mob,data} of rows){
     const avg=data.count?data.totalPed/data.count:0;
     let peakH=0,maxH=-1;
     data.hours.forEach((v,h)=>{if(v>maxH){maxH=v;peakH=h}});
     const peak=maxH>0?`${String(peakH).padStart(2,'0')}:00–${String((peakH+1)%24).padStart(2,'0')}:00`:'No data';
     const hofRate=data.count?data.hofs/data.count*100:0;
     const lastSeen=data.lastSeen?formatDateTimeUTCish(data.lastSeen):'—';
+    const uniquePlayers=data.players?.size||0;
 
-    const wpHtml=(mobWaypoints[mob]||[]).map(wp=>{
+    const wpHtml=(mobWaypoints[mob.toLowerCase()]||[]).map(wp=>{
       const escaped=wp.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return `<div class="wp-item" onclick="copyWaypoint('${escaped}')" title="${escapeHtml(wp)}">
-        <span class="wp-text">${escapeHtml(wp)}</span>
-        <span class="copy-hint">COPY</span>
-      </div>`;
+      return `<div class="wp-item" onclick="copyWaypoint('${escaped}')" title="${escapeHtml(wp)}"><span class="wp-text">${escapeHtml(wp)}</span><span class="copy-hint">COPY</span></div>`;
     }).join('');
 
     const card=document.createElement('div');
     card.className='mob-card';
     card.innerHTML=`
-      <div class="mob-card-head">
-        <strong>${escapeHtml(mob)}</strong>
-        <span class="badge">${data.count} globals</span>
-      </div>
+      <div class="mob-card-head"><strong>${escapeHtml(mob)}</strong><span class="badge">${data.count} globals</span></div>
       <div class="stat-grid">
         <div class="stat"><div class="label">Largest</div><div class="value success">${data.maxPed.toFixed(2)} PED</div></div>
         <div class="stat"><div class="label">Average</div><div class="value">${avg.toFixed(2)} PED</div></div>
         <div class="stat"><div class="label">Total PED</div><div class="value">${data.totalPed.toFixed(2)} PED</div></div>
         <div class="stat"><div class="label">HOFs</div><div class="value hof">${data.hofs} · ${hofRate.toFixed(1)}%</div></div>
-        <div class="stat"><div class="label">Peak Hour</div><div class="value warning">${peak}</div></div>
+        <div class="stat"><div class="label">Active Players</div><div class="value">${uniquePlayers}</div></div>
         <div class="stat"><div class="label">Last Seen</div><div class="value">${lastSeen}</div></div>
+        <div class="stat"><div class="label">Peak Hour</div><div class="value warning">${peak}</div></div>
       </div>
-      <div class="section-label">Waypoints · click to copy</div>
-      ${wpHtml}`;
+      ${wpHtml?`<div class="section-label">Known waypoints · click to copy</div>${wpHtml}`:''}`;
     container.appendChild(card);
   }
 }

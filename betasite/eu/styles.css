@@ -4607,3 +4607,15 @@ body.streamer-mode .obs-source-diagnostic{
   border-color:rgba(57,217,138,.48)!important;
   color:#91f1bd!important;
 }
+
+/* Player-first tracker: keep legacy event IDs available to JS without centering the UI on them. */
+.player-legacy-event-only{display:none!important}
+
+/* Player-first activity explorer */
+.activity-search{min-width:190px;max-width:280px}
+.hot-mobs-strip{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:thin}
+.hot-mob-chip{display:grid;grid-template-columns:auto auto;gap:2px 9px;align-items:center;min-width:170px;padding:9px 11px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text);text-align:left;cursor:pointer}
+.hot-mob-chip:hover{border-color:var(--accent)}
+.hot-mob-chip>span{font-size:.65rem;color:var(--muted)}
+.hot-mob-chip .hot-rank{color:var(--accent);font-weight:900}
+.analytics-note{font-size:.69rem;color:var(--muted);padding:2px 2px 10px}

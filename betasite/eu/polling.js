@@ -327,6 +327,8 @@ let companionBridgeBase='';
 let companionBridgeOffset=null;
 let companionBridgeBusy=false;
 let companionBridgeFailures=0;
+let companionBridgeSeq=Number(localStorage.getItem('pixelb8_companion_eu_seq')||0)||0;
+let companionBridgeLastSeen=0;
 
 async function companionBridgeFetch(url,timeout=900){
   const controller=new AbortController();
@@ -352,54 +354,102 @@ function stopCompanionBridgePolling(){
   companionBridgeBase='';
   companionBridgeOffset=null;
 }
+function setLiveSourceDetails(kind,detail=''){
+  const status=document.getElementById('fileStatus');
+  const source=document.getElementById('streamParserFile');
+  const bridge=document.getElementById('streamObsBridgeStatus');
+  if(kind==='companion'){
+    if(status)status.textContent=`Companion Live · ${detail}`;
+    if(source)source.textContent=`Source: PixelB8 Companion · ${detail}`;
+    if(bridge)bridge.textContent=`Companion: connected · ${detail}`;
+    setConnectionStatus('Companion Live',true);
+  }else if(kind==='browser'){
+    if(status)status.textContent=`Browser Fallback Live · ${detail}`;
+    if(source)source.textContent=`Source: browser file handle · ${detail}`;
+    if(bridge)bridge.textContent='Companion: not connected · browser fallback active';
+    setConnectionStatus('Browser Live',true);
+  }else if(kind==='cached'){
+    if(status)status.textContent=detail||'Cached analytics only · no live source connected';
+    if(source)source.textContent='Source: cached data';
+    if(bridge)bridge.textContent='Companion: not connected';
+    setConnectionStatus('Cached / Offline',false);
+  }else{
+    if(status)status.textContent=detail||'No live chat.log source connected';
+    if(source)source.textContent='Source: none';
+    if(bridge)bridge.textContent='Companion: not connected';
+    setConnectionStatus('No Source',false);
+  }
+}
 async function pollCompanionBridgeOnce(){
   if(!companionBridgeBase||companionBridgeBusy)return;
   companionBridgeBusy=true;
   try{
-    const q=companionBridgeOffset==null?'':`?offset=${encodeURIComponent(companionBridgeOffset)}`;
-    const r=await companionBridgeFetch(`${companionBridgeBase}/tail${q}`,1500);
+    const r=await companionBridgeFetch(`${companionBridgeBase}/changes?since=${encodeURIComponent(companionBridgeSeq)}`,1800);
     const data=await r.json().catch(()=>({}));
     if(!r.ok||data?.ok===false)throw new Error(data?.error||`Companion bridge returned ${r.status}`);
-    companionBridgeFailures=0;
-    if(data.reset===true){
-      // chat.log rotated/truncated. The bridge starts at the new file beginning.
-      window.showAppToast?.('Entropia chat.log rotated. Companion bridge resynchronized.','warning',2600);
+    companionBridgeFailures=0;companionBridgeLastSeen=Date.now();
+
+    if(data.gap===true){
+      // Companion's in-memory backlog rolled past this browser's last sequence.
+      // Fall back to the durable byte cursor in chat.log so no lines are lost.
+      const q=cachedFileSize>0?`?offset=${encodeURIComponent(cachedFileSize)}`:'';
+      const tr=await companionBridgeFetch(`${companionBridgeBase}/tail${q}`,2200);
+      const tail=await tr.json().catch(()=>({}));
+      if(!tr.ok||tail?.ok===false)throw new Error(tail?.error||`Companion tail returned ${tr.status}`);
+      if(typeof tail.text==='string'&&tail.text.length)processNewLiveLines(tail.text);
+      cachedFileSize=Number(tail.nextOffset)||cachedFileSize;
+      cachedFileLastModified=Number(tail.lastModified)||cachedFileLastModified;
+    }else if(typeof data.text==='string'&&data.text.length){
+      processNewLiveLines(data.text);
+      cachedFileSize=Number(data.fileSize)||cachedFileSize;
+      cachedFileLastModified=Number(data.lastModified)||cachedFileLastModified;
     }
-    if(typeof data.text==='string'&&data.text.length)processNewLiveLines(data.text);
-    companionBridgeOffset=Number(data.nextOffset)||0;
-    cachedFileSize=companionBridgeOffset;
-    cachedFileLastModified=Number(data.lastModified)||cachedFileLastModified;
-    if(data.text){saveParsedDataToIDB(globalParsedData,allMobHourlyStats,{name:data.fileName||'chat.log',size:cachedFileSize,lastModified:cachedFileLastModified});}
-    const status=document.getElementById('fileStatus');
-    if(status)status.textContent=`PixelB8 Companion · ${data.fileName||'chat.log'} · live 1s polling`;
-    const source=document.getElementById('streamParserFile');if(source)source.textContent=`Source: ${data.fileName||'chat.log'} · PixelB8 Companion`;
-    const liveStatus=document.getElementById('streamObsBridgeStatus');if(liveStatus)liveStatus.textContent=`PixelB8 Companion: ${data.fileName||'chat.log'} · 1s`;
-    setConnectionStatus('Companion Live',true);
+
+    companionBridgeSeq=Number(data.nextSeq)||companionBridgeSeq;
+    localStorage.setItem('pixelb8_companion_eu_seq',String(companionBridgeSeq));
+    if(data.text)saveParsedDataToIDB(globalParsedData,allMobHourlyStats,{name:data.fileName||'chat.log',size:cachedFileSize,lastModified:cachedFileLastModified});
+    const activityAge=data.lastActivityAt?Math.max(0,Math.round((Date.now()-Number(data.lastActivityAt))/1000)):null;
+    setLiveSourceDetails('companion',`${data.fileName||'chat.log'} · ${activityAge==null?'watching for game activity':activityAge<3?'game activity now':`last game activity ${activityAge}s ago`}`);
   }catch(err){
     companionBridgeFailures++;
     if(companionBridgeFailures>=4){
       console.warn('PixelB8 Companion bridge polling lost:',err);
       if(liveInterval){clearInterval(liveInterval);liveInterval=null;}
-      setConnectionStatus('Companion offline',false);
-      const el=document.getElementById('streamObsBridgeStatus');if(el)el.textContent='PixelB8 Companion bridge disconnected';
+      companionBridgeBase='';
+      setLiveSourceDetails(fileHandle?'browser':'cached',fileHandle?'saved chat.log handle still available':'Companion disconnected · cached analytics retained');
     }
   }finally{companionBridgeBusy=false;}
 }
 async function startPixelB8CompanionBridge(){
+  setConnectionStatus('Connecting…',false);
   const found=await findPixelB8CompanionBridge();
   if(!found||found.status?.enabled!==true||found.status?.available!==true)return false;
   stopLiveHandlePolling();
   companionBridgeBase=found.base;
-  const size=Number(found.status.size)||0;
-  // Reuse a compatible cached byte position; otherwise start at the current end,
-  // matching the existing live-handle behavior and avoiding a surprise full-log scan.
-  companionBridgeOffset=(cachedFileSize>0&&cachedFileSize<=size)?cachedFileSize:size;
-  cachedFileSize=companionBridgeOffset;
+  // Sequence is persistent across page sleeps/reloads. If this is a first-time
+  // browser, start at Companion's current sequence instead of replaying old live chunks.
+  const stateSeq=Number(found.status?.ingest?.seq)||0;
+  const bufferStart=Number(found.status?.ingest?.bufferStartSeq)||stateSeq;
+  if(!companionBridgeSeq || companionBridgeSeq>stateSeq || companionBridgeSeq<Math.max(0,bufferStart-1)) companionBridgeSeq=stateSeq;
+  localStorage.setItem('pixelb8_companion_eu_seq',String(companionBridgeSeq));
+  const currentSize=Number(found.status.size)||0;
+  const previousSize=Math.min(Number(cachedFileSize)||0,currentSize);
+  // Durable catch-up across Companion restarts: if the browser remembers a
+  // byte cursor and chat.log grew while Companion/page was unavailable, ingest
+  // those bytes once before switching to the sequence backlog.
+  if(previousSize>0 && previousSize<currentSize){
+    try{
+      const tr=await companionBridgeFetch(`${companionBridgeBase}/tail?offset=${encodeURIComponent(previousSize)}`,2600);
+      const tail=await tr.json().catch(()=>({}));
+      if(tr.ok&&tail?.ok!==false){
+        if(typeof tail.text==='string'&&tail.text.length)processNewLiveLines(tail.text);
+        cachedFileSize=Number(tail.nextOffset)||currentSize;
+        cachedFileLastModified=Number(tail.lastModified)||cachedFileLastModified;
+      }else cachedFileSize=currentSize;
+    }catch{cachedFileSize=currentSize;}
+  }else cachedFileSize=previousSize||currentSize;
   cachedFileLastModified=Number(found.status.lastModified)||cachedFileLastModified;
-  setConnectionStatus('Companion Live',true);
-  const status=document.getElementById('fileStatus');if(status)status.textContent=`PixelB8 Companion connected · ${found.status.fileName||'chat.log'} · polling every 1s`;
-  const source=document.getElementById('streamParserFile');if(source)source.textContent=`Source: ${found.status.fileName||'chat.log'} · PixelB8 Companion`;
-  const liveStatus=document.getElementById('streamObsBridgeStatus');if(liveStatus)liveStatus.textContent=`PixelB8 Companion: ${found.status.fileName||'chat.log'} · 1s`;
+  setLiveSourceDetails('companion',`${found.status.fileName||'chat.log'} · watcher active in Companion`);
   if(liveInterval)clearInterval(liveInterval);
   liveInterval=setInterval(pollCompanionBridgeOnce,COMPANION_BRIDGE_POLL_MS);
   await pollCompanionBridgeOnce();
@@ -667,7 +717,7 @@ async function processFileHandleIncremental(handle){
     cachedAnalysisSignature=getAnalysisCacheSignature();
     saveParsedDataToIDB(globalParsedData,allMobHourlyStats,file);
     document.getElementById('fileStatus').textContent=
-      `Cache rebuilt: ${globalParsedData.length.toLocaleString()} target records · ${(file.size/(1024*1024)).toFixed(2)} MB`;
+      `Cache rebuilt: ${globalParsedData.length.toLocaleString()} creature globals · ${(file.size/(1024*1024)).toFixed(2)} MB`;
   }else if(file.size>cachedFileSize){
     const oldSize=cachedFileSize;
     const appendedBlob=file.slice(cachedFileSize,file.size);
@@ -685,16 +735,16 @@ async function processFileHandleIncremental(handle){
   }else{
     cachedFileLastModified=file.lastModified||cachedFileLastModified;
     document.getElementById('fileStatus').textContent=
-      `Cache already current · ${globalParsedData?.length?.toLocaleString()||0} target records · ${(file.size/(1024*1024)).toFixed(2)} MB`;
+      `Cache already current · ${globalParsedData?.length?.toLocaleString()||0} creature globals · ${(file.size/(1024*1024)).toFixed(2)} MB`;
   }
 
   document.getElementById('fileConnectionCard').classList.add('hidden');
-  setConnectionStatus('Live',true);
+  setLiveSourceDetails('browser',`${file.name||'chat.log'} · direct browser file access`);
   startLivePolling(handle,file.size);
 }
 
 function startLivePolling(handle,initialSize){
-  setConnectionStatus('Live',true);
+  setLiveSourceDetails('browser',`${handle?.name||'chat.log'} · direct browser file access`);
   const tbody=document.getElementById('liveTableBody');
   const allMobTbody=document.getElementById('allMobLiveTableBody');
   tbody.innerHTML='<tr><td colspan="6" class="empty success">Live monitoring active. Waiting for target-mob globals…</td></tr>';
@@ -797,7 +847,15 @@ function processNewLiveLines(text){
       allMobTbody.prepend(allRow);
     }
 
-    // ---------- TARGET SIX SUBSET ----------
+    // ---------- WATCHLIST SUBSET ----------
+    // All detected creature globals are analytics records. The watchlist only
+    // controls the focused feed/recommendations; it never gates ingestion.
+    if(detectedMob){
+      const allPlayer=parsePlayerName(line,detectedMob);
+      if(!globalParsedData)globalParsedData=[];
+      globalParsedData.push({mob:detectedMob,date:logDate,ped:pedNum,isHof,hour:logDate.getHours(),player:allPlayer,raw:line});
+    }
+
     const targetMob=targetMobs.find(mob=>lower.includes(mob));
     if(!targetMob)continue;
 
@@ -819,13 +877,6 @@ function processNewLiveLines(text){
     if(isHof)liveSessionHofs++;
     liveLargestLoot=Math.max(liveLargestLoot,pedNum||0);
     liveLatestMob=targetMob;
-
-    // Keep target-only live data reflected in target analytics/schedule.
-    if(!globalParsedData)globalParsedData=[];
-    globalParsedData.push({
-      mob:targetMob,date:logDate,ped:pedNum,isHof,
-      hour:logDate.getHours(),player,raw:line
-    });
 
     if(tbody.querySelector('.empty'))tbody.innerHTML='';
 
@@ -953,7 +1004,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       });
 
       const el=document.getElementById('streamObsBridgeStatus');
-      if(el)el.textContent=`Live Polling: ${file.name} · 1s`;
+      if(el)el.textContent=`Companion: not connected · Browser Fallback: ${file.name} · 1s`;
+      setLiveSourceDetails('browser',`${file.name} · restored browser file handle`);
     }catch(err){
       console.warn('Automatic live handle restore unavailable:',err);
     }

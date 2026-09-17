@@ -56,12 +56,12 @@
 
       <section class="sidebar-section">
         <div class="sidebar-section-label">Mode</div>
-        <button id="trackerModeBtn" class="btn sidebar-action sidebar-event-action" data-rail="⚙" type="button" onclick="openTrackerOptions()" title="Tracker / event options">
+        <button id="trackerModeBtn" class="btn sidebar-action sidebar-event-action" data-rail="⚙" type="button" onclick="openTrackerOptions()" title="Player tracker / watchlist options">
           <span class="sidebar-event-icons">
             <span class="sidebar-item-icon">⚙</span>
             <span class="sidebar-event-graph" aria-hidden="true">📈</span>
           </span>
-          <span class="sidebar-item-text">Upcoming Legends</span>
+          <span class="sidebar-item-text">Player Mode</span>
         </button>
         <button id="streamerModeBtn" class="btn streamer-toggle sidebar-action obs-mode-sidebar-btn" data-rail="OBS" type="button" onclick="toggleStreamerMode()" title="OBS/browser-source HUD. Esc exits.">
           <span class="sidebar-item-icon">◈</span>
@@ -128,8 +128,8 @@
     <section id="globalTab" class="tab-page">
       <div class="global-analytics-shell">
         <div class="global-analytics-subnav">
-          <button id="globalScheduleBtn" class="global-subtab-btn active" onclick="switchGlobalAnalyticsTab('schedule')">Schedule</button>
-          <button id="globalAnalyticsBtn" class="global-subtab-btn" onclick="switchGlobalAnalyticsTab('analytics')">Analytics &amp; Waypoints</button>
+          <button id="globalScheduleBtn" class="global-subtab-btn active" onclick="switchGlobalAnalyticsTab('schedule')">Activity</button>
+          <button id="globalAnalyticsBtn" class="global-subtab-btn" onclick="switchGlobalAnalyticsTab('analytics')">Explore &amp; Analytics</button>
         </div>
         <div class="global-analytics-body">
 
@@ -152,9 +152,9 @@
         <div class="schedule-main">
           <div class="kpi-grid">
             <div class="kpi">
-              <div id="sessionWindowLabel" class="kpi-label">6-Hour Window</div>
+              <div id="sessionWindowLabel" class="kpi-label">Analysis Window</div>
               <div id="timerDisplay" class="kpi-value timer-value">Waiting...</div>
-              <div id="timerDetails" class="kpi-sub">Starts on your first event global.</div>
+              <div id="timerDetails" class="kpi-sub">Activity summary for your current analysis window.</div>
             </div>
             <div class="kpi">
               <div class="kpi-label">Active Hour</div>
@@ -162,22 +162,22 @@
               <div class="kpi-sub">UTC / synced log hour</div>
             </div>
             <div class="kpi">
-              <div class="kpi-label">Loaded Target Globals</div>
+              <div class="kpi-label">Loaded Creature Globals</div>
               <div id="loadedGlobalsKpi" class="kpi-value">0</div>
-              <div id="loadedGlobalsSub" class="kpi-sub">No data loaded</div>
+              <div id="loadedGlobalsSub" class="kpi-sub">No creature globals loaded</div>
             </div>
             <div class="kpi">
               <div class="kpi-label">All-Mob Peak Hour</div>
               <div id="allMobPeakKpi" class="kpi-value hof">--</div>
               <div id="allMobPeakSub" class="kpi-sub">Waiting for data</div>
             </div>
-            <div class="kpi">
-              <div class="kpi-label">Event Ends In</div>
+            <div class="kpi player-legacy-event-only">
+              <div class="kpi-label">Legacy Event End</div>
               <div id="eventEndCountdown" class="kpi-value warning">--d --:--:--</div>
               <div id="eventEndCountdownSub" class="kpi-sub">Aug 17 · 00:00 UTC</div>
             </div>
-            <div class="kpi">
-              <div id="latestStartLabel" class="kpi-label">Latest 6h Start In</div>
+            <div class="kpi player-legacy-event-only">
+              <div id="latestStartLabel" class="kpi-label">Legacy Session Deadline</div>
               <div id="latestStartCountdown" class="kpi-value success">--d --:--:--</div>
               <div id="latestStartCountdownSub" class="kpi-sub">Deadline: Aug 16 · 18:00 UTC</div>
             </div>
@@ -185,12 +185,12 @@
 
           <div class="recommend-grid">
             <div class="recommend primary">
-              <h3>Recommended Hunt Right Now</h3>
+              <h3>Hot Watchlist Mob Right Now</h3>
               <div id="recommendedMobBox" class="value success">Load chat.log</div>
               <div id="recommendationReason" class="reason"></div>
             </div>
             <div class="recommend window">
-              <h3>Best 6-Hour Contiguous Window</h3>
+              <h3>Best 6-Hour Activity Window</h3>
               <div id="bestWindowBox" class="value warning">Calculate from log data</div>
               <div id="bestWindowReason" class="reason"></div>
             </div>
@@ -198,7 +198,7 @@
 
           <div class="panel">
             <div class="panel-header">
-              <span id="eventScheduleTitleText" class="panel-title">Upcoming Legends · Aug 15–16, 2026</span>
+              <span id="eventScheduleTitleText" class="panel-title">Watchlist Activity by Hour</span>
               <div class="toolbar">
                 <label>Time mode</label>
                 <select id="timeModeSelect" onchange="toggleTimeMode()">
@@ -232,7 +232,7 @@
         <aside class="schedule-side">
           <div class="panel heatmap-panel">
             <div class="panel-header">
-              <span class="panel-title">Target 6 · Hourly Density</span>
+              <span class="panel-title">Watchlist · Hourly Density</span>
               <span id="targetPeakLabel" class="muted" style="font-size:.68rem">No data</span>
             </div>
             <div class="panel-body">
@@ -276,18 +276,32 @@
                 <span class="status-pill">Total PED <b id="analyticsTotalPed" class="success">0.00</b></span>
                 <span class="status-pill">Largest <b id="analyticsLargestPed" class="warning">0.00</b></span>
               </div>
+              <input id="activitySearchInput" class="activity-search" type="search" placeholder="Search mob or player…" oninput="updateAnalyticsDisplay()">
+              <select id="activitySortSelect" onchange="updateAnalyticsDisplay()">
+                <option value="hot" selected>Sort: What's Hot</option>
+                <option value="recent">Sort: Most Recent</option>
+                <option value="ped">Sort: Total PED</option>
+                <option value="largest">Sort: Largest Global</option>
+                <option value="hofs">Sort: Most HOFs</option>
+                <option value="name">Sort: Mob A–Z</option>
+              </select>
               <select id="timeframeSelect" onchange="updateAnalyticsDisplay()">
-                <option value="last3">Last 90 Days</option>
-                <option value="last6">Last 180 Days</option>
-                <option value="last12">Last 365 Days</option>
-                <option value="all" selected>All Time</option>
+                <option value="last24">Last 24 Hours</option>
+                <option value="last7">Last 7 Days</option>
+                <option value="last30" selected>Last 30 Days</option>
+                <option value="last90">Last 90 Days</option>
+                <option value="all">All History</option>
               </select>
             </div>
           </div>
         </div>
 
+        <div id="hotMobsStrip" class="hot-mobs-strip">
+          <div class="empty">Connect chat.log to see recent activity.</div>
+        </div>
+        <div class="analytics-note">All detected creature globals are included. Your Watchlist only focuses recommendations and hunt planning. Planet filtering will appear once planet/location can be inferred reliably from the available game data.</div>
         <div id="resultsContainer" class="analytics-cards">
-          <div class="empty">Connect chat.log to view analytics and waypoints.</div>
+          <div class="empty">Connect chat.log to view creature activity.</div>
         </div>
       </div>
     </section>
@@ -311,22 +325,22 @@
             <div id="liveMyHofPed" class="kpi-sub">0.00 PED total</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label">My Total Loot</div>
+            <div class="kpi-label">My Global Loot</div>
             <div id="liveMyTotalLoot" class="kpi-value warning">0.00 PED</div>
-            <div class="kpi-sub">Globals + HOFs in event window</div>
+            <div class="kpi-sub">Globals + HOFs in current analysis window</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label">Latest Target</div>
+            <div class="kpi-label">Latest Watchlist Mob</div>
             <div id="liveLatestMob" class="kpi-value accent">—</div>
-            <div class="kpi-sub">Most recent target-mob event</div>
+            <div class="kpi-sub">Most recent watchlist global</div>
           </div>
         </div>
 
         <div class="panel">
           <div class="panel-header">
             <div>
-              <span class="panel-title">Real-Time Session Globals</span>
-              <span class="muted" style="font-size:.68rem;margin-left:8px">Polling connected chat.log once per second</span>
+              <span class="panel-title">Live Entropia Activity</span>
+              <span class="muted" style="font-size:.68rem;margin-left:8px">Companion keeps ingesting even if this page sleeps</span>
             </div>
             <button class="btn" onclick="clearLiveFeed()">Clear Feed</button>
           </div>
@@ -335,9 +349,9 @@
         <div class="live-feed-stack">
           <div class="panel">
             <div class="panel-header">
-              <span class="panel-title">Target 6 Globals</span>
+              <span class="panel-title">Watchlist Globals</span>
               <div class="live-feed-meta">
-                Event targets only
+                Your optional mob watchlist
                 <span class="live-feed-count">G <b id="targetLiveGlobalCount">0</b></span>
                 <span class="live-feed-count">HOF <b id="targetLiveHofCount">0</b></span>
                 <span id="targetLiveFeedValue" class="live-feed-count">0.00 PED</span>
@@ -356,7 +370,7 @@
                   </tr>
                 </thead>
                 <tbody id="liveTableBody">
-                  <tr><td colspan="6" class="empty">Live monitor waiting for target-mob globals...</td></tr>
+                  <tr><td colspan="6" class="empty">Live monitor waiting for watchlist globals...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1065,7 +1079,7 @@
     <div class="tracker-options-header">
       <div>
         <div class="tracker-options-kicker">TRACKER CONFIGURATION</div>
-        <h2 id="trackerOptionsHeading">Upcoming Legends</h2>
+        <h2 id="trackerOptionsHeading">Player Tracker</h2>
       </div>
       <button class="btn" onclick="closeTrackerOptions()">×</button>
     </div>
@@ -1077,20 +1091,19 @@
           <label class="compact-field">
             <strong>Mode</strong>
             <select id="trackerModeSelect" onchange="previewTrackerModeOptions()">
-              <option value="auto">Auto</option>
-              <option value="event">Event</option>
-              <option value="casual">Casual</option>
+              <option value="casual">Player / Casual</option>
+              <option value="event">Legacy Event Mode</option>
             </select>
           </label>
           <div class="tracker-option-info">
             <b id="effectiveModePreview">EVENT</b>
-            <span id="modePreviewReason">Auto uses Event Mode during Upcoming Legends and Casual Mode afterward.</span>
+            <span id="modePreviewReason">Player Mode is the normal tracker experience for solo and team hunts.</span>
           </div>
         </div>
       </div>
 
       <div id="eventOptionsSection" class="tracker-options-section">
-        <div class="tracker-options-title">Event Profile</div>
+        <div class="tracker-options-title">Legacy Event Profile</div>
         <div class="tracker-options-grid three">
           <label class="compact-field">
             <strong>Event Name</strong>
@@ -1116,7 +1129,7 @@
       </div>
 
       <div class="tracker-options-section">
-        <div class="tracker-options-title">Analytics Targets · 1–6 Mobs</div>
+        <div class="tracker-options-title">Mob Watchlist · 1–6 Mobs</div>
         <div id="targetInputsGrid" class="target-input-grid">
           <input class="target-mob-input" data-target-index="0" value="Armax Bull">
           <input class="target-mob-input" data-target-index="1" value="Atrax">
@@ -1125,7 +1138,7 @@
           <input class="target-mob-input" data-target-index="4" value="Hispidus">
           <input class="target-mob-input" data-target-index="5" value="Estophyl">
         </div>
-        <div class="tracker-options-help">Casual Mode can analyze any 1–6 mobs. Leave unused target boxes blank.</div>
+        <div class="tracker-options-help">Optional focus list for hunts and activity recommendations. All creature globals are still collected for analytics.</div>
       </div>
 
       <div class="tracker-options-section">
@@ -1177,7 +1190,7 @@
     </div>
 
     <div class="tracker-options-footer">
-      <button class="btn" onclick="resetTrackerOptions()">Reset Upcoming Legends</button>
+      <button class="btn" onclick="resetTrackerOptions()">Reset Player Tracker</button>
       <button class="btn primary" onclick="saveTrackerOptions(true)">Apply & Analyze</button>
     </div>
   </section>
@@ -1221,7 +1234,7 @@
       <div class="hud-content">
         <div class="hud-stat-grid">
           <div class="hud-stat">
-            <div class="hud-stat-label">Event Ends In</div>
+            <div class="hud-stat-label">Legacy Event End</div>
             <div id="streamEventCountdown" class="hud-stat-value warn">--d --:--:--</div>
           </div>
           <div class="hud-stat">
@@ -1353,7 +1366,7 @@
         </div>
 
         <div class="streamer-option-note streamer-source-note">
-          Live mode prefers PixelB8 Companion when available. Otherwise it falls back to a persistent browser FileSystem handle and reads only newly appended bytes every second.
+          Live mode prefers PixelB8 Companion. Companion owns the continuous chat.log watcher, so a sleeping browser can catch up when it wakes. Browser file access remains an explicit fallback.
         </div>
       </div>
     </section>
