@@ -4806,3 +4806,29 @@ body.streamer-mode .obs-source-diagnostic{
   flex-direction:column;
   max-height:98%;
 }
+
+/* =========================================================
+   HUNT TRACKER SUBTAB SCROLL SAFETY
+   The subtab page owns vertical scrolling whenever responsive
+   Hunt/Team layouts grow taller than the available workspace.
+   ========================================================= */
+.hunt-subtab-page{
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+}
+
+@media (max-height:900px), (max-width:1250px){
+  #huntLoadoutsTab .loadout-layout,
+  #huntLiveTab .hunt-live-layout,
+  #huntTeamTab .team-tracker-layout{
+    height:auto!important;
+    min-height:100%;
+  }
+
+  #huntLiveTab .hunt-live-layout,
+  #huntTeamTab .team-tracker-layout{
+    overflow:visible!important;
+  }
+}
