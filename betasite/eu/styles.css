@@ -4788,3 +4788,23 @@ body.streamer-mode .obs-source-diagnostic{
 .live-filter-btn.active{border-color:var(--accent);box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 45%,transparent);color:var(--text)}
 .merged-live-meta{display:flex;gap:12px;align-items:center;padding:7px 12px;border-bottom:1px solid var(--line);font-size:.72rem;color:var(--muted)}
 @media(max-width:900px){.live-monitor-actions{justify-content:flex-start}.live-feed-filter{width:100%;overflow-x:auto}.live-filter-btn{flex:0 0 auto}}
+
+/* =========================================================
+   SMALL-WINDOW WORKSPACE SCROLLING
+   Hunt + Team should remain usable when the viewport is short.
+   ========================================================= */
+.hunt-live-layout,
+.team-tracker-layout{
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+}
+
+@media (max-height:820px){
+  .hunt-live-layout,
+  .team-tracker-layout{
+    grid-template-rows:auto auto auto auto!important;
+    align-content:start;
+  }
+}
