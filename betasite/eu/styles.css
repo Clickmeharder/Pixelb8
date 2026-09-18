@@ -4888,3 +4888,33 @@ body.streamer-mode .obs-source-diagnostic{
     overflow-x:auto;
   }
 }
+
+/* =========================================================
+   TEAM TRACKER NARROW-WINDOW SCROLL OWNERSHIP
+   Below the stacked-team breakpoint the inner team grid must not
+   become a second scroll container. Keep the Hunt subtab as the
+   single vertical scroll owner so the scrollbar cannot disappear.
+   ========================================================= */
+@media (max-width:850px){
+  #huntTeamTab.hunt-subtab-page{
+    height:100%!important;
+    min-height:0!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+  }
+
+  #huntTeamTab .team-tracker-layout{
+    height:auto!important;
+    min-height:100%!important;
+    overflow:visible!important;
+  }
+
+  #huntTeamTab .team-main-grid{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    align-content:start;
+  }
+}
