@@ -4967,3 +4967,40 @@ body.streamer-mode .obs-source-diagnostic{
     align-content:start;
   }
 }
+
+/* =========================================================
+   HUNT TRACKER DOCUMENT-FLOW HANDOFF @ 1100px
+   The global responsive shell switches the app to document scrolling at
+   this breakpoint. Live Hunt / Team must stop acting like fixed-height
+   internal scroll panes here or their 100% height loses a definite scroll
+   box and the vertical scrollbar disappears. Loadouts is left untouched.
+   ========================================================= */
+@media (max-width:1100px){
+  .hunt-tracker-shell{
+    height:auto!important;
+    min-height:100%;
+  }
+
+  .hunt-tracker-body{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+
+  #huntLiveTab.hunt-subtab-page,
+  #huntTeamTab.hunt-subtab-page{
+    height:auto!important;
+    min-height:0!important;
+    overflow-x:hidden!important;
+    overflow-y:visible!important;
+    scrollbar-gutter:auto;
+  }
+
+  #huntLiveTab .hunt-live-layout,
+  #huntTeamTab .team-tracker-layout{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    align-content:start;
+  }
+}
