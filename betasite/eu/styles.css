@@ -4270,7 +4270,6 @@ body.streamer-mode .workspace{
    Manual shot economics and one-off costs are separate concepts.
    ========================================================= */
 .hunt-cost-controls{
-  display:grid;
   gap:8px;
   margin-top:10px;
   padding-top:10px;
@@ -4304,7 +4303,6 @@ body.streamer-mode .workspace{
 }
 .hunt-cost-source-row{
   display:grid;
-  grid-template-columns:auto minmax(0,1fr);
   gap:8px;
   align-items:end;
 }
