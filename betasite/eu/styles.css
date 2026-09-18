@@ -4918,3 +4918,52 @@ body.streamer-mode .obs-source-diagnostic{
     align-content:start;
   }
 }
+
+/* =========================================================
+   HUNT TRACKER NARROW SUBTAB HEIGHT FIX
+   Loadouts already switches to natural-height content when narrow.
+   Live Hunt and Team must do the same: their final 1fr rows otherwise
+   remain viewport-constrained and can prevent the outer subtab from
+   measuring the full stacked content height for vertical scrolling.
+   ========================================================= */
+@media (max-width:850px){
+  #huntLiveTab.hunt-subtab-page,
+  #huntTeamTab.hunt-subtab-page{
+    height:100%!important;
+    min-height:0!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+  }
+
+  #huntLiveTab .hunt-live-layout{
+    height:auto!important;
+    min-height:100%!important;
+    grid-template-rows:auto auto auto auto!important;
+    overflow:visible!important;
+    align-content:start;
+  }
+
+  #huntLiveTab .hunt-live-main{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    align-content:start;
+  }
+
+  #huntTeamTab .team-tracker-layout{
+    height:auto!important;
+    min-height:100%!important;
+    grid-template-rows:auto auto auto auto!important;
+    overflow:visible!important;
+    align-content:start;
+  }
+
+  #huntTeamTab .team-main-grid{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    align-content:start;
+  }
+}
