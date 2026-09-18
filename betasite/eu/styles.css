@@ -4979,21 +4979,13 @@ body.streamer-mode .obs-source-diagnostic{
   .hunt-tracker-shell{
     height:auto!important;
     min-height:100%;
+    max-height:97vh;
   }
 
   .hunt-tracker-body{
     height:auto!important;
     min-height:0!important;
     overflow:visible!important;
-  }
-
-  #huntLiveTab.hunt-subtab-page,
-  #huntTeamTab.hunt-subtab-page{
-    height:auto!important;
-    min-height:0!important;
-    overflow-x:hidden!important;
-    overflow-y:visible!important;
-    scrollbar-gutter:auto;
   }
 
   #huntLiveTab .hunt-live-layout,
