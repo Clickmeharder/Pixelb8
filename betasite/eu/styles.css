@@ -4325,9 +4325,8 @@ body.streamer-mode .workspace{
 }
 .hunt-additional-cost-entry{
   display:grid;
-  grid-template-columns:minmax(170px,1fr) minmax(120px,.55fr) auto;
+  grid-template-columns: minmax(170px,1fr) auto;
   gap:7px;
-  align-items:end;
 }
 .hunt-additional-cost-list{
   display:flex;
