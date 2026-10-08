@@ -1,0 +1,31 @@
+/* Layout bridge only. PixelB8 rail visuals live inside the rail Shadow DOM.
+   The OSRS workspace itself remains styled exclusively by vtam.css. */
+:root{
+  --pixelb8-osrs-left-expanded:250px;
+  --pixelb8-osrs-left-collapsed:64px;
+}
+body{
+  padding-left:var(--pixelb8-osrs-left-expanded);
+  transition:padding-left .18s ease;
+}
+body.pixelb8-osrs-left-collapsed{
+  padding-left:var(--pixelb8-osrs-left-collapsed);
+}
+#pixelb8OsrsSidebarHost{
+  all:initial;
+  position:fixed;
+  z-index:110;
+  left:0;
+  top:0;
+  bottom:0;
+  width:var(--pixelb8-osrs-left-expanded);
+  display:block;
+  transition:width .18s ease;
+  contain:layout style paint;
+}
+body.pixelb8-osrs-left-collapsed #pixelb8OsrsSidebarHost{
+  width:var(--pixelb8-osrs-left-collapsed);
+}
+@media(max-width:760px){
+  :root{--pixelb8-osrs-left-expanded:210px}
+}

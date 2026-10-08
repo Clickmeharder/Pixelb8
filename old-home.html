@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelB8 Homepage</title>
+	<link rel="stylesheet" href="core/css/pixelb8-landing.css">
+	<link rel="stylesheet" href="../core/css/pixelb8-tools.css">
+
+	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        body {
+			margin: auto;
+			margin-top: 0px;
+			/* height: 100vh; */
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: space-around;
+			background: url('https://source.unsplash.com/1600x900/?cyberpunk,neon') no-repeat center center/cover;
+			color: #0b7272;
+			font-family: 'Orbitron', sans-serif;
+			overflow-y: auto;
+			overflow-x: hidden;
+			flex-wrap: nowrap;
+        }
+		
+        .enter-button {
+            font-size: 24px;
+            color: #0ff;
+            padding: 15px 40px;
+            border: 2px solid #0ff;
+            background: transparent;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.4s, border-color 0.4s;
+        }
+        .enter-button:hover {
+            color: #ff00ff;
+            border-color: #ff00ff;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                font-size: 22px;
+            }
+            .enter-button {
+                font-size: 18px;
+                padding: 12px 30px;
+            }
+        }
+    </style>
+    <style>
+
+
+
+        .row {
+            position: relative;
+            z-index: 10;
+            flex-shrink: 0; /* Prevents rows from squishing */
+        }
+
+        /* The first row needs extra margin for the fixed header */
+        .row:first-of-type {
+            margin-top: 120px;
+        }
+
+        .themed-main {
+			padding: 30px;
+			height: auto;
+			overflow: hidden;
+			overflow-y: auto;
+			border-radius: 4px;
+			transition: all 0.4s;
+        }
+		.themed-main:hover {
+			color: ;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 20px #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+		}
+			
+        .app-screenshot {
+            width: 100%;
+            max-width: 800px;
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .download-zone {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .dl-button {
+            font-size: 24px;
+            color: #0ff;
+            padding: 15px 40px;
+            border: 2px solid #0ff;
+            background: rgba(0, 255, 255, 0.05);
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 1.4s;
+            cursor: pointer;
+        }
+
+        .dl-button:hover {
+            color: #ff00ff;
+            border-color: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+        }
+
+        .warning-box {
+            border-left: 5px solid #ff00ff;
+            padding: 20px;
+            background: rgba(255, 0, 255, 0.05);
+            margin: 20px 0;
+        }
+
+        .highlight { color: #ff00ff; font-weight: bold; }
+        
+        h1, h2, h3 { color: #0ff; text-transform: uppercase; margin-top: 0; }
+
+        /* Space at the very bottom so the last row isn't touching the edge */
+        .footer-spacer {
+            height: 100px;
+            width: 100%;
+        }
+    </style>
+
+
+</head>
+<body>
+	<div class="background-container">
+	  <div class="stars"></div>
+	  <div class="twinkling"></div>
+	</div>
+    <div class="crt-overlay">
+        <div class="scanlines"></div>
+    </div>
+    <div class="header">PixelB8.LoL</div>
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="https://Pixelb8.lol/">Landing</a>
+		<a href="https://Pixelb8.lol/home">Home</a>
+        <a href="https://Pixelb8.lol/pixelbot">Visit Pixelbot</a>
+		<a href="https://Pixelb8.lol/eu">Entropia</a>
+        <a href="https://Pixelb8.lol/media">Media</a>
+		<a href="https://Pixelb8.lol/tools">Tools</a>
+		<a href="https://Pixelb8.lol/arcade">Arcade</a>
+    </div>
+	<div id="useraccountPanel" class="panel right-panel" style="position:absolute;top:0px;right:0px;height:auto;">
+		<div id="userInfoContainer" style="height:100px;">
+			<P id="username">StrangerDanger</p>
+			<P id="profileusername">-</p>
+			<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+			<p id="Userpixelcount" class="hidden">0px</p>
+			<p id="loginStatus">Status: offline</p>
+		</div>
+		<div class="row">
+			<button class="logged-in" id="logoutbutt" type="button">Logout</button>
+		</div>			
+			
+				<!-- User Account Panel - Logged In Section -->
+		<<div id="loggedInControls" style="display: none; margin-top: 10px;">
+			<button id="show-mailbox-modal">Mailbox</button>
+			<button id="editProfileBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px;">
+				✏️ Edit Profile
+			</button>
+
+			<button id="saveMyBuyingListBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px; background:#0a3;">
+				💾 Save My Buying List
+			</button>
+
+			<button id="saveMySellingListBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px; background:#a30;">
+				💾 Save My Selling List
+			</button>
+
+			<button id="browseCommunityListsBtn" class="stat-tab-btn" style="width:100%;">
+				👥 Browse Community Lists
+			</button>
+		</div>
+		<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
+			<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
+			<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
+		</div>
+	</div>
+	<div class="row TopRow" id="TopRow-Homepage">
+		<h2 id="themed-main-title">Digital Frontier</h2>
+		<section class="themed-main">
+            <p>Welcome to <strong>PixelB8.LoL</strong>—the central hub for the PixelB8 community. We specialize in creating niche tools, arcade experiences, and media for the modern digital colonist.</p>
+            <p>Whether you're here to optimize your Entropia grind or just exploring the arcade, you're in the right place.</p>
+		</section>
+	</div>
+
+	<div class="row">
+		<h2 id="themed-main-title">The Ecosystem</h2>
+		<section class="themed-main">
+			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px;">
+				<div>
+					<h4 style="color: #0ff;"><i class="fa-solid fa-robot"></i> PixelBot</h4>
+					<p style="font-size: 0.9em;">Our automated companion and community mascot.</p>
+				</div>
+
+				<div>
+					<h4 style="color: #0ff;"><i class="fa-solid fa-gamepad"></i> Arcade</h4>
+					<p style="font-size: 0.9em;">Retro-style web games</p>
+				</div>
+
+				<div>
+					<h4 style="color: #0ff;"><i class="fa-solid fa-tv"></i> Broadcasting</h4>
+					<p style="font-size: 0.9em;">Custom Twitch overlays, alerts, and streaming assets.</p>
+				</div>
+
+				<div>
+					<h4 style="color: #0ff;"><i class="fa-solid fa-wave-square"></i> Web Tools</h4>
+					<p style="font-size: 0.9em;">Audio visualizers and experimental web utilities.</p>
+				</div>
+
+				<div>
+					<h4 style="color: #0ff;"><i class="fa-solid fa-wrench"></i> EU Tools</h4>
+					<p style="font-size: 0.9em;">Calculators and analyzers for Entropia Universe.</p>
+				</div>
+			</div>
+		</section>
+	</div>
+
+    <div class="row">
+		<h2 id="themed-main-title">Latest Transmission</h2>
+		<section class="themed-main">
+            <h3 style="color: #ff00ff;">NEW TOOL RELEASE: S.U.S.P.E.C.T v1.0.0</h3>
+            <p>Our flagship Entropia Universe log tracker has officially entered <strong>AlphaBeta</strong>. Track your hunts, monitor globals, and export your data with ease.</p>
+            <a href="https://Pixelb8.lol/suspect" class="enter-button" style="display: inline-block; margin-top: 10px; font-size: 14px;">View Project</a>
+		</section>
+	</div>
+
+    <div class="row">
+		<h2 id="themed-main-title">Secure A Connection</h2>
+		<section class="themed-main" style="text-align: center;">
+            <p>Join the conversation and stay updated on our latest builds.</p>
+            <div style="font-size: 24px; display: flex; justify-content: center; gap: 30px; margin-top: 10px;">
+                <a href="https://discord.gg/5tSKHCCVeU" style="color: #0ff;"><i class="fa-brands fa-discord"></i></a>
+                <a href="https://github.com/Clickmeharder" style="color: #0ff;"><i class="fa-brands fa-github"></i></a>
+                <a href="https://youtube.com/@viralclickb8" style="color: #0ff;"><i class="fa-brands fa-youtube"></i></a>
+				<a href="https://twitch.tv/jaedraze" style="color: #0ff;"><i class="fa-brands fa-twitch"></i></a>
+            </div>
+		</section>
+	</div>
+
+<!-- Modal for Signup -->
+<div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-signup-label">Create Account</h5>
+        <button type="button" class="close close-modal-btn" data-dismiss="modal-usersignup" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+      </div>
+      <div class="modal-body">
+        <!-- Your signup form goes here -->
+        <form id="signup-form">
+          <div class="form-group input-field">
+            <label for="signup-username">Username</label>
+            <input type="signup-username" class="form-control" id="signup-username" aria-describedby="usernameHelp">
+          </div>
+          <div class="form-group input-field">
+            <label for="signup-email">Email address</label>
+            <input type="signup-email" class="form-control" id="signup-email" aria-describedby="emailHelp" required />
+          </div>
+          <div class="form-group input-field">
+            <label for="signup-password">Enter Password</label>
+            <input type="signup-password" class="form-control" id="signup-password" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal" id="modal-editProfile" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a1a1a; border:2px solid #0ff; padding:20px; width:400px; border-radius:8px; z-index:10001;">
+    <h3 style="color:#0ff; margin-top:0;">Edit Profile</h3>
+    <form id="update-profile-form">
+        <label>Username:</label>
+        <input type="text" id="update-username" style="width:100%; margin-bottom:10px; padding:8px;">
+
+        <label>Profile Photo URL:</label>
+        <input type="text" id="update-photoURL" style="width:100%; margin-bottom:15px; padding:8px;">
+
+        <button type="submit" style="background:#0ff; color:#000; padding:10px; width:100%; border:none; font-weight:bold;">Save Changes</button>
+    </form>
+    <button onclick="document.getElementById('modal-editProfile').style.display='none'" style="margin-top:10px; width:100%; background:#333; color:#fff;">Cancel</button>
+</div>
+<!-- ----------- -->
+<!--hidden modals (redo most/all these lol) -->
+<!-- ----------- -->
+<!-- Container to display user details -->
+<div id="user-detailsbox" class="modal" style="display:none;">
+	<span id="user-detailsboxError" style="display:none;">error</span>
+	<div id="user-details" style="display: none; border: 1px solid #ccc; padding: 20px; margin-top: 20px; background-color: ;">
+	  <h3>User Details</h3>
+	  <p><strong>Entropia Name:</strong> <span id="entropia-name">Loading...</span></p>
+	  <p><strong>Status:</strong> <span id="status">Loading...</span></p>
+	  <p><strong>Last Login:</strong> <span id="last-login">Loading...</span></p>
+	  <button id="sendmessage-to-user" data-owner-id="">Message</button>
+	  <button id="userdetails-close-button">Close</button>
+	</div>
+</div>
+
+<!-- Send Message Modal -->
+<div id="send-message-modal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="modal-close">&times;</span>
+    <h3>Send Message</h3>
+    <form id="send-message-form">
+      <label for="recipient">Recipient ID:</label>
+      <input type="text" id="recipient" required />
+      <label for="subject">Subject:</label>
+      <input type="text" id="subject" required />
+      <label for="message">Message:</label>
+      <textarea id="message" required></textarea>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal for viewing mail -->
+<div id="view-mail-modal" class="modal" style="display: none;">
+  <div class="mailbox-container">
+    <!-- Header Section -->
+    <div id="mailbox-header" class="mailbox-header">
+      <h3>Mailbox</h3>
+	  <button id="loadMessagesBtn">Refresh Messages</button>
+      <button id="close-mail-modal" class="modal-close">✖</button>
+    </div>
+    <!-- Tabs for Inbox and Outbox -->
+    <div class="mailbox-tabs">
+      <button class="tab-btn active" data-target="inbox-messages">Inbox</button>
+      <button class="tab-btn" data-target="outbox-messages">Outbox</button>
+    </div>
+    <!-- Messages Section -->
+	<div class="mailbox-wrapper">
+		<div class="mailbox-messages">
+		  <div id="inbox-messages" class="messages-container active">
+			<!-- Inbox messages will be displayed here -->
+		  </div>
+		  <div id="outbox-messages" class="messages-container">
+			<!-- Outbox messages will be displayed here -->
+		  </div>
+		</div>
+	</div>
+    <!-- Footer Section -->
+    <div class="mailbox-footer">
+      <!-- can put something here -->
+    </div>
+  </div>
+</div>
+
+    <div style="height: 100px;">---</div>
+
+    <script src="core/js/pixelb8-global.js"></script>
+	<script type="module" src="core/js/firebase/auth.js"></script>
+</body>
+</html>

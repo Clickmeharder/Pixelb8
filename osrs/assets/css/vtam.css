@@ -1,0 +1,339 @@
+:root{
+  --bg:#0f0c09;--panel:#1a1510;--panel-2:#211a13;--panel-3:#120f0c;--line:#5a4731;--line-soft:#34271c;
+  --text:#e2d2b5;--muted:#a3937b;--accent:#ff981f;--accent-2:#ffb45f;--good:#55d982;--bad:#ef7373;--info:#67b9e8;
+  --shadow:0 10px 28px rgba(0,0,0,.34);--radius:10px;--max:1480px
+}
+*{box-sizing:border-box}html{background:var(--bg);color:var(--text);font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif}body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#241a10 0,#120f0c 36rem,#0f0c09 100%)}a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{cursor:pointer}.mono{font-family:Consolas,"Courier New",monospace}.muted{color:var(--muted)}.accent{color:var(--accent)}.good{color:var(--good)}.bad{color:var(--bad)}.info{color:var(--info)}.hidden{display:none!important}[hidden]{display:none!important}
+.shell{max-width:var(--max);margin:0 auto;padding:14px}.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:10px 12px;background:rgba(18,15,12,.96);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(10px)}.brand{display:flex;align-items:center;gap:10px;min-width:max-content}.brand-mark{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);border-radius:7px;background:#2b2218;color:var(--accent);font-weight:900}.brand-title{font-weight:900;letter-spacing:.08em;color:var(--accent)}.brand-sub{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}.nav{display:flex;flex:1;gap:6px;overflow-x:auto;scrollbar-width:thin}.nav a{white-space:nowrap;padding:8px 11px;border:1px solid transparent;border-radius:7px;font-size:13px;font-weight:700;color:#cbbba2}.nav a:hover,.nav a.active{border-color:var(--line);background:#2b2218;color:var(--accent)}.account-switch{display:flex;align-items:center;gap:6px;margin-left:auto}.account-switch select{max-width:150px}
+.ticker-row{display:grid;grid-template-columns:auto 1fr;gap:8px;margin:10px 0}.ticker-controls,.ticker-wrap{border:1px solid var(--line);background:#15110d;border-radius:8px}.ticker-controls{display:flex;align-items:center;gap:5px;padding:6px}.ticker-controls button{padding:5px 8px}.ticker-wrap{overflow:hidden;white-space:nowrap;min-height:39px;display:flex;align-items:center}.ticker{display:inline-block;will-change:transform;animation:vtamTicker var(--ticker-speed,120s) linear infinite}.ticker:hover{animation-play-state:paused}.ticker-item{display:inline-flex;gap:9px;align-items:center;padding:8px 14px;border-right:1px solid #312519;font:12px Consolas,"Courier New",monospace}@keyframes vtamTicker{to{transform:translateX(-50%)}}
+.page{display:grid;gap:12px}.panel{background:linear-gradient(180deg,rgba(31,24,17,.97),rgba(24,19,14,.97));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.panel-pad{padding:18px}.page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800}.page-head h1,.panel h2,.panel h3{margin:.25rem 0}.page-head h1{color:var(--accent);font-size:clamp(24px,3vw,34px)}.page-head p{max-width:800px;color:#c8b89f;margin:.45rem 0 0;line-height:1.55}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn,.input,.select{border:1px solid var(--line);background:#120f0c;color:var(--text);border-radius:7px}.btn{padding:8px 11px;font-weight:700}.btn:hover,.btn.primary{background:#2b2218;color:var(--accent);border-color:var(--accent)}.btn.danger:hover{color:var(--bad);border-color:var(--bad)}.input,.select{padding:8px 10px}.input:focus,.select:focus{outline:1px solid var(--accent);border-color:var(--accent)}
+.grid{display:grid;gap:12px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}.metric{padding:15px;background:var(--panel-3);border:1px solid var(--line-soft);border-radius:8px}.metric-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:800}.metric-value{margin-top:5px;font:700 20px Consolas,"Courier New",monospace}.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line-soft)}.section-title h2{font-size:17px;color:var(--accent)}
+.table-wrap{overflow:auto;border:1px solid var(--line-soft);border-radius:8px}.table{width:100%;border-collapse:collapse;font-size:13px}.table th{position:sticky;top:0;background:#15110d;color:var(--accent);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.table th,.table td{padding:10px;border-bottom:1px solid #2c2118}.table tbody tr:hover{background:#251e16}.right{text-align:right!important}.center{text-align:center!important}.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border:1px solid var(--line);border-radius:99px;background:#211a13;font-size:10px;font-weight:800}.badge.owner{color:#ffd166}.badge.deputy{color:#8fd3ff}.badge.member{color:#a8e6a3}.status-dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}.list{display:grid;gap:8px}.list-row{display:flex;justify-content:space-between;gap:12px;padding:10px;border:1px solid var(--line-soft);background:#120f0c;border-radius:7px}.callout{padding:12px;border-left:3px solid var(--accent);background:#17120e;color:#c9baa1}.tool-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tool-card{min-height:140px;padding:15px;border:1px solid var(--line-soft);background:#120f0c;border-radius:8px;display:flex;flex-direction:column;gap:8px}.tool-card:hover{border-color:var(--accent);transform:translateY(-1px)}.tool-card h3{color:var(--accent);font-size:16px}.tool-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}.tool-card .btn{margin-top:auto;align-self:flex-start}.form-row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.field{display:grid;gap:5px}.field label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}.field .input{min-width:140px}.subnav{display:flex;gap:6px;overflow-x:auto;padding:8px}.subnav a{padding:7px 10px;border:1px solid var(--line-soft);border-radius:6px;white-space:nowrap;font-size:12px;font-weight:700}.subnav a:hover,.subnav a.active{color:var(--accent);border-color:var(--accent);background:#251e16}.footer{padding:18px 4px 8px;color:#776a59;text-align:center;font-size:11px}
+.office-door{display:grid;grid-template-columns:110px 1fr;gap:16px;align-items:center}.office-plaque{aspect-ratio:1;display:grid;place-items:center;border:4px double #886b42;background:linear-gradient(135deg,#3a2a18,#1b140e);font-size:40px;color:var(--accent);border-radius:8px}.progress{height:8px;background:#0d0a08;border:1px solid #3a2d20;border-radius:99px;overflow:hidden}.progress>span{display:block;height:100%;background:linear-gradient(90deg,#8d531a,var(--accent));width:var(--p,0%)}
+.context-menu{position:fixed;z-index:1000;display:none;min-width:190px;background:#1a1510;border:1px solid var(--line);box-shadow:0 8px 24px #000;border-radius:6px;overflow:hidden}.context-menu strong,.context-menu button{display:block;width:100%;padding:8px 10px;text-align:left;border:0;border-bottom:1px solid var(--line-soft);background:transparent;color:var(--text)}.context-menu strong{color:var(--accent);background:#251e16;font-size:11px}.context-menu button:hover{background:#30251a;color:var(--accent)}
+@media(max-width:980px){.topbar{align-items:flex-start;flex-wrap:wrap}.nav{order:3;width:100%}.account-switch{margin-left:auto}.grid-4,.grid-3,.tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.shell{padding:8px}.ticker-row{grid-template-columns:1fr}.ticker-controls{overflow-x:auto}.grid-2,.grid-3,.grid-4,.tool-grid{grid-template-columns:1fr}.page-head{flex-direction:column}.office-door{grid-template-columns:70px 1fr}.brand-sub{display:none}.account-switch select{max-width:120px}}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:#120f0c}::-webkit-scrollbar-thumb{background:#483825;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:#5a4731}
+
+/* VTAM rank hierarchy */
+.rank-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.rank-card{position:relative;min-height:72px;padding:12px;border:1px solid var(--line-soft);background:#120f0c;border-radius:8px;display:flex;flex-direction:column;justify-content:center;gap:3px}.rank-card b{color:#eadcc4}.rank-card small{color:var(--muted);font-size:10px}.rank-card.management{border-left:3px solid #8fd3ff}.rank-card.ownership{border-color:#947335;border-left:3px solid #ffd166}.rank-card.functional{border-left:3px solid #b8a0df}.rank-card.promotion{border-left:3px solid var(--accent)}.rank-card.standard{border-left:3px solid #687767}.rank-order{position:absolute;right:8px;top:7px;color:#6f6251;font:700 9px Consolas,"Courier New",monospace}.rank-icon{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;border:1px solid #4b3b2a;font-size:11px;text-shadow:0 1px 2px #000}.rank-icon.mask.green{color:#4bc06d;background:#102a18}.rank-icon.mask.blue{color:#5fa8ff;background:#101d31}.rank-icon.mask.pink{color:#ff7fc5;background:#311326}.rank-icon.mask.purple{color:#b984ff;background:#241338}.rank-icon.mask.darkgrey{color:#777;background:#1c1c1c}.rank-icon.mask.black{color:#222;background:#6e6458}.rank-icon.mask.red{color:#ff5d5d;background:#321313}.rank-icon.mask.yellow{color:#ffe05c;background:#332c10}.rank-icon.mask.gold{color:#ffc14d;background:#39280d}.promotion-track{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:6px;align-items:stretch;margin-top:14px}.promotion-step{min-width:0;padding:10px 6px;border:1px solid var(--line-soft);border-radius:8px;background:#120f0c;text-align:center;display:grid;place-items:center;align-content:center;gap:5px}.promotion-step div{display:grid;gap:3px}.promotion-step b{font-size:12px}.promotion-step small{font-size:9px;color:var(--muted)}.promotion-arrow{display:none}.rank-stage-list{display:grid;gap:8px;margin-top:14px}.rank-stage{display:grid;grid-template-columns:46px 1fr;gap:10px;padding:10px;border:1px solid var(--line-soft);background:#120f0c;border-radius:8px;align-items:center}.rank-stage p{margin:2px 0 0;color:var(--muted);font-size:12px}.rank-num{font:800 12px Consolas,"Courier New",monospace;color:var(--accent);text-align:center}.rank-stage.full-member{border-color:#6a573d;background:#19140f}.org-chain{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:7px;align-items:center}.org-chain>div{padding:12px;border:1px solid var(--line-soft);background:#120f0c;border-radius:8px;text-align:center}.org-chain b,.org-chain small{display:block}.org-chain small{margin-top:3px;color:var(--muted);font-size:10px}.org-chain>span{color:var(--accent);font-size:18px;transform:rotate(-90deg)}
+@media(max-width:1100px){.rank-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.promotion-track{grid-template-columns:repeat(3,minmax(0,1fr))}.org-chain{grid-template-columns:1fr}.org-chain>span{transform:none;text-align:center}}
+@media(max-width:650px){.rank-grid,.promotion-track{grid-template-columns:1fr}}
+
+/* Builds: OSRS-inspired skills & equipment */
+.build-dashboard{display:grid;grid-template-columns:minmax(430px,1.2fr) minmax(360px,.8fr);gap:12px}.osrs-character-panel{min-width:0}.compact-title{align-items:center}.total-level-badge{display:grid;grid-template-columns:auto auto;gap:7px;align-items:center;padding:7px 10px;border:2px ridge #6f5a3c;background:#241c13;box-shadow:inset 0 0 0 1px #0b0907;color:#d4c6ac}.total-level-badge span{font-size:10px;text-transform:uppercase;color:#9d8d75}.total-level-badge b{font:800 17px Georgia,serif;color:#fff2bf;text-shadow:1px 1px #000}.osrs-skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-top:12px;padding:8px;background:#3a3025;border:3px ridge #786851;box-shadow:inset 0 0 0 2px #17120e}.osrs-skill-tile{min-height:43px;position:relative;display:grid;grid-template-columns:31px 1fr auto;align-items:center;gap:3px;padding:3px 6px 3px 4px;background:linear-gradient(#514638,#41372c);border:1px solid #211b15;box-shadow:inset 1px 1px rgba(255,255,255,.08),inset -1px -1px rgba(0,0,0,.45);font-family:Georgia,"Times New Roman",serif}.osrs-skill-tile img{width:28px;height:28px;object-fit:contain;image-rendering:auto;filter:drop-shadow(1px 1px 1px #000)}.skill-name{font-size:10px;color:#d5c9b2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.skill-level{font-size:18px;font-weight:700;color:#fff6c8;text-shadow:1px 1px 0 #000}.equipment-shell{max-width:360px;margin:18px auto 6px;padding:12px;background:#3b3126;border:4px ridge #77664d;box-shadow:inset 0 0 0 2px #19140f}.equipment-grid{display:grid;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(5,58px);grid-template-areas:". head ." "cape neck ammo" "weapon body shield" ". legs ." "gloves boots ring";gap:7px;justify-content:center}.equipment-slot{position:relative;display:grid;place-items:center;padding:2px;border:2px ridge #74654f;border-radius:3px;background:linear-gradient(135deg,#514639,#332b22);box-shadow:inset 0 0 0 1px #17120e;color:#8e806b;cursor:pointer;overflow:visible}.equipment-slot:hover{border-color:#c7a55f;filter:brightness(1.12)}.equipment-slot img{max-width:45px;max-height:42px;object-fit:contain;filter:drop-shadow(1px 2px 1px #000);z-index:1}.equipment-slot-label{position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);max-width:78px;padding:1px 4px;background:#17120eef;border:1px solid #4a3c2b;border-radius:3px;color:#c8baa2;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.75;z-index:4}.equipment-slot.equipped .equipment-slot-label{opacity:0}.equipment-slot:hover .equipment-slot-label{opacity:1}.equipment-help{margin:18px 0 0;color:var(--muted);font-size:11px;line-height:1.45}.modal-backdrop{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:16px}.modal-backdrop[hidden]{display:none}.item-picker{width:min(680px,96vw);max-height:min(720px,88vh);display:grid;grid-template-rows:auto auto minmax(0,1fr);overflow:hidden}.item-picker-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line-soft)}.item-picker-head h2{margin:2px 0 0;color:var(--accent)}.item-picker-controls{display:flex;gap:8px;padding:12px;border-bottom:1px solid var(--line-soft)}.item-picker-controls .input{flex:1}.item-search-results{overflow:auto;padding:8px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;align-content:start}.item-result{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;min-width:0;padding:7px;border:1px solid var(--line-soft);background:#120f0c;color:var(--text);border-radius:6px;text-align:left}.item-result:hover{border-color:var(--accent);background:#251e16}.item-result-icon{width:42px;height:38px;display:grid;place-items:center}.item-result img{max-width:38px;max-height:34px;object-fit:contain}.item-result b,.item-result small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item-result b{font-size:12px;color:#e8dbc5}.item-result small{margin-top:2px;font-size:9px;color:var(--muted)}
+@media(max-width:980px){.build-dashboard{grid-template-columns:1fr}.equipment-shell{max-width:380px}}
+@media(max-width:650px){.osrs-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr));padding:5px}.osrs-skill-tile{grid-template-columns:24px 1fr;min-height:39px;padding:3px}.osrs-skill-tile img{width:23px;height:23px}.skill-name{display:none}.skill-level{font-size:16px}.equipment-grid{transform:scale(.92);transform-origin:top center;margin-bottom:-20px}.item-search-results{grid-template-columns:1fr}}
+
+/* Global right-side VTAM clan feed rail */
+:root{--vtam-chat-width:350px;--vtam-chat-collapsed-width:56px}
+.vtam-chat-ready body{padding-right:var(--vtam-chat-width);transition:padding-right .2s ease}
+.chat-rail{position:fixed;z-index:90;top:0;right:0;bottom:0;width:var(--vtam-chat-width);display:grid;grid-template-columns:1fr;background:linear-gradient(180deg,#18130f,#0e0b08);border-left:1px solid var(--line);box-shadow:-8px 0 28px rgba(0,0,0,.38);transition:width .2s ease}.chat-resize-handle{position:absolute;z-index:3;top:0;bottom:0;left:-7px;width:13px;cursor:ew-resize}.chat-resize-handle::before{content:"";position:absolute;top:0;bottom:0;left:6px;width:2px;background:#3e3022;box-shadow:0 0 0 1px #110d09}.chat-resize-handle:hover::before,.vtam-chat-resizing .chat-resize-handle::before{background:var(--accent);box-shadow:0 0 9px rgba(255,152,31,.55)}.vtam-chat-resizing{cursor:ew-resize!important;user-select:none!important}.chat-compact{display:none}.chat-expanded{min-width:0;height:100%;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}.chat-account{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding:13px 12px;border-bottom:1px solid var(--line);background:#211a13}.chat-account-avatar,.chat-compact-avatar{display:grid;place-items:center;border:2px ridge #77664d;background:#34291d;color:var(--accent);font-family:Georgia,serif;font-weight:900;text-shadow:1px 1px #000}.chat-account-avatar{width:42px;height:42px;border-radius:6px;font-size:20px}.chat-account-copy{min-width:0;display:grid;gap:2px}.chat-account-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f1dfc0}.chat-account-copy span{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}.chat-settings-btn,.chat-clear-btn,.chat-collapse-btn,.chat-compact-feed{border:1px solid var(--line);background:#120f0c;color:#cabb9f;border-radius:6px}.chat-settings-btn{width:31px;height:31px}.chat-settings-btn:hover,.chat-clear-btn:hover,.chat-collapse-btn:hover,.chat-compact-feed:hover{border-color:var(--accent);color:var(--accent)}.chat-feed-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border-bottom:1px solid var(--line-soft);background:#15110d}.chat-feed-head>div{display:flex;align-items:baseline;gap:8px}.chat-feed-head b{color:var(--accent);font-size:13px}.chat-feed-head span{font-size:9px;text-transform:uppercase;color:var(--muted)}.chat-feed-head span[data-state="online"]{color:var(--good)}.chat-feed-head span[data-state="connecting"]{color:var(--accent-2)}.chat-clear-btn{padding:4px 7px;font-size:10px}.chat-feed{min-height:0;overflow:auto;padding:9px;display:flex;flex-direction:column;gap:7px;background:radial-gradient(circle at top right,rgba(255,152,31,.035),transparent 45%),#0f0c09}.chat-empty{margin:auto;max-width:240px;text-align:center;display:grid;gap:7px;color:var(--muted);font-size:11px;line-height:1.45}.chat-empty strong{color:#d9c8aa}.chat-message{padding:8px 9px;border:1px solid #33281d;border-radius:7px;background:#17120e;box-shadow:inset 2px 0 #4d3c29}.chat-message-top{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px;margin-bottom:4px}.chat-message-top strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#ffb45f;font-size:11px}.chat-message-top time{color:#746754;font:9px Consolas,"Courier New",monospace}.chat-event-tag{max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:1px 4px;border:1px solid #493827;border-radius:3px;color:#9f907b;font-size:8px;text-transform:uppercase}.chat-message-body{color:#d6c6aa;font-size:12px;line-height:1.42;white-space:pre-wrap;overflow-wrap:anywhere}.chat-feed-foot{display:flex;align-items:center;gap:7px;padding:7px 10px;border-top:1px solid var(--line-soft);background:#15110d;color:var(--muted);font-size:9px}.chat-live-dot,.chat-compact-status{width:7px;height:7px;border-radius:50%;background:#6b5a45;box-shadow:0 0 0 2px rgba(107,90,69,.15)}.chat-live-dot[data-state="online"],.chat-compact-status[data-state="online"]{background:var(--good);box-shadow:0 0 8px rgba(85,217,130,.55)}.chat-live-dot[data-state="connecting"],.chat-compact-status[data-state="connecting"]{background:var(--accent);box-shadow:0 0 8px rgba(255,152,31,.45)}
+.vtam-chat-ready.vtam-chat-collapsed body{padding-right:var(--vtam-chat-collapsed-width)}.vtam-chat-collapsed .chat-rail{width:var(--vtam-chat-collapsed-width)}.vtam-chat-collapsed .chat-expanded,.vtam-chat-collapsed .chat-resize-handle{display:none}.vtam-chat-collapsed .chat-compact{display:flex;height:100%;flex-direction:column;align-items:center;gap:12px;padding:9px 6px;background:#17120e}.chat-collapse-btn{width:34px;height:31px;font-size:21px;line-height:1}.chat-compact-avatar{width:35px;height:35px;border-radius:6px}.chat-compact-feed{position:relative;width:36px;height:36px;padding:0;font-size:15px}.chat-compact-feed span{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;display:grid;place-items:center;border-radius:9px;background:#a82e28;border:1px solid #ff746a;color:#fff;font:800 8px Consolas,"Courier New",monospace}.chat-compact-status{margin-top:auto;margin-bottom:5px}
+.chat-settings-backdrop{position:fixed;z-index:4000;inset:0;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.72)}.chat-settings-backdrop[hidden]{display:none}.chat-settings-panel{width:min(560px,96vw);padding:16px}.chat-settings-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding-bottom:12px;border-bottom:1px solid var(--line-soft)}.chat-settings-head h2{color:var(--accent);margin:.2rem 0 0}.chat-settings-field{display:grid;gap:6px;margin-top:14px}.chat-settings-field>span{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#cbbba2}.chat-settings-field small{color:var(--muted);line-height:1.45}.chat-settings-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+@media(max-width:900px){:root{--vtam-chat-width:320px}.chat-rail{max-width:82vw}.shell{padding-left:10px;padding-right:10px}}@media(max-width:620px){.vtam-chat-ready body{padding-right:var(--vtam-chat-collapsed-width)}.chat-rail{width:var(--vtam-chat-collapsed-width)}.chat-expanded,.chat-resize-handle{display:none}.chat-compact{display:flex!important;height:100%;flex-direction:column;align-items:center;gap:12px;padding:9px 6px}.vtam-chat-ready.vtam-chat-mobile-open body{padding-right:min(88vw,380px)}.vtam-chat-mobile-open .chat-rail{width:min(88vw,380px);max-width:none}.vtam-chat-mobile-open .chat-expanded{display:grid}.vtam-chat-mobile-open .chat-compact{display:none!important}.vtam-chat-mobile-open .chat-resize-handle{display:none}}
+
+/* Clan feed event distinctions */
+.chat-message-clan_system,.chat-message-clan_message,.chat-message-clan_announcement,.chat-message-clan_event{background:#14120f;box-shadow:inset 2px 0 #7a6240}.chat-message-clan_system .chat-message-top strong,.chat-message-clan_message .chat-message-top strong{color:#d7c29c}.chat-message-clan_join{box-shadow:inset 2px 0 #426b4b}.chat-message-clan_leave{box-shadow:inset 2px 0 #71443f}.chat-message-clan_rank_change{box-shadow:inset 2px 0 #77613d}.chat-message-clan_market_listing{box-shadow:inset 2px 0 #66507a}
+
+/* Local personal feed above the public clan feed */
+.chat-expanded{grid-template-rows:auto minmax(180px,.78fr) minmax(220px,1.22fr)}
+.personal-feed-section,.clan-feed-section{min-height:0;display:grid;overflow:hidden}
+.personal-feed-section{grid-template-rows:auto auto minmax(0,1fr);border-bottom:1px solid var(--line)}
+.clan-feed-section{grid-template-rows:auto minmax(0,1fr) auto}
+.personal-feed{background:radial-gradient(circle at top left,rgba(109,178,255,.045),transparent 48%),#0f0c09}
+.personal-feed-head b{color:#d7c7a9}
+.personal-feed-head span[data-state="online"]{color:var(--good)}
+.personal-feed-head span[data-state="connecting"]{color:var(--accent-2)}
+.personal-feed-head span[data-state="offline"]{color:#8f806c}
+.personal-message{box-shadow:inset 2px 0 #34495d}
+.personal-message .chat-event-tag{border-color:#3c4b58;color:#9fb1be}
+.personal-message-level{box-shadow:inset 2px 0 #7c6b35}
+.personal-message-quest{box-shadow:inset 2px 0 #6d4f82}
+.personal-message-npc_loot,.personal-message-player_loot,.personal-message-clue_loot,.personal-message-loot{box-shadow:inset 2px 0 #3f704d}
+.personal-message-grand_exchange{box-shadow:inset 2px 0 #8a6934}
+.personal-message-player_trade,.personal-message-trade{box-shadow:inset 2px 0 #4a6b7b}
+.personal-message-kill_count{box-shadow:inset 2px 0 #793f39}
+@media(max-height:700px){.chat-expanded{grid-template-rows:auto minmax(130px,.65fr) minmax(180px,1.35fr)}}
+
+/* Personal Feed v2 */
+.personal-feed-toolbar{display:flex;align-items:center;gap:7px;padding:6px 9px;border-bottom:1px solid var(--line-soft);background:#12100d}
+.personal-feed-toolbar label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+.personal-feed-toolbar select{min-width:0;flex:1;padding:5px 7px;border:1px solid #3c3328;border-radius:5px;background:#0f0c09;color:#cdbda2;font-size:10px}
+.personal-feed-toolbar select:focus{outline:1px solid #5e7180;border-color:#5e7180}
+.personal-card-body{display:grid;gap:7px}
+.personal-card-title{display:grid;grid-template-columns:26px minmax(0,1fr);gap:7px;align-items:center}
+.personal-card-icon{width:25px;height:25px;display:grid;place-items:center;border:1px solid #3b4650;border-radius:5px;background:#10161b;color:#b9cbd7;font-size:12px;font-weight:900}
+.personal-card-title>div{min-width:0;display:grid;gap:1px}
+.personal-card-title b{color:#e0d2ba;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.personal-card-title small,.personal-card-muted{color:#837763;font-size:9px;text-transform:none}
+.personal-card-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.personal-card-stats>span{min-width:0;padding:5px 6px;border:1px solid #2e2922;border-radius:5px;background:#100d0b;display:grid;gap:1px}
+.personal-card-stats small{font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:#776b59}
+.personal-card-stats b{font:700 10px Consolas,"Courier New",monospace;color:#cdbda2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.personal-card-detail{padding-top:2px}
+.personal-item-list{display:grid;gap:3px}
+.personal-item-list>div{display:flex;justify-content:space-between;gap:8px;padding:3px 5px;border-radius:4px;background:#100d0b;color:#c9baa0;font-size:10px}
+.personal-item-list em{font-style:normal;color:#8c7f6b;white-space:nowrap;font:9px Consolas,"Courier New",monospace}
+.personal-trade-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.personal-trade-grid>div{min-width:0;padding:5px;border:1px solid #2f2921;border-radius:5px;background:#120f0c}
+.personal-trade-grid>div>b{display:block;margin-bottom:4px;color:#9fb1be;font-size:9px;text-transform:uppercase;letter-spacing:.06em}
+.personal-message-level .personal-card-icon{color:#e4c86e;border-color:#5c5030;background:#1b180d}
+.personal-message-quest .personal-card-icon{color:#c8a9dc;border-color:#594366;background:#1a1220}
+.personal-message-npc_loot .personal-card-icon,.personal-message-player_loot .personal-card-icon,.personal-message-clue_loot .personal-card-icon,.personal-message-loot .personal-card-icon{color:#90d0a0;border-color:#375d42;background:#101a13}
+.personal-message-grand_exchange .personal-card-icon{color:#e0bd76;border-color:#6b542d;background:#1d180e}
+.personal-message-player_trade .personal-card-icon,.personal-message-trade .personal-card-icon{color:#99c4d7;border-color:#3e5b68;background:#10181c}
+.personal-message-kill_count .personal-card-icon{color:#dc9188;border-color:#633a35;background:#1d1110}
+@media(max-width:340px){.personal-trade-grid{grid-template-columns:1fr}.personal-card-stats{grid-template-columns:1fr}}
+
+.clan-card{display:block;text-decoration:none;color:inherit}.clan-card .section-title{margin-bottom:8px}.clan-card-meta{display:flex;justify-content:space-between;gap:12px;margin-top:14px;font-size:12px;color:#a3937b}.clan-card:hover .clan-card-meta span:last-child{color:#ff981f}
+
+.legal-disclaimer{margin-top:6px;color:#5f5548;font-size:10px;line-height:1.45}.footer a{color:#9c8a70;text-decoration:underline;text-underline-offset:2px}.footer a:hover{color:var(--accent)}.register-clan-form{display:grid;gap:12px;max-width:560px}.register-clan-form .input{width:100%}.form-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}.registration-status{margin-top:14px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:7px;background:#120f0c;color:var(--muted)}.registration-status.success{border-color:#446b3e;color:#a8e6a3}.registration-status.error{border-color:#7b3939;color:#ffaaaa}.registration-success{margin-top:14px;padding-top:14px;border-top:1px solid var(--line-soft)}.key-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.verification-key{flex:1;min-width:280px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}.btn.ghost{background:transparent;color:var(--muted)}
+
+.clan-key-list{display:grid;gap:12px;margin-top:14px}.clan-key-card{padding:14px;border:1px solid var(--line-soft);border-radius:8px;background:#120f0c}.key-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}.key-card-head h3{margin:.2rem 0 0;color:var(--accent)}
+
+/* Disabled action used while the public Clan Feed template repo is not configured yet. */
+.btn.disabled,.btn[aria-disabled="true"]{opacity:.55;cursor:not-allowed;filter:saturate(.45)}
+
+/* Hosted clan feed setup guide */
+.setup-dialog {
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 16px;
+  background: transparent;
+  color: inherit;
+}
+.setup-dialog::backdrop { background: rgba(0,0,0,.72); }
+.setup-dialog-card {
+  padding: 22px;
+  background: var(--panel, #11151c);
+  border-radius: 16px;
+  overflow: auto;
+  max-height: calc(100vh - 48px);
+}
+.setup-step {
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr);
+  gap: 14px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.setup-step:first-of-type { margin-top: 14px; }
+.setup-step-number {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  font-weight: 800;
+}
+.setup-step h3 { margin: 2px 0 6px; }
+.setup-note { margin: 9px 0 0; }
+@media (max-width: 620px) {
+  .setup-step { grid-template-columns: 1fr; }
+  .setup-step-number { margin-bottom: -4px; }
+}
+.clan-feed-head{align-items:center}
+.clan-feed-heading{min-width:0;display:flex!important;align-items:center!important;gap:7px!important;flex:1}
+.clan-feed-heading b{flex:0 0 auto}
+.clan-feed-select{min-width:0;max-width:170px;flex:1;padding:4px 6px;border:1px solid #3c3328;border-radius:5px;background:#0f0c09;color:#d8c7aa;font-size:10px}
+.clan-feed-select:focus{outline:1px solid var(--accent);border-color:var(--accent)}
+.clan-feed-select:disabled{opacity:.65;color:var(--muted)}
+@media(max-width:420px){.clan-feed-select{max-width:125px}.clan-feed-heading{gap:5px!important}}
+
+.dashboard-sections{align-items:start}.dashboard-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-card-grid .tool-card{min-height:120px}
+@media(max-width:650px){.dashboard-card-grid{grid-template-columns:1fr}}
+
+/* Dashboard workspace navigation */
+.dashboard-mode-subnav{margin-bottom:8px;background:#15110d;border:1px solid var(--line-soft);border-radius:8px}
+.clan-workspace-subnav{margin-bottom:12px;background:#120f0c;border:1px solid var(--line-soft);border-radius:8px}
+.dashboard-mode-subnav a{min-width:92px;text-align:center}
+
+/* OSRS right utility rail account selector + desktop compact mode */
+.chat-account{grid-template-columns:42px minmax(0,1fr) auto}
+.chat-account-copy{gap:4px}
+.chat-account-select{width:100%;min-width:0;padding:6px 8px;font-size:12px;font-weight:800;color:#f1dfc0;background:#120f0c}
+.chat-account-copy>span{font-size:9px}
+.chat-compact-avatar{border:1px solid var(--line);padding:0;cursor:pointer}
+.vtam-chat-collapsed .chat-compact{box-shadow:inset 1px 0 #2e2419}
+.vtam-chat-collapsed .chat-compact-feed,.vtam-chat-collapsed .chat-collapse-btn,.vtam-chat-collapsed .chat-compact-avatar{flex:0 0 auto}
+
+/* Always-visible desktop handle for the OSRS right utility rail */
+.chat-edge-toggle{position:absolute;z-index:6;top:50%;left:-19px;transform:translateY(-50%);width:20px;height:54px;padding:0;border:1px solid var(--line);border-right:0;border-radius:7px 0 0 7px;background:#17120e;color:#cabb9f;font:900 18px/1 Georgia,serif;cursor:pointer;box-shadow:-3px 0 10px rgba(0,0,0,.28)}
+.chat-edge-toggle:hover{border-color:var(--accent);color:var(--accent);background:#211a13}
+.vtam-chat-collapsed .chat-edge-toggle{left:-18px}
+@media(max-width:620px){.chat-edge-toggle{display:none}}
+
+/* Clan source badges */
+.badge.local{background:rgba(92,166,255,.12);border-color:rgba(92,166,255,.42);color:#9dccff}
+.badge.registered{background:rgba(111,205,139,.12);border-color:rgba(111,205,139,.42);color:#9be0ad}
+
+/* Alch Terminal column chooser */
+.alch-column-toggle{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft)}
+.alch-column-toggle label{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--line-soft);border-radius:6px;background:#120f0c;color:#cabb9f;font-size:11px;cursor:pointer}
+.alch-column-toggle label:has(input:checked){border-color:var(--accent);color:var(--accent);background:#251e16}
+
+
+/* Grand Exchange flat headers + staff equipment toggles */
+.staff-toggle{width:76px;min-height:68px;display:grid;grid-template-rows:42px auto;place-items:center;gap:3px;padding:5px 6px;border:1px solid var(--line);border-radius:7px;background:#120f0c;color:#cabb9f;font:700 10px/1.15 system-ui,sans-serif;cursor:pointer}
+.staff-toggle img{max-width:40px;max-height:40px;object-fit:contain;image-rendering:auto;filter:drop-shadow(1px 2px 1px #000)}
+.staff-toggle span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.staff-toggle:hover{border-color:var(--accent);color:var(--accent);background:#211a13}
+.staff-toggle.active,.staff-toggle[aria-pressed="true"]{border-color:var(--accent);color:#fff2bf;background:#2b2218;box-shadow:inset 0 0 0 1px rgba(231,185,92,.28)}
+
+/* Alch Terminal compact item/rune icon slots */
+.alch-icon-slot{width:36px;height:36px;box-sizing:border-box;display:grid;place-items:center;margin:auto;padding:2px;background:#2a241d;border:1px solid #6d5f4b;border-radius:3px;box-shadow:inset 0 0 0 1px #15110d}
+.alch-icon-slot>img,.alch-item-icon{display:block;width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important;object-fit:contain;margin:0!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;filter:drop-shadow(1px 1px 1px #000)}
+.table th[data-col="icon"],.table td[data-col="icon"]{width:46px;text-align:center;padding-left:4px;padding-right:4px}
+
+/* Alch Terminal compact market controls */
+.alch-rune-controls{align-items:stretch}
+.rune-price-card{display:grid;grid-template-columns:36px minmax(90px,120px) auto;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--line-soft);border-radius:7px;background:#120f0c}
+.rune-price-card>.alch-icon-slot{margin:0}
+.rune-price-main{display:grid;gap:4px}.rune-price-main label{font-size:11px;color:#cabb9f;font-weight:700}.rune-price-main .input{min-width:90px;width:100%}
+.rune-market{display:grid;gap:4px;font-size:10px;color:var(--muted);white-space:nowrap}.rune-market strong{color:#e7d6b5;font-weight:700}
+.alch-count-actions{display:flex;align-items:center;gap:6px}.icon-btn{width:36px;height:36px;display:grid;place-items:center;padding:0;border:1px solid var(--line-soft);border-radius:6px;background:#120f0c;color:#cabb9f;font-size:18px;line-height:1;cursor:pointer}.icon-btn:hover{border-color:var(--accent);color:var(--accent);background:#211a13}
+
+.alch-basis-stack{display:grid;gap:4px;min-width:190px}
+.alch-basis-stack label{display:grid;grid-template-columns:72px minmax(100px,1fr);align-items:center;gap:6px;color:var(--muted);font-size:10px;line-height:1}
+.alch-basis-stack .select{min-width:0;height:28px;padding:3px 24px 3px 7px;font-size:11px}
+.mini-toggle{min-height:30px;padding:4px 8px;border:1px solid var(--line-soft);border-radius:6px;background:#120f0c;color:#cabb9f;font:700 10px/1 system-ui,sans-serif;white-space:nowrap;cursor:pointer}
+.mini-toggle:hover{border-color:var(--accent);color:var(--accent);background:#211a13}
+.mini-toggle.active,.mini-toggle[aria-pressed="true"]{border-color:var(--accent);color:#fff2bf;background:#2b2218;box-shadow:inset 0 0 0 1px rgba(231,185,92,.20)}
+
+/* Alch Terminal column toggle buttons */
+.alch-column-toggle{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft)}
+.alch-column-toggle>label:not(.field){position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:5px 9px;border:1px solid var(--line-soft);border-radius:6px;background:#120f0c;color:#cabb9f;font-size:11px;cursor:pointer;user-select:none}
+.alch-column-toggle>label:not(.field)>input{display:none!important;appearance:none!important;-webkit-appearance:none!important}
+.alch-column-toggle>label:not(.field):hover{border-color:var(--accent);color:var(--accent);background:#211a13}
+.alch-column-toggle>label:not(.field):has(input:checked){border-color:var(--accent);color:#fff2bf;background:#2b2218;box-shadow:inset 0 0 0 1px rgba(231,185,92,.20)}
+
+@media(max-width:650px){
+  .rune-price-card{grid-template-columns:36px minmax(80px,1fr)}
+  .rune-market{grid-column:2}
+}
+
+/* Feed settings tabs */
+.chat-settings-tabs{display:flex;gap:6px;margin:14px 0 4px;padding-bottom:10px;border-bottom:1px solid var(--line-soft)}
+.chat-settings-tab{flex:1;min-height:34px;padding:7px 10px;border:1px solid var(--line-soft);border-radius:6px;background:#120f0c;color:#b9aa92;font:800 11px/1 system-ui,sans-serif;cursor:pointer}
+.chat-settings-tab:hover{border-color:#6d5f4b;color:#ead9bb;background:#1b1611}
+.chat-settings-tab.active,.chat-settings-tab[aria-selected="true"]{border-color:var(--accent);color:#fff2bf;background:#2b2218;box-shadow:inset 0 0 0 1px rgba(231,185,92,.20)}
+.chat-settings-tab-panel[hidden]{display:none}
+.chat-settings-tab-panel{padding-top:2px}
+.chat-settings-tab-panel .chat-settings-field:first-child{margin-top:10px}
+
+/* Crafting tool */
+.craft-controls{align-items:flex-end;gap:10px;margin-top:12px}.craft-controls>.input{min-width:210px;flex:1}.craft-min-profit{min-width:125px}.craft-min-profit .input{width:125px}.craft-rate{min-width:82px}.craft-rate .input{width:82px}.craft-basis-stack{margin-left:0}.craft-table-wrap{margin-top:12px;max-height:540px}.craft-table-wrap th{white-space:nowrap;cursor:default}.craft-table-wrap th[data-sort]{cursor:pointer}.craft-inputs{min-width:180px;font-size:12px;color:#d9ccb5}.craft-subline{font-size:10px;color:var(--muted);margin-top:2px}.craft-note{font-size:11px;margin:9px 0 0}.craft-table-wrap td{vertical-align:middle}@media(max-width:1050px){.craft-controls{align-items:stretch}.craft-controls>.input{min-width:170px}.craft-table-wrap{max-height:500px}}
+
+/* Bone magic tool */
+.craft-tool-head,.bone-tool-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.craft-tool-head h2,.bone-tool-head h2{margin:2px 0 4px}.bone-controls{align-items:end}.bone-controls .field{min-width:110px}.bone-staff-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 12px}.bone-staff-row .muted{font-size:11px}.mini-toggle[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:rgba(255,152,31,.08)}
+
+/* Bone magic equipment + rune controls */
+.bone-config-row{display:flex;align-items:stretch;gap:12px;margin:10px 0 12px;flex-wrap:wrap}.bone-rune-prices{display:flex;gap:8px;flex:1;min-width:520px;flex-wrap:wrap}.bone-rune-card{display:grid;grid-template-columns:30px minmax(88px,1fr) 72px;align-items:center;gap:7px;min-width:190px;flex:1;padding:7px 8px;border:1px solid var(--line-soft);border-radius:7px;background:#120f0c}.bone-rune-card img{width:26px;height:26px;object-fit:contain;image-rendering:auto}.bone-rune-card strong{display:block;font-size:11px;color:#ead9bb;white-space:nowrap}.bone-rune-market{font-size:9px;color:var(--muted);white-space:nowrap}.bone-rune-card .input{width:72px;min-width:0;padding:6px 7px}.bone-equipment{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line-soft);border-radius:7px;background:#120f0c}.bone-equip-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em}.bone-equip-picker{position:relative}.bone-equip-slot{display:grid;grid-template-columns:28px minmax(88px,1fr) 12px;grid-template-rows:12px 28px;column-gap:7px;align-items:center;min-width:170px;padding:5px 7px;border:1px solid #443a2e;border-radius:6px;background:#19140f;color:#e6d7bd;cursor:pointer;text-align:left}.bone-equip-slot:hover{border-color:#75644d;background:#211a13}.bone-equip-slot img{grid-row:1/3;width:28px;height:28px;object-fit:contain}.bone-slot-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;align-self:end}.bone-equip-slot>span[id]{font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:start}.bone-slot-caret{grid-column:3;grid-row:1/3;color:var(--muted)}.bone-equip-menu{position:absolute;z-index:40;top:calc(100% + 5px);left:0;min-width:220px;padding:5px;border:1px solid #554735;border-radius:7px;background:#100d0a;box-shadow:0 10px 30px rgba(0,0,0,.5)}.bone-equip-menu[hidden]{display:none}.bone-equip-option{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:7px;width:100%;padding:6px 7px;border:1px solid transparent;border-radius:5px;background:transparent;color:#d9ccb5;text-align:left;cursor:pointer}.bone-equip-option:hover:not(:disabled),.bone-equip-option.active{border-color:#584936;background:#211a13;color:#fff2bf}.bone-equip-option:disabled{opacity:.35;cursor:not-allowed}.bone-equip-option img{width:26px;height:26px;object-fit:contain}.bone-equip-option span{font-size:11px;font-weight:800}.bone-equip-option small{font-size:9px;color:var(--muted)}.bone-table-wrap td:nth-child(2),.bone-table-wrap td:nth-child(3){white-space:nowrap}@media(max-width:1180px){.bone-rune-prices{min-width:100%}.bone-equipment{width:100%;flex-wrap:wrap}}@media(max-width:720px){.bone-rune-card{min-width:100%}.bone-equipment{align-items:stretch}.bone-equip-picker{flex:1;min-width:180px}.bone-equip-slot{width:100%}}
+
+.bone-mode-tabs{display:flex;gap:6px;margin:0 0 12px;padding:4px;border:1px solid var(--line-soft);border-radius:8px;background:#100d0a;width:max-content}.bone-mode-tab{border:1px solid transparent;border-radius:6px;background:transparent;color:var(--muted);font:inherit;font-size:11px;font-weight:800;padding:7px 11px;cursor:pointer}.bone-mode-tab:hover:not(:disabled){color:#f2dfbf;background:#1b150f}.bone-mode-tab.active{color:#fff0bd;border-color:#675336;background:#251b11}.bone-mode-tab:disabled{opacity:.35;cursor:not-allowed}.bone-batch-tool{margin-top:12px;padding:10px;border:1px solid var(--line-soft);border-radius:8px;background:#100d0a}.bone-batch-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}.bone-batch-head>div:first-child strong{font-size:12px}.bone-batch-head .form-row{margin:0}.bone-batch-grid{display:grid;grid-template-columns:repeat(7,minmax(90px,1fr));gap:6px;margin-top:9px}.bone-batch-metric{padding:7px 8px;border:1px solid #332a20;border-radius:6px;background:#17120e}.bone-batch-metric span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.05em}.bone-batch-metric strong{display:block;margin-top:3px;font-size:12px}.bone-controls small{display:block;margin-top:3px;font-size:9px}@media(max-width:1050px){.bone-batch-grid{grid-template-columns:repeat(4,minmax(90px,1fr))}}@media(max-width:650px){.bone-mode-tabs{width:100%}.bone-mode-tab{flex:1}.bone-batch-grid{grid-template-columns:repeat(2,minmax(90px,1fr))}}
+
+/* Bone Magic compact batch header + fruit market slices */
+.bone-tool-head{align-items:flex-start;flex-wrap:wrap}.bone-tool-title{min-width:180px}.bone-batch-top{margin:0;flex:1;min-width:520px;max-width:900px}.bone-batch-top .bone-batch-grid{margin-top:7px}.bone-fruit-market{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}.bone-fruit-market[hidden],.bone-market-slice[hidden]{display:none}.bone-market-slice{display:grid;grid-template-columns:30px minmax(100px,1fr) auto;align-items:center;gap:7px;min-width:220px;padding:7px 8px;border:1px solid var(--line-soft);border-radius:7px;background:#120f0c}.bone-market-slice img{width:26px;height:26px;object-fit:contain}.bone-market-slice strong{display:block;font-size:11px;color:#ead9bb}.bone-market-slice small{font-size:9px;color:var(--muted);white-space:nowrap}@media(max-width:900px){.bone-batch-top{min-width:100%;max-width:none}.bone-tool-head>.badge{order:2}.bone-batch-top{order:3}}
+
+/* Bone Magic compact header / market indicator */
+.bone-tool-head{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:10px;margin-bottom:14px}
+.bone-tool-head .bone-mode-tabs{margin:0}
+.bone-batch-top{width:100%;min-width:0;max-width:none;margin:0}
+.bone-market-indicator{display:inline-block;width:9px;height:9px;border-radius:50%;background:#6a5b4c;border:1px solid #8b7764;vertical-align:middle}
+.bone-market-indicator.good{background:#55b96f;border-color:#78d38d}
+.bone-market-indicator.bad{background:#b95656;border-color:#d27676}
+.alch-count-actions .bone-market-indicator{margin-left:2px;flex:0 0 auto}
+
+/* Bone Magic market slices v0.73 */
+.bone-market-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:72px}.bone-market-meta small{display:block}.bone-basket-cost{margin-top:2px;font-size:9px;color:var(--muted);white-space:nowrap}.bone-market-basket{min-width:260px}
+
+
+/* Crafting tool polish v0.78 */
+.craft-controls{margin-top:0}
+.craft-column-toggle{margin-top:10px}
+.craft-input-cell{display:grid;grid-template-columns:28px minmax(110px,1fr);gap:7px;align-items:center;min-width:155px}
+.craft-input-cell img{width:26px;height:26px;object-fit:contain}
+.craft-input-cell strong{display:block;font-size:11px;white-space:nowrap}
+.craft-input-cell small{display:block;margin-top:2px;font-size:9px;color:var(--muted);white-space:nowrap}
+.craft-material-tray{margin-top:10px;padding:9px;border:1px solid var(--line-soft);border-radius:8px;background:#100d0a}
+.craft-material-tray[hidden]{display:none}
+.craft-material-tray-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.craft-material-tray-head strong{font-size:11px;color:#ead9bb}
+.craft-material-tray-head span{font-size:10px}
+.craft-material-grid{display:flex;gap:7px;flex-wrap:wrap}
+.craft-material-card{display:grid;grid-template-columns:28px minmax(92px,1fr);gap:7px;align-items:center;padding:6px 7px;border:1px solid var(--line-soft);border-radius:6px;background:#17120e;min-width:145px}
+.craft-material-card img{width:26px;height:26px;object-fit:contain}
+.craft-material-card strong{display:block;font-size:10px;color:#e6d7bd;white-space:nowrap}
+.craft-material-card small{display:block;margin-top:2px;font-size:9px;color:var(--muted);white-space:nowrap}
+.craft-material-more{display:flex;flex-direction:column;justify-content:center;padding:6px 9px;border:1px dashed var(--line-soft);border-radius:6px;color:#cabb9f;font-size:10px}
+.craft-material-more small{font-size:9px;color:var(--muted)}
+#craftMaterialToggle[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:rgba(255,152,31,.08)}
+
+
+/* Crafting contextual material details v0.80 */
+.craft-material-container-cost{margin-top:2px;color:#b9aa92!important}
+.craft-material-chain-tag{display:inline-block;margin-left:5px;padding:1px 4px;border:1px solid var(--line-soft);border-radius:4px;color:var(--muted);font-size:8px;font-weight:700;text-transform:uppercase;vertical-align:1px}
+
+
+/* Item Sets arbitrage tool v0.82 */
+.set-tool-controls{align-items:flex-end;gap:10px}.set-tool-controls>.input{min-width:240px;flex:1}.set-table-wrap{margin-top:12px;max-height:590px}.set-table-wrap th{white-space:nowrap}.set-table-wrap th[data-sort]{cursor:pointer}.set-parts{display:flex;gap:5px;flex-wrap:wrap;min-width:300px}.set-part{display:grid;grid-template-columns:24px minmax(90px,1fr);grid-template-rows:auto auto;column-gap:5px;align-items:center;padding:4px 6px;border:1px solid var(--line-soft);border-radius:5px;background:#120f0c}.set-part img{grid-row:1/3;width:22px;height:22px;object-fit:contain}.set-part>span{font-size:9px;font-weight:800;color:#ddcfb6;white-space:nowrap}.set-part small{font-size:8px;color:var(--muted);white-space:nowrap}.set-column-toggle{margin-top:10px}@media(max-width:900px){.set-parts{min-width:220px}.set-tool-controls>.input{min-width:160px}}
+
+
+/* Item Sets micro calculator v0.83 */
+.set-calculator{margin-top:10px;padding:10px;border:1px solid var(--line-soft);border-radius:8px;background:#100d0a}
+.set-calculator[hidden]{display:none}.set-calc-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px}.set-calc-head strong{font-size:12px}.set-calc-head .muted{font-size:10px;margin-top:2px}
+.set-calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.set-calc-side{padding:8px;border:1px solid var(--line-soft);border-radius:7px;background:#15110d}.set-calc-side h3{font-size:11px;margin:0 0 7px;color:#ead9bb}
+.set-calc-items{display:flex;flex-direction:column;gap:5px}.set-calc-row{display:grid;grid-template-columns:28px minmax(120px,1fr) 84px 90px auto;gap:6px;align-items:center;padding:5px 6px;border:1px solid #342b22;border-radius:5px;background:#110e0b}.set-calc-row img{width:26px;height:26px;object-fit:contain}.set-calc-name strong{display:block;font-size:10px;white-space:nowrap}.set-calc-name small{display:block;font-size:8px;color:var(--muted);white-space:nowrap}.set-calc-basis,.set-calc-manual{min-width:0;height:30px;padding:4px 6px;font-size:10px}.set-calc-value{font:800 10px/1 monospace;color:#e2d4bc;white-space:nowrap}.set-calc-result{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--line-soft);font-size:11px}.set-calc-result strong{font-size:13px}
+.set-row{cursor:pointer}.set-row:hover{background:#17120e}.set-row.selected{box-shadow:inset 3px 0 0 var(--accent);background:#19130e}
+#setCalcToggle[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:rgba(255,152,31,.08)}
+@media(max-width:1000px){.set-calc-grid{grid-template-columns:1fr}}@media(max-width:650px){.set-calc-row{grid-template-columns:28px minmax(100px,1fr) 72px}.set-calc-manual,.set-calc-value{grid-column:2/4}}
+
+
+/* Global Grand Exchange access filter v0.84 */
+.ticker-access-select{height:30px;min-width:92px;padding:4px 24px 4px 8px;font-size:10px;font-weight:800}
+.ticker-fav.active,.ticker-fav[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:#251e16}
+
+
+/* GE icon tabs v0.85 */
+#geSubnav .ge-icon-tab{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:6px 8px}
+#geSubnav .ge-tab-icon{display:block;width:24px;height:24px;object-fit:contain;image-rendering:auto;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.55))}
+#geSubnav .ge-tab-fallback{display:none;font-size:10px;font-weight:800;letter-spacing:.02em}
+#geSubnav .ge-icon-tab.icon-fallback .ge-tab-fallback{display:inline}
+#geSubnav .ge-icon-tab.icon-fallback .ge-tab-icon{display:none}
+#geSubnav .ge-icon-tab.active{box-shadow:inset 0 0 0 1px rgba(231,185,92,.28)}
+
+
+/* Cooking + Smithing production tools v0.87 */
+.production-controls{align-items:flex-end;gap:10px}.production-controls>.input{min-width:220px;flex:1}.production-small{min-width:82px}.production-small .input{width:82px}.production-table-wrap{margin-top:12px;max-height:560px}.production-table-wrap th{white-space:nowrap}.production-table-wrap th[data-sort]{cursor:pointer}.production-table-wrap td{vertical-align:middle}@media(max-width:1000px){.production-controls{align-items:stretch}.production-controls>.input{min-width:160px}}
+
+
+/* Smithing material context + compact ingredient cards v0.88 */
+.smith-input-list{display:flex;gap:5px;flex-wrap:wrap;min-width:220px}
+.smith-input-card{display:grid;grid-template-columns:26px minmax(78px,1fr);gap:5px;align-items:center;padding:4px 6px;border:1px solid var(--line-soft);border-radius:5px;background:#120f0c}
+.smith-input-card img{width:24px;height:24px;object-fit:contain}
+.smith-input-card strong{display:block;font-size:9px;white-space:nowrap}
+.smith-input-card small{display:block;font-size:8px;color:var(--muted);white-space:nowrap}
+.smith-material-kind{display:inline-block;margin-left:5px;padding:1px 4px;border:1px solid var(--line-soft);border-radius:4px;color:var(--muted);font-size:7px;text-transform:uppercase;vertical-align:1px}
+#smithMaterialToggle[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:rgba(255,152,31,.08)}
+.smith-material-tray{margin-top:10px}
+
+
+/* Production cleanup v0.89 */
+#craftTable .smith-input-list{min-width:260px}
+#craftTable .smith-input-card{min-width:120px}
+
+
+/* Smithing anvil filters v0.91 */
+.smith-anvil-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px;padding-top:9px;border-top:1px solid var(--line-soft)}
+.smith-anvil-filters[hidden]{display:none}.smith-filter-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.smith-anvil-filters .select{min-width:128px;height:32px;font-size:10px}
+
+
+/* Fletching + Gathering v0.92 */
+.gather-skill-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.gather-skill-tabs .mini-toggle.active{border-color:var(--accent);color:var(--accent);background:rgba(255,152,31,.08)}
+.gather-controls{margin-bottom:6px}
+#gatherTable td,#fletchTable td{vertical-align:middle}

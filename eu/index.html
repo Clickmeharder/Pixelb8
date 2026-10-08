@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Entropia Universe Hunt Dashboard</title>
+<link href="../sharedassets/css/pixelb8-shell.css?v=20260818c" rel="stylesheet"/>
+<link href="styles.css" rel="stylesheet"/>
+<link href="streamermode.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="app" data-pixelb8-shell="" id="appShell">
+<aside class="app-sidebar" id="appSidebar">
+<div class="sidebar-brand-row">
+<div class="sidebar-brand-mark" title="PixelB8 EU"><span class="brand-mark-expanded">P8</span><span class="brand-mark-rail">PXLB8</span></div>
+<div class="brand sidebar-brand-copy">
+<h1>PixelB8 EU</h1>
+<p>Entropia live hunting tracker</p>
+</div>
+<button aria-label="Collapse sidebar" class="sidebar-collapse-btn" id="sidebarToggleBtn" onclick="toggleAppSidebar()" title="Collapse sidebar" type="button">‹</button>
+</div>
+<div class="sidebar-scroll">
+<nav aria-label="Main navigation" class="nav sidebar-nav">
+<div class="sidebar-section-label">Navigation</div>
+<button class="tab-btn active" data-tab="live" onclick="switchTab('live')" title="Globals">
+<span class="sidebar-nav-icon">G</span><span class="sidebar-item-text">Globals</span>
+</button>
+<button class="tab-btn" data-tab="hunt" onclick="switchTab('hunt')" title="Tracker">
+<span class="sidebar-nav-icon">H</span><span class="sidebar-item-text">Tracker</span>
+</button><button class="tab-btn" data-tab="maps" onclick="switchTab('maps')" title="Maps">
+<span class="sidebar-nav-icon">⌖</span><span class="sidebar-item-text">Maps</span>
+</button>
+<button class="tab-btn" data-tab="missions" onclick="switchTab('missions')" title="Missions">
+<span class="sidebar-nav-icon">!</span><span class="sidebar-item-text">Missions</span>
+</button>
+</nav>
+<section class="sidebar-section sidebar-loadout-section">
+<div class="sidebar-section-label">Loadout</div>
+<div class="compact-field sidebar-loadout-field" id="sidebarLoadoutField" title="Equipped loadout">
+<button class="sidebar-loadout-icon-btn" id="sidebarLoadoutIconBtn" type="button" aria-label="Choose equipped loadout" aria-expanded="false" onclick="toggleSidebarLoadoutFlyout(event)">
+<span class="sidebar-item-icon">⚔</span>
+</button>
+<div class="sidebar-loadout-select-wrap" id="sidebarLoadoutSelectWrap">
+<select class="select" id="sidebarEquippedLoadoutSelect" onchange="changeSidebarEquippedLoadout(this.value)">
+<option value="">No loadout equipped</option>
+</select>
+</div>
+</div>
+</section><section class="sidebar-section sidebar-status-section">
+<div class="sidebar-section-label">Status</div>
+<div class="sidebar-status-row" id="huntTrackingStatusRow" title="Current hunt tracker state">
+<span class="sidebar-item-icon status-dot-wrap"><span class="dot" id="huntTrackingIndicator"></span></span>
+<div class="sidebar-status-copy"><span>Tracking</span><b id="huntTrackingStatusText">Idle</b></div>
+</div><div class="sidebar-status-row" title="Connection status">
+<span class="sidebar-item-icon status-dot-wrap"><span class="dot" id="liveIndicator"></span></span>
+<div class="sidebar-status-copy"><span>Connection</span><b id="connectionStatusText">Offline</b></div>
+</div>
+<button class="sidebar-status-row sidebar-time-row" id="sidebarTimeRow" onclick="toggleSidebarClockMode()" aria-describedby="sidebarTimeTooltip" type="button"><span class="sidebar-item-icon">UTC</span><div class="sidebar-status-copy"><span id="sidebarTimeLabel">UTC Now</span><b id="sidebarTimeDisplay">--</b></div></button></section>
+<section class="sidebar-section"><div class="sidebar-section-label">Data</div><button class="btn primary sidebar-action" data-rail="📁" id="chatLogActionBtn" onclick="handleChatLogAction()" title="Select chat.log" type="button"><span class="sidebar-item-icon" id="chatLogActionIcon">📁</span><span class="sidebar-item-text" id="chatLogActionText">Select chat.log</span></button><button class="btn sidebar-action" data-rail="⚙" id="euSettingsBtn" onclick="openEuSettings()" title="Tracker settings" type="button"><span class="sidebar-item-icon">⚙</span><span class="sidebar-item-text">Settings</span></button></section>
+</div>
+<section class="pixelb8-more-dock pixelb8-links-section collapsed" data-pixelb8-more="" id="pixelb8MoreSection">
+<button aria-expanded="false" class="pixelb8-links-toggle" onclick="togglePixelb8More()" title="More from PixelB8" type="button">
+<span class="sidebar-item-icon">◆</span>
+<span class="sidebar-item-text">More from PixelB8</span>
+<span class="pixelb8-links-chevron">›</span>
+</button>
+<div class="pixelb8-links-body">
+<button class="btn sidebar-action pixelb8-link-btn" onclick="location.href='../home.html'" title="Return to PixelB8" type="button">
+<span class="sidebar-item-icon">⌂</span><span class="sidebar-item-text">PixelB8 Home</span>
+</button>
+<button class="btn sidebar-action pixelb8-link-btn" onclick="location.href='../arcade/index.html'" title="PixelB8 Arcade" type="button">
+<span class="sidebar-item-icon">🕹</span><span class="sidebar-item-text">Arcade</span>
+</button>
+<button class="btn sidebar-action pixelb8-link-btn" onclick="window.showAppToast?.('PixelB8 Creator Tools link coming soon.','info')" title="PixelB8 Creator Tools" type="button">
+<span class="sidebar-item-icon">🛠</span><span class="sidebar-item-text">Creator Tools</span>
+</button>
+<button class="btn sidebar-action pixelb8-link-btn" onclick="window.showAppToast?.('More PixelB8 tools are coming soon.','info')" title="More PixelB8" type="button">
+<span class="sidebar-item-icon">⋯</span><span class="sidebar-item-text">More PixelB8</span>
+</button>
+</div>
+</section>
+<div class="sidebar-footer">
+<span class="sidebar-footer-full">PixelB8 · EU Tools</span>
+<span class="sidebar-footer-rail">PXLB8</span>
+</div>
+</aside>
+<main class="workspace">
+<!-- Global Analytics -->
+<!-- Live -->
+<section class="tab-page" id="liveTab">
+<div class="live-layout">
+<div class="panel live-source-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Globals</span>
+<span class="muted" style="font-size:.68rem;margin-left:8px">Current-session data from your active chat.log source</span>
+</div>
+<div class="live-monitor-actions">
+<span class="status-pill" id="liveMonitorSource">Checking source…</span>
+<span class="muted" id="liveMonitorLastActivity">Last captured: —</span>
+<button class="btn" onclick="clearLiveFeed()">Clear Feed</button>
+</div>
+</div>
+</div>
+<div class="live-summary">
+<div class="kpi">
+<div class="kpi-label">My Globals</div>
+<div class="kpi-value success" id="liveMyGlobalCount">0</div>
+<div class="kpi-sub" id="liveMyGlobalPed">0.00 PED total</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">My HOFs</div>
+<div class="kpi-value hof" id="liveMyHofCount">0</div>
+<div class="kpi-sub" id="liveMyHofPed">0.00 PED total</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">My Global Loot</div>
+<div class="kpi-value warning" id="liveMyTotalLoot">0.00 PED</div>
+<div class="kpi-sub">Globals + HOFs in the current analysis window</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">Recent Activity</div>
+<div class="kpi-value accent" id="liveRecentCount">0</div>
+<div class="kpi-sub" id="liveRecentSub">No creature globals captured this session</div>
+</div>
+</div>
+<div class="panel live-recent-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Recent Globals &amp; HOFs</span>
+<span class="muted" style="font-size:.68rem;margin-left:8px">One live feed · filter it to yourself, your detected team, or everyone observed</span>
+</div>
+<div aria-label="Recent activity filter" class="live-feed-filter" role="group">
+<button class="btn live-filter-btn" id="liveFilterMine" onclick="setLiveActivityFilter('mine')" type="button">Mine</button>
+<button class="btn live-filter-btn" id="liveFilterTeam" onclick="setLiveActivityFilter('team')" type="button">Team</button>
+<button class="btn live-filter-btn active" id="liveFilterAll" onclick="setLiveActivityFilter('all')" type="button">All</button>
+</div>
+</div>
+<div class="live-feed-meta merged-live-meta">
+<span>G <b id="allMobLiveGlobalCount">0</b></span>
+<span>HOF <b id="allMobLiveHofCount">0</b></span>
+<span id="allMobLiveFeedValue">0.00 PED</span>
+</div>
+<div class="table-wrap">
+<table class="feed-table">
+<thead><tr><th>Timestamp</th><th>Type</th><th>Mob</th><th>Player</th><th>Loot</th><th>Raw Entry</th></tr></thead>
+<tbody id="allMobLiveTableBody"><tr><td class="empty" colspan="6">Globals waiting for creature globals…</td></tr></tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<!-- Hunt Tracker -->
+<section class="tab-page hidden" id="huntTab">
+<div class="hunt-tracker-shell">
+<div class="global-analytics-subnav">
+<button class="global-subtab-btn active" id="trackerSessionBtn" onclick="switchHuntTrackerTab('session')">Session</button>
+<button class="global-subtab-btn" id="huntLiveBtn" onclick="switchHuntTrackerTab('livehunt')">Hunting</button>
+<button class="global-subtab-btn" id="trackerFishingBtn" onclick="switchHuntTrackerTab('fishing')">Fishing</button>
+<button class="global-subtab-btn" id="trackerMiningBtn" onclick="switchHuntTrackerTab('mining')">Mining</button>
+<button class="global-subtab-btn" id="huntTeamBtn" onclick="switchHuntTrackerTab('team')">Team</button>
+<button class="global-subtab-btn" id="huntHistoryBtn" onclick="switchHuntTrackerTab('history')">History</button>
+<button class="global-subtab-btn" id="huntLoadoutsBtn" onclick="switchHuntTrackerTab('loadouts')">Setups</button></div>
+<div class="hunt-tracker-body">
+<section class="hunt-subtab-page" id="trackerSessionTab">
+<div class="session-tracker-layout">
+<section class="panel session-overview-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Current Session</span>
+<div class="muted" id="sessionTrackingState">Waiting for activity</div>
+</div>
+<div class="toolbar">
+<button class="btn" onclick="EntropiaSessionTracker.saveCurrent()">Save Session</button>
+<button class="btn danger-btn" onclick="EntropiaSessionTracker.newSession()">New Session</button>
+</div>
+</div>
+<div class="panel-body session-overview-body">
+<div class="hunt-metric-grid session-summary-grid">
+<div class="hunt-metric"><span>Duration</span><b id="sessionDuration">00:00:00</b></div>
+<div class="hunt-metric"><span>Spend</span><b id="sessionSpend">0.00 PED</b></div>
+<div class="hunt-metric"><span>Received Value</span><b class="success" id="sessionLoot">0.00 PED</b></div>
+<div class="hunt-metric"><span>Net</span><b id="sessionProfit">0.00 PED</b></div>
+<div class="hunt-metric"><span>Return</span><b id="sessionReturn">0.00%</b></div>
+<div class="hunt-metric"><span>Damage</span><b id="sessionDamage">0.0</b></div>
+<div class="hunt-metric"><span>Healing</span><b id="sessionHealing">0.0</b></div>
+<div class="hunt-metric"><span>Hunts</span><b id="sessionHuntCount">0</b></div>
+</div>
+<div class="session-activity-grid">
+<section class="session-activity-card">
+<div class="session-activity-head"><strong>Hunting</strong><span id="sessionHuntingState">No activity</span></div>
+<div class="session-activity-stats"><span><b id="sessionHuntingShots">0</b> shots</span><span><b id="sessionHuntingLoot">0.00</b> PED received</span><span><b id="sessionGatheredCount">0</b> gathered</span></div>
+</section>
+<section class="session-activity-card">
+<div class="session-activity-head"><strong>Fishing</strong><span id="sessionFishingState">Inactive</span></div>
+<div class="session-activity-stats"><span><b id="sessionFishingDuration">00:00:00</b> active</span><span><b id="sessionFishingCatches">0</b> catches</span><span><b id="sessionFishingValue">0.00</b> PED value</span></div>
+</section>
+</div>
+</div>
+</section>
+<section class="panel session-segments-panel">
+<div class="panel-header">
+<div><span class="panel-title">Session Activity</span><div class="muted">Named hunts and other tracked activity stay grouped inside this overall session.</div></div>
+</div>
+<div class="panel-body session-segments-list" id="sessionSegmentsList">
+<div class="empty">No session activity yet.</div>
+</div>
+</section>
+<section class="panel session-history-panel">
+<div class="panel-header">
+<div><span class="panel-title">Recent Saved Sessions</span><div class="muted">A lightweight history now; comparisons can build on this later.</div></div>
+</div>
+<div class="panel-body session-history-list" id="sessionHistoryList">
+<div class="empty">No saved sessions yet.</div>
+</div>
+</section>
+</div>
+</section>
+
+<section class="hunt-subtab-page hidden" id="trackerFishingTab">
+<div class="fishing-tracker-layout">
+<section class="panel fishing-live-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Fishing</span>
+<div class="muted">Fishing is separate from hunting so bait fishing, angling, deep sea and future rod/bait loadouts can grow independently.</div>
+</div>
+<div class="toolbar">
+<span class="status-pill" id="fishingEquippedLiveLabel">No fishing setup equipped</span>
+<button class="btn primary" id="fishingStartBtn" onclick="EntropiaFishingTracker.toggle()" type="button">▶ Start Fishing</button>
+<button class="btn danger-btn" id="fishingResetBtn" onclick="EntropiaFishingTracker.reset()" type="button">Reset</button>
+</div>
+</div>
+<div class="panel-body">
+<div class="hunt-metric-grid fishing-summary-grid">
+<div class="hunt-metric"><span>Fishing Time</span><b id="fishingDuration">00:00:00</b></div>
+<div class="hunt-metric"><span>Cost / Click</span><b id="fishingCostPerClick">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Observed Successful Casts</span><b id="fishingObservedCasts">0</b></div>
+<div class="hunt-metric"><span>Estimated Minimum TT Cost</span><b id="fishingMinCost">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Total Fishing Value</span><b class="success" id="fishingCatchValue">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Estimated Minimum Net</span><b id="fishingMinNet">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Fishing Receipts</span><b id="fishingCatchCount">0</b></div>
+<div class="hunt-metric"><span>Fish Catalog</span><b id="fishingCatalogCount">Loading…</b></div>
+</div>
+<div class="fishing-result-breakdown">
+<div class="fishing-result-card"><span>Baitfish</span><b id="fishingBaitfishQuantity">0</b><small id="fishingBaitfishValue">0.00000 PED</small></div>
+<div class="fishing-result-card"><span>Fish</span><b id="fishingFishQuantity">0</b><small id="fishingFishValue">0.00000 PED</small></div>
+<div class="fishing-result-card"><span>Fish Scrap</span><b id="fishingScrapQuantity">0</b><small id="fishingScrapValue">0.00000 PED</small></div>
+</div>
+<div class="fishing-v1-note">
+<strong>Minimum-cost estimate</strong>
+<span>Fishing attempts are not logged. Receipt lines sharing the same chat.log timestamp count as one observed successful cast. Normal fishing casts use the equipped setup's TT cost/click, while any cast containing Baitfish is always treated as Baitfishing Rod activity at 0 PED. Failed or missed casts are invisible, so actual normal-fishing TT cost may be higher. Baitfish is valued at 0.00001 PED each.</span>
+</div>
+<div class="fishing-catch-list" id="fishingCatchList"><div class="empty">No fishing receipts recorded yet.</div></div>
+</div>
+</section>
+</div>
+</section>
+
+<section class="hunt-subtab-page hidden" id="huntLoadoutsTab">
+<div class="global-analytics-subnav loadouts-inner-subnav">
+<button class="global-subtab-btn active" id="loadoutWorkspaceBtn" onclick="switchLoadoutWorkspaceTab('loadouts')" type="button">Loadouts</button>
+<button class="global-subtab-btn" id="fapsWorkspaceBtn" onclick="switchLoadoutWorkspaceTab('faps')" type="button">FAPs <span class="wip-tag">WIP</span></button>
+<button class="global-subtab-btn" id="miningGearWorkspaceBtn" onclick="switchLoadoutWorkspaceTab('mining')" type="button">Mining Gear</button>
+<button class="global-subtab-btn" id="fishingGearWorkspaceBtn" onclick="switchLoadoutWorkspaceTab('fishing')" type="button">Fishing Gear</button>
+</div>
+<section class="loadout-inner-page" id="loadoutWorkspaceTab">
+
+<div class="loadout-toolbar panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Loadout Library</span>
+<span class="muted" id="equippedLoadoutBadge" style="font-size:.67rem;margin-left:8px">No loadout equipped</span>
+</div>
+<div class="toolbar">
+<button class="btn" onclick="EntropiaLoadouts.newLoadout()">＋ New</button>
+<button class="btn" onclick="EntropiaLoadouts.importLoadouts()">Import</button>
+<button class="btn" onclick="EntropiaLoadouts.exportLoadouts()">Export</button>
+<button class="btn primary" onclick="EntropiaLoadouts.saveCurrent()">Save Loadout</button>
+</div>
+</div>
+</div>
+<div class="loadout-layout">
+<div class="loadout-left-stack">
+<aside class="panel loadout-library-panel">
+<div class="panel-header">
+<span class="panel-title">Saved Loadouts</span>
+<span class="muted" id="savedLoadoutCount">0</span>
+</div>
+<div class="loadout-select-shell">
+<select class="loadout-library-select" id="savedLoadoutSelect">
+<option value="">Select a saved loadout…</option>
+</select>
+<div class="saved-loadout-actions loadout-shared-actions">
+<button class="btn" id="savedLoadoutEditBtn" type="button">Edit</button>
+<button class="btn" id="savedLoadoutCopyBtn" type="button">Copy</button>
+<button class="btn" id="savedLoadoutEquipBtn" type="button">Equip</button>
+<button class="btn" id="savedLoadoutDeleteBtn" type="button">Delete</button>
+</div>
+<div class="muted loadout-selection-summary" id="savedLoadoutSummary">Choose a saved loadout.</div>
+</div>
+</aside>
+<aside class="panel loadout-left-placeholder-panel active-attachments-panel">
+<div class="panel-header active-attachments-head">
+<div>
+<span class="panel-title">Active Attachments</span>
+<div class="muted">Temporary equipped state. Saved loadout stays unchanged.</div>
+</div>
+<button class="btn active-attachments-restore" onclick="EntropiaLoadouts.restoreAllAttachments()" type="button">Restore All</button>
+</div>
+<div class="panel-body active-attachments-body" id="setupActiveAttachments">
+<div class="empty">Equip a loadout to manage its attachments.</div>
+</div>
+</aside>
+</div>
+<div class="loadout-builder-column">
+<div class="panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Loadout Builder</span>
+<span class="muted" id="loadoutBuilderState">New build</span>
+</div>
+<div class="builder-header-actions">
+<span class="nexus-api-state" id="nexusApiState">Nexus API ready</span>
+<div class="builder-view-switch">
+<button class="summary-mode-btn active" id="builderCardViewBtn" onclick="EntropiaLoadouts.setBuilderView('cards')" type="button">Card View</button>
+<button class="summary-mode-btn" id="builderTableViewBtn" onclick="EntropiaLoadouts.setBuilderView('table')" type="button">Table View</button>
+</div>
+</div>
+</div>
+<div class="panel-body loadout-builder-body">
+<input aria-hidden="true" class="hidden" id="loadoutUseSecondaryAmp" type="checkbox"/>
+<div class="builder-card-view" id="builderCardView">
+<div class="builder-card-grid" id="builderCardGrid"></div>
+</div>
+<div class="builder-table-view hidden" id="builderTableView">
+<div class="loadout-name-row">
+<label class="compact-field grow">
+<strong>Loadout Name</strong>
+<input id="loadoutNameInput" type="text" value="Custom Loadout"/>
+</label>
+<label class="compact-field">
+<strong>Hit Profession</strong>
+<input id="loadoutHitSkill" max="200" min="0" step=".1" type="number" value="100"/>
+</label>
+<label class="compact-field">
+<strong>Damage Profession</strong>
+<input id="loadoutDmgSkill" max="200" min="0" step=".1" type="number" value="100"/>
+</label>
+</div>
+<div class="loadout-section-title">Weapon</div>
+<div class="loadout-economy-grid loadout-weapon-grid">
+<label class="compact-field wide">
+<strong>Name</strong>
+<div class="loadout-picker-input">
+<input id="weaponName" placeholder="Weapon name" type="text"/>
+<button class="btn nexus-pick-btn" onclick="EntropiaLoadouts.openItemPicker('weapon')" type="button">Search API</button>
+</div>
+</label>
+<label class="compact-field">
+<strong>Max Damage</strong>
+<input id="weaponMaxDamage" min="0" step=".01" type="number" value="0"/>
+</label>
+<label class="compact-field">
+<strong>Uses / Min</strong>
+<input id="weaponApm" min="0" step=".01" type="number" value="60"/>
+</label>
+<label class="compact-field">
+<strong>Decay / Use</strong>
+<div class="input-suffix"><input id="weaponDecay" min="0" step=".0001" type="number" value="0"/><span>PEC</span></div>
+</label>
+<label class="compact-field">
+<strong>Ammo / Use</strong>
+<div class="input-suffix"><input id="weaponAmmo" min="0" step=".0001" type="number" value="0"/><span>PEC</span></div>
+</label>
+<label class="compact-field">
+<strong>Efficiency</strong>
+<div class="input-suffix"><input id="weaponEfficiency" max="100" min="0" step=".01" type="number" value="0"/><span>%</span></div>
+</label>
+<label class="compact-field">
+<strong>Market Economics</strong>
+<label class="market-toggle"><input id="useMarketMarkup" onchange="EntropiaLoadouts.toggleMarketMarkup()" type="checkbox"/><span>Use Market Markup</span></label>
+</label>
+<label class="compact-field market-mu-field">
+<strong>Weapon MU</strong>
+<div class="input-suffix"><input disabled="" id="weaponMu" min="0" step=".01" type="number" value="100"/><span>%</span></div>
+</label>
+<label class="compact-field">
+<strong>Ammo MU</strong>
+<div class="input-suffix"><input disabled="" id="ammoMu" min="0" step=".01" type="number" value="100"/><span>%</span></div>
+</label>
+</div>
+<div class="loadout-section-title">Attachments</div>
+<div class="loadout-attachment-table-wrap">
+<table class="loadout-attachment-table">
+<thead>
+<tr>
+<th>Slot</th>
+<th>Name</th>
+<th>Damage</th>
+<th>Decay PEC</th>
+<th>Ammo PEC</th>
+<th>Efficiency %</th>
+<th>MU %</th><th>API</th>
+</tr>
+</thead>
+<tbody>
+<tr data-slot="amp"><td>Amplifier</td><td><input data-field="name"/></td><td><input data-field="damage" step=".01" type="number"/></td><td><input data-field="decay" step=".0001" type="number"/></td><td><input data-field="ammo" step=".0001" type="number"/></td><td><input data-field="efficiency" step=".01" type="number"/></td><td><input data-field="mu" disabled="" step=".01" type="number" value="100"/></td><td><button class="btn nexus-row-btn" onclick="EntropiaLoadouts.openItemPicker('amp')" type="button">Browse</button><button class="btn slot-clear-btn" onclick="EntropiaLoadouts.clearSlot('amp')" type="button">Clear</button></td></tr>
+<tr class="secondary-amp-add-row" id="secondaryAmpAddRow">
+<td colspan="8"><button class="btn secondary-amp-add-btn" onclick="EntropiaLoadouts.enableSecondaryAmp()" type="button">＋ Secondary Amp</button></td>
+</tr>
+<tr class="secondary-amp-table-row" data-slot="amp2"><td>Mayhem Amp</td><td><input data-field="name"/></td><td><input data-field="damage" step=".01" type="number"/></td><td><input data-field="decay" step=".0001" type="number"/></td><td><input data-field="ammo" step=".0001" type="number"/></td><td><input data-field="efficiency" step=".01" type="number"/></td><td><input data-field="mu" disabled="" step=".01" type="number" value="100"/></td><td><button class="btn nexus-row-btn" onclick="EntropiaLoadouts.openItemPicker('amp2')" type="button">Browse</button><button class="btn slot-clear-btn" onclick="EntropiaLoadouts.clearSlot('amp2')" type="button">Clear</button><button class="btn slot-remove-btn" onclick="EntropiaLoadouts.removeSecondaryAmp()" type="button">Remove Slot</button></td></tr>
+<tr data-slot="absorber"><td>Absorber</td><td><input data-field="name"/></td><td><input data-field="damage" step=".01" type="number"/></td><td><input data-field="decay" step=".0001" type="number"/></td><td><input data-field="ammo" step=".0001" type="number"/></td><td><input data-field="efficiency" step=".01" type="number"/></td><td><input data-field="mu" disabled="" step=".01" type="number" value="100"/></td><td><button class="btn nexus-row-btn" onclick="EntropiaLoadouts.openItemPicker('absorber')" type="button">Browse</button><button class="btn slot-clear-btn" onclick="EntropiaLoadouts.clearSlot('absorber')" type="button">Clear</button></td></tr>
+<tr data-slot="scope"><td>Scope</td><td><input data-field="name"/></td><td><input data-field="damage" step=".01" type="number"/></td><td><input data-field="decay" step=".0001" type="number"/></td><td><input data-field="ammo" step=".0001" type="number"/></td><td><input data-field="efficiency" step=".01" type="number"/></td><td><input data-field="mu" disabled="" step=".01" type="number" value="100"/></td><td><button class="btn nexus-row-btn" onclick="EntropiaLoadouts.openItemPicker('scope')" type="button">Browse</button><button class="btn slot-clear-btn" onclick="EntropiaLoadouts.clearSlot('scope')" type="button">Clear</button></td></tr>
+<tr data-slot="sight1"><td>Sight 1</td><td><input data-field="name"/></td><td><input data-field="damage" step=".01" type="number"/></td><td><input data-field="decay" step=".0001" type="number"/></td><td><input data-field="ammo" step=".0001" type="number"/></td><td><input data-field="efficiency" step=".01" type="number"/></td><td><input data-field="mu" disabled="" step=".01" type="number" value="100"/></td><td><button class="btn nexus-row-btn" onclick="EntropiaLoadouts.openItemPicker('sight1')" type="button">Browse</button><button class="btn slot-clear-btn" onclick="EntropiaLoadouts.clearSlot('sight1')" type="button">Clear</button></td></tr>
+<tr data-slot="sight2"><td>Sight 2</td><td><input data-field="name"/></td><td><input data-field="damage" step=".01" type="number"/></td><td><input data-field="decay" step=".0001" type="number"/></td><td><input data-field="ammo" step=".0001" type="number"/></td><td><input data-field="efficiency" step=".01" type="number"/></td><td><input data-field="mu" disabled="" step=".01" type="number" value="100"/></td><td><button class="btn nexus-row-btn" onclick="EntropiaLoadouts.openItemPicker('sight2')" type="button">Browse</button><button class="btn slot-clear-btn" onclick="EntropiaLoadouts.clearSlot('sight2')" type="button">Clear</button></td></tr>
+</tbody>
+</table>
+</div>
+<div class="loadout-section-title loadout-section-title-row"><span>Enhancers</span><button class="btn nexus-row-btn" onclick="EntropiaLoadouts.openItemPicker('enhancer')" type="button">Browse Enhancers</button></div>
+<div class="loadout-enhancer-grid" id="loadoutEnhancerGrid"></div>
+</div>
+</div>
+</div>
+</div>
+<aside class="panel loadout-stats-panel loadout-summary-panel">
+<div class="panel-header loadout-summary-header">
+<div>
+<span class="panel-title">Loadout Summary</span>
+<span class="muted" id="summaryModeLabel" style="font-size:.60rem">Builder</span>
+</div>
+<div class="summary-mode-switch">
+<button class="summary-mode-btn" id="summaryCurrentBtn" onclick="EntropiaLoadouts.setSummaryMode('equipped')">Equipped</button>
+<button class="summary-mode-btn active" id="summaryBuilderBtn" onclick="EntropiaLoadouts.setSummaryMode('builder')">Builder</button>
+</div>
+</div>
+<div class="panel-body loadout-summary-body">
+<div class="shared-loadout-summary" id="sharedLoadoutSummary">
+<div class="empty">Select a weapon to start a build.</div>
+</div>
+<div class="summary-divider"></div>
+<div class="loadout-stat-grid compact-summary-stats">
+<div class="loadout-stat"><span>Cost / Shot</span><b id="loadoutStatCost">0.0000 PED</b></div>
+<div class="loadout-stat"><span>DPP</span><b class="success" id="loadoutStatDpp">0.00</b></div>
+<div class="loadout-stat"><span>DPS</span><b class="accent" id="loadoutStatDps">0.0</b></div>
+<div class="loadout-stat"><span>Efficiency</span><b id="loadoutStatEfficiency">0.00%</b></div>
+<div class="loadout-stat"><span>Min Damage</span><b id="loadoutStatMinDamage">0.00</b></div>
+<div class="loadout-stat"><span>Max Damage</span><b id="loadoutStatMaxDamage">0.00</b></div>
+<div class="loadout-stat"><span>Attacks / Min</span><b id="loadoutStatApm">0.00</b></div>
+<div class="loadout-stat"><span>Ammo / Shot</span><b id="loadoutStatAmmo">0.0000 PEC</b></div>
+<div class="loadout-stat"><span>Decay / Shot</span><b id="loadoutStatDecay">0.0000 PEC</b></div>
+<div class="loadout-stat"><span>Range</span><b id="loadoutStatRange">0.0 m</b></div>
+<div class="loadout-stat"><span>Hit Rate</span><b id="loadoutStatHitRate">0.00%</b></div>
+</div>
+<div class="summary-actions">
+<button class="btn success" id="summaryEquipBuilderBtn" onclick="EntropiaLoadouts.equipBuilder()">Equip Builder</button>
+<button class="btn hidden" id="summaryEditEquippedBtn" onclick="EntropiaLoadouts.loadEquippedIntoBuilder()">Edit Equipped Copy</button>
+</div>
+<div class="loadout-estimate-note">Builder values are theoretical. Equipped values are the loadout currently used by Live Hunt.</div>
+</div>
+</aside>
+</div>
+
+</section>
+<section class="loadout-inner-page hidden" id="fishingGearWorkspaceTab">
+<div class="fishing-gear-shell">
+<section class="panel fishing-gear-library">
+<div class="panel-header">
+<div>
+<span class="panel-title">Fishing Setups</span>
+<div class="muted">Saved rod rigs and the currently equipped fishing setup.</div>
+</div>
+<button class="btn" onclick="EntropiaFishingGear.newSetup()" type="button">＋ New</button>
+</div>
+<div class="panel-body fishing-gear-library-body">
+<select class="select" id="fishingSetupSelect" onchange="EntropiaFishingGear.selectSetup(this.value)">
+<option value="">Select a saved fishing setup…</option>
+</select>
+<div class="saved-loadout-actions">
+<button class="btn" id="fishingSetupEquipBtn" onclick="EntropiaFishingGear.equipSelected()" type="button">Equip</button>
+<button class="btn" id="fishingSetupDeleteBtn" onclick="EntropiaFishingGear.deleteSelected()" type="button">Delete</button>
+</div>
+<div class="fishing-equipped-card">
+<span>Equipped Fishing Setup</span>
+<b id="fishingEquippedSetupLabel">None</b>
+<small id="fishingEquippedSetupCost">0.00000 PED / click</small>
+</div>
+</div>
+</section>
+
+<section class="panel fishing-gear-builder">
+<div class="panel-header">
+<div>
+<span class="panel-title">Fishing Gear Builder</span>
+<div class="muted">Normal rods require Reel + Blank + Line + Lure. Baitfishing Rod is the zero-cost exception.</div>
+</div>
+<div class="toolbar">
+<span class="nexus-api-state" id="fishingGearApiState">Nexus API ready</span>
+<button class="btn" onclick="EntropiaFishingGear.refreshData(true)" type="button">Refresh</button>
+<button class="btn primary" onclick="EntropiaFishingGear.saveSetup()" type="button">Save Setup</button>
+</div>
+</div>
+<div class="panel-body fishing-gear-builder-body">
+<label class="compact-field">
+<strong>Setup Name</strong>
+<input id="fishingSetupName" type="text" value="Fishing Setup"/>
+</label>
+
+<div class="fishing-gear-slot-grid">
+<label class="compact-field fishing-gear-slot">
+<strong>Rod</strong>
+<select class="select" id="fishingRodSelect" onchange="EntropiaFishingGear.changeSlot('rod',this.value)"></select>
+<small id="fishingRodMeta">Choose a fishing rod.</small>
+</label>
+<label class="compact-field fishing-gear-slot">
+<strong>Reel</strong>
+<select class="select" id="fishingReelSelect" onchange="EntropiaFishingGear.changeSlot('reel',this.value)"></select>
+<small id="fishingReelMeta">Required for normal rods.</small>
+</label>
+<label class="compact-field fishing-gear-slot">
+<strong>Blank</strong>
+<select class="select" id="fishingBlankSelect" onchange="EntropiaFishingGear.changeSlot('blank',this.value)"></select>
+<small id="fishingBlankMeta">Required for normal rods.</small>
+</label>
+<label class="compact-field fishing-gear-slot">
+<strong>Line</strong>
+<select class="select" id="fishingLineSelect" onchange="EntropiaFishingGear.changeSlot('line',this.value)"></select>
+<small id="fishingLineMeta">Required for normal rods.</small>
+</label>
+<label class="compact-field fishing-gear-slot">
+<strong>Lure</strong>
+<select class="select" id="fishingLureSelect" onchange="EntropiaFishingGear.changeSlot('lure',this.value)"></select>
+<small id="fishingLureMeta">Required for normal rods.</small>
+</label>
+</div>
+
+<div class="fishing-gear-economy">
+<div class="hunt-metric"><span>Spool Cell TT</span><b id="fishingSpoolCellValue">0.00010 PED</b></div>
+<div class="hunt-metric"><span>Spool Cells / Click</span><b id="fishingSpoolBurn">0</b></div>
+<div class="hunt-metric"><span>Spool Cost / Click</span><b id="fishingSpoolCost">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Rod Decay / Click</span><b id="fishingRodDecayCost">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Attachment Decay / Click</span><b id="fishingAttachmentDecayCost">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Total TT / Click</span><b class="accent" id="fishingTotalClickCost">0.00000 PED</b></div>
+</div>
+<div class="fishing-gear-validity" id="fishingGearValidity">Choose a rod to build a fishing setup.</div>
+</div>
+</section>
+</div>
+</section>
+
+<section class="loadout-inner-page hidden" id="miningGearWorkspaceTab">
+<div class="mining-gear-shell">
+<section class="panel mining-gear-library">
+<div class="panel-header">
+<div>
+<span class="panel-title">Mining Setups</span>
+<div class="muted">Saved Finder, amplifier and extractor combinations.</div>
+</div>
+<button class="btn" onclick="EntropiaMiningGear.newSetup()" type="button">＋ New</button>
+</div>
+<div class="panel-body mining-gear-library-body">
+<select class="select" id="miningSetupSelect" onchange="EntropiaMiningGear.selectSetup(this.value)">
+<option value="">Select a saved mining setup…</option>
+</select>
+<div class="saved-loadout-actions">
+<button class="btn" onclick="EntropiaMiningGear.equipSelected()" type="button">Equip</button>
+<button class="btn" onclick="EntropiaMiningGear.deleteSelected()" type="button">Delete</button>
+</div>
+<div class="fishing-equipped-card">
+<span>Equipped Mining Setup</span>
+<b id="miningEquippedSetupLabel">None</b>
+<small id="miningEquippedSetupCost">No finder equipped</small>
+</div>
+</div>
+</section>
+
+<section class="panel mining-gear-builder">
+<div class="panel-header">
+<div>
+<span class="panel-title">Mining Gear Builder</span>
+<div class="muted">Finder determines Survey Probe burn. Finder amplifier is optional. Extractor is stored for reference but is not included in the minimum search-cost estimate.</div>
+</div>
+<div class="toolbar">
+<span class="nexus-api-state" id="miningGearApiState">Nexus API ready</span>
+<button class="btn" onclick="EntropiaMiningGear.refreshData(true)" type="button">Refresh</button>
+<button class="btn primary" onclick="EntropiaMiningGear.saveSetup()" type="button">Save Setup</button>
+</div>
+</div>
+<div class="panel-body mining-gear-builder-body">
+<label class="compact-field"><strong>Setup Name</strong><input id="miningSetupName" type="text" value="Mining Setup"/></label>
+<div class="mining-gear-slot-grid">
+<label class="compact-field"><strong>Finder</strong><select class="select" id="miningFinderSelect" onchange="EntropiaMiningGear.changeSlot('finder',this.value)"></select><small id="miningFinderMeta">Choose a finder.</small></label>
+<label class="compact-field"><strong>Finder Amplifier</strong><select class="select" id="miningAmpSelect" onchange="EntropiaMiningGear.changeSlot('amp',this.value)"></select><small id="miningAmpMeta">Optional.</small></label>
+<label class="compact-field"><strong>Extractor</strong><select class="select" id="miningExtractorSelect" onchange="EntropiaMiningGear.changeSlot('extractor',this.value)"></select><small id="miningExtractorMeta">Stored for reference; extraction cost is not inferred.</small></label>
+</div>
+<div class="mining-probe-cost-grid">
+<div class="hunt-metric"><span>Survey Probe TT</span><b>0.05000 PED</b></div>
+<div class="hunt-metric"><span>Finder Decay</span><b id="miningFinderDecay">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Amp Decay</span><b id="miningAmpDecay">0.00000 PED</b></div>
+<div class="hunt-metric"><span>EnMatter Cost / Drop</span><b id="miningEnmatterCost">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Ore Cost / Drop</span><b id="miningOreCost">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Treasure Cost / Drop</span><b id="miningTreasureCost">0.00000 PED</b></div>
+</div>
+<div class="fishing-gear-validity" id="miningGearValidity">Choose a finder to build a mining setup.</div>
+</div>
+</section>
+</div>
+</section>
+
+<section class="loadout-inner-page hidden" id="fapsWorkspaceTab">
+<div class="fap-page-shell">
+<article class="panel panel-pad fap-settings-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">FAP Tracking</span>
+<div class="muted">Experimental heal-tool attribution: matches each heal against the selected Primary / Secondary FAP instant-heal range and Uses / Min cooldown. For reliable attribution, their instant Min / Max heal ranges should not overlap; overlapping ranges can be ambiguous, so the tracker uses cooldown timing to make a best guess.</div>
+</div>
+<label class="toggle fap-enable-toggle"><input id="fapTrackingEnabled" onchange="EntropiaFaps.setEnabled(this.checked)" type="checkbox"/><span>Enable FAP Heal Tracking</span></label>
+</div>
+<div class="fap-api-row"><span class="status-pill" id="fapApiStatus">Nexus API</span><button class="btn" onclick="EntropiaFaps.refreshCatalog(true)" type="button">Refresh FAP List</button></div>
+<div class="fap-config-grid">
+<section class="fap-card" data-fap-slot="mainFap">
+<div class="fap-card-head"><div><strong>Primary FAP</strong><span>Main healing tool</span></div></div>
+<label class="compact-field"><strong>FAP</strong><select class="select fap-select" id="mainFapSelect" onchange="EntropiaFaps.selectFap('mainFap',this.value)"><option value="">None</option></select></label>
+<div class="fap-hot-row">
+<label class="market-toggle"><input id="mainFapIsHot" onchange="EntropiaFaps.setHot('mainFap',this.checked)" type="checkbox"/><span>is HoT</span></label>
+<label class="compact-field fap-hot-percent hidden" id="mainFapHotPctWrap"><strong>HoT %</strong><div class="input-suffix"><input id="mainFapHotPct" max="100" min="0" oninput="EntropiaFaps.setHotPercent('mainFap',this.value)" step="1" type="number" value="100"/><span>%</span></div></label>
+</div>
+<div class="fap-stat-grid" id="mainFapStats"></div>
+</section>
+<section class="fap-card" data-fap-slot="secondaryFap">
+<div class="fap-card-head"><div><strong>Secondary FAP</strong><span>Alternate healing tool</span></div></div>
+<label class="compact-field"><strong>FAP</strong><select class="select fap-select" id="secondaryFapSelect" onchange="EntropiaFaps.selectFap('secondaryFap',this.value)"><option value="">None</option></select></label>
+<div class="fap-hot-row">
+<label class="market-toggle"><input id="secondaryFapIsHot" onchange="EntropiaFaps.setHot('secondaryFap',this.checked)" type="checkbox"/><span>is HoT</span></label>
+<label class="compact-field fap-hot-percent hidden" id="secondaryFapHotPctWrap"><strong>HoT %</strong><div class="input-suffix"><input id="secondaryFapHotPct" max="100" min="0" oninput="EntropiaFaps.setHotPercent('secondaryFap',this.value)" step="1" type="number" value="100"/><span>%</span></div></label>
+</div>
+<div class="fap-stat-grid" id="secondaryFapStats"></div>
+</section>
+</div>
+<div class="fap-tracking-note">Heal attribution uses the selected FAP's instant heal range plus its Uses / Min cooldown. When both FAPs match, the slower eligible FAP is preferred, matching the old tracker.</div>
+</article>
+<article class="panel panel-pad fap-live-panel">
+<div class="panel-header"><div><span class="panel-title">Current Hunt FAP Usage</span><div class="muted">Only populated while FAP tracking is enabled.</div></div></div>
+<div class="fap-live-summary" id="fapLiveSummary"><div class="empty">No FAP uses tracked in the current hunt.</div></div>
+</article>
+</div>
+</section>
+</section>
+<section class="hunt-subtab-page hidden" id="trackerMiningTab">
+<div class="mining-tracker-layout">
+<section class="panel mining-live-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Mining</span>
+<div class="muted">Claims are observable; failed drops are not. Costs below are therefore minimum estimates only.</div>
+</div>
+<div class="toolbar">
+<label class="toggle mining-tracking-toggle" title="Mining parsing is disabled by default so mob drops of mining resources are not mistaken for mining activity.">
+<input id="miningTrackingEnabled" onchange="EntropiaMiningTracker.setEnabled(this.checked)" type="checkbox"/>
+<span>Mining Tracking</span>
+</label>
+<span class="status-pill mining-tracking-state" id="miningTrackingState">Disabled</span>
+<span class="status-pill" id="miningEquippedLiveLabel">No mining setup equipped</span>
+<button class="btn" id="miningAddDropsBtn" onclick="EntropiaMiningTracker.toggleManualDrops()" type="button">＋ Add Drops</button>
+<button class="btn danger-btn" onclick="EntropiaMiningTracker.reset()" type="button">Reset</button>
+</div>
+</div>
+<div class="panel-body">
+<div class="hunt-metric-grid mining-summary-grid">
+<div class="hunt-metric"><span>Manual Drops</span><b id="miningManualDropCount">0</b></div>
+<div class="hunt-metric"><span>Observed Claims</span><b id="miningClaimCount">0</b></div>
+<div class="hunt-metric"><span>EnMatter Claims</span><b id="miningEnmatterClaims">0</b></div>
+<div class="hunt-metric"><span>Ore Claims</span><b id="miningOreClaims">0</b></div>
+<div class="hunt-metric"><span>Unknown Claims</span><b id="miningUnknownClaims">0</b></div>
+<div class="hunt-metric"><span>Mining Returns</span><b class="success" id="miningReturnValue">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Search Minimum Cost</span><b id="miningSearchMinimumCost">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Observed Extractor Uses</span><b id="miningExtractorUses">0</b></div>
+<div class="hunt-metric"><span>Observed Extractor Cost</span><b id="miningExtractorCost">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Estimated Minimum Cost</span><b id="miningMinimumCost">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Estimated Minimum Net</span><b id="miningMinimumNet">0.00000 PED</b></div>
+<div class="hunt-metric"><span>Resource Catalog</span><b id="miningCatalogCount">Loading…</b></div>
+</div>
+<div class="mining-manual-drops-panel hidden" id="miningManualDropsPanel">
+<div class="mining-manual-drops-grid">
+<label class="compact-field"><strong>Drops</strong><input id="miningManualDropAmount" min="1" step="1" type="number" value="10"/></label>
+<label class="compact-field"><strong>Search Type</strong>
+<select class="select" id="miningManualDropType">
+<option value="enmatter">EnMatter</option>
+<option value="ore">Minerals / Ore</option>
+<option value="both">Both (EnMatter + Ore)</option>
+<option value="treasure">Treasure</option>
+<option value="all">All Three (EnMatter + Ore + Treasure)</option>
+</select>
+</label>
+</div>
+<div class="mining-manual-drops-actions">
+<button class="btn primary" onclick="EntropiaMiningTracker.addManualDrops()" type="button">Add Drops</button>
+<button class="btn" onclick="EntropiaMiningTracker.setManualDropTotal()" type="button">Set Total for Type</button>
+<button class="btn" onclick="EntropiaMiningTracker.clearManualDrops()" type="button">Clear Manual Drops</button>
+</div>
+<div class="muted mining-manual-drops-note">Manual drops represent attempts you know you made. Chat-detected claims stay separate. Cost estimates use the equipped mining setup.</div>
+</div>
+<div class="fishing-v1-note">
+<strong>Minimum-cost estimate</strong>
+<span>The chat log tells us when a claim succeeds but not when a mining drop fails. Manual drops provide a better search-cost estimate when entered. Each matching mining resource receipt is also counted as one observed extractor use and adds the equipped extractor's decay. Estimated Minimum Cost combines the search minimum with those observed extraction costs.</span>
+</div>
+<div class="mining-claim-list" id="miningClaimList"><div class="empty">No mining claims observed yet.</div></div>
+</div>
+</section>
+</div>
+</section>
+
+<section class="hunt-subtab-page hidden" id="huntTeamTab">
+<div class="team-workspace">
+<div class="global-analytics-subnav team-inner-subnav">
+<button class="global-subtab-btn active" id="teamOverviewBtn" onclick="switchTeamWorkspaceTab('team')" type="button">Team</button>
+<button class="global-subtab-btn" id="teamPerformanceBtn" onclick="switchTeamWorkspaceTab('performance')" type="button">Performance</button>
+<button class="global-subtab-btn" id="teamLiveShareBtn" onclick="switchTeamWorkspaceTab('share')" type="button">Live Share</button>
+</div>
+<section class="team-inner-page" id="teamOverviewTab">
+<div class="grid grid-2 team-overview-grid">
+<article class="panel panel-pad">
+<div class="panel-header">
+<div>
+<span class="panel-title">Current Team</span>
+<div class="muted">Built from recent Team chat plus teammates you add manually.</div>
+</div>
+<span class="status-pill" id="teamLocalStatusBadge">Local</span>
+</div>
+<label class="field">
+<span>Team name <small class="muted">optional</small></span>
+<input class="input" id="teamNameInput" placeholder="Current team" type="text"/>
+</label>
+<div class="team-toolbar">
+<button class="btn" onclick="EntropiaTeamTracker.newTeam()" type="button">New Team</button>
+<button class="btn" onclick="EntropiaTeamTracker.clearDetectedRoster()" type="button">Clear Detected</button>
+<button class="btn danger-btn" onclick="EntropiaTeamTracker.endTeam()" type="button">End Team</button>
+</div>
+<div class="team-add-member-row">
+<input class="input" id="teamManualMemberInput" placeholder="Add teammate name" type="text"/>
+<button class="btn primary" onclick="EntropiaTeamTracker.addManualMemberFromInput()" type="button">Add Member</button>
+</div>
+<div class="team-roster-list" id="teamRosterList">
+<div class="empty">No current teammates detected.</div>
+</div>
+</article>
+<article class="panel panel-pad">
+<div class="panel-header">
+<div>
+<span class="panel-title">Team Hunt Snapshot</span>
+<div class="muted">Local tracking works without Live Share.</div>
+</div>
+</div>
+<div class="hunt-metric-grid hunt-economy-summary team-hunt-snapshot-grid">
+<div class="hunt-metric"><span>Members</span><strong id="teamSummaryMembers">0</strong></div>
+<div class="hunt-metric"><span>Globals</span><strong id="teamSummaryGlobals">0</strong></div>
+<div class="hunt-metric"><span>HOFs</span><strong id="teamSummaryHofs">0</strong></div>
+<div class="hunt-metric"><span>Loot</span><strong id="teamSummaryLoot">0.00 PED</strong></div>
+</div>
+<p class="muted team-local-note">Team chat detection and your own hunt tracking are local. Live Share only adds telemetry that another player's chat.log cannot provide to you.</p>
+</article>
+</div>
+<article class="panel panel-pad team-log-panel">
+<div class="global-analytics-subnav team-log-subnav">
+<button class="global-subtab-btn active" id="teamLootTabBtn" onclick="switchTeamLogTab('loot')" type="button">Team Loot</button>
+<button class="global-subtab-btn" id="teamEventsTabBtn" onclick="switchTeamLogTab('events')" type="button">Team Events</button>
+</div>
+<div class="team-log-page" id="teamLootTabPage"><section class="team-loot-content">
+<div class="panel-header">
+<span class="panel-title">Team Channel Loot</span>
+<span class="muted">Quantity only · no TT value in these lines</span>
+</div>
+<div class="team-table-wrap">
+<table class="hunt-feed-table">
+<thead><tr><th>Time</th><th>Player</th><th>Item</th><th>Qty</th></tr></thead>
+<tbody id="teamLootBody"><tr><td class="empty" colspan="4">No Team loot lines yet.</td></tr></tbody>
+</table>
+</div>
+</section></div>
+<div class="team-log-page hidden" id="teamEventsTabPage"><section class="team-events-content">
+<div class="panel-header">
+<span class="panel-title">Team Events</span>
+<span class="muted" id="teamEventCount">0</span>
+</div>
+<div class="team-table-wrap">
+<table class="hunt-feed-table">
+<thead><tr><th>Time</th><th>Event</th><th>Player</th><th>Details</th></tr></thead>
+<tbody id="teamEventBody"><tr><td class="empty" colspan="4">Waiting for Team activity.</td></tr></tbody>
+</table>
+</div>
+</section></div>
+</article>
+</section>
+<section class="team-inner-page hidden" id="teamPerformanceTab"><div class="team-performance-restored"><div class="team-kpi-grid team-performance-kpis">
+<div class="kpi"><div class="kpi-label">Connected Peers</div><div class="kpi-value accent" id="teamOnlineCount">0</div><div class="kpi-sub">Dashboard room clients</div></div>
+<div class="kpi"><div class="kpi-label">Team Cost</div><div class="kpi-value warning" id="teamSharedCost">0.00 PED</div><div class="kpi-sub">Reported hunt cost</div></div>
+<div class="kpi"><div class="kpi-label">Team Loot</div><div class="kpi-value success" id="teamSharedLoot">0.00 PED</div><div class="kpi-sub">Reported hunt loot</div></div>
+<div class="kpi"><div class="kpi-label">Team Profit / Loss</div><div class="kpi-value" id="teamSharedProfit">0.00 PED</div><div class="kpi-sub" id="teamSharedReturn">Return 0.00%</div></div>
+<div class="kpi"><div class="kpi-label">Actual Team DPP</div><div class="kpi-value" id="teamActualDpp">0.00</div><div class="kpi-sub">Total damage / total PEC</div></div>
+<div class="kpi"><div class="kpi-label">Combined Actual DPS</div><div class="kpi-value accent" id="teamActualDps">0.0</div><div class="kpi-sub" id="teamAverageActualDps">Avg member 0.0</div></div>
+<div class="kpi"><div class="kpi-label">Estimated Team DPS</div><div class="kpi-value" id="teamEstimatedDps">0.0</div><div class="kpi-sub" id="teamAverageEstimatedDps">Avg member 0.0</div></div>
+<div class="kpi"><div class="kpi-label">Avg Loadout Efficiency</div><div class="kpi-value" id="teamAverageEfficiency">0.0%</div><div class="kpi-sub" id="teamAverageLoadoutDpp">Avg DPP 0.00</div></div>
+</div><section class="panel team-performance-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Team Performance</span>
+<span class="muted">Estimated loadouts vs actual hunt telemetry</span>
+</div>
+<span class="muted" id="teamPerformanceCoverage">0 members reporting</span>
+</div>
+<div class="panel-body team-performance-grid">
+<div class="team-performance-group">
+<div class="team-performance-heading">Loadout Estimate</div>
+<div class="team-performance-stat"><span>Combined DPS</span><b id="teamPerfEstimatedCombinedDps">0.0</b></div>
+<div class="team-performance-stat"><span>Average DPS</span><b id="teamPerfEstimatedAvgDps">0.0</b></div>
+<div class="team-performance-stat"><span>Average DPP</span><b id="teamPerfEstimatedAvgDpp">0.00</b></div>
+<div class="team-performance-stat"><span>Average Efficiency</span><b id="teamPerfEstimatedAvgEfficiency">0.0%</b></div>
+<div class="team-performance-stat"><span>Average Cost / Shot</span><b id="teamPerfEstimatedAvgCostShot">0.0000 PED</b></div>
+</div>
+<div class="team-performance-group">
+<div class="team-performance-heading">Actual Hunt</div>
+<div class="team-performance-stat"><span>Combined DPS</span><b id="teamPerfActualCombinedDps">0.0</b></div>
+<div class="team-performance-stat"><span>Average DPS</span><b id="teamPerfActualAvgDps">0.0</b></div>
+<div class="team-performance-stat"><span>Actual Team DPP</span><b id="teamPerfActualDpp">0.00</b></div>
+<div class="team-performance-stat"><span>Accuracy</span><b id="teamPerfAccuracy">0.0%</b></div>
+<div class="team-performance-stat"><span>Total Damage</span><b id="teamPerfDamage">0</b></div>
+</div>
+<div class="team-performance-group">
+<div class="team-performance-heading">Economy</div>
+<div class="team-performance-stat"><span>Total Cost</span><b id="teamPerfCost">0.00 PED</b></div>
+<div class="team-performance-stat"><span>Total Loot</span><b id="teamPerfLoot">0.00 PED</b></div>
+<div class="team-performance-stat"><span>Profit / Loss</span><b id="teamPerfProfit">0.00 PED</b></div>
+<div class="team-performance-stat"><span>Return</span><b id="teamPerfReturn">0.0%</b></div>
+<div class="team-performance-stat"><span>Total Shots</span><b id="teamPerfShots">0</b></div>
+</div>
+</div>
+</section></div></section>
+<section class="team-inner-page hidden" id="teamLiveShareTab">
+<article class="panel panel-pad">
+<div class="panel-header">
+<div>
+<span class="panel-title">Live Share <span class="muted">Optional</span></span>
+<div class="muted">Share loadout, damage, costs and other telemetry with teammates. This is not required for Team tracking.</div>
+</div>
+<span class="status-pill" id="teamLiveShareStatus">Disconnected</span>
+</div>
+<label class="field">
+<span>Private room code</span>
+<input class="input" id="teamRoomCodeInput" maxlength="8" placeholder="Room code" type="text"/>
+</label>
+<select aria-hidden="true" class="select hidden" id="teamPrivacySelect">
+<option selected="" value="private">Private</option>
+</select>
+<div class="toolbar team-live-share-toolbar">
+<button class="btn primary" onclick="EntropiaTeamTracker.createOrUpdateRoom()" type="button">Create Room</button>
+<button class="btn" onclick="EntropiaTeamTracker.joinRoomFromInput()" type="button">Join Room</button>
+<button class="btn danger-btn" onclick="EntropiaTeamTracker.leaveRoom()" type="button">Leave Room</button>
+</div>
+<div class="callout">
+<strong>Separate from your local team:</strong> leaving Live Share does not end the local team, and ending the local team does not automatically close the room.
+      </div>
+<div class="team-roster-list" id="teamSharedMemberList">
+<div class="empty">No shared telemetry connected.</div>
+</div>
+</article>
+</section>
+</div>
+</section>
+<section class="hunt-subtab-page hidden" id="huntLiveTab">
+<div class="hunt-live-layout">
+<div class="panel hunt-session-toolbar">
+<div class="panel-header">
+<div>
+<span class="panel-title">Live Hunt Telemetry</span>
+<span class="muted" id="liveHuntEquippedLabel" style="font-size:.67rem;margin-left:8px">No equipped loadout</span>
+</div>
+<div class="toolbar">
+<span class="hunt-status idle" id="huntSessionStatus">IDLE</span>
+<button class="btn success" id="huntPrimaryActionBtn" onclick="handlePrimaryHuntAction()">▶ Start Hunt</button>
+<button class="btn" disabled="" id="huntStopBtn" onclick="EntropiaHuntTracker.stop(); syncPrimaryHuntActionButton();">■ Stop</button>
+<button class="btn" onclick="EntropiaHuntTracker.reset()">↺ Reset</button>
+<button class="btn" onclick="EntropiaHuntTracker.exportSession()">Export</button>
+</div>
+</div>
+</div>
+<section class="panel hunt-session-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Hunt Session</span>
+<span class="muted" id="huntSessionSavedState">Not started</span>
+</div>
+<div class="toolbar">
+<button class="btn primary" disabled="" id="huntSaveBtn" onclick="EntropiaHuntTracker.saveCompletedSession()">Save Hunt</button>
+</div>
+</div>
+<div class="panel-body hunt-session-body">
+<div class="hunt-session-fields">
+<label class="compact-field grow">
+<strong>Hunt Name</strong>
+<input id="huntNameInput" maxlength="64" placeholder="e.g. Evening Proteron Hunt" type="text"/>
+</label>
+<label class="compact-field">
+<strong>Target / Mob</strong>
+<input id="huntTargetInput" maxlength="64" placeholder="Optional" type="text"/>
+</label>
+<div class="hunt-session-info">
+<span>Loadout</span><b id="huntSessionLoadout">No loadout</b>
+</div>
+<div class="hunt-session-info">
+<span>Started</span><b id="huntSessionStarted">—</b>
+</div>
+<div class="hunt-session-info">
+<span>Ended</span><b id="huntSessionEnded">—</b>
+</div>
+<div class="hunt-session-info">
+<span>Elapsed</span><b id="huntSessionElapsed">00:00:00</b>
+</div>
+</div>
+</div>
+</section>
+<div class="hunt-kpi-grid">
+<div class="kpi">
+<div class="kpi-label">Actual Cost</div>
+<div class="kpi-value warning" id="huntMetricCost">0.00 PED</div>
+<div class="kpi-sub" id="huntMetricCostSub">0 shots · loadout cost</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">Loot</div>
+<div class="kpi-value success" id="huntMetricLoot">0.00 PED</div>
+<div class="kpi-sub" id="huntMetricLootSub">0 loot drops</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">Profit / Loss</div>
+<div class="kpi-value" id="huntMetricProfit">0.00 PED</div>
+<div class="kpi-sub" id="huntMetricReturn">Return 0.00%</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">Damage Dealt</div>
+<div class="kpi-value accent" id="huntMetricDamage">0.0</div>
+<div class="kpi-sub" id="huntMetricAccuracy">Accuracy 0.0%</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">Live DPP</div>
+<div class="kpi-value" id="huntMetricDpp">0.00</div>
+<div class="kpi-sub">Observed damage / PEC spent</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">Live DPS</div>
+<div class="kpi-value accent" id="huntMetricDps">0.0</div>
+<div class="kpi-sub" id="huntMetricDuration">00:00:00 combat</div>
+</div>
+</div>
+<div class="hunt-live-main hunt-live-main-grid-fixed">
+<section class="panel hunt-breakdown-shared-panel">
+<div class="panel-header hunt-activity-header hunt-breakdown-header">
+<div class="hunt-activity-tabs">
+<button class="hunt-activity-tab active" id="huntCombatBreakdownBtn" onclick="switchHuntBreakdownTab('combat')" type="button">Combat Breakdown</button>
+<button class="hunt-activity-tab" id="huntEconomyBtn" onclick="switchHuntBreakdownTab('economy')" type="button">Economy</button>
+</div>
+</div>
+<div class="hunt-breakdown-page hunt-breakdown-body" id="huntCombatBreakdownPage"><section class="hunt-combat-panel">
+<div class="panel-body">
+<div class="hunt-metric-grid">
+<div class="hunt-metric"><span>Total Shots</span><b id="huntShots">0</b></div>
+<div class="hunt-metric"><span>Hits</span><b class="success" id="huntHits">0</b></div>
+<div class="hunt-metric"><span>Crits</span><b class="hof" id="huntCrits">0</b></div>
+<div class="hunt-metric"><span>Misses</span><b id="huntMisses">0</b></div>
+<div class="hunt-metric"><span>Evades</span><b id="huntEvades">0</b></div>
+<div class="hunt-metric"><span>Dodges</span><b id="huntDodges">0</b></div>
+<div class="hunt-metric"><span>Damage Taken</span><b id="huntDamageTaken">0.0</b></div>
+<div class="hunt-metric"><span>Healing</span><b id="huntHealing">0.0</b></div>
+<div class="hunt-metric"><span>Deaths</span><b id="huntDeaths">0</b></div>
+<div class="hunt-metric"><span>Enhancers Broken</span><b id="huntEnhancers">0</b></div>
+<div class="hunt-metric"><span>Globals</span><b class="success" id="huntGlobals">0</b></div>
+<div class="hunt-metric"><span>HOFs</span><b class="hof" id="huntHofs">0</b></div>
+</div>
+<div class="hunt-live-active-attachments">
+<div class="hunt-live-active-attachments-head">
+<div>
+<strong>Active Attachments</strong>
+<span>Temporary equipped state · saved loadout is not changed</span>
+</div>
+<button class="btn active-attachments-restore" onclick="EntropiaLoadouts.restoreAllAttachments()" type="button">Restore All</button>
+</div>
+<div class="active-attachments-body live" id="liveActiveAttachments">
+<div class="empty">Equip a loadout to manage its attachments.</div>
+</div>
+</div>
+</div>
+</section></div>
+<div class="hunt-breakdown-page hidden hunt-breakdown-body" id="huntEconomyPage"><section class="hunt-economy-panel">
+<div class="panel-body">
+<div class="hunt-economy-summary">
+<div class="hunt-metric"><span>Cost / Shot</span><b id="huntCostPerShot">0.0000 PED</b></div>
+<div class="hunt-metric"><span>Ammo Cost</span><b id="huntAmmoCost">0.00 PED</b></div>
+<div class="hunt-metric"><span>Decay Cost</span><b id="huntDecayCost">0.00 PED</b></div>
+<div class="hunt-metric"><span>FAP Cost</span><b id="huntFapCost">0.00 PED</b></div>
+<div class="hunt-metric"><span>Average Loot</span><b id="huntAvgLoot">0.00 PED</b></div>
+<div class="hunt-metric"><span>Cost / Minute</span><b id="huntCostPerMinute">0.00 PED</b></div>
+<div class="hunt-metric"><span>Loot / Minute</span><b id="huntLootPerMinute">0.00 PED</b></div>
+</div>
+<details class="hunt-cost-breakdown">
+<summary>Cost / Loadout Breakdown</summary>
+<div class="hunt-cost-breakdown-grid" id="huntCostBreakdown">
+<div class="empty">Start a hunt to build a cost breakdown.</div>
+</div>
+</details><details class="hunt-cost-breakdown"><summary>Cost Source</summary><div class="hunt-cost-controls">
+<section class="hunt-cost-control-card">
+<div class="hunt-cost-control-head">
+<div>
+<strong>Cost Source</strong>
+<span>Choose how weapon cost is calculated for new shots.</span>
+</div>
+</div>
+<div class="hunt-cost-source-row">
+<button class="btn cost-source-btn active" id="huntUseLoadoutCostBtn" onclick="EntropiaHuntTracker.clearManualCost()" type="button">Use Equipped Loadout</button>
+<div class="hunt-manual-shot-control">
+<label class="compact-field">
+<strong>Manual Cost / Shot Override</strong>
+<div class="input-suffix">
+<input id="huntManualCostInput" min="0" placeholder="e.g. 0.0250" step=".0001" type="number"/>
+<span>PED</span>
+</div>
+</label>
+<button class="btn" id="huntApplyManualCostBtn" onclick="EntropiaHuntTracker.applyManualCost()" type="button">Use Manual Cost</button>
+</div>
+</div>
+<div class="hunt-cost-control-note" id="huntCostSourceHint">Using equipped loadout economics.</div>
+</section>
+<section class="hunt-cost-control-card">
+<div class="hunt-cost-control-head">
+<div>
+<strong>Additional Hunt Costs</strong>
+<span>Add one-off expenses without changing cost per shot.</span>
+</div>
+</div>
+<div class="hunt-additional-cost-entry">
+<label class="compact-field grow">
+<strong>Cost Label</strong>
+<input id="huntAdditionalCostLabel" maxlength="40" placeholder="e.g. Pills / Keys / Travel" type="text"/>
+</label>
+<label class="compact-field">
+<strong>Amount</strong>
+<div class="input-suffix">
+<input id="huntAdditionalCost" min="0" placeholder="0.00" step="0.01" type="number"/>
+<span>PED</span>
+</div>
+</label>
+<button class="btn primary" onclick="EntropiaHuntTracker.addAdditionalCost()" type="button">Add Cost</button>
+</div>
+<div class="hunt-additional-cost-list" id="huntAdditionalCostList">
+<div class="empty">No additional costs added.</div>
+</div>
+</section>
+</div></details>
+</div>
+</section></div>
+</section>
+<section class="panel hunt-feed-panel hunt-activity-panel">
+<div class="panel-header hunt-activity-header">
+<div class="hunt-activity-tabs">
+<button class="hunt-activity-tab active" id="huntActivityFeedBtn" onclick="EntropiaHuntTracker.setActivityView('feed')" type="button">Event Feed</button>
+<button class="hunt-activity-tab" id="huntActivityLootBtn" onclick="EntropiaHuntTracker.setActivityView('loot')" type="button">Loot Breakdown</button>
+</div>
+<span class="muted" id="huntFeedCount">0 events</span>
+</div>
+<div class="hunt-activity-content">
+<div class="hunt-activity-view" id="huntActivityFeedView">
+<div class="hunt-feed-wrap">
+<table class="hunt-feed-table">
+<thead>
+<tr><th>Time</th><th>Event</th><th>Value</th><th>Details</th></tr>
+</thead>
+<tbody id="huntEventFeed">
+<tr><td class="empty" colspan="4">Start a hunt to begin tracking live combat.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="hunt-activity-view hidden" id="huntActivityLootView">
+<div class="panel-body hunt-loot-body">
+<div class="hunt-loot-mini-grid">
+<div class="hunt-metric"><span>Largest Drop</span><b class="success" id="huntLargestLoot">0.00 PED</b></div>
+<div class="hunt-metric"><span>Unique Items</span><b id="huntUniqueLootItems">0</b></div>
+<div class="hunt-metric"><span>Loot Drops</span><b id="huntLootDropCount">0</b></div>
+<div class="hunt-metric"><span>Item Lines</span><b id="huntLootLineCount">0</b></div>
+<div class="hunt-metric hunt-conversion-stat"><span>Universal Ammo</span><b class="accent" id="huntUniversalAmmo">0.00 PED</b></div>
+<div class="hunt-metric hunt-conversion-stat"><span>Shrapnel Converted</span><b id="huntShrapnelConverted">0.00 PED</b></div>
+<div class="hunt-metric"><span>Ground Pickups</span><b id="huntGroundPickupCount">0</b></div>
+<div class="hunt-metric"><span>Mission Rewards</span><b id="huntMissionRewardCount">0</b></div>
+</div>
+<div class="hunt-loot-tabs">
+<span class="hunt-loot-section-title">Item Totals</span>
+</div>
+<div class="hunt-loot-table-wrap">
+<table class="hunt-feed-table hunt-loot-table">
+<thead><tr><th>Item</th><th>Qty</th><th>TT Value</th><th>Lines</th></tr></thead>
+<tbody id="huntLootItemBody">
+<tr><td class="empty" colspan="4">No loot recorded yet.</td></tr>
+</tbody>
+</table>
+</div>
+<details class="hunt-recent-drops">
+<summary>Recent Loot Drops</summary>
+<div class="hunt-loot-table-wrap recent">
+<table class="hunt-feed-table hunt-loot-table">
+<thead><tr><th>Time</th><th>TT Value</th><th>Lines</th><th>Mob</th></tr></thead>
+<tbody id="huntLootDropBody">
+<tr><td class="empty" colspan="4">No loot drops recorded yet.</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="hunt-recent-drops">
+<summary>Ground Pickups</summary>
+<div class="hunt-loot-table-wrap recent"><table class="hunt-feed-table hunt-loot-table"><thead><tr><th>Category</th><th>Quantity</th></tr></thead><tbody id="huntPickupBody"><tr><td class="empty" colspan="2">No ground pickups recorded yet.</td></tr></tbody></table></div>
+</details>
+<details class="hunt-recent-drops">
+<summary>Mission Rewards</summary>
+<div class="hunt-loot-table-wrap recent"><table class="hunt-feed-table hunt-loot-table"><thead><tr><th>Mission</th><th>Item</th><th>Qty</th><th>TT Value</th></tr></thead><tbody id="huntMissionRewardBody"><tr><td class="empty" colspan="4">No mission rewards detected during this hunt.</td></tr></tbody></table></div>
+</details>
+<div class="hunt-loot-attribution-note">Solo loot is accepted only from System chat. Team loot is accepted only by the Team tracker from Team chat. Ground pickups and mission rewards are excluded from creature loot/return. Universal Ammo is treated as converted ammo unless it is part of a reward block immediately followed by Mission completed(...).</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</section>
+<section class="hunt-subtab-page hidden" id="huntHistoryTab"><div class="panel panel hunt-history-page-panel">
+<div class="panel-header">
+<span class="panel-title">Hunt History</span>
+<span class="muted" id="huntHistoryCount">0</span>
+</div>
+<div class="hunt-history-list" id="huntHistoryList">
+<div class="empty">No saved hunts yet.</div>
+</div>
+</div></section>
+</div>
+</div>
+</section><section class="tab-page hidden" id="mapsTab">
+<div class="maps-page-shell">
+<div class="global-analytics-subnav maps-subnav">
+<button class="global-subtab-btn active" id="mapsMapBtn" onclick="switchMapsTab('map')" type="button">Map</button>
+<button class="global-subtab-btn" id="mapsWaypointsBtn" onclick="switchMapsTab('waypoints')" type="button">Waypoints</button>
+</div>
+<div class="maps-page-body">
+<section class="maps-subtab-page" id="mapsMapTab"><article class="panel panel-pad maps-map-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Entropia Maps</span>
+<span class="muted" style="font-size:.68rem;margin-left:8px">Current location, waypoints, and teleporters</span>
+</div>
+</div>
+<div class="waypoint-current-location">
+<div class="hunt-metric-grid waypoint-location-grid">
+<div class="hunt-metric"><span>Current Planet</span><strong id="waypointCurrentPlanet">Unknown</strong></div>
+<div class="hunt-metric"><span>Last Known Position</span><strong id="waypointCurrentCoords">—</strong></div>
+</div>
+<div class="muted waypoint-location-time" id="waypointCurrentLocationTime">No readable location captured yet</div>
+</div><div class="maps-map-content" id="mapsMapContent">
+<div class="waypoint-map-toolbar">
+<label for="waypointPlanetSelect">Current Planet</label>
+<select class="select" id="waypointPlanetSelect" onchange="EntropiaWaypoints.setCurrentPlanet(this.value)"></select>
+<button class="btn" onclick="EntropiaWaypoints.useDetectedPlanet()" type="button">Use Detected</button>
+<span class="maps-toolbar-divider"></span>
+<label for="waypointMapPlanetSelect">Viewing Map</label>
+<select class="select" id="waypointMapPlanetSelect" onchange="PixelB8Maps.changeMap(this.value)"></select>
+<button class="btn" id="waypointMapCenterMe" onclick="PixelB8Maps.centerOnLastKnown()" type="button">Center on Me</button>
+<button class="btn" id="waypointMapZoomOut" onclick="PixelB8Maps.zoomMap(0.8)" type="button">−</button>
+<button class="btn" id="waypointMapZoomIn" onclick="PixelB8Maps.zoomMap(1.25)" type="button">+</button>
+<button class="btn" id="waypointMapReset" onclick="PixelB8Maps.resetMapView()" type="button">Reset</button>
+<div aria-label="Map layers" class="map-layer-switches">
+<label class="map-layer-pill">
+<input checked="" id="mapTeleportersToggle" onchange="PixelB8Maps.setLayer('teleporters',this.checked)" type="checkbox"/>
+<span class="map-layer-pill-box"></span><span>Teleporters</span>
+</label>
+<label class="map-layer-pill">
+<input checked="" id="mapWaypointsToggle" onchange="PixelB8Maps.setLayer('waypoints',this.checked)" type="checkbox"/>
+<span class="map-layer-pill-box"></span><span>Waypoints</span>
+</label>
+<label class="map-layer-pill">
+<input checked="" id="mapNexusLocationsToggle" onchange="PixelB8Maps.setLayer('nexuslocations',this.checked)" type="checkbox"/>
+<span class="map-layer-pill-box"></span><span>Nexus Locations</span>
+</label></div></div>
+<div class="waypoint-map-container" id="theMap">
+<div class="waypoint-map-wrapper" id="mapWrapper">
+<img alt="Planet map" class="map-layer surface-layer" id="baseMapImg" src=""/>
+<div class="waypoint-overlay" id="waypointMaplayer">
+<div class="waypoint-group teleporter-group" data-layer="teleporters" id="teleporters-layer"></div><div class="waypoint-group other-locations-group" data-layer="locations" id="other-locations-layer"></div><div class="waypoint-group" data-layer="tracked" id="waypoints-tracked"></div>
+<div class="waypoint-group last-known-position-group" data-layer="last-known" id="last-known-position-layer"></div></div>
+</div>
+<canvas id="mapCanvas"></canvas>
+<div class="map-status-bar">
+<span id="static-coords">Select a planet to see coordinates</span>
+</div>
+<aside class="map-locations-rail" id="mapLocationsRail">
+<div class="map-locations-rail-header">
+<div class="map-rail-tabs">
+<button class="map-rail-tab active" id="mapRailLocationsBtn" onclick="EntropiaMissions.switchMapRailTab('locations')" type="button">Locations</button>
+<button class="map-rail-tab" id="mapRailMissionsBtn" onclick="EntropiaMissions.switchMapRailTab('missions')" type="button">Missions</button>
+</div>
+<button class="map-locations-rail-toggle" id="mapLocationsRailToggle" onclick="PixelB8Maps.toggleLocationsRail()" title="Collapse panel" type="button">›</button>
+</div>
+<div class="map-locations-rail-body">
+<div id="mapLocationsPane">
+<input class="map-location-search" id="mapLocationSearch" oninput="PixelB8Maps.renderLocationRail()" placeholder="Search locations…" type="search"/>
+<details class="map-location-section" id="mapWaypointsSection">
+<summary>
+<span class="map-location-summary-main">
+<label class="map-category-mini-toggle" title="Show/hide waypoints on map" onclick="event.stopPropagation()">
+<input checked="" id="mapWaypointsRailToggle" onchange="PixelB8Maps.setLayer('waypoints',this.checked)" type="checkbox"/>
+<span></span>
+</label>
+<span>Waypoints</span>
+</span>
+<span class="map-location-count" id="mapWaypointsCount">0</span>
+</summary>
+<div class="map-location-list map-waypoint-groups" id="mapWaypointsList"></div>
+</details>
+<details class="map-location-section" id="mapTeleportersSection">
+<summary>
+<span class="map-location-summary-main">
+<label class="map-category-mini-toggle" title="Show/hide teleporters on map" onclick="event.stopPropagation()">
+<input checked="" id="mapTeleportersRailToggle" onchange="PixelB8Maps.setLayer('teleporters',this.checked)" type="checkbox"/>
+<span></span>
+</label>
+<span>Teleporters</span>
+</span>
+<span class="map-location-count" id="mapTeleportersCount">0</span>
+</summary>
+<div class="map-location-list" id="mapTeleportersList"></div>
+</details>
+<div class="map-nexus-location-sections" id="mapNexusLocationSections"></div>
+</div>
+<div class="hidden map-missions-pane" id="mapMissionsPane">
+<div class="map-missions-planet"><span>Viewing</span><strong id="mapMissionPlanetLabel">Current map</strong></div>
+<input class="map-location-search" id="mapMissionSearch" oninput="EntropiaMissions.renderMapRail()" placeholder="Search missions…" type="search"/>
+<div id="mapMissionsRailContent"></div>
+</div>
+</div>
+</aside><div class="map-context-menu hidden" id="mapContextMenu" role="menu">
+<div class="map-context-title" id="mapContextTitle">Map Location</div>
+<button id="mapContextCopyLocation" type="button">Copy location waypoint</button>
+<button id="mapContextCreateWaypoint" type="button">Create waypoint</button>
+<button class="hidden" id="mapContextCopyWaypoint" type="button">Copy waypoint</button>
+<button class="hidden" id="mapContextViewDetails" type="button">View details</button></div><div class="map-area-hover-label hidden" id="mapAreaHoverLabel"></div><div class="map-location-details-card hidden" id="mapLocationDetailsCard"><div class="map-location-details-head"><strong id="mapLocationDetailsTitle">Location</strong><button aria-label="Close" onclick="PixelB8Maps.closeLocationDetails()" type="button">×</button></div><div class="map-location-details-body" id="mapLocationDetailsBody"></div></div></div>
+<div class="muted waypoint-map-note">
+  Drag to pan. Mouse wheel zooms toward the cursor. Waypoints use the planet's real Entropia coordinate bounds.
+</div>
+</div></article></section>
+<section class="maps-subtab-page hidden" id="mapsWaypointsTab"><article class="panel panel-pad maps-waypoints-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Waypoints</span>
+<div class="muted">Captured from Entropia system chat and stored locally.</div>
+</div>
+<div class="toolbar">
+<select class="select" id="waypointCategoryFilter" onchange="EntropiaWaypoints.render()">
+<option value="all">All Categories</option>
+<option value="death">Death</option>
+<option value="mining">Mining</option>
+<option value="general">General</option>
+</select>
+<select class="select" id="waypointStateFilter" onchange="EntropiaWaypoints.render()">
+<option value="active">Active</option>
+<option value="all">All</option>
+<option value="removed">Removed / Reached</option>
+</select>
+<button class="btn" onclick="EntropiaWaypoints.clearRemoved()" type="button">Clear Removed</button>
+</div></div>
+<div class="waypoint-view-page" id="mapsWaypointList"><div class="waypoint-summary-grid hunt-metric-grid">
+<div class="hunt-metric"><span>Active</span><strong id="waypointActiveCount">0</strong></div>
+<div class="hunt-metric"><span>Death</span><strong id="waypointDeathCount">0</strong></div>
+<div class="hunt-metric"><span>Mining</span><strong id="waypointMiningCount">0</strong></div>
+<div class="hunt-metric"><span>Total Captured</span><strong id="waypointTotalCount">0</strong></div>
+</div><div class="table-wrap waypoint-table-wrap">
+<table class="table waypoint-table">
+<thead>
+<tr><th>Time</th><th>Planet</th><th>Category</th><th>Label</th><th>Coordinates</th><th>Raw Area</th><th>Status</th><th>Copy</th><th></th></tr>
+</thead>
+<tbody id="waypointTableBody">
+<tr><td class="empty" colspan="9">No waypoints captured yet.</td></tr>
+</tbody>
+</table>
+</div></div></article></section>
+</div>
+</div>
+</section>
+
+<section class="tab-page hidden" id="missionsTab">
+<div class="missions-page-shell">
+<div class="global-analytics-subnav missions-subnav" role="tablist" aria-label="Mission type">
+<button class="global-subtab-btn active" id="missionRepeatableBtn" type="button" role="tab" aria-selected="true">Repeatable</button>
+<button class="global-subtab-btn not-implemented" id="missionOneTimeBtn" type="button" role="tab" aria-selected="false" aria-disabled="true" onclick="window.showAppToast?.('One-Time Missions: Not yet implemented.','info')">One-Time</button>
+</div>
+<div class="missions-page-body">
+<article class="panel panel-pad missions-main-panel">
+<div class="panel-header missions-main-header">
+<div>
+<span class="panel-title">Missions</span>
+<div class="muted">Local repeatable mission catalog and cooldown tracker.</div>
+</div>
+<div class="toolbar mission-toolbar-actions">
+<button class="btn primary" onclick="EntropiaMissions.toggleAddForm()" type="button">+ Add Mission</button>
+<button class="btn" onclick="EntropiaMissions.restoreDefaults()" type="button">Restore Default Missions</button>
+<button class="btn danger-btn" onclick="EntropiaMissions.clearAllCooldowns()" type="button">Clear All Cooldowns</button>
+</div>
+</div>
+<div class="hunt-metric-grid mission-summary-grid">
+<div class="hunt-metric"><span>Total Missions</span><strong id="missionTotalCount">0</strong></div>
+<div class="hunt-metric"><span>Ready</span><strong class="success" id="missionReadyCount">0</strong></div>
+<div class="hunt-metric"><span>On Cooldown</span><strong class="warning" id="missionCooldownCount">0</strong></div>
+<div class="hunt-metric"><span>Custom</span><strong class="accent" id="missionCustomCount">0</strong></div>
+</div>
+<details class="mission-alerts-panel" id="missionAlertsPanel" open>
+<summary><span><span aria-hidden="true">🔔</span> Mission Alerts</span><span class="mission-alert-count" id="missionAlertCount">0</span></summary>
+<div class="mission-alerts-panel-body">
+<div class="mission-alerts-panel-head"><span class="muted">Recently ready missions and persistent cooldown alerts.</span><div class="toolbar"><button class="btn" onclick="EntropiaMissions.dismissAllAlerts()" type="button">Dismiss All</button><button class="btn danger-btn" onclick="EntropiaMissions.clearAlertHistory()" type="button">Clear History</button></div></div>
+<div class="mission-recent-alerts" id="missionRecentAlerts"><div class="empty mission-alert-history-empty">No mission alerts yet.</div></div>
+</div>
+</details>
+<div class="mission-filterbar">
+<select class="select" id="missionPlanetFilter" onchange="EntropiaMissions.renderMain()"><option value="all">All planets</option></select>
+<select class="select" id="missionStatusFilter" onchange="EntropiaMissions.renderMain()">
+<option value="all">Ready + Cooldown</option><option value="ready">Ready</option><option value="cooldown">On Cooldown</option>
+</select>
+<input class="mission-search-input" id="missionSearch" oninput="EntropiaMissions.renderMain()" placeholder="Search missions, categories, rewards…" type="search"/>
+</div>
+<section class="mission-add-panel hidden" id="missionAddPanel">
+<div class="mission-add-head"><div><strong>Add Custom Repeatable Mission</strong><span class="muted">Stored only in this browser.</span></div><button class="btn" onclick="EntropiaMissions.toggleAddForm(false)" type="button">×</button></div>
+<div class="mission-add-grid">
+<label><span>Name</span><input id="missionAddName" placeholder="Mission name" type="text"/></label>
+<label><span>Planet</span><input id="missionAddPlanet" placeholder="Calypso" type="text"/></label>
+<label><span>Category</span><input id="missionAddCategory" placeholder="Daily Terminal" type="text"/></label>
+<label><span>Difficulty</span><input id="missionAddDifficulty" placeholder="Easy" type="text"/></label>
+<label class="mission-add-wide"><span>Reward</span><input id="missionAddReward" placeholder="Reward" type="text"/></label>
+<label class="mission-add-wide"><span>Waypoint / Location</span><input id="missionAddWaypoint" placeholder="/wp [Calypso, 61955, 76163, 138, Mission NPC]" type="text"/></label>
+<div class="mission-add-cooldown"><span>Cooldown</span><input id="missionAddDays" min="0" placeholder="D" type="number"/><input id="missionAddHours" min="0" placeholder="H" type="number" value="21"/><input id="missionAddMinutes" min="0" placeholder="M" type="number"/></div>
+<label><span>Timer Starts</span><select class="select" id="missionAddType"><option value="SOR">On Received</option><option value="SOF">On Finished</option><option value="MISC">Manual / Other</option></select></label>
+</div>
+<div class="mission-add-actions"><button class="btn primary" onclick="EntropiaMissions.addCustomMission()" type="button">Add Mission</button></div>
+</section>
+<div class="mission-planet-groups" id="missionPlanetGroups"><div class="empty">Loading repeatable missions…</div></div>
+</article>
+</div>
+</div>
+</section>
+</main>
+<div class="pixelb8-vertical-resizer" data-pixelb8-right-resizer="" title="Drag to resize account &amp; chat">
+<span class="pixelb8-vertical-resizer-grip"></span>
+</div>
+<aside class="pixelb8-right-rail collapsed" data-pixelb8-right-rail="">
+<button class="pixelb8-right-rail-toggle" onclick="PixelB8Shell.toggleRightRail()" title="Open account &amp; chat">
+<span class="pixelb8-right-rail-toggle-icon">‹</span>
+</button>
+<div class="pixelb8-right-rail-inner">
+<section class="pixelb8-account-section collapsed" data-pixelb8-account-section="">
+<button aria-expanded="false" class="pixelb8-account-hud" data-pixelb8-account-toggle="" onclick="PixelB8Shell.toggleAccountSection(this.closest('[data-pixelb8-account-section]'))" title="Account options" type="button">
+<span class="pixelb8-account-avatar-wrap"><span class="pixelb8-account-avatar" data-pixelb8-profile-initial="">G</span><span class="pixelb8-account-presence"></span></span>
+<span class="pixelb8-account-copy"><span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span><strong data-pixelb8-profile-name="">Guest</strong><span data-pixelb8-profile-status="">Guest account</span></span>
+<span class="pixelb8-account-chevron">›</span>
+</button>
+<div class="pixelb8-account-actions">
+<button class="pixelb8-account-action" onclick="PixelB8Shell.openAccountSettings()" type="button"><span>⚙</span><b>Account Settings</b></button>
+<button class="pixelb8-account-action danger" onclick="PixelB8Shell.logout()" type="button"><span>↪</span><b>Logout</b></button>
+</div>
+</section>
+<section class="pixelb8-chat-section" data-pixelb8-chat-section="">
+<button aria-expanded="true" class="pixelb8-chat-toggle" data-pixelb8-chat-toggle="" onclick="PixelB8Shell.toggleChatSection(this.closest('[data-pixelb8-chat-section]'))" title="Toggle chat" type="button">
+<span class="pixelb8-chat-label">Chat</span>
+<span class="pixelb8-chat-state" data-pixelb8-chat-state="">OFFLINE</span>
+<span class="pixelb8-chat-chevron">›</span>
+</button>
+<div class="pixelb8-chat-container">
+<div class="pixelb8-chat-messages" data-pixelb8-chat-messages=""></div>
+<div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker=""><span onclick="PixelB8Shell.insertEmoji('😀')">😀</span><span onclick="PixelB8Shell.insertEmoji('😂')">😂</span><span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span><span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span><span onclick="PixelB8Shell.insertEmoji('👾')">👾</span><span onclick="PixelB8Shell.insertEmoji('😎')">😎</span><span onclick="PixelB8Shell.insertEmoji('👍')">👍</span><span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span></div>
+<div class="pixelb8-chat-input"><button onclick="PixelB8Shell.toggleEmojiPicker()" type="button">☺</button><input data-pixelb8-chat-input="" maxlength="240" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()" placeholder="Say something…"/><button class="primary" onclick="PixelB8Shell.sendChat()" type="button">Send</button></div>
+</div>
+</section>
+<div class="pixelb8-right-footer">PixelB8 Social</div>
+</div>
+</aside>
+</div>
+<div class="pixelb8-account-settings-backdrop hidden" data-pixelb8-account-settings="" onclick="PixelB8Shell.closeAccountSettings(event)">
+<section class="pixelb8-account-settings-card" onclick="event.stopPropagation()">
+<div class="pixelb8-account-settings-head">
+<div><span class="pixelb8-account-kicker">PIXELB8 PROFILE</span><h3>Account Settings</h3></div>
+<button class="btn" onclick="PixelB8Shell.closeAccountSettings()">×</button>
+</div>
+<div class="pixelb8-account-settings-body">
+<label><span>Display Name</span><input data-pixelb8-account-name-input="" maxlength="32" placeholder="Guest"/></label>
+<label><span>Profile Initial</span><input data-pixelb8-account-initial-input="" maxlength="2" placeholder="G"/></label>
+</div>
+<div class="pixelb8-account-settings-actions">
+<button class="btn" onclick="PixelB8Shell.closeAccountSettings()">Cancel</button>
+<button class="btn" onclick="PixelB8Shell.saveAccountSettings()">Save Profile</button>
+</div>
+</section>
+</div>
+<div id="toast">Waypoint copied.</div>
+<div class="tracker-options-backdrop hidden" id="trackerOptionsBackdrop" onclick="closeTrackerOptions(event)">
+<section class="tracker-options-panel" onclick="event.stopPropagation()">
+<div class="tracker-options-header">
+<div>
+<div class="tracker-options-kicker">TRACKER CONFIGURATION</div>
+<h2 id="trackerOptionsHeading">Player Tracker</h2>
+</div>
+<button class="btn" onclick="closeTrackerOptions()">×</button>
+</div>
+<div class="tracker-options-body">
+<div class="tracker-options-section">
+<div class="tracker-options-title">Operating Mode</div>
+<div class="tracker-options-grid">
+<label class="compact-field">
+<strong>Mode</strong>
+<select id="trackerModeSelect" onchange="previewTrackerModeOptions()">
+<option value="casual">Player / Casual</option>
+<option value="event">Legacy Event Mode</option>
+</select>
+</label>
+<div class="tracker-option-info">
+<b id="effectiveModePreview">EVENT</b>
+<span id="modePreviewReason">Player Mode is the normal tracker experience for solo and team hunts.</span>
+</div>
+</div>
+</div>
+<div class="tracker-options-section" id="eventOptionsSection">
+<div class="tracker-options-title">Legacy Event Profile</div>
+<div class="tracker-options-grid three">
+<label class="compact-field">
+<strong>Event Name</strong>
+<input id="eventNameInput" type="text" value="Upcoming Legends"/>
+</label>
+<label class="compact-field">
+<strong>Starts (UTC)</strong>
+<input id="eventStartInput" type="datetime-local" value="2026-08-15T00:00"/>
+</label>
+<label class="compact-field">
+<strong>Ends (UTC)</strong>
+<input id="eventEndInput" type="datetime-local" value="2026-08-17T00:00"/>
+</label>
+<label class="compact-field">
+<strong>Session Limit</strong>
+<div class="input-suffix">
+<input id="sessionHoursInput" max="48" min="0.25" step="0.25" type="number" value="6"/>
+<span>hours</span>
+</div>
+</label>
+</div>
+<div class="tracker-options-help">These are editable defaults. Future events can reuse the same tracker without code changes.</div>
+</div>
+<div class="tracker-options-section">
+<div class="tracker-options-title">History / File Read Limit</div>
+<div class="tracker-options-grid">
+<label class="compact-field">
+<strong>Analyze Back</strong>
+<select id="analysisLookbackSelect" onchange="toggleCustomLookback()">
+<option value="1">Last 24 hours</option>
+<option value="3">Last 3 days</option>
+<option value="7">Last 7 days</option>
+<option value="14">Last 14 days</option>
+<option selected="" value="30">Last 30 days</option>
+<option value="60">Last 60 days</option>
+<option value="90">Last 90 days</option>
+<option value="custom">Custom days</option>
+<option value="all">All history</option>
+</select>
+</label>
+<label class="compact-field hidden" id="customLookbackField">
+<strong>Custom Days</strong>
+<div class="input-suffix">
+<input id="customLookbackDaysInput" max="3650" min="1" step="1" type="number" value="30"/>
+<span>days</span>
+</div>
+</label>
+</div>
+<div class="tracker-options-help">
+          This limits the initial chat.log read itself, not just the charts. Large logs can load much faster when you only need recent history.
+        </div>
+</div>
+<div class="tracker-options-section">
+<div class="tracker-options-title">Optional Exact Analytics Window</div>
+<div class="tracker-options-grid">
+<label class="compact-field">
+<strong>From (UTC)</strong>
+<input id="analysisStartInput" type="datetime-local"/>
+</label>
+<label class="compact-field">
+<strong>To (UTC)</strong>
+<input id="analysisEndInput" type="datetime-local"/>
+</label>
+</div>
+<div class="tracker-options-help">
+          Optional fine control inside the loaded history. A From date can further narrow the Analyze Back range; it will never make the app read older data than the selected history limit.
+        </div>
+</div>
+</div>
+<div class="tracker-options-footer">
+<button class="btn" onclick="resetTrackerOptions()">Reset Player Tracker</button>
+<button class="btn primary" onclick="saveTrackerOptions(true)">Apply &amp; Analyze</button>
+</div>
+</section>
+</div>
+<div class="nexus-picker-backdrop hidden" id="nexusItemPickerBackdrop" onclick="EntropiaLoadouts.closeItemPicker(event)">
+<section class="nexus-picker-panel" onclick="event.stopPropagation()">
+<div class="nexus-picker-header">
+<div><div class="tracker-options-kicker">ENTROPIA NEXUS DATABASE</div><h2 id="nexusPickerTitle">Select Item</h2></div>
+<div class="toolbar"><button class="btn" id="nexusRefreshBtn" onclick="EntropiaLoadouts.refreshPickerData()" type="button">↻ Refresh</button><button class="btn" onclick="EntropiaLoadouts.closeItemPicker()" type="button">×</button></div>
+</div>
+<div class="nexus-picker-controls">
+<input autocomplete="off" id="nexusPickerSearch" placeholder="Search item name…" type="search"/>
+<span class="muted" id="nexusPickerStatus">Choose an item.</span>
+</div>
+<div class="nexus-picker-layout">
+<div class="nexus-picker-results" id="nexusPickerResults"><div class="empty">Loading Nexus data…</div></div>
+<aside class="nexus-picker-details" id="nexusPickerDetails"><div class="empty">Select an item to preview its stats.</div></aside>
+</div>
+</section>
+</div>
+<input accept=".log" class="visually-hidden-file-input" id="obsChatLogInput" oncancel="handleFallbackChatLogCancel()" onchange="handleFallbackChatLogInput(event)" type="file"/>
+<!-- Streamer / OBS HUD -->
+<div aria-hidden="true" id="streamerHud">
+<div class="hud-corner tl"></div>
+<div class="hud-corner tr"></div>
+<div class="hud-corner bl"></div>
+<div class="hud-corner br"></div>
+<div class="hud-scanline"></div>
+<div class="streamer-hud-shell">
+<!-- Event clocks -->
+<section class="hud-panel hud-top-left" data-panel-id="eventClock" data-panel-name="Event Clock">
+<div class="hud-title">
+        Event Clock
+        <span class="hud-status"><span class="dot" id="streamHudLiveDot"></span><span id="streamHudLiveText">OFFLINE</span></span>
+</div>
+<div class="hud-content">
+<div class="hud-stat-grid">
+<div class="hud-stat">
+<div class="hud-stat-label">Legacy Event End</div>
+<div class="hud-stat-value warn" id="streamEventCountdown">--d --:--:--</div>
+</div>
+<div class="hud-stat">
+<div class="hud-stat-label">Latest 6h Start</div>
+<div class="hud-stat-value good" id="streamSafeStartCountdown">--d --:--:--</div>
+</div>
+<div class="hud-stat">
+<div class="hud-stat-label">Game Time</div>
+<div class="hud-stat-value accent" id="streamGameTime">NOT SYNCED</div>
+</div>
+<div class="hud-stat">
+<div class="hud-stat-label">6h Session</div>
+<div class="hud-stat-value good" id="streamSessionTimer">WAITING</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Personal event stats -->
+<section class="hud-panel hud-top-right" data-panel-id="pilotStats" data-panel-name="Pilot Event Stats">
+<div class="hud-title">Pilot Event Stats <span class="hud-status">LIVE CACHE</span></div>
+<div class="hud-content">
+<div class="hud-gauge-row">
+<div class="hud-gauge" id="streamGlobalGauge" style="--gauge-color:var(--success);--gauge-pct:0">
+<div class="hud-gauge-value"><span id="streamMyGlobals">0</span><span class="hud-gauge-label">Globals</span></div>
+</div>
+<div class="hud-gauge" id="streamHofGauge" style="--gauge-color:var(--hof);--gauge-pct:0">
+<div class="hud-gauge-value"><span id="streamMyHofs">0</span><span class="hud-gauge-label">HOFs</span></div>
+</div>
+<div class="hud-gauge" id="streamLootGauge" style="--gauge-color:var(--warning);--gauge-pct:0">
+<div class="hud-gauge-value"><span id="streamMyLoot">0</span><span class="hud-gauge-label">PED Loot</span></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Live global feeds -->
+<section class="hud-panel hud-bottom-left" data-panel-id="globalTelemetry" data-panel-name="Global Telemetry">
+<div class="hud-title">Global Telemetry <span class="hud-status">CHAT.LOG</span></div>
+<div class="hud-content">
+<div class="hud-stat-grid">
+<div class="hud-stat" data-metric="targetGlobals">
+<div class="hud-stat-label">Target Globals</div>
+<div class="hud-stat-value good" id="streamTargetGlobals">0</div>
+</div>
+<div class="hud-stat" data-metric="targetHofs">
+<div class="hud-stat-label">Target HOFs</div>
+<div class="hud-stat-value hof" id="streamTargetHofs">0</div>
+</div>
+<div class="hud-stat" data-metric="targetValue">
+<div class="hud-stat-label">Target Value</div>
+<div class="hud-stat-value accent" id="streamTargetValue">0.00 PED</div>
+</div>
+<div class="hud-stat" data-metric="allValue">
+<div class="hud-stat-label">All-Mob Value</div>
+<div class="hud-stat-value warn" id="streamAllMobValue">0.00 PED</div>
+</div>
+<div class="hud-stat" data-metric="allGlobals">
+<div class="hud-stat-label">All Globals</div>
+<div class="hud-stat-value good" id="streamAllGlobals">0</div>
+</div>
+<div class="hud-stat" data-metric="allHofs">
+<div class="hud-stat-label">All HOFs</div>
+<div class="hud-stat-value hof" id="streamAllHofs">0</div>
+</div>
+<div class="hud-stat" data-metric="personalGlobals">
+<div class="hud-stat-label">My Globals</div>
+<div class="hud-stat-value good" id="streamPersonalGlobals">0</div>
+</div>
+<div class="hud-stat" data-metric="personalHofs">
+<div class="hud-stat-label">My HOFs</div>
+<div class="hud-stat-value hof" id="streamPersonalHofs">0</div>
+</div>
+<div class="hud-stat" data-metric="personalValue">
+<div class="hud-stat-label">My Loot</div>
+<div class="hud-stat-value warn" id="streamPersonalValue">0.00 PED</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Future combat telemetry slots -->
+<section class="hud-panel hud-bottom-right" data-panel-id="combatTelemetry" data-panel-name="Combat Telemetry">
+<div class="hud-title">Combat Telemetry <span class="hud-status">FUTURE INPUTS</span></div>
+<div class="hud-content">
+<div class="hud-telemetry">
+<div class="hud-stat" data-metric="dps"><div class="hud-stat-label">DPS</div><div class="hud-stat-value hud-placeholder">--</div></div>
+<div class="hud-stat" data-metric="damage"><div class="hud-stat-label">Damage</div><div class="hud-stat-value hud-placeholder">--</div></div>
+<div class="hud-stat" data-metric="cost"><div class="hud-stat-label">Cost</div><div class="hud-stat-value hud-placeholder">--</div></div>
+<div class="hud-stat" data-metric="profit"><div class="hud-stat-label">Profit</div><div class="hud-stat-value hud-placeholder">--</div></div>
+<div class="hud-stat" data-metric="efficiency"><div class="hud-stat-label">Return</div><div class="hud-stat-value hud-placeholder">--</div></div>
+</div>
+</div>
+</section>
+<!-- Optional OBS parsing/source controls. Hidden by default. -->
+<section class="hud-panel hud-parsing-source" data-panel-id="parsingSource" data-panel-name="Parsing / Source">
+<div class="hud-title">
+        Parsing / Source
+        <span class="hud-status"><span class="dot" id="streamParserDot"></span><span id="streamParserState">OFFLINE</span></span>
+</div>
+<div class="hud-content streamer-source-content">
+<div class="streamer-source-identity">
+<label class="streamer-source-field">
+<span>Avatar Name</span>
+<input id="streamAvatarNameInput" maxlength="64" placeholder="Entropia avatar" type="text"/>
+</label>
+<label class="streamer-source-field">
+<span>Streamer Name</span>
+<input id="streamerNameInput" maxlength="64" placeholder="Channel / display name" type="text"/>
+</label>
+</div>
+<div class="streamer-source-status">
+<div>
+<span>Source</span>
+<b id="streamParserSource">No chat.log connected</b>
+</div>
+<div>
+<span>Streamer</span>
+<b id="streamerNamePreview">—</b>
+</div>
+</div>
+<div class="streamer-source-actions">
+<button class="streamer-mini-btn source-primary" onclick="pickChatLogFile()" type="button">📁 Select chat.log</button>
+<button class="streamer-mini-btn source-primary" id="streamParserResumeBtn" onclick="resumeSavedChatLog()" type="button">⟳ Reconnect Live chat.log</button>
+<button class="streamer-mini-btn" onclick="showObsSourceDiagnostic({title:'OBS Source Diagnostics',message:'Current OBS/CEF environment and live FileSystem picker capabilities.',details:liveFileHandleEnvironmentSummary(),level:'warning',nativePicker:true})" type="button">⚠ Diagnostics</button>
+</div>
+<div class="streamer-option-note streamer-source-note">
+          Live mode prefers PixelB8 Companion. Companion owns the continuous chat.log watcher, so a sleeping browser can catch up when it wakes. Browser file access remains an explicit fallback.
+        </div>
+</div>
+</section>
+<!-- Optional Team Controls panel -->
+<section class="hud-panel hud-team-control" data-panel-id="teamControl" data-panel-name="Team Control">
+<div class="hud-title">
+        Team Control
+        <span class="hud-status"><span class="dot" id="streamTeamRoomDot"></span><span id="streamTeamRoomState">OFFLINE</span></span>
+</div>
+<div class="hud-content streamer-team-control-content">
+<div class="streamer-team-control-grid">
+<label class="streamer-source-field">
+<span>Team Name</span>
+<input id="streamTeamNameInput" maxlength="48" placeholder="Team name" type="text"/>
+</label>
+<label class="streamer-source-field">
+<span>Visibility</span>
+<select id="streamTeamPrivacySelect">
+<option value="private">Private</option>
+<option value="public">Public</option>
+</select>
+</label>
+<label class="streamer-source-field">
+<span>Room Code</span>
+<input id="streamTeamRoomCodeInput" maxlength="8" placeholder="ABC123" type="text"/>
+</label>
+</div>
+<div class="streamer-team-actions">
+<button class="streamer-mini-btn source-primary" onclick="EntropiaTeamTracker.createOrUpdateRoomFromStreamer()" type="button">Create / Update</button>
+<button class="streamer-mini-btn" onclick="EntropiaTeamTracker.joinRoomFromStreamer()" type="button">Join Code</button>
+<button class="streamer-mini-btn" onclick="EntropiaTeamTracker.copyRoomCode()" type="button">Copy Code</button>
+<button class="streamer-mini-btn danger-mini" onclick="EntropiaTeamTracker.leaveRoom()" type="button">Leave</button>
+</div>
+<div class="streamer-public-room-head">
+<span>Public Teams</span>
+<button class="streamer-mini-btn" onclick="EntropiaTeamTracker.refreshPublicRooms()" type="button">Refresh</button>
+</div>
+<div class="stream-public-team-list" id="streamPublicTeamList">
+<div class="hud-placeholder">No public rooms discovered.</div>
+</div>
+</div>
+</section>
+<!-- Optional Team Totals panel -->
+<section class="hud-panel hud-team-totals" data-panel-id="teamTotals" data-panel-name="Team Totals">
+<div class="hud-title">
+        Team Performance
+        <span class="hud-status"><span class="dot" id="streamTeamTotalsDot"></span><span id="streamTeamTotalsCount">0 ONLINE</span></span>
+</div>
+<div class="hud-content stream-team-performance">
+<div class="stream-team-section-label">Actual Hunt</div>
+<div class="hud-stat-grid team-total-stat-grid">
+<div class="hud-stat"><span class="hud-stat-label">Cost</span><span class="hud-stat-value" id="streamTeamCost">0.00 PED</span></div>
+<div class="hud-stat"><span class="hud-stat-label">Loot</span><span class="hud-stat-value" id="streamTeamLoot">0.00 PED</span></div>
+<div class="hud-stat"><span class="hud-stat-label">Profit</span><span class="hud-stat-value" id="streamTeamProfit">0.00 PED</span></div>
+<div class="hud-stat"><span class="hud-stat-label">Return</span><span class="hud-stat-value" id="streamTeamReturn">0.0%</span></div>
+<div class="hud-stat"><span class="hud-stat-label">Team DPS</span><span class="hud-stat-value" id="streamTeamActualDps">0.0</span></div>
+<div class="hud-stat"><span class="hud-stat-label">Team DPP</span><span class="hud-stat-value" id="streamTeamActualDpp">0.00</span></div>
+</div>
+<div class="stream-team-section-label">Loadout Estimate</div>
+<div class="hud-stat-grid team-total-stat-grid">
+<div class="hud-stat"><span class="hud-stat-label">Est. DPS</span><span class="hud-stat-value" id="streamTeamEstimatedDps">0.0</span></div>
+<div class="hud-stat"><span class="hud-stat-label">Avg DPS</span><span class="hud-stat-value" id="streamTeamAverageEstimatedDps">0.0</span></div>
+<div class="hud-stat"><span class="hud-stat-label">Avg DPP</span><span class="hud-stat-value" id="streamTeamAverageEstimatedDpp">0.00</span></div>
+<div class="hud-stat"><span class="hud-stat-label">Avg Efficiency</span><span class="hud-stat-value" id="streamTeamAverageEfficiency">0.0%</span></div>
+<div class="hud-stat"><span class="hud-stat-label">Accuracy</span><span class="hud-stat-value" id="streamTeamAccuracy">0.0%</span></div>
+<div class="hud-stat"><span class="hud-stat-label">Damage</span><span class="hud-stat-value" id="streamTeamDamage">0</span></div>
+</div>
+</div>
+</section>
+<!-- Optional Team Members panel -->
+<section class="hud-panel hud-team-members" data-panel-id="teamMembers" data-panel-name="Team Members">
+<div class="hud-title">
+        Team Members
+        <span class="hud-status" id="streamTeamMemberCount">0</span>
+</div>
+<div class="hud-content stream-team-member-cards" id="streamTeamMemberCards">
+<div class="hud-placeholder">No connected teammates.</div>
+</div>
+</section>
+<!-- Optional Equipped Loadout panel -->
+<section class="hud-panel hud-loadout" data-panel-id="loadoutPanel" data-panel-name="Equipped Loadout">
+<div class="hud-title">
+        Equipped Loadout
+        <span class="hud-status" id="streamLoadoutState">NONE</span>
+</div>
+<div class="hud-content stream-loadout-content">
+<div class="stream-loadout-name-block">
+<span class="stream-loadout-kicker">LOADOUT</span>
+<b data-metric="name" id="streamLoadoutName">No loadout equipped</b>
+<span class="stream-loadout-weapon" data-metric="weapon" id="streamLoadoutWeapon">—</span>
+</div>
+<div class="hud-stat-grid stream-loadout-stat-grid">
+<div class="hud-stat" data-metric="efficiency">
+<span class="hud-stat-label">Efficiency</span>
+<span class="hud-stat-value" id="streamLoadoutEfficiency">0.0%</span>
+</div>
+<div class="hud-stat" data-metric="dpp">
+<span class="hud-stat-label">DPP</span>
+<span class="hud-stat-value" id="streamLoadoutDpp">0.00</span>
+</div>
+<div class="hud-stat" data-metric="dps">
+<span class="hud-stat-label">DPS</span>
+<span class="hud-stat-value" id="streamLoadoutDps">0.0</span>
+</div>
+<div class="hud-stat" data-metric="cost">
+<span class="hud-stat-label">Cost / Shot</span>
+<span class="hud-stat-value" id="streamLoadoutCost">0.0000 PED</span>
+</div>
+<div class="hud-stat" data-metric="damage">
+<span class="hud-stat-label">Eff. Damage</span>
+<span class="hud-stat-value" id="streamLoadoutDamage">0.0</span>
+</div>
+<div class="hud-stat" data-metric="apm">
+<span class="hud-stat-label">APM</span>
+<span class="hud-stat-value" id="streamLoadoutApm">0.0</span>
+</div>
+<div class="hud-stat" data-metric="range">
+<span class="hud-stat-label">Range</span>
+<span class="hud-stat-value" id="streamLoadoutRange">0.0 m</span>
+</div>
+<div class="hud-stat" data-metric="maxDamage">
+<span class="hud-stat-label">Max Damage</span>
+<span class="hud-stat-value" id="streamLoadoutMaxDamage">0.0</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Recommended target -->
+<section class="hud-panel hud-center-bottom" data-panel-id="recommendedHunt" data-panel-name="Recommended Hunt">
+<div class="hud-title">
+        Recommended Hunt
+        <span class="hud-status">TARGETING</span>
+</div>
+<div class="hud-content hud-target">
+<div class="hud-target-icon">◎</div>
+<div class="hud-target-main">
+<div class="hud-target-label">Recommended Hunt</div>
+<div class="hud-target-name" id="streamRecommendedMob">WAITING FOR DATA</div>
+</div>
+<div class="hud-target-hour" id="streamActiveHour">--:00</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Streamer custom context menu -->
+<div class="streamer-context-menu" id="streamerContextMenu">
+<button class="streamer-context-item" data-action="panels">☷ Panel Menu</button>
+<button class="streamer-context-item hidden" data-action="advanced-panel" id="streamerAdvancedItem">⚙ Advanced Panel Options</button>
+<button class="streamer-context-item" data-action="appearance">◈ OBS Appearance</button>
+<button class="streamer-context-item" data-action="toggle-slim-headers" id="streamerSlimHeadersItem">▰ Enable Slim Headers</button>
+<div class="streamer-context-sep"></div>
+<button class="streamer-context-item danger hidden" data-action="hide-panel" id="streamerHidePanelItem">⊘ Hide This Panel</button>
+<button class="streamer-context-item" data-action="reset-layout">↺ Reset Streamer Layout</button>
+<button class="streamer-context-item danger" data-action="exit-streamer">× Exit Streamer Mode</button>
+</div>
+<!-- Streamer panel visibility manager -->
+<div class="streamer-panel-manager" id="streamerPanelManager">
+<div class="streamer-panel-manager-head" data-floating-drag-handle="panelManager">
+<span class="streamer-panel-manager-title">Streamer Panels</span>
+<button class="streamer-mini-btn" onclick="closeStreamerPanelManager()" style="flex:0 0 auto;padding:5px 8px">×</button>
+</div>
+<div class="streamer-panel-list" id="streamerPanelList"></div>
+<div class="streamer-panel-actions">
+<button class="streamer-mini-btn" onclick="showAllStreamerPanels()">Show All</button>
+<button class="streamer-mini-btn" onclick="resetStreamerLayout()">Reset Layout</button>
+</div>
+</div>
+<!-- Streamer appearance -->
+<div class="streamer-advanced-panel" id="streamerAppearancePanel" style="right:360px">
+<div class="streamer-panel-manager-head" data-floating-drag-handle="appearance">
+<span class="streamer-panel-manager-title">OBS Appearance</span>
+<button class="streamer-mini-btn" onclick="closeStreamerAppearancePanel()" style="flex:0 0 auto;padding:5px 8px">×</button>
+</div>
+<div class="streamer-option-section">
+<div class="streamer-option-title">Global HUD Theme</div>
+<div class="streamer-option-grid">
+<label class="streamer-option-toggle" style="display:grid">
+<span>Accent</span>
+<input id="streamAccentColor" oninput="updateStreamerThemeFromControls()" type="color" value="#35c2ff"/>
+</label>
+<label class="streamer-option-toggle" style="display:grid">
+<span>Panel BG</span>
+<input id="streamBgColor" oninput="updateStreamerThemeFromControls()" type="color" value="#05101b"/>
+</label>
+</div>
+<div class="streamer-range-row" style="margin-top:7px">
+<label>Panel Opacity</label>
+<input id="streamBgOpacity" max="100" min="10" oninput="updateStreamerThemeFromControls()" step="5" type="range" value="80"/>
+<div class="streamer-range-value" id="streamBgOpacityValue">80%</div>
+</div>
+<label class="streamer-option-toggle streamer-scanline-toggle" style="margin-top:8px">
+<input checked="" id="streamScanlineToggle" onchange="updateStreamerThemeFromControls()" type="checkbox"/>
+<span>Scan Line</span>
+</label>
+<div class="streamer-option-note">Applies to all OBS Mode panels and overlay settings windows.</div>
+</div>
+<div class="streamer-panel-actions">
+<button class="streamer-mini-btn" onclick="resetStreamerTheme()">Reset Default</button>
+</div>
+</div>
+<!-- Streamer advanced panel options -->
+<div class="streamer-advanced-panel" id="streamerAdvancedPanel">
+<div class="streamer-panel-manager-head" data-floating-drag-handle="advanced">
+<span class="streamer-panel-manager-title" id="streamerAdvancedTitle">Advanced Panel Options</span>
+<button class="streamer-mini-btn" onclick="closeStreamerAdvancedPanel()" style="flex:0 0 auto;padding:5px 8px">×</button>
+</div>
+<div id="streamerAdvancedBody"></div>
+</div>
+<div aria-live="polite" class="obs-source-diagnostic hidden" id="obsSourceDiagnostic" role="status">
+<div class="obs-source-diagnostic-head">
+<div>
+<span class="obs-source-diagnostic-kicker">OBS SOURCE DIAGNOSTICS</span>
+<strong id="obsDiagnosticTitle">chat.log connection</strong>
+</div>
+<button class="streamer-mini-btn" onclick="closeObsSourceDiagnostic()" type="button">×</button>
+</div>
+<div class="obs-source-diagnostic-message" id="obsDiagnosticMessage"></div>
+<div class="obs-source-diagnostic-details" id="obsDiagnosticDetails"></div>
+<div class="obs-source-native-picker hidden" id="obsDiagnosticNativePicker">
+<label for="obsChatLogInput">Choose chat.log directly</label>
+<p>Snapshot fallback only. For live one-second polling, run PixelB8 Companion with the EU Tracking Bridge enabled.</p>
+<input accept=".log" id="obsChatLogDirectInput" onchange="handleObsDirectChatLogInput(event)" type="file"/>
+</div>
+<div class="obs-source-diagnostic-actions">
+<button class="streamer-mini-btn source-primary" id="obsDiagnosticRetryBtn" onclick="retryObsChatLogPicker()" type="button">Retry Picker</button>
+<button class="streamer-mini-btn" onclick="toggleObsNativePicker(true)" type="button">Native File Control</button>
+</div>
+</div>
+<script src="js/analyze.js"></script>
+<script src="js/polling.js"></script>
+<script src="js/nexus-api.js"></script>
+<script src="js/loadouts.js"></script>
+<script src="js/faps.js"></script>
+<script src="js/session-tracker.js"></script>
+<script src="js/fishing-gear.js"></script>
+<script src="js/fishing-tracker.js"></script>
+<script src="js/mining-gear.js"></script>
+<script src="js/mining-tracker.js"></script>
+<script src="js/hunt-tracker.js"></script>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="js/team-tracker.js"></script>
+<script src="../sharedassets/js/pixelb8-shell.js?v=20260818d"></script>
+<script src="js/maps-api.js"></script><script src="js/maps-areas.js"></script><script src="js/maps.js"></script><script src="js/waypoints.js"></script><script src="../sharedassets/js/pixelb8-audio.js"></script><script src="js/audio.js"></script><script src="data/dailymissions.js"></script><script src="js/missions.js"></script><script src="js/app.js"></script>
+<div class="app-confirm-backdrop hidden" id="appConfirmBackdrop">
+<section aria-labelledby="appConfirmTitle" aria-modal="true" class="app-confirm-dialog" role="dialog">
+<div class="app-confirm-title" id="appConfirmTitle">Confirm</div>
+<div class="app-confirm-message" id="appConfirmMessage"></div>
+<div class="app-confirm-actions">
+<button class="btn" id="appConfirmCancel">Cancel</button>
+<button class="btn danger-btn" id="appConfirmAccept">Confirm</button>
+</div>
+</section>
+</div>
+<div class="hunt-history-backdrop hidden" id="huntHistoryBackdrop" onclick="EntropiaHuntTracker.closeHistoryDetails(event)">
+<section class="hunt-history-dialog" onclick="event.stopPropagation()">
+<div class="panel-header">
+<div>
+<span class="panel-title" id="huntHistoryDetailTitle">Hunt Details</span>
+<span class="muted" id="huntHistoryDetailDate"></span>
+</div>
+<button class="btn" onclick="EntropiaHuntTracker.closeHistoryDetails()">×</button>
+</div>
+<div class="hunt-history-detail-body" id="huntHistoryDetailBody"></div>
+</section>
+</div>
+<div aria-atomic="true" aria-live="polite" class="app-toast-host" id="appToastHost"></div>
+<div aria-atomic="true" aria-live="assertive" class="mission-alert-host" id="missionAlertHost"></div>
+<div class="eu-settings-backdrop hidden" id="euSettingsBackdrop" onclick="closeEuSettings(event)">
+<section aria-labelledby="euSettingsTitle" aria-modal="true" class="panel eu-settings-dialog" onclick="event.stopPropagation()" role="dialog">
+<div class="panel-header">
+<div><span class="panel-title" id="euSettingsTitle">Tracker Settings</span>
+<div class="muted">Local tracker preferences and chat.log source.</div></div>
+<button class="btn" onclick="closeEuSettings()" type="button">×</button>
+</div>
+<div class="eu-settings-grid">
+<label class="compact-field"><strong>Avatar Name</strong>
+<input id="avatarNameInput" oninput="updateAvatarName()" placeholder="John Doe" type="text"/>
+</label>
+<label class="toggle eu-settings-toggle" title="Voice announcer">
+<input id="voiceToggle" onchange="toggleVoiceAnnouncer()" type="checkbox"/>
+<span>🔊 Voice Announcer</span>
+</label>
+<section class="eu-session-settings">
+<div class="eu-settings-section-head">
+<div><strong>Session Tracking</strong><span class="muted">Parent activity tracking across hunts, fishing and other supported activity.</span></div>
+<label class="toggle"><input id="passiveSessionTracking" onchange="EntropiaSessionTracker.setPassiveEnabled(this.checked)" type="checkbox"/><span>Passive Session Tracking</span></label>
+</div>
+<div class="mission-tts-note">When enabled, recognized activity outside an active hunt can automatically start and continue the current session. Starting a hunt always starts/joins a session, while the hunt itself still begins fresh.</div>
+</section>
+<section class="eu-audio-settings" id="euAudioSettings">
+<div class="eu-settings-section-head">
+<div><strong>Audio Settings</strong><span class="muted">Event alerts and custom sounds.</span></div>
+<div class="toolbar">
+<button class="btn" id="audioGlobalMuteBtn" onclick="PixelB8Audio.toggleMute()" type="button">Global Mute</button>
+<button class="btn danger-btn" onclick="PixelB8Audio.resetAllSounds()" type="button">Reset EU Sounds</button>
+</div>
+</div>
+<div class="audio-event-list" id="audioEventList">
+<div class="audio-event-row audio-global-volume-row"><label><span>Global Volume <small class="muted">Shared</small></span></label><input data-global-audio-volume max="100" min="0" onchange="PixelB8GlobalAudio.preview('ui-click')" oninput="PixelB8GlobalAudio.setVolume(this.value/100)" step="1" type="range" value="100"/><span class="audio-file-name audio-volume-value" data-global-audio-volume-value>100%</span></div><div class="audio-event-row" data-global-audio-event="ui-click"><label><input data-global-audio-toggle="ui-click" onchange="PixelB8GlobalAudio.setEnabled('ui-click',this.checked)" type="checkbox"/><span>UI Click <small class="muted">Global</small></span></label><span class="audio-file-name" data-global-audio-file="ui-click">Default · ui-click.mp3</span><button class="btn" onclick="PixelB8GlobalAudio.chooseSound('ui-click')" type="button">Change</button><button class="btn audio-preview-btn" data-no-ui-click onclick="PixelB8GlobalAudio.preview('ui-click')" title="Preview" type="button">▶</button></div>
+<div class="audio-event-row" data-audio-event="dung-sound"><label><input onchange="PixelB8Audio.setEnabled('dung-sound',this.checked)" type="checkbox"/><span>Dung Pickup</span></label><span class="audio-file-name">Default · dung-pickup.mp3</span><button class="btn" onclick="PixelB8Audio.chooseSound('dung-sound')" type="button">Change</button><button class="btn audio-preview-btn" onclick="PixelB8Audio.preview('dung-sound')" title="Preview" type="button">▶</button></div>
+<div class="audio-event-row" data-audio-event="oil-sound"><label><input onchange="PixelB8Audio.setEnabled('oil-sound',this.checked)" type="checkbox"/><span>Item Pickup</span></label><span class="audio-file-name">Default · ka-ching.mp3</span><button class="btn" onclick="PixelB8Audio.chooseSound('oil-sound')" type="button">Change</button><button class="btn audio-preview-btn" onclick="PixelB8Audio.preview('oil-sound')" title="Preview" type="button">▶</button></div>
+<div class="audio-event-row" data-audio-event="lahar-event"><label><input onchange="PixelB8Audio.setEnabled('lahar-event',this.checked)" type="checkbox"/><span>Lahar Event</span></label><span class="audio-file-name">Default · lahar-event.mp3</span><button class="btn" onclick="PixelB8Audio.chooseSound('lahar-event')" type="button">Change</button><button class="btn audio-preview-btn" onclick="PixelB8Audio.preview('lahar-event')" title="Preview" type="button">▶</button></div>
+<div class="audio-event-row" data-audio-event="mission-done"><label><input onchange="PixelB8Audio.setEnabled('mission-done',this.checked)" type="checkbox"/><span>Mission Cooldown Audio Alert</span></label><span class="audio-file-name">Default · cooldown-finished.mp3</span><button class="btn" onclick="PixelB8Audio.chooseSound('mission-done')" type="button">Change</button><button class="btn audio-preview-btn" onclick="PixelB8Audio.preview('mission-done')" title="Preview" type="button">▶</button></div>
+<div class="audio-event-row" data-audio-event="chatlog-read-error"><label><input onchange="PixelB8Audio.setEnabled('chatlog-read-error',this.checked)" type="checkbox"/><span>Chat Log Read Error</span></label><span class="audio-file-name">Default · log-read-error.mp3</span><button class="btn" onclick="PixelB8Audio.chooseSound('chatlog-read-error')" type="button">Change</button><button class="btn audio-preview-btn" onclick="PixelB8Audio.preview('chatlog-read-error')" title="Preview" type="button">▶</button></div>
+<div class="audio-event-row" data-audio-event="chatlog-reconnected"><label><input onchange="PixelB8Audio.setEnabled('chatlog-reconnected',this.checked)" type="checkbox"/><span>Chat Log Reconnected</span></label><span class="audio-file-name">Default</span><button class="btn" onclick="PixelB8Audio.chooseSound('chatlog-reconnected')" type="button">Change</button><button class="btn audio-preview-btn" onclick="PixelB8Audio.preview('chatlog-reconnected')" title="Preview" type="button">▶</button></div>
+</div>
+<input accept="audio/*" class="hidden" id="audioFilePicker" type="file"/>
+</section>
+<section class="eu-mission-tts-settings">
+<div class="eu-settings-section-head">
+<div><strong>Mission Voice Announcements</strong><span class="muted">Optional TTS for repeatable mission state changes.</span></div>
+<label class="toggle"><input id="missionTtsEnabled" onchange="EntropiaMissions.setMissionTtsEnabled(this.checked)" type="checkbox"/><span>Enable Mission TTS</span></label>
+</div>
+<div class="mission-tts-note" id="missionTtsVoiceNote">Uses the Voice Announcer setting above.</div>
+<div class="mission-tts-event-list">
+<div class="mission-tts-row"><label><input id="missionTtsReady" onchange="EntropiaMissions.setMissionTtsEvent('ready',this.checked)" type="checkbox"/><span>Mission Ready / Cooldown Finished</span></label><button class="btn" onclick="EntropiaMissions.testMissionTts('ready')" type="button">Test</button></div>
+<div class="mission-tts-row"><label><input id="missionTtsStarted" onchange="EntropiaMissions.setMissionTtsEvent('started',this.checked)" type="checkbox"/><span>Mission Started</span></label><button class="btn" onclick="EntropiaMissions.testMissionTts('started')" type="button">Test</button></div>
+<div class="mission-tts-row"><label><input id="missionTtsCompleted" onchange="EntropiaMissions.setMissionTtsEvent('completed',this.checked)" type="checkbox"/><span>Mission Completed / Cooldown Started</span></label><button class="btn" onclick="EntropiaMissions.testMissionTts('completed')" type="button">Test</button></div>
+</div>
+</section>
+<div class="eu-settings-source">
+<strong>chat.log Source</strong>
+<span class="muted" id="settingsChatLogStatus">No saved chat.log</span>
+<div class="toolbar">
+<button class="btn primary" onclick="changeChatLogSource()" type="button">Change chat.log</button>
+<button class="btn" id="settingsConnectBtn" onclick="handleChatLogAction()" type="button">Connect / Resume</button>
+<button class="btn danger-btn" onclick="forgetSavedChatLog()" type="button">Forget Saved chat.log</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+
+<div class="sidebar-time-tooltip" id="sidebarTimeTooltip" role="tooltip" aria-hidden="true"></div>
+</body>
+</html>

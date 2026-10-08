@@ -1,377 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PixelB8 Homepage</title>
-	<link rel="stylesheet" href="core/css/pixelb8-landing.css">
-	<link rel="stylesheet" href="../core/css/pixelb8-tools.css">
-
-	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
-	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-
-        body {
-			margin: auto;
-			margin-top: 0px;
-			/* height: 100vh; */
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: space-around;
-			background: url('https://source.unsplash.com/1600x900/?cyberpunk,neon') no-repeat center center/cover;
-			color: #0b7272;
-			font-family: 'Orbitron', sans-serif;
-			overflow-y: auto;
-			overflow-x: hidden;
-			flex-wrap: nowrap;
-        }
-		
-        .enter-button {
-            font-size: 24px;
-            color: #0ff;
-            padding: 15px 40px;
-            border: 2px solid #0ff;
-            background: transparent;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            cursor: pointer;
-            position: relative;
-            transition: color 0.4s, border-color 0.4s;
-        }
-        .enter-button:hover {
-            color: #ff00ff;
-            border-color: #ff00ff;
-        }
-
-        @media (max-width: 600px) {
-            .header {
-                font-size: 22px;
-            }
-            .enter-button {
-                font-size: 18px;
-                padding: 12px 30px;
-            }
-        }
-    </style>
-    <style>
-
-
-
-        .row {
-            position: relative;
-            z-index: 10;
-            flex-shrink: 0; /* Prevents rows from squishing */
-        }
-
-        /* The first row needs extra margin for the fixed header */
-        .row:first-of-type {
-            margin-top: 120px;
-        }
-
-        .themed-main {
-			padding: 30px;
-			height: auto;
-			overflow: hidden;
-			overflow-y: auto;
-			border-radius: 4px;
-			transition: all 0.4s;
-        }
-		.themed-main:hover {
-			color: ;
-            border: 2px solid #0ff;
-            box-shadow: 0 0 20px #ff00ff;
-            background: rgba(255, 0, 255, 0.1);
-		}
-			
-        .app-screenshot {
-            width: 100%;
-            max-width: 800px;
-            display: block;
-            margin: 20px auto;
-            border: 2px solid #0ff;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-        }
-
-        .download-zone {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .dl-button {
-            font-size: 24px;
-            color: #0ff;
-            padding: 15px 40px;
-            border: 2px solid #0ff;
-            background: rgba(0, 255, 255, 0.05);
-            text-transform: uppercase;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 1.4s;
-            cursor: pointer;
-        }
-
-        .dl-button:hover {
-            color: #ff00ff;
-            border-color: #ff00ff;
-            box-shadow: 0 0 20px #ff00ff;
-            background: rgba(255, 0, 255, 0.1);
-        }
-
-        .warning-box {
-            border-left: 5px solid #ff00ff;
-            padding: 20px;
-            background: rgba(255, 0, 255, 0.05);
-            margin: 20px 0;
-        }
-
-        .highlight { color: #ff00ff; font-weight: bold; }
-        
-        h1, h2, h3 { color: #0ff; text-transform: uppercase; margin-top: 0; }
-
-        /* Space at the very bottom so the last row isn't touching the edge */
-        .footer-spacer {
-            height: 100px;
-            width: 100%;
-        }
-    </style>
-
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PixelB8</title>
+<link rel="stylesheet" href="sharedassets/css/pixelb8-shell.css">
+<link rel="stylesheet" href="sharedassets/css/home.css">
 </head>
 <body>
-	<div class="background-container">
-	  <div class="stars"></div>
-	  <div class="twinkling"></div>
-	</div>
-    <div class="crt-overlay">
-        <div class="scanlines"></div>
+<div class="app portal-app" id="appShell" data-pixelb8-shell>
+  <aside class="app-sidebar">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand-mark"><span class="brand-mark-expanded">P8</span><span class="brand-mark-rail">PXLB8</span></div>
+      <div class="sidebar-brand-copy"><h1>PixelB8</h1><p>Games · tools · worlds</p></div>
+      <button id="portalSidebarToggle" class="sidebar-collapse-btn" onclick="portalToggleSidebar()">‹</button>
     </div>
-    <div class="header">PixelB8.LoL</div>
-    <button class="menu-button" onclick="toggleMenu()">☰</button>
-    <div class="nav-menu" id="navMenu">
-        <a href="https://Pixelb8.lol/">Landing</a>
-		<a href="https://Pixelb8.lol/home">Home</a>
-        <a href="https://Pixelb8.lol/pixelbot">Visit Pixelbot</a>
-		<a href="https://Pixelb8.lol/eu">Entropia</a>
-        <a href="https://Pixelb8.lol/media">Media</a>
-		<a href="https://Pixelb8.lol/tools">Tools</a>
-		<a href="https://Pixelb8.lol/arcade">Arcade</a>
+    <div class="sidebar-scroll">
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">PixelB8</div>
+        <button class="portal-nav-btn" onclick="go('home.html')"><span class="sidebar-item-icon">⌂</span><span class="sidebar-item-text">Home</span></button>
+        <button class="portal-nav-btn" onclick="go('arcade/index.html')"><span class="sidebar-item-icon">🕹</span><span class="sidebar-item-text">Arcade</span></button>
+        <button class="portal-nav-btn" onclick="go('eu/index.html')"><span class="sidebar-item-icon">EU</span><span class="sidebar-item-text">EU Tracker</span></button><button class="portal-nav-btn" onclick="go('osrs/index.html')"><span class="sidebar-item-icon">OS</span><span class="sidebar-item-text">OSRS</span></button>
+        <button class="portal-nav-btn" onclick="alert('Creator Tools coming soon')"><span class="sidebar-item-icon">🛠</span><span class="sidebar-item-text">Creator Tools</span></button>
+      </section>
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Worlds</div>
+        <button class="portal-nav-btn"><span class="sidebar-item-icon">AH</span><span class="sidebar-item-text">After Hours · Coming Soon</span></button>
+      </section>
+      <section class="sidebar-section">
+        <div class="sidebar-section-label">Settings</div>
+        <button class="portal-nav-btn" onclick="PixelB8GlobalAudio.openSettings('Home Settings')" type="button"><span class="sidebar-item-icon">⚙</span><span class="sidebar-item-text">Settings</span></button>
+      </section>
     </div>
-	<div id="useraccountPanel" class="panel right-panel" style="position:absolute;top:0px;right:0px;height:auto;">
-		<div id="userInfoContainer" style="height:100px;">
-			<P id="username">StrangerDanger</p>
-			<P id="profileusername">-</p>
-			<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
-			<p id="Userpixelcount" class="hidden">0px</p>
-			<p id="loginStatus">Status: offline</p>
-		</div>
-		<div class="row">
-			<button class="logged-in" id="logoutbutt" type="button">Logout</button>
-		</div>			
-			
-				<!-- User Account Panel - Logged In Section -->
-		<<div id="loggedInControls" style="display: none; margin-top: 10px;">
-			<button id="show-mailbox-modal">Mailbox</button>
-			<button id="editProfileBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px;">
-				✏️ Edit Profile
-			</button>
+    <div class="sidebar-footer"><span class="sidebar-footer-full">PixelB8 Network</span><span class="sidebar-footer-rail">PXLB8</span></div>
+  </aside>
 
-			<button id="saveMyBuyingListBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px; background:#0a3;">
-				💾 Save My Buying List
-			</button>
-
-			<button id="saveMySellingListBtn" class="stat-tab-btn" style="width:100%; margin-bottom:6px; background:#a30;">
-				💾 Save My Selling List
-			</button>
-
-			<button id="browseCommunityListsBtn" class="stat-tab-btn" style="width:100%;">
-				👥 Browse Community Lists
-			</button>
-		</div>
-		<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
-			<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
-			<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
-		</div>
-	</div>
-	<div class="row TopRow" id="TopRow-Homepage">
-		<h2 id="themed-main-title">Digital Frontier</h2>
-		<section class="themed-main">
-            <p>Welcome to <strong>PixelB8.LoL</strong>—the central hub for the PixelB8 community. We specialize in creating niche tools, arcade experiences, and media for the modern digital colonist.</p>
-            <p>Whether you're here to optimize your Entropia grind or just exploring the arcade, you're in the right place.</p>
-		</section>
-	</div>
-
-	<div class="row">
-		<h2 id="themed-main-title">The Ecosystem</h2>
-		<section class="themed-main">
-			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px;">
-				<div>
-					<h4 style="color: #0ff;"><i class="fa-solid fa-robot"></i> PixelBot</h4>
-					<p style="font-size: 0.9em;">Our automated companion and community mascot.</p>
-				</div>
-
-				<div>
-					<h4 style="color: #0ff;"><i class="fa-solid fa-gamepad"></i> Arcade</h4>
-					<p style="font-size: 0.9em;">Retro-style web games</p>
-				</div>
-
-				<div>
-					<h4 style="color: #0ff;"><i class="fa-solid fa-tv"></i> Broadcasting</h4>
-					<p style="font-size: 0.9em;">Custom Twitch overlays, alerts, and streaming assets.</p>
-				</div>
-
-				<div>
-					<h4 style="color: #0ff;"><i class="fa-solid fa-wave-square"></i> Web Tools</h4>
-					<p style="font-size: 0.9em;">Audio visualizers and experimental web utilities.</p>
-				</div>
-
-				<div>
-					<h4 style="color: #0ff;"><i class="fa-solid fa-wrench"></i> EU Tools</h4>
-					<p style="font-size: 0.9em;">Calculators and analyzers for Entropia Universe.</p>
-				</div>
-			</div>
-		</section>
-	</div>
-
-    <div class="row">
-		<h2 id="themed-main-title">Latest Transmission</h2>
-		<section class="themed-main">
-            <h3 style="color: #ff00ff;">NEW TOOL RELEASE: S.U.S.P.E.C.T v1.0.0</h3>
-            <p>Our flagship Entropia Universe log tracker has officially entered <strong>AlphaBeta</strong>. Track your hunts, monitor globals, and export your data with ease.</p>
-            <a href="https://Pixelb8.lol/suspect" class="enter-button" style="display: inline-block; margin-top: 10px; font-size: 14px;">View Project</a>
-		</section>
-	</div>
-
-    <div class="row">
-		<h2 id="themed-main-title">Secure A Connection</h2>
-		<section class="themed-main" style="text-align: center;">
-            <p>Join the conversation and stay updated on our latest builds.</p>
-            <div style="font-size: 24px; display: flex; justify-content: center; gap: 30px; margin-top: 10px;">
-                <a href="https://discord.gg/5tSKHCCVeU" style="color: #0ff;"><i class="fa-brands fa-discord"></i></a>
-                <a href="https://github.com/Clickmeharder" style="color: #0ff;"><i class="fa-brands fa-github"></i></a>
-                <a href="https://youtube.com/@viralclickb8" style="color: #0ff;"><i class="fa-brands fa-youtube"></i></a>
-				<a href="https://twitch.tv/jaedraze" style="color: #0ff;"><i class="fa-brands fa-twitch"></i></a>
-            </div>
-		</section>
-	</div>
-
-<!-- Modal for Signup -->
-<div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modal-signup-label">Create Account</h5>
-        <button type="button" class="close close-modal-btn" data-dismiss="modal-usersignup" aria-label="Close">
-			<span aria-hidden="true">&times;</span>
-		</button>
+  <main class="portal-main">
+    <section class="portal-hero">
+      <div class="portal-hero-copy">
+        <span class="eyebrow">WELCOME TO PIXELB8</span>
+        <h2>Play. Build. Track. Explore.</h2>
+        <p>PixelB8 is a growing collection of browser games, creator tools, multiplayer experiments and connected utilities built around one shared account and social layer.</p>
+        <div class="portal-actions">
+          <button class="btn primary" onclick="go('arcade/index.html')">Enter Arcade</button>
+          <button class="btn" onclick="go('eu/index.html')">Open EU Tracker</button><button class="btn" onclick="go('osrs/index.html')">Open OSRS</button>
+        </div>
       </div>
-      <div class="modal-body">
-        <!-- Your signup form goes here -->
-        <form id="signup-form">
-          <div class="form-group input-field">
-            <label for="signup-username">Username</label>
-            <input type="signup-username" class="form-control" id="signup-username" aria-describedby="usernameHelp">
-          </div>
-          <div class="form-group input-field">
-            <label for="signup-email">Email address</label>
-            <input type="signup-email" class="form-control" id="signup-email" aria-describedby="emailHelp" required />
-          </div>
-          <div class="form-group input-field">
-            <label for="signup-password">Enter Password</label>
-            <input type="signup-password" class="form-control" id="signup-password" required />
-          </div>
-          <button type="submit" class="btn btn-primary">Create Account</button>
-        </form>
-      </div>
-    </div>
+      <div class="portal-hero-art"></div>
+    </section>
+
+    <section class="portal-grid">
+      <article class="portal-card" onclick="go('arcade/index.html')"><span class="tag">PLAY</span><h3>PixelB8 Arcade</h3><p>Single-player cabinets, multiplayer rooms, card games and weird little experiments.</p></article>
+      <article class="portal-card" onclick="go('eu/index.html')"><span class="tag">TRACK</span><h3>PixelB8 EU</h3><p>Entropia hunting analytics, loadouts, team tracking and OBS overlays.</p></article><article class="portal-card" onclick="go('osrs/index.html')"><span class="tag">TOOLS</span><h3>PixelB8 OSRS</h3><p>Old School RuneScape dashboards, clan tools, personal builds, live feeds and Grand Exchange utilities.</p></article>
+      <article class="portal-card" onclick="alert('Creator Tools coming soon')"><span class="tag">CREATE</span><h3>Creator Tools</h3><p>Sprite, animation and asset-building tools for browser games and PixelB8 worlds.</p></article>
+      <article class="portal-card"><span class="tag">FLAGSHIP · COMING SOON</span><h3>PixelB8: After Hours</h3><p>Our neon cyberpunk side-scrolling RPG / beat ’em up and the flagship PixelB8 world.</p></article>
+    </section>
+
+    <section class="portal-lower">
+      <article class="portal-panel"><h3>One connected PixelB8 shell</h3><p>The same account rail, MQTT chat, navigation language and graphite interface can follow users across Arcade, EU, creator tools and future pages.</p></article>
+      <article class="portal-panel"><h3>What’s live now</h3><p>Arcade, EU Tracker and OSRS now share the PixelB8 foundation while keeping their own app-specific interfaces.</p></article>
+    </section>
+  </main>
+
+  <div class="pixelb8-vertical-resizer" data-pixelb8-right-resizer title="Drag to resize account & chat">
+    <span class="pixelb8-vertical-resizer-grip"></span>
   </div>
-</div>
+  <aside class="pixelb8-right-rail collapsed" data-pixelb8-right-rail>
+    <button class="pixelb8-right-rail-toggle" onclick="PixelB8Shell.toggleRightRail()" title="Open account & chat">
+      <span class="pixelb8-right-rail-toggle-icon">‹</span>
+    </button>
+    <div class="pixelb8-right-rail-inner">
+      <section class="pixelb8-account-hud">
+        <div class="pixelb8-account-avatar-wrap">
+          <div class="pixelb8-account-avatar" data-pixelb8-profile-initial>G</div>
+          <span class="pixelb8-account-presence"></span>
+        </div>
+        <div class="pixelb8-account-copy">
+          <span class="pixelb8-account-kicker">PIXELB8 ACCOUNT</span>
+          <strong data-pixelb8-profile-name>Guest</strong>
+          <span data-pixelb8-profile-status>Guest account</span>
+        </div>
+      </section>
 
-<!-- Edit Profile Modal -->
-<div class="modal" id="modal-editProfile" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a1a1a; border:2px solid #0ff; padding:20px; width:400px; border-radius:8px; z-index:10001;">
-    <h3 style="color:#0ff; margin-top:0;">Edit Profile</h3>
-    <form id="update-profile-form">
-        <label>Username:</label>
-        <input type="text" id="update-username" style="width:100%; margin-bottom:10px; padding:8px;">
+      <section class="pixelb8-right-section pixelb8-account-actions">
+        <button class="pixelb8-account-action" onclick="PixelB8Shell.openAccountSettings()"><span>⚙</span><b>Account Settings</b></button>
+        <button class="pixelb8-account-action danger" onclick="PixelB8Shell.logout()"><span>↪</span><b>Logout</b></button>
+      </section>
 
-        <label>Profile Photo URL:</label>
-        <input type="text" id="update-photoURL" style="width:100%; margin-bottom:15px; padding:8px;">
+      <section class="pixelb8-right-section pixelb8-chat-section">
+        <div class="pixelb8-right-section-head">
+          <div>
+            <span class="pixelb8-account-kicker">PIXELB8 MQTT</span>
+            <strong>Global Chat</strong>
+          </div>
+          <span class="pixelb8-chat-state" data-pixelb8-chat-state>OFFLINE</span>
+        </div>
+        <div class="pixelb8-chat-container">
+          <div class="pixelb8-chat-messages" data-pixelb8-chat-messages></div>
+          <div class="pixelb8-emoji-picker hidden" data-pixelb8-emoji-picker>
+            <span onclick="PixelB8Shell.insertEmoji('😀')">😀</span>
+            <span onclick="PixelB8Shell.insertEmoji('😂')">😂</span>
+            <span onclick="PixelB8Shell.insertEmoji('🔥')">🔥</span>
+            <span onclick="PixelB8Shell.insertEmoji('🎮')">🎮</span>
+            <span onclick="PixelB8Shell.insertEmoji('👾')">👾</span>
+            <span onclick="PixelB8Shell.insertEmoji('😎')">😎</span>
+            <span onclick="PixelB8Shell.insertEmoji('👍')">👍</span>
+            <span onclick="PixelB8Shell.insertEmoji('❤️')">❤️</span>
+          </div>
+          <div class="pixelb8-chat-input">
+            <button onclick="PixelB8Shell.toggleEmojiPicker()">☺</button>
+            <input maxlength="240" data-pixelb8-chat-input placeholder="Say something…" onkeydown="if(event.key==='Enter')PixelB8Shell.sendChat()">
+            <button class="primary" onclick="PixelB8Shell.sendChat()">Send</button>
+          </div>
+        </div>
+      </section>
 
-        <button type="submit" style="background:#0ff; color:#000; padding:10px; width:100%; border:none; font-weight:bold;">Save Changes</button>
-    </form>
-    <button onclick="document.getElementById('modal-editProfile').style.display='none'" style="margin-top:10px; width:100%; background:#333; color:#fff;">Cancel</button>
-</div>
-<!-- ----------- -->
-<!--hidden modals (redo most/all these lol) -->
-<!-- ----------- -->
-<!-- Container to display user details -->
-<div id="user-detailsbox" class="modal" style="display:none;">
-	<span id="user-detailsboxError" style="display:none;">error</span>
-	<div id="user-details" style="display: none; border: 1px solid #ccc; padding: 20px; margin-top: 20px; background-color: ;">
-	  <h3>User Details</h3>
-	  <p><strong>Entropia Name:</strong> <span id="entropia-name">Loading...</span></p>
-	  <p><strong>Status:</strong> <span id="status">Loading...</span></p>
-	  <p><strong>Last Login:</strong> <span id="last-login">Loading...</span></p>
-	  <button id="sendmessage-to-user" data-owner-id="">Message</button>
-	  <button id="userdetails-close-button">Close</button>
-	</div>
-</div>
-
-<!-- Send Message Modal -->
-<div id="send-message-modal" class="modal" style="display: none;">
-  <div class="modal-content">
-    <span class="modal-close">&times;</span>
-    <h3>Send Message</h3>
-    <form id="send-message-form">
-      <label for="recipient">Recipient ID:</label>
-      <input type="text" id="recipient" required />
-      <label for="subject">Subject:</label>
-      <input type="text" id="subject" required />
-      <label for="message">Message:</label>
-      <textarea id="message" required></textarea>
-      <button type="submit">Send</button>
-    </form>
-  </div>
-</div>
-
-<!-- Modal for viewing mail -->
-<div id="view-mail-modal" class="modal" style="display: none;">
-  <div class="mailbox-container">
-    <!-- Header Section -->
-    <div id="mailbox-header" class="mailbox-header">
-      <h3>Mailbox</h3>
-	  <button id="loadMessagesBtn">Refresh Messages</button>
-      <button id="close-mail-modal" class="modal-close">✖</button>
+      <div class="pixelb8-right-footer">PixelB8 Social</div>
     </div>
-    <!-- Tabs for Inbox and Outbox -->
-    <div class="mailbox-tabs">
-      <button class="tab-btn active" data-target="inbox-messages">Inbox</button>
-      <button class="tab-btn" data-target="outbox-messages">Outbox</button>
-    </div>
-    <!-- Messages Section -->
-	<div class="mailbox-wrapper">
-		<div class="mailbox-messages">
-		  <div id="inbox-messages" class="messages-container active">
-			<!-- Inbox messages will be displayed here -->
-		  </div>
-		  <div id="outbox-messages" class="messages-container">
-			<!-- Outbox messages will be displayed here -->
-		  </div>
-		</div>
-	</div>
-    <!-- Footer Section -->
-    <div class="mailbox-footer">
-      <!-- can put something here -->
-    </div>
-  </div>
+  </aside>
+
 </div>
 
-    <div style="height: 100px;">---</div>
+<div class="pixelb8-account-settings-backdrop hidden" data-pixelb8-account-settings onclick="PixelB8Shell.closeAccountSettings(event)">
+  <section class="pixelb8-account-settings-card" onclick="event.stopPropagation()">
+    <div class="pixelb8-account-settings-head">
+      <div><span class="pixelb8-account-kicker">PIXELB8 PROFILE</span><h3>Account Settings</h3></div>
+      <button class="btn" onclick="PixelB8Shell.closeAccountSettings()">×</button>
+    </div>
+    <div class="pixelb8-account-settings-body">
+      <label><span>Display Name</span><input maxlength="32" data-pixelb8-account-name-input placeholder="Guest"></label>
+      <label><span>Profile Initial</span><input maxlength="2" data-pixelb8-account-initial-input placeholder="G"></label>
+    </div>
+    <div class="pixelb8-account-settings-actions">
+      <button class="btn" onclick="PixelB8Shell.closeAccountSettings()">Cancel</button>
+      <button class="btn" onclick="PixelB8Shell.saveAccountSettings()">Save Profile</button>
+    </div>
+  </section>
+</div>
 
-    <script src="core/js/pixelb8-global.js"></script>
-	<script type="module" src="core/js/firebase/auth.js"></script>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="sharedassets/js/pixelb8-shell.js"></script>
+<script src="sharedassets/js/pixelb8-audio.js"></script>
+<script src="sharedassets/js/home.js"></script>
 </body>
 </html>

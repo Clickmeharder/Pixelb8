@@ -1,0 +1,2397 @@
+function setOptionalText(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
+const trackerOptionsStorageKey='entropia_tracker_options_v1';
+const defaultTrackerOptions={
+  mode:'casual',
+  eventName:'Upcoming Legends',
+  eventStartUtc:'2026-08-15T00:00',
+  eventEndUtc:'2026-08-17T00:00',
+  sessionHours:6,
+  targets:['armax bull','atrax','caperon','neconu','hispidus','estophyl'],
+  analysisLookback:'30',
+  customLookbackDays:30,
+  analysisStartUtc:'',
+  analysisEndUtc:''
+};
+let trackerOptions={...defaultTrackerOptions,targets:[...defaultTrackerOptions.targets]};
+let trackerEffectiveMode='casual';
+let targetMobs=['armax bull','atrax','caperon','neconu','hispidus','estophyl'];
+
+const mobWaypoints={
+  neconu:[
+    "/wp [Calypso, 59206, 79652, 122, Neconu Young - Provider]",
+    "/wp [Calypso, 59049, 79531, 106, Neconu - Guardian - Stalker]"
+  ],
+  hispidus:[
+    "/wp [Calypso, 60532, 79305, 112, Hispidus- Alpha to Stalker]",
+    "/wp [Calypso, 60403, 79273, 103, Hispidus- Mature to Alpha]"
+  ],
+  estophyl:[
+    "/wp [Calypso, 60262, 79286, 104, Estophyl - Young to Guardian]",
+    "/wp [Calypso, 60170, 79415, 120, Estopyhl - Guardian to Stalker]"
+  ],
+  'armax bull':[
+    "/wp [Calypso, 60293, 79529, 120, Armax Bull - Young to Dominant]",
+    "/wp [Calypso, 60423, 79656, 160, Armax Bull - Alpha to Stalker]"
+  ],
+  caperon:[
+    "/wp [Calypso, 60291, 79706, 138, Caperon - Young to Provider]",
+    "/wp [Calypso, 60166, 79753, 141, Caperon - Provider to Stalker]"
+  ],
+  atrax:[
+    "/wp [Calypso, 58967, 79704, 111, Atrax Young - Provider]",
+    "/wp [Calypso, 58982, 79905, 126, Atrax - Guardian - Stalker]"
+  ]
+};
+
+let globalParsedData=null;
+let allMobHourlyStats=new Array(24).fill(0);
+let fileHandle=null;
+let liveInterval=null;
+let userAvatarName="";
+window.userAvatarName=userAvatarName;
+let firstUserGlobalTime=null;
+let timerInterval=null;
+let db=null;
+let voiceAnnouncerEnabled=false;
+let latestSyncedGameTime=null;
+let lastTimeSyncTimestamp=0;
+const activitySessionStartedAt=new Date();
+
+let liveSessionGlobals=0;
+let liveSessionHofs=0;
+let liveLargestLoot=0;
+let liveLatestMob="—";
+let liveAllMobGlobals=0;
+let liveAllMobHofs=0;
+let liveTargetFeedPed=0;
+let liveAllMobFeedPed=0;
+let liveActivityFilter='all';
+
+let userEventGlobalPed=0;
+let userEventHofPed=0;
+let userEventTotalLoot=0;
+let cachedFileSize=0;
+let cachedFileLastModified=0;
+let cachedAnalysisSignature='';
+let eventCountdownInterval=null;
+let streamerModeEnabled=false;
+let streamerHudInterval=null;
+let streamerContextTargetPanel=null;
+let streamerSlimHeadersEnabled=false;
+let streamerDragState=null;
+let streamerFloatingDragState=null;
+const streamerLayoutStorageKey='entropia_streamer_layout_v1';
+const streamerVisibilityStorageKey='entropia_streamer_visibility_v1';
+const streamerMetricStorageKey='entropia_streamer_metrics_v1';
+const streamerPresentationStorageKey='entropia_streamer_presentation_v1';
+const streamerSlimHeadersStorageKey='entropia_streamer_slim_headers_v1';
+const streamerThemeStorageKey='entropia_streamer_theme_v1';
+const streamerFloatingPanelsStorageKey='entropia_streamer_floating_panels_v1';
+const streamerNameStorageKey='entropia_streamer_display_name_v1';
+
+const streamerPresentationDefaults={
+  eventClock:{textScale:1,slimHeader:false},
+  pilotStats:{textScale:1,slimHeader:false},
+  globalTelemetry:{textScale:1,slimHeader:false},
+  combatTelemetry:{textScale:1,slimHeader:false},
+  recommendedHunt:{textScale:1,slimHeader:false},
+  loadoutPanel:{textScale:1,slimHeader:false}
+};
+
+const streamerMetricDefaults={
+  eventClock:{},
+  recommendedHunt:{},
+  globalTelemetry:{
+    targetGlobals:true,
+    targetHofs:true,
+    targetValue:true,
+    allGlobals:true,
+    allHofs:true,
+    allValue:true,
+    personalGlobals:true,
+    personalHofs:true,
+    personalValue:true
+  },
+  combatTelemetry:{
+    dps:true,
+    damage:true,
+    cost:true,
+    profit:true,
+    efficiency:true
+  },
+  pilotStats:{
+    globals:true,
+    hofs:true,
+    loot:true
+  },
+  loadoutPanel:{
+    name:true,
+    weapon:true,
+    efficiency:true,
+    dpp:true,
+    dps:true,
+    cost:true,
+    damage:true,
+    apm:true,
+    range:true,
+    maxDamage:false
+  }
+};
+
+let eventStart=new Date(Date.UTC(2026,7,15,0,0,0));
+// Event runs through Aug 16 and ends at the following midnight.
+let eventDeadline=new Date(Date.UTC(2026,7,17,0,0,0));
+let eventEnd=new Date(eventDeadline.getTime()-1);
+let latestSafeSixHourStart=new Date(eventDeadline.getTime()-(6*60*60*1000));
+
+function initDB(){
+  return new Promise((resolve,reject)=>{
+    const request=indexedDB.open('EntropiaLogDB',5);
+    request.onerror=()=>reject(request.error);
+    request.onsuccess=()=>{db=request.result;resolve(db)};
+    request.onupgradeneeded=e=>{
+      const database=e.target.result;
+      if(!database.objectStoreNames.contains('logs')){
+        database.createObjectStore('logs',{keyPath:'id'});
+      }
+    };
+  });
+}
+
+function saveFileHandleToIDB(handle){
+  if(!db)return;
+  const tx=db.transaction(['logs'],'readwrite');
+  tx.objectStore('logs').put({id:'fileHandle',data:handle});
+}
+
+async function loadFileHandleFromIDB(){
+  if(!db)await initDB();
+  return new Promise(resolve=>{
+    const tx=db.transaction(['logs'],'readonly');
+    const req=tx.objectStore('logs').get('fileHandle');
+    req.onsuccess=()=>resolve(req.result?req.result.data:null);
+    req.onerror=()=>resolve(null);
+  });
+}
+
+let sidebarClockMode=localStorage.getItem('entropia_sidebar_clock_mode')==='local'?'local':'utc';
+
+function positionSidebarTimeTooltip(){
+  const row=document.getElementById('sidebarTimeRow');
+  const tooltip=document.getElementById('sidebarTimeTooltip');
+  if(!row||!tooltip)return;
+  const rect=row.getBoundingClientRect();
+  const gap=10;
+  tooltip.style.left=`${Math.round(rect.right+gap)}px`;
+  tooltip.style.top=`${Math.round(rect.top+(rect.height/2))}px`;
+}
+
+function showSidebarTimeTooltip(){
+  const tooltip=document.getElementById('sidebarTimeTooltip');
+  if(!tooltip)return;
+  positionSidebarTimeTooltip();
+  tooltip.classList.add('visible');
+  tooltip.setAttribute('aria-hidden','false');
+}
+
+function hideSidebarTimeTooltip(){
+  const tooltip=document.getElementById('sidebarTimeTooltip');
+  if(!tooltip)return;
+  tooltip.classList.remove('visible');
+  tooltip.setAttribute('aria-hidden','true');
+}
+function updateRealClockDisplays(){
+  const now=new Date();
+  const localText=now.toLocaleString(undefined,{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const utcText=now.toLocaleString(undefined,{timeZone:'UTC',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})+' UTC';
+  const syncText=latestSyncedGameTime?formatDateTimeUTCish(latestSyncedGameTime):'Not synced';
+
+  const display=document.getElementById('sidebarTimeDisplay');
+  const label=document.getElementById('sidebarTimeLabel');
+  const row=document.getElementById('sidebarTimeRow');
+  if(display)display.textContent=sidebarClockMode==='local'?localText:utcText;
+  if(label)label.textContent=sidebarClockMode==='local'?'Local Now':'UTC Now';
+  const tooltip=document.getElementById('sidebarTimeTooltip');
+  if(tooltip)tooltip.textContent=`UTC: ${utcText} · Local: ${localText} · Last Game Sync: ${syncText} · Click to show ${sidebarClockMode==='local'?'UTC':'Local'} time.`;
+}
+function toggleSidebarClockMode(){
+  sidebarClockMode=sidebarClockMode==='utc'?'local':'utc';
+  localStorage.setItem('entropia_sidebar_clock_mode',sidebarClockMode);
+  updateRealClockDisplays();
+}
+let realClockTimer=null;
+
+function bindSidebarTimeTooltip(){
+  const row=document.getElementById('sidebarTimeRow');
+  if(!row||row.dataset.tooltipBound==='1')return;
+  row.dataset.tooltipBound='1';
+  row.addEventListener('mouseenter',showSidebarTimeTooltip);
+  row.addEventListener('mouseleave',hideSidebarTimeTooltip);
+  row.addEventListener('focus',showSidebarTimeTooltip);
+  row.addEventListener('blur',hideSidebarTimeTooltip);
+  window.addEventListener('resize',()=>{
+    if(document.getElementById('sidebarTimeTooltip')?.classList.contains('visible')){
+      positionSidebarTimeTooltip();
+    }
+  });
+}
+
+window.addEventListener('DOMContentLoaded',async()=>{
+  bindSidebarTimeTooltip();
+  updateRealClockDisplays();
+  if(realClockTimer)clearInterval(realClockTimer);
+  realClockTimer=setInterval(updateRealClockDisplays,1000);
+  const savedName=localStorage.getItem('entropia_avatar_name');
+  if(savedName){
+    userAvatarName=savedName.toLowerCase();
+    window.userAvatarName=userAvatarName;
+    document.getElementById('avatarNameInput').value=savedName;
+  }
+  const savedVoice=localStorage.getItem('entropia_voice_enabled');
+  if(savedVoice==='true'){
+    voiceAnnouncerEnabled=true;
+    document.getElementById('voiceToggle').checked=true;
+  }
+
+  await initDB();
+  const savedHandle=await loadFileHandleFromIDB();
+  window.updateChatLogActionButton?.();
+
+  const cached=await loadParsedDataFromIDB();
+  if(cached?.meta){
+    cachedFileSize=cached.meta.size||0;
+    cachedFileLastModified=cached.meta.lastModified||0;
+    cachedAnalysisSignature=cached.meta.analysisSignature||'';
+  }
+
+  if(cached?.records?.length){
+    globalParsedData=cached.records;
+    if(cached.allStats)allMobHourlyStats=cached.allStats;
+    setConnectionStatus(`Cached ${cached.records.length} records`,false);
+    setOptionalText('fileStatus',`Restored ${cached.records.length} cached target-mob records instantly. ${cachedFileSize?`Last analyzed byte: ${cachedFileSize.toLocaleString()}.`:''}`);
+    const latestRec=cached.records[cached.records.length-1];
+    if(latestRec?.date){
+      latestSyncedGameTime=latestRec.date;
+      setOptionalText('syncGameTimeDisplay',formatDateTimeUTCish(latestRec.date));
+    }
+    updateAnalyticsDisplay();
+    updateScheduleDisplay();
+    evaluateUserGlobals();
+  }else{
+    renderAnalyticsCards({});
+    updateScheduleDisplay();
+  }
+
+  loadTrackerOptions();
+
+  const streamerParam=new URLSearchParams(location.search).get('streamer');
+  const savedStreamer=localStorage.getItem('entropia_streamer_mode');
+  if(streamerParam==='1'||streamerParam==='true'||savedStreamer==='true'){
+    setStreamerMode(true);
+  }else{
+    syncStreamerHud();
+  }
+
+  // If a persisted file handle exists and permission is already available,
+  // only ingest bytes appended since the cached file position.
+  if(savedHandle){
+    try{
+      const permission=await savedHandle.queryPermission({mode:'read'});
+      if(permission==='granted'){
+        fileHandle=savedHandle;
+        await processFileHandleIncremental(fileHandle);
+      }
+    }catch(err){
+      console.log('Automatic incremental resume unavailable:',err);
+    }
+  }
+});
+
+
+function getConfiguredLookbackDays(){
+  const raw=trackerOptions?.analysisLookback??'30';
+  if(raw==='all')return null;
+  if(raw==='custom'){
+    return Math.max(1,Math.min(3650,Number(trackerOptions?.customLookbackDays)||30));
+  }
+  const days=Number(raw);
+  return Number.isFinite(days)&&days>0?days:30;
+}
+
+function getAnalysisReadCutoff(referenceDate=new Date()){
+  const days=getConfiguredLookbackDays();
+  if(days===null)return null;
+
+  const cutoff=new Date(referenceDate.getTime()-(days*24*60*60*1000));
+  const explicitStart=trackerOptions?.analysisStartUtc
+    ?utcInputToDate(trackerOptions.analysisStartUtc)
+    :null;
+
+  // An explicit From date may narrow the loaded range, but never expands
+  // beyond the user's Analyze Back limit.
+  if(explicitStart && explicitStart>cutoff)return explicitStart;
+  return cutoff;
+}
+
+function getAnalysisCacheSignature(){
+  // v3: analytics are all-creature and recency is based on the real clock,
+  // not the last game timestamp or a target/watchlist list.
+  return JSON.stringify({
+    version:3,
+    lookback:trackerOptions?.analysisLookback??'30',
+    customDays:Number(trackerOptions?.customLookbackDays)||30,
+    analysisStartUtc:trackerOptions?.analysisStartUtc||''
+  });
+}
+
+function describeAnalysisLookback(){
+  const days=getConfiguredLookbackDays();
+  if(days===null)return 'all history';
+  if(days===1)return 'last 24 hours';
+  return `last ${days} days`;
+}
+
+function utcInputToDate(value){
+  if(!value)return null;
+  return new Date(`${value}:00Z`);
+}
+
+function dateToUtcInput(date){
+  if(!(date instanceof Date)||Number.isNaN(date.getTime()))return '';
+  return date.toISOString().slice(0,16);
+}
+
+function loadTrackerOptions(){
+  let saved={};
+  try{saved=JSON.parse(localStorage.getItem(trackerOptionsStorageKey)||'{}')}catch{}
+  trackerOptions={
+    ...defaultTrackerOptions,
+    ...saved,
+    // Player-first migration: older builds defaulted to Auto/Event. Keep event
+    // fields for compatibility, but migrate the normal experience to Casual.
+    mode:(saved.mode==='casual')?'casual':defaultTrackerOptions.mode,
+    targets:Array.isArray(saved.targets)&&saved.targets.length
+      ?saved.targets.slice(0,6)
+      :[...defaultTrackerOptions.targets]
+  };
+  localStorage.setItem(trackerOptionsStorageKey,JSON.stringify(trackerOptions));
+  applyTrackerOptions();
+}
+
+function resolveTrackerEffectiveMode(){
+  return 'casual';
+}
+
+function applyTrackerOptions(){
+  targetMobs=(trackerOptions.targets||[])
+    .map(v=>String(v||'').trim().toLowerCase())
+    .filter(Boolean)
+    .slice(0,6);
+  if(!targetMobs.length)targetMobs=[...defaultTrackerOptions.targets];
+  trackerEffectiveMode='casual';
+  document.body.classList.add('casual-mode');
+  document.body.classList.remove('event-mode');
+  evaluateUserGlobals?.();
+}
+
+function openTrackerOptions(){ return; }
+
+
+function closeTrackerOptions(event){
+  if(event&&event.target!==document.getElementById('trackerOptionsBackdrop'))return;
+  document.getElementById('trackerOptionsBackdrop')?.classList.add('hidden');
+}
+
+function toggleCustomLookback(){
+  const select=document.getElementById('analysisLookbackSelect');
+  const custom=document.getElementById('customLookbackField');
+  if(custom)custom.classList.toggle('hidden',select?.value!=='custom');
+}
+
+function previewTrackerModeOptions(){
+  const mode=document.getElementById('trackerModeSelect')?.value||'auto';
+  const start=utcInputToDate(document.getElementById('eventStartInput')?.value);
+  const end=utcInputToDate(document.getElementById('eventEndInput')?.value);
+  let effective=mode;
+
+  if(mode==='auto'){
+    const now=new Date();
+    effective=(start&&end&&now>=start&&now<end)?'event':'casual';
+  }
+
+  const preview=document.getElementById('effectiveModePreview');
+  if(preview)preview.textContent=effective.toUpperCase();
+
+  const reason=document.getElementById('modePreviewReason');
+  if(reason){
+    reason.textContent=mode==='auto'
+      ?'Auto uses Event Mode only while the configured event window is active; otherwise the tracker stays fully usable in Casual Mode.'
+      :mode==='event'
+        ?'Event Mode forces event timers, session rules and event-window totals on.'
+        :'Casual Mode keeps live tracking active and lets you analyze any selected 1–6 mobs.';
+  }
+
+  const eventSection=document.getElementById('eventOptionsSection');
+  if(eventSection)eventSection.style.opacity=mode==='casual'?'.72':'1';
+}
+
+function saveTrackerOptions(runAnalysis=false){
+  trackerOptions={
+    mode:document.getElementById('trackerModeSelect')?.value||'auto',
+    eventName:(document.getElementById('eventNameInput')?.value||'Upcoming Legends').trim(),
+    eventStartUtc:document.getElementById('eventStartInput')?.value||'',
+    eventEndUtc:document.getElementById('eventEndInput')?.value||'',
+    sessionHours:Math.max(.25,Number(document.getElementById('sessionHoursInput')?.value)||6),
+    // Legacy event targets are preserved for backwards compatibility only.
+    // Explore/Analytics now collects and searches all detected creatures.
+    targets:Array.isArray(trackerOptions.targets)?trackerOptions.targets:[...defaultTrackerOptions.targets],
+    analysisLookback:document.getElementById('analysisLookbackSelect')?.value||'30',
+    customLookbackDays:Math.max(1,Math.min(3650,Number(document.getElementById('customLookbackDaysInput')?.value)||30)),
+    analysisStartUtc:document.getElementById('analysisStartInput')?.value||'',
+    analysisEndUtc:document.getElementById('analysisEndInput')?.value||''
+  };
+
+  localStorage.setItem(trackerOptionsStorageKey,JSON.stringify(trackerOptions));
+  applyTrackerOptions();
+  closeTrackerOptions();
+
+  if(runAnalysis){
+    if(fileHandle){
+      processFileHandle(fileHandle);
+      showToast?.(`Rebuilding all-creature analytics for ${describeAnalysisLookback()}…`);
+    }else{
+      updateScheduleDisplay?.();
+      updateAnalyticsDisplay?.();
+      showToast?.(`Settings saved. Connect chat.log to analyze ${describeAnalysisLookback()}.`);
+    }
+  }
+}
+
+function resetTrackerOptions(){
+  trackerOptions={...defaultTrackerOptions,targets:[...defaultTrackerOptions.targets]};
+  localStorage.setItem(trackerOptionsStorageKey,JSON.stringify(trackerOptions));
+  openTrackerOptions();
+}
+
+function syncObsModeButtonLabel(){
+  const btn=document.getElementById('streamerModeBtn');
+  if(!btn)return;
+
+  const expanded=btn.querySelector('.obs-mode-expanded-label');
+  const rail=btn.querySelector('.obs-mode-rail-label');
+
+  if(expanded)expanded.textContent='OBS Mode';
+  if(rail)rail.textContent='OBS';
+
+  btn.title='OBS/browser-source HUD. Esc exits.';
+}
+
+function toggleStreamerMode(){
+  setStreamerMode(!streamerModeEnabled);
+  syncObsModeButtonLabel();
+}
+
+function setStreamerMode(enabled){
+  streamerModeEnabled=!!enabled;
+  document.body.classList.toggle('streamer-mode',streamerModeEnabled);
+  document.documentElement.classList.toggle('streamer-mode',streamerModeEnabled);
+
+  const btn=document.getElementById('streamerModeBtn');
+  if(btn){
+    btn.classList.toggle('active',streamerModeEnabled);
+    syncObsModeButtonLabel();
+  }
+
+  const hud=document.getElementById('streamerHud');
+  if(hud)hud.setAttribute('aria-hidden',streamerModeEnabled?'false':'true');
+
+  localStorage.setItem('entropia_streamer_mode',streamerModeEnabled?'true':'false');
+
+  if(streamerHudInterval)clearInterval(streamerHudInterval);
+  if(streamerModeEnabled){
+    initializeStreamerWorkspace();
+    restoreStreamerLayout();
+    restoreStreamerVisibility();
+    buildStreamerPanelManager();
+    applyStreamerMetricConfig();
+    applyStreamerPresentationConfig();
+    restoreStreamerSlimHeadersState();
+    applyStreamerTheme();
+    initializeStreamerFloatingWindows();
+    bindStreamerSourcePanel();
+    syncStreamerHud();
+    streamerHudInterval=setInterval(syncStreamerHud,500);
+  }else{
+    closeStreamerContextMenu();
+    closeStreamerPanelManager();
+    closeStreamerAdvancedPanel();
+    closeStreamerAppearancePanel();
+    document.body.classList.remove('streamer-slim-headers');
+  }
+  syncObsModeButtonLabel();
+}
+
+function getStreamerPanels(){
+  return [...document.querySelectorAll('#streamerHud .hud-panel[data-panel-id]')];
+}
+
+function initializeStreamerWorkspace(){
+  const hud=document.getElementById('streamerHud');
+  if(!hud)return;
+
+  getStreamerPanels().forEach(panel=>{
+    if(!panel.querySelector('.streamer-resize-hint')){
+      const hint=document.createElement('div');
+      hint.className='streamer-resize-hint';
+      hint.textContent='↘';
+      panel.appendChild(hint);
+    }
+
+    const title=panel.querySelector('.hud-title');
+    if(title && !title.dataset.dragBound){
+      title.dataset.dragBound='1';
+      title.addEventListener('pointerdown',e=>beginStreamerPanelDrag(e,panel));
+    }
+
+    if(!panel.dataset.resizeBound){
+      panel.dataset.resizeBound='1';
+      const observer=new ResizeObserver(()=>saveStreamerLayout());
+      observer.observe(panel);
+    }
+  });
+}
+
+function beginStreamerPanelDrag(e,panel){
+  if(e.button!==0)return;
+  if(!streamerModeEnabled)return;
+
+  e.preventDefault();
+
+  const shell=document.querySelector('.streamer-hud-shell');
+  if(!shell)return;
+
+  const panelRect=panel.getBoundingClientRect();
+  const shellRect=shell.getBoundingClientRect();
+
+  // Convert any right/bottom/transform based defaults to explicit left/top
+  // the first time a panel is dragged.
+  const left=panelRect.left-shellRect.left;
+  const top=panelRect.top-shellRect.top;
+
+  panel.style.left=`${left}px`;
+  panel.style.top=`${top}px`;
+  panel.style.right='auto';
+  panel.style.bottom='auto';
+  panel.style.transform='none';
+
+  streamerDragState={
+    panel,
+    shell,
+    shellRect,
+    offsetX:e.clientX-panelRect.left,
+    offsetY:e.clientY-panelRect.top
+  };
+
+  panel.classList.add('dragging');
+  panel.setPointerCapture?.(e.pointerId);
+
+  window.addEventListener('pointermove',moveStreamerPanel);
+  window.addEventListener('pointerup',endStreamerPanelDrag,{once:true});
+}
+
+function moveStreamerPanel(e){
+  if(!streamerDragState)return;
+
+  const {panel,shellRect,offsetX,offsetY}=streamerDragState;
+  const rect=panel.getBoundingClientRect();
+
+  let left=e.clientX-shellRect.left-offsetX;
+  let top=e.clientY-shellRect.top-offsetY;
+
+  const maxLeft=Math.max(0,shellRect.width-rect.width);
+  const maxTop=Math.max(0,shellRect.height-rect.height);
+
+  left=Math.max(0,Math.min(maxLeft,left));
+  top=Math.max(0,Math.min(maxTop,top));
+
+  panel.style.left=`${left}px`;
+  panel.style.top=`${top}px`;
+}
+
+function endStreamerPanelDrag(){
+  if(!streamerDragState)return;
+  streamerDragState.panel.classList.remove('dragging');
+  streamerDragState=null;
+  window.removeEventListener('pointermove',moveStreamerPanel);
+  saveStreamerLayout();
+}
+
+function saveStreamerLayout(){
+  if(!streamerModeEnabled)return;
+
+  const shell=document.querySelector('.streamer-hud-shell');
+  if(!shell)return;
+  const shellRect=shell.getBoundingClientRect();
+
+  const layout={};
+  getStreamerPanels().forEach(panel=>{
+    const rect=panel.getBoundingClientRect();
+    layout[panel.dataset.panelId]={
+      left:rect.left-shellRect.left,
+      top:rect.top-shellRect.top,
+      width:rect.width,
+      height:rect.height
+    };
+  });
+
+  localStorage.setItem(streamerLayoutStorageKey,JSON.stringify(layout));
+}
+
+function restoreStreamerLayout(){
+  const raw=localStorage.getItem(streamerLayoutStorageKey);
+  if(!raw)return;
+
+  let layout;
+  try{layout=JSON.parse(raw)}catch{return}
+
+  const shell=document.querySelector('.streamer-hud-shell');
+  if(!shell)return;
+
+  const shellRect=shell.getBoundingClientRect();
+
+  getStreamerPanels().forEach(panel=>{
+    const saved=layout[panel.dataset.panelId];
+    if(!saved)return;
+
+    const width=Math.max(220,Math.min(saved.width||panel.offsetWidth,shellRect.width));
+    const height=Math.max(110,Math.min(saved.height||panel.offsetHeight,shellRect.height));
+    const left=Math.max(0,Math.min(saved.left||0,shellRect.width-width));
+    const top=Math.max(0,Math.min(saved.top||0,shellRect.height-height));
+
+    panel.style.left=`${left}px`;
+    panel.style.top=`${top}px`;
+    panel.style.width=`${width}px`;
+    panel.style.height=`${height}px`;
+    panel.style.right='auto';
+    panel.style.bottom='auto';
+    panel.style.transform='none';
+  });
+}
+
+function resetStreamerLayout(){
+  localStorage.removeItem(streamerLayoutStorageKey);
+
+  getStreamerPanels().forEach(panel=>{
+    panel.style.left='';
+    panel.style.top='';
+    panel.style.right='';
+    panel.style.bottom='';
+    panel.style.width='';
+    panel.style.height='';
+    panel.style.transform='';
+  });
+
+  closeStreamerContextMenu();
+}
+
+function getStreamerVisibility(){
+  try{
+    return JSON.parse(localStorage.getItem(streamerVisibilityStorageKey)||'{}');
+  }catch{
+    return {};
+  }
+}
+
+function saveStreamerVisibility(){
+  const visibility={};
+  getStreamerPanels().forEach(panel=>{
+    visibility[panel.dataset.panelId]=!panel.classList.contains('hidden-by-user');
+  });
+  localStorage.setItem(streamerVisibilityStorageKey,JSON.stringify(visibility));
+}
+
+function restoreStreamerVisibility(){
+  const visibility=getStreamerVisibility();
+  getStreamerPanels().forEach(panel=>{
+    const panelId=panel.dataset.panelId;
+    const hasSavedPreference=Object.prototype.hasOwnProperty.call(visibility,panelId);
+    const visible=hasSavedPreference
+      ?visibility[panelId]!==false
+      :!['parsingSource','teamControl','teamTotals','teamMembers','loadoutPanel'].includes(panelId);
+    panel.classList.toggle('hidden-by-user',!visible);
+  });
+}
+
+function setStreamerPanelVisible(panelId,visible){
+  const panel=document.querySelector(`#streamerHud .hud-panel[data-panel-id="${panelId}"]`);
+  if(!panel)return;
+  panel.classList.toggle('hidden-by-user',!visible);
+  saveStreamerVisibility();
+  buildStreamerPanelManager();
+}
+
+function hideStreamerPanel(panel){
+  if(!panel)return;
+  setStreamerPanelVisible(panel.dataset.panelId,false);
+  closeStreamerContextMenu();
+}
+
+function showAllStreamerPanels(){
+  getStreamerPanels().forEach(panel=>panel.classList.remove('hidden-by-user'));
+  saveStreamerVisibility();
+  buildStreamerPanelManager();
+}
+
+function buildStreamerPanelManager(){
+  const list=document.getElementById('streamerPanelList');
+  if(!list)return;
+
+  list.innerHTML='';
+  getStreamerPanels().forEach(panel=>{
+    const row=document.createElement('div');
+    row.className='streamer-panel-row';
+
+    const label=document.createElement('label');
+    const checkbox=document.createElement('input');
+    checkbox.type='checkbox';
+    checkbox.checked=!panel.classList.contains('hidden-by-user');
+    checkbox.addEventListener('change',()=>setStreamerPanelVisible(panel.dataset.panelId,checkbox.checked));
+
+    const text=document.createElement('span');
+    text.textContent=panel.dataset.panelName||panel.dataset.panelId;
+
+    label.append(checkbox,text);
+
+    const main=document.createElement('div');
+    main.className='streamer-panel-row-main';
+    main.appendChild(label);
+
+    if(streamerMetricDefaults[panel.dataset.panelId]){
+      const advanced=document.createElement('button');
+      advanced.className='streamer-panel-config-btn';
+      advanced.textContent='⚙';
+      advanced.title='Advanced panel options';
+      advanced.addEventListener('click',()=>{
+        openStreamerAdvancedPanel(panel.dataset.panelId);
+      });
+      main.appendChild(advanced);
+    }
+
+    row.appendChild(main);
+    list.appendChild(row);
+  });
+}
+
+function hexToRgbTuple(hex){
+  const value=(hex||'').replace('#','');
+  const full=value.length===3?value.split('').map(c=>c+c).join(''):value;
+  if(!/^[0-9a-f]{6}$/i.test(full))return [5,16,27];
+  return [
+    parseInt(full.slice(0,2),16),
+    parseInt(full.slice(2,4),16),
+    parseInt(full.slice(4,6),16)
+  ];
+}
+
+function lightenHex(hex,amount=.25){
+  const [r,g,b]=hexToRgbTuple(hex);
+  const mix=v=>Math.round(v+(255-v)*amount);
+  return '#'+[mix(r),mix(g),mix(b)].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+function getStreamerTheme(){
+  try{
+    return {
+      accent:'#35c2ff',
+      bg:'#05101b',
+      opacity:.80,
+      scanline:true,
+      ...JSON.parse(localStorage.getItem(streamerThemeStorageKey)||'{}')
+    };
+  }catch{
+    return {accent:'#35c2ff',bg:'#05101b',opacity:.80,scanline:true};
+  }
+}
+
+function applyStreamerTheme(theme=getStreamerTheme()){
+  const hud=document.getElementById('streamerHud');
+  if(!hud)return;
+  const [r,g,b]=hexToRgbTuple(theme.bg);
+  hud.style.setProperty('--stream-accent',theme.accent);
+  hud.style.setProperty('--stream-accent2',lightenHex(theme.accent,.36));
+  hud.style.setProperty('--stream-panel-bg',`${r},${g},${b}`);
+  hud.style.setProperty('--stream-panel-opacity',String(theme.opacity));
+  hud.classList.toggle('scanline-disabled',theme.scanline===false);
+
+  const accent=document.getElementById('streamAccentColor');
+  const bg=document.getElementById('streamBgColor');
+  const opacity=document.getElementById('streamBgOpacity');
+  const opacityValue=document.getElementById('streamBgOpacityValue');
+  const scanline=document.getElementById('streamScanlineToggle');
+  if(accent)accent.value=theme.accent;
+  if(bg)bg.value=theme.bg;
+  if(opacity)opacity.value=String(Math.round(theme.opacity*100));
+  if(opacityValue)opacityValue.textContent=`${Math.round(theme.opacity*100)}%`;
+  if(scanline)scanline.checked=theme.scanline!==false;
+}
+
+function updateStreamerThemeFromControls(){
+  const accent=document.getElementById('streamAccentColor')?.value||'#35c2ff';
+  const bg=document.getElementById('streamBgColor')?.value||'#05101b';
+  const opacity=Math.max(.1,Math.min(1,(Number(document.getElementById('streamBgOpacity')?.value)||80)/100));
+  const scanline=document.getElementById('streamScanlineToggle')?.checked!==false;
+  const theme={accent,bg,opacity,scanline};
+  localStorage.setItem(streamerThemeStorageKey,JSON.stringify(theme));
+  applyStreamerTheme(theme);
+}
+
+function resetStreamerTheme(){
+  localStorage.removeItem(streamerThemeStorageKey);
+  applyStreamerTheme({accent:'#35c2ff',bg:'#05101b',opacity:.80,scanline:true});
+}
+
+function openStreamerAppearancePanel(){
+  applyStreamerTheme();
+  document.getElementById('streamerAppearancePanel')?.classList.add('show');
+  closeStreamerContextMenu();
+}
+
+function closeStreamerAppearancePanel(){
+  document.getElementById('streamerAppearancePanel')?.classList.remove('show');
+}
+
+function initializeStreamerFloatingWindows(){
+  const map={
+    panelManager:'streamerPanelManager',
+    advanced:'streamerAdvancedPanel',
+    appearance:'streamerAppearancePanel'
+  };
+
+  document.querySelectorAll('[data-floating-drag-handle]').forEach(handle=>{
+    if(handle.dataset.dragReady)return;
+    handle.dataset.dragReady='1';
+    handle.addEventListener('pointerdown',e=>{
+      if(e.button!==0 || e.target.closest('button,input,label'))return;
+      const key=handle.dataset.floatingDragHandle;
+      const el=document.getElementById(map[key]);
+      if(!el)return;
+      const rect=el.getBoundingClientRect();
+      el.style.left=`${rect.left}px`;
+      el.style.top=`${rect.top}px`;
+      el.style.right='auto';
+      streamerFloatingDragState={
+        key,el,
+        offsetX:e.clientX-rect.left,
+        offsetY:e.clientY-rect.top
+      };
+      handle.setPointerCapture?.(e.pointerId);
+      window.addEventListener('pointermove',moveStreamerFloatingWindow);
+      window.addEventListener('pointerup',endStreamerFloatingWindow,{once:true});
+      e.preventDefault();
+    });
+  });
+
+  restoreStreamerFloatingWindows();
+}
+
+function moveStreamerFloatingWindow(e){
+  if(!streamerFloatingDragState)return;
+  const {el,offsetX,offsetY}=streamerFloatingDragState;
+  const rect=el.getBoundingClientRect();
+  const left=Math.max(6,Math.min(window.innerWidth-rect.width-6,e.clientX-offsetX));
+  const top=Math.max(6,Math.min(window.innerHeight-rect.height-6,e.clientY-offsetY));
+  el.style.left=`${left}px`;
+  el.style.top=`${top}px`;
+}
+
+function endStreamerFloatingWindow(){
+  if(!streamerFloatingDragState)return;
+  streamerFloatingDragState=null;
+  window.removeEventListener('pointermove',moveStreamerFloatingWindow);
+  saveStreamerFloatingWindows();
+}
+
+function saveStreamerFloatingWindows(){
+  const ids={
+    panelManager:'streamerPanelManager',
+    advanced:'streamerAdvancedPanel',
+    appearance:'streamerAppearancePanel'
+  };
+  const out={};
+  Object.entries(ids).forEach(([key,id])=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const rect=el.getBoundingClientRect();
+    out[key]={left:rect.left,top:rect.top};
+  });
+  localStorage.setItem(streamerFloatingPanelsStorageKey,JSON.stringify(out));
+}
+
+function restoreStreamerFloatingWindows(){
+  let saved={};
+  try{saved=JSON.parse(localStorage.getItem(streamerFloatingPanelsStorageKey)||'{}')}catch{}
+  const ids={
+    panelManager:'streamerPanelManager',
+    advanced:'streamerAdvancedPanel',
+    appearance:'streamerAppearancePanel'
+  };
+  Object.entries(saved).forEach(([key,pos])=>{
+    const el=document.getElementById(ids[key]);
+    if(!el||!pos)return;
+    el.style.left=`${Math.max(6,Math.min(window.innerWidth-80,pos.left||0))}px`;
+    el.style.top=`${Math.max(6,Math.min(window.innerHeight-40,pos.top||0))}px`;
+    el.style.right='auto';
+  });
+}
+
+function getStreamerPresentationConfig(){
+  let stored={};
+  try{
+    stored=JSON.parse(localStorage.getItem(streamerPresentationStorageKey)||'{}');
+  }catch{
+    stored={};
+  }
+
+  const merged={};
+  Object.entries(streamerPresentationDefaults).forEach(([panelId,defaults])=>{
+    merged[panelId]={...defaults,...(stored[panelId]||{})};
+  });
+  return merged;
+}
+
+function saveStreamerPresentationConfig(config){
+  localStorage.setItem(streamerPresentationStorageKey,JSON.stringify(config));
+  applyStreamerPresentationConfig();
+}
+
+function setStreamerPanelTextScale(panelId,value){
+  const config=getStreamerPresentationConfig();
+  if(!config[panelId])config[panelId]={};
+  config[panelId].textScale=Math.max(.65,Math.min(1.6,Number(value)||1));
+  saveStreamerPresentationConfig(config);
+}
+
+function applyStreamerPresentationConfig(){
+  const config=getStreamerPresentationConfig();
+  getStreamerPanels().forEach(panel=>{
+    const panelConfig=config[panel.dataset.panelId]||{};
+    const scale=panelConfig.textScale ?? 1;
+    panel.style.setProperty('--panel-text-scale',scale);
+    panel.classList.toggle('slim-header-enabled',panelConfig.slimHeader===true);
+  });
+}
+
+function setStreamerPanelSlimHeader(panelId,enabled){
+  const config=getStreamerPresentationConfig();
+  if(!config[panelId])config[panelId]={};
+  config[panelId].slimHeader=!!enabled;
+  saveStreamerPresentationConfig(config);
+}
+
+function setStreamerSlimHeadersEnabled(enabled){
+  streamerSlimHeadersEnabled=!!enabled;
+  document.body.classList.toggle('streamer-slim-headers',streamerSlimHeadersEnabled);
+  localStorage.setItem(streamerSlimHeadersStorageKey,streamerSlimHeadersEnabled?'true':'false');
+
+  const item=document.getElementById('streamerSlimHeadersItem');
+  if(item){
+    item.textContent=streamerSlimHeadersEnabled
+      ?'▱ Disable Slim Headers'
+      :'▰ Enable Slim Headers';
+  }
+}
+
+function restoreStreamerSlimHeadersState(){
+  const saved=localStorage.getItem(streamerSlimHeadersStorageKey);
+  setStreamerSlimHeadersEnabled(saved==='true');
+}
+
+function getStreamerMetricConfig(){
+  let stored={};
+  try{
+    stored=JSON.parse(localStorage.getItem(streamerMetricStorageKey)||'{}');
+  }catch{
+    stored={};
+  }
+
+  const merged={};
+  Object.entries(streamerMetricDefaults).forEach(([panelId,defaults])=>{
+    merged[panelId]={...defaults,...(stored[panelId]||{})};
+  });
+  return merged;
+}
+
+function saveStreamerMetricConfig(config){
+  localStorage.setItem(streamerMetricStorageKey,JSON.stringify(config));
+  applyStreamerMetricConfig();
+}
+
+function applyStreamerMetricConfig(){
+  const config=getStreamerMetricConfig();
+
+  Object.entries(config).forEach(([panelId,metrics])=>{
+    const panel=document.querySelector(`#streamerHud .hud-panel[data-panel-id="${panelId}"]`);
+    if(!panel)return;
+
+    if(panelId==='pilotStats'){
+      const gaugeMap={
+        globals:'streamGlobalGauge',
+        hofs:'streamHofGauge',
+        loot:'streamLootGauge'
+      };
+      Object.entries(gaugeMap).forEach(([metric,id])=>{
+        const el=document.getElementById(id);
+        if(el)el.classList.toggle('hud-metric-hidden',metrics[metric]===false);
+      });
+      return;
+    }
+
+    Object.entries(metrics).forEach(([metric,visible])=>{
+      const el=panel.querySelector(`[data-metric="${metric}"]`);
+      if(el)el.classList.toggle('hud-metric-hidden',visible===false);
+    });
+  });
+}
+
+function setStreamerMetric(panelId,metric,visible){
+  const config=getStreamerMetricConfig();
+  if(!config[panelId])config[panelId]={};
+  config[panelId][metric]=visible;
+  saveStreamerMetricConfig(config);
+}
+
+function advancedPanelDefinition(panelId){
+  if(panelId==='eventClock'){
+    return {
+      title:'Event Clock Options',
+      sections:[]
+    };
+  }
+
+  if(panelId==='recommendedHunt'){
+    return {
+      title:'Recommended Hunt Options',
+      sections:[]
+    };
+  }
+
+  if(panelId==='globalTelemetry'){
+    return {
+      title:'Global Telemetry Options',
+      sections:[
+        {
+          title:'Target Mobs',
+          items:[
+            ['targetGlobals','Globals'],
+            ['targetHofs','HOFs'],
+            ['targetValue','Total PED']
+          ]
+        },
+        {
+          title:'All Mobs',
+          items:[
+            ['allGlobals','Globals'],
+            ['allHofs','HOFs'],
+            ['allValue','Total PED']
+          ]
+        },
+        {
+          title:'Personal',
+          items:[
+            ['personalGlobals','My Globals'],
+            ['personalHofs','My HOFs'],
+            ['personalValue','My Loot']
+          ],
+          note:'The telemetry metrics automatically flex and wrap with the panel size. Make the panel wide for a single row, narrow for a single column, or resize it into layouts such as 3×3.'
+        }
+      ]
+    };
+  }
+
+  if(panelId==='combatTelemetry'){
+    return {
+      title:'Combat Telemetry Options',
+      sections:[
+        {
+          title:'Visible Metrics',
+          items:[
+            ['dps','DPS'],
+            ['damage','Damage'],
+            ['cost','Cost'],
+            ['profit','Profit / Loss'],
+            ['efficiency','Efficiency']
+          ],
+          note:'These are display slots for now. We can wire real combat values into them later.'
+        }
+      ]
+    };
+  }
+
+  if(panelId==='pilotStats'){
+    return {
+      title:'Pilot Event Stats Options',
+      sections:[
+        {
+          title:'Heads-Up Gauges',
+          items:[
+            ['globals','Globals Gauge'],
+            ['hofs','HOF Gauge'],
+            ['loot','Loot Gauge']
+          ],
+          note:'This is the first pass. We can expand the big HUD with more selectable gauge types later.'
+        }
+      ]
+    };
+  }
+
+  if(panelId==='loadoutPanel'){
+    return {
+      title:'Equipped Loadout Options',
+      sections:[
+        {
+          title:'Identity',
+          items:[
+            ['name','Loadout Name'],
+            ['weapon','Weapon']
+          ]
+        },
+        {
+          title:'Economy & Performance',
+          items:[
+            ['efficiency','Efficiency'],
+            ['dpp','DPP'],
+            ['dps','DPS'],
+            ['cost','Cost / Shot']
+          ]
+        },
+        {
+          title:'Weapon Details',
+          items:[
+            ['damage','Effective Damage'],
+            ['apm','APM'],
+            ['range','Range'],
+            ['maxDamage','Max Damage']
+          ],
+          note:'Toggle only the loadout information you want visible on stream. These settings are saved with the rest of the OBS panel configuration.'
+        }
+      ]
+    };
+  }
+
+  return null;
+}
+
+function getStreamerMetricLabel(panelId,key){
+  const labels={
+    loadoutPanel:{
+      name:'Loadout Name',
+      weapon:'Weapon',
+      efficiency:'Efficiency',
+      dpp:'DPP',
+      dps:'DPS',
+      cost:'Cost / Shot',
+      damage:'Effective Damage',
+      apm:'APM',
+      range:'Range',
+      maxDamage:'Max Damage'
+    }
+  };
+  return labels[panelId]?.[key]||key.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase());
+}
+
+function openStreamerAdvancedPanel(panelId){
+  const def=advancedPanelDefinition(panelId);
+  if(!def)return;
+
+  const panel=document.getElementById('streamerAdvancedPanel');
+  const title=document.getElementById('streamerAdvancedTitle');
+  const body=document.getElementById('streamerAdvancedBody');
+  if(!panel||!title||!body)return;
+
+  title.textContent=def.title;
+  body.innerHTML='';
+
+  const config=getStreamerMetricConfig();
+  const panelConfig=config[panelId]||{};
+  const presentationConfig=getStreamerPresentationConfig();
+  const panelPresentation=presentationConfig[panelId]||{textScale:1};
+
+  // Presentation controls apply to every configurable streamer panel.
+  const presentationSection=document.createElement('div');
+  presentationSection.className='streamer-option-section';
+
+  const presentationHeading=document.createElement('div');
+  presentationHeading.className='streamer-option-title';
+  presentationHeading.textContent='Panel Appearance';
+  presentationSection.appendChild(presentationHeading);
+
+  const slimLabel=document.createElement('label');
+  slimLabel.className='streamer-option-toggle';
+  slimLabel.style.marginBottom='7px';
+
+  const slimCb=document.createElement('input');
+  slimCb.type='checkbox';
+  slimCb.checked=panelPresentation.slimHeader===true;
+  slimCb.addEventListener('change',()=>setStreamerPanelSlimHeader(panelId,slimCb.checked));
+
+  const slimText=document.createElement('span');
+  slimText.textContent='Use Slim Header';
+
+  slimLabel.append(slimCb,slimText);
+  presentationSection.appendChild(slimLabel);
+
+  const rangeRow=document.createElement('div');
+  rangeRow.className='streamer-range-row';
+
+  const rangeLabel=document.createElement('label');
+  rangeLabel.textContent='Text Size';
+
+  const range=document.createElement('input');
+  range.type='range';
+  range.min='65';
+  range.max='160';
+  range.step='5';
+  range.value=String(Math.round((panelPresentation.textScale||1)*100));
+
+  const rangeValue=document.createElement('div');
+  rangeValue.className='streamer-range-value';
+  rangeValue.textContent=`${range.value}%`;
+
+  range.addEventListener('input',()=>{
+    rangeValue.textContent=`${range.value}%`;
+    setStreamerPanelTextScale(panelId,Number(range.value)/100);
+  });
+
+  rangeRow.append(rangeLabel,range,rangeValue);
+  presentationSection.appendChild(rangeRow);
+
+  const presentationNote=document.createElement('div');
+  presentationNote.className='streamer-option-note';
+  presentationNote.textContent='Saved per panel. When global Slim Headers mode is enabled, only panels with this option checked collapse their header text.';
+  presentationSection.appendChild(presentationNote);
+
+  body.appendChild(presentationSection);
+
+  def.sections.forEach(section=>{
+    const sec=document.createElement('div');
+    sec.className='streamer-option-section';
+
+    const heading=document.createElement('div');
+    heading.className='streamer-option-title';
+    heading.textContent=section.title;
+    sec.appendChild(heading);
+
+    const grid=document.createElement('div');
+    grid.className='streamer-option-grid';
+
+    section.items.forEach(([metric,labelText])=>{
+      const label=document.createElement('label');
+      label.className='streamer-option-toggle';
+
+      const cb=document.createElement('input');
+      cb.type='checkbox';
+      cb.checked=panelConfig[metric]!==false;
+      cb.addEventListener('change',()=>setStreamerMetric(panelId,metric,cb.checked));
+
+      const text=document.createElement('span');
+      text.textContent=labelText;
+
+      label.append(cb,text);
+      grid.appendChild(label);
+    });
+
+    sec.appendChild(grid);
+
+    if(section.note){
+      const note=document.createElement('div');
+      note.className='streamer-option-note';
+      note.textContent=section.note;
+      sec.appendChild(note);
+    }
+
+    body.appendChild(sec);
+  });
+
+  panel.classList.add('show');
+  closeStreamerContextMenu();
+}
+
+function closeStreamerAdvancedPanel(){
+  document.getElementById('streamerAdvancedPanel')?.classList.remove('show');
+}
+
+function openStreamerPanelManager(){
+  buildStreamerPanelManager();
+  document.getElementById('streamerPanelManager')?.classList.add('show');
+  closeStreamerContextMenu();
+}
+
+function closeStreamerPanelManager(){
+  document.getElementById('streamerPanelManager')?.classList.remove('show');
+}
+
+function openStreamerContextMenu(x,y,targetPanel=null){
+  const menu=document.getElementById('streamerContextMenu');
+  if(!menu)return;
+
+  streamerContextTargetPanel=targetPanel;
+
+  const hideItem=document.getElementById('streamerHidePanelItem');
+  if(hideItem)hideItem.classList.toggle('hidden',!targetPanel);
+
+  const advancedItem=document.getElementById('streamerAdvancedItem');
+  const hasAdvanced=!!(targetPanel&&streamerMetricDefaults[targetPanel.dataset.panelId]);
+  if(advancedItem)advancedItem.classList.toggle('hidden',!hasAdvanced);
+
+  const slimItem=document.getElementById('streamerSlimHeadersItem');
+  if(slimItem){
+    slimItem.textContent=streamerSlimHeadersEnabled
+      ?'▱ Disable Slim Headers'
+      :'▰ Enable Slim Headers';
+  }
+
+  menu.classList.add('show');
+
+  const rect=menu.getBoundingClientRect();
+  const left=Math.min(x,window.innerWidth-rect.width-8);
+  const top=Math.min(y,window.innerHeight-rect.height-8);
+  menu.style.left=`${Math.max(8,left)}px`;
+  menu.style.top=`${Math.max(8,top)}px`;
+}
+
+function closeStreamerContextMenu(){
+  const menu=document.getElementById('streamerContextMenu');
+  if(menu)menu.classList.remove('show');
+  streamerContextTargetPanel=null;
+}
+
+document.addEventListener('contextmenu',e=>{
+  if(!streamerModeEnabled)return;
+
+  e.preventDefault();
+
+  const panel=e.target.closest?.('#streamerHud .hud-panel[data-panel-id]');
+  openStreamerContextMenu(e.clientX,e.clientY,panel||null);
+});
+
+document.addEventListener('pointerdown',e=>{
+  if(!streamerModeEnabled)return;
+
+  const menu=document.getElementById('streamerContextMenu');
+  const manager=document.getElementById('streamerPanelManager');
+  const advanced=document.getElementById('streamerAdvancedPanel');
+  const appearance=document.getElementById('streamerAppearancePanel');
+
+  if(menu?.classList.contains('show')&&!menu.contains(e.target)){
+    closeStreamerContextMenu();
+  }
+
+  if(manager?.classList.contains('show') &&
+     !manager.contains(e.target) &&
+     !e.target.closest?.('#streamerContextMenu')){
+    closeStreamerPanelManager();
+  }
+
+  if(advanced?.classList.contains('show') &&
+     !advanced.contains(e.target) &&
+     !e.target.closest?.('#streamerContextMenu') &&
+     !e.target.closest?.('.streamer-panel-config-btn')){
+    closeStreamerAdvancedPanel();
+  }
+
+  if(appearance?.classList.contains('show') &&
+     !appearance.contains(e.target) &&
+     !e.target.closest?.('#streamerContextMenu')){
+    closeStreamerAppearancePanel();
+  }
+});
+
+document.getElementById('streamerContextMenu')?.addEventListener('click',e=>{
+  const item=e.target.closest('[data-action]');
+  if(!item)return;
+
+  const action=item.dataset.action;
+
+  if(action==='panels'){
+    openStreamerPanelManager();
+  }else if(action==='appearance'){
+    openStreamerAppearancePanel();
+  }else if(action==='toggle-slim-headers'){
+    setStreamerSlimHeadersEnabled(!streamerSlimHeadersEnabled);
+    closeStreamerContextMenu();
+  }else if(action==='advanced-panel'){
+    if(streamerContextTargetPanel){
+      openStreamerAdvancedPanel(streamerContextTargetPanel.dataset.panelId);
+    }
+  }else if(action==='hide-panel'){
+    hideStreamerPanel(streamerContextTargetPanel);
+  }else if(action==='reset-layout'){
+    resetStreamerLayout();
+  }else if(action==='exit-streamer'){
+    setStreamerMode(false);
+  }
+});
+
+window.addEventListener('resize',()=>{
+  if(streamerModeEnabled){
+    restoreStreamerLayout();
+  }
+});
+
+function getStreamerDisplayName(){
+  return localStorage.getItem(streamerNameStorageKey)||'';
+}
+
+function setStreamerDisplayName(value){
+  const name=String(value||'').trim().slice(0,64);
+  localStorage.setItem(streamerNameStorageKey,name);
+  const preview=document.getElementById('streamerNamePreview');
+  if(preview)preview.textContent=name||'—';
+}
+
+function syncStreamerSourceControls(){
+  const avatarMain=document.getElementById('avatarNameInput');
+  const avatarStream=document.getElementById('streamAvatarNameInput');
+  const streamerName=document.getElementById('streamerNameInput');
+
+  if(avatarStream&&document.activeElement!==avatarStream){
+    avatarStream.value=avatarMain?.value||localStorage.getItem('entropia_avatar_name')||'';
+  }
+  if(streamerName&&document.activeElement!==streamerName){
+    streamerName.value=getStreamerDisplayName();
+  }
+
+  const preview=document.getElementById('streamerNamePreview');
+  if(preview)preview.textContent=getStreamerDisplayName()||'—';
+
+  const connection=document.getElementById('connectionStatusText')?.textContent?.trim()||'Offline';
+  const parserState=document.getElementById('streamParserState');
+  if(parserState)parserState.textContent=connection.toUpperCase();
+
+  const sourceDot=document.getElementById('liveIndicator');
+  const parserDot=document.getElementById('streamParserDot');
+  if(parserDot)parserDot.classList.toggle('active',!!sourceDot?.classList.contains('active'));
+
+  const source=document.getElementById('streamParserSource');
+  if(source){
+    const status=document.getElementById('fileStatus')?.textContent?.trim();
+    source.textContent=status||connection||'No chat.log connected';
+  }
+
+  const resume=document.getElementById('streamParserResumeBtn');
+  if(resume)resume.textContent='↻ Reconnect';
+}
+
+function bindStreamerSourcePanel(){
+  const avatarStream=document.getElementById('streamAvatarNameInput');
+  const streamerName=document.getElementById('streamerNameInput');
+
+  if(avatarStream&&!avatarStream.dataset.bound){
+    avatarStream.dataset.bound='1';
+    avatarStream.addEventListener('input',()=>{
+      const main=document.getElementById('avatarNameInput');
+      if(main)main.value=avatarStream.value;
+      updateAvatarName();
+    });
+  }
+
+  if(streamerName&&!streamerName.dataset.bound){
+    streamerName.dataset.bound='1';
+    streamerName.addEventListener('input',()=>setStreamerDisplayName(streamerName.value));
+  }
+
+  syncStreamerSourceControls();
+}
+
+function getStreamerMetricSettings(panelId){
+  try{
+    const saved=JSON.parse(localStorage.getItem(streamerMetricStorageKey)||'{}');
+    return {...(streamerMetricDefaults[panelId]||{}),...(saved?.[panelId]||{})};
+  }catch{
+    return {...(streamerMetricDefaults[panelId]||{})};
+  }
+}
+
+function syncStreamerLoadoutPanel(){
+  const active=window.activeLoadout;
+  const setText=(id,value)=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent=value;
+  };
+
+  setText('streamLoadoutState',active?'EQUIPPED':'NONE');
+  setText('streamLoadoutName',active?.name||'No loadout equipped');
+  setText('streamLoadoutWeapon',active?.weaponName||'—');
+  setText('streamLoadoutEfficiency',`${Number(active?.efficiency||0).toFixed(1)}%`);
+  setText('streamLoadoutDpp',Number(active?.dpp||0).toFixed(2));
+  setText('streamLoadoutDps',Number(active?.dps||0).toFixed(1));
+  setText('streamLoadoutCost',`${Number(active?.costPerShot||0).toFixed(4)} PED`);
+  setText('streamLoadoutDamage',Number(active?.effectiveDamage||0).toFixed(1));
+  setText('streamLoadoutApm',Number(active?.apm||0).toFixed(1));
+  setText('streamLoadoutRange',`${Number(active?.range||0).toFixed(1)} m`);
+  setText('streamLoadoutMaxDamage',Number(active?.maxDamage||0).toFixed(1));
+
+
+}
+
+function syncStreamerHud(){
+  syncStreamerSourceControls();
+  syncStreamerLoadoutPanel();
+  window.EntropiaTeamTracker?.render?.();
+  const setText=(id,value)=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent=value;
+  };
+
+  const getText=(id,fallback='—')=>{
+    const el=document.getElementById(id);
+    return el?.textContent?.trim()||fallback;
+  };
+
+  // Connection
+  const sourceDot=document.getElementById('liveIndicator');
+  const streamDot=document.getElementById('streamHudLiveDot');
+  if(streamDot)streamDot.classList.toggle('active',!!sourceDot?.classList.contains('active'));
+  setText('streamHudLiveText',getText('connectionStatusText','OFFLINE').toUpperCase());
+
+  // Clocks
+  setText('streamEventCountdown',getText('eventEndCountdown','--d --:--:--'));
+  setText('streamSafeStartCountdown',getText('latestStartCountdown','--d --:--:--'));
+  setText('streamGameTime',getText('syncGameTimeDisplay','NOT SYNCED'));
+  setText('streamSessionTimer',getText('timerDisplay','WAITING'));
+  setText('streamActiveHour',getText('currentTimeDisplay','--:00'));
+
+  // Personal event totals
+  const myGlobals=parseInt(getText('liveMyGlobalCount','0'),10)||0;
+  const myHofs=parseInt(getText('liveMyHofCount','0'),10)||0;
+  const lootText=getText('liveMyTotalLoot','0.00 PED');
+  const myLoot=parseFloat(lootText.replace(/[^0-9.-]/g,''))||0;
+
+  setText('streamMyGlobals',myGlobals);
+  setText('streamMyHofs',myHofs);
+  setText('streamMyLoot',myLoot.toFixed(0));
+
+  // Gauges are deliberately relative, so they remain visually useful
+  // even before we know the event's formal scoring targets.
+  const globalPct=Math.min(100,myGlobals*5);
+  const hofPct=Math.min(100,myHofs*20);
+  const lootPct=Math.min(100,myLoot/10);
+
+  const g1=document.getElementById('streamGlobalGauge');
+  const g2=document.getElementById('streamHofGauge');
+  const g3=document.getElementById('streamLootGauge');
+  if(g1)g1.style.setProperty('--gauge-pct',globalPct);
+  if(g2)g2.style.setProperty('--gauge-pct',hofPct);
+  if(g3)g3.style.setProperty('--gauge-pct',lootPct);
+
+  // Live feed totals
+  setText('streamTargetGlobals',getText('targetLiveGlobalCount','0'));
+  setText('streamTargetHofs',getText('targetLiveHofCount','0'));
+  setText('streamTargetValue',getText('targetLiveFeedValue','0.00 PED'));
+  setText('streamAllGlobals',getText('allMobLiveGlobalCount','0'));
+  setText('streamAllHofs',getText('allMobLiveHofCount','0'));
+  setText('streamAllMobValue',getText('allMobLiveFeedValue','0.00 PED'));
+
+  // Personal event metrics are also available inside Global Telemetry.
+  setText('streamPersonalGlobals',myGlobals);
+  setText('streamPersonalHofs',myHofs);
+  setText('streamPersonalValue',lootText);
+
+  // Recommendation
+  let recommended=getText('recommendedMobBox','WAITING FOR DATA');
+  recommended=recommended.replace(/^🎯\s*/,'').replace(/\s+·.*$/,'').trim();
+  setText('streamRecommendedMob',recommended||'WAITING FOR DATA');
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape'||!streamerModeEnabled)return;
+
+  const menu=document.getElementById('streamerContextMenu');
+  const manager=document.getElementById('streamerPanelManager');
+  const advanced=document.getElementById('streamerAdvancedPanel');
+  const appearance=document.getElementById('streamerAppearancePanel');
+
+  if(menu?.classList.contains('show')){
+    closeStreamerContextMenu();
+    return;
+  }
+  if(advanced?.classList.contains('show')){
+    closeStreamerAdvancedPanel();
+    return;
+  }
+  if(appearance?.classList.contains('show')){
+    closeStreamerAppearancePanel();
+    return;
+  }
+  if(manager?.classList.contains('show')){
+    closeStreamerPanelManager();
+    return;
+  }
+
+  setStreamerMode(false);
+});
+
+function setConnectionStatus(text,isLive){
+  const status=document.getElementById('connectionStatusText');
+  const indicator=document.getElementById('liveIndicator');
+  if(status)status.textContent=text;
+  if(indicator)indicator.classList.toggle('active',!!isLive);
+}
+
+
+function switchTab(tabName){
+  const active=tabName==='hunt'?'hunt':(tabName==='maps'?'maps':(tabName==='missions'?'missions':'live'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===active));
+  document.getElementById('liveTab')?.classList.toggle('hidden',active!=='live');
+  document.getElementById('huntTab')?.classList.toggle('hidden',active!=='hunt');
+  document.getElementById('mapsTab')?.classList.toggle('hidden',active!=='maps');
+  document.getElementById('missionsTab')?.classList.toggle('hidden',active!=='missions');
+
+  if(active==='hunt'){
+    const huntActive=document.getElementById('huntLiveBtn')?.classList.contains('active')
+      ?'livehunt'
+      :(document.getElementById('huntTeamBtn')?.classList.contains('active')?'team'
+      :(document.getElementById('huntHistoryBtn')?.classList.contains('active')?'history':'loadouts'));
+    switchHuntTrackerTab(huntActive);
+    window.EntropiaLoadouts?.refresh?.();
+  }
+
+  if(active==='maps'){
+    const mapsActive=document.getElementById('mapsWaypointsBtn')?.classList.contains('active')?'waypoints':'map';
+    switchMapsTab(mapsActive);
+    window.EntropiaWaypoints?.render?.();
+    window.EntropiaMissions?.renderMapRail?.();
+  }
+  if(active==='missions')window.EntropiaMissions?.render?.();
+}
+
+
+
+
+
+function switchMapsTab(tabName){
+  const active=tabName==='waypoints'?'waypoints':'map';
+  document.getElementById('mapsMapTab')?.classList.toggle('hidden',active!=='map');
+  document.getElementById('mapsWaypointsTab')?.classList.toggle('hidden',active!=='waypoints');
+  document.getElementById('mapsMapBtn')?.classList.toggle('active',active==='map');
+  document.getElementById('mapsWaypointsBtn')?.classList.toggle('active',active==='waypoints');
+
+  if(active==='map')window.PixelB8Maps?.renderMap?.();
+  else window.EntropiaWaypoints?.render?.();
+}
+
+function switchHuntBreakdownTab(tabName){
+  const active=tabName==='economy'?'economy':'combat';
+  document.getElementById('huntCombatBreakdownPage')?.classList.toggle('hidden',active!=='combat');
+  document.getElementById('huntEconomyPage')?.classList.toggle('hidden',active!=='economy');
+  document.getElementById('huntCombatBreakdownBtn')?.classList.toggle('active',active==='combat');
+  document.getElementById('huntEconomyBtn')?.classList.toggle('active',active==='economy');
+}
+
+function syncHuntTrackingStatus(){
+  const status=window.EntropiaHuntTracker?.getSession?.()?.status||'idle';
+  const row=document.getElementById('huntTrackingStatusRow');
+  const text=document.getElementById('huntTrackingStatusText');
+  const dot=document.getElementById('huntTrackingIndicator');
+
+  const label=status==='active'?'Tracking':status==='paused'?'Paused':status==='stopped'?'Stopped':'Idle';
+  if(text)text.textContent=label;
+  if(row)row.dataset.trackingState=status;
+  if(dot){
+    dot.classList.toggle('active',status==='active');
+    dot.classList.toggle('warning',status==='paused');
+  }
+}
+window.syncHuntTrackingStatus=syncHuntTrackingStatus;
+
+function switchTeamLogTab(tabName){
+  const active=tabName==='events'?'events':'loot';
+  document.getElementById('teamLootTabPage')?.classList.toggle('hidden',active!=='loot');
+  document.getElementById('teamEventsTabPage')?.classList.toggle('hidden',active!=='events');
+  document.getElementById('teamLootTabBtn')?.classList.toggle('active',active==='loot');
+  document.getElementById('teamEventsTabBtn')?.classList.toggle('active',active==='events');
+}
+
+function switchTeamWorkspaceTab(tabName){
+  const active=tabName==='performance'?'performance':(tabName==='share'?'share':'team');
+  document.getElementById('teamOverviewTab')?.classList.toggle('hidden',active!=='team');
+  document.getElementById('teamPerformanceTab')?.classList.toggle('hidden',active!=='performance');
+  document.getElementById('teamLiveShareTab')?.classList.toggle('hidden',active!=='share');
+  document.getElementById('teamOverviewBtn')?.classList.toggle('active',active==='team');
+  document.getElementById('teamPerformanceBtn')?.classList.toggle('active',active==='performance');
+  document.getElementById('teamLiveShareBtn')?.classList.toggle('active',active==='share');
+  window.EntropiaTeamTracker?.render?.();
+}
+
+
+function switchLoadoutWorkspaceTab(tabName) {
+  const active=tabName==='faps'?'faps':(tabName==='fishing'?'fishing':(tabName==='mining'?'mining':'loadouts'));
+  document.getElementById('loadoutWorkspaceTab')?.classList.toggle('hidden',active!=='loadouts');
+  document.getElementById('fishingGearWorkspaceTab')?.classList.toggle('hidden',active!=='fishing');
+  document.getElementById('miningGearWorkspaceTab')?.classList.toggle('hidden',active!=='mining');
+  document.getElementById('fapsWorkspaceTab')?.classList.toggle('hidden',active!=='faps');
+  document.getElementById('loadoutWorkspaceBtn')?.classList.toggle('active',active==='loadouts');
+  document.getElementById('fishingGearWorkspaceBtn')?.classList.toggle('active',active==='fishing');
+  document.getElementById('miningGearWorkspaceBtn')?.classList.toggle('active',active==='mining');
+  document.getElementById('fapsWorkspaceBtn')?.classList.toggle('active',active==='faps');
+  if(active==='fishing')window.EntropiaFishingGear?.render?.();
+  if(active==='mining')window.EntropiaMiningGear?.render?.();
+  if(active==='faps')window.EntropiaFaps?.render?.();
+}
+window.switchLoadoutWorkspaceTab=switchLoadoutWorkspaceTab;
+
+function switchHuntTrackerTab(tabName){
+  const allowed=['session','livehunt','fishing','mining','team','history','loadouts'];
+  const active=allowed.includes(tabName)?tabName:'session';
+
+  document.getElementById('trackerSessionTab')?.classList.toggle('hidden',active!=='session');
+  document.getElementById('huntLoadoutsTab')?.classList.toggle('hidden',active!=='loadouts');
+  document.getElementById('huntLiveTab')?.classList.toggle('hidden',active!=='livehunt');
+  document.getElementById('trackerFishingTab')?.classList.toggle('hidden',active!=='fishing');
+  document.getElementById('trackerMiningTab')?.classList.toggle('hidden',active!=='mining');
+  document.getElementById('huntTeamTab')?.classList.toggle('hidden',active!=='team');
+  document.getElementById('huntHistoryTab')?.classList.toggle('hidden',active!=='history');
+
+  document.getElementById('trackerSessionBtn')?.classList.toggle('active',active==='session');
+  document.getElementById('huntLoadoutsBtn')?.classList.toggle('active',active==='loadouts');
+  document.getElementById('huntLiveBtn')?.classList.toggle('active',active==='livehunt');
+  document.getElementById('trackerFishingBtn')?.classList.toggle('active',active==='fishing');
+  document.getElementById('trackerMiningBtn')?.classList.toggle('active',active==='mining');
+  document.getElementById('huntTeamBtn')?.classList.toggle('active',active==='team');
+  document.getElementById('huntHistoryBtn')?.classList.toggle('active',active==='history');
+
+  if(active==='loadouts'){
+    const loadoutActive=document.getElementById('fapsWorkspaceBtn')?.classList.contains('active')
+      ?'faps'
+      :(document.getElementById('miningGearWorkspaceBtn')?.classList.contains('active')
+        ?'mining'
+        :(document.getElementById('fishingGearWorkspaceBtn')?.classList.contains('active')?'fishing':'loadouts'));
+    switchLoadoutWorkspaceTab(loadoutActive);
+  }
+  if(active==='session')window.EntropiaSessionTracker?.render?.();
+  if(active==='livehunt')window.EntropiaLoadouts?.syncEquippedLabels?.();
+  if(active==='fishing')window.EntropiaFishingTracker?.render?.();
+  if(active==='mining')window.EntropiaMiningTracker?.render?.();
+  if(active==='team')window.EntropiaTeamTracker?.render?.();
+  if(active==='history')window.EntropiaHuntTracker?.renderHistory?.();
+}
+
+function switchGlobalAnalyticsTab(){ return; }
+
+
+function updateAvatarName(){
+  const val=document.getElementById('avatarNameInput')?.value.trim()||'';
+  userAvatarName=val.toLowerCase();
+  localStorage.setItem('entropia_avatar_name',val);
+  const streamInput=document.getElementById('streamAvatarNameInput');
+  if(streamInput&&document.activeElement!==streamInput)streamInput.value=val;
+  evaluateUserGlobals();
+  window.EntropiaTeamTracker?.updateIdentity?.();
+}
+
+function toggleVoiceAnnouncer(){
+  voiceAnnouncerEnabled=document.getElementById('voiceToggle').checked;
+  localStorage.setItem('entropia_voice_enabled',voiceAnnouncerEnabled);
+  if(voiceAnnouncerEnabled&&'speechSynthesis'in window)speakText("Voice announcer enabled.");
+}
+
+function speakText(text){
+  if(!voiceAnnouncerEnabled||!('speechSynthesis'in window))return;
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=1;u.pitch=1;
+  speechSynthesis.speak(u);
+}
+
+async function processSelectedChatLogFile(file,{obs=false}={}){
+  if(!file)return;
+
+  if(liveInterval){
+    clearInterval(liveInterval);
+    liveInterval=null;
+  }
+  fileHandle=null;
+
+  const desiredSignature=getAnalysisCacheSignature();
+  setOptionalText('fileStatus',`Reading ${file.name} · ${(file.size/(1024*1024)).toFixed(2)} MB`);
+  setConnectionStatus(obs?'OBS file access':'Analyzing',false);
+
+  const recent=await readLogForConfiguredLookback(file);
+  parseChatLog(recent.text);
+
+  cachedFileSize=file.size;
+  cachedFileLastModified=file.lastModified||0;
+  cachedAnalysisSignature=desiredSignature;
+  saveParsedDataToIDB(globalParsedData,allMobHourlyStats,file);
+
+  const readMb=(recent.bytesRead/(1024*1024)).toFixed(2);
+  const totalMb=(file.size/(1024*1024)).toFixed(2);
+
+  setOptionalText('fileStatus',obs
+    ?`OBS access granted · ${file.name} · read ${readMb} MB of ${totalMb} MB.`
+    :(recent.cutoff
+      ?`Analyzed ${describeAnalysisLookback()} · read ${readMb} MB of ${totalMb} MB · ${globalParsedData.length.toLocaleString()} creature globals`
+      :`Analyzed all history · ${totalMb} MB · ${globalParsedData.length.toLocaleString()} creature globals`));
+
+  document.getElementById('fileConnectionCard')?.classList.add('hidden');
+
+  // A standard File object is a user-granted snapshot, not a persistent
+  // FileSystemFileHandle. Do not claim live tailing. OBS users can click
+  // Select chat.log again from Interact to refresh safely.
+  setConnectionStatus(obs?'OBS snapshot':'File loaded',false);
+
+  if(obs){
+    window.showAppToast?.(
+      'chat.log loaded in OBS. Reconnect will reuse this source for the current OBS session.',
+      'success',
+      4800
+    );
+  }
+}
+
+async function processFileHandle(handle){
+  // Manual file selection: cache is only reusable when both the file
+  // and the analytics scope (targets/lookback) match.
+  const file=await handle.getFile();
+  const desiredSignature=getAnalysisCacheSignature();
+
+  const canContinueFromCache=
+    Array.isArray(globalParsedData) &&
+    cachedFileSize>0 &&
+    file.size>=cachedFileSize &&
+    (!cachedFileLastModified || file.lastModified>=cachedFileLastModified) &&
+    cachedAnalysisSignature===desiredSignature;
+
+  if(canContinueFromCache){
+    await processFileHandleIncremental(handle);
+    return;
+  }
+
+  setOptionalText('fileStatus',`Building ${describeAnalysisLookback()} cache from ${file.name} · ${(file.size/(1024*1024)).toFixed(2)} MB total`);
+  setConnectionStatus('Analyzing',false);
+
+  const recent=await readLogForConfiguredLookback(file);
+  parseChatLog(recent.text);
+
+  cachedFileSize=file.size;
+  cachedFileLastModified=file.lastModified||0;
+  cachedAnalysisSignature=desiredSignature;
+
+  saveParsedDataToIDB(globalParsedData,allMobHourlyStats,file);
+
+  const readMb=(recent.bytesRead/(1024*1024)).toFixed(2);
+  const totalMb=(file.size/(1024*1024)).toFixed(2);
+  setOptionalText('fileStatus',recent.cutoff
+      ?`Analyzed ${describeAnalysisLookback()} · read ${readMb} MB of ${totalMb} MB · ${globalParsedData.length.toLocaleString()} creature globals`
+      :`Analyzed all history · ${totalMb} MB · ${globalParsedData.length.toLocaleString()} creature globals`);
+
+  document.getElementById('fileConnectionCard')?.classList.add('hidden');
+  startLivePolling(handle,file.size);
+}
+
+function updateLiveSummary(){
+  const g=document.getElementById('allMobLiveGlobalCount');if(g)g.textContent=Math.max(0,liveAllMobGlobals-liveAllMobHofs);
+  const h=document.getElementById('allMobLiveHofCount');if(h)h.textContent=liveAllMobHofs;
+  const p=document.getElementById('allMobLiveFeedValue');if(p)p.textContent=`${liveAllMobFeedPed.toFixed(2)} PED`;
+  evaluateUserGlobals();
+  updateLiveMonitorStatus();
+  applyLiveActivityFilter();
+  syncStreamerHud();
+}
+
+function updateLiveMonitorStatus(){
+  const source=document.getElementById('liveMonitorSource');
+  const last=document.getElementById('liveMonitorLastActivity');
+  const latest=latestCapturedRecord?.();
+  if(source)source.textContent=currentSourceLabel?.()||'No live source';
+  if(last)last.textContent=`Last captured: ${latest?`${formatDateTimeUTCish(latest.date)} · ${describeCaptureAge(latest.date)}`:'—'}`;
+}
+
+function setLiveActivityFilter(filter){
+  liveActivityFilter=['mine','team','all'].includes(filter)?filter:'all';
+  applyLiveActivityFilter();
+}
+
+function getLiveTeamNames(){
+  try{return new Set((window.EntropiaTeamTracker?.getMemberNames?.()||[]).map(v=>String(v||'').trim().toLowerCase()).filter(Boolean));}
+  catch{return new Set();}
+}
+
+function applyLiveActivityFilter(){
+  ['mine','team','all'].forEach(k=>document.getElementById(`liveFilter${k[0].toUpperCase()+k.slice(1)}`)?.classList.toggle('active',liveActivityFilter===k));
+  const body=document.getElementById('allMobLiveTableBody');if(!body)return;
+  const self=String(window.userAvatarName||userAvatarName||'').trim().toLowerCase();
+  const team=getLiveTeamNames();if(self)team.add(self);
+  let visible=0;
+  [...body.querySelectorAll('tr[data-player]')].forEach(row=>{
+    const player=String(row.dataset.player||'').trim().toLowerCase();
+    const show=liveActivityFilter==='all'||(liveActivityFilter==='mine'&&!!self&&player===self)||(liveActivityFilter==='team'&&team.has(player));
+    row.hidden=!show;if(show)visible++;
+  });
+  const count=document.getElementById('liveRecentCount');if(count)count.textContent=String(visible);
+  const sub=document.getElementById('liveRecentSub');if(sub)sub.textContent=visible?`${visible} ${liveActivityFilter==='all'?'observed':liveActivityFilter} record${visible===1?'':'s'} in this live feed`:`No ${liveActivityFilter==='all'?'creature':liveActivityFilter} globals captured this session`;
+}
+
+function updateUserEventLiveSummary(globalCount,hofCount){
+  const globalCountEl=document.getElementById('liveMyGlobalCount');
+  const globalPedEl=document.getElementById('liveMyGlobalPed');
+  const hofCountEl=document.getElementById('liveMyHofCount');
+  const hofPedEl=document.getElementById('liveMyHofPed');
+  const totalEl=document.getElementById('liveMyTotalLoot');
+
+  if(globalCountEl)globalCountEl.textContent=globalCount;
+  if(globalPedEl)globalPedEl.textContent=`${userEventGlobalPed.toFixed(2)} PED total`;
+  if(hofCountEl)hofCountEl.textContent=hofCount;
+  if(hofPedEl)hofPedEl.textContent=`${userEventHofPed.toFixed(2)} PED total`;
+  if(totalEl)totalEl.textContent=`${userEventTotalLoot.toFixed(2)} PED`;
+}
+
+function startTimerCountdown(){
+  if(timerInterval)clearInterval(timerInterval);
+  const expiry=new Date(firstUserGlobalTime.getTime()+6*60*60*1000);
+
+  function tick(){
+    const now=new Date();
+    const diff=expiry-now;
+    const display=document.getElementById('timerDisplay');
+    const details=document.getElementById('timerDetails');
+    if(diff<=0){
+      display.textContent='00:00:00';
+      display.classList.remove('warning');
+      display.style.color='var(--danger)';
+      details.textContent=`Window closed · started ${formatClock(firstUserGlobalTime)} · ended ${formatClock(expiry)}`;
+      clearInterval(timerInterval);
+      return;
+    }
+    const h=Math.floor(diff/3600000);
+    const m=Math.floor((diff%3600000)/60000);
+    const s=Math.floor((diff%60000)/1000);
+    display.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    display.style.color='var(--success)';
+    details.textContent=`Started ${formatClock(firstUserGlobalTime)} · ends ${formatClock(expiry)}`;
+  }
+  tick();
+  timerInterval=setInterval(tick,1000);
+}
+
+function resetTimerDisplay(){ if(timerInterval){clearInterval(timerInterval);timerInterval=null;} }
+
+
+function toggleTimeMode(){
+  const mode=document.getElementById('timeModeSelect').value;
+  document.getElementById('customTimeGroup').classList.toggle('hidden',mode!=='custom');
+  updateScheduleDisplay();
+}
+
+function getActiveTargetHour(){
+  if(document.getElementById('timeModeSelect').value==='custom'){
+    return Math.max(0,Math.min(23,parseInt(document.getElementById('simHourInput').value,10)||0));
+  }
+  return new Date().getUTCHours();
+}
+
+
+function emptyHourlyStats(){
+  const stats={};
+  for(let h=0;h<24;h++){
+    stats[h]={total:0,ped:0,hofs:0};
+    targetMobs.forEach(m=>stats[h][m]=0);
+  }
+  return stats;
+}
+
+
+function makeHeatCell(hour,count,max,mode,isCurrent){
+  const ratio=count/max;
+  const cell=document.createElement('div');
+  cell.className='heatmap-cell';
+  let bg='#0a1726',color='#e8f1fb';
+  if(ratio>.75){
+    bg=mode==='all'?'#a62563':'#a92f38';color='#fff';
+  }else if(ratio>.4){
+    bg='#8e5b19';color='#fff';
+  }else if(ratio>.1){
+    bg='#14547a';color='#fff';
+  }
+  cell.style.background=bg;
+  if(isCurrent){
+    cell.style.outline='2px solid var(--accent)';
+    cell.style.outlineOffset='1px';
+  }
+  cell.style.color=color;
+  cell.innerHTML=`<strong>${count}</strong><span class="heatmap-hour">${String(hour).padStart(2,'0')}h</span>`;
+  cell.title=`${String(hour).padStart(2,'0')}:00 · ${count} ${mode==='all'?'all-mob':'target'} globals`;
+  return cell;
+}
+
+
+function getCapturedRecordDate(rec){
+  const raw=rec?.date||rec?.timestamp||rec?.time;
+  const d=raw instanceof Date?raw:(raw?new Date(raw):null);
+  return d&&!Number.isNaN(d.getTime())?d:null;
+}
+
+function describeCaptureAge(date){
+  if(!date)return 'No captured data';
+  const diff=Math.max(0,Date.now()-date.getTime());
+  const mins=Math.floor(diff/60000);
+  if(mins<1)return 'just now';
+  if(mins<60)return `${mins}m ago`;
+  const hours=Math.floor(mins/60);
+  if(hours<24)return `${hours}h ago`;
+  const days=Math.floor(hours/24);
+  return `${days}d ago`;
+}
+
+function latestCapturedRecord(){
+  let latest=null;
+  for(const rec of globalParsedData||[]){
+    const d=getCapturedRecordDate(rec);
+    if(d&&(!latest||d>latest.date))latest={rec,date:d};
+  }
+  return latest;
+}
+
+function currentSourceLabel(){
+  const text=document.getElementById('fileStatus')?.textContent?.trim()||'';
+  if(/Companion Live/i.test(text))return 'PixelB8 Companion Live';
+  if(/Browser Fallback|Browser Live/i.test(text))return 'Browser Fallback Live';
+  if(/cached/i.test(text))return 'Cached / Offline';
+  if(/connect|checking/i.test(text))return 'Connecting / checking source';
+  return text||'No live source';
+}
+
+function updateCapturedFreshnessUI(){ return; }
+
+
+function capturedRangeCutoff(value){
+  const now=Date.now();
+  if(value==='last24')return new Date(now-24*60*60*1000);
+  if(value==='last7')return new Date(now-7*24*60*60*1000);
+  if(value==='last30')return new Date(now-30*24*60*60*1000);
+  if(value==='last90')return new Date(now-90*24*60*60*1000);
+  return new Date(0);
+}
+
+function renderCapturedHistory(){ return; }
+
+
+function updateAnalyticsDisplay(){ return; }
+
+
+function renderHotMobs(rows){
+  const el=document.getElementById('hotMobsStrip');if(!el)return;
+  if(!rows.length){el.innerHTML='<div class="empty">No creature globals match this view yet.</div>';return;}
+  el.innerHTML=rows.map(({mob,data},i)=>`<button class="hot-mob-chip" type="button" title="${escapeHtml(mob)}" onclick="document.getElementById('activitySearchInput').value='${escapeHtml(mob).replace(/'/g,'&#39;')}';updateAnalyticsDisplay()">
+    <span class="hot-rank">#${i+1}</span><b class="hot-name">${escapeHtml(mob)}</b>
+    <span class="hot-stats"><span class="hof">${data.hofs} HOF${data.hofs===1?'':'s'}</span><span>${data.count} Global${data.count===1?'':'s'}</span><span>${data.totalPed.toFixed(0)} PED</span></span>
+  </button>`).join('');
+}
+
+function renderAnalyticsCards(rows){
+  const container=document.getElementById('resultsContainer');
+  container.innerHTML='';
+  if(!rows.length){container.innerHTML='<div class="empty">No creature globals match the current search/time range.</div>';return;}
+
+  const body=rows.map(({mob,data})=>{
+    const avg=data.count?data.totalPed/data.count:0;
+    let peakH=0,maxH=-1;
+    data.hours.forEach((v,h)=>{if(v>maxH){maxH=v;peakH=h}});
+    const peak=maxH>0?`${String(peakH).padStart(2,'0')}:00–${String((peakH+1)%24).padStart(2,'0')}:00`:'—';
+    const lastSeen=data.lastSeen?formatDateTimeUTCish(data.lastSeen):'—';
+    const uniquePlayers=data.players?.size||0;
+    const waypoints=mobWaypoints[mob.toLowerCase()]||[];
+    const wp=waypoints[0]||'';
+    const wpButton=wp
+      ?`<button class="btn analytics-waypoint-copy" type="button" data-waypoint="${encodeURIComponent(wp)}" title="${escapeHtml(wp)}">${escapeHtml(wp)}</button>`
+      :'<span class="muted">—</span>';
+    return `<tr>
+      <td><span class="analytics-mob-name">${escapeHtml(mob)}</span></td>
+      <td class="analytics-number"><b>${data.count}</b></td>
+      <td class="analytics-number success">${data.totalPed.toFixed(2)}</td>
+      <td class="analytics-number">${avg.toFixed(2)}</td>
+      <td class="analytics-number warning">${data.maxPed.toFixed(2)}</td>
+      <td class="analytics-number hof">${data.hofs}</td>
+      <td class="analytics-number">${uniquePlayers}</td>
+      <td class="analytics-last-seen">${lastSeen}</td>
+      <td class="analytics-number">${peak}</td>
+      <td>${wpButton}</td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML=`<div class="analytics-table-wrap">
+    <table class="analytics-table">
+      <thead><tr>
+        <th>Mob</th>
+        <th>Globals</th>
+        <th>Total PED</th>
+        <th>Average</th>
+        <th>Largest</th>
+        <th>HOFs</th>
+        <th>Players</th>
+        <th>Last Seen</th>
+        <th>Peak Hour</th>
+        <th>Waypoint</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>
+  </div>`;
+  container.querySelectorAll('.analytics-waypoint-copy').forEach(btn=>{
+    btn.addEventListener('click',()=>copyWaypoint(decodeURIComponent(btn.dataset.waypoint||'')));
+  });
+}
+
+function copyWaypoint(wpText){
+  navigator.clipboard.writeText(wpText).then(showToast).catch(err=>console.error('Copy failed',err));
+}
+function showToast(){
+  const toast=document.getElementById('toast');
+  toast.className='show';
+  setTimeout(()=>toast.className='',1800);
+}
+
+function startEventCountdowns(){
+  if(eventCountdownInterval){clearInterval(eventCountdownInterval);eventCountdownInterval=null;}
+}
+
+function formatDuration(ms){
+  ms=Math.max(0,ms);
+  const totalSeconds=Math.floor(ms/1000);
+  const days=Math.floor(totalSeconds/86400);
+  const hours=Math.floor((totalSeconds%86400)/3600);
+  const minutes=Math.floor((totalSeconds%3600)/60);
+  const seconds=totalSeconds%60;
+  return `${days}d ${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+}
+
+function formatClock(d){
+  return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+function formatDateTimeUTCish(d){
+  if(!(d instanceof Date)||isNaN(d))return'—';
+  return d.toISOString().replace('T',' ').slice(0,19);
+}
+function escapeHtml(value){
+  return String(value??'').replace(/[&<>"']/g,ch=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[ch]));
+}
+
+/* ---------------------------------------------------------
+   In-app notifications
+   --------------------------------------------------------- */
+window.showAppToast=function(message,type='info',duration=2800){
+  const host=document.getElementById('appToastHost');
+  if(!host)return;
+  const toast=document.createElement('div');
+  toast.className=`app-toast ${type||'info'}`;
+  toast.setAttribute('role','status');
+  toast.innerHTML=`<span class="app-toast-dot"></span><span class="app-toast-message"></span>`;
+  toast.querySelector('.app-toast-message').textContent=String(message||'');
+  host.appendChild(toast);
+  requestAnimationFrame(()=>toast.classList.add('show'));
+  const remove=()=>{
+    toast.classList.remove('show');
+    setTimeout(()=>toast.remove(),180);
+  };
+  toast.addEventListener('click',remove,{once:true});
+  setTimeout(remove,Math.max(1200,Number(duration)||2800));
+};
+
+
+window.appConfirm=function(message,{title='Confirm',confirmText='Confirm'}={}){
+  return new Promise(resolve=>{
+    const backdrop=document.getElementById('appConfirmBackdrop');
+    const titleEl=document.getElementById('appConfirmTitle');
+    const messageEl=document.getElementById('appConfirmMessage');
+    const cancel=document.getElementById('appConfirmCancel');
+    const accept=document.getElementById('appConfirmAccept');
+    if(!backdrop||!cancel||!accept){resolve(false);return;}
+    if(titleEl)titleEl.textContent=title;
+    if(messageEl)messageEl.textContent=message;
+    accept.textContent=confirmText;
+
+    const done=value=>{
+      backdrop.classList.add('hidden');
+      cancel.onclick=null;accept.onclick=null;backdrop.onclick=null;
+      resolve(value);
+    };
+    cancel.onclick=()=>done(false);
+    accept.onclick=()=>done(true);
+    backdrop.onclick=e=>{if(e.target===backdrop)done(false)};
+    backdrop.classList.remove('hidden');
+    accept.focus();
+  });
+};
+
+
+/* =========================================================
+   APPLICATION SIDEBAR
+   ========================================================= */
+const APP_SIDEBAR_KEY='entropia_app_sidebar_collapsed_v1';
+
+function setAppSidebarCollapsed(collapsed){
+  const shell=document.getElementById('appShell');
+  const sidebar=document.getElementById('appSidebar');
+  const button=document.getElementById('sidebarToggleBtn');
+  if(!shell||!sidebar)return;
+
+  shell.classList.toggle('sidebar-collapsed',!!collapsed);
+  sidebar.classList.toggle('collapsed',!!collapsed);
+  if(!collapsed)closeSidebarLoadoutFlyout();
+
+  if(button){
+    button.textContent=collapsed?'›':'‹';
+    button.title=collapsed?'Expand sidebar':'Collapse sidebar';
+    button.setAttribute('aria-label',collapsed?'Expand sidebar':'Collapse sidebar');
+    button.setAttribute('aria-expanded',String(!collapsed));
+  }
+  localStorage.setItem(APP_SIDEBAR_KEY,collapsed?'1':'0');
+
+  syncObsModeButtonLabel();
+}
+
+function toggleAppSidebar(){
+  const shell=document.getElementById('appShell');
+  const next=!shell?.classList.contains('sidebar-collapsed');
+  setAppSidebarCollapsed(next);
+  if(!next)closeSidebarLoadoutFlyout();
+}
+
+function closeSidebarLoadoutFlyout(){
+  const field=document.getElementById('sidebarLoadoutField');
+  const button=document.getElementById('sidebarLoadoutIconBtn');
+  field?.classList.remove('flyout-open');
+  button?.setAttribute('aria-expanded','false');
+}
+
+function toggleSidebarLoadoutFlyout(event){
+  const shell=document.getElementById('appShell');
+  if(!shell?.classList.contains('sidebar-collapsed'))return;
+  event?.stopPropagation();
+  const field=document.getElementById('sidebarLoadoutField');
+  const button=document.getElementById('sidebarLoadoutIconBtn');
+  const open=!field?.classList.contains('flyout-open');
+  field?.classList.toggle('flyout-open',open);
+  button?.setAttribute('aria-expanded',String(open));
+}
+
+function restoreAppSidebar(){
+  setAppSidebarCollapsed(localStorage.getItem(APP_SIDEBAR_KEY)==='1');
+  syncObsModeButtonLabel();
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',restoreAppSidebar);
+}else{
+  restoreAppSidebar();
+}
+
+
+function togglePixelb8More(){
+  PixelB8Shell.toggleMore('#pixelb8MoreSection');
+}
+
+function initializePixelb8More(){
+  PixelB8Shell.initMore(document);
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',initializePixelb8More);
+}else{
+  initializePixelb8More();
+}
+
+
+window.addEventListener('loadout-equipped-changed',()=>{
+  syncStreamerLoadoutPanel();
+  applyStreamerMetricConfig();
+});
+
+document.addEventListener('DOMContentLoaded',()=>{
+  PixelB8Shell.initRightRail();
+  PixelB8Shell.bindVerticalResizer({
+    element:'[data-pixelb8-right-resizer]',
+    cssVariable:'--pixelb8-right-expanded',
+    storageKey:'pixelb8_shared_right_width_v1',
+    defaultWidth:248,
+    minWidth:210,
+    maxWidth:460,
+    invert:true,
+    enabled:()=>document.querySelector('[data-pixelb8-shell]')?.classList.contains('social-expanded')
+  });
+});
+
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>switchTab('live'),{once:true});}else{switchTab('live');}
+
+
+function refreshSidebarEquippedLoadout(){
+  const select=document.getElementById('sidebarEquippedLoadoutSelect');
+  if(!select||!window.EntropiaLoadouts)return;
+  const list=window.EntropiaLoadouts.getSavedLoadouts?.()||[];
+  const equipped=window.EntropiaLoadouts.getEquippedLoadoutId?.()||'';
+  select.innerHTML='<option value="">No loadout equipped</option>'+list.map(entry=>
+    `<option value="${entry.id}"${entry.id===equipped?' selected':''}>${String(entry.name||'Unnamed Loadout').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</option>`
+  ).join('');
+}
+function changeSidebarEquippedLoadout(id){
+  if(!window.EntropiaLoadouts)return;
+  if(!id){
+    localStorage.removeItem('entropia_hunt_equipped_loadout_v1');
+    window.EntropiaLoadouts.syncEquippedLabels?.();
+    refreshSidebarEquippedLoadout();
+    return;
+  }
+  window.EntropiaLoadouts.equip?.(id);
+  refreshSidebarEquippedLoadout();
+
+  closeSidebarLoadoutFlyout();
+}
+window.addEventListener('loadout-equipped-changed',refreshSidebarEquippedLoadout);
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(refreshSidebarEquippedLoadout,0),{once:true});
+}else{
+  setTimeout(refreshSidebarEquippedLoadout,0);
+}
+
+
+function syncPrimaryHuntActionButton(){
+  syncHuntTrackingStatus();
+  const btn=document.getElementById('huntPrimaryActionBtn');
+  const stopBtn=document.getElementById('huntStopBtn');
+  const session=window.EntropiaHuntTracker?.getSession?.();
+  const status=session?.status||'idle';
+  if(btn){
+    if(status==='active'){
+      btn.textContent='Ⅱ Pause';
+      btn.dataset.huntAction='pause';
+    }else if(status==='paused'){
+      btn.textContent='▶ Resume';
+      btn.dataset.huntAction='resume';
+    }else{
+      btn.textContent='▶ Start Hunt';
+      btn.dataset.huntAction='start';
+    }
+  }
+  if(stopBtn)stopBtn.disabled=!(status==='active'||status==='paused');
+}
+
+function handlePrimaryHuntAction(){
+  const tracker=window.EntropiaHuntTracker;
+  if(!tracker)return;
+  const status=tracker.getSession?.()?.status||'idle';
+  if(status==='active'||status==='paused'){
+    tracker.togglePause?.();
+  }else{
+    tracker.start?.();
+  }
+  syncPrimaryHuntActionButton();
+}
+
+window.syncPrimaryHuntActionButton=syncPrimaryHuntActionButton;
+window.handlePrimaryHuntAction=handlePrimaryHuntAction;
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(syncPrimaryHuntActionButton,0),{once:true});
+}else{
+  setTimeout(syncPrimaryHuntActionButton,0);
+}

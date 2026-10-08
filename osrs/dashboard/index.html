@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en" data-base="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — PixelB8 OSRS</title>
+  <link rel="stylesheet" href="../assets/css/vtam.css">
+</head>
+<body>
+<main class="shell">
+  <div id="vtamTop"></div>
+  <section class="page">
+    <nav class="subnav dashboard-mode-subnav" id="dashboardSubnav" aria-label="Character, Clan and Tools"></nav>
+    <nav class="subnav clan-workspace-subnav" id="clanSubnav" aria-label="Clan dashboard sections" hidden></nav>
+    <div id="dashboardStatus" class="registration-status" hidden></div>
+    <div id="dashboardViewCharacter" class="dashboard-view"></div>
+    <div id="dashboardViewClanMain" class="dashboard-view" hidden><div id="clanDashboard"></div></div>
+    <div id="dashboardViewClanRanks" class="dashboard-view" hidden><div id="clanRanks"></div></div>
+    <div id="dashboardViewClanVault" class="dashboard-view" hidden></div>
+    <div id="dashboardViewClanOffice" class="dashboard-view" hidden></div>
+  </section>
+  <footer class="footer">PixelB8 OSRS • Dashboard<div class="legal-disclaimer">Old School RuneScape and RuneScape are trademarks of Jagex Limited. PixelB8 is not affiliated with, endorsed by, or sponsored by Jagex.</div></footer>
+</main>
+
+<template id="personalBuildsTemplate"><div class="panel panel-pad page-head">
+<div>
+<div class="eyebrow">Character</div>
+<h1>Character</h1>
+<p>Refresh a character from public hiscores, plan stat and quest goals, build an equipment loadout with live OSRS item icons, and track GE buy-limit timers.</p>
+</div>
+<div class="form-row">
+<div class="field">
+<label for="rsn">RuneScape Name</label>
+<input autocomplete="off" class="input" id="rsn" value="VTAM CEO"/>
+</div>
+<button class="btn primary" id="lookup">Refresh Character</button>
+</div>
+</div>
+<div class="callout" id="lookupStatus">Enter an RSN and refresh to load public skill levels. Equipment loadouts and goals are stored locally in this browser.</div>
+<div class="build-dashboard">
+<article class="panel panel-pad osrs-character-panel">
+<div class="section-title compact-title">
+<div>
+<div class="eyebrow">Skills</div>
+<h2 id="skillsTitle">VTAM CEO</h2>
+</div>
+<div class="total-level-badge"><span>Total</span><b id="totalLevel">—</b></div>
+</div>
+<div aria-label="Old School RuneScape skill levels" class="osrs-skill-grid" id="skillPanel"></div>
+</article>
+<article class="panel panel-pad osrs-character-panel">
+<div class="section-title compact-title">
+<div>
+<div class="eyebrow">Equipment</div>
+<h2>Loadout</h2>
+</div>
+<button class="btn" id="clearEquipment">Clear</button>
+</div>
+<div class="equipment-shell">
+<div aria-label="RuneScape equipment slots" class="equipment-grid" id="equipmentGrid"></div>
+</div>
+<p class="equipment-help">Click an equipment slot to search the OSRS item database. Item images come from the Wiki icon filename supplied by the market mapping API.</p>
+</article>
+</div>
+<div class="grid grid-2">
+<article class="panel panel-pad">
+<div class="section-title"><h2>Stat Goals</h2><button class="btn" id="addGoal">Add Goal</button></div>
+<div class="list" id="goalList" style="margin-top:12px"></div>
+</article>
+<article class="panel panel-pad">
+<div class="section-title"><h2>Quest Goals</h2><button class="btn" id="addQuest">Add Quest</button></div>
+<div class="list" id="questList" style="margin-top:12px"></div>
+</article>
+</div>
+<article class="panel panel-pad">
+<div class="section-title"><h2>GE Slot &amp; Buy-Limit Timers</h2><button class="btn" id="addTimer">New Timer</button></div>
+<div class="list" id="timerList" style="margin-top:12px"></div>
+</article><div class="modal-backdrop" hidden="" id="itemPickerBackdrop">
+<section aria-labelledby="itemPickerTitle" aria-modal="true" class="item-picker panel" role="dialog">
+<div class="item-picker-head">
+<div>
+<div class="eyebrow">Equipment Search</div>
+<h2 id="itemPickerTitle">Choose Item</h2>
+</div>
+<button aria-label="Close" class="btn" id="closeItemPicker">×</button>
+</div>
+<div class="item-picker-controls">
+<input autocomplete="off" class="input" id="itemSearch" placeholder="Search items…"/>
+<button class="btn danger" id="unequipItem">Unequip</button>
+</div>
+<div class="item-search-results" id="itemSearchResults"><div class="muted">Loading OSRS item database…</div></div>
+</section>
+</div>
+</template>
+<template id="clanVaultTemplate"><div class="panel panel-pad page-head">
+<div>
+<div class="eyebrow">Treasury &amp; Coffer</div>
+<h1><span data-clan-display="">Clan</span> Vault</h1>
+<p>Local treasury reference for this clan. Values are stored only in this browser for now.</p>
+</div>
+<button class="btn primary" id="editVault">Edit Local Ledger</button>
+</div>
+<div class="grid grid-3">
+<div class="metric">
+<div class="metric-label">Platinum Tokens</div>
+<div class="metric-value good" id="tokens">0</div>
+<div class="muted mono" id="tokensGp">0 GP</div>
+</div>
+<div class="metric">
+<div class="metric-label">Clan Coffer</div>
+<div class="metric-value" id="coffer">0 GP</div>
+<div class="muted">Editable local value</div>
+</div>
+<div class="metric">
+<div class="metric-label">Tracked Net Value</div>
+<div class="metric-value accent" id="net">0 GP</div>
+</div>
+</div>
+<div class="grid grid-2">
+<article class="panel panel-pad">
+<div class="section-title"><h2>Funds &amp; Allocations</h2></div>
+<div class="list" id="vaultAllocations" style="margin-top:12px"></div>
+</article>
+<article class="panel panel-pad">
+<div class="section-title"><h2>Ledger Notes</h2></div>
+<p class="muted">This foundation stores vault values locally in the browser. A future shared clan-data layer can replace local storage without changing the page structure.</p>
+<div class="callout">Vault totals are informational and are not connected to RuneLite, a bank plugin, or a shared clan database.</div>
+</article>
+</div></template>
+<template id="clanOfficeTemplate"><div class="panel panel-pad page-head"><div><div class="eyebrow">Local Clan Tools</div><h1 id="officeTitle">Clan Office</h1><p id="officeIntro">Your clan member workspace.</p></div></div><div class="registration-status" hidden="" id="officeAccessStatus"></div><div class="panel panel-pad" hidden="" id="officeMemberPanel"></div><div class="registration-status" hidden="" id="officeKeyStatus"></div><div class="panel panel-pad" hidden="" id="officeClanFeedManager"><div class="section-title"><div><div class="eyebrow">Optional Realtime Hosting</div><h2>Clan-owned Feed</h2></div><span class="badge member" id="clanFeedHostingBadge">Not configured</span></div><p class="muted">Set the secure WebSocket URL for this clan’s shared live feed. Anyone viewing this clan page will automatically listen to this URL. Leave it blank to use only each viewer’s Local RuneLite Bridge.</p><div class="actions" style="margin:12px 0"><button class="btn primary" id="deployClanFeed" type="button">Set Up Free Clan Feed</button><span class="muted" id="deployClanFeedHint">Guided setup for your own free Cloudflare clan-feed relay.</span></div><div class="field"><label for="clanFeedWebSocketUrl">Shared Clan Feed WebSocket URL</label><div class="key-row"><input autocomplete="off" class="input" id="clanFeedWebSocketUrl" placeholder="wss://your-feed.workers.dev/clan/your-clan" spellcheck="false" type="url"/><button class="btn primary" id="saveClanFeedUrl" type="button">Save Feed URL</button><button class="btn danger" id="clearClanFeedUrl" type="button">Remove</button></div><small class="muted">Use a secure <code>wss://</code> endpoint. This stores only the public feed address — never a clan key.</small></div><div class="clan-key-card" id="clanFeedViewerAccess" style="margin-top:16px"><div class="key-card-head"><div><div class="eyebrow">Read-only Access</div><h3>Clan Feed Viewer Code</h3></div><span class="badge member" id="viewerCodeBadge">Not created</span></div><p class="muted">Share this code only with clan members. This code is stored only in this browser. PixelB8 does not receive or hash it.</p><div class="key-row"><input class="input verification-key" id="viewerCodeDisplay" readonly="" value="Not created"/><button class="btn" hidden="" id="toggleViewerCode" type="button">Show / Hide</button><button class="btn" hidden="" id="copyViewerCode" type="button">Copy</button><button class="btn primary" id="generateViewerCode" type="button">Generate Viewer Code</button><button class="btn danger" hidden="" id="regenerateViewerCode" type="button">Regenerate</button></div><small class="muted">Share this code only with clan members. Your Cloudflare Worker can use it to grant read-only viewer access through short-lived tokens.</small><div class="registration-status" hidden="" id="viewerCodeStatus"></div></div><div class="registration-status" hidden="" id="clanFeedUrlStatus"></div></div><dialog class="setup-dialog" id="clanFeedSetupDialog">
+<div class="setup-dialog-card">
+<div class="section-title">
+<div><div class="eyebrow">Clan-owned Feed Setup</div><h2>Deploy your clan feed</h2></div>
+<button class="btn ghost" id="closeClanFeedSetup" type="button">Close</button>
+</div>
+<p class="muted">Your clan feed runs in your own free Cloudflare account, so its traffic and free quota stay separate from PixelB8 and other clans.</p>
+<div class="setup-step">
+<div class="setup-step-number">1</div>
+<div>
+<h3>Connect GitHub to Cloudflare</h3>
+<p class="muted">Open the Cloudflare setup once and choose <strong>New GitHub connection</strong>. Authorize the <strong>Cloudflare Workers &amp; Pages</strong> GitHub app for the GitHub account you want to use. When the connection finishes, you can close that Cloudflare tab and return here.</p>
+<a class="btn" href="#" id="connectGithubCloudflare" rel="noopener" target="_blank">Connect GitHub to Cloudflare</a>
+<p class="muted setup-note">This is a one-time connection for your Cloudflare account. After your clan feed is deployed, you can restrict Cloudflare's GitHub access to only the new clan-feed repo.</p>
+</div>
+</div>
+<div class="setup-step">
+<div class="setup-step-number">2</div>
+<div>
+<h3>Deploy the PixelB8 clan feed</h3>
+<p class="muted">Open the deploy page again and select the GitHub account you just connected. Keep <strong>Create private Git repository</strong> enabled and set the project name to <code id="deployRepoNamePreview">your-clan-feed-cloudflare-setup</code>.</p>
+<a class="btn primary" href="#" id="continueClanFeedDeploy" rel="noopener" target="_blank">Deploy Clan Feed</a>
+<p class="muted setup-note">Leave Preview Builds off and leave Protect with Cloudflare Access off. Cloudflare will create the private deployment repo for you.</p>
+</div>
+</div>
+<div class="setup-step">
+<div class="setup-step-number">3</div>
+<div>
+<h3>Limit GitHub access</h3>
+<p class="muted">After deployment, you can open GitHub's installed-app settings and change Cloudflare Workers &amp; Pages to <strong>Only select repositories</strong>, selecting only your new clan-feed repo.</p>
+<a class="btn ghost" href="https://github.com/settings/installations" rel="noopener" target="_blank">Manage GitHub App Access</a>
+</div>
+</div>
+<div class="setup-step">
+<div class="setup-step-number">4</div>
+<div>
+<h3>Save your deployed feed URL</h3>
+<p class="muted">After Cloudflare finishes, copy the Worker URL it gives you. Close this guide, paste the secure <code>wss://</code> feed URL into the field below, and press <strong>Save Feed URL</strong>.</p>
+</div>
+</div>
+</div>
+</dialog></template>
+
+<script src="../../sharedassets/js/pixelb8-audio.js"></script><script src="../assets/js/osrs-pixelb8-shell.js"></script>
+
+
+<script src="../assets/js/clans.js"></script>
+<script src="../assets/js/vtam.js"></script>
+<script src="../assets/js/clan-dashboard.js"></script>
+<script src="../assets/js/clan-ranks.js"></script>
+<script src="../assets/js/roster.js"></script>
+<script src="../assets/js/builds.js"></script>
+<script src="../assets/js/clan-office.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+</body>
+</html>

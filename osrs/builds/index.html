@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en" data-base="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PixelB8 OSRS — Builds</title>
+  <link rel="stylesheet" href="../assets/css/vtam.css">
+</head>
+<body>
+<main class="shell">
+  <div id="vtamTop"></div>
+  <section class="page">
+    <nav class="subnav dashboard-mode-subnav" id="dashboardSubnav" aria-label="Dashboard sections"></nav>
+    <div class="panel panel-pad page-head">
+      <div>
+        <div class="eyebrow">Character Planning</div>
+        <h1>Builds</h1>
+        <p>Refresh a character from public hiscores, plan stat and quest goals, build an equipment loadout with live OSRS item icons, and track GE buy-limit timers.</p>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="rsn">RuneScape Name</label>
+          <input class="input" id="rsn" value="VTAM CEO" autocomplete="off">
+        </div>
+        <button class="btn primary" id="lookup">Refresh Character</button>
+      </div>
+    </div>
+
+    <div id="lookupStatus" class="callout">Enter an RSN and refresh to load public skill levels. Equipment loadouts and goals are stored locally in this browser.</div>
+
+    <div class="build-dashboard">
+      <article class="panel panel-pad osrs-character-panel">
+        <div class="section-title compact-title">
+          <div>
+            <div class="eyebrow">Skills</div>
+            <h2 id="skillsTitle">VTAM CEO</h2>
+          </div>
+          <div class="total-level-badge"><span>Total</span><b id="totalLevel">—</b></div>
+        </div>
+        <div id="skillPanel" class="osrs-skill-grid" aria-label="Old School RuneScape skill levels"></div>
+      </article>
+
+      <article class="panel panel-pad osrs-character-panel">
+        <div class="section-title compact-title">
+          <div>
+            <div class="eyebrow">Equipment</div>
+            <h2>Loadout</h2>
+          </div>
+          <button class="btn" id="clearEquipment">Clear</button>
+        </div>
+        <div class="equipment-shell">
+          <div id="equipmentGrid" class="equipment-grid" aria-label="RuneScape equipment slots"></div>
+        </div>
+        <p class="equipment-help">Click an equipment slot to search the OSRS item database. Item images come from the Wiki icon filename supplied by the market mapping API.</p>
+      </article>
+    </div>
+
+    <div class="grid grid-2">
+      <article class="panel panel-pad">
+        <div class="section-title"><h2>Stat Goals</h2><button class="btn" id="addGoal">Add Goal</button></div>
+        <div class="list" id="goalList" style="margin-top:12px"></div>
+      </article>
+      <article class="panel panel-pad">
+        <div class="section-title"><h2>Quest Goals</h2><button class="btn" id="addQuest">Add Quest</button></div>
+        <div class="list" id="questList" style="margin-top:12px"></div>
+      </article>
+    </div>
+
+    <article class="panel panel-pad">
+      <div class="section-title"><h2>GE Slot & Buy-Limit Timers</h2><button class="btn" id="addTimer">New Timer</button></div>
+      <div class="list" id="timerList" style="margin-top:12px"></div>
+    </article>
+  </section>
+  <footer class="footer">PixelB8 OSRS • Character Build Planner<div class="legal-disclaimer">Old School RuneScape and RuneScape are trademarks of Jagex Limited. PixelB8 is not affiliated with, endorsed by, or sponsored by Jagex.</div></footer>
+</main>
+
+<div class="modal-backdrop" id="itemPickerBackdrop" hidden>
+  <section class="item-picker panel" role="dialog" aria-modal="true" aria-labelledby="itemPickerTitle">
+    <div class="item-picker-head">
+      <div>
+        <div class="eyebrow">Equipment Search</div>
+        <h2 id="itemPickerTitle">Choose Item</h2>
+      </div>
+      <button class="btn" id="closeItemPicker" aria-label="Close">×</button>
+    </div>
+    <div class="item-picker-controls">
+      <input class="input" id="itemSearch" placeholder="Search items…" autocomplete="off">
+      <button class="btn danger" id="unequipItem">Unequip</button>
+    </div>
+    <div id="itemSearchResults" class="item-search-results"><div class="muted">Loading OSRS item database…</div></div>
+  </section>
+</div>
+
+<script src="../../sharedassets/js/pixelb8-audio.js"></script><script src="../assets/js/osrs-pixelb8-shell.js"></script><script src="../assets/js/clans.js"></script>
+<script src="../assets/js/vtam.js"></script>
+<script src="../assets/js/builds.js"></script><script>VTAM.renderDashboardSubnav('personal');</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en" data-base="../../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Clan Vault — PixelB8 OSRS</title>
+  <link rel="stylesheet" href="../../../assets/css/vtam.css">
+</head>
+<body>
+<main class="shell">
+  <div id="vtamTop"></div>
+  <section class="page">
+    <nav class="subnav dashboard-mode-subnav" id="dashboardSubnav" aria-label="Dashboard sections"></nav>
+    <nav class="subnav clan-workspace-subnav" id="clanSubnav" aria-label="Clan dashboard sections"></nav>
+    <div class="panel panel-pad page-head">
+      <div>
+        <div class="eyebrow">Treasury & Coffer</div>
+        <h1><span data-clan-display>Clan</span> Vault</h1>
+        <p>Local treasury reference for this clan. Values are stored only in this browser for now.</p>
+      </div>
+      <button class="btn primary" id="editVault">Edit Local Ledger</button>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="metric">
+        <div class="metric-label">Platinum Tokens</div>
+        <div class="metric-value good" id="tokens">0</div>
+        <div class="muted mono" id="tokensGp">0 GP</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Clan Coffer</div>
+        <div class="metric-value" id="coffer">0 GP</div>
+        <div class="muted">Editable local value</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Tracked Net Value</div>
+        <div class="metric-value accent" id="net">0 GP</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <article class="panel panel-pad">
+        <div class="section-title"><h2>Funds & Allocations</h2></div>
+        <div class="list" id="vaultAllocations" style="margin-top:12px"></div>
+      </article>
+      <article class="panel panel-pad">
+        <div class="section-title"><h2>Ledger Notes</h2></div>
+        <p class="muted">This foundation stores vault values locally in the browser. A future shared clan-data layer can replace local storage without changing the page structure.</p>
+        <div class="callout">Vault totals are informational and are not connected to RuneLite, a bank plugin, or a shared clan database.</div>
+      </article>
+    </div>
+  </section>
+  <footer class="footer"><span data-clan-display>Clan</span> • Vault • <a id="clanHomeLink" href="../index.html">Dashboard Main</a><div class="legal-disclaimer">Old School RuneScape and RuneScape are trademarks of Jagex Limited. PixelB8 is not affiliated with, endorsed by, or sponsored by Jagex.</div></footer>
+</main>
+<script src="../../../../sharedassets/js/pixelb8-audio.js"></script><script src="../../../assets/js/osrs-pixelb8-shell.js"></script><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+<script src="../../../assets/js/firebase-clans.js"></script>
+<script src="../../../assets/js/clans.js"></script>
+<script src="../../../assets/js/vtam.js"></script>
+<script>
+(async()=>{
+  const profile=VTAM.currentProfile();
+  const slug=VTAM.profileClanSlug(profile);
+  if(!slug){location.href='../../../dashboard/index.html';return;}
+  history.replaceState(null,'',`index.html?clan=${encodeURIComponent(slug)}`);
+  document.documentElement.dataset.clan=slug;
+  const clan=await OSRSClans.load(slug);
+  if(!clan){document.querySelector('section.page').innerHTML='<div class="panel panel-pad"><h1>Clan not found</h1></div>';return;}
+  VTAM.init('dashboard');
+  VTAM.renderDashboardSubnav('clan');
+  VTAM.renderClanSubnav('vault');
+  OSRSClans.hydrateClanPage(slug);
+  document.getElementById('clanHomeLink').href=`../../../dashboard/clan/index.html?clan=${encodeURIComponent(slug)}`;
+
+  const cofferKey=`pixelb8_clan_vault_coffer:${slug}`;
+  const tokensKey=`pixelb8_clan_vault_tokens:${slug}`;
+  if(slug==='vtam' && localStorage.getItem(cofferKey)===null && localStorage.getItem('vtam_coffer_gp')!==null){
+    localStorage.setItem(cofferKey, localStorage.getItem('vtam_coffer_gp'));
+  }
+  if(localStorage.getItem(tokensKey)===null && Number(clan.vault?.platinumTokens||0)>0){
+    localStorage.setItem(tokensKey,String(Number(clan.vault.platinumTokens)||0));
+  }
+
+  function draw(){
+    const tokens=Math.max(0,Number(localStorage.getItem(tokensKey))||0);
+    const coffer=Math.max(0,Number(localStorage.getItem(cofferKey))||0);
+    const tokenGp=tokens*1000;
+    document.getElementById('tokens').textContent=tokens.toLocaleString();
+    document.getElementById('tokensGp').textContent=VTAM.money(tokenGp);
+    document.getElementById('coffer').textContent=VTAM.money(coffer);
+    document.getElementById('net').textContent=VTAM.money(tokenGp+coffer);
+    const allocations=Array.isArray(clan.vault?.allocations)?clan.vault.allocations:[];
+    document.getElementById('vaultAllocations').innerHTML=allocations.length
+      ? allocations.map(x=>`<div class="list-row"><span><b>${OSRSClans.escapeHtml(x.name||'Allocation')}</b><br><small class="muted">${OSRSClans.escapeHtml(x.description||'')}</small></span><span class="good mono">${VTAM.money(Number(x.amount)||0)}</span></div>`).join('')
+      : '<div class="chat-empty"><strong>No allocations recorded</strong><span>This clan has no preset local allocations.</span></div>';
+  }
+  draw();
+  document.getElementById('editVault').onclick=()=>{
+    const tokenValue=prompt('Platinum token count:',localStorage.getItem(tokensKey)||'0');
+    if(tokenValue===null)return;
+    const cofferValue=prompt('Clan coffer value in GP:',localStorage.getItem(cofferKey)||'0');
+    if(cofferValue===null)return;
+    if(!isNaN(Number(tokenValue)))localStorage.setItem(tokensKey,String(Math.max(0,Number(tokenValue))));
+    if(!isNaN(Number(cofferValue)))localStorage.setItem(cofferKey,String(Math.max(0,Number(cofferValue))));
+    draw();
+  };
+})();
+</script>
+</body>
+</html>
