@@ -2534,6 +2534,10 @@ body:not(.streamer-mode) .summary-mode-btn{
   color:var(--graphite-muted)!important;
   border-color:transparent!important;
 }
+button#huntLoadoutsBtn {
+    margin-left: auto;
+    margin-right: 73px;
+}
 
 body:not(.streamer-mode) .tab-btn:hover,
 body:not(.streamer-mode) .global-subtab-btn:hover,
