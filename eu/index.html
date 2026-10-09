@@ -87,10 +87,10 @@
 </div>
 </aside>
 
-<main class="workspace">
-<!-- Global Analytics -->
 
-<!-- Hunt Tracker -->
+<!-- ======== main workspace ========= -->
+<main class="workspace">
+<!-- Tracker Tab -->
 <section class="tab-page" id="huntTab">
 <div class="hunt-tracker-shell">
 <div class="global-analytics-subnav">
@@ -1065,18 +1065,21 @@
 </div>
 </div>
 </section>
-<section class="hunt-subtab-page hidden" id="huntHistoryTab"><div class="panel panel hunt-history-page-panel">
-<div class="panel-header">
-<span class="panel-title">Hunt History</span>
-<span class="muted" id="huntHistoryCount">0</span>
+<section class="hunt-subtab-page hidden" id="huntHistoryTab">
+	<div class="panel panel hunt-history-page-panel">
+	  <div class="panel-header">
+		<span class="panel-title">Hunt History</span>
+		<span class="muted" id="huntHistoryCount">0</span>
+	  </div>
+	  <div class="hunt-history-list" id="huntHistoryList"><div class="empty">No saved hunts yet.</div></div>
+	</div>
+</section>
 </div>
-<div class="hunt-history-list" id="huntHistoryList">
-<div class="empty">No saved hunts yet.</div>
 </div>
-</div></section>
-</div>
-</div>
-</section><section class="tab-page hidden" id="mapsTab">
+</section>
+
+<!-- Map Tab -->
+<section class="tab-page hidden" id="mapsTab">
 <div class="maps-page-shell">
 <div class="global-analytics-subnav maps-subnav">
 <button class="global-subtab-btn active" id="mapsMapBtn" onclick="switchMapsTab('map')" type="button">Map</button>
@@ -1226,6 +1229,7 @@
 </div>
 </section>
 
+<!-- Mission Tab -->
 <section class="tab-page hidden" id="missionsTab">
 <div class="missions-page-shell">
 <div class="global-analytics-subnav missions-subnav" role="tablist" aria-label="Mission type">
@@ -1284,7 +1288,8 @@
 </div>
 </div>
 </section>
-<!-- Live -->
+
+<!-- Global Tab -->
 <section class="tab-page hidden" id="liveTab">
 <div class="live-layout">
 <div class="panel live-source-panel">
@@ -1350,6 +1355,9 @@
 </section>
 
 </main>
+<!-- ======= end main workspace =========== -->
+<!-- ====================================== -->
+
 <div class="pixelb8-vertical-resizer" data-pixelb8-right-resizer="" title="Drag to resize account &amp; chat">
 <span class="pixelb8-vertical-resizer-grip"></span>
 </div>
