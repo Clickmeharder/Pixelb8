@@ -2318,14 +2318,7 @@ body:not(.streamer-mode) tbody tr:hover{
   background:#152131!important;
 }
 
-/* KPI/stat cards */
-body:not(.streamer-mode) .kpi,
-body:not(.streamer-mode) .loadout-stat,
-body:not(.streamer-mode) .builder-slot-stat,
-body:not(.streamer-mode) .hunt-metric{
-  background:#101a27!important;
-  border-color:#25374a!important;
-}
+
 
 /* Nexus picker */
 body:not(.streamer-mode) .nexus-picker-panel{
@@ -2442,6 +2435,15 @@ body:not(.streamer-mode) .build-chip{
   background:var(--graphite-surface)!important;
   border-color:var(--graphite-border)!important;
   box-shadow:none!important;
+}
+
+/* KPI/stat cards */
+body:not(.streamer-mode) .kpi,
+body:not(.streamer-mode) .loadout-stat,
+body:not(.streamer-mode) .builder-slot-stat,
+body:not(.streamer-mode) .hunt-metric{
+  background:#101a27!important;
+  border-color:#25374a!important;
 }
 
 /* Raised / header surfaces */
