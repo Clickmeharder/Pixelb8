@@ -25,7 +25,8 @@
 <div class="sidebar-section-label">Navigation</div>
 <button class="tab-btn active" data-tab="hunt" onclick="switchTab('hunt')" title="Tracker">
 <span class="sidebar-nav-icon">H</span><span class="sidebar-item-text">Tracker</span>
-</button><button class="tab-btn" data-tab="maps" onclick="switchTab('maps')" title="Maps">
+</button>
+<button class="tab-btn" data-tab="maps" onclick="switchTab('maps')" title="Maps">
 <span class="sidebar-nav-icon">⌖</span><span class="sidebar-item-text">Maps</span>
 </button>
 <button class="tab-btn" data-tab="missions" onclick="switchTab('missions')" title="Missions">
@@ -88,72 +89,9 @@
 
 <main class="workspace">
 <!-- Global Analytics -->
-<!-- Live -->
-<section class="tab-page" id="liveTab">
-<div class="live-layout">
-<div class="panel live-source-panel">
-<div class="panel-header">
-<div>
-<span class="panel-title">Globals</span>
-<span class="muted" style="font-size:.68rem;margin-left:8px">Current-session data from your active chat.log source</span>
-</div>
-<div class="live-monitor-actions">
-<span class="status-pill" id="liveMonitorSource">Checking source…</span>
-<span class="muted" id="liveMonitorLastActivity">Last captured: —</span>
-<button class="btn" onclick="clearLiveFeed()">Clear Feed</button>
-</div>
-</div>
-</div>
-<div class="live-summary">
-<div class="kpi	">
-<div class="kpi-label">My Globals</div>
-<div class="kpi-value success" id="liveMyGlobalCount">0</div>
-<div class="kpi-sub" id="liveMyGlobalPed">0.00 PED total</div>
-</div>
-<div class="kpi">
-<div class="kpi-label">My HOFs</div>
-<div class="kpi-value hof" id="liveMyHofCount">0</div>
-<div class="kpi-sub" id="liveMyHofPed">0.00 PED total</div>
-</div>
-<div class="kpi">
-<div class="kpi-label">My Global Loot</div>
-<div class="kpi-value warning" id="liveMyTotalLoot">0.00 PED</div>
-<div class="kpi-sub">Globals + HOFs in the current analysis window</div>
-</div>
-<div class="kpi">
-<div class="kpi-label">Recent Activity</div>
-<div class="kpi-value accent" id="liveRecentCount">0</div>
-<div class="kpi-sub" id="liveRecentSub">No creature globals captured this session</div>
-</div>
-</div>
-<div class="panel live-recent-panel">
-<div class="panel-header">
-<div>
-<span class="panel-title">Recent Globals &amp; HOFs</span>
-<span class="muted" style="font-size:.68rem;margin-left:8px">One live feed · filter it to yourself, your detected team, or everyone observed</span>
-</div>
-<div aria-label="Recent activity filter" class="live-feed-filter" role="group">
-<button class="btn live-filter-btn" id="liveFilterMine" onclick="setLiveActivityFilter('mine')" type="button">Mine</button>
-<button class="btn live-filter-btn" id="liveFilterTeam" onclick="setLiveActivityFilter('team')" type="button">Team</button>
-<button class="btn live-filter-btn active" id="liveFilterAll" onclick="setLiveActivityFilter('all')" type="button">All</button>
-</div>
-</div>
-<div class="live-feed-meta merged-live-meta">
-<span>G <b id="allMobLiveGlobalCount">0</b></span>
-<span>HOF <b id="allMobLiveHofCount">0</b></span>
-<span id="allMobLiveFeedValue">0.00 PED</span>
-</div>
-<div class="table-wrap">
-<table class="feed-table">
-<thead><tr><th>Timestamp</th><th>Type</th><th>Mob</th><th>Player</th><th>Loot</th><th>Raw Entry</th></tr></thead>
-<tbody id="allMobLiveTableBody"><tr><td class="empty" colspan="6">Globals waiting for creature globals…</td></tr></tbody>
-</table>
-</div>
-</div>
-</div>
-</section>
+
 <!-- Hunt Tracker -->
-<section class="tab-page hidden" id="huntTab">
+<section class="tab-page" id="huntTab">
 <div class="hunt-tracker-shell">
 <div class="global-analytics-subnav">
 <button class="global-subtab-btn active" id="trackerSessionBtn" onclick="switchHuntTrackerTab('session')">Session</button>
@@ -1346,6 +1284,71 @@
 </div>
 </div>
 </section>
+<!-- Live -->
+<section class="tab-page hidden" id="liveTab">
+<div class="live-layout">
+<div class="panel live-source-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Globals</span>
+<span class="muted" style="font-size:.68rem;margin-left:8px">Current-session data from your active chat.log source</span>
+</div>
+<div class="live-monitor-actions">
+<span class="status-pill" id="liveMonitorSource">Checking source…</span>
+<span class="muted" id="liveMonitorLastActivity">Last captured: —</span>
+<button class="btn" onclick="clearLiveFeed()">Clear Feed</button>
+</div>
+</div>
+</div>
+<div class="live-summary">
+<div class="kpi	">
+<div class="kpi-label">My Globals</div>
+<div class="kpi-value success" id="liveMyGlobalCount">0</div>
+<div class="kpi-sub" id="liveMyGlobalPed">0.00 PED total</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">My HOFs</div>
+<div class="kpi-value hof" id="liveMyHofCount">0</div>
+<div class="kpi-sub" id="liveMyHofPed">0.00 PED total</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">My Global Loot</div>
+<div class="kpi-value warning" id="liveMyTotalLoot">0.00 PED</div>
+<div class="kpi-sub">Globals + HOFs in the current analysis window</div>
+</div>
+<div class="kpi">
+<div class="kpi-label">Recent Activity</div>
+<div class="kpi-value accent" id="liveRecentCount">0</div>
+<div class="kpi-sub" id="liveRecentSub">No creature globals captured this session</div>
+</div>
+</div>
+<div class="panel live-recent-panel">
+<div class="panel-header">
+<div>
+<span class="panel-title">Recent Globals &amp; HOFs</span>
+<span class="muted" style="font-size:.68rem;margin-left:8px">One live feed · filter it to yourself, your detected team, or everyone observed</span>
+</div>
+<div aria-label="Recent activity filter" class="live-feed-filter" role="group">
+<button class="btn live-filter-btn" id="liveFilterMine" onclick="setLiveActivityFilter('mine')" type="button">Mine</button>
+<button class="btn live-filter-btn" id="liveFilterTeam" onclick="setLiveActivityFilter('team')" type="button">Team</button>
+<button class="btn live-filter-btn active" id="liveFilterAll" onclick="setLiveActivityFilter('all')" type="button">All</button>
+</div>
+</div>
+<div class="live-feed-meta merged-live-meta">
+<span>G <b id="allMobLiveGlobalCount">0</b></span>
+<span>HOF <b id="allMobLiveHofCount">0</b></span>
+<span id="allMobLiveFeedValue">0.00 PED</span>
+</div>
+<div class="table-wrap">
+<table class="feed-table">
+<thead><tr><th>Timestamp</th><th>Type</th><th>Mob</th><th>Player</th><th>Loot</th><th>Raw Entry</th></tr></thead>
+<tbody id="allMobLiveTableBody"><tr><td class="empty" colspan="6">Globals waiting for creature globals…</td></tr></tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+
 </main>
 <div class="pixelb8-vertical-resizer" data-pixelb8-right-resizer="" title="Drag to resize account &amp; chat">
 <span class="pixelb8-vertical-resizer-grip"></span>
