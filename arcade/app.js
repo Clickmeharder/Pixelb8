@@ -17,11 +17,11 @@ const GAMES=[
   {id:'gridrunner',directoryId:'gridrunner',title:'Grid Runner',type:'multi',path:'assets/games/multiplayer/gridrunner/index.html',mark:'GRID',accent:'rgba(57,217,138,.24)',description:'PixelB8 multiplayer grid-running original.'},
   {id:'neonfleet',directoryId:'neonfleet',title:'Neon Fleet',type:'multi',path:'assets/games/multiplayer/neonfleet/index.html',mark:'NF',accent:'rgba(79,195,247,.31)',description:'Neon multiplayer fleet battles.'},
   {id:'lootsnatcher',directoryId:'lootsnatcher',title:'Loot Snatcher',type:'multi',path:'assets/games/multiplayer/lootsnatcher/index.html',mark:'LS',accent:'rgba(244,189,97,.28)',description:'Compete for loot in this multiplayer PixelB8 original.'},
-  {id:'suscomtcg',directoryId:'suscomtcg',title:'SUSCOM: TCG',type:'multi',path:'assets/games/multiplayer/suscomtcg/index.html',mark:'TCG',accent:'rgba(153,116,255,.28)',description:'Entropia-inspired multiplayer trading-card battle.'},
+  //{id:'suscomtcg',directoryId:'suscomtcg',title:'SUSCOM: TCG',type:'multi',path:'assets/games/multiplayer/suscomtcg/index.html',mark:'TCG',accent:'rgba(153,116,255,.28)',description:'Entropia-inspired multiplayer trading-card battle.'},
   {id:'outdrive2',directoryId:'outdrive2',title:'Out Drive 2',type:'multi',path:'assets/games/multiplayer/outdrive2/index.html',mark:'OD2',accent:'rgba(79,195,247,.28)',description:'The multiplayer evolution of Out Drive.'},
-  {id:'riftcommand',directoryId:'riftcommand',title:'Rift Command',type:'multi',path:'assets/games/multiplayer/riftcommand/index.html',mark:'RC',accent:'rgba(57,217,138,.28)',description:'Turn-based multiplayer tactical operations.'},
-  {id:'fishing',directoryId:'fishing',title:'Fishing',type:'multi',path:'assets/games/multiplayer/fishing/index.html',mark:'FISH',accent:'rgba(79,195,247,.22)',description:'Relaxed multiplayer fishing table.'},
-  {id:'lootgauntlet',directoryId:'lootgauntlet',title:'Loot Gauntlet',type:'multi',path:'assets/games/multiplayer/lootgauntlet/index.html',mark:'LG',accent:'rgba(244,189,97,.27)',description:'Multiplayer loot challenge.'},
+  //{id:'riftcommand',directoryId:'riftcommand',title:'Rift Command',type:'multi',path:'assets/games/multiplayer/riftcommand/index.html',mark:'RC',accent:'rgba(57,217,138,.28)',description:'Turn-based multiplayer tactical operations.'},
+ // {id:'fishing',directoryId:'fishing',title:'Fishing',type:'multi',path:'assets/games/multiplayer/fishing/index.html',mark:'FISH',accent:'rgba(79,195,247,.22)',description:'Relaxed multiplayer fishing table.'},
+  //{id:'lootgauntlet',directoryId:'lootgauntlet',title:'Loot Gauntlet',type:'multi',path:'assets/games/multiplayer/lootgauntlet/index.html',mark:'LG',accent:'rgba(244,189,97,.27)',description:'Multiplayer loot challenge.'},
   {id:'comppetclash',directoryId:'comppetclash',title:'Competitive Pet Clash',type:'multi',path:'assets/games/multiplayer/comppetclash/index.html',mark:'PET',accent:'rgba(255,105,120,.23)',description:'Legacy competitive pet battle table.'}
 ];
 
