@@ -413,7 +413,7 @@ window.EntropiaLoadouts=(function(){
   function renderEnhancers(){
     const host=document.getElementById('loadoutEnhancerGrid');
     if(!host||host.children.length)return;
-    host.innerHTML=Array.from({length:10},(_,i)=>`<div class="loadout-enhancer-slot"><input class="loadout-enhancer-input" placeholder="Socket ${i+1}" title="Enhancer socket ${i+1}"><button class="btn nexus-enhancer-btn" type="button" onclick="EntropiaLoadouts.openItemPicker('enhancer',${i})">⌕</button></div>`).join('');
+    host.innerHTML=Array.from({length:10},(_,i)=>`<div class="loadout-enhancer-slot" data-enhancer-index="${i}"><input class="loadout-enhancer-input" placeholder="Socket ${i+1}" title="Enhancer socket ${i+1}"><button class="btn nexus-enhancer-btn" type="button" onclick="EntropiaLoadouts.openItemPicker('enhancer',${i})">⌕</button></div>`).join('');
   }
 
   function applyMarketMarkupUiState(){const enabled=!!document.getElementById('useMarketMarkup')?.checked;['weaponMu','ammoMu'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=!enabled});document.querySelectorAll('.loadout-attachment-table [data-field="mu"]').forEach(el=>el.disabled=!enabled);}
@@ -471,6 +471,7 @@ window.EntropiaLoadouts=(function(){
   function equipBuilder(){const data=collectForm();if(!data.weapon.name){window.showAppToast?.("Select a weapon first.",'warning');return}let list=loadLibrary(),id=currentId;if(!id){id=`loadout_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;list.push({id,name:data.name,data,createdAt:Date.now(),updatedAt:Date.now()});saveLibrary(list);currentId=id}else{const idx=list.findIndex(x=>x.id===id);if(idx>=0){list[idx]={...list[idx],name:data.name,data,updatedAt:Date.now()};saveLibrary(list)}}equip(id);summaryMode='equipped';renderSharedSummary();}
 
   function clearSlot(slot,index=null){
+    const keepEnhancerOpen=slot==='enhancer'&&builderView==='cards'&&!!document.querySelector('.enhancer-card')?.open;
     if(slot==='weapon'){
       apiSelections.weapon=null;
       setVal('loadoutWeaponName','');
@@ -478,7 +479,7 @@ window.EntropiaLoadouts=(function(){
       // Compatibility is rechecked when selecting a new weapon.
     }else if(slot==='enhancer'&&Number.isInteger(index)){
       apiSelections.enhancers[index]=null;
-      const input=document.querySelector(`[data-enhancer-index="${index}"] input`);
+      const input=document.querySelectorAll('.loadout-enhancer-input')[index];
       if(input)input.value='';
     }else if(slots.includes(slot)){
       apiSelections[slot]=null;
@@ -492,7 +493,7 @@ window.EntropiaLoadouts=(function(){
     }
     recalc();
     renderEnhancers?.();
-    if(builderView==='cards')renderBuilderCardView();
+    if(keepEnhancerOpen)document.querySelector('.enhancer-card')?.setAttribute('open','');
   }
 
   function setSecondaryAmpEnabled(enabled){
@@ -578,7 +579,7 @@ window.EntropiaLoadouts=(function(){
         <div class="builder-enhancer-slots">
           ${Array.from({length:10},(_,i)=>{
             const name=enh[i]?.name||'';
-            return `<div class="builder-enhancer-chip ${name?'':'empty'}"><small>${i+1}</small><span title="${escapeHtml(name)}">${escapeHtml(name||'Empty')}</span><span class="enhancer-chip-actions"><button class="btn" type="button" onclick="EntropiaLoadouts.openItemPicker('enhancer',${i})">${name?'↻':'＋'}</button>${name?`<button class="btn slot-clear-btn" type="button" onclick="EntropiaLoadouts.clearSlot('enhancer',${i})">×</button>`:''}</span></div>`;
+            return `<div class="builder-enhancer-chip ${name?'':'empty'}"><small>${i+1}</small><span title="${escapeHtml(name)}">${escapeHtml(name||'Empty')}</span><span class="enhancer-chip-actions"><button class="btn" type="button" onclick="event.preventDefault();event.stopPropagation();EntropiaLoadouts.openItemPicker('enhancer',${i})">${name?'↻':'＋'}</button>${name?`<button class="btn slot-clear-btn" type="button" onclick="event.preventDefault();event.stopPropagation();EntropiaLoadouts.clearSlot('enhancer',${i})">×</button>`:''}</span></div>`;
           }).join('')}
         </div>
       </div>
@@ -960,7 +961,11 @@ window.EntropiaLoadouts=(function(){
 
     const builder=document.getElementById('huntLoadoutsTab');
     builder?.addEventListener('input',e=>{
-      if(e.target.matches('input,select'))recalc();
+      if(!e.target.matches('input,select'))return;
+      // Card-view headline fields have their own live handlers above. Rebuilding
+      // the card grid here would replace the focused input on every keystroke.
+      if(e.target.matches('#cardLoadoutName,#cardHitSkill,#cardDmgSkill'))return;
+      recalc();
     });
 
     document.getElementById('nexusPickerSearch')?.addEventListener('input',renderPickerResults);
