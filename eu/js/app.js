@@ -1648,10 +1648,19 @@ function switchTab(tabName){
   document.getElementById('missionsTab')?.classList.toggle('hidden',active!=='missions');
 
   if(active==='hunt'){
-    const huntActive=document.getElementById('huntLiveBtn')?.classList.contains('active')
-      ?'livehunt'
-      :(document.getElementById('huntTeamBtn')?.classList.contains('active')?'team'
-      :(document.getElementById('huntHistoryBtn')?.classList.contains('active')?'history':'loadouts'));
+    const huntActive=document.getElementById('trackerSessionBtn')?.classList.contains('active')
+      ?'session'
+      :(document.getElementById('huntLiveBtn')?.classList.contains('active')
+        ?'livehunt'
+        :(document.getElementById('trackerFishingBtn')?.classList.contains('active')
+          ?'fishing'
+          :(document.getElementById('trackerMiningBtn')?.classList.contains('active')
+            ?'mining'
+            :(document.getElementById('huntTeamBtn')?.classList.contains('active')
+              ?'team'
+              :(document.getElementById('huntHistoryBtn')?.classList.contains('active')
+                ?'history'
+                :(document.getElementById('huntLoadoutsBtn')?.classList.contains('active')?'loadouts':'session'))))));
     switchHuntTrackerTab(huntActive);
     window.EntropiaLoadouts?.refresh?.();
   }
@@ -2321,8 +2330,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 
-//set the first one to the intended onload page for first visit. currently we just have it go to hunt page anyway. so its pointless ig
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>switchTab('hunt'),{once:true});}else{switchTab('hunt');}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>switchTab('live'),{once:true});}else{switchTab('live');}
 
 
 function refreshSidebarEquippedLoadout(){
