@@ -6045,7 +6045,7 @@ article.panel.panel-pad.missions-main-panel {
 .hunt-live-active-attachments-head span{
   display:block;
   margin-top:2px;
-  font-size:.54rem;
+  font-size:.84rem;
   line-height:1.3;
 }
 .active-attachments-restore{
@@ -6080,7 +6080,7 @@ article.panel.panel-pad.missions-main-panel {
 .active-attachment-copy span{
   display:block;
   color:var(--muted);
-  font-size:.51rem;
+  font-size: .65rem;
   font-weight:900;
   letter-spacing:.06em;
   text-transform:uppercase;
@@ -6092,7 +6092,7 @@ article.panel.panel-pad.missions-main-panel {
   margin-top:2px;
   overflow:hidden;
   color:var(--text);
-  font-size:.61rem;
+  font-size: .81rem;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
@@ -6103,7 +6103,7 @@ article.panel.panel-pad.missions-main-panel {
   border-radius:5px;
   background:rgba(10,24,38,.8);
   color:var(--muted);
-  font:800 .53rem "SFMono-Regular",Consolas,monospace;
+  font:800 .73rem "SFMono-Regular",Consolas,monospace;
   cursor:pointer;
 }
 .active-attachment-toggle.attached{
@@ -6138,7 +6138,7 @@ article.panel.panel-pad.missions-main-panel {
 .hunt-live-active-attachments-head strong{
   display:block;
   color:var(--accent2);
-  font-size:.62rem;
+  font-size:.82rem;
   letter-spacing:.06em;
   text-transform:uppercase;
 }
@@ -6393,7 +6393,7 @@ body:not(.streamer-mode) .app:not(.sidebar-collapsed) .sidebar-loadout-icon-btn{
 .fishing-summary-grid{
   grid-template-columns:repeat(4,minmax(0,1fr));
 }
-.fishing-v1-note{
+.v1-note{
   display:grid;
   gap:4px;
   margin-top:12px;
@@ -6402,11 +6402,11 @@ body:not(.streamer-mode) .app:not(.sidebar-collapsed) .sidebar-loadout-icon-btn{
   border-radius:7px;
   background:rgba(53,194,255,.04);
 }
-.fishing-v1-note strong{
+.v1-note strong{
   color:var(--accent2);
   font-size:.67rem;
 }
-.fishing-v1-note span{
+.v1-note span{
   color:var(--muted);
   font-size:.61rem;
   line-height:1.5;
