@@ -2321,7 +2321,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>switchTab('live'),{once:true});}else{switchTab('live');}
+//set the first one to the intended onload page for first visit. currently we just have it go to hunt page anyway. so its pointless ig
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>switchTab('hunt'),{once:true});}else{switchTab('hunt');}
 
 
 function refreshSidebarEquippedLoadout(){
