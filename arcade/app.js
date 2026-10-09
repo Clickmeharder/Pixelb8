@@ -4,11 +4,11 @@ const ROOM_BROKER='wss://broker.hivemq.com:8884/mqtt';
 const GAMES=[
   // Single-player modular games from the legacy arcade.
   {id:'outdrive',title:'Out Drive',type:'single',path:'assets/games/singleplayer/outdrive/index.html',mark:'OD',accent:'rgba(79,195,247,.30)',description:'Classic PixelB8 driving cabinet.'},
-  {id:'decman',title:'DECman',type:'single',path:'assets/games/singleplayer/decman/index.html',mark:'DEC',accent:'rgba(244,189,97,.28)',description:'Retro maze-action cabinet with level tooling.'},
-  {id:'entropydrifter',title:'Entropy Drifter',type:'single',path:'assets/games/singleplayer/entropydrifter/index.html',mark:'ED',accent:'rgba(153,116,255,.28)',description:'Legacy arcade drifter experiment.'},
+  //{id:'decman',title:'DECman',type:'single',path:'assets/games/singleplayer/decman/index.html',mark:'DEC',accent:'rgba(244,189,97,.28)',description:'Retro maze-action cabinet with level tooling.'},
+  // {id:'entropydrifter',title:'Entropy Drifter',type:'single',path:'assets/games/singleplayer/entropydrifter/index.html',mark:'ED',accent:'rgba(153,116,255,.28)',description:'Legacy arcade drifter experiment.'},
   {id:'cyrenerangers',title:'Cyrene Rangers',type:'single',path:'assets/games/singleplayer/cyrenerangers/index.html',mark:'CR',accent:'rgba(57,217,138,.25)',description:'PixelB8 single-player ranger cabinet.'},
-  {id:'spacepirates',title:'Space Pirates',type:'single',path:'assets/games/singleplayer/spacepirates/index.html',mark:'SP',accent:'rgba(79,195,247,.24)',description:'Old-school space piracy arcade game.'},
-  {id:'leisuresuitlooter',title:'Leisure Suit Looter',type:'single',path:'assets/games/singleplayer/liesuresuitlooter/index.html',mark:'LSL',accent:'rgba(255,105,120,.23)',description:'One of the original oddball PixelB8 cabinets.'},
+  //{id:'spacepirates',title:'Space Pirates',type:'single',path:'assets/games/singleplayer/spacepirates/index.html',mark:'SP',accent:'rgba(79,195,247,.24)',description:'Old-school space piracy arcade game.'},
+  //{id:'leisuresuitlooter',title:'Leisure Suit Looter',type:'single',path:'assets/games/singleplayer/liesuresuitlooter/index.html',mark:'LSL',accent:'rgba(255,105,120,.23)',description:'One of the original oddball PixelB8 cabinets.'},
 
   // Multiplayer games. directoryId matches ArcadeMultiplayer.init(gameId).
   {id:'checkers',directoryId:'checkers',title:'Checkers',type:'multi',path:'assets/games/multiplayer/checkers/index.html',mark:'CHK',accent:'rgba(244,189,97,.24)',description:'Online checkers using the shared PixelB8 room transport.'},
