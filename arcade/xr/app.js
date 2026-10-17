@@ -85,11 +85,13 @@ const state={
     tool:'cue',
     bridgePlaced:false,
     trajectory:false,
+    freeAim:false,
     shotInProgress:false,
     cueNeedsRespawn:false,
     physicsAccumulator:0,
     lastAim:null,
     aimVisuals:null,
+    placementPreview:{x:0,z:0,valid:false,visible:false},
     manualRack:{
       active:false,
       selectedBall:null,
@@ -392,6 +394,26 @@ function buildPoolTable(){
 
     <a-entity id="poolBalls"></a-entity>
     <a-entity id="poolAimGuide"></a-entity>
+
+    <!-- Ball-in-hand preview shown after a scratch. -->
+    <a-entity id="poolBallInHandPreview" visible="false">
+      <a-sphere id="poolBallInHandGhost"
+        position="0 ${POOL.feltY+POOL.ballRadius} 0"
+        radius="${POOL.ballRadius}"
+        color="#ffffff"
+        material="shader:flat;transparent:true;opacity:.74;depthTest:false">
+      </a-sphere>
+      <a-ring id="poolBallInHandRing"
+        position="0 ${POOL.feltY+.010} 0"
+        rotation="-90 0 0"
+        radius-inner=".072"
+        radius-outer=".095"
+        color="#ff3038"
+        material="shader:flat;transparent:true;opacity:.90;depthTest:false"
+        animation__pulse="property:scale;from:.82 .82 .82;to:1.18 1.18 1.18;dir:alternate;loop:true;dur:520;easing:easeInOutSine"
+        animation__fade="property:material.opacity;from:.92;to:.38;dir:alternate;loop:true;dur:520;easing:easeInOutSine">
+      </a-ring>
+    </a-entity>
 
     <a-box class="xr-interactable" data-interact="pool" data-id="pool"
       position="0 1.20 0" width="4.55" height=".90" depth="2.75" material="opacity:0;transparent:true"></a-box>
@@ -817,45 +839,102 @@ function drivePoolBallOffTable(ball){
   toast(`Ball ${ball.n} off table — foul.`,1200);
 }
 
+function getCueBallPlacementCandidate(){
+  const ray=poolViewRay();
+  if(!ray||Math.abs(ray.dir.y)<1e-5)return null;
+
+  const targetY=POOL.feltY+POOL.ballRadius;
+  const t=(targetY-ray.origin.y)/ray.dir.y;
+  if(t<=0)return null;
+
+  const hit=ray.origin.clone().addScaledVector(ray.dir,t);
+  const x=hit.x-POOL.centerX;
+  const z=hit.z-POOL.centerZ;
+  const margin=POOL.ballRadius+.04;
+
+  const inside=
+    Math.abs(x)<=POOL.innerHalfX-margin &&
+    Math.abs(z)<=POOL.innerHalfZ-margin;
+
+  const blocked=inside&&state.pool.balls.some(
+    b=>b.n!==0&&!b.pocketed&&Math.hypot(b.x-x,b.z-z)<POOL.ballRadius*2.15
+  );
+
+  return {x,z,y:targetY,inside,blocked,valid:inside&&!blocked};
+}
+
+function updateCueBallPlacementPreview(){
+  const preview=document.getElementById('poolBallInHandPreview');
+  const ghost=document.getElementById('poolBallInHandGhost');
+  const ring=document.getElementById('poolBallInHandRing');
+
+  if(!preview||!state.pool.active||!state.pool.rules?.ballInHand||state.pool.shotInProgress){
+    preview?.setAttribute('visible',false);
+    state.pool.placementPreview.visible=false;
+    return;
+  }
+
+  const candidate=getCueBallPlacementCandidate();
+  if(!candidate){
+    preview.setAttribute('visible',false);
+    state.pool.placementPreview.visible=false;
+    return;
+  }
+
+  preview.setAttribute('visible',true);
+  preview.object3D.position.set(candidate.x,0,candidate.z);
+
+  state.pool.placementPreview={
+    x:candidate.x,z:candidate.z,valid:candidate.valid,visible:true
+  };
+
+  ring?.setAttribute('color',candidate.valid?'#ff3038':'#ff9d2e');
+  ghost?.setAttribute('color',candidate.valid?'#ffffff':'#ffb18c');
+}
+
+function hideCueBallPlacementPreview(){
+  document.getElementById('poolBallInHandPreview')?.setAttribute('visible',false);
+  state.pool.placementPreview.visible=false;
+}
+
 function placeCueBallFromView(){
   const r=state.pool.rules;
   if(!state.pool.active||!r.ballInHand||state.pool.shotInProgress)return false;
 
-  const ray=poolViewRay();
-  if(!ray||Math.abs(ray.dir.y)<1e-5)return false;
-  const targetY=POOL.feltY+POOL.ballRadius;
-  const t=(targetY-ray.origin.y)/ray.dir.y;
-  if(t<=0)return false;
-
-  const hit=ray.origin.clone().addScaledVector(ray.dir,t);
-  const x=hit.x-POOL.centerX,z=hit.z-POOL.centerZ;
-  const margin=POOL.ballRadius+.04;
-  if(Math.abs(x)>POOL.innerHalfX-margin||Math.abs(z)>POOL.innerHalfZ-margin){
+  const candidate=getCueBallPlacementCandidate();
+  if(!candidate){
+    toast('Aim at the pool felt.',800);
+    return false;
+  }
+  if(!candidate.inside){
     toast('Place the cue ball on the felt.',900);
     return false;
   }
-
-  const blocked=state.pool.balls.some(
-    b=>b.n!==0&&!b.pocketed&&Math.hypot(b.x-x,b.z-z)<POOL.ballRadius*2.15
-  );
-  if(blocked){
+  if(candidate.blocked){
     toast('That spot is occupied.',800);
     return false;
   }
 
   const cue=state.pool.balls.find(b=>b.n===0);
   if(!cue)return false;
+
   cue.pocketed=false;
-  cue.x=x;cue.z=z;cue.y=targetY;
+  cue.x=candidate.x;cue.z=candidate.z;cue.y=candidate.y;
   cue.vx=cue.vy=cue.vz=0;
   cue.sideSpin=cue.spinX=cue.spinZ=0;
+
   r.ballInHand=false;
   state.pool.cueNeedsRespawn=false;
+  hideCueBallPlacementPreview();
+
   renderPoolBalls(false);
   updatePoolRulesHud();
+  updateHeldPoolTool();
+  updatePoolAimGuide();
   toast('Cue ball placed.',700);
   return true;
 }
+
 
 function resetPoolBalls(){
   const balls=[];
@@ -980,12 +1059,6 @@ function calculatePoolAim(){
   const {cue,center}=data;
   const radius=POOL.ballRadius;
 
-  // Aim is based on where the player's view passes the cue ball, not whether
-  // the rendered cue physically reaches it. Reach is assumed once pool mode is active.
-  const toCenter=center.clone().sub(origin);
-  const t=toCenter.dot(dir);
-  const closest=origin.clone().addScaledVector(dir,t);
-
   const shotDir=new THREE.Vector3(dir.x,0,dir.z);
   if(shotDir.lengthSq()<1e-6)shotDir.set(1,0,0);
   shotDir.normalize();
@@ -993,12 +1066,65 @@ function calculatePoolAim(){
   const right=new THREE.Vector3(-shotDir.z,0,shotDir.x);
   const up=new THREE.Vector3(0,1,0);
 
+  if(state.pool.freeAim){
+    // True ray/sphere aiming from the center reticle.
+    const oc=origin.clone().sub(center);
+    const b=oc.dot(dir);
+    const c=oc.lengthSq()-radius*radius;
+    const disc=b*b-c;
+
+    let hitPoint=null;
+    if(disc>=0){
+      const root=Math.sqrt(disc);
+      let t=-b-root;
+      if(t<0)t=-b+root;
+      if(t>=0)hitPoint=origin.clone().addScaledVector(dir,t);
+    }
+
+    const toCenter=center.clone().sub(origin);
+    const tClosest=Math.max(0,toCenter.dot(dir));
+    const closest=origin.clone().addScaledVector(dir,tClosest);
+    const offset=closest.clone().sub(center);
+    const sideRaw=offset.dot(right);
+    const topRaw=offset.dot(up);
+    const radial=Math.hypot(sideRaw,topRaw);
+
+    const missRadius=radius*1.28;
+    const hit=Boolean(hitPoint);
+    const nearMiss=!hit&&radial<=missRadius;
+
+    // For a miss marker, clamp to the ball rim so the indicator still gives
+    // meaningful feedback without snapping the cue itself.
+    const scale=radial>radius&&radial>0?radius/radial:1;
+    const sideContact=sideRaw*scale;
+    const topContact=topRaw*scale;
+    const frontDepth=Math.sqrt(Math.max(0,radius*radius-sideContact*sideContact-topContact*topContact));
+
+    const contact=hitPoint||center.clone()
+      .addScaledVector(right,sideContact)
+      .addScaledVector(up,topContact)
+      .addScaledVector(shotDir,-frontDepth);
+
+    return {
+      cue,origin,dir,shotDir,right,
+      hit,nearMiss,contact,
+      side:THREE.MathUtils.clamp(sideRaw/radius,-1,1),
+      top:THREE.MathUtils.clamp(topRaw/radius,-1,1),
+      radial,missRadius,
+      freeAim:true
+    };
+  }
+
+  // Assisted mode: keep the forgiving ball-centered aiming behavior.
+  const toCenter=center.clone().sub(origin);
+  const t=toCenter.dot(dir);
+  const closest=origin.clone().addScaledVector(dir,t);
+
   const delta=closest.clone().sub(center);
   const sideRaw=delta.dot(right);
   const topRaw=delta.dot(up);
   const radial=Math.hypot(sideRaw,topRaw);
 
-  // Small halo outside the ball lets the player intentionally miss/foul.
   const missRadius=radius*1.28;
   const hit=radial<=radius;
   const nearMiss=!hit&&radial<=missRadius;
@@ -1018,104 +1144,91 @@ function calculatePoolAim(){
     hit,nearMiss,contact,
     side:THREE.MathUtils.clamp(sideRaw/radius,-1,1),
     top:THREE.MathUtils.clamp(topRaw/radius,-1,1),
-    radial,missRadius
+    radial,missRadius,
+    freeAim:false
   };
 }
-function poolCueBackPointWithRailClearance(aim,contact,length){
-  const dir=aim.shotDir.clone().normalize();
 
-  // Base handle height follows player posture.
-  // Standing keeps a slightly more elevated butt; crouching flattens the cue.
-  const crouch=THREE.MathUtils.clamp(state.player.crouchAmount||0,0,1);
-  const baseHandleLift=THREE.MathUtils.lerp(.11,.025,crouch);
 
-  const back=contact.clone().addScaledVector(dir,-length);
-  back.y+=baseHandleLift;
+function poolFreeAimTipPoint(aim){
+  const ray=poolViewRay();
+  const data=poolCueBallCenter();
+  if(!ray||!data)return null;
 
-  // Work in pool-local X/Z to find where the cue exits the playable felt.
-  const cx=contact.x-POOL.centerX;
-  const cz=contact.z-POOL.centerZ;
-  const bx=back.x-POOL.centerX;
-  const bz=back.z-POOL.centerZ;
-
-  const minX=-POOL.innerHalfX,maxX=POOL.innerHalfX;
-  const minZ=-POOL.innerHalfZ,maxZ=POOL.innerHalfZ;
-
-  const dx=bx-cx,dz=bz-cz;
-  let tCross=Infinity;
-
-  // Segment parameter t: contact=0, back=1.
-  if(Math.abs(dx)>1e-6){
-    for(const edgeX of [minX,maxX]){
-      const t=(edgeX-cx)/dx;
-      if(t>0&&t<1){
-        const z=cz+dz*t;
-        if(z>=minZ-.025&&z<=maxZ+.025)tCross=Math.min(tCross,t);
-      }
-    }
-  }
-
-  if(Math.abs(dz)>1e-6){
-    for(const edgeZ of [minZ,maxZ]){
-      const t=(edgeZ-cz)/dz;
-      if(t>0&&t<1){
-        const x=cx+dx*t;
-        if(x>=minX-.025&&x<=maxX+.025)tCross=Math.min(tCross,t);
-      }
-    }
-  }
-
-  if(Number.isFinite(tCross)){
-    const railTop=POOL.feltY+.165;
-    const clearance=.018;
-    const requiredAtRail=railTop+clearance;
-
-    // Only raise the cue if its CURRENT shaft height is actually near/below
-    // the rail top. This prevents exaggerated lift when the ball is merely
-    // somewhere near an edge.
-    const currentAtRail=contact.y+(back.y-contact.y)*tCross;
-    const deficit=requiredAtRail-currentAtRail;
-
-    if(deficit>0){
-      // Soft activation zone: tiny deficits barely move the butt, larger
-      // intersections get the full required correction.
-      const activation=THREE.MathUtils.clamp(deficit/.085,0,1);
-      const eased=activation*activation*(3-2*activation);
-
-      const fullBackY=contact.y+(requiredAtRail-contact.y)/Math.max(.10,tCross);
-      back.y=THREE.MathUtils.lerp(back.y,fullBackY,eased);
-    }
-  }
-
-  // Small safety floor only; don't artificially prop the cue upward.
-  back.y=Math.max(back.y,POOL.feltY+.015);
-  return back;
+  // Put the physical cue tip on the center-reticle ray at cue-ball depth.
+  // Unlike assisted mode, do not snap this point onto the ball surface.
+  const toCenter=data.center.clone().sub(ray.origin);
+  const t=Math.max(.20,toCenter.dot(ray.dir));
+  return ray.origin.clone().addScaledVector(ray.dir,t);
 }
-
 
 function updateHeldPoolCue(){
   const held=document.getElementById('heldPoolCue');
   if(!held)return;
 
-  const active=state.pool.active&&!state.pool.shotInProgress&&!state.pool.manualRack.active&&state.pool.tool==='cue';
+  const ballInHand=Boolean(state.pool.rules?.ballInHand);
+  const active=
+    state.pool.active &&
+    !state.pool.shotInProgress &&
+    !state.pool.manualRack.active &&
+    !ballInHand &&
+    state.pool.tool==='cue';
+
   held.setAttribute('visible',active);
   if(!active)return;
+
+  if(!state.pool.gripping){
+    setCueCarryPose(held);
+    return;
+  }
 
   const aim=calculatePoolAim();
   const cam=camera();
   if(!aim||!cam)return;
 
-  const contact=aim.contact.clone();
-  const cueLength=1.22+state.pool.cuePull*.78;
-  const back=poolCueBackPointWithRailClearance(aim,contact,cueLength);
+  let tipPoint;
+  let back;
 
-  const contactLocal=cam.object3D.worldToLocal(contact.clone());
+  if(state.pool.freeAim){
+    tipPoint=poolFreeAimTipPoint(aim);
+    if(!tipPoint)return;
+
+    const view=poolViewRay();
+    const flat=new THREE.Vector3(view.dir.x,0,view.dir.z);
+    if(flat.lengthSq()<1e-6)flat.copy(aim.shotDir);
+    flat.normalize();
+
+    const cueLength=1.22+state.pool.cuePull*.78;
+    back=tipPoint.clone().addScaledVector(flat,-cueLength);
+
+    // In free aim, posture controls the butt height naturally.
+    const crouch=THREE.MathUtils.clamp(state.player.crouchAmount||0,0,1);
+    back.y+=THREE.MathUtils.lerp(.075,.012,crouch);
+
+    // Only apply rail clearance if the free-aim tip is actually close enough
+    // to the cue ball to represent a practical shot setup.
+    const cueData=poolCueBallCenter();
+    if(cueData&&tipPoint.distanceTo(cueData.center)<.42){
+      const pseudoAim={...aim,shotDir:flat};
+      const cleared=poolCueBackPointWithRailClearance(
+        pseudoAim,
+        tipPoint,
+        cueLength
+      );
+      back.y=Math.max(back.y,cleared.y);
+    }
+  }else{
+    tipPoint=aim.contact.clone();
+    const cueLength=1.22+state.pool.cuePull*.78;
+    back=poolCueBackPointWithRailClearance(aim,tipPoint,cueLength);
+  }
+
+  const tipLocal=cam.object3D.worldToLocal(tipPoint.clone());
   const backLocal=cam.object3D.worldToLocal(back.clone());
-  const mid=contactLocal.clone().add(backLocal).multiplyScalar(.5);
+  const mid=tipLocal.clone().add(backLocal).multiplyScalar(.5);
   held.object3D.position.copy(mid);
 
-  // Cue cylinder's long axis is local Y.
-  const axis=contactLocal.clone().sub(backLocal).normalize();
+  const axis=tipLocal.clone().sub(backLocal).normalize();
   held.object3D.quaternion.copy(
     new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),axis)
   );
@@ -1291,13 +1404,15 @@ function updatePoolAimVisuals(aim){
   }
 
   // poolAimGuide lives inside poolTable, so use table-local x/z/y values.
-  v.dot.visible=true;
-  v.dot.position.set(
-    aim.contact.x-POOL.centerX,
-    aim.contact.y+.018,
-    aim.contact.z-POOL.centerZ
-  );
-  v.dot.material.color.setHex(aim.hit?0xff2028:0xffc928);
+  v.dot.visible=aim.freeAim?aim.hit:true;
+  if(v.dot.visible){
+    v.dot.position.set(
+      aim.contact.x-POOL.centerX,
+      aim.contact.y+.018,
+      aim.contact.z-POOL.centerZ
+    );
+    v.dot.material.color.setHex(aim.hit?0xff2028:0xffc928);
+  }
 
   if(!state.pool.trajectory){
     v.cueLine.visible=false;
@@ -1357,6 +1472,17 @@ function updatePoolAimGuide(){
 
   updateHeldPoolCue();
   updateHeldPoolTool();
+
+  if(state.pool.active&&state.pool.rules?.ballInHand){
+    host.innerHTML='';
+    state.pool.lastAim=null;
+    hidePoolAimVisuals();
+    updateCueBallPlacementPreview();
+    updatePoolPowerMeter();
+    return;
+  }else{
+    hideCueBallPlacementPreview();
+  }
 
   if(!state.pool.active||state.pool.shotInProgress||state.pool.manualRack.active){
     host.innerHTML='';
@@ -1439,6 +1565,7 @@ function exitPoolMode(){
   document.getElementById('poolManualRackPanel')?.classList.add('hidden');
   state.pool.manualRack.active=false;
   setTriangleRackVisible(false);
+  hideCueBallPlacementPreview();
   applyPoolHotbar(false);
   document.getElementById('hudMode').textContent='WASD move · Enter interact · R run/walk · Shift+wheel crouch · L lean · X sit · Space jump';
   updatePoolAimGuide();
@@ -1602,6 +1729,9 @@ function respawnCueBall(){
     cue.pocketed=true;
     cue.vx=cue.vy=cue.vz=0;
     state.pool.cueNeedsRespawn=false;
+    hidePoolAimVisuals();
+    updateHeldPoolTool();
+    updateCueBallPlacementPreview();
     updatePoolRulesHud();
     return;
   }
@@ -2436,14 +2566,17 @@ function updateHeldPoolTool(){
   const cue=document.getElementById('heldPoolCue');
   const bridge=document.getElementById('heldPoolBridge');
   const active=state.pool.active;
-  if(cue)cue.setAttribute('visible',active&&!state.pool.shotInProgress&&state.pool.tool==='cue');
+  const ballInHand=Boolean(state.pool.rules?.ballInHand);
+  const usable=active&&!state.pool.shotInProgress&&!state.pool.manualRack.active&&!ballInHand;
+
+  if(cue)cue.setAttribute('visible',usable&&state.pool.tool==='cue');
+
   if(bridge){
-    bridge.setAttribute('visible',active&&!state.pool.shotInProgress&&state.pool.tool==='bridge');
+    bridge.setAttribute('visible',usable&&state.pool.tool==='bridge');
     const pull=state.pool.cuePull;
     bridge.object3D.position.set(.18,-.16,-1.30+pull*.78);
   }
 }
-
 function removePoolBridgeFromTable(){
   const host=document.getElementById('poolBridgeHost');
   if(host)host.innerHTML='';
@@ -3073,6 +3206,15 @@ document.getElementById('poolTrajectoryToggle')?.addEventListener('change',e=>{
     updatePoolAimGuide();
     if(state.pool.lastAim)updatePoolAimVisuals(state.pool.lastAim);
   }
+});
+
+document.getElementById('poolFreeAimToggle')?.addEventListener('change',e=>{
+  state.pool.freeAim=Boolean(e.target.checked);
+  if(state.pool.active){
+    updateHeldPoolCue();
+    updatePoolAimGuide();
+  }
+  toast(state.pool.freeAim?'Free Aim enabled':'Assisted Aim enabled',850);
 });
 
 document.getElementById('poolAutoRackBtn')?.addEventListener('click',e=>{
