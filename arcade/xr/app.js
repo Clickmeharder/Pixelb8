@@ -49,6 +49,11 @@ const state={
     stamina:100,
     running:false,
     crouched:false,
+    crouchAmount:0,
+    leaning:false,
+    sitting:false,
+    seatEl:null,
+    baseEyeHeight:1.65,
     onGround:true,
     velocityY:0,
     floorY:0,
@@ -56,6 +61,7 @@ const state={
     vrMoving:false,
     inventoryOpen:false,
     selectedSlot:1,
+    lastShiftTap:0,
     lastHealthChange:Date.now(),
     lastStaminaChange:Date.now()
   },
@@ -74,6 +80,8 @@ const state={
     lastMouseStamp:0,
     gripping:false,
     fineYaw:0,
+    tool:'cue',
+    bridgePlaced:false,
     shotInProgress:false,
     cueNeedsRespawn:false,
     physicsAccumulator:0,
@@ -207,7 +215,7 @@ function makeCabinet(game,x,z){
 
 function chairMarkup(x,z,rot,color='#303843'){
   return `
-    <a-entity position="${x} 0 ${z}" rotation="0 ${rot} 0">
+    <a-entity class="chair-seat" data-seat="true" data-occupied="false" position="${x} 0 ${z}" rotation="0 ${rot} 0">
       <a-box position="0 .47 0" width=".62" height=".10" depth=".62" color="${color}"></a-box>
       <a-box position="0 .86 .27" width=".62" height=".72" depth=".09" color="${color}"></a-box>
       <a-cylinder position="-.24 .23 -.22" radius=".035" height=".46" color="#222a31"></a-cylinder>
@@ -437,6 +445,11 @@ function poolAimRay(){
 
   const dir=new THREE.Vector3(0,0,-1).applyQuaternion(quat).normalize();
 
+  // The mechanical bridge/rest extends the effective cue reach across the table.
+  if(state.pool.tool==='bridge'){
+    origin.addScaledVector(dir,.72);
+  }
+
   // While gripping, horizontal mouse motion is fine cue adjustment rather than camera movement.
   if(state.pool.fineYaw){
     dir.applyAxisAngle(new THREE.Vector3(0,1,0),state.pool.fineYaw).normalize();
@@ -598,13 +611,15 @@ function enterPoolMode(){
   state.pool.gripping=false;
   state.pool.fineYaw=0;
   state.pool.lastMouseStamp=performance.now();
+  applyPoolHotbar(true);
+  updateHeldPoolTool();
 
   // Pool is part of the world, not a frozen minigame. Keep normal walking,
   // collisions and mouse-look active so the player can circle the table.
   setMovementEnabled(true);
   camera()?.setAttribute('look-controls','enabled',true);
 
-  document.getElementById('hudMode').textContent='POOL · walk/aim normally · hold LMB to grip · pull DOWN · stroke UP · Backspace leave';
+  document.getElementById('hudMode').textContent='POOL · walk/look normally · L lean · 4 cue / 5 bridge · hold LMB to stroke · Backspace leave';
   setPrompt(null);
   updatePoolAimGuide();
 
@@ -625,7 +640,9 @@ function exitPoolMode(){
   setMovementEnabled(true);
   camera()?.setAttribute('look-controls','enabled',true);
   document.getElementById('heldPoolCue')?.setAttribute('visible',false);
-  document.getElementById('hudMode').textContent='WASD move · Enter interact · R run/walk · C crouch · Space jump';
+  document.getElementById('heldPoolBridge')?.setAttribute('visible',false);
+  applyPoolHotbar(false);
+  document.getElementById('hudMode').textContent='WASD move · Enter interact · R run/walk · Shift+wheel crouch · L lean · X sit · Space jump';
   updatePoolAimGuide();
 }
 
@@ -675,6 +692,18 @@ function shootPool(strokeSpeed=null){
   state.pool.gripping=false;
   state.pool.fineYaw=0;
   camera()?.setAttribute('look-controls','enabled',true);
+
+  if(state.pool.tool==='bridge'){
+    const bridge=document.getElementById('poolBridgeOnTable');
+    if(bridge){
+      bridge.setAttribute('animation__fade','property:scale;to:0.01 0.01 0.01;dur:350;easing:easeInQuad');
+      setTimeout(()=>removePoolBridgeFromTable(),380);
+    }
+    state.pool.tool='cue';
+    selectHotbarSlot(4,false);
+    updateHeldPoolTool();
+  }
+
   updatePoolAimGuide();
 }
 function pocketPoolBall(ball){
@@ -1427,11 +1456,74 @@ function selectHotbarSlot(slot,use=true){
   if(use&&item)useHotbarItem(item,n);
 }
 
+function applyPoolHotbar(active){
+  if(active){
+    window.PixelB8XRPlayer?.setHotbarSlot?.(4,{id:'pool-cue',label:'Pool Cue',icon:'🎱',kind:'pool'});
+    window.PixelB8XRPlayer?.setHotbarSlot?.(5,{id:'pool-bridge',label:'Bridge Rest',icon:'╫',kind:'pool'});
+    state.pool.tool='cue';
+    selectHotbarSlot(4,false);
+  }else{
+    window.PixelB8XRPlayer?.setHotbarSlot?.(4,null);
+    window.PixelB8XRPlayer?.setHotbarSlot?.(5,null);
+    if(state.player.selectedSlot===4||state.player.selectedSlot===5)selectHotbarSlot(1,false);
+    state.pool.tool='cue';
+    removePoolBridgeFromTable();
+  }
+  updateHeldPoolTool();
+}
+
+function updateHeldPoolTool(){
+  const cue=document.getElementById('heldPoolCue');
+  const bridge=document.getElementById('heldPoolBridge');
+  const active=state.pool.active;
+  if(cue)cue.setAttribute('visible',active&&state.pool.tool==='cue');
+  if(bridge)bridge.setAttribute('visible',active&&state.pool.tool==='bridge');
+}
+
+function removePoolBridgeFromTable(){
+  document.getElementById('poolBridgeOnTable')?.remove();
+  state.pool.bridgePlaced=false;
+}
+
+function placePoolBridgeOnTable(){
+  const host=document.getElementById('poolAimGuide');
+  const aim=calculatePoolAim();
+  if(!host||!aim?.cue)return;
+  removePoolBridgeFromTable();
+
+  const cue=aim.cue;
+  const dx=aim.shotDir.x,dz=aim.shotDir.z;
+  const bridgeX=cue.x-dx*.44;
+  const bridgeZ=cue.z-dz*.44;
+  const deg=-THREE.MathUtils.radToDeg(Math.atan2(dz,dx));
+
+  const holder=document.createElement('a-entity');
+  holder.id='poolBridgeOnTable';
+  holder.innerHTML=`
+    <a-entity position="${bridgeX} 1.07 ${bridgeZ}">
+      <a-box width=".25" height=".018" depth=".025" rotation="0 ${deg} 0" color="#c7ccd0"></a-box>
+      <a-box width=".025" height=".12" depth=".025" position="0 .055 0" color="#c7ccd0"></a-box>
+      <a-cylinder position="${-dx*.55} .105 ${-dz*.55}" rotation="90 0 ${deg}"
+        radius=".010" height="1.10" color="#c99b5d"></a-cylinder>
+    </a-entity>`;
+  host.appendChild(holder);
+  state.pool.bridgePlaced=true;
+}
+
 function useHotbarItem(item,slot){
   const el=document.querySelector(`[data-hotbar-slot="${slot}"]`);
   el?.classList.remove('pulse');
   void el?.offsetWidth;
   el?.classList.add('pulse');
+
+  if(state.pool.active&&(item.id==='pool-cue'||item.id==='pool-bridge')){
+    state.pool.tool=item.id==='pool-bridge'?'bridge':'cue';
+    if(state.pool.tool==='bridge')placePoolBridgeOnTable();
+    else removePoolBridgeFromTable();
+    updateHeldPoolTool();
+    toast(state.pool.tool==='bridge'?'Bridge rest selected':'Pool cue selected',1000);
+    return;
+  }
 
   const phrases={
     wave:'You wave.',
@@ -1488,7 +1580,7 @@ function changeHealth(delta){
 }
 
 function movementAcceleration(){
-  if(state.player.crouched)return 13;
+  if(state.player.crouchAmount>.08)return 13;
   if(state.player.running&&state.player.stamina>0)return 48;
   return 25;
 }
@@ -1509,17 +1601,102 @@ function setRunning(run){
   toast(state.player.running?'Run mode':'Walk mode',900);
 }
 
-function toggleCrouch(){
-  state.player.crouched=!state.player.crouched;
-  if(state.player.crouched)state.player.running=false;
-  camera()?.setAttribute('position',`0 ${state.player.crouched?1.08:1.65} 0`);
+function applyEyePosture(){
+  const p=state.player;
+  const cam=camera();
+  if(!cam)return;
+
+  const crouchDrop=.62*p.crouchAmount;
+  const sitDrop=p.sitting?.74:0;
+  const leanDrop=p.leaning?.16:0;
+  const leanForward=p.leaning?.26:0;
+
+  cam.object3D.position.y=p.baseEyeHeight-crouchDrop-sitDrop-leanDrop;
+  cam.object3D.position.z=-leanForward;
+
+  p.crouched=p.crouchAmount>.08;
+  document.getElementById('crouchState')?.classList.toggle('hidden',!p.crouched);
+}
+
+function setCrouchAmount(amount){
+  const p=state.player;
+  if(p.sitting)return;
+  p.crouchAmount=THREE.MathUtils.clamp(Number(amount)||0,0,1);
+  if(p.crouchAmount>.1)p.running=false;
   refreshMovementControls();
-  toast(state.player.crouched?'Crouched':'Standing',900);
+  applyEyePosture();
+}
+
+function standStraight(){
+  const p=state.player;
+  if(p.sitting)toggleSit(false);
+  p.crouchAmount=0;
+  p.leaning=false;
+  refreshMovementControls();
+  applyEyePosture();
+  toast('Standing straight',700);
+}
+
+function toggleLean(){
+  if(state.player.sitting)return;
+  state.player.leaning=!state.player.leaning;
+  applyEyePosture();
+  toast(state.player.leaning?'Leaning forward':'Lean off',800);
+}
+
+function nearestAvailableChair(maxDist=1.55){
+  const p=playerWorldXZ();
+  if(!p)return null;
+  let best=null,bestDist=maxDist;
+  document.querySelectorAll('.chair-seat[data-seat="true"]').forEach(chair=>{
+    if(chair.dataset.occupied==='true'&&chair!==state.player.seatEl)return;
+    const cp=worldPos(chair);
+    const d=Math.hypot(p.x-cp.x,p.z-cp.z);
+    if(d<bestDist){best=chair;bestDist=d;}
+  });
+  return best;
+}
+
+function toggleSit(force=null){
+  const p=state.player;
+  const sit=force==null?!p.sitting:Boolean(force);
+
+  if(!sit){
+    if(p.seatEl)p.seatEl.dataset.occupied='false';
+    p.seatEl=null;
+    p.sitting=false;
+    setMovementEnabled(!state.engaged&&!p.inventoryOpen);
+    applyEyePosture();
+    toast('Stood up',700);
+    return;
+  }
+
+  const chair=nearestAvailableChair();
+  p.sitting=true;
+  p.running=false;
+  p.crouchAmount=0;
+  p.leaning=false;
+
+  if(chair){
+    chair.dataset.occupied='true';
+    p.seatEl=chair;
+    const cp=worldPos(chair);
+    const r=rig();
+    r.object3D.position.x=cp.x;
+    r.object3D.position.z=cp.z;
+    setMovementEnabled(false);
+    toast('Sat in chair',700);
+  }else{
+    p.seatEl=null;
+    setMovementEnabled(false);
+    toast('Sat down',700);
+  }
+  applyEyePosture();
 }
 
 function jump(){
   const p=state.player;
-  if(!p.onGround||p.crouched||p.stamina<10||state.engaged||p.inventoryOpen)return;
+  if(!p.onGround||p.sitting||p.crouchAmount>.65||p.stamina<10||state.engaged||p.inventoryOpen)return;
   p.onGround=false;
   p.velocityY=4.45;
   changeStamina(-11);
@@ -1543,10 +1720,10 @@ function updatePlayer(time,delta){
 
   const keyboardMoving=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight']
     .some(code=>p.keys.has(code));
-  const moving=(keyboardMoving||p.vrMoving)&&!state.engaged&&!p.inventoryOpen;
+  const moving=(keyboardMoving||p.vrMoving)&&!p.sitting&&!state.engaged&&!p.inventoryOpen;
 
   if(moving){
-    const drain=p.running?5.4:(p.crouched?0.9:1.7);
+    const drain=p.running?5.4:(p.crouchAmount>.08?0.9:1.7);
     changeStamina(-drain*dt);
   }else if(p.onGround&&!state.engaged){
     changeStamina(7.2*dt);
@@ -1631,12 +1808,9 @@ function handlePoolMouseMove(e){
   if(!state.pool.active||state.pool.shotInProgress||state.player.inventoryOpen)return;
   if(isEditableTarget(e.target))return;
 
-  // When not gripping, normal A-Frame mouse-look owns the mouse. The aim dot
-  // simply follows the camera ray.
-  if(!state.pool.gripping){
-    updatePoolAimGuide();
-    return;
-  }
+  // When LMB is not held, do not touch mouse movement at all.
+  // A-Frame owns it completely for normal first-person looking/walking.
+  if(!state.pool.gripping)return;
 
   const now=performance.now();
   const dt=Math.max(4,Math.min(60,now-(state.pool.lastMouseStamp||now)));
@@ -1686,8 +1860,24 @@ AFRAME.registerComponent('arcade-world',{
     initGlobalChat();
 
     window.addEventListener('mousemove',handlePoolMouseMove,{passive:true});
-    window.addEventListener('mousedown',beginPoolGrip,true);
+    window.addEventListener('mousedown',e=>{
+      if(e.button===1){
+        e.preventDefault();
+        standStraight();
+        return;
+      }
+      beginPoolGrip(e);
+    },true);
     window.addEventListener('mouseup',endPoolGrip,true);
+
+    window.addEventListener('wheel',e=>{
+      if(isEditableTarget(e.target)||!e.shiftKey)return;
+      e.preventDefault();
+      if(state.player.sitting)return;
+      // Wheel down crouches more; wheel up stands taller.
+      const step=Math.sign(e.deltaY)*.10;
+      setCrouchAmount(state.player.crouchAmount+step);
+    },{passive:false,capture:true});
 
     window.addEventListener('keydown',e=>{
       // Inputs own their keys. This is especially important for MQTT chat:
@@ -1721,7 +1911,7 @@ AFRAME.registerComponent('arcade-world',{
         return;
       }
 
-      state.player.keys.add(e.code);
+      if(!state.player.sitting)state.player.keys.add(e.code);
 
       if(e.key==='Enter'&&state.nearby){
         e.preventDefault();
@@ -1735,10 +1925,27 @@ AFRAME.registerComponent('arcade-world',{
         return;
       }
 
-      if(e.key.toLowerCase()==='c'){
+      if(e.key.toLowerCase()==='l'){
         e.preventDefault();
-        toggleCrouch();
+        toggleLean();
         return;
+      }
+
+      if(e.key.toLowerCase()==='x'){
+        e.preventDefault();
+        toggleSit();
+        return;
+      }
+
+      if(e.key==='Shift'){
+        const now=performance.now();
+        if(now-state.player.lastShiftTap<330){
+          e.preventDefault();
+          standStraight();
+          state.player.lastShiftTap=0;
+          return;
+        }
+        state.player.lastShiftTap=now;
       }
 
       if(e.key.toLowerCase()==='i'){
@@ -1792,6 +1999,12 @@ AFRAME.registerComponent('arcade-world',{
     updatePoolPhysics(delta);
     resolveStaticCollisions();
     syncCabinetHardware();
+
+    if(state.pool.active&&!state.pool.gripping){
+      // Aim marker follows normal free-look without intercepting mouse input.
+      updatePoolAimGuide();
+    }
+    updateHeldPoolTool();
 
     for(const rec of state.gameTextures.values()){
       rec.texture.needsUpdate=true;

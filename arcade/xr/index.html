@@ -14,7 +14,7 @@
 <div id="desktopHud">
   <div class="xr-brand">
     <b>PIXELB8 ARCADE · 3D</b>
-    <span id="hudMode">WASD move · Enter interact · R run/walk · C crouch · Space jump</span>
+    <span id="hudMode">WASD move · Enter interact · R run/walk · Shift+wheel crouch · L lean · X sit · Space jump</span>
   </div>
   <div class="xr-actions">
     <button id="controlsBtn" type="button">Controls</button>
@@ -94,10 +94,10 @@
       <button id="controlsClose" type="button">×</button>
     </header>
     <div class="control-grid">
-      <div><b>Explore</b><span>WASD moves. R toggles Run / Walk, C toggles crouch, Space jumps, and I opens inventory.</span></div>
+      <div><b>Explore</b><span>WASD moves. R toggles Run / Walk. Hold Shift + wheel for variable crouch, L leans, X sits, Space jumps, I opens inventory.</span></div>
       <div><b>Cabinets</b><span>Walk close and press Enter. The real game canvas is rendered live on the cabinet. Backspace steps away, so Escape remains available to the game.</span></div>
       <div><b>VR / WebXR</b><span>Use the headset VR button. Left thumbstick moves. Point/trigger can interact with doors and cabinets.</span></div>
-      <div><b>Pool</b><span>Walk around the table normally. Aim the red dot with your view, hold left mouse to grip the cue, pull down, then stroke upward. Contact point controls spin.</span></div>
+      <div><b>Pool</b><span>Walk around normally. Hold left mouse only when taking a stroke. L leans forward; pool adds Cue and Bridge to the hotbar for long-reach shots.</span></div>
       <div><b>Dungeon</b><span>Find the creepy basement door. The corridor generates more sections as you descend.</span></div>
     </div>
   </section>
@@ -150,6 +150,15 @@
         <a-cylinder position="0 .78 0" radius=".013" height=".055" color="#f0e7d3"></a-cylinder>
         <a-cylinder position="0 -.79 0" radius=".018" height=".10" color="#352218"></a-cylinder>
         <a-sphere position=".06 -.37 .02" radius=".065" color="#b88363" roughness=".75"></a-sphere>
+      </a-entity>
+      <a-entity id="heldPoolBridge" visible="false" position=".18 -.18 -.92" rotation="88 0 0">
+        <a-cylinder radius=".010" height="1.72" color="#c99b5d" roughness=".42"></a-cylinder>
+        <a-entity position="0 .88 0">
+          <a-box width=".24" height=".025" depth=".025" color="#c7ccd0"></a-box>
+          <a-box width=".025" height=".11" depth=".025" color="#c7ccd0"></a-box>
+          <a-box width=".025" height=".07" depth=".025" position="-.10 .035 0" rotation="0 0 -30" color="#c7ccd0"></a-box>
+          <a-box width=".025" height=".07" depth=".025" position=".10 .035 0" rotation="0 0 30" color="#c7ccd0"></a-box>
+        </a-entity>
       </a-entity>
     </a-camera>
     <a-entity id="leftHand"
