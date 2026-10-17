@@ -97,6 +97,7 @@
       <div><b>Explore</b><span>WASD moves. R toggles Run / Walk, C toggles crouch, Space jumps, and I opens inventory.</span></div>
       <div><b>Cabinets</b><span>Walk close and press Enter. The real game canvas is rendered live on the cabinet. Backspace steps away, so Escape remains available to the game.</span></div>
       <div><b>VR / WebXR</b><span>Use the headset VR button. Left thumbstick moves. Point/trigger can interact with doors and cabinets.</span></div>
+      <div><b>Pool</b><span>Enter the pool table, move the mouse left/right to aim, pull the mouse down to draw the cue back, then stroke upward. Faster forward motion hits harder.</span></div>
       <div><b>Dungeon</b><span>Find the creepy basement door. The corridor generates more sections as you descend.</span></div>
     </div>
   </section>
@@ -178,21 +179,9 @@
   <a-text value="TABLE GAMES" position="7.7 3.22 -5.8" align="center" color="#ff9bd0" width="4.4"></a-text>
   <a-entity id="tableGameHost"></a-entity>
 
-  <!-- Pool table -->
-  <a-entity id="poolTable" position="7.4 0 -1.0">
-    <a-box position="0 .74 0" width="3.5" height=".18" depth="1.85" color="#513319"></a-box>
-    <a-box position="0 .86 0" width="3.18" height=".10" depth="1.52" color="#13552d"></a-box>
-    <a-box position="0 .36 0" width="3.15" height=".12" depth="1.35" color="#2d2117"></a-box>
-    <a-cylinder position="-1.45 .36 -.62" radius=".09" height=".72" color="#342319"></a-cylinder>
-    <a-cylinder position="1.45 .36 -.62" radius=".09" height=".72" color="#342319"></a-cylinder>
-    <a-cylinder position="-1.45 .36 .62" radius=".09" height=".72" color="#342319"></a-cylinder>
-    <a-cylinder position="1.45 .36 .62" radius=".09" height=".72" color="#342319"></a-cylinder>
-    <a-text value="POOL · COMING SOON" position="0 1.16 0" rotation="-90 0 0" align="center" color="#d7f8e2" width="3"></a-text>
-    <a-sphere position="-.45 .94 -.18" radius=".045" color="#fff"></a-sphere>
-    <a-sphere position=".22 .94 .08" radius=".045" color="#ffcf45"></a-sphere>
-    <a-sphere position=".34 .94 .04" radius=".045" color="#3c63ff"></a-sphere>
-    <a-sphere position=".46 .94 0" radius=".045" color="#ef4e5f"></a-sphere>
-  </a-entity>
+  <!-- Playable pool area -->
+  <a-text value="POOL" position="8.7 3.18 4.8" align="center" color="#8fe3ad" width="3.2"></a-text>
+  <a-entity id="poolHost"></a-entity>
 
   <!-- Washrooms / Exit / Dungeon doors -->
   <a-entity id="doorHost"></a-entity>

@@ -28,9 +28,9 @@ const HOTBAR_ITEMS={
 };
 
 const BOARD_TABLES=[
-  {id:'connect4',title:'Connect 4',kind:'connect4',x:5.7,z:-3.8,color:'#ff5d70'},
-  {id:'checkers',title:'Checkers',kind:'checkers',x:9.1,z:-3.8,color:'#e2b457'},
-  {id:'deckofcards',title:'Deck of Cards',kind:'cards',x:12.5,z:-3.8,color:'#34a568'}
+  {id:'connect4',title:'Connect 4',kind:'connect4',x:5.5,z:-3.7,color:'#ff5d70'},
+  {id:'checkers',title:'Checkers',kind:'checkers',x:9.0,z:-3.7,color:'#e2b457'},
+  {id:'deckofcards',title:'Deck of Cards',kind:'cards',x:13.0,z:-3.7,color:'#34a568'}
 ];
 
 const state={
@@ -58,6 +58,24 @@ const state={
     selectedSlot:1,
     lastHealthChange:Date.now(),
     lastStaminaChange:Date.now()
+  },
+  collision:{
+    radius:.28,
+    lastSafe:null
+  },
+  pool:{
+    active:false,
+    balls:[],
+    aim:Math.PI,
+    power:.62,
+    cuePull:0,
+    maxCuePull:0,
+    forwardPeak:0,
+    lastMouseStamp:0,
+    shotInProgress:false,
+    cueNeedsRespawn:false,
+    physicsAccumulator:0,
+    turn:1
   }
 };
 
@@ -96,23 +114,92 @@ function worldPos(el){
   return v;
 }
 
-function makeCabinet(game,x,z){
+function makeOutDriveCabinet(game,x,z){
   return `
-  <a-entity class="cabinet-root" data-interact="cabinet" data-id="${game.id}" position="${x} 0 ${z}">
-    <a-box position="0 1.22 0" width="1.45" height="2.44" depth=".92" color="#151b23" roughness=".56" metalness=".18"></a-box>
-    <a-box position="0 2.27 .02" width="1.34" height=".28" depth=".94" color="${game.color}" emissive="${game.color}" emissiveIntensity=".35"></a-box>
-    <a-text value="${game.mark}" position="0 2.27 .495" align="center" color="#041015" width="2.8"></a-text>
-    <a-plane id="screen-${game.id}" position="0 1.55 .475" width="1.17" height=".73" color="#020305"
-      material="shader:flat;side:double"></a-plane>
-    <a-box position="0 .94 .55" width="1.28" height=".13" depth=".38" color="#232c36"></a-box>
-    <a-cylinder position="-.24 1.06 .67" radius=".035" height=".13" color="#606a76"></a-cylinder>
-    <a-sphere position="-.24 1.13 .67" radius=".06" color="${game.color}" emissive="${game.color}" emissiveIntensity=".3"></a-sphere>
-    <a-cylinder position=".24 1.00 .69" rotation="90 0 0" radius=".06" height=".028" color="#ff516d"></a-cylinder>
-    <a-box position="0 .25 0" width="1.26" height=".48" depth=".83" color="#10151c"></a-box>
-    <a-text value="ENTER TO PLAY" position="0 .54 .47" align="center" color="#aeb9c4" width="1.55"></a-text>
-    <a-box class="xr-interactable" data-interact="cabinet" data-id="${game.id}" position="0 1.3 .57"
-      width="1.52" height="2.5" depth=".28" material="opacity:0;transparent:true"></a-box>
+  <a-entity class="cabinet-root collision-box" data-collision-halfx=".92" data-collision-halfz=".72"
+    data-interact="cabinet" data-id="${game.id}" position="${x} 0 ${z}">
+    <a-box position="0 1.2 0" width="1.58" height="2.4" depth=".92" color="#a60c0c" roughness=".48" metalness=".12"></a-box>
+    <a-box position="0 2.28 .01" width="1.58" height=".38" depth=".95" color="#080909"></a-box>
+    <a-text value="OUT DRIVE" position="0 2.29 .49" align="center" color="#00ffcc" width="3.0"></a-text>
+    <a-text value="ROAD TO ENTROPIA" position="0 2.13 .493" align="center" color="#ff6262" width="1.7"></a-text>
+
+    <a-box position="0 1.58 .43" width="1.36" height=".90" depth=".16" color="#08090b"></a-box>
+    <a-plane id="screen-${game.id}" position="0 1.59 .525" width="1.16" height=".87" color="#020305" material="shader:flat;side:double"></a-plane>
+
+    <a-box position="0 .91 .55" width="1.58" height=".18" depth=".48" color="#17191b"></a-box>
+    <a-entity id="xr-outdrive-wheel" position="-.12 1.02 .73" rotation="90 0 0">
+      <a-torus radius=".22" radius-tubular=".035" color="#141414"></a-torus>
+      <a-box width=".36" height=".045" depth=".045" color="#bd1717"></a-box>
+      <a-box width=".045" height=".23" depth=".045" position="0 -.08 0" color="#bd1717"></a-box>
+      <a-cylinder radius=".07" height=".05" color="#7f0505" rotation="90 0 0"></a-cylinder>
+      <a-text value="HORN" position="0 0 .035" rotation="-90 0 0" align="center" color="#fff" width=".54"></a-text>
+    </a-entity>
+
+    <a-entity id="xr-outdrive-shifter" position=".53 .95 .73">
+      <a-box width=".24" height=".08" depth=".30" color="#0c0d0e"></a-box>
+      <a-cylinder radius=".025" height=".27" position="0 .15 0" color="#777"></a-cylinder>
+      <a-sphere id="xr-outdrive-shifter-knob" radius=".07" position="0 .29 0" color="#c81616"></a-sphere>
+      <a-text id="xr-outdrive-gear" value="1" position="0 .295 .075" align="center" color="#fff" width=".5"></a-text>
+    </a-entity>
+
+    <a-box position="0 .55 .47" width="1.58" height=".18" depth=".04" color="#fff"></a-box>
+    <a-box position="-.60 .55 .495" width=".20" height=".18" depth=".02" color="#080808"></a-box>
+    <a-box position="-.20 .55 .495" width=".20" height=".18" depth=".02" color="#080808"></a-box>
+    <a-box position=".20 .55 .495" width=".20" height=".18" depth=".02" color="#080808"></a-box>
+    <a-box position=".60 .55 .495" width=".20" height=".18" depth=".02" color="#080808"></a-box>
+
+    <a-box position="0 .25 0" width="1.40" height=".48" depth=".82" color="#781010"></a-box>
+    <a-box position="0 .25 .43" width=".42" height=".30" depth=".04" color="#141414"></a-box>
+    <a-box position="-.09 .28 .46" width=".055" height=".14" depth=".02" color="#ff3434" emissive="#ff3434" emissiveIntensity=".5"></a-box>
+    <a-box position=".09 .28 .46" width=".055" height=".14" depth=".02" color="#421111"></a-box>
+
+    <a-box class="xr-interactable" data-interact="cabinet" data-id="${game.id}" position="0 1.3 .62"
+      width="1.75" height="2.55" depth=".36" material="opacity:0;transparent:true"></a-box>
   </a-entity>`;
+}
+
+function makeCyreneCabinet(game,x,z){
+  const buttons=[
+    [-.28,1.01,'#e44242'],[-.08,1.01,'#3ba7ff'],[.12,1.01,'#52d77d'],
+    [-.18,.88,'#b765f1'],[.02,.88,'#f2cf44'],[.22,.88,'#f28a42']
+  ];
+  return `
+  <a-entity class="cabinet-root collision-box" data-collision-halfx=".96" data-collision-halfz=".74"
+    data-interact="cabinet" data-id="${game.id}" position="${x} 0 ${z}">
+    <a-box position="0 1.2 0" width="1.66" height="2.4" depth=".94" color="#8a1496" roughness=".5" metalness=".10"></a-box>
+    <a-box position="0 2.28 .01" width="1.66" height=".39" depth=".97" color="#09080b"></a-box>
+    <a-text value="CYRENE RANGERS" position="0 2.28 .50" align="center" color="#00ffcc" width="2.85"></a-text>
+
+    <a-box position="0 1.58 .43" width="1.42" height=".86" depth=".16" color="#09090b"></a-box>
+    <a-plane id="screen-${game.id}" position="0 1.59 .525" width="1.24" height=".70" color="#020305" material="shader:flat;side:double"></a-plane>
+
+    <a-box position="0 .93 .56" width="1.66" height=".17" depth=".50" color="#17191b"></a-box>
+    <a-entity id="xr-cyrene-stick" position="-.48 1.0 .73">
+      <a-cylinder radius=".10" height=".045" color="#090909"></a-cylinder>
+      <a-cylinder radius=".027" height=".20" position="0 .11 0" color="#6b6b6b"></a-cylinder>
+      <a-sphere id="xr-cyrene-stick-ball" radius=".075" position="0 .22 0" color="#c8172a"></a-sphere>
+    </a-entity>
+    ${buttons.map((b,i)=>`<a-cylinder id="xr-cyrene-btn-${i}" position="${b[0]} ${b[1]} .73" rotation="90 0 0" radius=".055" height=".035" color="${b[2]}"></a-cylinder>`).join('')}
+
+    <a-box position="0 .55 .47" width="1.66" height=".18" depth=".04" color="#fff"></a-box>
+    <a-box position="-.62 .55 .495" width=".21" height=".18" depth=".02" color="#080808"></a-box>
+    <a-box position="-.20 .55 .495" width=".21" height=".18" depth=".02" color="#080808"></a-box>
+    <a-box position=".20 .55 .495" width=".21" height=".18" depth=".02" color="#080808"></a-box>
+    <a-box position=".62 .55 .495" width=".21" height=".18" depth=".02" color="#080808"></a-box>
+
+    <a-box position="0 .25 0" width="1.46" height=".48" depth=".84" color="#65116d"></a-box>
+    <a-box position="0 .25 .44" width=".31" height=".30" depth=".04" color="#141414"></a-box>
+    <a-box position="0 .29 .47" width=".055" height=".14" depth=".02" color="#ff3434" emissive="#ff3434" emissiveIntensity=".45"></a-box>
+
+    <a-box class="xr-interactable" data-interact="cabinet" data-id="${game.id}" position="0 1.3 .63"
+      width="1.82" height="2.55" depth=".36" material="opacity:0;transparent:true"></a-box>
+  </a-entity>`;
+}
+
+function makeCabinet(game,x,z){
+  if(game.id==='outdrive')return makeOutDriveCabinet(game,x,z);
+  if(game.id==='cyrenerangers')return makeCyreneCabinet(game,x,z);
+  return '';
 }
 
 function chairMarkup(x,z,rot,color='#303843'){
@@ -130,7 +217,7 @@ function chairMarkup(x,z,rot,color='#303843'){
 function tableMarkup(item){
   if(item.kind==='cards'){
     return `
-    <a-entity class="table-root" data-interact="table" data-id="${item.id}" position="${item.x} 0 ${item.z}">
+    <a-entity class="table-root collision-box" data-collision-halfx="1.28" data-collision-halfz="1.28" data-interact="table" data-id="${item.id}" position="${item.x} 0 ${item.z}">
       <a-cylinder position="0 .76 0" radius="1.05" height=".15" color="#3a2417"></a-cylinder>
       <a-cylinder position="0 .85 0" radius=".94" height=".08" color="#14582e"></a-cylinder>
       <a-cylinder position="0 .38 0" radius=".18" height=".76" color="#2a1c14"></a-cylinder>
@@ -145,7 +232,7 @@ function tableMarkup(item){
 
   const isConnect=item.kind==='connect4';
   return `
-  <a-entity class="table-root" data-interact="table" data-id="${item.id}" position="${item.x} 0 ${item.z}">
+  <a-entity class="table-root collision-box" data-collision-halfx="1.28" data-collision-halfz="1.28" data-interact="table" data-id="${item.id}" position="${item.x} 0 ${item.z}">
     <a-box position="0 .74 0" width="2.0" height=".16" depth="1.35" color="#4a3322"></a-box>
     <a-box position="0 .83 0" width="1.82" height=".06" depth="1.16" color="${isConnect?'#262f37':'#dad0b5'}"></a-box>
     <a-cylinder position="-.72 .36 -.45" radius=".055" height=".72" color="#30231a"></a-cylinder>
@@ -164,7 +251,7 @@ function tableMarkup(item){
 
 function makeDoor(id,title,x,z,rot,color,copy){
   return `
-  <a-entity class="door-root" data-interact="${id}" data-id="${id}" position="${x} 0 ${z}" rotation="0 ${rot} 0">
+  <a-entity class="door-root collision-box" data-collision-halfx=".86" data-collision-halfz=".25" data-interact="${id}" data-id="${id}" position="${x} 0 ${z}" rotation="0 ${rot} 0">
     <a-box position="0 1.25 0" width="1.5" height="2.5" depth=".16" color="${color}" roughness=".72"></a-box>
     <a-box position="0 2.57 0" width="1.72" height=".15" depth=".23" color="#20262d"></a-box>
     <a-box position="-.82 1.3 0" width=".12" height="2.65" depth=".23" color="#20262d"></a-box>
@@ -183,6 +270,7 @@ function buildArcade(){
     makeCabinet(CABINET_GAMES[1],-5.4,-4.1);
 
   document.getElementById('tableGameHost').innerHTML=BOARD_TABLES.map(tableMarkup).join('');
+  buildPoolTable();
 
   const doors=[
     makeDoor('girls','GIRLS',-12.2,-6.85,0,'#42243c','Washroom'),
@@ -193,6 +281,371 @@ function buildArcade(){
   document.getElementById('doorHost').innerHTML=doors.join('');
 }
 
+
+const POOL={
+  centerX:8.7,
+  centerZ:3.25,
+  innerHalfX:1.62,
+  innerHalfZ:.80,
+  ballRadius:.055,
+  pocketRadius:.155,
+  stopSpeed:.010,
+  rollingDecel:.34,
+  ballRestitution:.965,
+  cushionRestitution:.91,
+  fixedStep:1/240,
+  maxFrameTime:.05,
+  sidePocketHalfWidth:.18,
+  cornerPocketMouthX:1.44,
+  cornerPocketMouthZ:.64,
+  pockets:[
+    [-1.66,-.84],[0,-.88],[1.66,-.84],
+    [-1.66,.84],[0,.88],[1.66,.84]
+  ]
+};
+
+function poolBallColor(n){
+  const colors={
+    1:'#f5d442',2:'#315ee8',3:'#df3f3f',4:'#7141ad',5:'#ef8b2c',6:'#2a9c62',7:'#8a2727',
+    8:'#111111',9:'#f5d442',10:'#315ee8',11:'#df3f3f',12:'#7141ad',13:'#ef8b2c',14:'#2a9c62',15:'#8a2727'
+  };
+  return colors[n]||'#fff';
+}
+
+function buildPoolTable(){
+  const host=document.getElementById('poolHost');
+  if(!host)return;
+  host.innerHTML=`
+  <a-entity id="poolTable" class="collision-box" data-collision-halfx="2.25" data-collision-halfz="1.35"
+    data-interact="pool" data-id="pool" position="${POOL.centerX} 0 ${POOL.centerZ}">
+    <!-- legs / body -->
+    <a-box position="0 .58 0" width="3.86" height=".42" depth="2.18" color="#3b2819"></a-box>
+    <a-box position="0 .84 0" width="3.62" height=".12" depth="1.94" color="#145b31"></a-box>
+    <a-cylinder position="-1.55 .30 -.76" radius=".10" height=".60" color="#302014"></a-cylinder>
+    <a-cylinder position="1.55 .30 -.76" radius=".10" height=".60" color="#302014"></a-cylinder>
+    <a-cylinder position="-1.55 .30 .76" radius=".10" height=".60" color="#302014"></a-cylinder>
+    <a-cylinder position="1.55 .30 .76" radius=".10" height=".60" color="#302014"></a-cylinder>
+
+    <!-- raised cushions / rails -->
+    <a-box position="0 .96 -.96" width="3.92" height=".19" depth=".18" color="#4b301c"></a-box>
+    <a-box position="0 .96 .96" width="3.92" height=".19" depth=".18" color="#4b301c"></a-box>
+    <a-box position="-1.91 .96 0" width=".18" height=".19" depth="1.75" color="#4b301c"></a-box>
+    <a-box position="1.91 .96 0" width=".18" height=".19" depth="1.75" color="#4b301c"></a-box>
+
+    <!-- pockets: corners + sides -->
+    ${POOL.pockets.map(([x,z])=>`<a-cylinder position="${x} 1.005 ${z}" rotation="0 0 0" radius=".125" height=".025" color="#020303"></a-cylinder>`).join('')}
+
+    <!-- cue rack and two cues -->
+    <a-entity position="-2.35 1.05 0">
+      <a-box width=".12" height="1.35" depth=".08" color="#2e2016"></a-box>
+      <a-cylinder position="-.12 .10 0" rotation="0 0 -76" radius=".018" height="1.75" color="#d2a15e"></a-cylinder>
+      <a-cylinder position=".12 .10 0" rotation="0 0 -104" radius=".018" height="1.75" color="#d2a15e"></a-cylinder>
+      <a-text value="CUES" position="0 .83 .05" align="center" color="#d9bd8c" width="1.1"></a-text>
+    </a-entity>
+
+    <!-- wooden triangle rack stored beneath the foot rail -->
+    <a-entity position="0 .60 .99">
+      <a-box position="0 .14 0" width=".78" height=".035" depth=".035" rotation="0 0 0" color="#b77b3b"></a-box>
+      <a-box position="-.34 -.08 0" width=".72" height=".035" depth=".035" rotation="0 0 60" color="#b77b3b"></a-box>
+      <a-box position=".34 -.08 0" width=".72" height=".035" depth=".035" rotation="0 0 -60" color="#b77b3b"></a-box>
+    </a-entity>
+
+    <a-entity id="poolBalls"></a-entity>
+    <a-entity id="poolAimGuide"></a-entity>
+
+    <a-box class="xr-interactable" data-interact="pool" data-id="pool"
+      position="0 1.20 0" width="4.55" height=".90" depth="2.75" material="opacity:0;transparent:true"></a-box>
+  </a-entity>`;
+  resetPoolBalls();
+}
+
+function resetPoolBalls(){
+  const balls=[];
+  balls.push({n:0,x:-1.05,z:0,vx:0,vz:0,pocketed:false});
+  const startX=.58;
+  let n=1;
+  const spacing=POOL.ballRadius*2.12;
+  for(let row=0;row<5;row++){
+    const x=startX+row*(spacing*.90);
+    const z0=-(row*spacing)/2;
+    for(let j=0;j<=row;j++){
+      balls.push({n:n++,x,z:z0+j*spacing,vx:0,vz:0,pocketed:false});
+    }
+  }
+  state.pool.balls=balls;
+  state.pool.shotInProgress=false;
+  state.pool.cueNeedsRespawn=false;
+  state.pool.cuePull=0;
+  state.pool.maxCuePull=0;
+  state.pool.forwardPeak=0;
+  state.pool.physicsAccumulator=0;
+  renderPoolBalls(true);
+}
+
+function renderPoolBalls(rebuild=false){
+  const host=document.getElementById('poolBalls');
+  if(!host)return;
+  if(rebuild){
+    host.innerHTML=state.pool.balls.map(ball=>{
+      const stripe=ball.n>=9;
+      const color=ball.n===0?'#f7f7ef':poolBallColor(ball.n);
+      return `<a-entity id="pool-ball-${ball.n}" position="${ball.x} 1.08 ${ball.z}">
+        <a-sphere radius="${POOL.ballRadius}" color="${color}" roughness=".25" metalness=".05"></a-sphere>
+        ${stripe?`<a-torus radius="${POOL.ballRadius*.73}" radius-tubular="${POOL.ballRadius*.17}" rotation="90 0 0" color="#f2f2e9"></a-torus>`:''}
+        ${ball.n?`<a-text value="${ball.n}" position="0 ${POOL.ballRadius+.006} 0" rotation="-90 0 0" align="center" color="${ball.n===8?'#fff':'#111'}" width=".18"></a-text>`:''}
+      </a-entity>`;
+    }).join('');
+  }else{
+    for(const ball of state.pool.balls){
+      const el=document.getElementById(`pool-ball-${ball.n}`);
+      if(!el)continue;
+      el.setAttribute('visible',!ball.pocketed);
+      if(!ball.pocketed)el.object3D.position.set(ball.x,1.08,ball.z);
+    }
+  }
+  updatePoolAimGuide();
+}
+
+function updatePoolAimGuide(){
+  const host=document.getElementById('poolAimGuide');
+  if(!host)return;
+  const cue=state.pool.balls.find(b=>b.n===0&&!b.pocketed);
+  if(!state.pool.active||!cue||state.pool.shotInProgress){
+    host.innerHTML='';
+    return;
+  }
+
+  const dx=Math.cos(state.pool.aim),dz=Math.sin(state.pool.aim);
+  const pull=state.pool.cuePull;
+  const cueLength=1.28;
+  const tipGap=.075+pull;
+  const centerDistance=tipGap+(cueLength/2);
+  const mx=cue.x-dx*centerDistance;
+  const mz=cue.z-dz*centerDistance;
+  const deg=-THREE.MathUtils.radToDeg(state.pool.aim);
+  const pullPct=Math.round((pull/.70)*100);
+
+  // A faint line shows the intended cue-ball path. The actual wooden cue is
+  // behind the ball and visibly moves with the mouse stroke.
+  host.innerHTML=`
+    <a-box position="${cue.x+dx*.55} 1.087 ${cue.z+dz*.55}"
+      width="1.05" height=".008" depth=".012"
+      rotation="0 ${-THREE.MathUtils.radToDeg(state.pool.aim)} 0"
+      color="#b9f4d0" material="opacity:.28;transparent:true"></a-box>
+    <a-cylinder position="${mx} 1.105 ${mz}" rotation="90 0 ${deg}"
+      radius=".017" height="${cueLength}" color="#d5a66a"></a-cylinder>
+    <a-cylinder position="${cue.x-dx*tipGap} 1.105 ${cue.z-dz*tipGap}"
+      rotation="90 0 ${deg}" radius=".020" height=".07" color="#ece6d5"></a-cylinder>
+    <a-text value="PULL ${pullPct}%" position="${cue.x} 1.27 ${cue.z}"
+      rotation="-90 0 0" align="center" color="#d9f8e5" width=".62"></a-text>`;
+}
+function enterPoolMode(){
+  if(state.engaged||state.player.inventoryOpen)return;
+  state.pool.active=true;
+  state.pool.aim=Math.PI;
+  state.pool.power=.62;
+  state.pool.cuePull=0;
+  state.pool.maxCuePull=0;
+  state.pool.forwardPeak=0;
+  state.pool.lastMouseStamp=performance.now();
+  setMovementEnabled(false);
+  camera()?.setAttribute('look-controls','enabled',false);
+  document.getElementById('hudMode').textContent='POOL · Mouse L/R aim · pull DOWN · stroke UP · Backspace leave';
+  setPrompt(null);
+  updatePoolAimGuide();
+
+  // Keep relative mouse movement available even if the browser dropped pointer
+  // lock while entering pool mode.
+  const canvas=document.querySelector('#xrScene canvas');
+  if(document.pointerLockElement!==canvas)canvas?.requestPointerLock?.();
+
+  toast('Pool: move mouse L/R to aim, pull DOWN, then stroke UP. Faster forward stroke = harder shot.',3600);
+}
+
+function exitPoolMode(){
+  if(!state.pool.active)return;
+  state.pool.active=false;
+  state.pool.cuePull=0;
+  state.pool.maxCuePull=0;
+  state.pool.forwardPeak=0;
+  setMovementEnabled(true);
+  camera()?.setAttribute('look-controls','enabled',true);
+  document.getElementById('hudMode').textContent='WASD move · Enter interact · R run/walk · C crouch · Space jump';
+  updatePoolAimGuide();
+}
+
+function shootPool(strokeSpeed=null){
+  if(!state.pool.active||state.pool.shotInProgress)return;
+  let cue=state.pool.balls.find(b=>b.n===0&&!b.pocketed);
+  if(!cue)return;
+
+  // Mouse strokes supply physical forward velocity. Keyboard fallback still
+  // uses the old power variable if a mouse stroke speed was not supplied.
+  const pullFactor=.78+Math.min(1,state.pool.maxCuePull/.58)*.32;
+  const speed=strokeSpeed==null
+    ?(1.7+5.0*state.pool.power)
+    :Math.max(.65,Math.min(8.2,strokeSpeed*pullFactor));
+
+  cue.vx=Math.cos(state.pool.aim)*speed;
+  cue.vz=Math.sin(state.pool.aim)*speed;
+  state.pool.shotInProgress=true;
+  state.pool.cuePull=0;
+  state.pool.maxCuePull=0;
+  state.pool.forwardPeak=0;
+  updatePoolAimGuide();
+}
+
+function pocketPoolBall(ball){
+  ball.pocketed=true;
+  ball.vx=ball.vz=0;
+  if(ball.n===0){
+    state.pool.cueNeedsRespawn=true;
+    toast('Scratch.',1000);
+  }else{
+    toast(`Ball ${ball.n} pocketed.`,900);
+  }
+}
+
+function respawnCueBall(){
+  const cue=state.pool.balls.find(b=>b.n===0);
+  if(!cue)return;
+  cue.pocketed=false;
+  cue.vx=cue.vz=0;
+
+  // Start near the head spot and move slightly if another ball occupies it.
+  let x=-1.05,z=0;
+  for(let tries=0;tries<12;tries++){
+    const blocked=state.pool.balls.some(b=>b.n!==0&&!b.pocketed&&Math.hypot(b.x-x,b.z-z)<POOL.ballRadius*2.2);
+    if(!blocked)break;
+    z+=.13;
+    if(z>.55){z=-.55;x-=.12;}
+  }
+  cue.x=x;cue.z=z;
+  state.pool.cueNeedsRespawn=false;
+  renderPoolBalls(false);
+}
+
+function poolPocketOpeningForX(x){
+  return Math.abs(x)<POOL.sidePocketHalfWidth || Math.abs(x)>POOL.cornerPocketMouthX;
+}
+
+function poolPocketOpeningForZ(z){
+  return Math.abs(z)>POOL.cornerPocketMouthZ;
+}
+
+function stepPoolPhysics(dt){
+  const live=state.pool.balls.filter(b=>!b.pocketed);
+  const r=POOL.ballRadius;
+  const rx=POOL.innerHalfX-r;
+  const rz=POOL.innerHalfZ-r;
+
+  // Integrate + rolling resistance + pocket/cushion handling.
+  for(const ball of live){
+    ball.x+=ball.vx*dt;
+    ball.z+=ball.vz*dt;
+
+    let speed=Math.hypot(ball.vx,ball.vz);
+    if(speed>0){
+      const next=Math.max(0,speed-POOL.rollingDecel*dt);
+      if(next<=POOL.stopSpeed){
+        ball.vx=0;ball.vz=0;
+      }else{
+        const scale=next/speed;
+        ball.vx*=scale;ball.vz*=scale;
+      }
+    }
+
+    // A real table has gaps in its cushions at the six pockets. Capture first.
+    let sunk=false;
+    for(const [px,pz] of POOL.pockets){
+      if(Math.hypot(ball.x-px,ball.z-pz)<=POOL.pocketRadius){
+        pocketPoolBall(ball);
+        sunk=true;
+        break;
+      }
+    }
+    if(sunk)continue;
+
+    // Long cushions (z). Do not bounce across the side/corner pocket mouths.
+    if(ball.z<-rz && !poolPocketOpeningForX(ball.x)){
+      ball.z=-rz;
+      ball.vz=Math.abs(ball.vz)*POOL.cushionRestitution;
+    }else if(ball.z>rz && !poolPocketOpeningForX(ball.x)){
+      ball.z=rz;
+      ball.vz=-Math.abs(ball.vz)*POOL.cushionRestitution;
+    }
+
+    // End cushions (x). Corner pocket mouths are open.
+    if(ball.x<-rx && !poolPocketOpeningForZ(ball.z)){
+      ball.x=-rx;
+      ball.vx=Math.abs(ball.vx)*POOL.cushionRestitution;
+    }else if(ball.x>rx && !poolPocketOpeningForZ(ball.z)){
+      ball.x=rx;
+      ball.vx=-Math.abs(ball.vx)*POOL.cushionRestitution;
+    }
+
+    // Safety boundary outside the pocket throats in case a very fast ball
+    // crosses a mouth without falling far enough into the capture radius.
+    const outerX=POOL.innerHalfX+.19;
+    const outerZ=POOL.innerHalfZ+.17;
+    if(ball.x<-outerX){ball.x=-outerX;ball.vx=Math.abs(ball.vx)*.55;}
+    if(ball.x>outerX){ball.x=outerX;ball.vx=-Math.abs(ball.vx)*.55;}
+    if(ball.z<-outerZ){ball.z=-outerZ;ball.vz=Math.abs(ball.vz)*.55;}
+    if(ball.z>outerZ){ball.z=outerZ;ball.vz=-Math.abs(ball.vz)*.55;}
+  }
+
+  // Equal-mass sphere collisions in the table plane.
+  const balls=state.pool.balls.filter(b=>!b.pocketed);
+  const minDist=r*2;
+  for(let i=0;i<balls.length;i++){
+    for(let j=i+1;j<balls.length;j++){
+      const a=balls[i],b=balls[j];
+      let dx=b.x-a.x,dz=b.z-a.z;
+      let dist=Math.hypot(dx,dz);
+      if(dist>=minDist)continue;
+
+      if(dist<1e-6){
+        dx=minDist;dz=0;dist=minDist;
+      }
+      const nx=dx/dist,nz=dz/dist;
+      const penetration=minDist-dist;
+      const correction=penetration*.505;
+      a.x-=nx*correction;a.z-=nz*correction;
+      b.x+=nx*correction;b.z+=nz*correction;
+
+      const relNormal=(b.vx-a.vx)*nx+(b.vz-a.vz)*nz;
+      if(relNormal<0){
+        const impulse=-(1+POOL.ballRestitution)*relNormal/2;
+        a.vx-=impulse*nx;a.vz-=impulse*nz;
+        b.vx+=impulse*nx;b.vz+=impulse*nz;
+      }
+    }
+  }
+}
+
+function updatePoolPhysics(delta){
+  if(!state.pool.balls.length)return;
+  state.pool.physicsAccumulator+=Math.min(POOL.maxFrameTime,Math.max(0,(delta||0)/1000));
+
+  let steps=0;
+  while(state.pool.physicsAccumulator>=POOL.fixedStep && steps<16){
+    stepPoolPhysics(POOL.fixedStep);
+    state.pool.physicsAccumulator-=POOL.fixedStep;
+    steps++;
+  }
+
+  const anyMoving=state.pool.balls.some(
+    b=>!b.pocketed&&Math.hypot(b.vx,b.vz)>POOL.stopSpeed
+  );
+
+  if(state.pool.shotInProgress&&!anyMoving){
+    state.pool.shotInProgress=false;
+    if(state.pool.cueNeedsRespawn)respawnCueBall();
+    updatePoolAimGuide();
+  }
+
+  renderPoolBalls(false);
+}
 function setupEmbeddedGames(){
   CABINET_GAMES.forEach(game=>{
     const frame=document.getElementById(game.frameId);
@@ -293,6 +746,10 @@ function dispatchGameKey(type,e){
   const win=rec?.frame?.contentWindow;
   if(!win)return;
   try{
+    // Dispatch once. The iframe's own window receives the event and normal
+    // capture/bubble handling inside the game takes it from there.
+    // Dispatching a second copy at document level made double-tap games such
+    // as Cyrene Rangers interpret one A/D press as two presses.
     const evt=new win.KeyboardEvent(type,{
       key:e.key,
       code:e.code,
@@ -307,7 +764,6 @@ function dispatchGameKey(type,e){
       repeat:e.repeat
     });
     win.dispatchEvent(evt);
-    rec.frame.contentDocument?.dispatchEvent(evt);
   }catch(err){
     console.warn('Game key forwarding failed',err);
   }
@@ -454,7 +910,7 @@ function findNearestInteraction(){
   let best=null;
   let bestDist=2.25;
 
-  document.querySelectorAll('[data-interact].door-root,.cabinet-root,.table-root,#dungeonEntrance [data-interact]').forEach(el=>{
+  document.querySelectorAll('[data-interact].door-root,.cabinet-root,.table-root,#poolTable,#dungeonEntrance [data-interact]').forEach(el=>{
     const hit=el.matches('.cabinet-root,.table-root,.door-root')?el:el.closest('[data-interact]');
     if(!hit)return;
     const d=Math.hypot(p.x-worldPos(hit).x,p.y-worldPos(hit).y,p.z-worldPos(hit).z);
@@ -476,6 +932,7 @@ function findNearestInteraction(){
     const table=BOARD_TABLES.find(t=>t.id===id);
     return table&&{type,id,title:table.title,copy:'Press Enter · XR table integration coming next'};
   }
+  if(type==='pool')return{type,id,title:'Pool Table',copy:'Press Enter to play pool'};
   if(type==='exit')return{type,id,title:'Exit Arcade',copy:'Press Enter to return to the 2D Arcade'};
   if(type==='dungeon')return{type,id,title:'Basement Dungeon',copy:'Press Enter to descend'};
   if(type==='girls')return{type,id,title:'Girls Washroom',copy:'Door is decorative for now'};
@@ -489,6 +946,7 @@ function interact(item){
   switch(item.type){
     case 'cabinet': engageCabinet(item.id); break;
     case 'table': toast(`${item.title}: physical table is ready; multiplayer XR gameplay comes next.`); break;
+    case 'pool': enterPoolMode(); break;
     case 'exit': location.href='../index.html'; break;
     case 'dungeon': enterDungeon(); break;
     case 'dungeon-exit': leaveDungeon(); break;
@@ -497,6 +955,105 @@ function interact(item){
   }
 }
 
+
+
+function playerWorldXZ(){
+  const cam=camera();
+  if(!cam)return null;
+  const p=new THREE.Vector3();
+  cam.object3D.getWorldPosition(p);
+  return p;
+}
+
+function setPlayerWorldXZ(x,z){
+  const cam=camera(),r=rig();
+  if(!cam||!r)return;
+  const parentWorld=new THREE.Vector3();
+  r.object3D.getWorldPosition(parentWorld);
+  cam.object3D.position.x=x-parentWorld.x;
+  cam.object3D.position.z=z-parentWorld.z;
+}
+
+function resolveStaticCollisions(){
+  if(state.engaged||state.pool.active||state.player.inventoryOpen)return;
+  const p=playerWorldXZ();
+  if(!p)return;
+  const radius=state.collision.radius;
+
+  // Outer arcade bounds. Dungeon uses its own corridor bounds below.
+  if(!state.dungeon){
+    let x=Math.max(-16.55,Math.min(16.55,p.x));
+    let z=Math.max(-6.50,Math.min(14.4,p.z));
+
+    document.querySelectorAll('.collision-box').forEach(el=>{
+      const pos=worldPos(el);
+      if(!pos)return;
+      const hx=Number(el.dataset.collisionHalfx)||0;
+      const hz=Number(el.dataset.collisionHalfz)||0;
+      if(!hx||!hz)return;
+
+      const dx=x-pos.x,dz=z-pos.z;
+      const px=hx+radius-Math.abs(dx);
+      const pz=hz+radius-Math.abs(dz);
+      if(px>0&&pz>0){
+        // Push out along the shallower penetration axis.
+        if(px<pz)x=pos.x+(dx<0?-(hx+radius):(hx+radius));
+        else z=pos.z+(dz<0?-(hz+radius):(hz+radius));
+      }
+    });
+    setPlayerWorldXZ(x,z);
+  }else{
+    // Dungeon corridor: stop walking through the side walls.
+    const x=Math.max(-2.36,Math.min(2.36,p.x));
+    setPlayerWorldXZ(x,p.z);
+  }
+}
+
+function syncCabinetHardware(){
+  // Mirror the actual 2D cabinet controls into the 3D cabinet.
+  const out=state.gameTextures.get('outdrive');
+  if(out?.frame?.contentDocument){
+    const doc=out.frame.contentDocument;
+    const srcWheel=doc.getElementById('steeringWheel');
+    const wheel=document.getElementById('xr-outdrive-wheel');
+    if(srcWheel&&wheel){
+      const m=String(srcWheel.style.transform||'');
+      const deg=Number((m.match(/rotate\((-?[\d.]+)deg\)/)||[])[1]||0);
+      wheel.setAttribute('rotation',`90 0 ${deg}`);
+    }
+    const srcGear=doc.getElementById('shifterKnob');
+    const gearText=document.getElementById('xr-outdrive-gear');
+    const knob=document.getElementById('xr-outdrive-shifter-knob');
+    if(srcGear&&gearText&&knob){
+      const gear=Number(srcGear.textContent)||1;
+      gearText.setAttribute('value',String(gear));
+      knob.object3D.position.y=.22+(gear-1)*.045;
+    }
+  }
+
+  const cy=state.gameTextures.get('cyrenerangers');
+  if(cy?.frame?.contentDocument){
+    const doc=cy.frame.contentDocument;
+    const src=doc.getElementById('joystickBall');
+    const ball=document.getElementById('xr-cyrene-stick-ball');
+    if(src&&ball){
+      const tr=String(src.style.transform||'');
+      let x=0,z=0;
+      const m=tr.match(/translate\((-?[\d.]+)px,\s*(-?[\d.]+)px\)/);
+      if(m){x=Number(m[1])*.0025;z=Number(m[2])*.0025;}
+      ball.object3D.position.set(x,.22,z);
+    }
+    const ids=['btnAttack','btnJump','btnBomb','btnSpecial','btnTransform','btnGrab'];
+    ids.forEach((id,i)=>{
+      const source=doc.getElementById(id);
+      const target=document.getElementById(`xr-cyrene-btn-${i}`);
+      if(source&&target){
+        const pressed=source.classList.contains('active-press');
+        target.object3D.scale.y=pressed?0.72:1;
+      }
+    });
+  }
+}
 
 function isEditableTarget(target){
   if(!target)return false;
@@ -840,6 +1397,43 @@ function initPlayerUI(){
   };
 }
 
+function handlePoolMouseMove(e){
+  if(!state.pool.active||state.pool.shotInProgress||state.player.inventoryOpen)return;
+  if(isEditableTarget(e.target))return;
+
+  const now=performance.now();
+  const dt=Math.max(4,Math.min(60,now-(state.pool.lastMouseStamp||now)));
+  state.pool.lastMouseStamp=now;
+
+  // Horizontal mouse movement rotates around the cue ball.
+  if(e.movementX){
+    state.pool.aim+=e.movementX*.0028;
+  }
+
+  const dy=Number(e.movementY)||0;
+  if(dy>0){
+    // Pulling the mouse toward yourself draws the cue backward.
+    state.pool.cuePull=Math.min(.70,state.pool.cuePull+dy*.0042);
+    state.pool.maxCuePull=Math.max(state.pool.maxCuePull,state.pool.cuePull);
+    state.pool.forwardPeak=0;
+  }else if(dy<0 && state.pool.cuePull>0){
+    // Driving the mouse forward pushes the cue toward the ball.
+    const before=state.pool.cuePull;
+    state.pool.cuePull=Math.max(0,state.pool.cuePull+dy*.0052);
+    const pixelsPerMs=(-dy)/dt;
+    state.pool.forwardPeak=Math.max(state.pool.forwardPeak,pixelsPerMs);
+
+    // Fire only when the cue has actually travelled back to the cue ball.
+    if(before>.018 && state.pool.cuePull<=.006 && state.pool.maxCuePull>=.075){
+      const physicalSpeed=Math.max(.65,Math.min(8.2,state.pool.forwardPeak*5.9));
+      shootPool(physicalSpeed);
+      return;
+    }
+  }
+
+  updatePoolAimGuide();
+}
+
 AFRAME.registerComponent('arcade-world',{
   init(){
     buildArcade();
@@ -848,10 +1442,63 @@ AFRAME.registerComponent('arcade-world',{
     initPlayerUI();
     initGlobalChat();
 
+    window.addEventListener('mousemove',handlePoolMouseMove,{passive:true});
+
     window.addEventListener('keydown',e=>{
       // Inputs own their keys. This is especially important for MQTT chat:
       // Enter sends the message instead of entering a cabinet or reaching the game.
       if(isEditableTarget(e.target))return;
+
+      if(state.pool.active){
+        if(e.key==='Backspace'||e.key==='Escape'){
+          e.preventDefault();
+          exitPoolMode();
+          return;
+        }
+        if(state.pool.shotInProgress){
+          e.preventDefault();
+          return;
+        }
+
+        // Keyboard fallback for accessibility / trackpads. Mouse is the intended
+        // pool control: left/right aim, pull down, then stroke up.
+        if(e.code==='KeyA'||e.code==='ArrowLeft'){
+          state.pool.aim-=.06;
+          updatePoolAimGuide();
+          e.preventDefault();
+          return;
+        }
+        if(e.code==='KeyD'||e.code==='ArrowRight'){
+          state.pool.aim+=.06;
+          updatePoolAimGuide();
+          e.preventDefault();
+          return;
+        }
+        if(e.code==='KeyS'||e.code==='ArrowDown'){
+          state.pool.cuePull=Math.min(.70,state.pool.cuePull+.07);
+          state.pool.maxCuePull=Math.max(state.pool.maxCuePull,state.pool.cuePull);
+          updatePoolAimGuide();
+          e.preventDefault();
+          return;
+        }
+        if(e.code==='KeyW'||e.code==='ArrowUp'){
+          state.pool.cuePull=Math.max(0,state.pool.cuePull-.09);
+          updatePoolAimGuide();
+          e.preventDefault();
+          return;
+        }
+        if(e.code==='Space'){
+          if(state.pool.maxCuePull<.075){
+            state.pool.maxCuePull=.32;
+            state.pool.cuePull=.32;
+          }
+          shootPool(3.8);
+          e.preventDefault();
+          return;
+        }
+        e.preventDefault();
+        return;
+      }
 
       if(state.engaged){
         if(e.key==='Backspace'){
@@ -915,6 +1562,11 @@ AFRAME.registerComponent('arcade-world',{
     window.addEventListener('keyup',e=>{
       if(isEditableTarget(e.target))return;
 
+      if(state.pool.active){
+        e.preventDefault();
+        return;
+      }
+
       if(state.engaged){
         if(e.key==='Backspace')return;
         dispatchGameKey('keyup',e);
@@ -935,12 +1587,16 @@ AFRAME.registerComponent('arcade-world',{
         const ident=interactEl?.dataset?.id||type;
         if(type==='cabinet')interact({type,id:ident});
         else if(type==='table')interact({type,id:ident,title:BOARD_TABLES.find(t=>t.id===ident)?.title||'Table Game'});
+        else if(type==='pool')interact({type,id:ident,title:'Pool Table'});
         else if(type)interact({type,id:ident,title:type});
       });
     });
   },
   tick(time,delta){
     updatePlayer(time,delta);
+    updatePoolPhysics(delta);
+    resolveStaticCollisions();
+    syncCabinetHardware();
 
     for(const rec of state.gameTextures.values()){
       rec.texture.needsUpdate=true;
@@ -971,7 +1627,7 @@ AFRAME.registerComponent('xr-thumbstick-locomotion',{
   },
   tick(time,delta){
     state.player.vrMoving=Boolean(this.axis.x||this.axis.y);
-    if(state.engaged||state.player.inventoryOpen||(!this.axis.x&&!this.axis.y))return;
+    if(state.engaged||state.pool.active||state.player.inventoryOpen||(!this.axis.x&&!this.axis.y))return;
     const cam=camera();
     if(!cam)return;
     const dt=Math.min(.05,delta/1000);
