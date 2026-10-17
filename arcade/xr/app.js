@@ -216,6 +216,7 @@ function makeCabinet(game,x,z){
 function chairMarkup(x,z,rot,color='#303843'){
   return `
     <a-entity class="chair-seat" data-seat="true" data-occupied="false" position="${x} 0 ${z}" rotation="0 ${rot} 0">
+      <a-entity class="seat-anchor" position="0 .51 0"></a-entity>
       <a-box position="0 .47 0" width=".62" height=".10" depth=".62" color="${color}"></a-box>
       <a-box position="0 .86 .27" width=".62" height=".72" depth=".09" color="${color}"></a-box>
       <a-cylinder position="-.24 .23 -.22" radius=".035" height=".46" color="#222a31"></a-cylinder>
@@ -434,34 +435,41 @@ function renderPoolBalls(rebuild=false){
   updatePoolAimGuide();
 }
 
-function poolAimRay(){
+function poolViewRay(){
   const cam=camera();
   if(!cam)return null;
-
   const origin=new THREE.Vector3();
   const quat=new THREE.Quaternion();
   cam.object3D.getWorldPosition(origin);
   cam.object3D.getWorldQuaternion(quat);
-
   const dir=new THREE.Vector3(0,0,-1).applyQuaternion(quat).normalize();
+  return {origin,dir};
+}
 
-  if(state.player.leaning){
-    origin.addScaledVector(dir,.42);
-  }
+function poolAimRay(){
+  const held=state.pool.tool==='bridge'
+    ?document.getElementById('heldPoolBridge')
+    :document.getElementById('heldPoolCue');
+  const tip=state.pool.tool==='bridge'
+    ?document.getElementById('heldPoolBridgeTip')
+    :document.getElementById('heldPoolCueTip');
 
-  // The mechanical bridge/rest gives substantially more reach.
-  if(state.pool.tool==='bridge'){
-    origin.addScaledVector(dir,1.02);
-  }
+  if(!held||!tip)return null;
 
-  // While gripping, horizontal mouse motion is fine cue adjustment rather than camera movement.
+  const origin=new THREE.Vector3();
+  const center=new THREE.Vector3();
+  tip.object3D.getWorldPosition(origin);
+  held.object3D.getWorldPosition(center);
+
+  // The visible cue itself defines the physics line. Local -Y is the forward tip.
+  const dir=origin.clone().sub(center).normalize();
+
   if(state.pool.fineYaw){
     dir.applyAxisAngle(new THREE.Vector3(0,1,0),state.pool.fineYaw).normalize();
   }
 
   return {origin,dir};
 }
-
 function poolCueBallCenter(){
   const cue=state.pool.balls.find(b=>b.n===0&&!b.pocketed);
   if(!cue)return null;
@@ -540,9 +548,7 @@ function updateHeldPoolCue(){
   // The cue is intentionally in first-person space so the player can actually
   // see the backswing instead of relying on a numeric power meter.
   const pull=state.pool.cuePull;
-  const leanReach=state.player.leaning?0.42:0;
-  const toolReach=state.pool.tool==='bridge'?0.55:0;
-  held.object3D.position.set(.18,-.20,-.96-leanReach-toolReach+pull*.82);
+  held.object3D.position.set(.18,-.18,-.92+pull*.78);
   held.object3D.rotation.set(
     THREE.MathUtils.degToRad(88),
     state.pool.fineYaw*.85,
@@ -656,40 +662,44 @@ function shootPool(strokeSpeed=null){
   if(!state.pool.active||state.pool.shotInProgress)return;
 
   const aim=calculatePoolAim();
-  if(!aim||!aim.cue)return;
+  const cueData=poolCueBallCenter();
+  const ray=poolAimRay();
+  if(!aim||!cueData||!ray)return;
 
-  const pullFactor=.35+Math.min(1,state.pool.maxCuePull/.58)*.65;
-  const raw=strokeSpeed==null?2.2:strokeSpeed;
-  const speed=Math.max(.12,Math.min(7.2,raw*pullFactor));
+  const cue=cueData.cue;
+  const ballCenter=cueData.center;
+
+  // Physical reach check. The visible cue tip must actually get to the cue ball.
+  const tipDistance=ray.origin.distanceTo(ballCenter);
+  const contactTolerance=POOL.ballRadius+.035;
+
+  const pullFactor=.25+Math.min(1,state.pool.maxCuePull/.58)*.75;
+  const raw=strokeSpeed==null?2.0:strokeSpeed;
+  const speed=Math.max(.08,Math.min(7.2,raw*pullFactor));
 
   state.pool.cuePull=0;
   state.pool.maxCuePull=0;
   state.pool.forwardPeak=0;
 
-  if(!aim.hit){
+  if(!aim.hit||tipDistance>contactTolerance){
     state.pool.gripping=false;
     state.pool.fineYaw=0;
     camera()?.setAttribute('look-controls','enabled',true);
     updatePoolAimGuide();
-    toast('Missed the cue ball — foul.',1300);
+    toast(tipDistance>contactTolerance?'Cue tip did not reach the cue ball.':'Missed the cue ball — foul.',1300);
     return;
   }
 
-  const cue=aim.cue;
   const dx=aim.shotDir.x,dz=aim.shotDir.z;
   const rightX=aim.right.x,rightZ=aim.right.z;
 
-  // Primary translation.
   cue.vx=dx*speed;
   cue.vz=dz*speed;
 
-  // Side-English: mostly spin, with a very small cue-squirt component.
   cue.sideSpin=THREE.MathUtils.clamp(aim.side,-1,1)*speed*.72;
   cue.vx+=rightX*(-aim.side)*speed*.035;
   cue.vz+=rightZ*(-aim.side)*speed*.035;
 
-  // Top/backspin is stored as residual rolling velocity. It expresses itself
-  // after impact and decays into normal rolling.
   const top=THREE.MathUtils.clamp(aim.top,-1,1);
   cue.spinX=dx*top*speed*.48;
   cue.spinZ=dz*top*speed*.48;
@@ -1490,41 +1500,52 @@ function updateHeldPoolTool(){
   if(bridge){
     bridge.setAttribute('visible',active&&state.pool.tool==='bridge');
     const pull=state.pool.cuePull;
-    const leanReach=state.player.leaning?0.42:0;
-    bridge.object3D.position.set(.18,-.18,-1.08-leanReach+pull*.82);
+    bridge.object3D.position.set(.18,-.16,-1.30+pull*.78);
   }
 }
 
 function removePoolBridgeFromTable(){
-  document.getElementById('poolBridgeOnTable')?.remove();
+  const host=document.getElementById('poolBridgeHost');
+  if(host)host.innerHTML='';
   state.pool.bridgePlaced=false;
 }
 
 function placePoolBridgeOnTable(){
-  const host=document.getElementById('poolAimGuide');
-  const aim=calculatePoolAim();
-  if(!host||!aim?.cue)return;
+  const host=document.getElementById('poolBridgeHost');
+  const ray=poolViewRay();
+  if(!host||!ray||Math.abs(ray.dir.y)<1e-5)return false;
+
+  const t=(1.055-ray.origin.y)/ray.dir.y;
+  if(t<=0)return false;
+
+  const hit=ray.origin.clone().addScaledVector(ray.dir,t);
+  const lx=hit.x-POOL.centerX;
+  const lz=hit.z-POOL.centerZ;
+
+  if(Math.abs(lx)>POOL.innerHalfX-.12||Math.abs(lz)>POOL.innerHalfZ-.12){
+    toast('Aim at the pool felt to place the bridge.',1200);
+    return false;
+  }
+
   removePoolBridgeFromTable();
 
-  const cue=aim.cue;
-  const dx=aim.shotDir.x,dz=aim.shotDir.z;
-  const bridgeX=cue.x-dx*.44;
-  const bridgeZ=cue.z-dz*.44;
-  const deg=-THREE.MathUtils.radToDeg(Math.atan2(dz,dx));
+  const flat=new THREE.Vector3(ray.dir.x,0,ray.dir.z);
+  if(flat.lengthSq()<1e-6)flat.set(1,0,0);
+  flat.normalize();
+  const yaw=-THREE.MathUtils.radToDeg(Math.atan2(flat.z,flat.x));
 
-  const holder=document.createElement('a-entity');
-  holder.id='poolBridgeOnTable';
-  holder.innerHTML=`
-    <a-entity position="${bridgeX} 1.07 ${bridgeZ}">
-      <a-box width=".25" height=".018" depth=".025" rotation="0 ${deg} 0" color="#c7ccd0"></a-box>
-      <a-box width=".025" height=".12" depth=".025" position="0 .055 0" color="#c7ccd0"></a-box>
-      <a-cylinder position="${-dx*.55} .105 ${-dz*.55}" rotation="90 0 ${deg}"
-        radius=".010" height="1.10" color="#c99b5d"></a-cylinder>
+  host.innerHTML=`
+    <a-entity id="poolBridgeOnTable" position="${hit.x} 0 ${hit.z}">
+      <a-entity position="0 1.065 0">
+        <a-box width=".30" height=".022" depth=".028" rotation="0 ${yaw} 0" color="#c7ccd0"></a-box>
+        <a-box width=".026" height=".14" depth=".026" position="0 .060 0" color="#c7ccd0"></a-box>
+        <a-cylinder position="${-flat.x*.58} .12 ${-flat.z*.58}" rotation="90 0 ${yaw}"
+          radius=".011" height="1.16" color="#c99b5d"></a-cylinder>
+      </a-entity>
     </a-entity>`;
-  host.appendChild(holder);
   state.pool.bridgePlaced=true;
+  return true;
 }
-
 function useHotbarItem(item,slot){
   const el=document.querySelector(`[data-hotbar-slot="${slot}"]`);
   el?.classList.remove('pulse');
@@ -1533,10 +1554,14 @@ function useHotbarItem(item,slot){
 
   if(state.pool.active&&(item.id==='pool-cue'||item.id==='pool-bridge')){
     state.pool.tool=item.id==='pool-bridge'?'bridge':'cue';
-    if(state.pool.tool==='bridge')placePoolBridgeOnTable();
-    else removePoolBridgeFromTable();
+    if(state.pool.tool==='bridge'){
+      const placed=placePoolBridgeOnTable();
+      toast(placed?'Bridge rest placed':'Bridge selected — aim at felt and press 5 again',1100);
+    }else{
+      removePoolBridgeFromTable();
+      toast('Pool cue selected',900);
+    }
     updateHeldPoolTool();
-    toast(state.pool.tool==='bridge'?'Bridge rest selected':'Pool cue selected',1000);
     return;
   }
 
@@ -1616,23 +1641,31 @@ function setRunning(run){
   toast(state.player.running?'Run mode':'Walk mode',900);
 }
 
+function postureRig(){
+  return document.getElementById('postureRig');
+}
+
 function applyEyePosture(){
   const p=state.player;
-  const cam=camera();
-  if(!cam)return;
+  const pr=postureRig();
+  if(!pr)return;
 
   const crouchDrop=.62*p.crouchAmount;
-  const sitDrop=p.sitting?.74:0;
-  const leanDrop=p.leaning?.18:0;
+  const leanDrop=p.leaning?0.12:0;
+  const leanForward=p.leaning?0.30:0;
 
-  // Posture is an eye-height offset only. Do not touch local X/Z here,
-  // or posture changes will erase the camera's accumulated WASD movement.
-  cam.object3D.position.y=p.baseEyeHeight-crouchDrop-sitDrop-leanDrop;
+  // Camera already sits 1.65 m above the rig. postureRig only adds
+  // body/posture offsets, so changing posture can never alter world position.
+  if(p.sitting){
+    // Standing camera = 1.65m. -0.43 gives ~1.22m seated eye height.
+    pr.object3D.position.set(0,-.43,0);
+  }else{
+    pr.object3D.position.set(0,-crouchDrop-leanDrop,-leanForward);
+  }
 
   p.crouched=p.crouchAmount>.08;
   document.getElementById('crouchState')?.classList.toggle('hidden',!p.crouched);
 }
-
 function setCrouchAmount(amount){
   const p=state.player;
   if(p.sitting)return;
@@ -1697,10 +1730,29 @@ function toggleSit(force=null){
   if(chair){
     chair.dataset.occupied='true';
     p.seatEl=chair;
-    const cp=worldPos(chair);
+
+    const seat=chair.querySelector('.seat-anchor')||chair;
+    const seatWorld=new THREE.Vector3();
+    const chairQuat=new THREE.Quaternion();
+    seat.object3D.getWorldPosition(seatWorld);
+    chair.object3D.getWorldQuaternion(chairQuat);
+
     const r=rig();
-    r.object3D.position.x=cp.x;
-    r.object3D.position.z=cp.z;
+    const cam=camera();
+    if(r&&cam){
+      // Move body to the chair, but stay on the current floor level.
+      r.object3D.position.x=seatWorld.x;
+      r.object3D.position.z=seatWorld.z;
+      r.object3D.position.y=p.floorY;
+
+      // Clear accumulated camera-local walking offset now that body snapped to seat.
+      cam.object3D.position.x=0;
+      cam.object3D.position.z=0;
+
+      const facing=new THREE.Euler().setFromQuaternion(chairQuat,'YXZ');
+      r.object3D.rotation.y=facing.y;
+    }
+
     setMovementEnabled(false);
     toast('Sat in chair',700);
   }else{
@@ -1708,9 +1760,9 @@ function toggleSit(force=null){
     setMovementEnabled(false);
     toast('Sat down',700);
   }
+
   applyEyePosture();
 }
-
 function jump(){
   const p=state.player;
   if(!p.onGround||p.sitting||p.crouchAmount>.65||p.stamina<10||state.engaged||p.inventoryOpen)return;

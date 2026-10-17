@@ -134,33 +134,37 @@
   arcade-world>
 
   <a-entity id="playerRig" position="0 0 11" xr-thumbstick-locomotion>
-    <a-camera id="playerCamera"
-      position="0 1.65 0"
-      look-controls="pointerLockEnabled:true"
-      wasd-controls="acceleration:26">
-      <a-cursor id="desktopCursor"
-        fuse="false"
-        raycaster="objects:.xr-interactable;far:5"
-        material="color:#8edcff;shader:flat;opacity:.72"
-        geometry="primitive:ring;radiusInner:.004;radiusOuter:.007">
-      </a-cursor>
-      <!-- First-person pool cue. Hidden until a cue is picked up. -->
-      <a-entity id="heldPoolCue" visible="false" position=".18 -.20 -.78" rotation="88 0 0">
-        <a-cylinder id="heldPoolCueShaft" radius=".011" height="1.78" color="#d3a363" roughness=".38"></a-cylinder>
-        <a-cylinder position="0 .78 0" radius=".013" height=".055" color="#f0e7d3"></a-cylinder>
-        <a-cylinder position="0 -.79 0" radius=".018" height=".10" color="#352218"></a-cylinder>
-        <a-sphere position=".06 -.37 .02" radius=".065" color="#b88363" roughness=".75"></a-sphere>
-      </a-entity>
-      <a-entity id="heldPoolBridge" visible="false" position=".18 -.18 -.92" rotation="88 0 0">
-        <a-cylinder radius=".010" height="1.92" color="#c99b5d" roughness=".42"></a-cylinder>
-        <a-entity position="0 .88 0">
-          <a-box width=".24" height=".025" depth=".025" color="#c7ccd0"></a-box>
-          <a-box width=".025" height=".11" depth=".025" color="#c7ccd0"></a-box>
-          <a-box width=".025" height=".07" depth=".025" position="-.10 .035 0" rotation="0 0 -30" color="#c7ccd0"></a-box>
-          <a-box width=".025" height=".07" depth=".025" position=".10 .035 0" rotation="0 0 30" color="#c7ccd0"></a-box>
+    <a-entity id="postureRig" position="0 0 0">
+      <a-camera id="playerCamera"
+        position="0 1.65 0"
+        look-controls="pointerLockEnabled:true"
+        wasd-controls="acceleration:26">
+        <a-cursor id="desktopCursor"
+          fuse="false"
+          raycaster="objects:.xr-interactable;far:5"
+          material="color:#8edcff;shader:flat;opacity:.72"
+          geometry="primitive:ring;radiusInner:.004;radiusOuter:.007">
+        </a-cursor>
+        <!-- First-person pool cue. Hidden until a cue is picked up. -->
+        <a-entity id="heldPoolCue" visible="false" position=".18 -.20 -.78" rotation="88 0 0">
+          <a-cylinder id="heldPoolCueShaft" radius=".011" height="1.78" color="#d3a363" roughness=".38"></a-cylinder>
+        <a-entity id="heldPoolCueTip" position="0 -.92 0"></a-entity>
+          <a-cylinder position="0 .78 0" radius=".013" height=".055" color="#f0e7d3"></a-cylinder>
+          <a-cylinder position="0 -.79 0" radius=".018" height=".10" color="#352218"></a-cylinder>
+          <a-sphere position=".06 -.37 .02" radius=".065" color="#b88363" roughness=".75"></a-sphere>
         </a-entity>
-      </a-entity>
-    </a-camera>
+        <a-entity id="heldPoolBridge" visible="false" position=".18 -.18 -.92" rotation="88 0 0">
+          <a-cylinder radius=".010" height="1.92" color="#c99b5d" roughness=".42"></a-cylinder>
+        <a-entity id="heldPoolBridgeTip" position="0 -.99 0"></a-entity>
+          <a-entity position="0 .88 0">
+            <a-box width=".24" height=".025" depth=".025" color="#c7ccd0"></a-box>
+            <a-box width=".025" height=".11" depth=".025" color="#c7ccd0"></a-box>
+            <a-box width=".025" height=".07" depth=".025" position="-.10 .035 0" rotation="0 0 -30" color="#c7ccd0"></a-box>
+            <a-box width=".025" height=".07" depth=".025" position=".10 .035 0" rotation="0 0 30" color="#c7ccd0"></a-box>
+          </a-entity>
+        </a-entity>
+      </a-camera>
+    </a-entity>
     <a-entity id="leftHand"
       laser-controls="hand:left"
       raycaster="objects:.xr-interactable;far:7"></a-entity>
@@ -198,6 +202,7 @@
   <!-- Playable pool area -->
   <a-text value="POOL" position="8.7 3.18 4.8" align="center" color="#8fe3ad" width="3.2"></a-text>
   <a-entity id="poolHost"></a-entity>
+  <a-entity id="poolBridgeHost"></a-entity>
 
   <!-- Washrooms / Exit / Dungeon doors -->
   <a-entity id="doorHost"></a-entity>

@@ -652,3 +652,5 @@ body::-webkit-scrollbar-thumb:hover,
 /* XR preview entry */
 .arcade-3d-entry{display:inline-flex;align-items:center;gap:7px}
 .arcade-3d-status{display:inline-flex;align-items:center;min-height:16px;padding:1px 5px;border:1px solid rgba(244,189,97,.48);border-radius:999px;background:rgba(244,189,97,.09);color:#f4bd61;font-size:.47rem;font-weight:900;letter-spacing:.055em;line-height:1}
+
+.arcade-3d-wip{display:inline-flex;align-items:center;min-height:16px;padding:1px 5px;border:1px solid rgba(255,213,74,.75);border-radius:4px;background:rgba(255,213,74,.11);color:#ffd54a;font-size:.48rem;font-weight:950;letter-spacing:.08em;line-height:1}
