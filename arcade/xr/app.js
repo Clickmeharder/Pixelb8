@@ -1,5 +1,12 @@
-const spatialRuntime=window.PixelB8Spatial?.createRuntime?.(window.PixelB8WorldManifest||{})?.start?.()||null;
-window.PixelB8SpatialRuntime=spatialRuntime;
+const spatialRuntime=window.PIXELB8_SKIP_XR_BOOTSTRAP
+  ?null
+  :(window.PixelB8Spatial?.createRuntime?.(window.PixelB8WorldManifest||{})?.start?.()||null);
+if(spatialRuntime)window.PixelB8SpatialRuntime=spatialRuntime;
+window.PixelB8SpatialInventory=
+  window.PixelB8Spatial?.InventoryModel
+    ?new window.PixelB8Spatial.InventoryModel()
+    :null;
+
 
 const CABINET_GAMES=[
   {
@@ -82,10 +89,12 @@ const state={
     lastMouseStamp:0,
     gripping:false,
     fineYaw:0,
+    cueElevation:0,
+    cueReach:0,
+    reaching:false,
     tool:'cue',
     bridgePlaced:false,
     trajectory:false,
-    freeAim:false,
     shotInProgress:false,
     cueNeedsRespawn:false,
     physicsAccumulator:0,
@@ -370,10 +379,10 @@ function buildPoolTable(){
     <a-cylinder position="1.55 .30 .76" radius=".10" height=".60" color="#302014"></a-cylinder>
 
     <!-- raised cushions / rails -->
-    <a-box position="0 .96 -.96" width="3.92" height=".19" depth=".18" color="#4b301c"></a-box>
-    <a-box position="0 .96 .96" width="3.92" height=".19" depth=".18" color="#4b301c"></a-box>
-    <a-box position="-1.91 .96 0" width=".18" height=".19" depth="1.75" color="#4b301c"></a-box>
-    <a-box position="1.91 .96 0" width=".18" height=".19" depth="1.75" color="#4b301c"></a-box>
+    <a-box position="0 .935 -.96" width="3.92" height=".14" depth=".18" color="#4b301c"></a-box>
+    <a-box position="0 .935 .96" width="3.92" height=".14" depth=".18" color="#4b301c"></a-box>
+    <a-box position="-1.91 .935 0" width=".18" height=".14" depth="1.75" color="#4b301c"></a-box>
+    <a-box position="1.91 .935 0" width=".18" height=".14" depth="1.75" color="#4b301c"></a-box>
 
     <!-- pockets: corners + sides -->
     ${POOL.pockets.map(([x,z])=>`<a-cylinder position="${x} .908 ${z}" rotation="0 0 0" radius=".125" height=".018" color="#020303"></a-cylinder>`).join('')}
@@ -419,30 +428,7 @@ function buildPoolTable(){
       position="0 1.20 0" width="4.55" height=".90" depth="2.75" material="opacity:0;transparent:true"></a-box>
   </a-entity>
 
-  <!-- Wall-mounted cue rack on the right wall -->
-  <a-entity id="poolCueRack" data-interact="pool" data-id="pool"
-    position="16.80 0 3.25" rotation="0 -90 0">
-    <a-box position="0 1.55 0" width="1.14" height="1.82" depth=".08" color="#261a12"></a-box>
-    <a-box position="0 2.33 .07" width="1.04" height=".14" depth=".12" color="#5a3920"></a-box>
-    <a-box position="0 .82 .07" width="1.04" height=".14" depth=".12" color="#5a3920"></a-box>
-    <a-text value="POOL CUES" position="0 2.53 .09" align="center" color="#d9bd8c" width="1.75"></a-text>
-
-    <!-- rack clips -->
-    <a-box position="-.27 2.28 .13" width=".11" height=".10" depth=".13" color="#17110c"></a-box>
-    <a-box position=".27 2.28 .13" width=".11" height=".10" depth=".13" color="#17110c"></a-box>
-    <a-box position="-.27 .88 .13" width=".11" height=".10" depth=".13" color="#17110c"></a-box>
-    <a-box position=".27 .88 .13" width=".11" height=".10" depth=".13" color="#17110c"></a-box>
-
-    <!-- two cues hanging vertically against the wall -->
-    <a-cylinder position="-.27 1.56 .15" radius=".017" height="1.64" color="#d7a86b"></a-cylinder>
-    <a-cylinder position=".27 1.56 .15" radius=".017" height="1.64" color="#d7a86b"></a-cylinder>
-    <a-cylinder position="-.27 .75 .15" radius=".024" height=".055" color="#1d71b8"></a-cylinder>
-    <a-cylinder position=".27 .75 .15" radius=".024" height=".055" color="#8a2f2f"></a-cylinder>
-
-    <a-box class="xr-interactable" data-interact="pool" data-id="pool"
-      position="0 1.55 .34" width="1.55" height="2.35" depth=".72"
-      material="opacity:0;transparent:true"></a-box>
-  </a-entity>`;
+`;
   resetPoolBalls();
 }
 
@@ -699,6 +685,7 @@ function finishManualRack(){
     const pos=MANUAL_RACK_POSITIONS[i];
     if(!ball||!pos)continue;
     ball.pocketed=false;
+    ball.returned=false;
     ball.x=pos.x;ball.z=pos.z;ball.y=POOL.feltY+POOL.ballRadius;
     ball.vx=ball.vy=ball.vz=0;
     ball.sideSpin=ball.spinX=ball.spinZ=0;
@@ -817,6 +804,7 @@ function drivePoolBallOffTable(ball){
   if(ball.n===8){
     if(r.breakShot){
       ball.pocketed=true;
+  ball.returned=false;
       ball.vx=ball.vy=ball.vz=0;
       r.eightOffOnBreak=true;
       setPoolFoul('8-ball driven off on break');
@@ -919,6 +907,7 @@ function placeCueBallFromView(){
   if(!cue)return false;
 
   cue.pocketed=false;
+  cue.returned=false;
   cue.x=candidate.x;cue.z=candidate.z;cue.y=candidate.y;
   cue.vx=cue.vy=cue.vz=0;
   cue.sideSpin=cue.spinX=cue.spinZ=0;
@@ -938,7 +927,7 @@ function placeCueBallFromView(){
 
 function resetPoolBalls(){
   const balls=[];
-  balls.push({n:0,x:-1.05,y:POOL.feltY+POOL.ballRadius,z:0,vx:0,vy:0,vz:0,pocketed:false,sideSpin:0,spinX:0,spinZ:0});
+  balls.push({n:0,x:-1.05,y:POOL.feltY+POOL.ballRadius,z:0,vx:0,vy:0,vz:0,pocketed:false,returned:false,sideSpin:0,spinX:0,spinZ:0});
 
   // WPA-style 8-ball triangle: apex at foot spot, 8 in center,
   // opposite groups on the two rear corners.
@@ -956,7 +945,7 @@ function resetPoolBalls(){
     const x=startX+row*(spacing*.90);
     const z0=-(row*spacing)/2;
     rack[row].forEach((n,j)=>{
-      balls.push({n,x,y:POOL.feltY+POOL.ballRadius,z:z0+j*spacing,vx:0,vy:0,vz:0,pocketed:false,sideSpin:0,spinX:0,spinZ:0});
+      balls.push({n,x,y:POOL.feltY+POOL.ballRadius,z:z0+j*spacing,vx:0,vy:0,vz:0,pocketed:false,returned:false,sideSpin:0,spinX:0,spinZ:0});
     });
   }
 
@@ -969,6 +958,26 @@ function resetPoolBalls(){
   state.pool.physicsAccumulator=0;
   renderPoolBalls(true);
 }
+function poolPocketedBalls(){
+  return state.pool.balls.filter(ball=>ball.n!==0&&ball.returned);
+}
+
+function updatePoolPocketedHud(){
+  const host=document.getElementById('poolPocketedBalls');
+  const empty=document.getElementById('poolPocketedEmpty');
+  if(!host)return;
+
+  const balls=poolPocketedBalls();
+  if(empty)empty.classList.toggle('hidden',balls.length>0);
+
+  host.innerHTML=balls.map(ball=>{
+    const stripe=ball.n>=9;
+    return `<span class="pool-pocket-chip${stripe?' stripe':''}"
+      title="Ball ${ball.n}"
+      style="--ball:${poolBallColor(ball.n)}">${ball.n}</span>`;
+  }).join('');
+}
+
 function renderPoolBalls(rebuild=false){
   const host=document.getElementById('poolBalls');
   if(!host)return;
@@ -990,6 +999,7 @@ function renderPoolBalls(rebuild=false){
       if(!ball.pocketed)el.object3D.position.set(ball.x,ball.y,ball.z);
     }
   }
+  updatePoolPocketedHud();
   updatePoolAimGuide();
 }
 
@@ -1039,10 +1049,25 @@ function poolCueBallCenter(){
 
 function poolLaunchDirection(aim){
   const side=THREE.MathUtils.clamp(aim?.side||0,-1,1);
-  const base=aim?.shotDir||new THREE.Vector3(1,0,0);
-  const right=aim?.right||new THREE.Vector3(0,0,1);
-  const squirt=side*THREE.MathUtils.degToRad(9);
-  const c=Math.cos(squirt),s=Math.sin(squirt);
+  const reached=poolAimWithReach(aim);
+  const base=reached?.shotDir||new THREE.Vector3(1,0,0);
+  const right=reached?.right||new THREE.Vector3(0,0,1);
+
+  // Contact geometry: the farther the tip is from center, the more of the
+  // impulse resolves laterally. Keep a practical cap to avoid edge-miscue
+  // singularities while still making extreme side hits visibly matter.
+  const edge=Math.min(.965,Math.abs(side));
+  const contactAngle=Math.asin(edge);
+  const maxDeflect=THREE.MathUtils.degToRad(32);
+
+  // Nonlinear rise: gentle around center, strong near the rim.
+  const normalized=contactAngle/(Math.PI/2);
+  const deflect=maxDeflect*Math.pow(normalized,1.35);
+  const signed=side*deflect;
+
+  const c=Math.cos(signed);
+  const s=Math.sin(signed);
+
   return new THREE.Vector3(
     base.x*c-right.x*s,
     0,
@@ -1059,6 +1084,12 @@ function calculatePoolAim(){
   const {cue,center}=data;
   const radius=POOL.ballRadius;
 
+  // Aim is based on where the player's view passes the cue ball, not whether
+  // the rendered cue physically reaches it. Reach is assumed once pool mode is active.
+  const toCenter=center.clone().sub(origin);
+  const t=toCenter.dot(dir);
+  const closest=origin.clone().addScaledVector(dir,t);
+
   const shotDir=new THREE.Vector3(dir.x,0,dir.z);
   if(shotDir.lengthSq()<1e-6)shotDir.set(1,0,0);
   shotDir.normalize();
@@ -1066,65 +1097,12 @@ function calculatePoolAim(){
   const right=new THREE.Vector3(-shotDir.z,0,shotDir.x);
   const up=new THREE.Vector3(0,1,0);
 
-  if(state.pool.freeAim){
-    // True ray/sphere aiming from the center reticle.
-    const oc=origin.clone().sub(center);
-    const b=oc.dot(dir);
-    const c=oc.lengthSq()-radius*radius;
-    const disc=b*b-c;
-
-    let hitPoint=null;
-    if(disc>=0){
-      const root=Math.sqrt(disc);
-      let t=-b-root;
-      if(t<0)t=-b+root;
-      if(t>=0)hitPoint=origin.clone().addScaledVector(dir,t);
-    }
-
-    const toCenter=center.clone().sub(origin);
-    const tClosest=Math.max(0,toCenter.dot(dir));
-    const closest=origin.clone().addScaledVector(dir,tClosest);
-    const offset=closest.clone().sub(center);
-    const sideRaw=offset.dot(right);
-    const topRaw=offset.dot(up);
-    const radial=Math.hypot(sideRaw,topRaw);
-
-    const missRadius=radius*1.28;
-    const hit=Boolean(hitPoint);
-    const nearMiss=!hit&&radial<=missRadius;
-
-    // For a miss marker, clamp to the ball rim so the indicator still gives
-    // meaningful feedback without snapping the cue itself.
-    const scale=radial>radius&&radial>0?radius/radial:1;
-    const sideContact=sideRaw*scale;
-    const topContact=topRaw*scale;
-    const frontDepth=Math.sqrt(Math.max(0,radius*radius-sideContact*sideContact-topContact*topContact));
-
-    const contact=hitPoint||center.clone()
-      .addScaledVector(right,sideContact)
-      .addScaledVector(up,topContact)
-      .addScaledVector(shotDir,-frontDepth);
-
-    return {
-      cue,origin,dir,shotDir,right,
-      hit,nearMiss,contact,
-      side:THREE.MathUtils.clamp(sideRaw/radius,-1,1),
-      top:THREE.MathUtils.clamp(topRaw/radius,-1,1),
-      radial,missRadius,
-      freeAim:true
-    };
-  }
-
-  // Assisted mode: keep the forgiving ball-centered aiming behavior.
-  const toCenter=center.clone().sub(origin);
-  const t=toCenter.dot(dir);
-  const closest=origin.clone().addScaledVector(dir,t);
-
   const delta=closest.clone().sub(center);
   const sideRaw=delta.dot(right);
   const topRaw=delta.dot(up);
   const radial=Math.hypot(sideRaw,topRaw);
 
+  // Small halo outside the ball lets the player intentionally miss/foul.
   const missRadius=radius*1.28;
   const hit=radial<=radius;
   const nearMiss=!hit&&radial<=missRadius;
@@ -1144,25 +1122,145 @@ function calculatePoolAim(){
     hit,nearMiss,contact,
     side:THREE.MathUtils.clamp(sideRaw/radius,-1,1),
     top:THREE.MathUtils.clamp(topRaw/radius,-1,1),
-    radial,missRadius,
-    freeAim:false
+    radial,missRadius
+  };
+}
+function poolCueReachAngle(){
+  const reach=THREE.MathUtils.clamp(state.pool.cueReach||0,-1,1);
+  // About +/- 13 degrees is enough to feel like extending the handle hand
+  // without allowing impossible sideways strokes.
+  return reach*THREE.MathUtils.degToRad(13);
+}
+
+function poolCueAxisWithReach(aim){
+  const base=aim?.shotDir?.clone?.()||new THREE.Vector3(1,0,0);
+  base.y=0;
+  if(base.lengthSq()<1e-6)base.set(1,0,0);
+  base.normalize();
+
+  const a=poolCueReachAngle();
+  const c=Math.cos(a),s=Math.sin(a);
+
+  return new THREE.Vector3(
+    base.x*c-base.z*s,
+    0,
+    base.x*s+base.z*c
+  ).normalize();
+}
+
+function poolAimWithReach(aim){
+  if(!aim)return aim;
+
+  const shotDir=poolCueAxisWithReach(aim);
+  const right=new THREE.Vector3(-shotDir.z,0,shotDir.x);
+
+  return {
+    ...aim,
+    shotDir,
+    right
   };
 }
 
+function poolCueBackPointWithRailClearance(aim,contact,length){
+  const dir=aim.shotDir.clone().normalize();
+  const crouch=THREE.MathUtils.clamp(state.player.crouchAmount||0,0,1);
 
-function poolFreeAimTipPoint(aim){
-  const ray=poolViewRay();
-  const data=poolCueBallCenter();
-  if(!ray||!data)return null;
+  // Player-controlled handle elevation is additive to natural stance.
+  // Shift+wheel remains crouch; plain wheel controls this value.
+  const manualLift=THREE.MathUtils.clamp(state.pool.cueElevation||0,-.04,.48);
+  const baseHandleLift=THREE.MathUtils.lerp(.115,.030,crouch)+manualLift;
 
-  // Put the physical cue tip on the center-reticle ray at cue-ball depth.
-  // Unlike assisted mode, do not snap this point onto the ball surface.
-  const toCenter=data.center.clone().sub(ray.origin);
-  const t=Math.max(.20,toCenter.dot(ray.dir));
-  return ray.origin.clone().addScaledVector(ray.dir,t);
+  const back=contact.clone().addScaledVector(dir,-length);
+  back.y+=baseHandleLift;
+
+  const cx=contact.x-POOL.centerX;
+  const cz=contact.z-POOL.centerZ;
+  const bx=back.x-POOL.centerX;
+  const bz=back.z-POOL.centerZ;
+
+  const dx=bx-cx;
+  const dz=bz-cz;
+
+  // Physical cue radius + a tiny visual safety margin.
+  const cueRadius=.018;
+  const railTop=1.005;
+  const railSafeY=railTop+cueRadius+.008;
+
+  // Table footprint. The felt is the open region; everything between the
+  // felt boundary and outer footprint is solid cushion/rail/body.
+  const innerX=POOL.innerHalfX-.015;
+  const innerZ=POOL.innerHalfZ-.015;
+  const outerX=2.02;
+  const outerZ=1.10;
+
+  let requiredBackY=back.y;
+
+  // Sample the shaft rather than checking one rail crossing. This prevents
+  // diagonal/near-corner cases from slipping through the table geometry.
+  const samples=36;
+  for(let i=1;i<=samples;i++){
+    const t=i/samples;
+    const x=cx+dx*t;
+    const z=cz+dz*t;
+
+    const insideOuter=Math.abs(x)<=outerX&&Math.abs(z)<=outerZ;
+    const insideFelt=Math.abs(x)<innerX&&Math.abs(z)<innerZ;
+    const intersectsTable=insideOuter&&!insideFelt;
+    if(!intersectsTable)continue;
+
+    const currentY=contact.y+(back.y-contact.y)*t;
+    if(currentY>=railSafeY)continue;
+
+    // Solve y(t) >= railSafeY for back.y.
+    const needed=contact.y+(railSafeY-contact.y)/Math.max(.035,t);
+    requiredBackY=Math.max(requiredBackY,needed);
+  }
+
+  // Keep physically valid clearance. The cap is intentionally generous now:
+  // if a real rail is in the way, collision wins over a prettier pose.
+  const absoluteMax=contact.y+.76;
+  back.y=Math.min(Math.max(back.y,requiredBackY),absoluteMax);
+  back.y=Math.max(back.y,POOL.feltY+.018);
+
+  return back;
+}
+
+function isPlayerNearPoolTable(){
+  const cam=camera();
+  if(!cam)return false;
+
+  const p=new THREE.Vector3();
+  cam.object3D.getWorldPosition(p);
+
+  // Measure distance from the outside footprint of the table rather than
+  // from its center, so all four sides behave consistently.
+  const outerHalfX=2.05;
+  const outerHalfZ=1.14;
+  const dx=Math.max(Math.abs(p.x-POOL.centerX)-outerHalfX,0);
+  const dz=Math.max(Math.abs(p.z-POOL.centerZ)-outerHalfZ,0);
+
+  return Math.hypot(dx,dz)<=.82;
+}
+
+function setCueCarryPose(held){
+  const crouch=THREE.MathUtils.clamp(state.player.crouchAmount||0,0,1);
+
+  // Carry the cue low at the player's right side. Most of the shaft/handle
+  // sits below the viewport; only the front quarter and tip rise into view.
+  held.object3D.position.set(
+    .53,
+    THREE.MathUtils.lerp(-1.02,-1.08,crouch),
+    -.72
+  );
+  held.object3D.rotation.set(
+    THREE.MathUtils.degToRad(11),
+    THREE.MathUtils.degToRad(-7),
+    THREE.MathUtils.degToRad(-10)
+  );
 }
 
 function updateHeldPoolCue(){
+  updatePoolReachHud();
   const held=document.getElementById('heldPoolCue');
   if(!held)return;
 
@@ -1177,7 +1275,9 @@ function updateHeldPoolCue(){
   held.setAttribute('visible',active);
   if(!active)return;
 
-  if(!state.pool.gripping){
+  // Near the table, keep the cue presented on the cue ball even when not
+  // actively stroking. Only switch to carry pose after stepping away.
+  if(!state.pool.gripping&&!isPlayerNearPoolTable()){
     setCueCarryPose(held);
     return;
   }
@@ -1186,53 +1286,34 @@ function updateHeldPoolCue(){
   const cam=camera();
   if(!aim||!cam)return;
 
-  let tipPoint;
-  let back;
+  const contact=aim.contact.clone();
+  const reachedAim=poolAimWithReach(aim);
+  const cueLength=1.22+state.pool.cuePull*.78;
+  const back=poolCueBackPointWithRailClearance(reachedAim,contact,cueLength);
 
-  if(state.pool.freeAim){
-    tipPoint=poolFreeAimTipPoint(aim);
-    if(!tipPoint)return;
-
-    const view=poolViewRay();
-    const flat=new THREE.Vector3(view.dir.x,0,view.dir.z);
-    if(flat.lengthSq()<1e-6)flat.copy(aim.shotDir);
-    flat.normalize();
-
-    const cueLength=1.22+state.pool.cuePull*.78;
-    back=tipPoint.clone().addScaledVector(flat,-cueLength);
-
-    // In free aim, posture controls the butt height naturally.
-    const crouch=THREE.MathUtils.clamp(state.player.crouchAmount||0,0,1);
-    back.y+=THREE.MathUtils.lerp(.075,.012,crouch);
-
-    // Only apply rail clearance if the free-aim tip is actually close enough
-    // to the cue ball to represent a practical shot setup.
-    const cueData=poolCueBallCenter();
-    if(cueData&&tipPoint.distanceTo(cueData.center)<.42){
-      const pseudoAim={...aim,shotDir:flat};
-      const cleared=poolCueBackPointWithRailClearance(
-        pseudoAim,
-        tipPoint,
-        cueLength
-      );
-      back.y=Math.max(back.y,cleared.y);
-    }
-  }else{
-    tipPoint=aim.contact.clone();
-    const cueLength=1.22+state.pool.cuePull*.78;
-    back=poolCueBackPointWithRailClearance(aim,tipPoint,cueLength);
-  }
-
-  const tipLocal=cam.object3D.worldToLocal(tipPoint.clone());
+  const contactLocal=cam.object3D.worldToLocal(contact.clone());
   const backLocal=cam.object3D.worldToLocal(back.clone());
-  const mid=tipLocal.clone().add(backLocal).multiplyScalar(.5);
+  const mid=contactLocal.clone().add(backLocal).multiplyScalar(.5);
   held.object3D.position.copy(mid);
 
-  const axis=tipLocal.clone().sub(backLocal).normalize();
+  const axis=contactLocal.clone().sub(backLocal).normalize();
   held.object3D.quaternion.copy(
     new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),axis)
   );
 }
+function updatePoolReachHud(){
+  const el=document.getElementById('poolReachValue');
+  if(!el)return;
+
+  const reach=THREE.MathUtils.clamp(state.pool.cueReach||0,-1,1);
+  if(Math.abs(reach)<.08){
+    el.textContent='CENTER';
+  }else{
+    const pct=Math.round(Math.abs(reach)*100);
+    el.textContent=`${reach>0?'RIGHT':'LEFT'} ${pct}%`;
+  }
+}
+
 function updatePoolPowerMeter(){
   const fill=document.getElementById('poolPowerFill');
   const value=document.getElementById('poolPowerValue');
@@ -1246,25 +1327,71 @@ function updatePoolPowerMeter(){
   value.textContent=`${pct}%`;
 }
 
-function poolFirstObjectHit(aim,maxDist=3.2){
-  if(!aim)return null;
-  const origin=new THREE.Vector2(aim.cue.x,aim.cue.z);
+function poolFirstObjectHit(aim,maxDist=3.0){
+  const cue=aim?.cue;
+  if(!cue)return null;
+
   const launch=poolLaunchDirection(aim);
-  const dir=new THREE.Vector2(launch.x,launch.z).normalize();
-  let best=null,bestT=maxDist;
+  const ox=cue.x,oz=cue.z;
+  const dx=launch.x,dz=launch.z;
+  const combined=POOL.ballRadius*2;
+
+  let best=null;
 
   for(const ball of state.pool.balls){
     if(ball.n===0||ball.pocketed)continue;
-    const rel=new THREE.Vector2(ball.x-origin.x,ball.z-origin.y);
-    const t=rel.dot(dir);
-    if(t<=0||t>=bestT)continue;
-    const closest=origin.clone().addScaledVector(dir,t);
-    const d=closest.distanceTo(new THREE.Vector2(ball.x,ball.z));
-    if(d<=POOL.ballRadius*2.03){
-      best={ball,t,closest};
-      bestT=t;
-    }
+
+    const rx=ball.x-ox;
+    const rz=ball.z-oz;
+    const along=rx*dx+rz*dz;
+    if(along<=0||along>maxDist)continue;
+
+    const perpSq=rx*rx+rz*rz-along*along;
+    const r2=combined*combined;
+    if(perpSq>r2)continue;
+
+    const backoff=Math.sqrt(Math.max(0,r2-perpSq));
+    const travel=along-backoff;
+    if(travel<0||travel>maxDist)continue;
+
+    if(best&&travel>=best.travel)continue;
+
+    const cueImpactX=ox+dx*travel;
+    const cueImpactZ=oz+dz*travel;
+
+    let nx=ball.x-cueImpactX;
+    let nz=ball.z-cueImpactZ;
+    const nLen=Math.hypot(nx,nz)||1;
+    nx/=nLen;nz/=nLen;
+
+    const tx=-nz,tz=nx;
+
+    // Equal-mass elastic collision: incoming velocity decomposes into
+    // normal (transferred to object ball) and tangent (retained by cue ball).
+    const vn=dx*nx+dz*nz;
+    const vt=dx*tx+dz*tz;
+
+    let objectDir={x:nx,z:nz};
+    let cueExit={x:tx*Math.sign(vt||1),z:tz*Math.sign(vt||1)};
+
+    // If the hit is almost full, cue tangent motion is tiny.
+    const cueExitStrength=Math.abs(vt);
+    const objectStrength=Math.max(0,vn);
+
+    best={
+      ball,
+      travel,
+      cueImpactX,
+      cueImpactZ,
+      normal:{x:nx,z:nz},
+      tangent:{x:tx,z:tz},
+      objectDir,
+      cueExit,
+      cueExitStrength,
+      objectStrength
+    };
   }
+
   return best;
 }
 
@@ -1373,8 +1500,9 @@ function ensurePoolAimVisuals(){
   const cueLine=makeLine(0xff3f46);
   const objectLine=makeLine(0xffd54a);
   const tangentLine=makeLine(0xff7a80);
+  const jumpLine=makeLine(0x79d7ff);
 
-  state.pool.aimVisuals={host,dot,cueLine,objectLine,tangentLine};
+  state.pool.aimVisuals={host,dot,cueLine,objectLine,tangentLine,jumpLine};
   return state.pool.aimVisuals;
 }
 
@@ -1394,6 +1522,45 @@ function hidePoolAimVisuals(){
   v.cueLine.visible=false;
   v.objectLine.visible=false;
   v.tangentLine.visible=false;
+  if(v.jumpLine)v.jumpLine.visible=false;
+}
+
+function poolPredictedJump(aim){
+  if(!aim?.hit)return null;
+
+  const top=THREE.MathUtils.clamp(aim.top,-1,1);
+  const lowHit=Math.max(0,-top);
+
+  // Estimate handle elevation from manual wheel raise + rail-forced elevation.
+  const manual=Math.max(0,state.pool.cueElevation||0);
+  const crouch=THREE.MathUtils.clamp(state.player.crouchAmount||0,0,1);
+  const stanceBase=THREE.MathUtils.lerp(.115,.030,crouch);
+  const elevation=Math.max(0,stanceBase+manual);
+
+  // Need both a low contact and a meaningfully elevated butt.
+  const jumpFactor=THREE.MathUtils.clamp(
+    (lowHit-.30)/.70 * (elevation-.08)/.32,
+    0,1
+  );
+
+  if(jumpFactor<=.02)return null;
+
+  // Preview velocity is relative, not exact power: use current pull meter so
+  // the arc grows as the player prepares a stronger stroke.
+  const pull=Math.max(.18,Math.min(1,state.pool.maxCuePull/.58));
+  const speed=2.4+pull*4.0;
+  const vy=.75+jumpFactor*2.6;
+
+  return {jumpFactor,speed,vy};
+}
+
+function setThreePolyline(line,points,visible=true){
+  if(!line)return;
+  line.visible=visible;
+  if(!visible)return;
+  line.geometry.setFromPoints(points);
+  line.geometry.attributes.position.needsUpdate=true;
+  line.geometry.computeBoundingSphere();
 }
 
 function updatePoolAimVisuals(aim){
@@ -1403,69 +1570,91 @@ function updatePoolAimVisuals(aim){
     return;
   }
 
-  // poolAimGuide lives inside poolTable, so use table-local x/z/y values.
-  v.dot.visible=aim.freeAim?aim.hit:true;
-  if(v.dot.visible){
-    v.dot.position.set(
-      aim.contact.x-POOL.centerX,
-      aim.contact.y+.018,
-      aim.contact.z-POOL.centerZ
-    );
-    v.dot.material.color.setHex(aim.hit?0xff2028:0xffc928);
-  }
+  v.dot.visible=true;
+  v.dot.position.set(
+    aim.contact.x-POOL.centerX,
+    aim.contact.y+.018,
+    aim.contact.z-POOL.centerZ
+  );
+  v.dot.material.color.setHex(aim.hit?0xff2028:0xffc928);
 
   if(!state.pool.trajectory){
     v.cueLine.visible=false;
     v.objectLine.visible=false;
     v.tangentLine.visible=false;
+    if(v.jumpLine)v.jumpLine.visible=false;
     return;
   }
 
   const y=POOL.feltY+POOL.ballRadius+.025;
+  const launch=poolLaunchDirection(aim);
   const cueStart=new THREE.Vector3(aim.cue.x,y,aim.cue.z);
-  const hit=poolFirstObjectHit(aim,3.0);
-  let cueEnd;
+  const hit=poolFirstObjectHit(aim,3.2);
 
-  if(hit)cueEnd=new THREE.Vector3(hit.ball.x,y,hit.ball.z);
-  else{
-    const launch=poolLaunchDirection(aim);
-    cueEnd=new THREE.Vector3(
-      aim.cue.x+launch.x*1.60,
-      y,
-      aim.cue.z+launch.z*1.60
-    );
+  // Jump preview supersedes flat cue-path preview when a jump is predicted.
+  const jump=poolPredictedJump(aim);
+  if(jump&&v.jumpLine){
+    const points=[];
+    const totalT=.72;
+    const steps=24;
+    for(let i=0;i<=steps;i++){
+      const t=totalT*(i/steps);
+      const px=aim.cue.x+launch.x*jump.speed*t;
+      const pz=aim.cue.z+launch.z*jump.speed*t;
+      const py=y+jump.vy*t-.5*POOL.gravity*t*t;
+      if(py<y&&i>1)break;
+      points.push(new THREE.Vector3(px,Math.max(y,py),pz));
+    }
+    setThreePolyline(v.jumpLine,points,points.length>1);
+  }else if(v.jumpLine){
+    v.jumpLine.visible=false;
   }
-  setThreeLine(v.cueLine,cueStart,cueEnd,true);
 
   if(!hit){
+    const cueEnd=new THREE.Vector3(
+      aim.cue.x+launch.x*1.70,
+      y,
+      aim.cue.z+launch.z*1.70
+    );
+    setThreeLine(v.cueLine,cueStart,cueEnd,true);
     v.objectLine.visible=false;
     v.tangentLine.visible=false;
     return;
   }
 
-  let nx=hit.ball.x-hit.closest.x;
-  let nz=hit.ball.z-hit.closest.y;
-  let mag=Math.hypot(nx,nz);
-  if(mag<1e-6){const launch=poolLaunchDirection(aim);nx=launch.x;nz=launch.z;mag=1;}
-  nx/=mag;nz/=mag;
+  const impact=new THREE.Vector3(hit.cueImpactX,y,hit.cueImpactZ);
+  setThreeLine(v.cueLine,cueStart,impact,true);
 
+  // Object-ball path is the collision normal from the true impact geometry.
+  const objLen=.95*Math.max(.28,hit.objectStrength);
   setThreeLine(
     v.objectLine,
     new THREE.Vector3(hit.ball.x,y+.003,hit.ball.z),
-    new THREE.Vector3(hit.ball.x+nx*.90,y+.003,hit.ball.z+nz*.90),
+    new THREE.Vector3(
+      hit.ball.x+hit.objectDir.x*objLen,
+      y+.003,
+      hit.ball.z+hit.objectDir.z*objLen
+    ),
     true
   );
 
-  let tx=-nz,tz=nx;
-  const launchForTangent=poolLaunchDirection(aim);if(tx*launchForTangent.x+tz*launchForTangent.z<0){tx=-tx;tz=-tz;}
-  setThreeLine(
-    v.tangentLine,
-    new THREE.Vector3(hit.ball.x,y+.006,hit.ball.z),
-    new THREE.Vector3(hit.ball.x+tx*.48,y+.006,hit.ball.z+tz*.48),
-    true
-  );
+  // Cue ball retains only the tangent component after an ideal equal-mass hit.
+  if(hit.cueExitStrength>.055){
+    const cueExitLen=.78*hit.cueExitStrength;
+    setThreeLine(
+      v.tangentLine,
+      impact,
+      new THREE.Vector3(
+        impact.x+hit.cueExit.x*cueExitLen,
+        y+.006,
+        impact.z+hit.cueExit.z*cueExitLen
+      ),
+      true
+    );
+  }else{
+    v.tangentLine.visible=false;
+  }
 }
-
 function updatePoolAimGuide(){
   const host=document.getElementById('poolAimGuide');
   if(!host)return;
@@ -1518,6 +1707,12 @@ function updatePoolAimGuide(){
 }
 function enterPoolMode(){
   if(state.engaged||state.player.inventoryOpen)return;
+
+  const hasCue=state.inventory.some(item=>item?.typeId==='pixelb8.pool-cue');
+  if(!hasCue){
+    toast('You need a pool cue. Take one from the cue rack.',1800);
+    return;
+  }
   state.pool.active=true;
   state.pool.aim=Math.PI;
   state.pool.power=.62;
@@ -1538,12 +1733,12 @@ function enterPoolMode(){
   setMovementEnabled(true);
   camera()?.setAttribute('look-controls','enabled',true);
 
-  document.getElementById('hudMode').textContent='POOL · walk/look normally · L lean · 4 cue / 5 bridge · hold LMB to stroke · Backspace leave';
+  document.getElementById('hudMode').textContent='POOL · walk/look normally · L lean · 4 cue / 5 bridge · wheel cue height · RMB+mouse Reach · Shift+wheel crouch · hold LMB to stroke · Backspace leave';
   setPrompt(null);
   updatePoolAimGuide();
 
   const canvas=document.querySelector('#xrScene canvas');
-  if(document.pointerLockElement!==canvas)canvas?.requestPointerLock?.();
+  if(document.pointerLockElement!==canvas&&window.PIXELB8_ALLOW_POINTER_LOCK!==false){try{canvas?.requestPointerLock?.();}catch{}}
 
   toast('Pool: walk around and aim the red dot. Hold left mouse, pull DOWN, then stroke UP. Backspace leaves pool.',4200);
 }
@@ -1552,6 +1747,7 @@ function exitPoolMode(){
   if(!state.pool.active)return;
   state.pool.active=false;
   state.pool.gripping=false;
+  state.pool.reaching=false;
   state.pool.cuePull=0;
   state.pool.maxCuePull=0;
   state.pool.forwardPeak=0;
@@ -1605,6 +1801,8 @@ function shootPool(strokeSpeed=null){
 
   if(!aim.hit){
     state.pool.gripping=false;
+    state.pool.gripViewQuaternion=null;
+    state.pool.gripViewRotation=null;
     state.pool.fineYaw=0;
     camera()?.setAttribute('look-controls','enabled',true);
     if(aim.nearMiss){
@@ -1620,31 +1818,22 @@ function shootPool(strokeSpeed=null){
     return;
   }
 
-  const dx=aim.shotDir.x,dz=aim.shotDir.z;
-  const rightX=aim.right.x,rightZ=aim.right.z;
+  const reachedAim=poolAimWithReach(aim);
+  const dx=reachedAim.shotDir.x,dz=reachedAim.shotDir.z;
+  const rightX=reachedAim.right.x,rightZ=reachedAim.right.z;
 
   const side=THREE.MathUtils.clamp(aim.side,-1,1);
 
-  // Off-centre cue contact does two distinct things:
-  // 1) it adds side-spin (English), and
-  // 2) it deflects the cue ball's INITIAL launch direction slightly
-  //    opposite the side being struck (cue-ball squirt).
-  //
-  // A full left/right hit produces roughly 9 degrees of launch deflection.
-  // This is deliberately visible enough to match what the aiming UI implies,
-  // without turning side English into an exaggerated 45-degree redirect.
-  const maxSquirtRad=THREE.MathUtils.degToRad(9);
-  const squirt=side*maxSquirtRad;
-
-  const cosS=Math.cos(squirt);
-  const sinS=Math.sin(squirt);
-  const launchX=dx*cosS-rightX*sinS;
-  const launchZ=dz*cosS-rightZ*sinS;
+  // Reach changes the actual cue axis. Contact-offset deflection then acts
+  // relative to that reached axis, so visuals, trajectory and physics agree.
+  const launch=poolLaunchDirection(aim);
+  const launchX=launch.x;
+  const launchZ=launch.z;
 
   cue.vx=launchX*speed;
   cue.vz=launchZ*speed;
 
-  cue.sideSpin=side*speed*.72;
+  cue.sideSpin=side*speed*.82;
 
   const top=THREE.MathUtils.clamp(aim.top,-1,1);
   cue.spinX=launchX*top*speed*.48;
@@ -1660,10 +1849,12 @@ function shootPool(strokeSpeed=null){
 
   state.pool.shotInProgress=true;
   state.pool.gripping=false;
+    state.pool.gripViewQuaternion=null;
+    state.pool.gripViewRotation=null;
   state.pool.fineYaw=0;
   camera()?.setAttribute('look-controls','enabled',true);
   const canvas=document.querySelector('#xrScene canvas');
-  if(document.pointerLockElement!==canvas)canvas?.requestPointerLock?.();
+  if(document.pointerLockElement!==canvas&&window.PIXELB8_ALLOW_POINTER_LOCK!==false){try{canvas?.requestPointerLock?.();}catch{}}
 
   if(state.pool.tool==='bridge'){
     const bridge=document.getElementById('poolBridgeOnTable');
@@ -1681,6 +1872,7 @@ function shootPool(strokeSpeed=null){
 function pocketPoolBall(ball){
   if(ball.pocketed)return;
   ball.pocketed=true;
+  ball.returned=ball.n!==0;
   ball.vx*=.45;
   ball.vz*=.45;
   ball.vy=Math.min(ball.vy||0,-.35);
@@ -1699,6 +1891,7 @@ function pocketPoolBall(ball){
   }else{
     toast(`Ball ${ball.n} pocketed.`,900);
   }
+  updatePoolPocketedHud();
 }
 
 function respawnCueBallFreePlay(){
@@ -1712,6 +1905,7 @@ function respawnCueBallFreePlay(){
     }
   }
   cue.pocketed=false;
+  cue.returned=false;
   cue.x=spot[0];cue.z=spot[1];cue.y=POOL.feltY+POOL.ballRadius;
   cue.vx=cue.vy=cue.vz=0;
   cue.sideSpin=cue.spinX=cue.spinZ=0;
@@ -1951,7 +2145,7 @@ function updatePoolPhysics(delta){
     }
     camera()?.setAttribute('look-controls','enabled',true);
     const canvas=document.querySelector('#xrScene canvas');
-    if(state.pool.active&&document.pointerLockElement!==canvas)canvas?.requestPointerLock?.();
+    if(state.pool.active&&document.pointerLockElement!==canvas&&window.PIXELB8_ALLOW_POINTER_LOCK!==false){try{canvas?.requestPointerLock?.();}catch{}}
     updateHeldPoolTool();
     updatePoolRulesHud();
     updatePoolAimGuide();
@@ -2215,6 +2409,69 @@ function buildDungeonEntrance(){
   ensureDungeonChunks(0);
 }
 
+function ensureArcadeCueRackAsset(){
+  const runtime=window.PixelB8SpatialRuntime;
+  if(!runtime?.assets)return null;
+  const existing=runtime.assets.get('pool-cue-rack-main');
+  if(existing)return existing;
+  if(!runtime.registry?.getAsset?.('pixelb8.pool-cue-rack'))return null;
+
+  return runtime.assets.spawn('pixelb8.pool-cue-rack',{
+    id:'pool-cue-rack-main',
+    hostId:'assetHost',
+    position:[16.80,0,3.25],
+    rotation:[0,-90,0]
+  });
+}
+
+function arcadeCueRack(){
+  return window.PixelB8SpatialRuntime?.assets?.get?.('pool-cue-rack-main')||null;
+}
+
+function syncCueTakenToLegacyInventory(item){
+  if(!item)return;
+  if(!state.inventory.some(existing=>existing?.uid===item.uid)){
+    state.inventory.push(item);
+    renderInventory();
+  }
+}
+
+function syncCueReturnedFromLegacyInventory(item){
+  if(!item)return;
+  const index=state.inventory.findIndex(existing=>existing?.uid===item.uid);
+  if(index>=0){
+    state.inventory.splice(index,1);
+    renderInventory();
+  }
+}
+
+function updateArcadeCueRackFocus(){
+  const rack=arcadeCueRack();
+  if(!rack)return null;
+  if(state.engaged||state.pool.active||state.player.inventoryOpen){
+    rack.clearFocus?.();
+    return null;
+  }
+  return rack.updateFocus?.(camera(),window.PixelB8SpatialInventory)||null;
+}
+
+function interactArcadeCueRack(){
+  const rack=arcadeCueRack();
+  if(!rack||rack.focusedSlot<0)return false;
+
+  const result=rack.interactFocused(window.PixelB8SpatialInventory);
+  if(!result)return false;
+
+  if(result.action==='take'){
+    syncCueTakenToLegacyInventory(result.item);
+    toast('Pool cue added to inventory.',1100);
+  }else{
+    syncCueReturnedFromLegacyInventory(result.item);
+    toast('Pool cue returned to rack.',1100);
+  }
+  return true;
+}
+
 function findNearestInteraction(){
   if(state.engaged||state.pool.active)return null;
   const cam=camera();
@@ -2223,7 +2480,7 @@ function findNearestInteraction(){
   let best=null;
   let bestDist=2.45;
 
-  document.querySelectorAll('[data-interact].door-root,.cabinet-root,.table-root,#poolTable,#poolCueRack,#dungeonEntrance [data-interact]').forEach(el=>{
+  document.querySelectorAll('[data-interact].door-root,.cabinet-root,.table-root,#poolTable,#dungeonEntrance [data-interact]').forEach(el=>{
     const hit=el.matches('.cabinet-root,.table-root,.door-root')?el:el.closest('[data-interact]');
     if(!hit)return;
     const hp=worldPos(hit);
@@ -2248,7 +2505,7 @@ function findNearestInteraction(){
     const table=BOARD_TABLES.find(t=>t.id===id);
     return table&&{type,id,title:table.title,copy:'Press Enter · XR table integration coming next'};
   }
-  if(type==='pool')return{type,id,title:'Pool',copy:'Press Enter to pick up a cue and play'};
+  if(type==='pool')return{type,id,title:'Pool',copy:'Press Enter to play · requires a pool cue'};
   if(type==='exit')return{type,id,title:'Exit Arcade',copy:'Press Enter to return to the 2D Arcade'};
   if(type==='dungeon')return{type,id,title:'Basement Dungeon',copy:'Press Enter to descend'};
   if(type==='girls')return{type,id,title:'Girls Washroom',copy:'Door is decorative for now'};
@@ -2377,10 +2634,19 @@ function syncCabinetHardware(){
 
 function isEditableTarget(target){
   if(!target)return false;
-  return target instanceof HTMLInputElement
-    || target instanceof HTMLTextAreaElement
-    || target instanceof HTMLSelectElement
-    || target.isContentEditable;
+  if(target instanceof HTMLTextAreaElement)return true;
+  if(target instanceof HTMLSelectElement)return true;
+  if(target.isContentEditable)return true;
+
+  if(target instanceof HTMLInputElement){
+    const type=(target.type||'text').toLowerCase();
+    return [
+      'text','search','email','url','tel','password','number',
+      'date','datetime-local','month','time','week'
+    ].includes(type);
+  }
+
+  return false;
 }
 
 function getProfile(){
@@ -2896,7 +3162,14 @@ function initPlayerUI(){
   });
 
   // Public hooks for future combat/items/NPC systems.
-  window.PixelB8XRPlayer={
+  window.PixelB8PoolAssets={
+  get inventory(){return window.PixelB8SpatialInventory;},
+  get rack(){return window.PixelB8SpatialRuntime?.assets?.get?.('pool-cue-rack-main')||null;},
+  takeCue(slot=0){const rack=this.rack;if(!rack||!this.inventory)return null;return rack.take(slot,this.inventory);},
+  returnCue(uid,slot=null){const rack=this.rack,inventory=this.inventory;if(!rack||!inventory)return false;const item=inventory.get(uid);return item?rack.returnItem(item,inventory,slot):false;}
+};
+
+window.PixelB8XRPlayer={
     damage(amount){changeHealth(-Math.abs(Number(amount)||0));},
     heal(amount){changeHealth(Math.abs(Number(amount)||0));},
     setHealth(value){state.player.health=Math.max(0,Math.min(100,Number(value)||0));showVitals('health');updateVitals();},
@@ -2924,6 +3197,38 @@ function initPlayerUI(){
   };
 }
 
+function beginPoolReach(e){
+  if(
+    !state.pool.active ||
+    state.pool.shotInProgress ||
+    state.player.inventoryOpen ||
+    state.pool.rules?.ballInHand ||
+    state.pool.tool!=='cue' ||
+    e.button!==2 ||
+    isEditableTarget(e.target)
+  )return false;
+
+  e.preventDefault();
+  state.pool.reaching=true;
+  camera()?.setAttribute('look-controls','enabled',false);
+  updateHeldPoolCue();
+  return true;
+}
+
+function endPoolReach(e){
+  if(e.button!==2||!state.pool.reaching)return;
+  e.preventDefault();
+  state.pool.reaching=false;
+
+  // If LMB stroke isn't also active, return normal view controls.
+  if(!state.pool.gripping){
+    camera()?.setAttribute('look-controls','enabled',true);
+  }
+
+  updateHeldPoolCue();
+  updatePoolAimGuide();
+}
+
 function beginPoolGrip(e){
   if(!state.pool.active||state.pool.shotInProgress||state.player.inventoryOpen)return;
   if(e.button!==0||isEditableTarget(e.target))return;
@@ -2935,6 +3240,9 @@ function beginPoolGrip(e){
   }
 
   state.pool.gripping=true;
+  const gripCam=camera();
+  state.pool.gripViewQuaternion=gripCam?.object3D.quaternion.clone()||null;
+  state.pool.gripViewRotation=gripCam?.object3D.rotation.clone()||null;
   state.pool.cuePull=0;
   state.pool.maxCuePull=0;
   state.pool.forwardPeak=0;
@@ -2955,9 +3263,11 @@ function endPoolGrip(e){
     state.pool.maxCuePull=0;
     state.pool.forwardPeak=0;
     state.pool.fineYaw=0;
+    state.pool.gripViewQuaternion=null;
+    state.pool.gripViewRotation=null;
     camera()?.setAttribute('look-controls','enabled',true);
     const canvas=document.querySelector('#xrScene canvas');
-    if(state.pool.active&&document.pointerLockElement!==canvas)canvas?.requestPointerLock?.();
+    if(state.pool.active&&document.pointerLockElement!==canvas&&window.PIXELB8_ALLOW_POINTER_LOCK!==false){try{canvas?.requestPointerLock?.();}catch{}}
     updatePoolPowerMeter();
     updatePoolAimGuide();
   }
@@ -2967,9 +3277,32 @@ function handlePoolMouseMove(e){
   if(!state.pool.active||state.pool.shotInProgress||state.player.inventoryOpen)return;
   if(isEditableTarget(e.target))return;
 
+  // RMB Reach moves the handle hand laterally while keeping the cue tip
+  // anchored to the current cue-ball contact point.
+  if(state.pool.reaching){
+    const mx=Number(e.movementX)||0;
+    if(mx){
+      state.pool.cueReach=THREE.MathUtils.clamp(
+        (state.pool.cueReach||0)+mx*.0065,
+        -1,1
+      );
+      updateHeldPoolCue();
+      updatePoolAimGuide();
+    }
+    return;
+  }
+
   // When LMB is not held, do not touch mouse movement at all.
   // A-Frame owns it completely for normal first-person looking/walking.
   if(!state.pool.gripping)return;
+
+  // Lock the view for the whole stroke. Some browsers/A-Frame builds can still
+  // receive pointer deltas after look-controls is disabled, so restore the
+  // exact grip-start camera orientation on every stroke movement.
+  const gripCam=camera();
+  if(gripCam&&state.pool.gripViewQuaternion){
+    gripCam.object3D.quaternion.copy(state.pool.gripViewQuaternion);
+  }
 
   const now=performance.now();
   const dt=Math.max(4,Math.min(60,now-(state.pool.lastMouseStamp||now)));
@@ -2987,7 +3320,7 @@ function handlePoolMouseMove(e){
 
   if(dy>0){
     // Pull mouse toward yourself -> cue comes visibly backward.
-    state.pool.cuePull=Math.min(.70,state.pool.cuePull+dy*.0030);
+    state.pool.cuePull=Math.min(.70,state.pool.cuePull+dy*.0022);
     state.pool.maxCuePull=Math.max(state.pool.maxCuePull,state.pool.cuePull);
     state.pool.forwardPeak=0;
   }else if(dy<0&&state.pool.cuePull>0){
@@ -3001,7 +3334,7 @@ function handlePoolMouseMove(e){
     if(before>.010&&state.pool.cuePull<=.003&&state.pool.maxCuePull>=.035){
       // Far less aggressive than the old mapping: both backswing distance
       // and forward stroke speed matter.
-      const physicalSpeed=Math.max(.10,Math.min(7.2,state.pool.forwardPeak*2.25));
+      const physicalSpeed=Math.max(.10,Math.min(7.2,state.pool.forwardPeak*1.72));
       shootPool(physicalSpeed);
       return;
     }
@@ -3011,6 +3344,82 @@ function handlePoolMouseMove(e){
   updatePoolAimGuide();
 }
 
+
+window.PixelB8LegacyPoolController={
+  mount({
+    hostId='poolHost',
+    centerX=0,
+    centerZ=0,
+    initializeUI=true
+  }={}){
+    const host=document.getElementById(hostId);
+    if(!host)throw new Error(`Missing pool host: ${hostId}`);
+
+    POOL.centerX=Number(centerX)||0;
+    POOL.centerZ=Number(centerZ)||0;
+
+    buildPoolTable();
+    resetPoolRules();
+    resetPoolBalls();
+
+    if(initializeUI&&!window.__pixelb8LegacyPoolUIReady){
+      initPlayerUI();
+      window.__pixelb8LegacyPoolUIReady=true;
+    }
+
+    updatePoolRulesHud();
+    updatePoolPocketedHud();
+    updateHeldPoolTool();
+
+    return this;
+  },
+
+  enter(){enterPoolMode();},
+  exit(){exitPoolMode();},
+  reset(){poolAutoRack();},
+  tick(delta){updatePoolPhysics(delta);},
+  tickPlayer(time,delta){
+    updatePlayer(time,delta);
+    resolveStaticCollisions();
+    updateHeldPoolTool();
+  },
+
+  beginGrip(e){return beginPoolGrip(e);},
+  endGrip(e){return endPoolGrip(e);},
+  mouseMove(e){return handlePoolMouseMove(e);},
+  beginReach(e){return beginPoolReach(e);},
+  endReach(e){return endPoolReach(e);},
+
+  setInventoryOpen(open){setInventoryOpen(open);},
+  toggleInventory(){setInventoryOpen(!state.player.inventoryOpen);},
+  selectHotbar(slot,use=true){selectHotbarSlot(slot,use);},
+
+  isActive(){return state.pool.active;},
+  isInventoryOpen(){return state.player.inventoryOpen;},
+  isNearTable(){return isPlayerNearPoolTable();},
+
+  addLegacyInventoryItem(item){
+    if(!item)return false;
+    if(state.inventory.some(existing=>existing?.uid&&existing.uid===item.uid))return false;
+    if(state.inventory.length>=24)return false;
+    state.inventory.push(item);
+    renderInventory();
+    return true;
+  },
+
+  removeLegacyInventoryItem(uid){
+    const index=state.inventory.findIndex(item=>item?.uid===uid);
+    if(index<0)return null;
+    const [item]=state.inventory.splice(index,1);
+    renderInventory();
+    return item;
+  },
+
+  getLegacyInventory(){return [...state.inventory];},
+  getState(){return state;},
+  getPoolConstants(){return POOL;}
+};
+
 AFRAME.registerComponent('arcade-world',{
   init(){
     buildArcade();
@@ -3018,6 +3427,7 @@ AFRAME.registerComponent('arcade-world',{
     setupEmbeddedGames();
     initPlayerUI();
     initGlobalChat();
+    setTimeout(()=>ensureArcadeCueRackAsset(),0);
 
     window.addEventListener('mousemove',handlePoolMouseMove,{passive:true});
     window.addEventListener('mousedown',e=>{
@@ -3026,17 +3436,55 @@ AFRAME.registerComponent('arcade-world',{
         standStraight();
         return;
       }
+      if(e.button===2&&beginPoolReach(e))return;
       beginPoolGrip(e);
     },true);
-    window.addEventListener('mouseup',endPoolGrip,true);
+
+    window.addEventListener('mouseup',e=>{
+      if(e.button===2){
+        endPoolReach(e);
+        return;
+      }
+      endPoolGrip(e);
+    },true);
+
+    window.addEventListener('contextmenu',e=>{
+      if(state.pool.active&&state.pool.tool==='cue'){
+        e.preventDefault();
+      }
+    },true);
 
     window.addEventListener('wheel',e=>{
-      if(isEditableTarget(e.target)||!e.shiftKey)return;
-      e.preventDefault();
-      if(state.player.sitting)return;
-      // Wheel down crouches more; wheel up stands taller.
-      const step=Math.sign(e.deltaY)*.10;
-      setCrouchAmount(state.player.crouchAmount+step);
+      if(isEditableTarget(e.target))return;
+
+      if(e.shiftKey){
+        e.preventDefault();
+        if(state.player.sitting)return;
+        // Shift+wheel keeps its existing posture control.
+        const step=Math.sign(e.deltaY)*.10;
+        setCrouchAmount(state.player.crouchAmount+step);
+        return;
+      }
+
+      // While playing pool, plain wheel manually raises/lowers the cue butt.
+      // Wheel up raises; wheel down lowers. Physical table collision remains
+      // the minimum height, so lowering can never force the cue through a rail.
+      if(
+        state.pool.active &&
+        !state.pool.shotInProgress &&
+        !state.pool.rules?.ballInHand &&
+        state.pool.tool==='cue' &&
+        isPlayerNearPoolTable()
+      ){
+        e.preventDefault();
+        const delta=e.deltaY<0?.025:-.025;
+        state.pool.cueElevation=THREE.MathUtils.clamp(
+          (state.pool.cueElevation||0)+delta,
+          -.04,.48
+        );
+        updateHeldPoolCue();
+        updatePoolAimGuide();
+      }
     },{passive:false,capture:true});
 
     window.addEventListener('keydown',e=>{
@@ -3072,6 +3520,11 @@ AFRAME.registerComponent('arcade-world',{
       }
 
       if(!state.player.sitting)state.player.keys.add(e.code);
+
+      if(e.key==='Enter'&&interactArcadeCueRack()){
+        e.preventDefault();
+        return;
+      }
 
       if(e.key==='Enter'&&state.nearby){
         e.preventDefault();
@@ -3159,6 +3612,8 @@ AFRAME.registerComponent('arcade-world',{
       rec.texture.needsUpdate=true;
     }
 
+    updateArcadeCueRackFocus();
+
     if(!state.engaged){
       setPrompt(findNearestInteraction());
     }
@@ -3200,21 +3655,29 @@ AFRAME.registerComponent('xr-thumbstick-locomotion',{
   }
 });
 
+function returnFocusToWorld({lockPointer=true}={}){
+  const active=document.activeElement;
+  if(active&&typeof active.blur==='function')active.blur();
+
+  const canvas=document.querySelector('#xrScene canvas');
+  if(
+    lockPointer &&
+    state.pool.active &&
+    !state.player.inventoryOpen &&
+    document.pointerLockElement!==canvas &&
+    window.PIXELB8_ALLOW_POINTER_LOCK!==false
+  ){
+    try{canvas?.requestPointerLock?.();}catch{}
+  }
+}
+
 document.getElementById('poolTrajectoryToggle')?.addEventListener('change',e=>{
   state.pool.trajectory=Boolean(e.target.checked);
   if(state.pool.active){
     updatePoolAimGuide();
     if(state.pool.lastAim)updatePoolAimVisuals(state.pool.lastAim);
   }
-});
-
-document.getElementById('poolFreeAimToggle')?.addEventListener('change',e=>{
-  state.pool.freeAim=Boolean(e.target.checked);
-  if(state.pool.active){
-    updateHeldPoolCue();
-    updatePoolAimGuide();
-  }
-  toast(state.pool.freeAim?'Free Aim enabled':'Assisted Aim enabled',850);
+  returnFocusToWorld();
 });
 
 document.getElementById('poolAutoRackBtn')?.addEventListener('click',e=>{
@@ -3254,6 +3717,18 @@ document.getElementById('poolCallSolids')?.addEventListener('click',e=>{
 document.getElementById('poolCallStripes')?.addEventListener('click',e=>{
   e.preventDefault();
   callPoolGroup('stripes');
+});
+
+document.getElementById('poolHud')?.addEventListener('click',e=>{
+  const control=e.target?.closest?.('button,input[type="checkbox"],input[type="radio"]');
+  if(!control)return;
+  setTimeout(()=>returnFocusToWorld(),0);
+});
+
+document.getElementById('poolManualRackPanel')?.addEventListener('click',e=>{
+  const control=e.target?.closest?.('button,input[type="checkbox"],input[type="radio"]');
+  if(!control)return;
+  setTimeout(()=>returnFocusToWorld({lockPointer:false}),0);
 });
 
 document.getElementById('arcade2dBtn')?.addEventListener('click',()=>location.href='../index.html');

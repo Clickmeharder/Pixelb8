@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Void Test Room · PixelDimension</title>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <link rel="stylesheet" href="../../core/ui/foundation.css">
+  <script src="../../core/player/player-controller.js"></script>
+  <script src="../../core/ui/foundation-ui.js"></script>
+  <script src="../../core/interaction/interaction-system.js"></script>
+  <script src="../../core/world/world-runtime.js"></script>
+  <script src="../../core/assets/basic-assets.js"></script>
+  <script src="../../core/world/bootstrap.js"></script>
+  
+  <script src="../../../arcade/spatial/core/event-bus.js"></script>
+  <script src="../../../arcade/spatial/core/runtime.js"></script>
+  <script src="../../../arcade/spatial/core/inventory/items.js"></script>
+  <script src="../../../arcade/spatial/assets/pool-cue/manifest.js"></script>
+  <script src="../../../arcade/spatial/assets/pool-cue/item.js"></script>
+  <script src="../../../arcade/spatial/assets/pool-cue-rack/manifest.js"></script>
+  <script src="../../../arcade/spatial/assets/pool-cue-rack/cue-rack.js"></script>
+  <script src="../../../arcade/spatial/assets/pool-set/manifest.js"></script>
+  <script src="../../../arcade/spatial/assets/pool-set/pool-set.js"></script>
+  <script>
+    window.PIXELB8_SKIP_XR_BOOTSTRAP=true;
+    window.PIXELB8_ALLOW_POINTER_LOCK=false;
+    window.addEventListener('mousedown',()=>window.PIXELB8_ALLOW_POINTER_LOCK=true,{once:true,capture:true});
+    window.addEventListener('keydown',()=>window.PIXELB8_ALLOW_POINTER_LOCK=true,{once:true,capture:true});
+  </script>
+  <script src="../../../arcade/xr/app.js"></script>
+
+  <script defer src="void-test.js"></script>
+</head>
+<body>
+  <div class="pd-room-title">Void Test Room</div>
+  <div id="pdFoundationUI">
+    <div id="pdInteractionPrompt" class="hidden"></div>
+    <div class="pd-crosshair"></div>
+    <div class="pd-status">
+      <b>PIXELDIMENSION</b>
+      <span id="pdRunState" class="pd-run-state">WALK</span>
+      <div class="pd-vitals">
+        <span>HP</span><div class="pd-bar"><i id="pdHealth"></i></div>
+        <span>STA</span><div class="pd-bar stamina"><i id="pdStamina"></i></div>
+      </div>
+      <span>WASD · R run · Space jump · I inventory</span>
+    </div>
+  </div>
+
+  <div id="pdInventory" class="pd-modal hidden">
+    <section class="pd-inventory-card">
+      <div class="pd-inventory-head">
+        <b>INVENTORY</b>
+        <button id="pdInventoryClose" type="button">Close</button>
+      </div>
+      <div id="pdInventoryGrid"></div>
+    </section>
+  </div>
+
+  
+  <section id="poolHud" class="pool-hud hidden" style="position:fixed;z-index:60;right:12px;top:12px;width:220px;padding:7px;border:1px solid #354753;border-radius:6px;background:rgba(5,9,13,.88);font-size:9px">
+    <div class="pool-scoreline"><span id="poolTurnLabel">YOUR TURN</span><span id="poolOpenLabel">OPEN TABLE</span></div>
+    <div class="pool-groups"><span>YOU <b id="poolYourGroup">OPEN</b></span><span>OPP <b id="poolOppGroup">OPEN</b></span></div>
+    <div id="poolCallRow" class="pool-call-row"><span>CALL</span><button id="poolCallSolids" type="button">SOLIDS</button><button id="poolCallStripes" type="button">STRIPES</button></div>
+    <div id="poolRuleNotice" class="pool-rule-notice">Break shot · table is open</div>
+    <div class="pool-pocketed-row"><span>POCKETED</span><div id="poolPocketedBalls" class="pool-pocketed-balls"></div><i id="poolPocketedEmpty">none</i></div>
+    <div class="pool-hud-actions">
+      <label><input id="poolTrajectoryToggle" type="checkbox"> Lines</label>
+      <span>REACH <b id="poolReachValue">CENTER</b></span>
+      <button id="poolAutoRackBtn" type="button">AUTO RACK</button>
+      <button id="poolManualRackBtn" type="button">MANUAL RACK</button>
+    </div>
+  </section>
+
+  <section id="poolPowerDock" class="pool-power-dock hidden" style="position:fixed;z-index:60;left:50%;bottom:3px;transform:translateX(-50%);width:480px">
+    <span>POWER</span><div class="pool-power-track"><i id="poolPowerFill"></i></div><b id="poolPowerValue">0%</b>
+  </section>
+
+  <section id="poolManualRackPanel" class="pool-manual-rack hidden">
+    <header><b>Manual Rack</b><button id="poolManualRackClose" type="button">×</button></header>
+    <p>Select a ball, then a triangle position.</p>
+    <div id="poolRackBallTray" class="pool-rack-ball-tray"></div>
+    <div id="poolRackSlots" class="pool-rack-slots"></div>
+    <footer><button id="poolRackClearBtn" type="button">CLEAR</button><button id="poolRackFinishBtn" type="button">FINISH RACK</button></footer>
+  </section>
+
+  <!-- Legacy controller expects these IDs. Hidden/minimal in PixelDimension. -->
+  <div id="hudMode" class="hidden"></div>
+  <div id="playerVitals" class="hidden"><i id="healthFill"></i><i id="staminaFill"></i><span id="healthValue"></span><span id="staminaValue"></span><div id="moveFlags"></div></div>
+  <div id="hotbar" class="hidden"></div>
+  <div id="inventoryPanel" class="hidden"><div id="inventoryGrid"></div><span id="inventoryCount"></span><button id="inventoryClose"></button></div>
+  <div id="toast" class="hidden"></div>
+  <div id="interactionPrompt" class="hidden"><b id="promptTitle"></b><span id="promptCopy"></span></div>
+  <div id="cabinetMode" class="hidden"><b id="cabinetModeTitle"></b></div>
+  <div id="dungeonHud" class="hidden"><span id="dungeonDepth"></span></div>
+
+
+  <a-scene id="pdScene" loading-screen="enabled:false"
+    background="color:#080b10" renderer="antialias:true;colorManagement:true">
+    <a-entity light="type:ambient;intensity:.72"></a-entity>
+    <a-entity light="type:directional;intensity:1" position="3 7 4"></a-entity>
+
+    <a-plane rotation="-90 0 0" width="30" height="30" color="#11171d" roughness=".95"></a-plane>
+    
+    <a-box id="rackWall" position="5.4 1.7 0" width=".18" height="3.4" depth="7.5"
+      color="#171d24" data-pd-collider="box" data-halfx=".09" data-halfz="3.75"></a-box>
+
+    <a-entity id="poolHost"></a-entity>
+
+
+    <a-entity id="playerRig" position="0 0 5.8">
+      <a-entity id="postureRig">
+        <a-camera id="playerCamera" position="0 1.65 0"
+          look-controls="pointerLockEnabled:true"
+          wasd-controls="enabled:false">
+          <a-entity id="heldPoolCue" visible="false" position=".18 -.20 -.78" rotation="88 0 0">
+            <a-cylinder id="heldPoolCueShaft" radius=".011" height="1.78" color="#d3a363"></a-cylinder>
+            <a-entity id="heldPoolCueTip" position="0 -.92 0"></a-entity>
+            <a-cylinder position="0 .78 0" radius=".013" height=".055" color="#f0e7d3"></a-cylinder>
+            <a-cylinder position="0 -.79 0" radius=".018" height=".10" color="#352218"></a-cylinder>
+          </a-entity>
+          <a-entity id="heldPoolBridge" visible="false" position=".18 -.18 -.92" rotation="88 0 0">
+            <a-cylinder radius=".010" height="1.92" color="#c99b5d"></a-cylinder>
+            <a-entity id="heldPoolBridgeTip" position="0 -.99 0"></a-entity>
+          </a-entity>
+        </a-camera>
+      </a-entity>
+    </a-entity>
+
+    <a-entity id="roomHost"></a-entity>
+    <a-entity id="assetHost"></a-entity>
+  </a-scene>
+</body>
+</html>

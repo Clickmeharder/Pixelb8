@@ -1,0 +1,14 @@
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05070a;color:#dce7ef;font-family:Consolas,monospace}
+*{box-sizing:border-box}.hidden{display:none!important}
+#pdFoundationUI{position:fixed;z-index:50;inset:0;pointer-events:none}
+.pd-crosshair{position:absolute;left:50%;top:50%;width:7px;height:7px;border:1px solid #89dfff;border-radius:50%;transform:translate(-50%,-50%)}
+#pdInteractionPrompt{position:absolute;left:50%;top:13%;transform:translateX(-50%);padding:6px 9px;border:1px solid #47616f;border-radius:5px;background:rgba(5,9,13,.9);font-size:11px}
+.pd-status{position:absolute;left:12px;bottom:12px;display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid #334653;border-radius:6px;background:rgba(5,9,13,.84);font-size:9px}
+.pd-run-state{min-width:36px;text-align:center;color:#8997a2}.pd-run-state.active{color:#70e0ae}
+.pd-vitals{display:flex;gap:5px;align-items:center}.pd-bar{width:90px;height:5px;background:#172129;border-radius:99px;overflow:hidden}.pd-bar i{display:block;width:100%;height:100%;background:#68cfa0}.pd-bar.stamina i{background:#d0bd69}
+.pd-room-title{position:fixed;z-index:45;left:12px;top:12px;padding:7px 9px;border:1px solid #334653;border-radius:6px;background:rgba(5,9,13,.82);font-size:11px;pointer-events:none}
+.pd-modal{position:fixed;z-index:80;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.65);pointer-events:auto}
+.pd-inventory-card{width:min(620px,calc(100vw - 24px));padding:12px;border:1px solid #3d5261;border-radius:8px;background:#0a1117}
+.pd-inventory-head{display:flex;align-items:center;justify-content:space-between}.pd-inventory-head button{background:#14212a;color:#dce7ef;border:1px solid #3a4f5d;border-radius:4px;padding:5px 8px}
+#pdInventoryGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:10px}.pd-inventory-slot{min-height:58px;border:1px solid #263945;border-radius:5px;display:grid;place-items:center;text-align:center;color:#55636e;font-size:8px}.pd-inventory-slot.has-item{color:#dce7ef;background:#111b23}.pd-inventory-slot span{font-size:18px}.pd-inventory-slot b{font-size:8px}
+.a-enter-vr-button{transition:none!important}

@@ -12,6 +12,13 @@
 <script src="../spatial/core/runtime.js"></script>
 <script src="../spatial/worlds/arcade.manifest.js"></script>
 <script src="../spatial/games/pool/adapter.js"></script>
+<script src="../spatial/core/inventory/items.js"></script>
+<script src="../spatial/assets/pool-cue/manifest.js"></script>
+<script src="../spatial/assets/pool-cue/item.js"></script>
+<script src="../spatial/assets/pool-cue-rack/manifest.js"></script>
+<script src="../spatial/assets/pool-cue-rack/cue-rack.js"></script>
+<script src="../spatial/assets/pool-set/manifest.js"></script>
+<script src="../spatial/assets/pool-set/pool-set.js"></script>
 <script defer src="app.js"></script>
 </head>
 <body>
@@ -74,15 +81,19 @@
     <button id="poolCallStripes" type="button">STRIPES</button>
   </div>
   <div id="poolRuleNotice" class="pool-rule-notice">Break shot · table is open</div>
+  <div class="pool-pocketed-row">
+    <span>POCKETED</span>
+    <div id="poolPocketedBalls" class="pool-pocketed-balls"></div>
+    <i id="poolPocketedEmpty">none</i>
+  </div>
   <div class="pool-hud-actions">
     <label class="pool-trajectory-toggle" title="Show predicted shot paths">
       <input id="poolTrajectoryToggle" type="checkbox">
       <span>Lines</span>
     </label>
-    <label class="pool-trajectory-toggle" title="Detach the cue tip from assisted ball contact and aim directly with the center reticle">
-      <input id="poolFreeAimToggle" type="checkbox">
-      <span>Free Aim</span>
-    </label>
+    <span class="pool-reach-readout" title="Hold right mouse and move left/right to shift your handle hand">
+      REACH <b id="poolReachValue">CENTER</b>
+    </span>
     <button id="poolAutoRackBtn" type="button">AUTO RACK</button>
     <button id="poolManualRackBtn" type="button">MANUAL RACK</button>
   </div>
@@ -254,6 +265,7 @@
   <!-- Playable pool area -->
   <a-text value="POOL" position="8.7 3.18 4.8" align="center" color="#8fe3ad" width="3.2"></a-text>
   <a-entity id="poolHost"></a-entity>
+  <a-entity id="assetHost"></a-entity>
   <a-entity id="poolBridgeHost"></a-entity>
 
   <!-- Washrooms / Exit / Dungeon doors -->

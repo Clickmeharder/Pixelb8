@@ -87,3 +87,15 @@ body:has(#poolPowerDock:not(.hidden)) .hotbar{bottom:20px}
   .pool-manual-rack{right:7px;top:195px;width:210px}
   .pool-power-dock{width:calc(100vw - 18px)}
 }
+
+/* v0.29 physical pool-table additions */
+.pool-pocketed-row{display:flex;align-items:center;gap:5px;min-height:18px;padding-top:3px;border-top:1px solid rgba(255,255,255,.05)}
+.pool-pocketed-row>span{flex:0 0 auto;color:#71808b;font:900 .42rem Consolas,monospace;letter-spacing:.07em}
+.pool-pocketed-row>i{color:#66747f;font:italic .43rem Consolas,monospace}
+.pool-pocketed-balls{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.pool-pocket-chip{--ball:#fff;display:inline-grid;place-items:center;width:14px;height:14px;border-radius:50%;background:var(--ball);border:1px solid rgba(255,255,255,.32);box-shadow:0 1px 2px rgba(0,0,0,.5);color:#111;text-shadow:0 1px rgba(255,255,255,.45);font:900 7px/1 Consolas,monospace}
+.pool-pocket-chip.stripe{box-shadow:inset 0 4px 0 #eee,inset 0 -4px 0 #eee,0 1px 2px rgba(0,0,0,.5)}
+.pool-pocket-chip[style*="#111111"]{color:#fff;text-shadow:none}
+
+.pool-reach-readout{display:inline-flex;align-items:center;gap:4px;color:#84929d;font:900 .45rem Consolas,monospace;letter-spacing:.04em}
+.pool-reach-readout b{min-width:35px;color:#d8e3eb;font-size:.46rem;text-align:left}

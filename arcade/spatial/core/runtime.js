@@ -3,11 +3,34 @@ const Core=window.PixelB8SpatialCore=window.PixelB8SpatialCore||{};
 const EventBus=Core.EventBus;
 
 class ModuleRegistry{
-  constructor(){this.modules=new Map();this.games=new Map();}
+  constructor(){this.modules=new Map();this.games=new Map();this.assets=new Map();}
   register(id,module){this.modules.set(id,module);return module;}
   registerGame(id,module){this.games.set(id,module);return module;}
+  registerAsset(id,asset){this.assets.set(id,asset);return asset;}
   get(id){return this.modules.get(id);}
   getGame(id){return this.games.get(id);}
+  getAsset(id){return this.assets.get(id);}
+}
+
+class AssetInstanceManager{
+  constructor(runtime){this.runtime=runtime;this.instances=new Map();}
+  spawn(assetId,options={}){
+    const def=this.runtime.registry.getAsset(assetId);
+    if(!def)throw new Error(`Unknown asset: ${assetId}`);
+    if(typeof def.create!=='function')throw new Error(`Asset ${assetId} has no create() factory`);
+    const instance=def.create(options);
+    const id=instance.id||options.id||`${assetId}:${this.instances.size+1}`;
+    instance.id=id;
+    const context={runtime:this.runtime,bus:this.runtime.bus,registry:this.runtime.registry,sessions:this.runtime.sessions,world:this.runtime.manifest};
+    instance.mount?.(context);
+    this.instances.set(id,instance);
+    this.runtime.bus.emit('asset:spawned',{assetId,instanceId:id,instance});
+    return instance;
+  }
+  get(id){return this.instances.get(id);}
+  destroy(id){const instance=this.instances.get(id);if(!instance)return false;instance.destroy?.();this.instances.delete(id);this.runtime.bus.emit('asset:removed',{instanceId:id});return true;}
+  findByCapability(capability){return [...this.instances.values()].filter(instance=>(instance?.manifest?.capabilities||instance?.capabilities||[]).includes(capability));}
+  serialize(){return [...this.instances.values()].map(instance=>typeof instance.serialize==='function'?instance.serialize():{id:instance.id});}
 }
 
 class GameSession{
@@ -59,6 +82,7 @@ class SpatialRuntime{
     this.registry=new ModuleRegistry();
     this.interest=new InterestManager(manifest.interest);
     this.sessions=new Map();
+    this.assets=new AssetInstanceManager(this);
     this.instance=new InstanceClient({
       worldId:manifest.id,
       instanceId:manifest.instance?.id||null,
@@ -67,6 +91,7 @@ class SpatialRuntime{
     });
   }
   registerGame(id,module){return this.registry.registerGame(id,module);}
+  registerAsset(id,asset){return this.registry.registerAsset(id,asset);}
   createSession(opts){
     const session=new GameSession({...opts,bus:this.bus});
     this.sessions.set(session.id,session);
@@ -82,6 +107,7 @@ Core.ModuleRegistry=ModuleRegistry;
 Core.GameSession=GameSession;
 Core.InterestManager=InterestManager;
 Core.InstanceClient=InstanceClient;
+Core.AssetInstanceManager=AssetInstanceManager;
 Core.SpatialRuntime=SpatialRuntime;
 window.PixelB8Spatial=window.PixelB8Spatial||{};
 window.PixelB8Spatial.createRuntime=manifest=>new SpatialRuntime(manifest);

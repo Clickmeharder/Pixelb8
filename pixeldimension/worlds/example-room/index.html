@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Example Room · PixelDimension</title>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <link rel="stylesheet" href="../../core/ui/foundation.css">
+  <script src="../../core/player/player-controller.js"></script>
+  <script src="../../core/ui/foundation-ui.js"></script>
+  <script src="../../core/interaction/interaction-system.js"></script>
+  <script src="../../core/world/world-runtime.js"></script>
+  <script src="../../core/assets/basic-assets.js"></script>
+  <script src="../../core/world/bootstrap.js"></script>
+  
+  <script defer src="example-room.js"></script>
+</head>
+<body>
+  <div class="pd-room-title">Example Room</div>
+  <div id="pdFoundationUI">
+    <div id="pdInteractionPrompt" class="hidden"></div>
+    <div class="pd-crosshair"></div>
+    <div class="pd-status">
+      <b>PIXELDIMENSION</b>
+      <span id="pdRunState" class="pd-run-state">WALK</span>
+      <div class="pd-vitals">
+        <span>HP</span><div class="pd-bar"><i id="pdHealth"></i></div>
+        <span>STA</span><div class="pd-bar stamina"><i id="pdStamina"></i></div>
+      </div>
+      <span>WASD · R run · Space jump · I inventory</span>
+    </div>
+  </div>
+
+  <div id="pdInventory" class="pd-modal hidden">
+    <section class="pd-inventory-card">
+      <div class="pd-inventory-head">
+        <b>INVENTORY</b>
+        <button id="pdInventoryClose" type="button">Close</button>
+      </div>
+      <div id="pdInventoryGrid"></div>
+    </section>
+  </div>
+
+  
+
+  <a-scene id="pdScene" loading-screen="enabled:false"
+    background="color:#080b10" renderer="antialias:true;colorManagement:true">
+    <a-entity light="type:ambient;intensity:.72"></a-entity>
+    <a-entity light="type:directional;intensity:1" position="3 7 4"></a-entity>
+
+    <a-plane rotation="-90 0 0" width="30" height="30" color="#11171d" roughness=".95"></a-plane>
+    
+    <a-box position="0 1.5 -5" width="11" height="3" depth=".18"
+      color="#171f27" data-pd-collider="box" data-halfx="5.5" data-halfz=".09"></a-box>
+    <a-box position="-5.5 1.5 0" width=".18" height="3" depth="10"
+      color="#171f27" data-pd-collider="box" data-halfx=".09" data-halfz="5"></a-box>
+    <a-box position="5.5 1.5 0" width=".18" height="3" depth="10"
+      color="#171f27" data-pd-collider="box" data-halfx=".09" data-halfz="5"></a-box>
+    
+
+    <a-entity id="playerRig" position="0 0 4">
+      <a-entity id="postureRig">
+        <a-camera id="playerCamera" position="0 1.65 0"
+          look-controls="pointerLockEnabled:true"
+          wasd-controls="enabled:false"></a-camera>
+      </a-entity>
+    </a-entity>
+
+    <a-entity id="roomHost"></a-entity>
+    <a-entity id="assetHost"></a-entity>
+  </a-scene>
+</body>
+</html>
