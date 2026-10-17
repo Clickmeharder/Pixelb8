@@ -61,7 +61,6 @@ const state={
     vrMoving:false,
     inventoryOpen:false,
     selectedSlot:1,
-    lastShiftTap:0,
     lastHealthChange:Date.now(),
     lastStaminaChange:Date.now()
   },
@@ -214,8 +213,9 @@ function makeCabinet(game,x,z){
 }
 
 function chairMarkup(x,z,rot,color='#303843'){
+  const facing=(Number(rot)||0)+180;
   return `
-    <a-entity class="chair-seat" data-seat="true" data-occupied="false" position="${x} 0 ${z}" rotation="0 ${rot} 0">
+    <a-entity class="chair-seat" data-seat="true" data-occupied="false" position="${x} 0 ${z}" rotation="0 ${facing} 0">
       <a-entity class="seat-anchor" position="0 .51 0"></a-entity>
       <a-box position="0 .47 0" width=".62" height=".10" depth=".62" color="${color}"></a-box>
       <a-box position="0 .86 .27" width=".62" height=".72" depth=".09" color="${color}"></a-box>
@@ -480,7 +480,7 @@ function poolCueBallCenter(){
 }
 
 function calculatePoolAim(){
-  const ray=poolAimRay();
+  const ray=poolViewRay();
   const data=poolCueBallCenter();
   if(!ray||!data)return null;
 
@@ -488,79 +488,79 @@ function calculatePoolAim(){
   const {cue,center}=data;
   const radius=POOL.ballRadius;
 
-  // Closest approach to ball center determines the spin/contact offset.
+  // Aim is based on where the player's view passes the cue ball, not whether
+  // the rendered cue physically reaches it. Reach is assumed once pool mode is active.
   const toCenter=center.clone().sub(origin);
-  const tClosest=toCenter.dot(dir);
-  const closest=origin.clone().addScaledVector(dir,tClosest);
-  const offset=center.clone().sub(closest);
-  const missDistance=offset.length();
-
-  // Sphere intersection for the visible red contact dot.
-  const oc=origin.clone().sub(center);
-  const b=oc.dot(dir);
-  const c=oc.lengthSq()-radius*radius;
-  const disc=b*b-c;
-
-  let hitPoint=null;
-  if(disc>=0){
-    const root=Math.sqrt(disc);
-    let t=-b-root;
-    if(t<0)t=-b+root;
-    if(t>=0)hitPoint=origin.clone().addScaledVector(dir,t);
-  }
+  const t=toCenter.dot(dir);
+  const closest=origin.clone().addScaledVector(dir,t);
 
   const shotDir=new THREE.Vector3(dir.x,0,dir.z);
   if(shotDir.lengthSq()<1e-6)shotDir.set(1,0,0);
   shotDir.normalize();
 
   const right=new THREE.Vector3(-shotDir.z,0,shotDir.x);
-  const worldUp=new THREE.Vector3(0,1,0);
-  const viewUp=worldUp.clone().sub(dir.clone().multiplyScalar(worldUp.dot(dir))).normalize();
+  const up=new THREE.Vector3(0,1,0);
 
-  // Positive side = right-English. Positive top = topspin.
-  const side=THREE.MathUtils.clamp(offset.dot(right)/radius,-1,1);
-  const top=THREE.MathUtils.clamp(offset.dot(viewUp)/radius,-1,1);
+  const delta=closest.clone().sub(center);
+  const sideRaw=delta.dot(right);
+  const topRaw=delta.dot(up);
+  const radial=Math.hypot(sideRaw,topRaw);
 
-  // Felt intersection is useful when the cue line misses the cue ball completely.
-  let feltPoint=null;
-  if(Math.abs(dir.y)>1e-5){
-    const tFelt=(1.025-origin.y)/dir.y;
-    if(tFelt>0)feltPoint=origin.clone().addScaledVector(dir,tFelt);
-  }
+  // Small halo outside the ball lets the player intentionally miss/foul.
+  const missRadius=radius*1.28;
+  const hit=radial<=radius;
+  const nearMiss=!hit&&radial<=missRadius;
+
+  const scale=radial>radius&&radial>0?radius/radial:1;
+  const sideContact=sideRaw*scale;
+  const topContact=topRaw*scale;
+  const frontDepth=Math.sqrt(Math.max(0,radius*radius-sideContact*sideContact-topContact*topContact));
+
+  const contact=center.clone()
+    .addScaledVector(right,sideContact)
+    .addScaledVector(up,topContact)
+    .addScaledVector(shotDir,-frontDepth);
 
   return {
     cue,origin,dir,shotDir,right,
-    hit:Boolean(hitPoint)&&missDistance<=radius,
-    hitPoint,
-    feltPoint,
-    side,top,
-    missDistance
+    hit,nearMiss,contact,
+    side:THREE.MathUtils.clamp(sideRaw/radius,-1,1),
+    top:THREE.MathUtils.clamp(topRaw/radius,-1,1),
+    radial,missRadius
   };
 }
-
 function updateHeldPoolCue(){
   const held=document.getElementById('heldPoolCue');
   if(!held)return;
 
-  held.setAttribute('visible',state.pool.active);
-  if(!state.pool.active)return;
+  const active=state.pool.active&&state.pool.tool==='cue';
+  held.setAttribute('visible',active);
+  if(!active)return;
 
-  // The cue is intentionally in first-person space so the player can actually
-  // see the backswing instead of relying on a numeric power meter.
-  const pull=state.pool.cuePull;
-  held.object3D.position.set(.18,-.18,-.92+pull*.78);
-  held.object3D.rotation.set(
-    THREE.MathUtils.degToRad(88),
-    state.pool.fineYaw*.85,
-    0
+  const aim=calculatePoolAim();
+  const cam=camera();
+  if(!aim||!cam)return;
+
+  const contact=aim.contact.clone();
+  const back=contact.clone().addScaledVector(aim.shotDir,-1.22-state.pool.cuePull*.78);
+
+  const contactLocal=cam.object3D.worldToLocal(contact.clone());
+  const backLocal=cam.object3D.worldToLocal(back.clone());
+  const mid=contactLocal.clone().add(backLocal).multiplyScalar(.5);
+  held.object3D.position.copy(mid);
+
+  // Cue cylinder's long axis is local Y.
+  const axis=contactLocal.clone().sub(backLocal).normalize();
+  held.object3D.quaternion.copy(
+    new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),axis)
   );
 }
-
 function updatePoolAimGuide(){
   const host=document.getElementById('poolAimGuide');
   if(!host)return;
 
   updateHeldPoolCue();
+  updateHeldPoolTool();
 
   if(!state.pool.active||state.pool.shotInProgress){
     host.innerHTML='';
@@ -575,43 +575,36 @@ function updatePoolAimGuide(){
     return;
   }
 
+  const lx=aim.contact.x-POOL.centerX;
+  const lz=aim.contact.z-POOL.centerZ;
   const pullPct=Math.round((state.pool.cuePull/.70)*100);
-  const parts=[];
+  const sideLabel=Math.abs(aim.side)<.14?'CENTER':(aim.side>0?'RIGHT':'LEFT');
+  const spinLabel=Math.abs(aim.top)<.14?'CENTER':(aim.top>0?'TOP':'BACK');
 
-  if(aim.hitPoint){
-    // Convert world point to pool-table-local coordinates.
-    const lx=aim.hitPoint.x-POOL.centerX;
-    const lz=aim.hitPoint.z-POOL.centerZ;
-    const sideLabel=Math.abs(aim.side)<.14?'CENTER':(aim.side>0?'RIGHT':'LEFT');
-    const spinLabel=Math.abs(aim.top)<.14?'CENTER':(aim.top>0?'TOP':'BACK');
-
-    parts.push(`
-      <a-sphere position="${lx} ${aim.hitPoint.y+.004} ${lz}"
-        radius=".018" color="#ff3038" emissive="#ff3038" emissiveIntensity=".7"></a-sphere>
-      <a-text value="${sideLabel} / ${spinLabel}" position="${lx} ${aim.hitPoint.y+.12} ${lz}"
-        rotation="-90 0 0" align="center" color="#ffb1b4" width=".52"></a-text>`);
-  }else if(aim.feltPoint){
-    const lx=aim.feltPoint.x-POOL.centerX;
-    const lz=aim.feltPoint.z-POOL.centerZ;
-    if(Math.abs(lx)<POOL.innerHalfX+.25 && Math.abs(lz)<POOL.innerHalfZ+.25){
-      parts.push(`
-        <a-ring position="${lx} 1.035 ${lz}" rotation="-90 0 0"
-          radius-inner=".020" radius-outer=".032"
-          color="#ff3038" material="shader:flat"></a-ring>
-        <a-text value="MISS" position="${lx} 1.045 ${lz+.08}" rotation="-90 0 0"
-          align="center" color="#ff7479" width=".42"></a-text>`);
-    }
+  let marker='';
+  if(aim.hit){
+    marker=`
+      <a-sphere position="${lx} ${aim.contact.y+.004} ${lz}"
+        radius=".018" color="#ff3038" emissive="#ff3038" emissiveIntensity=".75"></a-sphere>
+      <a-text value="${sideLabel} / ${spinLabel}" position="${lx} ${aim.contact.y+.11} ${lz}"
+        rotation="-90 0 0" align="center" color="#ffb1b4" width=".52"></a-text>`;
+  }else if(aim.nearMiss){
+    marker=`
+      <a-ring position="${lx} ${aim.contact.y+.004} ${lz}" rotation="-90 0 0"
+        radius-inner=".020" radius-outer=".034" color="#ffd24a"></a-ring>
+      <a-text value="MISS / FOUL" position="${lx} ${aim.contact.y+.11} ${lz}"
+        rotation="-90 0 0" align="center" color="#ffd24a" width=".54"></a-text>`;
+  }else{
+    marker=`
+      <a-text value="AIM CLOSER TO CUE BALL" position="${aim.cue.x} 1.30 ${aim.cue.z}"
+        rotation="-90 0 0" align="center" color="#ff8d8d" width=".80"></a-text>`;
   }
 
-  const cue=aim.cue;
-  parts.push(`
+  host.innerHTML=marker+`
     <a-text value="${state.pool.gripping?'STROKE':'HOLD LMB'} · PULL ${pullPct}%"
-      position="${cue.x} 1.29 ${cue.z}"
-      rotation="-90 0 0" align="center" color="#d9f8e5" width=".72"></a-text>`);
-
-  host.innerHTML=parts.join('');
+      position="${aim.cue.x} 1.40 ${aim.cue.z}"
+      rotation="-90 0 0" align="center" color="#d9f8e5" width=".72"></a-text>`;
 }
-
 function enterPoolMode(){
   if(state.engaged||state.player.inventoryOpen)return;
   state.pool.active=true;
@@ -662,17 +655,9 @@ function shootPool(strokeSpeed=null){
   if(!state.pool.active||state.pool.shotInProgress)return;
 
   const aim=calculatePoolAim();
-  const cueData=poolCueBallCenter();
-  const ray=poolAimRay();
-  if(!aim||!cueData||!ray)return;
+  if(!aim||!aim.cue)return;
 
-  const cue=cueData.cue;
-  const ballCenter=cueData.center;
-
-  // Physical reach check. The visible cue tip must actually get to the cue ball.
-  const tipDistance=ray.origin.distanceTo(ballCenter);
-  const contactTolerance=POOL.ballRadius+.035;
-
+  const cue=aim.cue;
   const pullFactor=.25+Math.min(1,state.pool.maxCuePull/.58)*.75;
   const raw=strokeSpeed==null?2.0:strokeSpeed;
   const speed=Math.max(.08,Math.min(7.2,raw*pullFactor));
@@ -681,12 +666,12 @@ function shootPool(strokeSpeed=null){
   state.pool.maxCuePull=0;
   state.pool.forwardPeak=0;
 
-  if(!aim.hit||tipDistance>contactTolerance){
+  if(!aim.hit){
     state.pool.gripping=false;
     state.pool.fineYaw=0;
     camera()?.setAttribute('look-controls','enabled',true);
     updatePoolAimGuide();
-    toast(tipDistance>contactTolerance?'Cue tip did not reach the cue ball.':'Missed the cue ball — foul.',1300);
+    toast(aim.nearMiss?'Missed the cue ball — foul.':'Aim closer to the cue ball.',1300);
     return;
   }
 
@@ -2004,17 +1989,6 @@ AFRAME.registerComponent('arcade-world',{
         e.preventDefault();
         toggleSit();
         return;
-      }
-
-      if(e.key==='Shift'){
-        const now=performance.now();
-        if(now-state.player.lastShiftTap<330){
-          e.preventDefault();
-          standStraight();
-          state.player.lastShiftTap=0;
-          return;
-        }
-        state.player.lastShiftTap=now;
       }
 
       if(e.key.toLowerCase()==='i'){
