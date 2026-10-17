@@ -1,3 +1,6 @@
+const spatialRuntime=window.PixelB8Spatial?.createRuntime?.(window.PixelB8WorldManifest||{})?.start?.()||null;
+window.PixelB8SpatialRuntime=spatialRuntime;
+
 const CABINET_GAMES=[
   {
     id:'outdrive',
@@ -86,6 +89,12 @@ const state={
     cueNeedsRespawn:false,
     physicsAccumulator:0,
     lastAim:null,
+    aimVisuals:null,
+    manualRack:{
+      active:false,
+      selectedBall:null,
+      slots:Array(15).fill(null)
+    },
     rules:{
       currentPlayer:1,
       groups:{1:null,2:null},
@@ -97,6 +106,7 @@ const state={
       foulReason:'',
       ballInHand:false,
       rackOver:false,
+      freePlay:false,
       winner:null,
       eightOffOnBreak:false
     },
@@ -373,6 +383,13 @@ function buildPoolTable(){
       <a-box position=".34 -.08 0" width=".72" height=".035" depth=".035" rotation="0 0 -60" color="#b77b3b"></a-box>
     </a-entity>
 
+    <!-- Used only while manually arranging a rack. -->
+    <a-entity id="poolTriangleRack" visible="false" position=".80 ${POOL.feltY+.045} 0" rotation="0 0 -90">
+      <a-box position="0 .23 0" width=".82" height=".026" depth=".028" color="#c18a4a"></a-box>
+      <a-box position="-.36 -.08 0" width=".76" height=".026" depth=".028" rotation="0 0 60" color="#c18a4a"></a-box>
+      <a-box position=".36 -.08 0" width=".76" height=".026" depth=".028" rotation="0 0 -60" color="#c18a4a"></a-box>
+    </a-entity>
+
     <a-entity id="poolBalls"></a-entity>
     <a-entity id="poolAimGuide"></a-entity>
 
@@ -429,6 +446,7 @@ function resetPoolRules(){
   r.foulReason='';
   r.ballInHand=false;
   r.rackOver=false;
+  r.freePlay=false;
   r.winner=null;
   r.eightOffOnBreak=false;
   state.pool.turn=1;
@@ -485,7 +503,7 @@ function updatePoolRulesHud(){
 
   if(notice){
     if(r.rackOver){
-      notice.textContent=r.winner===1?'Rack won. Re-rack to play again.':'Rack lost. Re-rack to play again.';
+      notice.textContent=(r.winner===1?'Rack won':'Rack lost')+' · FREE PLAY until you re-rack';
     }else if(r.ballInHand){
       notice.textContent='BALL IN HAND · click the felt to place the cue ball';
     }else if(r.foul){
@@ -503,15 +521,189 @@ function updatePoolRulesHud(){
   }
 }
 
-function poolRerack(){
+function poolAutoRack(){
+  exitManualRackMode(false);
   resetPoolBalls();
   resetPoolRules();
-  toast('8-ball re-racked.',900);
+  toast('8-ball auto-racked.',900);
+}
+
+function poolRerack(){ poolAutoRack(); }
+
+const MANUAL_RACK_POSITIONS=(()=>{
+  const out=[];
+  const startX=.58;
+  const spacing=POOL.ballRadius*2.12;
+  for(let row=0;row<5;row++){
+    const x=startX+row*(spacing*.90);
+    const z0=-(row*spacing)/2;
+    for(let j=0;j<=row;j++)out.push({x,z:z0+j*spacing,row,col:j});
+  }
+  return out;
+})();
+
+function rackBallCss(n){
+  return poolBallColor(n);
+}
+
+function renderManualRackPanel(){
+  const stateRack=state.pool.manualRack;
+  const tray=document.getElementById('poolRackBallTray');
+  const slots=document.getElementById('poolRackSlots');
+  if(!tray||!slots)return;
+
+  const used=new Set(stateRack.slots.filter(Boolean));
+  tray.innerHTML=Array.from({length:15},(_,i)=>i+1).map(n=>{
+    const selected=stateRack.selectedBall===n?' selected':'';
+    const isUsed=used.has(n)?' used':'';
+    return `<button type="button" class="pool-rack-ball${selected}${isUsed}" data-rack-ball="${n}"
+      style="background:${rackBallCss(n)}">${n}</button>`;
+  }).join('');
+
+  const grid=[];
+  let index=0;
+  for(let row=0;row<5;row++){
+    const left=5-row;
+    for(let pad=0;pad<left;pad++)grid.push('<span></span>');
+    for(let col=0;col<=row;col++){
+      const n=stateRack.slots[index];
+      grid.push(`<button type="button" class="pool-rack-slot${n?' filled':''}" data-rack-slot="${index}"
+        style="${n?`background:${rackBallCss(n)}`:''}">${n||'·'}</button>`);
+      index++;
+      if(col<row)grid.push('<span></span>');
+    }
+    for(let pad=0;pad<left;pad++)grid.push('<span></span>');
+  }
+  slots.innerHTML=grid.join('');
+
+  tray.querySelectorAll('[data-rack-ball]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const n=Number(btn.dataset.rackBall);
+      if(used.has(n)){
+        const old=stateRack.slots.indexOf(n);
+        if(old>=0)stateRack.slots[old]=null;
+      }
+      stateRack.selectedBall=n;
+      renderManualRackPanel();
+    });
+  });
+
+  slots.querySelectorAll('[data-rack-slot]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const slot=Number(btn.dataset.rackSlot);
+      const selected=stateRack.selectedBall;
+      if(selected){
+        const old=stateRack.slots.indexOf(selected);
+        if(old>=0)stateRack.slots[old]=null;
+        stateRack.slots[slot]=selected;
+        stateRack.selectedBall=null;
+      }else if(stateRack.slots[slot]){
+        stateRack.selectedBall=stateRack.slots[slot];
+        stateRack.slots[slot]=null;
+      }
+      renderManualRackPanel();
+      renderManualRackPreview();
+    });
+  });
+}
+
+function renderManualRackPreview(){
+  if(!state.pool.manualRack.active)return;
+  const byNumber=new Map(state.pool.balls.map(b=>[b.n,b]));
+  for(let i=0;i<15;i++){
+    const n=state.pool.manualRack.slots[i];
+    if(!n)continue;
+    const ball=byNumber.get(n);
+    const pos=MANUAL_RACK_POSITIONS[i];
+    if(ball&&pos){
+      ball.pocketed=false;
+      ball.x=pos.x;ball.z=pos.z;ball.y=POOL.feltY+POOL.ballRadius;
+      ball.vx=ball.vy=ball.vz=0;
+    }
+  }
+  renderPoolBalls(false);
+}
+
+function setTriangleRackVisible(visible){
+  const rack=document.getElementById('poolTriangleRack');
+  rack?.setAttribute('visible',visible);
+}
+
+function enterManualRackMode(){
+  if(state.pool.shotInProgress){
+    toast('Wait for the balls to stop first.',900);
+    return;
+  }
+  const r=state.pool.manualRack;
+  r.active=true;
+  r.selectedBall=null;
+  r.slots=Array(15).fill(null);
+
+  // Pull all numbered balls into a staging state; cue ball remains playable.
+  for(const ball of state.pool.balls){
+    if(ball.n===0)continue;
+    ball.pocketed=true;
+    ball.vx=ball.vy=ball.vz=0;
+  }
+
+  document.getElementById('poolManualRackPanel')?.classList.remove('hidden');
+  setTriangleRackVisible(true);
+  renderManualRackPanel();
+  renderPoolBalls(false);
+  toast('Manual rack: select a ball, then a triangle slot.',1400);
+}
+
+function exitManualRackMode(cancel=true){
+  const r=state.pool.manualRack;
+  if(!r.active)return;
+  r.active=false;
+  r.selectedBall=null;
+  document.getElementById('poolManualRackPanel')?.classList.add('hidden');
+  setTriangleRackVisible(false);
+  if(cancel)poolAutoRack();
+}
+
+function finishManualRack(){
+  const r=state.pool.manualRack;
+  if(r.slots.some(v=>!v)){
+    toast('Fill all 15 rack positions first.',1000);
+    return;
+  }
+
+  const byNumber=new Map(state.pool.balls.map(b=>[b.n,b]));
+  for(let i=0;i<15;i++){
+    const n=r.slots[i];
+    const ball=byNumber.get(n);
+    const pos=MANUAL_RACK_POSITIONS[i];
+    if(!ball||!pos)continue;
+    ball.pocketed=false;
+    ball.x=pos.x;ball.z=pos.z;ball.y=POOL.feltY+POOL.ballRadius;
+    ball.vx=ball.vy=ball.vz=0;
+    ball.sideSpin=ball.spinX=ball.spinZ=0;
+  }
+
+  const cue=byNumber.get(0);
+  if(cue){
+    cue.pocketed=false;cue.x=-1.05;cue.z=0;cue.y=POOL.feltY+POOL.ballRadius;
+    cue.vx=cue.vy=cue.vz=0;
+  }
+
+  r.active=false;
+  r.selectedBall=null;
+  document.getElementById('poolManualRackPanel')?.classList.add('hidden');
+  setTriangleRackVisible(false);
+  resetPoolRules();
+  renderPoolBalls(false);
+  toast('Manual rack ready.',900);
 }
 
 function completePoolShot(){
   const r=state.pool.rules;
-  if(r.rackOver)return;
+  if(r.rackOver){
+    r.freePlay=true;
+    updatePoolRulesHud();
+    return;
+  }
 
   const shooter=r.currentPlayer;
   const other=shooter===1?2:1;
@@ -537,9 +729,11 @@ function completePoolShot(){
       const cleared=shooterGroup&&!poolGroupRemaining(shooterGroup);
       if(r.foul||!cleared){
         r.rackOver=true;
+        r.freePlay=true;
         r.winner=other;
       }else{
         r.rackOver=true;
+        r.freePlay=true;
         r.winner=shooter;
       }
     }
@@ -608,6 +802,7 @@ function drivePoolBallOffTable(ball){
       ball.pocketed=true;
       ball.vx=ball.vy=ball.vz=0;
       r.rackOver=true;
+      r.freePlay=true;
       r.winner=r.currentPlayer===1?2:1;
       toast('8-ball off the table — rack lost.',1600);
     }
@@ -948,6 +1143,124 @@ function trajectoryMarkup(aim){
 
   return out;
 }
+function ensurePoolAimVisuals(){
+  if(state.pool.aimVisuals)return state.pool.aimVisuals;
+  const host=document.getElementById('poolAimGuide');
+  if(!host||!window.THREE)return null;
+
+  const dot=new THREE.Mesh(
+    new THREE.SphereGeometry(.026,14,10),
+    new THREE.MeshBasicMaterial({color:0xff2028,depthTest:false,depthWrite:false})
+  );
+  dot.renderOrder=999;
+  dot.visible=false;
+  host.object3D.add(dot);
+
+  function makeLine(color){
+    const geometry=new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(),new THREE.Vector3()
+    ]);
+    const material=new THREE.LineBasicMaterial({
+      color,transparent:true,opacity:.95,depthTest:false,depthWrite:false
+    });
+    const line=new THREE.Line(geometry,material);
+    line.renderOrder=998;
+    line.visible=false;
+    host.object3D.add(line);
+    return line;
+  }
+
+  const cueLine=makeLine(0xff3f46);
+  const objectLine=makeLine(0xffd54a);
+  const tangentLine=makeLine(0xff7a80);
+
+  state.pool.aimVisuals={host,dot,cueLine,objectLine,tangentLine};
+  return state.pool.aimVisuals;
+}
+
+function setThreeLine(line,a,b,visible=true){
+  if(!line)return;
+  line.visible=visible;
+  if(!visible)return;
+  line.geometry.setFromPoints([a,b]);
+  line.geometry.attributes.position.needsUpdate=true;
+  line.geometry.computeBoundingSphere();
+}
+
+function hidePoolAimVisuals(){
+  const v=state.pool.aimVisuals;
+  if(!v)return;
+  v.dot.visible=false;
+  v.cueLine.visible=false;
+  v.objectLine.visible=false;
+  v.tangentLine.visible=false;
+}
+
+function updatePoolAimVisuals(aim){
+  const v=ensurePoolAimVisuals();
+  if(!v||!aim||state.pool.shotInProgress){
+    hidePoolAimVisuals();
+    return;
+  }
+
+  // poolAimGuide lives inside poolTable, so use table-local x/z/y values.
+  v.dot.visible=true;
+  v.dot.position.set(
+    aim.contact.x-POOL.centerX,
+    aim.contact.y+.018,
+    aim.contact.z-POOL.centerZ
+  );
+  v.dot.material.color.setHex(aim.hit?0xff2028:0xffc928);
+
+  if(!state.pool.trajectory){
+    v.cueLine.visible=false;
+    v.objectLine.visible=false;
+    v.tangentLine.visible=false;
+    return;
+  }
+
+  const y=POOL.feltY+POOL.ballRadius+.025;
+  const cueStart=new THREE.Vector3(aim.cue.x,y,aim.cue.z);
+  const hit=poolFirstObjectHit(aim,3.0);
+  let cueEnd;
+
+  if(hit)cueEnd=new THREE.Vector3(hit.ball.x,y,hit.ball.z);
+  else cueEnd=new THREE.Vector3(
+    aim.cue.x+aim.shotDir.x*1.60,
+    y,
+    aim.cue.z+aim.shotDir.z*1.60
+  );
+  setThreeLine(v.cueLine,cueStart,cueEnd,true);
+
+  if(!hit){
+    v.objectLine.visible=false;
+    v.tangentLine.visible=false;
+    return;
+  }
+
+  let nx=hit.ball.x-hit.closest.x;
+  let nz=hit.ball.z-hit.closest.y;
+  let mag=Math.hypot(nx,nz);
+  if(mag<1e-6){nx=aim.shotDir.x;nz=aim.shotDir.z;mag=1;}
+  nx/=mag;nz/=mag;
+
+  setThreeLine(
+    v.objectLine,
+    new THREE.Vector3(hit.ball.x,y+.003,hit.ball.z),
+    new THREE.Vector3(hit.ball.x+nx*.90,y+.003,hit.ball.z+nz*.90),
+    true
+  );
+
+  let tx=-nz,tz=nx;
+  if(tx*aim.shotDir.x+tz*aim.shotDir.z<0){tx=-tx;tz=-tz;}
+  setThreeLine(
+    v.tangentLine,
+    new THREE.Vector3(hit.ball.x,y+.006,hit.ball.z),
+    new THREE.Vector3(hit.ball.x+tx*.48,y+.006,hit.ball.z+tz*.48),
+    true
+  );
+}
+
 function updatePoolAimGuide(){
   const host=document.getElementById('poolAimGuide');
   if(!host)return;
@@ -955,9 +1268,10 @@ function updatePoolAimGuide(){
   updateHeldPoolCue();
   updateHeldPoolTool();
 
-  if(!state.pool.active||state.pool.shotInProgress){
+  if(!state.pool.active||state.pool.shotInProgress||state.pool.manualRack.active){
     host.innerHTML='';
     state.pool.lastAim=null;
+    hidePoolAimVisuals();
     return;
   }
 
@@ -965,38 +1279,24 @@ function updatePoolAimGuide(){
   state.pool.lastAim=aim;
   if(!aim){
     host.innerHTML='';
+    hidePoolAimVisuals();
     return;
   }
 
-  const lx=aim.contact.x-POOL.centerX;
-  const lz=aim.contact.z-POOL.centerZ;
+  updatePoolAimVisuals(aim);
+
   const pullPct=Math.round((state.pool.cuePull/.70)*100);
   const sideLabel=Math.abs(aim.side)<.14?'CENTER':(aim.side>0?'RIGHT':'LEFT');
   const spinLabel=Math.abs(aim.top)<.14?'CENTER':(aim.top>0?'TOP':'BACK');
 
-  let marker='';
-  if(aim.hit){
-    marker=`
-      <a-sphere position="${lx} ${aim.contact.y+.020} ${lz}"
-        radius=".026" color="#ff2028" emissive="#ff3038" emissiveIntensity=".85" material="shader:flat;depthTest:false"></a-sphere>
-      <a-text value="${sideLabel} / ${spinLabel}" position="${lx} ${aim.contact.y+.11} ${lz}"
-        rotation="-90 0 0" align="center" color="#ffb1b4" width=".52"></a-text>`;
-  }else if(aim.nearMiss){
-    marker=`
-      <a-ring position="${lx} ${aim.contact.y+.004} ${lz}" rotation="-90 0 0"
-        radius-inner=".020" radius-outer=".034" color="#ffd24a"></a-ring>
-      <a-text value="MISS / FOUL" position="${lx} ${aim.contact.y+.11} ${lz}"
-        rotation="-90 0 0" align="center" color="#ffd24a" width=".54"></a-text>`;
-  }else{
-    marker=`
-      <a-text value="AIM CLOSER TO CUE BALL" position="${aim.cue.x} 1.30 ${aim.cue.z}"
-        rotation="-90 0 0" align="center" color="#ff8d8d" width=".80"></a-text>`;
-  }
+  // Keep textual labels sparse; actual contact marker/trajectory are persistent THREE objects.
+  let label='';
+  if(aim.hit)label=`${sideLabel} / ${spinLabel}`;
+  else if(aim.nearMiss)label='MISS / FOUL';
 
-  host.innerHTML=marker+trajectoryMarkup(aim)+`
-    <a-text value="${state.pool.gripping?'STROKE':'HOLD LMB'} · PULL ${pullPct}%"
-      position="${aim.cue.x} 1.40 ${aim.cue.z}"
-      rotation="-90 0 0" align="center" color="#d9f8e5" width=".72"></a-text>`;
+  host.innerHTML=label?`
+    <a-text value="${label}" position="${aim.cue.x} ${POOL.feltY+POOL.ballRadius+.19} ${aim.cue.z}"
+      rotation="-90 0 0" align="center" color="${aim.hit?'#ffb1b4':'#ffd24a'}" width=".54"></a-text>`:'';
 
   updatePoolPowerMeter();
 }
@@ -1012,6 +1312,7 @@ function enterPoolMode(){
   state.pool.fineYaw=0;
   state.pool.lastMouseStamp=performance.now();
   document.getElementById('poolHud')?.classList.remove('hidden');
+  document.getElementById('poolPowerDock')?.classList.remove('hidden');
   updatePoolRulesHud();
   applyPoolHotbar(true);
   updateHeldPoolTool();
@@ -1044,6 +1345,10 @@ function exitPoolMode(){
   document.getElementById('heldPoolCue')?.setAttribute('visible',false);
   document.getElementById('heldPoolBridge')?.setAttribute('visible',false);
   document.getElementById('poolHud')?.classList.add('hidden');
+  document.getElementById('poolPowerDock')?.classList.add('hidden');
+  document.getElementById('poolManualRackPanel')?.classList.add('hidden');
+  state.pool.manualRack.active=false;
+  setTriangleRackVisible(false);
   applyPoolHotbar(false);
   document.getElementById('hudMode').textContent='WASD move · Enter interact · R run/walk · Shift+wheel crouch · L lean · X sit · Space jump';
   updatePoolAimGuide();
@@ -1057,11 +1362,18 @@ function shootPool(strokeSpeed=null){
 
   const cue=aim.cue;
   const rules=state.pool.rules;
-  if(rules.rackOver)return;
-  if(rules.ballInHand){
+  const freePlay=Boolean(rules.rackOver||rules.freePlay);
+
+  if(!freePlay&&rules.ballInHand){
     toast('Place the cue ball first.',900);
     return;
   }
+
+  if(freePlay&&cue.pocketed){
+    respawnCueBallFreePlay();
+    return;
+  }
+
   rules.shotPocketed=[];
   rules.foul=false;
   rules.foulReason='';
@@ -1079,9 +1391,11 @@ function shootPool(strokeSpeed=null){
     state.pool.fineYaw=0;
     camera()?.setAttribute('look-controls','enabled',true);
     if(aim.nearMiss){
-      setPoolFoul('Missed cue ball');
-      completePoolShot();
-      toast('Missed the cue ball — foul.',1300);
+      if(!freePlay){
+        setPoolFoul('Missed cue ball');
+        completePoolShot();
+      }
+      toast(freePlay?'Missed the cue ball.':'Missed the cue ball — foul.',1300);
     }else{
       toast('Aim closer to the cue ball.',1000);
     }
@@ -1143,11 +1457,35 @@ function pocketPoolBall(ball){
 
   if(ball.n===0){
     state.pool.cueNeedsRespawn=true;
-    setPoolFoul('Scratch');
-    toast('Scratch — foul.',1000);
+    if(state.pool.rules.rackOver||state.pool.rules.freePlay){
+      toast('Scratch — cue ball will return.',1000);
+    }else{
+      setPoolFoul('Scratch');
+      toast('Scratch — foul.',1000);
+    }
   }else{
     toast(`Ball ${ball.n} pocketed.`,900);
   }
+}
+
+function respawnCueBallFreePlay(){
+  const cue=state.pool.balls.find(b=>b.n===0);
+  if(!cue)return;
+  const spots=[[-1.05,0],[-1.25,0],[-.95,.22],[-.95,-.22]];
+  let spot=spots[0];
+  for(const candidate of spots){
+    if(!state.pool.balls.some(b=>b.n!==0&&!b.pocketed&&Math.hypot(b.x-candidate[0],b.z-candidate[1])<POOL.ballRadius*2.25)){
+      spot=candidate;break;
+    }
+  }
+  cue.pocketed=false;
+  cue.x=spot[0];cue.z=spot[1];cue.y=POOL.feltY+POOL.ballRadius;
+  cue.vx=cue.vy=cue.vz=0;
+  cue.sideSpin=cue.spinX=cue.spinZ=0;
+  state.pool.cueNeedsRespawn=false;
+  state.pool.rules.ballInHand=false;
+  renderPoolBalls(false);
+  updatePoolAimGuide();
 }
 
 function respawnCueBall(){
@@ -1355,10 +1693,13 @@ function updatePoolPhysics(delta){
   if(state.pool.shotInProgress&&!anyMoving){
     state.pool.shotInProgress=false;
 
-    // Resolve groups, fouls, turn, win/loss before cue-ball placement.
+    // Resolve rack rules, or simply keep the physical table playable after game-over.
     completePoolShot();
 
-    if(state.pool.cueNeedsRespawn)respawnCueBall();
+    if(state.pool.cueNeedsRespawn){
+      if(state.pool.rules.rackOver||state.pool.rules.freePlay)respawnCueBallFreePlay();
+      else respawnCueBall();
+    }
     camera()?.setAttribute('look-controls','enabled',true);
     const canvas=document.querySelector('#xrScene canvas');
     if(state.pool.active&&document.pointerLockElement!==canvas)canvas?.requestPointerLock?.();
@@ -2602,12 +2943,39 @@ AFRAME.registerComponent('xr-thumbstick-locomotion',{
 
 document.getElementById('poolTrajectoryToggle')?.addEventListener('change',e=>{
   state.pool.trajectory=Boolean(e.target.checked);
-  if(state.pool.active)updatePoolAimGuide();
+  if(state.pool.active){
+    updatePoolAimGuide();
+    if(state.pool.lastAim)updatePoolAimVisuals(state.pool.lastAim);
+  }
 });
 
-document.getElementById('poolRerackBtn')?.addEventListener('click',e=>{
+document.getElementById('poolAutoRackBtn')?.addEventListener('click',e=>{
   e.preventDefault();
-  poolRerack();
+  poolAutoRack();
+});
+
+document.getElementById('poolManualRackBtn')?.addEventListener('click',e=>{
+  e.preventDefault();
+  enterManualRackMode();
+});
+
+document.getElementById('poolManualRackClose')?.addEventListener('click',e=>{
+  e.preventDefault();
+  exitManualRackMode(true);
+});
+
+document.getElementById('poolRackClearBtn')?.addEventListener('click',e=>{
+  e.preventDefault();
+  state.pool.manualRack.slots=Array(15).fill(null);
+  state.pool.manualRack.selectedBall=null;
+  for(const ball of state.pool.balls)if(ball.n!==0)ball.pocketed=true;
+  renderManualRackPanel();
+  renderPoolBalls(false);
+});
+
+document.getElementById('poolRackFinishBtn')?.addEventListener('click',e=>{
+  e.preventDefault();
+  finishManualRack();
 });
 
 document.getElementById('poolCallSolids')?.addEventListener('click',e=>{

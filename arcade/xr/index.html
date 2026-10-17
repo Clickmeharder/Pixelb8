@@ -8,6 +8,10 @@
 <link rel="stylesheet" href="styles.css">
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="../spatial/core/event-bus.js"></script>
+<script src="../spatial/core/runtime.js"></script>
+<script src="../spatial/worlds/arcade.manifest.js"></script>
+<script src="../spatial/games/pool/adapter.js"></script>
 <script defer src="app.js"></script>
 </head>
 <body>
@@ -62,26 +66,42 @@
   </div>
   <div class="pool-groups">
     <span>YOU <b id="poolYourGroup">OPEN</b></span>
-    <span>OPPONENT <b id="poolOppGroup">OPEN</b></span>
+    <span>OPP <b id="poolOppGroup">OPEN</b></span>
   </div>
   <div id="poolCallRow" class="pool-call-row">
-    <span>CALL GROUP</span>
+    <span>CALL</span>
     <button id="poolCallSolids" type="button">SOLIDS</button>
     <button id="poolCallStripes" type="button">STRIPES</button>
   </div>
   <div id="poolRuleNotice" class="pool-rule-notice">Break shot · table is open</div>
-  <div class="pool-power-row">
-    <span>SHOT POWER</span>
-    <div class="pool-power-track"><i id="poolPowerFill"></i></div>
-    <b id="poolPowerValue">0%</b>
-  </div>
   <div class="pool-hud-actions">
-    <label class="pool-trajectory-toggle">
+    <label class="pool-trajectory-toggle" title="Show predicted shot paths">
       <input id="poolTrajectoryToggle" type="checkbox">
-      <span>Trajectory Lines</span>
+      <span>Lines</span>
     </label>
-    <button id="poolRerackBtn" type="button">RE-RACK</button>
+    <button id="poolAutoRackBtn" type="button">AUTO RACK</button>
+    <button id="poolManualRackBtn" type="button">MANUAL RACK</button>
   </div>
+</section>
+
+<section id="poolPowerDock" class="pool-power-dock hidden" aria-label="Pool shot power">
+  <span>POWER</span>
+  <div class="pool-power-track"><i id="poolPowerFill"></i></div>
+  <b id="poolPowerValue">0%</b>
+</section>
+
+<section id="poolManualRackPanel" class="pool-manual-rack hidden">
+  <header>
+    <div><span>POOL</span><b>Manual Rack</b></div>
+    <button id="poolManualRackClose" type="button">×</button>
+  </header>
+  <p>Select a ball, then choose a triangle position.</p>
+  <div id="poolRackBallTray" class="pool-rack-ball-tray"></div>
+  <div id="poolRackSlots" class="pool-rack-slots" aria-label="Triangle rack positions"></div>
+  <footer>
+    <button id="poolRackClearBtn" type="button">CLEAR</button>
+    <button id="poolRackFinishBtn" type="button">FINISH RACK</button>
+  </footer>
 </section>
 
 <div id="playerVitals" class="player-vitals">

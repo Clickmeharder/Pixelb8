@@ -49,20 +49,41 @@ button{font:inherit;cursor:pointer}
   .inventory-grid{grid-template-columns:repeat(4,1fr)}
 }
 
-.pool-hud{position:fixed;z-index:41;left:50%;bottom:166px;transform:translateX(-50%);width:min(360px,calc(100vw - 28px));display:grid;gap:7px;padding:8px 10px;border:1px solid rgba(58,72,84,.72);border-radius:8px;background:rgba(7,11,16,.90);box-shadow:0 10px 28px rgba(0,0,0,.36);backdrop-filter:blur(7px)}
-.pool-power-row{display:grid;grid-template-columns:auto minmax(0,1fr) 34px;align-items:center;gap:8px}
-.pool-power-row>span{font-size:.5rem;font-weight:900;letter-spacing:.09em;color:#97a3ae}.pool-power-row>b{text-align:right;font:800 .56rem Consolas,monospace;color:#dce6ee}
-.pool-power-track{height:8px;overflow:hidden;border-radius:999px;background:#151d24;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}.pool-power-track i{display:block;width:0%;height:100%;background:linear-gradient(90deg,#61d89a,#f3cd63,#e65b5b);transition:width .06s linear}
-.pool-trajectory-toggle{display:flex;align-items:center;justify-content:center;gap:7px;color:#aab5bf;font-size:.58rem;font-weight:800;user-select:none}.pool-trajectory-toggle input{width:15px;height:15px;accent-color:#4fc3f7}
-
-.pool-scoreline,.pool-groups,.pool-call-row,.pool-hud-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.pool-scoreline{font-size:.58rem;font-weight:950;letter-spacing:.08em;color:#e4edf4}
-#poolOpenLabel{color:#ffd54a}
-.pool-groups{font-size:.54rem;color:#8997a3}.pool-groups b{margin-left:4px;color:#dce7ef;letter-spacing:.04em}
-.pool-call-row{padding:6px 0;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
-.pool-call-row>span{font-size:.49rem;font-weight:900;letter-spacing:.08em;color:#8f9ba5}
-.pool-call-row button,.pool-hud-actions button{border:1px solid #344550;border-radius:5px;background:#101921;color:#becbd5;font:800 .53rem Consolas,monospace;padding:5px 8px;cursor:pointer}
 .pool-call-row button.active{border-color:#ffd54a;color:#ffd54a;background:rgba(255,213,74,.10)}
 .pool-call-row button:disabled{opacity:.4;cursor:default}
 .pool-rule-notice{min-height:15px;text-align:center;color:#ffcb79;font:700 .52rem Consolas,monospace}
 .pool-hud-actions{justify-content:center}.pool-hud-actions button{margin-left:auto;color:#ffcf69;border-color:#665325}
+
+/* v0.17 pool UI: keep the aiming viewport clear */
+.pool-hud{position:fixed;z-index:41;right:12px;top:62px;width:214px;display:grid;gap:6px;padding:7px 8px;border:1px solid rgba(58,72,84,.72);border-radius:8px;background:rgba(7,11,16,.86);box-shadow:0 8px 24px rgba(0,0,0,.32);backdrop-filter:blur(6px)}
+.pool-scoreline,.pool-groups,.pool-call-row,.pool-hud-actions{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.pool-scoreline{font-size:.53rem;font-weight:950;letter-spacing:.07em;color:#e4edf4}.pool-scoreline #poolOpenLabel{color:#ffd54a}
+.pool-groups{font-size:.49rem;color:#8997a3}.pool-groups b{margin-left:3px;color:#dce7ef;letter-spacing:.03em}
+.pool-call-row{padding:4px 0;border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+.pool-call-row>span{font-size:.46rem;font-weight:900;letter-spacing:.08em;color:#8f9ba5}
+.pool-call-row button,.pool-hud-actions button,.pool-manual-rack button{border:1px solid #344550;border-radius:5px;background:#101921;color:#becbd5;font:800 .49rem Consolas,monospace;padding:4px 6px;cursor:pointer}
+.pool-call-row button.active{border-color:#ffd54a;color:#ffd54a;background:rgba(255,213,74,.10)}.pool-call-row button:disabled{opacity:.4;cursor:default}
+.pool-rule-notice{min-height:13px;text-align:center;color:#ffcb79;font:700 .47rem Consolas,monospace}
+.pool-hud-actions{justify-content:flex-start}.pool-hud-actions button{color:#ffcf69;border-color:#665325}
+.pool-trajectory-toggle{display:flex;align-items:center;gap:4px;color:#aab5bf;font-size:.49rem;font-weight:800;user-select:none}.pool-trajectory-toggle input{width:13px;height:13px;accent-color:#4fc3f7}
+
+.pool-power-dock{position:fixed;z-index:40;left:50%;bottom:4px;transform:translateX(-50%);width:min(560px,calc(100vw - 24px));display:grid;grid-template-columns:42px minmax(0,1fr) 34px;align-items:center;gap:7px;padding:3px 7px;border:1px solid rgba(49,60,71,.72);border-radius:5px;background:rgba(7,11,16,.88);pointer-events:none}
+.pool-power-dock>span{font-size:.45rem;font-weight:900;letter-spacing:.08em;color:#8c99a5}.pool-power-dock>b{text-align:right;font:800 .49rem Consolas,monospace;color:#dce6ee}
+.pool-power-track{height:5px;overflow:hidden;border-radius:999px;background:#151d24;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}.pool-power-track i{display:block;width:0%;height:100%;background:linear-gradient(90deg,#61d89a,#f3cd63,#e65b5b);transition:width .04s linear}
+.pool-hud:not(.hidden)~.player-vitals{}
+body:has(#poolPowerDock:not(.hidden)) .hotbar{bottom:20px}
+
+.pool-manual-rack{position:fixed;z-index:45;right:12px;top:210px;width:230px;padding:8px;border:1px solid #46525d;border-radius:8px;background:rgba(8,12,17,.95);box-shadow:0 12px 30px rgba(0,0,0,.42)}
+.pool-manual-rack header,.pool-manual-rack footer{display:flex;align-items:center;justify-content:space-between;gap:7px}.pool-manual-rack header>div{display:grid}.pool-manual-rack header span{font-size:.43rem;color:#6f7e8b;font-weight:900;letter-spacing:.1em}.pool-manual-rack header b{font-size:.61rem;color:#e1eaf1}.pool-manual-rack header>button{font-size:.85rem;padding:0;width:23px;height:23px}
+.pool-manual-rack p{margin:7px 0;color:#87949f;font-size:.49rem;line-height:1.3}
+.pool-rack-ball-tray{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-bottom:8px}
+.pool-rack-ball{aspect-ratio:1;border-radius:50%!important;padding:0!important;color:#fff!important;text-shadow:0 1px 2px #000;font-size:.51rem!important}.pool-rack-ball.selected{outline:2px solid #fff;outline-offset:1px}.pool-rack-ball.used{opacity:.28}
+.pool-rack-slots{display:grid;grid-template-columns:repeat(9,20px);grid-auto-rows:22px;justify-content:center;margin:4px auto 9px}
+.pool-rack-slot{width:20px!important;height:20px!important;padding:0!important;border-radius:50%!important;font-size:.47rem!important}.pool-rack-slot.filled{border-color:#d8e2e9!important;color:#fff!important}
+.pool-manual-rack footer{justify-content:flex-end}.pool-manual-rack footer button:last-child{color:#9ce6bd;border-color:#35624a}
+
+@media(max-width:720px){
+  .pool-hud{right:7px;top:54px;width:190px}
+  .pool-manual-rack{right:7px;top:195px;width:210px}
+  .pool-power-dock{width:calc(100vw - 18px)}
+}
