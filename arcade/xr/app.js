@@ -17,6 +17,16 @@ const CABINET_GAMES=[
   }
 ];
 
+const CHAT_TOPIC='pixelb8/site/v1/chat/global';
+const CHAT_BROKER='wss://broker.hivemq.com:8884/mqtt';
+const PROFILE_KEY='pixelb8_profile_v1';
+
+const HOTBAR_ITEMS={
+  1:{id:'wave',label:'Wave',icon:'👋',kind:'action'},
+  2:{id:'slap',label:'Slap',icon:'🖐',kind:'action'},
+  3:{id:'punch',label:'Punch',icon:'✊',kind:'action'}
+};
+
 const BOARD_TABLES=[
   {id:'connect4',title:'Connect 4',kind:'connect4',x:5.7,z:-3.8,color:'#ff5d70'},
   {id:'checkers',title:'Checkers',kind:'checkers',x:9.1,z:-3.8,color:'#e2b457'},
@@ -30,7 +40,25 @@ const state={
   dungeon:false,
   dungeonMaxChunk:-1,
   dungeonChunks:new Map(),
-  toastTimer:null
+  toastTimer:null,
+  chatClient:null,
+  chatSeen:new Set(),
+  inventory:[],
+  player:{
+    health:100,
+    stamina:100,
+    running:false,
+    crouched:false,
+    onGround:true,
+    velocityY:0,
+    floorY:0,
+    keys:new Set(),
+    vrMoving:false,
+    inventoryOpen:false,
+    selectedSlot:1,
+    lastHealthChange:Date.now(),
+    lastStaminaChange:Date.now()
+  }
 };
 
 const prompt=document.getElementById('interactionPrompt');
@@ -58,7 +86,7 @@ function setPrompt(item){
     return;
   }
   promptTitle.textContent=item.title;
-  promptCopy.textContent=item.copy||'Press E';
+  promptCopy.textContent=item.copy||'Press Enter';
   prompt.classList.remove('hidden');
 }
 
@@ -81,7 +109,7 @@ function makeCabinet(game,x,z){
     <a-sphere position="-.24 1.13 .67" radius=".06" color="${game.color}" emissive="${game.color}" emissiveIntensity=".3"></a-sphere>
     <a-cylinder position=".24 1.00 .69" rotation="90 0 0" radius=".06" height=".028" color="#ff516d"></a-cylinder>
     <a-box position="0 .25 0" width="1.26" height=".48" depth=".83" color="#10151c"></a-box>
-    <a-text value="E TO PLAY" position="0 .54 .47" align="center" color="#aeb9c4" width="1.55"></a-text>
+    <a-text value="ENTER TO PLAY" position="0 .54 .47" align="center" color="#aeb9c4" width="1.55"></a-text>
     <a-box class="xr-interactable" data-interact="cabinet" data-id="${game.id}" position="0 1.3 .57"
       width="1.52" height="2.5" depth=".28" material="opacity:0;transparent:true"></a-box>
   </a-entity>`;
@@ -297,7 +325,7 @@ function engageCabinet(id){
   setMovementEnabled(false);
   modeTitle.textContent=game.title;
   mode.classList.remove('hidden');
-  document.getElementById('hudMode').textContent=`Playing ${game.title} · ESC to step away`;
+  document.getElementById('hudMode').textContent=`Playing ${game.title} · Backspace to step away`;
   setPrompt(null);
 
   // Give the existing game the same "insert coin" start signal.
@@ -315,12 +343,15 @@ function disengageCabinet(){
   state.engaged=null;
   setMovementEnabled(true);
   mode.classList.add('hidden');
-  document.getElementById('hudMode').textContent='WASD move · mouse look · E interact';
+  document.getElementById('hudMode').textContent='WASD move · Enter interact · R run/walk · C crouch · Space jump';
 }
 
 function enterDungeon(){
   disengageCabinet();
   state.dungeon=true;
+  state.player.floorY=-12;
+  state.player.onGround=true;
+  state.player.velocityY=0;
   const r=rig();
   r.object3D.position.set(0,-12,-52);
   camera()?.object3D.rotation.set(0,0,0);
@@ -331,6 +362,9 @@ function enterDungeon(){
 
 function leaveDungeon(){
   state.dungeon=false;
+  state.player.floorY=0;
+  state.player.onGround=true;
+  state.player.velocityY=0;
   const r=rig();
   r.object3D.position.set(0,0,9.5);
   dungeonHud.classList.add('hidden');
@@ -436,17 +470,17 @@ function findNearestInteraction(){
 
   if(type==='cabinet'){
     const game=CABINET_GAMES.find(g=>g.id===id);
-    return game&&{type,id,title:game.title,copy:'Press E to play inside this cabinet'};
+    return game&&{type,id,title:game.title,copy:'Press Enter to play inside this cabinet'};
   }
   if(type==='table'){
     const table=BOARD_TABLES.find(t=>t.id===id);
-    return table&&{type,id,title:table.title,copy:'Press E · XR table integration coming next'};
+    return table&&{type,id,title:table.title,copy:'Press Enter · XR table integration coming next'};
   }
-  if(type==='exit')return{type,id,title:'Exit Arcade',copy:'Press E to return to the 2D Arcade'};
-  if(type==='dungeon')return{type,id,title:'Basement Dungeon',copy:'Press E to descend'};
+  if(type==='exit')return{type,id,title:'Exit Arcade',copy:'Press Enter to return to the 2D Arcade'};
+  if(type==='dungeon')return{type,id,title:'Basement Dungeon',copy:'Press Enter to descend'};
   if(type==='girls')return{type,id,title:'Girls Washroom',copy:'Door is decorative for now'};
   if(type==='boys')return{type,id,title:'Boys Washroom',copy:'Door is decorative for now'};
-  if(type==='dungeon-exit')return{type,id,title:'Return to Arcade',copy:'Press E to go back upstairs'};
+  if(type==='dungeon-exit')return{type,id,title:'Return to Arcade',copy:'Press Enter to go back upstairs'};
   return null;
 }
 
@@ -463,35 +497,432 @@ function interact(item){
   }
 }
 
+
+function isEditableTarget(target){
+  if(!target)return false;
+  return target instanceof HTMLInputElement
+    || target instanceof HTMLTextAreaElement
+    || target instanceof HTMLSelectElement
+    || target.isContentEditable;
+}
+
+function getProfile(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}');
+    const name=String(saved.name||'Guest').trim().slice(0,32)||'Guest';
+    return {name,initial:String(saved.initial||name[0]||'G').slice(0,2).toUpperCase()};
+  }catch{
+    return {name:'Guest',initial:'G'};
+  }
+}
+
+function setChatState(online,label){
+  const el=document.getElementById('chatState');
+  if(!el)return;
+  el.textContent=label;
+  el.classList.toggle('online',online);
+}
+
+function renderChatSystem(text){
+  const host=document.getElementById('chatMessages');
+  if(!host)return;
+  const row=document.createElement('div');
+  row.className='xr-chat-system';
+  row.textContent=text;
+  host.appendChild(row);
+  while(host.children.length>80)host.removeChild(host.firstChild);
+  host.scrollTop=host.scrollHeight;
+}
+
+function renderChatMessage(msg){
+  const host=document.getElementById('chatMessages');
+  if(!host)return;
+  const profile=getProfile();
+  const row=document.createElement('div');
+  row.className='xr-chat-row'+(String(msg.name||'')===profile.name?' self':'');
+  const meta=document.createElement('div');
+  meta.className='xr-chat-meta';
+  const author=document.createElement('b');
+  author.textContent=String(msg.name||'Guest').slice(0,32);
+  const time=document.createElement('span');
+  time.textContent=new Date(Number(msg.timestamp)||Date.now()).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  meta.append(author,time);
+  const body=document.createElement('div');
+  body.textContent=String(msg.text||'').slice(0,240);
+  row.append(meta,body);
+  host.appendChild(row);
+  while(host.children.length>80)host.removeChild(host.firstChild);
+  host.scrollTop=host.scrollHeight;
+}
+
+function initGlobalChat(){
+  const form=document.getElementById('chatForm');
+  const input=document.getElementById('chatInput');
+  const panel=document.getElementById('globalChat');
+  const collapse=document.getElementById('chatCollapse');
+
+  collapse?.addEventListener('click',()=>{
+    const collapsed=panel.classList.toggle('collapsed');
+    collapse.textContent=collapsed?'+':'−';
+  });
+
+  form?.addEventListener('submit',e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    sendGlobalChat();
+  });
+
+  input?.addEventListener('keydown',e=>{
+    // Chat owns its keyboard while focused. This prevents Enter, numbers,
+    // movement keys, Backspace, etc. leaking into the world/cabinet.
+    e.stopPropagation();
+    if(e.key==='Enter'){
+      e.preventDefault();
+      sendGlobalChat();
+    }
+  });
+
+  if(typeof mqtt==='undefined'){
+    setChatState(false,'OFFLINE');
+    renderChatSystem('MQTT chat library unavailable.');
+    return;
+  }
+
+  state.chatClient=mqtt.connect(CHAT_BROKER,{
+    clientId:`P8_XR_CHAT_${Math.random().toString(36).slice(2,12)}`,
+    clean:true,
+    reconnectPeriod:3000,
+    connectTimeout:10000
+  });
+  state.chatClient.on('connect',()=>{
+    state.chatClient.subscribe(CHAT_TOPIC);
+    setChatState(true,'LIVE');
+    renderChatSystem('Connected to PixelB8 global chat.');
+  });
+  state.chatClient.on('reconnect',()=>setChatState(false,'RECONNECTING'));
+  state.chatClient.on('offline',()=>setChatState(false,'OFFLINE'));
+  state.chatClient.on('close',()=>setChatState(false,'OFFLINE'));
+  state.chatClient.on('error',()=>setChatState(false,'ERROR'));
+  state.chatClient.on('message',(topic,payload)=>{
+    if(topic!==CHAT_TOPIC)return;
+    try{
+      const msg=JSON.parse(payload.toString());
+      if(!msg?.id||!msg?.text||state.chatSeen.has(msg.id))return;
+      state.chatSeen.add(msg.id);
+      renderChatMessage(msg);
+    }catch{}
+  });
+}
+
+function sendGlobalChat(){
+  const input=document.getElementById('chatInput');
+  const text=String(input?.value||'').trim().slice(0,240);
+  if(!text)return;
+  if(!state.chatClient?.connected){
+    renderChatSystem('Chat is offline.');
+    return;
+  }
+  const profile=getProfile();
+  state.chatClient.publish(CHAT_TOPIC,JSON.stringify({
+    id:`${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+    name:profile.name,
+    text,
+    timestamp:Date.now()
+  }),{qos:0,retain:false});
+  input.value='';
+}
+
+function renderInventory(){
+  const grid=document.getElementById('inventoryGrid');
+  const count=document.getElementById('inventoryCount');
+  if(!grid)return;
+  const slots=24;
+  grid.innerHTML=Array.from({length:slots},(_,i)=>{
+    const item=state.inventory[i];
+    return item
+      ? `<div class="inventory-slot has-item" data-inventory-slot="${i}"><span>${item.icon||'■'}</span><b>${item.label||item.id||'Item'}</b></div>`
+      : `<div class="inventory-slot" data-inventory-slot="${i}">Empty</div>`;
+  }).join('');
+  if(count)count.textContent=`${state.inventory.length} / ${slots}`;
+}
+
+function setInventoryOpen(open){
+  state.player.inventoryOpen=Boolean(open);
+  const panel=document.getElementById('inventoryPanel');
+  panel?.classList.toggle('hidden',!state.player.inventoryOpen);
+  if(state.player.inventoryOpen){
+    renderInventory();
+    setMovementEnabled(false);
+    document.exitPointerLock?.();
+  }else if(!state.engaged){
+    setMovementEnabled(true);
+  }
+}
+
+function selectHotbarSlot(slot,use=true){
+  const n=Number(slot);
+  state.player.selectedSlot=n;
+  document.querySelectorAll('[data-hotbar-slot]').forEach(el=>{
+    el.classList.toggle('active',Number(el.dataset.hotbarSlot)===n);
+  });
+  const item=HOTBAR_ITEMS[n];
+  if(use&&item)useHotbarItem(item,n);
+}
+
+function useHotbarItem(item,slot){
+  const el=document.querySelector(`[data-hotbar-slot="${slot}"]`);
+  el?.classList.remove('pulse');
+  void el?.offsetWidth;
+  el?.classList.add('pulse');
+
+  const phrases={
+    wave:'You wave.',
+    slap:'You throw a slap.',
+    punch:'You punch the air.'
+  };
+  toast(phrases[item.id]||`Used ${item.label}.`,1200);
+
+  // Hook point for future visible hands, multiplayer avatar events, weapons and toys.
+  window.dispatchEvent(new CustomEvent('pixelb8-xr-player-action',{
+    detail:{action:item.id,slot,timestamp:Date.now()}
+  }));
+}
+
+function showVitals(kind='stamina'){
+  const now=Date.now();
+  if(kind==='health')state.player.lastHealthChange=now;
+  if(kind==='stamina')state.player.lastStaminaChange=now;
+  document.getElementById('playerVitals')?.classList.remove('faded');
+}
+
+function updateVitals(){
+  const p=state.player;
+  const hf=document.getElementById('healthFill');
+  const sf=document.getElementById('staminaFill');
+  if(hf)hf.style.width=`${Math.max(0,Math.min(100,p.health))}%`;
+  if(sf)sf.style.width=`${Math.max(0,Math.min(100,p.stamina))}%`;
+  const hv=document.getElementById('healthValue');
+  const sv=document.getElementById('staminaValue');
+  if(hv)hv.textContent=String(Math.round(p.health));
+  if(sv)sv.textContent=String(Math.round(p.stamina));
+
+  const recent=Math.max(p.lastHealthChange,p.lastStaminaChange);
+  document.getElementById('playerVitals')?.classList.toggle('faded',Date.now()-recent>10000);
+}
+
+function changeStamina(delta){
+  const p=state.player;
+  const next=Math.max(0,Math.min(100,p.stamina+delta));
+  if(Math.abs(next-p.stamina)<.001)return;
+  p.stamina=next;
+  p.lastStaminaChange=Date.now();
+  if(p.running&&p.stamina<=.1)setRunning(false);
+  updateVitals();
+}
+
+function changeHealth(delta){
+  const p=state.player;
+  const next=Math.max(0,Math.min(100,p.health+delta));
+  if(Math.abs(next-p.health)<.001)return;
+  p.health=next;
+  p.lastHealthChange=Date.now();
+  updateVitals();
+}
+
+function movementAcceleration(){
+  if(state.player.crouched)return 13;
+  if(state.player.running&&state.player.stamina>0)return 48;
+  return 25;
+}
+
+function refreshMovementControls(){
+  camera()?.setAttribute('wasd-controls','acceleration',movementAcceleration());
+  const modeEl=document.getElementById('moveMode');
+  if(modeEl){
+    modeEl.textContent=state.player.running?'RUN':'WALK';
+    modeEl.classList.toggle('run',state.player.running);
+  }
+  document.getElementById('crouchState')?.classList.toggle('hidden',!state.player.crouched);
+}
+
+function setRunning(run){
+  state.player.running=Boolean(run)&&state.player.stamina>0&&!state.player.crouched;
+  refreshMovementControls();
+  toast(state.player.running?'Run mode':'Walk mode',900);
+}
+
+function toggleCrouch(){
+  state.player.crouched=!state.player.crouched;
+  if(state.player.crouched)state.player.running=false;
+  camera()?.setAttribute('position',`0 ${state.player.crouched?1.08:1.65} 0`);
+  refreshMovementControls();
+  toast(state.player.crouched?'Crouched':'Standing',900);
+}
+
+function jump(){
+  const p=state.player;
+  if(!p.onGround||p.crouched||p.stamina<10||state.engaged||p.inventoryOpen)return;
+  p.onGround=false;
+  p.velocityY=4.45;
+  changeStamina(-11);
+  showVitals('stamina');
+}
+
+function updatePlayer(time,delta){
+  const p=state.player;
+  const dt=Math.min(.05,Math.max(0,(delta||0)/1000));
+
+  if(!p.onGround){
+    p.velocityY+=-9.8*dt;
+    const r=rig();
+    r.object3D.position.y+=p.velocityY*dt;
+    if(r.object3D.position.y<=p.floorY){
+      r.object3D.position.y=p.floorY;
+      p.velocityY=0;
+      p.onGround=true;
+    }
+  }
+
+  const keyboardMoving=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight']
+    .some(code=>p.keys.has(code));
+  const moving=(keyboardMoving||p.vrMoving)&&!state.engaged&&!p.inventoryOpen;
+
+  if(moving){
+    const drain=p.running?5.4:(p.crouched?0.9:1.7);
+    changeStamina(-drain*dt);
+  }else if(p.onGround&&!state.engaged){
+    changeStamina(7.2*dt);
+  }
+
+  updateVitals();
+}
+
+function initPlayerUI(){
+  renderInventory();
+  refreshMovementControls();
+  updateVitals();
+
+  document.querySelectorAll('[data-hotbar-slot]').forEach(btn=>{
+    btn.addEventListener('click',()=>selectHotbarSlot(btn.dataset.hotbarSlot,true));
+  });
+
+  document.getElementById('inventoryClose')?.addEventListener('click',()=>setInventoryOpen(false));
+  document.getElementById('inventoryPanel')?.addEventListener('click',e=>{
+    if(e.target.id==='inventoryPanel')setInventoryOpen(false);
+  });
+
+  // Public hooks for future combat/items/NPC systems.
+  window.PixelB8XRPlayer={
+    damage(amount){changeHealth(-Math.abs(Number(amount)||0));},
+    heal(amount){changeHealth(Math.abs(Number(amount)||0));},
+    setHealth(value){state.player.health=Math.max(0,Math.min(100,Number(value)||0));showVitals('health');updateVitals();},
+    getHealth(){return state.player.health;},
+    getStamina(){return state.player.stamina;},
+    addInventoryItem(item){
+      if(state.inventory.length>=24)return false;
+      state.inventory.push(item||{id:'item',label:'Item'});
+      renderInventory();
+      return true;
+    },
+    setHotbarSlot(slot,item){
+      const n=Number(slot);
+      if(n<0||n>9)return false;
+      if(item)HOTBAR_ITEMS[n]=item; else delete HOTBAR_ITEMS[n];
+      const btn=document.querySelector(`[data-hotbar-slot="${n}"]`);
+      if(btn){
+        btn.classList.toggle('empty',!item);
+        btn.querySelector('span').textContent=item?.icon||'·';
+        btn.querySelector('b').textContent=item?.label||'Empty';
+      }
+      return true;
+    },
+    useHotbar(slot){selectHotbarSlot(slot,true);}
+  };
+}
+
 AFRAME.registerComponent('arcade-world',{
   init(){
     buildArcade();
     buildDungeonEntrance();
     setupEmbeddedGames();
+    initPlayerUI();
+    initGlobalChat();
 
     window.addEventListener('keydown',e=>{
+      // Inputs own their keys. This is especially important for MQTT chat:
+      // Enter sends the message instead of entering a cabinet or reaching the game.
+      if(isEditableTarget(e.target))return;
+
       if(state.engaged){
-        if(e.key==='Escape'){
+        if(e.key==='Backspace'){
           e.preventDefault();
+          e.stopPropagation();
           disengageCabinet();
           return;
         }
+        // Escape and every normal game key are deliberately forwarded.
         dispatchGameKey('keydown',e);
         e.preventDefault();
         return;
       }
 
-      if(e.key.toLowerCase()==='e'&&state.nearby){
+      if(state.player.inventoryOpen){
+        if(e.key.toLowerCase()==='i'||e.key==='Escape'){
+          e.preventDefault();
+          setInventoryOpen(false);
+        }
+        return;
+      }
+
+      state.player.keys.add(e.code);
+
+      if(e.key==='Enter'&&state.nearby){
         e.preventDefault();
         interact(state.nearby);
+        return;
+      }
+
+      if(e.key.toLowerCase()==='r'){
+        e.preventDefault();
+        setRunning(!state.player.running);
+        return;
+      }
+
+      if(e.key.toLowerCase()==='c'){
+        e.preventDefault();
+        toggleCrouch();
+        return;
+      }
+
+      if(e.key.toLowerCase()==='i'){
+        e.preventDefault();
+        setInventoryOpen(true);
+        return;
+      }
+
+      if(e.code==='Space'){
+        e.preventDefault();
+        jump();
+        return;
+      }
+
+      if(/^[0-9]$/.test(e.key)){
+        e.preventDefault();
+        selectHotbarSlot(Number(e.key),true);
       }
     },true);
 
     window.addEventListener('keyup',e=>{
+      if(isEditableTarget(e.target))return;
+
       if(state.engaged){
+        if(e.key==='Backspace')return;
         dispatchGameKey('keyup',e);
         e.preventDefault();
+        return;
       }
+
+      state.player.keys.delete(e.code);
     },true);
 
     ['leftHand','rightHand'].forEach(id=>{
@@ -508,7 +939,9 @@ AFRAME.registerComponent('arcade-world',{
       });
     });
   },
-  tick(){
+  tick(time,delta){
+    updatePlayer(time,delta);
+
     for(const rec of state.gameTextures.values()){
       rec.texture.needsUpdate=true;
     }
@@ -537,7 +970,8 @@ AFRAME.registerComponent('xr-thumbstick-locomotion',{
     });
   },
   tick(time,delta){
-    if(state.engaged||(!this.axis.x&&!this.axis.y))return;
+    state.player.vrMoving=Boolean(this.axis.x||this.axis.y);
+    if(state.engaged||state.player.inventoryOpen||(!this.axis.x&&!this.axis.y))return;
     const cam=camera();
     if(!cam)return;
     const dt=Math.min(.05,delta/1000);
@@ -548,7 +982,8 @@ AFRAME.registerComponent('xr-thumbstick-locomotion',{
     move.addScaledVector(right,this.axis.x);
     move.addScaledVector(forward,-this.axis.y);
     if(move.lengthSq()>1)move.normalize();
-    this.el.object3D.position.addScaledVector(move,this.speed*dt);
+    const speed=state.player.crouched?1.25:(state.player.running&&state.player.stamina>0?4.6:this.speed);
+    this.el.object3D.position.addScaledVector(move,speed*dt);
   }
 });
 
