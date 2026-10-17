@@ -327,7 +327,7 @@ function buildPoolTable(){
   const host=document.getElementById('poolHost');
   if(!host)return;
   host.innerHTML=`
-  <a-entity id="poolTable" class="collision-box" data-collision-halfx="2.25" data-collision-halfz="1.35"
+  <a-entity id="poolTable" class="collision-box" data-collision-halfx="2.02" data-collision-halfz="1.10"
     data-interact="pool" data-id="pool" position="${POOL.centerX} 0 ${POOL.centerZ}">
     <!-- legs / body -->
     <a-box position="0 .58 0" width="3.86" height=".42" depth="2.18" color="#3b2819"></a-box>
@@ -445,9 +445,13 @@ function poolAimRay(){
 
   const dir=new THREE.Vector3(0,0,-1).applyQuaternion(quat).normalize();
 
-  // The mechanical bridge/rest extends the effective cue reach across the table.
+  if(state.player.leaning){
+    origin.addScaledVector(dir,.42);
+  }
+
+  // The mechanical bridge/rest gives substantially more reach.
   if(state.pool.tool==='bridge'){
-    origin.addScaledVector(dir,.72);
+    origin.addScaledVector(dir,1.02);
   }
 
   // While gripping, horizontal mouse motion is fine cue adjustment rather than camera movement.
@@ -536,7 +540,9 @@ function updateHeldPoolCue(){
   // The cue is intentionally in first-person space so the player can actually
   // see the backswing instead of relying on a numeric power meter.
   const pull=state.pool.cuePull;
-  held.object3D.position.set(.18,-.20,-.76+pull*.82);
+  const leanReach=state.player.leaning?0.42:0;
+  const toolReach=state.pool.tool==='bridge'?0.55:0;
+  held.object3D.position.set(.18,-.20,-.96-leanReach-toolReach+pull*.82);
   held.object3D.rotation.set(
     THREE.MathUtils.degToRad(88),
     state.pool.fineYaw*.85,
@@ -1198,10 +1204,14 @@ function playerWorldXZ(){
 function setPlayerWorldXZ(x,z){
   const cam=camera(),r=rig();
   if(!cam||!r)return;
-  const parentWorld=new THREE.Vector3();
-  r.object3D.getWorldPosition(parentWorld);
-  cam.object3D.position.x=x-parentWorld.x;
-  cam.object3D.position.z=z-parentWorld.z;
+
+  const current=new THREE.Vector3();
+  cam.object3D.getWorldPosition(current);
+
+  // Correct the player's WORLD position by translating the rig.
+  // Never rewrite camera-local X/Z: WASD movement lives there.
+  r.object3D.position.x+=x-current.x;
+  r.object3D.position.z+=z-current.z;
 }
 
 function resolveStaticCollisions(){
@@ -1477,7 +1487,12 @@ function updateHeldPoolTool(){
   const bridge=document.getElementById('heldPoolBridge');
   const active=state.pool.active;
   if(cue)cue.setAttribute('visible',active&&state.pool.tool==='cue');
-  if(bridge)bridge.setAttribute('visible',active&&state.pool.tool==='bridge');
+  if(bridge){
+    bridge.setAttribute('visible',active&&state.pool.tool==='bridge');
+    const pull=state.pool.cuePull;
+    const leanReach=state.player.leaning?0.42:0;
+    bridge.object3D.position.set(.18,-.18,-1.08-leanReach+pull*.82);
+  }
 }
 
 function removePoolBridgeFromTable(){
@@ -1608,11 +1623,11 @@ function applyEyePosture(){
 
   const crouchDrop=.62*p.crouchAmount;
   const sitDrop=p.sitting?.74:0;
-  const leanDrop=p.leaning?.16:0;
-  const leanForward=p.leaning?.26:0;
+  const leanDrop=p.leaning?.18:0;
 
+  // Posture is an eye-height offset only. Do not touch local X/Z here,
+  // or posture changes will erase the camera's accumulated WASD movement.
   cam.object3D.position.y=p.baseEyeHeight-crouchDrop-sitDrop-leanDrop;
-  cam.object3D.position.z=-leanForward;
 
   p.crouched=p.crouchAmount>.08;
   document.getElementById('crouchState')?.classList.toggle('hidden',!p.crouched);
@@ -1625,6 +1640,7 @@ function setCrouchAmount(amount){
   if(p.crouchAmount>.1)p.running=false;
   refreshMovementControls();
   applyEyePosture();
+  if(state.pool.active)updatePoolAimGuide();
 }
 
 function standStraight(){
@@ -1641,6 +1657,7 @@ function toggleLean(){
   if(state.player.sitting)return;
   state.player.leaning=!state.player.leaning;
   applyEyePosture();
+  if(state.pool.active)updatePoolAimGuide();
   toast(state.player.leaning?'Leaning forward':'Lean off',800);
 }
 
