@@ -81,6 +81,7 @@ const state={
     fineYaw:0,
     tool:'cue',
     bridgePlaced:false,
+    trajectory:false,
     shotInProgress:false,
     cueNeedsRespawn:false,
     physicsAccumulator:0,
@@ -300,6 +301,10 @@ const POOL={
   innerHalfX:1.62,
   innerHalfZ:.80,
   ballRadius:.055,
+  feltY:1.025,
+  gravity:9.81,
+  verticalRestitution:.42,
+  jumpThreshold:.58,
   pocketRadius:.155,
   stopSpeed:.010,
   rollingDecel:.34,
@@ -390,7 +395,7 @@ function buildPoolTable(){
 
 function resetPoolBalls(){
   const balls=[];
-  balls.push({n:0,x:-1.05,z:0,vx:0,vz:0,pocketed:false,sideSpin:0,spinX:0,spinZ:0});
+  balls.push({n:0,x:-1.05,y:POOL.feltY+POOL.ballRadius,z:0,vx:0,vy:0,vz:0,pocketed:false,sideSpin:0,spinX:0,spinZ:0});
   const startX=.58;
   let n=1;
   const spacing=POOL.ballRadius*2.12;
@@ -398,7 +403,7 @@ function resetPoolBalls(){
     const x=startX+row*(spacing*.90);
     const z0=-(row*spacing)/2;
     for(let j=0;j<=row;j++){
-      balls.push({n:n++,x,z:z0+j*spacing,vx:0,vz:0,pocketed:false,sideSpin:0,spinX:0,spinZ:0});
+      balls.push({n:n++,x,y:POOL.feltY+POOL.ballRadius,z:z0+j*spacing,vx:0,vy:0,vz:0,pocketed:false,sideSpin:0,spinX:0,spinZ:0});
     }
   }
   state.pool.balls=balls;
@@ -418,7 +423,7 @@ function renderPoolBalls(rebuild=false){
     host.innerHTML=state.pool.balls.map(ball=>{
       const stripe=ball.n>=9;
       const color=ball.n===0?'#f7f7ef':poolBallColor(ball.n);
-      return `<a-entity id="pool-ball-${ball.n}" position="${ball.x} 1.08 ${ball.z}">
+      return `<a-entity id="pool-ball-${ball.n}" position="${ball.x} ${ball.y} ${ball.z}">
         <a-sphere radius="${POOL.ballRadius}" color="${color}" roughness=".25" metalness=".05"></a-sphere>
         ${stripe?`<a-torus radius="${POOL.ballRadius*.73}" radius-tubular="${POOL.ballRadius*.17}" rotation="90 0 0" color="#f2f2e9"></a-torus>`:''}
         ${ball.n?`<a-text value="${ball.n}" position="0 ${POOL.ballRadius+.006} 0" rotation="-90 0 0" align="center" color="${ball.n===8?'#fff':'#111'}" width=".18"></a-text>`:''}
@@ -429,7 +434,7 @@ function renderPoolBalls(rebuild=false){
       const el=document.getElementById(`pool-ball-${ball.n}`);
       if(!el)continue;
       el.setAttribute('visible',!ball.pocketed);
-      if(!ball.pocketed)el.object3D.position.set(ball.x,1.08,ball.z);
+      if(!ball.pocketed)el.object3D.position.set(ball.x,ball.y,ball.z);
     }
   }
   updatePoolAimGuide();
@@ -475,7 +480,7 @@ function poolCueBallCenter(){
   if(!cue)return null;
   return {
     cue,
-    center:new THREE.Vector3(POOL.centerX+cue.x,1.08,POOL.centerZ+cue.z)
+    center:new THREE.Vector3(POOL.centerX+cue.x,cue.y,POOL.centerZ+cue.z)
   };
 }
 
@@ -533,7 +538,7 @@ function updateHeldPoolCue(){
   const held=document.getElementById('heldPoolCue');
   if(!held)return;
 
-  const active=state.pool.active&&state.pool.tool==='cue';
+  const active=state.pool.active&&!state.pool.shotInProgress&&state.pool.tool==='cue';
   held.setAttribute('visible',active);
   if(!active)return;
 
@@ -555,6 +560,76 @@ function updateHeldPoolCue(){
     new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),axis)
   );
 }
+function updatePoolPowerMeter(){
+  const fill=document.getElementById('poolPowerFill');
+  const value=document.getElementById('poolPowerValue');
+  if(!fill||!value)return;
+
+  const pullNorm=THREE.MathUtils.clamp(state.pool.maxCuePull/.58,0,1);
+  const strokeNorm=THREE.MathUtils.clamp(state.pool.forwardPeak/1.8,0,1);
+  const pct=Math.round(Math.max(pullNorm*.72,strokeNorm)*100);
+
+  fill.style.width=`${pct}%`;
+  value.textContent=`${pct}%`;
+}
+
+function poolFirstObjectHit(aim,maxDist=3.2){
+  if(!aim)return null;
+  const origin=new THREE.Vector2(aim.cue.x,aim.cue.z);
+  const dir=new THREE.Vector2(aim.shotDir.x,aim.shotDir.z).normalize();
+  let best=null,bestT=maxDist;
+
+  for(const ball of state.pool.balls){
+    if(ball.n===0||ball.pocketed)continue;
+    const rel=new THREE.Vector2(ball.x-origin.x,ball.z-origin.y);
+    const t=rel.dot(dir);
+    if(t<=0||t>=bestT)continue;
+    const closest=origin.clone().addScaledVector(dir,t);
+    const d=closest.distanceTo(new THREE.Vector2(ball.x,ball.z));
+    if(d<=POOL.ballRadius*2.03){
+      best={ball,t,closest};
+      bestT=t;
+    }
+  }
+  return best;
+}
+
+function trajectoryMarkup(aim){
+  if(!state.pool.trajectory||!aim?.hit)return'';
+
+  const hit=poolFirstObjectHit(aim,3.0);
+  const cueStart=new THREE.Vector2(aim.cue.x,aim.cue.z);
+  const cueEnd=hit
+    ?new THREE.Vector2(hit.ball.x,hit.ball.z)
+    :cueStart.clone().add(new THREE.Vector2(aim.shotDir.x,aim.shotDir.z).multiplyScalar(1.6));
+
+  const dx=cueEnd.x-cueStart.x,dz=cueEnd.y-cueStart.y;
+  const len=Math.hypot(dx,dz);
+  const mx=(cueStart.x+cueEnd.x)/2,mz=(cueStart.y+cueEnd.y)/2;
+  const yaw=-THREE.MathUtils.radToDeg(Math.atan2(dz,dx));
+
+  let out=`
+    <a-box position="${mx} ${POOL.feltY+POOL.ballRadius+.018} ${mz}" width="${len}" height=".008" depth=".012"
+      rotation="0 ${yaw} 0" color="#ff4a50"
+      material="opacity:.72;transparent:true;shader:flat;depthTest:false"></a-box>`;
+
+  if(hit){
+    const normal=new THREE.Vector2(hit.ball.x-hit.closest.x,hit.ball.z-hit.closest.y);
+    if(normal.lengthSq()<1e-6)normal.set(aim.shotDir.x,aim.shotDir.z);
+    normal.normalize();
+    const end=new THREE.Vector2(hit.ball.x,hit.ball.z).add(normal.clone().multiplyScalar(.85));
+    const odx=end.x-hit.ball.x,odz=end.y-hit.ball.z;
+    const olen=Math.hypot(odx,odz);
+    const omx=(end.x+hit.ball.x)/2,omz=(end.y+hit.ball.z)/2;
+    const oyaw=-THREE.MathUtils.radToDeg(Math.atan2(odz,odx));
+    out+=`
+      <a-box position="${omx} ${POOL.feltY+POOL.ballRadius+.020} ${omz}" width="${olen}" height=".008" depth=".012"
+        rotation="0 ${oyaw} 0" color="#ffd54a"
+        material="opacity:.64;transparent:true;shader:flat;depthTest:false"></a-box>`;
+  }
+  return out;
+}
+
 function updatePoolAimGuide(){
   const host=document.getElementById('poolAimGuide');
   if(!host)return;
@@ -584,8 +659,8 @@ function updatePoolAimGuide(){
   let marker='';
   if(aim.hit){
     marker=`
-      <a-sphere position="${lx} ${aim.contact.y+.004} ${lz}"
-        radius=".018" color="#ff3038" emissive="#ff3038" emissiveIntensity=".75"></a-sphere>
+      <a-sphere position="${lx} ${aim.contact.y+.012} ${lz}"
+        radius=".024" color="#ff2028" emissive="#ff3038" emissiveIntensity=".85" material="shader:flat;depthTest:false"></a-sphere>
       <a-text value="${sideLabel} / ${spinLabel}" position="${lx} ${aim.contact.y+.11} ${lz}"
         rotation="-90 0 0" align="center" color="#ffb1b4" width=".52"></a-text>`;
   }else if(aim.nearMiss){
@@ -600,10 +675,12 @@ function updatePoolAimGuide(){
         rotation="-90 0 0" align="center" color="#ff8d8d" width=".80"></a-text>`;
   }
 
-  host.innerHTML=marker+`
+  host.innerHTML=marker+trajectoryMarkup(aim)+`
     <a-text value="${state.pool.gripping?'STROKE':'HOLD LMB'} · PULL ${pullPct}%"
       position="${aim.cue.x} 1.40 ${aim.cue.z}"
       rotation="-90 0 0" align="center" color="#d9f8e5" width=".72"></a-text>`;
+
+  updatePoolPowerMeter();
 }
 function enterPoolMode(){
   if(state.engaged||state.player.inventoryOpen)return;
@@ -616,6 +693,7 @@ function enterPoolMode(){
   state.pool.gripping=false;
   state.pool.fineYaw=0;
   state.pool.lastMouseStamp=performance.now();
+  document.getElementById('poolHud')?.classList.remove('hidden');
   applyPoolHotbar(true);
   updateHeldPoolTool();
 
@@ -646,6 +724,7 @@ function exitPoolMode(){
   camera()?.setAttribute('look-controls','enabled',true);
   document.getElementById('heldPoolCue')?.setAttribute('visible',false);
   document.getElementById('heldPoolBridge')?.setAttribute('visible',false);
+  document.getElementById('poolHud')?.classList.add('hidden');
   applyPoolHotbar(false);
   document.getElementById('hudMode').textContent='WASD move · Enter interact · R run/walk · Shift+wheel crouch · L lean · X sit · Space jump';
   updatePoolAimGuide();
@@ -689,10 +768,20 @@ function shootPool(strokeSpeed=null){
   cue.spinX=dx*top*speed*.48;
   cue.spinZ=dz*top*speed*.48;
 
+  // Hard low hits can pop the cue ball into the air.
+  // Aim.top is negative when striking below center.
+  const lowHit=Math.max(0,-top);
+  if(lowHit>POOL.jumpThreshold&&speed>3.1){
+    const jumpStrength=(lowHit-POOL.jumpThreshold)/(1-POOL.jumpThreshold);
+    cue.vy=Math.min(3.7,.9+jumpStrength*2.4+(speed-3.1)*.18);
+  }
+
   state.pool.shotInProgress=true;
   state.pool.gripping=false;
   state.pool.fineYaw=0;
   camera()?.setAttribute('look-controls','enabled',true);
+  const canvas=document.querySelector('#xrScene canvas');
+  if(document.pointerLockElement!==canvas)canvas?.requestPointerLock?.();
 
   if(state.pool.tool==='bridge'){
     const bridge=document.getElementById('poolBridgeOnTable');
@@ -708,8 +797,13 @@ function shootPool(strokeSpeed=null){
   updatePoolAimGuide();
 }
 function pocketPoolBall(ball){
+  if(ball.pocketed)return;
   ball.pocketed=true;
-  ball.vx=ball.vz=0;
+  // Let the ball visibly fall through the pocket under gravity.
+  ball.vx*=.45;
+  ball.vz*=.45;
+  ball.vy=Math.min(ball.vy||0,-.35);
+
   if(ball.n===0){
     state.pool.cueNeedsRespawn=true;
     toast('Scratch.',1000);
@@ -723,6 +817,8 @@ function respawnCueBall(){
   if(!cue)return;
   cue.pocketed=false;
   cue.vx=cue.vz=0;
+  cue.vy=0;
+  cue.y=POOL.feltY+POOL.ballRadius;
   cue.sideSpin=0;cue.spinX=0;cue.spinZ=0;
 
   // Start near the head spot and move slightly if another ball occupies it.
@@ -747,16 +843,40 @@ function poolPocketOpeningForZ(z){
 }
 
 function stepPoolPhysics(dt){
-  const live=state.pool.balls.filter(b=>!b.pocketed);
   const r=POOL.ballRadius;
   const rx=POOL.innerHalfX-r;
   const rz=POOL.innerHalfZ-r;
+  const feltBallY=POOL.feltY+r;
 
-  // Integrate + rolling resistance + pocket/cushion handling.
-  for(const ball of live){
-    // Cue-ball spin gradually transfers into travel. Positive top-spin carries
-    // forward; backspin can pull the cue ball back after contact.
-    if(ball.n===0){
+  // First integrate all balls, including pocketed balls so they visibly fall.
+  for(const ball of state.pool.balls){
+    // Gravity for everything in pool space.
+    ball.vy=(ball.vy||0)-POOL.gravity*dt;
+    ball.y=(ball.y??feltBallY)+ball.vy*dt;
+
+    if(ball.pocketed){
+      ball.x+=ball.vx*dt;
+      ball.z+=ball.vz*dt;
+      ball.vx*=Math.exp(-2.6*dt);
+      ball.vz*=Math.exp(-2.6*dt);
+      // Once far below table, stop spending work on it.
+      if(ball.y<POOL.feltY-1.25){
+        ball.vx=ball.vz=ball.vy=0;
+      }
+      continue;
+    }
+
+    // Felt supports balls unless airborne.
+    if(ball.y<=feltBallY){
+      ball.y=feltBallY;
+      if(ball.vy<0){
+        if(Math.abs(ball.vy)>.65)ball.vy=-ball.vy*POOL.verticalRestitution;
+        else ball.vy=0;
+      }
+    }
+
+    // Cue-ball spin transfer while on/near felt.
+    if(ball.n===0&&ball.y<=feltBallY+.01){
       ball.vx+=(ball.spinX||0)*dt*.95;
       ball.vz+=(ball.spinZ||0)*dt*.95;
       const spinDecay=Math.exp(-2.25*dt);
@@ -769,7 +889,7 @@ function stepPoolPhysics(dt){
     ball.z+=ball.vz*dt;
 
     let speed=Math.hypot(ball.vx,ball.vz);
-    if(speed>0){
+    if(ball.y<=feltBallY+.01&&speed>0){
       const next=Math.max(0,speed-POOL.rollingDecel*dt);
       if(next<=POOL.stopSpeed){
         ball.vx=0;ball.vz=0;
@@ -779,78 +899,96 @@ function stepPoolPhysics(dt){
       }
     }
 
-    // A real table has gaps in its cushions at the six pockets. Capture first.
+    // Pocket capture uses a throat radius and only captures balls near table height.
+    // Airborne jump shots can pass over a pocket mouth.
     let sunk=false;
-    for(const [px,pz] of POOL.pockets){
-      if(Math.hypot(ball.x-px,ball.z-pz)<=POOL.pocketRadius){
-        pocketPoolBall(ball);
-        sunk=true;
-        break;
+    if(ball.y<=feltBallY+.10){
+      for(const [px,pz] of POOL.pockets){
+        const d=Math.hypot(ball.x-px,ball.z-pz);
+        if(d<=POOL.pocketRadius){
+          pocketPoolBall(ball);
+          sunk=true;
+          break;
+        }
       }
     }
     if(sunk)continue;
 
-    // Long cushions (z). Do not bounce across the side/corner pocket mouths.
-    if(ball.z<-rz && !poolPocketOpeningForX(ball.x)){
-      ball.z=-rz;
-      ball.vz=Math.abs(ball.vz)*POOL.cushionRestitution;
-      if(ball.n===0)ball.vx+=(ball.sideSpin||0)*.22;
-    }else if(ball.z>rz && !poolPocketOpeningForX(ball.x)){
-      ball.z=rz;
-      ball.vz=-Math.abs(ball.vz)*POOL.cushionRestitution;
-      if(ball.n===0)ball.vx-=(ball.sideSpin||0)*.22;
+    // Rails only collide with balls that are not high enough to clear them.
+    const railTop=POOL.feltY+.16;
+    if(ball.y-r<railTop){
+      if(ball.z<-rz&&!poolPocketOpeningForX(ball.x)){
+        ball.z=-rz;
+        ball.vz=Math.abs(ball.vz)*POOL.cushionRestitution;
+        if(ball.n===0)ball.vx+=(ball.sideSpin||0)*.22;
+      }else if(ball.z>rz&&!poolPocketOpeningForX(ball.x)){
+        ball.z=rz;
+        ball.vz=-Math.abs(ball.vz)*POOL.cushionRestitution;
+        if(ball.n===0)ball.vx-=(ball.sideSpin||0)*.22;
+      }
+
+      if(ball.x<-rx&&!poolPocketOpeningForZ(ball.z)){
+        ball.x=-rx;
+        ball.vx=Math.abs(ball.vx)*POOL.cushionRestitution;
+        if(ball.n===0)ball.vz-=(ball.sideSpin||0)*.22;
+      }else if(ball.x>rx&&!poolPocketOpeningForZ(ball.z)){
+        ball.x=rx;
+        ball.vx=-Math.abs(ball.vx)*POOL.cushionRestitution;
+        if(ball.n===0)ball.vz+=(ball.sideSpin||0)*.22;
+      }
     }
 
-    // End cushions (x). Corner pocket mouths are open.
-    if(ball.x<-rx && !poolPocketOpeningForZ(ball.z)){
-      ball.x=-rx;
-      ball.vx=Math.abs(ball.vx)*POOL.cushionRestitution;
-      if(ball.n===0)ball.vz-=(ball.sideSpin||0)*.22;
-    }else if(ball.x>rx && !poolPocketOpeningForZ(ball.z)){
-      ball.x=rx;
-      ball.vx=-Math.abs(ball.vx)*POOL.cushionRestitution;
-      if(ball.n===0)ball.vz+=(ball.sideSpin||0)*.22;
+    // Recovery guard: never let a live ball become trapped beyond a rail/pocket.
+    const outerX=POOL.innerHalfX+.22;
+    const outerZ=POOL.innerHalfZ+.20;
+    if(Math.abs(ball.x)>outerX||Math.abs(ball.z)>outerZ){
+      // If it's near a pocket throat, sink it rather than pinning it outside the rail.
+      let nearest=Infinity;
+      for(const [px,pz] of POOL.pockets)nearest=Math.min(nearest,Math.hypot(ball.x-px,ball.z-pz));
+      if(nearest<POOL.pocketRadius*1.65){
+        pocketPoolBall(ball);
+        continue;
+      }
+      ball.x=THREE.MathUtils.clamp(ball.x,-rx,rx);
+      ball.z=THREE.MathUtils.clamp(ball.z,-rz,rz);
+      ball.vx*=-.45;
+      ball.vz*=-.45;
     }
-
-    // Safety boundary outside the pocket throats in case a very fast ball
-    // crosses a mouth without falling far enough into the capture radius.
-    const outerX=POOL.innerHalfX+.19;
-    const outerZ=POOL.innerHalfZ+.17;
-    if(ball.x<-outerX){ball.x=-outerX;ball.vx=Math.abs(ball.vx)*.55;}
-    if(ball.x>outerX){ball.x=outerX;ball.vx=-Math.abs(ball.vx)*.55;}
-    if(ball.z<-outerZ){ball.z=-outerZ;ball.vz=Math.abs(ball.vz)*.55;}
-    if(ball.z>outerZ){ball.z=outerZ;ball.vz=-Math.abs(ball.vz)*.55;}
   }
 
-  // Equal-mass sphere collisions in the table plane.
+  // 3D ball-ball collisions. Airborne balls only collide if their spheres overlap vertically.
   const balls=state.pool.balls.filter(b=>!b.pocketed);
   const minDist=r*2;
+
   for(let i=0;i<balls.length;i++){
     for(let j=i+1;j<balls.length;j++){
       const a=balls[i],b=balls[j];
-      let dx=b.x-a.x,dz=b.z-a.z;
-      let dist=Math.hypot(dx,dz);
+      const dx=b.x-a.x,dy=b.y-a.y,dz=b.z-a.z;
+      let dist=Math.hypot(dx,dy,dz);
       if(dist>=minDist)continue;
 
+      let nx,nz,ny;
       if(dist<1e-6){
-        dx=minDist;dz=0;dist=minDist;
+        nx=1;ny=0;nz=0;dist=minDist;
+      }else{
+        nx=dx/dist;ny=dy/dist;nz=dz/dist;
       }
-      const nx=dx/dist,nz=dz/dist;
+
       const penetration=minDist-dist;
       const correction=penetration*.505;
-      a.x-=nx*correction;a.z-=nz*correction;
-      b.x+=nx*correction;b.z+=nz*correction;
+      a.x-=nx*correction;a.y-=ny*correction;a.z-=nz*correction;
+      b.x+=nx*correction;b.y+=ny*correction;b.z+=nz*correction;
 
-      const relNormal=(b.vx-a.vx)*nx+(b.vz-a.vz)*nz;
+      const rvx=b.vx-a.vx,rvy=(b.vy||0)-(a.vy||0),rvz=b.vz-a.vz;
+      const relNormal=rvx*nx+rvy*ny+rvz*nz;
       if(relNormal<0){
         const impulse=-(1+POOL.ballRestitution)*relNormal/2;
-        a.vx-=impulse*nx;a.vz-=impulse*nz;
-        b.vx+=impulse*nx;b.vz+=impulse*nz;
+        a.vx-=impulse*nx;a.vy=(a.vy||0)-impulse*ny;a.vz-=impulse*nz;
+        b.vx+=impulse*nx;b.vy=(b.vy||0)+impulse*ny;b.vz+=impulse*nz;
       }
     }
   }
 }
-
 function updatePoolPhysics(delta){
   if(!state.pool.balls.length)return;
   state.pool.physicsAccumulator+=Math.min(POOL.maxFrameTime,Math.max(0,(delta||0)/1000));
@@ -863,12 +1001,20 @@ function updatePoolPhysics(delta){
   }
 
   const anyMoving=state.pool.balls.some(
-    b=>!b.pocketed&&Math.hypot(b.vx,b.vz)>POOL.stopSpeed
+    b=>!b.pocketed&&(
+      Math.hypot(b.vx,b.vz)>POOL.stopSpeed||
+      Math.abs(b.vy||0)>.05||
+      Math.abs((b.y??(POOL.feltY+POOL.ballRadius))-(POOL.feltY+POOL.ballRadius))>.01
+    )
   );
 
   if(state.pool.shotInProgress&&!anyMoving){
     state.pool.shotInProgress=false;
     if(state.pool.cueNeedsRespawn)respawnCueBall();
+    camera()?.setAttribute('look-controls','enabled',true);
+    const canvas=document.querySelector('#xrScene canvas');
+    if(state.pool.active&&document.pointerLockElement!==canvas)canvas?.requestPointerLock?.();
+    updateHeldPoolTool();
     updatePoolAimGuide();
   }
 
@@ -1481,9 +1627,9 @@ function updateHeldPoolTool(){
   const cue=document.getElementById('heldPoolCue');
   const bridge=document.getElementById('heldPoolBridge');
   const active=state.pool.active;
-  if(cue)cue.setAttribute('visible',active&&state.pool.tool==='cue');
+  if(cue)cue.setAttribute('visible',active&&!state.pool.shotInProgress&&state.pool.tool==='cue');
   if(bridge){
-    bridge.setAttribute('visible',active&&state.pool.tool==='bridge');
+    bridge.setAttribute('visible',active&&!state.pool.shotInProgress&&state.pool.tool==='bridge');
     const pull=state.pool.cuePull;
     bridge.object3D.position.set(.18,-.16,-1.30+pull*.78);
   }
@@ -1839,6 +1985,7 @@ function beginPoolGrip(e){
   state.pool.forwardPeak=0;
   state.pool.fineYaw=0;
   state.pool.lastMouseStamp=performance.now();
+  updatePoolPowerMeter();
 
   // Freeze view only during the actual cue stroke. Walking stays available.
   camera()?.setAttribute('look-controls','enabled',false);
@@ -1854,6 +2001,9 @@ function endPoolGrip(e){
     state.pool.forwardPeak=0;
     state.pool.fineYaw=0;
     camera()?.setAttribute('look-controls','enabled',true);
+    const canvas=document.querySelector('#xrScene canvas');
+    if(state.pool.active&&document.pointerLockElement!==canvas)canvas?.requestPointerLock?.();
+    updatePoolPowerMeter();
     updatePoolAimGuide();
   }
 }
@@ -1902,6 +2052,7 @@ function handlePoolMouseMove(e){
     }
   }
 
+  updatePoolPowerMeter();
   updatePoolAimGuide();
 }
 
@@ -2092,6 +2243,11 @@ AFRAME.registerComponent('xr-thumbstick-locomotion',{
     const speed=state.player.crouched?1.25:(state.player.running&&state.player.stamina>0?4.6:this.speed);
     this.el.object3D.position.addScaledVector(move,speed*dt);
   }
+});
+
+document.getElementById('poolTrajectoryToggle')?.addEventListener('change',e=>{
+  state.pool.trajectory=Boolean(e.target.checked);
+  if(state.pool.active)updatePoolAimGuide();
 });
 
 document.getElementById('arcade2dBtn')?.addEventListener('click',()=>location.href='../index.html');

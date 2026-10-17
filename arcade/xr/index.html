@@ -55,6 +55,18 @@
   </div>
 </section>
 
+<section id="poolHud" class="pool-hud hidden">
+  <div class="pool-power-row">
+    <span>SHOT POWER</span>
+    <div class="pool-power-track"><i id="poolPowerFill"></i></div>
+    <b id="poolPowerValue">0%</b>
+  </div>
+  <label class="pool-trajectory-toggle">
+    <input id="poolTrajectoryToggle" type="checkbox">
+    <span>Trajectory Lines</span>
+  </label>
+</section>
+
 <div id="playerVitals" class="player-vitals">
   <div class="vital-row">
     <span>HP</span>
@@ -151,8 +163,7 @@
         <a-entity id="heldPoolCueTip" position="0 -.92 0"></a-entity>
           <a-cylinder position="0 .78 0" radius=".013" height=".055" color="#f0e7d3"></a-cylinder>
           <a-cylinder position="0 -.79 0" radius=".018" height=".10" color="#352218"></a-cylinder>
-          <a-sphere position=".06 -.37 .02" radius=".065" color="#b88363" roughness=".75"></a-sphere>
-        </a-entity>
+          </a-entity>
         <a-entity id="heldPoolBridge" visible="false" position=".18 -.18 -.92" rotation="88 0 0">
           <a-cylinder radius=".010" height="1.92" color="#c99b5d" roughness=".42"></a-cylinder>
         <a-entity id="heldPoolBridgeTip" position="0 -.99 0"></a-entity>

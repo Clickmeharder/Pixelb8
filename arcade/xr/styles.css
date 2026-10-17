@@ -48,3 +48,9 @@ button{font:inherit;cursor:pointer}
   .player-vitals{bottom:86px}
   .inventory-grid{grid-template-columns:repeat(4,1fr)}
 }
+
+.pool-hud{position:fixed;z-index:41;left:50%;bottom:166px;transform:translateX(-50%);width:min(360px,calc(100vw - 28px));display:grid;gap:7px;padding:8px 10px;border:1px solid rgba(58,72,84,.72);border-radius:8px;background:rgba(7,11,16,.90);box-shadow:0 10px 28px rgba(0,0,0,.36);backdrop-filter:blur(7px)}
+.pool-power-row{display:grid;grid-template-columns:auto minmax(0,1fr) 34px;align-items:center;gap:8px}
+.pool-power-row>span{font-size:.5rem;font-weight:900;letter-spacing:.09em;color:#97a3ae}.pool-power-row>b{text-align:right;font:800 .56rem Consolas,monospace;color:#dce6ee}
+.pool-power-track{height:8px;overflow:hidden;border-radius:999px;background:#151d24;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}.pool-power-track i{display:block;width:0%;height:100%;background:linear-gradient(90deg,#61d89a,#f3cd63,#e65b5b);transition:width .06s linear}
+.pool-trajectory-toggle{display:flex;align-items:center;justify-content:center;gap:7px;color:#aab5bf;font-size:.58rem;font-weight:800;user-select:none}.pool-trajectory-toggle input{width:15px;height:15px;accent-color:#4fc3f7}
