@@ -56,15 +56,32 @@
 </section>
 
 <section id="poolHud" class="pool-hud hidden">
+  <div class="pool-scoreline">
+    <span id="poolTurnLabel">YOUR TURN</span>
+    <span id="poolOpenLabel">OPEN TABLE</span>
+  </div>
+  <div class="pool-groups">
+    <span>YOU <b id="poolYourGroup">OPEN</b></span>
+    <span>OPPONENT <b id="poolOppGroup">OPEN</b></span>
+  </div>
+  <div id="poolCallRow" class="pool-call-row">
+    <span>CALL GROUP</span>
+    <button id="poolCallSolids" type="button">SOLIDS</button>
+    <button id="poolCallStripes" type="button">STRIPES</button>
+  </div>
+  <div id="poolRuleNotice" class="pool-rule-notice">Break shot · table is open</div>
   <div class="pool-power-row">
     <span>SHOT POWER</span>
     <div class="pool-power-track"><i id="poolPowerFill"></i></div>
     <b id="poolPowerValue">0%</b>
   </div>
-  <label class="pool-trajectory-toggle">
-    <input id="poolTrajectoryToggle" type="checkbox">
-    <span>Trajectory Lines</span>
-  </label>
+  <div class="pool-hud-actions">
+    <label class="pool-trajectory-toggle">
+      <input id="poolTrajectoryToggle" type="checkbox">
+      <span>Trajectory Lines</span>
+    </label>
+    <button id="poolRerackBtn" type="button">RE-RACK</button>
+  </div>
 </section>
 
 <div id="playerVitals" class="player-vitals">

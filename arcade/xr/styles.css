@@ -54,3 +54,15 @@ button{font:inherit;cursor:pointer}
 .pool-power-row>span{font-size:.5rem;font-weight:900;letter-spacing:.09em;color:#97a3ae}.pool-power-row>b{text-align:right;font:800 .56rem Consolas,monospace;color:#dce6ee}
 .pool-power-track{height:8px;overflow:hidden;border-radius:999px;background:#151d24;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}.pool-power-track i{display:block;width:0%;height:100%;background:linear-gradient(90deg,#61d89a,#f3cd63,#e65b5b);transition:width .06s linear}
 .pool-trajectory-toggle{display:flex;align-items:center;justify-content:center;gap:7px;color:#aab5bf;font-size:.58rem;font-weight:800;user-select:none}.pool-trajectory-toggle input{width:15px;height:15px;accent-color:#4fc3f7}
+
+.pool-scoreline,.pool-groups,.pool-call-row,.pool-hud-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pool-scoreline{font-size:.58rem;font-weight:950;letter-spacing:.08em;color:#e4edf4}
+#poolOpenLabel{color:#ffd54a}
+.pool-groups{font-size:.54rem;color:#8997a3}.pool-groups b{margin-left:4px;color:#dce7ef;letter-spacing:.04em}
+.pool-call-row{padding:6px 0;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.pool-call-row>span{font-size:.49rem;font-weight:900;letter-spacing:.08em;color:#8f9ba5}
+.pool-call-row button,.pool-hud-actions button{border:1px solid #344550;border-radius:5px;background:#101921;color:#becbd5;font:800 .53rem Consolas,monospace;padding:5px 8px;cursor:pointer}
+.pool-call-row button.active{border-color:#ffd54a;color:#ffd54a;background:rgba(255,213,74,.10)}
+.pool-call-row button:disabled{opacity:.4;cursor:default}
+.pool-rule-notice{min-height:15px;text-align:center;color:#ffcb79;font:700 .52rem Consolas,monospace}
+.pool-hud-actions{justify-content:center}.pool-hud-actions button{margin-left:auto;color:#ffcf69;border-color:#665325}

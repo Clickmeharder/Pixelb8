@@ -86,6 +86,20 @@ const state={
     cueNeedsRespawn:false,
     physicsAccumulator:0,
     lastAim:null,
+    rules:{
+      currentPlayer:1,
+      groups:{1:null,2:null},
+      tableOpen:true,
+      breakShot:true,
+      calledGroup:null,
+      shotPocketed:[],
+      foul:false,
+      foulReason:'',
+      ballInHand:false,
+      rackOver:false,
+      winner:null,
+      eightOffOnBreak:false
+    },
     turn:1
   }
 };
@@ -301,7 +315,7 @@ const POOL={
   innerHalfX:1.62,
   innerHalfZ:.80,
   ballRadius:.055,
-  feltY:1.025,
+  feltY:.905,
   gravity:9.81,
   verticalRestitution:.42,
   jumpThreshold:.58,
@@ -337,7 +351,7 @@ function buildPoolTable(){
     data-interact="pool" data-id="pool" position="${POOL.centerX} 0 ${POOL.centerZ}">
     <!-- legs / body -->
     <a-box position="0 .58 0" width="3.86" height=".42" depth="2.18" color="#3b2819"></a-box>
-    <a-box position="0 .84 0" width="3.62" height=".12" depth="1.94" color="#145b31"></a-box>
+    <a-box position="0 .86 0" width="3.62" height=".09" depth="1.94" color="#145b31"></a-box>
     <a-cylinder position="-1.55 .30 -.76" radius=".10" height=".60" color="#302014"></a-cylinder>
     <a-cylinder position="1.55 .30 -.76" radius=".10" height=".60" color="#302014"></a-cylinder>
     <a-cylinder position="-1.55 .30 .76" radius=".10" height=".60" color="#302014"></a-cylinder>
@@ -350,7 +364,7 @@ function buildPoolTable(){
     <a-box position="1.91 .96 0" width=".18" height=".19" depth="1.75" color="#4b301c"></a-box>
 
     <!-- pockets: corners + sides -->
-    ${POOL.pockets.map(([x,z])=>`<a-cylinder position="${x} 1.005 ${z}" rotation="0 0 0" radius=".125" height=".025" color="#020303"></a-cylinder>`).join('')}
+    ${POOL.pockets.map(([x,z])=>`<a-cylinder position="${x} .908 ${z}" rotation="0 0 0" radius=".125" height=".018" color="#020303"></a-cylinder>`).join('')}
 
     <!-- wooden triangle rack stored beneath the foot rail -->
     <a-entity position="0 .60 .99">
@@ -393,19 +407,285 @@ function buildPoolTable(){
   resetPoolBalls();
 }
 
+function poolBallGroup(n){
+  if(n>=1&&n<=7)return'solids';
+  if(n>=9&&n<=15)return'stripes';
+  return null;
+}
+
+function oppositePoolGroup(group){
+  return group==='solids'?'stripes':group==='stripes'?'solids':null;
+}
+
+function resetPoolRules(){
+  const r=state.pool.rules;
+  r.currentPlayer=1;
+  r.groups={1:null,2:null};
+  r.tableOpen=true;
+  r.breakShot=true;
+  r.calledGroup=null;
+  r.shotPocketed=[];
+  r.foul=false;
+  r.foulReason='';
+  r.ballInHand=false;
+  r.rackOver=false;
+  r.winner=null;
+  r.eightOffOnBreak=false;
+  state.pool.turn=1;
+  updatePoolRulesHud();
+}
+
+function callPoolGroup(group){
+  const r=state.pool.rules;
+  if(!state.pool.active||r.rackOver||!r.tableOpen||r.breakShot)return;
+  r.calledGroup=group;
+  updatePoolRulesHud();
+  toast(`Called ${group}. Pocket one legally to claim the group.`,1200);
+}
+
+function setPoolFoul(reason){
+  const r=state.pool.rules;
+  r.foul=true;
+  r.foulReason=reason||'Foul';
+}
+
+function poolGroupRemaining(group){
+  return state.pool.balls.some(b=>!b.pocketed&&poolBallGroup(b.n)===group);
+}
+
+function updatePoolRulesHud(){
+  const r=state.pool.rules;
+  const turn=document.getElementById('poolTurnLabel');
+  const open=document.getElementById('poolOpenLabel');
+  const you=document.getElementById('poolYourGroup');
+  const opp=document.getElementById('poolOppGroup');
+  const notice=document.getElementById('poolRuleNotice');
+  const callRow=document.getElementById('poolCallRow');
+  const solids=document.getElementById('poolCallSolids');
+  const stripes=document.getElementById('poolCallStripes');
+
+  if(turn)turn.textContent=r.rackOver
+    ?(r.winner===1?'YOU WIN':'OPPONENT WINS')
+    :(r.currentPlayer===1?'YOUR TURN':'OPPONENT TURN');
+
+  if(open)open.textContent=r.rackOver?'RACK OVER':(r.tableOpen?'OPEN TABLE':'GROUPS SET');
+  if(you)you.textContent=(r.groups[1]||'open').toUpperCase();
+  if(opp)opp.textContent=(r.groups[2]||'open').toUpperCase();
+
+  const canCall=state.pool.active&&r.tableOpen&&!r.breakShot&&!r.rackOver;
+  callRow?.classList.toggle('hidden',!canCall);
+  if(solids){
+    solids.disabled=!canCall;
+    solids.classList.toggle('active',r.calledGroup==='solids');
+  }
+  if(stripes){
+    stripes.disabled=!canCall;
+    stripes.classList.toggle('active',r.calledGroup==='stripes');
+  }
+
+  if(notice){
+    if(r.rackOver){
+      notice.textContent=r.winner===1?'Rack won. Re-rack to play again.':'Rack lost. Re-rack to play again.';
+    }else if(r.ballInHand){
+      notice.textContent='BALL IN HAND · click the felt to place the cue ball';
+    }else if(r.foul){
+      notice.textContent=`FOUL · ${r.foulReason}`;
+    }else if(r.breakShot){
+      notice.textContent='BREAK SHOT · groups stay open after the break';
+    }else if(r.tableOpen){
+      notice.textContent=r.calledGroup
+        ?`Called ${r.calledGroup.toUpperCase()}`
+        :'OPEN TABLE · call SOLIDS or STRIPES before shooting';
+    }else{
+      const g=r.groups[r.currentPlayer];
+      notice.textContent=`${g?.toUpperCase()||'OPEN'} · ${poolGroupRemaining(g)?'clear your group':'on the 8-ball'}`;
+    }
+  }
+}
+
+function poolRerack(){
+  resetPoolBalls();
+  resetPoolRules();
+  toast('8-ball re-racked.',900);
+}
+
+function completePoolShot(){
+  const r=state.pool.rules;
+  if(r.rackOver)return;
+
+  const shooter=r.currentPlayer;
+  const other=shooter===1?2:1;
+  const pocketed=[...r.shotPocketed];
+  const objectBalls=pocketed.filter(n=>n!==0);
+  const eightPocketed=objectBalls.includes(8);
+  const normalBalls=objectBalls.filter(n=>n!==8);
+  const shooterGroup=r.groups[shooter];
+
+  if(eightPocketed){
+    if(r.breakShot){
+      // WPA: 8 on break is spotted/re-break option. For this arcade table we
+      // spot it automatically to keep play flowing.
+      const eight=state.pool.balls.find(b=>b.n===8);
+      if(eight){
+        eight.pocketed=false;
+        eight.x=.72;eight.z=0;
+        eight.y=POOL.feltY+POOL.ballRadius;
+        eight.vx=eight.vy=eight.vz=0;
+      }
+      toast('8-ball on break: spotted.',1200);
+    }else{
+      const cleared=shooterGroup&&!poolGroupRemaining(shooterGroup);
+      if(r.foul||!cleared){
+        r.rackOver=true;
+        r.winner=other;
+      }else{
+        r.rackOver=true;
+        r.winner=shooter;
+      }
+    }
+  }
+
+  // Open table remains open after break, even if balls dropped.
+  if(!r.rackOver&&!r.breakShot&&r.tableOpen){
+    if(r.calledGroup){
+      const madeCalled=normalBalls.some(n=>poolBallGroup(n)===r.calledGroup);
+      if(madeCalled&&!r.foul){
+        r.groups[shooter]=r.calledGroup;
+        r.groups[other]=oppositePoolGroup(r.calledGroup);
+        r.tableOpen=false;
+        toast(`${shooter===1?'You are':'Opponent is'} ${r.calledGroup}.`,1200);
+      }
+    }
+  }
+
+  let continues=false;
+  if(!r.rackOver&&!r.foul){
+    if(r.breakShot){
+      continues=normalBalls.length>0;
+    }else if(r.tableOpen){
+      continues=Boolean(r.calledGroup&&normalBalls.some(n=>poolBallGroup(n)===r.calledGroup));
+    }else{
+      continues=normalBalls.some(n=>poolBallGroup(n)===r.groups[shooter]);
+    }
+  }
+
+  if(!r.rackOver){
+    if(r.foul){
+      r.currentPlayer=other;
+      r.ballInHand=true;
+      r.cueNeedsRespawn=true;
+    }else if(!continues){
+      r.currentPlayer=other;
+    }
+  }
+
+  r.breakShot=false;
+  r.calledGroup=null;
+  r.shotPocketed=[];
+  r.foul=false;
+  r.foulReason='';
+  state.pool.turn=r.currentPlayer;
+  updatePoolRulesHud();
+}
+
+function drivePoolBallOffTable(ball){
+  if(ball.pocketed)return;
+  const r=state.pool.rules;
+
+  if(ball.n===0){
+    pocketPoolBall(ball);
+    setPoolFoul('Cue ball off the table');
+    return;
+  }
+
+  if(ball.n===8){
+    if(r.breakShot){
+      ball.pocketed=true;
+      ball.vx=ball.vy=ball.vz=0;
+      r.eightOffOnBreak=true;
+      setPoolFoul('8-ball driven off on break');
+    }else{
+      ball.pocketed=true;
+      ball.vx=ball.vy=ball.vz=0;
+      r.rackOver=true;
+      r.winner=r.currentPlayer===1?2:1;
+      toast('8-ball off the table — rack lost.',1600);
+    }
+    return;
+  }
+
+  // Standard object balls stay off the table and are treated as out of play.
+  ball.pocketed=true;
+  ball.vx=ball.vy=ball.vz=0;
+  r.shotPocketed.push(ball.n);
+  setPoolFoul(`Ball ${ball.n} driven off the table`);
+  toast(`Ball ${ball.n} off table — foul.`,1200);
+}
+
+function placeCueBallFromView(){
+  const r=state.pool.rules;
+  if(!state.pool.active||!r.ballInHand||state.pool.shotInProgress)return false;
+
+  const ray=poolViewRay();
+  if(!ray||Math.abs(ray.dir.y)<1e-5)return false;
+  const targetY=POOL.feltY+POOL.ballRadius;
+  const t=(targetY-ray.origin.y)/ray.dir.y;
+  if(t<=0)return false;
+
+  const hit=ray.origin.clone().addScaledVector(ray.dir,t);
+  const x=hit.x-POOL.centerX,z=hit.z-POOL.centerZ;
+  const margin=POOL.ballRadius+.04;
+  if(Math.abs(x)>POOL.innerHalfX-margin||Math.abs(z)>POOL.innerHalfZ-margin){
+    toast('Place the cue ball on the felt.',900);
+    return false;
+  }
+
+  const blocked=state.pool.balls.some(
+    b=>b.n!==0&&!b.pocketed&&Math.hypot(b.x-x,b.z-z)<POOL.ballRadius*2.15
+  );
+  if(blocked){
+    toast('That spot is occupied.',800);
+    return false;
+  }
+
+  const cue=state.pool.balls.find(b=>b.n===0);
+  if(!cue)return false;
+  cue.pocketed=false;
+  cue.x=x;cue.z=z;cue.y=targetY;
+  cue.vx=cue.vy=cue.vz=0;
+  cue.sideSpin=cue.spinX=cue.spinZ=0;
+  r.ballInHand=false;
+  state.pool.cueNeedsRespawn=false;
+  renderPoolBalls(false);
+  updatePoolRulesHud();
+  toast('Cue ball placed.',700);
+  return true;
+}
+
 function resetPoolBalls(){
   const balls=[];
   balls.push({n:0,x:-1.05,y:POOL.feltY+POOL.ballRadius,z:0,vx:0,vy:0,vz:0,pocketed:false,sideSpin:0,spinX:0,spinZ:0});
+
+  // WPA-style 8-ball triangle: apex at foot spot, 8 in center,
+  // opposite groups on the two rear corners.
+  const rack=[
+    [1],
+    [10,2],
+    [3,8,11],
+    [12,4,13,5],
+    [6,14,7,15,9]
+  ];
   const startX=.58;
-  let n=1;
   const spacing=POOL.ballRadius*2.12;
-  for(let row=0;row<5;row++){
+
+  for(let row=0;row<rack.length;row++){
     const x=startX+row*(spacing*.90);
     const z0=-(row*spacing)/2;
-    for(let j=0;j<=row;j++){
-      balls.push({n:n++,x,y:POOL.feltY+POOL.ballRadius,z:z0+j*spacing,vx:0,vy:0,vz:0,pocketed:false,sideSpin:0,spinX:0,spinZ:0});
-    }
+    rack[row].forEach((n,j)=>{
+      balls.push({n,x,y:POOL.feltY+POOL.ballRadius,z:z0+j*spacing,vx:0,vy:0,vz:0,pocketed:false,sideSpin:0,spinX:0,spinZ:0});
+    });
   }
+
   state.pool.balls=balls;
   state.pool.shotInProgress=false;
   state.pool.cueNeedsRespawn=false;
@@ -415,7 +695,6 @@ function resetPoolBalls(){
   state.pool.physicsAccumulator=0;
   renderPoolBalls(true);
 }
-
 function renderPoolBalls(rebuild=false){
   const host=document.getElementById('poolBalls');
   if(!host)return;
@@ -594,42 +873,81 @@ function poolFirstObjectHit(aim,maxDist=3.2){
   return best;
 }
 
+function poolLineMarkup(x1,z1,x2,z2,y,color,opacity=.78){
+  const dx=x2-x1,dz=z2-z1;
+  const len=Math.hypot(dx,dz);
+  if(len<.01)return'';
+  const mx=(x1+x2)/2,mz=(z1+z2)/2;
+  const yaw=-THREE.MathUtils.radToDeg(Math.atan2(dz,dx));
+
+  // Box width follows local X; yaw rotates it in the X/Z plane.
+  return `<a-box position="${mx} ${y} ${mz}"
+    width="${len}" height=".010" depth=".016"
+    rotation="0 ${yaw} 0"
+    color="${color}"
+    material="shader:flat;opacity:${opacity};transparent:true;depthTest:false"></a-box>`;
+}
+
 function trajectoryMarkup(aim){
   if(!state.pool.trajectory||!aim?.hit)return'';
 
+  const y=POOL.feltY+POOL.ballRadius+.022;
+  const cueStartX=aim.cue.x;
+  const cueStartZ=aim.cue.z;
   const hit=poolFirstObjectHit(aim,3.0);
-  const cueStart=new THREE.Vector2(aim.cue.x,aim.cue.z);
-  const cueEnd=hit
-    ?new THREE.Vector2(hit.ball.x,hit.ball.z)
-    :cueStart.clone().add(new THREE.Vector2(aim.shotDir.x,aim.shotDir.z).multiplyScalar(1.6));
 
-  const dx=cueEnd.x-cueStart.x,dz=cueEnd.y-cueStart.y;
-  const len=Math.hypot(dx,dz);
-  const mx=(cueStart.x+cueEnd.x)/2,mz=(cueStart.y+cueEnd.y)/2;
-  const yaw=-THREE.MathUtils.radToDeg(Math.atan2(dz,dx));
-
-  let out=`
-    <a-box position="${mx} ${POOL.feltY+POOL.ballRadius+.018} ${mz}" width="${len}" height=".008" depth=".012"
-      rotation="0 ${yaw} 0" color="#ff4a50"
-      material="opacity:.72;transparent:true;shader:flat;depthTest:false"></a-box>`;
+  let cueEndX,cueEndZ;
+  let out='';
 
   if(hit){
-    const normal=new THREE.Vector2(hit.ball.x-hit.closest.x,hit.ball.z-hit.closest.y);
-    if(normal.lengthSq()<1e-6)normal.set(aim.shotDir.x,aim.shotDir.z);
-    normal.normalize();
-    const end=new THREE.Vector2(hit.ball.x,hit.ball.z).add(normal.clone().multiplyScalar(.85));
-    const odx=end.x-hit.ball.x,odz=end.y-hit.ball.z;
-    const olen=Math.hypot(odx,odz);
-    const omx=(end.x+hit.ball.x)/2,omz=(end.y+hit.ball.z)/2;
-    const oyaw=-THREE.MathUtils.radToDeg(Math.atan2(odz,odx));
-    out+=`
-      <a-box position="${omx} ${POOL.feltY+POOL.ballRadius+.020} ${omz}" width="${olen}" height=".008" depth=".012"
-        rotation="0 ${oyaw} 0" color="#ffd54a"
-        material="opacity:.64;transparent:true;shader:flat;depthTest:false"></a-box>`;
+    cueEndX=hit.ball.x;
+    cueEndZ=hit.ball.z;
+  }else{
+    cueEndX=cueStartX+aim.shotDir.x*1.6;
+    cueEndZ=cueStartZ+aim.shotDir.z*1.6;
   }
+
+  out+=poolLineMarkup(
+    cueStartX,cueStartZ,
+    cueEndX,cueEndZ,
+    y,'#ff3f46',.88
+  );
+
+  if(hit){
+    // Predict the object-ball path from collision normal.
+    let nx=hit.ball.x-hit.closest.x;
+    let nz=hit.ball.z-hit.closest.y;
+    const mag=Math.hypot(nx,nz);
+    if(mag<1e-6){
+      nx=aim.shotDir.x;
+      nz=aim.shotDir.z;
+    }else{
+      nx/=mag;
+      nz/=mag;
+    }
+
+    const objEndX=hit.ball.x+nx*.90;
+    const objEndZ=hit.ball.z+nz*.90;
+
+    out+=poolLineMarkup(
+      hit.ball.x,hit.ball.z,
+      objEndX,objEndZ,
+      y+.004,'#ffd54a',.82
+    );
+
+    // Add a short post-impact cue-ball tangent line.
+    let tx=-nz,tz=nx;
+    const incomingDot=tx*aim.shotDir.x+tz*aim.shotDir.z;
+    if(incomingDot<0){tx=-tx;tz=-tz;}
+    out+=poolLineMarkup(
+      hit.ball.x,hit.ball.z,
+      hit.ball.x+tx*.48,hit.ball.z+tz*.48,
+      y+.006,'#ff7a80',.58
+    );
+  }
+
   return out;
 }
-
 function updatePoolAimGuide(){
   const host=document.getElementById('poolAimGuide');
   if(!host)return;
@@ -659,8 +977,8 @@ function updatePoolAimGuide(){
   let marker='';
   if(aim.hit){
     marker=`
-      <a-sphere position="${lx} ${aim.contact.y+.012} ${lz}"
-        radius=".024" color="#ff2028" emissive="#ff3038" emissiveIntensity=".85" material="shader:flat;depthTest:false"></a-sphere>
+      <a-sphere position="${lx} ${aim.contact.y+.020} ${lz}"
+        radius=".026" color="#ff2028" emissive="#ff3038" emissiveIntensity=".85" material="shader:flat;depthTest:false"></a-sphere>
       <a-text value="${sideLabel} / ${spinLabel}" position="${lx} ${aim.contact.y+.11} ${lz}"
         rotation="-90 0 0" align="center" color="#ffb1b4" width=".52"></a-text>`;
   }else if(aim.nearMiss){
@@ -694,6 +1012,7 @@ function enterPoolMode(){
   state.pool.fineYaw=0;
   state.pool.lastMouseStamp=performance.now();
   document.getElementById('poolHud')?.classList.remove('hidden');
+  updatePoolRulesHud();
   applyPoolHotbar(true);
   updateHeldPoolTool();
 
@@ -737,6 +1056,16 @@ function shootPool(strokeSpeed=null){
   if(!aim||!aim.cue)return;
 
   const cue=aim.cue;
+  const rules=state.pool.rules;
+  if(rules.rackOver)return;
+  if(rules.ballInHand){
+    toast('Place the cue ball first.',900);
+    return;
+  }
+  rules.shotPocketed=[];
+  rules.foul=false;
+  rules.foulReason='';
+
   const pullFactor=.25+Math.min(1,state.pool.maxCuePull/.58)*.75;
   const raw=strokeSpeed==null?2.0:strokeSpeed;
   const speed=Math.max(.08,Math.min(7.2,raw*pullFactor));
@@ -749,8 +1078,14 @@ function shootPool(strokeSpeed=null){
     state.pool.gripping=false;
     state.pool.fineYaw=0;
     camera()?.setAttribute('look-controls','enabled',true);
+    if(aim.nearMiss){
+      setPoolFoul('Missed cue ball');
+      completePoolShot();
+      toast('Missed the cue ball — foul.',1300);
+    }else{
+      toast('Aim closer to the cue ball.',1000);
+    }
     updatePoolAimGuide();
-    toast(aim.nearMiss?'Missed the cue ball — foul.':'Aim closer to the cue ball.',1300);
     return;
   }
 
@@ -799,14 +1134,17 @@ function shootPool(strokeSpeed=null){
 function pocketPoolBall(ball){
   if(ball.pocketed)return;
   ball.pocketed=true;
-  // Let the ball visibly fall through the pocket under gravity.
   ball.vx*=.45;
   ball.vz*=.45;
   ball.vy=Math.min(ball.vy||0,-.35);
 
+  const r=state.pool.rules;
+  if(!r.shotPocketed.includes(ball.n))r.shotPocketed.push(ball.n);
+
   if(ball.n===0){
     state.pool.cueNeedsRespawn=true;
-    toast('Scratch.',1000);
+    setPoolFoul('Scratch');
+    toast('Scratch — foul.',1000);
   }else{
     toast(`Ball ${ball.n} pocketed.`,900);
   }
@@ -815,6 +1153,15 @@ function pocketPoolBall(ball){
 function respawnCueBall(){
   const cue=state.pool.balls.find(b=>b.n===0);
   if(!cue)return;
+
+  if(state.pool.rules.ballInHand){
+    cue.pocketed=true;
+    cue.vx=cue.vy=cue.vz=0;
+    state.pool.cueNeedsRespawn=false;
+    updatePoolRulesHud();
+    return;
+  }
+
   cue.pocketed=false;
   cue.vx=cue.vz=0;
   cue.vy=0;
@@ -938,21 +1285,18 @@ function stepPoolPhysics(dt){
       }
     }
 
-    // Recovery guard: never let a live ball become trapped beyond a rail/pocket.
+    // Ball driven off the table: foul under 8-ball rules.
     const outerX=POOL.innerHalfX+.22;
     const outerZ=POOL.innerHalfZ+.20;
     if(Math.abs(ball.x)>outerX||Math.abs(ball.z)>outerZ){
-      // If it's near a pocket throat, sink it rather than pinning it outside the rail.
       let nearest=Infinity;
       for(const [px,pz] of POOL.pockets)nearest=Math.min(nearest,Math.hypot(ball.x-px,ball.z-pz));
       if(nearest<POOL.pocketRadius*1.65){
         pocketPoolBall(ball);
-        continue;
+      }else{
+        drivePoolBallOffTable(ball);
       }
-      ball.x=THREE.MathUtils.clamp(ball.x,-rx,rx);
-      ball.z=THREE.MathUtils.clamp(ball.z,-rz,rz);
-      ball.vx*=-.45;
-      ball.vz*=-.45;
+      continue;
     }
   }
 
@@ -1010,11 +1354,16 @@ function updatePoolPhysics(delta){
 
   if(state.pool.shotInProgress&&!anyMoving){
     state.pool.shotInProgress=false;
+
+    // Resolve groups, fouls, turn, win/loss before cue-ball placement.
+    completePoolShot();
+
     if(state.pool.cueNeedsRespawn)respawnCueBall();
     camera()?.setAttribute('look-controls','enabled',true);
     const canvas=document.querySelector('#xrScene canvas');
     if(state.pool.active&&document.pointerLockElement!==canvas)canvas?.requestPointerLock?.();
     updateHeldPoolTool();
+    updatePoolRulesHud();
     updatePoolAimGuide();
   }
 
@@ -1646,7 +1995,7 @@ function placePoolBridgeOnTable(){
   const ray=poolViewRay();
   if(!host||!ray||Math.abs(ray.dir.y)<1e-5)return false;
 
-  const t=(1.055-ray.origin.y)/ray.dir.y;
+  const t=((POOL.feltY+.012)-ray.origin.y)/ray.dir.y;
   if(t<=0)return false;
 
   const hit=ray.origin.clone().addScaledVector(ray.dir,t);
@@ -1667,7 +2016,7 @@ function placePoolBridgeOnTable(){
 
   host.innerHTML=`
     <a-entity id="poolBridgeOnTable" position="${hit.x} 0 ${hit.z}">
-      <a-entity position="0 1.065 0">
+      <a-entity position="0 ${POOL.feltY+.04} 0">
         <a-box width=".30" height=".022" depth=".028" rotation="0 ${yaw} 0" color="#c7ccd0"></a-box>
         <a-box width=".026" height=".14" depth=".026" position="0 .060 0" color="#c7ccd0"></a-box>
         <a-cylinder position="${-flat.x*.58} .12 ${-flat.z*.58}" rotation="90 0 ${yaw}"
@@ -1979,6 +2328,12 @@ function beginPoolGrip(e){
   if(!state.pool.active||state.pool.shotInProgress||state.player.inventoryOpen)return;
   if(e.button!==0||isEditableTarget(e.target))return;
 
+  if(state.pool.rules.ballInHand){
+    e.preventDefault();
+    placeCueBallFromView();
+    return;
+  }
+
   state.pool.gripping=true;
   state.pool.cuePull=0;
   state.pool.maxCuePull=0;
@@ -2248,6 +2603,21 @@ AFRAME.registerComponent('xr-thumbstick-locomotion',{
 document.getElementById('poolTrajectoryToggle')?.addEventListener('change',e=>{
   state.pool.trajectory=Boolean(e.target.checked);
   if(state.pool.active)updatePoolAimGuide();
+});
+
+document.getElementById('poolRerackBtn')?.addEventListener('click',e=>{
+  e.preventDefault();
+  poolRerack();
+});
+
+document.getElementById('poolCallSolids')?.addEventListener('click',e=>{
+  e.preventDefault();
+  callPoolGroup('solids');
+});
+
+document.getElementById('poolCallStripes')?.addEventListener('click',e=>{
+  e.preventDefault();
+  callPoolGroup('stripes');
 });
 
 document.getElementById('arcade2dBtn')?.addEventListener('click',()=>location.href='../index.html');
