@@ -962,7 +962,7 @@ function poolLaunchDirection(aim){
   const side=THREE.MathUtils.clamp(aim?.side||0,-1,1);
   const base=aim?.shotDir||new THREE.Vector3(1,0,0);
   const right=aim?.right||new THREE.Vector3(0,0,1);
-  const squirt=-side*THREE.MathUtils.degToRad(9);
+  const squirt=side*THREE.MathUtils.degToRad(9);
   const c=Math.cos(squirt),s=Math.sin(squirt);
   return new THREE.Vector3(
     base.x*c-right.x*s,
@@ -1024,8 +1024,13 @@ function calculatePoolAim(){
 function poolCueBackPointWithRailClearance(aim,contact,length){
   const dir=aim.shotDir.clone().normalize();
 
-  // Start with a level cue pointing backward from the contact point.
+  // Base handle height follows player posture.
+  // Standing keeps a slightly more elevated butt; crouching flattens the cue.
+  const crouch=THREE.MathUtils.clamp(state.player.crouchAmount||0,0,1);
+  const baseHandleLift=THREE.MathUtils.lerp(.11,.025,crouch);
+
   const back=contact.clone().addScaledVector(dir,-length);
+  back.y+=baseHandleLift;
 
   // Work in pool-local X/Z to find where the cue exits the playable felt.
   const cx=contact.x-POOL.centerX;
@@ -1041,45 +1046,52 @@ function poolCueBackPointWithRailClearance(aim,contact,length){
 
   // Segment parameter t: contact=0, back=1.
   if(Math.abs(dx)>1e-6){
-    const tx1=(minX-cx)/dx;
-    const tx2=(maxX-cx)/dx;
-    for(const t of [tx1,tx2]){
+    for(const edgeX of [minX,maxX]){
+      const t=(edgeX-cx)/dx;
       if(t>0&&t<1){
         const z=cz+dz*t;
-        if(z>=minZ-.03&&z<=maxZ+.03)tCross=Math.min(tCross,t);
+        if(z>=minZ-.025&&z<=maxZ+.025)tCross=Math.min(tCross,t);
       }
     }
   }
 
   if(Math.abs(dz)>1e-6){
-    const tz1=(minZ-cz)/dz;
-    const tz2=(maxZ-cz)/dz;
-    for(const t of [tz1,tz2]){
+    for(const edgeZ of [minZ,maxZ]){
+      const t=(edgeZ-cz)/dz;
       if(t>0&&t<1){
         const x=cx+dx*t;
-        if(x>=minX-.03&&x<=maxX+.03)tCross=Math.min(tCross,t);
+        if(x>=minX-.025&&x<=maxX+.025)tCross=Math.min(tCross,t);
       }
     }
   }
 
   if(Number.isFinite(tCross)){
-    // Rail top is ~16cm above felt. Give the cue a small safety margin.
     const railTop=POOL.feltY+.165;
-    const clearance=.026;
+    const clearance=.018;
     const requiredAtRail=railTop+clearance;
 
-    // y(tCross) = contactY + (backY-contactY)*tCross
-    // Solve for the minimum backY that clears the rail.
-    if(contact.y<requiredAtRail){
-      const neededBackY=contact.y+(requiredAtRail-contact.y)/Math.max(.08,tCross);
-      back.y=Math.max(back.y,neededBackY);
+    // Only raise the cue if its CURRENT shaft height is actually near/below
+    // the rail top. This prevents exaggerated lift when the ball is merely
+    // somewhere near an edge.
+    const currentAtRail=contact.y+(back.y-contact.y)*tCross;
+    const deficit=requiredAtRail-currentAtRail;
+
+    if(deficit>0){
+      // Soft activation zone: tiny deficits barely move the butt, larger
+      // intersections get the full required correction.
+      const activation=THREE.MathUtils.clamp(deficit/.085,0,1);
+      const eased=activation*activation*(3-2*activation);
+
+      const fullBackY=contact.y+(requiredAtRail-contact.y)/Math.max(.10,tCross);
+      back.y=THREE.MathUtils.lerp(back.y,fullBackY,eased);
     }
   }
 
-  // Never let the visible butt end fall below the felt plane either.
-  back.y=Math.max(back.y,POOL.feltY+.03);
+  // Small safety floor only; don't artificially prop the cue upward.
+  back.y=Math.max(back.y,POOL.feltY+.015);
   return back;
 }
+
 
 function updateHeldPoolCue(){
   const held=document.getElementById('heldPoolCue');
@@ -1495,7 +1507,7 @@ function shootPool(strokeSpeed=null){
   // This is deliberately visible enough to match what the aiming UI implies,
   // without turning side English into an exaggerated 45-degree redirect.
   const maxSquirtRad=THREE.MathUtils.degToRad(9);
-  const squirt=-side*maxSquirtRad;
+  const squirt=side*maxSquirtRad;
 
   const cosS=Math.cos(squirt);
   const sinS=Math.sin(squirt);
@@ -2601,7 +2613,10 @@ function setCrouchAmount(amount){
   if(p.crouchAmount>.1)p.running=false;
   refreshMovementControls();
   applyEyePosture();
-  if(state.pool.active)updatePoolAimGuide();
+  if(state.pool.active){
+    updateHeldPoolCue();
+    updatePoolAimGuide();
+  }
 }
 
 function standStraight(){
@@ -2611,6 +2626,10 @@ function standStraight(){
   p.leaning=false;
   refreshMovementControls();
   applyEyePosture();
+  if(state.pool.active){
+    updateHeldPoolCue();
+    updatePoolAimGuide();
+  }
   toast('Standing straight',700);
 }
 
