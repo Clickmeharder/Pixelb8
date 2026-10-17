@@ -1,0 +1,22 @@
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020408;color:#e8eef5;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+#desktopHud{position:fixed;z-index:30;left:14px;right:14px;top:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none}
+.xr-brand{display:grid;gap:3px;padding:9px 11px;border:1px solid rgba(79,195,247,.32);border-radius:7px;background:rgba(7,11,17,.84);box-shadow:0 8px 24px rgba(0,0,0,.35);backdrop-filter:blur(6px)}
+.xr-brand b{color:#8edcff;font-size:.72rem;letter-spacing:.09em}.xr-brand span{color:#8f9ba8;font-size:.62rem}
+.xr-actions{display:flex;gap:7px;pointer-events:auto}.xr-actions button,.modal header button{min-height:34px;padding:6px 10px;border:1px solid #34414d;border-radius:7px;background:#141a21;color:#dce5ee;font-weight:800;font-size:.72rem}.xr-actions button:hover,.modal header button:hover{border-color:#4fc3f7;color:#8edcff}
+.interaction-prompt{position:fixed;z-index:35;left:50%;bottom:28px;transform:translateX(-50%);min-width:270px;display:grid;gap:3px;text-align:center;padding:10px 15px;border:1px solid rgba(79,195,247,.45);border-radius:8px;background:rgba(5,9,14,.92);box-shadow:0 12px 34px rgba(0,0,0,.46)}
+.interaction-prompt b{color:#fff;font-size:.84rem}.interaction-prompt span{color:#8edcff;font-size:.68rem;font-weight:800}
+.cabinet-mode{position:fixed;z-index:35;left:50%;top:14px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid rgba(255,79,169,.42);border-radius:7px;background:rgba(10,5,10,.88)}
+.cabinet-mode span{color:#ff72bd;font-size:.55rem;font-weight:950;letter-spacing:.11em}.cabinet-mode b{font-size:.72rem}.cabinet-mode small{color:#8995a2;font-size:.6rem}
+.dungeon-hud{position:fixed;z-index:35;right:16px;bottom:16px;display:grid;gap:2px;padding:8px 11px;border:1px solid rgba(190,67,49,.5);border-radius:7px;background:rgba(13,7,6,.9);text-align:right}
+.dungeon-hud span{color:#aa7167;font-size:.52rem;font-weight:900;letter-spacing:.12em}.dungeon-hud b{color:#ff8b69;font:900 .9rem Consolas,monospace}
+.toast{position:fixed;z-index:60;left:50%;bottom:84px;transform:translateX(-50%);padding:9px 13px;border:1px solid #3b4652;border-radius:7px;background:rgba(9,13,18,.94);color:#e8eef5;font-size:.7rem;font-weight:750;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+.modal{position:fixed;z-index:70;inset:0;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.72);backdrop-filter:blur(6px)}
+.modal-card{width:min(640px,calc(100vw - 28px));overflow:hidden;border:1px solid #34414d;border-radius:10px;background:linear-gradient(180deg,#151b22,#0c1117);box-shadow:0 24px 75px rgba(0,0,0,.62)}
+.modal header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #29323c}.modal header span{color:#8edcff;font-size:.58rem;font-weight:900;letter-spacing:.12em}.modal h2{margin:2px 0 0;font-size:1rem}.modal header button{width:34px;padding:0;font-size:1.1rem}
+.control-grid{display:grid;gap:9px;padding:14px 16px 17px}.control-grid>div{display:grid;gap:4px;padding:10px;border:1px solid #26303a;border-radius:7px;background:#10161c}.control-grid b{font-size:.76rem}.control-grid span{color:#99a5b1;font-size:.7rem;line-height:1.45}
+#embeddedGames{position:fixed;left:-10000px;top:0;width:800px;height:600px;overflow:hidden;opacity:.001;pointer-events:none;z-index:-1}
+#embeddedGames iframe{display:block;width:800px;height:600px;border:0}
+.a-enter-vr{right:16px!important;bottom:16px!important}
+@media(max-width:720px){#desktopHud{left:8px;right:8px;top:8px}.xr-brand span{display:none}.cabinet-mode small{display:none}}

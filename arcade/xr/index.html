@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PixelB8 Arcade · 3D / WebXR</title>
+<meta name="theme-color" content="#05070b">
+<link rel="stylesheet" href="styles.css">
+<script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+<script defer src="app.js"></script>
+</head>
+<body>
+<div id="desktopHud">
+  <div class="xr-brand">
+    <b>PIXELB8 ARCADE · 3D</b>
+    <span id="hudMode">WASD move · mouse look · E interact</span>
+  </div>
+  <div class="xr-actions">
+    <button id="controlsBtn" type="button">Controls</button>
+    <button id="arcade2dBtn" type="button">2D Arcade</button>
+  </div>
+</div>
+
+<div id="interactionPrompt" class="interaction-prompt hidden">
+  <b id="promptTitle">Interact</b>
+  <span id="promptCopy">Press E</span>
+</div>
+
+<div id="cabinetMode" class="cabinet-mode hidden">
+  <span>PLAYING</span>
+  <b id="cabinetModeTitle">Cabinet</b>
+  <small>Keyboard is controlling the cabinet · ESC to step away</small>
+</div>
+
+<div id="dungeonHud" class="dungeon-hud hidden">
+  <span>DUNGEON DEPTH</span>
+  <b id="dungeonDepth">0</b>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<div id="controlsPanel" class="modal hidden">
+  <section class="modal-card">
+    <header>
+      <div><span>PIXELB8</span><h2>3D Arcade Controls</h2></div>
+      <button id="controlsClose" type="button">×</button>
+    </header>
+    <div class="control-grid">
+      <div><b>Explore</b><span>WASD to move. Click the scene to capture the mouse and look around.</span></div>
+      <div><b>Cabinets</b><span>Walk close and press E. The real existing game canvas is rendered live onto the cabinet. ESC leaves the cabinet.</span></div>
+      <div><b>VR / WebXR</b><span>Use the headset VR button. Left thumbstick moves. Point/trigger can interact with doors and cabinets.</span></div>
+      <div><b>Dungeon</b><span>Find the creepy basement door. The corridor generates more sections as you descend.</span></div>
+    </div>
+  </section>
+</div>
+
+<!-- Same-origin game hosts.
+     Kept visually offscreen, not display:none, so their canvases continue updating. -->
+<div id="embeddedGames" aria-hidden="true">
+  <iframe id="gameFrame-outdrive" src="../assets/games/singleplayer/outdrive/index.html" tabindex="-1"></iframe>
+  <iframe id="gameFrame-cyrenerangers" src="../assets/games/singleplayer/cyrenerangers/index.html" tabindex="-1"></iframe>
+</div>
+
+<a-scene id="xrScene"
+  renderer="antialias:true;colorManagement:true"
+  background="color:#020408"
+  vr-mode-ui="enabled:true"
+  device-orientation-permission-ui="enabled:true"
+  arcade-world>
+
+  <a-entity id="playerRig" position="0 0 11" xr-thumbstick-locomotion>
+    <a-camera id="playerCamera"
+      position="0 1.65 0"
+      look-controls="pointerLockEnabled:true"
+      wasd-controls="acceleration:26">
+      <a-cursor id="desktopCursor"
+        fuse="false"
+        raycaster="objects:.xr-interactable;far:5"
+        material="color:#8edcff;shader:flat;opacity:.72"
+        geometry="primitive:ring;radiusInner:.004;radiusOuter:.007">
+      </a-cursor>
+    </a-camera>
+    <a-entity id="leftHand"
+      laser-controls="hand:left"
+      raycaster="objects:.xr-interactable;far:7"></a-entity>
+    <a-entity id="rightHand"
+      laser-controls="hand:right"
+      raycaster="objects:.xr-interactable;far:7"></a-entity>
+  </a-entity>
+
+  <!-- Main arcade shell -->
+  <a-plane rotation="-90 0 0" width="34" height="36" color="#0c1016" roughness=".86"></a-plane>
+  <a-plane position="0 5 -7" rotation="90 0 0" width="34" height="36" color="#080c12"></a-plane>
+  <a-box position="0 2.5 -7" width="34" height="5" depth=".22" color="#10161d"></a-box>
+  <a-box position="-17 2.5 4" width=".22" height="5" depth="22" color="#10161d"></a-box>
+  <a-box position="17 2.5 4" width=".22" height="5" depth="22" color="#10161d"></a-box>
+
+  <!-- Entrance aisle -->
+  <a-box position="0 .02 3.5" width="3.4" height=".035" depth="26" color="#101c28"></a-box>
+  <a-box position="-1.73 .035 3.5" width=".05" height=".06" depth="26" color="#4fc3f7" emissive="#4fc3f7" emissiveIntensity=".65"></a-box>
+  <a-box position="1.73 .035 3.5" width=".05" height=".06" depth="26" color="#ff4fa9" emissive="#ff4fa9" emissiveIntensity=".55"></a-box>
+
+  <a-entity position="0 3.75 -6.84">
+    <a-plane width="8.4" height="1.45" color="#101822"></a-plane>
+    <a-text value="PIXELB8 ARCADE" align="center" color="#8edcff" width="8.8" position="0 .18 .02"></a-text>
+    <a-text value="3D / WEBXR" align="center" color="#ff72bd" width="5" position="0 -.28 .02"></a-text>
+  </a-entity>
+
+  <!-- Cabinet row -->
+  <a-text value="ARCADE CABINETS" position="-7.2 3.22 -5.8" align="center" color="#8edcff" width="5.1"></a-text>
+  <a-entity id="cabinetHost"></a-entity>
+
+  <!-- Board game lounge -->
+  <a-text value="TABLE GAMES" position="7.7 3.22 -5.8" align="center" color="#ff9bd0" width="4.4"></a-text>
+  <a-entity id="tableGameHost"></a-entity>
+
+  <!-- Pool table -->
+  <a-entity id="poolTable" position="7.4 0 -1.0">
+    <a-box position="0 .74 0" width="3.5" height=".18" depth="1.85" color="#513319"></a-box>
+    <a-box position="0 .86 0" width="3.18" height=".10" depth="1.52" color="#13552d"></a-box>
+    <a-box position="0 .36 0" width="3.15" height=".12" depth="1.35" color="#2d2117"></a-box>
+    <a-cylinder position="-1.45 .36 -.62" radius=".09" height=".72" color="#342319"></a-cylinder>
+    <a-cylinder position="1.45 .36 -.62" radius=".09" height=".72" color="#342319"></a-cylinder>
+    <a-cylinder position="-1.45 .36 .62" radius=".09" height=".72" color="#342319"></a-cylinder>
+    <a-cylinder position="1.45 .36 .62" radius=".09" height=".72" color="#342319"></a-cylinder>
+    <a-text value="POOL · COMING SOON" position="0 1.16 0" rotation="-90 0 0" align="center" color="#d7f8e2" width="3"></a-text>
+    <a-sphere position="-.45 .94 -.18" radius=".045" color="#fff"></a-sphere>
+    <a-sphere position=".22 .94 .08" radius=".045" color="#ffcf45"></a-sphere>
+    <a-sphere position=".34 .94 .04" radius=".045" color="#3c63ff"></a-sphere>
+    <a-sphere position=".46 .94 0" radius=".045" color="#ef4e5f"></a-sphere>
+  </a-entity>
+
+  <!-- Washrooms / Exit / Dungeon doors -->
+  <a-entity id="doorHost"></a-entity>
+
+  <!-- Main arcade lighting -->
+  <a-light type="ambient" color="#677890" intensity=".48"></a-light>
+  <a-light type="point" color="#4fc3f7" intensity="1.05" distance="20" position="-7 4 2"></a-light>
+  <a-light type="point" color="#ff4fa9" intensity=".95" distance="20" position="7 4 2"></a-light>
+  <a-light type="point" color="#65e3a0" intensity=".55" distance="14" position="0 3 -3"></a-light>
+
+  <!-- Dungeon is far below/behind the main arcade -->
+  <a-entity id="dungeonRoot" visible="true"></a-entity>
+</a-scene>
+</body>
+</html>
