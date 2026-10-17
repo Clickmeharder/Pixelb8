@@ -958,6 +958,19 @@ function poolCueBallCenter(){
   };
 }
 
+function poolLaunchDirection(aim){
+  const side=THREE.MathUtils.clamp(aim?.side||0,-1,1);
+  const base=aim?.shotDir||new THREE.Vector3(1,0,0);
+  const right=aim?.right||new THREE.Vector3(0,0,1);
+  const squirt=-side*THREE.MathUtils.degToRad(9);
+  const c=Math.cos(squirt),s=Math.sin(squirt);
+  return new THREE.Vector3(
+    base.x*c-right.x*s,
+    0,
+    base.z*c-right.z*s
+  ).normalize();
+}
+
 function calculatePoolAim(){
   const ray=poolViewRay();
   const data=poolCueBallCenter();
@@ -1008,11 +1021,71 @@ function calculatePoolAim(){
     radial,missRadius
   };
 }
+function poolCueBackPointWithRailClearance(aim,contact,length){
+  const dir=aim.shotDir.clone().normalize();
+
+  // Start with a level cue pointing backward from the contact point.
+  const back=contact.clone().addScaledVector(dir,-length);
+
+  // Work in pool-local X/Z to find where the cue exits the playable felt.
+  const cx=contact.x-POOL.centerX;
+  const cz=contact.z-POOL.centerZ;
+  const bx=back.x-POOL.centerX;
+  const bz=back.z-POOL.centerZ;
+
+  const minX=-POOL.innerHalfX,maxX=POOL.innerHalfX;
+  const minZ=-POOL.innerHalfZ,maxZ=POOL.innerHalfZ;
+
+  const dx=bx-cx,dz=bz-cz;
+  let tCross=Infinity;
+
+  // Segment parameter t: contact=0, back=1.
+  if(Math.abs(dx)>1e-6){
+    const tx1=(minX-cx)/dx;
+    const tx2=(maxX-cx)/dx;
+    for(const t of [tx1,tx2]){
+      if(t>0&&t<1){
+        const z=cz+dz*t;
+        if(z>=minZ-.03&&z<=maxZ+.03)tCross=Math.min(tCross,t);
+      }
+    }
+  }
+
+  if(Math.abs(dz)>1e-6){
+    const tz1=(minZ-cz)/dz;
+    const tz2=(maxZ-cz)/dz;
+    for(const t of [tz1,tz2]){
+      if(t>0&&t<1){
+        const x=cx+dx*t;
+        if(x>=minX-.03&&x<=maxX+.03)tCross=Math.min(tCross,t);
+      }
+    }
+  }
+
+  if(Number.isFinite(tCross)){
+    // Rail top is ~16cm above felt. Give the cue a small safety margin.
+    const railTop=POOL.feltY+.165;
+    const clearance=.026;
+    const requiredAtRail=railTop+clearance;
+
+    // y(tCross) = contactY + (backY-contactY)*tCross
+    // Solve for the minimum backY that clears the rail.
+    if(contact.y<requiredAtRail){
+      const neededBackY=contact.y+(requiredAtRail-contact.y)/Math.max(.08,tCross);
+      back.y=Math.max(back.y,neededBackY);
+    }
+  }
+
+  // Never let the visible butt end fall below the felt plane either.
+  back.y=Math.max(back.y,POOL.feltY+.03);
+  return back;
+}
+
 function updateHeldPoolCue(){
   const held=document.getElementById('heldPoolCue');
   if(!held)return;
 
-  const active=state.pool.active&&!state.pool.shotInProgress&&state.pool.tool==='cue';
+  const active=state.pool.active&&!state.pool.shotInProgress&&!state.pool.manualRack.active&&state.pool.tool==='cue';
   held.setAttribute('visible',active);
   if(!active)return;
 
@@ -1021,7 +1094,8 @@ function updateHeldPoolCue(){
   if(!aim||!cam)return;
 
   const contact=aim.contact.clone();
-  const back=contact.clone().addScaledVector(aim.shotDir,-1.22-state.pool.cuePull*.78);
+  const cueLength=1.22+state.pool.cuePull*.78;
+  const back=poolCueBackPointWithRailClearance(aim,contact,cueLength);
 
   const contactLocal=cam.object3D.worldToLocal(contact.clone());
   const backLocal=cam.object3D.worldToLocal(back.clone());
@@ -1050,7 +1124,8 @@ function updatePoolPowerMeter(){
 function poolFirstObjectHit(aim,maxDist=3.2){
   if(!aim)return null;
   const origin=new THREE.Vector2(aim.cue.x,aim.cue.z);
-  const dir=new THREE.Vector2(aim.shotDir.x,aim.shotDir.z).normalize();
+  const launch=poolLaunchDirection(aim);
+  const dir=new THREE.Vector2(launch.x,launch.z).normalize();
   let best=null,bestT=maxDist;
 
   for(const ball of state.pool.balls){
@@ -1225,11 +1300,14 @@ function updatePoolAimVisuals(aim){
   let cueEnd;
 
   if(hit)cueEnd=new THREE.Vector3(hit.ball.x,y,hit.ball.z);
-  else cueEnd=new THREE.Vector3(
-    aim.cue.x+aim.shotDir.x*1.60,
-    y,
-    aim.cue.z+aim.shotDir.z*1.60
-  );
+  else{
+    const launch=poolLaunchDirection(aim);
+    cueEnd=new THREE.Vector3(
+      aim.cue.x+launch.x*1.60,
+      y,
+      aim.cue.z+launch.z*1.60
+    );
+  }
   setThreeLine(v.cueLine,cueStart,cueEnd,true);
 
   if(!hit){
@@ -1241,7 +1319,7 @@ function updatePoolAimVisuals(aim){
   let nx=hit.ball.x-hit.closest.x;
   let nz=hit.ball.z-hit.closest.y;
   let mag=Math.hypot(nx,nz);
-  if(mag<1e-6){nx=aim.shotDir.x;nz=aim.shotDir.z;mag=1;}
+  if(mag<1e-6){const launch=poolLaunchDirection(aim);nx=launch.x;nz=launch.z;mag=1;}
   nx/=mag;nz/=mag;
 
   setThreeLine(
@@ -1252,7 +1330,7 @@ function updatePoolAimVisuals(aim){
   );
 
   let tx=-nz,tz=nx;
-  if(tx*aim.shotDir.x+tz*aim.shotDir.z<0){tx=-tx;tz=-tz;}
+  const launchForTangent=poolLaunchDirection(aim);if(tx*launchForTangent.x+tz*launchForTangent.z<0){tx=-tx;tz=-tz;}
   setThreeLine(
     v.tangentLine,
     new THREE.Vector3(hit.ball.x,y+.006,hit.ball.z),
@@ -1406,16 +1484,32 @@ function shootPool(strokeSpeed=null){
   const dx=aim.shotDir.x,dz=aim.shotDir.z;
   const rightX=aim.right.x,rightZ=aim.right.z;
 
-  cue.vx=dx*speed;
-  cue.vz=dz*speed;
+  const side=THREE.MathUtils.clamp(aim.side,-1,1);
 
-  cue.sideSpin=THREE.MathUtils.clamp(aim.side,-1,1)*speed*.72;
-  cue.vx+=rightX*(-aim.side)*speed*.035;
-  cue.vz+=rightZ*(-aim.side)*speed*.035;
+  // Off-centre cue contact does two distinct things:
+  // 1) it adds side-spin (English), and
+  // 2) it deflects the cue ball's INITIAL launch direction slightly
+  //    opposite the side being struck (cue-ball squirt).
+  //
+  // A full left/right hit produces roughly 9 degrees of launch deflection.
+  // This is deliberately visible enough to match what the aiming UI implies,
+  // without turning side English into an exaggerated 45-degree redirect.
+  const maxSquirtRad=THREE.MathUtils.degToRad(9);
+  const squirt=-side*maxSquirtRad;
+
+  const cosS=Math.cos(squirt);
+  const sinS=Math.sin(squirt);
+  const launchX=dx*cosS-rightX*sinS;
+  const launchZ=dz*cosS-rightZ*sinS;
+
+  cue.vx=launchX*speed;
+  cue.vz=launchZ*speed;
+
+  cue.sideSpin=side*speed*.72;
 
   const top=THREE.MathUtils.clamp(aim.top,-1,1);
-  cue.spinX=dx*top*speed*.48;
-  cue.spinZ=dz*top*speed*.48;
+  cue.spinX=launchX*top*speed*.48;
+  cue.spinZ=launchZ*top*speed*.48;
 
   // Hard low hits can pop the cue ball into the air.
   // Aim.top is negative when striking below center.
@@ -1564,6 +1658,19 @@ function stepPoolPhysics(dt){
     if(ball.n===0&&ball.y<=feltBallY+.01){
       ball.vx+=(ball.spinX||0)*dt*.95;
       ball.vz+=(ball.spinZ||0)*dt*.95;
+
+      // Small swerve from side English while rolling.
+      const planarSpeed=Math.hypot(ball.vx,ball.vz);
+      if(planarSpeed>.08&&Math.abs(ball.sideSpin||0)>.02){
+        const ux=ball.vx/planarSpeed;
+        const uz=ball.vz/planarSpeed;
+        const rx=-uz;
+        const rz=ux;
+        const swerve=(ball.sideSpin||0)*dt*.055;
+        ball.vx+=rx*swerve;
+        ball.vz+=rz*swerve;
+      }
+
       const spinDecay=Math.exp(-2.25*dt);
       ball.spinX=(ball.spinX||0)*spinDecay;
       ball.spinZ=(ball.spinZ||0)*spinDecay;
