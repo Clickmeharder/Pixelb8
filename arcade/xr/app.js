@@ -335,17 +335,9 @@ function buildPoolTable(){
     <!-- pockets: corners + sides -->
     ${POOL.pockets.map(([x,z])=>`<a-cylinder position="${x} 1.005 ${z}" rotation="0 0 0" radius=".125" height=".025" color="#020303"></a-cylinder>`).join('')}
 
-    <!-- cue rack and two cues -->
-    <a-entity position="-2.35 1.05 0">
-      <a-box width=".12" height="1.35" depth=".08" color="#2e2016"></a-box>
-      <a-cylinder position="-.12 .10 0" rotation="0 0 -76" radius=".018" height="1.75" color="#d2a15e"></a-cylinder>
-      <a-cylinder position=".12 .10 0" rotation="0 0 -104" radius=".018" height="1.75" color="#d2a15e"></a-cylinder>
-      <a-text value="CUES" position="0 .83 .05" align="center" color="#d9bd8c" width="1.1"></a-text>
-    </a-entity>
-
     <!-- wooden triangle rack stored beneath the foot rail -->
     <a-entity position="0 .60 .99">
-      <a-box position="0 .14 0" width=".78" height=".035" depth=".035" rotation="0 0 0" color="#b77b3b"></a-box>
+      <a-box position="0 .14 0" width=".78" height=".035" depth=".035" color="#b77b3b"></a-box>
       <a-box position="-.34 -.08 0" width=".72" height=".035" depth=".035" rotation="0 0 60" color="#b77b3b"></a-box>
       <a-box position=".34 -.08 0" width=".72" height=".035" depth=".035" rotation="0 0 -60" color="#b77b3b"></a-box>
     </a-entity>
@@ -355,6 +347,29 @@ function buildPoolTable(){
 
     <a-box class="xr-interactable" data-interact="pool" data-id="pool"
       position="0 1.20 0" width="4.55" height=".90" depth="2.75" material="opacity:0;transparent:true"></a-box>
+  </a-entity>
+
+  <!-- Wall-mounted cue rack beside the table -->
+  <a-entity id="poolCueRack" data-interact="pool" data-id="pool"
+    position="${POOL.centerX-3.15} 0 ${POOL.centerZ+.15}" rotation="0 90 0">
+    <a-box position="0 1.55 0" width="1.05" height="1.68" depth=".10" color="#2e2016"></a-box>
+    <a-box position="0 2.18 .065" width=".94" height=".13" depth=".10" color="#51351f"></a-box>
+    <a-box position="0 .94 .065" width=".94" height=".13" depth=".10" color="#51351f"></a-box>
+    <a-text value="POOL CUES" position="0 2.39 .08" align="center" color="#d9bd8c" width="1.7"></a-text>
+
+    <a-cylinder position="-.25 1.57 .10" rotation="0 0 0" radius=".018" height="1.72" color="#d7a86b"></a-cylinder>
+    <a-cylinder position=".25 1.57 .10" rotation="0 0 0" radius=".018" height="1.72" color="#d7a86b"></a-cylinder>
+    <a-cylinder position="-.25 .73 .10" radius=".026" height=".045" color="#1d71b8"></a-cylinder>
+    <a-cylinder position=".25 .73 .10" radius=".026" height=".045" color="#8a2f2f"></a-cylinder>
+
+    <a-box position="-.25 2.18 .11" width=".10" height=".08" depth=".11" color="#17110c"></a-box>
+    <a-box position=".25 2.18 .11" width=".10" height=".08" depth=".11" color="#17110c"></a-box>
+    <a-box position="-.25 .94 .11" width=".10" height=".08" depth=".11" color="#17110c"></a-box>
+    <a-box position=".25 .94 .11" width=".10" height=".08" depth=".11" color="#17110c"></a-box>
+
+    <a-box class="xr-interactable" data-interact="pool" data-id="pool"
+      position="0 1.55 .24" width="1.35" height="2.25" depth=".62"
+      material="opacity:0;transparent:true"></a-box>
   </a-entity>`;
   resetPoolBalls();
 }
@@ -903,18 +918,21 @@ function buildDungeonEntrance(){
 }
 
 function findNearestInteraction(){
-  if(state.engaged)return null;
+  if(state.engaged||state.pool.active)return null;
   const cam=camera();
   if(!cam)return null;
   const p=worldPos(cam);
   let best=null;
-  let bestDist=2.25;
+  let bestDist=2.45;
 
-  document.querySelectorAll('[data-interact].door-root,.cabinet-root,.table-root,#poolTable,#dungeonEntrance [data-interact]').forEach(el=>{
+  document.querySelectorAll('[data-interact].door-root,.cabinet-root,.table-root,#poolTable,#poolCueRack,#dungeonEntrance [data-interact]').forEach(el=>{
     const hit=el.matches('.cabinet-root,.table-root,.door-root')?el:el.closest('[data-interact]');
     if(!hit)return;
-    const d=Math.hypot(p.x-worldPos(hit).x,p.y-worldPos(hit).y,p.z-worldPos(hit).z);
-    if(d<bestDist){
+    const hp=worldPos(hit);
+    const d=Math.hypot(p.x-hp.x,p.z-hp.z);
+    const type=hit.dataset.interact;
+    const allowed=type==='pool'?3.05:2.45;
+    if(d<allowed && (!best || d<bestDist)){
       bestDist=d;
       best=hit;
     }
@@ -932,7 +950,7 @@ function findNearestInteraction(){
     const table=BOARD_TABLES.find(t=>t.id===id);
     return table&&{type,id,title:table.title,copy:'Press Enter · XR table integration coming next'};
   }
-  if(type==='pool')return{type,id,title:'Pool Table',copy:'Press Enter to play pool'};
+  if(type==='pool')return{type,id,title:'Pool',copy:'Press Enter to pick up a cue and play'};
   if(type==='exit')return{type,id,title:'Exit Arcade',copy:'Press Enter to return to the 2D Arcade'};
   if(type==='dungeon')return{type,id,title:'Basement Dungeon',copy:'Press Enter to descend'};
   if(type==='girls')return{type,id,title:'Girls Washroom',copy:'Door is decorative for now'};
