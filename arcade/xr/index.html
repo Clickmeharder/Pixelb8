@@ -97,7 +97,7 @@
       <div><b>Explore</b><span>WASD moves. R toggles Run / Walk, C toggles crouch, Space jumps, and I opens inventory.</span></div>
       <div><b>Cabinets</b><span>Walk close and press Enter. The real game canvas is rendered live on the cabinet. Backspace steps away, so Escape remains available to the game.</span></div>
       <div><b>VR / WebXR</b><span>Use the headset VR button. Left thumbstick moves. Point/trigger can interact with doors and cabinets.</span></div>
-      <div><b>Pool</b><span>Enter the pool table, move the mouse left/right to aim, pull the mouse down to draw the cue back, then stroke upward. Faster forward motion hits harder.</span></div>
+      <div><b>Pool</b><span>Walk around the table normally. Aim the red dot with your view, hold left mouse to grip the cue, pull down, then stroke upward. Contact point controls spin.</span></div>
       <div><b>Dungeon</b><span>Find the creepy basement door. The corridor generates more sections as you descend.</span></div>
     </div>
   </section>
@@ -144,6 +144,13 @@
         material="color:#8edcff;shader:flat;opacity:.72"
         geometry="primitive:ring;radiusInner:.004;radiusOuter:.007">
       </a-cursor>
+      <!-- First-person pool cue. Hidden until a cue is picked up. -->
+      <a-entity id="heldPoolCue" visible="false" position=".18 -.20 -.78" rotation="88 0 0">
+        <a-cylinder id="heldPoolCueShaft" radius=".011" height="1.55" color="#d3a363" roughness=".38"></a-cylinder>
+        <a-cylinder position="0 .78 0" radius=".013" height=".055" color="#f0e7d3"></a-cylinder>
+        <a-cylinder position="0 -.79 0" radius=".018" height=".10" color="#352218"></a-cylinder>
+        <a-sphere position=".06 -.37 .02" radius=".065" color="#b88363" roughness=".75"></a-sphere>
+      </a-entity>
     </a-camera>
     <a-entity id="leftHand"
       laser-controls="hand:left"
